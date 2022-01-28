@@ -1,0 +1,138 @@
+0001   0000             ;+---------------------------------------------------------------------------
+0002   0000             ; MXOS
+0003   0000             ; Запуск RKS файла
+0004   0000             ;
+0005   0000             ; 2021-01-27 Разработано SpaceEngineer
+0006   0000             ;----------------------------------------------------------------------------
+0007   0000             
+0008   0000             ; Адрес загрузки монитора
+0009   0000             MON_ADDR = 0C000h
+0010   0000             
+0011   0000             ; Адрес временного буфера загрузки монитора
+0012   0000             MON_ADDR_TEMP = 0D000h
+0013   0000             
+0014   0000             ; Функции системы
+0015   0000             getch			= 0C803h ; Ожидание ввода с клавиатуры
+0016   0000             printChar		= 0C809h ; Вывод символа на экран
+0017   0000             printString 	= 0C818h ; Вывести строку на экран
+0018   0000             fileLoad		= 0C848h ; Загрузить файл по адресу из заголовка этого файла
+0019   0000             fileNamePrepare	= 0C85Ah ; Преобразовать имя файла во внутренний формат
+0020   0000             fileLoad2		= 0C866h ; Загрузить файл по адресу DE
+0021   0000             
+0022   F100             .org 0F100h
+0023   F100                     ; В DE передаётся адрес строки аргументов
+0024   F100 D5                  push d
+0025   F101 21 74 F1            lxi  h, aLoading
+0026   F104 CD 18 C8            call printString
+0027   F107 E1          		pop  h
+0028   F108 E5                  push h
+0029   F109 CD 18 C8            call printString
+0030   F10C E1                  pop  h
+0031   F10D             
+0032   F10D                     ; Загрузка программы
+0033   F10D                     ; Подготовка имени файла и переключение накопителя
+0034   F10D 11 9D F1    		lxi  d, nameBuffer
+0035   F110 CD 5A C8    		call fileNamePrepare   ; HL = имя файла = строка аргументов
+0036   F113 EB                  xchg
+0037   F114             
+0038   F114             		; Загружаем файл
+0039   F114 21 9D F1    		lxi  h, nameBuffer
+0040   F117 CD 48 C8    		call fileLoad
+0041   F11A DA 6E F1    		jc   fileNotFoundRet
+0042   F11D             
+0043   F11D             		; Получаем адрес загрузки (= адрес запуска) файла в DE
+0044   F11D 11 0A 00    		lxi	d, 10
+0045   F120 19          		dad	d   ; HL += 10
+0046   F121 5E          		mov	e, m
+0047   F122 23          		inx	h
+0048   F123 56          		mov	d, m
+0049   F124             
+0050   F124                     ; Помещаем в стек для передачи Монитору
+0051   F124 D5                  push d
+0052   F125             
+0053   F125 21 74 F1            lxi  h, aLoading
+0054   F128 CD 18 C8            call printString
+0055   F12B 21 92 F1    		lxi  h, aMonitorPath
+0056   F12E CD 18 C8            call printString
+0057   F131             
+0058   F131                     ; Загрузка Монитора
+0059   F131                     ; Подготовка имени файла A:MON2.SYS
+0060   F131 21 92 F1    		lxi  h, aMonitorPath
+0061   F134 11 9D F1    		lxi  d, nameBuffer
+0062   F137 CD 5A C8    		call fileNamePrepare
+0063   F13A             
+0064   F13A                     ; Загружаем файл MON2.SYS на 0D000h - он затрет NC.COM
+0065   F13A 21 9D F1    		lxi  h, nameBuffer
+0066   F13D 11 00 D0    		lxi  d, MON_ADDR_TEMP ; изменить адрес загрузки файла на DE
+0067   F140 CD 66 C8    		call fileLoad2  ; нужна исправленная функция! BIOS 4.50 и старше 
+0068   F143 DA 6D F1    		jc   popFileNotFoundRet
+0069   F146             
+0070   F146             		; Получаем размер файла Монитора в DE
+0071   F146 11 0C 00    		lxi	d, 12
+0072   F149 19          		dad	d   ; HL += 12
+0073   F14A 5E          		mov	e, m
+0074   F14B 23          		inx	h
+0075   F14C 56          		mov	d, m
+0076   F14D             
+0077   F14D                     ; HL = MON_ADDR_TEMP
+0078   F14D                     ; DE = MON_ADDR_TEMP + размер монитора
+0079   F14D 21 00 D0    		lxi  h, MON_ADDR_TEMP
+0080   F150 EB                  xchg
+0081   F151 19          		dad  d
+0082   F152 EB                  xchg
+0083   F153             
+0084   F153                     ; Копируем Монитор на адрес C000h. При этом он затрёт BIOS, и дисковые
+0085   F153                     ; функциии ОС станут недоступны. Поэтому и нужен был временный буфер.
+0086   F153 01 00 C0    		lxi  b, MON_ADDR
+0087   F156 CD 5C F1            call memcpy
+0088   F159             
+0089   F159                     ; Запуск Монитора. Монитор сам переходит в режим STD, инициализируется,
+0090   F159                     ; и запускает программу по адресу из вершины стека.
+0091   F159 C3 00 C0            jmp  MON_ADDR
+0092   F15C             
+0093   F15C             memcpy: ; Копироваение из HL в BC с увеличением адресов, пока HL не равно DE
+0094   F15C 7E                  mov  a, m
+0095   F15D 02                  stax b
+0096   F15E CD 67 F1            call cmp_hl_de
+0097   F161 C8                  rz
+0098   F162 23                  inx  h
+0099   F163 03                  inx  b
+0100   F164 C3 5C F1            jmp  memcpy
+0101   F167             
+0102   F167             cmp_hl_de:
+0103   F167 7D                  mov	a, l
+0104   F168 BB                  cmp	e
+0105   F169 C0                  rnz
+0106   F16A 7C                  mov	a, h
+0107   F16B BA                  cmp	d
+0108   F16C C9                  ret
+0109   F16D             
+0110   F16D             popFileNotFoundRet:
+0111   F16D D1                  pop  d ; восстанавливаем стек для правильного аварийного выхода
+0112   F16E             fileNotFoundRet:
+0113   F16E 21 80 F1            lxi  h, aFileNotFound
+0114   F171 C3 18 C8            jmp  printString
+0115   F174             
+0116   F174                     ; Esc + ) включает KOI-8 до конца выводимой строки
+0117   F174             aLoading:
+0118   F174 0A 1B 28 4C         .db 0Ah,1Bh,"(Loading ",0
+0118   F178 6F 61 64 69 
+0118   F17C 6E 67 20 00 
+0119   F180             
+0120   F180             aFileNotFound:
+0121   F180 0A 1B 28 46         .db 0Ah,1Bh,"(File not found",0
+0121   F184 69 6C 65 20 
+0121   F188 6E 6F 74 20 
+0121   F18C 66 6F 75 6E 
+0121   F190 64 00 
+0122   F192             
+0123   F192             aMonitorPath:
+0124   F192 41 3A 4D 4F         .db "A:MON2.SYS",0
+0124   F196 4E 32 2E 53 
+0124   F19A 59 53 00 
+0125   F19D             
+0126   F19D             nameBuffer:
+0127   F19D                     .block 10
+0128   F1A7             
+0129   F1A7             .end
+tasm: Number of errors = 0

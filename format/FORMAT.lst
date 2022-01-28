@@ -1,0 +1,185 @@
+0001   0000             ;+---------------------------------------------------------------------------
+0002   0000             ; MXOS
+0003   0000             ; FORMAT.COM
+0004   0000             ;
+0005   0000             ; 2022-01-14 Дизассемблировано и доработано SpaceEngineer
+0006   0000             ;
+0007   0000             ; Доработки:
+0008   0000             ; - "тихий режим" по параметру Y (форматировать без спроса)
+0009   0000             ;    например FORMAT.COM B: Y
+0010   0000             ;
+0011   0000             ;----------------------------------------------------------------------------
+0012   0000             
+0013   0000             ; Функции DOS
+0014   0000             getch			= 0C803h	; Ожидание ввода с клавиатуры
+0015   0000             printChar		= 0C809h	; Вывод символа на экран
+0016   0000             printString		= 0C818h	; Вывод строки на экран
+0017   0000             fileGetSetDrive	= 0C842h	; Получить/установить активное устройство
+0018   0000             diskDriver		= 0C863h	; Драйвер выбранного устройства
+0019   0000             
+0020   0000             Buffer          = 0D100h	; Буфер
+0021   0000             
+0022   0000             ;----------------------------------------------------------------------------
+0023   0000             
+0024   D000             .org 0D000h
+0025   D000             
+0026   D000 1A          		ldax    d		; В DE передаётся адрес строки аргументов
+0027   D001 FE 20       		cpi     20h
+0028   D003 D2 1C D0    		jnc		ReadParams	; Прыжок, если есть параметр
+0029   D006             
+0030   D006             		; Запрос буквы диска для форматирования
+0031   D006             ChooseDrive:
+0032   D006 21 AD D0    		lxi     h, str_ChoseDrive
+0033   D009 CD 18 C8    		call    printString		; Вывод сообщения 'CHOOSE DRIVE: '
+0034   D00C CD 03 C8    		call    getch			; Ожидание нажатия клавиши
+0035   D00F 4F          		mov     c, a
+0036   D010 CD 09 C8    		call    printChar
+0037   D013 FE 21       		cpi     21h				; Сравнение с пробелом
+0038   D015 DA 8C D0    		jc		Abort			; Выход в ОС, если меньше или равно
+0039   D018 47          		mov     b, a			; Запомнить букву диска в B
+0040   D019 C3 36 D0    		jmp     ConfirmRequest
+0041   D01C             
+0042   D01C             ReadParams:
+0043   D01C 47          		mov     b, a			; Запомнить букву диска в B
+0044   D01D             
+0045   D01D             SearchLoop1:					; Поиск первого пробела в строке параметров
+0046   D01D 1A          		ldax    d
+0047   D01E FE 21       		cpi     21h
+0048   D020 DA 27 D0    		jc		SearchLoop2
+0049   D023 13          		inx     d
+0050   D024 C3 1D D0    		jmp     SearchLoop1
+0051   D027             
+0052   D027             SearchLoop2:					; Пропуск последующих пробелов
+0053   D027 1A          		ldax    d
+0054   D028 FE 20       		cpi     20h
+0055   D02A C2 31 D0    		jnz		SearchLoopExit
+0056   D02D 13          		inx     d
+0057   D02E C3 27 D0    		jmp		SearchLoop2
+0058   D031             
+0059   D031             SearchLoopExit:		
+0060   D031 FE 59       		cpi     'Y'				; Если найден параметр 'Y', переход к форматированию
+0061   D033 CA 4C D0    		jz		Confirmed
+0062   D036             
+0063   D036             		; Подтверждение форматирования
+0064   D036             ConfirmRequest:
+0065   D036 78          		mov     a, b
+0066   D037 32 A2 D0    		sta     str_A_Y_N		; Заменить 'A' в строке сообщения на введённую букву
+0067   D03A 21 9A D0    		lxi     h, str_Format
+0068   D03D CD 18 C8    		call    printString     ; вывод сообщения 'FORMAT <буква>: [Y/N]?'
+0069   D040 CD 03 C8    		call    getch			; Ожидание нажатия клавиши
+0070   D043 4F          		mov     c, a
+0071   D044 CD 09 C8    		call    printChar
+0072   D047 FE 59       		cpi     'Y'				; Сравнение с 'Y'
+0073   D049 C2 8C D0    		jnz		Abort			; Выход в ОС, если не 'Y'
+0074   D04C             		
+0075   D04C             Confirmed:
+0076   D04C 78          		mov     a, b			; Восстановить букву диска в A
+0077   D04D             
+0078   D04D             		; Буква диска в регистре A
+0079   D04D             Format:
+0080   D04D D6 41       		sui     41h				; Номер диска
+0081   D04F FE 08       		cpi     08h				; Максимальный номер диска = 7
+0082   D051 D2 93 D0    		jnc     InvalidDrive	; Выход, если неверный номер диска
+0083   D054 47          		mov     b, a			; Запомнить номер диска в B
+0084   D055             
+0085   D055             		; Установить выбранный диск текущим
+0086   D055 78          		mov     a, b	; Номер диска в A
+0087   D056 1E 01       		mvi     e, 01h
+0088   D058 CD 42 C8    		call    fileGetSetDrive
+0089   D05B             
+0090   D05B             		; Выдать размер диска в A
+0091   D05B 1E 03       		mvi     e, 03h
+0092   D05D CD 63 C8    		call    diskDriver
+0093   D060 5F          		mov     e, a	; Поместить размер диска в E
+0094   D061 3D          		dcr     a
+0095   D062             
+0096   D062             		; Очистка буфера (E байт)
+0097   D062 21 00 D1    		lxi     h, Buffer
+0098   D065             ClearBufLoop:
+0099   D065 36 00       		mvi     m, 0
+0100   D067 2C          		inr     l
+0101   D068 1D          		dcr     e
+0102   D069 C2 65 D0    		jnz     ClearBufLoop
+0103   D06C             
+0104   D06C             		; Создание пустой структуры FAT (256 байт)
+0105   D06C             CreateFATLoop:
+0106   D06C 3C          		inr     a
+0107   D06D CA 76 D0    		jz      WriteToDisk
+0108   D070 36 01       		mvi     m, 01h
+0109   D072 2C          		inr     l
+0110   D073 C3 6C D0    		jmp     CreateFATLoop
+0111   D076             
+0112   D076             		; Запись FAT на диск
+0113   D076             		; D - номер сектора
+0114   D076             		; E - код операции
+0115   D076             WriteToDisk:
+0116   D076 11 01 00    		lxi     d, 0001h  ; Запись сектора номер 0
+0117   D079 CD 63 C8    		call    diskDriver
+0118   D07C             
+0119   D07C             		; Создание пустой структуры каталога (256 байт)
+0120   D07C             CreateCatLoop:
+0121   D07C 36 FF       		mvi     m, 0FFh
+0122   D07E 2C          		inr     l
+0123   D07F C2 7C D0    		jnz     CreateCatLoop
+0124   D082             
+0125   D082             		; Запись секторов с номера 3 по 1
+0126   D082 16 03       		mvi     d, 03h
+0127   D084             WriteLoop:
+0128   D084 CD 63 C8    		call    diskDriver
+0129   D087 15          		dcr     d
+0130   D088 C2 84 D0    		jnz     WriteLoop
+0131   D08B             
+0132   D08B             		; Выход в ОС
+0133   D08B C9          		ret
+0134   D08C             
+0135   D08C             Abort:
+0136   D08C 21 D3 D0    		lxi     h, str_Aborting
+0137   D08F CD 18 C8    		call    printString		; Вывод сообщения 'ABORTING'
+0138   D092 C9                  ret
+0139   D093             
+0140   D093             InvalidDrive:
+0141   D093 21 BD D0    		lxi     h, str_InvalidDrive
+0142   D096 CD 18 C8    		call    printString		; Вывод сообщения 'INVALID DRIVE LETTER'
+0143   D099 C9                  ret
+0144   D09A             
+0145   D09A             ;----------------------------------------------------------------------------
+0146   D09A             ; Данные
+0147   D09A             
+0148   D09A             str_Format:
+0149   D09A 0A          		.db 0Ah
+0150   D09B 46 4F 52 4D 		.text "FORMAT "
+0150   D09F 41 54 20 
+0151   D0A2             
+0152   D0A2             str_A_Y_N:
+0153   D0A2 41 3A 20 5B 		.text "A: [Y/N]? "
+0153   D0A6 59 2F 4E 5D 
+0153   D0AA 3F 20 
+0154   D0AC 00          		.db 0
+0155   D0AD             
+0156   D0AD             str_ChoseDrive:
+0157   D0AD 0A          		.db 0Ah
+0158   D0AE 43 48 4F 4F 		.text "CHOOSE DRIVE: "
+0158   D0B2 53 45 20 44 
+0158   D0B6 52 49 56 45 
+0158   D0BA 3A 20 
+0159   D0BC 00          		.db 0
+0160   D0BD             
+0161   D0BD             str_InvalidDrive:
+0162   D0BD 0A          		.db 0Ah
+0163   D0BE 49 4E 56 41 		.text "INVALID DRIVE LETTER"
+0163   D0C2 4C 49 44 20 
+0163   D0C6 44 52 49 56 
+0163   D0CA 45 20 4C 45 
+0163   D0CE 54 54 45 52 
+0164   D0D2 00          		.db 0
+0165   D0D3             
+0166   D0D3             str_Aborting:
+0167   D0D3 0A          		.db 0Ah
+0168   D0D4 41 42 4F 52 		.text "ABORTING"
+0168   D0D8 54 49 4E 47 
+0169   D0DC 00          		.db 0
+0170   D0DD             
+0171   D0DD             ;----------------------------------------------------------------------------
+0172   D0DD             
+0173   D0DD             .end
+tasm: Number of errors = 0

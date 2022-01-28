@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{8C51CFA0-4D8C-4CF5-A678-F02AED39C256}</ProjectGuid>
+    <RootNamespace>dos</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="beep.inc" />
+    <None Include="calcCS.inc" />
+    <None Include="calcCursorAddr.inc" />
+    <None Include="calcCursorAddr2.inc" />
+    <None Include="checkARAM.inc" />
+    <None Include="clearScreen.inc" />
+    <None Include="cmp_hl_de.inc" />
+    <None Include="cmp_hl_de_2.inc" />
+    <None Include="delay_l.inc" />
+    <CustomBuild Include="DOS.asm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) sys 49152</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).sys</Outputs>
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BuildInParallel>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">*.inc</AdditionalInputs>
+    </CustomBuild>
+    <None Include="DOS.lst" />
+    <None Include="drawChar.inc" />
+    <None Include="drawCursor.inc" />
+    <None Include="drawCursor2.inc" />
+    <None Include="driver.inc" />
+    <None Include="driver_FFC0.inc" />
+    <None Include="driver_sel.inc" />
+    <None Include="fileCmpExt.inc" />
+    <None Include="fileCreate.inc" />
+    <None Include="fileDelete.inc" />
+    <None Include="fileExec.inc" />
+    <None Include="fileExecBat.inc" />
+    <None Include="fileFind.inc" />
+    <None Include="fileFindCluster.inc" />
+    <None Include="fileGetInfoAddr.inc" />
+    <None Include="fileGetSetAddr.inc" />
+    <None Include="fileGetSetAttr.inc" />
+    <None Include="fileGetSetDrive.inc" />
+    <None Include="fileList.inc" />
+    <None Include="fileLoad.inc" />
+    <None Include="fileNamePrepare.inc" />
+    <None Include="fileRename.inc" />
+    <None Include="font.inc" />
+    <None Include="getch.inc" />
+    <None Include="getch2.inc" />
+    <None Include="getch3.inc" />
+    <None Include="input.inc" />
+    <None Include="installDriver.inc" />
+    <None Include="jmps_c000.inc" />
+    <None Include="jmps_c800.inc" />
+    <None Include="keyScan.inc" />
+    <None Include="loadSaveFatDir.inc" />
+    <None Include="memcpy_bc_hl.inc" />
+    <None Include="memmove_bc_hl.inc" />
+    <None Include="memset_de_20_b.inc" />
+    <None Include="printChar.inc" />
+    <None Include="printChar2.inc" />
+    <None Include="printChar3.inc" />
+    <None Include="printChar4.inc" />
+    <None Include="printChar5.inc" />
+    <None Include="printChar6.inc" />
+    <None Include="printer.inc" />
+    <None Include="printHex.inc" />
+    <None Include="printString.inc" />
+    <None Include="printString1.inc" />
+    <None Include="reboot0.inc" />
+    <None Include="reboot1.inc" />
+    <None Include="reboot2.inc" />
+    <None Include="reboot3.inc" />
+    <None Include="sbb_de_hl_to_hl.inc" />
+    <None Include="scrollDown.inc" />
+    <None Include="scrollUp.inc" />
+    <None Include="scrollUp2.inc" />
+    <None Include="setGetCursorPos.inc" />
+    <None Include="setGetMemTop.inc" />
+    <None Include="strToHex.inc" />
+    <None Include="tapeLoad.inc" />
+    <None Include="tapeLoadInt.inc" />
+    <None Include="tapeRead.inc" />
+    <None Include="tapeReadDelay.inc" />
+    <None Include="tapeReadError.inc" />
+    <None Include="tapeSave.inc" />
+    <None Include="tapeWrite.inc" />
+    <None Include="tapeWriteDelay.inc" />
+    <None Include="tapeWriteWord.inc" />
+    <None Include="unpacker.asm" />
+    <None Include="unpacker.lst" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

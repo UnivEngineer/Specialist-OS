@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="unpacker.asm">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="tapeWriteWord.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="beep.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="calcCS.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="calcCursorAddr.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="calcCursorAddr2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="clearScreen.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="cmp_hl_de.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="cmp_hl_de_2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="delay_l.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="drawChar.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="drawCursor.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="drawCursor2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="driver.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="driver_FFC0.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="driver_sel.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileCmpExt.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileCreate.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileDelete.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileExec.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileExecBat.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileFind.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileFindCluster.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileGetInfoAddr.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileGetSetAddr.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileGetSetAttr.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileGetSetDrive.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileList.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileLoad.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileNamePrepare.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fileRename.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="font.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="getch.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="getch2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="getch3.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="input.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="installDriver.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="jmps_c000.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="jmps_c800.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="keyScan.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="loadSaveFatDir.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="memcpy_bc_hl.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="memmove_bc_hl.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="memset_de_20_b.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printChar.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printChar2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printChar3.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printChar4.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printChar5.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printChar6.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printer.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printHex.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printString.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printString1.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="reboot0.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="reboot1.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="reboot2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="reboot3.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="sbb_de_hl_to_hl.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="scrollDown.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="scrollUp.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="scrollUp2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="setGetCursorPos.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="setGetMemTop.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeLoad.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeLoadInt.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeRead.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeReadDelay.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeReadError.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeSave.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeWrite.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeWriteDelay.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="DOS.lst">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="unpacker.lst">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="checkARAM.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="strToHex.inc">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="DOS.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

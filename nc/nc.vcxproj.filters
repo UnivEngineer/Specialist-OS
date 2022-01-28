@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="upDownLeftRight.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="clearCmdLine.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="compactName.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="copyFileInt.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="draw.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="drawCursor.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="drawWindow.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="driver.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="enter.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="enter2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f3.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f4.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f5.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f6.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f7.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f8.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="f9.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="getSelectedFile.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="input.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="inputForCopyMove.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="inverseRect.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="loadAndPrint.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="loadFiles.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="loadSelFileAt0.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="main.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="main2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="memcpy_hl_de_3.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="memset_hl_a_c.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="mxos.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printCurDrive.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printDec.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printFileName.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printFilePanel.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printInfoLine.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printInfoPanel.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printInvSelFile.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printSelDrive.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printSpaces.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printString2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printStringInv.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="rwBytePanel.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="saveState.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="selFileToCmdLine.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="setCursorPosPanel.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="start.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tab.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeErrorHandler.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tapeWrite.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="NC.lst">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="NC.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
