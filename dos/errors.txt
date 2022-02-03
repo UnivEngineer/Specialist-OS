@@ -1,6 +1,0 @@
-TASM 8085 Assembler.      Version 3.2 September, 2001.
- Copyright (C) 2001 Squak Valley Software
-tasm: pass 1 complete.
-fileList.inc line 0021: unrecognized instruction.          (SD)
-tasm: pass 2 complete.
-tasm: Number of errors = 1

@@ -11,14 +11,14 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printChar:	push	psw
-		push	d
-		push	b
-		push	h
-		call	printChar2
-		pop	h
-		pop	b
-		pop	d
-		pop	psw
-		ret
+printChar:  push  af
+            push  de
+            push  bc
+            push  hl
+            call  printChar2
+            pop   hl
+            pop   bc
+            pop   de
+            pop   af
+            ret
 

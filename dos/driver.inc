@@ -26,129 +26,122 @@
 ;     bc, de, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано и доработано vinxru
+; 2022-02-02 Доработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-#if ROM_64K
-ROM_SIZE = 0
-#else
-ROM_SIZE = 0C0h
-#endif
+    IF ROM_64K
+ROM_SIZE  =  0 
+    ELSE
+ROM_SIZE  =  0C0h 
+    ENDIF
 
-diskDriver:	; Сохраняем регистры
-		push	h
-#if BIG_MEM
-		push	b		; +1
-#endif
-		push	d
-		push	psw
+diskDriver: ; Сохраняем регистры
+            push    hl
+            push    bc          ; +1
+            push    de
+            push    af
 
-		; Заранее загружаем в С активный диск
-#if BIG_MEM
-		lda	v_drive		; +4
-		mov	c, a		; +5
-		dcr	c		; +6
-#endif
-		; Функция 1 - Запись блока
-		dcr	e
-		jz	diskDriver_w
+            ; Заранее загружаем в С активный диск
+            ld      a, (v_drive); +4
+            ld      c, a        ; +5
 
-		; Функция 2 - Чтение блока
-		dcr	e
-		jz	diskDriver_r
-		
-		; Функция 3 - Получение размера диска
-		pop	psw		
-#if BIG_MEM==0
-		lda	v_drive         ; +3
-		ana	a
-		mvi	a, ROM_SIZE
-#else
-		inr	c
-		mvi	a, ROM_SIZE
-#endif
-		jz	diskDriver_1
-		mvi	a, 0FFh		; Размер RAM-диска		
-diskDriver_1:		
-		; Восстановливаем регистры и выходим
-#if BIG_MEM
-		jmp	pop_dbh_ret
-#else
-		pop	d
-		pop	h
-		ret
-#endif
-		
+            ; Функция 1 - Запись блока
+            dec     e
+            jp z,   diskDriver_w
+
+            ; Функция 2 - Чтение блока
+            dec     e
+            jp z,   diskDriver_r
+            
+            ; Функция 3 - Получение размера диска
+            pop     af          
+            inc     c
+            ld      a, ROM_SIZE
+            jp z,   popDBh_ret  ; Восстановливаем регистры и выходим
+            ld      a, 0FFh     ; Размер RAM-диска            
+            jp      popDBh_ret  ; Восстановливаем регистры и выходим
+            
 ; ---------------------------------------------------------------------------
 ; Функция 2 - Чтение блока
 
-diskDriver_r:	
-#if ROM_64K
-		; Это ПЗУ
-		inr	c
-		jnz	rom_64k
-		; Это старшая часть ПЗУ
-		mvi	a, 80h
-		xra	d
-		jm	rom_64k
-		; 
-		mov	d, a
-		; Первые 4 байта в ПЗУ СТД это программа инициализации
-		inx	d
-		inx	d
-		inx	d
-		inx	d
-		; Включаем ПЗУ СТД (да, надо регистр цвета сбросить для этого)
-		xra	a
-		sta	IO_COLOR
-		; Включаем ПЗУ СТД
-rom_64k_0:
-		sta	IO_PAGE_STD
-		; Чтение
-		ldax	d
-		; Включение ОЗУ MX
-		sta	IO_RAM-800h
-		; Запись
-		mov	m, a
-		inx	h
-		; Цикл
-		inx	d
-		mvi	a, 4
-		cmp	e
-		jnz	rom_64k_0
-		; Восстаналиваем цвет
-		mvi	a, INIT_COLOR
-		sta	IO_COLOR
-		; Выходим
-		jmp	popa_adh_ret
-		
-rom_64k:	dcr	c
-#endif
-#if BIG_MEM==0
-		; Не нужно, тут и так E=0
-		mvi	e, 0		;+1
-#endif
-		call	0FFC0h
+diskDriver_r:
+            ; Это ROM-диск?
+            or      a
+            jp nz,  ramDRead ; нет, переходим к драйверу RAM-диска
 
-popa_adh_ret:	; Восстанавливаем регистры и выходим
-		pop	psw
-#if BIG_MEM
-		jmp	pop_dbh_ret
-#else
-		pop	d
-		pop	h
-		ret
-#endif
+    IF ROM_64K
+
+            ; Это старшая часть ПЗУ?
+            ld      a, 80h
+            xor     d
+            jp m,   romMXRead; нет переходим к драйверу ROM-диска MX (Специалист-MX2)
+
+            ; Драйвер ROM-диска STD (Специалист-MX2)
+            ld      d, a
+            inc     de ; пропускаем первые 4 байта в ПЗУ STD (это код перехода на загрузчик)
+            inc     de
+            inc     de
+            inc     de
+            ; Включаем ПЗУ STD (да, надо регистр цвета сбросить для этого)
+            xor     a
+            ld      (IO_COLOR), a
+            ; Включаем режим STD
+romStdReadLoop:
+            ld      (IO_PAGE_STD), a
+            ; Чтение
+            ld      a, (de)
+            ; Включение ОЗУ MX
+            ld      (IO_PAGE_RAM-800h),a
+            ; Запись
+            ld      (hl), a
+            inc     hl
+            ; Цикл
+            inc     de
+            ld      a, 4
+            cp      e
+            jp nz,  romStdReadLoop
+
+            ; Восстаналиваем цвет
+            ld      a, COLOR_BIOS
+            ld      (IO_COLOR), a
+            ; Выходим
+            jp      popa_adh_ret
+            
+    ENDIF
+
+romMXRead:
+romMXReadDrv:
+            ld      a, c    ; номер страницы = 0
+romMXReadLoop:
+            ld      (IO_PAGE_ROM), a
+            ld      a, (de)
+            ld      (IO_PAGE_RAM), a
+            ld      (hl), a
+            inc     hl
+            inc     e
+            jp nz,  romMXReadDrv
+            jp      popa_adh_ret
+
+ramDRead:
+            ; Вызываем драйвер чтения RAM-диска
+            call    bios_RAMDRead
+
+popa_adh_ret:
+            ; Восстанавливаем регистры и выходим
+            pop     af
+            jp      popDBh_ret
 
 ; ---------------------------------------------------------------------------
 ; Функция 1 - Запись блока
 
-diskDriver_w:	
-#if BIG_MEM==0
-		; Не нужно, тут и так E=0
-		mvi	e, 0		;-1 у нас лишний байт в драйвере
-#endif
-		call	0FFD0h
+diskDriver_w:
+            ; Это ROM-диск?
+            or      a
+            jp z,   popa_adh_ret    ; да, восстанавливаем регистры и выходим
 
-		; Восстановливаем регистры и выходим
-		jmp	popa_adh_ret
+            ; Вызываем драйвер чтения RAM-диска
+            call    bios_RAMDWrite
+
+            ; Восстановливаем регистры и выходим
+            jp      popa_adh_ret
 

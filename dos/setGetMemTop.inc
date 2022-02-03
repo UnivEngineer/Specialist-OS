@@ -11,13 +11,13 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-setMemTop:	push	psw
-		mov	a, h
-		cpi	0D0h
-		jc	setMemTop_0
-		  shld	v_memTop
-setMemTop_0:	pop	psw
-		ret
+setMemTop:  push  af
+            ld    a, h
+            cp    0D0h
+            jp c, setMemTop_0
+              ld  (v_memTop), hl
+setMemTop_0:      pop   af
+            ret
 
 ;----------------------------------------------------------------------------
 ; Получить объем доступной памяти
@@ -28,7 +28,7 @@ setMemTop_0:	pop	psw
 ; На выходе
 ;  все регистры сохраняются
 ;----------------------------------------------------------------------------
-		
-getMemTop:	lhld	v_memTop
-		ret
+            
+getMemTop:  ld    hl, (v_memTop)
+            ret
 

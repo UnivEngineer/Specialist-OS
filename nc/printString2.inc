@@ -1,32 +1,40 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Вывод строки по адресу HL длиной B
+; Вывод строки по адресу hl длиной b или до терминатора.
+; Выводит только реальные символы, чтобы не портить экран при
+; неотформатированном или повреждённом диске.
 ;
-; 2013-12-18 Дизассемблировано vinxru
-; 2022-01-14 Доработано SpaceEngineer
+; вход:
+;   hl - адрес строки
+;   b  - макс. длина печати
+;   c  - терминатор
+;
+; 2022-01-31 SpaceEngineer
 ;----------------------------------------------------------------------------
 
-; Печать только реальных символов, чтобы не портить экран при
-; неотформатированном или повреждённом диске.
-
 printString2:
+    push    af
+    push    de
 
-		push	psw
-		push	d
-		push	b
-		push	h
+printString2loop:
+    ld      a, (hl)
+    cp      c
+    jp c,   printString2exit
 
-		mov		a, m
-		call	printChar_real
+    push    bc
+    push    hl
 
-		pop		h
-		pop		b
-		pop		d
-		pop		psw
+    call    bios_printCharReal
 
-		inx		h
-		dcr		b
-		jnz		printString2
+    pop     hl
+    pop     bc
 
-		ret
+    inc     hl
+    dec     b
+    jp nz,  printString2loop
+
+printString2exit:
+    pop     de
+    pop     af
+    ret
 

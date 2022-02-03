@@ -4,106 +4,117 @@
 ;
 ; На входе 
 ;  hl - исходное имя
-;  de - буфер для результата (9 байт)
+;  de - буфер для результата (P_INPUT_WIDTH + 3 байт)
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileNamePrepare:; Сохраняем регистры
-		push	b
-		push	d
+fileNamePrepare:
+            ; Сохраняем регистры
+            push    bc
+            push    de
 
-		; Если второй символ исходной строки ':', то меняем диск
-		inx	h		
-		mov	a, m
-		cpi	':'
-		dcx	h
-		jnz	fileNamePr_1
+            ; Если второй символ исходной строки ':', то меняем диск
+            inc     hl          
+            ld      a, (hl)
+            cp      ':'
+            dec     hl
+            jp nz,  fileNamePr_1
 
-		; Меняем диск
-		mov	a, m		
-		sui	'A'
-		call	fileSelectDrive
+            ; Меняем диск
+            ld      a, (hl)       
+            sub     'A'
+            call    fileSelectDrive
 
-		; Диск не входит в имя файла
-		inx	h		
-		inx	h		
-		
-fileNamePr_1:	; 6 символов имени, 3 расширения
-		lxi	b, 603h
+            ; Диск не входит в имя файла
+            inc     hl          
+            inc     hl          
+            
+fileNamePr_1:
+            ; b = длина имени, c = 3 - длина расширения
+            ld      bc, (DIR_NAME_LENGTH << 8) + 3
 
-		; Копируем текст до точки, пробела или конца строки, не более 6 символов. 
-fileNamePr_2:	mov	a, m
-		ana	a
-		jp	fileNamePr_3
-		sui	40h
-fileNamePr_3:	cpi	' '+1
-		jc	fileNamePr_5
-		inx	h
-		cpi	'.'
-		jz	fileNamePr_5		
-		stax	d
-		inx	d
-		dcr	b
-		jnz	fileNamePr_2
+            ; Копируем текст до точки, пробела или конца строки, не более DIR_NAME_LENGTH символов.
+fileNamePr_2:
+            ld      a, (hl)
+            and     a
+            jp p,   fileNamePr_3
+            sub     40h         ; проеобразование KOI?
+fileNamePr_3:
+            cp      ' '+1
+            jp c,   fileNamePr_5
+            inc     hl
+            cp      '.'
+            jp z,   fileNamePr_5            
+            ld      (de), a
+            inc     de
+            dec     b
+            jp nz,  fileNamePr_2
 
-		; Пропускаем текст до точки, пробела или конца строки
-fileNamePr_4:	mov	a, m
-		cpi	' '+1
-		jc	fileNamePr_6
-		inx	h
-		cpi	'.'
-		jnz	fileNamePr_4
-		jmp	fileNamePr_6
-
-; ---------------------------------------------------------------------------
-
-fileNamePr_5:	; Имя короче 6 символов
-		; Заполняем недостающие символы имени пробелами
-		call	memset_de_20_b
-
-		; Копируем текст до пробела или конца строки, не более 3 символов. 
-fileNamePr_6:	mov	a, m                         
-		ana	a
-		jp	fileNamePr_7
-		sui	40h		
-fileNamePr_7:	cpi	' '+1
-		jc	fileNamePr_11
-		stax	d
-		inx	h
-		inx	d
-		dcr	c
-		jnz	fileNamePr_6
-
-fileNamePr_8:	; Пропускаем текст до пробела или конца строки
-		mov	a, m
-		cpi	' '
-		jc	fileNamePr_10
-		inx	h
-		jnz	fileNamePr_8
-		
-fileNamePr_9:	; Пропускаем текст до пробела или конца строки
-		; Почему то дублируется код
-		mov	a, m
-		cpi	' '
-		jc	fileNamePr_10
-		inx	h
-		jz	fileNamePr_9
-		dcx	h
-
-fileNamePr_10:	; Восстанавливаем регистры и выходим
-		pop	d
-		pop	b
-		ret
+            ; Пропускаем текст до точки, пробела или конца строки
+fileNamePr_4:
+            ld      a, (hl)
+            cp      ' '+1
+            jp c,   fileNamePr_6
+            inc     hl
+            cp      '.'
+            jp nz,  fileNamePr_4
+            jp      fileNamePr_6
 
 ; ---------------------------------------------------------------------------
 
-fileNamePr_11:	; Заполняем недостающие символы расширения пробелами
-		mov	b, c
-		call	memset_de_20_b
+fileNamePr_5:
+            ; Имя короче DIR_NAME_LENGTH символов
+            ; Заполняем недостающие символы имени пробелами
+            call    memset_de_20_b
 
-		; Восстанавливаем регистры и выходим
-		pop	d
-		pop	b
-		ret
+            ; Копируем текст до пробела или конца строки, не более 3 символов. 
+fileNamePr_6:
+            ld      a, (hl)                         
+            and     a
+            jp p,   fileNamePr_7
+            sub     40h         ; проеобразование KOI?
+fileNamePr_7:
+            cp      ' '+1
+            jp c,   fileNamePr_11
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  fileNamePr_6
+
+fileNamePr_8:
+            ; Пропускаем текст до пробела или конца строки
+            ld      a, (hl)
+            cp      ' '
+            jp c,   fileNamePr_10
+            inc     hl
+            jp nz,  fileNamePr_8
+            
+;fileNamePr_9:
+;            ; Пропускаем текст до пробела или конца строки
+;            ; Почему то дублируется код
+;            ld      a, (hl)
+;            cp      ' '
+;            jp c,   fileNamePr_10
+;            inc     hl
+;            jp z,   fileNamePr_9
+;            dec     hl
+
+fileNamePr_10:    ; Восстанавливаем регистры и выходим
+            pop     de
+            pop     bc
+            ret
+
+; ---------------------------------------------------------------------------
+
+fileNamePr_11:
+            ; Заполняем недостающие символы расширения пробелами
+            ld      b, c
+            call    memset_de_20_b
+
+            ; Восстанавливаем регистры и выходим
+            pop     de
+            pop     bc
+            ret
 

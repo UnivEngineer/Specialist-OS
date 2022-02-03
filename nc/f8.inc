@@ -5,71 +5,68 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-F8:		; Рисуем окно
-		call	drawWindowIfSel
+F8:         ; Рисуем окно
+            call    drawWindowIfSel
 
-		; Выводим надпись "DELETE FROM A:"
-        ; центр экрана это x = 60h
-        ; половина ширина строки w = 14*3/2 = 21
-        ; координата строки x = 60h-21 = 4Bh
-		lxi	h, 4B5Eh
-		shld	v_cursorY
-		lxi	h, aDeleteFrom
-		call	printString
-		call	printSelDrive
+            ; Выводим "DELETE FROM A:"
+            CENTER_LINE 14, 5Eh
+            ld          hl, aDeleteFrom
+            call        bios_printString
+            call        printSelDrive
 
-		call	printInvSelFile
+            call        printInvSelFile
 
-loc_D54C:	; Ждем нажатия Enter или ESC
-		call	keyScan
-		cpi	1Bh
-		jz	mainReload
-		cpi	0Dh
-		jnz	loc_D54C
+loc_D54C:   ; Ждем нажатия Enter или ESC
+            call        bios_keyScan
+            cp          1Bh
+            jp z,       mainReload
+            cp          0Dh
+            jp nz,      loc_D54C
 
-		; Если файл только для чтения
-		call	getSelectedFile		
-		lxi	d, 9
-		dad	d
-		mov	a, m
-		ani	1
-		jz	loc_D595
+            ; Если файл только для чтения
+            call        getSelectedFile         
+            ld          de, FILE_DESCRIPTOR.attrib
+            add         hl, de
+            ld          a, (hl)
+            and         1
+            jp z,       loc_D595
 
-		call	drawWindow2
+            call        drawWindow2
 
-		; Выводим текст "FILE IS PROTECTED"
-		lxi	h, 4680h
-		shld	v_cursorY
-		lxi	h, aFileIsProtected
-		call	printString
+            ; Выводим текст "FILE IS READ-ONLY"
+            COLOR       COLOR_DIALOG_ERR
+            CENTER_LINE 18, 80h
+            ld          hl, aFileIsReanOnly
+            call        bios_printString
 
-		; Выводим v_input
-		lxi	h, 5090h
-		shld	v_cursorY		
-		lxi	h, v_input
-		call	printStringInv
+            ; Выводим nc_vars.input
+            COLOR       COLOR_DIALOG
+            ld          hl, 5090h
+            ld          (bios_vars.cursorY), hl         
+            ld          hl, nc_vars.input
+            call        printStringInv
 
-loc_D581:				; CODE XREF: drawWindowIfSel+379j
-		call	keyScan
-		inr	a
-		jnz	loc_D581
+loc_D581:   ; CODE XREF: drawWindowIfSel+379j
+            call        bios_keyScan
+            inc         a
+            jp nz,      loc_D581
 
-loc_D588:				; CODE XREF: drawWindowIfSel+386j
-		call	keyScan
-		cpi	1Bh
-		jz	mainReload
-		cpi	0Dh
-		jnz	loc_D588
+loc_D588:   ; CODE XREF: drawWindowIfSel+386j
+            call        bios_keyScan
+            cp          1Bh
+            jp z,       mainReload
+            cp          0Dh
+            jp nz,      loc_D588
 
-loc_D595:	; Удаляем текущий файл
-		call	getSelectedFile
-		call	fileDelete
+loc_D595:   ; Удаляем текущий файл
+            call        getSelectedFile
+            call        bios_fileDelete
 
-		; Уменьшаем счетчик файлов
-		lxi	h, panelA_filesCnt
-		call	readBytePanel
-		dcr	a
-		call	writeBytePanel
+            ; Уменьшаем счетчик файлов
+            ld          hl, panelA_filesCnt
+            call        readBytePanel
+            dec         a
+            call        writeBytePanel
 
-		jmp	mainReload
+            jp          mainReload
 

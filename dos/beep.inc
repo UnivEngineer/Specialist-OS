@@ -7,38 +7,38 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-beep:		; Сохраняем все регистры. DE не используется ниже
-		push	psw
-		push	b
-		push	h
+beep:       ; Сохраняем все регистры. de не используется ниже
+            push  af
+            push  bc
+            push  hl
 
-		; Частота и длительность сигнала
-		lhld	v_beep
+            ; Частота и длительность сигнала
+            ld    hl, (bios_vars.beepDuration)
 
-beep_0:		; Единицу на динамик
-		mvi	a, 0Bh
-		sta	IO_KEYB_MODE
+beep_0:     ; Единицу на динамик
+            ld    a, 0Bh
+            ld    (IO_KEYB_MODE),a
 
-		; Задержка L тактов
-		call	delay_l
+            ; Задержка l тактов
+            call  delay_l
 
-		; Ноль на динамик
-		mvi	a, 0Ah
-		sta	IO_KEYB_MODE
+            ; Ноль на динамик
+            ld    a, 0Ah
+            ld    (IO_KEYB_MODE),a
 
-		; Задержка L тактов
-		call	delay_l
+            ; Задержка l тактов
+            call  delay_l
 
-		; Повторяем H раз
-		dcr	h
-		jnz	beep_0
+            ; Повторяем h раз
+            dec   h
+            jp nz,  beep_0
 
-		; Ничего не делаем
-		nop
+            ; Ничего не делаем
+            nop
 
-		; Восстаналиваем все регистры и выходим. DE не используется
-		pop	h
-		pop	b
-		pop	psw
-		ret
+            ; Восстаналиваем все регистры и выходим. de не используется
+            pop   hl
+            pop   bc
+            pop   af
+            ret
 

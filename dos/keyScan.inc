@@ -8,90 +8,90 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-setKeybMode83:	mvi	a, 83h
-		sta	IO_KEYB_MODE
-		ret
+setKeybMode83:    ld    a, 83h
+            ld    (IO_KEYB_MODE),a
+            ret
 
 ; ---------------------------------------------------------------------------
 
-keyScan2:	; Режим чтения ряда
-		call	setKeybMode82
+keyScan2:   ; Режим чтения ряда
+            call  setKeybMode82
 
-		; Одним чтением првоеряем все клавиши
-		lda	IO_KEYB_B	
+            ; Одним чтением првоеряем все клавиши
+            ld    a, (IO_KEYB_B)     
 
-		; Эти биты не используются в сканировании
-		ori	3
+            ; Эти биты не используются в сканировании
+            or    3
 
-		; Ни одна клавиша не нажата
-		cpi	0FFh
-		rz
+            ; Ни одна клавиша не нажата
+            cp    0FFh
+            ret Z 
 
-		; Сохраняем регистры
-		push	h
-		push	b
-		push	d
-		
-		; Перебираем 12 столбцов кнопок
-		lxi	h, 0FFEh
-		lxi	d, v_keybTbl + 11
-		mvi	b, 0FFh
-loc_C1DD:	mov	a, h
-		sta	IO_KEYB_C
-		mov	a, l
-		sta	IO_KEYB_A
-		rrc
-		cma
-		ani	4
-		mov	c, a
-		lda	IO_KEYB_B
-		ora	c
+            ; Сохраняем регистры
+            push  hl
+            push  bc
+            push  de
+            
+            ; Перебираем 12 столбцов кнопок
+            ld    hl, 0FFEh
+            ld    de, v_keybTbl + 11
+            ld    b, 0FFh
+loc_C1DD:   ld    a, h
+            ld    (IO_KEYB_C),a
+            ld    a, l
+            ld    (IO_KEYB_A),a
+            RRCA
+            CPL
+            and   4
+            ld    c, a
+            ld    a, (IO_KEYB_B)
+            or    c
 
-		; Перебираем 6 кнопок в столбце
-		mvi	c, 6
-		rrc
-		rrc
-loc_C1F2:	rrc
-		cnc	keybScan3
-		dcr	c
-		jnz	loc_C1F2
+            ; Перебираем 6 кнопок в столбце
+            ld    c, 6
+            RRCA
+            RRCA
+loc_C1F2:   RRCA
+            call NC,    keybScan3
+            dec   c
+            jp nz,  loc_C1F2
 
-		; Цикл
-		dcx	d
-		dad	h
-		inx	h
-		mov	a, h
-		adi	0F0h
-		mov	h, a
-		jc	loc_C1DD
+            ; Цикл
+            dec   de
+            add   hl, hl
+            inc   hl
+            ld    a, h
+            add   a,0F0h
+            ld    h, a
+            jp c, loc_C1DD
 
-		; Режим ВВ55 по уполчанию
-		call	setKeybMode82
+            ; Режим ВВ55 по уполчанию
+            call  setKeybMode82
 
-		; Результат
-		mov	a, b
+            ; Результат
+            ld    a, b
 
-		; Восстаналвиаем регистры
-		pop	d
-		pop	b
-		pop	h
-		ret
+            ; Восстаналвиаем регистры
+            pop   de
+            pop   bc
+            pop   hl
+            ret
 
 ;----------------------------------------------------------------------------
 
-keybScan3:	push	d
-		push	psw
-		mvi	a, 6		; e += (6 - c) * 16
-		sub	c
-		add	a
-		add	a
-		add	a
-		add	a
-		add	e
-		mov	e, a
-		ldax	d		; b = *de;
-		mov	b, a
-		pop	psw
-		pop	d
-		ret
+keybScan3:  push  de
+            push  af
+            ld    a, 6        ; e += (6 - c) * 16
+            sub   c
+            add   a, a
+            add   a, a
+            add   a, a
+            add   a, a
+            add   a, e
+            ld    e, a
+            ld    a, (de)            ; b = *de;
+            ld    b, a
+            pop   af
+            pop   de
+            ret
 

@@ -5,8 +5,8 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-loadFiles:	mvi	e, 1
-		call	fileGetSetDrive
-		lxi	h, files
-		jmp	fileList
+loadFiles:  ld    e, 1
+            call  bios_fileGetSetDrive
+            ld    hl, nc_vars.fileListBuffer
+            jp    bios_fileList
 

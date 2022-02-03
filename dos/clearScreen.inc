@@ -8,42 +8,44 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-clearScreen:	; bc, hl - сохраняем. de - не используется
-		push	h
-		push	b
+clearScreen:
+            ; bc, hl - сохраняем. de - не используется
+            push  hl
+            push  bc
 
-		; Сохранение SP
-		lxi	h, 0
-		dad	sp
-		shld	v_oldSP
+            ; Сохранение sp
+            ld    hl, 0
+            add   hl,sp
+            ld    (bios_vars.oldSP), hl
 
-		; Устанавливаем SP в конец видеопамяти
-		lxi	sp, 0C000h
+            ; Устанавливаем sp в конец видеопамяти
+            ld    sp, 0C000h
 
-		; Байт (слово) для заполнения памяти
-		lhld	v_inverse
+            ; Байт (слово) для заполнения памяти
+            ld    hl, (bios_vars.inverse)
 
-		; Помещаем в стек 3000h байт
-		lxi	b, 3000h / 16
-clearScreen_0:	  push	h
-		  push	h
-		  push	h
-		  push	h
-		  push	h
-		  push	h
-		  push	h
-		  push	h
-		  dcx	b
-		  mov	a, b
-		  ora	c
-		jnz	clearScreen_0
+            ; Помещаем в стек 3000h байт
+            ld    bc, 3000h / 16
+clearScreen_0:
+            push      hl
+            push      hl
+            push      hl
+            push      hl
+            push      hl
+            push      hl
+            push      hl
+            push      hl
+            dec bc
+            ld  a, b
+            or  c
+            jp nz,  clearScreen_0
 
-		; Восстанавливаем SP
-		lhld	v_oldSP
-		sphl
+            ; Восстанавливаем sp
+            ld    hl, (bios_vars.oldSP)
+            ld    sp, hl
 
-		; bc, hl были сохранены. de - не используется
-		pop	b
-		pop	h
-		ret
+            ; bc, hl были сохранены. de - не используется
+            pop   bc
+            pop   hl
+            ret
 

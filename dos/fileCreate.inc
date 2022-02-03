@@ -3,7 +3,7 @@
 ; Создать файл
 ;
 ; На входе
-;  hl - имя файла и информация (всё в формате записи каталога)
+;  hl - адрес дескриптора файла в формате FAT (имя, фтрибуты, размер и т.д.)
 ;
 ; На выходе
 ;  сf - ошибка
@@ -11,151 +11,178 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileCreate:	; Сохраняем регистры
-		push	h
-		push	b
-		push	d
+fileCreate: ; Сохраняем регистры
+            push    hl
+            push    bc
+            push    de
 
-		; Если файл существует, то удаляем его
-		call	fileFind
-		cnc	deleteFileInt
+            ; Если файл существует, то удаляем его
+            call    fileFind
+            call nc,deleteFileInt
 
-		; Сохраняем готовую запись каталога
-		push	h
+            ; Сохраняем готовый дескриптор файла
+            push    hl
 
-		; Ищем свободную запись в каталоге
-		lxi	h, diskDirectory	; Адрес каталога
-		lxi	d, 16			; Размер записи в каталоге
-		mvi	b, 48			; Максимум файлов
-fileCreate_0:	mov	a, m
-		inr	a
-		jz	fileCreate_1		; Свободная запись найдена
-		dad	d
-		dcr	b
-		jnz	fileCreate_0
+            ; Ищем свободную запись в каталоге
+            ld      hl, diskDirectory     ; Адрес каталога
+            ld      de, DIR_DESCR_SIZE    ; Размер записи в каталоге
+            ld      b,  DIR_MAX_FILES     ; Максимум файлов
+fileCreate_0:
+            ld      a, (hl)
+            inc     a
+            jp z,   fileCreate_1          ; Свободная запись найдена
+            add     hl, de
+            dec     b
+            jp nz,  fileCreate_0
 
-		; Свободных записей нет
+            ; Свободных записей нет
 
-		; Освобождаем стек
-		pop	h
+            ; Освобождаем стек
+            pop     hl
 
-		; Установка A=0, ZF=1
-		xra	a		
+            ; Установка a=0, ZF=1
+            xor     a           
 
-stc_pop_dbh_ret:; Установка флага CF=1
-		stc
+stc_popDBh_ret:
+            ; Установка флага CF=1
+            scf
 
-pop_dbh_ret:	; Восстановление регистров и выход
-		pop	d
-		pop	b
-		pop	h
-		ret
+popDBh_ret: ; Восстановление регистров и выход
+            pop     de
+            pop     bc
+            pop     hl
+            ret
 
 ; ---------------------------------------------------------------------------
 ; Свободная запись найдена
 
-fileCreate_1:	; Адрес свободной записи в DE
-		xchg
+fileCreate_1:
+            ; Сохраняем адрес дескриптора создаваемого файла в буфере каталога
+            ld      (v_createdFile), hl
 
-		; Готовая запись каталога в HL
-		pop	h
+            ; Копируем в de
+            ex      de, hl
 
-		; Копируем готовую запись в каталог 
-		mvi	c, 14
-fileCreate_2:	mov	a, m
-		stax	d
-		inx	h
-		inx	d
-		dcr	c
-		jnz	fileCreate_2
+            ; Адрес готового дескриптора файла в hl
+            pop     hl
 
-		; Сохраняем адрес созданного файла
-		xchg
-		shld	v_createdFile
-			
-		; Ищем свободный кластер
-		call	fileFindClusterFirst
-		jc	stc_pop_dbh_ret
+            ; Копируем готовый дескриптор файла в каталог (из hl в de)
+            ld      c, DIR_DESCR_SIZE
+fileCreate_2:
+            ld      a, (hl)
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  fileCreate_2
 
-		push	psw
+            ; Ищем свободный кластер (результат - в A)
+            call    fileFindClusterFirst
+            jp c,   stc_popDBh_ret ; если нет свободных кластеров - выходим с ошибкой
 
-		; Сохраняем в каталог адрес первого кластера
-		inx	h
-		mov	m, a ; [15]
+            push    af
 
-		; Читаем длину
-		dcx	h
-		dcx	h
-		mov	d, m ; [13]
-		dcx	h
-		mov	e, m ; [12]
+            ; Сохраняем в каталог адрес первого кластера
+            ld      hl, (v_createdFile)
+            ld      bc, FILE_DESCRIPTOR.firstCluster
+            add     hl, bc  ; hl = адрес поля firstCluster в дескрипторе файла
+            ld      (hl), a
 
-		; Читаем адрес
-		dcx	h
-		mov	b, m ; [11]
-		dcx	h
-		mov	l, m ; [10]
+		    ; Читаем адрес загрузки файла
+            ; de = адрес загрузки файла
+            ld      hl, (v_createdFile)
+            ld      bc, FILE_DESCRIPTOR.loadAddress
+            add     hl, bc  ; hl = адрес поля loadAddress (мл. байт) в дескрипторе файла
+            ld      e, (hl)
+            inc     hl      ; hl = адрес поля loadAddress (ст. байт) в дескрипторе файла
+            ld      d, (hl) ; b = старший байт адреса загрузки
 
-		; Сохраняем адрес
-		mov	h, b
-		shld	v_input_start
+            ; Сохраняем адрес загрузки в переменную v_input_start
+            ex      de, hl
+            ld      (v_input_start), hl ; v_input_start = адрес загрузки файла
 
-		; Сохраняем длину
-		xchg
-		shld	v_input_end
+            ; Читаем размер файла
+            ; de = размер файла
+            ld      hl, (v_createdFile)
+            ld      bc, FILE_DESCRIPTOR.size
+            add     hl, bc  ; hl = адрес поля size (мл. байт) в дескрипторе файла
+            ld      e, (hl)
+            inc     hl      ; hl = адрес поля size (ст. байт) в дескрипторе файла
+            ld      d, (hl)
 
-		; ?
-		mov	b, h
-		inr	b
-		mvi	h, 0FBh
+            ; Сохраняем размер файла в переменную v_input_end
+            ex      de, hl
+            ld      (v_input_end), hl   ; v_input_end = размер файла
 
-		; Первый кластер файла
-		pop	psw
-		mov	c, a
-		mov	l, a
+            ; Подготавливаем необходимые регистры
+            ld      b, h        ; b = старший байт размера = количество кластеров файла - 1, т.к. кластер размером 256 байт.
+            inc     b           ; b = количество кластеров файла. TODO: это не будет работать с другим размером кластера!
+            pop     af          ; a = первый кластер файла
+            ld      c, a        ; с = первый кластер файла
+            ld      h, fat>>8   ; h = старший адрес таблицы fat в памяти
+            ld      l, a        ; hl = указатель на первый кластер файла в таблице fat
 
-		jmp	loc_CC24
-
-; ---------------------------------------------------------------------------
-
-allocClusters:	call	fileFindClusterNext
-		jc	stc_pop_dbh_ret		
-loc_CC24:	mov	m, a
-		mov	l, a
-		dcr	b
-		jnz	allocClusters
-		mov	m, l		
-		mvi	b, 0FBh
-		xchg
-		mvi	e, 1		
-loc_CC30:	mov	d, c
-		call	j_diskDriver
-		inr	h
-		ldax	b
-		cmp	c
-		mov	c, a
-		jnz	loc_CC30		
-		lhld	v_input_end
-		inx	h
-		xchg
-		lhld	v_input_start
-		mvi	b, 0		
-loc_CC45:	mov	a, d
-		ora	e
-		jz	loc_CC52
-		mov	a, m
-		add	b
-		mov	b, a
-		inx	h
-		dcx	d
-		jmp	loc_CC45
+            jp      writeFirstCluster
 
 ; ---------------------------------------------------------------------------
+; Записываем кластеры файла в таблицу fat в памяти
 
-loc_CC52:	mov	a, b
-		lhld	v_createdFile
-		mov	m, a
-		call	saveFatDir
-		ora	a
-		jmp	pop_dbh_ret
+allocClusters:
+            call    fileFindClusterNext
+            jp c,   stc_popDBh_ret  ; если больше нет свободных кластеров - выходим с ошибкой
+writeFirstCluster:
+            ld      (hl), a         ; записываем номер кластера в fat
+            ld      l, a            ; прыгем на следующий кластер (hl = указатель на следующий кластер файла в таблице fat)
+            dec     b               ; счётчик записанных кластеров
+            jp nz,  allocClusters
+            ld      (hl), l         ; конец, последний кластер файла указывает сам на себя
+
+; ---------------------------------------------------------------------------
+; Сохраняем файл на диск
+
+            ld      hl, (v_input_start) ;hl = адрес загрузки файла из v_input_start
+            ld      b, fat>>8       ; bc = адрес первого кластера файла в таблице fat
+            ld      e, 1            ; режим драйвера 1 - запись
+writeFileLoop:
+            ld      d, c            ; номер кластера на диске (изначально c = первый кластер файла)
+            call    j_diskDriver
+            inc     h               ; cледующий блок файла в памяти (!!! TODO: адрес файла обязательно выровнен по 256 байтам?)
+            ld      a, (bc)         ; a = номер следующего кластера файла из таблицы fat
+            cp      c               ; сравниваем с номером только что записанного кластера
+            ld      c, a            ; c = номер следующего кластера
+            jp nz,  writeFileLoop   ; если номер следующего кластера = номер только что записанного, это был последний
+
+; ---------------------------------------------------------------------------
+; Расчет однобайтовой контрольной суммы
+
+            ld      hl, (v_input_end)   ; hl = размер файла - 1 из v_input_end
+            inc     hl                  ; hl = размер файла
+            ex      de, hl              ; de = размер файла
+            ld      hl, (v_input_start) ; hl = адрес загрузки файла из v_input_start
+            ld      b, 0                ; тут будет накапливаться сумма
+fileCreateCRCLoop:
+            ld      a, d
+            or      e
+            jp z,   fileCreateExit      ; если счетчик досчитал до нуля, выходим
+            ld  a,  (hl)                ; читаем байт файла
+            add     a, b                ; накапливаем сумму
+            ld      b, a
+            inc     hl                  ; следующий байт
+            dec     de                  ; уменьшаем счетчик
+            jp      fileCreateCRCLoop
+
+; ------------------------------------------------------------------------------------------------------------------------
+; Сохранение и выход
+
+fileCreateExit:
+            ; Сохраняем контрольную сумму в дескриптор файла
+            ld      a, b                ; a = посчитанная контрольная сумма
+            ld      hl, (v_createdFile)
+            ld      bc, FILE_DESCRIPTOR.checkSum
+            add     hl, bc              ; hl = адрес поля checkSum в дескрипторе файла
+            ld      (hl), a             ; сохраняем контрльную сумму
+
+            call    saveFatDir          ; сохраняем fat и каталог на диск
+            or      a                   ; выходим с флагом cf = 0
+            jp      popDBh_ret
 

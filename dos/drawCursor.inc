@@ -3,51 +3,51 @@
 ; Рисование курсора на экране
 ;
 ; На выходе
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-drawCursor:	; Если установлен 7-ой бит v_cursorCfg & 0x80, выходим
-		lda	v_cursorCfg
-		ana	a
-		rm
+drawCursor: ; Если установлен 7-ой бит bios_vars.cursorCfg & 0x80, выходим
+            ld    a, (bios_vars.cursorCfg)
+            and   a
+            ret m 
 
-drawCursor2:	; Курсор нарисован/стерт
-		inr	c
-		
-drawCursor3:	; Сохраняем регистры
-		push	h
-		push	b
-		push	d
+drawCursor2:      ; Курсор нарисован/стерт
+            inc   c
+            
+drawCursor3:      ; Сохраняем регистры
+            push  hl
+            push  bc
+            push  de
 
-		; Рассчитываем адрес на экране
-		call	calcCursorAddr
-		mov	d, a
+            ; Рассчитываем адрес на экране
+            call  calcCursorAddr
+            ld    d, a
 
-		; Положение курсора от +2 до -5 (при битах 654 от 0 до 7)
-		; b = v_cursorCfg
-		; e = ~((v_cursorCfg / 16) % 8 - 3) + l
-		lda	v_cursorCfg
-		mov	b, a
-		rrc
-		rrc
-		rrc
-		rrc
-		ani	7
-		sui	3
-		cma
-		add	l
-		mov	e, a
+            ; Положение курсора от +2 до -5 (при битах 654 от 0 до 7)
+            ; b = bios_vars.cursorCfg
+            ; e = ~((bios_vars.cursorCfg / 16) % 8 - 3) + l
+            ld    a, (bios_vars.cursorCfg)
+            ld    b, a
+            RRCA
+            RRCA
+            RRCA
+            RRCA
+            and   7
+            sub   3
+            CPL
+            add   a, l
+            ld    e, a
 
-		; Рассчитыаем маску курсора
-		;  hl = 011111100b << (((~h) % 4 +1)*2)
-		mov	a, h
-		cma
-		ani	3
-		lxi	h, 011111100b ; FCh
-		inr	a
-drawCursor_0:	dad	h
-		dad	h
-		jmp	drawCursor_1
+            ; Рассчитыаем маску курсора
+            ;  hl = 011111100b << (((~h) % 4 +1)*2)
+            ld    a, h
+            CPL
+            and   3
+            ld    hl, 011111100b ; FCh
+            inc   a
+drawCursor_0:     add   hl, hl
+            add   hl, hl
+            jp    drawCursor_1
 

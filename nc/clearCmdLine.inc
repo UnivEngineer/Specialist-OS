@@ -5,21 +5,22 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-clearCmdLine:	lxi	h, 7F3h
-		shld	v_cursorY
-	
-		mvi	h, 10
-		shld	v_cmdLinePos
+clearCmdLine:
+            ld    hl, 7F3h
+            ld    (bios_vars.cursorY), hl
 
-		COLOR(COLOR_CMDLINE)
-		
-		mvi	c, 92 ; '\'
-		call	printChar
+            ld    h, 10
+            ld    (nc_vars.cmdLinePos), hl
 
-		lxi	h, v_cmdLine
-		shld	v_cmdLineEnd
-		                   
-		mvi	b, 60
+            COLOR   COLOR_CMDLINE
+            
+            ld    c, 92 ; '\'
+            call  bios_printChar
 
-		; Продолжение на printSpaces
+            ld    hl, nc_vars.cmdLine
+            ld    (nc_vars.cmdLineEnd), hl
+                               
+            ld    b, 60
+
+            ; Продолжение на printSpaces
 

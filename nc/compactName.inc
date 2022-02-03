@@ -1,71 +1,78 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Убрать их имени пробелы
+; Убрать из имени пробелы
 ;
-; hl - откуда
-; de - куда
+; вход:
+;   hl - откуда
+;   de - куда
+;
+; сохраняемые регистры:
+;   hl, bc
 ;
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-compactName:	; Сохраняем регистры
-		push	h
-		push	b
+compactName:
+            ; Сохраняем регистры
+            push    hl
+            push    bc
 
-		; Копируем до пробела, но не более 6 букв
-		lxi	b, 6		
-compactName_1:	mov	a, m
-		cpi	' '
-		jz	compactName_2		
-		stax	d
-		inx	h
-		inx	d
-		dcr	c
-		jnz	compactName_1
+            ; Копируем до пробела, но не более DIR_NAME_LENGTH букв
+            ld      bc, DIR_NAME_LENGTH
+compactName_1:      ld  a, (hl)
+            cp      ' '
+            jp z,   compactName_2           
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  compactName_1
 
-compactName_2:	; Пропущенные символы исходной строки
-		dad	b
+compactName_2:
+            ; Пропущенные символы исходной строки
+            add     hl, bc
 
-		; Точка
-		mvi	a, '.'
-		stax	d
-		inx	d
+            ; Точка
+            ld      a, '.'
+            ld      (de),a
+            inc     de
 
-		; Копируем 3 буквы
-		mvi	c, 3
-compactName_3:	mov	a, m
-		cpi	' '
-		jz	compactName_4
-		stax	d
-		inx	h
-		inx	d
-		dcr	c
-		jnz	compactName_3
+            ; Копируем до пробела, но не более 3 букв
+            ld      c, 3
+compactName_3:
+            ld      a, (hl)
+            cp      ' '
+            jp z,   compactName_4
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  compactName_3
 
-compactName_4:	xchg
-		push	psw
+compactName_4:
+            ex      de, hl
+            push    af
 
-		; Если последний символ '.', то удаляем его
-		dcx	h
-		mov	a, m
-		cpi	'.'
-		jz	compactName_5
-		inx	h
-compactName_5:	
+            ; Если последний символ '.', то удаляем его
+            dec     hl
+            ld      a, (hl)
+            cp      '.'
+            jp z,   compactName_5
+            inc     hl
 
-		; Добавляем пробел и конец строки
-		mvi	m, ' '
-		inx	h
-		mvi	m, 0Dh
-		inx	h
-		mvi	m, 0
+compactName_5:
+            ; Добавляем пробел и конец строки
+            ld      (hl), ' '
+            inc     hl
+            ld      (hl), 0Dh
+            inc     hl
+            ld      (hl), 0
 
-		; Результат в DE
-		xchg
+            ; Результат в de
+            ex    de, hl
 
-		; Восстаналиваем регистры и выходим
-		pop	psw
-		pop	b
-		pop	h
-		ret
-
+            ; Восстаналиваем регистры и выходим
+            pop   af
+            pop   bc
+            pop   hl
+            ret

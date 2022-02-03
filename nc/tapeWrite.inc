@@ -5,46 +5,50 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-tapeWriteWord:	mov	a, l
-		call	tapeWrite
-		mov	a, h
-		jmp	tapeWrite
+tapeWriteWord:
+            ld    a, l
+            call  bios_tapeWrite
+            ld    a, h
+            jp    bios_tapeWrite
 
 ;----------------------------------------------------------------------------
-; Запись блока данных по адресу HL длиной BC+1 на ленту
+; Запись блока данных по адресу hl длиной bc+1 на ленту
 ;----------------------------------------------------------------------------
 
-tapeWriteBlock:	inx	b
-loc_D410:	 call	checkBreak
-		 mov	a, m
-		 call	tapeWrite
-		 inx	h
-		 dcx	b
-		 mov	a, b
-		 ora	c
-		jnz	loc_D410
-		ret
+tapeWriteBlock:
+            inc    bc
+loc_D410:   call   checkBreak
+            ld     a, (hl)
+            call   bios_tapeWrite
+            inc    hl
+            dec    bc
+            ld     a, b
+            or     c
+            jp nz, loc_D410
+            ret
 
 ;----------------------------------------------------------------------------
 ; Запись пилот тона на ленту
+; 200h нулей, затем E6h
 ;----------------------------------------------------------------------------
 
-tapeWritePilot:	lxi	b, 200h
-loc_D422:	 call	checkBreak
-		 xra	a
-		 call	tapeWrite
-		 dcx	b
-		 mov	a, b
-		 ora	c
-		jnz	loc_D422
+tapeWritePilot:
+            ld     bc, 200h
+loc_D422:   call   checkBreak
+            xor    a
+            call   bios_tapeWrite
+            dec    bc
+            ld     a, b
+            or     c
+            jp nz, loc_D422
 
-		mvi	a, 0E6h
-		jmp	tapeWrite
+            ld    a, 0E6h
+            jp    bios_tapeWrite
 
 ; ---------------------------------------------------------------------------
 
-checkBreak:	lda	IO_KEYB_B
-		ana	a
-		jp	tapeErrorHandler
-		ret
+checkBreak: ld     a, (IO_KEYB_B)
+            and    a
+            jp p,  tapeErrorHandler
+            ret
 

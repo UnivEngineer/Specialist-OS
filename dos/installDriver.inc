@@ -12,31 +12,31 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-installDriver:	; Сохранение регистров
-		push	d
-		push	h
+installDriver:    ; Сохранение регистров
+            push de
+            push hl
 
-		; Максимум дисков
-		ani	7
+            ; Максимум дисков
+            and 7
 
-		; Вычисление адреса в таблице дисков
-		add	a
-		mov	l, a
-		mvi	h, 0
-		lxi	d, v_drives
-		dad	d
+            ; Вычисление адреса в таблице дисков
+            add   a, a
+            ld    l, a
+            ld    h, 0
+            ld    de, v_drives
+            add   hl, de
 
-		; Установка драйвера
-		pop	d
-		mov	m, e
-		inx	h
-		mov	m, d
+            ; Установка драйвера
+            pop   de
+            ld  (hl), e
+            inc   hl
+            ld  (hl), d
 
-		; Восстановление регистров
-		xchg
-		pop	d
-		rrc
+            ; Восстановление регистров
+            ex  de, hl
+            pop de
+            RRCA
 
-		; Выход
-		ret
+            ; Выход
+            ret
 

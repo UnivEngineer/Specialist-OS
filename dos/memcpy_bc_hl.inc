@@ -14,11 +14,12 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-memcpy_bc_hl:	mov	a, m
-		stax	b
-		inx	h
-		inx	b
-		call	cmp_hl_de
-		jnz	memcpy_bc_hl
-		ret
+memcpy_bc_hl:
+            ld      a, (hl)
+            ld      (bc),a
+            inc     hl
+            inc     bc
+            call    cmp_hl_de
+            jp nz,  memcpy_bc_hl
+            ret
 

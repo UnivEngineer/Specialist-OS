@@ -5,42 +5,69 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printInfoLine:	; Если файлов нет, выходим
-		lxi	h, panelA_filesCnt
-		call	readBytePanel
-		ana	a
-		rz
+printInfoLine:
+        ; Если файлов нет, выходим
+        ld      hl, panelA_filesCnt
+        call    readBytePanel
+        and     a
+        ret z
 
-		COLOR(COLOR_INFOLINE)		
+        COLOR   COLOR_INFOLINE
 
-		lxi	h, 12DEh
-		call	setCursorPosPanel
+        ld      hl, (P_FILE_NAME_X << 8) + P_FILE_NAME_Y
+        call    setCursorPosPanel
 
-		call	getSelectedFile
-		call	printFileName
-		mvi	b, 3
-		call	printSpaces	; b - кол-во пробелов
+        ; ld      c, '\'
+        ; call    bios_printChar
 
-		dcx	h
-		dcx	h
-		dcx	h
-		mov	d, m
-		dcx	h
-		mov	e, m
+        ; Устанавливаем hl на дескриптор файла
+        call    getSelectedFile
+        push    hl
 
-		push	d
+        ; Печатаем имя файла в компактном виде
+        ld      de, nc_vars.tempFileDescr  ; буфер
+        call    compactName
+        ld      hl, nc_vars.tempFileDescr
+        ld      b, DIR_NAME_LENGTH + 6  ; макс длина строки (name.ext + ' ' + терминатор)
+        ld      c, 20                   ; терминатор - пробел или меньше
+        call    printString2
 
-		dcx	h
-		mov	a, m
-		call	printHexByte
-		dcx	h
-		mov	a, m
-		call	printHexByte
+        ; После имени файла, если оно короткие, надо напечатать
+        ; пробелы, чтобы стереть предыдущий текст. После работы
+        ; printString2 у нас в b как раз количество символов,
+        ; оставшихся до DIR_NAME_LENGTH + 6
+		call    printSpaces	; b - кол-во пробелов
 
-		mvi	c, ' '
-		call	printChar
+        ; Смещаем курсор
+        ld      hl, (P_FILE_DATA_X << 8) + P_FILE_DATA_Y
+        call    setCursorPosPanel
 
-		pop	d
+        ; Устанавливаем hl на поле адреса загрузки
+        pop     hl
+        push    hl
+        ld      bc, FILE_DESCRIPTOR.loadAddress + 1 ; bc = смещение
+        add     hl, bc
 
-		jmp	printDec
+        ; Читаем старший и младший байты адреса загрузки
+        ; и тут же печатаем их в HEX форме
+        ld      a, (hl)
+        call    bios_printHexByte
+        dec     hl
+        ld      a, (hl)
+        call    bios_printHexByte
 
+        ; Смещаем курсор
+		LD 	    c, 18h  ; код символа "вправо"
+		call	bios_printChar
+
+        ; Устанавливаем hl на поле размера файла
+        pop     hl
+        ld      bc, FILE_DESCRIPTOR.size ; bc = смещение
+        add     hl, bc
+
+        ; Читаем размер файла в de и печатаем в десятичной форме
+        ld      e, (hl)
+        inc     hl
+        ld      d, (hl)
+        inc     de          ; в дескрипторе файла хранится размер-1
+        jp      bios_printDecWord

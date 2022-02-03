@@ -11,20 +11,20 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printHexWord:	; Сохраняем регистры
-		push	psw		
+printHexWord:     ; Сохраняем регистры
+            push  af          
 
-		; Старший байт
-		mov	a, h
-		call	printHexByte
+            ; Старший байт
+            ld    a, h
+            call  printHexByte
 
-		; Младшйи байт
-		mov	a, l
-		call	printHexByte
+            ; Младшйи байт
+            ld    a, l
+            call  printHexByte
 
-		; Восстаналиваем регистры
-		pop	psw
-		ret
+            ; Восстаналиваем регистры
+            pop   af
+            ret
 
 ;----------------------------------------------------------------------------
 ; Вывод 16-ричного числа на экран (байт)
@@ -36,28 +36,28 @@ printHexWord:	; Сохраняем регистры
 ;  все регистры сохраняются
 ;----------------------------------------------------------------------------
 
-printHexByte:	; Сохраняем регистры
-		push	b
-		push	psw
+printHexByte:     ; Сохраняем регистры
+            push  bc
+            push  af
 
-		; Сохраняем A для вывода второй цифры
-		mov	b, a
+            ; Сохраняем a для вывода второй цифры
+            ld    b, a
 
-		; Первая цифра - старшие 4 бита
-		rlc
-		rlc
-		rlc
-		rlc
-		call	printHexNibble
+            ; Первая цифра - старшие 4 бита
+            rlca
+            rlca
+            rlca
+            rlca
+            call  printHexNibble
 
-		; Вторая цифра - младщие 4 бита
-		mov	a, b
-		call	printHexNibble
+            ; Вторая цифра - младщие 4 бита
+            ld    a, b
+            call  printHexNibble
 
-		; Восстаналиваем регистры
-		pop	psw
-		pop	b
-		ret
+            ; Восстаналиваем регистры
+            pop   af
+            pop   bc
+            ret
 
 ;----------------------------------------------------------------------------
 ; Вывод 16-ричного числа на экран (цифра)
@@ -69,11 +69,11 @@ printHexByte:	; Сохраняем регистры
 ;  c, a - изменяются, остальные регистры сохраняются
 ;----------------------------------------------------------------------------
 
-printHexNibble:	ani	0Fh
-		adi	'0'
-		cpi	'9'+1
-		jc	printHexNib_0
-		  adi	'A'-'0'-10
-printHexNib_0:	mov	c, a
-		jmp	j_printChar
+printHexNibble:   and   0Fh
+            add   a, '0'
+            cp    '9'+1
+            jp c, printHexNib_0
+              add a, 'A'-'0'-10
+printHexNib_0:    ld    c, a
+            jp    j_printChar
 

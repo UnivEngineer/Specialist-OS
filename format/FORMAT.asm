@@ -5,169 +5,154 @@
 ; 2022-01-14 Дизассемблировано и доработано SpaceEngineer
 ;
 ; Доработки:
-; - "тихий режим" по параметру Y (форматировать без спроса)
+; - "тихий режим" по параметру Y (форматировать без cпроcа)
 ;    например FORMAT.COM B: Y
 ;
 ;----------------------------------------------------------------------------
 
-; Функции DOS
-getch			= 0C803h	; Ожидание ввода с клавиатуры
-printChar		= 0C809h	; Вывод символа на экран
-printString		= 0C818h	; Вывод строки на экран
-fileGetSetDrive	= 0C842h	; Получить/установить активное устройство
-diskDriver		= 0C863h	; Драйвер выбранного устройства
+    INCLUDE "../include/mxos.inc"
 
-Buffer          = 0D100h	; Буфер
+    ORG 0F100h
 
-;----------------------------------------------------------------------------
+    ld      a,(de)      ; В de передаётся адрес строки аргументов
+    cp      20h
+    jp nc,  Readparams  ; Прыжок, если есть параметр
 
-.org 0D000h
+    ; Запрос буквы диска для форматирования
+chooseDrive:
+    ld      hl, str_ChoseDrive
+    call    bios_printString     ; Вывод сообщения 'CHOOSE DRIVE: '
+    call    bios_getch           ; Ожидание нажатия клавиши
+    ld      c, a
+    call    bios_printChar
+    cp      21h             ; сравнение c пробелом
+    jp c,   abort           ; Выход в ОС, если меньше или равно
+    ld      b, a            ; Запомнить букву диска в b
+    jp      confirmRequest
 
-		ldax    d		; В DE передаётся адрес строки аргументов
-		cpi     20h
-		jnc		ReadParams	; Прыжок, если есть параметр
+Readparams:
+    ld      b, a            ; Запомнить букву диска в b
 
-		; Запрос буквы диска для форматирования
-ChooseDrive:
-		lxi     h, str_ChoseDrive
-		call    printString		; Вывод сообщения 'CHOOSE DRIVE: '
-		call    getch			; Ожидание нажатия клавиши
-		mov     c, a
-		call    printChar
-		cpi     21h				; Сравнение с пробелом
-		jc		Abort			; Выход в ОС, если меньше или равно
-		mov     b, a			; Запомнить букву диска в B
-		jmp     ConfirmRequest
+SearchLoop1:                ; Поиск первого пробела в строке параметров
+    ld      a,(de)
+    cp      21h
+    jp c,   SearchLoop2
+    inc     de
+    jp      SearchLoop1
 
-ReadParams:
-		mov     b, a			; Запомнить букву диска в B
+SearchLoop2:                ; Пропуск последующих пробелов
+    ld      a,(de)
+    cp      20h
+    jp nz,  SearchLoopExit
+    inc     de
+    jp      SearchLoop2
 
-SearchLoop1:					; Поиск первого пробела в строке параметров
-		ldax    d
-		cpi     21h
-		jc		SearchLoop2
-		inx     d
-		jmp     SearchLoop1
+SearchLoopExit:     
+    cp      'Y'             ; Если найден параметр 'Y', переход к форматированию
+    jp z,   confirmed
 
-SearchLoop2:					; Пропуск последующих пробелов
-		ldax    d
-		cpi     20h
-		jnz		SearchLoopExit
-		inx     d
-		jmp		SearchLoop2
+    ; Подтверждение форматирования
+confirmRequest:
+    ld      a, b
+    ld      (str_A_Y_N),a   ; Заменить 'A' в строке сообщения на введённую букву
+    ld      hl, str_Format
+    call    bios_printString; вывод сообщения 'FORMAT <буква>: [Y/N]?'
+    call    bios_getch      ; Ожидание нажатия клавиши
+    ld      c, a
+    call    bios_printChar
+    cp      'Y'             ; сравнение c 'Y'
+    jp nz,  abort           ; Выход в ОС, если не 'Y'
+    
+confirmed:
+    ld      a, b            ; Восстановить букву диска в a
 
-SearchLoopExit:		
-		cpi     'Y'				; Если найден параметр 'Y', переход к форматированию
-		jz		Confirmed
-
-		; Подтверждение форматирования
-ConfirmRequest:
-		mov     a, b
-		sta     str_A_Y_N		; Заменить 'A' в строке сообщения на введённую букву
-		lxi     h, str_Format
-		call    printString     ; вывод сообщения 'FORMAT <буква>: [Y/N]?'
-		call    getch			; Ожидание нажатия клавиши
-		mov     c, a
-		call    printChar
-		cpi     'Y'				; Сравнение с 'Y'
-		jnz		Abort			; Выход в ОС, если не 'Y'
-		
-Confirmed:
-		mov     a, b			; Восстановить букву диска в A
-
-		; Буква диска в регистре A
+    ; Буква диска в регистре a
 Format:
-		sui     41h				; Номер диска
-		cpi     08h				; Максимальный номер диска = 7
-		jnc     InvalidDrive	; Выход, если неверный номер диска
-		mov     b, a			; Запомнить номер диска в B
+    sub     41h             ; Номер диска
+    cp      08h             ; Максимальный номер диска = 7
+    jp nc,  InvalidDrive    ; Выход, если неверный номер диска
+    ld      b, a            ; Запомнить номер диска в b
 
-		; Установить выбранный диск текущим
-		mov     a, b	; Номер диска в A
-		mvi     e, 01h
-		call    fileGetSetDrive
+    ; Установить выбранный диск текущим
+    ld      a, b    ; Номер диска в a
+    ld      e, 01h
+    call    bios_fileGetSetDrive
 
-		; Выдать размер диска в A
-		mvi     e, 03h
-		call    diskDriver
-		mov     e, a	; Поместить размер диска в E
-		dcr     a
+    ; Выдать размер диска в a
+    ld      e, 03h
+    call    bios_diskDriver
+    ld      e, a    ; Поместить размер диска в e
+    dec     a
 
-		; Очистка буфера (E байт)
-		lxi     h, Buffer
-ClearBufLoop:
-		mvi     m, 0
-		inr     l
-		dcr     e
-		jnz     ClearBufLoop
+    ; Очиcтка буфера (e байт)
+    ld      hl, buffer
+clearbufLoop:
+    ld      (hl), 0
+    inc     l
+    dec     e
+    jp nz,  clearbufLoop
 
-		; Создание пустой структуры FAT (256 байт)
-CreateFATLoop:
-		inr     a
-		jz      WriteToDisk
-		mvi     m, 01h
-		inr     l
-		jmp     CreateFATLoop
+    ; Создание пустой структуры FAT (256 байт)
+createFATLoop:
+    inc     a
+    jp z,   WriteToDisk
+    ld      (hl), 01h
+    inc     l
+    jp      createFATLoop
 
-		; Запись FAT на диск
-		; D - номер сектора
-		; E - код операции
+    ; Запить FAT на диск
+    ; d - номер сектора
+    ; e - код операции
 WriteToDisk:
-		lxi     d, 0001h  ; Запись сектора номер 0
-		call    diskDriver
+    ld      de, 0001h  ; Запись сектора номер 0
+    call    bios_diskDriver
 
-		; Создание пустой структуры каталога (256 байт)
-CreateCatLoop:
-		mvi     m, 0FFh
-		inr     l
-		jnz     CreateCatLoop
+    ; Создание пустой структуры каталога (256 байт)
+createcatLoop:
+    ld      (hl), 0FFh
+    inc     l
+    jp nz,  createcatLoop
 
-		; Запись секторов с номера 3 по 1
-		mvi     d, 03h
+    ; Запить секторов c номера 3 по 1
+    ld      d, 03h
 WriteLoop:
-		call    diskDriver
-		dcr     d
-		jnz     WriteLoop
+    call    bios_diskDriver
+    dec     d
+    jp nz,  WriteLoop
 
-		; Выход в ОС
-		ret
+    ; Выход в ОС
+    ret
 
-Abort:
-		lxi     h, str_Aborting
-		call    printString		; Вывод сообщения 'ABORTING'
-        ret
+abort:
+    ld      hl, str_Aborting
+    call    bios_printString     ; Вывод сообщения 'ABORTING'
+    ret
 
 InvalidDrive:
-		lxi     h, str_InvalidDrive
-		call    printString		; Вывод сообщения 'INVALID DRIVE LETTER'
-        ret
+    ld      hl, str_InvalidDrive
+    call    bios_printString     ; Вывод сообщения 'INVALID DRIVE LETTER'
+    ret
 
 ;----------------------------------------------------------------------------
 ; Данные
 
 str_Format:
-		.db 0Ah
-		.text "FORMAT "
+    DB 0Ah,"FORMAT "
 
 str_A_Y_N:
-		.text "A: [Y/N]? "
-		.db 0
+    DB "A: [Y/N]? ",0
 
 str_ChoseDrive:
-		.db 0Ah
-		.text "CHOOSE DRIVE: "
-		.db 0
+    DB 0Ah,"CHOOSE DRIVE: ",0
 
 str_InvalidDrive:
-		.db 0Ah
-		.text "INVALID DRIVE LETTER"
-		.db 0
+    DB 0Ah,"INVALID DRIVE LETTER",0
 
 str_Aborting:
-		.db 0Ah
-		.text "ABORTING"
-		.db 0
+    DB 0Ah,"ABORTING",0
+
+buffer = 0D100h ; Буфер
 
 ;----------------------------------------------------------------------------
 
-.end
+    END

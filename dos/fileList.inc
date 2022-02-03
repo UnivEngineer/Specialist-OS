@@ -6,54 +6,54 @@
 ;  hl - адрес буфера (769 байт)
 ;
 ; На выходе
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileList:	; Загрузка FAT и каталога
-		call	loadFatDir
+fileList:   ; Загрузка FAT и каталога
+            call    loadFatDir
 
-		; Сохранение регистров
-		push	h
-		push	b
-		push	d
+            ; Сохранение регистров
+            push    hl
+            push    bc
+            push    de
 
-		; Максимум файлов
-		mvi	b, 48
+            ; Максимум файлов
+            ld      b, DIR_MAX_FILES
 
-		; Адрес первого файла
-		lxi	d, diskDirectory
-		
-fileList_loop:	; Если первый символ не FFh, копируем описатель
-		ldax	d
-		inr	a
-		jnz	fileList_copy
+            ; Адрес первого файла
+            ld      de, diskDirectory
+            
+fileList_loop:    ; Если первый символ не FFh, копируем описатель
+            ld      a, (de)
+            inc     a
+            jp nz,  fileList_copy
 
-		; Вычисляем адрес следующего файла
-		push	h
-		lxi	h, 10h
-		dad	d
-		xchg
-		pop	h
+            ; Вычисляем адрес следующего файла
+            push    hl
+            ld      hl, DIR_DESCR_SIZE
+            add     hl, de
+            ex      de, hl
+            pop     hl
 
-fileList_next:	; Цикл
-		dcr	b
-		jnz	fileList_loop
+fileList_next:    ; Цикл
+            dec     b
+            jp nz,  fileList_loop
 
-		; В конце символ 0FFh
-		mvi	m, 0FFh
-		jmp	pop_dbh_ret
+            ; В конце символ 0FFh
+            ld      (hl), 0FFh
+            jp      popDBh_ret
 
 ; ---------------------------------------------------------------------------
 
-fileList_copy:	; Копируем 16 байт из DE в HL
-		mvi	c, 16
-fileList_copyl:	ldax	d
-		mov	m, a
-		inx	h
-		inx	d
-		dcr	c
-		jnz	fileList_copyl
-		jmp	fileList_next
+fileList_copy:    ; Копируем DIR_DESCR_SIZE байт из de в hl
+            ld      c, DIR_DESCR_SIZE
+fileList_copyl:     ld    a, (de)
+            ld      (hl), a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  fileList_copyl
+            jp      fileList_next
 

@@ -11,5 +11,5 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printString1:	jmp	printString
+printString1:     jp    printString
 

@@ -9,10 +9,12 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-memset_de_20_b:	mvi	a, ' '
-memset_de_a_b:	stax	d
-		inx	d
-		dcr	b
-		jnz	memset_de_a_b
-		ret
+memset_de_20_b:
+            ld      a, ' '
+memset_de_a_b:
+            ld      (de), a
+            inc     de
+            dec     b
+            jp nz,  memset_de_a_b
+            ret
 

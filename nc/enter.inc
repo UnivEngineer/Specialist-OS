@@ -5,116 +5,117 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-Enter:  ; Если ком строка не пустая
-		lhld v_cmdLineEnd
-		mvi  a, v_cmdLine & 0FFh
-		cmp  l
-		jnz  EnterCmdLine
+Enter:      ; Если ком строка не пустая
+            ld      hl, (nc_vars.cmdLineEnd)
+            ld      a, nc_vars.cmdLine & 0FFh
+            cp      l
+            jp nz,  EnterCmdLine
 
-        ; Запомнить текущий диск в регистре B
-        mvi  e, 0
-        call fileGetSetDrive
-        mov  b, a
+            ; Запомнить текущий диск в регистре b
+            ld      e, 0
+            call    bios_fileGetSetDrive
+            ld      b, a
 
-        ; Подготовить имя файла A:NC.EXT
-		lxi  h, aNcExt
-		lxi  d, files2; files2 используется как буфер
-		call fileNamePrepare
-        xchg
+            ; Подготовить имя файла A:NC.EXT
+            ld      hl, aNcExt
+            ld      de, nc_vars.tempFileDescr; nc_vars.tempFileDescr используется как буфер
+            call    bios_fileNamePrepare
+            ex      de, hl
 
-		; Загрузить файл A:NC.EXT по адресу 0
-		lxi  h, files2
-		lxi  d, 0
-		mvi  c, 1
-		call fileGetSetAddr ; изменить адрес загрузки файла на DE = 0
-		call fileLoad
-		jc   Enter_stdExec
+            ; Загрузить файл A:NC.EXT по адресу 0
+            ld      hl, nc_vars.tempFileDescr
+            ld      de, 0
+            ld      c, 1
+            call    bios_fileGetSetAddr ; изменить адрес загрузки файла на de = 0
+            call    bios_fileLoad
+            jp c,   Enter_stdExec
 
-        ; Переключить диск обратно
-        ;mov  a, b
-        ;mvi	 e, 1
-        ;call fileGetSetDrive
+            ; Переключить диск обратно
+            ;mov    a, b
+            ;mvi    e, 1
+            ;call   bios_fileGetSetDrive
 
-		; Получить имя выбранного файла
-		call getSelectedFile
-		mov  a, m
-		inr  a
-		jz   mainLoop ; Ничего не выбрано
+            ; Получить имя выбранного файла
+            call    getSelectedFile
+            ld      a, (hl)
+            inc     a
+            jp z,   mainLoop ; Ничего не выбрано
 
-		; hl - расширение файла
-		lxi	d, 6
-		dad	d
+            ; hl = указатель на расширение файла
+            ld      de, FILE_DESCRIPTOR.ext
+            add     hl, de
 
-		; hl - расширение файла
-		lxi	d, 0
+            ld      de, 0
 
-		; Сравниваем расширение из файла
+            ; Сравниваем с расширеним из файла
 Enter_extLoop:
-		mvi  c, 3
-		push h
+            ld      c, 3
+            push    hl
 Enter_1:
-		ldax d
-		cmp  m
-		jnz  Enter_nextExt
-		inx  h
-		inx  d
-		dcr  c
-		jnz  Enter_1
-		pop  h
-		inx  d
+            ld      a, (de)
+            cp      (hl)
+            jp nz,  Enter_nextExt
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  Enter_1
+            pop     hl
+            inc     de
 
-		; Найдено расширение
+            ; Найдено расширение
 
-		; Копирование имени выбранного файла в ком строку
+            ; Копирование имени выбранного файла в ком строку
 Enter_5:
-		lxi	h, v_cmdLine
+            ld      hl, nc_vars.cmdLine
 Enter_4:
-		ldax d
-		mov  m, a
-		cpi  0Dh
-		jz   Enter_3
-		inr  a
-		jz   Enter_3
-		inx  h
-		inx  d
-		jmp  Enter_4
+            ld      a, (de)
+            ld      (hl),a
+            cp      0Dh
+            jp z,   Enter_3
+            inc     a
+            jp z,   Enter_3
+            inc     hl
+            inc     de
+            jp      Enter_4
 
 ; ---------------------------------------------------------------------------
 
 Enter_3:
-		mvi  m, ' '
-		inx  h
-		mvi  m, 0
-		shld v_cmdLineEnd
+            ld      (hl), ' '
+            inc     hl
+            ld      (hl), 0
+            ld      (nc_vars.cmdLineEnd), hl
 
-		; Вывод ком строки на экран
-		lxi  h, v_cmdLine
-		call printString
+            ; Вывод ком строки на экран
+            COLOR   COLOR_CMDSCREEN
+            ld      hl, nc_vars.cmdLine
+            call    bios_printString
 
-Enter_stdExec:	; Получить выбранный файл
-		call getSelectedFile
+Enter_stdExec:    ; Получить выбранный файл
+            call     getSelectedFile
 
-		; Ничего не выбрано
-		mov	a, m
-		inr	a
-		jz	mainLoop
+            ; Ничего не выбрано
+            ld      a, (hl)
+            inc     a
+            jp z,   mainLoop
 
-		; ?
-		call selFileToCmdLine
+            ; ?
+            call    selFileToCmdLine
 
-EnterCmdLine:	; Очистка экрана
-		COLOR(COLOR_CMDSCREEN)
-		mvi	 c, 1Fh
-		call printChar
+EnterCmdLine:
+            ; Очистка экрана
+            COLOR   COLOR_CMDSCREEN
+            ld      c, 1Fh
+            call    bios_printChar
 
-		; Помещаем в конец ком строки 0Dh
-		lhld v_cmdLineEnd
-		mvi	 m, 0Dh
+            ; Помещаем в конец ком строки 0Dh
+            ld      hl, (nc_vars.cmdLineEnd)
+            ld      (hl), 0Dh
 
-		; Сохраняем состояние
-		call saveState
+            ; Сохраняем состояние
+            call    saveState
 
-		; Запускаем файл
-		lxi  h, v_cmdLine
-		jmp  fileExec
+            ; Запускаем файл
+            ld      hl, nc_vars.cmdLine
+            jp      bios_fileExec
 

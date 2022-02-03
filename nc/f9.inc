@@ -5,98 +5,91 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-f9:		; Рисуем окно
-		call	drawWindowIfSel
+f9:         ; Рисуем окно
+            call    drawWindowIfSel
 
-		; Выводим SAVING FROM A: TO TAPE
-        ; центр экрана это x = 60h
-        ; половина ширина строки w = 20*3/2 = 30
-        ; координата строки x = 60h-30 = 42h
-		lxi	h, 425Eh
-		shld	v_cursorY
-		lxi	h, aSaveFromToTape
-		call	printString
-		call	printSelDrive
+            ; Выводим "SAVING FROM A: TO TAPE"
+            CENTER_LINE 20, 5Eh
+            ld      hl, aSaveFromToTape
+            call    bios_printString
+            call    printSelDrive
 
-		; ?
-		call	printInvSelFile
+            ; ?
+            call    printInvSelFile
 
-		; Ждем нажатия Enter или ESC.
-loc_D39C:	call	keyScan
-		cpi	1Bh
-		jz	mainReload
-		cpi	0Dh
-		jnz	loc_D39C
+            ; Ждем нажатия Enter или ESC.
+loc_D39C:   call    bios_keyScan
+            cp      1Bh
+            jp z,   mainReload
+            cp      0Dh
+            jp nz,  loc_D39C
 
-		; Сохранение SP	и установка обр	ошибок.
-		call	prepareTapeLoad
+            ; Сохранение sp   и установка обр   ошибок.
+            call    prepareTapeLoad
 
-		call	drawWindowIfSel
+            call    drawWindowIfSel
 
-		; Вывод SAVING TO TAPE
-        ; центр экрана это x = 60h
-        ; половина ширина строки w = 14*3/2 = 21
-        ; координата строки x = 60h-21 = 4Bh
-		lxi	h, 4B5Eh
-		shld	v_cursorY
-		lxi	h, aSavingToTape	
-		call	printString
+            ; Выводим "SAVING TO TAPE"
+            CENTER_LINE 14, 5Eh
+            ld      hl, aSavingToTape 
+            call    bios_printString
 
-		; Загрузка файла
-		call	loadSelFileAt0
+            ; Загрузка файла на адрес 0
+            call    loadSelFileAt0  ; на выходе de - оригинальный адрес загрузки
 
-		; Получение адреса загрузки и длины
-		push	d
-		push	h
-		lxi	d, 0Ch
-		dad	d
-		mov	e, m
-		inx	h
-		mov	d, m
-		pop	h
-		push	d
-		push	h
-		lxi	h, 0
-		dad	d
-		xchg
-		lxi	h, 0
+            ; Получение адреса загрузки и размера файла
+            push    de  ; оригинальный адрес загрузки
+            push    hl  ; начало дескриптора
+            ld      de, FILE_DESCRIPTOR.size
+            add     hl, de
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl) ; de = размер-1
+            pop     hl  ; начало дескриптора
+            push    de  ; размер
+            push    hl  ; начало дескриптора
+            ld      hl, 0   ; файл загружен на адрес 0
+            add     hl, de  ; hl = размер-1 + 0
+            ex      de, hl  ; de = размер-1 + 0
+            ld      hl, 0
 
-		; Расчет контрольной суммы
-		call	calcCS
-		mov	h, b
-		mov	l, c
-		shld	v_tapeSaveCRC
+            ; Расчет контрольной суммы от hl до de
+            call    bios_calcCS ; bc = crc
+            ld      h, b
+            ld      l, c
+            ld      (nc_vars.tapeSaveCRC), hl
 
-		; Пилот-тон
-		call	tapeWritePilot
+            ; Пилот-тон
+            call    tapeWritePilot  ; 200h нулей, затем E6h
 
-		; Начало файла
-		mvi	a, 0D9h
-		call	tapeWrite
-		call	tapeWrite
-		call	tapeWrite
+            ; Начало файла
+            ld      a, 0D9h
+            call    bios_tapeWrite  ; три раза 0D9h
+            call    bios_tapeWrite
+            call    bios_tapeWrite
 
-		pop	h ; откуда
-		lxi	b, 8 ; длина
-		call	tapeWriteBlock
+            ; имя файла
+            pop     hl ; начало дескриптра
+            ld      bc, DIR_NAME_LENGTH+2 ; длина (запишется +1); старый формат - 9 символов, новый - DIR_NAME_LENGTH+3
+            call    tapeWriteBlock
 
-		; Пилот-тон
-		call	tapeWritePilot
+            ; Пилот-тон
+            call    tapeWritePilot  ; 200h нулей, затем E6h
 
-		pop	b ; Длина
-		pop	h ; Начальный адрес
-		call	tapeWriteWord
+            pop     bc ; размер
+            pop     hl ; оригинальный адрес загрузки
+            call    tapeWriteWord
 
-		dad	b ; Конечный адрес		
-		call	tapeWriteWord
+            add     hl, bc ; конечный адрес загрузки
+            call    tapeWriteWord
 
-		; Запись файла
-		lxi	h, 0
-		call	tapeWriteBlock	; hl-адрес, bc-длина-1
+            ; Запись файла
+            ld      hl, 0
+            call    tapeWriteBlock    ; hl = адрес, bc = размер-1
 
-		; Запись контрольной суммы
-		lhld	v_tapeSaveCRC
-		call	tapeWriteWord
+            ; Запись контрольной суммы
+            ld      hl, (nc_vars.tapeSaveCRC)
+            call    tapeWriteWord
 
-		jmp	mainReload
+            jp      mainReload
 

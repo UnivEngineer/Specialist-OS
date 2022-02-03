@@ -6,48 +6,48 @@
 ;----------------------------------------------------------------------------
 
 inputForCopyMove:
-		; Положение курсора
-		lxi	h, 3D6Eh
-		shld	v_cursorY
+            ; Положение курсора
+            ld      hl, 3D6Eh
+            ld      (bios_vars.cursorY), hl
 
-		; Строка для редактирования	
-		lxi	d, v_input
+            ; Строка для редактирования   
+            ld      de, nc_vars.input
 
-		; Отображается ли панель?
-		lxi	h, panelA_info
-		lda	activePanel
-		ana	a
-		jnz	loc_D255
-		inx	h
-loc_D255:	mov	a, m
+            ; Отображается ли панель?
+            ld      hl, panelA_info
+            ld      a, (activePanel)
+            and     a
+            jp nz,      loc_D255
+            inc     hl
+loc_D255:   ld      a, (hl)
 
-		; Если не отображается, то накопитель в стркоу не помещать
-		ana	a
-		jnz	loc_D265
+            ; Если не отображается, то накопитель в стркоу не помещать
+            and     a
+            jp nz,      loc_D265
 
-		; Записываем букву накопителя
-		inx	h
-		inx	h
-		mov	a, m
-		adi	'A'
-		stax	d
-		inx	d
+            ; Записываем букву накопителя
+            inc     hl
+            inc     hl
+            ld      a, (hl)
+            add     a, 'A'
+            ld      (de),a
+            inc     de
 
-		; Записываем ':'
-		mvi	a, ':'
-		stax	d
-		inx	d
+            ; Записываем ':'
+            ld      a, ':'
+            ld      (de),a
+            inc     de
 
-loc_D265:	; Записать выбранный файл
-		call	getSelectedFile
-		call	compactName
+loc_D265:   ; Записать выбранный файл
+            call    getSelectedFile
+            call    compactName
 
-		; Записать 0
-		dcx	d
-		dcx	d
-		xra	a
-		stax	d
+            ; Записать терминатор
+            dec     de  ; compactName добавляет в конец строки ' ', 0Dh
+            dec     de
+            xor     a
+            ld      (de),a
 
-		; Перейти к редакированию
-		jmp	input
+            ; Перейти к редакированию
+            jp      input
 

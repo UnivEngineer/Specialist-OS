@@ -11,35 +11,35 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printer:	; Сохраняем регистры
-		push	psw
+printer:    ; Сохраняем регистры
+            push  af
 
-		; Режим порта расширения
-		mvi	a, 90h
-		sta	IO_PROG+3
+            ; Режим порта расширения
+            ld    a, 90h
+            ld    (IO_PROG_MODE), a
 
-		; Выводим байт на принтер
-		mov	a, c		
-		cma
-		sta	IO_PROG+1
+            ; Выводим байт на принтер
+            ld    a, c        
+            CPL
+            ld    (IO_PROG_B), a
 
-printer_loop:	; Выход	при нажатии любой клавиши
-		lda	IO_KEYB_B	
-		ani	2
-		jz	printer_ret
+printer_loop:     ; Выход     при нажатии любой клавиши
+            ld    a, (IO_KEYB_B)     
+            and   2
+            jp z, printer_ret
 
-		; Ждем пока принтер не будет готов
-		lda	IO_PROG		
-		ani	40h
-		jnz	printer_loop
-		
-		; Строб
-		mvi	a, 3		
-		sta	IO_PROG+2
-		xra	a
-		sta	IO_PROG+2
+            ; Ждем пока принтер не будет готов
+            ld    a, (IO_PROG_A)       
+            and   40h
+            jp nz,  printer_loop
+            
+            ; Строб
+            ld    a, 3        
+            ld    (IO_PROG_C), a
+            xor   a
+            ld    (IO_PROG_C), a
 
-printer_ret:	; Восстаналвиаем регистры
-		pop	psw
-		ret
+printer_ret:      ; Восстаналвиаем регистры
+            pop   af
+            ret
 

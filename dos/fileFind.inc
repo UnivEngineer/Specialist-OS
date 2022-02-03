@@ -6,79 +6,79 @@
 ;  hl - имя
 ;
 ; На выходе
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;  cf - ошибка
 ;  v_foundedFile - найденный файл
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileFind:	; Загрузка FAT и корневого каталога в память
-		call	loadFatDir
+fileFind:   ; Загрузка FAT и корневого каталога в память
+            call    loadFatDir
 
-fileFind2:	; Сохраняем регистры
-		push	b
-		push	d
+fileFind2:  ; Сохраняем регистры
+            push    bc
+            push    de
 
-		; Начало каталога
-		lxi	d, diskDirectory
+            ; Начало каталога
+            ld      de, diskDirectory
 
-		; Кол-во файлов в каталоге
-		mvi	b, 48
+            ; Кол-во файлов в каталоге
+            ld      b, DIR_MAX_FILES
 
-fileFind_loop:	; Сохраняем адрес начала имени в каталоге и образец
-		push	h
-		push	d
+fileFind_loop:    ; Сохраняем адрес начала имени в каталоге и образец
+            push    hl
+            push    de
 
-		; Если первый символ имени 0FFh, переходим к следующем файлу
-		ldax	d
-		inr	a
-		jz	fileFind_next
+            ; Если первый символ имени 0FFh, переходим к следующем файлу
+            ld      a, (de)
+            inc     a
+            jp z,   fileFind_next
 
-		; Длина имени 9 символов
-		mvi	c, 9
+            ; Длина имени + расширения
+            ld      c, DIR_NAME_LENGTH + 3
 
-fileFind_name:	; Если символы не равны, переходим к следующему файлу
-		ldax	d
-		cmp	m
-		jnz	fileFind_next
-		inx	h
-		inx	d
+fileFind_name:    ; Если символы не равны, переходим к следующему файлу
+            ld      a, (de)
+            cp      (hl)
+            jp nz,  fileFind_next
+            inc     hl
+            inc     de
 
-		; Цикл
-		dcr	c
-		jnz	fileFind_name
+            ; Цикл
+            dec     c
+            jp nz,  fileFind_name
 
-		; Сохраняем адрес найденного файла
-		pop	h
-		shld	v_foundedFile
+            ; Сохраняем адрес найденного файла
+            pop     hl
+            ld      (v_foundedFile), hl
 
-		; Восстаналиваем регистры и выходим с CF=0
-		pop	h
-		ora	a	; х.з.
-		pop	d
-		pop	b
-		ret
+            ; Восстаналиваем регистры и выходим с CF=0
+            pop     hl
+            or      a     ; х.з.
+            pop     de
+            pop     bc
+            ret
 
 ; ---------------------------------------------------------------------------
 
-fileFind_next:	; Вычисляем адрес следующего файла
-		pop	d
-		lxi	h, 10h
-		dad	d
-		xchg
+fileFind_next:    ; Вычисляем адрес следующего файла
+            pop   de
+            ld    hl, DIR_DESCR_SIZE
+            add   hl, de
+            ex    de, hl
 
-		; Восстанавливаем образец
-		pop	h
+            ; Восстанавливаем образец
+            pop   hl
 
-		; Еще остались файлы?
-		dcr	b
-		jnz	fileFind_loop
+            ; Еще остались файлы?
+            dec   b
+            jp nz,  fileFind_loop
 
-		; Восстаналиваем регистры и выходим с CF=1 и A=3
-		pop	d
-		pop	b
-		mvi	a, 3
-		stc
-		ret
+            ; Восстаналиваем регистры и выходим с CF=1 и a=3
+            pop   de
+            pop   bc
+            ld    a, 3
+            scf
+            ret
 

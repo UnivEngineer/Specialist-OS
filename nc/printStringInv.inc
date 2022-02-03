@@ -5,10 +5,10 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printStringInv:	mvi	a, 1
-		sta	v_inverse
-		call	printString
-		xra	a
-		sta	v_inverse
-		ret
+printStringInv:   ld    a, 1
+            ld    (bios_vars.inverse),a
+            call  bios_printString
+            xor   a
+            ld    (bios_vars.inverse),a
+            ret
 

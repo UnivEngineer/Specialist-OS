@@ -5,34 +5,34 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-reboot1:	; Для выключения звука
-		mvi	a, 36h
+reboot1:    ; Для выключения звука
+            ld    a, 36h
 
-		; Включаем ОЗУ
-		sta	IO_RAM
+            ; Включаем ОЗУ
+            ld    (IO_PAGE_RAM), a
 
-		; Выключаем звук		
-		sta	IO_TIMER+3
+            ; Выключаем звук        
+            ld    (IO_TIMER_MODE), a
 
-		; Инициализация переменных
-		lxi	h, initVars	; Откуда
-		lxi	d, initVarsEnd	; Конец
-		lxi	b, vars		; Куда
-		call	memcpy_bc_hl
+            ; Инициализация переменных
+            ld    hl, initVars      ; Откуда
+            ld    de, initVarsEnd   ; Конец
+            ld    bc, bios_vars     ; Куда
+            call  memcpy_bc_hl
 
-		; Установка цвета
-#if DISABLE_COLOR_BUG
-		mvi	a, INIT_COLOR
-		sta	IO_COLOR
-#else
-		mvi	a, 0Fh  
-		sta	IO_KEYB_MODE 
-#endif
+            ; Установка цвета
+    IF ENABLE_COLOR
+            ld    a, COLOR_BIOS
+            ld    (IO_COLOR), a
+    ELSE
+            ld    a, 0Fh  
+            ld    (IO_KEYB_MODE), a 
+    ENDIF
 
-#if LOAD_FONT
+    IF LOAD_FONT
 onceInitFont:
-		jmp	initFont
-#else
-		jmp	reboot2
-#endif
+            jp    initFont
+    ELSE
+            jp    reboot2
+    ENDIF
 

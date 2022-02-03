@@ -52,7 +52,6 @@
     <None Include="draw.inc" />
     <None Include="drawCursor.inc" />
     <None Include="drawWindow.inc" />
-    <None Include="driver.inc" />
     <None Include="enter.inc" />
     <None Include="enter2.inc" />
     <None Include="f2.inc" />
@@ -74,17 +73,15 @@
     <None Include="main2.inc" />
     <None Include="memcpy_hl_de_3.inc" />
     <None Include="memset_hl_a_c.inc" />
-    <None Include="mxos.inc" />
     <CustomBuild Include="NC.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) com 53248</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) com 0xD000</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).com</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">*.inc</AdditionalInputs>
       <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BuildInParallel>
     </CustomBuild>
     <None Include="NC.lst" />
     <None Include="printCurDrive.inc" />
-    <None Include="printDec.inc" />
     <None Include="printFileName.inc" />
     <None Include="printFilePanel.inc" />
     <None Include="printInfoLine.inc" />

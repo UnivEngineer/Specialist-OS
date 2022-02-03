@@ -5,78 +5,111 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printFilePanel:	COLOR(COLOR_BORDER)
+printFilePanel:
+        COLOR   COLOR_BORDER
 
-		lxi	h, g_filePanel
-		call	draw
+        ld      hl, g_filePanel
+        call    draw
 
-		COLOR(COLOR_PANELNAME)
+        COLOR   COLOR_PANELNAME
 
-		; Вывод NAME
-		lxi	h, 1110h
-		call	setCursorPosPanel
-		lxi	h, aNameName
-		call	printString
+        ; Вывод NAME
+        ld      hl, (P_NAME_X << 8) + P_NAME_Y
+        call    setCursorPosPanel
+        ld      hl, aNameName
+        call    bios_printString
 
-		COLOR(COLOR_INFOLINE)
+        COLOR   COLOR_INFOLINE
 
-		; Вывод буквы диска
-		lxi	h, panelA_drive
-		call	readBytePanel
-		lxi	h, 9DEh
-		call	setCursorPosPanel
-		call	printDrive
+        ; Вывод буквы диска
+        ld      hl, panelA_drive
+        call    readBytePanel
+        ld      hl, (P_DRIVE_LETTER_X << 8) + P_DRIVE_LETTER_Y
+        call    setCursorPosPanel
+        call    printDrive
 
-		COLOR(COLOR_FILE)
+        COLOR   COLOR_FILE
 
-		; Вывод всех файлов
-		lxi	h, files
-		lxi	d, 0A20h
-		mvi	c, 0		
+        ; Вывод всех файлов
+        ld      hl, nc_vars.fileListBuffer
+        ld      de, (P_FILE_LIST_X1 << 8) + P_FILE_LIST_Y
+        ld      c,  0
 
-		
-loc_D92E:	; Установка положения курсора
-		xchg
-		call	setCursorPosPanel
-		xchg
+            
+printFilesLoop:
+        ; Установка положения курсора
+        ex      de, hl
+        call    setCursorPosPanel
+        ex      de, hl
 
-		; Файл существует?
-		mov	a, m
-		inr	a
-		jz	loc_D94E
+        ; Файл существует?
+        ld      a, (hl)
+        inc     a
+        jp z,   loc_D94E
 
-		; Вывод имени
-		call	printFileName
+        push    bc
+        push    de
 
-		; Счетчик
-		inr	c
+        ; Печать имени файла
+        push    hl
+        ld      b, DIR_NAME_LENGTH  ; длина имени
+        call    printString2
+        pop     hl
 
-		; Положение курсора
-		mov	a, e
-		adi	10
-		mov	e, a
+        ; Курсор на столбец, где выводятся расширения
+        ld      a, d
+        add     a, (DIR_NAME_LENGTH + 1) * 3
+        ld      d, a
+        ex      de, hl
+        call    setCursorPosPanel
+        ex      de, hl
 
-		; Следующая колонка
-		cpi	0D0h
-		jc	loc_D92E
-		mov	a, d
-		lxi	d, 3920h
-		cpi	14h
-		jc	loc_D92E
+        ; Печать расширения имени файла
+        push    hl
+        ld      bc, DIR_NAME_LENGTH  ; длина имени
+        add     hl, bc    ; перемещаем hl на начло расширения
+        ld      b, 3      ; длина расширения
+        call    printString2
+        pop     hl
 
-loc_D94E:	; Сохранение кол-ва файлов
-		lxi	h, panelA_filesCnt
-		mov	a, c
-		call	writeBytePanel
+        pop     de
 
-		; Если курсор больше максимума
-		lxi	h, panelA_curFile
-		call	readBytePanel
-		cmp	c
-		rc
+        ; Следующий файл
+        ld      bc, DIR_DESCR_SIZE
+        add     hl, bc
 
-		; То изменить на максимум
-		dcr	a
-		rm
-		jmp	writeBytePanel
+        pop     bc
+
+        ; Счетчик
+        inc     c
+
+        ; Курсор на следующую строку
+        ld      a, e
+        add     a, 10
+        ld      e, a
+
+        ; Курсор на следующий столбец
+        cp      P_FILE_LIST_Y_MAX
+        jp c,   printFilesLoop
+        ld      a, d
+        ld      de, (P_FILE_LIST_X2 << 8) + P_FILE_LIST_Y
+        cp      20
+        jp c,   printFilesLoop
+
+loc_D94E:
+        ; Сохранение кол-ва файлов
+        ld      hl, panelA_filesCnt
+        ld      a, c
+        call    writeBytePanel
+
+        ; Если курсор больше максимума
+        ld      hl, panelA_curFile
+        call    readBytePanel
+        cp      c
+        ret c 
+
+        ; То изменить на максимум
+        dec     a
+        ret m 
+        jp      writeBytePanel
 

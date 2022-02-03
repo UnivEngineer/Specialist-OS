@@ -5,63 +5,63 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-copyFileInt:	; Загрузка выбранного файла в память
-		call	loadSelFileAt0
-		push	d	; Тут реальный адрес
+copyFileInt:
+            ; Загрузка выбранного файла в память
+            call  loadSelFileAt0
+            push  de    ; Тут реальный адрес
 
-		; Подготавливаем имя	
-		xchg
-		lxi	h, v_input
-		call	fileNamePrepare
-		xchg
+            ; Подготавливаем имя    
+            ex    de, hl
+            ld    hl, nc_vars.input
+            call  bios_fileNamePrepare
+            ex    de, hl
 
-loc_D4E4:	; Сохраняем имя
-		push	h
+saveFileInt:
+            ; hl = адрес дескриптора файла
+            push  hl
 
-		; Устанавливаем адрес сохраняемого файла
-		lxi	d, 10
-		dad	d
-		lxi	d, 0
-		mov	m, e
-		inx	h
-		mov	m, d
+            ; Устанавливаем адрес сохраняемого файла
+            ld    de, FILE_DESCRIPTOR.loadAddress   ; смещение поля адреса относительно начала дескриптора
+            add   hl, de
+            ld    de, 0     ; записываем 0 в поле loadAddress дескриптора
+            ld    (hl), e
+            inc   hl
+            ld    (hl), d
 
-		; Сохраняем файл
-		pop	h
-		call	fileCreate
+            ; Сохраняем файл
+            pop   hl
+            call  bios_fileCreate
 
-		; Изменяем адрес загрузки файла
-		pop	d
-		mvi	c, 1
-		call	fileGetSetAddr
+            ; Изменяем адрес загрузки файла
+            pop   de
+            ld    c, 1
+            call  bios_fileGetSetAddr
 
-		; Выходим, если нет ошибки
-		rnc
+            ; Выходим, если нет ошибки
+            ret nc      
 
-		; Рисуем окно
-		call	drawWindow2
+            ; Рисуем окно
+            call  drawWindow2
 
-		; Вывод "CAN'T CREATE FILE"
-        ; центр экрана это x = 60h
-        ; половина ширина строки w = 18*3/2 = 27
-        ; координата строки x = 60h-27 = 45h
-		lxi	h, 4580h
-		shld	v_cursorY
-		lxi	h, aCantCreateFile
-		call	printString
+            ; Вывод "CAN'T CREATE FILE"
+            COLOR   COLOR_DIALOG_ERR
+            CENTER_LINE 18, 80h
+            ld    hl, aCantCreateFile
+            call  bios_printString
 
-		; Вывод имени
-		lxi	h, 5090h
-		shld	v_cursorY
-		lxi	h, v_input
-		call	printStringInv
+            ; Вывод имени
+            COLOR COLOR_DIALOG
+            ld    hl, 5090h
+            ld    (bios_vars.cursorY), hl
+            ld    hl, nc_vars.input
+            call  printStringInv
 
-anyKey:		; Ждем нажатия любой клавиши
-		call	keyScan
-		inr	a
-		jz	anyKey
+anyKey:           ; Ждем нажатия любой клавиши
+            call  bios_keyScan
+            inc   a
+            jp z, anyKey
 
-		; Выход
-		pop	h
-		jmp	mainReload
+            ; Выход
+            pop   hl
+            jp    mainReload
 

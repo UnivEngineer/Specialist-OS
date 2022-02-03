@@ -7,28 +7,28 @@
 
 ; [hl + activePanel] = a
 
-writeBytePanel:	push	b
-		push	h
-		push	psw
-		mov	c, a
-		lda	activePanel
-		ana	a
-		jz	loc_D97E
-		inx	h
-loc_D97E:	mov	m, c
-		pop	psw
-		pop	h
-		pop	b
-		ret
+writeBytePanel:   push  bc
+            push  hl
+            push  af
+            ld    c, a
+            ld    a, (activePanel)
+            and   a
+            jp z, loc_D97E
+            inc   hl
+loc_D97E:   ld  (hl), c
+            pop   af
+            pop   hl
+            pop   bc
+            ret
 
 ; a = [hl + activePanel]
 
-readBytePanel:	push	h
-		lda	activePanel
-		ana	a
-		jz	loc_D98C
-		inx	h
-loc_D98C:	mov	a, m
-		pop	h
-		ret
+readBytePanel:    push  hl
+            ld    a, (activePanel)
+            and   a
+            jp z, loc_D98C
+            inc   hl
+loc_D98C:   ld  a, (hl)
+            pop   hl
+            ret
 

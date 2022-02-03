@@ -4,7 +4,7 @@
 ;
 ; На входе
 ;  de - адрес расширения 1
-;  v_fileName_ext - расширение 2
+;  v_curFileDescr - имя с расширением 2
 ;
 ; На выходе
 ;  zf=0 - расширения равны
@@ -13,28 +13,30 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-cmpFileExt:	lxi	h, v_fileName_ext
+cmpFileExt:
+            ; Адрес расширения
+            ld      hl, v_curFileDescr + DIR_NAME_LENGTH
+            ld      bc, 3   ; Сравниваем 3 символа
+cmpFileExt_0:
+            ld      a, (de)
+            cp      (hl)
+            jp nz,  cmpFileExt_1
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  cmpFileExt_0
 
-		; Сравниваем 3 символа
-                lxi	b, 3
-cmpFileExt_0:	ldax	d
-		cmp	m
-		jnz	cmpFileExt_1
-		inx	h
-		inx	d
-		dcr	c
-		jnz	cmpFileExt_0
+            ; ZF=1 если равны
 
-		; ZF=1 если равны
+cmpFileExt_1:
+            ; Делаем так, чтобы de на выходе функции был на 3 больше, 
+            ; чем на входе в функцию
+            push    af
+            ex      de, hl
+            add     hl, bc
+            ex      de, hl
+            pop     af
 
-cmpFileExt_1:	; Делаем так, что бы DE на выходе функции был на 3 больше, 
-		; чем на входе в функцию
-		push	psw
-		xchg
-		dad	b
-		xchg
-		pop	psw
-
-		; Выход
-		ret
+            ; Выход
+            ret
 

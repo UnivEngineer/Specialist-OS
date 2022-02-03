@@ -5,18 +5,18 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-calcCursorAd_0:	; Перевод строки (на входе C=10)
-		call	printChar
+calcCursorAd_0:   ; Перевод строки (на входе c=10)
+            call  printChar
 
-		; Восстановление регистров после printChar (хотя он не портит регистры)
-		lhld	v_cursorY
-		mov	a, h
+            ; Восстановление регистров после printChar (хотя он не портит регистры)
+            ld    hl, (bios_vars.cursorY)
+            ld    a, h
 
-calcCursorAd_1:	; Расчет старшего байта адреса
-		; a = cursorX / 4 + 90h		
-		rrc
-		rrc
-		ani	3Fh
-		adi	90h
-		ret
+calcCursorAd_1:   ; Расчет старшего байта адреса
+            ; a = cursorX / 4 + 90h       
+            RRCA
+            RRCA
+            and   3Fh
+            add   a,90h
+            ret
 

@@ -5,31 +5,31 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-F3:		; Временный выбор противоположной панели
-		lda	activePanel
-		push	psw
-		xri	1
-		sta	activePanel
+F3:         ; Временный выбор противоположной панели
+            ld    a, (activePanel)
+            push  af
+            xor   1
+            ld    (activePanel),a
 
-		; Меняем видимость панели
-		lxi	h, panelA_info
-		call	readBytePanel
-		xri	1
-		call	writeBytePanel
+            ; Меняем видимость панели
+            ld    hl, panelA_info
+            call  readBytePanel
+            xor   1
+            call  writeBytePanel
 
-		; Восстанавлаием активную панель
-		pop	psw
-		sta	activePanel
-		ana	a
-		jz	loc_D701
+            ; Восстанавлаием активную панель
+            pop   af
+            ld    (activePanel),a
+            and   a
+            jp z, loc_D701
 
-		; Перерисовываем панель
-		call	loadAndPrintA
+            ; Перерисовываем панель
+            call  loadAndPrintA
 
-		jmp	loc_D603
+            jp    loc_D603
 
 ; ---------------------------------------------------------------------------
 
-loc_D701:	call	loadAndPrintB
-		jmp	loc_D603
+loc_D701:   call  loadAndPrintB
+            jp    loc_D603
 

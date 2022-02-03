@@ -5,15 +5,15 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-F4:		; Получение кол-ва файлов
-		lxi	h, panelA_filesCnt
-		call	readBytePanel
+F4:     ; Получение кол-ва файлов
+        ld      hl, panelA_filesCnt
+        call    readBytePanel
 
-		; Если файлов нет, выходим
-		ana	a
-		jz	mainLoop
+        ; Если файлов нет, выходим
+        and     a
+        jp z,   mainLoop
 
-		; Запуск редактора
-		lxi	d, aEditor	; "A:E.COM\r"
-		jmp	Enter_5
+        ; Запуск редактора
+        ld      de, aEditor   ; "A:E.COM\r"
+        jp      Enter_5
 

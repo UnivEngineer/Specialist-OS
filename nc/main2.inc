@@ -5,7 +5,7 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-mainLoop_ctrl:	cpi	0Dh
-		jz	ctrlEnter
-		jmp	mainLoop_e
+mainLoop_ctrl:    cp    0Dh
+            jp z, ctrlEnter
+            jp    mainLoop_e
 

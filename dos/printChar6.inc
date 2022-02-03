@@ -8,7 +8,7 @@
 ; ---------------------------------------------------------------------------
 ; Обработка ESC+F
 
-printChar_eF:	mvi	a, 80h
-		sta	v_escMode
-		ret
+printChar_eF:   ld    a, 80h
+                ld    (bios_vars.escMode), a
+                ret
 

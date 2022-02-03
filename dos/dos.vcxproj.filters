@@ -18,9 +18,6 @@
     <None Include="unpacker.asm">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="tapeWriteWord.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="beep.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -55,12 +52,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="driver.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="driver_FFC0.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="driver_sel.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="fileCmpExt.inc">
@@ -177,9 +168,6 @@
     <None Include="printString1.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="reboot0.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="reboot1.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -207,40 +195,25 @@
     <None Include="setGetMemTop.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="tapeLoad.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeLoadInt.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeRead.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeReadDelay.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeReadError.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeSave.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeWrite.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeWriteDelay.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="DOS.lst">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="unpacker.lst">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="checkARAM.inc">
+    <None Include="strToHex.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="strToHex.inc">
+    <None Include="driverFFC0.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="checkRAMD.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="printDecWord.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="tape.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

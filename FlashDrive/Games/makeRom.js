@@ -6,6 +6,8 @@
 // 2022-01-27 ƒополнено SpaceEngineer
 //----------------------------------------------------------------------------
 
+fat16   = 1;                    // —формировать ром-диск в FAT16
+
 // —тандартна€ ерунда
 fso = new ActiveXObject("Scripting.FileSystemObject");
 shell = new ActiveXObject("WScript.Shell");
@@ -47,7 +49,7 @@ dest = [];
 rom = [];
 
 numFiles = 0;
-maxFiles = 36;	// ћаксимально файлов на странице
+maxFiles = fat16 ? 24 : 48; // ћаксимум файлов в каталоге
 
 minCluster = 4;
 numClusters = 4;
@@ -220,14 +222,42 @@ function putFile(fileName)
 		dest = dest.substr(0,256*cluster) + block + dest.substr(256*cluster+block.length);
 	}
 
-	//  аталог
-	dir += (fileName+"        ").substr(0,6);
-	dir += (ext+"   ").substr(0,3);  
-	dir += encode[0]; // attrib
-	dir += encode[startAddr & 0xFF]+encode[startAddr >> 8];
-	dir += encode[(data_size - 1) & 0xFF]+encode[(data_size - 1) >> 8];
-	dir += encode[0]; // crc?
-	dir += encode[startCluster];
+    // ƒескриптор файла в каталоге
+    if (fat16)
+    {
+        dir += (fileName+"        ").substr(0,8);   // им€
+        dir += (ext+"   ").substr(0,3);             // расширение
+        dir += encode[0];                           // attrib
+        dir += encode[0];                           // (только FAT32) исп. в WinNT
+        dir += encode[0];                           // (только FAT32) врем€ создани€ - миллисекунды
+        dir += encode[0] + encode[0];               // (только FAT32) врем€ создани€
+        dir += encode[0] + encode[0];               // (только FAT32) дата создани€
+        dir += encode[startAddr & 0xFF];            // (только FAT32) дата обращени€; используем дл€ адреса загрузки - байт 0
+        dir += encode[startAddr >> 8];              // (только FAT32) дата обращени€; используем дл€ адреса загрузки - байт 1
+        dir += encode[0];                           // первый кластер - байт 2
+        dir += encode[0];                           // первый кластер - байт 3
+        dir += encode[0] + encode[0];               // врем€ записи
+        dir += encode[0] + encode[0];               // дата записи
+        dir += encode[startCluster];                // первый кластер - байт 0
+        dir += encode[0];                           // первый кластер - байт 1
+        dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
+        dir += encode[(data_size - 1) >> 8];        // размер - байт 1
+        dir += encode[0];                           // размер - байт 2
+        dir += encode[0];                           // размер - байт 3
+    }
+    else
+    {
+        dir += (fileName+"        ").substr(0,6);   // им€
+        dir += (ext+"   ").substr(0,3);             // расширение
+        dir += encode[0];                           // attrib
+        dir += encode[startAddr & 0xFF];            // адрес загрузки - байт 0
+        dir += encode[startAddr >> 8];              // адрес загрузки - байт 1
+        dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
+        dir += encode[(data_size - 1) >> 8];        // размер - байт 1
+        dir += encode[0];                           // crc?
+        dir += encode[startCluster];                // первый кластер
+    }
+
 	return 0;
 }
 

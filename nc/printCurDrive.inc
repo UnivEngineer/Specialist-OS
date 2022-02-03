@@ -5,16 +5,16 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printCurDrive:	; Узнаем активное устройство
-		mvi	e, 2
-		call	fileGetSetDrive
+printCurDrive:    ; Узнаем активное устройство
+            ld    e, 2
+            call  bios_fileGetSetDrive
 
-printDrive:	; Выводим его букву на экран
-		adi	'A'
-		mov	c, a
-		call	printChar
+printDrive: ; Выводим его букву на экран
+            add   a, 'A'
+            ld    c, a
+            call  bios_printChar
 
-		; Выводим ':'
-		mvi	c, ':'
-		jmp	printChar
+            ; Выводим ':'
+            ld    c, ':'
+            jp    bios_printChar
 

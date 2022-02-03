@@ -1,205 +1,205 @@
-TMP		= 07FFFh
-IO_RAM		= 0FFFCh
+DEFC TMP  =  07FFFh 
+DEFC IO_RAM  =  0FFFCh 
 
 .org 0E000h
 
-start:		; Включаем ОЗУ
-		sta	IO_RAM
+start:            ; Включаем ОЗУ
+            ld    (IO_RAM),a
 
-		; Стек
-		lxi	sp, TMP
+            ; Стек
+            ld    sp, TMP
 
-		; Распаковываем ОС
-		lxi	d, packedData
-		lxi	b, 0C000h
-		push	b
-		jmp	unmlz
+            ; Распаковываем ОС
+            ld    de, packedData
+            ld    bc, 0C000h
+            push  bc
+            jp    unmlz
 
 ; Разархиватор MegaLZ
 ; (с) b2m, vinxru, группа mayhem...
 
 
-unmlz:		mvi	a, 80h
+unmlz:            ld    a, 80h
 
-loc_2:		sta	TMP		
-		ldax	d
-		inx	d
-		jmp	loc_13
+loc_2:            ld    (TMP),a           
+            ld    a, (de)
+            inc   de
+            jp    loc_13
 ; ---------------------------------------------------------------------------
 
-loc_A:		mov	a, m
-		inx	h
-		stax	b
-		inx	b
+loc_A:            ld    a, m
+            inc   hl
+            ld    (bc),a
+            inc   bc
 
 loc_E:
-		mov	a, m
-		inx	h
-		stax	b
-		inx	b
+            ld    a, m
+            inc   hl
+            ld    (bc),a
+            inc   bc
 
 loc_12:
-		mov	a, m
+            ld    a, m
 
 loc_13:
-		stax	b
-		inx	b
+            ld    (bc),a
+            inc   bc
 
 loc_15:
-		lda	TMP
-		add	a
-		jnz	loc_1F
-		ldax	d
-		inx	d
-		ral
+            ld    a, (TMP)
+            add   a, a
+            jp nz,  loc_1F
+            ld    a, (de)
+            inc   de
+            RLA
 
 loc_1F:
-		jc	loc_2
-		add	a
-		jnz	loc_29
-		ldax	d
-		inx	d
-		ral
+            jp c, loc_2
+            add   a, a
+            jp nz,  loc_29
+            ld    a, (de)
+            inc   de
+            RLA
 
 loc_29:
-		jc	loc_4F
-		add	a
-		jnz	loc_33
-		ldax	d
-		inx	d
-		ral
+            jp c, loc_4F
+            add   a, a
+            jp nz,  loc_33
+            ld    a, (de)
+            inc   de
+            RLA
 
 loc_33:
-		jc	loc_43
-		lxi	h, 3FFFh
-		call	sub_A2
-		sta	TMP
-		dad	b
-		jmp	loc_12
+            jp c, loc_43
+            ld    hl, 3FFFh
+            call  sub_A2
+            ld    (TMP),a
+            add   hl, bc
+            jp    loc_12
 ; ---------------------------------------------------------------------------
 
 loc_43:
-		sta	TMP
-		ldax	d
-		inx	d
-		mov	l, a
-		mvi	h, 0FFh
-		dad	b
-		jmp	loc_E
+            ld    (TMP),a
+            ld    a, (de)
+            inc   de
+            ld    l, a
+            ld    h, 0FFh
+            add   hl, bc
+            jp    loc_E
 ; ---------------------------------------------------------------------------
 
 loc_4F:
-		add	a
-		jnz	loc_56
-		ldax	d
-		inx	d
-		ral
+            add   a, a
+            jp nz,  loc_56
+            ld    a, (de)
+            inc   de
+            RLA
 
 loc_56:
-		jc	loc_60
-		call	sub_B7
-		dad	b
-		jmp	loc_A
+            jp c, loc_60
+            call  sub_B7
+            add   hl, bc
+            jp    loc_A
 ; ---------------------------------------------------------------------------
 
 loc_60:
-		mvi	h, 0
+            ld    h, 0
 
 loc_62:
-		inr	h
-		add	a
-		jnz	loc_6A
-		ldax	d
-		inx	d
-		ral
+            inc   h
+            add   a, a
+            jp nz,  loc_6A
+            ld    a, (de)
+            inc   de
+            RLA
 
 loc_6A:
-		jnc	loc_62
-		push	psw
-		mov	a, h
-		cpi	8
-		jnc	loc_98
-		mvi	a, 0
+            jp nc,  loc_62
+            push  af
+            ld    a, h
+            cp    8
+            jp nc,  loc_98
+            ld    a, 0
 
 loc_76:
-		rar
-		dcr	h
-		jnz	loc_76
-		mov	h, a
-		mvi	l, 1
-		pop	psw
-		call	sub_A2
-		inx	h
-		inx	h
-		push	h
-		call	sub_B7
-		xchg
-		xthl
-		xchg
-		dad	b
+            RRA
+            dec   h
+            jp nz,  loc_76
+            ld    h, a
+            ld    l, 1
+            pop   af
+            call  sub_A2
+            inc   hl
+            inc   hl
+            push  hl
+            call  sub_B7
+            ex    de, hl
+            ex    (sp), hl
+            ex    de, hl
+            add   hl, bc
 
-loc_8C:		mov	a, m
-		inx	h
-		stax	b
-		inx	b
-		dcr	e
-		jnz	loc_8C
-		pop	d
-		jmp	loc_15
+loc_8C:           ld    a, m
+            inc   hl
+            ld    (bc),a
+            inc   bc
+            dec   e
+            jp nz,  loc_8C
+            pop   de
+            jp    loc_15
 
 ; ---------------------------------------------------------------------------
 
 loc_98:
-		pop	psw
-		; Конец
-		ret
+            pop   af
+            ; Конец
+            ret
 
 ; ---------------------------------------------------------------------------
 
-sub_A2:		add	a
-		jnz	loc_A9
-		ldax	d
-		inx	d
-		ral
+sub_A2:           add   a, a
+            jp nz,  loc_A9
+            ld    a, (de)
+            inc   de
+            RLA
 
-loc_A9:		jc	loc_B1
-		dad	h
-		rc
-		jmp	sub_A2
-
-; ---------------------------------------------------------------------------
-
-loc_B1:		dad	h
-		inr	l
-		rc
-		jmp	sub_A2
+loc_A9:           jp c, loc_B1
+            add   hl, hl
+            ret c 
+            jp    sub_A2
 
 ; ---------------------------------------------------------------------------
 
-sub_B7:		add	a
-		jnz	loc_BE
-		ldax	d
-		inx	d
-		ral
+loc_B1:           add   hl, hl
+            inc   l
+            ret c 
+            jp    sub_A2
 
-loc_BE:		jc	loc_CA
-		sta	TMP
-		ldax	d
-		inx	d
-		mov	l, a
-		mvi	h, 0FFh
-		ret
 ; ---------------------------------------------------------------------------
 
-loc_CA:		lxi	h, 1FFFh
-		call	sub_A2
-		sta	TMP
-		mov	h, l
-		dcr	h
-		ldax	d
-		inx	d
-		mov	l, a
-		ret
+sub_B7:           add   a, a
+            jp nz,  loc_BE
+            ld    a, (de)
+            inc   de
+            RLA
+
+loc_BE:           jp c, loc_CA
+            ld    (TMP),a
+            ld    a, (de)
+            inc   de
+            ld    l, a
+            ld    h, 0FFh
+            ret
+; ---------------------------------------------------------------------------
+
+loc_CA:           ld    hl, 1FFFh
+            call  sub_A2
+            ld    (TMP),a
+            ld    h, l
+            dec   h
+            ld    a, (de)
+            inc   de
+            ld    l, a
+            ret
 
 packedData:
 

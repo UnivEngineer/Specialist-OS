@@ -5,61 +5,61 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-scrollUp2:	; Копируем 246 байт из SP в H0 
-		mvi	c, 246 / 6
-		mvi	l, 0
+scrollUp2:  ; Копируем 246 байт из sp в H0 
+            ld    c, 246 / 6
+            ld    l, 0
 
-scrollUp2_0:	; Копирование 6 байт из SP в HL
-		pop	d
-		mov	m, e
-		inx	h
-		mov	m, d
-		inx	h
-		pop	d
-		mov	m, e
-		inx	h
-		mov	m, d
-		inx	h
-		pop	d
-		mov	m, e
-		inx	h
-		mov	m, d
-		inx	h
+scrollUp2_0:      ; Копирование 6 байт из sp в hl
+            pop   de
+            ld  (hl), e
+            inc   hl
+            ld  (hl), d
+            inc   hl
+            pop   de
+            ld  (hl), e
+            inc   hl
+            ld  (hl), d
+            inc   hl
+            pop   de
+            ld  (hl), e
+            inc   hl
+            ld  (hl), d
+            inc   hl
 
-		; Цикл
-		dcr	c
-		jnz	scrollUp2_0
+            ; Цикл
+            dec   c
+            jp nz,  scrollUp2_0
 
-		; Сохраняем H
-		mov	a, h
-		
-		; Заполняем 10 байт 
-		lhld	v_inverse
-		push	h
-		push	h
-		push	h
-		push	h
-		push	h
+            ; Сохраняем h
+            ld    a, h
+            
+            ; Заполняем 10 байт 
+            ld    hl, (bios_vars.inverse)
+            push  hl
+            push  hl
+            push  hl
+            push  hl
+            push  hl
 
-		; Следующий столбец (SP += 20)
-		lxi	h, 14h
-		dad	sp
-		sphl
+            ; Следующий столбец (sp += 20)
+            ld    hl, 14h
+            add   hl,sp
+            ld    sp, hl
 
-		; Восстанавливаем H
-		mov	h, a
+            ; Восстанавливаем h
+            ld    h, a
 
-		; Следующий столбец
-		inr	h
+            ; Следующий столбец
+            inc   h
 
-		; Цикл
-		dcr	b
-		jnz	scrollUp2
+            ; Цикл
+            dec   b
+            jp nz,  scrollUp2
 
-		; Восстановление регистров и выход
-		lhld	v_oldSP
-		sphl
-		pop	psw
-		pop	b
-		ret
+            ; Восстановление регистров и выход
+            ld    hl, (bios_vars.oldSP)
+            ld    sp, hl
+            pop   af
+            pop   bc
+            ret
 

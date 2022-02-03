@@ -5,47 +5,59 @@
 ; На входе 
 ;   hl - имя файла
 ;   с  - 0=чтение, 1=изменение
-;   b  - новые атрибуты (если C==1)
+;   b  - новые атрибуты (если c==1)
 ;
 ; На выходе 
 ;   cf - ошибка
 ;   a  - атрибуты
-;   bc,de,hl - сохраняются
+;   bc, de, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
+; 2022-01-31 Доработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-fileGetSetAttr:	push	b
-		mov	b, a		
+fileGetSetAttr:
+            push    bc
+            ld      b, a        
 
-		; Ищем файл с именем в HL. Если найден, то переходим
-		call	fileFind
-		jnc	fileGetSetAt_0
+            ; Ищем файл с именем в hl. Если найден, то переходим
+            call    fileFind
+            jp nc,  fileGetSetAt_0
 
-		; Ошибка, выходим
-		pop	b
-		ret
+            ; Ошибка, выходим
+            pop     bc
+            ret
 
 ; ---------------------------------------------------------------------------
 
-fileGetSetAt_0:	push	h
-		call	fileGetInfoAddr
+fileGetSetAt_0:
+            push    hl
 
-		; Переходим, если на входе в функцию C=0
-		jnz	fileGetSetAt_1
+            ; Получаем адрес байта атрибутов
+            push    de
+            ld      hl, (v_foundedFile)
+            ld      de, FILE_DESCRIPTOR.attrib
+            add     hl, de
+            pop     de
 
-		; Устанавливаем флаги
-		mov	m, b
+            ; Проверяем режим
+            ld      a, c
+            dec     c ; ZF=1 если режим 1
+            jp nz,  fileGetSetAt_1
 
-fileGetSetAt_1:	; Читаем флаги
-		mov	a, m
+            ; Устанавливаем атрибуты
+            ld      (hl), b
 
-		; Сохраняем изменения (хотя для чтения это не нужно делать)
-		call	saveFatDir
+fileGetSetAt_1:
+            ; Читаем атрибуты
+            ld      a, (hl)
 
-		; Восстанавливаем регистры и выходим ;! А тут точно CF==0 будет?
-		ora	a
-		pop	h
-		pop	b
-		ret
+            ; Сохраняем изменения (хотя для чтения это не нужно делать)
+            call    saveFatDir
+
+            ; Восстанавливаем регистры и выходим ;! А тут точно CF==0 будет?
+            or      a
+            pop     hl
+            pop     bc
+            ret
 

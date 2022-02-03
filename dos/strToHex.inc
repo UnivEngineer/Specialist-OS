@@ -18,68 +18,68 @@
 ;----------------------------------------------------------------------------
 
 strToHex:
-        lxi	h, 0		
+            ld  hl, 0       
 
-strToHex_loop:	; Чтение символа
-		ldax	d
-		inx	d
+strToHex_loop:    ; Чтение символа
+            ld    a, (de)
+            inc   de
 
-		; Если конец строки, выходим с флагами NZ, C
-		cpi	0Dh
-		jz	ora_a_stc_ret
+            ; Если конец строки, выходим с флагами NZ, c
+            cp    0Dh
+            jp z, ora_a_stc_ret
 
-		; Если пробел или запятая, выходим с флагами NZ, NC
-		cpi	','
-		jz	ora_a_ret		
-		cpi	' '
-		jz	ora_a_ret
+            ; Если пробел или запятая, выходим с флагами NZ, NC
+            cp    ','
+            jp z, ora_a_ret         
+            cp    ' '
+            jp z, ora_a_ret
 
-		; Если некорректный символ, выходим с флагами С,Z
-		sui	'0'
-		jm	xra_a_stc_ret		
+            ; Если некорректный символ, выходим с флагами С,Z
+            sub   '0'
+            jp M, xra_a_stc_ret           
 
-		; Если это цифра
-		cpi	10
-		jm	strToHex_0
+            ; Если это цифра
+            cp    10
+            jp M, strToHex_0
 
-		; Если некорректный символ, выходим с флагами С,Z
-		cpi	11h
-		jm	xra_a_stc_ret
-		cpi	17h
-		jp	xra_a_stc_ret
+            ; Если некорректный символ, выходим с флагами С,Z
+            cp    11h
+            jp M, xra_a_stc_ret
+            cp    17h
+            jp p, xra_a_stc_ret
 
-		; Это буквы A..F
-		sui	'A'-'0'-10
+            ; Это буквы A..F
+            sub   'A'-'0'-10
 
-strToHex_0:	
-		; hl *=	16
-		dad	h
-		dad	h
-		dad	h
-		dad	h
+strToHex_0: 
+            ; hl *= 16
+            add   hl, hl
+            add   hl, hl
+            add   hl, hl
+            add   hl, hl
 
-		; Если переполнение, выходим c флагами С,Z
-		jc	xra_a_stc_ret
-		
-		; hl += bc
-		push b
-		mvi  b, 0
-		mov  c, a
-		dad  b
-		pop  b
+            ; Если переполнение, выходим c флагами С,Z
+            jp c, xra_a_stc_ret
+            
+            ; hl += bc
+            push bc
+            ld   b, 0
+            ld   c, a
+            add  hl, bc
+            pop  bc
 
-		jmp	strToHex_loop
+            jp    strToHex_loop
 
-xra_a_stc_ret:	; Вывод знака вопроса
-        mvi	c, '?'
-        call	printChar
-        xra	a
+xra_a_stc_ret:    ; Вывод знака вопроса
+            ld  c, '?'
+            call      printChar
+            xor a
 
 ora_a_stc_ret:
-        ora	a
-        stc
-        ret
+            or  a
+            scf
+            ret
 
 ora_a_ret:
-        ora	a
-        ret
+            or  a
+            ret

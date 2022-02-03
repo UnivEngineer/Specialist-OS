@@ -1,24 +1,27 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
 ; Установка положения курсора с учетом активной панели
+; вход:
+;   hl - координаты курсора на панели
 ;
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
 setCursorPosPanel:
-		; Сохраняем регистры
-		push	h
-		push	psw
-		lda	activePanel
-		ana	a
-		jz	loc_D9BA
-		mvi	a, 96		; Половина экрана
-loc_D9BA:	add	h
-		mov	h, a
-		shld	v_cursorY
+            ; Сохраняем регистры
+            push  hl
+            push  af
 
-		; Восстанавливаем регистры
-		pop	psw
-		pop	h
-		ret
+            ld    a, (activePanel)
+            and   a
+            jp z, loc_D9BA
+            ld    a, 96       ; Половина экрана
+loc_D9BA:   add   a, h
+            ld    h, a
+            ld    (bios_vars.cursorY), hl
+
+            ; Восстанавливаем регистры
+            pop   af
+            pop   hl
+            ret
 

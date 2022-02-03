@@ -7,39 +7,34 @@
 ;  de - адрес загрузки
 ;
 ; На выходе
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;  v_foundedFile - найденный файл
 ;  cf - ошибка
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileLoad2:	; Ищем файл с именем в HL
+fileLoad2:  ; Ищем файл с именем в hl
 
-        ; SpaceEngineer: функция fileFind2 пропускает обновление буфера fat и
-        ; каталога текущего диска. Из-за этого fileLoad2 некорректно работает
-        ; с файлами на ром-диске (A:, без поддержки записи - потому что изменение
-        ; адреса загрузки программы сделано несколько костыльно, через патчинг
-        ; этого адреса в структуре каталога). 
-        ; Вызывающая программа могла бы сама вызвать loadFatDir перед вызовом
-        ; fileLoad2, но, к сожалению, loadFatDir не числится в списке стандартных
-        ; точек вызова.
+            ; SpaceEngineer: функция fileFind2 пропускает обновление буфера fat и
+            ; каталога текущего диска. Из-за этого fileLoad2 некорректно работает
+            ; с файлами на ром-диске (A:, без поддержки записи - потому что изменение
+            ; адреса загрузки программы сделано несколько костыльно, через патчинг
+            ; этого адреса в структуре каталога). 
+            ; Вызывающая программа могла бы сама вызвать loadFatDir перед вызовом
+            ; fileLoad2, но, к сожалению, loadFatDir не числится в списке стандартных
+            ; точек вызова.
 
-		;call	fileFind2
-        call	fileFind
-		rc
+            ;call    fileFind2
+            call    fileFind
+            ret c 
 
-		; Сохранить регистры
-		push	h
-		push	b
-		push	d
+            ; Сохранить регистры
+            push    hl
+            push    bc
+            push    de
 
-		; Указатель на длину найденного файла
-		lhld	v_foundedFile
-		lxi	b, 13
-		dad	b
-
-		jmp	loc_CCBA
+            jp      fileLoadStep2
 
 ;----------------------------------------------------------------------------
 ; Загрузить файл по адресу указанному в заголовке
@@ -48,94 +43,109 @@ fileLoad2:	; Ищем файл с именем в HL
 ;  hl - имя
 ;
 ; На выходе
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;  v_foundedFile - найденный файл
 ;  cf - ошибка
 ;----------------------------------------------------------------------------
 
-fileLoad:	; Ищем файл с именем в HL
-		call	fileFind
-		rc
+fileLoad:   ; Ищем файл с именем в hl
+            call    fileFind
+            ret c 
 
-		; Сохраняем регистры
-		push	h
-		push	b
-		push	d
+            ; Сохраняем регистры
+            push    hl
+            push    bc
+            push    de
 
-		; DE = адрес загрузки
-		lhld	v_foundedFile
-		lxi	d, 10
-		dad	d
-		mov	e, m ; +10
-		inx	h
-		mov	d, m ; +11
+            ; hl = указатель на адрес загрузки
+            ld      hl, (v_foundedFile)
+            ld      de, FILE_DESCRIPTOR.loadAddress
+            add     hl, de
 
-		inx	h
-		inx	h
+            ; de = адрес загрузки
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl)
 
-loc_CCBA:	; Длина файла в кластерах
-		mov	b, m ; +13
-		inr	b
-		
-		; Первый кластер
-		inx	h
-		inx	h
-		mov	a, m ; +15
+fileLoadStep2:
+            ; hl = указатель на номер первого кластера файла
+            ld      hl, (v_foundedFile)
+            ld      bc, FILE_DESCRIPTOR.firstCluster
+            add     hl, bc
 
-		xchg
+            ; a = первый кластер файла
+            ld      a, (hl)
 
-loc_CCC0:	; Читаем кластер в память
-		mvi	e, 2		; Чтение
-		mov	d, a		; Кластер
-		call	j_diskDriver
+            ; hl = указатель на длину найденного файла
+            ld      hl, (v_foundedFile)
+            ld      bc, FILE_DESCRIPTOR.size + 1
+            add     hl, bc
 
-		; Следующий кластер
-		inr	h
-		mov	e, d
-		mvi	d, 0FBh
-		ldax	d
+            ; b = размер файла в кластерах. Просто читаем старший байт
+            ; размера, т.к. кластер размером 256 байт.
+            ; TODO: это не будет работать с другим размером кластера!
+            ld      b, (hl)
+            inc     b
 
-		; Цикл
-		dcr	b
-		jnz	loc_CCC0
+            ; hl = адрес загрузки
+            ex      de, hl
 
-		; Восстанавливаем регистры
-		pop	d
-		pop	b
-		pop	h
+fileLoadLoop:
+            ; Читаем кластер в память
+            ld      e, 2        ; Чтение
+            ld      d, a        ; Кластер
+            call    j_diskDriver
 
-		jmp	loc_CCD9
+            ; Следующий кластер
+            inc     h
+            ld      e, d
+            ld      d, fat>>8 ; адрес таблицы fat в памяти
+            ld      a, (de)
+
+            ; Цикл
+            dec     b
+            jp nz,  fileLoadLoop
+
+            ; Восстанавливаем регистры
+            pop     de
+            pop     bc
+            pop     hl
+
+            jp      fileLoadExit
 
 ; ---------------------------------------------------------------------------
 
-fileLoadInfo:	; Ищем файл с именем в HL
-		call	fileFind
-		rc
+fileLoadInfo:
+            ; Ищем файл с именем в hl
+            call    fileFind
+            ret c 
 
-loc_CCD9:	; Сохраняем регистры
-		push	h
-		push	b
-		push	d
+fileLoadExit:
+            ; Сохраняем регистры
+            push    hl
+            push    bc
+            push    de
 
-		; Что то в DE
-		lxi	b, 9
-		dad	b
-		xchg
+            ; de = указатель на первое поле после расширения
+            ld      bc, FILE_DESCRIPTOR.ext + 3
+            add     hl, bc
+            ex      de, hl
 
-		; Информация о файле исключая имя
-		lhld	v_foundedFile
-		dad	b
+            ; Информация о файле, исключая имя
+            ld      hl, (v_foundedFile)
+            add     hl, bc
 
-		; Копируем 7 байт из HL в DE
-		mvi	b, 7
-loc_CCE7:	mov	a, m
-		stax	d
-		inx	h
-		inx	d
-		dcr	b
-		jnz	loc_CCE7
+            ; Копируем дескриптор из hl в de, исключая имя и расширение
+            ld      b, DIR_DESCR_SIZE - DIR_NAME_LENGTH - 3
+fileLoadCDLoop:
+            ld      a, (hl)
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     b
+            jp nz,  fileLoadCDLoop
 
-		; Выход CF=0
-		ora	a
-		jmp	pop_dbh_ret
+            ; Выход CF=0
+            or      a
+            jp      popDBh_ret
 

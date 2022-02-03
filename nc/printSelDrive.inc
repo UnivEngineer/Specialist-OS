@@ -7,7 +7,7 @@
 
 ; Печать буквы активного диска
 
-printSelDrive:	lxi	h, panelA_drive
-		call	readBytePanel
-		jmp	printDrive
+printSelDrive:    ld    hl, panelA_drive
+            call  readBytePanel
+            jp    printDrive
 

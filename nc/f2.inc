@@ -5,207 +5,208 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-F2:		; Временно устанавливаем activePanel=1
-		lda	activePanel
-		push	psw
-		mvi	a, 1
-		sta	activePanel
+F2:         ; Временно устанавливаем activePanel=1
+            ld    a, (activePanel)
+            push  af
+            ld    a, 1
+            ld    (activePanel),a
 
-		; Диалог
-		call	chooseDrive
+            ; Диалог
+            call  chooseDrive
 
-		; Если выбрали устройство, то сохраняем его.
-		cpi	0FFh
-		jz	loc_D5C3		
-		sta	panelB_drive
+            ; Если выбрали устройство, то сохраняем его.
+            cp    0FFh
+            jp z, loc_D5C3          
+            ld    (panelB_drive),a
 
-		; А так же делаем панель видимой и перемещаем курсор в начало
-		xra	a
-		sta	panelB_info
-		sta	panelB_curFile
+            ; А так же делаем панель видимой и перемещаем курсор в начало
+            xor   a
+            ld    (panelB_info),a
+            ld    (panelB_curFile),a
 
-loc_D5C3:	; Восстанавливаем activePanel
-		pop	psw
-		sta	activePanel
+loc_D5C3:   ; Восстанавливаем activePanel
+            pop   af
+            ld    (activePanel),a
 
-		; Перезагружаем и перерисовываем вторую панель
-		call	loadAndPrintB
+            ; Перезагружаем и перерисовываем вторую панель
+            call  loadAndPrintB
 
-		; Перезагружаем и перерисовываем первую панель, только если она отображается
-		lda	panelA_info
-		ana	a
-		jz	loc_D603
-		call	loadAndPrintA
+            ; Перезагружаем и перерисовываем первую панель, только если она отображается
+            ld    a, (panelA_info)
+            and   a
+            jp z, loc_D603
+            call  loadAndPrintA
 
-		; Сохраняем состояние и выходим
-		jmp	loc_D603
-
-; ---------------------------------------------------------------------------
-
-F1:		; Временно устанавливаем activePanel=02
-		lda	activePanel
-		push	psw
-		mvi	a, 0
-		sta	activePanel
-
-		; Диалог
-		call	chooseDrive
-
-		; Если выбрали устройство, то сохраняем его.
-		cpi	0FFh
-		jz	loc_D5F2
-		sta	panelA_drive
-
-		; А так же делаем панель видимой и перемещаем курсор в начало
-		xra	a
-		sta	panelA_info
-		sta	panelA_curFile
-
-loc_D5F2:	; Восстанавливаем activePanel
-		pop	psw
-		sta	activePanel
-
-		; Перезагружаем и перерисовываем первую панель
-		call	loadAndPrintA
-
-		; Перезагружаем и перерисовываем вторую панель, только если она отображается
-		lda	panelB_info
-		ana	a
-		jz	loc_D603
-		call	loadAndPrintB
-		
-loc_D603:	; Сохраняем состояние и выходим
-		call	saveState
-		jmp	mainDriveChanged
+            ; Сохраняем состояние и выходим
+            jp    loc_D603
 
 ; ---------------------------------------------------------------------------
 
-chooseDrive:	COLOR(COLOR_DIALOG)
+F1:         ; Временно устанавливаем activePanel=02
+            ld    a, (activePanel)
+            push  af
+            ld    a, 0
+            ld    (activePanel),a
 
-		lxi	h, g_chooseDrive
-		call	draw
+            ; Диалог
+            call  chooseDrive
 
-		; Выводим текст "CHOOSE DRIVE:"
-		lxi	h, 1E63h
-		call	setCursorPosPanel
-		lxi	h, aChooseDrive
-		call	printString
+            ; Если выбрали устройство, то сохраняем его.
+            cp    0FFh
+            jp z, loc_D5F2
+            ld    (panelA_drive),a
 
-		; Выводим текст "A   B   C   D"
-		lxi	h, 1C74h
-		call	setCursorPosPanel
-		lxi	h, aABCD
-		call	printString
+            ; А так же делаем панель видимой и перемещаем курсор в начало
+            xor   a
+            ld    (panelA_info),a
+            ld    (panelA_curFile),a
 
-		; Выводим текст "E   F   G   H"
-		lxi	h, 1C7Fh
-		call	setCursorPosPanel
-		lxi	h, aEFGH	
-		call	printString
+loc_D5F2:   ; Восстанавливаем activePanel
+            pop   af
+            ld    (activePanel),a
 
-		; Меняем вид курсора
-		lda	v_cursorCfg
-		push	psw
-		xra	a
-		sta	v_cursorCfg
+            ; Перезагружаем и перерисовываем первую панель
+            call  loadAndPrintA
 
-		; Сохраняем текущее устройство
-		lxi	h, panelA_drive
-		call	readBytePanel
-		sta	v_chooseDrive
-
-loc_D644:	; Рисуем курсор
-		call	chooseDrive_draw
-
-		; Ждем нажатия клавиши
-		call	getch
-
-		; Стираем курсор
-		push	psw
-		call	chooseDrive_draw
-		pop	psw
-
-		mvi	c, 1
-		cpi	18h
-		jz	loc_D690
-		mvi	c, 7
-		cpi	8
-		jz	loc_D690
-		mvi	c, 4
-		cpi	1Ah
-		jz	loc_D690
-		cpi	19h
-		jz	loc_D690
-		cpi	0Dh
-		jz	loc_D688
-		cpi	1Bh
-		jz	loc_D681
-
-		; Выбор диска нажатием на A-H
-		sui	41h
-		cpi	8
-		jnc	loc_D644
-		mov	c, a
-
-		; Восстанавливаем вид курсора
-		pop	psw
-		sta	v_cursorCfg
-		mov	a, c
-		ret
+            ; Перезагружаем и перерисовываем вторую панель, только если она отображается
+            ld    a, (panelB_info)
+            and   a
+            jp z, loc_D603
+            call  loadAndPrintB
+            
+loc_D603:   ; Сохраняем состояние и выходим
+            call  saveState
+            jp    mainDriveChanged
 
 ; ---------------------------------------------------------------------------
 
-loc_D681:	; Восстанавливаем вид курсора
-		pop	psw
-		sta	v_cursorCfg
+chooseDrive:
+        COLOR   COLOR_DIALOG
 
-		; Ничего не выбрано
-		mvi	a, 0FFh
-		ret
+            ld    hl, g_chooseDrive
+            call  draw
+
+            ; Выводим текст "CHOOSE DRIVE:"
+            ld    hl, 1E63h
+            call  setCursorPosPanel
+            ld    hl, aChooseDrive
+            call  bios_printString
+
+            ; Выводим текст "A   B   C   D"
+            ld    hl, 1C74h
+            call  setCursorPosPanel
+            ld    hl, aABCD
+            call  bios_printString
+
+            ; Выводим текст "E   F   G   H"
+            ld    hl, 1C7Fh
+            call  setCursorPosPanel
+            ld    hl, aEFGH   
+            call  bios_printString
+
+            ; Меняем вид курсора
+            ld    a, (bios_vars.cursorCfg)
+            push  af
+            xor   a
+            ld    (bios_vars.cursorCfg), a
+
+            ; Сохраняем текущее устройство
+            ld    hl, panelA_drive
+            call  readBytePanel
+            ld    (nc_vars.chooseDrive), a
+
+loc_D644:   ; Рисуем курсор
+            call  chooseDrive_draw
+
+            ; Ждем нажатия клавиши
+            call  bios_getch
+
+            ; Стираем курсор
+            push  af
+            call  chooseDrive_draw
+            pop   af
+
+            ld    c, 1
+            cp    18h
+            jp z, loc_D690
+            ld    c, 7
+            cp    8
+            jp z, loc_D690
+            ld    c, 4
+            cp    1Ah
+            jp z, loc_D690
+            cp    19h
+            jp z, loc_D690
+            cp    0Dh
+            jp z, loc_D688
+            cp    1Bh
+            jp z, loc_D681
+
+            ; Выбор диска нажатием на a-h
+            sub   41h
+            cp    8
+            jp nc,      loc_D644
+            ld    c, a
+
+            ; Восстанавливаем вид курсора
+            pop   af
+            ld    (bios_vars.cursorCfg),a
+            ld    a, c
+            ret
 
 ; ---------------------------------------------------------------------------
 
-loc_D688:	; Восстанавливаем вид курсора
-		pop	psw
-		sta	v_cursorCfg
-		; Выбрали
-		lda	v_chooseDrive
-		ret
+loc_D681:   ; Восстанавливаем вид курсора
+            pop   af
+            ld    (bios_vars.cursorCfg),a
+
+            ; Ничего не выбрано
+            ld    a, 0FFh
+            ret
 
 ; ---------------------------------------------------------------------------
 
-loc_D690:	lda	v_chooseDrive
-		add	c
-		ani	7
-		sta	v_chooseDrive
-		jmp	loc_D644
+loc_D688:   ; Восстанавливаем вид курсора
+            pop   af
+            ld    (bios_vars.cursorCfg),a
+            ; Выбрали
+            ld    a, (nc_vars.chooseDrive)
+            ret
+
+; ---------------------------------------------------------------------------
+
+loc_D690:   ld    a, (nc_vars.chooseDrive)
+            add   a, c
+            and   7
+            ld    (nc_vars.chooseDrive),a
+            jp    loc_D644
 
 ; ---------------------------------------------------------------------------
 
 chooseDrive_draw:
-		; Выбранное устройство
-		lda	v_chooseDrive
+            ; Выбранное устройство
+            ld    a, (nc_vars.chooseDrive)
 
-		; Координаты курсора
-		lxi	h, 976Ch
+            ; Координаты курсора
+            ld    hl, 976Ch
 
-		; Вторая строка
-		cpi	4
-		jc	chooseDrive_draw2
-		 sui	4
-		 mov	c, a
-		 mov	a, l
-		 adi	0Bh
-		 mov	l, a
-		 mov	a, c
-chooseDrive_draw2:	
-                ; Рисуем
-		mov	c, a
-		add	a
-		add	c
-		add	h
-		mov	h, a
-		call	activePanelPos
-		mvi	b, 1		; ширина 8 пикселей
-		jmp	inverseRect	; hl - адрес
-		
+            ; Вторая строка
+            cp    4
+            jp c, chooseDrive_draw2
+            sub  4
+            ld   c, a
+            ld   a, l
+            add  a,0Bh
+            ld   l, a
+            ld   a, c
+chooseDrive_draw2:      
+            ; Рисуем
+            ld    c, a
+            add   a, a
+            add   a, c
+            add   a, h
+            ld    h, a
+            call  activePanelPos
+            ld    b, 1        ; ширина 8 пикселей
+            jp    inverseRect ; hl - адрес
+            

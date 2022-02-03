@@ -9,46 +9,51 @@
 ;
 ; На выходе 
 ;   de - адрес
-;   bc,hl - сохраняются
+;   bc, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
+; 2022-01-31 Доработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-fileGetSetAddr:	; Ищем файл с именем в HL
-		call	fileFind
-		rc
+fileGetSetAddr:   ; Ищем файл с именем в hl
+            call    fileFind
+            ret c 
 
-		push	h
+            push    hl
 
-		; Получаем адрес где находится длина файла
-		call	fileGetInfoAddr
-		inx	h
+            ; Получаем адрес длины файла
+            push    de
+            ld      hl, (v_foundedFile)
+            ld      de, FILE_DESCRIPTOR.loadAddress
+            add     hl, de
+            pop     de
 
-		; Переходим, если на входе в функцию C=0
-		jnz	fileGetSetAd_0
+            ; Проверяем режим
+            ld      a, c
+            dec     c ; ZF=1 если режим 1
+            jp nz,  fileGetSetAd_0
 
-		; Заменяем адрес загрузки
-		mov	m, e
-		inx	h
-		mov	m, d
+            ; Заменяем адрес загрузки
+            ld      (hl), e
+            inc     hl
+            ld      (hl), d
 
-		; Сохраняем изменения
-		call	saveFatDir
+            ; Сохраняем изменения
+            call    saveFatDir
 
-		; Выходим
-		pop	h
-		ora	a
-		ret
+            ; Выходим
+            pop     hl
+            or      a
+            ret
 
-; ---------------------------------------------------------------------------
+fileGetSetAd_0:
+            ; Читаем адрес загрузки
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl)
 
-fileGetSetAd_0:	; Читаем адрес загрузки
-		mov	e, m
-		inx	h
-		mov	d, m
-
-		; Выходим
-		pop	h
-		ora	a
-		ret
+            ; Выходим
+            pop     hl
+            or      a
+            ret
 

@@ -5,86 +5,88 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-input:		; Вывод строки
-		push	h
-		lxi	h, v_input
-		call	printStringInv
-		pop	h
+input:      ; Вывод строки
+            push    hl
+            ld      hl, nc_vars.input
+            call    printStringInv
+            pop     hl
 
-		; Включаем инверсию
-		mvi	a, 1
-		sta	v_inverse
+            ; Включаем инверсию
+            ld      a, 1
+            ld      (bios_vars.inverse),a
 
-input_loop:	; Ввод символа
-		call	getch
+input_loop: ; Ввод символа
+            call  bios_getch
 
-		; Enter или ESC
-		cpi	0Dh
-		jz	input_exit
-		cpi	1Bh
-		jz	input_exit
+            ; Enter или ESC
+            cp      0Dh
+            jp z,   input_exit
+            cp      1Bh
+            jp z,   input_exit
 
-		; Если служебная клавиша или пробел, то пропускаем
-		cpi	21h
-		jc	input_loop
+            ; Если служебная клавиша или пробел, то пропускаем
+            cp      21h
+            jp c,   input_loop
 
-		; Сохраняем для вывода
-		mov	c, a
+            ; Сохраняем для вывода
+            ld      c, a
 
-		; Помещаем символ в буфер
-		stax	d
+            ; Помещаем символ в буфер
+            ld      (de),a
 
-		; Удаление
-		cpi	7Fh
-		jz	input_bkspc
+            ; Удаление
+            cp      7Fh
+            jp z,   input_bkspc
 
-		; Если переполнение
-		mvi	a, (v_input+23) & 0FFh
-		cmp	e
-		jz	input_loop
+            ; Если переполнение
+            ld      a, (nc_vars.input + P_INPUT_WIDTH) & 0FFh  ; a = младший байт адреса пследнего байта буфера
+            cp      e
+            jp z,   input_loop
 
-		; Вывод символа на экран		
-		call	printChar
+            ; Вывод символа на экран            
+            call    bios_printChar
 
-		; Увеличение длины строки
-		inx	d
+            ; Увеличение длины строки
+            inc     de
 
-		jmp	input_loop
-
-; ---------------------------------------------------------------------------
-
-input_bkspc:	; Если это начало строки, выходим
-		mvi	a, v_input & 0FFh
-		cmp	e
-		jz	input_loop
-
-		; Уменьшаем длину строки
-		dcr	e
-
-		; Стираем символ с экрана
-		push	h
-		lxi	h, asc_DC17
-		call	printString
-		pop	h
-
-		jmp	input_loop
+            jp      input_loop
 
 ; ---------------------------------------------------------------------------
 
-input_exit:	; Сохраняем ESC или Enter для выхода 
-		mov	c, a
+input_bkspc:
+            ; Если это начало строки, выходим
+            ld      a, nc_vars.input & 0FFh
+            cp      e
+            jp z,   input_loop
 
-		; Записываем в конец строки 0Dh, 0
-		xchg
-		mvi	m, 0Dh
-		inx	h
-		xra	a
-		mov	m, a
+            ; Уменьшаем длину строки
+            dec     e
 
-		; Восстанавливаем инверсию
-		sta	v_inverse
+            ; Стираем символ с экрана
+            push    hl
+            ld      hl, asc_DC17
+            call    bios_printString
+            pop     hl
 
-		; Выход		
-		mov	a, c
-		ret
+            jp      input_loop
+
+; ---------------------------------------------------------------------------
+
+input_exit:
+            ; Сохраняем ESC или Enter для выхода 
+            ld      c, a
+
+            ; Записываем в конец строки 0Dh, 0
+            ex      de, hl
+            ld      (hl), 0Dh
+            inc     hl
+            xor     a
+            ld      (hl), a
+
+            ; Восстанавливаем инверсию
+            ld      (bios_vars.inverse),a
+
+            ; Выход           
+            ld      a, c
+            ret
 

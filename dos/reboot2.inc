@@ -6,60 +6,67 @@
 ;----------------------------------------------------------------------------
 
 reboot2:
-		; Очищаем экран
-		call	clearScreen
+            ; Очищаем экран
+            call    clearScreen
 
-		; Проверяем, нажата ли какая нибудь клавиша
-		call	j_keyScan
+    IF BOOT_FROM_TAPE
+            ; Проверяем, нажата ли какая нибудь клавиша
+            call    j_keyScan
+            push    af
+    ENDIF
 
-		push	psw
+            ; Выводим версию ОС на экран
+            ld      hl, txtBiosVer
+            call    printString1
 
-		; Выводим версию ОС на экран
-		lxi h, txtBiosVer
-		call printString1
+            ; Определяем размер ДОЗУ
+            ld      hl, RAMD_PAGE_END
+            ld      a, (bios_vars.maxRamPage)
+            call    checkRAMD
 
-		; Определяем размер ДОЗУ и печатаем процесс на экран
-		lxi	 h, ARAM_PAGE_END
-		lda	 v_maxRamPage
-		call checkARAM
+            ; Выводим объем ДОЗУ на экран
+            ld      hl, txtRAM
+            call    printString1
 
-		; Выводим объем памяти на экран
-		lxi  h, txtRAM
-		call printString1
+            ; Вычисляем объем ДОЗУ в байтах
+            ld      a, (bios_vars.maxRamPage)
+            ld      h, 0
+            ld      l, a
+            inc     l       ; hl = объём в страницах
+            inc     l       ; +1 страница - основная память
+            add     hl, hl
+            add     hl, hl
+            add     hl, hl
+            add     hl, hl
+            add     hl, hl
+            add     hl, hl  ; hl = hl * 64
+            ex      hl, de
+            call    printDecWord
 
-		lda	 v_maxRamPage
-        call printHexByte
+            ld      hl, txtKB
+            call    printString1
 
-		lxi  h, txtKB
-		call printString1
+        IF BOOT_FROM_TAPE==0
 
-        ;call getch
+            ; Продолжаем загрузку системы
+            jp      j_reboot3
 
-		pop	psw
+        ELSE
 
-		; Если не нажата ни одна клавиша, запускаем файл с RAM-диска
-		inr	a
-		jz	j_reboot3
+            ; Если не нажата ни одна клавиша, продолжаем загрузку системы
+            pop     af
+            inc     a
+            jp z,   j_reboot3
 
-		; Загружаем программу с ленты (без контроля КС) и запускаем
-		call	tapeLoadInt
-		lhld	v_tapeAddr
-		pchl
+            ; Загружаем драйвер магнитофона
+            ld      hl, aATape_com
+            call    fileExec
 
-; ---------------------------------------------------------------------------
+            ; Загружаем программу с ленты (без контроля КС) и запускаем
+            ld      hl, txtLoadingFromTape
+            call    printString1
+            call    t_tapeLoadInt
+            ld      hl, (bios_vars.tapeAddr)
+            jp      (hl)
 
-txtBiosVer:
-		.db 0Ch	; '\f'
-		.text "MXOS BIOS 4.50"
-		.db 0Ah	; '\n'
-		.db 0
-
-txtRAM:
-		.db 0Ah	; '\n'
-		.text "RAM "
-		.db 0
-
-txtKB:
-		.text " * 64 KB"
-		.db 0Ah	; '\n'
-		.db 0
+        ENDIF

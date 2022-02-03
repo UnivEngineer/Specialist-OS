@@ -8,21 +8,21 @@
 ; ---------------------------------------------------------------------------
 ; Обработка кода 0Ah. Перевод строки
 
-printChar_c0A:	; cursorX = 0
-		mvi	h, 0
+printChar_c0A:    ; cursorX = 0
+            ld    h, 0
 
-		; Продолжение в printChar_c1A
+            ; Продолжение в printChar_c1A
 
 ; ---------------------------------------------------------------------------
 ; Обработка кода 1Ah. Вниз
 
-printChar_c1A:	; Если cursorY < 246, то cursorY += 10 и выход
-		mov	a, l
-		adi	10
-		jnc	saveVCursorLA
+printChar_c1A:    ; Если cursorY < 246, то cursorY += 10 и выход
+            ld    a, l
+            add   a,10
+            jp nc,  saveVCursorLA
 
-		; Сохраняем положение курсора (изменен только cursorX)
-		shld	v_cursorY
+            ; Сохраняем положение курсора (изменен только cursorX)
+            ld    (bios_vars.cursorY), hl
 
-		; Далее прокрутка экрана вверх
+            ; Далее прокрутка экрана вверх
 

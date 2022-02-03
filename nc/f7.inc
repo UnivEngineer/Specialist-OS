@@ -5,182 +5,189 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-; Сохранение SP	и установка обр	ошибок.
+; Сохранение sp   и установка обр   ошибок.
 
-prepareTapeLoad:lxi	h, 0
-		dad	sp
-		inx	h
-		inx	h
-		shld	v_savedSP
+prepareTapeLoad:
+            ld          hl, 0
+            add         hl, sp
+            inc         hl
+            inc         hl
+            ld          (nc_vars.savedSP), hl
 
-		lxi	h, tapeErrorHandler
-		shld	v_tapeError
+            ld          hl, tapeErrorHandler
+            ld          (bios_vars.tapeError), hl
 
-		mvi	a, 0Fh
-		sta	IO_KEYB_C
-		mvi	a, 0FEh
-		sta	IO_KEYB_A
-		ret
-
-; ---------------------------------------------------------------------------
-
-F7:		; Рисуем окно
-		call	drawWindow1
-
-		; Выводим "LOADING FROM TAPE TO A:"
-        ; центр экрана это x = 60h
-        ; половина ширина строки w = 23*3/2 = 34
-        ; координата строки x = 60h-34 = 3Eh
-		lxi	h, 3E5Eh
-		shld	v_cursorY
-		lxi	h, aLoadingFromTapeTo
-		call	printString		
-		call	printSelDrive
-		
-		; Сохранение SP	и установка обр	ошибок.
-		call	prepareTapeLoad	
-
-loc_D2AA:	; Ждем пилот и D9 D9 D9
-		mvi	a, 0FFh		
-		mvi	c, 3
-		jmp	loc_D2B3
-loc_D2B1:	 mvi	a, 8
-loc_D2B3:	 call	tapeRead
-		 cpi	0D9h 
-		 jnz	loc_D2AA
-		 dcr	c
-		jnz	loc_D2B1
-
-		; Читаем имя
-		lxi	h, files2
-		mov	d, h
-		mov	e, l
-		mvi	c, 9		
-loc_D2C6:	 mvi	a, 8
-		 call	tapeRead
-		 cpi	' '
-		 jc	loc_D370
-		 mov	m, a
-		 inx	h
-		 dcr	c
-		jnz	loc_D2C6
-
-loc_D2D6:	mvi	m, 0
-
-		call	printInvFile
-
-		; Ждем пилот и читаем слово
-		mvi	a, 0FFh
-		call	tapeReadWord2		
-		shld	word_DDA0
-
-		; Еще одно слово
-		xchg
-		call	tapeReadWord
-
-		; Сохраняем разность
-		mov	a, l
-		sub	e
-		mov	l, a
-		mov	a, h
-		sbb	d
-		mov	h, a
-		shld	v_file_length
-
-		; Читаем данные по адресу 0000
-		inx	h
-		xchg
-		lxi	h, 0
-		shld	v_file_addr		
-loc_D2F8:	mvi	a, 8
-		call	tapeRead
-		mov	m, a
-		inx	h
-		dcx	d
-		mov	a, d
-		ora	e
-		jnz	loc_D2F8
-
-		; Чиаем CRC
-		call	tapeReadWord
-		shld	v_tapeSaveCRC
-
-		; Считаем CRC
-		lhld	v_file_length
-		xchg
-		lxi	h, 0
-		dad	d
-		xchg
-		lxi	h, 0
-		call	calcCS
-		lhld	v_tapeSaveCRC
-
-		; Если расчетный CRC не равен реальному, выходим
-		mov	a, b
-		cmp	h
-		jnz	F7_crcError
-		mov	a, c
-		cmp	l
-		jnz	F7_crcError
-
-		call	sub_D333
-
-		; Перерисовываем экран и продолжаем загрузку
-		call	loadAndPrintA
-		call	loadAndPrintB
-		jmp	F7
+            ld          a, 0Fh
+            ld          (IO_KEYB_C),a
+            ld          a, 0FEh
+            ld          (IO_KEYB_A),a
+            ret
 
 ; ---------------------------------------------------------------------------
 
-sub_D333:	lhld	word_DDA0
-		push	h
-		lxi	h, files2
-		jmp	loc_D4E4
+F7:         ; Рисуем окно
+            call        drawWindow1
+
+            ; Выводим "LOADING FROM TAPE TO A:"
+            CENTER_LINE 23, 5Eh
+            ld          hl, aLoadingFromTapeTo
+            call        bios_printString       
+            call        printSelDrive
+            
+            ; Сохранение sp и установка обработчика ошибок
+            call        prepareTapeLoad   
+
+loc_D2AA:
+            ; Ждем пилот и D9 D9 D9
+            ld          a, 0FFh           
+            ld          c, 3
+            jp          loc_D2B3
+loc_D2B1:
+            ld          a, 8
+loc_D2B3:
+            call        bios_tapeRead
+            cp          0D9h 
+            jp nz,      loc_D2AA
+            dec c
+            jp nz,      loc_D2B1
+
+            ; Читаем имя
+            ld          hl, nc_vars.tempFileDescr
+            ld          d, h
+            ld          e, l
+            ld          c, DIR_NAME_LENGTH + 3 ; старый формат файла 9 символов, новый - DIR_NAME_LENGTH + 3 символов
+loc_D2C6:
+            ld          a, 8
+            call        bios_tapeRead
+            cp          ' '
+            jp c,       tapeReadAppendName
+            ld          (hl), a
+            inc         hl
+            dec         c
+            jp nz,      loc_D2C6
+
+loc_D2D6:
+            ld         (hl), 0 ; обнуляем байт атрибута в дескрипторе файла
+
+            call        printInvFile
+
+            ; Пропускаем пилот и читаем начальный адрес загрузки
+            ld          a, 0FFh
+            call        tapeReadWord2
+            ld          (nc_vars.tapeLoadAddr), hl
+
+            ; Читаем конечный адрес загрузки
+            ex          de, hl
+            call        tapeReadWord
+
+            ; Считаем размер файла (hl = hl - de)
+            ld          a, l
+            sub         e
+            ld          l, a
+            ld          a, h
+            sbc         d
+            ld          h, a
+            ld          (nc_vars.tempFileDescr.size), hl
+
+            ; Читаем данные по адресу 0000
+            inc         hl
+            ex          de, hl
+            ld          hl, 0
+            ld          (nc_vars.tempFileDescr.loadAddress), hl           
+loc_D2F8:   ld          a, 8
+            call        bios_tapeRead
+            ld          (hl), a
+            inc         hl
+            dec         de
+            ld          a, d
+            or          e
+            jp nz,      loc_D2F8
+
+            ; Чиаем CRC
+            call        tapeReadWord
+            ld          (nc_vars.tapeSaveCRC), hl
+
+            ; Считаем CRC
+            ld          hl, (nc_vars.tempFileDescr.size)
+            ex          de, hl
+            ld          hl, 0
+            add         hl, de
+            ex          de, hl
+            ld          hl, 0
+            call        bios_calcCS
+            ld          hl, (nc_vars.tapeSaveCRC)
+
+            ; Если расчетный CRC не равен реальному, выходим
+            ld          a, b
+            cp          h
+            jp nz,      F7_crcError
+            ld          a, c
+            cp          l
+            jp nz,      F7_crcError
+
+            ; Соханяем файл на текущий диск
+            call        F7_saveFile
+
+            ; Перерисовываем экран и продолжаем загрузку
+            call        loadAndPrintA
+            call        loadAndPrintB
+            jp          F7
 
 ; ---------------------------------------------------------------------------
 
-F7_crcError:	call	drawWindow2
+F7_saveFile:
+            ld          hl, (nc_vars.tapeLoadAddr)
+            push        hl
+            ld          hl, nc_vars.tempFileDescr
+            jp          saveFileInt
 
-		; Вывод "ERROR LOADING FROM TAPE"
-        ; центр экрана это x = 60h
-        ; половина ширина строки w = 23*3/2 = 34
-        ; координата строки x = 60h-34 = 3Eh
-		lxi	h, 3E80h
-		shld	v_cursorY
-		lxi	h, aErrorLoadingTa
-		call	printString
+; ---------------------------------------------------------------------------
 
-		; Вывод строки из v_input
-		lxi	h, 5090h
-		shld	v_cursorY
-		lxi	h, v_input
-		call	printStringInv
+F7_crcError:
+            call        drawWindow2
 
-loc_D358:	; Ждем нажатия ESC
-		call	keyScan
-		cpi	1Bh
-		jnz	loc_D358
+            ; Вывод "ERROR LOADING FROM TAPE"
+            COLOR       COLOR_DIALOG_ERR
+            CENTER_LINE 23, 80h
+            ld          hl, aErrorLoadingTa
+            call        bios_printString
 
-		jmp	mainReload
+            ; Вывод строки из nc_vars.input
+            COLOR       COLOR_DIALOG
+            ld          hl, 5090h
+            ld          (bios_vars.cursorY), hl
+            ld          hl, nc_vars.input
+            call        printStringInv
+
+loc_D358:   ; Ждем нажатия ESC
+            call        bios_keyScan
+            cp          1Bh
+            jp nz,      loc_D358
+
+            jp          mainReload
 
 ;----------------------------------------------------------------------------
 ; Чтение слова с ленты
 ;----------------------------------------------------------------------------
 
-tapeReadWord:	mvi	a, 8
-tapeReadWord2:	call	tapeRead
-		mov	l, a
-		mvi	a, 8
-		call	tapeRead
-		mov	h, a
-		ret
+tapeReadWord:
+            ld          a, 8
+tapeReadWord2:
+            call        bios_tapeRead
+            ld          l, a
+            ld          a, 8
+            call        bios_tapeRead
+            ld          h, a
+            ret
 
 
 ; ---------------------------------------------------------------------------
 
-loc_D370:	mvi	m, ' '
-		inx	h
-		dcr	c
-		jnz	loc_D370
-		jmp	loc_D2D6
+; Если имя файла на ленте было короче, чем DIR_NAME_LENGTH+3, дополняем его пробелами
+tapeReadAppendName:
+            ld          (hl), ' '
+            inc         hl
+            dec         c
+            jp nz,      tapeReadAppendName
+            jp          loc_D2D6
 

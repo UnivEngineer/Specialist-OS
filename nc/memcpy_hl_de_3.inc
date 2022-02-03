@@ -1,24 +1,40 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Копирвоание 3-х байт из адреса DE в адрес HL
+; Копирвоание 3-х байт из адреса de в адрес hl
 ;
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-memcpy_hl_de_3:	ldax	d
-		mov	m, a
-		inx	h
-		inx	d
+memcpy_hl_de_3:
+        ld    a, (de)
+        ld    (hl), a
+        inc   hl
+        inc   de
 
-		ldax	d
-		mov	m, a
-		inx	h
-		inx	d
+        ld    a, (de)
+        ld    (hl), a
+        inc   hl
+        inc   de
 
-		ldax	d
-		mov	m, a
-		inx	h
-		inx	d
+        ld    a, (de)
+        ld    (hl), a
+        inc   hl
+        inc   de
 
-		ret
+        ret
 
+;----------------------------------------------------------------------------
+; MXOS NC.COM
+; hl = hl - de
+;
+; SpaceEngineer
+;----------------------------------------------------------------------------
+
+;sub_hl_de
+;        ld    a, l
+;        sub   e
+;        ld    l, a
+;        ld    a, h
+;        sbc   d
+;        ld    h, a
+;        ret

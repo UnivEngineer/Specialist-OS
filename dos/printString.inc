@@ -11,29 +11,29 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printString:	; Сохраняем регистры
-		push	b
-		push	psw
+printString:      ; Сохраняем регистры
+            push  bc
+            push  af
 
-printString_1:	; Читаем очередной байт
-		mov	a, m
-		
-		; Если прочитан 0, выходим
-		ora	a
-		jz	printString_2
+printString_1:    ; Читаем очередной байт
+            ld  a, (hl)
+            
+            ; Если прочитан 0, выходим
+            or    a
+            jp z, printString_2
 
-		; Выводим байт на экран
-		mov	c, a
-		call	printChar
+            ; Выводим байт на экран
+            ld    c, a
+            call  printChar
 
-		; Следующий байт
-		inx	h
-		jmp	printString_1
+            ; Следующий байт
+            inc   hl
+            jp    printString_1
 
 ; ---------------------------------------------------------------------------
 
-printString_2:	; Восстанавливаем регистры
-		pop	psw
-		pop	b
-		ret
+printString_2:    ; Восстанавливаем регистры
+            pop   af
+            pop   bc
+            ret
 

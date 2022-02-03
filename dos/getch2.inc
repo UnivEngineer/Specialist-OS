@@ -8,248 +8,248 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-getch2:		; Сохраняем регистры
-		push	h
-		push	b
-		push	d
+getch2:           ; Сохраняем регистры
+            push  hl
+            push  bc
+            push  de
 
-		; Получаем код нажатой клавиши и сохраняем его в v_lastKey
-		call	keyScan2
-		sta	v_lastKey
+            ; Получаем код нажатой клавиши и сохраняем его в bios_vars.lastKey
+            call  keyScan2
+            ld    (bios_vars.lastKey),a
 
-getch_retry:	; Тут будет признак, нарисован курсор или нет
-		mvi	c, 1
+getch_retry:      ; Тут будет признак, нарисован курсор или нет
+            ld    c, 1
 
-loc_C227:	; Рисуем курсор
-		call	drawCursor2
+loc_C227:   ; Рисуем курсор
+            call  drawCursor2
 
-		; Задержка
-		lda	v_cursorDelay
-loc_C22D:	mvi	b, 40h
-		call	delay_l_0
-		dcr	a
-		jnz	loc_C22D
+            ; Задержка
+            ld    a, (bios_vars.cursorDelay)
+loc_C22D:   ld    b, 40h
+            call  delay_l_0
+            dec   a
+            jp nz,  loc_C22D
 
-loc_C236:	; Рисуем/стираем курсор
-		call	drawCursor
-		
-		; Задержка мерцания курсора
-		lxi	d, 500h
+loc_C236:   ; Рисуем/стираем курсор
+            call  drawCursor
+            
+            ; Задержка мерцания курсора
+            ld    de, 500h
 
-loc_C23C:	; Получаем код нажатой клавиши
-		call	keyScan2
-		cpi	80h		; х.з.
-		cpi	0FFh
-		jnz	getch2_pressed
+loc_C23C:   ; Получаем код нажатой клавиши
+            call  keyScan2
+            cp    80h         ; х.з.
+            cp    0FFh
+            jp nz,  getch2_pressed
 
-		; Записываем v_lastKey=0FFh
-		sta	v_lastKey
+            ; Записываем bios_vars.lastKey=0FFh
+            ld    (bios_vars.lastKey),a
 
-		; Повторяем 500h раз
-		dcx	d
-		mov	a, d
-		ora	e
-		jnz	loc_C23C
+            ; Повторяем 500h раз
+            dec   de
+            ld    a, d
+            or    e
+            jp nz,  loc_C23C
 
-		; Повтор всего
-		jmp	loc_C236
-
-; ---------------------------------------------------------------------------
-
-.db 0FFh, 0FFh
+            ; Повтор всего
+            jp    loc_C236
 
 ; ---------------------------------------------------------------------------
 
-setKeybMode82:	mvi	a, 82h
-		sta	IO_KEYB_MODE
-		ret
+    DB 0FFh, 0FFh
 
 ; ---------------------------------------------------------------------------
 
-setKeybMode91:	mvi	a, 91h
-		sta	IO_KEYB_MODE
-		ret
+setKeybMode82:    ld    a, 82h
+            ld    (IO_KEYB_MODE),a
+            ret
+
+; ---------------------------------------------------------------------------
+
+setKeybMode91:    ld    a, 91h
+            ld    (IO_KEYB_MODE),a
+            ret
 
 ; ---------------------------------------------------------------------------
 ; Была нажата клавиша
 
-getch2_pressed:	; Сохраняем код
-		mov	b, a
+getch2_pressed:   ; Сохраняем код
+            ld    b, a
 
-		; Если нарисован курсор, стираем его
-		mov	a, c
-		rrc
-		jc	loc_C269
-		call	drawCursor2
-loc_C269:	
-		lhld	v_lastLastKey	; h = v_lastKey, l = v_lastLastKey
-		mov	a, b		; a = b = код нажатой клавиши
-		cmp	h
-		jnz	loc_C28D	; Код нажатой клавиши изменился
-		cmp	l
-		jz	loc_C295
+            ; Если нарисован курсор, стираем его
+            ld    a, c
+            RRCA
+            jp c, loc_C269
+            call  drawCursor2
+loc_C269:   
+            ld    hl, (bios_vars.lastLastKey)   ; h = bios_vars.lastKey, l = bios_vars.lastLastKey
+            ld    a, b        ; a = b = код нажатой клавиши
+            cp    h
+            jp nz,  loc_C28D    ; Код нажатой клавиши изменился
+            cp    l
+            jp z, loc_C295
 
-		; Рисуем курсор
-		call	drawCursor
+            ; Рисуем курсор
+            call  drawCursor
 
-		; Ждем, пока отпустят клавишу
-		lda	byte_8FF5
-		mov	d, a
-loc_C27C:	call	keyScan2
-		cmp	h
-		jnz	loc_C227	; Быстро нажали другую клавишу
-		dcr	d
-		jnz	loc_C27C
+            ; Ждем, пока отпустят клавишу
+            ld    a, (bios_vars.byte_8FF5)
+            ld    d, a
+loc_C27C:   call  keyScan2
+            cp    h
+            jp nz,  loc_C227    ; Быстро нажали другую клавишу
+            dec   d
+            jp nz,  loc_C27C
 
-		; Долго держали
+            ; Долго держали
 
-		; Стираем курсор
-		call	drawCursor
+            ; Стираем курсор
+            call  drawCursor
 
-		jmp	loc_C290
+            jp    loc_C290
 ; ---------------------------------------------------------------------------
 
-loc_C28D:	; Звуковой сигнал
-		call	beep
+loc_C28D:   ; Звуковой сигнал
+            call  beep
 
-loc_C290:	;
-		mov	l, h
-		mov	h, b	; код нажатой и предыдущей клавиши сохраняем в v_lastKey
-		shld	v_lastLastKey
+loc_C290:   ;
+            ld    l, h
+            ld    h, b  ; код нажатой и предыдущей клавиши сохраняем в bios_vars.lastKey
+            ld    (bios_vars.lastLastKey), hl
 
-loc_C295:	; Не служеюбные клавиши CAPS LOCK, SHIFT и РУС/LAT не влияют
-		mov	a, b
-		cpi	21h
-		jc	getch_noShift   
+loc_C295:   ; Не служеюбные клавиши CAPS LOCK, SHIFT и РУС/LAT не влияют
+            ld    a, b
+            cp    21h
+            jp c, getch_noShift   
                 ; На клавиши c кодами 21h-3Fh влияет SHIFT
-		cpi	40h
-		jc	getch_shift 
+            cp    40h
+            jp c, getch_shift 
                 ; На символьные клавиши (40h-7Eh) влияют CAPS LOCK, SHIFT и РУС/LAT
-		cpi	7Fh
-		jc	getch_chars
+            cp    7Fh
+            jp c, getch_chars
                 ; Не служеюбные клавиши (7Fh+) CAPS LOCK, SHIFT и РУС/LAT не влияют
-		jz	getch_noShift
+            jp z, getch_noShift
 
-		; ...
-		nop
-		nop
+            ; ...
+            nop
+            nop
 
                 ; Переходим, если код клавиши не 81h
-		cpi	81h
-		jnz	getch_noShift
+            cp    81h
+            jp nz,  getch_noShift
 
                 ; Код клавиши 81h
 
-		; Если шифт не нажат
-		lda	IO_KEYB_B
-		ani	2
-		jnz	loc_C55C
+            ; Если шифт не нажат
+            ld    a, (IO_KEYB_B)
+            and   2
+            jp nz,  loc_C55C
 
                 ; Код клавиши 81h с шифтом
 
-		; Звуковой сигнал
-		call	beep
+            ; Звуковой сигнал
+            call  beep
 
-		; CAPS LOCK для KOI-7 или РУС/LAT для KOI-8
-		jmp	getch_rc
+            ; CAPS LOCK для KOI-7 или РУС/LAT для KOI-8
+            jp    getch_rc
 
 ; ---------------------------------------------------------------------------
 ; Нажата комбинация РУС/LAT
 
-getch_rusLat:	; на входе a = v_keyLocks
-		xri	81h
-		sta	v_keyLocks
+getch_rusLat:     ; на входе a = bios_vars.keyLocks
+            xor   81h
+            ld    (bios_vars.keyLocks),a
 
-		; Особый звуковой сигнал
-		lda	v_beep
-		push	psw
-		mvi	a, 4Fh
-		sta	v_beep
-		call	beep
-		mvi	a, 5Fh
-		sta	v_beep
-		call	beep
-		pop	psw
-		sta	v_beep
+            ; Особый звуковой сигнал
+            ld    a, (bios_vars.beepDuration)
+            push  af
+            ld    a, 4Fh
+            ld    (bios_vars.beepDuration),a
+            call  beep
+            ld    a, 5Fh
+            ld    (bios_vars.beepDuration),a
+            call  beep
+            pop   af
+            ld    (bios_vars.beepDuration),a
 
-		; ...
-		nop
+            ; ...
+            nop
 
-		jmp	getch_retry
+            jp    getch_retry
 
 ; ---------------------------------------------------------------------------
 ; Включаем кирилицу или строчные буквы
 
-getch_chars:	; Если не нажат CAPS LOCK, пропускаем код ниже
-		lda	v_keyLocks
-		mov	c, a
-		ana	a
-		jm	loc_C2EA	; CAPS LOCK
+getch_chars:      ; Если не нажат CAPS LOCK, пропускаем код ниже
+            ld    a, (bios_vars.keyLocks)
+            ld    c, a
+            and   a
+            jp M, loc_C2EA    ; CAPS LOCK
 
-		; Превращаем заглавные в строчные
-		mov	a, b
-		xri	20h
-		mov	b, a
+            ; Превращаем заглавные в строчные
+            ld    a, b
+            xor   20h
+            ld    b, a
 
-loc_C2EA:	; Если зафиксирвоан ли РУС/ЛАТ, помещаем в C=1
-		mov	a, c
-		ani	1
-		mov	c, a
+loc_C2EA:   ; Если зафиксирвоан ли РУС/ЛАТ, помещаем в c=1
+            ld    a, c
+            and   1
+            ld    c, a
 
-		; Если шифт нажат, помещаем в A=0
-		lda	IO_KEYB_B
-		ani	2
-		rrc				;! Как на счет флага C ?
+            ; Если шифт нажат, помещаем в a=0
+            ld    a, (IO_KEYB_B)
+            and   2
+            RRCA                    ;! Как на счет флага c ?
 
-		; Превращаем английские символы в русские если A^C==0
-		xra	c
-		mov	a, b
-		jnz	loc_C5A8
-		adi	80h
-		jmp	loc_C5A8
+            ; Превращаем английские символы в русские если a^c==0
+            xor   c
+            ld    a, b
+            jp nz,  loc_C5A8
+            add   a,80h
+            jp    loc_C5A8
 
 ; ---------------------------------------------------------------------------
 ; Меняем цифры на символы
 
-getch_shift:	; Если не нажат шифт, пропускаем код ниже
-		lda	IO_KEYB_B
-		ani	2
-		mov	a, b
-		jnz	loc_C5A8
+getch_shift:      ; Если не нажат шифт, пропускаем код ниже
+            ld    a, (IO_KEYB_B)
+            and   2
+            ld    a, b
+            jp nz,  loc_C5A8
 
-		; Меняем цифры на символы
-		xri	10h
+            ; Меняем цифры на символы
+            xor   10h
 
-		; Одно исключение 30h должен меняться на 5Fh
-		cpi	20h
-		jnz	getch_noShift
-		mvi	a, 5Fh
+            ; Одно исключение 30h должен меняться на 5Fh
+            cp    20h
+            jp nz,  getch_noShift
+            ld    a, 5Fh
 
-		; Прододжение getch_noShift
+            ; Прододжение getch_noShift
 
 ; ---------------------------------------------------------------------------
 ; Символы без изменений
 
-getch_noShift:  ; Сохраняем код нажатой клавиши в B     
-		mov	b, a
+getch_noShift:  ; Сохраняем код нажатой клавиши в b     
+            ld    b, a
 
-loc_C311:	call	setKeybMode83
-		mvi	a, 0F7h
-		sta	IO_KEYB_A
-		lda	IO_KEYB_B
-		cma
-		rrc
-		rrc
-		rrc
-		call	setKeybMode82
-		nop
+loc_C311:   call  setKeybMode83
+            ld    a, 0F7h
+            ld    (IO_KEYB_A),a
+            ld    a, (IO_KEYB_B)
+            CPL
+            RRCA
+            RRCA
+            RRCA
+            call  setKeybMode82
+            nop
 
-		; Восстаналиваем код нажатой клавиши
-		mov	a, b
+            ; Восстаналиваем код нажатой клавиши
+            ld    a, b
 
-popa_ret_2:	; Восстаналиваем регистры и выходим
-		pop	d
-		pop	b
-		pop	h
-		ret
+popa_ret_2: ; Восстаналиваем регистры и выходим
+            pop   de
+            pop   bc
+            pop   hl
+            ret
 

@@ -11,8 +11,8 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-delay_l:	mov	b, l
-delay_l_0:	dcr	b
-		jnz	delay_l_0
-		ret
+delay_l:    ld    b, l
+delay_l_0:  dec   b
+            jp nz,  delay_l_0
+            ret
 

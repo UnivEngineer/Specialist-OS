@@ -10,14 +10,14 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-calcCursorAddr:	; В HL положение курсора
-		lhld	v_cursorY
+calcCursorAddr:   ; В hl положение курсора
+            ld    hl, (bios_vars.cursorY)
 
-		; Если cursorX >= 190, то перевод строки (вывод кода 10)
-		; Иначе рассчитываем адрес старшего байта a = cursorX / 4 + 90h
-		mov	a, h
-		cpi	190
-		jc	calcCursorAd_1
-		mvi	c, 10
-		jmp	calcCursorAd_0
+            ; Если cursorX >= 190, то перевод строки (вывод кода 10)
+            ; Иначе рассчитываем адрес старшего байта a = cursorX / 4 + 90h
+            ld    a, h
+            cp    190
+            jp c, calcCursorAd_1
+            ld    c, 10
+            jp    calcCursorAd_0
 

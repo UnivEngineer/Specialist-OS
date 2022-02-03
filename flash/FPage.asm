@@ -1,67 +1,59 @@
-;+---------------------------------------------------------------------------
+;----------------------------------------------------------------------------
 ; MXOS
 ; FLPAGE.COM - переключатель страниц флеш-диска ВВ55
 ;
 ; 2022-01-25 Разработано SpaceEngineer
-;
 ;----------------------------------------------------------------------------
 
-; Функции системы
-printChar       = 0C809h ; Вывод символа на экран
-input           = 0C80Fh ; Ввод строки с клавиатуры
-printHexByte	= 0C815h ; Вывести 16-ричное число (байт)
-printString     = 0C818h ; Вывести строку на экран
-strToHex        = 0C839h ; Преобразвоние строки в HEX формате в число
+    INCLUDE "../include/mxos.inc"
 
-; Переменные системы
-v_flashPage     = 8FF9h  ; Текущая страница флеш-диска (макс. 1Fh = 31)
-v_input         = 0DE8Eh ; Буфер для ввода строки
+    ORG 0F100h
 
-.org 08000H
-
-        ; вывод текущей страницы
-	    lxi  h, txtCurrentPage
-	    call printString
-        lda  v_flashPage
-        call printHexByte
+    ; вывод текущей страницы
+    ld      hl, txtCurrentPage
+    call    bios_printString
+    ld      a, (bios_vars.flashPage)
+    call    bios_printHexByte
 
 Repeat:
-        ; вывод запроса
-	    lxi  h, txtEnterPage
-	    call printString
+    ; вывод запроса
+    ld      hl, txtEnterPage
+    call    bios_printString
 
-        ; ввод строки
-	    lxi  h, v_input
-	    lxi  d, v_input+23
-        call input
+    ; ввод строки
+    ld      hl, v_input
+    ld      de, v_input + 23
+    call    bios_input
 
-        ; анализ строки
-        xchg
-        call strToHex
-        jz   Repeat
+    ; анализ строки
+    ex      de,hl
+    call    bios_strToHex
+    jp z,   Repeat
 
-        ; проверяем значение
-        lxi  d, 20h ; макс. 1Fh + 1
-        call cmp_hl_de
-        jnc  Repeat
+    ; проверяем значение
+    ld      de, 20h ; макс. 1Fh + 1
+    call    cmp_hl_de
+    jp nc,  Repeat
 
-        ; записываем результат
-        mov a, l
-        sta v_flashPage
-        ret
+    ; записываем результат
+    ld      a, l
+    ld      (bios_vars.flashPage), a
+    ret
 
 cmp_hl_de:
-        mov	a, h
-        cmp	d
-        rnz
-        mov	a, l
-        cmp	e
-        ret
+    ld      a, h
+    cp      d
+    ret nz  
+    ld      a, l
+    cp      e
+    ret
 
 txtCurrentPage:
-        .db 0Ah,"CURRENT PAGE NUMBER: ",0
+    DB 0Ah,"CURRENT PAGE NUMBER: ",0
 
 txtEnterPage:
-        .db 0Ah,"ENTER NEW PAGE NUMBER (0-1F): ",0
+    DB 0Ah,"ENTER NEW PAGE NUMBER (0-1F): ",0
 
-.END
+v_input:
+
+    END

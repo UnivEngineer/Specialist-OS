@@ -7,41 +7,72 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-reboot3:	; Инициализация стека
-		lxi	sp, STACK_ADDR
+reboot3:    ; Инициализация стека
+            ld      sp, STACK_ADDR
 
-		; Копируем драйвер в отведенное для него место
-		lxi	h, driverStart
-		lxi	d, driverEnd
-		lxi	b, 0FFC0h
-		call	memmove_bc_hl
+            ; Устанавливаем блочный драйвер
+            ld      b, 0
+            call    setRAMDDriver
 
-		; Обновляем переменные
-		lxi	h, j_reboot3
-		shld	v_tapeError
+            ; Обновляем переменные
+            ld      hl, j_reboot3
+            ld      (bios_vars.tapeError), hl
 
-		; Код ниже будет выполнен лишь один раз после холодной перезагрузки.
-		; То есть при теплой перезагрузке он не вызывается.
 reboot3_0:
-		jmp	reboot3_1
+            jp      reboot3_1
+
+; -------------------------------------
+; Код ниже будет выполнен лишь один раз после холодной перезагрузки.
+; То есть при теплой перезагрузке он не вызывается.
+
 reboot3_1:
-		lxi	h, reboot3_2
-		shld	reboot3_0+1
+            ; Патчим предыдущую инструкцию - теперь она стала jp reboot3_2
+            ld      hl, reboot3_2
+            ld      (reboot3_0+1), hl
 
-		; Если нажата клавиша, пропустить запуск A:AUTOEX.BAT
-		lda	IO_KEYB_B	
-		ani	2
-		jz	reboot3_2
+            ; Устанавливаем побайтовый драйвер
+            ld      b, 1
+            call    setRAMDDriver
 
-		; Запуск файла A:AUTOEX.BAT
-		lxi	h, aAAutoex_bat
-		call	fileExec
+            ; Если в рам-диске по адресу 0FF00h (последний неполный сектор)
+            ; нет специальной метки, значит, не запускали форматирование
+            ld      hl, 0FFBFh      ; адрес в странице
+            xor     a               ; 0 страница
+            call    bios_RAMDRead
+            ld      a, c            ; считанный байт в c
+            cp      5Ah
+            jp z,   skipFormat      ; метка есть - пропускаем форматирование
+
+            ; Записываем метку
+            xor     a               ; 0 страница
+            ld      c, 5Ah          ; записываемый байт
+            call    bios_RAMDWrite
+
+            ; Устанавливаем блочный драйвер
+            ld      b, 0
+            call    setRAMDDriver
+
+            ; Запуск файла "A:FORMAT.BAT"
+            ld      hl, pathFormatBat
+            call    fileExec
+
+skipFormat:
+            ; Если нажата клавиша, пропустить запуск A:AUTOEX.BAT
+            ld      a, (IO_KEYB_B)     
+            and     2
+            jp z,   reboot3_2
+
+            ; Запуск файла A:AUTOEX.BAT
+            ld      hl, pathAutoexecBat
+            call    fileExec
+
+; -------------------------------------
 
 reboot3_2:
-		; Запуск файла NC.COM
-		lxi	h, aANc_com
-		call	fileExec
+            ; Запуск файла A:NC.COM
+            ld      hl, pathNcCom
+            call    fileExec
 
-		; Теплая перезагрузка
-		jmp	j_reboot3
+            ; Теплая перезагрузка
+            jp      j_reboot3
 

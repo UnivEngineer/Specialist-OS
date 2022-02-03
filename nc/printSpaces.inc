@@ -7,9 +7,11 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printSpaces:	mvi	c, ' '
-printSpaces_1:	call	printChar
-		dcr	b
-		jnz	printSpaces_1
-		ret
+printSpaces:
+            ld    c, ' '
+printSpaces_1:
+            call  bios_printChar
+            dec   b
+            jp nz,  printSpaces_1
+            ret
 

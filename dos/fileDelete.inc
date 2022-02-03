@@ -7,55 +7,55 @@
 ;
 ; На выходе
 ;  cf - ошибка
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileDelete:	; Найти файл с именем из HL
-		call	fileFind
-		rc
+fileDelete: ; Найти файл с именем из hl
+            call  fileFind
+            ret c 
 
-		; Удалить файл
-		call	deleteFileInt
+            ; Удалить файл
+            call  deleteFileInt
 
-		; Сохранить изменения на диск
-		call	saveFatDir
+            ; Сохранить изменения на диск
+            call  saveFatDir
 
-		; Результат
-		ora	a
-		ret
-		
+            ; Результат
+            or    a
+            ret
+            
 ; ---------------------------------------------------------------------------
 
-deleteFileInt:	; Сохраняем регистры
-		push	h
-		push	b
-		push	d
+deleteFileInt:    ; Сохраняем регистры
+            push  hl
+            push  bc
+            push  de
 
-		; Помечаем файл, как удаленный заменяя его первую букву на FF
-		lhld	v_foundedFile
-		mvi	m, 0FFh		
+            ; Помечаем файл, как удаленный заменяя его первую букву на FF
+            ld    hl, (v_foundedFile)
+            ld  (hl), 0FFh          
 
-		; Получаем первый кластер файла в A
-		lxi	d, 15
-		dad	d
-		mov	a, m
+            ; Получаем первый кластер файла в a
+            ld    de, FILE_DESCRIPTOR.firstCluster
+            add   hl, de
+            ld  a, (hl)
 
-		; Адрес таблицы FAT
-		mvi	h, fat>>8
+            ; Адрес таблицы FAT
+            ld    h, fat>>8
 
-deleteFileIn_0:	; Получаем следующий кластер в А
-		mov	l, a
-		mov	a, m
+deleteFileIn_0:   ; Получаем следующий кластер в А
+            ld    l, a
+            ld  a, (hl)
 
-		; А этот помечаем не занятым
-		mvi	m, 0
+            ; А этот помечаем не занятым
+            ld  (hl), 0
 
-		; Если это был не последний кластер, продолжаем.
-		cmp	l
-		jnz	deleteFileIn_0
+            ; Если это был не последний кластер, продолжаем.
+            cp    l
+            jp nz,  deleteFileIn_0
 
-		; Восстаналиваем регистры и выходим
-		jmp	pop_dbh_ret
+            ; Восстаналиваем регистры и выходим
+            jp    popDBh_ret
 

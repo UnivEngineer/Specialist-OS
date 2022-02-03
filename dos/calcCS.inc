@@ -12,22 +12,19 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-calcCS:		lxi	b, 0
-calcCS_1:	mov	a, m
-		add	c
-		mov	c, a
-		push	psw
-		call	cmp_hl_de_2
-		jz	calcCS_2
-		pop	psw
-		mov	a, b
-		adc	m
-		mov	b, a
-		inx	h
-		jmp	calcCS_1
-
-; ---------------------------------------------------------------------------
-
-calcCS_2:	pop	psw
-		ret
+calcCS:     ld      bc, 0
+calcCS_1:   ld      a, (hl)
+            add     a, c
+            ld      c, a
+            push    af
+            call    cmp_hl_de_2
+            jp z,   calcCS_2
+            pop     af
+            ld      a, b
+            ADC     a, (hl)
+            ld      b, a
+            inc     hl
+            jp      calcCS_1
+calcCS_2:   pop     af
+            ret
 

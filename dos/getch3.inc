@@ -8,75 +8,75 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-loc_C55C:	; Если нажат лишь РУС/LAT - то обрабатываем его как CAPS/LOCK
-		call	setKeybMode91
-		mvi	a, 0F8h
-		sta	IO_KEYB_B
-		lda	IO_KEYB_A		
-		push	psw
-		call	setKeybMode82
-		pop	psw
-		ani	8
-		jnz	getch_capsLock
+loc_C55C:   ; Если нажат лишь РУС/LAT - то обрабатываем его как CAPS/LOCK
+            call  setKeybMode91
+            ld    a, 0F8h
+            ld    (IO_KEYB_B),a
+            ld    a, (IO_KEYB_A)           
+            push  af
+            call  setKeybMode82
+            pop   af
+            and   8
+            jp nz,  getch_capsLock
 
-		; Меняем KOI-7 / KOI-8
-		lda	v_koi8
-		cma
-		sta	v_koi8
+            ; Меняем KOI-7 / KOI-8
+            ld    a, (bios_vars.koi8)
+            CPL
+            ld    (bios_vars.koi8),a
 
-		; Звуковой сигнал
-		call	beep
+            ; Звуковой сигнал
+            call  beep
 
-		mvi	a, 3Ah
-		sta	v_keyLocks
+            ld    a, 3Ah
+            ld    (bios_vars.keyLocks),a
 
-		; Меняем частоту
-		mvi	a, 5Fh
-		sta	v_beep
+            ; Меняем частоту
+            ld    a, 5Fh
+            ld    (bios_vars.beepDuration),a
 
-		jmp	getch_retry
+            jp    getch_retry
 
 ; ---------------------------------------------------------------------------
 ; CAPS LOCK для KOI-7
 
-getch_capsLock:	; Переключаем capsLock
-		lda	v_keyLocks
-		xri	80h
-		sta	v_keyLocks
+getch_capsLock:   ; Переключаем capsLock
+            ld    a, (bios_vars.keyLocks)
+            xor   80h
+            ld    (bios_vars.keyLocks),a
 
-		; Изменяем высоту звуковго сигнала		
-		lda	v_beep
-		xri	10h
-		sta	v_beep
+            ; Изменяем высоту звуковго сигнала        
+            ld    a, (bios_vars.beepDuration)
+            xor   10h
+            ld    (bios_vars.beepDuration),a
 
-		; Ждем следующую клавишу
-		jmp	getch_retry
+            ; Ждем следующую клавишу
+            jp    getch_retry
 
 ; ---------------------------------------------------------------------------
 ; CAPS LOCK для KOI-7 или РУС/LAT для KOI-8
 
-getch_rc:	; В режиме KOI-8 мы переключаем кодировку
-		lda	v_koi8
-		inr	a
+getch_rc:   ; В режиме KOI-8 мы переключаем кодировку
+            ld    a, (bios_vars.koi8)
+            inc   a
 
-		lda	v_keyLocks	; Требуется в getch_rusLat
-		jnz	getch_rusLat
+            ld    a, (bios_vars.keyLocks) ; Требуется в getch_rusLat
+            jp nz,  getch_rusLat
 
-		; В режиме KOI-7 мы перключаем регистр
-		jmp	getch_capsLock	
+            ; В режиме KOI-7 мы перключаем регистр
+            jp    getch_capsLock    
 
 ; ---------------------------------------------------------------------------
 
-loc_C5A8:	; Включен KOI-7
-		mov	b, a
+loc_C5A8:   ; Включен KOI-7
+            ld    b, a
 
-		lda	IO_KEYB_B
-		ani	2
-		jnz	loc_C311
+            ld    a, (IO_KEYB_B)
+            and   2
+            jp nz,  loc_C311
 
-		mvi	a, 0A0h
-		xra	b
-		mov	b, a
+            ld    a, 0A0h
+            xor   b
+            ld    b, a
 
-		jmp	loc_C311
+            jp    loc_C311
 

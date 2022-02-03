@@ -1,113 +1,108 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; FORMAT.COM
+; FORMAT.cOM
 ;
 ; 2022-01-14 Disassembled by SpaceEngineer
 ;----------------------------------------------------------------------------
 
-.org 0D000h
-
 ; Функции DOS
-getch			= 0C803h	; Ожидание ввода с клавиатуры
-printChar		= 0C809h	; Вывод символа на экран
-printString		= 0C818h	; Вывод строки на экран
-fileGetSetDrive	= 0C842h	; Получить/установить активное устройство
-diskDriver		= 0C863h	; Драйвер выбранного диска
+getch            =  0C803h ; Ожидание ввода c клавиатуры
+printchar        =  0C809h ; Вывод символа на экран
+printString      =  0C818h ; Вывод строки на экран
+fileGetSetDrive  =  0C842h ; Получить/установить активное устройство
+diskDriver       =  0C863h ; Драйвер выбранного диска
 
-Buffer          = 0D100h	; Буфер
+buffer           =  0D100h ; Буфер
 
-; Код
+;----------------------------------------------------------------------------
+    ORG 0D000h
 
-		ldax    d	; В DE передаётся адрес строки аргументов
-		cpi     20h
-		jnc		LetterEntered
+    ld      a,(de)    ; В de передаётся адрес строки аргументов
+    cp      20h
+    jp nc,  LetterEntered
 
-		; Запрос буквы диска для форматирования
-ChooseDrive:
-		lxi     h, str_ChoseDrive
-		call    printString		; Вывод сообщения 'CHOOSE DRIVE ? '
-		call    getch			; Ожидание нажатия клавиши
-		cpi     21h				; Сравнение с пробелом
-		rc
-		mov     c,a
-		call    printChar
+    ; Запрос буквы диска для форматирования
+chooseDrive:
+    ld      hl, str_ChoseDrive
+    call    printString     ; Вывод сообщения 'cHOOSE DRIVE ? '
+    call    getch           ; Ожидание нажатия клавиши
+    cp      21h             ; сравнение c пробелом
+    ret c   
+    ld      c,a
+    call    printchar
 
 LetterEntered:
-		sta     str_A_Y_N		; Заменим 'A' в строке на введённую букву
-		sui     41h				; Номер диска
-		cpi     08h				; Максимальный номер диска = 7
-		jnc     ChooseDrive		; Повтор запроса буквы, если неверная
-		mov     b, a			; Запомним номер диска в B
+    ld      (str_A_Y_N),a   ; Заменим 'a' в строке на введённую букву
+    sub     41h             ; Номер диска
+    cp      08h             ; Максимальный номер диска = 7
+    jp nc,  chooseDrive     ; Повтор запроса буквы, если неверная
+    ld      b, a            ; Запомним номер диска в b
 
-		lxi     h, str_Format
-		call    printString		; Вывод сообщения 'FORMAT B: Y/N'
-		call    getch			; Ожидание нажатия клавиши
-		cpi     59h				; Сравнение с 'Y'
-		rnz						; Выход, если не 'Y'
+    ld      hl, str_Format
+    call    printString     ; Вывод сообщения 'FORMAT b: Y/N'
+    call    getch           ; Ожидание нажатия клавиши
+    cp      59h             ; сравнение c 'Y'
+    ret nz                  ; Выход, если не 'Y'
 
-		; Установим выбранный диск текущим
-		mov     a, b			; Номер диска в A
-		mvi     e, 01h
-		call    fileGetSetDrive
+    ; Установим выбранный диск текущим
+    ld      a, b            ; Номер диска в a
+    ld      e, 01h
+    call    fileGetSetDrive
 
-		; Выдать размер диска в A
-		mvi     e, 03h
-		call    diskDriver
-		mov     e, a	; Помещаем размер диска в E
-		dcr     a
+    ; Выдать размер диска в a
+    ld      e, 03h
+    call    diskDriver
+    ld      e, a    ; Помещаем размер диска в e
+    dec     a
 
-		; Очистка буфера (E байт)
-		lxi     h, Buffer
-ClearBufLoop:
-		mvi     m, 0
-		inr     l
-		dcr     e
-		jnz     ClearBufLoop
+    ; Очистка буфера (e байт)
+    ld     hl, buffer
+clearbufLoop:
+    ld      m, 0
+    inc     l
+    dec     e
+    jp nz,  clearbufLoop
 
-		; Создание пустой структуры FAT (256 байт)
-CreateFATLoop:
-		inr     a
-		jz      WriteToDisk
-		mvi     m, 01h
-		inr     l
-		jmp     CreateFATLoop
+    ; Создание пустой структуры FAT (256 байт)
+createFaTLoop:
+    inc     a
+    jp z,   WriteToDisk
+    ld      m, 01h
+    inc     l
+    jp      createFaTLoop
 
-		; Запись FAT на диск
-		; D - номер сектора
-		; E - код операции
+    ; Запись FAT на диск
+    ; d - номер сектора
+    ; e - код операции
 WriteToDisk:
-		lxi     d, 0001h  ; Запись сектора номер 0
-		call    diskDriver
+    ld      de, 0001h   ; Запись сектора номер 0
+    call    diskDriver
 
-		; Создание пустой структуры каталога (256 байт)
-CreateCatLoop:
-		mvi     m, 0FFh
-		inr     l
-		jnz     CreateCatLoop
+    ; Создание пустой структуры каталога (256 байт)
+createcatLoop:
+    ld      m, 0FFh
+    inc     l
+    jp nz,  createcatLoop
 
-		; Запись секторов с номера 3 по 1
-		mvi     d, 03h
+    ; Запись секторов c номера 3 по 1
+    ld      d, 03h
 WriteLoop:
-		call    diskDriver
-		dcr     d
-		jnz     WriteLoop
+    call    diskDriver
+    dec     d
+    jp nz,  WriteLoop
 
-		; Выход в ОС
-		ret
+    ; Выход в ОС
+    ret
 
 ; Данные
 
 str_Format:
-		.db 0Ah
-		.text "FORMAT "
+    DB 0Ah,"FORMAT "
 
 str_A_Y_N:
-		.text "A: Y/N "
-		.db 0
+    DB "A: Y/N ",0
 
 str_ChoseDrive:
-		.db 0Ah
-		.text "CHOOSE DRIVE ? "
-		.db 0
+    DB 0Ah,"CHOOSE DRIVE ? ",0
 
-.end
+    END

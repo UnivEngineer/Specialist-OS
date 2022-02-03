@@ -5,51 +5,52 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-loadAndPrintB:	; Времено меняем активную панель на правую
-		lda	activePanel
-		push	psw
-		mvi	a, 1
-		sta	activePanel
+loadAndPrintB:    ; Времено меняем активную панель на правую
+            ld      a, (activePanel)
+            push    af
+            ld      a, 1
+            ld      (activePanel),a
 
-		; Переходим к общему коду
-		lda	panelB_info
-		jmp	loadAndPrint
-
-; ---------------------------------------------------------------------------
-
-loadAndPrintA:	; Времено меняем активную панель на левую
-		lda	activePanel
-		push	psw
-		mvi	a, 0
-		sta	activePanel
-
-		; Панель видима?
-		lda	panelA_info
-loadAndPrint:	ana	a
-		jnz	loadAndPrint_2
-
-		; Загружаем список файлов
-		lxi	h, panelA_drive
-		call	readBytePanel
-		call	loadFiles	; На входе a должен содержать номер накопителя
-
-		; Выводим список файлов
-		call	printFilePanel
-
-		jmp	loadAndPrint_3
+            ; Переходим к общему коду
+            ld      a, (panelB_info)
+            jp      loadAndPrint
 
 ; ---------------------------------------------------------------------------
 
-loadAndPrint_2:	; Рисуем панельинформации
-		call	printInfoPanel
+loadAndPrintA:    ; Времено меняем активную панель на левую
+            ld      a, (activePanel)
+            push    af
+            ld      a, 0
+            ld      (activePanel),a
 
-loadAndPrint_3:	; Восстанавливаем активную панель
-		pop	psw
-		sta	activePanel
+            ; Панель видима?
+            ld      a, (panelA_info)
+loadAndPrint:
+            and     a
+            jp nz,  loadAndPrint_2
 
-		; Загружаем список файлов
-		lxi	h, panelA_drive
-		call	readBytePanel
-		call	loadFiles	; На входе a должен содержать номер накопителя
-		ret
+            ; Загружаем список файлов
+            ld      hl, panelA_drive
+            call    readBytePanel
+            call    loadFiles   ; На входе a должен содержать номер накопителя
+
+            ; Выводим список файлов
+            call    printFilePanel
+
+            jp      loadAndPrint_3
+
+; ---------------------------------------------------------------------------
+
+loadAndPrint_2:   ; Рисуем панель информации
+            call    printInfoPanel
+
+loadAndPrint_3:   ; Восстанавливаем активную панель
+            pop     af
+            ld      (activePanel),a
+
+            ; Загружаем список файлов
+            ld      hl, panelA_drive
+            call    readBytePanel
+            call    loadFiles   ; На входе a должен содержать номер накопителя
+            ret
 

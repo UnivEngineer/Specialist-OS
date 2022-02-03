@@ -6,13 +6,13 @@
 ;----------------------------------------------------------------------------
 
 printInvSelFile:
-		call	getSelectedFile
-		xchg
-printInvFile:	lxi	h, 506Eh
-		shld	v_cursorY
-		xchg
-		lxi	d, v_input
-		call	compactName
-		lxi	h, v_input
-		jmp	printStringInv
+            call  getSelectedFile
+            ex    de, hl
+printInvFile:     ld    hl, 506Eh
+            ld    (bios_vars.cursorY), hl
+            ex    de, hl
+            ld    de, nc_vars.input
+            call  compactName
+            ld    hl, nc_vars.input
+            jp    printStringInv
 

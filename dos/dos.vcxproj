@@ -50,14 +50,14 @@
     <None Include="calcCS.inc" />
     <None Include="calcCursorAddr.inc" />
     <None Include="calcCursorAddr2.inc" />
-    <None Include="checkARAM.inc" />
+    <None Include="checkRAMD.inc" />
     <None Include="clearScreen.inc" />
     <None Include="cmp_hl_de.inc" />
     <None Include="cmp_hl_de_2.inc" />
     <None Include="delay_l.inc" />
     <CustomBuild Include="DOS.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) sys 49152</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) sys 0xC000</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).sys</Outputs>
       <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BuildInParallel>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">*.inc</AdditionalInputs>
@@ -67,8 +67,7 @@
     <None Include="drawCursor.inc" />
     <None Include="drawCursor2.inc" />
     <None Include="driver.inc" />
-    <None Include="driver_FFC0.inc" />
-    <None Include="driver_sel.inc" />
+    <None Include="driverFFC0.inc" />
     <None Include="fileCmpExt.inc" />
     <None Include="fileCreate.inc" />
     <None Include="fileDelete.inc" />
@@ -103,11 +102,11 @@
     <None Include="printChar4.inc" />
     <None Include="printChar5.inc" />
     <None Include="printChar6.inc" />
+    <None Include="printDecWord.inc" />
     <None Include="printer.inc" />
     <None Include="printHex.inc" />
     <None Include="printString.inc" />
     <None Include="printString1.inc" />
-    <None Include="reboot0.inc" />
     <None Include="reboot1.inc" />
     <None Include="reboot2.inc" />
     <None Include="reboot3.inc" />
@@ -118,15 +117,7 @@
     <None Include="setGetCursorPos.inc" />
     <None Include="setGetMemTop.inc" />
     <None Include="strToHex.inc" />
-    <None Include="tapeLoad.inc" />
-    <None Include="tapeLoadInt.inc" />
-    <None Include="tapeRead.inc" />
-    <None Include="tapeReadDelay.inc" />
-    <None Include="tapeReadError.inc" />
-    <None Include="tapeSave.inc" />
-    <None Include="tapeWrite.inc" />
-    <None Include="tapeWriteDelay.inc" />
-    <None Include="tapeWriteWord.inc" />
+    <None Include="tape.inc" />
     <None Include="unpacker.asm" />
     <None Include="unpacker.lst" />
   </ItemGroup>

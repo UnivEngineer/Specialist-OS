@@ -1,138 +1,453 @@
-0001   0000             ;+---------------------------------------------------------------------------
-0002   0000             ; MXOS
-0003   0000             ; Запуск RKS файла
-0004   0000             ;
-0005   0000             ; 2021-01-27 Разработано SpaceEngineer
-0006   0000             ;----------------------------------------------------------------------------
-0007   0000             
-0008   0000             ; Адрес загрузки монитора
-0009   0000             MON_ADDR = 0C000h
-0010   0000             
-0011   0000             ; Адрес временного буфера загрузки монитора
-0012   0000             MON_ADDR_TEMP = 0D000h
-0013   0000             
-0014   0000             ; Функции системы
-0015   0000             getch			= 0C803h ; Ожидание ввода с клавиатуры
-0016   0000             printChar		= 0C809h ; Вывод символа на экран
-0017   0000             printString 	= 0C818h ; Вывести строку на экран
-0018   0000             fileLoad		= 0C848h ; Загрузить файл по адресу из заголовка этого файла
-0019   0000             fileNamePrepare	= 0C85Ah ; Преобразовать имя файла во внутренний формат
-0020   0000             fileLoad2		= 0C866h ; Загрузить файл по адресу DE
-0021   0000             
-0022   F100             .org 0F100h
-0023   F100                     ; В DE передаётся адрес строки аргументов
-0024   F100 D5                  push d
-0025   F101 21 74 F1            lxi  h, aLoading
-0026   F104 CD 18 C8            call printString
-0027   F107 E1          		pop  h
-0028   F108 E5                  push h
-0029   F109 CD 18 C8            call printString
-0030   F10C E1                  pop  h
-0031   F10D             
-0032   F10D                     ; Загрузка программы
-0033   F10D                     ; Подготовка имени файла и переключение накопителя
-0034   F10D 11 9D F1    		lxi  d, nameBuffer
-0035   F110 CD 5A C8    		call fileNamePrepare   ; HL = имя файла = строка аргументов
-0036   F113 EB                  xchg
-0037   F114             
-0038   F114             		; Загружаем файл
-0039   F114 21 9D F1    		lxi  h, nameBuffer
-0040   F117 CD 48 C8    		call fileLoad
-0041   F11A DA 6E F1    		jc   fileNotFoundRet
-0042   F11D             
-0043   F11D             		; Получаем адрес загрузки (= адрес запуска) файла в DE
-0044   F11D 11 0A 00    		lxi	d, 10
-0045   F120 19          		dad	d   ; HL += 10
-0046   F121 5E          		mov	e, m
-0047   F122 23          		inx	h
-0048   F123 56          		mov	d, m
-0049   F124             
-0050   F124                     ; Помещаем в стек для передачи Монитору
-0051   F124 D5                  push d
-0052   F125             
-0053   F125 21 74 F1            lxi  h, aLoading
-0054   F128 CD 18 C8            call printString
-0055   F12B 21 92 F1    		lxi  h, aMonitorPath
-0056   F12E CD 18 C8            call printString
-0057   F131             
-0058   F131                     ; Загрузка Монитора
-0059   F131                     ; Подготовка имени файла A:MON2.SYS
-0060   F131 21 92 F1    		lxi  h, aMonitorPath
-0061   F134 11 9D F1    		lxi  d, nameBuffer
-0062   F137 CD 5A C8    		call fileNamePrepare
-0063   F13A             
-0064   F13A                     ; Загружаем файл MON2.SYS на 0D000h - он затрет NC.COM
-0065   F13A 21 9D F1    		lxi  h, nameBuffer
-0066   F13D 11 00 D0    		lxi  d, MON_ADDR_TEMP ; изменить адрес загрузки файла на DE
-0067   F140 CD 66 C8    		call fileLoad2  ; нужна исправленная функция! BIOS 4.50 и старше 
-0068   F143 DA 6D F1    		jc   popFileNotFoundRet
-0069   F146             
-0070   F146             		; Получаем размер файла Монитора в DE
-0071   F146 11 0C 00    		lxi	d, 12
-0072   F149 19          		dad	d   ; HL += 12
-0073   F14A 5E          		mov	e, m
-0074   F14B 23          		inx	h
-0075   F14C 56          		mov	d, m
-0076   F14D             
-0077   F14D                     ; HL = MON_ADDR_TEMP
-0078   F14D                     ; DE = MON_ADDR_TEMP + размер монитора
-0079   F14D 21 00 D0    		lxi  h, MON_ADDR_TEMP
-0080   F150 EB                  xchg
-0081   F151 19          		dad  d
-0082   F152 EB                  xchg
-0083   F153             
-0084   F153                     ; Копируем Монитор на адрес C000h. При этом он затрёт BIOS, и дисковые
-0085   F153                     ; функциии ОС станут недоступны. Поэтому и нужен был временный буфер.
-0086   F153 01 00 C0    		lxi  b, MON_ADDR
-0087   F156 CD 5C F1            call memcpy
-0088   F159             
-0089   F159                     ; Запуск Монитора. Монитор сам переходит в режим STD, инициализируется,
-0090   F159                     ; и запускает программу по адресу из вершины стека.
-0091   F159 C3 00 C0            jmp  MON_ADDR
-0092   F15C             
-0093   F15C             memcpy: ; Копироваение из HL в BC с увеличением адресов, пока HL не равно DE
-0094   F15C 7E                  mov  a, m
-0095   F15D 02                  stax b
-0096   F15E CD 67 F1            call cmp_hl_de
-0097   F161 C8                  rz
-0098   F162 23                  inx  h
-0099   F163 03                  inx  b
-0100   F164 C3 5C F1            jmp  memcpy
-0101   F167             
-0102   F167             cmp_hl_de:
-0103   F167 7D                  mov	a, l
-0104   F168 BB                  cmp	e
-0105   F169 C0                  rnz
-0106   F16A 7C                  mov	a, h
-0107   F16B BA                  cmp	d
-0108   F16C C9                  ret
-0109   F16D             
-0110   F16D             popFileNotFoundRet:
-0111   F16D D1                  pop  d ; восстанавливаем стек для правильного аварийного выхода
-0112   F16E             fileNotFoundRet:
-0113   F16E 21 80 F1            lxi  h, aFileNotFound
-0114   F171 C3 18 C8            jmp  printString
-0115   F174             
-0116   F174                     ; Esc + ) включает KOI-8 до конца выводимой строки
-0117   F174             aLoading:
-0118   F174 0A 1B 28 4C         .db 0Ah,1Bh,"(Loading ",0
-0118   F178 6F 61 64 69 
-0118   F17C 6E 67 20 00 
-0119   F180             
-0120   F180             aFileNotFound:
-0121   F180 0A 1B 28 46         .db 0Ah,1Bh,"(File not found",0
-0121   F184 69 6C 65 20 
-0121   F188 6E 6F 74 20 
-0121   F18C 66 6F 75 6E 
-0121   F190 64 00 
-0122   F192             
-0123   F192             aMonitorPath:
-0124   F192 41 3A 4D 4F         .db "A:MON2.SYS",0
-0124   F196 4E 32 2E 53 
-0124   F19A 59 53 00 
-0125   F19D             
-0126   F19D             nameBuffer:
-0127   F19D                     .block 10
-0128   F1A7             
-0129   F1A7             .end
-tasm: Number of errors = 0
+# file opened: D:\Projects\Specialist\MySoft\MXOS-Z80\launch\LAUNCH.asm
+  1   0000              ;+---------------------------------------------------------------------------
+  2   0000              ; MXOS
+  3   0000              ; Запуск RKS файла
+  4   0000              ;
+  5   0000              ; 2021-01-27 Разработано SpaceEngineer
+  6   0000              ;----------------------------------------------------------------------------
+  7   0000
+  8   0000                  INCLUDE "../include/mxos.inc"
+# file opened: D:\Projects\Specialist\MySoft\MXOS-Z80\launch\../include/mxos.inc
+  1+  0000              ;-----------------------------------------------------------------------
+  2+  0000              ; MXOS
+  3+  0000              ; Точки входа и настройки сборки MXOS
+  4+  0000              ;
+  5+  0000              ; Карта памяти:
+  6+  0000              ;   8FDF-8FFF - [  32  B] Переменные
+  7+  0000              ;   9000-BFFF - [12   KB] Экран
+  8+  0000              ;   C000-CFFF - [4    KB] DOS.SYS (в конце чуть чуть свободного места под доработки)
+  9+  0000              ;   D000-E1FF - [4.5  KB] NC.COM (в конце место под список файлов и чуть чуть свободного места под доработки)
+ 10+  0000              ;   E200-E5FF - [1.0  KB] (свободно 1024 байт)
+ 11+  0000              ;   E600-E7FF - [0.5  KB] Драйвер магнитофона
+ 12+  0000              ;   E900-F0FF - [2    KB] Шрифт (можно отключить запуском ROMFNT.COM или опцией LOAD_FONT=0)
+ 13+  0000              ;   F100-F8FF - [2.0  KB] FORMAT.COM, FPAGE.COM, MON2.COM и прочие утилиты
+ 14+  0000              ;   F900-F9FF - [ 256  B] (Свободно 256 байт)
+ 15+  0000              ;   FA00-FAFF - [ 256  B] Драйвер флеш-диска
+ 16+  0000              ;   FB00-FDFF - [ 768  B] Дисковый буфер
+ 17+  0000              ;   FF00-FF81 - [ 129  B] Командная строка. Заполняется функцией bios_fileExec
+ 18+  0000              ;   FF82-FFBF - [ 130  B] Стек
+ 19+  0000              ;   FFC0-FFEF - [  32  B] Непереключаемое ОЗУ, драйвера обмена с RAM диском
+ 20+  0000              ;   FFE0-FFFF - [  32  B] Оборудование
+ 21+  0000              ;-----------------------------------------------------------------------
+ 22+  0000
+ 23+  0000
+ 24+  0000              ;-----------------------------------------------------------------------
+ 25+  0000              ; Конфигурация сборки
+ 26+  0000              ;-----------------------------------------------------------------------
+ 27+  0000
+ 28+  0000              RAMD_MAX_PAGE        =  0Fh     ; Максимальное количество страниц RAM диска (до 0Fh)
+ 29+  0000              RAMD_PAGE_END        =  0FFBBh  ; Включить поддержку ДОЗУ большего чем 64 Кб
+ 30+  0000              ROM_64K              =  1       ; Включить поддержку ПЗУ 64 Кб Специалиста МХ2
+ 31+  0000              ENABLE_COLOR         =  1       ; Включить поддержку цвета
+ 32+  0000              LOAD_FONT            =  1       ; Загружать шрифт в ОЗУ
+ 33+  0000              FONT_ADDR            =  0E900h  ; Адрес шрфита
+ 34+  0000              COLOR_BIOS           =  0F0h    ; Цвет командной строки
+ 35+  0000              RAMFOS_COMPATIBILITY =  1       ; Совместимость с RAMFOS (WIP)
+ 36+  0000              BOOT_FROM_TAPE       =  0       ; Включить загрузку с ленты при нажатой клавише после сброса
+ 37+  0000              FAT16                =  1       ; Включить поддержку FAT16
+ 38+  0000
+ 39+  0000                  IF  LOAD_FONT
+ 40+  0000              FONT_ADDR_DIV_8 = FONT_ADDR/8
+ 41+  0000                  ELSE
+ 42+  0000 ~            FONT_ADDR_DIV_8 = -1
+ 43+  0000                  ENDIF
+ 44+  0000
+ 45+  0000              ;-----------------------------------------------------------------------
+ 46+  0000              ; Переменные ОС в подэкранном пространстве и их начальные значения
+ 47+  0000              ; Доступ к переменным и программ польователя:
+ 48+  0000              ; ld a, bios_vars.lastKey
+ 49+  0000              ;-----------------------------------------------------------------------
+ 50+  0000
+ 51+  0000                  STRUCT BIOS_VARIABLES
+ 52+  0000 ~            _reserv_1     DW      -1
+ 53+  0000 ~            tapeError     DW      0C800h          ; Адрес, куда происходит переход при ошибке чтения с ленты
+ 54+  0000 ~            tapeAddr      DW      -1              ; Адрес программы загруженной с ленты
+ 55+  0000 ~            _reserv_2     DW      -1
+ 56+  0000 ~            charGen       DW      FONT_ADDR_DIV_8 ; Адрес альтернативного знакогенератора /8
+ 57+  0000 ~            cursorCfg     DB      0A9h            ; Внешний вид курсора (7 - бит видимость, 654 - положение, 3210 - высота)
+ 58+  0000 ~            koi8          DB      -1              ; 0FFh = включен KOI-8, 0 = включен KOI-7
+ 59+  0000 ~            escMode       DB      -1              ; Обработка ESC-последовательности
+ 60+  0000 ~            keyLocks      DB      3Ah
+ 61+  0000 ~            _reserv_3     DW      -1
+ 62+  0000 ~            lastLastKey   DB      -1
+ 63+  0000 ~            lastKey       DB      -1
+ 64+  0000 ~            beepDuration  DB      5Fh             ; Длительность звукового сигнала
+ 65+  0000 ~            beepFreq      DB      20h             ; Частота звукового сигнала
+ 66+  0000 ~            tapeInverse   DB      0FFh
+ 67+  0000 ~            cursorDelay   DB      020h
+ 68+  0000 ~            byte_8FF5     DB      0E0h
+ 69+  0000 ~            oldSP         DW      -1              ; Используется для сохранения SP некоторыми функциями
+ 70+  0000 ~            maxRamPage    DB      RAMD_MAX_PAGE   ; Максимальный детектированный номер страницы RAM-диска
+ 71+  0000 ~            flashPage     DB      0               ; Текущий номер страницы флеш-диска
+ 72+  0000 ~            inverse       DW      0               ; Инвертирование текста (0=нормальный текст, 0FFFFh=инверсный)
+ 73+  0000 ~            cursorY       DB      -1              ; Положение курсора по вертикали в пикселях
+ 74+  0000 ~            cursorX       DB      -1              ; Положение курсора по горизонтали в пикселях / 2
+ 75+  0000 ~            writeDelay    DB      28h             ; Скорость при записи на ленту
+ 76+  0000 ~            readDelay     DB      3Ch             ; Скорость при чтении с ленты
+ 77+  0000                  ENDS
+ 78+  0000
+ 79+  0000              ; Адрес структуры BIOS_VARIABLES
+ 80+  0000
+ 81+  0000              	ORG 08FDFh
+ 82+  8FDF
+ 83+  8FDF              bios_vars   BIOS_VARIABLES = $
+ 84+  8FDF
+ 85+  8FDF              ;-----------------------------------------------------------------------
+ 86+  8FDF              ; Буферы в памяти
+ 87+  8FDF              ;-----------------------------------------------------------------------
+ 88+  8FDF
+ 89+  8FDF              fat              = 0FB00h
+ 90+  8FDF              diskDirectory    = 0FC00h
+ 91+  8FDF              diskDirectoryEnd = 0FE00h
+ 92+  8FDF              v_cmdLine        = 0FF00h
+ 93+  8FDF              STACK_ADDR       = 0FFC0h
+ 94+  8FDF
+ 95+  8FDF              ;-----------------------------------------------------------------------
+ 96+  8FDF              ; Стандартные точки входа ОС
+ 97+  8FDF              ; Отмеченные * применять не рекомендуется
+ 98+  8FDF              ;-----------------------------------------------------------------------
+ 99+  8FDF
+100+  8FDF              bios_init            = 0C000h ; Теплая перезагрузка
+101+  8FDF
+102+  8FDF              ; Устаревшие точки, лечше не применять
+103+  8FDF              bios_keyScanOld      = 0C003h ; * Получить код нажатой клавиши, = bios_keyScan
+104+  8FDF              bios_drawCursorOld   = 0C006h ; * Нарисовать/стереть курсор
+105+  8FDF              bios_clearScreenOld  = 0C010h ; * Оистка экрана
+106+  8FDF              bios_printCharOld    = 0C037h ; * Вывод символа на экран
+107+  8FDF              bios_beep_Old        = 0C170h ; * Звуковой сигнал
+108+  8FDF              bios_delay_l         = 0C18Fh ; * Задержка
+109+  8FDF              bios_getchOld        = 0C337h ; * Ожидание ввода с клавиатуры
+110+  8FDF              bios_tapeReadOld     = 0C377h ; * Чтение байта с магнитофона
+111+  8FDF              bios_tapeWriteOld    = 0C3D0h ; * Запись байта на магнитофон
+112+  8FDF              bios_cmp_hl_de       = 0C427h ; * Сравнить hl и de
+113+  8FDF              bios_memcpy_bc_hl    = 0C42Dh ; * Скопировать блок памяти
+114+  8FDF              bios_printStringOld  = 0C438h ; * Вывод строки на экран
+115+  8FDF
+116+  8FDF              bios_reboot          = 0C800h ; Запустить NC.COM
+117+  8FDF              bios_getch           = 0C803h ; Ожидание ввода с клавиатуры
+118+  8FDF              bios_tapeRead        = 0C806h ; Чтение байта с магнитофона
+119+  8FDF              bios_printChar       = 0C809h ; Вывод символа на экран
+120+  8FDF              bios_tapeWrite       = 0C80Ch ; Запись байта на магнитофон
+121+  8FDF              bios_input           = 0C80Fh ; Ввод строки с клавиатуры
+122+  8FDF              bios_keyCheck        = 0C812h ; Получить код нажатой клавиши, = bios_keyScan
+123+  8FDF              bios_printHexByte    = 0C815h ; Вывод HEX числа на экран (байт)
+124+  8FDF              bios_printString     = 0C818h ; Вывод строки на экран
+125+  8FDF              bios_keyScan         = 0C81Bh ; Получить код нажатой клавиши
+126+  8FDF              bios_getCursorPos    = 0C81Eh ; Получить координаты курсора в hl (координаты в пикселях)
+127+  8FDF              bios_setCursorPos    = 0C821h ; Установить координаты курсора из hl (координаты в пикселях)
+128+  8FDF              bios_tapeLoad        = 0C824h ; Загрузить программу с магнитофона
+129+  8FDF              bios_tapeSave        = 0C827h ; Сохранить программу на магнитофон
+130+  8FDF              bios_calcCS          = 0C82Ah ; Расчет контрольной суммы
+131+  8FDF              bios_printHexWord    = 0C82Dh ; Вывод HEX числа на экран (слово)
+132+  8FDF              bios_getMemTop       = 0C830h ; Получить объем доступной памяти
+133+  8FDF              bios_setMemTop       = 0C833h ; Установить объем доступной памяти
+134+  8FDF              bios_printer         = 0C836h ; Напечатать байт на принтере
+135+  8FDF                  IF RAMFOS_COMPATIBILITY
+136+  8FDF              bios_strToHex        = 0C839h ; Преобразвоние строки в HEX формате в число
+137+  8FDF                  ELSE
+138+  8FDF ~            bios_rebootAlt       = 0C839h ; Запустить NC.COM
+139+  8FDF                  ENDIF
+140+  8FDF              bios_rebootAlt2      = 0C83Ch ; Запустить NC.COM
+141+  8FDF              bios_fileList        = 0C83Fh ; Получить список файлов
+142+  8FDF              bios_fileGetSetDrive = 0C842h ; Получить/установить активное устройство
+143+  8FDF              bios_fileCreate      = 0C845h ; Создать файл
+144+  8FDF              bios_fileLoad        = 0C848h ; Загрузить файл по адресу из заголовка этого файла
+145+  8FDF              bios_fileDelete      = 0C84Bh ; Удалить файл
+146+  8FDF              bios_fileRename      = 0C84Eh ; Переименовать файл
+147+  8FDF              bios_fileLoadInfo    = 0C851h ; Загрузить информацию о файле
+148+  8FDF              bios_fileGetSetAddr  = 0C854h ; Получить/установить адрес загрузки файла
+149+  8FDF              bios_fileGetSetAttr  = 0C857h ; Получить/установить атрибуты файла
+150+  8FDF              bios_fileNamePrepare = 0C85Ah ; Преобразовать имя файла во внутренний формат
+151+  8FDF              bios_fileExec        = 0C85Dh ; Запустить файл
+152+  8FDF              bios_installDriver   = 0C860h ; Установить драйвер накопителя
+153+  8FDF              bios_diskDriver      = 0C863h ; Драйвер выбранного диска
+154+  8FDF              bios_fileLoad2       = 0C866h ; Загрузить файл по адресу de
+155+  8FDF              bios_printCharReal   = 0C869h ; Вывод символа на экран (только реальные символы)
+156+  8FDF              bios_printDecWord    = 0C86Ch ; Вывод числа экран в десятичной форме
+157+  8FDF              bios_setRAMDDriver   = 0C86Fh ; Установить драйвр рам-диска
+158+  8FDF
+159+  8FDF              ;-----------------------------------------------------------------------
+160+  8FDF              ; Точки входа драйвера доступа к ДОЗУ
+161+  8FDF              ;-----------------------------------------------------------------------
+162+  8FDF
+163+  8FDF              bios_RAMDRead  = 0FFC0h ; чтение из ДОЗУ
+164+  8FDF              bios_RAMDWrite = 0FFD0h ; запись в  ДОЗУ
+165+  8FDF
+166+  8FDF              ;-----------------------------------------------------------------------
+167+  8FDF              ; Адрес таблицы переходов драйвера магнитофона
+168+  8FDF              ;-----------------------------------------------------------------------
+169+  8FDF
+170+  8FDF              TAPE_DRIVER_JUMPS = bios_tapeReadOld    ; размещается на месте бывшей п/п чтения байта
+171+  8FDF
+172+  8FDF              ;-----------------------------------------------------------------------
+173+  8FDF              ; Порты устройств ПК "Специалист-MX2"
+174+  8FDF              ;-----------------------------------------------------------------------
+175+  8FDF
+176+  8FDF              IO_KEYB_A       =  0FFE0h   ; ВВ55 клавиатуры
+177+  8FDF              IO_KEYB_B       =  0FFE1h
+178+  8FDF              IO_KEYB_C       =  0FFE2h
+179+  8FDF              IO_KEYB_MODE    =  0FFE3h
+180+  8FDF              IO_PROG_A       =  0FFE4h   ; ВВ55 программатора/флеш диска
+181+  8FDF              IO_PROG_B       =  0FFE5h
+182+  8FDF              IO_PROG_C       =  0FFE6h
+183+  8FDF              IO_PROG_MODE    =  0FFE7h
+184+  8FDF              IO_FDD_CMD      =  0FFE8h   ; контроллер дисковода ВГ93
+185+  8FDF              IO_FDD_TRACK    =  0FFE9h
+186+  8FDF              IO_FDD_SECTOR   =  0FFEAh
+187+  8FDF              IO_FDD_DATA     =  0FFEBh
+188+  8FDF              IO_TIMER_CH0    =  0FFECh   ; таймер ВИ53
+189+  8FDF              IO_TIMER_CH1    =  0FFEDh
+190+  8FDF              IO_TIMER_CH2    =  0FFEEh
+191+  8FDF              IO_TIMER_MODE   =  0FFEFh
+192+  8FDF              IO_FDD_REQ      =  0FFF0h   ; контроллер дисковода
+193+  8FDF              IO_FDD_MOTOR    =  0FFF1h
+194+  8FDF              IO_FDD_SIDE     =  0FFF2h
+195+  8FDF              IO_FDD_DRIVE    =  0FFF3h
+196+  8FDF              IO_COLOR        =  0FFF8h   ; регистр цвета
+197+  8FDF              IO_PAGE_RAM     =  0FFFCh   ; порт включения основного ОЗУ
+198+  8FDF              IO_PAGE_RAMD    =  0FFFDh   ; порт включения ОЗУ RAM-дисков
+199+  8FDF              IO_PAGE_ROM     =  0FFFEh   ; порт включения ПЗУ
+200+  8FDF              IO_PAGE_STD     =  0FFFFh   ; порт включения STD режима
+201+  8FDF
+202+  8FDF              ;-----------------------------------------------------------------------
+203+  8FDF              ; Структура файловой системы
+204+  8FDF              ;-----------------------------------------------------------------------
+205+  8FDF
+206+  8FDF              ; Структура каталога
+207+  8FDF
+208+  8FDF                  IF FAT16
+209+  8FDF
+210+  8FDF              DIR_DESCR_SIZE  = 32    ; Размер дескриптора файла в каталоге
+211+  8FDF              DIR_MAX_FILES   = 24    ; Максимум файлов в каталоге
+212+  8FDF              DIR_NAME_LENGTH = 8     ; Длина имени файла
+213+  8FDF
+214+  8FDF              ;-----------------------------------------------------------------------
+215+  8FDF              ; Десткриптор файла (одна запись в каталоге) FAT12/16/32
+216+  8FDF              ;-----------------------------------------------------------------------
+217+  8FDF
+218+  8FDF                  STRUCT FILE_DESCRIPTOR  ; 32 байта
+219+  8FDF ~            name            BLOCK   DIR_NAME_LENGTH     ; смещение 00h, 8 байт  - имя файла
+220+  8FDF ~            ext             BLOCK   3                   ; смещение 08h, 3 байта - расширение имени файла
+221+  8FDF ~            attrib          BLOCK   1                   ; смещение 0Bh, 1 байт  - атрибуты файла
+222+  8FDF ~            checkSum        BLOCK   1  ; ntRes          ; смещение 0Ch, 1 байт  - контрольная сумма (!!! временный костыль, в FAT32 это ntRes - используются в Windows NT !!!)
+223+  8FDF ~            ctrTimeTenth    BLOCK   1                   ; смещение 0Dh, 1 байт  - (только FAT32) время создания файла, десятки миллисекунд (0-199)
+224+  8FDF ~            ctrTime         BLOCK   2                   ; смещение 0Eh, 2 байта - (только FAT32) время создания файла, секунды*2 (0-43200)
+225+  8FDF ~            ctrDate         BLOCK   2                   ; смещение 10h, 2 байта - (только FAT32) дата  создания файла
+226+  8FDF ~            loadAddress     BLOCK   2  ; accDate        ; смещение 12h, 2 байта - начальный адрес загрузки в ОЗУ, он же и стартовый (!!! временный костыль, в FAT32 это accDate - дата доступа к файлу !!!)
+227+  8FDF ~            firstClusterHi  BLOCK   2                   ; смещение 14h, 2 байта - номер первого кластера в FAT, старшее слово
+228+  8FDF ~            wrtTime         BLOCK   2                   ; смещение 16h, 2 байта - время модификации файла, секунды*2 (0-43200)
+229+  8FDF ~            wrtDate         BLOCK   2                   ; смещение 18h, 2 байта - дата  модификации файла
+230+  8FDF ~            firstCluster    BLOCK   2                   ; смещение 1Ah, 2 байта - номер первого кластера в FAT, младшее слово
+231+  8FDF ~            size            BLOCK   4                   ; смещение 1Ch, 4 байта - размер файла в байтах
+232+  8FDF                  ENDS
+233+  8FDF
+234+  8FDF              ;-----------------------------------------------------------------------
+235+  8FDF              ; Десткриптор файла (одна запись в каталоге) FAT12/16/32
+236+  8FDF              ;-----------------------------------------------------------------------
+237+  8FDF
+238+  8FDF                  ELSE
+239+  8FDF ~
+240+  8FDF ~            DIR_DESCR_SIZE  = 16    ; Размер дескриптора файла в каталоге
+241+  8FDF ~            DIR_MAX_FILES   = 48    ; Максимум файлов в каталоге
+242+  8FDF ~            DIR_NAME_LENGTH = 6     ; Длина имени файла
+243+  8FDF ~
+244+  8FDF ~            ;-----------------------------------------------------------------------
+245+  8FDF ~            ; Десткриптор файла (одна запись в каталоге) MXOS FAT8
+246+  8FDF ~            ;-----------------------------------------------------------------------
+247+  8FDF ~
+248+  8FDF ~                STRUCT FILE_DESCRIPTOR  ; 16 байт
+249+  8FDF ~            name            BLOCK   DIR_NAME_LENGTH     ; смещение 00h, 6 байт  - имя файла
+250+  8FDF ~            ext             BLOCK   3                   ; смещение 06h, 3 байта - расширение имени файла
+251+  8FDF ~            attrib          BLOCK   1                   ; смещение 09h, 1 байт  - атрибуты файла: 00h - обычный файл, 01h - системный файл
+252+  8FDF ~            loadAddress     BLOCK   2                   ; смещение 0Ah, 2 байта - начальный адрес загрузки в ОЗУ, он же и стартовый
+253+  8FDF ~            size            BLOCK   2                   ; смещение 0Ch, 2 байта - размер файла в байтах - 1
+254+  8FDF ~            checkSum        BLOCK   1                   ; смещение 0Eh, 1 байт  - контрольная сумма
+255+  8FDF ~            firstCluster    BLOCK   1                   ; смещение 0Fh, 1 байт  - номер первого кластера в FAT
+256+  8FDF ~                ENDS
+257+  8FDF ~
+258+  8FDF ~            ;-----------------------------------------------------------------------
+259+  8FDF ~            ; Десткриптор файла (одна запись в каталоге) MXOS FAT8
+260+  8FDF ~            ;-----------------------------------------------------------------------
+261+  8FDF ~
+262+  8FDF                  ENDIF
+263+  8FDF
+264+  8FDF              ;-----------------------------------------------------------------------
+265+  8FDF              ; Всякие полезности
+266+  8FDF              ;-----------------------------------------------------------------------
+267+  8FDF
+268+  8FDF              ; Макрос для заполнения памяти от текущего адреса до указанного
+269+  8FDF                  MACRO ORG_PAD adr
+270+  8FDF ~                     ; add padding + display warning
+271+  8FDF ~                     IF $ > adr
+272+  8FDF ~                       ; no padding
+273+  8FDF ~                       ASSERT 0
+274+  8FDF ~                       DISPLAY /l, "Error! ORG_PAD failed! ", $, " is more than ", adr
+275+  8FDF ~                     ELSE
+276+  8FDF ~                       ; add padding
+277+  8FDF ~                       BLOCK adr-$
+278+  8FDF ~                     ENDIF
+279+  8FDF ~                     ORG adr
+280+  8FDF                  ENDM
+281+  8FDF
+282+  8FDF              ; Макросы для проверки текущего адреса
+283+  8FDF                  MACRO ASSERT_EQUAL adr
+284+  8FDF ~                     IF $ != adr
+285+  8FDF ~                       ASSERT 0
+286+  8FDF ~                       DISPLAY /l, "Error! Entry point has been shifted (", $, " != ", adr, ")"
+287+  8FDF ~                     ENDIF
+288+  8FDF                  ENDM
+289+  8FDF
+290+  8FDF                  MACRO ASSERT_DONT_FIT adr
+291+  8FDF ~                     IF $ > adr
+292+  8FDF ~                       ASSERT 0
+293+  8FDF ~                       DISPLAY /l, "Error! Image did not fit (", $, " > ", adr, ")"
+294+  8FDF ~                     ENDIF
+295+  8FDF                  ENDM
+296+  8FDF
+297+  8FDF              ;-----------------------------------------------------------------------
+298+  8FDF              ; Конец
+299+  8FDF              ;-----------------------------------------------------------------------
+300+  8FDF
+# file closed: D:\Projects\Specialist\MySoft\MXOS-Z80\launch\../include/mxos.inc
+  9   8FDF
+ 10   8FDF              ; Адрес загрузки монитора
+ 11   8FDF              MON_ADDR        =  0C000h
+ 12   8FDF
+ 13   8FDF              ; Адрес временного буфера загрузки монитора
+ 14   8FDF              MON_ADDR_TEMP   =  0D000h
+ 15   8FDF
+ 16   8FDF                  ORG 0F100h
+ 17   F100
+ 18   F100                  ; В de передаётся адрес строки аргументов
+ 19   F100 1A               ld      a, (de)
+ 20   F101 FE 20            cp      20h
+ 21   F103 DA 7A F1         jp c,   noargsRet ; аргумент не задан, выходим
+ 22   F106
+ 23   F106 D5               push    de
+ 24   F107 21 80 F1         ld      hl, txtLoading
+ 25   F10A CD 18 C8         call    bios_printString
+ 26   F10D E1               pop     hl
+ 27   F10E E5               push    hl
+ 28   F10F CD 18 C8         call    bios_printString
+ 29   F112 E1               pop     hl
+ 30   F113
+ 31   F113                  ; Загрузка программы
+ 32   F113                  ; Подготовка имени файла и переключение накопителя
+ 33   F113 11 C3 F1         ld      de, nameBuffer
+ 34   F116 CD 5A C8         call    bios_fileNamePrepare   ; hl = имя файла = строка аргументов
+ 35   F119 EB               ex      de, hl
+ 36   F11A
+ 37   F11A                  ; Загружаем файл
+ 38   F11A 21 C3 F1         ld      hl, nameBuffer
+ 39   F11D CD 48 C8         call    bios_fileLoad
+ 40   F120 DA 74 F1         jp c,   fileNotFoundRet
+ 41   F123
+ 42   F123                  ; Получаем адрес загрузки (= адрес запуска) файла в de
+ 43   F123 11 12 00         ld      de, FILE_DESCRIPTOR.loadAddress
+ 44   F126 19               add     hl, de
+ 45   F127 5E               ld      e, (hl)
+ 46   F128 23               inc     hl
+ 47   F129 56               ld      d, (hl)
+ 48   F12A
+ 49   F12A                  ; Помещаем в стек для передачи Монитору
+ 50   F12A D5               push    de
+ 51   F12B
+ 52   F12B 21 80 F1         ld      hl, txtLoading
+ 53   F12E CD 18 C8         call    bios_printString
+ 54   F131 21 B8 F1         ld      hl, txtMonitorPath
+ 55   F134 CD 18 C8         call    bios_printString
+ 56   F137
+ 57   F137                  ; Загрузка Монитора
+ 58   F137                  ; Подготовка имени файла a:MON2.SYS
+ 59   F137 21 B8 F1         ld      hl, txtMonitorPath
+ 60   F13A 11 C3 F1         ld      de, nameBuffer
+ 61   F13D CD 5A C8         call    bios_fileNamePrepare
+ 62   F140
+ 63   F140                  ; Загружаем файл MON2.SYS на 0D000h - он затрет nc.cOM
+ 64   F140 21 C3 F1         ld      hl, nameBuffer
+ 65   F143 11 00 D0         ld      de, MON_ADDR_TEMP ; изменить адрес загрузки файла на de
+ 66   F146 CD 66 C8         call    bios_fileLoad2  ; нужна исправленная функция! BIOS 4.50 и старше
+ 67   F149 DA 73 F1         jp c,   popFileNotFoundRet
+ 68   F14C
+ 69   F14C                  ; Получаем размер файла Монитора в de
+ 70   F14C 11 1C 00         ld      de, FILE_DESCRIPTOR.size
+ 71   F14F 19               add     hl, de
+ 72   F150 5E               ld      e, (hl)
+ 73   F151 23               inc     hl
+ 74   F152 56               ld      d, (hl)
+ 75   F153
+ 76   F153                  ; hl = MON_ADDR_TEMP
+ 77   F153                  ; de = MON_ADDR_TEMP + размер монитора
+ 78   F153 21 00 D0         ld      hl, MON_ADDR_TEMP
+ 79   F156 EB               ex      de, hl
+ 80   F157 19               add     hl, de
+ 81   F158 EB               ex      de, hl
+ 82   F159
+ 83   F159                  ; Копируем Монитор на адрес C000h. При этом он затрёт BIOS, и дисковые
+ 84   F159                  ; функции ОС станут недоступны. Поэтому и нужен был временный буфер.
+ 85   F159 01 00 C0         ld      bc, MON_ADDR
+ 86   F15C CD 62 F1         call    memcpy
+ 87   F15F
+ 88   F15F                  ; Запуск Монитора. Монитор сам переходит в режим STD, инициализируется,
+ 89   F15F                  ; и запускает программу по адресу из вершины стека.
+ 90   F15F C3 00 C0         jp      MON_ADDR
+ 91   F162
+ 92   F162              memcpy: ; Копироваение из hl в bc с увеличением адресов, пока hl не равно de
+ 93   F162 7E               ld      a, (hl)
+ 94   F163 02               ld      (bc), a
+ 95   F164 CD 6D F1         call    cmp_hl_de
+ 96   F167 C8               ret z
+ 97   F168 23               inc     hl
+ 98   F169 03               inc     bc
+ 99   F16A C3 62 F1         jp      memcpy
+100   F16D
+101   F16D              cmp_hl_de:
+102   F16D 7D               ld      a, l
+103   F16E BB               cp      e
+104   F16F C0               ret nz
+105   F170 7C               ld      a, h
+106   F171 BA               cp      d
+107   F172 C9               ret
+108   F173
+109   F173              popFileNotFoundRet:
+110   F173 D1               pop     de ; восстанавливаем стек для правильного аварийного выхода
+111   F174              fileNotFoundRet:
+112   F174 21 8A F1         ld      hl, txtFileNotFound
+113   F177 C3 18 C8         jp      bios_printString
+114   F17A
+115   F17A              noargsRet:
+116   F17A 21 9A F1         ld      hl, txtNoArgs
+117   F17D C3 18 C8         jp      bios_printString
+118   F180
+119   F180                  ; Esc + ) включает KOI-8 до конца выводимой строки
+120   F180              txtLoading:
+121   F180 0A 4C 4F 41      DB 0Ah,"LOADING ",0
+121   F184 44 49 4E 47
+121   F188 20 00
+122   F18A
+123   F18A              txtFileNotFound:
+124   F18A 0A 46 49 4C      DB 0Ah,"FILE NOT FOUND",0
+124   F18E 45 20 4E 4F
+124   F192 54 20 46 4F
+124   F196 55 4E 44 00
+125   F19A
+126   F19A              txtNoArgs:
+127   F19A 0A 55 53 41      DB 0Ah,"USAGE: LAUNCH.COM <FILE.RKS>",0
+127   F19E 47 45 3A 20
+127   F1A2 4C 41 55 4E
+127   F1A6 43 48 2E 43
+127   F1AA 4F 4D 20 3C
+127   F1AE 46 49 4C 45
+127   F1B2 2E 52 4B 53
+127   F1B6 3E 00
+128   F1B8
+129   F1B8              txtMonitorPath:
+130   F1B8 41 3A 4D 4F      DB "A:MON2.MON",0
+130   F1BC 4E 32 2E 4D
+130   F1C0 4F 4E 00
+131   F1C3
+132   F1C3              nameBuffer:
+133   F1C3 00 00 00...      BLOCK 10,0
+134   F1CD
+135   F1CD                  END
+# file closed: D:\Projects\Specialist\MySoft\MXOS-Z80\launch\LAUNCH.asm

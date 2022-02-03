@@ -12,146 +12,146 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-input:		; Сохраняем регистры
-		push	h
-		push	b
-		push	psw
+input:            ; Сохраняем регистры
+            push  hl
+            push  bc
+            push  af
 
-		; Сохраняем значения
-		shld	v_input_start
-		xchg
-		shld	v_input_end
+            ; Сохраняем значения
+            ld    (v_input_start), hl
+            ex    de, hl
+            ld    (v_input_end), hl
 
-		; Помещаем в конец буфера 0
-		mov	h, d
-		mov	l, e
-		mvi	m, 0
+            ; Помещаем в конец буфера 0
+            ld    h, d
+            ld    l, e
+            ld  (hl), 0
 
-input_loop:	; Ждем клавиашу
-		call	j_getch
-		mov	c, a
+input_loop: ; Ждем клавиашу
+            call  j_getch
+            ld    c, a
 
-		; Нажата служебная клавиша
-		cpi	20h
-		jc	input_spec
+            ; Нажата служебная клавиша
+            cp    20h
+            jp c, input_spec
 
-		; Нажата клавиша Back space
-		cpi	7Fh
-		jz	input_bkspc
+            ; Нажата клавиша Back space
+            cp    7Fh
+            jp z, input_bkspc
 
-		; ...
-		nop
-		nop
-		nop
+            ; ...
+            nop
+            nop
+            nop
 
-		; Это конец буфера
-		push	h
-		lhld	v_input_end
-		call	cmp_hl_de_2
-		pop	h
-		jnz	loc_C8DE		
-		call	cmp_hl_de_2
-		jz	input_loop
-		ldax	d
-		dcx	d
-		stax	d
-loc_C8DE:	push	b
-		mov	b, h
-		mov	c, l
-		inx	b
-		call	memmove_bc_hl
-		pop	b
-		mov	m, c		; *hl++	= c;
-		call	j_printChar	; Вывод	символа	на экран
-		inx	h
-		inx	d		
-loc_C8EC:	push	h
-		lhld	v_cursorY
-		xthl
-		push	h
-		call	j_printString
-		mvi	c, ' '
-		call	j_printChar
-		pop	h
-		xthl
-		shld	v_cursorY
-		pop	h
+            ; Это конец буфера
+            push  hl
+            ld    hl, (v_input_end)
+            call  cmp_hl_de_2
+            pop   hl
+            jp nz,  loc_C8DE          
+            call  cmp_hl_de_2
+            jp z, input_loop
+            ld    a, (de)
+            dec   de
+            ld    (de),a
+loc_C8DE:   push  bc
+            ld    b, h
+            ld    c, l
+            inc   bc
+            call  memmove_bc_hl
+            pop   bc
+            ld  (hl), c       ; *hl++     = c;
+            call  j_printChar ; Вывод     символа     на экран
+            inc   hl
+            inc   de          
+loc_C8EC:   push  hl
+            ld    hl, (bios_vars.cursorY)
+            ex    (sp), hl
+            push  hl
+            call  j_printString
+            ld    c, ' '
+            call  j_printChar
+            pop   hl
+            ex    (sp), hl
+            ld    (bios_vars.cursorY), hl
+            pop   hl
 
-		; Продолжение
-		jmp	input_loop
-
-; ---------------------------------------------------------------------------
-
-input_bkspc:	; Если курсор в начале строки ничего не удаляем
-		call	cmp_hl_de_2
-		jz	input_loop
-
-		; Сдвигаем строку
-		mov	b, h
-		mov	c, l
-		inx	h
-		call	memmove_bc_hl
-
-		; Уменьшаем положение курсора
-		dcx	h
-
-		dcx	d
-		jmp	loc_C8EC
+            ; Продолжение
+            jp    input_loop
 
 ; ---------------------------------------------------------------------------
 
-input_spec:	; Нажато влево
-		cpi	8
-		jz	input_left
+input_bkspc:      ; Если курсор в начале строки ничего не удаляем
+            call  cmp_hl_de_2
+            jp z, input_loop
 
-		; Нажато вправо
-		cpi	18h
-		jz	input_right
+            ; Сдвигаем строку
+            ld    b, h
+            ld    c, l
+            inc   hl
+            call  memmove_bc_hl
 
-		; Нажат не ввод
-		cpi	0Dh
-		jnz	input_loop
+            ; Уменьшаем положение курсора
+            dec   hl
 
-		; Нажат ввод
-
-		; Сохраняем в конец стрки 0D
-		stax	d
-
-		; Восстанавливаем регистры и выходим
-		pop	psw
-		pop	b
-		pop	h
-		ret
+            dec   de
+            jp    loc_C8EC
 
 ; ---------------------------------------------------------------------------
 
-input_left:	; Если курсор в начале строки (hl==v_input_start) не перемещаем курсор
-		xchg
-		push	h		
-		lhld	v_input_start
-		call	cmp_hl_de_2
-		pop	h
-		xchg
-		jz	input_loop
+input_spec: ; Нажато влево
+            cp    8
+            jp z, input_left
 
-		; Уменьшаем положение курсора
-		dcx	h
+            ; Нажато вправо
+            cp    18h
+            jp z, input_right
 
-input_lr:	; Перемещаем курсор вправо/влево
-		call	j_printChar
+            ; Нажат не ввод
+            cp    0Dh
+            jp nz,  input_loop
 
-		; Продолжаем ввод
-		jmp	input_loop
+            ; Нажат ввод
+
+            ; Сохраняем в конец стрки 0D
+            ld    (de),a
+
+            ; Восстанавливаем регистры и выходим
+            pop   af
+            pop   bc
+            pop   hl
+            ret
 
 ; ---------------------------------------------------------------------------
 
-input_right:	; Если курсор в конце строк (hl==de) не перемещаем курсор
-		call	cmp_hl_de_2
-		jz	input_loop
+input_left: ; Если курсор в начале строки (hl==v_input_start) не перемещаем курсор
+            ex    de, hl
+            push  hl          
+            ld    hl, (v_input_start)
+            call  cmp_hl_de_2
+            pop   hl
+            ex    de, hl
+            jp z, input_loop
 
-		; Увеличиваем положение курсора
-		inx	h
+            ; Уменьшаем положение курсора
+            dec   hl
 
-		; Общее продолжение
-		jmp	input_lr
+input_lr:   ; Перемещаем курсор вправо/влево
+            call  j_printChar
+
+            ; Продолжаем ввод
+            jp    input_loop
+
+; ---------------------------------------------------------------------------
+
+input_right:      ; Если курсор в конце строк (hl==de) не перемещаем курсор
+            call  cmp_hl_de_2
+            jp z, input_loop
+
+            ; Увеличиваем положение курсора
+            inc   hl
+
+            ; Общее продолжение
+            jp    input_lr
 

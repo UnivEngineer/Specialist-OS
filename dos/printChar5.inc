@@ -9,57 +9,57 @@
 ; ---------------------------------------------------------------------------
 ; Обработка ESC+(. Выключение KOI-7
 
-printChar_e28:	mvi	a, 0FFh
-		sta	v_koi8
-		ret
+printChar_e28:    ld    a, 0FFh
+            ld    (bios_vars.koi8), a
+            ret
 
 ; ---------------------------------------------------------------------------
 ; Обработка ESC+). Включение KOI-7
 
-printChar_e29:	xra	a
-		sta	v_koi8
-		ret
+printChar_e29:    xor   a
+            ld    (bios_vars.koi8), a
+            ret
 
 ; ---------------------------------------------------------------------------
 ; Обработка кода 9. Табуляция
 
-printChar_c9:	lda	v_cursorX	
-		adi	24
-		sta	v_cursorX
-		ret
+printChar_c9:     ld    a, (bios_vars.cursorX)  
+            add   a,24
+            ld    (bios_vars.cursorX),a
+            ret
 
 ; ---------------------------------------------------------------------------
-; Вывод символа С из знакогенартора по адресу HL*8 на экран в положение 
+; Вывод символа С из знакогенартора по адресу hl*8 на экран в положение 
 ; курсора. Курсор при этом перемещается 
 
-printChar_alt:	; de = (hl+c)*8
-		mvi	b, 0
-		dad	b
-		dad	h
-		dad	h
-		dad	h
-		xchg
+printChar_alt:    ; de = (hl+c)*8
+            ld    b, 0
+            add   hl, bc
+            add   hl, hl
+            add   hl, hl
+            add   hl, hl
+            ex    de, hl
 
-		; Продолжение в printChar_de
+            ; Продолжение в printChar_de
 
 ; ---------------------------------------------------------------------------
-; Вывод символа DE на экран в положение курсора. Курсор при этом перемещается 
+; Вывод символа de на экран в положение курсора. Курсор при этом перемещается 
 ; вправо.
 
-printChar_de:	; Рассчитываем адрес вывода (hl=v_cursorPos, a*256+l=адрес)
-		call	calcCursorAddr
+printChar_de:     ; Рассчитываем адрес вывода (hl=v_cursorPos, a*256+l=адрес)
+            call  calcCursorAddr
 
-		; Перемещаем курсор вправо
-		inr	h
-		inr	h
-		inr	h		
-		shld	v_cursorY
+            ; Перемещаем курсор вправо
+            inc   h
+            inc   h
+            inc   h           
+            ld    (bios_vars.cursorY), hl
 
-		; Корректируем адрес вывода (bc = al - 7)
-		mov	b, a
-		mov	a, l
-		sui	7
-		mov	c, a
+            ; Корректируем адрес вывода (bc = al - 7)
+            ld    b, a
+            ld    a, l
+            sub   7
+            ld    c, a
 
-		; Продолжение в drawChar
+            ; Продолжение в drawChar
 

@@ -8,43 +8,43 @@
 ;
 ; На выходе
 ;  cf - ошибка
-;  bc,de,hl - сохраняются
+;  bc, de, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileRename:	; Найти файл с именем из HL
-		call	fileFind
-		rc
+fileRename: ; Найти файл с именем из hl
+            call    fileFind
+            ret c 
 
-		; Сохранить регистры
-		push	h
-		push	b
-		push	d
-		
-		;
-		lhld	v_foundedFile
+            ; Сохранить регистры
+            push    hl
+            push    bc
+            push    de
+            
+            ;
+            ld      hl, (v_foundedFile)
 
-		; Попытаться найти файл с новым именем
-		xchg
-		call	fileFind2		
+            ; Попытаться найти файл с новым именем
+            ex      de, hl
+            call    fileFind2         
 
-		; Если такой файл есть, то удалить
-		cnc	deleteFileInt
-		
-		; Заменяем имя
-		mvi	c, 9		
-loc_CD2C:	mov	a, m
-		stax	d
-		inx	h
-		inx	d
-		dcr	c
-		jnz	loc_CD2C
+            ; Если такой файл есть, то удалить
+            call nc,deleteFileInt
+            
+            ; Заменяем имя
+            ld      c, DIR_NAME_LENGTH + 3        
+loc_CD2C:   ld      a, (hl)
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  loc_CD2C
 
-		; Сохраняем изменения
-		call	saveFatDir
+            ; Сохраняем изменения
+            call    saveFatDir
 
-		; Выход
-		ora	a
-		jmp	pop_dbh_ret
+            ; Выход
+            or      a
+            jp      popDBh_ret
 

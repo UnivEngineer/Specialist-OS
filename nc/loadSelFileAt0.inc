@@ -2,20 +2,24 @@
 ; MXOS NC.COM
 ; Загрузить выбранный файл по адресу 0
 ;
+; выход:
+;   de = оригинальный адрес загруки
+;
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-loadSelFileAt0:	call	getSelectedFile
+loadSelFileAt0:
+            call  getSelectedFile
 
-		; Получаем адрес загрузки файла
-		mvi	c, 2
-		call	fileGetSetAddr
-		push	d
+            ; Получаем адрес загрузки файла
+            ld    c, 2
+            call  bios_fileGetSetAddr
+            push  de
 
-		; Загружаем файл в начало памяти
-		lxi	d, 0
-		call	fileLoad2
+            ; Загружаем файл в начало памяти
+            ld    de, 0
+            call  bios_fileLoad2
 
-		pop	d
-		ret
+            pop   de
+            ret
 

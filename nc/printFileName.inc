@@ -1,20 +1,25 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Вывод имени файла
+; Вывод имени файла в обычном виде с точкой
 ;
-; 2013-12-18 Дизассемблировано vinxru
-; 2022-01-14 Доработано SpaceEngineer
+; вход:
+;   hl - адрес дескриптора файла
+;
+; выход:
+;   hl - указывает на следующее за расширением поле в дескрипторе файла
+;
+; 2022-01-31 SpaceEngineer
 ;----------------------------------------------------------------------------
 
-printFileName:	push	b
-		mvi	b, 6
-		call	printString2
-		mvi	c, 20h ; ' '
-		call	printChar
-		mvi	b, 3
-		call	printString2
-		lxi	b, 7
-		dad	b
-		pop	b
-		ret
-
+;printFileName:
+;        push  bc
+;        ld    c, ' '               ; прерываем печать имени по пробелу
+;        ld    b, DIR_NAME_LENGTH   ; длина имени
+;        call  printString2
+;        ld    c, '.'
+;        call  bios_printChar       ; печатаем точку
+;        ld    b, 3                 ; длина расширения
+;        call  printString2
+;        pop   bc
+;        ret
+;

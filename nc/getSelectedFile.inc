@@ -2,23 +2,28 @@
 ; MXOS NC.COM
 ; Получить имя выбранного файла
 ;
+; выход:
+;   hl - адрес дескриптора файла
+;
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-getSelectedFile:push	d
+getSelectedFile:
+        push    de
 
-		; Получить номер текущего файла
-		lxi	h, panelA_curFile
-		call	readBytePanel
+        ; Получить номер текущего файла
+        ld      hl, panelA_curFile
+        call    readBytePanel
 
-		; Получить имя (адрес) текущего файла
-		; files2 += 16*curFile[activePanel];
-		lxi	h, files2	
-		lxi	d, 16
-loc_D80F:	 dad	d
-		 dcr	a
-		jp	loc_D80F
+        ; Получить имя (адрес) текущего файла
+        ; nc_vars.tempFileDescr += DIR_DESCR_SIZE * curFile[activePanel];
+        ld      hl, nc_vars.tempFileDescr 
+        ld      de, DIR_DESCR_SIZE
+loc_D80F:
+        add     hl, de
+        dec     a
+        jp p,   loc_D80F
 
-		pop	d
-		ret
+        pop     de
+        ret
 

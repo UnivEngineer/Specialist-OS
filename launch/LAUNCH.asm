@@ -5,126 +5,131 @@
 ; 2021-01-27 Разработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
+    INCLUDE "../include/mxos.inc"
+    
 ; Адрес загрузки монитора
-MON_ADDR = 0C000h
+MON_ADDR        =  0C000h 
 
 ; Адрес временного буфера загрузки монитора
-MON_ADDR_TEMP = 0D000h
+MON_ADDR_TEMP   =  0D000h 
 
-; Функции системы
-getch			= 0C803h ; Ожидание ввода с клавиатуры
-printChar		= 0C809h ; Вывод символа на экран
-printString 	= 0C818h ; Вывести строку на экран
-fileLoad		= 0C848h ; Загрузить файл по адресу из заголовка этого файла
-fileNamePrepare	= 0C85Ah ; Преобразовать имя файла во внутренний формат
-fileLoad2		= 0C866h ; Загрузить файл по адресу DE
+    ORG 0F100h
 
-.org 0F100h
+    ; В de передаётся адрес строки аргументов
+    ld      a, (de)
+    cp      20h
+    jp c,   noargsRet ; аргумент не задан, выходим
 
-        ; В DE передаётся адрес строки аргументов
-        push d
-        lxi  h, aLoading
-        call printString
-		pop  h
-        push h
-        call printString
-        pop  h
+    push    de
+    ld      hl, txtLoading
+    call    bios_printString
+    pop     hl
+    push    hl
+    call    bios_printString
+    pop     hl
 
-        ; Загрузка программы
-        ; Подготовка имени файла и переключение накопителя
-		lxi  d, nameBuffer
-		call fileNamePrepare   ; HL = имя файла = строка аргументов
-        xchg
+    ; Загрузка программы
+    ; Подготовка имени файла и переключение накопителя
+    ld      de, nameBuffer
+    call    bios_fileNamePrepare   ; hl = имя файла = строка аргументов
+    ex      de, hl
 
-		; Загружаем файл
-		lxi  h, nameBuffer
-		call fileLoad
-		jc   fileNotFoundRet
+    ; Загружаем файл
+    ld      hl, nameBuffer
+    call    bios_fileLoad
+    jp c,   fileNotFoundRet
 
-		; Получаем адрес загрузки (= адрес запуска) файла в DE
-		lxi	d, 10
-		dad	d   ; HL += 10
-		mov	e, m
-		inx	h
-		mov	d, m
+    ; Получаем адрес загрузки (= адрес запуска) файла в de
+    ld      de, FILE_DESCRIPTOR.loadAddress
+    add     hl, de
+    ld      e, (hl)
+    inc     hl
+    ld      d, (hl)
 
-        ; Помещаем в стек для передачи Монитору
-        push d
+    ; Помещаем в стек для передачи Монитору
+    push    de
 
-        lxi  h, aLoading
-        call printString
-		lxi  h, aMonitorPath
-        call printString
+    ld      hl, txtLoading
+    call    bios_printString
+    ld      hl, txtMonitorPath
+    call    bios_printString
 
-        ; Загрузка Монитора
-        ; Подготовка имени файла A:MON2.SYS
-		lxi  h, aMonitorPath
-		lxi  d, nameBuffer
-		call fileNamePrepare
+    ; Загрузка Монитора
+    ; Подготовка имени файла a:MON2.SYS
+    ld      hl, txtMonitorPath
+    ld      de, nameBuffer
+    call    bios_fileNamePrepare
 
-        ; Загружаем файл MON2.SYS на 0D000h - он затрет NC.COM
-		lxi  h, nameBuffer
-		lxi  d, MON_ADDR_TEMP ; изменить адрес загрузки файла на DE
-		call fileLoad2  ; нужна исправленная функция! BIOS 4.50 и старше 
-		jc   popFileNotFoundRet
+    ; Загружаем файл MON2.SYS на 0D000h - он затрет nc.cOM
+    ld      hl, nameBuffer
+    ld      de, MON_ADDR_TEMP ; изменить адрес загрузки файла на de
+    call    bios_fileLoad2  ; нужна исправленная функция! BIOS 4.50 и старше 
+    jp c,   popFileNotFoundRet
 
-		; Получаем размер файла Монитора в DE
-		lxi	d, 12
-		dad	d   ; HL += 12
-		mov	e, m
-		inx	h
-		mov	d, m
+    ; Получаем размер файла Монитора в de
+    ld      de, FILE_DESCRIPTOR.size
+    add     hl, de
+    ld      e, (hl)
+    inc     hl
+    ld      d, (hl)
 
-        ; HL = MON_ADDR_TEMP
-        ; DE = MON_ADDR_TEMP + размер монитора
-		lxi  h, MON_ADDR_TEMP
-        xchg
-		dad  d
-        xchg
+    ; hl = MON_ADDR_TEMP
+    ; de = MON_ADDR_TEMP + размер монитора
+    ld      hl, MON_ADDR_TEMP
+    ex      de, hl
+    add     hl, de
+    ex      de, hl
 
-        ; Копируем Монитор на адрес C000h. При этом он затрёт BIOS, и дисковые
-        ; функциии ОС станут недоступны. Поэтому и нужен был временный буфер.
-		lxi  b, MON_ADDR
-        call memcpy
+    ; Копируем Монитор на адрес C000h. При этом он затрёт BIOS, и дисковые
+    ; функции ОС станут недоступны. Поэтому и нужен был временный буфер.
+    ld      bc, MON_ADDR
+    call    memcpy
 
-        ; Запуск Монитора. Монитор сам переходит в режим STD, инициализируется,
-        ; и запускает программу по адресу из вершины стека.
-        jmp  MON_ADDR
+    ; Запуск Монитора. Монитор сам переходит в режим STD, инициализируется,
+    ; и запускает программу по адресу из вершины стека.
+    jp      MON_ADDR
 
-memcpy: ; Копироваение из HL в BC с увеличением адресов, пока HL не равно DE
-        mov  a, m
-        stax b
-        call cmp_hl_de
-        rz
-        inx  h
-        inx  b
-        jmp  memcpy
+memcpy: ; Копироваение из hl в bc с увеличением адресов, пока hl не равно de
+    ld      a, (hl)
+    ld      (bc), a
+    call    cmp_hl_de
+    ret z
+    inc     hl
+    inc     bc
+    jp      memcpy
 
 cmp_hl_de:
-        mov	a, l
-        cmp	e
-        rnz
-        mov	a, h
-        cmp	d
-        ret
+    ld      a, l
+    cp      e
+    ret nz  
+    ld      a, h
+    cp      d
+    ret
 
 popFileNotFoundRet:
-        pop  d ; восстанавливаем стек для правильного аварийного выхода
+    pop     de ; восстанавливаем стек для правильного аварийного выхода
 fileNotFoundRet:
-        lxi  h, aFileNotFound
-        jmp  printString
+    ld      hl, txtFileNotFound
+    jp      bios_printString
 
-        ; Esc + ) включает KOI-8 до конца выводимой строки
-aLoading:
-        .db 0Ah,1Bh,"(Loading ",0
+noargsRet:
+    ld      hl, txtNoArgs
+    jp      bios_printString
 
-aFileNotFound:
-        .db 0Ah,1Bh,"(File not found",0
+    ; Esc + ) включает KOI-8 до конца выводимой строки
+txtLoading:
+    DB 0Ah,"LOADING ",0
 
-aMonitorPath:
-        .db "A:MON2.SYS",0
+txtFileNotFound:
+    DB 0Ah,"FILE NOT FOUND",0
+
+txtNoArgs:
+    DB 0Ah,"USAGE: LAUNCH.COM <FILE.RKS>",0
+
+txtMonitorPath:
+    DB "A:MON2.MON",0
 
 nameBuffer:
-        .block 10
+    BLOCK 10,0
 
-.end
+    END

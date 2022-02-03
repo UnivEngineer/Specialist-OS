@@ -5,128 +5,129 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printInfoPanel:	COLOR(COLOR_BORDER)
+printInfoPanel:
+            COLOR   COLOR_BORDER
 
-		; Рисуем панель
-		lxi	h, g_infoPanel
-		call	draw
+            ; Рисуем панель
+            ld      hl, g_infoPanel
+            call    draw
 
-                COLOR(COLOR_INFOHEADER)
+            COLOR   COLOR_INFOHEADER
 
-		; COMMANDER VERSION 1.4
-		lxi	h, 1110h
-		call	setCursorPosPanel
-		lxi	h, aCommanderVer
-		call	printString
+            ; COMMANDER VERSION xxx
+            ld      hl, 1110h
+            call    setCursorPosPanel
+            ld      hl, aCommanderVer
+            call    bios_printString
 
-		; (C) OMSK 1992
-		lxi	h, 1D1Ah
-		call	setCursorPosPanel
-		lxi	h, aCOmsk1992	
-		call	printString
+            ; (C) OMSK 1992
+            ld      hl, 1D1Ah
+            call    setCursorPosPanel
+            ld      hl, aCOmsk1992    
+            call    bios_printString
 
-		; Положение курсора
-		lxi	h, 1630h
-		call	setCursorPosPanel
+            ; Положение курсора
+            ld      hl, 1630h
+            call    setCursorPosPanel
 
-		; Получить размер диска
-		mvi	e, 3		
-		call	diskDriver
-#if DISABLE_FREE_SPACE_BUG
-		sbi	4
-#endif
-		mov	d, a
-		mvi	e, 0
-		push	d
+            ; Получить размер диска
+            ld      e, 3        
+            call    bios_diskDriver
+    IF FIX_FREE_SPACE_BUG
+            sbc     4
+    ENDIF
+            ld      d, a
+            ld      e, 0
+            push    de
 
-		; ##### TOTAL BYTES
-                COLOR(COLOR_INFONUMBERS)
-		call	printDec
-                COLOR(COLOR_INFOTEXT)
-		lxi	h, aTotalBytes	
-		call	printString
+            ; ##### TOTAL BYTES
+            COLOR   COLOR_INFONUMBER
+            call    bios_printDecWord
+            COLOR   COLOR_INFOTEXT
+            ld      hl, aTotalBytes   
+            call    bios_printString
 
-		; ON DRIVE A:
-		lxi	h, 1F3Ch
-		call	setCursorPosPanel
-		lxi	h, aOnDrive	
-		call	printString		
-                COLOR(COLOR_INFONUMBERS)
-		call	printCurDrive
-                COLOR(COLOR_INFOTEXT)
+            ; ON DRIVE A:
+            ld      hl, 1F3Ch
+            call    setCursorPosPanel
+            ld      hl, aOnDrive      
+            call    bios_printString       
+            COLOR   COLOR_INFONUMBER
+            call    printCurDrive
+            COLOR   COLOR_INFOTEXT
 
-		; Положение курсора
-		lxi	h, 548h
-		call	setCursorPosPanel
-		
-		; Подсчет свободного места на диске
+            ; Положение курсора
+            ld      hl, 548h
+            call    setCursorPosPanel
+            
+            ; Подсчет свободного места на диске
 
-		; Читаем FAT
-		lxi	h, 0FE00h
-		lxi	d, 2
-		call	diskDriver
+            ; Читаем FAT
+            ld      hl, 0FE00h
+            ld      de, 2
+            call    bios_diskDriver
 
-		; Считаем не занятые кластеры с 4-ого
-		mov	e, l
-		mvi	l, 4
-#if DISABLE_FREE_SPACE_BUG
-		xra	a
-		mov	d, a
-#else
-		mov	d, l
-#endif
-loc_D8B8:	 mov	a, m
-		 ana	a
-		 jnz	loc_D8BE
-		  inr	d
-loc_D8BE:	 inr	l
-		jnz	loc_D8B8
+            ; Считаем не занятые кластеры с 4-ого
+            ld      e, l
+            ld      l, 4
+    IF FIX_FREE_SPACE_BUG
+            xor     a
+            ld      d, a
+    ELSE
+            ld      d, l
+    ENDIF
+loc_D8B8:   ld      a, (hl)
+            and     a
+            jp nz,  loc_D8BE
+            inc     d
+loc_D8BE:   inc     l
+            jp nz,  loc_D8B8
 
-		push	d
+            push    de
 
-		; ##### BYTES FREE ON DRIVE #:
-                COLOR(COLOR_INFONUMBERS)
-		call	printDec
-                COLOR(COLOR_INFOTEXT)
-		lxi	h, aBytesFreeOnDrv
-		call	printString
-		call	printCurDrive
+            ; ##### BYTES FREE ON DRIVE #:
+            COLOR   COLOR_INFONUMBER
+            call    bios_printDecWord
+            COLOR   COLOR_INFOTEXT
+            ld      hl, aBytesFreeOnDrv
+            call    bios_printString
+            call    printCurDrive
 
-		; Положение курсора
-		lxi	h, 0D54h
-		call	setCursorPosPanel
+            ; Положение курсора
+            ld      hl, 0D54h
+            call    setCursorPosPanel
 
-		; DE = кол-во файлов		
-		lxi	h, panelA_filesCnt
-		lda	activePanel
-		ana	a
-		jnz	loc_D8E0
-		inx	h
-loc_D8E0:	mov	e, m
-		mvi	d, 0
+            ; de = кол-во файлов          
+            ld      hl, panelA_filesCnt
+            ld      a, (activePanel)
+            and     a
+            jp nz,  loc_D8E0
+            inc     hl
+loc_D8E0:   ld      e, (hl)
+            ld      d, 0
 
-		; ##### FILES USE #####
-                COLOR(COLOR_INFONUMBERS)
-		call	printDec
-                COLOR(COLOR_INFOTEXT)
-		lxi	h, aFilesUse
-		call	printString
-		pop	h
-		pop	d
-		mov	a, d
-		sub	h
-		mov	d, a
-		mvi	e, 0
-                COLOR(COLOR_INFONUMBERS)
-		call	printDec
-                COLOR(COLOR_INFOTEXT)
+            ; ##### FILES USE #####
+            COLOR   COLOR_INFONUMBER
+            call    bios_printDecWord
+            COLOR   COLOR_INFOTEXT
+            ld      hl, aFilesUse
+            call    bios_printString
+            pop     hl
+            pop     de
+            ld      a, d
+            sub     h
+            ld      d, a
+            ld      e, 0
+            COLOR   COLOR_INFONUMBER
+            call    bios_printDecWord
+            COLOR   COLOR_INFOTEXT
 
-		; BYTES IN A:
-		lxi	h, 1F60h
-		call	setCursorPosPanel
-		lxi	h, aBytesIn
-		call	printString		
+            ; BYTES IN A:
+            ld      hl, 1F60h
+            call    setCursorPosPanel
+            ld      hl, aBytesIn
+            call    bios_printString       
 
-                COLOR(COLOR_INFONUMBERS)
-		jmp	printCurDrive
-		
+            COLOR   COLOR_INFONUMBER
+            jp      printCurDrive
+
