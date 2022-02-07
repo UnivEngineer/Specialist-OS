@@ -11,6 +11,9 @@ initFont:   ; Изменяем команду перехода сюда на reboot2
             ld      (onceInitFont+1), hl
             push    hl
 
+    IF EMBED_FONT == 0
+
+            ; Шрифт грузится из файла
             ; Устанавливаем блочный драйвер ДОЗУ
             ld      b, 0
             call    setRAMDDriver
@@ -22,13 +25,14 @@ initFont:   ; Изменяем команду перехода сюда на reboot2
             ex      de, hl
             ld      de, FONT_ADDR
             jp      fileLoad2
-/*
+
+    ELSE
+            ; Шрифт встроен в хвост программы
+            ; Копируем его на адрес FONT_ADDR
             ld      hl, font
             ld      de, fontEnd
             ld      bc, FONT_ADDR
             jp      memcpy_bc_hl
-
-
 
 font:
       DB 000h,000h,000h,000h,000h,000h,000h,000h ; 0
@@ -289,4 +293,4 @@ font:
       DB 000h,000h,000h,000h,000h,000h,000h,01Fh ; 255
 fontEnd:
 
-*/
+    ENDIF

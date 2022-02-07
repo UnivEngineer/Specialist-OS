@@ -5,12 +5,13 @@
 // 2013-11-01 Разработано vinxru
 //----------------------------------------------------------------------------
 
-fat16   = 1;                    // Сформировать ром-диск в FAT16
-fatSize = 1;                    // Размер FAT в кластерах
-dirSize = 3;                    // Размер каталога в кластерах
-diskSize = (65536 >> 8);        // Размер ПЗУ в кластерах
-maxFiles = fat16 ? 24-1 : 48-2; // Максимум файлов в каталоге (последние 16 байт каталога - это код загрузчика)
-includeFont = 0;                // Надо поместить шрифт по адресу 0x800
+fat16       = 1;                    // Сформировать ром-диск в FAT16
+fatElemSize = fat16 ? 2 : 1;        // Размер элемента fat в байтах
+fatSize     = fat16 ? 16: 1;        // Размер fat в кластерах
+dirSize     = fat16 ? 4 : 3;        // Размер каталога в кластерах
+diskSize    = (65536 >> 8);         // Размер ПЗУ в кластерах
+maxFiles    = dirSize * 8 - 1;      // Максимум файлов в каталоге (последние 32 байт каталога - это код загрузчика)
+includeFont = 0;                    // Надо поместить шрифт по адресу 0x800
 
 // Стандартная ерунда
 
@@ -42,7 +43,6 @@ ignore = [];
 ignore["LIST.TMP"] = 1;
 ignore["TBL.BIN"] = 1;
 ignore["-MAKEROM.JS"] = 1;
-ignore["-MAKEROM_OLD.JS"] = 1;
 ignore["SPECSVGA.BIN"] = 1;
 ignore["SPMX.BIN"] = 1;
 ignore["makeRom.vcxproj.user"] = 1;
@@ -58,9 +58,9 @@ firstFiles["NC.COM"] = 1;
 
 // Пустая FAT
 fat = [];
-for (i=0; i<4; i++) fat[i] = 0xFF; // первые 4 байта - команда перехода на загрузчик
-for (;i<diskSize; i++) fat[i] = 0;
-for (;i<256; i++) fat[i] = 0xFF;
+for (i=0; i<4; i++)                     fat[i] = 0xFF;  // первые 4 байта - команда перехода на загрузчик
+for (;i<fatElemSize*diskSize; i++)      fat[i] = 0x00;  // свободный кластер
+for (;i<fatElemSize*fatSize*256; i++)   fat[i] = 0xFF;  // неиспользуемый кластер (если ПЗУ меньше 64 кб)
 
 dest = [];
 for(i=0; i<diskSize*256; i++) dest += encode[0xFF];
@@ -70,29 +70,47 @@ dosCluster  = 0;
 dosSize     = 0;
 dosAddr     = 0;
 fontCluster = 0;
-filesCnt    = 0;
-minCluster  = 4;
+numFiles    = 0;
+minCluster  = fatSize + dirSize;
 
-function allocCluster(cluster)
+function allocCluster(cluster, minCluster)
 {
-    for(;;)
+    for (;;)
     {
         for (var i=minCluster; i<diskSize; i++)
         {
-            if(fat[i]==0)
+            if (fat16)
             {
-                if(cluster) fat[cluster] = i;
-                fat[i] = i;
-                return i;
+                i2 = i * 2;
+                if ((fat[i2] == 0) && (fat[i2+1] == 0))
+                {
+                    if (cluster)
+                    {
+                        fat[cluster*2]   = (i & 0xFF);
+                        fat[cluster*2+1] = (i >> 8) & 0xFF;
+                    }
+                    fat[i2]   = (i & 0xFF);
+                    fat[i2+1] = (i >> 8) & 0xFF;
+                    return i;
+                }
+            }
+            else
+            {
+                if (fat[i] == 0)
+                {
+                    if (cluster) fat[cluster] = i;
+                    fat[i] = i;
+                    return i;
+                }
             }
         }
 
-        if(minCluster==4)
+        if (minCluster == fatSize + dirSize)
         {
-			shell.Popup("Не хватило места!\n" + filesCnt, 0, "Error", 0)
+			shell.Popup("Не хватило места!\n" + numFiles, 0, "Error", 0)
             throw "Нет места";
         }
-        minCluster = 4;
+        minCluster = fatSize + dirSize;
     }
 }
 
@@ -102,15 +120,15 @@ function putFile(fileName, boot)
     data_size = data.length;
 
     // Файлы нулевого объема не поддерживаются
-    if(data.length==0) return;
+    if (data.length==0) return;
 
     // Проверяем объем
-    if(filesCnt+1==maxFiles)
+    if (numFiles+1==maxFiles)
     {
         shell.Popup("Максимум файлов: " + maxFiles, 0, "Ошибка", 0);
         throw "Максимум файлов "+maxFiles;
     }
-    filesCnt++;
+    numFiles++;
 
     // Получаем адрес загрузки
     startAddr = 0;
@@ -135,13 +153,19 @@ function putFile(fileName, boot)
     // Отрезаем всё лишнее
     fileName = fso.GetBaseName(fileName);
 
+    //shell.Popup(
+    //    fileName + "." + ext + "\n" +
+    //    startAddr + "\n" +
+    //    data_size + "\n\n",
+    //    0, "File", 0);
+
     // Сохраняем файл
     cluster = startCluster = 0;
     while (data.length != 0)
     {
         cluster = allocCluster(cluster, minCluster); 
-        if(startCluster==0) startCluster = cluster;
-        block = data.substr(0,256); data=data.substr(256);
+        if (startCluster == 0) startCluster = cluster;
+        block = data.substr(0,256); data = data.substr(256);
         dest = dest.substr(0,256*cluster) + block + dest.substr(256*cluster+block.length);
     }    
 
@@ -161,8 +185,8 @@ function putFile(fileName, boot)
         dir += encode[0];                           // первый кластер - байт 3
         dir += encode[0] + encode[0];               // время записи
         dir += encode[0] + encode[0];               // дата записи
-        dir += encode[startCluster];                // первый кластер - байт 0
-        dir += encode[0];                           // первый кластер - байт 1
+        dir += encode[startCluster & 0xFF];         // первый кластер - байт 0
+        dir += encode[startCluster >> 8];           // первый кластер - байт 1
         dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
         dir += encode[(data_size - 1) >> 8];        // размер - байт 1
         dir += encode[0];                           // размер - байт 2
@@ -200,7 +224,7 @@ function putFile(fileName, boot)
 shell.Run("cmd /c dir /b /on *.* >list.tmp", 2, true);
 list = fso.OpenTextFile("list.tmp", 1, false, 0);
 boolFileFounded="", filesA=[], filesB=[];
-while(!list.AtEndOfStream)
+while (!list.AtEndOfStream)
 {
     fileName = list.readLine().toUpperCase();
     shortFileName = fso.GetBaseName(fso.GetBaseName(fileName))+"."+fso.GetExtensionName(fileName);
@@ -219,40 +243,44 @@ if (includeFont)
   putFile("font.fnt");
 }
 
-if(bootFileFounded)
+if (bootFileFounded)
   putFile(bootFileFounded, true);
-for(i=0; i<filesA.length; i++)
+for (i=0; i<filesA.length; i++)
   putFile(filesA[i], false);
-for(i=0; i<filesB.length; i++)
+for (i=0; i<filesB.length; i++)
   putFile(filesB[i], false);
 
-// Выравнивание каталога
-
-while(dir.length < 3*256) dir += encode[0xFF];
+// Пустой хвост каталога
+while (dir.length < dirSize*256)
+    dir += encode[0xFF];
 
 // Код загрузки
 
-if(dosCluster) {  
+if (dosCluster)
+{  
   // Стандартный загрузчик
-  if(filesCnt > 46) throw "Слишком много файлов, некуда поместить загрузчик";
-  fat[0] = 0xC3, fat[1] = 0xE1, fat[2] = 0x03;
-  dir = dir.substr(0, 16*46);
+  if (numFiles > maxFiles) throw "Слишком много файлов, некуда поместить загрузчик";
+  loaderCluster = fatSize + dirSize - 1;
+  fat[0] = 0xC3, fat[1] = 0xE1, fat[2] = loaderCluster; // JMP xx01h, где xx = последний кластер каталога
+  dir = dir.substr(0, dir.length - 32);
   dir += encode[0xFF]+encode[0x21]+encode[0x00]+encode[dosCluster]+encode[0x11]+encode[dosAddr&0xFF]+encode[dosAddr>>8]+encode[0xC3];
-  dir += encode[0xF1]+encode[0x03]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF];
+  dir += encode[0xF1]+encode[loaderCluster]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF];
   dir += encode[0xFF]+encode[0x7E]+encode[0x12]+encode[0x13]+encode[0x23]+encode[0x7A]+encode[0xFE]+encode[(dosAddr>>8) + dosSize];
-  dir += encode[0xC2]+encode[0xF1]+encode[0x03]+encode[0xC3]+encode[dosAddr&0xFF]+encode[dosAddr>>8]+encode[0xFF]+encode[0xFF];
-} else {
+  dir += encode[0xC2]+encode[0xF1]+encode[loaderCluster]+encode[0xC3]+encode[dosAddr&0xFF]+encode[dosAddr>>8]+encode[0xFF]+encode[0xFF];
+}
+else
+{
   // Просто подвешиваем компьютер
   fat[0] = 0xC3, fat[1] = 0x00, fat[2] = 0x00;
 }
 
 // FAT+Каталог
 start = "";
-for(i=0; i<256; i++) start += encode[fat[i]];
+for (i=0; i<fatSize*256; i++) start += encode[fat[i]];
 start += dir;
 
 // Специалист MX
-std = start + dest.substr(4*256);
+//std = start + dest.substr(4*256);
 
 // Специалист MX2
 mx2 = encode[0x31] + encode[0xFF] + encode[0xF7] + encode[0xC7]; // lxi sp, 0F7FFh / rst 0

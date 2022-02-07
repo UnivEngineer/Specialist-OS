@@ -93,12 +93,6 @@
     <None Include="main2.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="memcpy_hl_de_3.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="memset_hl_a_c.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="printCurDrive.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -155,6 +149,9 @@
     </None>
     <None Include="NC.lst">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tools.inc">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

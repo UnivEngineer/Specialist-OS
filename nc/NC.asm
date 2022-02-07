@@ -9,10 +9,15 @@
 
       ORG 0D000h
 
-FIX_FREE_SPACE_BUG  =  1 ; Исправить ошибку определения свободного объема
-SHOW_F9             =  0 ; Рисовать все кнопки F1...F9 на нижнем тулбаре (иначе F1...F8)
+; Конфигурация сборки
+
+SHOW_F9          = 0            ; Рисовать все кнопки F1...F9 на нижнем тулбаре (иначе F1...F8)
+
+FILE_LIST_SIZE   = 36           ; Размер буфера для листинга директории (штук файлов)
+FILE_LIST_BUFFER = 8000h        ; Адрес буфера для листинга директории (FILE_LIST_SIZE дескрипторов + 1 = 1153 байт)
 
 ; Цвета
+
 COLOR_CMDLINE    =  070h        ; Цвет командной строки
 COLOR_CMDSCREEN  =  COLOR_BIOS  ; Цвет командного экрана (когда панели спрятаны)
 COLOR_BORDER     =  0F1h        ; Цвет рамки
@@ -27,33 +32,6 @@ COLOR_INFONUMBER =  0E1h        ; Цифры на информационной панели
 COLOR_INFOTEXT   =  0F1h        ; Текст на информационной панели
 COLOR_HELP_F     =  040h        ; Цвет функциональных клавиш в строке подсказки
 COLOR_HELP_TEXT  =  071h        ; Цвет текста в строке подсказки
-
-; Коодинаты элементов панелей
-
-P_NAME_X          = 17  ; Заголовок панели "NAME"
-P_NAME_Y          = 16
-
-    IF FAT16
-P_FILE_LIST_X1    = 6   ; Файловая таблица (2 колонки)
-P_FILE_LIST_X2    = 54
-P_FILE_LIST_Y     = 32
-    ELSE
-P_FILE_LIST_X1    = 10  ; Файловая таблица (2 колонки)
-P_FILE_LIST_X2    = 57
-P_FILE_LIST_Y     = 32
-    ENDIF
-
-P_FILE_LIST_H     = 18  ; Высота файловой таблицы в строках
-P_FILE_LIST_Y_MAX = P_FILE_LIST_H * 10 + P_FILE_LIST_Y
-
-P_DRIVE_LETTER_X  = 9   ; Буква имени диска внизу панели
-P_DRIVE_LETTER_Y  = 222
-P_FILE_NAME_X     = 15  ; Имя файла внизу панели
-P_FILE_NAME_Y     = 222
-P_FILE_DATA_X     = 57  ; Данные о файле (адрес загрузки, размер)
-P_FILE_DATA_Y     = 222
-
-P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла в символах
 
 ;---------------------------------------------------------------------------
 ; Макросы
@@ -119,8 +97,7 @@ P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла в символах
     INCLUDE "printString2.inc"
     INCLUDE "setCursorPosPanel.inc"
     INCLUDE "draw.inc"
-    INCLUDE "memset_hl_a_c.inc"
-    INCLUDE "memcpy_hl_de_3.inc"
+    INCLUDE "tools.inc"
     INCLUDE "compactName.inc"
     INCLUDE "input.inc"
 
@@ -134,8 +111,8 @@ aF1LeftF2RighF3:    DB "F1 L F2 R F3 INF F4 EDIT F5 COPY F6 RMOV F7 LOAD F8 DEL 
     ELSE
 aF1LeftF2RighF3:    DB "F1 LEFT F2 RIGH F3 INFO F4 EDIT F5 COPY F6 RMOV F7 LOAD F8 DEL",0
     ENDIF
-aCommanderVer:      DB "COMMANDER VERSION 1.6",0
-aCOmsk1992:         DB "(C) OMSK 1992",0
+aCommanderVer:      DB "COMMANDER VERSION 1.7",0
+aCopyright:         DB "(C) OMSK 1992",0
 aFileIsReanOnly:    DB "FILE IS READ ONLY!",0
 aABCD:              DB "A   B   C   D",0
 aEFGH:              DB "E   F   G   H",0
@@ -145,11 +122,13 @@ asc_DC17:           DB 8, ' ',8, 0
 aCopyFromTo:        DB "COPY FROM    TO",8,8,8,8,8, 0
 aCantCreateFile:    DB "CAN",39,"T CREATE FILE!",0
 aRemoveFromTo:      DB "RENAME/MOVE FROM    TO",8,8,8,8,8, 0
-aBytesFreeOnDrv:    DB " BYTES FREE ON DRIVE ",0
-aFilesUse:          DB " FILES USE ",0
-aBytesIn:           DB "BYTES IN ",0
-aTotalBytes:        DB " TOTAL BYTES",0
-aOnDrive:           DB "ON DRIVE ",0
+aKBytesExtMemory:   DB 18h,"KB EXTENDED MEMORY",0   ; здесь и далее 18h вместо пробела, чтобы не портить цвет предыдущего символа
+aKBytesMemory:      DB 18h,"BYTES MEMORY",0
+aKBytesFree:        DB 18h,"BYTES FREE",0
+aKBytesTotalOnDrv:  DB 18h,"KB TOTAL ON DRIVE ",0
+aKBytesFreeOnDrv:   DB 18h,"KB FREE  ON DRIVE ",0
+aFilesUse:          DB 18h,"FILES USE ",0
+aKBytesIn:          DB 18h,"KB IN ",0
 aSaveFromToTape:    DB "SAVE FROM    TO TAPE",8,8,8,8,8,8,8,8,8,8, 0
 aSavingToTape:      DB "SAVING TO TAPE",0
 aLoadingFromTapeTo: DB "LOADING FROM TAPE TO ",0
@@ -204,7 +183,7 @@ g_filePanel:
 g_infoPanel:
             G_WINDOW 0, 0, 0, 192, 230        ; 2, 0, 90h, 0E0h, 16h
             G_LINE   0, 4, 31, 184            ; 1, 1Fh, 90h, 16h, 0Fh, 0F0h
-            G_LINE   0, 4, 112, 184           ; 1, 70h, 90h, 16h, 0Fh, 0F0h
+            G_LINE   0, 4, 136, 184           ; 1, 70h, 90h, 16h, 0Fh, 0F0h
             DB 0
 
 g_chooseDrive:
@@ -222,6 +201,37 @@ g_window2:
             G_LINE   80h, 108, 132, 168       ; 81h, 84h, 9Dh, 14h, 0Fh, 0F0h
             DB 0
 
+; Коодинаты элементов панелей
+
+P_NAME_X          = 17  ; Заголовок панели "NAME"
+P_NAME_Y          = 16
+
+    IF FAT16
+P_FILE_LIST_X1    = 6   ; Файловая таблица (2 колонки)
+P_FILE_LIST_X2    = 54
+P_FILE_LIST_Y     = 32
+    ELSE
+P_FILE_LIST_X1    = 10  ; Файловая таблица (2 колонки)
+P_FILE_LIST_X2    = 57
+P_FILE_LIST_Y     = 32
+    ENDIF
+
+P_FILE_LIST_H     = 18  ; Высота файловой таблицы в строках
+P_FILE_LIST_Y_MAX = P_FILE_LIST_H * 10 + P_FILE_LIST_Y
+
+P_DRIVE_LETTER_X  = 9   ; Буква имени диска внизу панели
+P_DRIVE_LETTER_Y  = 222
+P_FILE_NAME_X     = 15  ; Имя файла внизу панели
+P_FILE_NAME_Y     = 222
+P_FILE_DATA_X     = 57  ; Данные о файле (адрес загрузки, размер)
+P_FILE_DATA_Y     = 222
+
+P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла в символах
+
+;-----------------------------------------------------------------------
+; Переменные
+;-----------------------------------------------------------------------
+
 initState:        DB 5Ah
 activePanel:      DB 0
 panelA_info:      DB 0
@@ -234,10 +244,6 @@ panelA_curFile:   DB 0
 panelB_curFile:   DB 0
 aNcExt:           DB "A:NC.EXT",0
 aEditor:          DB "A:E.COM",0Dh      ; терминатором тут должно быть 0Dh
-
-;-----------------------------------------------------------------------
-; Переменные
-;-----------------------------------------------------------------------
 
     STRUCT NC_VARIABLES
 cmdLinePos      DW    0
@@ -252,7 +258,6 @@ cmdLineCtrl     DB    0FFh      ; контроль переполнения командной строки
 input           BLOCK 21, 0FFh
                 BLOCK 11
 tempFileDescr   FILE_DESCRIPTOR
-fileListBuffer  BLOCK 768       ; Буфер для листинга директории (768 байт = 48 шт FILE_DESCRIPTOR) - не включен в бинарник
     ENDS
 
 ; Установка только значения метки vars (машинный код не генерируется, переменные могут содержать мусор)

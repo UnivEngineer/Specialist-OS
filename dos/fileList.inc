@@ -1,9 +1,11 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; Получить список файлов
+; Получить список файлов каталога.
+; Функция копирует в буфер непустые дескрипторы файлов.
 ;
 ; На входе 
-;  hl - адрес буфера (769 байт)
+;  hl - адрес буфера
+;  b  - максимальное количество дескрипторов файлов для вывода
 ;
 ; На выходе
 ;  bc, de, hl - сохраняются
@@ -19,13 +21,18 @@ fileList:   ; Загрузка FAT и каталога
             push    bc
             push    de
 
-            ; Максимум файлов
-            ld      b, DIR_MAX_FILES
-
             ; Адрес первого файла
-            ld      de, diskDirectory
-            
-fileList_loop:    ; Если первый символ не FFh, копируем описатель
+            ld      de, DIR_BUFFER
+
+            ; Максимум файлов уже в b
+            ; Но надо ограничить разером каталога устройства
+            ld      a, DIR_MAX_FILES
+            cp      b
+            jp nc,  fileList_loop
+            ld      b, a    ; b = max(b, DIR_MAX_FILES)
+
+fileList_loop:
+            ; Если первый символ не FFh, копируем дескриптор
             ld      a, (de)
             inc     a
             jp nz,  fileList_copy
@@ -37,17 +44,19 @@ fileList_loop:    ; Если первый символ не FFh, копируем описатель
             ex      de, hl
             pop     hl
 
-fileList_next:    ; Цикл
+fileList_next:
+            ; Цикл
             dec     b
             jp nz,  fileList_loop
 
             ; В конце символ 0FFh
             ld      (hl), 0FFh
-            jp      popDBh_ret
+            jp      popDBH_ret
 
 ; ---------------------------------------------------------------------------
 
-fileList_copy:    ; Копируем DIR_DESCR_SIZE байт из de в hl
+fileList_copy:
+            ; Копируем DIR_DESCR_SIZE байт из de в hl
             ld      c, DIR_DESCR_SIZE
 fileList_copyl:     ld    a, (de)
             ld      (hl), a

@@ -8,15 +8,15 @@
 execBat:
             pop   de
 
-            ; Устанавливаем адрес загрузки BAT-файла на diskDirectory (= FC00h)
-            ld      hl, diskDirectory
+            ; Устанавливаем адрес загрузки BAT-файла на BAT_BUFFER (= FC00h)
+            ld      hl, BAT_BUFFER
             ld      (v_batPtr), hl
             ex      de, hl
 
             ; Изменяем адрес загрузки BAT-файла
             ; TODO: это не работает с ром-диском (A: без поддержки записи). Поэтому
             ; нельзя запустить BAT-файл с диска A:, если его адрес загрузки в каталоге
-            ; уже не прошит как FC00h (= &diskDirectory)
+            ; уже не прошит как FC00h (= BAT_BUFFER)
             ld      hl, v_curFileDescr
             ld      c, 1
             call    fileGetSetAddr

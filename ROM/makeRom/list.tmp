@@ -4,7 +4,7 @@ AUTOEX.0xFC00.BAT
 disk-h.0xFA00.com
 DL-red.0xD000.COM
 DOS.0xC000.sys
-E.0xD000.COM
+E.0xD000.com
 Flash.0xFA00.com
 FONT.FNT
 FORMAT.0xF100.com
@@ -14,11 +14,14 @@ LAUNCH.0xF100.com
 list.tmp
 -makeRom.js
 Mon2.0xC000.mon
-MON2.0xF100.COM
+mon2.0xF100.com
+MUSIC.RKS
 NC.0xD000.com
 NC.EXT
 ramfos.0.exe
-romfnt.0.com
 tape.0xE600.com
 tbl.bin
-TstScr.0.COM
+Test-Fif.0.COM
+Test-M.54272.COM
+Test-MX.0.COM
+test-scr.0.exe

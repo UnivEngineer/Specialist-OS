@@ -13,7 +13,7 @@ beep:       ; Сохраняем все регистры. de не используется ниже
             push  hl
 
             ; Частота и длительность сигнала
-            ld    hl, (bios_vars.beepDuration)
+            ld    hl, (bios_vars.beepFreq)
 
 beep_0:     ; Единицу на динамик
             ld    a, 0Bh

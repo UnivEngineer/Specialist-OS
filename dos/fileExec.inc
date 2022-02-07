@@ -12,7 +12,7 @@
 ;----------------------------------------------------------------------------
 
 fileExec:   ; Сюда будем записывать результат
-            ld      de, v_cmdLine
+            ld      de, CMD_LINE
             
             ; Если первый символ меньше пробела, выходим c CF
             ld      a, (hl)
@@ -47,11 +47,11 @@ fileExec_1: ; В конец имени помещаем 13, 0
             call    printCharA
 
             ; Выводим на экран имя файла
-            ld      hl, v_cmdLine
+            ld      hl, CMD_LINE
             call    j_printString
 
             ; Подготовка имени файла
-            ld      hl, v_cmdLine
+            ld      hl, CMD_LINE
             ld      de, v_curFileDescr
             call    fileNamePrepare
 

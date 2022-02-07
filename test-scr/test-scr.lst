@@ -1,0 +1,226 @@
+# file opened: D:\Projects\Specialist\MySoft\MXOS-Z80\test-scr\test-scr.asm
+  1   0000              ;----------------------------------------------------------------------------
+  2   0000              ; Кросс-платформенный тест экрана для "Специалиста-MX"
+  3   0000              ; Должен работать в любой OC
+  4   0000              ;
+  5   0000              ; 2022-02-05 SpaceEnigneer
+  6   0000              ;----------------------------------------------------------------------------
+  7   0000
+  8   0000                  ORG 0
+  9   0000
+ 10   0000              KOI8 = 0	; печать символов КОИ8 в тесте
+ 11   0000
+ 12   0000              REG_KEYB		= 0FFE0h
+ 13   0000              REG_TIMER		= 0FFECh
+ 14   0000              REG_COLOR		= 0FFF8h
+ 15   0000              REG_PAGE_RAM	= 0FFFCh
+ 16   0000              REG_PAGE_RAMD	= 0FFFDh
+ 17   0000              REG_PAGE_ROM	= 0FFFEh
+ 18   0000              REG_PAGE_STD	= 0FFFFh
+ 19   0000
+ 20   0000              ;-----------------------------------------------------
+ 21   0000
+ 22   0000              TestLoop:
+ 23   0000 3A FB 00         ld   a, (Mode)
+ 24   0003 FE 00            cp   0
+ 25   0005 CC 70 00         call z, TestCheckerboard
+ 26   0008                  ;cp   1
+ 27   0008                  ;call z, TestPrint
+ 28   0008 CD 7F 00         call TestPrint
+ 29   000B
+ 30   000B              KeyLoop:	; Ожидание нажатия клавиши
+ 31   000B CD 1B C8     	call 0C81Bh
+ 32   000E FE 19        	cp   19h	; кнопка вверх
+ 33   0010 CA 30 00     	jp   z, ButUp
+ 34   0013 FE 1A        	cp   1Ah	; кнопка вниз
+ 35   0015 CA 3C 00     	jp   z, ButDown
+ 36   0018 FE 18        	cp   18h	; кнопка вправо
+ 37   001A CA 48 00     	jp   z, ButRight
+ 38   001D FE 08        	cp   08h	; кнопка влево
+ 39   001F CA 54 00     	jp   z, ButLeft
+ 40   0022 FE 20        	cp   20h	; кнопка пробел
+ 41   0024 CA 60 00     	jp   z, ChangeMode
+ 42   0027 FE 1B        	cp   1Bh	; кнопка Esc
+ 43   0029 C8           	ret  z
+ 44   002A FE 1F        	cp   1Fh	; кнопка СТР
+ 45   002C C8           	ret  z
+ 46   002D C3 0B 00     	jp   KeyLoop
+ 47   0030
+ 48   0030              ;-----------------------------------------------------
+ 49   0030
+ 50   0030              ButUp:		; Увеличить цвет символов
+ 51   0030 3A F9 00     	ld  a, (FrontColor)
+ 52   0033 3C           	inc a
+ 53   0034 E6 0F        	and 0Fh
+ 54   0036 32 F9 00     	ld  (FrontColor), a
+ 55   0039 C3 00 00     	jp  TestLoop
+ 56   003C
+ 57   003C              ButDown:	; Уменьшить цвет символов
+ 58   003C 3A F9 00     	ld  a, (FrontColor)
+ 59   003F 3D           	dec a
+ 60   0040 E6 0F        	and 0Fh
+ 61   0042 32 F9 00     	ld  (FrontColor), a
+ 62   0045 C3 00 00     	jp  TestLoop
+ 63   0048
+ 64   0048              ButRight:	; Увеличить цвет фона
+ 65   0048 3A FA 00     	ld  a, (BackColor)
+ 66   004B 3C           	inc a
+ 67   004C E6 0F        	and 0Fh
+ 68   004E 32 FA 00     	ld  (BackColor), a
+ 69   0051 C3 00 00     	jp  TestLoop
+ 70   0054
+ 71   0054              ButLeft:	; Уменьшить цвет фона
+ 72   0054 3A FA 00     	ld  a, (BackColor)
+ 73   0057 3D           	dec a
+ 74   0058 E6 0F        	and 0Fh
+ 75   005A 32 FA 00     	ld  (BackColor), a
+ 76   005D C3 00 00     	jp  TestLoop
+ 77   0060
+ 78   0060              ChangeMode: ; Переключить режим
+ 79   0060 3A FB 00         ld  a, (Mode)
+ 80   0063 3C               inc a
+ 81   0064 FE 02            cp  2
+ 82   0066 C2 6A 00         jp  nz, SetMode
+ 83   0069 AF               xor a
+ 84   006A              SetMode:
+ 85   006A 32 FB 00         ld  (Mode), a
+ 86   006D C3 00 00         jp  TestLoop
+ 87   0070
+ 88   0070              ;-----------------------------------------------------
+ 89   0070              ; Закрашиваение экрана пикселями в шахматном порядке
+ 90   0070              ;-----------------------------------------------------
+ 91   0070
+ 92   0070              TestCheckerboard:
+ 93   0070 CD E4 00     	call Beep	; звуковой сигнал
+ 94   0073 CD D4 00         call SetColor
+ 95   0076 11 AA 55         ld   de, 55AAh
+ 96   0079 CD AE 00     	call ClearScreen
+ 97   007C C3 0B 00         jp   KeyLoop
+ 98   007F
+ 99   007F              ;-----------------------------------------------------
+100   007F              ; Тест скорости вывода текста
+101   007F              ;-----------------------------------------------------
+102   007F
+103   007F              TestPrint:
+104   007F 11 00 00         ld   de, 0
+105   0082 CD AE 00     	call ClearScreen
+106   0085 0E 20        	ld   c, 20h		; Код первого символа
+107   0087
+108   0087              TestPrintRep:
+109   0087 C5           	push bc
+110   0088
+111   0088                  IF KOI8 == 1
+112   0088 ~            	    ld   c, 1Bh		; Esc
+113   0088 ~            	    call 0C809h
+114   0088 ~            	    ld   c, '('		; Включение КОИ-8 (MXOS)
+115   0088 ~            	    call 0C809h
+116   0088                  ENDIF
+117   0088
+118   0088 0E 0C        	ld   c, 0Ch		; Установка курсора в начало экрана путем печати символа 0Ch (кроссплатформенно)
+119   008A CD 09 C8     	call 0C809h
+120   008D C1           	pop  bc
+121   008E 11 C0 05     	ld   de, 64*23	; Сколько всего символов выводить (23 строки разрешено в RAMFOS)
+122   0091              PrintLoop:
+123   0091 CD 09 C8     	call 0C809h
+124   0094 0C           	inc  c
+125   0095
+126   0095                  IF KOI8 == 1
+127   0095 ~            	    jnz  Print1		; Прыгаем, если не перешли через 0FFh
+128   0095 ~            	    ld   c, 020h	; Код первого символа КОИ7
+129   0095 ~            	    jp   Print2
+130   0095 ~            Print1:
+131   0095 ~            	    ld   a, c
+132   0095 ~            	    cp   080h		; Код последнего символа КОИ7 + 1
+133   0095 ~            	    jp   nz, Print2
+134   0095 ~            	    ld   c, 0C0h	; Код первого символа КОИ8
+135   0095                  ENDIF
+136   0095
+137   0095 79           	ld   a, c
+138   0096 FE 80        	cp   080h		; Код последнего символа КОИ7 + 1
+139   0098 C2 9D 00     	jp   nz, Print2
+140   009B 0E 20        	ld   c, 020h	; Код первого символа КОИ7
+141   009D
+142   009D              Print2:
+143   009D 1B           	dec  de
+144   009E 7A           	ld   a, d
+145   009F B3           	or   e
+146   00A0 C2 91 00     	jp   nz, PrintLoop
+147   00A3 CD 1B C8     	call 0C81Bh		; Проверка нажатия любой клавиши
+148   00A6 FE FF        	cp   0FFh		; Не нажата
+149   00A8 CA 87 00     	jp   z, TestPrintRep
+150   00AB C3 0B 00         jp   KeyLoop
+151   00AE
+152   00AE              ;-----------------------------------------------------
+153   00AE              ; Очистка экрана
+154   00AE              ; de = слово для заполнения памяти
+155   00AE              ; bc, hl - сохраняюстя
+156   00AE
+157   00AE              ClearScreen:
+158   00AE E5               push hl
+159   00AF C5               push bc
+160   00B0 21 00 00         ld   hl, 0  ; Сохранение SP
+161   00B3 39               add  hl, sp
+162   00B4 22 F7 00         ld   (MemSP), hl
+163   00B7 31 00 C0         ld   sp, 0C000h         ; Устанавливаем SP в конец видеопамяти
+164   00BA 01 00 03         ld   bc, 300h           ; Помещаем в стек 3000h байт
+165   00BD EB               ex   hl, de
+166   00BE              ClearLoop:
+167   00BE E5           	push hl
+168   00BF E5           	push hl
+169   00C0 E5           	push hl
+170   00C1 E5           	push hl
+171   00C2 E5           	push hl
+172   00C3 E5           	push hl
+173   00C4 E5           	push hl
+174   00C5 E5           	push hl
+175   00C6 0B           	dec  bc
+176   00C7 78           	ld   a, b
+177   00C8 B1           	or   c
+178   00C9 C2 BE 00     	jp   nz, ClearLoop
+179   00CC 2A F7 00     	ld   hl, (MemSP) ; Восстанавливаем SP
+180   00CF F9           	ld   sp, hl
+181   00D0 EB               ex   hl, de
+182   00D1 C1           	pop  bc
+183   00D2 E1           	pop  hl
+184   00D3 C9           	ret
+185   00D4
+186   00D4              ;-----------------------------------------------------
+187   00D4
+188   00D4              SetColor:
+189   00D4 3A F9 00         ld   a, (FrontColor)
+190   00D7 07               rlca
+191   00D8 07               rlca
+192   00D9 07               rlca
+193   00DA 07               rlca
+194   00DB 5F               ld   e, a
+195   00DC 3A FA 00         ld   a, (BackColor)
+196   00DF B3               or   e
+197   00E0 32 F8 FF         ld   (REG_COLOR), a
+198   00E3 C9               ret
+199   00E4
+200   00E4              ;-----------------------------------------------------
+201   00E4
+202   00E4              Beep:	; Звуковой сигнал
+203   00E4 01 5F 0F     	ld  bc, 0F5Fh
+204   00E7 3E 0A        	ld  a, 0Ah	; команда для ВВ55 - установить PC5 в 0
+205   00E9              Snd1:	; цикл звукового сигнала
+206   00E9 32 E3 FF     	ld  (REG_KEYB+3), a     ; запись команды в регистр управления порта клавиатуры ВВ55
+207   00EC              Snd2:
+208   00EC 05           	dec b                   ; задержка на FFh циклов (в b)
+209   00ED C2 EC 00     	jp  nz, Snd2
+210   00F0 EE 01        	xor 01h                 ; команда для ВВ55 - установить PC5 в инверсное значение
+211   00F2 0D           	dec c
+212   00F3 C2 E9 00     	jp  nz, Snd1            ; повторить FFh раз (в C)
+213   00F6 C9           	ret
+214   00F7
+215   00F7              ;-----------------------------------------------------
+216   00F7
+217   00F7 00 00        MemSP:          DW     0000h
+218   00F9 0F           FrontColor:     DB     0Fh
+219   00FA 00           BackColor:      DB     00h
+220   00FB 00           Mode:           DB     00h
+221   00FC
+222   00FC              ;-----------------------------------------------------
+223   00FC
+224   00FC                  END
+# file closed: D:\Projects\Specialist\MySoft\MXOS-Z80\test-scr\test-scr.asm

@@ -30,20 +30,20 @@ drawCursor3:      ; Сохраняем регистры
             ; e = ~((bios_vars.cursorCfg / 16) % 8 - 3) + l
             ld    a, (bios_vars.cursorCfg)
             ld    b, a
-            RRCA
-            RRCA
-            RRCA
-            RRCA
+            rrca
+            rrca
+            rrca
+            rrca
             and   7
             sub   3
-            CPL
+            cpl
             add   a, l
             ld    e, a
 
             ; Рассчитыаем маску курсора
             ;  hl = 011111100b << (((~h) % 4 +1)*2)
             ld    a, h
-            CPL
+            cpl
             and   3
             ld    hl, 011111100b ; FCh
             inc   a

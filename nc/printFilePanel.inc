@@ -31,21 +31,20 @@ printFilePanel:
         COLOR   COLOR_FILE
 
         ; Вывод всех файлов
-        ld      hl, nc_vars.fileListBuffer
+        ld      hl, FILE_LIST_BUFFER
         ld      de, (P_FILE_LIST_X1 << 8) + P_FILE_LIST_Y
         ld      c,  0
 
-            
 printFilesLoop:
         ; Установка положения курсора
         ex      de, hl
         call    setCursorPosPanel
         ex      de, hl
 
-        ; Файл существует?
+        ; Файл существует (первый символ имени - не FF)?
         ld      a, (hl)
         inc     a
-        jp z,   loc_D94E
+        jp z,   printFilesLoopExit
 
         push    bc
         push    de
@@ -96,7 +95,7 @@ printFilesLoop:
         cp      20
         jp c,   printFilesLoop
 
-loc_D94E:
+printFilesLoopExit:
         ; Сохранение кол-ва файлов
         ld      hl, panelA_filesCnt
         ld      a, c

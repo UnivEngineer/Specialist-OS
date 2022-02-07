@@ -23,10 +23,10 @@ loc_D6C7:   ld    c, a
             xor   1                       
             ld    (activePanel),a
 
-            ; Перезагружаем списк файлов
+            ; Перезагружаем список файлов
             ld    hl, panelA_drive
             call  readBytePanel
             call  loadFiles   ; На входе нужен a=накопитель
 
-            jp    loc_D603
+            jp    saveStateAndReload
 

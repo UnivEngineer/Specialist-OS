@@ -34,11 +34,11 @@ loc_D5C3:   ; ¬осстанавливаем activePanel
             ; ѕерезагружаем и перерисовываем первую панель, только если она отображаетс€
             ld    a, (panelA_info)
             and   a
-            jp z, loc_D603
+            jp z, saveStateAndReload
             call  loadAndPrintA
 
             ; —охран€ем состо€ние и выходим
-            jp    loc_D603
+            jp    saveStateAndReload
 
 ; ---------------------------------------------------------------------------
 
@@ -71,10 +71,11 @@ loc_D5F2:   ; ¬осстанавливаем activePanel
             ; ѕерезагружаем и перерисовываем вторую панель, только если она отображаетс€
             ld    a, (panelB_info)
             and   a
-            jp z, loc_D603
+            jp z, saveStateAndReload
             call  loadAndPrintB
             
-loc_D603:   ; —охран€ем состо€ние и выходим
+saveStateAndReload:
+            ; —охран€ем состо€ние и выходим
             call  saveState
             jp    mainDriveChanged
 

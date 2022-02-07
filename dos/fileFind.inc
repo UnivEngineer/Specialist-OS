@@ -21,12 +21,13 @@ fileFind2:  ; Сохраняем регистры
             push    de
 
             ; Начало каталога
-            ld      de, diskDirectory
+            ld      de, DIR_BUFFER
 
             ; Кол-во файлов в каталоге
             ld      b, DIR_MAX_FILES
 
-fileFind_loop:    ; Сохраняем адрес начала имени в каталоге и образец
+fileFind_loop:
+            ; Сохраняем адрес начала имени в каталоге и образец
             push    hl
             push    de
 
@@ -38,7 +39,8 @@ fileFind_loop:    ; Сохраняем адрес начала имени в каталоге и образец
             ; Длина имени + расширения
             ld      c, DIR_NAME_LENGTH + 3
 
-fileFind_name:    ; Если символы не равны, переходим к следующему файлу
+fileFind_name:
+            ; Если символы не равны, переходим к следующему файлу
             ld      a, (de)
             cp      (hl)
             jp nz,  fileFind_next
@@ -55,7 +57,7 @@ fileFind_name:    ; Если символы не равны, переходим к следующему файлу
 
             ; Восстаналиваем регистры и выходим с CF=0
             pop     hl
-            or      a     ; х.з.
+            or      a     ; для выхода с флагом
             pop     de
             pop     bc
             ret

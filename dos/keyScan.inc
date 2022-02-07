@@ -40,8 +40,8 @@ loc_C1DD:   ld    a, h
             ld    (IO_KEYB_C),a
             ld    a, l
             ld    (IO_KEYB_A),a
-            RRCA
-            CPL
+            rrca
+            cpl
             and   4
             ld    c, a
             ld    a, (IO_KEYB_B)
@@ -49,9 +49,9 @@ loc_C1DD:   ld    a, h
 
             ; Перебираем 6 кнопок в столбце
             ld    c, 6
-            RRCA
-            RRCA
-loc_C1F2:   RRCA
+            rrca
+            rrca
+loc_C1F2:   rrca
             call NC,    keybScan3
             dec   c
             jp nz,  loc_C1F2

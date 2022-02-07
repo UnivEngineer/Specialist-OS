@@ -35,7 +35,7 @@ installDriver:    ; Сохранение регистров
             ; Восстановление регистров
             ex  de, hl
             pop de
-            RRCA
+            rrca
 
             ; Выход
             ret

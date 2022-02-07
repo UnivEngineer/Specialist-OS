@@ -67,7 +67,7 @@ setRAMDDriver_2:
 
 ; Чтение 256-байтного блока с диска
 
-driverBlockStart: ; копируется на FFC0h
+driverBlockStart: ; эта п/п копируется на FFC0h
             ld      a, c
             ld      (IO_PAGE_RAMD), a
             ld      a, (de)
@@ -83,7 +83,7 @@ driverBlockStart: ; копируется на FFC0h
 
 ; Запись 256-байтного блока на диск
 
-driverBlockWrite: ; копируется на FFD0h
+driverBlockWrite: ; эта п/п копируется на FFD0h
             ld      b, (hl)
             ld      a, c
             ld      (IO_PAGE_RAMD), a
@@ -117,7 +117,7 @@ driverBlockEnd:
 ;
 ;----------------------------------------------------------------------------
 
-driverByteStart: ; копируется на FFC0h
+driverByteStart: ; эта п/п копируется на FFC0h
             ld      (IO_PAGE_RAMD), a
             ld      c, (hl)
             ld      (IO_PAGE_RAM), a
@@ -133,7 +133,7 @@ driverByteStart: ; копируется на FFC0h
             nop
             nop
 
-driverByteWrite: ; копируется на FFD0h
+driverByteWrite: ; эта п/п копируется на FFD0h
             ld      (IO_PAGE_RAMD), a
             ld      (hl), c
             ld      (IO_PAGE_RAM), a

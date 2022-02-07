@@ -38,9 +38,9 @@
 	INCLUDE "printChar4.inc" ; Продолжается в scrollUp
 	INCLUDE "scrollUp.inc"
 
-    ; Буфер для копирования изображения символов при использовании шрифта в ПЗУ
+    ; Буфер для копирования изображения символов при использовании шрифта из ПЗУ
 v_char:
-    DB 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh
+    BLOCK   13, 0FFh
 
 	INCLUDE "keyScan.inc"
 	INCLUDE "getch2.inc"
@@ -53,9 +53,18 @@ v_char:
 
     ORG_PAD 0C377h
     INCLUDE "tape.inc"
+	INCLUDE "cmp_hl_de_2.inc"
+	INCLUDE "sbb_de_hl_to_hl.inc"
+	INCLUDE "memmove_bc_hl.inc"
+	INCLUDE "memset_de_20_b.inc"
 
     ORG_PAD 0C3D0h
     jp  t_tapeWrite
+
+    IF RAMFOS_COMPATIBILITY
+	INCLUDE "strToHex.inc"
+    ENDIF
+    ; Здесь есть свободное место (15 байт)
 
     ORG_PAD 0C427h
 	INCLUDE "cmp_hl_de.inc"
@@ -75,7 +84,7 @@ v_char:
     jp  t_tapeReadError
 
 ;---------------------------------------------------------------------------
-; Переменые
+; Переменные
 ;---------------------------------------------------------------------------
 
 ; Начальные значения переменных хранятся здесь, и при сбросе
@@ -105,6 +114,7 @@ v_keybTbl:
 	INCLUDE "scrollDown.inc"
 	INCLUDE "scrollUp2.inc"
 	INCLUDE "checkRAMD.inc"
+    ; Здесь есть свободное место (29 байт)
 
 ;---------------------------------------------------------------------------
 ; Точки входа 0C800h
@@ -112,14 +122,10 @@ v_keybTbl:
 
 	ORG_PAD 0C800h
 	INCLUDE "jmps_c800.inc"
-
 	INCLUDE "setGetCursorPos.inc"
 	INCLUDE "setGetMemTop.inc"
 	INCLUDE "printHex.inc"
 	INCLUDE "input.inc"
-	INCLUDE "cmp_hl_de_2.inc"
-	INCLUDE "sbb_de_hl_to_hl.inc"
-	INCLUDE "memmove_bc_hl.inc"
 	INCLUDE "calcCS.inc"
 	INCLUDE "reboot3.inc"
 	INCLUDE "fileExecBat.inc"
@@ -130,7 +136,8 @@ v_keybTbl:
 	INCLUDE "installDriver.inc"
 	INCLUDE "fileGetSetDrive.inc"
 	INCLUDE "loadSaveFatDir.inc"
-	INCLUDE "fileFindCluster.inc"
+	INCLUDE "fatFindCluster.inc"
+    INCLUDE "fatReadWriteCluster.inc"
 	INCLUDE "fileCreate.inc"
 	INCLUDE "fileFind.inc"
 	INCLUDE "fileLoad.inc"
@@ -141,25 +148,27 @@ v_keybTbl:
 	INCLUDE "fileGetInfoAddr.inc"
 	INCLUDE "fileList.inc"
 	INCLUDE "fileNamePrepare.inc"
-	INCLUDE "memset_de_20_b.inc"
-
-    IF RAMFOS_COMPATIBILITY
-	INCLUDE "strToHex.inc"
-    ENDIF
-
 	INCLUDE "printDecWord.inc"
 
 ;---------------------------------------------------------------------------
-; Константы и переменые
+; Константы и Переменные
 ;---------------------------------------------------------------------------
 
 txtBadCommand:	    DB 0Ah,"BAD COMMAND OR FILE NAME",0
-txtBiosVer:         DB 0Ch,"MXOS BIOS 4.60",0Ah, 0
-txtRAM:             DB 0Ah,"RAM:",0
+txtBiosVer:         DB 0Ch,"MXOS BIOS 5.00",0Ah, 0
+txtRAM:             DB 0Ah,"RAM: ",0
 txtKB:              DB " KB",0Ah, 0
-v_drives:			DW diskDriver, diskDriver, diskDriver, diskDriver  ; Адреса драйверов для 8 устройств
-					DW diskDriver, diskDriver, diskDriver, diskDriver  ; (начальное значение = diskDriver = 0C863h)
-v_findCluster:		DW 0
+
+; Адреса драйверов для 8 устройств. Начальные значения:
+; = diskDriver для устройств A: и B: (встроенный драйвер ROM и RAM диска),
+; = diskDriverDummy для отальных (пустой драйвер).
+v_drives:			DW diskDriver, diskDriver      ; A:, B:
+                    DW diskDriver, diskDriver      ; C:, D:
+					DW diskDriver, diskDriver      ; E:, F:
+                    DW diskDriver, diskDriver      ; G:, H:
+
+v_findCluster:		DW 0        ; Используется в fileFindClusterFirst/fileFindClusterNext
+v_fileFirstCluster: DW 0        ; Первый кластер созданного файла
 v_drive:			DB 1
 v_input_start:		DW 0
 v_createdFile:		DW 0        ; Адрес дескриптора созданного файла

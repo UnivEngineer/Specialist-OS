@@ -12,6 +12,7 @@
 ;  cf - ошибка
 ;
 ; 2013-12-12 Дизассемблировано vinxru
+; 2022-02-04 Переработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
 fileLoad2:  ; Ищем файл с именем в hl
@@ -68,43 +69,45 @@ fileLoad:   ; Ищем файл с именем в hl
             ld      d, (hl)
 
 fileLoadStep2:
+            ; Сохраним адрес загрузки
+            push    de
+
             ; hl = указатель на номер первого кластера файла
             ld      hl, (v_foundedFile)
             ld      bc, FILE_DESCRIPTOR.firstCluster
             add     hl, bc
 
-            ; a = первый кластер файла
-            ld      a, (hl)
+            ; de = первый кластер файла
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl)
 
             ; hl = указатель на длину найденного файла
             ld      hl, (v_foundedFile)
             ld      bc, FILE_DESCRIPTOR.size + 1
             add     hl, bc
 
-            ; b = размер файла в кластерах. Просто читаем старший байт
+            ; c = количество кластеров файла. Просто читаем старший байт
             ; размера, т.к. кластер размером 256 байт.
             ; TODO: это не будет работать с другим размером кластера!
-            ld      b, (hl)
-            inc     b
+            ld      c, (hl)
+            inc     c
 
             ; hl = адрес загрузки
-            ex      de, hl
+            pop     hl
 
 fileLoadLoop:
             ; Читаем кластер в память
-            ld      e, 2        ; Чтение
-            ld      d, a        ; Кластер
-            call    j_diskDriver
+            ld      b, 2            ; b = 2 - режим чтения
+            call    j_diskDriver    ; de = номер кластера, hl = адрес куда читать
 
-            ; Следующий кластер
-            inc     h
-            ld      e, d
-            ld      d, fat>>8 ; адрес таблицы fat в памяти
-            ld      a, (de)
+            inc     h               ; следующий блок в памяти (TODO: это работает только для кластера 256 байт)
 
-            ; Цикл
-            dec     b
-            jp nz,  fileLoadLoop
+            ; Вычисляем следующий кластер в fat
+            call    fatReadCluster  ; de = номер следующего кластера
+
+            dec     c               ; счётчик записанных кластеров
+            jp nz,  fileLoadLoop    ; повтор цикла
 
             ; Восстанавливаем регистры
             pop     de
@@ -139,7 +142,7 @@ fileLoadExit:
             ld      b, DIR_DESCR_SIZE - DIR_NAME_LENGTH - 3
 fileLoadCDLoop:
             ld      a, (hl)
-            ld      (de),a
+            ld      (de), a
             inc     hl
             inc     de
             dec     b
@@ -147,5 +150,5 @@ fileLoadCDLoop:
 
             ; Выход CF=0
             or      a
-            jp      popDBh_ret
+            jp      popDBH_ret
 

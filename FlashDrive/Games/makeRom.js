@@ -6,7 +6,13 @@
 // 2022-01-27 Дополнено SpaceEngineer
 //----------------------------------------------------------------------------
 
-fat16   = 1;                    // Сформировать ром-диск в FAT16
+fat16       = 1;                // Сформировать ром-диск в FAT16
+fatElemSize = fat16 ? 2 : 1;    // Размер элемента fat в байтах
+fatSize     = fat16 ? 16: 1;    // Размер fat в кластерах
+dirSize     = fat16 ? 4 : 3;    // Размер каталога в кластерах
+shipSizeB   = 512*1024;         // Размер ПЗУ в байтах
+diskSize    = shipSizeB >> 8;   // Размер ПЗУ в кластерах
+maxFiles    = dirSize * 8;      // Максимум файлов в каталоге
 
 // Стандартная ерунда
 fso = new ActiveXObject("Scripting.FileSystemObject");
@@ -48,45 +54,54 @@ dest = [];
 // Пустой образ ПЗУ
 rom = [];
 
-numFiles = 0;
-maxFiles = fat16 ? 24 : 48; // Максимум файлов в каталоге
-
-minCluster = 4;
-numClusters = 4;
-maxClusters = 65536 >> 8;		// Размер страницы ПЗУ в секторах
+minCluster  = fatSize + dirSize;
+numClusters = minCluster;
+maxClusters = diskSize;    // Размер страницы ПЗУ в секторах
 
 numPages = 0;
-maxPages = 512*1024 / 65536;	// Размер микросхемы ПЗУ в страницах
+maxPages = 1;   // Размер микросхемы ПЗУ в страницах
 
 numChips = 0;
 
-// Поиск пустого кластера
-function allocCluster(cluster, fileName)
+function allocCluster(cluster, minCluster)
 {
-	for(;;)
-	{
-		for (var i=minCluster; i<maxClusters; i++)
-		{
-			if (fat[i]==0)
-			{
-				if(cluster) fat[cluster] = i;
-				fat[i] = i;
-				return i;
-			}
-		}
+    for (;;)
+    {
+        for (var i=minCluster; i<diskSize; i++)
+        {
+            if (fat16)
+            {
+                i2 = i * 2;
+                if ((fat[i2] == 0) && (fat[i2+1] == 0))
+                {
+                    if (cluster)
+                    {
+                        fat[cluster*2]   = (i & 0xFF);
+                        fat[cluster*2+1] = (i >> 8) & 0xFF;
+                    }
+                    fat[i2]   = (i & 0xFF);
+                    fat[i2+1] = (i >> 8) & 0xFF;
+                    return i;
+                }
+            }
+            else
+            {
+                if (fat[i] == 0)
+                {
+                    if (cluster) fat[cluster] = i;
+                    fat[i] = i;
+                    return i;
+                }
+            }
+        }
 
-		if (minCluster == 4)
-		{
-			shell.Popup("Не хватило места!\n\n" + fileName +
-						"\n\nallocCluster():\n\nnumChips = " + numChips +
-						"\nnumPages = " + numPages +
-						"\ntotalClusters = " + numClusters +
-						"\nnumFiles = " + numFiles,
-						0, "Error", 0)
-			throw "Нет места";
-		}
-		minCluster = 4;
-	}
+        if (minCluster == fatSize + dirSize)
+        {
+			shell.Popup("Не хватило места!\n" + filesCnt, 0, "Error", 0)
+            throw "Нет места";
+        }
+        minCluster = fatSize + dirSize;
+    }
 }
 
 // Создание нового образа микросхемы ПЗУ
@@ -117,10 +132,18 @@ function newPage()
 	//shell.Popup("New page: " + numPages, 0, "New page", 0)
 
 	// Пустой FAT
-	fat = [];
-	for (i=0; i<4; i++) fat[i] = 0x76; // Первые 4 байта - код перехода на загрузчик, команда HLT здесь
-	for (;i<maxClusters; i++) fat[i] = 0;
-	for (;i<256; i++) fat[i] = 0xFF;
+	//fat = [];
+	//for (i=0; i<4; i++) fat[i] = 0x76; // Первые 4 байта - код перехода на загрузчик, команда HLT здесь
+	//for (;i<maxClusters; i++) fat[i] = 0;
+	//for (;i<256; i++) fat[i] = 0xFF;
+
+	// Пустой FAT
+    fat = [];
+    // Первые 4 байта fat заняты командой перехода на загрузчик.
+    // Она нам не нужна, пишем 76h здесь (HLT)
+	for (i=0; i<4; i++) fat[i] = 0x76;
+    // Остальные кластеры свободны (код 0x0000)
+    for (;i<fatElemSize*diskSize; i++) fat[i] = 0x00;
 
 	// Пустой каталог
 	dir = [];
@@ -136,22 +159,22 @@ function newPage()
 // Завершение текущей страницы ПЗУ
 function finishPage()
 {
-	//shell.Popup("Finish page: " + numPages, 0, "Finish page", 0)
+    //shell.Popup("Finish page: " + numPages, 0, "Finish page", 0)
 
-	// Пустой хвост каталога
-	while (dir.length < 3*256)
-		dir += encode[0xFF];
+    // Пустой хвост каталога
+    while (dir.length < dirSize*256)
+        dir += encode[0xFF];
 
-	// FAT + каталог
-	start = "";
-	for(i=0; i<256; i++) start += encode[fat[i]];
-	start += dir;
+    // FAT + Каталог
+    start = "";
+    for (i=0; i<fatSize*256; i++) start += encode[fat[i]];
+    start += dir;
 
 	// Собираем страницу диска
-	page = start + dest.substr(start.length, 65536-start.length);
+	page = start + dest.substr(start.length, shipSizeB-start.length);
 
 	// Пустой хвост страницы диска
-	while (page.length < 65536) page += encode[0xFF];
+	while (page.length < shipSizeB) page += encode[0xFF];
 
 	// Добавляем в образ ПЗУ
 	rom += page;
@@ -179,7 +202,7 @@ function putFile(fileName)
 	if (numClusters + data_clusters >= maxClusters - minCluster) return 2;
 
 	// Проверяем размер каталога
-	if (numFiles + 1 >= maxFiles) return 2;
+	if (numFiles >= maxFiles) return 2;
 
 	numClusters += data_clusters;
 	numFiles++;
@@ -190,7 +213,12 @@ function putFile(fileName)
 	ext = fso.GetExtensionName(fileName);
 
 	//if ((numChips == 2) && (numPages > 0))
-	//	shell.Popup("File: " + fileName + "\nsize = " + data_clusters + " clusters\nnumFiles = " + numFiles + "\ntotalClusters = " + numClusters + "\nnumPages = " + numPages, 0, "Adding file", 0)
+	//  shell.Popup("File: " + fileName
+    //                + "\nsize = " + data_clusters
+    //                + " clusters\nnumFiles = " + numFiles
+    //                + "\ntotalClusters = " + numClusters
+    //                + "\nnumPages = " + numPages,
+    //                0, "Adding file", 0)
 
 
 	if (ext == "RKS")
@@ -212,11 +240,11 @@ function putFile(fileName)
 	fileName = fso.GetBaseName(fileName);
 
 	// Сохраняем файл
-	cluster = startCluster = 0;
+	cluster = firstFileCluster = 0;
 	while (data.length != 0)
 	{
-		cluster = allocCluster(cluster, fileName); 
-		if (startCluster == 0) startCluster = cluster;
+		cluster = allocCluster(cluster, minCluster); 
+		if (firstFileCluster == 0) firstFileCluster = cluster;
 		block = data.substr(0,256);
 		data = data.substr(256);
 		dest = dest.substr(0,256*cluster) + block + dest.substr(256*cluster+block.length);
@@ -238,8 +266,8 @@ function putFile(fileName)
         dir += encode[0];                           // первый кластер - байт 3
         dir += encode[0] + encode[0];               // время записи
         dir += encode[0] + encode[0];               // дата записи
-        dir += encode[startCluster];                // первый кластер - байт 0
-        dir += encode[0];                           // первый кластер - байт 1
+        dir += encode[firstFileCluster & 0xFF];     // первый кластер - байт 0
+        dir += encode[firstFileCluster >> 8];       // первый кластер - байт 1
         dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
         dir += encode[(data_size - 1) >> 8];        // размер - байт 1
         dir += encode[0];                           // размер - байт 2
@@ -254,8 +282,8 @@ function putFile(fileName)
         dir += encode[startAddr >> 8];              // адрес загрузки - байт 1
         dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
         dir += encode[(data_size - 1) >> 8];        // размер - байт 1
-        dir += encode[0];                           // crc?
-        dir += encode[startCluster];                // первый кластер
+        dir += encode[0];                           // crc
+        dir += encode[firstFileCluster];            // первый кластер
     }
 
 	return 0;

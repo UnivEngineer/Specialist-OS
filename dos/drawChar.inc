@@ -13,7 +13,7 @@
             ; Высота символа
             ld    l, 8
 
-            ; Переходим в одной из функций вывода
+            ; Переходим к одной из функций вывода
             ld    a, h
             and   3
             jp z, drawChar0   ; a==0
@@ -35,11 +35,12 @@ drawChar2:  ld    a, (bc)
             rrca
             rrca
             rrca
-drawChar2_cma:    CPL
+drawChar2_cma:
+            cpl
             push  af
             and   3
             xor   h
-            ld    (bc),a
+            ld    (bc), a
             inc   b
             ld    a, (bc)
             and   0Fh
@@ -65,7 +66,8 @@ drawChar3:  ld    a, (bc)
             ld    a, (de)
             rlca
             rlca
-drawChar3_xri:    xor   0FCh
+drawChar3_xri:
+            xor   0FCh
             xor   h
             ld    (bc),a
 
@@ -82,7 +84,8 @@ drawChar0:  ld    a, (bc)
             and   0C0h
             ld    h, a
             ld    a, (de)
-drawChar0_xri:    xor   3Fh
+drawChar0_xri:
+            xor   3Fh
             xor   h
             ld    (bc),a
 
@@ -101,7 +104,8 @@ drawChar1:  ld    a, (bc)
             ld    a, (de)
             rrca
             rrca
-drawChar1_cma:    CPL
+drawChar1_cma:
+            cpl
             and   0Fh
             xor   h
             ld    (bc),a
@@ -112,7 +116,8 @@ drawChar1_cma:    CPL
             ld    a, (de)
             rrca
             rrca
-drawChar1_cma2:   CPL
+drawChar1_cma2:
+            cpl
             and   0C0h
             xor   h
             ld    (bc),a
@@ -128,7 +133,8 @@ drawChar1_cma2:   CPL
 ; ---------------------------------------------------------------------------
 ; Вызывается из printChar_real2
 
-normalVideo:      ; Меняем CZ normalVideo на CNZ inverseVideo
+normalVideo:
+            ; Меняем CZ normalVideo на CNZ inverseVideo
             ld    hl, inverseVideo
             ld    (printChar_poly+1), hl
             ld    a, 0C4h
@@ -138,7 +144,8 @@ normalVideo:      ; Меняем CZ normalVideo на CNZ inverseVideo
             xor   a
             ld    (drawChar0_xri+1),a
             ld    (drawChar3_xri+1),a
-normalVideo_1:    ; Меняем CMA на NOP
+normalVideo_1:
+            ; Меняем CMA на NOP
             ld    (drawChar2_cma),a       
             ld    (drawChar1_cma),a
             ld    (drawChar1_cma2),a
@@ -147,7 +154,8 @@ normalVideo_1:    ; Меняем CMA на NOP
 ; ---------------------------------------------------------------------------
 ; Вызывается из printChar_real2
 
-inverseVideo:     ; Меняем CNZ inverseVideo на CZ normalVideo
+inverseVideo:
+            ; Меняем CNZ inverseVideo на CZ normalVideo
             ld    hl, normalVideo
             ld    (printChar_poly+1), hl
             ld    a, 0CCh           

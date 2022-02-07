@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="tape.asm">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="tape.lst">
       <Filter>Resource Files</Filter>
     </None>
@@ -54,5 +51,10 @@
     <None Include="tapeInit.inc">
       <Filter>Header Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="tape.asm">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

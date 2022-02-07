@@ -1,36 +1,35 @@
-;+---------------------------------------------------------------------------
+;----------------------------------------------------------------------------
 ; MXOS
 ; FORMAT.COM
-;
-; 2022-01-14 Дизассемблировано и доработано SpaceEngineer
 ;
 ; Доработки:
 ; - "тихий режим" по параметру Y (форматировать без cпроcа)
 ;    например FORMAT.COM B: Y
 ;
+; 2022-01-14 Дизассемблировано и доработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
 
     ORG 0F100h
 
-    ld      a,(de)      ; В de передаётся адрес строки аргументов
+    ld      a, (de)         ; В de передаётся адрес строки аргументов
     cp      20h
-    jp nc,  Readparams  ; Прыжок, если есть параметр
+    jp nc,  ReadParams      ; Прыжок, если есть параметр
 
     ; Запрос буквы диска для форматирования
 chooseDrive:
     ld      hl, str_ChoseDrive
-    call    bios_printString     ; Вывод сообщения 'CHOOSE DRIVE: '
-    call    bios_getch           ; Ожидание нажатия клавиши
+    call    bios_printString; Вывод сообщения 'CHOOSE DRIVE: '
+    call    bios_getch      ; Ожидание нажатия клавиши
     ld      c, a
     call    bios_printChar
     cp      21h             ; сравнение c пробелом
-    jp c,   abort           ; Выход в ОС, если меньше или равно
+    jp c,   Abort           ; Выход в ОС, если меньше или равно
     ld      b, a            ; Запомнить букву диска в b
-    jp      confirmRequest
+    jp      ConfirmRequest
 
-Readparams:
+ReadParams:
     ld      b, a            ; Запомнить букву диска в b
 
 SearchLoop1:                ; Поиск первого пробела в строке параметров
@@ -49,21 +48,21 @@ SearchLoop2:                ; Пропуск последующих пробелов
 
 SearchLoopExit:     
     cp      'Y'             ; Если найден параметр 'Y', переход к форматированию
-    jp z,   confirmed
+    jp z,   Confirmed
 
     ; Подтверждение форматирования
-confirmRequest:
+ConfirmRequest:
     ld      a, b
-    ld      (str_A_Y_N),a   ; Заменить 'A' в строке сообщения на введённую букву
+    ld      (str_A_Y_N), a  ; Заменить 'A' в строке сообщения на введённую букву
     ld      hl, str_Format
     call    bios_printString; вывод сообщения 'FORMAT <буква>: [Y/N]?'
     call    bios_getch      ; Ожидание нажатия клавиши
     ld      c, a
     call    bios_printChar
     cp      'Y'             ; сравнение c 'Y'
-    jp nz,  abort           ; Выход в ОС, если не 'Y'
+    jp nz,  Abort           ; Выход в ОС, если не 'Y'
     
-confirmed:
+Confirmed:
     ld      a, b            ; Восстановить букву диска в a
 
     ; Буква диска в регистре a
@@ -72,66 +71,135 @@ Format:
     cp      08h             ; Максимальный номер диска = 7
     jp nc,  InvalidDrive    ; Выход, если неверный номер диска
     ld      b, a            ; Запомнить номер диска в b
+    push    af              ; И в стеке
 
     ; Установить выбранный диск текущим
-    ld      a, b    ; Номер диска в a
-    ld      e, 01h
+    ld      e, 01h          ; Номер диска в a
     call    bios_fileGetSetDrive
 
-    ; Выдать размер диска в a
-    ld      e, 03h
-    call    bios_diskDriver
-    ld      e, a    ; Поместить размер диска в e
-    dec     a
+    ; Выдать размер диска в de
+    ld      b, 3            ; режим 3 - получить размер
+    call    bios_diskDriver ; de = размер в кластерах
 
-    ; Очиcтка буфера (e байт)
+    ; Вычисляем количество рабочих и "плохих" кластеров
+    ld      hl, FAT_SIZE / FAT_ITEM_SIZE
+    call    sub_hl_de   ; hl = количество кластеров в fat минус количество кластеров на диске
+    push    hl
+
+    ; Обнуляем рабочую часть fat (de * CLUSTER_SIZE слов 0000h)
+                        ; de = размер в кластерах
+    ld      hl, buffer  ; hl = адрес буфера
+    ld      bc, 0       ; bc = слово для заполнения
+    call    memset
+
+    ; Помещаем слово 0001h ("плохой" сектор) в оставшиеся ячейки fat
+    ; (у ROM-диска 48 кб это все что выше 48 кб, и т.д.)
+                        ; hl = адрес буфера (продолжаем предыдущий)
+    pop     de          ; de = количество кластеров в fat минус количество кластеров на диске
+    ld      bc, 1       ; bc = слово для заполнения
+    call    memset
+
+    ; Помещаем слово 0001h ("плохой" сектор) в зарезервированные ячейки fat, соответсвующие
+    ; самой fat и корневому каталогу
+    ld      hl, buffer                      ; hl = адрес буфера
+    ld      de, FAT_CLUSTERS + DIR_CLUSTERS ; de = количество самой fat и корневого каталога
+    ld      bc, 1                           ; bc = слово для заполнения
+    call    memset
+
+    ; Помещаем слово 0001h ("плохой" сектор) в ячейки fat, соответсвующие
+    ; неполным секторам в конце 64 кб блоков, если это RAM-диск
+    pop     af  ; a = номер диска
+    cp      1   ; RAM-диск это диск 1 ("B:")
+    call z, MarkRamDiskBads
+
+    ; Запись FAT на диск
     ld      hl, buffer
-clearbufLoop:
-    ld      (hl), 0
-    inc     l
-    dec     e
-    jp nz,  clearbufLoop
+    ld      de, 0               ; начинаем с кластера номер 0
+    ld      c,  FAT_CLUSTERS    ; сколько кластеров
+    call    WriteBuffer
 
-    ; Создание пустой структуры FAT (256 байт)
-createFATLoop:
-    inc     a
-    jp z,   WriteToDisk
-    ld      (hl), 01h
-    inc     l
-    jp      createFATLoop
+    ; Создание пустого каталого каталога (DIR_SIZE байт 0FFh)
+    ld      hl, buffer                      ; hl = адрес буфера
+    ld      de, DIR_SIZE / FAT_ITEM_SIZE    ; de = количество секторов
+    ld      bc, 0FFFFh                      ; bc = слово для заполнения
+    call    memset
 
-    ; Запить FAT на диск
-    ; d - номер сектора
-    ; e - код операции
-WriteToDisk:
-    ld      de, 0001h  ; Запись сектора номер 0
-    call    bios_diskDriver
-
-    ; Создание пустой структуры каталога (256 байт)
-createcatLoop:
-    ld      (hl), 0FFh
-    inc     l
-    jp nz,  createcatLoop
-
-    ; Запить секторов c номера 3 по 1
-    ld      d, 03h
-WriteLoop:
-    call    bios_diskDriver
-    dec     d
-    jp nz,  WriteLoop
+    ; Запись каталога на диск
+    ld      hl, buffer
+    ld      de, FAT_CLUSTERS ; начинаем с кластера номер FAT_CLUSTERS
+    ld      c,  DIR_CLUSTERS ; сколько кластеров
+    call    WriteBuffer
 
     ; Выход в ОС
     ret
 
-abort:
-    ld      hl, str_Aborting
-    call    bios_printString     ; Вывод сообщения 'ABORTING'
+;----------------------------------------------------------------------------
+
+; Запись буфера на диск
+; c - сколько кластеров
+; de - номер первого кластера
+WriteBuffer:
+    ld      b,  1   ; режим 1 - запись
+    ld      hl, buffer
+WriteBufferLoop:
+    call    bios_diskDriver
+    inc     de      ; следующий кластер
+    inc     h       ; седующий блок в памяти (размер кластера 256 байт)
+    dec     c
+    jp nz,  WriteBufferLoop
     ret
 
+; Пометить неполные сектора RAM-диска как "бэды"
+MarkRamDiskBads:
+    ld      b,  FAT_CLUSTERS / FAT_ITEM_SIZE    ; b = количество 64кб банок RAM-диска
+    ld      hl, buffer + 255 * FAT_ITEM_SIZE    ; hl = адрес первого "бэда" в буфере fat
+    ld      de, 256 * FAT_ITEM_SIZE - 1         ; de = приращение адреса для перехода к следующему "бэду"
+MarkRamDiskBadsLoop:
+    ld      (hl), 1
+    inc     hl
+    ld      (hl), 0
+    add     hl, de
+    dec     b
+    jp nz,  MarkRamDiskBadsLoop
+    ret
+
+; Заполнение памяти по адресу hl словом bc количеством слов de
+memset:
+    ld      a, d
+    or      e
+    ret     z   ; если de == 0, выходим
+memsetLoop:
+    ld      a, c
+    ld      (hl), a
+    inc     hl
+    ld      a, b
+    ld      (hl), a
+    inc     hl
+    dec     de
+    ld      a, d
+    or      e
+    jp nz,  memsetLoop
+    ret
+
+; hl = hl - de
+sub_hl_de:
+    ld    a, l
+    sub   e
+    ld    l, a
+    ld    a, h
+    sbc   d
+    ld    h, a
+    ret
+
+; Вывод сообщения 'ABORTING'
+Abort:
+    ld      hl, str_Aborting
+    jp      bios_printString
+
+    ; Вывод сообщения 'INVALID DRIVE LETTER'
 InvalidDrive:
     ld      hl, str_InvalidDrive
-    call    bios_printString     ; Вывод сообщения 'INVALID DRIVE LETTER'
-    ret
+    jp      bios_printString
 
 ;----------------------------------------------------------------------------
 ; Данные
@@ -151,7 +219,7 @@ str_InvalidDrive:
 str_Aborting:
     DB 0Ah,"ABORTING",0
 
-buffer = 0D100h ; Буфер
+buffer = 0000h ; 0D100h ; Адрес буфера
 
 ;----------------------------------------------------------------------------
 

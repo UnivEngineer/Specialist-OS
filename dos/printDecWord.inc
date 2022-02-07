@@ -5,6 +5,7 @@
 ;
 ; вход:
 ;   de = число
+;   b = дополнить ведущими символами: 20h - пробелами, 30h - нул€ми, 00h - не дополн€ть
 ;
 ; выход:
 ;   hl, de, bc - сохран€ютс€
@@ -17,7 +18,7 @@ printDecWord:
             push  bc
             push  hl
             ex    de, hl
-            ld    b, 20h
+            ; ld    b,  20h  ; b = маска кода символа, замен€ет ведущие нули на (код_символа and маска)
             ld    de, -10000
             call  printDec1
             ld    de, -1000
@@ -58,9 +59,9 @@ loc_DB11:   inc   c
             ; if (c!='0') b=0xFF; c&=b;          
             cp    '0'
             jp z, loc_DB26
-            ld    b, 0FFh           
+            ld    b, 0FFh   ; первый не ноль, мен€ем маску кода символа на 0FFh
 loc_DB26:   and   b
+            ret   z ; выходим если код символа 0
             ld    c, a
-
             jp    printChar
 

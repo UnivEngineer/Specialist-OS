@@ -26,7 +26,7 @@ loc_C227:   ; Рисуем курсор
             ; Задержка
             ld    a, (bios_vars.cursorDelay)
 loc_C22D:   ld    b, 40h
-            call  delay_l_0
+            call  delay_b
             dec   a
             jp nz,  loc_C22D
 
@@ -78,7 +78,7 @@ getch2_pressed:   ; Сохраняем код
 
             ; Если нарисован курсор, стираем его
             ld    a, c
-            RRCA
+            rrca
             jp c, loc_C269
             call  drawCursor2
 loc_C269:   
@@ -161,16 +161,16 @@ getch_rusLat:     ; на входе a = bios_vars.keyLocks
             ld    (bios_vars.keyLocks),a
 
             ; Особый звуковой сигнал
-            ld    a, (bios_vars.beepDuration)
+            ld    a, (bios_vars.beepFreq)
             push  af
             ld    a, 4Fh
-            ld    (bios_vars.beepDuration),a
+            ld    (bios_vars.beepFreq),a
             call  beep
             ld    a, 5Fh
-            ld    (bios_vars.beepDuration),a
+            ld    (bios_vars.beepFreq),a
             call  beep
             pop   af
-            ld    (bios_vars.beepDuration),a
+            ld    (bios_vars.beepFreq),a
 
             ; ...
             nop
@@ -199,7 +199,7 @@ loc_C2EA:   ; Если зафиксирвоан ли РУС/ЛАТ, помещаем в c=1
             ; Если шифт нажат, помещаем в a=0
             ld    a, (IO_KEYB_B)
             and   2
-            RRCA                    ;! Как на счет флага c ?
+            rrca                    ;! Как на счет флага c ?
 
             ; Превращаем английские символы в русские если a^c==0
             xor   c
@@ -237,10 +237,10 @@ loc_C311:   call  setKeybMode83
             ld    a, 0F7h
             ld    (IO_KEYB_A),a
             ld    a, (IO_KEYB_B)
-            CPL
-            RRCA
-            RRCA
-            RRCA
+            cpl
+            rrca
+            rrca
+            rrca
             call  setKeybMode82
             nop
 

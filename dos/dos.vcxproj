@@ -68,13 +68,14 @@
     <None Include="drawCursor2.inc" />
     <None Include="driver.inc" />
     <None Include="driverFFC0.inc" />
+    <None Include="fatReadWriteCluster.inc" />
     <None Include="fileCmpExt.inc" />
     <None Include="fileCreate.inc" />
     <None Include="fileDelete.inc" />
     <None Include="fileExec.inc" />
     <None Include="fileExecBat.inc" />
     <None Include="fileFind.inc" />
-    <None Include="fileFindCluster.inc" />
+    <None Include="fatFindCluster.inc" />
     <None Include="fileGetInfoAddr.inc" />
     <None Include="fileGetSetAddr.inc" />
     <None Include="fileGetSetAttr.inc" />

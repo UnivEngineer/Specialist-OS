@@ -16,8 +16,8 @@ getSelectedFile:
         call    readBytePanel
 
         ; Получить имя (адрес) текущего файла
-        ; nc_vars.tempFileDescr += DIR_DESCR_SIZE * curFile[activePanel];
-        ld      hl, nc_vars.tempFileDescr 
+        ; вычисляется hl = FILE_LIST_BUFFER + DIR_DESCR_SIZE * curFile[activePanel];
+        ld      hl, FILE_LIST_BUFFER - DIR_DESCR_SIZE
         ld      de, DIR_DESCR_SIZE
 loc_D80F:
         add     hl, de

@@ -72,9 +72,6 @@
     <None Include="fileFind.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="fileFindCluster.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="fileGetInfoAddr.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -214,6 +211,12 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="tape.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fatFindCluster.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fatReadWriteCluster.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -46,17 +46,17 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
             ld          hl, nc_vars.input
             call        printStringInv
 
-loc_D581:   ; CODE XREF: drawWindowIfSel+379j
+loc_D581:   ; Цикл ожидания нажатия любой клавиши
             call        bios_keyScan
             inc         a
             jp nz,      loc_D581
 
-loc_D588:   ; CODE XREF: drawWindowIfSel+386j
+loc_D588:   ; Цикл ожидания нажатия Esc или Enter
             call        bios_keyScan
-            cp          1Bh
-            jp z,       mainReload
-            cp          0Dh
-            jp nz,      loc_D588
+            cp          1Bh             ; Esc
+            jp z,       mainReload      ; Если Esc - выход
+            cp          0Dh             ; Enter
+            jp nz,      loc_D588        ; Если Enter - всё равно удалить
 
 loc_D595:   ; Удаляем текущий файл
             call        getSelectedFile

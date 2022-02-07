@@ -14,8 +14,8 @@ calcCursorAd_0:   ; Перевод строки (на входе c=10)
 
 calcCursorAd_1:   ; Расчет старшего байта адреса
             ; a = cursorX / 4 + 90h       
-            RRCA
-            RRCA
+            rrca
+            rrca
             and   3Fh
             add   a,90h
             ret

@@ -21,7 +21,7 @@ loc_C55C:   ; Если нажат лишь РУС/LAT - то обрабатываем его как CAPS/LOCK
 
             ; Меняем KOI-7 / KOI-8
             ld    a, (bios_vars.koi8)
-            CPL
+            cpl
             ld    (bios_vars.koi8),a
 
             ; Звуковой сигнал
@@ -32,7 +32,7 @@ loc_C55C:   ; Если нажат лишь РУС/LAT - то обрабатываем его как CAPS/LOCK
 
             ; Меняем частоту
             ld    a, 5Fh
-            ld    (bios_vars.beepDuration),a
+            ld    (bios_vars.beepFreq),a
 
             jp    getch_retry
 
@@ -45,9 +45,9 @@ getch_capsLock:   ; Переключаем capsLock
             ld    (bios_vars.keyLocks),a
 
             ; Изменяем высоту звуковго сигнала        
-            ld    a, (bios_vars.beepDuration)
+            ld    a, (bios_vars.beepFreq)
             xor   10h
-            ld    (bios_vars.beepDuration),a
+            ld    (bios_vars.beepFreq),a
 
             ; Ждем следующую клавишу
             jp    getch_retry

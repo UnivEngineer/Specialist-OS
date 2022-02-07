@@ -21,7 +21,7 @@ reboot2:
 
             ; Определяем размер ДОЗУ
             ld      hl, RAMD_PAGE_END
-            ld      a, (bios_vars.maxRamPage)
+            ld      a, (bios_vars.ramPageCount)
             call    checkRAMD
 
             ; Выводим объем ДОЗУ на экран
@@ -29,10 +29,9 @@ reboot2:
             call    printString1
 
             ; Вычисляем объем ДОЗУ в байтах
-            ld      a, (bios_vars.maxRamPage)
+            ld      a, (bios_vars.ramPageCount)
             ld      h, 0
-            ld      l, a
-            inc     l       ; hl = объём в страницах
+            ld      l, a    ; hl = объём в страницах
             inc     l       ; +1 страница - основная память
             add     hl, hl
             add     hl, hl

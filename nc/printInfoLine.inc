@@ -70,4 +70,5 @@ printInfoLine:
         inc     hl
         ld      d, (hl)
         inc     de          ; в дескрипторе файла хранится размер-1
+        ld      b, 20h
         jp      bios_printDecWord

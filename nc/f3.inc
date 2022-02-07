@@ -26,10 +26,10 @@ F3:         ; Временный выбор противоположной панели
             ; Перерисовываем панель
             call  loadAndPrintA
 
-            jp    loc_D603
+            jp    saveStateAndReload
 
 ; ---------------------------------------------------------------------------
 
 loc_D701:   call  loadAndPrintB
-            jp    loc_D603
+            jp    saveStateAndReload
 

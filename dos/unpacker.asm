@@ -3,7 +3,7 @@ DEFC IO_RAM  =  0FFFCh
 
 .org 0E000h
 
-start:            ; Включаем ОЗУ
+start:      ; Включаем ОЗУ
             ld    (IO_RAM),a
 
             ; Стек
@@ -19,7 +19,7 @@ start:            ; Включаем ОЗУ
 ; (с) b2m, vinxru, группа mayhem...
 
 
-unmlz:            ld    a, 80h
+unmlz:      ld    a, 80h
 
 loc_2:            ld    (TMP),a           
             ld    a, (de)
@@ -122,7 +122,7 @@ loc_6A:
             ld    a, 0
 
 loc_76:
-            RRA
+            rra
             dec   h
             jp nz,  loc_76
             ld    h, a
@@ -138,7 +138,7 @@ loc_76:
             ex    de, hl
             add   hl, bc
 
-loc_8C:           ld    a, m
+loc_8C:     ld    a, m
             inc   hl
             ld    (bc),a
             inc   bc
@@ -156,33 +156,33 @@ loc_98:
 
 ; ---------------------------------------------------------------------------
 
-sub_A2:           add   a, a
+sub_A2:     add   a, a
             jp nz,  loc_A9
             ld    a, (de)
             inc   de
             RLA
 
-loc_A9:           jp c, loc_B1
+loc_A9:     jp c, loc_B1
             add   hl, hl
             ret c 
             jp    sub_A2
 
 ; ---------------------------------------------------------------------------
 
-loc_B1:           add   hl, hl
+loc_B1:     add   hl, hl
             inc   l
             ret c 
             jp    sub_A2
 
 ; ---------------------------------------------------------------------------
 
-sub_B7:           add   a, a
+sub_B7:     add   a, a
             jp nz,  loc_BE
             ld    a, (de)
             inc   de
             RLA
 
-loc_BE:           jp c, loc_CA
+loc_BE:     jp c, loc_CA
             ld    (TMP),a
             ld    a, (de)
             inc   de
@@ -191,7 +191,7 @@ loc_BE:           jp c, loc_CA
             ret
 ; ---------------------------------------------------------------------------
 
-loc_CA:           ld    hl, 1FFFh
+loc_CA:     ld    hl, 1FFFh
             call  sub_A2
             ld    (TMP),a
             ld    h, l

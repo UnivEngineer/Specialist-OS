@@ -13,49 +13,54 @@
 ;----------------------------------------------------------------------------
 
 fileDelete: ; Найти файл с именем из hl
-            call  fileFind
-            ret c 
+            call    fileFind
+            ret     c 
 
             ; Удалить файл
-            call  deleteFileInt
+            call    deleteFileInt
 
             ; Сохранить изменения на диск
-            call  saveFatDir
+            call    saveFatDir
 
             ; Результат
-            or    a
+            or      a
             ret
             
 ; ---------------------------------------------------------------------------
 
-deleteFileInt:    ; Сохраняем регистры
-            push  hl
-            push  bc
-            push  de
+deleteFileInt:
+            ; Сохраняем регистры
+            push    hl
+            push    bc
+            push    de
 
-            ; Помечаем файл, как удаленный заменяя его первую букву на FF
-            ld    hl, (v_foundedFile)
-            ld  (hl), 0FFh          
+            ; Помечаем файл, как удаленный заменяя его первую букву его имени на 0FFh
+            ld      hl, (v_foundedFile)
+            ld      (hl), 0FFh          
 
-            ; Получаем первый кластер файла в a
-            ld    de, FILE_DESCRIPTOR.firstCluster
-            add   hl, de
-            ld  a, (hl)
+            ; Получаем первый кластер файла в de
+            ld      de, FILE_DESCRIPTOR.firstCluster
+            add     hl, de
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl)
 
-            ; Адрес таблицы FAT
-            ld    h, fat>>8
+deleteFileLoop:
+            ld      h, d
+            ld      l, e
 
-deleteFileIn_0:   ; Получаем следующий кластер в А
-            ld    l, a
-            ld  a, (hl)
-
-            ; А этот помечаем не занятым
-            ld  (hl), 0
+            ; Обнуляем класте номер de и получаем номер
+            ; следующиего кластера файла в de
+            call    fatFreeCluster
 
             ; Если это был не последний кластер, продолжаем.
-            cp    l
-            jp nz,  deleteFileIn_0
+            ld      a, d
+            cp      h
+            jp nz,  deleteFileLoop
+            ld      a, e
+            cp      l
+            jp nz,  deleteFileLoop
 
             ; Восстаналиваем регистры и выходим
-            jp    popDBh_ret
+            jp      popDBH_ret
 

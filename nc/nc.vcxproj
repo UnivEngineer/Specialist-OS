@@ -71,8 +71,7 @@
     <None Include="loadSelFileAt0.inc" />
     <None Include="main.inc" />
     <None Include="main2.inc" />
-    <None Include="memcpy_hl_de_3.inc" />
-    <None Include="memset_hl_a_c.inc" />
+    <None Include="tools.inc" />
     <CustomBuild Include="NC.asm">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) com 0xD000</Command>

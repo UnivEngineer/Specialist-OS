@@ -46,5 +46,5 @@ loc_CD2C:   ld      a, (hl)
 
             ; Выход
             or      a
-            jp      popDBh_ret
+            jp      popDBH_ret
 
