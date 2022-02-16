@@ -7,11 +7,13 @@
 
     INCLUDE "../include/mxos.inc"
 
-      ORG 0D000h
+    IF NEW_MEMORY_MAP
+        ORG 0E800h
+    ELSE
+        ORG 0D000h
+    ENDIF
 
 ; Конфигурация сборки
-
-SHOW_F9          = 0            ; Рисовать все кнопки F1...F9 на нижнем тулбаре (иначе F1...F8)
 
 FILE_LIST_SIZE   = 36           ; Размер буфера для листинга директории (штук файлов)
 FILE_LIST_BUFFER = 8000h        ; Адрес буфера для листинга директории (FILE_LIST_SIZE дескрипторов + 1 = 1153 байт)
@@ -58,29 +60,27 @@ COLOR_HELP_TEXT  =  071h        ; Цвет текста в строке подсказки
     INCLUDE "start.inc"     ; Продолжается в main
     INCLUDE "main.inc"
     INCLUDE "selFileToCmdLine.inc"
-    INCLUDE "f4.inc"
-    INCLUDE "enter.inc"
-    INCLUDE "saveState.inc"
-    INCLUDE "enter2.inc"
-    INCLUDE "main2.inc"
+    INCLUDE "butF4.inc"
+    INCLUDE "butEnter.inc"
+    INCLUDE "saveLoadState.inc"
     INCLUDE "drawWindow.inc"
     INCLUDE "printStringInv.inc"
     INCLUDE "inputForCopyMove.inc"
     INCLUDE "printSelDrive.inc"
-    INCLUDE "f7.inc"
+    INCLUDE "butF7.inc"
     INCLUDE "tapeErrorHandler.inc"
-    INCLUDE "f9.inc"
+    INCLUDE "butF9.inc"
     INCLUDE "tapeWrite.inc"
-    INCLUDE "f6.inc"
-    INCLUDE "f5.inc"
+    INCLUDE "butF6.inc"
+    INCLUDE "butF5.inc"
     INCLUDE "loadSelFileAt0.inc"
     INCLUDE "copyFileInt.inc"
     INCLUDE "printInvSelFile.inc"
-    INCLUDE "f8.inc"
-    INCLUDE "f2.inc"
-    INCLUDE "tab.inc"
-    INCLUDE "f3.inc"
-    INCLUDE "upDownLeftRight.inc"
+    INCLUDE "butF8.inc"
+    INCLUDE "butF2.inc"
+    INCLUDE "butTab.inc"
+    INCLUDE "butF3.inc"
+    INCLUDE "butArrows.inc"
     INCLUDE "clearCmdLine.inc"    ; Продолжается в printSpaces
     INCLUDE "printSpaces.inc"
     INCLUDE "drawCursor.inc"
@@ -105,34 +105,37 @@ COLOR_HELP_TEXT  =  071h        ; Цвет текста в строке подсказки
 ; Константы и переменные
 ;---------------------------------------------------------------------------
 
-aNameName:          DB "NAME",18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,"NAME",0
-    IF SHOW_F9
-aF1LeftF2RighF3:    DB "F1 L F2 R F3 INF F4 EDIT F5 COPY F6 RMOV F7 LOAD F8 DEL F9 SAVE",0
-    ELSE
-aF1LeftF2RighF3:    DB "F1 LEFT F2 RIGH F3 INFO F4 EDIT F5 COPY F6 RMOV F7 LOAD F8 DEL",0
-    ENDIF
-aCommanderVer:      DB "COMMANDER VERSION 1.7",0
-aCopyright:         DB "(C) OMSK 1992",0
-aFileIsReanOnly:    DB "FILE IS READ ONLY!",0
+aNameName:          DB "Name",18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,"Name",0
+aF1LeftF2RighF3:    DB "F1 Left F2 Rght F3 Info F4 Edit F5 Copy F6 RMov F7 Load F8 Del",0
+aCommanderVer:      DB "Commander version 2.0",0
+aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
+aFileIsReanOnly:    DB "File is read-only!",0
 aABCD:              DB "A   B   C   D",0
 aEFGH:              DB "E   F   G   H",0
-aChooseDrive:       DB "CHOOSE DRIVE:",0
-aDeleteFrom:        DB "DELETE FROM ",0
+aChooseDrive:       DB "Choose drive:",0
+aDeleteFrom:        DB "Delete from ",0
 asc_DC17:           DB 8, ' ',8, 0
-aCopyFromTo:        DB "COPY FROM    TO",8,8,8,8,8, 0
-aCantCreateFile:    DB "CAN",39,"T CREATE FILE!",0
-aRemoveFromTo:      DB "RENAME/MOVE FROM    TO",8,8,8,8,8, 0
-aKBytesExtMemory:   DB 18h,"KB EXTENDED MEMORY",0   ; здесь и далее 18h вместо пробела, чтобы не портить цвет предыдущего символа
-aKBytesMemory:      DB 18h,"BYTES MEMORY",0
-aKBytesFree:        DB 18h,"BYTES FREE",0
-aKBytesTotalOnDrv:  DB 18h,"KB TOTAL ON DRIVE ",0
-aKBytesFreeOnDrv:   DB 18h,"KB FREE  ON DRIVE ",0
-aFilesUse:          DB 18h,"FILES USE ",0
-aKBytesIn:          DB 18h,"KB IN ",0
-aSaveFromToTape:    DB "SAVE FROM    TO TAPE",8,8,8,8,8,8,8,8,8,8, 0
-aSavingToTape:      DB "SAVING TO TAPE",0
-aLoadingFromTapeTo: DB "LOADING FROM TAPE TO ",0
-aErrorLoadingTa:    DB "ERROR LOADING FROM TAPE",0
+aCopyFromTo:        DB "Copy from    to",8,8,8,8,8, 0
+aCantCreateFile:    DB "Can",39,"t create file!",0
+aRemoveFromTo:      DB "Rename/move from    to",8,8,8,8,8, 0
+aKBytesExtMemory:   DB 18h,"KB extended memory",0   ; здесь и далее 18h вместо ведущего пробела,
+aKBytesMemory:      DB 18h,"bytes Memory",0         ; чтобы не портить цвет предыдущего символа
+aKBytesFree:        DB 18h,"bytes Free",0
+aKBytesTotalOnDrv:  DB 18h,"KB total on drive ",0
+aKBytesFreeOnDrv:   DB 18h,"KB free  on drive ",0
+aFilesUse:          DB 18h,"files use ",0
+aKBytesIn:          DB 18h,"KB in ",0
+aVolumeLabel:       DB "Volume label: ",0
+aDrive:             DB "Drive ",0
+aHasNoDriver:       DB 18h,"has no driver",0
+aNotFormatted:      DB 18h,"is not formatted",0
+aSaveFromToTape:    DB "Save from    to tape",8,8,8,8,8,8,8,8,8,8, 0
+aSavingToTape:      DB "Saving to tape",0
+aLoadingFromTapeTo: DB "Loading from tape to ",0
+aErrorLoadingTa:    DB "Error loading from tape",0
+
+aNcExt:             DB "A:NC.EXT",0
+aEditor:            DB "A:E.COM",0Dh      ; терминатором тут должно быть 0Dh
 
 ; Описания окон
 
@@ -206,15 +209,9 @@ g_window2:
 P_NAME_X          = 17  ; Заголовок панели "NAME"
 P_NAME_Y          = 16
 
-    IF FAT16
 P_FILE_LIST_X1    = 6   ; Файловая таблица (2 колонки)
 P_FILE_LIST_X2    = 54
 P_FILE_LIST_Y     = 32
-    ELSE
-P_FILE_LIST_X1    = 10  ; Файловая таблица (2 колонки)
-P_FILE_LIST_X2    = 57
-P_FILE_LIST_Y     = 32
-    ENDIF
 
 P_FILE_LIST_H     = 18  ; Высота файловой таблицы в строках
 P_FILE_LIST_Y_MAX = P_FILE_LIST_H * 10 + P_FILE_LIST_Y
@@ -232,18 +229,28 @@ P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла в символах
 ; Переменные
 ;-----------------------------------------------------------------------
 
-initState:        DB 5Ah
-activePanel:      DB 0
-panelA_info:      DB 0
-panelB_info:      DB 1
-panelA_drive:     DB 0
-panelB_drive:     DB 0
-panelA_filesCnt:  DB 0
-panelB_filesCnt:  DB 0
-panelA_curFile:   DB 0
-panelB_curFile:   DB 0
-aNcExt:           DB "A:NC.EXT",0
-aEditor:          DB "A:E.COM",0Dh      ; терминатором тут должно быть 0Dh
+; Блок переменных состояния
+; Сохраняется в неиспользуемом секторе нулевой страницs RAM-диска
+
+    STRUCT NC_STATE
+initState           DB    5Ah   ; признак, что NC.COM уже запускался
+activePanel         DB    0     ; номер активной панели
+panelA_info         DB    0     ; 1 = панель A в режиме информации
+panelB_info         DB    0     ; 1 = панель B в режиме информации
+panelA_drive        DB    0     ; номер диска панели A
+panelB_drive        DB    7     ; номер диска панели B
+panelA_filesCnt     DB    0     ; количество файлов на панели A
+panelB_filesCnt     DB    0     ; количество файлов на панели B
+panelA_firstFile    DB    0     ; c какого файла начинается панель A
+panelB_firstFile    DB    0     ; c какого файла начинается панель B
+panelA_curFile      DB    0     ; на каком файле курсор на панели A
+panelB_curFile      DB    0     ; на каком файле курсор на панели B
+    ENDS
+
+state   NC_STATE
+stateEnd:           ; адрес конца блока переменных состояния
+
+; Другие переменные - не включены в бинарник
 
     STRUCT NC_VARIABLES
 cmdLinePos      DW    0
@@ -252,6 +259,7 @@ chooseDrive     DB    0
 tapeSaveCRC     DW    0         ; контрольная сумма файла с ленты
 savedSP         DW    0
 tapeLoadAddr    DW    0         ; адрес загрузки файла с ленты
+diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
 cmdLine         BLOCK 59, 0FFh  ; командная строка
 cmdLineCtrl     DB    0FFh      ; контроль переполнения командной строки
                 BLOCK 13, 0FFh
@@ -261,8 +269,13 @@ tempFileDescr   FILE_DESCRIPTOR
     ENDS
 
 ; Установка только значения метки vars (машинный код не генерируется, переменные могут содержать мусор)
-nc_vars         NC_VARIABLES = $
+vars    NC_VARIABLES = $
 
-; Максимальный допустимый размер NC.COM - до адреса 0E1FFh
+; Максимальный допустимый размер NC.COM - до адреса 0E200h
+    IF NEW_MEMORY_MAP
+        ASSERT_DONT_FIT FAT_CACHE_ADDR
+    ELSE
+        ASSERT_DONT_FIT 0E200h
+    ENDIF
 
     END

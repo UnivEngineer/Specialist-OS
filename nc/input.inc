@@ -7,7 +7,7 @@
 
 input:      ; Вывод строки
             push    hl
-            ld      hl, nc_vars.input
+            ld      hl, vars.input
             call    printStringInv
             pop     hl
 
@@ -39,7 +39,7 @@ input_loop: ; Ввод символа
             jp z,   input_bkspc
 
             ; Если переполнение
-            ld      a, (nc_vars.input + P_INPUT_WIDTH) & 0FFh  ; a = младший байт адреса пследнего байта буфера
+            ld      a, (vars.input + P_INPUT_WIDTH) & 0FFh  ; a = младший байт адреса пследнего байта буфера
             cp      e
             jp z,   input_loop
 
@@ -55,7 +55,7 @@ input_loop: ; Ввод символа
 
 input_bkspc:
             ; Если это начало строки, выходим
-            ld      a, nc_vars.input & 0FFh
+            ld      a, vars.input & 0FFh
             cp      e
             jp z,   input_loop
 

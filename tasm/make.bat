@@ -21,7 +21,7 @@ set address=%3
 :: если во время компиляции будут ошибки, тогда они будут перечислены в файле errors.txt
 ::..\tasm\TASM.EXE -gb -b -85 %filefull%.asm %filefull%.%ext%
 ::..\tasm\ASM80WIN.EXE %filefull%.asm
-..\tasm\sjasmplus.exe --i8080 --lst=%filefull%.lst --raw=%filefull%.%ext% %filefull%.asm
+..\tasm\sjasmplus.exe --i8080 -Wno-rdlow --lst=%filefull%.lst --raw=%filefull%.%ext% %filefull%.asm
 :: > errors.txt
 
 :: обнаружены ошибки компиляции ― переходим на err

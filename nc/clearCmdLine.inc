@@ -10,15 +10,15 @@ clearCmdLine:
             ld    (bios_vars.cursorY), hl
 
             ld    h, 10
-            ld    (nc_vars.cmdLinePos), hl
+            ld    (vars.cmdLinePos), hl
 
             COLOR   COLOR_CMDLINE
             
             ld    c, 92 ; '\'
             call  bios_printChar
 
-            ld    hl, nc_vars.cmdLine
-            ld    (nc_vars.cmdLineEnd), hl
+            ld    hl, vars.cmdLine
+            ld    (vars.cmdLineEnd), hl
                                
             ld    b, 60
 

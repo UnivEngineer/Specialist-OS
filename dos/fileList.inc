@@ -1,68 +1,160 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; Получить список файлов каталога.
-; Функция копирует в буфер непустые дескрипторы файлов.
+; Получить список записей каталога.
+; Функция копирует в буфер непустые записи (дескрипторы файлов).
 ;
 ; На входе 
 ;  hl - адрес буфера
-;  b  - максимальное количество дескрипторов файлов для вывода
+;  de - размер буфера (количество дескрипторов файлов)
+;  bc - с какого дескриптора начинать заполнение буфера
 ;
 ; На выходе
-;  bc, de, hl - сохраняются
+;  de - сколько всего дескрипторов в каталоге
+;
+;  bc, hl - сохраняются
 ;
 ; 2013-12-12 Дизассемблировано vinxru
+; 2022-02-11 Переработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-fileList:   ; Загрузка FAT и каталога
-            call    loadFatDir
+fileList:   ; Если нет драйвера или диск не отформатирован -
+            ; формируем пустой список и выходим
+            ld      a, (v_diskInfo.isValid)
+            cp      DISK_VALID
+            jp z,   fileListOk
 
-            ; Сохранение регистров
-            push    hl
-            push    bc
-            push    de
+            ; В начало буфера помещаем символ 0FFh
+            ld      (hl), 0FFh
 
-            ; Адрес первого файла
-            ld      de, DIR_BUFFER
+            ; Возвращаем количество файлов в директории в de (ноль)
+            ld      de, 0
+            ret
 
-            ; Максимум файлов уже в b
-            ; Но надо ограничить разером каталога устройства
-            ld      a, DIR_MAX_FILES
-            cp      b
-            jp nc,  fileList_loop
-            ld      b, a    ; b = max(b, DIR_MAX_FILES)
+fileListOk: ; Сохранение регистров
+            push    bc  ; [1]
+            push    hl  ; [2]
+            
+            ; В de - максимум файлов, но его надо еще ограничить размером каталога
+            ld      hl, (v_diskInfo.rootDirMaxFiles)
+            call    cmp_hl_de_2
+            jp c,   fl_min
+            ex      hl, de
+fl_min:     ; Сохраняем максимум файлов
+            ld      (v_dirMaxFiles), hl
 
-fileList_loop:
-            ; Если первый символ не FFh, копируем дескриптор
+            ; Сохраняем номер первого файла
+            ld      h, b
+            ld      l, c
+            ld      (v_dirFirstFile), hl
+
+            ; Обнуляем счетчики файлов
+            ld      hl, 0
+            ld      (v_dirListedFiles), hl
+            ld      (v_dirTotalFiles),  hl
+
+            pop     hl  ; [2]
+            push    hl  ; [2]
+
+            ; de = номер первого сектора каталога
+            ; с  = количество секторов каталога (мл. байт)
+            call    fatBeginDirLoop
+
+            ; Цикл по секторам каталога
+fileList_dirLoop:
+            ; Сохраняем номер сектора каталога
+            push    de  ; [3]               ; de = номер сектора каталога
+
+            ; Кэшируем сектор каталога
+            push    hl  ; [4]
+            xor     a                       ; флаг - сектор не будет меняться
+            call    getSectorAddressInCache ; выход: hl = адрес сектора в буфере
+            ex      hl, de                  ; de = адрес сектора в буфере
+            pop     hl  ; [4]
+
+            ; Кол-во дескрипторов файлов в одном секторе каталога (мл. байт)
+            ld      a, (v_diskInfo.descrPerSector)
+            ld      b, a
+
+            ; Цикл по дескрипторам в закешированном секторе каталога
+fileList_sectorLoop:
+            ; Если первый символ = FFh, дескриптор пустой
             ld      a, (de)
             inc     a
-            jp nz,  fileList_copy
+            jp z,   fileList_nextDescr
 
-            ; Вычисляем адрес следующего файла
-            push    hl
+            push    hl  ; [4]
+            push    de  ; [5]
+
+            ; Увеличиваем счетчик общего количества файлов в каталоге
+            ld      hl, (v_dirTotalFiles)
+            inc     hl
+            ld      (v_dirTotalFiles), hl
+
+            ; Если не дошли до первого файла (v_dirTotalFiles < v_dirFirstFile),
+            ; то продолжаем сканирование каталога без копирования дескриптора в буфер
+            ex      hl, de
+            ld      hl, (v_dirFirstFile)
+            call    cmp_hl_de
+            jp nc,  fileList_skipCopy
+
+            ; Если буфер уже заполнен (v_dirListedFiles >= v_dirMaxFiles),
+            ; то продолжаем сканирование каталога без копирования дескриптора в буфер
+            ld      hl, (v_dirMaxFiles)
+            ex      hl, de
+            ld      hl, (v_dirListedFiles)
+            call    cmp_hl_de
+            jp nc,  fileList_skipCopy
+
+            ; Увеличиваем счетчик скопированных дескрипторов
+            inc     hl
+            ld      (v_dirListedFiles), hl
+
+            pop     de  ; [5]
+            pop     hl  ; [4]
+
+            ; Копируем дескриптор из de в hl
+            push    bc  ; [4]
+            call    copyDescriptor
+            pop     bc  ; [4]
+
+            ; copyDescriptor смещает de, поэтому код расчета
+            ; адреса следующего дескриптора надо перепрыгнуть
+            jp      fileList_next
+
+fileList_skipCopy:
+            pop     de  ; [5]
+            pop     hl  ; [4]
+
+fileList_nextDescr:
+            ; Вычисляем адрес следующего дескриптора
+            push    hl  ; [4]
             ld      hl, DIR_DESCR_SIZE
             add     hl, de
             ex      de, hl
-            pop     hl
+            pop     hl  ; [4]
 
 fileList_next:
-            ; Цикл
+            ; Еще остались файлы в секторе каталога?
             dec     b
-            jp nz,  fileList_loop
+            jp nz,  fileList_sectorLoop
 
-            ; В конце символ 0FFh
-            ld      (hl), 0FFh
-            jp      popDBH_ret
-
-; ---------------------------------------------------------------------------
-
-fileList_copy:
-            ; Копируем DIR_DESCR_SIZE байт из de в hl
-            ld      c, DIR_DESCR_SIZE
-fileList_copyl:     ld    a, (de)
-            ld      (hl), a
-            inc     hl
-            inc     de
+            ; Еще остались секторы каталога?
+            ; Восстанавливаем номер сектора каталога
+            pop     de  ; [3]   de = номер сектора каталога
+            inc     de  ;       следующий сектор каталога
             dec     c
-            jp nz,  fileList_copyl
-            jp      fileList_next
+            jp nz,  fileList_dirLoop
+
+fileList_exit
+            ; Завершение и выход
+            ; В конец буфера помещаем символ 0FFh
+            ld      (hl), 0FFh
+
+            ; Возвращаем количество файлов в директории в de
+            ld      hl, (v_dirTotalFiles)
+            ex      hl, de
+
+            pop     hl  ; [2]
+            pop     bc  ; [1]
+            ret
 

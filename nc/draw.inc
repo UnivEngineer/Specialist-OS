@@ -80,7 +80,7 @@ loc_D9F3:
 
 activePanelPos:
         push      af
-            ld    a, (activePanel)
+            ld    a, (state.activePanel)
             and   a
             jp z, loc_DA0B
             ld    a, 24

@@ -6,10 +6,28 @@
 ;   a = номер накопителя
 ;
 ; 2013-12-18 Дизассемблировано vinxru
+; 2022-02-16 Доработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-loadFiles:  ld    e, 1
-            call  bios_fileGetSetDrive
-            ld    hl, FILE_LIST_BUFFER
-            ld    b, FILE_LIST_SIZE
-            jp    bios_fileList
+loadFiles:  ; Получение спика файлов в буфере
+           
+            ld      e, 1
+            call    bios_fileGetSetDrive  ; устанавливем активные накопитель
+
+            ; bc = файл, с которого начинается спосок файлов панели
+            ld      hl, state.panelA_firstFile
+            call    readBytePanel
+            ld      c, a
+            ld      b, 0    ; считаем, что файлов в каталоге меньше 256
+
+            ; Получаем список файлов в буфере и общее
+            ; количество файлов в каталоге в de
+            ld      hl, FILE_LIST_BUFFER  ; адрес буфера
+            ld      de, FILE_LIST_SIZE    ; размер буфера
+            call    bios_fileList
+
+            ; Сохранение количествава файлов
+            ld      a, e                ; считаем, что файлов в каталоге меньше 256
+            ld      hl, state.panelA_filesCnt
+            jp      writeBytePanel
+

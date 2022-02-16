@@ -45,21 +45,42 @@ last    BLOCK  1,  0
 editor_vars EDITOR_VARIABLES = 8F80H
 
 ; Начало программы
-        ORG   0D000H
+    IF NEW_MEMORY_MAP==0
+        ORG 0E800h
+    ELSE
+        ORG 0D000h
+    ENDIF
+
+; Буферы в конце программы
+BUFFER1 = $ + 0F0Ah ; 0DF0AH
+BUFFER2 = $ + 0F00h ; 0DF00H
 
 SMC1:
-        JP    LBL145
+        JP    LBL145    ; адрес этого перехода изменяется п/п LBL3
         JP    LBL103
-        DB    0,18h,0
-LBL1:   ADD   A,L
-LBL2:   LD    HL,REF2             ; 53282
+
+        ; Что-то непонятное, границы буфера текста?
+VAR01:  DB    0
+VAR02:  DB    18h
+VAR03:  DB    0
+VAR04:  DB    85h
+
+LBL2:   LD    HL,REF2
         CALL  bios_printString
-LBL3:   LD    HL,7000H    ; 28672; [2]
-        LD    DE,8F00H    ; 36608
+
+        ; Похоже на обработчик ошибки ввода/вывода с ленты
+LBL3:   ; ??? Считаем контрольную сумму блока 7000-8EFF
+        LD    HL,7000H
+        LD    DE,8F00H
         CALL  bios_calcCS
-        LD    HL,LBL4             ; 53457
+        ; Суровая самомодификация кода:
+        ; Меняем адрес в первой инстукции JP в начале редактора на LBL4
+SMC6:   LD    HL, LBL4
         LD    (SMC1+1),HL
+
+        ; И прыгаем на LBL4
         JP    LBL4
+
 REF2:   DB    0AH,"          EDITOR VERSION 4.1, (C) OM"
 REF3:   DB    "S"
 REF4:   DB    "K"
@@ -87,9 +108,13 @@ REF16:  DB    "INSERT   ",00H
 REF17:  DB    "OVERWRITE",00H
 REF18:  DB    "LINE",00H
 REF19:  DB    "COL",00H
-LBL4:   LD    HL,0000H
+
+LBL4:   ; Читаем указатель стека в hl
+        LD    HL,0000H
         ADD   HL,SP
+        ; И записываем его в код п/п SMC4
         LD    (SMC4+1),HL
+
 LBL5:   LD    A,10H         ; 16
         LD    (editor_vars.last),A
         XOR   A
@@ -100,7 +125,7 @@ LBL5:   LD    A,10H         ; 16
         LD    (bios_vars.inverse),HL
         LD    HL,0001H    ; 1
         LD    (VAR8),HL
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         LD    (VAR1),HL
         LD    (VAR3),HL
         LD    E,L
@@ -145,70 +170,121 @@ REF21:  LD    HL,REF21    ; 53535
         CALL  SUB57
         POP   HL
         LD    (bios_vars.cursorY),HL
-        JP    LBL141
-LBL11:  LD    C,A           ; [2]
-        CP    7FH           ; 127
-        JP    Z,LBL33
-        CP    07H           ; 7
-        JP    Z,LBL102
-        CP    01H           ; 1
-        JP    Z,LBL54
-        CP    02H           ; 2
-        JP    Z,LBL57
-        CP    20H           ; 32 ' '
-        JP    NC,LBL27
-        OR    A
-        JP    Z,LBL31
-        LD    HL,REF22    ; 53635
-LBL12:  LD    A,(HL)
-        OR    A
-        JP    Z,SUB40
+        JP    keyInput
+
+;----------------------------------------------------------------------
+
+        ; Продолжение разбора кода нажатой клавиши
+keyInput2:
+        LD    C,A               ; сохраняем в регистре c
+        CP    7FH               ; Del - удалить символ над курсором
+        JP    Z,keyHandler_Del
+        CP    07H               ; F8 - отмена изменений в строке
+        JP    Z,keyHandler_F8
+        CP    01H               ; F2 - курсор на страницу вверх (PageUp)
+        JP    Z,keyHandler_F2
+        CP    02H               ; F3 - курсор на страницу вниз (PageDn)
+        JP    Z,keyHandler_F3
+        CP    20H               ; пробел
+        JP    NC,keyHandler_Space
+        OR    A                 ; F1 - Ins (перекл. режима Insert/Overwrite)
+        JP    Z,keyHandler_F1
+
+        ; Теперь проходм по таблице подпрограмм
+        LD    HL, KeyHendlerTable
+fkh_Loop:
+        LD    A,(HL)        ; код клавиши
+        OR    A             ; если 0 - достигнут конец таблицы
+        JP    Z,Beep4       ; бип 4 раза и выход
         INC   HL
-        LD    E,(HL)
+        LD    E,(HL)        ; de = адрес подпрограммы
         INC   HL
         LD    D,(HL)
         INC   HL
-        CP    C
-        JP    NZ,LBL12
-        PUSH  DE
-        RET
-REF22:  DB    1AH,49H,0D2H,19H  ; ".I.."
-        DB    73H,0D2H,08H,0EEH ; "s..."
-        DB    0D2H,18H,0E3H,0D2H        ; "...."
-        DB    0DH,13H,0D3H,09H  ; "...."
-        DB    0F6H,0D4H,1FH,0E0H        ; "...."
-        DB    0D1H,02H,0EEH,0D1H        ; "...."
-        DB    06H,6BH,0D8H,0CH  ; ".k.."
-        DB    0EH,0D3H,0AH,0FEH ; "...."
-        DB    0D2H,1BH,0A8H,0D1H        ; "...."
-        DB    00H,0CDH,17H,0D4H ; "...."
-        DB    0CDH,03H,0C8H,4FH ; "...O"
-        DB    21H,0B5H,0D1H,0C3H        ; "!..."
-        DB    73H,0D1H,0CH,0FAH ; "s..."
-        DB    0D1H,0AH,9EH,0D5H ; "...."
-        DB    4CH,0B2H,0D5H,44H ; "L..D"
-        DB    0E3H,0D5H,55H,57H ; "..UW"
-        DB    0D6H,4FH,80H,0D6H ; ".O.."
-        DB    49H,10H,0D7H,56H  ; "I..V"
-        DB    00H,0D8H,47H,05H  ; "..G."
-        DB    0D8H,4EH,0B4H,0D9H        ; ".N.."
-        DB    4AH,0D7H,0D8H,53H ; "J..S"
-        DB    06H,0D9H,43H,3FH  ; "..C?"
-        DB    0D9H,4DH,72H,0D9H ; ".Mr."
-        DB    00H                   ; "."
+        CP    C             ; сравниваем a и запомненный в с код клавиши
+        JP    NZ,fkh_Loop   ; если не равно, повтор цикла
+        PUSH  DE            ; алрес п/п - в стек
+        RET                 ; переход на адрес п/п
+
+;----------------------------------------------------------------------
+
+    STRUCT  KEY_HANDLER
+key:        DB  0
+address:    DW  0
+    ENDS
+
+        ; Таблица переходов на подпрограммы
+        ; код символа, адрес
+KeyHendlerTable:
+        KEY_HANDLER  1Ah, keyHandler_Down   ; Вниз      - курсор вниз
+        KEY_HANDLER  19h, keyHandler_Up     ; Вверх     - курсор вверх
+        KEY_HANDLER  08h, keyHandler_Left   ; Влево     - курсор влево
+        KEY_HANDLER  18h, keyHandler_Right  ; Вправо    - курсор вправо
+        KEY_HANDLER  0Dh, keyHandler_Enter  ; Enter     - вставить строку ниже (не разбивает текущую строку!)
+        KEY_HANDLER  09h, keyHandler_Tab    ; Tab       - курсор на 4 (8) позиций влево, с привязкой по сетке (?)
+        KEY_HANDLER  1Fh, keyHandler_CTP    ; СТР       - выход без сохранения!
+        KEY_HANDLER  02h, keyHandler_F3_2   ; F3 снова?
+        KEY_HANDLER  06h, keyHandler_F7     ; F7        - поиск текста в строке курсора и ниже (перематывает документ на строку с текстом)
+        KEY_HANDLER  0Ch, keyHandler_Home   ; Home      - курсор в начало строки
+        KEY_HANDLER  0Ah, keyHandler_End    ; End (ПС)  - курсор в конец строки
+        KEY_HANDLER  1Bh, keyHandler_Esc    ; Esc       - режим Esc-последовательности
+        DB  00H
+
+;----------------------------------------------------------------------
+
+        ; Обработка нажатия Esc
+keyHandler_Esc:
+        CALL    SUB15
+
+        ; Ожидаем ввод второго символа Esc-последовательности
+        CALL    bios_getch
+        LD      C,A
+
+        ; Проходм по второй таблице подпрограмм
+        LD      HL,KeyHendlerTable2
+        JP      fkh_Loop
+
+;----------------------------------------------------------------------
+
+        ; Таблица переходов на подпрограммы
+        ; код символа, адрес
+KeyHendlerTable2:
+        KEY_HANDLER  0Ch, keyHandler_Esc_Home   ; Esc-Home     - курсор в начало первой страницы
+        KEY_HANDLER  0Ah, keyHandler_Esc_End    ; Esc-End (ПС) - курсор в начало последней страницы
+        KEY_HANDLER  4Ch, keyHandler_Esc_L      ; Esc-L - выделить строки текста, второй раз Esc-L - конец выделения
+        KEY_HANDLER  44h, keyHandler_Esc_D      ; Esc-D - удалить выделенные строки
+        KEY_HANDLER  55h, keyHandler_Esc_U      ; Esc-U - снять выделение строк
+        KEY_HANDLER  4Fh, keyHandler_Esc_O      ; Esc-O - сохранить файл на магнитофон
+        KEY_HANDLER  49h, keyHandler_Esc_I      ; Esc-I - загрузить файл с магнитофона
+        KEY_HANDLER  56h, keyHandler_Esc_V      ; Esc-V - загрузить файл с магнитофона (в другом формате?)
+        KEY_HANDLER  47h, keyHandler_Esc_G      ; Esc-G - загрузить файл с магнитофона и вставить в конец документа
+        KEY_HANDLER  4Eh, keyHandler_Esc_N      ; Esc-N - новый файл (очистить буфер)
+        KEY_HANDLER  4Ah, keyHandler_Esc_J      ; Esc-J - объединить строки в положении курсора и ниже
+        KEY_HANDLER  53h, keyHandler_Esc_S      ; Esc-S - разбить строку в положении курсора
+        KEY_HANDLER  43h, keyHandler_Esc_C      ; Esc-C - вставить выделенные строки ниже положения курсора
+        KEY_HANDLER  4Dh, keyHandler_Esc_M      ; Esc-M - переместить выделенные строки ниже положения курсора
+        DB  00H
+
+;----------------------------------------------------------------------
+
+keyHandler_CTP:
         LD    C,1FH         ; 31
         CALL  bios_printChar
         CALL  SUB15
         CALL  SUB54
         JP    bios_reboot
+
+keyHandler_F3_2:
         CALL  SUB15
         LD    C,1FH         ; 31
         CALL  bios_printChar
         CALL  SUB54
         RET
-LBL13:  LD    HL,0001H    ; 1; [4]
+
+keyHandler_Esc_Home:
+        LD    HL,0001H    ; 1; [4]
         LD    (VAR8),HL
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         LD    (VAR1),HL
         LD    (VAR3),HL
 SUB1:   LD    HL,(VAR1)   ; [10]
@@ -235,7 +311,9 @@ SUB5:   CALL  SUB43         ; [5]
         LD    HL,(VAR1)
         CALL  SUB2
         JP    SUB44
-SUB6:   CALL  SUB15
+
+keyHandler_Down:
+        CALL  SUB15
         CALL  SUB48
         RET   Z
         CALL  SUB50
@@ -250,6 +328,8 @@ SUB6:   CALL  SUB15
         LD    HL,(VAR3)
         CALL  SUB7
         JP    SUB44
+
+keyHandler_Up
         CALL  SUB15
         CALL  SUB49
         RET   Z
@@ -265,7 +345,7 @@ SUB6:   CALL  SUB15
         CALL  SUB43
         CALL  SUB7
         JP    SUB44
-SUB7:   CALL  SUB9          ; [4]
+SUB7:   CALL  keyHandler_Home          ; [4]
         CALL  SUB8
         JP    NC,LBL16
         LD    A,0FFH                ; 255
@@ -303,10 +383,14 @@ SUB8: PUSH  DE            ; [7]
 LBL19:  EX    DE,HL         ; [2]
         POP   DE
         RET
+
+keyHandler_Right:
         CALL  SUB36
         JP    Z,LBL117
 LBL20:  LD    B,0BAH                ; 186
         JP    LBL21
+
+keyHandler_Left:
         CALL  SUB36
         JP    Z,LBL120
         LD    B,00H
@@ -314,24 +398,30 @@ LBL21:  LD    A,(bios_vars.cursorY+1)
         CP    B
         RET   Z
         JP    bios_printChar
-LBL22:  CALL  SUB12
+
+keyHandler_End:
+        CALL  SUB12
         CALL  SUB10
         LD    HL,LBL2             ; 53258
         CALL  SUB39
         LD    A,E
         JP    LBL48
-SUB9:   XOR   A             ; [4]
+
+keyHandler_Home:
+        XOR   A             ; [4]
         LD    (bios_vars.cursorY+1),A
         RET
+
+keyHandler_Enter:
         LD    HL,(VAR3)
         CALL  SUB8
-        JP    C,SUB40
+        JP    C,Beep4
         CALL  SUB12
         CALL  SUB10
         LD    A,0DH         ; 13
         LD    (DE),A
         CALL  SUB15
-        CALL  SUB9
+        CALL  keyHandler_Home
         LD    HL,(VAR3)
         LD    C,18H         ; 24
 LBL23:  LD    A,(HL)
@@ -341,15 +431,21 @@ LBL23:  LD    A,(HL)
         INC   HL
         JP    LBL23
 LBL24:  LD    C,1AH         ; 26
-        CALL  SUB6
+        CALL  keyHandler_Down
         JP    SUB46
-SUB10:  LD    DE,REF6             ; 53322; [4]
-SUB11:  DEC   DE            ; [3]
+
+        ; В REF6 изначально текст "KSOFT '92"
+SUB10:  LD    DE, REF6
+
+        ; Пропус пробелов в строке по адресу de
+SkipSpaces:
+        DEC   DE
         LD    A,(DE)
-        CP    20H           ; 32 ' '
-        JP    Z,SUB11
+        CP    20H
+        JP    Z,SkipSpaces
         INC   DE
         RET
+
 SUB12:  LD    A,(VAR4)    ; [7]
         OR    A
         RET   NZ
@@ -375,9 +471,11 @@ LBL26:  LD    A,(HL)
         INC   HL
         INC   DE
         JP    LBL26
-LBL27:  LD    HL,(VAR3)
+
+keyHandler_Space:
+        LD    HL,(VAR3)
         CALL  SUB8
-        JP    C,SUB40
+        JP    C,Beep4
         CALL  SUB12
         CALL  SUB13
         LD    A,(VAR5)
@@ -391,7 +489,7 @@ LBL27:  LD    HL,(VAR3)
         LD    C,08H         ; 8
         JP    bios_printChar
 LBL28:  LD    DE,REF5             ; 53321
-        CALL  SUB11
+        CALL  SkipSpaces
         PUSH  HL
         LD    HL,REF5             ; 53321
         CALL  SUB38
@@ -409,7 +507,9 @@ LBL30:  LD    B,(HL)
         CALL  SUB44
         LD    C,18H         ; 24
         JP    LBL20
-LBL31:  LD    HL,VAR5             ; 53340
+
+keyHandler_F1:
+        LD    HL,VAR5             ; 53340
         LD    A,(HL)
         cpl
         LD    (HL),A
@@ -421,7 +521,9 @@ LBL32:  RET   Z
         INC   HL
         SUB   03H           ; 3
         JP    LBL32
-LBL33:  CALL  SUB12
+
+keyHandler_Del:
+        CALL  SUB12
         CALL  SUB13
         PUSH  HL
         LD    C,L
@@ -431,7 +533,7 @@ LBL33:  CALL  SUB12
         CALL  SUB37
         POP   HL
         LD    DE,REF5             ; 53321
-        CALL  SUB11
+        CALL  SkipSpaces
         PUSH  HL
         LD    HL,REF5             ; 53321
         CALL  SUB38
@@ -445,14 +547,15 @@ LBL35:  LD    C,(HL)
         INC   HL
         JP    C,LBL35
         JP    SUB44
-SUB15:  LD    A,(VAR4)    ; [10]
+
+SUB15:  LD    A,(VAR4)  ; читаем VAR4
         OR    A
-        RET   Z
-        XOR   A
-        LD    (VAR4),A
+        RET   Z         ; если VAR4 == 0, выходим
+        XOR   A         ; инвертируем
+        LD    (VAR4),A  ; сохраняем обртано
         PUSH  BC
         CALL  SUB10
-        LD    HL,LBL2             ; 53258
+        LD    HL,LBL2
         CALL  SUB39
         LD    HL,(VAR3)
         EX    DE,HL
@@ -537,7 +640,7 @@ LBL42:  PUSH  DE
         PUSH  DE
         PUSH  HL
         EX    DE,HL
-        LD    HL,(0D008H)
+        LD    HL,(VAR03)
         CALL  SUB38
         JP    C,LBL71
         POP   HL
@@ -584,6 +687,8 @@ LBL45:  LD    A,(BC)
         JP    NZ,LBL45
 LBL46:  POP   DE
         RET
+
+keyHandler_Tab:
         CALL  SUB36
         JP    Z,LBL51
         LD    HL,0001H    ; 1
@@ -630,8 +735,10 @@ LBL53:  ADD   A,(HL)                ; [2]
         JP    C,LBL53
         SUB   (HL)
         JP    LBL49
-LBL54:  CALL  SUB15         ; [2]
-        LD    HL,(0D006H)
+
+keyHandler_F2:
+        CALL  SUB15         ; [2]
+        LD    HL,(VAR01)
         EX    DE,HL
         LD    HL,(VAR1)
         LD    B,16H         ; 22
@@ -646,7 +753,9 @@ LBL55:  CALL  SUB38
 LBL56:  LD    (VAR1),HL
         CALL  SUB5
         RET
-LBL57:  CALL  SUB15
+
+keyHandler_F3:
+        CALL  SUB15
         LD    HL,(VAR1)
         LD    BC,1619H    ; 5657
 LBL58:  LD    E,L
@@ -667,13 +776,17 @@ LBL59:  PUSH  HL
 LBL60:  LD    (VAR1),HL
         CALL  SUB5
         RET
-LBL61:  CALL  SUB48
-        JP    NZ,LBL61
+
+keyHandler_Esc_End:
+        CALL  SUB48
+        JP    NZ,keyHandler_Esc_End
         LD    HL,(VAR3)
         LD    (VAR1),HL
         LD    A,08H         ; 8
         LD    (bios_vars.cursorY),A
-        JP    LBL54
+        JP    keyHandler_F2
+
+keyHandler_Esc_L:
         LD    HL,REF23    ; 54885
         PUSH  HL
         LD    HL,(VAR6)
@@ -682,6 +795,7 @@ LBL61:  CALL  SUB48
         JP    NZ,LBL62
         CALL  SUB17
         JP    LBL63
+
 LBL62:  EX    DE,HL
         LD    HL,(VAR3)
         CALL  SUB42
@@ -691,14 +805,17 @@ LBL62:  EX    DE,HL
 SUB17:  LD    HL,(VAR3)
         LD    (VAR6),HL
         RET
+
 LBL63:  LD    HL,(VAR3)   ; [2]
         CALL  SUB42
         LD    (VAR7),HL
         RET
+
+keyHandler_Esc_D:
         LD    HL,(VAR6)
         LD    A,L
         OR    H
-        JP    Z,SUB40
+        JP    Z,Beep4
         EX    DE,HL
         LD    HL,(VAR3)
 LBL64:  CALL  SUB8
@@ -746,6 +863,8 @@ SUB18:  PUSH  HL
         RET   NZ
         LD    C,19H         ; 25
         JP    bios_printChar
+
+keyHandler_Esc_U:
         LD    HL,(VAR6)
         LD    DE,0000H
         CALL  SUB38
@@ -758,23 +877,25 @@ REF23:  CALL  SUB43
         JP    SUB44
 LBL71:  LD    HL,REF8             ; 53351; [2]
         CALL  bios_printString
-        CALL  SUB40
+        CALL  Beep4
         CALL  bios_getch
         JP    LBL5
+
+keyHandler_Esc_O:
         LD    HL,REF9             ; 53370
         CALL  bios_printString
         CALL  SUB33
         JP    NZ,SUB1
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         CALL  SUB32
         PUSH  BC
         PUSH  DE
         CALL  SUB19
         EX    (SP),HL
         EX    DE,HL
-        LD    HL,LBL2             ; 53258
-        LD    A,0E6H                ; 230
-        LD    B,05H         ; 5
+        LD    HL,LBL2
+        LD    A,0E6H
+        LD    B,05H
 LBL72:  CALL  SUB24
         DEC   B
         JP    NZ,LBL72
@@ -786,23 +907,23 @@ LBL73:  LD    A,(HL)
         JP    LBL73
 LBL74:  CALL  SUB20
         POP   DE
-        LD    A,(0D006H)
+        LD    A,(VAR01)
         cpl
         INC   A
         LD    L,A
-        LD    A,(0D007H)
+        LD    A,(VAR02)
         cpl
         INC   A
         LD    H,A
         ADD   HL,DE
-        LD    A,0E6H                ; 230
+        LD    A,0E6H
         CALL  SUB24
         LD    A,L
         cpl
         CALL  SUB24
         LD    A,H
         cpl
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         CALL  SUB23
         POP   BC
         LD    A,C
@@ -833,7 +954,10 @@ SUB23:  CALL  SUB24         ; [2]
         JP    SUB24
 SUB24:  LD    C,A           ; [9]
         JP    bios_tapeWrite
+
+keyHandler_Esc_I:
         LD    B,00H
+
 LBL76:  LD    A,B           ; [2]
         LD    (VAR9),A
         LD    HL,0000H
@@ -856,7 +980,7 @@ LBL78:  LD    (HL),B
         INC   HL
         INC   B
         JP    NZ,LBL77
-        LD    A,08H         ; 8
+        LD    A,08H
         CALL  SUB28
         POP   HL
         PUSH  BC
@@ -868,16 +992,18 @@ LBL78:  LD    (HL),B
         JP    NZ,LBL79
         POP   HL
         LD    (VAR2),HL
-        JP    LBL13
-LBL79:  POP   HL            ; [2]
-        LD    HL,REF12    ; 53384
+        JP    keyHandler_Esc_Home
+
+LBL79:  POP   HL
+        LD    HL,REF12
         CALL  bios_printString
-        CALL  SUB40
+        CALL  Beep4
         CALL  bios_getch
         LD    HL,(VAR2)
-        LD    (HL),0FFH   ; 255
-        JP    LBL13
-SUB25:  LD    HL,0D01AH   ; 53274
+        LD    (HL),0FFH
+        JP    keyHandler_Esc_Home
+
+SUB25:  LD    HL,SMC6+1 ; тут адрес перехода в п/п LBL3
         CALL  SUB29
 LBL80:  CALL  SUB30
         LD    (HL),A
@@ -885,14 +1011,15 @@ LBL80:  CALL  SUB30
         JP    Z,LBL81
         INC   HL
         JP    LBL80
-LBL81:  LD    HL,REF10    ; 53371
+
+LBL81:  LD    HL,REF10
         CALL  bios_printString
-        LD    HL,0D01AH   ; 53274
+        LD    HL,SMC6+1 ; тут адрес перехода в п/п LBL3
         PUSH  HL
         CALL  bios_printString
         CALL  SUB26
         POP   HL
-        LD    DE,LBL2             ; 53258
+        LD    DE,LBL2
 LBL82:  LD    A,(DE)
         OR    A
         RET   Z
@@ -908,7 +1035,7 @@ LBL83:  DEC   HL
         CALL  SUB38
         RET   Z
         JP    LBL83
-SUB27:  LD    A,0FFH                ; 255
+SUB27:  LD    A,0FFH
 SUB28:  CALL  bios_tapeRead
         LD    C,A
         CALL  SUB30
@@ -916,21 +1043,24 @@ SUB28:  CALL  bios_tapeRead
         RET
 LBL84:  XOR   A
         LD    (bios_vars.tapeInverse),A
-SUB29:  LD    B,04H         ; 4
-        LD    A,0FFH                ; 255
+
+SUB29:  LD    B,04H
+        LD    A,0FFH
 LBL85:  CALL  bios_tapeRead
-        CP    0E6H          ; 230
+        CP    0E6H
         JP    NZ,LBL84
         DEC   B
-        LD    A,08H         ; 8
+        LD    A,08H
         JP    NZ,LBL85
         RET
-SUB30:  LD    A,08H         ; 8; [3]
+
+SUB30:  LD    A,08H
         JP    bios_tapeRead
-SUB31:  CALL  SUB25         ; [2]
+
+SUB31:  CALL  SUB25
         JP    NZ,SUB31
         CALL  SUB27
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         LD    A,(VAR9)
         DEC   A
         JP    M,LBL86
@@ -943,17 +1073,22 @@ LBL86:  LD    A,B
         LD    C,A
         PUSH  HL
         EX    DE,HL
-        LD    HL,(0D008H)
+        LD    HL,(VAR03)
         EX    DE,HL
         ADD   HL,BC
         CALL  SUB38
         POP   HL
         RET   C
         JP    LBL71
+
+keyHandler_Esc_V:
         LD    B,0FFH                ; 255
         JP    LBL76
+
+keyHandler_Esc_G:
         LD    B,01H         ; 1
         JP    LBL76
+
 SUB32:  LD    BC,0000H    ; [2]
 LBL87:  LD    A,(HL)
         CP    0FFH          ; 255
@@ -982,8 +1117,8 @@ LBL89:  LD    C,A
         INC   HL
         JP    LBL88
         LD    BC,2A20H    ; 10784
-        CALL  SUB9
-        JP    SUB41
+        CALL  keyHandler_Home
+        JP    TypeCharCtimesB
 LBL90:  CP    1FH           ; 31
         JP    NZ,LBL91
         OR    A
@@ -1004,6 +1139,8 @@ LBL92:  CP    0DH           ; 13
         XOR   A
         LD    (HL),A
         RET
+
+keyHandler_F7:
         CALL  SUB15
         LD    HL,06F9H    ; 1785
         LD    (bios_vars.cursorY),HL
@@ -1016,7 +1153,7 @@ LBL92:  CP    0DH           ; 13
         CP    0DH           ; 13
         JP    Z,LBL93
         LD    BC,1020H    ; 4128
-        CALL  SUB41
+        CALL  TypeCharCtimesB
         LD    (bios_vars.cursorY),HL
         LD    HL,REF14    ; 53403
         LD    E,L
@@ -1041,13 +1178,15 @@ LBL95:  LD    B,(HL)
         JP    Z,LBL95
         INC   B
         JP    NZ,LBL94
-        CALL  SUB40
-        JP    LBL13
+        CALL  Beep4
+        JP    keyHandler_Esc_Home
 LBL96:  CALL  SUB35
         LD    (VAR1),HL
         LD    (VAR3),HL
         CALL  SUB52
         JP    SUB1
+
+keyHandler_Esc_J:
         CALL  SUB12
         CALL  SUB10
         LD    HL,(VAR3)
@@ -1072,6 +1211,8 @@ LBL97:  CALL  SUB38
         INC   DE
         INC   BC
         JP    LBL97
+
+keyHandler_Esc_S:
         LD    HL,(VAR3)
         CALL  SUB14
         LD    E,L
@@ -1082,9 +1223,10 @@ LBL97:  CALL  SUB38
         POP   HL
         LD    (HL),0DH    ; 13
         JP    SUB5
+
 SUB35:  PUSH  DE            ; [6]
         EX    DE,HL
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         EX    DE,HL
         CALL  SUB38
         JP    Z,LBL101
@@ -1098,17 +1240,21 @@ LBL98:  LD    A,(HL)
         CALL  SUB38
         DEC   HL
         JP    NZ,LBL98
+
 LBL99:  INC   HL
-LBL100:  XOR   A
+LBL100: XOR   A
         INC   A
-LBL101:  POP   DE
+
+LBL101: POP   DE
         RET
+
+keyHandler_Esc_C:
         LD    HL,(VAR7)
         EX    DE,HL
         LD    HL,(VAR6)
         LD    A,H
         OR    L
-        JP    Z,SUB40
+        JP    Z,Beep4
         CALL  SUB39
         LD    HL,(VAR3)
         CALL  SUB8
@@ -1116,7 +1262,7 @@ LBL101:  POP   DE
         CALL  SUB42
         POP   AF
         CALL  C,SUB8
-        JP    C,SUB40
+        JP    C,Beep4
         PUSH  HL
         EX    DE,HL
         ADD   HL,DE
@@ -1128,16 +1274,18 @@ LBL101:  POP   DE
         POP   HL
         CALL  SUB37
         JP    SUB5
+
+keyHandler_Esc_M:
         LD    HL,(VAR7)
         EX    DE,HL
         LD    HL,(VAR6)
         LD    A,H
         OR    L
-        JP    Z,SUB40
+        JP    Z,Beep4
         CALL  SUB39
         LD    HL,(VAR3)
         CALL  SUB8
-        JP    C,SUB40
+        JP    C,Beep4
         CALL  SUB42
         PUSH  HL
         EX    DE,HL
@@ -1162,23 +1310,27 @@ LBL101:  POP   DE
         LD    (VAR7),HL
         POP   HL
         JP    LBL66
+
+keyHandler_Esc_N:
         LD    HL,REF15    ; 53419
         CALL  bios_printString
         CALL  bios_getch
         CP    59H           ; 89 'Y'
         JP    NZ,SUB1
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         LD    (HL),0DH    ; 13
         INC   HL
         LD    (HL),0FFH   ; 255
         LD    (VAR2),HL
-        JP    LBL13
-LBL102:  XOR   A
+        JP    keyHandler_Esc_Home
+
+keyHandler_F8:
+        XOR   A
         LD    (VAR4),A
         CALL  SUB43
-        CALL  SUB9
+        CALL  keyHandler_Home
         LD    BC,3F20H    ; 16160
-        CALL  SUB41
+        CALL  TypeCharCtimesB
         LD    HL,(VAR3)
         CALL  SUB7
         JP    SUB44
@@ -1205,11 +1357,18 @@ SUB39:  LD    A,E           ; [9]
         SBC   A,H
         LD    D,A
         RET
-SUB40:  LD    BC,0407H    ; 1031; [11]
-SUB41:  CALL  bios_printChar            ; [5]
+
+        ; Звуковой сигнал 4 раза через п/п печати символа 07h
+Beep4:
+        LD    BC,0407H      ; b = счетчик цикла, c = код символа
+
+        ; Печать b раз символа с кодом c
+TypeCharCtimesB:
+        CALL  bios_printChar
         DEC   B
-        JP    NZ,SUB41
+        JP    NZ,TypeCharCtimesB
         RET
+
 SUB42:  LD    A,(HL)                ; [11]
         CP    0FFH          ; 255
         RET   Z
@@ -1239,12 +1398,12 @@ LBL103: CALL  SUB54
         LD    HL,06F9H    ; 1785
         LD    (bios_vars.cursorY),HL
         LD    BC,3020H    ; 12320
-        CALL  SUB41
+        CALL  TypeCharCtimesB
         CALL  SUB4
         POP   AF
         LD    HL,REF21    ; 53535
         PUSH  HL
-        JP    LBL11
+        JP    keyInput2
 SUB45:  LD    H,90H         ; 144
         LD    D,H
 LBL104: LD    C,39H         ; 57 '9'
@@ -1399,7 +1558,7 @@ LBL113: AND   B
         JP    bios_printChar
 SUB52:  LD    HL,(VAR3)   ; [3]
         EX    DE,HL
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         LD    (VAR3),HL
         LD    HL,0001H    ; 1
         LD    (VAR8),HL
@@ -1438,9 +1597,15 @@ LBL116: LD    (HL),0FFH   ; 255
         LD    (bios_vars.cursorY),HL
         POP   HL
         RET
-SUB54:  POP   HL            ; [3]
-SMC4:   LD    SP,8F50H    ; 36688
+
+SUB54:  POP   HL
+
+        ; Установка указателя стека, агрумент этой инструкции
+        ; может меняться из п/п LBL4
+SMC4:   LD    SP,8F50H
+        ; Переход по адресу в hl
         JP    (HL)
+
 LBL117: CALL  SUB12
         CALL  SUB13
         LD    DE,REF4             ; 53320
@@ -1454,7 +1619,7 @@ LBL118: CALL  SUB38
         CALL  bios_printChar
         JP    LBL118
 LBL119: CALL  SUB38         ; [2]
-        JP    Z,LBL22
+        JP    Z,keyHandler_End
         LD    A,(HL)
         CP    20H           ; 32 ' '
         RET   NZ
@@ -1520,15 +1685,20 @@ LBL125: LD    (bios_vars.inverse),HL
 SUB57:  PUSH  HL            ; [6]
         LD    HL,0000H
         JP    LBL125
-SUB58:  CALL  SUB63         ; [3]
-        LD    DE,0DF0AH   ; 57098
-        LD    BC,REF25    ; 56771
+
+;----------------------------------------------------------------------
+; Запрос имени файла в строке состояния
+
+inputFileName:
+        CALL  SUB63
+        LD    DE,BUFFER1
+        LD    BC,inputFileNameBuffer    ; 56771
         CALL  bios_memcpy_bc_hl
         LD    HL,00F9H    ; 249
         LD    (bios_vars.cursorY),HL
         LD    HL,0FFFFH   ; 65535
         LD    (bios_vars.inverse),HL
-        LD    HL,REF24    ; 56766
+        LD    HL,txtFile    ; 56766
         CALL  bios_printString
         CALL  bios_getch
         LD    HL,0FF9H    ; 4089
@@ -1540,33 +1710,51 @@ SUB58:  CALL  SUB63         ; [3]
         CALL  bios_printString
         LD    HL,0FF9H    ; 4089
         LD    (bios_vars.cursorY),HL
-        LD    HL,REF25    ; 56771
-        LD    BC,REF25    ; 56771
+        LD    HL,inputFileNameBuffer    ; 56771
+        LD    BC,inputFileNameBuffer    ; 56771
         LD    DE,REF26    ; 56781
         POP   AF
         JP    LBL131
-LBL126: LD    HL,REF25    ; 56771; [6]
-        LD    DE,REF26    ; 56781
-        LD    BC,0DF00H   ; 57088
+
+LBL126: LD    HL,inputFileNameBuffer
+        LD    DE,REF26
+        LD    BC,BUFFER2
         CALL  bios_memcpy_bc_hl
         LD    HL,0000H
         LD    (bios_vars.inverse),HL
         RET
-SUB59:  CALL  SUB60
-        LD    HL,(0D006H)
+
+;----------------------------------------------------------------------
+; Загрузка файла с диска
+
+openFile:
+        CALL  prepareFileName
+        LD    HL,(VAR01)
         EX    DE,HL
-        LD    HL,REF27    ; 56784
+        LD    HL,fileDescName
         CALL  bios_fileLoad2
         JP    C,LBL135
         JP    LBL126
-SUB60:  LD    HL,REF25    ; 56771; [3]
-        LD    DE,REF27    ; 56784
+
+;----------------------------------------------------------------------
+; Подготовка имени файла для файловых операций
+
+prepareFileName:
+        LD    HL,inputFileNameBuffer
+        LD    DE,fileDescName
         CALL  bios_fileNamePrepare
         RET
-SUB61:  CALL  SUB60
+
+;----------------------------------------------------------------------
+; Сохранение файла на диск
+
+saveFile:
+        CALL  prepareFileName
         LD    DE,0000H
         LD    B,00H
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
+
+        ; Подсчет контрольной суммы
 LBL127: LD    A,B
         ADD   A,(HL)
         LD    B,A
@@ -1576,16 +1764,23 @@ LBL127: LD    A,B
         JP    Z,LBL128
         INC   HL
         JP    LBL127
-LBL128: LD    HL,(0D006H)
-        LD    (VAR10),HL
+
+        ; Формирование дескриптора файла
+LBL128: LD    HL,(VAR01)
+        LD    (fileDescAddr),HL
         EX    DE,HL
-        LD    (VAR11),HL
+        LD    (fileDescSize),HL
         LD    A,B
-        LD    (VAR12),A
-        LD    HL,REF27    ; 56784
+        LD    (fileDescCRC),A
+
+        ; Сохранение файла
+        LD    HL,fileDescName
         CALL  bios_fileCreate
         JP    C,LBL135
         JP    LBL126
+
+;----------------------------------------------------------------------
+
 LBL129: POP   AF
         JP    SUB1
         LD    B,H
@@ -1636,23 +1831,31 @@ LBL136: CALL  bios_beep_Old
         DEC   C
         JP    NZ,LBL136
         JP    LBL126
-SUB62:  CALL  SUB60
-        LD    HL,REF27    ; 56784
+;----------------------------------------------------------------------
+
+insertFile:
+        CALL  prepareFileName
+        LD    HL,fileDescName
+
+        ; Запрашиваем дескриптор файла
         CALL  bios_fileLoadInfo
-        LD    HL,(VAR11)
-        EX    DE,HL
+        LD    HL,(fileDescSize)
+        EX    DE,HL         ; de = размер файла
         PUSH  DE
-        LD    HL,(0D006H)
-LBL137:  LD    A,(HL)
+        LD    HL,(VAR01)    ; hl = адрес буфера
+
+        ; Сканируем буфер, пока не найдем конец текста (0FFh)
+LBL137: LD    A,(HL)
         INC   A
         JP    Z,LBL138
         INC   HL
         JP    LBL137
-LBL138:  POP   DE
-        PUSH  HL
+
+LBL138: POP   DE    ; de = размер файла
+        PUSH  HL    ; hl = адрес конца буфера
         ADD   HL,DE
         EX    DE,HL
-        LD    HL,(0D008H)
+        LD    HL,(VAR03)
         LD    A,H
         CP    D
         JP    C,LBL135
@@ -1660,67 +1863,92 @@ LBL138:  POP   DE
         LD    A,L
         CP    E
         JP    C,LBL135
+
+        ; загрузка файла по адресу de
 LBL139: POP   DE
-        LD    HL,REF27    ; 56784
+        LD    HL,fileDescName
         CALL  bios_fileLoad2
         JP    C,LBL135
         JP    LBL126
+
+;----------------------------------------------------------------------
+
 LBL140: POP   DE
         LD    HL,0000H
         LD    (bios_vars.inverse),HL
         JP    LBL10
-REF24:  DB    46H,49H,4CH,45H           ; "FILE"
-        DB    3AH                   ; ":"
-REF25:  DB    00H,00H,00H,00H           ; "...."
-        DB    00H,00H,00H,00H           ; "...."
-        DB    00H,00H                     ; ".."
+
+;----------------------------------------------------------------------
+
+txtFile:
+        DB    "FILE:"
+
+inputFileNameBuffer:
+        BLOCK 10, 00h
+
 REF26:  DB    00H,00H,00H         ; "..."
-REF27:  DB    20H,20H,20H,20H           ; "    "
-        DB    20H,20H,20H,20H           ; "    "
-        DB    20H,20H                     ; "  "
-VAR10:  DW    2020H
-VAR11:  DW    2020H
-VAR12:  DB    20H
-        DB    20H                   ; " "
-REF28:  DB    20H,20H,20H,20H           ; "    "
-        DB    20H,20H,20H,20H           ; "    "
-        DB    20H,20H,20H,20H           ; "    "
-        DB    00H                   ; "."
-LBL141:
+
+; Дескриптор файла (запись в каталоге MXOS)
+fileDescName:   BLOCK 10, 20h   ; имя, расширение и атрибуты
+fileDescAddr:   DW    2020H     ; адрес загрузки
+fileDescSize:   DW    2020H     ; размер
+fileDescCRC:    DB    20H       ; контрольная сумма
+                DB    20H       ; первый сектор
+
+REF28:  DB    20H,20H,20H,20H     ; "    "
+        DB    20H,20H,20H,20H     ; "    "
+        DB    20H,20H,20H,20H     ; "    "
+        DB    00H                 ; "."
+
+;----------------------------------------------------------------------
+
+        ; Обработка кода нажатой клавиши
+keyInput:
         CALL  bios_getch
         LD    C,A
-        CP    03H           ; 3
-        JP    Z,LBL142
-        CP    04H           ; 4
-        JP    Z,LBL143
-        CP    05H           ; 5
-        JP    Z,LBL144
-        JP    LBL11
-LBL142:
-        CALL  SUB58
-        CALL  SUB59
+        CP    03H               ; F4 - открыть файл
+        JP    Z,keyHandler_F4
+        CP    04H               ; F5 - сохранить файл на диск
+        JP    Z,keyHandler_F5
+        CP    05H               ; F6 - открыть файл и вставить его в конец документа
+        JP    Z,keyHandler_F6
+        JP    keyInput2
+
+;----------------------------------------------------------------------
+
+keyHandler_F4:
+        CALL  inputFileName
+        CALL  openFile
         JP    LBL3
-LBL143:
-        CALL  SUB58
-        CALL  SUB61
+
+keyHandler_F5:
+        CALL  inputFileName
+        CALL  saveFile
         JP    SUB1
-LBL144:
-        CALL  SUB58
-        CALL  SUB62
+
+keyHandler_F6:
+        CALL  inputFileName
+        CALL  insertFile
         JP    LBL3
+
+;----------------------------------------------------------------------
+
+        ; ???
         NOP
+
 SUB63:
         CALL  SUB15
-        LD    HL,0DF00H   ; 57088
+        LD    HL,BUFFER2
         RET
 LBL145:
         EX    DE,HL
-        LD    DE,REF29    ; 56892
+        LD    DE,REF29
         CALL  bios_fileNamePrepare
-        LD    HL,(0D006H)
+        LD    HL,(VAR01)
         EX    DE,HL
-        LD    HL,REF29    ; 56892
+        LD    HL,REF29
         CALL  bios_fileLoad2
         JP    LBL2
-        DB    00H,00H                     ; ".."
-REF29:  DB    00H,00H,00H,00H           ; "...."
+
+        DB    00H,00H
+REF29:  DB    00H,00H,00H,00H

@@ -22,12 +22,11 @@ fileRename: ; Найти файл с именем из hl
             push    bc
             push    de
             
-            ;
-            ld      hl, (v_foundedFile)
+            ld      hl, (v_cachedDescrPtr)
 
             ; Попытаться найти файл с новым именем
             ex      de, hl
-            call    fileFind2         
+            call    fileFind
 
             ; Если такой файл есть, то удалить
             call nc,deleteFileInt
@@ -41,8 +40,11 @@ loc_CD2C:   ld      a, (hl)
             dec     c
             jp nz,  loc_CD2C
 
-            ; Сохраняем изменения
-            call    saveFatDir
+            ; Ставим сектору каталога флаг isModified
+            call    markDirSectorAsModified
+
+            ; Сохраняем изменения на диск
+            call    saveSectorCache
 
             ; Выход
             or      a

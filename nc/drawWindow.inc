@@ -6,7 +6,7 @@
 ;----------------------------------------------------------------------------
 
 drawWindowIfSel:; Получить кол-во файлов
-        ld      hl, panelA_filesCnt
+        ld      hl, state.panelA_filesCnt
         call    readBytePanel
 
         ; Если файлов нет, выходим

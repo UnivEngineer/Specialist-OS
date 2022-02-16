@@ -7,24 +7,27 @@
 ;----------------------------------------------------------------------------
 
 ; ---------------------------------------------------------------------------
-; Обработка ESC+(. Выключение KOI-7
+; Обработка ESC+(. Включение KOI-7
 
-printChar_e28:    ld    a, 0FFh
-            ld    (bios_vars.koi8), a
+printChar_e28:
+            ld    a, 0FFh
+            ld    (bios_vars.koi7), a
             ret
 
 ; ---------------------------------------------------------------------------
-; Обработка ESC+). Включение KOI-7
+; Обработка ESC+). Включение KOI-8
 
-printChar_e29:    xor   a
-            ld    (bios_vars.koi8), a
+printChar_e29:
+            xor   a
+            ld    (bios_vars.koi7), a
             ret
 
 ; ---------------------------------------------------------------------------
 ; Обработка кода 9. Табуляция
 
-printChar_c9:     ld    a, (bios_vars.cursorX)  
-            add   a,24
+printChar_c9:
+            ld    a, (bios_vars.cursorX)  
+            add   a, 12 ; 24
             ld    (bios_vars.cursorX),a
             ret
 
@@ -32,7 +35,8 @@ printChar_c9:     ld    a, (bios_vars.cursorX)
 ; Вывод символа С из знакогенартора по адресу hl*8 на экран в положение 
 ; курсора. Курсор при этом перемещается 
 
-printChar_alt:    ; de = (hl+c)*8
+printChar_alt:
+            ; de = (hl+c) * 8
             ld    b, 0
             add   hl, bc
             add   hl, hl
@@ -46,7 +50,8 @@ printChar_alt:    ; de = (hl+c)*8
 ; Вывод символа de на экран в положение курсора. Курсор при этом перемещается 
 ; вправо.
 
-printChar_de:     ; Рассчитываем адрес вывода (hl=v_cursorPos, a*256+l=адрес)
+printChar_de:
+            ; Рассчитываем адрес вывода (hl=v_cursorPos, a*256+l=адрес)
             call  calcCursorAddr
 
             ; Перемещаем курсор вправо

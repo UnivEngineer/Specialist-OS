@@ -12,7 +12,6 @@ tapeInit:
         ld      bc, TAPE_DRIVER_JUMPS
         jp      bios_memcpy_bc_hl
 
-
         ; Таблца переходов
 jumpsStart:
         jp      tapeRead

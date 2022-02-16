@@ -16,8 +16,8 @@ fatFindClusterFirst:
             push  hl
 
             ; de = номер первого кластера дл€ поиска
-            ; ѕервые FAT_CLUSTERS + DIR_CLUSTERS €чеек fat не используютс€
-            ld    de, FAT_CLUSTERS + DIR_CLUSTERS
+            ; ѕервые 2 €чейки fat зарезервированы
+            ld    de, 2
 
             jp    fatFindClusterCommon
 
@@ -44,7 +44,9 @@ fatFindClusterNext:
             ; »щем свободный кластер: перебераем все €чейки fat, пока не найдЄм 0
 fatFindClusterCommon:
             push    bc
-            ld      bc, FAT_SIZE / FAT_ITEM_SIZE; кол-во €чеек fat
+            ld      hl, (v_diskInfo.fatNumCells)
+            ld      b, h
+            ld      c, l    ; bc = кол-во €чеек fat
 
 fatFindClusterLoop:
             ; «апоминаем номер последнего кластера в hl
@@ -70,7 +72,7 @@ fatFindClusterLoop:
             or      c
             jp nz,  fatFindClusterLoop  ; повтор цикла
 
-; ---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
 
             ; —вободный кластер не найден
             ; ¬осстанавливаем регистры и выходим с a=1, CF=1, ZF=0
@@ -80,7 +82,7 @@ fatFindClusterLoop:
             scf
             ret
 
-; ---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
 
             ; —вободный кластер найден
 fatFindClusterOk:

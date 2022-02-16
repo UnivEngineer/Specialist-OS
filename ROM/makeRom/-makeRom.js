@@ -1,20 +1,60 @@
 //----------------------------------------------------------------------------
-// RAMFOS
+// MXOS
 // Создание образа диска из отдельных файлов
 //
 // 2013-11-01 Разработано vinxru
+// 2022-02-15 Доработано SpaceEngineer
 //----------------------------------------------------------------------------
 
-fat16       = 1;                    // Сформировать ром-диск в FAT16
-fatElemSize = fat16 ? 2 : 1;        // Размер элемента fat в байтах
-fatSize     = fat16 ? 16: 1;        // Размер fat в кластерах
-dirSize     = fat16 ? 4 : 3;        // Размер каталога в кластерах
-diskSize    = (65536 >> 8);         // Размер ПЗУ в кластерах
-maxFiles    = dirSize * 8 - 1;      // Максимум файлов в каталоге (последние 32 байт каталога - это код загрузчика)
-includeFont = 0;                    // Надо поместить шрифт по адресу 0x800
+// Основные настройки
+volumeSize    = 64*1024         // Размер всего диска в байтах
+chipSize      = 64*1024         // Размер одной микросхемы ПЗУ в байтах
+maxFiles      = 64;             // Максимум файлов в корневом каталоге
+volumeLabel   = "SYSTEM ROM "   // Метка тома, 11 символов
+
+// Создавать ли загрузочный диск (ПЗУ), и имя файла,
+// который загрузчик должен скопировать в ОЗУ и запустить
+makeBootDisk  = 1;
+bootFile      = "DOS.SYS";
+
+// Поместить ли шрифт по адресу 0x800 и имя файла шрифта
+makeRomFont   = 0;
+fontFile      = "FONT.FNT";
+
+// Файлы, которые должны быть в начале диска
+firstFiles = [];
+firstFiles["NC.COM"] = 1;
+
+// формат образа ПЗУ:
+// 0 - 32 кб для Специалиста-MX
+// 1 - 64 кб для Специалиста-MX2
+// 2 - флеш-диск (нарезать на файлы размером chipSize)
+romFormat = 1
+
+// Имя файла образа ПЗУ
+romFileName = "MXOS_MY.bin"
+
+// Путь к папкам, куда сохранять образ ПЗУ
+destinationPath = "..\\";
+emulatorPath    = "..\\..\\..\\..\\Emulator\\emu\\Specialist\\";
+
+//----------------------------------------------------------------------------
+
+// Расчет вспомогательных значений
+fatElemSize   = 2;                              // Размер элемента fat в байтах
+sectorSize    = 256;                            // Размер сектора в байтах
+secPerClus    = 1;                              // Количество секторов в кластере
+volumeSectors = volumeSize / sectorSize;        // Размер всего диска в секторах
+fatSectors    = volumeSectors * 2 / sectorSize; // Размер FAT в секторах
+dirSectors    = maxFiles * 32 / sectorSize;     // Размер корневого каталога в секторах
+
+fatStartSector  = 1;                                            // Первый сектор таблицы FAT
+dirStartSector  = fatStartSector + fatSectors;                  // Первый сектор корневого каталога
+dataStartSector = dirStartSector + dirSectors;                  // Первый сектор области данных
+dataSectors     = volumeSectors - fatSectors - dirSectors - 1;  // Размер области данных в секторах
+dataClusters    = dataSectors / secPerClus;                     // Размер области данных в кластерах
 
 // Стандартная ерунда
-
 fso = new ActiveXObject("Scripting.FileSystemObject");
 shell = new ActiveXObject("WScript.Shell");
 function kill(name) { if(fso.FileExists(name)) fso.DeleteFile(name); }
@@ -23,8 +63,8 @@ function loadAll(name) { return fso.OpenTextFile(name, 1, false, 0).Read(fileSiz
 function save(fileName, data) { fso.CreateTextFile(fileName).Write(data); }
 src = loadAll("tbl.bin"); encode = []; decode = []; for(i=0; i<256; i++) { encode[i] = src.charAt(i); decode[src.charCodeAt(i)] = i; }
 
-// Расчет контрольной суммы файла
 
+// Расчет контрольной суммы файла
 function specialistSum(data) {
   s = 0;
   for(i=0; i<data.length-1; i++)
@@ -34,36 +74,18 @@ function specialistSum(data) {
 }
 
 // Удаляем временные файлы
-
 kill("list.tmp");
 
 // Файлы, которые не надо добавлять на диск
-
 ignore = [];
 ignore["LIST.TMP"] = 1;
 ignore["TBL.BIN"] = 1;
+ignore["BOOT.BIN"] = 1;
 ignore["-MAKEROM.JS"] = 1;
 ignore["SPECSVGA.BIN"] = 1;
 ignore["SPMX.BIN"] = 1;
-ignore["makeRom.vcxproj.user"] = 1;
-ignore["makeRom.vcxproj"] = 1;
-ignore["makeRom.vcxproj.filters"] = 1;
-if (includeFont == 1)
-    ignore["FONT.FNT"] = 1;
-
-bootFile = "DOS.SYS";
-
-firstFiles = [];
-firstFiles["NC.COM"] = 1;
-
-// Пустая FAT
-fat = [];
-for (i=0; i<4; i++)                     fat[i] = 0xFF;  // первые 4 байта - команда перехода на загрузчик
-for (;i<fatElemSize*diskSize; i++)      fat[i] = 0x00;  // свободный кластер
-for (;i<fatElemSize*fatSize*256; i++)   fat[i] = 0xFF;  // неиспользуемый кластер (если ПЗУ меньше 64 кб)
-
-dest = [];
-for(i=0; i<diskSize*256; i++) dest += encode[0xFF];
+if (makeRomFont == 1)
+    ignore[fontFile] = 1;
 
 dir         = "";
 dosCluster  = 0;
@@ -71,56 +93,56 @@ dosSize     = 0;
 dosAddr     = 0;
 fontCluster = 0;
 numFiles    = 0;
-minCluster  = fatSize + dirSize;
 
-function allocCluster(cluster, minCluster)
+// Загружаем образ boot сектора
+bootSector = "BOOT.BIN";
+bootSrc = loadAll("boot.bin");
+boot = [];
+for (i=0; i<256; i++) boot[i] = decode[bootSrc.charCodeAt(i)];
+
+// Пустая FAT
+fat = [];
+for (i=0; i<4;              i++) fat[i] = 0xFF; // первые два кластера резервные
+for (   ; i<fatSectors*256; i++) fat[i] = 0x00; // остальные кластеры свободны
+
+// Пустая область данных
+dest = [];
+
+// Выделение кластера
+function allocCluster(cluster)
 {
     for (;;)
     {
-        for (var i=minCluster; i<diskSize; i++)
+        for (var i=2; i<dataClusters; i++)
         {
-            if (fat16)
+            i2 = i * 2;
+            if ((fat[i2] == 0) && (fat[i2+1] == 0))
             {
-                i2 = i * 2;
-                if ((fat[i2] == 0) && (fat[i2+1] == 0))
+                if (cluster)
                 {
-                    if (cluster)
-                    {
-                        fat[cluster*2]   = (i & 0xFF);
-                        fat[cluster*2+1] = (i >> 8) & 0xFF;
-                    }
-                    fat[i2]   = (i & 0xFF);
-                    fat[i2+1] = (i >> 8) & 0xFF;
-                    return i;
+                   fat[cluster*2]   = (i & 0xFF);
+                   fat[cluster*2+1] = (i >> 8) & 0xFF;
                 }
-            }
-            else
-            {
-                if (fat[i] == 0)
-                {
-                    if (cluster) fat[cluster] = i;
-                    fat[i] = i;
-                    return i;
-                }
+                
+                fat[i2]   = (i & 0xFF);
+                fat[i2+1] = (i >> 8) & 0xFF;
+                return i;
             }
         }
 
-        if (minCluster == fatSize + dirSize)
-        {
-			shell.Popup("Не хватило места!\n" + numFiles, 0, "Error", 0)
-            throw "Нет места";
-        }
-        minCluster = fatSize + dirSize;
+        shell.Popup("Не хватило места!\n" + numFiles, 0, "Error", 0)
+        throw "Нет места";
     }
 }
 
-function putFile(fileName, boot)
+// Добавление файла
+function putFile(fileName, isBoot)
 {
     data = loadAll(fileName);
     data_size = data.length;
 
     // Файлы нулевого объема не поддерживаются
-    if (data.length==0) return;
+    //if (data_size==0) return;
 
     // Проверяем объем
     if (numFiles+1==maxFiles)
@@ -133,9 +155,9 @@ function putFile(fileName, boot)
     // Получаем адрес загрузки
     startAddr = 0;
 
-    fileName = fileName.toUpperCase();
+    //fileName = fileName.toUpperCase();
     ext = fso.GetExtensionName(fileName);
-    if (ext == "RKS")
+    if (ext.toUpperCase() == "RKS")
     {
         // Получаем адрес загрузки из заголовка файла
         startAddr = decode[data.charCodeAt(0)] + decode[data.charCodeAt(1)] * 256;
@@ -160,142 +182,174 @@ function putFile(fileName, boot)
     //    0, "File", 0);
 
     // Сохраняем файл
-    cluster = startCluster = 0;
+    cluster = firstCluster = 0;     // файл нулевого размера указывает на кластер 0
     while (data.length != 0)
     {
-        cluster = allocCluster(cluster, minCluster); 
-        if (startCluster == 0) startCluster = cluster;
-        block = data.substr(0,256); data = data.substr(256);
-        dest = dest.substr(0,256*cluster) + block + dest.substr(256*cluster+block.length);
-    }    
+        cluster = allocCluster(cluster); 
+        if (firstCluster == 0) firstCluster = cluster;
+        block = data.substr(0, 256);
+        data = data.substr(256);
+        while (block.length < 256) block += encode[0xFF];
+        dest = dest + block;
+    }
 
     // Дескриптор файла в каталоге
-    if (fat16)
-    {
-        dir += (fileName+"        ").substr(0,8);   // имя
-        dir += (ext+"   ").substr(0,3);             // расширение
-        dir += encode[0];                           // attrib
-        dir += encode[0];                           // (только FAT32) исп. в WinNT
-        dir += encode[0];                           // (только FAT32) время создания - миллисекунды
-        dir += encode[0] + encode[0];               // (только FAT32) время создания
-        dir += encode[0] + encode[0];               // (только FAT32) дата создания
-        dir += encode[startAddr & 0xFF];            // (только FAT32) дата обращения; используем для адреса загрузки - байт 0
-        dir += encode[startAddr >> 8];              // (только FAT32) дата обращения; используем для адреса загрузки - байт 1
-        dir += encode[0];                           // первый кластер - байт 2
-        dir += encode[0];                           // первый кластер - байт 3
-        dir += encode[0] + encode[0];               // время записи
-        dir += encode[0] + encode[0];               // дата записи
-        dir += encode[startCluster & 0xFF];         // первый кластер - байт 0
-        dir += encode[startCluster >> 8];           // первый кластер - байт 1
-        dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
-        dir += encode[(data_size - 1) >> 8];        // размер - байт 1
-        dir += encode[0];                           // размер - байт 2
-        dir += encode[0];                           // размер - байт 3
+    dir += (fileName+"        ").substr(0,8);   // имя
+    dir += (ext+"   ").substr(0,3);             // расширение
+    dir += encode[0];                           // attrib
+    dir += encode[0];                           // (только FAT32) исп. в WinNT
+    dir += encode[0];                           // (только FAT32) время создания - миллисекунды
+    dir += encode[0] + encode[0];               // (только FAT32) время создания
+    dir += encode[0] + encode[0];               // (только FAT32) дата создания
+    dir += encode[startAddr & 0xFF];            // (только FAT32) дата обращения; используем для адреса загрузки - байт 0
+    dir += encode[startAddr >> 8];              // (только FAT32) дата обращения; используем для адреса загрузки - байт 1
+    dir += encode[0];                           // первый кластер - байт 2
+    dir += encode[0];                           // первый кластер - байт 3
+    dir += encode[0] + encode[0];               // время записи
+    dir += encode[0] + encode[0];               // дата записи
+    dir += encode[firstCluster & 0xFF];         // первый кластер - байт 0
+    dir += encode[firstCluster >> 8];           // первый кластер - байт 1
+    dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
+    dir += encode[(data_size - 1) >> 8];        // размер - байт 1
+    dir += encode[0];                           // размер - байт 2
+    dir += encode[0];                           // размер - байт 3
 
-        /*shell.Popup(
-            fileName + "." + ext + "\n" +
-            startAddr + "\n" +
-            startCluster + "\n" +
-            data_size + "\n\n",
-            0, "File", 0);*/
-    }
-    else
-    {
-        dir += (fileName+"        ").substr(0,6);   // имя
-        dir += (ext+"   ").substr(0,3);             // расширение
-        dir += encode[0];                           // attrib
-        dir += encode[startAddr & 0xFF];            // адрес загрузки - байт 0
-        dir += encode[startAddr >> 8];              // адрес загрузки - байт 1
-        dir += encode[(data_size - 1) & 0xFF];      // размер - байт 0
-        dir += encode[(data_size - 1) >> 8];        // размер - байт 1
-        dir += encode[0];                           // crc?
-        dir += encode[startCluster];                // первый кластер
-    }
+    /*shell.Popup(
+        fileName + "." + ext + "\n" +
+        startAddr + "\n" +
+        firstCluster + "\n" +
+        data_size + "\n\n",
+        0, "File", 0);*/
 
     // Операционная система
-    if (boot)
+    if (isBoot)
     {
-        dosCluster = startCluster;
+        dosCluster = firstCluster;
         dosAddr = startAddr;
         dosSize = (data_size+255)>>8;
     }
 }
 
+// Получение списка файлов
 shell.Run("cmd /c dir /b /on *.* >list.tmp", 2, true);
 list = fso.OpenTextFile("list.tmp", 1, false, 0);
-boolFileFounded="", filesA=[], filesB=[];
+boolFileFound = "", filesA = [], filesB = [];
 while (!list.AtEndOfStream)
 {
-    fileName = list.readLine().toUpperCase();
-    shortFileName = fso.GetBaseName(fso.GetBaseName(fileName))+"."+fso.GetExtensionName(fileName);
+    fileName = list.readLine();
+    fileNameU = fileName.toUpperCase()
+    shortFileName = fso.GetBaseName(fso.GetBaseName(fileNameU))+"."+fso.GetExtensionName(fileNameU);
+
     // Операционная система
-    if(boolFileFounded=="" && shortFileName == "DOS.SYS")
-        bootFileFounded = fileName;
-    else if(firstFiles[shortFileName])
+    if (makeBootDisk && boolFileFound == "" && shortFileName == bootFile)
+        bootFileFound = fileName;
+    else if (firstFiles[shortFileName])
         filesA.push(fileName);
-    else if(!ignore[fileName])
+    else if (!ignore[fileNameU])
         filesB.push(fileName);
 }
 
-if (includeFont)
-{
-  minCluster = 8; // Файл должен начинаться с этого адреса
-  putFile("font.fnt");
-}
+//if (makeRomFont)
+//{
+//  minCluster = 8; // Файл должен начинаться с этого кластера
+//  putFile(fontFile);
+//}
 
-if (bootFileFounded)
-  putFile(bootFileFounded, true);
+if (makeBootDisk && bootFileFound)
+  putFile(bootFileFound, true);
 for (i=0; i<filesA.length; i++)
   putFile(filesA[i], false);
 for (i=0; i<filesB.length; i++)
   putFile(filesB[i], false);
 
 // Пустой хвост каталога
-while (dir.length < dirSize*256)
+while (dir.length < dirSectors*256)
     dir += encode[0xFF];
 
-// Код загрузки
+// Модифицируем некоторые поля boot сектора
+boot[0x0B] = sectorSize & 0xFF;     // BPB_BytsPerSec (мл. байт)
+boot[0x0C] = sectorSize >> 8;       // BPB_BytsPerSec (ст. байт)
+boot[0x0D] = secPerClus & 0xFF;     // BPB_SecPerClus
+boot[0x11] = maxFiles & 0xFF;       // BPB_RootEntCnt (мл. байт)
+boot[0x12] = maxFiles >> 8;         // BPB_RootEntCnt (ст. байт)
+boot[0x13] = volumeSectors & 0xFF;  // BPB_TotSec16 (мл. байт)
+boot[0x14] = volumeSectors >> 8;    // BPB_TotSec16 (ст. байт)
+boot[0x16] = fatSectors & 0xFF;     // BPB_FATSz16 (мл. байт)
+boot[0x17] = fatSectors >> 8;       // BPB_FATSz16 (ст. байт)
+for (i=0; i<11; i++)                // BS_VolLab
+    boot[0x2B + i] = decode[volumeLabel.charCodeAt(i)];
 
-if (dosCluster)
-{  
-  // Стандартный загрузчик
-  if (numFiles > maxFiles) throw "Слишком много файлов, некуда поместить загрузчик";
-  loaderCluster = fatSize + dirSize - 1;
-  fat[0] = 0xC3, fat[1] = 0xE1, fat[2] = loaderCluster; // JMP xx01h, где xx = последний кластер каталога
-  dir = dir.substr(0, dir.length - 32);
-  dir += encode[0xFF]+encode[0x21]+encode[0x00]+encode[dosCluster]+encode[0x11]+encode[dosAddr&0xFF]+encode[dosAddr>>8]+encode[0xC3];
-  dir += encode[0xF1]+encode[loaderCluster]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF]+encode[0xFF];
-  dir += encode[0xFF]+encode[0x7E]+encode[0x12]+encode[0x13]+encode[0x23]+encode[0x7A]+encode[0xFE]+encode[(dosAddr>>8) + dosSize];
-  dir += encode[0xC2]+encode[0xF1]+encode[loaderCluster]+encode[0xC3]+encode[dosAddr&0xFF]+encode[dosAddr>>8]+encode[0xFF]+encode[0xFF];
-}
-else
+// Модифицируем код загрузчика
+if (makeBootDisk)
 {
-  // Просто подвешиваем компьютер
-  fat[0] = 0xC3, fat[1] = 0x00, fat[2] = 0x00;
+    dosROMAddr = ((dosCluster - 2) * secPerClus + dataStartSector) * sectorSize;
+    boot[0x3F] = dosROMAddr & 0xFF;         // начальный адрес DOS.SYS в ПЗУ (откуда копировать)
+    boot[0x40] = dosROMAddr >> 8;
+    boot[0x42] = dosAddr & 0xFF;            // начальный адрес DOS.SYS в памяти (куда копировать)
+    boot[0x43] = dosAddr >> 8;
+    boot[0x4A] = (dosAddr >> 8) + dosSize;  // конечный адрес DOS.SYS в памяти (старший байт + 1)
 }
 
-// FAT+Каталог
+// Собираем образ ПЗУ
 start = "";
-for (i=0; i<fatSize*256; i++) start += encode[fat[i]];
+// Boot сектор
+for (i=0; i<256; i++) start += encode[boot[i]];
+// FAT
+for (i=0; i<fatSectors*256; i++) start += encode[fat[i]];
+// Каталог
 start += dir;
 
-// Специалист MX
-//std = start + dest.substr(4*256);
+// Сохраняем образ ПЗУ
+if (romFormat == 0)
+{
+    // Специалист MX
+    rom = start + dest;
+    while (rom.length < 65536) rom += encode[0xFF];
 
-// Специалист MX2
-mx2 = encode[0x31] + encode[0xFF] + encode[0xF7] + encode[0xC7]; // lxi sp, 0F7FFh / rst 0
-mx2 += dest.substr(32768, 32768-4);
-while(mx2.length < 32768) mx2 += encode[0xFF];
-mx2 += start + dest.substr(start.length, 32768-start.length);
-while(mx2.length < 65536) mx2 += encode[0xFF];
+    // Сохраняем результат
+    save(destinationPath + romFileName, rom);
+    save(emulatorPath    + romFileName, rom);
+}
+else if (romFormat == 1)
+{
+    // Специалист MX2
+    // В начале ПЗУ - код перехода на boot сектор (lxi sp, 0F7FFh / rst 0),
+    // эти 4 лишних байта учитываются в драйвере ром-диска
+    rom = encode[0x31] + encode[0xFF] + encode[0xF7] + encode[0xC7];
 
-// Сохраняем результат
-save("..\\MXOS_MY.bin", mx2);
-//save("specsvga.bin", mx2);
-//save("spmx.bin", std);
-//save("..\\specsvga.bin", mx2);
-//save("..\\spmx.rom", std);
+    // Первая половина ПЗУ - это вторая половина образа
+    rom += dest.substr(32768-start.length, 32768-start.length-4);
+    while (rom.length < 32768) rom += encode[0xFF];
 
-// И сразу в эмулятор
-save("D:\\Projects\\Specialist\\Emulator\\emu\\Specialist\\MXOS_MY.bin", mx2);
-//save("D:\\Projects\\Specialist\\Emulator\\emu80\\specmx\\commander\\MXOS_MY.rom", mx2);
+    // Вторая половина ПЗУ - это первая половина образа
+    rom += start + dest.substr(0, 32768-start.length);
+    while (rom.length < 65536) rom += encode[0xFF];
+
+    // Сохраняем результат
+    save(destinationPath + romFileName, rom);
+    save(emulatorPath    + romFileName, rom);
+}
+else if (romFormat == 2)
+{
+    // Флеш диск
+    rom = start + dest;
+    
+    // Разбиваем имя файла
+    romFn  = fso.GetBaseName(romFileName);
+    romExt = fso.GetExtensionName(romFileName);
+
+    // Нарезаем на куски размером chipSize
+    partNum = 0;
+    while (rom.length > 0)
+    {
+        part = rom.substr(0, chipSize);
+        rom = rom.substr(chipSize);
+        while (part.length < chipSize) part += encode[0xFF];
+
+        // Сохраняем результат
+        partFileName = destinationPath + romFn + partNum + "." + romExt;
+        save(partFileName, part);
+        
+        partNum++;
+    }
+}

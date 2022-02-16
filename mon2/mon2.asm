@@ -45,7 +45,7 @@
 ; bios_vars.tapeError  = 8FE1h
 ; bios_vars.tapeAddr   = 8FE3h
 ; bios_vars.cursorCfg  = 8FE9h
-; bios_vars.koi8       = 8FEAh
+; bios_vars.koi7       = 8FEAh
 ; bios_vars.cursorX    = 8FFCh
 
 ; Собственные переменные
@@ -104,14 +104,14 @@ vars3 MON2_VARS_3 = 0F900H
         CALL  bios_printChar
 
         ; Рестарт без очистки экрана
-RestartNoCls:
+restartNoCls:
         LD    SP,0FFBFH
         LD    HL,mon2_restart           ; установить обработчик ошибки магнитофона
         LD    (bios_vars.tapeError),HL  ; на рестарт монитора
         LD    HL,7EFFH    ; 32511
         LD    (vars1.V_8FAB),HL
         CALL  SUB1
-        JP    RestartNoCls
+        JP    restartNoCls
 
 SUB1:   LD    HL,txtNewLine             ; 62970
         CALL  bios_printStringOld
@@ -425,11 +425,15 @@ LBL16:  PUSH  BC
         LD    HL,(vars1.V_8FA5)
         CALL  printHexWordHL
         RET
-LBL17:  CALL  bios_keyScan
+
+        ; Если нажата клавиша, записать 0FFh по адресу (HL)
+setMIfKeyPressed:
+        CALL  bios_keyScan
         INC   A
         RET   Z
-        LD    (HL),0FFH   ; 255
+        LD    (HL), 0FFh
         RET
+
 SUB7:   LD    B,(HL)
         DEC   HL
         LD    C,(HL)
@@ -475,7 +479,7 @@ LBL19:  PUSH  HL
         LD    (HL),C
         POP   HL
 LBL20:  CALL  SUB9
-        JP    RestartNoCls
+        JP    restartNoCls
 SUB9:   JP    (HL)
 SUB10:  INC   HL            ; [4]
         INC   DE
@@ -504,7 +508,7 @@ REF4:   LD    (vars1.V_8F9D),HL
         CALL  SUB11
         CALL  SUB10
         CALL  SUB10
-        JP    RestartNoCls
+        JP    restartNoCls
 LBL21:  PUSH  HL
         PUSH  BC
         LD    HL,8F60H    ; 36704
@@ -807,7 +811,7 @@ LBL50:  CALL  SUB22
         POP   BC
         RET
 SUB22:  CP    20H           ; 32 ' '; [2]
-        JP    C,RestartNoCls
+        JP    C,restartNoCls
         CP    3AH           ; 58 ':'
         JP    C,LBL51
         AND   5FH           ; 95 '_'
@@ -830,7 +834,7 @@ LBL51:  OR    10H           ; 16
         RET
 LBL52:  LD    HL,txtSpaceQuestMark             ; 62966; [4]
         CALL  bios_printStringOld
-        JP    RestartNoCls
+        JP    restartNoCls
 LBL53:  PUSH  BC
         PUSH  DE
         LD    DE,vars1.V_8F80   ; 36736
@@ -852,7 +856,7 @@ SUB24:  CALL  mon2_keyScan         ; [5]
         CALL  mon2_getch
 SUB25:  CP    1FH           ; 31
         RET   NZ
-        JP    RestartNoCls
+        JP    restartNoCls
 LBL54:  CALL  mon2_printHexWord
         LD    A,L
         AND   0FH           ; 15
@@ -1011,13 +1015,13 @@ LBL67:
     ORG_PAD0 0F800h
 
 
-mon2_restart:       JP    RestartNoCls                  ; F800
+mon2_restart:       JP    restartNoCls          ; F800
 mon2_getch:         JP    bios_getchOld         ; F803
                     JP    bios_tapeReadOld      ; F806
 mon2_printChar:     JP    bios_printCharOld     ; F809
                     JP    bios_tapeWriteOld     ; F80C
                     JP    bios_printer          ; F80F
-                    JP    LBL17                 ; F812
+                    JP    setMIfKeyPressed      ; F812
 mon2_printHexByte:  JP    bios_printHexByte     ; F815
 mon2_printString:   JP    bios_printStringOld   ; F818
 mon2_keyScan:       JP    bios_keyScanOld       ; F81B

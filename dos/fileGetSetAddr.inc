@@ -23,7 +23,7 @@ fileGetSetAddr:   ; Ищем файл с именем в hl
 
             ; Получаем адрес длины файла
             push    de
-            ld      hl, (v_foundedFile)
+            ld      hl, (v_cachedDescrPtr)
             ld      de, FILE_DESCRIPTOR.loadAddress
             add     hl, de
             pop     de
@@ -38,8 +38,11 @@ fileGetSetAddr:   ; Ищем файл с именем в hl
             inc     hl
             ld      (hl), d
 
-            ; Сохраняем изменения
-            call    saveFatDir
+            ; Ставим сектору каталога флаг isModified
+            call    markDirSectorAsModified
+
+            ; Сохраняем изменения на диск
+            call    saveSectorCache
 
             ; Выходим
             pop     hl

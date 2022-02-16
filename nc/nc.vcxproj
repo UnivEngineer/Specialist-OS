@@ -52,16 +52,15 @@
     <None Include="draw.inc" />
     <None Include="drawCursor.inc" />
     <None Include="drawWindow.inc" />
-    <None Include="enter.inc" />
-    <None Include="enter2.inc" />
-    <None Include="f2.inc" />
-    <None Include="f3.inc" />
-    <None Include="f4.inc" />
-    <None Include="f5.inc" />
-    <None Include="f6.inc" />
-    <None Include="f7.inc" />
-    <None Include="f8.inc" />
-    <None Include="f9.inc" />
+    <None Include="butEnter.inc" />
+    <None Include="butF2.inc" />
+    <None Include="butF3.inc" />
+    <None Include="butF4.inc" />
+    <None Include="butF5.inc" />
+    <None Include="butF6.inc" />
+    <None Include="butF7.inc" />
+    <None Include="butF8.inc" />
+    <None Include="butF9.inc" />
     <None Include="getSelectedFile.inc" />
     <None Include="input.inc" />
     <None Include="inputForCopyMove.inc" />
@@ -70,11 +69,10 @@
     <None Include="loadFiles.inc" />
     <None Include="loadSelFileAt0.inc" />
     <None Include="main.inc" />
-    <None Include="main2.inc" />
     <None Include="tools.inc" />
     <CustomBuild Include="NC.asm">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) com 0xD000</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call $(SolutionDir)tasm\make.bat $(ProjectDir)%(Filename) com 0xE800</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).com</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">*.inc</AdditionalInputs>
       <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</BuildInParallel>
@@ -91,14 +89,14 @@
     <None Include="printString2.inc" />
     <None Include="printStringInv.inc" />
     <None Include="rwBytePanel.inc" />
-    <None Include="saveState.inc" />
+    <None Include="saveLoadState.inc" />
     <None Include="selFileToCmdLine.inc" />
     <None Include="setCursorPosPanel.inc" />
     <None Include="start.inc" />
-    <None Include="tab.inc" />
+    <None Include="butTab.inc" />
     <None Include="tapeErrorHandler.inc" />
     <None Include="tapeWrite.inc" />
-    <None Include="upDownLeftRight.inc" />
+    <None Include="butArrows.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

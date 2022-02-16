@@ -6,8 +6,6 @@
 ;----------------------------------------------------------------------------
 
 reboot2:
-            ; Очищаем экран
-            call    clearScreen
 
     IF BOOT_FROM_TAPE
             ; Проверяем, нажата ли какая нибудь клавиша
@@ -33,12 +31,8 @@ reboot2:
             ld      h, 0
             ld      l, a    ; hl = объём в страницах
             inc     l       ; +1 страница - основная память
-            add     hl, hl
-            add     hl, hl
-            add     hl, hl
-            add     hl, hl
-            add     hl, hl
-            add     hl, hl  ; hl = hl * 64
+            ld      de, 64
+            call    mul_hl_de  ; hl = hl * 64
             ex      hl, de
             call    printDecWord
 

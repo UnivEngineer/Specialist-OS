@@ -32,17 +32,9 @@ formatCalled:
             ; Раскрашиваем строку с кнопками
             COLOR   COLOR_HELP_TEXT
             ld      hl, 92F7h
-    IF SHOW_F9
-            ld      d, 9
-    ELSE
             ld      d, 8
-    ENDIF
 loc_D049:
-    IF SHOW_F9
-            ld      b, 3
-    ELSE
             ld      b, 4
-    ENDIF
             call    inverseRect     ; hl - адрес, b - ширина, высота 9
             inc     h
             inc     h

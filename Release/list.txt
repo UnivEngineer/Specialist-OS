@@ -1,7 +1,7 @@
 D:\Projects\Specialist\MySoft\MXOS-Z80\dos\DOS.lst
 D:\Projects\Specialist\MySoft\MXOS-Z80\E\E.lst
 D:\Projects\Specialist\MySoft\MXOS-Z80\flash\Flash.lst
-D:\Projects\Specialist\MySoft\MXOS-Z80\flash\FPage.lst
+D:\Projects\Specialist\MySoft\MXOS-Z80\flash\Rom.lst
 D:\Projects\Specialist\MySoft\MXOS-Z80\format\FORMAT.lst
 D:\Projects\Specialist\MySoft\MXOS-Z80\launch\LAUNCH.lst
 D:\Projects\Specialist\MySoft\MXOS-Z80\mon2\mon2.lst

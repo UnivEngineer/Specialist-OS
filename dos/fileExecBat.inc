@@ -6,7 +6,7 @@
 ;----------------------------------------------------------------------------
 
 execBat:
-            pop   de
+            pop     de
 
             ; Устанавливаем адрес загрузки BAT-файла на BAT_BUFFER (= FC00h)
             ld      hl, BAT_BUFFER
@@ -36,34 +36,34 @@ execBat:
 execBat_loop:
 
             ; Сохраняем текущий диск в регистре b
-            ld  a, (v_drive)
-            ld   b, a
+            ld      a, (v_drive)
+            ld      b, a
 
 v_batDrive:
             ; Выбрать диск содержащий BAT файл
-            ld   a, 1 ; << сюда вместо 1 пишется диск, содержащий BAT файл
-            call fileSelectDrive
+            ld      a, 1 ; << сюда вместо 1 пишется диск, содержащий BAT файл
+            call    fileSelectDrive
 
             ; Загрузить BAT-файл в память
-            ld  hl, v_batFileDescr 
-            call fileLoad
-            ld hl, (v_batPtr)
+            ld      hl, v_batFileDescr 
+            call    fileLoad
+            ld      hl, (v_batPtr)
 
             ; Сохраняем начало строки
-            ld    d, h
-            ld    e, l
+            ld      d, h
+            ld      e, l
 
             ; Ищем конец строки
 execBat_0:
-            ld  a, (hl)       
-            inc   hl
+            ld      a, (hl)       
+            inc     hl
 
             ; Найден конец строки, запускаем файл
-            cp    0Dh         
-            jp z, execBat_1
+            cp      0Dh         
+            jp z,   execBat_1
 
-            ; Конец     файла
-            cp    0FFh        
+            ; Конец файла
+            cp      0FFh        
             jp nz,  execBat_0
             ret
 
@@ -71,15 +71,15 @@ execBat_0:
 
 execBat_1:
             ; Сохраняем указатель
-            ld (v_batPtr), hl  
+            ld      (v_batPtr), hl  
 
             ; Восстановление активного диска          
-            ld   a, b         
-            call fileSelectDrive
+            ld      a, b         
+            call    fileSelectDrive
 
             ; Запустить файл
-            ex    de, hl             
-            call fileExec
+            ex      de, hl             
+            call    fileExec
 
-            jp execBat_loop
+            jp      execBat_loop
 

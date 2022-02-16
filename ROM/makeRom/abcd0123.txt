@@ -1,1 +1,1 @@
-function allocCluster(cluster)
+UPPER CASE ENGLISH TEXT  ABCDEFGHIJKLMNOPQRSTUVWXYZlower case english text  abcdefghijklmnopqrstuvwxyzנעןניףמשו עץףףכיו גץכקש  בגקחהו³צתיךכלםמןנעףפץזטד‏û‎~שרüאס׃װֿׂÞ־Ùֵ  ׂױ׃׃ֵֹֻ ֲױֻ׳Ù  ֱֲ׳ִֵַ£ײÚֹÊֻּֽ־ֿ׀ׂ׃װױֳֶָÞÛÝßÙ״Üְׁ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ְֱֲֳִֵֶַָֹÊֻּֽ־ֿ׀ׁׂ׃װױײ׳״ÙÚÛÜÝÞßאבגדהוזחטיךכלםמןנסעףפץצקרשתûü‎‏~line 20line 25line 35line 35line 40line 45line 50line 55line 60line 65

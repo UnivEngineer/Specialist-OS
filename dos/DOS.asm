@@ -37,19 +37,18 @@
     ORG_PAD 0C196h
 	INCLUDE "printChar4.inc" ; Продолжается в scrollUp
 	INCLUDE "scrollUp.inc"
-
-    ; Буфер для копирования изображения символов при использовании шрифта из ПЗУ
-v_char:
-    BLOCK   13, 0FFh
-
 	INCLUDE "keyScan.inc"
 	INCLUDE "getch2.inc"
 	INCLUDE "calcCursorAddr.inc"
+
+    ; тут есть место 15 байт
 
     ORG_PAD 0C337h
 	INCLUDE "getch.inc"
 	INCLUDE "calcCursorAddr2.inc"
 	INCLUDE "drawCursor.inc"
+
+    ; тут есть место 6 байт
 
     ORG_PAD 0C377h
     INCLUDE "tape.inc"
@@ -64,7 +63,8 @@ v_char:
     IF RAMFOS_COMPATIBILITY
 	INCLUDE "strToHex.inc"
     ENDIF
-    ; Здесь есть свободное место (15 байт)
+
+    ; тут есть место 15 байт
 
     ORG_PAD 0C427h
 	INCLUDE "cmp_hl_de.inc"
@@ -78,43 +78,46 @@ v_char:
     
     ORG_PAD 0C443h
     INCLUDE "drawCursor2.inc"
-	INCLUDE "reboot1.inc"
+
+    ; тут есть место 29 байт
 
     ORG_PAD 0C478h
     jp  t_tapeReadError
 
 ;---------------------------------------------------------------------------
-; Переменные
+; Константы и Переменные
 ;---------------------------------------------------------------------------
 
 ; Начальные значения переменных хранятся здесь, и при сбросе
 ; копируются на адрес bios_vars (=8FDFh) функцией reboot1
-
-initVars    BIOS_VARIABLES
-
+initVars        BIOS_VARIABLES
 initVarsEnd:
-    DB 00h
 
-; Таблица кодов клавиатуры
-
+; Таблица кодов клавиш
 v_keybTbl:
-    DB 81h, 0Ch, 19h, 1Ah, 09h, 1Bh, 20h,  8,  80h, 18h, 0Ah, 0Dh, 0, 0, 0, 0
+    DB 81h, 0Ch, 19h, 1Ah, 09h, 1Bh, 20h, 08h, 80h, 18h, 0Ah, 0Dh, 0, 0, 0, 0
     DB 71h, 7Eh, 73h, 6Dh, 69h, 74h, 78h, 62h, 60h, 2Ch, 2Fh, 7Fh, 0, 0, 0, 0
     DB 66h, 79h, 77h, 61h, 70h, 72h, 6Fh, 6Ch, 64h, 76h, 7Ch, 2Eh, 0, 0, 0, 0
     DB 6Ah, 63h, 75h, 6Bh, 65h, 6Eh, 67h, 7Bh, 7Dh, 7Ah, 68h, 3Ah, 0, 0, 0, 0
     DB 3Bh, 31h, 32h, 33h, 34h, 35h, 36h, 37h, 38h, 39h, 30h, 2Dh, 0, 0, 0, 0
     DB 00h, 01h, 02h, 03h, 04h, 05h, 06h, 07h, 8Ah, 8Bh, 8Ch, 1Fh, 0, 0, 0, 0
 
-    ORG_PAD 0C500h
+;---------------------------------------------------------------------------
+; Код
+;---------------------------------------------------------------------------
+
+    ;ORG_PAD 0C500h
 	INCLUDE "printer.inc"
 	INCLUDE "printString.inc"
+	INCLUDE "reboot1.inc"
 	INCLUDE "reboot2.inc"
 	INCLUDE "getch3.inc"
 	INCLUDE "printChar2.inc"	; Продолжается в scrollDown
 	INCLUDE "scrollDown.inc"
 	INCLUDE "scrollUp2.inc"
 	INCLUDE "checkRAMD.inc"
-    ; Здесь есть свободное место (29 байт)
+
+    ; тут есть место 17 байт
 
 ;---------------------------------------------------------------------------
 ; Точки входа 0C800h
@@ -130,14 +133,16 @@ v_keybTbl:
 	INCLUDE "reboot3.inc"
 	INCLUDE "fileExecBat.inc"
 	INCLUDE "fileExec.inc"
-	INCLUDE "fileCmpExt.inc"
 	INCLUDE "driverFFC0.inc"
 	INCLUDE "driver.inc"
 	INCLUDE "installDriver.inc"
 	INCLUDE "fileGetSetDrive.inc"
-	INCLUDE "loadSaveFatDir.inc"
+    INCLUDE "strcmp.inc"
+	INCLUDE "fatCache.inc"
 	INCLUDE "fatFindCluster.inc"
     INCLUDE "fatReadWriteCluster.inc"
+    INCLUDE "fatGetFreeSpace.inc"
+    INCLUDE "fatReadBootSector.inc"
 	INCLUDE "fileCreate.inc"
 	INCLUDE "fileFind.inc"
 	INCLUDE "fileLoad.inc"
@@ -149,55 +154,76 @@ v_keybTbl:
 	INCLUDE "fileList.inc"
 	INCLUDE "fileNamePrepare.inc"
 	INCLUDE "printDecWord.inc"
+    INCLUDE "math.inc"
 
 ;---------------------------------------------------------------------------
 ; Константы и Переменные
 ;---------------------------------------------------------------------------
 
-txtBadCommand:	    DB 0Ah,"BAD COMMAND OR FILE NAME",0
-txtBiosVer:         DB 0Ch,"MXOS BIOS 5.00",0Ah, 0
-txtRAM:             DB 0Ah,"RAM: ",0
-txtKB:              DB " KB",0Ah, 0
+v_drive:            DB 1            ; Текущий накопитель
+v_findCluster:      DW 0            ; Используется в fileFindClusterFirst/fileFindClusterNext
+v_fileFirstCluster: DW 0            ; Первый кластер созданного файла
+v_input_start:      DW 0            ; Используется в input, createFile
+v_input_end:        DW 0            ; Используется в input, createFile
+v_cachedDescrPtr:   DW 0            ; Используется в findFile, createFile
+v_cachedSector:     DW 0            ; Используется в findFile, createFile
+v_newDescrPtr:      DW 0            ; Адрес дескриптора созданного файла
+v_foundDescrPtr:    DW 0            ; Адрес дескриптора найденного файла
+v_batPtr:           DW 0            ; Адрес буфра, где находится содержимое BAT файла
+v_memTop:           DW bios_vars-1  ; Максимальный доступный программам адрес в памяти (в оригинале почему-то 0FAFFh)
+v_dirFirstFile      DW 0            ; Используется в fileList
+v_dirMaxFiles       DW 0            ; Используется в fileList
+v_dirListedFiles    DW 0            ; Используется в fileList
+v_dirTotalFiles     DW 0            ; Используется в fileList
 
-; Адреса драйверов для 8 устройств. Начальные значения:
-; = diskDriver для устройств A: и B: (встроенный драйвер ROM и RAM диска),
+; Фейковое "системное время". Пока что просто счетчик, увеличивающийся при обращении.
+; В будущем может быть заменен на реальное время с RTC или таймера.
+v_fakeSystemTime:   DW 0
+
+; Адреса драйверов для 8 накопителей. Начальные значения:
+; = diskDriver для накопителей A: и B: (встроенный драйвер ROM и RAM диска),
 ; = diskDriverDummy для отальных (пустой драйвер).
-v_drives:			DW diskDriver, diskDriver      ; A:, B:
-                    DW diskDriver, diskDriver      ; C:, D:
-					DW diskDriver, diskDriver      ; E:, F:
-                    DW diskDriver, diskDriver      ; G:, H:
+v_drives:           DW diskDriver,      diskDriver      ; A:, B:
+                    DW diskDriverDummy, diskDriverDummy ; C:, D:
+                    DW diskDriverDummy, diskDriverDummy ; E:, F:
+                    DW diskDriverDummy, diskDriverDummy ; G:, H:
 
-v_findCluster:		DW 0        ; Используется в fileFindClusterFirst/fileFindClusterNext
-v_fileFirstCluster: DW 0        ; Первый кластер созданного файла
-v_drive:			DB 1
-v_input_start:		DW 0
-v_createdFile:		DW 0        ; Адрес дескриптора созданного файла
-v_foundedFile:		DW 0
-v_input_end:		DW 0
-v_batPtr:			DW 0        ; Адрес буфра, где находится содержимое BAT файла
-v_memTop:			DW 0FAFFh   ; Максимальный доступный программам адрес в памяти
+; Информация о текущем накопителе
+v_diskInfo          DISK_INFO
 
 pathFontFnt:        DB "A:FONT.FNT",0
-pathNcCom:			DB "A:NC.COM",0
-pathAutoexecBat:	DB "A:AUTOEX.BAT",0
+pathNcCom:          DB "A:NC.COM",0
+pathAutoexecBat:    DB "A:AUTOEXEC.BAT",0
 pathFormatBat:      DB "A:FORMAT.BAT",0
 aBat:               DB "BAT"
 aCom:               DB "COM"
 aExe:               DB "EXE"
+aFat:               DB "FAT"
 
     IF BOOT_FROM_TAPE
 aATape_com:         DB "A:TAPE.COM",0
 txtLoadingFromTape: DB 0Ah,"LOADING FROM TAPE...",0
     ENDIF
 
+txtBiosVer:         DB 0Ch,"BIOS 5.00",0Ah,0
+txtRAM:             DB 0Ah,"RAM: ",0
+txtKB:              DB " KB",0Ah,0
+txtBadCommand:	    DB 0Ah,"BAD COMMAND OR FILE NAME",0
+
+v_tmpFileDescr 		FILE_DESCRIPTOR ; Копия дескриптора текущего файла
 v_curFileDescr 		FILE_DESCRIPTOR ; Копия дескриптора текущего файла
 v_batFileDescr 		FILE_DESCRIPTOR ; Копия дескриптора текущего BAT файла
 
+; Буфер для копирования изображения символов при использовании шрифта из ПЗУ
+v_char:             BLOCK   13, 0FFh
+
     ; Проверка - DOS.SYS не должен вылезать за эти пределы
-    ASSERT_DONT_FIT 0D000h
+    IF NEW_MEMORY_MAP==0
+        ASSERT_DONT_FIT 0D000h  ; с этого адреса начинается NC.COM
+    ENDIF
 
     IF LOAD_FONT
-	    INCLUDE "font.inc"
+	    INCLUDE "initFont.inc"
     ENDIF
 
     END

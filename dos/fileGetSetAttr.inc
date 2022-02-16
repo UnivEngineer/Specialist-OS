@@ -35,7 +35,7 @@ fileGetSetAt_0:
 
             ; Получаем адрес байта атрибутов
             push    de
-            ld      hl, (v_foundedFile)
+            ld      hl, (v_cachedDescrPtr)
             ld      de, FILE_DESCRIPTOR.attrib
             add     hl, de
             pop     de
@@ -48,12 +48,15 @@ fileGetSetAt_0:
             ; Устанавливаем атрибуты
             ld      (hl), b
 
+            ; Ставим сектору каталога флаг isModified
+            call    markDirSectorAsModified
+
+            ; Сохраняем изменения на диск
+            call    saveSectorCache
+
 fileGetSetAt_1:
             ; Читаем атрибуты
             ld      a, (hl)
-
-            ; Сохраняем изменения (хотя для чтения это не нужно делать)
-            call    saveFatDir
 
             ; Восстанавливаем регистры и выходим ;! А тут точно CF==0 будет?
             or      a

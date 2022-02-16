@@ -11,8 +11,8 @@ printInvSelFile:
 printInvFile:     ld    hl, 506Eh
             ld    (bios_vars.cursorY), hl
             ex    de, hl
-            ld    de, nc_vars.input
+            ld    de, vars.input
             call  compactName
-            ld    hl, nc_vars.input
+            ld    hl, vars.input
             jp    printStringInv
 

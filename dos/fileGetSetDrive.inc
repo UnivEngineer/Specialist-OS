@@ -27,6 +27,13 @@ fileSelectDrive:
             ; Максимум устройств - 1
             and     7
 
+            ; Если устройство не менялось, выходим
+            push    hl
+            ld      hl, v_drive
+            cp      a, (hl)
+            pop     hl
+            ret z
+
             ; Сохраняем выбранное устройство
             ld      (v_drive), a
 
@@ -52,6 +59,14 @@ fileSelectDrive:
 
             ; Восстаналвиаем a
             rrca
+
+            ; Очищаем кэш fat
+            push    bc
+            call    resetSectorCache
+            pop     bc
+
+            ; Считываем загрузочный сектор и инициализируем структуру v_diskInfo
+            call    fatReadBootSector
 
             ; Восстанавливаем регистры и выходим
             pop     de

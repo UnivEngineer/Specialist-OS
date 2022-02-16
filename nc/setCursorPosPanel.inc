@@ -12,7 +12,7 @@ setCursorPosPanel:
             push  hl
             push  af
 
-            ld    a, (activePanel)
+            ld    a, (state.activePanel)
             and   a
             jp z, loc_D9BA
             ld    a, 96       ; Половина экрана

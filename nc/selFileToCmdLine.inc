@@ -12,12 +12,12 @@ getSelFilePath:
         ex      de, hl
 
         ; Получаем текущий накопитель
-        ld      hl, panelA_drive
+        ld      hl, state.panelA_drive
         call    readBytePanel
-        add     a, 'A'
+        add     'A'
 
         ; Выводим его в ком строку
-        ld      hl, (nc_vars.cmdLineEnd)
+        ld      hl, (vars.cmdLineEnd)
         ld      (hl), a
         inc     hl
 
@@ -31,7 +31,7 @@ getSelFilePath:
 
         ; Ограничение длины
         dec     de
-        ld      a, nc_vars.cmdLineCtrl & 0FFh
+        ld      a, vars.cmdLineCtrl & 0FFh
         cp      e
         jp nc,  loc_D146
         ld      e, a
@@ -56,15 +56,15 @@ selFileToCmdLine:
 
         ; Вывод
         COLOR   COLOR_CMDLINE
-        ld      hl, (nc_vars.cmdLineEnd)
+        ld      hl, (vars.cmdLineEnd)
         call    bios_printString
 
         ; Дописываем имя файла
         ex      de, hl
-        ld      (nc_vars.cmdLineEnd), hl
+        ld      (vars.cmdLineEnd), hl
 
         ; Сохраняем новое положение
         ld      hl, (bios_vars.cursorY)
-        ld      (nc_vars.cmdLinePos), hl
+        ld      (vars.cmdLinePos), hl
         ret
 

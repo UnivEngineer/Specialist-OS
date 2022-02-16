@@ -11,7 +11,7 @@ tapeErrorHandler:
             ld    (bios_vars.tapeError), hl
 
             ; Восстановление стека
-            ld    hl, (nc_vars.savedSP)
+            ld    hl, (vars.savedSP)
             ld    sp, hl
 
             ; Перезагрузка файлов и продолжение работы

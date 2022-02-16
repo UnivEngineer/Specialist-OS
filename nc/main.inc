@@ -6,38 +6,40 @@
 ;----------------------------------------------------------------------------
 
 mainReload: ; Перерисовываем обе панели
-            ld    a, (activePanel)
-            and   a
-            jp nz,      mainReload_0
-            call  loadAndPrintA
-            call  loadAndPrintB
-            jp    mainDriveChanged
-mainReload_0:     call  loadAndPrintB
-            call  loadAndPrintA
+            ld      a, (state.activePanel)
+            and     a
+            jp      nz, mainReload_0
+            call    loadAndPrintA
+            call    loadAndPrintB
+            jp      mainDriveChanged
+
+mainReload_0:
+            call    loadAndPrintB
+            call    loadAndPrintA
             
 mainDriveChanged:
             ; Вывод накопителя в ком строку
             COLOR   COLOR_CMDLINE
             ld      hl, 1F3h
             ld      (bios_vars.cursorY), hl
-            ld      hl, panelA_drive
+            ld      hl, state.panelA_drive
             call    readBytePanel
             call    printDrive
 
             ; Вывод информации о файле
-            call  printInfoLine
+            call    printInfoLine
 
 mainLoop:   ; Рисуем курсор выбранного файла
             COLOR   COLOR_CURSOR
-            call  drawCursor
+            call    drawCursor
 
             ; Положение курсора в ком строке
-            ld    hl, (nc_vars.cmdLinePos)
-            ld    (bios_vars.cursorY), hl
+            ld      hl, (vars.cmdLinePos)
+            ld      (bios_vars.cursorY), hl
 
             ; Ждем нажатия клавиши
             COLOR   COLOR_CMDLINE
-            call  bios_getch
+            call    bios_getch
 
             ; Стираем курсор выбранного файла
             push    af
@@ -45,82 +47,86 @@ mainLoop:   ; Рисуем курсор выбранного файла
             call    drawCursor
             pop     af
 
-            ; Анализ нажатий клавиши
-            ld    c, a
-            jp c, mainLoop_ctrl
-            and   a
-            jp z, F1
-            dec   a
-            jp z, F2
-            dec   a
-            jp z, F3
-            dec   a
-            jp z, F4
-            dec   a
-            jp z, F5
-            dec   a
-            jp z, F6
-            dec   a
-            jp z, F7
-            dec   a
-            jp z, F8
-            dec   a
-            jp z, Left
-            dec   a
-            jp z, Tab
-            sub   4
-            jp z, Enter
-            sub   0Bh
-            jp z, Right
-            dec   a
-            jp z, Up
-            dec   a
-            jp z, Down
-            dec   a
-            jp z, Esc
-            add   a,1Bh
-            cp    7Fh
-            jp z, Bkspc
-            cp    8Ah
-            jp z, f9
-mainLoop_e: cp    ' '
-            jp c, mainLoop
+            ; Анализ нажатой клавиши
+            ld      c, a
+            jp c,   but_ctrl
+            and     a     ; F1 (00h)
+            jp z,   but_F1
+            dec     a     ; F2 (01h)
+            jp z,   but_F2
+            dec     a     ; F3 (02h)
+            jp z,   but_F3
+            dec     a     ; F4 (03h)
+            jp z,   but_F4
+            dec     a     ; F5 (04h)
+            jp z,   but_F5
+            dec     a     ; F6 (05h)
+            jp z,   but_F6
+            dec     a     ; F7 (06h)
+            jp z,   but_F7
+            dec     a     ; F8 (07h)
+            jp z,   but_F8
+            dec     a     ; стрелка влево (08h)
+            jp z,   but_Left
+            dec     a     ; Tab/Таб (09h)
+            jp z,   but_Tab
+            dec     a     ; End/ПС (0Ah)
+            jp z,   but_End
+            sub     2     ; Home/стрелка влево-вверх (0Ch)
+            jp z,   but_Home
+            dec     a     ; Enter/ВК (0Dh)
+            jp z,   but_Enter
+            sub     0Bh   ; стрелка вправо (18h)
+            jp z,   but_Right
+            dec     a     ; стрелка вверх (19h)
+            jp z,   but_Up
+            dec     a     ; стрелка вниз (1Ah)
+            jp z,   but_Down
+            dec     a     ; Esc/АР2 (1Bh)
+            jp z,   but_Esc
+            add     1Bh
+            cp      7Fh   ; Del/ЗБ (7Fh)
+            jp z,   but_Bkspc
+            cp      8Ah   ; F9 (8Ah)
+            jp z,   but_F9
+mainLoop_e: cp      20h   ; Пробел (20h)
+            jp c,   mainLoop
 
             ; Вывод символов в ком строку
-            ld    hl, (nc_vars.cmdLineEnd)
-            ld    c, a
-            ld  (hl), a
+            ld      hl, (vars.cmdLineEnd)
+            ld      c, a
+            ld      (hl), a
 
             ; Если ком строка переполнена, выходим
-            ld    a, nc_vars.cmdLineCtrl & 0FFh
-            cp    l
-            jp z, mainLoop
+            ld      a, vars.cmdLineCtrl & 0FFh
+            cp      l
+            jp z,   mainLoop
 
             ; Увеличиваем длину
-            inc   hl
-            ld    (nc_vars.cmdLineEnd), hl
+            inc     hl
+            ld      (vars.cmdLineEnd), hl
 
             ; Выводим символ на экран
             COLOR   COLOR_CMDLINE
-            call  bios_printChar
+            call    bios_printChar
 
 mainLoop_savePos: ; ?
-            ld    hl, (bios_vars.cursorY)
-            ld    (nc_vars.cmdLinePos), hl
+            ld      hl, (bios_vars.cursorY)
+            ld      (vars.cmdLinePos), hl
 
-            jp    mainLoop
+            jp      mainLoop
 
 ; ---------------------------------------------------------------------------
 
-Bkspc:            ; Если ком строка пустая, выходим
-            ld    hl, (nc_vars.cmdLineEnd)
-            ld    a, nc_vars.cmdLine & 0FFh
-            cp    l
-            jp z, mainLoop
+but_Bkspc:  ; Если ком строка пустая, выходим
+            ld      hl, (vars.cmdLineEnd)
+            ld      a, vars.cmdLine & 0FFh
+            cp      l
+            jp z,   mainLoop
 
             ; Удаляем один символ
-            dec   hl
-            ld    (nc_vars.cmdLineEnd), hl
+            dec     hl
+            ld      (vars.cmdLineEnd), hl
             
             ; Стираем символ на экране
             COLOR   070h
@@ -131,17 +137,23 @@ Bkspc:            ; Если ком строка пустая, выходим
 
 ; ---------------------------------------------------------------------------
 
-Esc:        call  clearCmdLine
-            jp    mainLoop
+but_Esc:    call    clearCmdLine
+            jp      mainLoop
+
+; ---------------------------------------------------------------------------
+
+but_ctrl:   cp    0Dh
+            jp z, ctrlEnter
+            jp    mainLoop_e
 
 ; ---------------------------------------------------------------------------
 
 ctrlEnter:  ; Если файл не выбран, выход
-            call  getSelectedFile
-            ld  a, (hl)
-            cp    0FFh
-            jp z, mainLoop
+            call    getSelectedFile
+            ld      a, (hl)
+            cp      0FFh
+            jp z,   mainLoop
 
-            call  selFileToCmdLine
-            jp    mainLoop
+            call    selFileToCmdLine
+            jp      mainLoop
 

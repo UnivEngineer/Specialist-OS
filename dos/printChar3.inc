@@ -32,10 +32,10 @@ printChar3: ; Код 7
             ; Код 26
             dec   a
             jp z, printChar_c1A
-            ; Продолжение, если код 31
+            ; Продолжение, если код 1Fh (31)
             sub   5
-            ret NZ      
-            ; Код 31 очищает экран
+            ret nz
+            ; Код  1Fh (31) очищает экран
             call  clearScreen
 
             ; Продолжение в printChar_c0C
@@ -43,7 +43,8 @@ printChar3: ; Код 7
 ; ---------------------------------------------------------------------------
 ; Обработка кода 0Ch. Курсор в левый верхний угол экрана
 
-printChar_c0C:    ; bios_vars.cursorY = 8
+printChar_c0C:
+            ; bios_vars.cursorY = 8
             ld    l, 8
 
             ; Продолжение в printChar_c0D
@@ -51,10 +52,13 @@ printChar_c0C:    ; bios_vars.cursorY = 8
 ; ---------------------------------------------------------------------------
 ; Обработка кода 0Dh. Курсор в начало строки
 
-printChar_c0D:    ; bios_vars.cursorX = 0
+printChar_c0D:
+            ; bios_vars.cursorX = 0
             xor   a
-saveVCursorHA:    ld    h, a
-saveVCursor:      ld    (bios_vars.cursorY), hl
+saveVCursorHA:
+            ld    h, a
+saveVCursor:
+            ld    (bios_vars.cursorY), hl
             ret
 
 ; ---------------------------------------------------------------------------

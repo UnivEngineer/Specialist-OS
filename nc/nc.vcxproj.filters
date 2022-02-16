@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="upDownLeftRight.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="clearCmdLine.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -34,36 +31,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="drawWindow.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="enter.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="enter2.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f2.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f3.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f4.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f5.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f6.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f7.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f8.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="f9.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="getSelectedFile.inc">
@@ -88,9 +55,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="main.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="main2.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="printCurDrive.inc">
@@ -126,9 +90,6 @@
     <None Include="rwBytePanel.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="saveState.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="selFileToCmdLine.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -136,9 +97,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="start.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tab.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="tapeErrorHandler.inc">
@@ -151,6 +109,42 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="tools.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butArrows.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butTab.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF2.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF3.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF4.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF5.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF6.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF7.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF8.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butF9.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="butEnter.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="saveLoadState.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

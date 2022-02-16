@@ -54,9 +54,6 @@
     <None Include="driver.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="fileCmpExt.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="fileCreate.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -96,9 +93,6 @@
     <None Include="fileRename.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="font.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="getch.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -121,9 +115,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="keyScan.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="loadSaveFatDir.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="memcpy_bc_hl.inc">
@@ -217,6 +208,24 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="fatReadWriteCluster.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fatCache.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fatGetFreeSpace.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="initFont.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="strcmp.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="fatReadBootSector.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="math.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

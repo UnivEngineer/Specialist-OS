@@ -18,15 +18,12 @@
     <None Include="Flash.lst">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="FPage.lst">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Flash.asm">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="FPage.asm">
+    <CustomBuild Include="Rom.asm">
       <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>

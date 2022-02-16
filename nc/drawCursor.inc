@@ -8,7 +8,7 @@
 drawCursor: ; Цвет устаналвиается перед выводом
 
             ; Если файлов нет, выходим
-            ld    hl, panelA_filesCnt
+            ld    hl, state.panelA_filesCnt
             call  readBytePanel
             and   a
     IF ENABLE_COLOR
@@ -16,9 +16,15 @@ drawCursor: ; Цвет устаналвиается перед выводом
     ELSE
             jp z, drawCursor_0
     ENDIF
-            ; Номер выбранного файла
-            ld    hl, panelA_curFile
+            ; C какого файла начинается список файлов на панели
+            ld    hl, state.panelA_firstFile
             call  readBytePanel
+            ld    c, a
+
+            ; Номер выбранного файла
+            ld    hl, state.panelA_curFile
+            call  readBytePanel
+            sub   c
 
             ; Рассчиытваем координату X (h = a < 18 ? 0x91 : 0x9D)
             ld    h, 91h
@@ -27,7 +33,8 @@ drawCursor: ; Цвет устаналвиается перед выводом
             sub   18
             ld    h, 9Dh
 
-drawCursor_1:     ; Рассчиытваем координату Y (l = a * 10 + 18h)
+drawCursor_1:
+            ; Рассчиытваем координату Y (l = a * 10 + 18h)
             add   a, a
             ld    c, a
             add   a, a
@@ -40,7 +47,7 @@ drawCursor_1:     ; Рассчиытваем координату Y (l = a * 10 + 18h)
             ld    b, 10
 
             ; Если правая панель, сдвигаем курсор на пол экрана
-drawCursor_2:     ld    a, (activePanel)
+drawCursor_2:     ld    a, (state.activePanel)
             and   a
             jp z, drawCursor_3
             ld    a, 18h

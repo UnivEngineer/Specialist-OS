@@ -12,7 +12,7 @@ copyFileInt:
 
             ; Подготавливаем имя    
             ex    de, hl
-            ld    hl, nc_vars.input
+            ld    hl, vars.input
             call  bios_fileNamePrepare
             ex    de, hl
 
@@ -53,7 +53,7 @@ saveFileInt:
             COLOR COLOR_DIALOG
             ld    hl, 5090h
             ld    (bios_vars.cursorY), hl
-            ld    hl, nc_vars.input
+            ld    hl, vars.input
             call  printStringInv
 
 anyKey:           ; Ждем нажатия любой клавиши

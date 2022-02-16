@@ -7,7 +7,7 @@
 
 printInfoLine:
         ; Если файлов нет, выходим
-        ld      hl, panelA_filesCnt
+        ld      hl, state.panelA_filesCnt
         call    readBytePanel
         and     a
         ret z
@@ -25,9 +25,9 @@ printInfoLine:
         push    hl
 
         ; Печатаем имя файла в компактном виде
-        ld      de, nc_vars.tempFileDescr  ; буфер
+        ld      de, vars.tempFileDescr  ; буфер
         call    compactName
-        ld      hl, nc_vars.tempFileDescr
+        ld      hl, vars.tempFileDescr
         ld      b, DIR_NAME_LENGTH + 6  ; макс длина строки (name.ext + ' ' + терминатор)
         ld      c, 20                   ; терминатор - пробел или меньше
         call    printString2

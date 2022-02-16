@@ -5,110 +5,136 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-printFilePanel:
+;----------------------------------------------------------------------------
+; Перерисовка всей панели
+
+redrawFilePanel:
         COLOR   COLOR_BORDER
 
+        ; Рисование панели
         ld      hl, g_filePanel
         call    draw
 
-        COLOR   COLOR_PANELNAME
-
-        ; Вывод NAME
-        ld      hl, (P_NAME_X << 8) + P_NAME_Y
-        call    setCursorPosPanel
-        ld      hl, aNameName
-        call    bios_printString
-
-        COLOR   COLOR_INFOLINE
-
         ; Вывод буквы диска
-        ld      hl, panelA_drive
+        COLOR   COLOR_INFOLINE
+        ld      hl, state.panelA_drive
         call    readBytePanel
         ld      hl, (P_DRIVE_LETTER_X << 8) + P_DRIVE_LETTER_Y
         call    setCursorPosPanel
         call    printDrive
 
+        ; Вывод NAME
+        COLOR   COLOR_PANELNAME
+        ld      hl, (P_NAME_X << 8) + P_NAME_Y
+        call    setCursorPosPanel
+        ld      hl, aNameName
+        call    bios_printString
+
+        ; Выодим список файлов сверху вниз
+        ld      b, 0
+
+;----------------------------------------------------------------------------
+; Перерисовка списка файлов
+; вход:
+;   b - направление (0 - сверху вниз, 1 - снизу вверх)
+
+printFilePanel:
+        ; Рисуем сверху вниз или снизу вверх?
+        ld      a, b
+        or      a
+        push    af
+
+        ; Загрузка списка файлов
+        ld      hl, state.panelA_drive
+        call    readBytePanel   ; a = номер накопителя
+        call    loadFiles
+
+        ; Цвет для печати списка файлов
         COLOR   COLOR_FILE
 
-        ; Вывод всех файлов
-        ld      hl, FILE_LIST_BUFFER
-        ld      de, (P_FILE_LIST_X1 << 8) + P_FILE_LIST_Y
-        ld      c,  0
+        pop     af
+        jp nz,  printFilesDownUp
 
-printFilesLoop:
+;----------------------------------------------------------------------------
+; Цикл печати сверху вниз
+
+printFilesUpDown:
+        ; Указатель списка файлов - на нулевой файл
+        ld      hl, FILE_LIST_BUFFER
+
+        ; Положение курсора - на нулевой файл
+        ld      de, (P_FILE_LIST_X1 << 8) + P_FILE_LIST_Y
+
+pfud_Loop:
+        ; Прерываем цикл по достижении конца списка файлов
+        ; (первый символ имени = FF)
+        ld      a, (hl)
+        inc     a
+        ret z
+
         ; Установка положения курсора
         ex      de, hl
         call    setCursorPosPanel
         ex      de, hl
 
-        ; Файл существует (первый символ имени - не FF)?
-        ld      a, (hl)
-        inc     a
-        jp z,   printFilesLoopExit
-
-        push    bc
-        push    de
-
         ; Печать имени файла
-        push    hl
-        ld      b, DIR_NAME_LENGTH  ; длина имени
-        call    printString2
-        pop     hl
-
-        ; Курсор на столбец, где выводятся расширения
-        ld      a, d
-        add     a, (DIR_NAME_LENGTH + 1) * 3
-        ld      d, a
-        ex      de, hl
-        call    setCursorPosPanel
-        ex      de, hl
-
-        ; Печать расширения имени файла
-        push    hl
-        ld      bc, DIR_NAME_LENGTH  ; длина имени
-        add     hl, bc    ; перемещаем hl на начло расширения
-        ld      b, 3      ; длина расширения
-        call    printString2
-        pop     hl
-
-        pop     de
+        call    printFileNamOnPanel
 
         ; Следующий файл
         ld      bc, DIR_DESCR_SIZE
         add     hl, bc
 
-        pop     bc
-
-        ; Счетчик
-        inc     c
-
         ; Курсор на следующую строку
         ld      a, e
-        add     a, 10
+        add     10
         ld      e, a
 
         ; Курсор на следующий столбец
         cp      P_FILE_LIST_Y_MAX
-        jp c,   printFilesLoop
+        jp c,   pfud_Loop
         ld      a, d
         ld      de, (P_FILE_LIST_X2 << 8) + P_FILE_LIST_Y
         cp      20
-        jp c,   printFilesLoop
+        jp c,   pfud_Loop
 
-printFilesLoopExit:
-        ; Сохранение кол-ва файлов
-        ld      hl, panelA_filesCnt
-        ld      a, c
-        call    writeBytePanel
+        ret
 
-        ; Если курсор больше максимума
-        ld      hl, panelA_curFile
-        call    readBytePanel
-        cp      c
-        ret c 
+;----------------------------------------------------------------------------
+; Цикл печати снизу вверх
 
-        ; То изменить на максимум
-        dec     a
-        ret m 
-        jp      writeBytePanel
+printFilesDownUp:
+        ; Указатель списка файлов - на последний файл
+        ld      hl, FILE_LIST_BUFFER + (FILE_LIST_SIZE-1) * DIR_DESCR_SIZE
 
+        ; Положение курсора - на последний файл
+        ld      de, (P_FILE_LIST_X2 << 8) + P_FILE_LIST_Y_MAX - 10
+
+pfdu_Loop:
+        ; Установка положения курсора
+        ex      de, hl
+        call    setCursorPosPanel
+        ex      de, hl
+
+        ; Печать имени файла
+        call    printFileNamOnPanel
+
+        ; Предыдущий файл
+        push    bc
+        ld      bc, 10000h - DIR_DESCR_SIZE
+        add     hl, bc
+        pop     bc
+
+        ; Курсор на предыдущую строку
+        ld      a, e
+        sub     10
+        ld      e, a
+
+        ; Курсор на предыдущий столбец
+        cp      P_FILE_LIST_Y
+        jp nc,  pfdu_Loop
+        ld      a, d
+        ld      de, (P_FILE_LIST_X1 << 8) + P_FILE_LIST_Y_MAX - 10
+        cp      20
+        jp nc,  pfdu_Loop
+
+        ret

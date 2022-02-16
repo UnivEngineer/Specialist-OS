@@ -11,9 +11,9 @@
 MON_ADDR        =  0C000h 
 
 ; Адрес временного буфера загрузки монитора
-MON_ADDR_TEMP   =  0D000h 
+MON_ADDR_TEMP   =  0E000h 
 
-    ORG 0F100h
+    ORG 0F800h
 
     ; В de передаётся адрес строки аргументов
     ld      a, (de)
@@ -60,10 +60,10 @@ MON_ADDR_TEMP   =  0D000h
     ld      de, nameBuffer
     call    bios_fileNamePrepare
 
-    ; Загружаем файл MON2.SYS на 0D000h - он затрет nc.cOM
+    ; Загружаем файл MON2.SYS во временный буфер - он затрет nc.com
     ld      hl, nameBuffer
-    ld      de, MON_ADDR_TEMP ; изменить адрес загрузки файла на de
-    call    bios_fileLoad2  ; нужна исправленная функция! BIOS 4.50 и старше 
+    ld      de, MON_ADDR_TEMP   ; изменить адрес загрузки файла на de
+    call    bios_fileLoad2      ; нужна исправленная функция! BIOS 4.50 и старше 
     jp c,   popFileNotFoundRet
 
     ; Получаем размер файла Монитора в de
@@ -85,11 +85,18 @@ MON_ADDR_TEMP   =  0D000h
     ld      bc, MON_ADDR
     call    memcpy
 
+    ; Инициализируем STD контроллер цвета
+    ld      a, 82h              ; порты A, C - вывод, порт B - ввод
+    ld      (IO_KEYB_MODE), a
+    ld      a, 0h               ; белый цвет
+    ld      (IO_KEYB_C), a
+
     ; Запуск Монитора. Монитор сам переходит в режим STD, инициализируется,
     ; и запускает программу по адресу из вершины стека.
     jp      MON_ADDR
 
-memcpy: ; Копироваение из hl в bc с увеличением адресов, пока hl не равно de
+    ; Копироваение из hl в bc с увеличением адресов, пока hl не равно de
+memcpy:
     ld      a, (hl)
     ld      (bc), a
     call    cmp_hl_de

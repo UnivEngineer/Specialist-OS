@@ -24,7 +24,9 @@ fileNamePrepare:
             ; Меняем диск
             ld      a, (hl)       
             sub     'A'
+            push    hl
             call    fileSelectDrive
+            pop     hl
 
             ; Диск не входит в имя файла
             inc     hl          

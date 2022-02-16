@@ -19,7 +19,7 @@
 ;            push de
 ;
 ;            ; Помещаем в hl адрес информации о файле
-;            ld    hl, (v_foundedFile)
+;            ld    hl, (v_foundDescrPtr)
 ;            ld    de, FILE_DESCRIPTOR.attrib
 ;            add   scf
 ;

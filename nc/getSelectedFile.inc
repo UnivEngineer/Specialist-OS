@@ -11,18 +11,26 @@
 getSelectedFile:
         push    de
 
-        ; Получить номер текущего файла
-        ld      hl, panelA_curFile
+        ; С какого файла начинается список файлов панели
+        ld      hl, state.panelA_firstFile
         call    readBytePanel
+        ld      e, a
 
-        ; Получить имя (адрес) текущего файла
-        ; вычисляется hl = FILE_LIST_BUFFER + DIR_DESCR_SIZE * curFile[activePanel];
-        ld      hl, FILE_LIST_BUFFER - DIR_DESCR_SIZE
-        ld      de, DIR_DESCR_SIZE
-loc_D80F:
+        ; Номер текущего файла
+        ld      hl, state.panelA_curFile
+        call    readBytePanel
+        sub     e
+
+        ; Адрес дескриптора текущего файла в буфере:
+        ; hl = FILE_LIST_BUFFER + DIR_DESCR_SIZE * curFile[state.activePanel];
+
+        ld      hl, DIR_DESCR_SIZE
+        ld      e, a
+        ld      d, 0
+        call    bios_mul_hl_de
+
+        ld      de, FILE_LIST_BUFFER
         add     hl, de
-        dec     a
-        jp p,   loc_D80F
 
         pop     de
         ret

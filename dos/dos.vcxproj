@@ -68,8 +68,10 @@
     <None Include="drawCursor2.inc" />
     <None Include="driver.inc" />
     <None Include="driverFFC0.inc" />
+    <None Include="fatCache.inc" />
+    <None Include="fatGetFreeSpace.inc" />
+    <None Include="fatReadBootSector.inc" />
     <None Include="fatReadWriteCluster.inc" />
-    <None Include="fileCmpExt.inc" />
     <None Include="fileCreate.inc" />
     <None Include="fileDelete.inc" />
     <None Include="fileExec.inc" />
@@ -84,7 +86,7 @@
     <None Include="fileLoad.inc" />
     <None Include="fileNamePrepare.inc" />
     <None Include="fileRename.inc" />
-    <None Include="font.inc" />
+    <None Include="initFont.inc" />
     <None Include="getch.inc" />
     <None Include="getch2.inc" />
     <None Include="getch3.inc" />
@@ -93,7 +95,7 @@
     <None Include="jmps_c000.inc" />
     <None Include="jmps_c800.inc" />
     <None Include="keyScan.inc" />
-    <None Include="loadSaveFatDir.inc" />
+    <None Include="math.inc" />
     <None Include="memcpy_bc_hl.inc" />
     <None Include="memmove_bc_hl.inc" />
     <None Include="memset_de_20_b.inc" />
@@ -117,6 +119,7 @@
     <None Include="scrollUp2.inc" />
     <None Include="setGetCursorPos.inc" />
     <None Include="setGetMemTop.inc" />
+    <None Include="strcmp.inc" />
     <None Include="strToHex.inc" />
     <None Include="tape.inc" />
     <None Include="unpacker.asm" />
