@@ -55,7 +55,7 @@ loc_D2B3:
             ld          hl, vars.tempFileDescr
             ld          d, h
             ld          e, l
-            ld          c, DIR_NAME_LENGTH + 3 ; старый формат файла 9 символов, новый - DIR_NAME_LENGTH + 3 символов
+            ld          c, FILE_NAME_LENGTH + 3 ; старый формат файла 9 символов, новый - FILE_NAME_LENGTH + 3 символов
 loc_D2C6:
             ld          a, 8
             call        bios_tapeRead
@@ -183,7 +183,7 @@ tapeReadWord2:
 
 ; ---------------------------------------------------------------------------
 
-; Если имя файла на ленте было короче, чем DIR_NAME_LENGTH+3, дополняем его пробелами
+; Если имя файла на ленте было короче, чем FILE_NAME_LENGTH + 3, дополняем его пробелами
 tapeReadAppendName:
             ld          (hl), ' '
             inc         hl

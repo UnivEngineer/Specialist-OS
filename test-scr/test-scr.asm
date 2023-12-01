@@ -5,17 +5,11 @@
 ; 2022-02-05 SpaceEnigneer
 ;----------------------------------------------------------------------------
 
+    INCLUDE "../include/mxos.inc"
+
     ORG 0
 
-KOI8 = 0	; печать символов КОИ8 в тесте
-
-REG_KEYB		= 0FFE0h
-REG_TIMER		= 0FFECh
-REG_COLOR		= 0FFF8h
-REG_PAGE_RAM	= 0FFFCh
-REG_PAGE_RAMD	= 0FFFDh
-REG_PAGE_ROM	= 0FFFEh
-REG_PAGE_STD	= 0FFFFh
+KOI8 = 1	; печать символов КОИ8 в тесте
 
 ;-----------------------------------------------------
 
@@ -28,7 +22,7 @@ TestLoop:
     call TestPrint
 
 KeyLoop:	; Ожидание нажатия клавиши
-	call 0C81Bh
+	call bios_keyScan
 	cp   19h	; кнопка вверх
 	jp   z, ButUp
 	cp   1Ah	; кнопка вниз
@@ -101,6 +95,8 @@ TestCheckerboard:
 ;-----------------------------------------------------
 
 TestPrint:
+	call Beep	; звуковой сигнал
+    call SetColor
     ld   de, 0
 	call ClearScreen
 	ld   c, 20h		; Код первого символа
@@ -108,46 +104,40 @@ TestPrint:
 TestPrintRep:
 	push bc
 
-    IF KOI8 == 1
-	    ld   c, 1Bh		; Esc
-	    call 0C809h
-	    ld   c, '('		; Включение КОИ-8 (MXOS)
-	    call 0C809h
-    ENDIF
-
 	ld   c, 0Ch		; Установка курсора в начало экрана путем печати символа 0Ch (кроссплатформенно)
-	call 0C809h
+	call bios_printChar
 	pop  bc
 	ld   de, 64*23	; Сколько всего символов выводить (23 строки разрешено в RAMFOS)
 PrintLoop:
-	call 0C809h
+	call bios_printChar
 	inc  c
 
     IF KOI8 == 1
-	    jnz  Print1		; Прыгаем, если не перешли через 0FFh
-	    ld   c, 020h	; Код первого символа КОИ7
+	    jp   nz,  Print1    ; Прыгаем, если не перешли через 0FFh
+	    ld   c, 020h        ; Код первого символа КОИ7
 	    jp   Print2
 Print1:
 	    ld   a, c
-	    cp   080h		; Код последнего символа КОИ7 + 1
+	    cp   080h           ; Код последнего символа КОИ7 + 1
 	    jp   nz, Print2
-	    ld   c, 0C0h	; Код первого символа КОИ8
+	    ld   c, 0C0h        ; Код первого символа КОИ8
     ENDIF
 
 	ld   a, c
-	cp   080h		; Код последнего символа КОИ7 + 1
+	cp   080h               ; Код последнего символа КОИ7 + 1
 	jp   nz, Print2
-	ld   c, 020h	; Код первого символа КОИ7
+	ld   c, 020h            ; Код первого символа КОИ7
 
 Print2:
 	dec  de
 	ld   a, d
 	or   e
 	jp   nz, PrintLoop
-	call 0C81Bh		; Проверка нажатия любой клавиши
-	cp   0FFh		; Не нажата
-	jp   z, TestPrintRep
-    jp   KeyLoop
+
+	call bios_keyCheck  ; Проверка нажатия любой клавиши
+	cp   0FFh
+    jp   z,TestPrintRep ; Не нажата - продолжаем
+    jp   KeyLoop        ; Иначе выходим
 
 ;-----------------------------------------------------
 ; Очистка экрана
@@ -194,7 +184,7 @@ SetColor:
     ld   e, a
     ld   a, (BackColor)
     or   e
-    ld   (REG_COLOR), a
+    ld   (IO_COLOR), a
     ret
 
 ;-----------------------------------------------------
@@ -203,7 +193,7 @@ Beep:	; Звуковой сигнал
 	ld  bc, 0F5Fh
 	ld  a, 0Ah	; команда для ВВ55 - установить PC5 в 0
 Snd1:	; цикл звукового сигнала
-	ld  (REG_KEYB+3), a     ; запись команды в регистр управления порта клавиатуры ВВ55
+	ld  (IO_KEYB_MODE), a   ; запись команды в регистр управления порта клавиатуры ВВ55
 Snd2:
 	dec b                   ; задержка на FFh циклов (в b)
 	jp  nz, Snd2

@@ -7,26 +7,26 @@
 
 draw:       ; Читаем 5 байт из hl в a, hl, c, b. 
             ; При этом de = hl+5
-            ld  a, (hl)
+            ld    a, (hl)
             inc   hl
-            ld  e, (hl)
+            ld    e, (hl)
             inc   hl
-            ld  d, (hl)
+            ld    d, (hl)
             inc   hl
-            ld  c, (hl)
+            ld    c, (hl)
             inc   hl
-            ld  b, (hl)
+            ld    b, (hl)
             inc   hl          
             ex    de, hl
 
             ; Если a=0 (первый байт), то выйти
             and   a
-            ret Z 
+            ret z 
 
             ; Если не установлен 7-ой бит и активная панель правая, то X += 192
             jp M, draw_0
             call  activePanelPos
-draw_0:     
+draw_0:
 
             ; Если a&0xF==3, то заполнить c байт памяти байтом b
             and   0Fh
@@ -48,30 +48,30 @@ draw_next:  ; hl=de и следующий цикл
 ; ---------------------------------------------------------------------------
 ; Заполнить c байт памяти байтом b
 
-draw3:            ld    a, b
+draw3:      ld    a, b
             call  memset_hl_a_c
             jp    draw_next
 
 ; ---------------------------------------------------------------------------
 ; Линия hl-адрес, b-первый байт, c-средняя длина, *de++ - последний байт 
 
-draw1:            ; *hl++ |= b
+draw1:      ; *hl++ |= b
             ld    a, b
             or    (hl)
-            ld  (hl), a
+            ld    (hl), a
             inc   h
             
 loc_D9F3:
-        ld  (hl), 0FFh
+            ld    (hl), 0FFh
             inc   h
             dec   c
-            jp nz,      loc_D9F3
+            jp nz, loc_D9F3
 
             ; hl |= *de++
             ld    a, (de)
             inc   de
             or    (hl)
-            ld  (hl), a
+            ld    (hl), a
 
             jp    draw_next
 
@@ -79,7 +79,7 @@ loc_D9F3:
 ; Если активная правая панель, сдвинуть адрес на пол экрана
 
 activePanelPos:
-        push      af
+            push  af
             ld    a, (state.activePanel)
             and   a
             jp z, loc_DA0B
@@ -92,7 +92,8 @@ loc_DA0B:   add   a, h
 ; ---------------------------------------------------------------------------
 ; Рисуем окно (b=ширина-2, с=высота-6)
 
-draw_window:      ; Если h - 90h + b >= 0x2F, то есть X + b + 2 > ширина экрана, то выйти
+draw_window:
+            ; Если h - 90h + b >= 0x2F, то есть X + b + 2 > ширина экрана, то выйти
             ld    a, h
             sub   90h
             add   a, b
@@ -109,7 +110,8 @@ draw_window:      ; Если h - 90h + b >= 0x2F, то есть X + b + 2 > ширина экрана,
             call  line313
 
             ; Повтор b раз
-draw_window_2:    push  de
+draw_window_2:
+            push  de
             call  line313
             dec   b
             jp z, draw_window_3
@@ -119,7 +121,7 @@ draw_window_2:    push  de
 ; ---------------------------------------------------------------------------
 
 draw_window_3:
-        pop af
+            pop   af
 
             ; Линия
             call  line313

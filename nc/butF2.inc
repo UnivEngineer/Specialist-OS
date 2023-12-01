@@ -211,6 +211,6 @@ chooseDrive_draw2:
             add   a, h
             ld    h, a
             call  activePanelPos
-            ld    b, 1        ; ширина 8 пикселей
-            jp    inverseRect ; hl - адрес
+            ld    bc, (1 << 8) + 9  ; ширина 1 байт, высота 9 пикселей
+            jp    inverseRect       ; hl = адрес
             

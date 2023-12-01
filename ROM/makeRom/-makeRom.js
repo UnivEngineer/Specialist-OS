@@ -63,7 +63,6 @@ function loadAll(name) { return fso.OpenTextFile(name, 1, false, 0).Read(fileSiz
 function save(fileName, data) { fso.CreateTextFile(fileName).Write(data); }
 src = loadAll("tbl.bin"); encode = []; decode = []; for(i=0; i<256; i++) { encode[i] = src.charAt(i); decode[src.charCodeAt(i)] = i; }
 
-
 // Расчет контрольной суммы файла
 function specialistSum(data) {
   s = 0;

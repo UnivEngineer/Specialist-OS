@@ -55,7 +55,7 @@ MON_ADDR_TEMP   =  0E000h
     call    bios_printString
 
     ; Загрузка Монитора
-    ; Подготовка имени файла a:MON2.SYS
+    ; Подготовка имени файла A:MON2.MON
     ld      hl, txtMonitorPath
     ld      de, nameBuffer
     call    bios_fileNamePrepare

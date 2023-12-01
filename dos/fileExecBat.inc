@@ -24,7 +24,7 @@ execBat:
 
             ; Сохраняем имя BAT-файла
             ld      hl, v_curFileDescr      
-            ld      de, v_curFileDescr + DIR_NAME_LENGTH + 3
+            ld      de, v_curFileDescr + FILE_NAME_LENGTH + 3
             ld      bc, v_batFileDescr
             call    memmove_bc_hl
 

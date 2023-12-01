@@ -140,7 +140,7 @@ CalcParams:
 
     ; Расчитываем размер каталога
     ld      hl,(v_DirFiles)     ; количество дескрипторов в корневом каталоге
-    ld      de, DIR_DESCR_SIZE  ; размер дескриптора в байтах
+    ld      de, FILE_DESCR_SIZE ; размер дескриптора в байтах
     call    bios_mul_hl_de      ; размер каталога в байтах
     ld      (v_DirBytes), hl
     ld      de, SECTOR_SIZE

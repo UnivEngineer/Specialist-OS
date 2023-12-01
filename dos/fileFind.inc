@@ -52,7 +52,7 @@ fileFind_sectorLoop:
             jp z,   fileFind_next
 
             ; Сравниваем имена файлов по адресам hl и de
-            ld      c, DIR_NAME_LENGTH + 3  ; длина имени + расширения
+            ld      c, FILE_NAME_LENGTH + 3 ; длина имени + расширения
             call    stricmp
             jp nz,  fileFind_next           ; если имена не совпадают, переходим к следующему файлу
 
@@ -92,7 +92,7 @@ fileFind_sectorLoop:
 fileFind_next:
             ; Вычисляем адрес следующего дескриптора файла
             pop     de  ; [6]   de = адрес дескриптора файла в кэше
-            ld      hl, DIR_DESCR_SIZE
+            ld      hl, FILE_DESCR_SIZE
             add     hl, de
             ex      de, hl
 
@@ -120,29 +120,4 @@ fileFind_next:
             pop     bc  ; [1]
             ld      a, 3
             scf
-            ret
-
-;----------------------------------------------------------------------------
-; MXOS
-; Копирование дескриптора файла
-;
-; вход:
-;  de = адрес откуда
-;  hl = адрес куда
-;
-; регистры не сохраняются!
-;
-; 2022-02-11 SpaceEngineer
-;----------------------------------------------------------------------------
-
-copyDescriptor:
-            ld      b, DIR_DESCR_SIZE
-cfd_loop:   ; Копируем b байт из de в hl
-            ld      a, (de)
-            ld      (hl), a
-            inc     hl
-            inc     de
-            dec     b
-            jp nz,  cfd_loop
-
             ret

@@ -10,7 +10,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{8C51CFA0-4D8C-4CF5-A678-F02AED39C256}</ProjectGuid>
     <RootNamespace>dos</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -54,6 +54,7 @@
     <None Include="clearScreen.inc" />
     <None Include="cmp_hl_de.inc" />
     <None Include="cmp_hl_de_2.inc" />
+    <None Include="copyDescriptor.inc" />
     <None Include="delay_l.inc" />
     <CustomBuild Include="DOS.asm">
       <FileType>Document</FileType>

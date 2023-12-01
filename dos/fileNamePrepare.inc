@@ -34,9 +34,9 @@ fileNamePrepare:
             
 fileNamePr_1:
             ; b = длина имени, c = 3 - длина расширения
-            ld      bc, (DIR_NAME_LENGTH << 8) + 3
+            ld      bc, (FILE_NAME_LENGTH << 8) + 3
 
-            ; Копируем текст до точки, пробела или конца строки, не более DIR_NAME_LENGTH символов.
+            ; Копируем текст до точки, пробела или конца строки, не более FILE_NAME_LENGTH символов.
 fileNamePr_2:
             ld      a, (hl)
             and     a
@@ -66,7 +66,7 @@ fileNamePr_4:
 ; ---------------------------------------------------------------------------
 
 fileNamePr_5:
-            ; Имя короче DIR_NAME_LENGTH символов
+            ; Имя короче FILE_NAME_LENGTH символов
             ; Заполняем недостающие символы имени пробелами
             call    memset_de_20_b
 

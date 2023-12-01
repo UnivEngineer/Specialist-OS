@@ -26,42 +26,46 @@ drawCursor: ; Цвет устаналвиается перед выводом
             call  readBytePanel
             sub   c
 
-            ; Рассчиытваем координату X (h = a < 18 ? 0x91 : 0x9D)
-            ld    h, 91h
-            cp    18
+            ; Рассчиытваем координату X (точнее, адрес)
+            ld    h, 90h + (P_FILE_LIST_X1 * 2 / 8)
+            cp    FILE_LIST_SIZE/2
             jp c, drawCursor_1
-            sub   18
-            ld    h, 9Dh
+            sub   FILE_LIST_SIZE/2
+            ld    h, 90h + (P_FILE_LIST_X2 * 2 / 8)
 
 drawCursor_1:
-            ; Рассчиытваем координату Y (l = a * 10 + 18h)
+            ; Рассчиытваем координату Y (точнее, адрес)
+            ; a = a * 10 + P_FILE_LIST_Y - 8
             add   a, a
             ld    c, a
             add   a, a
             add   a, a
             add   a, c
-            add   a,24
+            add   P_FILE_LIST_Y - 8
             ld    l, a
 
-            ; Ширина
-            ld    b, 10
+            ; Ширина курсора в байтах, высота в пикселях
+            ld    bc, (10 << 8) + 10
 
             ; Если правая панель, сдвигаем курсор на пол экрана
-drawCursor_2:     ld    a, (state.activePanel)
+drawCursor_2:
+            ld    a, (state.activePanel)
             and   a
             jp z, drawCursor_3
             ld    a, 18h
-drawCursor_3:     add   a, h
+drawCursor_3:
+            add   a, h
             ld    h, a
 
-            ; Рисуем курсор (hl - адрес, b - ширина, высота 9)
+            ; Рисуем курсор (hl = адрес, b = ширина, c = высота)
             call  inverseRect
             ret
 
 ; ---------------------------------------------------------------------------
 
     IF ENABLE_COLOR==0
-drawCursor_0:     ld    hl, 92D6h
+drawCursor_0:
+            ld    hl, 92D6h
             ld    b, 2
             jp    drawCursor_2
     ENDIF

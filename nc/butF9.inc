@@ -70,7 +70,7 @@ loc_D39C:   call    bios_keyScan
 
             ; имя файла
             pop     hl ; начало дескриптра
-            ld      bc, DIR_NAME_LENGTH+2 ; длина (запишется +1); старый формат - 9 символов, новый - DIR_NAME_LENGTH+3
+            ld      bc, FILE_NAME_LENGTH+2 ; длина (запишется +1); старый формат - 9 символов, новый - FILE_NAME_LENGTH+3
             call    tapeWriteBlock
 
             ; Пилот-тон

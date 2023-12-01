@@ -13,27 +13,64 @@
         ORG 0D000h
     ENDIF
 
-; Конфигурация сборки
+; Список файлов на всю высоту панелей
+FULL_PANELS = 0
 
-FILE_LIST_SIZE   = 36           ; Размер буфера для листинга директории (штук файлов)
-FILE_LIST_BUFFER = 8000h        ; Адрес буфера для листинга директории (FILE_LIST_SIZE дескрипторов + 1 = 1153 байт)
-
-; Цвета
+; Предустановки цветов:
+; 0 = vinxru
+; 1 = новый
+; 2 = Norton Commander
+COLOR_PRESET = 1
 
 COLOR_CMDLINE    =  070h        ; Цвет командной строки
 COLOR_CMDSCREEN  =  COLOR_BIOS  ; Цвет командного экрана (когда панели спрятаны)
-COLOR_BORDER     =  0F1h        ; Цвет рамки
-COLOR_PANELNAME  =  0A1h        ; Цвет заголовка панели (NAME)
-COLOR_FILE       =  0B1h        ; Цвет файлов
-COLOR_INFOLINE   =  0B1h        ; Цвет строки информации о текущем файле
-COLOR_CURSOR     =  0B0h        ; Цвет курсора (инверсный)
-COLOR_DIALOG     =  007h        ; Цвет окон диалогов F1-F9
-COLOR_DIALOG_ERR =  047h        ; Цвет окна с сообщением об ошибке
-COLOR_INFOHEADER =  0A1h        ; Заголовок информационной панели
-COLOR_INFONUMBER =  0E1h        ; Цифры на информационной панели
-COLOR_INFOTEXT   =  0F1h        ; Текст на информационной панели
-COLOR_HELP_F     =  040h        ; Цвет функциональных клавиш в строке подсказки
-COLOR_HELP_TEXT  =  071h        ; Цвет текста в строке подсказки
+
+    IF COLOR_PRESET == 0
+
+COLOR_BORDER     =  0F1h    ; Цвет рамки
+COLOR_PANELNAME  =  0A1h    ; Цвет заголовка панели (NAME)
+COLOR_FILE       =  0B1h    ; Цвет файлов
+COLOR_INFOLINE   =  0B1h    ; Цвет строки информации о текущем файле
+COLOR_CURSOR     =  0B0h    ; Цвет выделенного файла (инверсный)
+COLOR_DIALOG     =  007h    ; Цвет окон диалогов F1-F9
+COLOR_DIALOG_ERR =  047h    ; Цвет текста на окне с сообщением об ошибке
+COLOR_INFOHEADER =  0A1h    ; Заголовок информационной панели
+COLOR_INFONUMBER =  0E1h    ; Цифры на информационной панели
+COLOR_INFOTEXT   =  0F1h    ; Текст на информационной панели
+COLOR_HELP_F     =  040h    ; Цвет функциональных клавиш в строке подсказки
+COLOR_HELP_TEXT  =  071h    ; Цвет текста в строке подсказки
+
+    ELSEIF COLOR_PRESET == 1
+
+COLOR_BORDER     =  0F1h    ; Цвет рамки
+COLOR_PANELNAME  =  0E1h    ; Цвет заголовка панели (NAME)
+COLOR_FILE       =  0B1h    ; Цвет файлов
+COLOR_INFOLINE   =  0B1h    ; Цвет строки информации о текущем файле
+COLOR_CURSOR     =  030h    ; Цвет выделенного файла (инверсный)
+COLOR_DIALOG     =  007h    ; Цвет окон диалогов F1-F9
+COLOR_DIALOG_ERR =  047h    ; Цвет текста на окне с сообщением об ошибке
+COLOR_INFOHEADER =  0E1h    ; Заголовок информационной панели
+COLOR_INFONUMBER =  0E1h    ; Цифры на информационной панели
+COLOR_INFOTEXT   =  0F1h    ; Текст на информационной панели
+COLOR_HELP_F     =  060h    ; Цвет функциональных клавиш в строке подсказки
+COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подсказки
+
+    ELSE
+
+COLOR_BORDER     =  0B1h    ; Цвет рамки
+COLOR_PANELNAME  =  0E1h    ; Цвет заголовка панели (NAME)
+COLOR_FILE       =  0B1h    ; Цвет файлов
+COLOR_INFOLINE   =  0B1h    ; Цвет строки информации о текущем файле
+COLOR_CURSOR     =  030h    ; Цвет выделенного файла (инверсный)
+COLOR_DIALOG     =  007h    ; Цвет окон диалогов F1-F9
+COLOR_DIALOG_ERR =  047h    ; Цвет текста на окне с сообщением об ошибке
+COLOR_INFOHEADER =  0B1h    ; Заголовок информационной панели
+COLOR_INFONUMBER =  0E1h    ; Цифры на информационной панели
+COLOR_INFOTEXT   =  0B1h    ; Текст на информационной панели
+COLOR_HELP_F     =  070h    ; Цвет функциональных клавиш в строке подсказки
+COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подсказки
+
+    ENDIF
 
 ;---------------------------------------------------------------------------
 ; Макросы
@@ -105,7 +142,6 @@ COLOR_HELP_TEXT  =  071h        ; Цвет текста в строке подсказки
 ; Константы и переменные
 ;---------------------------------------------------------------------------
 
-aNameName:          DB "Name",18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,18h,"Name",0
 aF1LeftF2RighF3:    DB "F1 Left F2 Rght F3 Info F4 Edit F5 Copy F6 RMov F7 Load F8 Del",0
 aCommanderVer:      DB "Commander version 2.0",0
 aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
@@ -134,9 +170,14 @@ aSavingToTape:      DB "Saving to tape",0
 aLoadingFromTapeTo: DB "Loading from tape to ",0
 aErrorLoadingTa:    DB "Error loading from tape",0
 
+    IF FULL_PANELS==0
+aNameName:          DB "Name",0
+    ENDIF
+
 aNcExt:             DB "A:NC.EXT",0
 aEditor:            DB "A:E.COM",0Dh      ; терминатором тут должно быть 0Dh
 
+;-----------------------------------------------------------------------
 ; Описания окон
 
 v_window:   DB 01111111b            ; Верхний левый угол
@@ -204,16 +245,33 @@ g_window2:
             G_LINE   80h, 108, 132, 168       ; 81h, 84h, 9Dh, 14h, 0Fh, 0F0h
             DB 0
 
-; Коодинаты элементов панелей
+;-----------------------------------------------------------------------
+; Размер буфера для листинга директории (штук дескрипторов файлов)
 
-P_NAME_X          = 17  ; Заголовок панели "NAME"
+    IF FULL_PANELS
+FILE_LIST_SIZE    = 40
+    ELSE
+FILE_LIST_SIZE    = 36
+    ENDIF
+
+;-----------------------------------------------------------------------
+; Коодинаты элементов панелей от левого верхнего угла экрана
+; x - удвоенные пиксели, y - пиксели
+
+P_NAME_X1         = 17  ; Заголовок панели "NAME" (2 колонки)
+P_NAME_X2         = 65
 P_NAME_Y          = 16
 
 P_FILE_LIST_X1    = 6   ; Файловая таблица (2 колонки)
 P_FILE_LIST_X2    = 54
-P_FILE_LIST_Y     = 32
 
-P_FILE_LIST_H     = 18  ; Высота файловой таблицы в строках
+    IF FULL_PANELS
+P_FILE_LIST_Y     = 12
+    ELSE
+P_FILE_LIST_Y     = 32
+    ENDIF
+
+P_FILE_LIST_H     = FILE_LIST_SIZE / 2  ; Высота файловой таблицы в строках
 P_FILE_LIST_Y_MAX = P_FILE_LIST_H * 10 + P_FILE_LIST_Y
 
 P_DRIVE_LETTER_X  = 9   ; Буква имени диска внизу панели
@@ -250,7 +308,8 @@ panelB_curFile      DB    0     ; на каком файле курсор на панели B
 state   NC_STATE
 stateEnd:           ; адрес конца блока переменных состояния
 
-; Другие переменные - не включены в бинарник
+; Другие переменные - не включены в бинарник (машинный код не
+; генерируется, при первом запуске переменные могут содержать мусор)
 
     STRUCT NC_VARIABLES
 cmdLinePos      DW    0
@@ -268,14 +327,32 @@ input           BLOCK 21, 0FFh
 tempFileDescr   FILE_DESCRIPTOR
     ENDS
 
-; Установка только значения метки vars (машинный код не генерируется, переменные могут содержать мусор)
-vars    NC_VARIABLES = $
+vars    NC_VARIABLES = $        ; адрес начала блока переменнных
+varsEnd = vars + NC_VARIABLES   ; адрес конца  блока переменнных
 
-; Максимальный допустимый размер NC.COM - до адреса 0E200h
+; Адрес буфера для листинга директории (FILE_LIST_SIZE структур FILE_INFO + 1 = 577 байт)
+;FILE_LIST_BUFFER = 8800h
+FILE_LIST_BUFFER      = varsEnd
+FILE_LIST_BUFFER_SIZE = FILE_LIST_SIZE * FILE_INFO_SIZE + 1
+
+;-----------------------------------------------------------------------
+; Проверяем, что программа помещается в память вместе со своими буферами
+;-----------------------------------------------------------------------
+
+; Конец NC.COM после разворачивания в памяти
+NC_END = FILE_LIST_BUFFER + FILE_LIST_BUFFER_SIZE
+
+; Максимальный допустимый размер NC.COM
     IF NEW_MEMORY_MAP
-        ASSERT_DONT_FIT FAT_CACHE_ADDR
+NC_END_MAX = FAT_CACHE_ADDR  ; до дискового кэша
     ELSE
-        ASSERT_DONT_FIT 0E200h
+NC_END_MAX = 0E200h          ; до адреса 0E200h
+    ENDIF
+
+; Проверка
+    IF NC_END >= NC_END_MAX
+        ASSERT 0
+        DISPLAY /l, "Error! NC.COM did not fit (", NC_END, " > ", NC_END_MAX, ")"
     ENDIF
 
     END

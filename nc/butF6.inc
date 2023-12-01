@@ -41,7 +41,7 @@ loc_D47B:   ld          e, 1
             ld          de, vars.tempFileDescr
 
             ; копируем имя файла
-            ld          c, DIR_NAME_LENGTH + 3
+            ld          c, FILE_NAME_LENGTH + 3
 loc_D488:
             ld          a, (hl)
             ld          (de),a

@@ -1,11 +1,11 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; Получить список записей каталога.
-; Функция копирует в буфер непустые записи (дескрипторы файлов).
+; Получить список файлов каталога.
+; Функция копирует в буфер уомпактные описатели файлов (FILE_INFO).
 ;
-; На входе 
+; На входе
 ;  hl - адрес буфера
-;  de - размер буфера (количество дескрипторов файлов)
+;  de - размер буфера (макс. количество описателей файлов)
 ;  bc - с какого дескриптора начинать заполнение буфера
 ;
 ; На выходе
@@ -114,12 +114,14 @@ fileList_sectorLoop:
 
             ; Копируем дескриптор из de в hl
             push    bc  ; [4]
-            call    copyDescriptor
+            ;call    copyDescriptor
+            call    copyDescriptorCompact
             pop     bc  ; [4]
 
             ; copyDescriptor смещает de, поэтому код расчета
             ; адреса следующего дескриптора надо перепрыгнуть
-            jp      fileList_next
+            ;jp      fileList_next
+            jp      fileList_nextDescr
 
 fileList_skipCopy:
             pop     de  ; [5]
@@ -128,7 +130,7 @@ fileList_skipCopy:
 fileList_nextDescr:
             ; Вычисляем адрес следующего дескриптора
             push    hl  ; [4]
-            ld      hl, DIR_DESCR_SIZE
+            ld      hl, FILE_DESCR_SIZE
             add     hl, de
             ex      de, hl
             pop     hl  ; [4]

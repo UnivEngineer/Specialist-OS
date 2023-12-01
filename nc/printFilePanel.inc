@@ -24,11 +24,18 @@ redrawFilePanel:
         call    printDrive
 
         ; Вывод NAME
+    IF FULL_PANELS==0
         COLOR   COLOR_PANELNAME
-        ld      hl, (P_NAME_X << 8) + P_NAME_Y
+        ld      hl, (P_NAME_X1 << 8) + P_NAME_Y
         call    setCursorPosPanel
         ld      hl, aNameName
         call    bios_printString
+
+        ld      hl, (P_NAME_X2 << 8) + P_NAME_Y
+        call    setCursorPosPanel
+        ld      hl, aNameName
+        call    bios_printString
+    ENDIF
 
         ; Выодим список файлов сверху вниз
         ld      b, 0
@@ -81,7 +88,7 @@ pfud_Loop:
         call    printFileNamOnPanel
 
         ; Следующий файл
-        ld      bc, DIR_DESCR_SIZE
+        ld      bc, FILE_INFO_SIZE
         add     hl, bc
 
         ; Курсор на следующую строку
@@ -104,7 +111,7 @@ pfud_Loop:
 
 printFilesDownUp:
         ; Указатель списка файлов - на последний файл
-        ld      hl, FILE_LIST_BUFFER + (FILE_LIST_SIZE-1) * DIR_DESCR_SIZE
+        ld      hl, FILE_LIST_BUFFER + (FILE_LIST_SIZE-1) * FILE_INFO_SIZE
 
         ; Положение курсора - на последний файл
         ld      de, (P_FILE_LIST_X2 << 8) + P_FILE_LIST_Y_MAX - 10
@@ -120,7 +127,7 @@ pfdu_Loop:
 
         ; Предыдущий файл
         push    bc
-        ld      bc, 10000h - DIR_DESCR_SIZE
+        ld      bc, -FILE_INFO_SIZE
         add     hl, bc
         pop     bc
 

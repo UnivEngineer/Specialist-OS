@@ -5,7 +5,8 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-drawWindowIfSel:; Получить кол-во файлов
+drawWindowIfSel:
+        ; Получить кол-во файлов
         ld      hl, state.panelA_filesCnt
         call    readBytePanel
 
@@ -26,8 +27,8 @@ drawWindow1:
         call    draw
       
         ; Рисуем прямоугольник
-        ld      hl, 9F66h   ; x=120 y=102
-        ld      b, 18       ; w=144 h=9
+        ld      hl, 9F65h           ; x=120 y=101
+        ld      bc, (18 << 8) + 11  ; w=144 h=11
         jp      inverseRect
 
 ; ---------------------------------------------------------------------------
@@ -40,6 +41,6 @@ drawWindow2:
         call    draw
 
         ; Рисуем прямоугольник
-        ld      hl, 9E88h   ; x=112 y=136
-        ld      b, 20       ; w=160 h=9
+        ld      hl, 9E87h           ; x=112 y=135
+        ld      bc, (20 << 8) + 11  ; w=160 h=11
         jp      inverseRect

@@ -31,15 +31,15 @@ formatCalled:
 
             ; Раскрашиваем строку с кнопками
             COLOR   COLOR_HELP_TEXT
-            ld      hl, 92F7h
-            ld      d, 8
-loc_D049:
-            ld      b, 4
-            call    inverseRect     ; hl - адрес, b - ширина, высота 9
+            ld      hl, 92F7h           ; адрес первого прямоугольника
+            ld      d, 8                ; количество прямоугольников
+colToolbarLoop:
+            ld      bc, (4 << 8) + 9    ; b = ширина = 4 байта, c = высота 9 пикселей
+            call    inverseRect
             inc     h
             inc     h
             dec     d
-            jp nz,  loc_D049
+            jp nz,  colToolbarLoop
 
             ; Очищаем командную строку
             call    clearCmdLine

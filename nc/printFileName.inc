@@ -14,7 +14,7 @@
 ;printFileName:
 ;        push  bc
 ;        ld    c, ' '               ; прерываем печать имени по пробелу
-;        ld    b, DIR_NAME_LENGTH   ; длина имени
+;        ld    b, FILE_NAME_LENGTH  ; длина имени
 ;        call  printString2
 ;        ld    c, '.'
 ;        call  bios_printChar       ; печатаем точку
@@ -40,7 +40,7 @@
 printFileNamOnPanel:
         push    hl
         push    bc
-        ld      bc, DIR_NAME_LENGTH << 8    ; b = длина имени, с = 0 (без терминатора)
+        ld      bc, FILE_NAME_LENGTH << 8   ; b = длина имени, с = 0 (без терминатора)
         call    printString2
         ld      c, 18h                      ; курсор вправо
         call    bios_printChar

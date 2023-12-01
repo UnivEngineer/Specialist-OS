@@ -153,7 +153,7 @@ fileLoadExit:
             add     hl, bc
 
             ; Копируем дескриптор из hl в de, исключая имя и расширение
-            ld      b, DIR_DESCR_SIZE - DIR_NAME_LENGTH - 3
+            ld      b, FILE_DESCR_SIZE - FILE_NAME_LENGTH - 3
 fileLoadCDLoop:
             ld      a, (hl)
             ld      (de), a

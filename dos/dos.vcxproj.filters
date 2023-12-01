@@ -228,6 +228,9 @@
     <None Include="math.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="copyDescriptor.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="DOS.asm">

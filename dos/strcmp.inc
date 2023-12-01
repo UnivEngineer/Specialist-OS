@@ -133,7 +133,7 @@ upperCase2: ; Символы псевдографики - не меняем
 
 cmpFileExt:
             ; Адрес расширения
-            ld      hl, v_curFileDescr + DIR_NAME_LENGTH
+            ld      hl, v_curFileDescr + FILE_NAME_LENGTH
             ld      c, 3   ; cравниваем 3 символа
             call    stricmp ; zf = 1 если равны
 

@@ -48,93 +48,129 @@
 ; bios_vars.koi7       = 8FEAh
 ; bios_vars.cursorX    = 8FFCh
 
+;----------------------------------------------------------------------------
 ; Собственные переменные
+INPUT_BUF     = 8F60h
+INPUT_BUF_END = 8F6Dh
+
     STRUCT MON2_VARS_1
-V_8F80:     DS    1
-V_8F81:     DS    2
-V_8F83:     DS    2
-V_8F85:     DS    2
-V_8F87:     DS    2
-V_8F89:     DS    1
-V_8F8A:     DS    1
-V_8F8B:     DS    1
-V_8F8C:     DS    2
-V_8F8E:     DS    2
-V_8F90:     DS    1
-V_8F91:     DS    4
-V_8F95:     DS    1
-V_8F96:     DS    1
-V_8F97:     DS    2
-V_8F99:     DS    1
-V_8F9A:     DS    3
-V_8F9D:     DS    2
-V_8F9F:     DS    2
-V_8FA1:     DS    2
-V_8FA3:     DS    2
-V_8FA5:     DS    2
-V_8FA7:     DS    4
-V_8FAB:     DS    2
+Directive:      DS    1
+FirstParam:     DS    2
+SecondParam:    DS    2
+ThirdParam:     DS    2
+V_8F87:         DS    2
+V_8F89:         DS    1
+V_8F8A:         DS    1
+V_8F8B:         DS    1
+V_8F8C:         DS    2
+V_8F8E:         DS    2
+V_8F90:         DS    1
+V_8F91:         DS    4
+V_8F95:         DS    1
+V_8F96:         DS    1
+V_8F97:         DS    2
+V_8F99:         DS    1
+V_8F9A:         DS    3
+V_8F9D:         DS    2
+V_8F9F:         DS    2
+V_8FA1:         DS    2
+V_8FA3:         DS    2
+V_8FA5:         DS    2
+V_8FA7:         DS    4
+V_8FAB:         DS    2
     ENDS
 
     STRUCT MON2_VARS_2
-V_F0E0:     DS    5
-V_F0E5:     DS    1
-V_F0E6:     DS    1
-V_F0E7:     DS    1
+V_F0E0:         DS    5
+V_F0E5:         DS    1
+V_F0E6:         DS    1
+V_F0E7:         DS    1
     ENDS
 
-    STRUCT MON2_VARS_3
-; похоже на старый дескриптор файла
-V_F900:     DS    10    ; имя (6), расширение (3), атрибуты (1)
-V_F90A:     DS    2     ; адрес загрузки
-V_F90C:     DS    2     ; размер-1
-    ENDS
-
-; Адреса блоков переменных
-vars1 MON2_VARS_1 = 08F80H
-vars2 MON2_VARS_2 = 0F0E0H
-vars3 MON2_VARS_3 = 0F900H
-
-
+;----------------------------------------------------------------------------
 ; Начало программы
     ORG   0F100h
+
+; Адреса блоков переменных
+vars1       MON2_VARS_1     = 08F80H
+vars2       MON2_VARS_2     = 0F0E0H
+v_fileDescr FILE_DESCRIPTOR = 0F900H
+
+; Буфер для листинга директории
+; В новой карте памяти можно расположить его
+; перед Монитором - там больше места
+    IF  NEW_MEMORY_MAP
+v_fileInfo  FILE_INFO = 0E800H
+DIR_BUFFER_SIZE = ($ - v_fileInfo) / FILE_INFO_SIZE - 1
+    ELSE
+v_fileInfo  FILE_INFO = v_fileDescr + FILE_DESCRIPTOR_SIZE
+DIR_BUFFER_SIZE = (0FB00h - v_fileInfo) / FILE_INFO_SIZE - 1
+    ENDIF
+
+;----------------------------------------------------------------------------
+; Код
 
         ; Начинаем с очистки экрана
         LD    C,1FH ; rjl символа очистки экрана
         CALL  bios_printChar
 
         ; Рестарт без очистки экрана
-restartNoCls:
+RestartNoCls:
         LD    SP,0FFBFH
         LD    HL,mon2_restart           ; установить обработчик ошибки магнитофона
         LD    (bios_vars.tapeError),HL  ; на рестарт монитора
         LD    HL,7EFFH    ; 32511
         LD    (vars1.V_8FAB),HL
-        CALL  SUB1
-        JP    restartNoCls
+        CALL  MonitorMain
+        JP    RestartNoCls
 
-SUB1:   LD    HL,txtNewLine             ; 62970
+;----------------------------------------------------------------------------
+; Главная подпрограмма - ввод директивы, анализ, выполнение
+
+MonitorMain:
+        ; перевод строки
+        LD    HL,txtNewLine
         CALL  bios_printStringOld
-        LD    E,02H         ; 2
+
+        ; узнать текущий диск
+        LD    E,02H
         CALL  bios_fileGetSetDrive
-        ADD   A,41H         ; 65 'A'
+
+        ; печать промпта A:\>
+        ADD   A,'A'
         LD    C,A
         CALL  bios_printChar
-        LD    C,3EH         ; 62 '>'
+        LD    C,':'
         CALL  bios_printChar
-        CALL  SUB2
+        LD    C,'\'
+        CALL  bios_printChar
+        LD    C,'>'
+        CALL  bios_printChar
+
+        ; очистка буфера
+        CALL  ClearInputBuf
+
+        ; ввод строки
         CALL  SUB19
+
         PUSH  HL
         PUSH  DE
         PUSH  BC
-        LD    E,02H         ; 2
+
+        ; узнать текущий диск
+        LD    E,02H
         CALL  bios_fileGetSetDrive
         PUSH  AF
-        LD    HL,8F60H    ; 36704
-        LD    DE,vars3.V_F900   ; 63744
+
+        ; преобразовать имя файла в буфере
+        LD    HL,INPUT_BUF
+        LD    DE,v_fileInfo.name
         CALL  bios_fileNamePrepare
-        LD    E,02H         ; 2
+
+        ; узнать текущий диск
+        LD    E,02H
         CALL  bios_fileGetSetDrive
+
         LD    E,A
         POP   AF
         CP    E
@@ -142,66 +178,87 @@ SUB1:   LD    HL,txtNewLine             ; 62970
         POP   DE
         POP   HL
         RET   NZ
+
+        ; перевод строки
         CALL  printNewLine
-        CALL  SUB14
-        CP    44H           ; 68 'D'
-        JP    Z,LBL54
-        CP    4DH           ; 77 'M'
-        JP    Z,LBL46
-        CP    4CH           ; 76 'L'
-        JP    Z,LBL39
-        CP    4BH           ; 75 'K'
-        JP    Z,calcAndPrintCRC
-        CP    54H           ; 84 'T'
-        JP    Z,LBL34
-        CP    58H           ; 88 'X'
-        JP    Z,LBL15
-        CP    57H           ; 87 'W'
+
+        ; анализ строки
+        CALL  Tokenizer
+
+        ; анализ дуквы директивы
+        CP    44H           ; Директива D - дамп блока памяти в HEX виде
+        JP    Z,Dir_D
+        CP    4DH           ; Директива M - редактирование блока памяти
+        JP    Z,Dir_M
+        CP    4CH           ; Директива L - дамп блока памяти в текстовом виде
+        JP    Z,Dir_L
+        CP    4BH           ; Директива K - подсчет контрольной суммы блока памяти
+        JP    Z,Dir_K
+        CP    54H           ; Директива T - копирование блока памяти на новый адрес
+        JP    Z,Dir_T
+        CP    58H           ; Директива X - печать содержимого регистров процессора
+        JP    Z,Dir_X
+        CP    57H           ; Директива W - запись блока памяти на ленту без имени
         JP    Z,mon2_tapeSave
-        CP    52H           ; 82 'R'
-        JP    Z,LBL12
-        CP    43H           ; 67 'C'
-        JP    Z,LBL35
-        CP    48H           ; 72 'H'
-        JP    Z,LBL14
-        CP    4EH           ; 78 'N'
-        JP    Z,LBL31
-        CP    47H           ; 71 'G'
-        JP    Z,LBL18
-        CP    46H           ; 70 'F'
-        JP    Z,LBL33
-        CP    53H           ; 83 'S'
-        JP    Z,LBL21
-        CP    4AH           ; 74 'J'
-        JP    Z,LBL2
-        CP    3FH           ; 63 '?'
+        CP    52H           ; Директива R - чтение файла с ленты
+        JP    Z,Dir_R
+        CP    43H           ; Директива C - сравнение двух блоков памяти
+        JP    Z,Dir_C
+        CP    48H           ; Директива H - печать суммы и разности двух HEX слов
+        JP    Z,Dir_H
+        CP    4EH           ; Директива N - ???
+        JP    Z,Dir_N
+        CP    47H           ; Директива G - запуск программы по адресу
+        JP    Z,Dir_G
+        CP    46H           ; Директива F - заполнить блок памяти байтом
+        JP    Z,Dir_F
+        CP    53H           ; Директива S - ???
+        JP    Z,Dir_S
+        CP    4AH           ; Директива J - выход из Mонитора
+        JP    Z,Dir_J
+        CP    3FH           ; Директива ? - листинг директории
         JP    Z,Dir_DirDisk
-        CP    42H           ; 66 'B'
-        JP    Z,LBL5
-        CP    41H           ; 65 'A'
-        JP    Z,LBL7
-        CP    56H           ; 86 'V'
-        JP    Z,LBL8
-        CP    55H           ; 85 'U'
-        JP    Z,LBL9
-        CP    59H           ; 89 'Y'
-        JP    Z,LBL10
-        CP    51H           ; 81 'Q'
-        JP    Z,Dir_GetFileAttr
-        JP    LBL52
-LBL2:   CALL  bios_keyCheck             ; [2]
+        CP    42H           ; Директива B - сохранить область памяти в файл
+        JP    Z,Dir_B
+        CP    41H           ; Директива A - изменение адреса загрузки файла
+        JP    Z,Dir_A
+        CP    56H           ; Директива V - загрузка файла в память по указанному адресу
+        JP    Z,Dir_V
+        CP    55H           ; Директива U - загрузка файла в память
+        JP    Z,Dir_U 
+        CP    59H           ; Директива Y - установка атрибутов файла
+        JP    Z,Dir_Y
+        CP    51H           ; Директива Q - печать атрибутов файла
+        JP    Z,Dir_Q
+
+        ; директива не распознана - печать знака вопроса и перезапуск
+        JP    TypeErrorRestart
+
+;----------------------------------------------------------------------------
+; Директива J - выход из Mонитора
+
+Dir_J:  CALL  bios_keyCheck
         INC   A
         JP    Z,bios_reboot
-        JP    LBL2
-SUB2:   LD    HL,8F60H    ; 36704
+        JP    Dir_J
+
+;----------------------------------------------------------------------------
+; Запись слова 0000h в начало буфера для ввода строки INPUT_BUF
+
+ClearInputBuf:
+        LD    HL,INPUT_BUF
         LD    (HL),00H
         INC   HL
         LD    (HL),00H
         RET
 
-        ; Директива ? - вывод каталога диска
+;----------------------------------------------------------------------------
+; Директива ? - вывод каталога диска
+
 Dir_DirDisk:
-        LD    HL,vars3.V_F900   ; буфер
+        LD    BC, 0                 ; начинаем с 0 файла
+        LD    HL, v_fileInfo.name   ; адрес буфера
+        LD    DE, DIR_BUFFER_SIZE   ; размер буфера в штуках
         CALL  bios_fileList
 DirDiskLoop:
         LD    A,(HL)            ; первый символ имени файла
@@ -212,7 +269,7 @@ DirDiskLoop:
         CALL  Z,bios_getch      ; если нажата СТР, ждем нажатия СТР еще раз
         CP    1FH               ; СТР
         RET   Z                 ; выход, если СТР нажата еще раз
-        LD    B,06H             ; печатаем 6 символов имени файла
+        LD    B,08H             ; печатаем 8 символов имени файла
         CALL  printStringB
         LD    C,2EH             ; печатаем точку
         CALL  bios_printChar
@@ -229,9 +286,9 @@ DirDiskLoop:
         INC   HL
         LD    D,(HL)
         EX    (SP),HL           ; текущий указатель дескриптора в стек, а HL = адрес загрузки файла
-        CALL  printHexWordHL   ; печатаем начальный адрес загрузки файла
+        CALL  printHexWordHL    ; печатаем начальный адрес загрузки файла
         ADD   HL,DE
-        CALL  printHexWordHL   ; печатаем конечынй адрес загрузки файла
+        CALL  printHexWordHL    ; печатаем конечынй адрес загрузки файла
         POP   HL                ; HL = указатель дескриптора
         LD    A,L
         AND   0F0H
@@ -241,7 +298,9 @@ DirDiskLoop:
         CALL  printNewLine
         JP    DirDiskLoop
 
-        ; Печать строки по адресу HL длиной B
+;----------------------------------------------------------------------------
+; Печать строки по адресу HL длиной B
+
 printStringB:
         LD    C,(HL)
         CALL  bios_printChar
@@ -250,7 +309,13 @@ printStringB:
         JP    NZ,printStringB
         RET
 
-LBL5:   LD    (vars3.V_F90A),HL
+;----------------------------------------------------------------------------
+; Директива B - сохранение области памяити в файл
+
+Dir_B:  ; адрес начала - в дескриптор
+        LD    (v_fileDescr.loadAddress), HL
+
+        ; DE = -HL
         EX    DE,HL
         LD    A,D
         CPL
@@ -259,75 +324,128 @@ LBL5:   LD    (vars3.V_F90A),HL
         CPL
         LD    E,A
         INC   DE
+
+        ; HL = адрес_конца - адрес_начала = размер - 1
         ADD   HL,DE
-        LD    (vars3.V_F90C),HL
+
+        ; размер - в дескриптор
+        LD    (v_fileDescr.size),HL
+
+        ; запрос именя файла
         CALL  EnterFileName
+
+        ; сохранение файла
         CALL  bios_fileCreate
-        LD    HL,txtSmallDisk             ; 62041
+
+        ; в случае ошибки печатаем надпись "МАЛ ДИСК"
+        LD    HL,txtSmallDisk
         CALL  C,SUB4
         RET
+
+        ; или "МАЛ DIR"
 SUB4:   OR    A
         JP    Z,LBL6
-        CALL  bios_printString
-        RET
-LBL6:   LD    HL,txtSmallDir             ; 62054
-        CALL  bios_printString
-        RET
+        JP    bios_printString
 
-        ; Русский текст в кодировке КОИ-8
-txtSmallDisk:   DB  0AH,0DH,"mal disk !",00H
-txtSmallDir:    DB  0AH,0DH,"mal DIR !", 00H
-txtNoFile:      DB  0AH,0DH,"net fajla ",00H
+LBL6:   LD    HL, txtSmallDir
+        JP    bios_printString
 
-LBL7:   PUSH  HL
+;----------------------------------------------------------------------------
+; Русский текст в кодировке КОИ-7
+
+txtSmallDisk:   DB  0AH,0DH,"SMALL DISK!",00H
+txtSmallDir:    DB  0AH,0DH,"SMALL DIR!",00H
+txtNoFile:      DB  0AH,0DH,"NO FILE ",00H
+
+;----------------------------------------------------------------------------
+; Директива A - изменение адреса загрузки файла
+
+Dir_A:  PUSH  HL
         CALL  EnterFileName
         POP   DE
         LD    C,01H
         CALL  bios_fileGetSetAddr
-        LD    HL,txtNoFile             ; 62066
+        LD    HL,txtNoFile
         CALL  C,bios_printString
         RET
-LBL8:   PUSH  HL
+
+;----------------------------------------------------------------------------
+; Директива V - загрузка файла в память по указанному адресу
+
+Dir_V:  ; запоминаем первый параметр директивы в стеке
+        PUSH  HL
+
+        ; запрос имени файла
         CALL  EnterFileName
+
+        ; вытаскиваем первый параметр директивы из стеке
         POP   DE
         PUSH  DE
+
+        ; загружаем файл по адресу, указанному в директиве
         CALL  bios_fileLoad2
+
+        ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
         PUSH  AF
-        LD    HL,txtNoFile             ; 62066
+        LD    HL,txtNoFile
         CALL  C,bios_printString
         POP   AF
         POP   DE
         RET   C
+
+        ; получение информации о файле
         PUSH  DE
-        LD    HL,vars3.V_F900   ; 63744
+        LD    HL,v_fileDescr.name
         CALL  bios_fileLoadInfo
-        LD    HL,(vars3.V_F90C)
+
+        ; размер файла
+        LD    HL,(v_fileDescr.size)
         EX    DE,HL
+
+        ; печать начального адреса
         POP   HL
         CALL  printHexWordHL
-        ADD   HL,DE
-        CALL  printHexWordHL
-        RET
-LBL9:   CALL  EnterFileName
-        CALL  bios_fileLoad
-        PUSH  AF
-        LD    HL,txtNoFile             ; 62066
-        CALL  C,bios_printString
-        CALL  printSpace
-        POP   AF
-        RET   C
-        LD    HL,vars3.V_F900   ; 63744
-        CALL  bios_fileLoadInfo
-        LD    HL,(vars3.V_F90A)
-        PUSH  HL
-        CALL  printHexWordHL
-        POP   DE
-        LD    HL,(vars3.V_F90C)
+
+        ; печать конечного адреса
         ADD   HL,DE
         CALL  printHexWordHL
         RET
 
-LBL10:  PUSH  HL
+;----------------------------------------------------------------------------
+; Директива U - загрузка файла в память
+
+Dir_U:  ; запрос имени файла
+        CALL  EnterFileName
+        CALL  bios_fileLoad
+
+        ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
+        PUSH  AF
+        LD    HL,txtNoFile
+        CALL  C,bios_printString
+        CALL  printSpace
+        POP   AF
+        RET   C
+
+        ; получение информации о файле
+        LD    HL,v_fileDescr.name
+        CALL  bios_fileLoadInfo
+
+        ; печать адреса загрузки
+        LD    HL,(v_fileDescr.loadAddress)
+        PUSH  HL
+        CALL  printHexWordHL
+        POP   DE
+
+        ; печать размера файла
+        LD    HL,(v_fileDescr.size)
+        ADD   HL,DE
+        CALL  printHexWordHL
+        RET
+
+;----------------------------------------------------------------------------
+; Директива Y - установка атрибутов файла
+
+Dir_Y:  PUSH  HL
         CALL  EnterFileName         ; ввод имени файла
         LD    C,01H                 ; режим для фаункции bios_fileGetSetAttr - установка байта атрибутов файла
         EX    (SP),HL
@@ -338,8 +456,10 @@ LBL10:  PUSH  HL
         CALL  C,bios_printString    ; если файл не найден - вывести сообщение
         RET
 
-        ; Директива Q - вывод атрибутов файла
-Dir_GetFileAttr:
+;----------------------------------------------------------------------------
+; Директива Q - печать атрибутов файла
+
+Dir_Q:
         CALL  EnterFileName         ; ввод имени файла
         LD    C,02H                 ; режим для фаункции bios_fileGetSetAttr - чтение байта атрибутов файла
         CALL  bios_fileGetSetAttr   ; чтение байта атрибутов файла
@@ -351,51 +471,82 @@ Dir_GetFileAttr:
         CALL  NC,bios_printHexByte  ; печатаем байт атрибутов, если не было ошибки
         RET
 
-        ; Запрос имени файла
-        ; на выходе:
-        ;   HL = адрем буфера с подготовленным именем файла
+;----------------------------------------------------------------------------
+; Запрос имени файла
+; выход:
+;   HL = адрес буфера с подготовленным именем файла
+
 EnterFileName:
         LD    HL,txtFileQuestMark   ; печать приглашеиня ввести имя файла
         CALL  bios_printString
-        LD    HL,8F60H              ; буфер для ввода строки
-        LD    DE,8F6DH
+        LD    HL,INPUT_BUF          ; буфер для ввода строки
+        LD    DE,INPUT_BUF_END
         CALL  bios_input
-        LD    DE,vars3.V_F900       ; буфер для подготовленного имени файла
+        LD    DE,v_fileDescr.name   ; буфер для подготовленного имени файла
         CALL  bios_fileNamePrepare  ; подготавливаем имя файла
         EX    DE,HL                 ; HL = подготовленное имя файла
         RET
 
-LBL12:  CALL  SUB34
+;----------------------------------------------------------------------------
+; Директива R - чтеине файла с ленты
+
+Dir_R:  ; загрузка файла
+        CALL  mon2_tapeLoad
         PUSH  BC
         PUSH  DE
         PUSH  HL
+
+        ; расчет контрольной суммы
         CALL  bios_calcCS
+
+        ; печать начального адреса
         POP   HL
         CALL  printHexWordHL
+
+        ; печать конечного адреса
         POP   HL
         CALL  printHexWordHL
+
+        ; сравнение контрольной суммы из файла и рассчитанной
         POP   HL
         LD    D,B
         LD    E,C
         CALL  bios_cmp_hl_de
+
+        ; если не совпадают - переход
         JP    NZ,LBL13
+
+        ; иначе печать контрольной суммы и выход
         CALL  printHexWordHL
         RET
-LBL13:  CALL  printSpace
-        LD    C,3FH         ; 63 '?'
+
+LBL13:  ; печать знака вопроса и выход
+        CALL  printSpace
+        LD    C, '?'
         CALL  bios_printChar
         RET
-SUB6: PUSH  AF
+
+;----------------------------------------------------------------------------
+
+SUB6:   PUSH  AF
         LD    A,(bios_vars.cursorCfg)
         PUSH  AF
-        LD    A,11H         ; 17
+        LD    A,11H
         JP    LBL63
+
+        ; ???
         NOP
         NOP
-LBL14:  PUSH  HL
-        ADD   HL,DE
-        CALL  printHexWordHL
-        CALL  printSpace
+
+;----------------------------------------------------------------------------
+; Директива H - печать суммы и разности двух HEX слов
+
+Dir_H:  PUSH  HL
+        ADD   HL,DE             ; сумма
+        CALL  printHexWordHL    ; печатаем ее
+        CALL  printSpace        ; печатаем проблел
+
+        ; DE = -DE
         LD    A,E
         CPL
         LD    E,A
@@ -403,11 +554,16 @@ LBL14:  PUSH  HL
         CPL
         LD    D,A
         INC   DE
+
         POP   HL
-        ADD   HL,DE
-        CALL  printHexWordHL
+        ADD   HL,DE             ; разность
+        CALL  printHexWordHL    ; печатаем ее
         RET
-LBL15:  LD    HL,vars1.V_8FA3+1 ; 36772
+
+;----------------------------------------------------------------------------
+; Директива X - печать содержимого регистров процессора
+
+Dir_X:  LD    HL,vars1.V_8FA3+1 ; 36772
         LD    DE,txtRegisters             ; 63244
         LD    C,04H         ; 4
 LBL16:  PUSH  BC
@@ -426,13 +582,17 @@ LBL16:  PUSH  BC
         CALL  printHexWordHL
         RET
 
-        ; Если нажата клавиша, записать 0FFh по адресу (HL)
+;----------------------------------------------------------------------------
+; Если нажата клавиша, записать 0FFh по адресу (HL)
+
 setMIfKeyPressed:
         CALL  bios_keyScan
         INC   A
         RET   Z
         LD    (HL), 0FFh
         RET
+
+;----------------------------------------------------------------------------
 
 SUB7:   LD    B,(HL)
         DEC   HL
@@ -455,23 +615,29 @@ SUB8:   EX    DE,HL         ; [5]
         POP   BC
         EX    DE,HL
         RET
-LBL18:  LD    A,E
+
+;----------------------------------------------------------------------------
+; Директива G - запуск программы по адресу (первый параметр)
+; Второй параметр - точка перехвата?
+
+Dir_G:  LD    A,E
         OR    A
-        JP    NZ,LBL19
+        JP    NZ,LBL19  ; если в E не ноль
         LD    A,D
         OR    A
-        JP    Z,LBL20
+        JP    Z,LBL20   ; если в D не ноль
+
 LBL19:  PUSH  HL
         EX    DE,HL
         LD    (vars1.V_8F97),HL
         LD    A,(HL)
-        LD    (HL),0FFH   ; 255
+        LD    (HL),0FFH
         LD    (vars1.V_8F99),A
-        LD    HL,0038H    ; 56
-        LD    DE,vars1.V_8F9A   ; 36762
-        LD    BC,REF4             ; 62455
+        LD    HL,0038H
+        LD    DE,vars1.V_8F9A
+        LD    BC,REF4
         CALL  SUB11
-        LD    (HL),0C3H   ; 195
+        LD    (HL),0C3H
         CALL  SUB10
         CALL  SUB10
         LD    (HL),B
@@ -479,13 +645,14 @@ LBL19:  PUSH  HL
         LD    (HL),C
         POP   HL
 LBL20:  CALL  SUB9
-        JP    restartNoCls
+        JP    RestartNoCls
 SUB9:   JP    (HL)
-SUB10:  INC   HL            ; [4]
+SUB10:  INC   HL
         INC   DE
-SUB11:  LD    A,(HL)                ; [2]
+SUB11:  LD    A,(HL)
         LD    (DE),A
         RET
+
 REF4:   LD    (vars1.V_8F9D),HL
         EX    DE,HL
         LD    (vars1.V_8F9F),HL
@@ -503,27 +670,31 @@ REF4:   LD    (vars1.V_8F9D),HL
         LD    HL,(vars1.V_8F97)
         LD    A,(vars1.V_8F99)
         LD    (HL),A
-        LD    HL,vars1.V_8F9A   ; 36762
-        LD    DE,0038H    ; 56
+        LD    HL,vars1.V_8F9A
+        LD    DE,0038H
         CALL  SUB11
         CALL  SUB10
         CALL  SUB10
-        JP    restartNoCls
-LBL21:  PUSH  HL
+        JP    RestartNoCls
+
+;----------------------------------------------------------------------------
+; Директива S - ???
+
+Dir_S:  PUSH  HL
         PUSH  BC
-        LD    HL,8F60H    ; 36704
+        LD    HL,INPUT_BUF
         LD    C,00H
 LBL22:  LD    A,(HL)
-        CP    2CH           ; 44 ','
+        CP    2CH           ; символ ','
         JP    NZ,LBL23
-        INC   C
+        INC   C             ; пропускаем ','
 LBL23:  INC   HL
-        CP    0DH           ; 13
+        CP    0DH           ; пеервод строки
         JP    NZ,LBL22
         DEC   C
         LD    A,C
         LD    (vars1.V_8F89),A
-        CP    01H           ; 1
+        CP    01H
         POP   BC
         POP   HL
         JP    Z,LBL24
@@ -536,7 +707,7 @@ LBL23:  INC   HL
         CALL  SUB15
         LD    A,L
         LD    (vars1.V_8F8B),A
-        LD    HL,vars1.V_8F8C   ; 36748
+        LD    HL,vars1.V_8F8C
         LD    (HL),E
         INC   HL
         LD    (HL),C
@@ -545,13 +716,13 @@ LBL23:  INC   HL
         POP   HL
 LBL24:  LD    A,C
         LD    (vars1.V_8F8A),A
-LBL25:  PUSH  HL            ; [2]
-        LD    HL,vars1.V_8F8A   ; 36746
+LBL25:  PUSH  HL
+        LD    HL,vars1.V_8F8A
         LD    (vars1.V_8F8E),HL
         POP   HL
         CALL  bios_cmp_hl_de
         RET   Z
-        CALL  SUB24
+        CALL  WaitClsKey
         LD    A,(vars1.V_8F89)
         LD    (vars1.V_8F90),A
         LD    B,A
@@ -612,33 +783,49 @@ SUB12:  LD    A,(HL)
         CALL  printSpace
         POP   BC
         RET
-LBL31:  LD    A,(HL)                ; [2]
+
+;----------------------------------------------------------------------------
+
+Dir_N:  LD    A,(HL)
         CP    C
         JP    Z,LBL32
         CALL  printHexWordHL
         LD    A,(HL)
         PUSH  BC
         CALL  mon2_printHexByte
-        CALL  SUB24
+        CALL  WaitClsKey
         CALL  printNewLine
         POP   BC
 LBL32:  CALL  bios_cmp_hl_de
         RET   Z
         INC   HL
-        JP    LBL31
-LBL33:  LD    (HL),C                ; [2]
+        JP    Dir_N
+
+;----------------------------------------------------------------------------
+; Директива F - заполнить блок памяти байтом
+
+Dir_F:  LD    (HL),C
         CALL  bios_cmp_hl_de
         RET   Z
         INC   HL
-        JP    LBL33
-LBL34:  LD    A,(HL)                ; [2]
+        JP    Dir_F
+
+;----------------------------------------------------------------------------
+; Директива T - копирование блока памяти на новый адрес
+; Перекрывающиеся области памяти будут испорчены
+
+Dir_T:  LD    A,(HL)
         LD    (BC),A
         CALL  bios_cmp_hl_de
         RET   Z
         INC   HL
         INC   BC
-        JP    LBL34
-LBL35:  LD    A,(BC)                ; [2]
+        JP    Dir_T
+
+;----------------------------------------------------------------------------
+; Директива C - сравнение двух блоков памяти
+
+Dir_C:  LD    A,(BC)
         CP    (HL)
         JP    Z,LBL36
         PUSH  BC
@@ -650,16 +837,18 @@ LBL35:  LD    A,(BC)                ; [2]
         PUSH  BC
         LD    A,(BC)
         CALL  mon2_printHexByte
-        CALL  SUB24
+        CALL  WaitClsKey
         CALL  printNewLine
         POP   BC
 LBL36:  CALL  bios_cmp_hl_de
         RET   Z
         INC   HL
         INC   BC
-        JP    LBL35
+        JP    Dir_C
 
-        ; Печать слова в HEX формате из HL, обрамляется пробелами
+;----------------------------------------------------------------------------
+; Печать слова в HEX формате из HL, обрамляется пробелами
+
 printHexWordHL:
         PUSH  BC
         CALL  printSpace
@@ -672,21 +861,26 @@ printHexWordHL_noSpace:
         POP   BC
         RET
 
-        ; Расчет и печать контрольной суммы
-        ; вход:
-        ;   hl = начальный адрес
-        ;   de = конечный адрес
-calcAndPrintCRC:
+;----------------------------------------------------------------------------
+; Расчет и печать контрольной суммы
+; вход:
+;   hl = начальный адрес
+;   de = конечный адрес
+
+Dir_K:
         CALL  mon2_calcCS
         PUSH  BC
         POP   HL    ; hl = bc
         CALL  printHexWordHL
         RET
 
-LBL39:  CALL  printHexWordHL         ; [2]
+;----------------------------------------------------------------------------
+; Директива L - дамп блока памяти в текстовом виде
+
+Dir_L:  CALL  printHexWordHL
         LD    B,10H         ; 16
 LBL40:  LD    C,(HL)
-        LD    A,(vars1.V_8F85)
+        LD    A,(vars1.ThirdParam)
         OR    A
         JP    Z,LBL41
         AND   C
@@ -704,31 +898,57 @@ LBL43:  CALL  mon2_printChar
         DEC   B
         INC   HL
         JP    NZ,LBL40
-        CALL  SUB24
+        CALL  WaitClsKey
         CALL  printNewLine
-        JP    LBL39
-SUB14:  LD    BC,8F60H    ; 36704
+        JP    Dir_L
+
+;----------------------------------------------------------------------------
+; Анализ строки в буфере и разбивка на компоненты:
+; A = буква директивы
+; HL = первый HEX параметр
+; DE = второй HEX параметр
+; BC = третий HEX параметр
+
+Tokenizer:
+        ; читаем букву директивы
+        LD    BC,INPUT_BUF
         LD    A,(BC)
-        LD    (vars1.V_8F80),A
+
+        ; сохраняем букву директивы
+        LD    (vars1.Directive),A
         INC   BC
-SUB15:  CALL  SUB16
-        LD    (vars1.V_8F81),HL
-        CALL  SUB16
-        LD    (vars1.V_8F83),HL
-        CALL  SUB16
-        LD    (vars1.V_8F85),HL
+
+SUB15:  ; читаем и сохраняем три HEX параметра
+        CALL  ReadHexWord
+        LD    (vars1.FirstParam),HL
+        CALL  ReadHexWord
+        LD    (vars1.SecondParam),HL
+        CALL  ReadHexWord
+        LD    (vars1.ThirdParam),HL
+
         LD    L,C
         LD    H,B
         LD    (vars1.V_8F87),HL
-        LD    HL,(vars1.V_8F85)
+
+        ; помещаем три HEX параметра в регитсры HL, DE, BC
+        LD    HL,(vars1.ThirdParam)
         LD    C,L
         LD    B,H
-        LD    HL,(vars1.V_8F83)
+        LD    HL,(vars1.SecondParam)
         EX    DE,HL
-        LD    HL,(vars1.V_8F81)
-        LD    A,(vars1.V_8F80)
+        LD    HL,(vars1.FirstParam)
+
+        ; и букву директиры - в регистр A
+        LD    A,(vars1.Directive)
+
+        ; выходим
         RET
-SUB16:  LD    HL,0000H    ; [3]
+
+;----------------------------------------------------------------------------
+; Преобразование строки по адресу BC в HEX число в HL
+
+ReadHexWord:
+        LD    HL,0000H
 LBL44:  LD    A,(BC)
         CP    0DH           ; 13
         RET   Z
@@ -745,24 +965,35 @@ LBL44:  LD    A,(BC)
         JP    LBL44
 LBL45:  INC   BC
         RET
-SUB17:  SUB   30H           ; 48 '0'
-        CP    0AH           ; 10
+
+;----------------------------------------------------------------------------
+
+SUB17:  SUB   '0'
+        CP    0Ah
         RET   C
-        SUB   11H           ; 17
-        CP    06H           ; 6
-        JP    NC,LBL52
-        ADD   A,0AH         ; 10
+        SUB   11h
+        CP    06h
+        JP    NC,TypeErrorRestart
+        ADD   A,10
         RET
+
+;----------------------------------------------------------------------------
+
 SUB18:  PUSH  BC
-        LD    C,19H         ; 25
+        LD    C,19h
         CALL  mon2_printChar
         POP   BC
         RET
+
+;----------------------------------------------------------------------------
+
 SUB19:  PUSH  HL
-        LD    HL,8F60H    ; 36704
+        LD    HL,INPUT_BUF
         JP    LBL53
 
-        ; Печать перевода строки (0Ah, 0Dh)
+;----------------------------------------------------------------------------
+; Печать перевода строки (0Ah, 0Dh)
+
 printNewLine:
         LD    C,0AH
         CALL  mon2_printChar
@@ -770,24 +1001,29 @@ printNewLine:
         CALL  mon2_printChar
         RET
 
-        ; Русский текст в кодировке КОИ-8
+;----------------------------------------------------------------------------
+; Русский текст в кодировке КОИ-7
+
 txtSpaceQuestMark:  DB  "  ?",00H
 txtNewLine:         DB  0AH,0DH,00H
 txtHomeRight11Dot:  DB  0DH,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,2EH,00H
-txtFileQuestMark:   DB  "fajl ? ",00H
-                    DB  0AH,"fajl: ",00H
+txtFileQuestMark:   DB  "FILE? ",00H
+                    DB  0AH,"FILE: ",00H
 
-LBL46:  CALL  SUB18
-LBL47:  CALL  printNewLine         ; [2]
+;----------------------------------------------------------------------------
+; Директива M - редактирование блока памяти
+
+Dir_M:  CALL  SUB18
+LBL47:  CALL  printNewLine
         CALL  printHexWordHL
         LD    A,(HL)
         CALL  mon2_printHexByte
         CALL  printSpace
         CALL  mon2_getch
-        CALL  SUB25
-        CP    1AH           ; 26
+        CALL  RestartIfCls
+        CP    1AH           ; кнопка вниз
         JP    Z,LBL48
-        CP    08H           ; 8
+        CP    08H           ; кнопка влева
         JP    Z,LBL49
         CALL  SUB21
         LD    (HL),A
@@ -810,15 +1046,16 @@ LBL50:  CALL  SUB22
         OR    B
         POP   BC
         RET
+
 SUB22:  CP    20H           ; 32 ' '; [2]
-        JP    C,restartNoCls
+        JP    C,RestartNoCls
         CP    3AH           ; 58 ':'
         JP    C,LBL51
         AND   5FH           ; 95 '_'
         CP    41H           ; 65 'A'
-        JP    C,LBL52
+        JP    C,TypeErrorRestart
         CP    47H           ; 71 'G'
-        JP    NC,LBL52
+        JP    NC,TypeErrorRestart
         PUSH  AF
         LD    C,A
         CALL  mon2_printChar
@@ -832,37 +1069,61 @@ LBL51:  OR    10H           ; 16
         POP   AF
         SUB   30H           ; 48 '0'
         RET
-LBL52:  LD    HL,txtSpaceQuestMark             ; 62966; [4]
+
+;----------------------------------------------------------------------------
+; Печать знака вопроса и перезапуск
+
+TypeErrorRestart:
+        LD    HL,txtSpaceQuestMark
         CALL  bios_printStringOld
-        JP    restartNoCls
+        JP    RestartNoCls
+
+;----------------------------------------------------------------------------
+
 LBL53:  PUSH  BC
         PUSH  DE
-        LD    DE,vars1.V_8F80   ; 36736
+        LD    DE,vars1.Directive
         CALL  SUB28
         POP   DE
         POP   BC
         POP   HL
         RET
 
-        ; Печать пробела
+;----------------------------------------------------------------------------
+; Печать пробела
+
 printSpace:
         LD    C,20H
         CALL  mon2_printChar
         RET
 
-SUB24:  CALL  mon2_keyScan         ; [5]
-        CP    1FH           ; 31
+;----------------------------------------------------------------------------
+; Ожидание нажатия клавиши СТР
+
+WaitClsKey:
+        CALL  mon2_keyScan
+        CP    1FH
         RET   NZ
         CALL  mon2_getch
-SUB25:  CP    1FH           ; 31
+        ; продолжение в RestartIfCls
+
+;----------------------------------------------------------------------------
+; Перезапуск Монитора, если A == 1Fh
+
+RestartIfCls:
+        CP    1FH
         RET   NZ
-        JP    restartNoCls
-LBL54:  CALL  mon2_printHexWord
+        JP    RestartNoCls
+
+;----------------------------------------------------------------------------
+; Директива D - дамп блока памяти в HEX виде
+
+Dir_D:  CALL  mon2_printHexWord
         LD    A,L
-        AND   0FH           ; 15
+        AND   0FH
         LD    C,A
         CPL
-        AND   0FH           ; 15
+        AND   0FH
         INC   A
         LD    B,A
         LD    A,C
@@ -870,14 +1131,14 @@ LBL54:  CALL  mon2_printHexWord
         ADD   A,A
         ADD   A,A
         ADD   A,C
-        ADD   A,0FH         ; 15
+        ADD   A,0FH
         LD    (bios_vars.cursorX),A
 LBL55:  LD    A,(HL)
         CALL  mon2_printHexByte
         LD    A,B
-        CP    09H           ; 9
+        CP    09H
         JP    NZ,LBL56
-        LD    C,2DH         ; 45 '-'
+        LD    C,2DH         ; печать символа '-'
         CALL  mon2_printChar
         JP    LBL57
 LBL56:  CALL  printSpace
@@ -886,9 +1147,9 @@ LBL57:  CALL  bios_cmp_hl_de
         DEC   B
         INC   HL
         JP    NZ,LBL55
-        CALL  SUB24
+        CALL  WaitClsKey
         CALL  printNewLine
-        JP    LBL54
+        JP    Dir_D
         LD    E,A
         RRCA
         RRCA
@@ -907,6 +1168,8 @@ SUB26:  AND   0FH           ; 15; [2]
 LBL58:  ADD   A,30H         ; 48 '0'
         RET
 
+;----------------------------------------------------------------------------
+
 txtRegisters:
         DB    "A=",0
         DB    "F=",0
@@ -919,6 +1182,8 @@ txtRegisters:
         DB    0AH,0DH," M(HL)=",0
         DB    "PC=",0
         DB    "SP=",0
+
+;----------------------------------------------------------------------------
 
 SUB27:  PUSH  AF            ; [2]
 LBL59:  LD    A,(vars2.V_F0E6)
@@ -965,12 +1230,14 @@ LBL63:  LD    (bios_vars.cursorCfg),A
         LD    C,18H         ; 24
         POP   AF
         JP    mon2_printChar
+;----------------------------------------------------------------------------
+
 SUB28:  LD    B,H
         LD    C,L
-LBL64:  CALL  mon2_getch         ; [4]
-        CP    08H           ; 8
+LBL64:  CALL  mon2_getch
+        CP    08H           ; клавиша влево
         JP    Z,LBL65
-        CP    0DH           ; 13
+        CP    0DH           ; клавиша Enter
         JP    Z,LBL67
         LD    (vars1.V_8F95),A
         CALL  bios_cmp_hl_de
@@ -983,6 +1250,9 @@ LBL64:  CALL  mon2_getch         ; [4]
         POP   BC
         INC   HL
         JP    LBL64
+
+;----------------------------------------------------------------------------
+
 LBL65:  LD    A,H
         CP    B
         JP    NZ,LBL66
@@ -1015,7 +1285,7 @@ LBL67:
     ORG_PAD0 0F800h
 
 
-mon2_restart:       JP    restartNoCls          ; F800
+mon2_restart:       JP    RestartNoCls          ; F800
 mon2_getch:         JP    bios_getchOld         ; F803
                     JP    bios_tapeReadOld      ; F806
 mon2_printChar:     JP    bios_printCharOld     ; F809
@@ -1029,7 +1299,7 @@ mon2_keyScan:       JP    bios_keyScanOld       ; F81B
                     RET                         ; F821 - не используется
                     NOP
                     NOP
-SUB34:              JP    bios_tapeLoad         ; F824
+mon2_tapeLoad:      JP    bios_tapeLoad         ; F824
 mon2_tapeSave:      JP    bios_tapeSave         ; F827
 mon2_calcCS:        JP    bios_calcCS           ; F82A
                     JP    bios_beep_Old         ; F82D
@@ -1037,5 +1307,7 @@ mon2_calcCS:        JP    bios_calcCS           ; F82A
                     JP    bios_setMemTop        ; F833
 mon2_printHexWord:  PUSH  BC                    ; F836 - печать слова из HL в HEX формате, дополняется пробелом
                     JP    printHexWordHL_noSpace
+
+;----------------------------------------------------------------------------
 
     END

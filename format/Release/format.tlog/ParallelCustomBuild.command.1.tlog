@@ -1,0 +1,2 @@
+^D:\PROJECTS\RETRO-PC\SPECIALIST\MYSOFT\MXOS-Z80\FORMAT\FORMAT.ASM
+call D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tasm\make.bat D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\format\FORMAT com 0xF100

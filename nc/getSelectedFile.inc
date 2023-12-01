@@ -1,9 +1,9 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Получить имя выбранного файла
+; Получить информацию о выбранном файле (FILE_INFO)
 ;
 ; выход:
-;   hl - адрес дескриптора файла
+;   hl - адрес структуры FILE_INFO
 ;
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
@@ -21,10 +21,10 @@ getSelectedFile:
         call    readBytePanel
         sub     e
 
-        ; Адрес дескриптора текущего файла в буфере:
-        ; hl = FILE_LIST_BUFFER + DIR_DESCR_SIZE * curFile[state.activePanel];
+        ; Адрес описателя текущего файла в буфере:
+        ; hl = FILE_LIST_BUFFER + FILE_INFO_SIZE * curFile[state.activePanel];
 
-        ld      hl, DIR_DESCR_SIZE
+        ld      hl, FILE_INFO_SIZE
         ld      e, a
         ld      d, 0
         call    bios_mul_hl_de

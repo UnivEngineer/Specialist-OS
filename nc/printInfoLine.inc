@@ -20,7 +20,7 @@ printInfoLine:
         ; ld      c, '\'
         ; call    bios_printChar
 
-        ; Устанавливаем hl на дескриптор файла
+        ; Устанавливаем hl на описатель файла
         call    getSelectedFile
         push    hl
 
@@ -28,14 +28,14 @@ printInfoLine:
         ld      de, vars.tempFileDescr  ; буфер
         call    compactName
         ld      hl, vars.tempFileDescr
-        ld      b, DIR_NAME_LENGTH + 6  ; макс длина строки (name.ext + ' ' + терминатор)
+        ld      b, FILE_NAME_LENGTH + 6 ; макс длина строки (name.ext + ' ' + терминатор)
         ld      c, 20                   ; терминатор - пробел или меньше
         call    printString2
 
-        ; После имени файла, если оно короткие, надо напечатать
+        ; После имени файла, если оно короткое, надо напечатать
         ; пробелы, чтобы стереть предыдущий текст. После работы
         ; printString2 у нас в b как раз количество символов,
-        ; оставшихся до DIR_NAME_LENGTH + 6
+        ; оставшихся до FILE_NAME_LENGTH + 6
 		call    printSpaces	; b - кол-во пробелов
 
         ; Смещаем курсор
@@ -45,7 +45,7 @@ printInfoLine:
         ; Устанавливаем hl на поле адреса загрузки
         pop     hl
         push    hl
-        ld      bc, FILE_DESCRIPTOR.loadAddress + 1 ; bc = смещение
+        ld      bc, FILE_INFO.loadAddress + 1 ; bc = смещение
         add     hl, bc
 
         ; Читаем старший и младший байты адреса загрузки
@@ -62,7 +62,7 @@ printInfoLine:
 
         ; Устанавливаем hl на поле размера файла
         pop     hl
-        ld      bc, FILE_DESCRIPTOR.size ; bc = смещение
+        ld      bc, FILE_INFO.size ; bc = смещение
         add     hl, bc
 
         ; Читаем размер файла в de и печатаем в десятичной форме

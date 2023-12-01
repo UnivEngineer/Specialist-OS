@@ -45,7 +45,7 @@ fileCreate_dirLoop:
             ld      b, a
 
             ; Размер дескриптора
-            ld      de, DIR_DESCR_SIZE
+            ld      de, FILE_DESCR_SIZE
 
             ; Цикл по дескрипторам в закешированном секторе каталога
 fileCreate_sectorLoop:

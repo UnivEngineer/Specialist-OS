@@ -1,0 +1,2 @@
+^D:\PROJECTS\RETRO-PC\SPECIALIST\MYSOFT\MXOS-Z80\MON2\MON2.ASM
+call D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tasm\make.bat D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\mon2\mon2 com 0xF100

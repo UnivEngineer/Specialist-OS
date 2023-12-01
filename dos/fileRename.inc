@@ -32,7 +32,7 @@ fileRename: ; Найти файл с именем из hl
             call nc,deleteFileInt
             
             ; Заменяем имя
-            ld      c, DIR_NAME_LENGTH + 3        
+            ld      c, FILE_NAME_LENGTH + 3        
 loc_CD2C:   ld      a, (hl)
             ld      (de),a
             inc     hl

@@ -153,6 +153,7 @@ v_keybTbl:
 	INCLUDE "fileGetInfoAddr.inc"
 	INCLUDE "fileList.inc"
 	INCLUDE "fileNamePrepare.inc"
+    INCLUDE "copyDescriptor.inc"
 	INCLUDE "printDecWord.inc"
     INCLUDE "math.inc"
 

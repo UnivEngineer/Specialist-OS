@@ -17,8 +17,8 @@ compactName:
             push    hl
             push    bc
 
-            ; Копируем до пробела, но не более DIR_NAME_LENGTH букв
-            ld      bc, DIR_NAME_LENGTH
+            ; Копируем до пробела, но не более FILE_NAME_LENGTH букв
+            ld      bc, FILE_NAME_LENGTH
 compactName_1:      ld  a, (hl)
             cp      ' '
             jp z,   compactName_2           

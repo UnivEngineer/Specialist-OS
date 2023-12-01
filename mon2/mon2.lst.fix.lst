@@ -73,7 +73,7 @@
   66+ 0000
   67+ 0000              ;-----------------------------------------------------------------------
   68+ 0000              ; Переменные ОС в подэкранном пространстве и их начальные значения
-  69+ 0000              ; Доступ к переменным и программ польователя:
+  69+ 0000              ; Доступ к переменным из программ польователя:
   70+ 0000              ; ld a, bios_vars.lastKey
   71+ 0000              ;-----------------------------------------------------------------------
   72+ 0000
@@ -233,9 +233,9 @@
  226+ 0000              ;-----------------------------------------------------------------------
  227+ 0000
  228+ 0000              ; Структура каталога
- 229+ 0000              DIR_DESCR_SIZE  = 32    ; размер дескриптора файла в каталоге (байт)
- 230+ 0000              DIR_NAME_LENGTH = 8     ; длина имени файла  (байт)
- 231+ 0000              FAT_ITEM_SIZE   = 2     ; размер записи в таблице FAT (байт)
+ 229+ 0000              FILE_DESCR_SIZE  = 32   ; размер дескриптора файла в каталоге (байт)
+ 230+ 0000              FILE_NAME_LENGTH = 8    ; длина имени файла  (байт)
+ 231+ 0000              FAT_ITEM_SIZE    = 2    ; размер записи в таблице FAT (байт)
  232+ 0000
  233+ 0000              SECTOR_SIZE  = 00100h   ; размер сектора 256 байт
  234+ 0000              CLUSTER_SIZE = 00100h   ; размер кластера 256 байт
@@ -253,7 +253,7 @@
  246+ 0000              ;-----------------------------------------------------------------------
  247+ 0000
  248+ 0000                  STRUCT FILE_DESCRIPTOR  ; 32 байта
- 249+ 0000 ~            name            BLOCK   DIR_NAME_LENGTH     ; смещение 00h, 8 байт  - имя файла
+ 249+ 0000 ~            name            BLOCK   FILE_NAME_LENGTH    ; смещение 00h, 8 байт  - имя файла
  250+ 0000 ~            ext             BLOCK   3                   ; смещение 08h, 3 байта - расширение имени файла
  251+ 0000 ~            attrib          BLOCK   1                   ; смещение 0Bh, 1 байт  - атрибуты файла
  252+ 0000 ~            ntReserved      BLOCK   1                   ; смещение 0Ch, 1 байт  - используются в Windows NT
@@ -269,97 +269,112 @@
  262+ 0000                  ENDS
  263+ 0000
  264+ 0000              ;-----------------------------------------------------------------------
- 265+ 0000              ; Информация о активном накопителе (диске)
- 266+ 0000              ;-----------------------------------------------------------------------
- 267+ 0000
- 268+ 0000                  STRUCT DISK_INFO
- 269+ 0000 ~            sectorSize          BLOCK   2   ; размер сектора, байт (256, 512, 1024)
- 270+ 0000 ~            sectorsPerCluster   BLOCK   2   ; размер кластера, секторов (1, 2, 4, 8)
- 271+ 0000 ~            resSectors          BLOCK   2   ; сколько секторов занимает зарезервированная область = первый сектор таблицы fat
- 272+ 0000 ~            fatSectors          BLOCK   2   ; сколько секторов занимает таблица fat
- 273+ 0000 ~            dirSectors          BLOCK   2   ; сколько секторов занимает корневой каталог
- 274+ 0000 ~            totalSectors        BLOCK   2   ; сколько всего секторов на диске
- 275+ 0000 ~            rootDirMaxFiles     BLOCK   2   ; максимум файлов в корневом каталоге
- 276+ 0000 ~            descrPerSector      BLOCK   2   ; сколько дескрипторов файлов вмещается в один сектор
- 277+ 0000 ~            fatNumCells         BLOCK   2   ; количество ячеек в таблице fat (= fatSectors * sectorSize / 2)
- 278+ 0000 ~            dirStartSector      BLOCK   2   ; первый сектор корневого каталога
- 279+ 0000 ~            dataStartSector     BLOCK   2   ; первый сектор области данных
- 280+ 0000 ~            volumeLabel         BLOCK  12   ; метка тома и 0 в конце
- 281+ 0000 ~            isValid             BLOCK   1   ; 0 = нет драйвера, 1 = диск не распознан, 2 = диск распознан, корректно отформатирован
- 282+ 0000                  ENDS
- 283+ 0000
- 284+ 0000              DISK_NO_DRIVER = 0
- 285+ 0000              DISK_INVALID   = 1
- 286+ 0000              DISK_VALID     = 2
- 287+ 0000
- 288+ 0000              ;-----------------------------------------------------------------------
- 289+ 0000              ; Буферы в памяти
- 290+ 0000              ;-----------------------------------------------------------------------
- 291+ 0000
- 292+ 0000              ; Дисковый кэш
- 293+ 0000              FAT_CACHE_ADDR = 0FB00h ; адрес кэша секторов fat в памяти
- 294+ 0000              FAT_CACHE_SIZE = 1024   ; размер кэша в байтах
- 295+ 0000              FAT_CACHE_CAPACITY = FAT_CACHE_SIZE / SECTOR_SIZE   ; сколько секторов вмещается в кэш
- 296+ 0000
- 297+ 0000              ; Буфер для загрузки BAT файла
- 298+ 0000                  IF NEW_MEMORY_MAP
- 299+ 0000              BAT_BUFFER = 0E800h
- 300+ 0000                  ELSE
- 301+ 0000 ~            BAT_BUFFER = 0FC00h
- 302+ 0000                  ENDIF
- 303+ 0000
- 304+ 0000              ; Командная строка и стек
- 305+ 0000              CMD_LINE   = 0FF00h  ; 192 байта, но в конце стек
- 306+ 0000              STACK_ADDR = 0FFC0h  ; стек
- 307+ 0000
- 308+ 0000              ;-----------------------------------------------------------------------
- 309+ 0000              ; Всякие полезности
- 310+ 0000              ;-----------------------------------------------------------------------
+ 265+ 0000              ; Информация о файле (компактный вариант дескриптора)
+ 266+ 0000              ; Почти совместимо с дескриптором оригинального Коммандера
+ 267+ 0000              ;-----------------------------------------------------------------------
+ 268+ 0000
+ 269+ 0000              FILE_INFO_SIZE = 16     ; размер структуры (байт)
+ 270+ 0000
+ 271+ 0000                  STRUCT FILE_INFO    ; 16 байт
+ 272+ 0000 ~            name            BLOCK   FILE_NAME_LENGTH    ; смещение 00h, 8 байт  - имя файла
+ 273+ 0000 ~            ext             BLOCK   3                   ; смещение 08h, 3 байта - расширение имени файла
+ 274+ 0000 ~            attrib          BLOCK   1                   ; смещение 0Bh, 1 байт  - атрибуты файла
+ 275+ 0000 ~            loadAddress     BLOCK   2                   ; смещение 0Eh, 2 байта - начальный адрес загрузки в ОЗУ, он же и стартовый
+ 276+ 0000 ~            size            BLOCK   2                   ; смещение 0Ch, 2 байта - размер файла в байтах
+ 277+ 0000                  ENDS
+ 278+ 0000
+ 279+ 0000              ;-----------------------------------------------------------------------
+ 280+ 0000              ; Информация о активном накопителе (диске)
+ 281+ 0000              ;-----------------------------------------------------------------------
+ 282+ 0000
+ 283+ 0000                  STRUCT DISK_INFO
+ 284+ 0000 ~            sectorSize          BLOCK   2   ; размер сектора, байт (256, 512, 1024)
+ 285+ 0000 ~            sectorsPerCluster   BLOCK   2   ; размер кластера, секторов (1, 2, 4, 8)
+ 286+ 0000 ~            resSectors          BLOCK   2   ; сколько секторов занимает зарезервированная область = первый сектор таблицы fat
+ 287+ 0000 ~            fatSectors          BLOCK   2   ; сколько секторов занимает таблица fat
+ 288+ 0000 ~            dirSectors          BLOCK   2   ; сколько секторов занимает корневой каталог
+ 289+ 0000 ~            totalSectors        BLOCK   2   ; сколько всего секторов на диске
+ 290+ 0000 ~            rootDirMaxFiles     BLOCK   2   ; максимум файлов в корневом каталоге
+ 291+ 0000 ~            descrPerSector      BLOCK   2   ; сколько дескрипторов файлов вмещается в один сектор
+ 292+ 0000 ~            fatNumCells         BLOCK   2   ; количество ячеек в таблице fat (= fatSectors * sectorSize / 2)
+ 293+ 0000 ~            dirStartSector      BLOCK   2   ; первый сектор корневого каталога
+ 294+ 0000 ~            dataStartSector     BLOCK   2   ; первый сектор области данных
+ 295+ 0000 ~            volumeLabel         BLOCK  12   ; метка тома и 0 в конце
+ 296+ 0000 ~            isValid             BLOCK   1   ; 0 = нет драйвера, 1 = диск не распознан, 2 = диск распознан, корректно отформатирован
+ 297+ 0000                  ENDS
+ 298+ 0000
+ 299+ 0000              DISK_NO_DRIVER = 0
+ 300+ 0000              DISK_INVALID   = 1
+ 301+ 0000              DISK_VALID     = 2
+ 302+ 0000
+ 303+ 0000              ;-----------------------------------------------------------------------
+ 304+ 0000              ; Буферы в памяти
+ 305+ 0000              ;-----------------------------------------------------------------------
+ 306+ 0000
+ 307+ 0000              ; Дисковый кэш
+ 308+ 0000              FAT_CACHE_ADDR = 0FB00h ; адрес кэша секторов fat в памяти
+ 309+ 0000              FAT_CACHE_SIZE = 1024   ; размер кэша в байтах
+ 310+ 0000              FAT_CACHE_CAPACITY = FAT_CACHE_SIZE / SECTOR_SIZE   ; сколько секторов вмещается в кэш
  311+ 0000
- 312+ 0000              ; Макрос для заполнения памяти от текущего адреса до указанного
- 313+ 0000                  MACRO ORG_PAD adr
- 314+ 0000 ~                     IF $ > adr
- 315+ 0000 ~                       ; вывод сообщения об ошибке
- 316+ 0000 ~                       ASSERT 0
- 317+ 0000 ~                       DISPLAY /l, "Error! ORG_PAD failed! ", $, " is more than ", adr
- 318+ 0000 ~                     ELSE
- 319+ 0000 ~                       ; заполнение памяти
- 320+ 0000 ~                       BLOCK adr-$, 0FFh
- 321+ 0000 ~                     ENDIF
- 322+ 0000 ~                     ORG adr
- 323+ 0000                  ENDM
- 324+ 0000
- 325+ 0000                  MACRO ORG_PAD0 adr
- 326+ 0000 ~                     IF $ > adr
- 327+ 0000 ~                       ; вывод сообщения об ошибке
- 328+ 0000 ~                       ASSERT 0
- 329+ 0000 ~                       DISPLAY /l, "Error! ORG_PAD0 failed! ", $, " is more than ", adr
- 330+ 0000 ~                     ELSE
- 331+ 0000 ~                       ; заполнение памяти
- 332+ 0000 ~                       BLOCK adr-$, 0
- 333+ 0000 ~                     ENDIF
- 334+ 0000 ~                     ORG adr
- 335+ 0000                  ENDM
- 336+ 0000
- 337+ 0000              ; Макросы для проверки текущего адреса
- 338+ 0000                  MACRO ASSERT_EQUAL adr
- 339+ 0000 ~                     IF $ != adr
- 340+ 0000 ~                       ASSERT 0
- 341+ 0000 ~                       DISPLAY /l, "Error! Entry point has been shifted (", $, " != ", adr, ")"
- 342+ 0000 ~                     ENDIF
- 343+ 0000                  ENDM
- 344+ 0000
- 345+ 0000                  MACRO ASSERT_DONT_FIT adr
- 346+ 0000 ~                     IF $ > adr
- 347+ 0000 ~                       ASSERT 0
- 348+ 0000 ~                       DISPLAY /l, "Error! Image did not fit (", $, " > ", adr, ")"
- 349+ 0000 ~                     ENDIF
+ 312+ 0000              ; Буфер для загрузки BAT файла
+ 313+ 0000                  IF NEW_MEMORY_MAP
+ 314+ 0000              BAT_BUFFER = 0E800h
+ 315+ 0000                  ELSE
+ 316+ 0000 ~            BAT_BUFFER = 0FC00h
+ 317+ 0000                  ENDIF
+ 318+ 0000
+ 319+ 0000              ; Командная строка и стек
+ 320+ 0000              CMD_LINE   = 0FF00h  ; 192 байта, но в конце стек
+ 321+ 0000              STACK_ADDR = 0FFC0h  ; стек
+ 322+ 0000
+ 323+ 0000              ;-----------------------------------------------------------------------
+ 324+ 0000              ; Всякие полезности
+ 325+ 0000              ;-----------------------------------------------------------------------
+ 326+ 0000
+ 327+ 0000              ; Макрос для заполнения памяти от текущего адреса до указанного
+ 328+ 0000                  MACRO ORG_PAD adr
+ 329+ 0000 ~                     IF $ > adr
+ 330+ 0000 ~                       ; вывод сообщения об ошибке
+ 331+ 0000 ~                       ASSERT 0
+ 332+ 0000 ~                       DISPLAY /l, "Error! ORG_PAD failed! ", $, " is more than ", adr
+ 333+ 0000 ~                     ELSE
+ 334+ 0000 ~                       ; заполнение памяти
+ 335+ 0000 ~                       BLOCK adr-$, 0FFh
+ 336+ 0000 ~                     ENDIF
+ 337+ 0000 ~                     ORG adr
+ 338+ 0000                  ENDM
+ 339+ 0000
+ 340+ 0000                  MACRO ORG_PAD0 adr
+ 341+ 0000 ~                     IF $ > adr
+ 342+ 0000 ~                       ; вывод сообщения об ошибке
+ 343+ 0000 ~                       ASSERT 0
+ 344+ 0000 ~                       DISPLAY /l, "Error! ORG_PAD0 failed! ", $, " is more than ", adr
+ 345+ 0000 ~                     ELSE
+ 346+ 0000 ~                       ; заполнение памяти
+ 347+ 0000 ~                       BLOCK adr-$, 0
+ 348+ 0000 ~                     ENDIF
+ 349+ 0000 ~                     ORG adr
  350+ 0000                  ENDM
  351+ 0000
- 352+ 0000              ;-----------------------------------------------------------------------
- 353+ 0000              ; Конец
- 354+ 0000              ;-----------------------------------------------------------------------
- 355+ 0000
+ 352+ 0000              ; Макросы для проверки текущего адреса
+ 353+ 0000                  MACRO ASSERT_EQUAL adr
+ 354+ 0000 ~                     IF $ != adr
+ 355+ 0000 ~                       ASSERT 0
+ 356+ 0000 ~                       DISPLAY /l, "Error! Entry point has been shifted (", $, " != ", adr, ")"
+ 357+ 0000 ~                     ENDIF
+ 358+ 0000                  ENDM
+ 359+ 0000
+ 360+ 0000                  MACRO ASSERT_DONT_FIT adr
+ 361+ 0000 ~                     IF $ > adr
+ 362+ 0000 ~                       ASSERT 0
+ 363+ 0000 ~                       DISPLAY /l, "Error! Image did not fit (", $, " > ", adr, ")"
+ 364+ 0000 ~                     ENDIF
+ 365+ 0000                  ENDM
+ 366+ 0000
+ 367+ 0000              ;-----------------------------------------------------------------------
+ 368+ 0000              ; Конец
+ 369+ 0000              ;-----------------------------------------------------------------------
+ 370+ 0000
    8  0000
    9  0000              ; Используемые подпрограммы DOS.SYS:
   10  0000              ; bios_keyScanOld      = 0C003h
@@ -403,1018 +418,1290 @@
   48  0000              ; bios_vars.koi7       = 8FEAh
   49  0000              ; bios_vars.cursorX    = 8FFCh
   50  0000
-  51  0000              ; Собственные переменные
-  52  0000                  STRUCT MON2_VARS_1
-  53  0000 ~            V_8F80:     DS    1
-  54  0000 ~            V_8F81:     DS    2
-  55  0000 ~            V_8F83:     DS    2
-  56  0000 ~            V_8F85:     DS    2
-  57  0000 ~            V_8F87:     DS    2
-  58  0000 ~            V_8F89:     DS    1
-  59  0000 ~            V_8F8A:     DS    1
-  60  0000 ~            V_8F8B:     DS    1
-  61  0000 ~            V_8F8C:     DS    2
-  62  0000 ~            V_8F8E:     DS    2
-  63  0000 ~            V_8F90:     DS    1
-  64  0000 ~            V_8F91:     DS    4
-  65  0000 ~            V_8F95:     DS    1
-  66  0000 ~            V_8F96:     DS    1
-  67  0000 ~            V_8F97:     DS    2
-  68  0000 ~            V_8F99:     DS    1
-  69  0000 ~            V_8F9A:     DS    3
-  70  0000 ~            V_8F9D:     DS    2
-  71  0000 ~            V_8F9F:     DS    2
-  72  0000 ~            V_8FA1:     DS    2
-  73  0000 ~            V_8FA3:     DS    2
-  74  0000 ~            V_8FA5:     DS    2
-  75  0000 ~            V_8FA7:     DS    4
-  76  0000 ~            V_8FAB:     DS    2
-  77  0000                  ENDS
-  78  0000
-  79  0000                  STRUCT MON2_VARS_2
-  80  0000 ~            V_F0E0:     DS    5
-  81  0000 ~            V_F0E5:     DS    1
-  82  0000 ~            V_F0E6:     DS    1
-  83  0000 ~            V_F0E7:     DS    1
-  84  0000                  ENDS
-  85  0000
-  86  0000                  STRUCT MON2_VARS_3
-  87  0000 ~            ; похоже на старый дескриптор файла
-  88  0000 ~            V_F900:     DS    10    ; имя (6), расширение (3), атрибуты (1)
-  89  0000 ~            V_F90A:     DS    2     ; адрес загрузки
-  90  0000 ~            V_F90C:     DS    2     ; размер-1
-  91  0000                  ENDS
-  92  0000
-  93  0000              ; Адреса блоков переменных
-  94  0000              vars1 MON2_VARS_1 = 08F80H
-  95  0000              vars2 MON2_VARS_2 = 0F0E0H
-  96  0000              vars3 MON2_VARS_3 = 0F900H
-  97  0000
-  98  0000
-  99  0000              ; Начало программы
- 100  0000                  ORG   0F100h
- 101  F100
- 102  F100                      ; Начинаем с очистки экрана
- 103  F100 0E 1F                LD    C,1FH ; rjl символа очистки экрана
- 104  F102 CD 09 C8             CALL  bios_printChar
- 105  F105
- 106  F105                      ; Рестарт без очистки экрана
- 107  F105              restartNoCls:
- 108  F105 31 BF FF             LD    SP,0FFBFH
- 109  F108 21 00 F8             LD    HL,mon2_restart           ; установить обработчик ошибки магнитофона
- 110  F10B 22 E1 8F             LD    (bios_vars.tapeError),HL  ; на рестарт монитора
- 111  F10E 21 FF 7E             LD    HL,7EFFH    ; 32511
- 112  F111 22 AB 8F             LD    (vars1.V_8FAB),HL
- 113  F114 CD 1A F1             CALL  SUB1
- 114  F117 C3 05 F1             JP    restartNoCls
- 115  F11A
- 116  F11A 21 FA F5     SUB1:   LD    HL,txtNewLine             ; 62970
- 117  F11D CD 38 C4             CALL  bios_printStringOld
- 118  F120 1E 02                LD    E,02H         ; 2
- 119  F122 CD 42 C8             CALL  bios_fileGetSetDrive
- 120  F125 C6 41                ADD   A,41H         ; 65 'A'
- 121  F127 4F                   LD    C,A
- 122  F128 CD 09 C8             CALL  bios_printChar
- 123  F12B 0E 3E                LD    C,3EH         ; 62 '>'
- 124  F12D CD 09 C8             CALL  bios_printChar
- 125  F130 CD D5 F1             CALL  SUB2
- 126  F133 CD E4 F5             CALL  SUB19
- 127  F136 E5                   PUSH  HL
- 128  F137 D5                   PUSH  DE
- 129  F138 C5                   PUSH  BC
- 130  F139 1E 02                LD    E,02H         ; 2
- 131  F13B CD 42 C8             CALL  bios_fileGetSetDrive
- 132  F13E F5                   PUSH  AF
- 133  F13F 21 60 8F             LD    HL,8F60H    ; 36704
- 134  F142 11 00 F9             LD    DE,vars3.V_F900   ; 63744
- 135  F145 CD 5A C8             CALL  bios_fileNamePrepare
- 136  F148 1E 02                LD    E,02H         ; 2
- 137  F14A CD 42 C8             CALL  bios_fileGetSetDrive
- 138  F14D 5F                   LD    E,A
- 139  F14E F1                   POP   AF
- 140  F14F BB                   CP    E
- 141  F150 C1                   POP   BC
- 142  F151 D1                   POP   DE
- 143  F152 E1                   POP   HL
- 144  F153 C0                   RET   NZ
- 145  F154 CD EB F5             CALL  printNewLine
- 146  F157 CD 83 F5             CALL  SUB14
- 147  F15A FE 44                CP    44H           ; 68 'D'
- 148  F15C CA B4 F6             JP    Z,LBL54
- 149  F15F FE 4D                CP    4DH           ; 77 'M'
- 150  F161 CA 1B F6             JP    Z,LBL46
- 151  F164 FE 4C                CP    4CH           ; 76 'L'
- 152  F166 CA 4F F5             JP    Z,LBL39
- 153  F169 FE 4B                CP    4BH           ; 75 'K'
- 154  F16B CA 46 F5             JP    Z,calcAndPrintCRC
- 155  F16E FE 54                CP    54H           ; 84 'T'
- 156  F170 CA 04 F5             JP    Z,LBL34
- 157  F173 FE 58                CP    58H           ; 88 'X'
- 158  F175 CA 68 F3             JP    Z,LBL15
- 159  F178 FE 57                CP    57H           ; 87 'W'
- 160  F17A CA 27 F8             JP    Z,mon2_tapeSave
- 161  F17D FE 52                CP    52H           ; 82 'R'
- 162  F17F CA 20 F3             JP    Z,LBL12
- 163  F182 FE 43                CP    43H           ; 67 'C'
- 164  F184 CA 0F F5             JP    Z,LBL35
- 165  F187 FE 48                CP    48H           ; 72 'H'
- 166  F189 CA 53 F3             JP    Z,LBL14
- 167  F18C FE 4E                CP    4EH           ; 78 'N'
- 168  F18E CA DF F4             JP    Z,LBL31
- 169  F191 FE 47                CP    47H           ; 71 'G'
- 170  F193 CA BE F3             JP    Z,LBL18
- 171  F196 FE 46                CP    46H           ; 70 'F'
- 172  F198 CA FB F4             JP    Z,LBL33
- 173  F19B FE 53                CP    53H           ; 83 'S'
- 174  F19D CA 2A F4             JP    Z,LBL21
- 175  F1A0 FE 4A                CP    4AH           ; 74 'J'
- 176  F1A2 CA CB F1             JP    Z,LBL2
- 177  F1A5 FE 3F                CP    3FH           ; 63 '?'
- 178  F1A7 CA DE F1             JP    Z,Dir_DirDisk
- 179  F1AA FE 42                CP    42H           ; 66 'B'
- 180  F1AC CA 2E F2             JP    Z,LBL5
- 181  F1AF FE 41                CP    41H           ; 65 'A'
- 182  F1B1 CA 7F F2             JP    Z,LBL7
- 183  F1B4 FE 56                CP    56H           ; 86 'V'
- 184  F1B6 CA 90 F2             JP    Z,LBL8
- 185  F1B9 FE 55                CP    55H           ; 85 'U'
- 186  F1BB CA B7 F2             JP    Z,LBL9
- 187  F1BE FE 59                CP    59H           ; 89 'Y'
- 188  F1C0 CA DF F2             JP    Z,LBL10
- 189  F1C3 FE 51                CP    51H           ; 81 'Q'
- 190  F1C5 CA F2 F2             JP    Z,Dir_GetFileAttr
- 191  F1C8 C3 8A F6             JP    LBL52
- 192  F1CB CD 12 C8     LBL2:   CALL  bios_keyCheck             ; [2]
- 193  F1CE 3C                   INC   A
- 194  F1CF CA 00 C8             JP    Z,bios_reboot
- 195  F1D2 C3 CB F1             JP    LBL2
- 196  F1D5 21 60 8F     SUB2:   LD    HL,8F60H    ; 36704
- 197  F1D8 36 00                LD    (HL),00H
- 198  F1DA 23                   INC   HL
- 199  F1DB 36 00                LD    (HL),00H
- 200  F1DD C9                   RET
- 201  F1DE
- 202  F1DE                      ; Директива ? - вывод каталога диска
- 203  F1DE              Dir_DirDisk:
- 204  F1DE 21 00 F9             LD    HL,vars3.V_F900   ; буфер
- 205  F1E1 CD 3F C8             CALL  bios_fileList
- 206  F1E4              DirDiskLoop:
- 207  F1E4 7E                   LD    A,(HL)            ; первый символ имени файла
- 208  F1E5 3C                   INC   A
- 209  F1E6 C8                   RET   Z                 ; если FF (конец каталога) - выходим
- 210  F1E7 CD 12 C8             CALL  bios_keyCheck     ; Проверяем, не нажата ли клавиша
- 211  F1EA FE 1F                CP    1FH               ; СТР
- 212  F1EC CC 03 C8             CALL  Z,bios_getch      ; если нажата СТР, ждем нажатия СТР еще раз
- 213  F1EF FE 1F                CP    1FH               ; СТР
- 214  F1F1 C8                   RET   Z                 ; выход, если СТР нажата еще раз
- 215  F1F2 06 06                LD    B,06H             ; печатаем 6 символов имени файла
- 216  F1F4 CD 24 F2             CALL  printStringB
- 217  F1F7 0E 2E                LD    C,2EH             ; печатаем точку
- 218  F1F9 CD 09 C8             CALL  bios_printChar
- 219  F1FC 06 03                LD    B,03H             ; печатаем 3 символа расширения файла
- 220  F1FE CD 24 F2             CALL  printStringB
- 221  F201 CD 9F F6             CALL  printSpace
- 222  F204 23                   INC   HL                ; переходим через байт атрибута файла
- 223  F205 5E                   LD    E,(HL)            ; DE = адрес загрузки файла
- 224  F206 23                   INC   HL
- 225  F207 56                   LD    D,(HL)
- 226  F208 D5                   PUSH  DE                ; адрес загрузки файла в стеке
- 227  F209 23                   INC   HL
- 228  F20A 5E                   LD    E,(HL)            ; DE = размер файла
- 229  F20B 23                   INC   HL
- 230  F20C 56                   LD    D,(HL)
- 231  F20D E3                   EX    (SP),HL           ; текущий указатель дескриптора в стек, а HL = адрес загрузки файла
- 232  F20E CD 35 F5             CALL  printHexWordHL   ; печатаем начальный адрес загрузки файла
- 233  F211 19                   ADD   HL,DE
- 234  F212 CD 35 F5             CALL  printHexWordHL   ; печатаем конечынй адрес загрузки файла
- 235  F215 E1                   POP   HL                ; HL = указатель дескриптора
- 236  F216 7D                   LD    A,L
- 237  F217 E6 F0                AND   0F0H
- 238  F219 6F                   LD    L,A               ; Обнуляем младшие 4 бита HL - переход на начало текущего дескриптора файла
- 239  F21A 11 10 00             LD    DE,0010H
- 240  F21D 19                   ADD   HL,DE             ; HL += 16 - переход на следующий дескриптор файла
- 241  F21E CD EB F5             CALL  printNewLine
- 242  F221 C3 E4 F1             JP    DirDiskLoop
- 243  F224
- 244  F224                      ; Печать строки по адресу HL длиной B
- 245  F224              printStringB:
- 246  F224 4E                   LD    C,(HL)
- 247  F225 CD 09 C8             CALL  bios_printChar
- 248  F228 23                   INC   HL
- 249  F229 05                   DEC   B
- 250  F22A C2 24 F2             JP    NZ,printStringB
- 251  F22D C9                   RET
- 252  F22E
- 253  F22E 22 0A F9     LBL5:   LD    (vars3.V_F90A),HL
- 254  F231 EB                   EX    DE,HL
- 255  F232 7A                   LD    A,D
- 256  F233 2F                   CPL
- 257  F234 57                   LD    D,A
- 258  F235 7B                   LD    A,E
- 259  F236 2F                   CPL
- 260  F237 5F                   LD    E,A
- 261  F238 13                   INC   DE
- 262  F239 19                   ADD   HL,DE
- 263  F23A 22 0C F9             LD    (vars3.V_F90C),HL
- 264  F23D CD 09 F3             CALL  EnterFileName
- 265  F240 CD 45 C8             CALL  bios_fileCreate
- 266  F243 21 59 F2             LD    HL,txtSmallDisk             ; 62041
- 267  F246 DC 4A F2             CALL  C,SUB4
- 268  F249 C9                   RET
- 269  F24A B7           SUB4:   OR    A
- 270  F24B CA 52 F2             JP    Z,LBL6
- 271  F24E CD 18 C8             CALL  bios_printString
- 272  F251 C9                   RET
- 273  F252 21 66 F2     LBL6:   LD    HL,txtSmallDir             ; 62054
- 274  F255 CD 18 C8             CALL  bios_printString
- 275  F258 C9                   RET
- 276  F259
- 277  F259                      ; Русский текст в кодировке КОИ-8
- 278  F259 0A 0D 6D 61  txtSmallDisk:   DB  0AH,0DH,"mal disk !",00H
- 278  F25D 6C 20 64 69
- 278  F261 73 6B 20 21
- 278  F265 00
- 279  F266 0A 0D 6D 61  txtSmallDir:    DB  0AH,0DH,"mal DIR !", 00H
- 279  F26A 6C 20 44 49
- 279  F26E 52 20 21 00
- 280  F272 0A 0D 6E 65  txtNoFile:      DB  0AH,0DH,"net fajla ",00H
- 280  F276 74 20 66 61
- 280  F27A 6A 6C 61 20
- 280  F27E 00
- 281  F27F
- 282  F27F E5           LBL7:   PUSH  HL
- 283  F280 CD 09 F3             CALL  EnterFileName
- 284  F283 D1                   POP   DE
- 285  F284 0E 01                LD    C,01H
- 286  F286 CD 54 C8             CALL  bios_fileGetSetAddr
- 287  F289 21 72 F2             LD    HL,txtNoFile             ; 62066
- 288  F28C DC 18 C8             CALL  C,bios_printString
- 289  F28F C9                   RET
- 290  F290 E5           LBL8:   PUSH  HL
- 291  F291 CD 09 F3             CALL  EnterFileName
- 292  F294 D1                   POP   DE
- 293  F295 D5                   PUSH  DE
- 294  F296 CD 66 C8             CALL  bios_fileLoad2
- 295  F299 F5                   PUSH  AF
- 296  F29A 21 72 F2             LD    HL,txtNoFile             ; 62066
- 297  F29D DC 18 C8             CALL  C,bios_printString
- 298  F2A0 F1                   POP   AF
- 299  F2A1 D1                   POP   DE
- 300  F2A2 D8                   RET   C
- 301  F2A3 D5                   PUSH  DE
- 302  F2A4 21 00 F9             LD    HL,vars3.V_F900   ; 63744
- 303  F2A7 CD 51 C8             CALL  bios_fileLoadInfo
- 304  F2AA 2A 0C F9             LD    HL,(vars3.V_F90C)
- 305  F2AD EB                   EX    DE,HL
- 306  F2AE E1                   POP   HL
- 307  F2AF CD 35 F5             CALL  printHexWordHL
- 308  F2B2 19                   ADD   HL,DE
- 309  F2B3 CD 35 F5             CALL  printHexWordHL
- 310  F2B6 C9                   RET
- 311  F2B7 CD 09 F3     LBL9:   CALL  EnterFileName
- 312  F2BA CD 48 C8             CALL  bios_fileLoad
- 313  F2BD F5                   PUSH  AF
- 314  F2BE 21 72 F2             LD    HL,txtNoFile             ; 62066
- 315  F2C1 DC 18 C8             CALL  C,bios_printString
- 316  F2C4 CD 9F F6             CALL  printSpace
- 317  F2C7 F1                   POP   AF
- 318  F2C8 D8                   RET   C
- 319  F2C9 21 00 F9             LD    HL,vars3.V_F900   ; 63744
- 320  F2CC CD 51 C8             CALL  bios_fileLoadInfo
- 321  F2CF 2A 0A F9             LD    HL,(vars3.V_F90A)
- 322  F2D2 E5                   PUSH  HL
- 323  F2D3 CD 35 F5             CALL  printHexWordHL
- 324  F2D6 D1                   POP   DE
- 325  F2D7 2A 0C F9             LD    HL,(vars3.V_F90C)
- 326  F2DA 19                   ADD   HL,DE
- 327  F2DB CD 35 F5             CALL  printHexWordHL
- 328  F2DE C9                   RET
- 329  F2DF
- 330  F2DF E5           LBL10:  PUSH  HL
- 331  F2E0 CD 09 F3             CALL  EnterFileName         ; ввод имени файла
- 332  F2E3 0E 01                LD    C,01H                 ; режим для фаункции bios_fileGetSetAttr - установка байта атрибутов файла
- 333  F2E5 E3                   EX    (SP),HL
- 334  F2E6 7D                   LD    A,L
- 335  F2E7 E1                   POP   HL
- 336  F2E8 CD 57 C8             CALL  bios_fileGetSetAttr   ; установка байта атрибутов файла
- 337  F2EB 21 72 F2             LD    HL,txtNoFile
- 338  F2EE DC 18 C8             CALL  C,bios_printString    ; если файл не найден - вывести сообщение
- 339  F2F1 C9                   RET
- 340  F2F2
- 341  F2F2                      ; Директива Q - вывод атрибутов файла
- 342  F2F2              Dir_GetFileAttr:
- 343  F2F2 CD 09 F3             CALL  EnterFileName         ; ввод имени файла
- 344  F2F5 0E 02                LD    C,02H                 ; режим для фаункции bios_fileGetSetAttr - чтение байта атрибутов файла
- 345  F2F7 CD 57 C8             CALL  bios_fileGetSetAttr   ; чтение байта атрибутов файла
- 346  F2FA F5                   PUSH  AF                    ; результат и флаг ошибки (cf) - в стек
- 347  F2FB 21 72 F2             LD    HL,txtNoFile
- 348  F2FE DC 18 C8             CALL  C,bios_printString    ; если файл не найден - вывести сообщение
- 349  F301 CD 9F F6             CALL  printSpace
- 350  F304 F1                   POP   AF                    ; вытаскиваем байт атрибутов
- 351  F305 D4 15 C8             CALL  NC,bios_printHexByte  ; печатаем байт атрибутов, если не было ошибки
- 352  F308 C9                   RET
- 353  F309
- 354  F309                      ; Запрос имени файла
- 355  F309                      ; на выходе:
- 356  F309                      ;   HL = адрем буфера с подготовленным именем файла
- 357  F309              EnterFileName:
- 358  F309 21 0B F6             LD    HL,txtFileQuestMark   ; печать приглашеиня ввести имя файла
- 359  F30C CD 18 C8             CALL  bios_printString
- 360  F30F 21 60 8F             LD    HL,8F60H              ; буфер для ввода строки
- 361  F312 11 6D 8F             LD    DE,8F6DH
- 362  F315 CD 0F C8             CALL  bios_input
- 363  F318 11 00 F9             LD    DE,vars3.V_F900       ; буфер для подготовленного имени файла
- 364  F31B CD 5A C8             CALL  bios_fileNamePrepare  ; подготавливаем имя файла
- 365  F31E EB                   EX    DE,HL                 ; HL = подготовленное имя файла
- 366  F31F C9                   RET
- 367  F320
- 368  F320 CD 24 F8     LBL12:  CALL  SUB34
- 369  F323 C5                   PUSH  BC
- 370  F324 D5                   PUSH  DE
- 371  F325 E5                   PUSH  HL
- 372  F326 CD 2A C8             CALL  bios_calcCS
- 373  F329 E1                   POP   HL
- 374  F32A CD 35 F5             CALL  printHexWordHL
- 375  F32D E1                   POP   HL
- 376  F32E CD 35 F5             CALL  printHexWordHL
- 377  F331 E1                   POP   HL
- 378  F332 50                   LD    D,B
- 379  F333 59                   LD    E,C
- 380  F334 CD 27 C4             CALL  bios_cmp_hl_de
- 381  F337 C2 3E F3             JP    NZ,LBL13
- 382  F33A CD 35 F5             CALL  printHexWordHL
- 383  F33D C9                   RET
- 384  F33E CD 9F F6     LBL13:  CALL  printSpace
- 385  F341 0E 3F                LD    C,3FH         ; 63 '?'
- 386  F343 CD 09 C8             CALL  bios_printChar
- 387  F346 C9                   RET
- 388  F347 F5           SUB6: PUSH  AF
- 389  F348 3A E9 8F             LD    A,(bios_vars.cursorCfg)
- 390  F34B F5                   PUSH  AF
- 391  F34C 3E 11                LD    A,11H         ; 17
- 392  F34E C3 83 F7             JP    LBL63
- 393  F351 00                   NOP
- 394  F352 00                   NOP
- 395  F353 E5           LBL14:  PUSH  HL
- 396  F354 19                   ADD   HL,DE
- 397  F355 CD 35 F5             CALL  printHexWordHL
- 398  F358 CD 9F F6             CALL  printSpace
- 399  F35B 7B                   LD    A,E
- 400  F35C 2F                   CPL
- 401  F35D 5F                   LD    E,A
- 402  F35E 7A                   LD    A,D
- 403  F35F 2F                   CPL
- 404  F360 57                   LD    D,A
- 405  F361 13                   INC   DE
- 406  F362 E1                   POP   HL
- 407  F363 19                   ADD   HL,DE
- 408  F364 CD 35 F5             CALL  printHexWordHL
- 409  F367 C9                   RET
- 410  F368 21 A4 8F     LBL15:  LD    HL,vars1.V_8FA3+1 ; 36772
- 411  F36B 11 0C F7             LD    DE,txtRegisters             ; 63244
- 412  F36E 0E 04                LD    C,04H         ; 4
- 413  F370 C5           LBL16:  PUSH  BC
- 414  F371 CD 9D F3             CALL  SUB7
- 415  F374 C1                   POP   BC
- 416  F375 0D                   DEC   C
- 417  F376 C2 70 F3             JP    NZ,LBL16
- 418  F379 CD B2 F3             CALL  SUB8
- 419  F37C 2A 9D 8F             LD    HL,(vars1.V_8F9D)
- 420  F37F CD 35 F5             CALL  printHexWordHL
- 421  F382 CD B2 F3             CALL  SUB8
- 422  F385 2A 97 8F             LD    HL,(vars1.V_8F97)
- 423  F388 CD 35 F5             CALL  printHexWordHL
- 424  F38B CD B2 F3             CALL  SUB8
- 425  F38E 2A A5 8F             LD    HL,(vars1.V_8FA5)
- 426  F391 CD 35 F5             CALL  printHexWordHL
- 427  F394 C9                   RET
- 428  F395
- 429  F395                      ; Если нажата клавиша, записать 0FFh по адресу (HL)
- 430  F395              setMIfKeyPressed:
- 431  F395 CD 1B C8             CALL  bios_keyScan
- 432  F398 3C                   INC   A
- 433  F399 C8                   RET   Z
- 434  F39A 36 FF                LD    (HL), 0FFh
- 435  F39C C9                   RET
- 436  F39D
- 437  F39D 46           SUB7:   LD    B,(HL)
- 438  F39E 2B                   DEC   HL
- 439  F39F 4E                   LD    C,(HL)
- 440  F3A0 2B                   DEC   HL
- 441  F3A1 C5                   PUSH  BC
- 442  F3A2 CD B2 F3             CALL  SUB8
- 443  F3A5 78                   LD    A,B
- 444  F3A6 CD 15 F8             CALL  mon2_printHexByte
- 445  F3A9 CD B2 F3             CALL  SUB8
- 446  F3AC C1                   POP   BC
- 447  F3AD 79                   LD    A,C
- 448  F3AE CD 15 F8             CALL  mon2_printHexByte
- 449  F3B1 C9                   RET
- 450  F3B2 EB           SUB8:   EX    DE,HL         ; [5]
- 451  F3B3 C5                   PUSH  BC
- 452  F3B4 CD 9F F6             CALL  printSpace
- 453  F3B7 CD 38 C4             CALL  bios_printStringOld
- 454  F3BA 23                   INC   HL
- 455  F3BB C1                   POP   BC
- 456  F3BC EB                   EX    DE,HL
- 457  F3BD C9                   RET
- 458  F3BE 7B           LBL18:  LD    A,E
- 459  F3BF B7                   OR    A
- 460  F3C0 C2 C8 F3             JP    NZ,LBL19
- 461  F3C3 7A                   LD    A,D
- 462  F3C4 B7                   OR    A
- 463  F3C5 CA EB F3             JP    Z,LBL20
- 464  F3C8 E5           LBL19:  PUSH  HL
- 465  F3C9 EB                   EX    DE,HL
- 466  F3CA 22 97 8F             LD    (vars1.V_8F97),HL
- 467  F3CD 7E                   LD    A,(HL)
- 468  F3CE 36 FF                LD    (HL),0FFH   ; 255
- 469  F3D0 32 99 8F             LD    (vars1.V_8F99),A
- 470  F3D3 21 38 00             LD    HL,0038H    ; 56
- 471  F3D6 11 9A 8F             LD    DE,vars1.V_8F9A   ; 36762
- 472  F3D9 01 F7 F3             LD    BC,REF4             ; 62455
- 473  F3DC CD F4 F3             CALL  SUB11
- 474  F3DF 36 C3                LD    (HL),0C3H   ; 195
- 475  F3E1 CD F2 F3             CALL  SUB10
- 476  F3E4 CD F2 F3             CALL  SUB10
- 477  F3E7 70                   LD    (HL),B
- 478  F3E8 2B                   DEC   HL
- 479  F3E9 71                   LD    (HL),C
- 480  F3EA E1                   POP   HL
- 481  F3EB CD F1 F3     LBL20:  CALL  SUB9
- 482  F3EE C3 05 F1             JP    restartNoCls
- 483  F3F1 E9           SUB9:   JP    (HL)
- 484  F3F2 23           SUB10:  INC   HL            ; [4]
- 485  F3F3 13                   INC   DE
- 486  F3F4 7E           SUB11:  LD    A,(HL)                ; [2]
- 487  F3F5 12                   LD    (DE),A
- 488  F3F6 C9                   RET
- 489  F3F7 22 9D 8F     REF4:   LD    (vars1.V_8F9D),HL
- 490  F3FA EB                   EX    DE,HL
- 491  F3FB 22 9F 8F             LD    (vars1.V_8F9F),HL
- 492  F3FE C5                   PUSH  BC
- 493  F3FF E1                   POP   HL
- 494  F400 22 A1 8F             LD    (vars1.V_8FA1),HL
- 495  F403 F5                   PUSH  AF
- 496  F404 E1                   POP   HL
- 497  F405 22 A3 8F             LD    (vars1.V_8FA3),HL
- 498  F408 21 00 00             LD    HL,0000H
- 499  F40B 39                   ADD   HL,SP
- 500  F40C 23                   INC   HL
- 501  F40D 23                   INC   HL
- 502  F40E 22 A5 8F             LD    (vars1.V_8FA5),HL
- 503  F411 2A 97 8F             LD    HL,(vars1.V_8F97)
- 504  F414 3A 99 8F             LD    A,(vars1.V_8F99)
- 505  F417 77                   LD    (HL),A
- 506  F418 21 9A 8F             LD    HL,vars1.V_8F9A   ; 36762
- 507  F41B 11 38 00             LD    DE,0038H    ; 56
- 508  F41E CD F4 F3             CALL  SUB11
- 509  F421 CD F2 F3             CALL  SUB10
- 510  F424 CD F2 F3             CALL  SUB10
- 511  F427 C3 05 F1             JP    restartNoCls
- 512  F42A E5           LBL21:  PUSH  HL
- 513  F42B C5                   PUSH  BC
- 514  F42C 21 60 8F             LD    HL,8F60H    ; 36704
- 515  F42F 0E 00                LD    C,00H
- 516  F431 7E           LBL22:  LD    A,(HL)
- 517  F432 FE 2C                CP    2CH           ; 44 ','
- 518  F434 C2 38 F4             JP    NZ,LBL23
- 519  F437 0C                   INC   C
- 520  F438 23           LBL23:  INC   HL
- 521  F439 FE 0D                CP    0DH           ; 13
- 522  F43B C2 31 F4             JP    NZ,LBL22
- 523  F43E 0D                   DEC   C
- 524  F43F 79                   LD    A,C
- 525  F440 32 89 8F             LD    (vars1.V_8F89),A
- 526  F443 FE 01                CP    01H           ; 1
- 527  F445 C1                   POP   BC
- 528  F446 E1                   POP   HL
- 529  F447 CA 62 F4             JP    Z,LBL24
- 530  F44A E5                   PUSH  HL
- 531  F44B D5                   PUSH  DE
- 532  F44C C5                   PUSH  BC
- 533  F44D 2A 87 8F             LD    HL,(vars1.V_8F87)
- 534  F450 4D                   LD    C,L
- 535  F451 44                   LD    B,H
- 536  F452 CD 8B F5             CALL  SUB15
- 537  F455 7D                   LD    A,L
- 538  F456 32 8B 8F             LD    (vars1.V_8F8B),A
- 539  F459 21 8C 8F             LD    HL,vars1.V_8F8C   ; 36748
- 540  F45C 73                   LD    (HL),E
- 541  F45D 23                   INC   HL
- 542  F45E 71                   LD    (HL),C
- 543  F45F C1                   POP   BC
- 544  F460 D1                   POP   DE
- 545  F461 E1                   POP   HL
- 546  F462 79           LBL24:  LD    A,C
- 547  F463 32 8A 8F             LD    (vars1.V_8F8A),A
- 548  F466 E5           LBL25:  PUSH  HL            ; [2]
- 549  F467 21 8A 8F             LD    HL,vars1.V_8F8A   ; 36746
- 550  F46A 22 8E 8F             LD    (vars1.V_8F8E),HL
- 551  F46D E1                   POP   HL
- 552  F46E CD 27 C4             CALL  bios_cmp_hl_de
- 553  F471 C8                   RET   Z
- 554  F472 CD A5 F6             CALL  SUB24
- 555  F475 3A 89 8F             LD    A,(vars1.V_8F89)
- 556  F478 32 90 8F             LD    (vars1.V_8F90),A
- 557  F47B 47                   LD    B,A
- 558  F47C 4E           LBL26:  LD    C,(HL)
- 559  F47D E5                   PUSH  HL
- 560  F47E 2A 8E 8F             LD    HL,(vars1.V_8F8E)
- 561  F481 7E                   LD    A,(HL)
- 562  F482 B9                   CP    C
- 563  F483 C2 D0 F4             JP    NZ,LBL30
- 564  F486 23                   INC   HL
- 565  F487 22 8E 8F             LD    (vars1.V_8F8E),HL
- 566  F48A E1                   POP   HL
- 567  F48B 23                   INC   HL
- 568  F48C 05                   DEC   B
- 569  F48D C2 7C F4             JP    NZ,LBL26
- 570  F490 E5                   PUSH  HL
- 571  F491 D5                   PUSH  DE
- 572  F492 C5                   PUSH  BC
- 573  F493 F5                   PUSH  AF
- 574  F494 3A 89 8F             LD    A,(vars1.V_8F89)
- 575  F497 2B           LBL27:  DEC   HL
- 576  F498 3D                   DEC   A
- 577  F499 C2 97 F4             JP    NZ,LBL27
- 578  F49C CD 35 F5             CALL  printHexWordHL
- 579  F49F 2B                   DEC   HL
- 580  F4A0 2B                   DEC   HL
- 581  F4A1 3A 89 8F             LD    A,(vars1.V_8F89)
- 582  F4A4 C6 04                ADD   A,04H         ; 4
- 583  F4A6 47                   LD    B,A
- 584  F4A7 CD D5 F4     LBL28:  CALL  SUB12
- 585  F4AA 23                   INC   HL
- 586  F4AB 05                   DEC   B
- 587  F4AC C2 A7 F4             JP    NZ,LBL28
- 588  F4AF 21 FD F5             LD    HL,txtHomeRight11Dot
- 589  F4B2 CD 18 F8             CALL  mon2_printString
- 590  F4B5 3A 89 8F             LD    A,(vars1.V_8F89)
- 591  F4B8 47                   LD    B,A
- 592  F4B9 80                   ADD   A,B
- 593  F4BA 80                   ADD   A,B
- 594  F4BB 3D                   DEC   A
- 595  F4BC 5F                   LD    E,A
- 596  F4BD 0E 18                LD    C,18H         ; 24
- 597  F4BF CD 47 F3     LBL29:  CALL  SUB6
- 598  F4C2 1D                   DEC   E
- 599  F4C3 C2 BF F4             JP    NZ,LBL29
- 600  F4C6 CD EB F5             CALL  printNewLine
- 601  F4C9 F1                   POP   AF
- 602  F4CA C1                   POP   BC
- 603  F4CB D1                   POP   DE
- 604  F4CC E1                   POP   HL
- 605  F4CD C3 66 F4             JP    LBL25
- 606  F4D0 E1           LBL30:  POP   HL
- 607  F4D1 23                   INC   HL
- 608  F4D2 C3 66 F4             JP    LBL25
- 609  F4D5 7E           SUB12:  LD    A,(HL)
- 610  F4D6 C5                   PUSH  BC
- 611  F4D7 CD 15 F8             CALL  mon2_printHexByte
- 612  F4DA CD 9F F6             CALL  printSpace
- 613  F4DD C1                   POP   BC
- 614  F4DE C9                   RET
- 615  F4DF 7E           LBL31:  LD    A,(HL)                ; [2]
- 616  F4E0 B9                   CP    C
- 617  F4E1 CA F3 F4             JP    Z,LBL32
- 618  F4E4 CD 35 F5             CALL  printHexWordHL
- 619  F4E7 7E                   LD    A,(HL)
- 620  F4E8 C5                   PUSH  BC
- 621  F4E9 CD 15 F8             CALL  mon2_printHexByte
- 622  F4EC CD A5 F6             CALL  SUB24
- 623  F4EF CD EB F5             CALL  printNewLine
- 624  F4F2 C1                   POP   BC
- 625  F4F3 CD 27 C4     LBL32:  CALL  bios_cmp_hl_de
- 626  F4F6 C8                   RET   Z
- 627  F4F7 23                   INC   HL
- 628  F4F8 C3 DF F4             JP    LBL31
- 629  F4FB 71           LBL33:  LD    (HL),C                ; [2]
- 630  F4FC CD 27 C4             CALL  bios_cmp_hl_de
- 631  F4FF C8                   RET   Z
- 632  F500 23                   INC   HL
- 633  F501 C3 FB F4             JP    LBL33
- 634  F504 7E           LBL34:  LD    A,(HL)                ; [2]
- 635  F505 02                   LD    (BC),A
- 636  F506 CD 27 C4             CALL  bios_cmp_hl_de
- 637  F509 C8                   RET   Z
- 638  F50A 23                   INC   HL
- 639  F50B 03                   INC   BC
- 640  F50C C3 04 F5             JP    LBL34
- 641  F50F 0A           LBL35:  LD    A,(BC)                ; [2]
- 642  F510 BE                   CP    (HL)
- 643  F511 CA 2C F5             JP    Z,LBL36
- 644  F514 C5                   PUSH  BC
- 645  F515 CD 35 F5             CALL  printHexWordHL
- 646  F518 7E                   LD    A,(HL)
- 647  F519 CD 15 F8             CALL  mon2_printHexByte
- 648  F51C CD 9F F6             CALL  printSpace
- 649  F51F C1                   POP   BC
- 650  F520 C5                   PUSH  BC
- 651  F521 0A                   LD    A,(BC)
- 652  F522 CD 15 F8             CALL  mon2_printHexByte
- 653  F525 CD A5 F6             CALL  SUB24
- 654  F528 CD EB F5             CALL  printNewLine
- 655  F52B C1                   POP   BC
- 656  F52C CD 27 C4     LBL36:  CALL  bios_cmp_hl_de
- 657  F52F C8                   RET   Z
- 658  F530 23                   INC   HL
- 659  F531 03                   INC   BC
- 660  F532 C3 0F F5             JP    LBL35
- 661  F535
- 662  F535                      ; Печать слова в HEX формате из HL, обрамляется пробелами
- 663  F535              printHexWordHL:
- 664  F535 C5                   PUSH  BC
- 665  F536 CD 9F F6             CALL  printSpace
- 666  F539              printHexWordHL_noSpace:
- 667  F539 7C                   LD    A,H
- 668  F53A CD 15 F8             CALL  mon2_printHexByte
- 669  F53D 7D                   LD    A,L
- 670  F53E CD 15 F8             CALL  mon2_printHexByte
- 671  F541 CD 9F F6             CALL  printSpace
- 672  F544 C1                   POP   BC
- 673  F545 C9                   RET
- 674  F546
- 675  F546                      ; Расчет и печать контрольной суммы
- 676  F546                      ; вход:
- 677  F546                      ;   hl = начальный адрес
- 678  F546                      ;   de = конечный адрес
- 679  F546              calcAndPrintCRC:
- 680  F546 CD 2A F8             CALL  mon2_calcCS
- 681  F549 C5                   PUSH  BC
- 682  F54A E1                   POP   HL    ; hl = bc
- 683  F54B CD 35 F5             CALL  printHexWordHL
- 684  F54E C9                   RET
- 685  F54F
- 686  F54F CD 35 F5     LBL39:  CALL  printHexWordHL         ; [2]
- 687  F552 06 10                LD    B,10H         ; 16
- 688  F554 4E           LBL40:  LD    C,(HL)
- 689  F555 3A 85 8F             LD    A,(vars1.V_8F85)
- 690  F558 B7                   OR    A
- 691  F559 CA 5E F5             JP    Z,LBL41
- 692  F55C A1                   AND   C
- 693  F55D 4F                   LD    C,A
- 694  F55E 79           LBL41:  LD    A,C
- 695  F55F FE 20                CP    20H           ; 32 ' '
- 696  F561 DA 69 F5             JP    C,LBL42
- 697  F564 FE 7F                CP    7FH           ; 127
- 698  F566 DA 6B F5             JP    C,LBL43
- 699  F569 0E 2E        LBL42:  LD    C,2EH         ; 46 '.'
- 700  F56B CD 09 F8     LBL43:  CALL  mon2_printChar
- 701  F56E CD 9F F6             CALL  printSpace
- 702  F571 CD 27 C4             CALL  bios_cmp_hl_de
- 703  F574 C8                   RET   Z
- 704  F575 05                   DEC   B
- 705  F576 23                   INC   HL
- 706  F577 C2 54 F5             JP    NZ,LBL40
- 707  F57A CD A5 F6             CALL  SUB24
- 708  F57D CD EB F5             CALL  printNewLine
- 709  F580 C3 4F F5             JP    LBL39
- 710  F583 01 60 8F     SUB14:  LD    BC,8F60H    ; 36704
- 711  F586 0A                   LD    A,(BC)
- 712  F587 32 80 8F             LD    (vars1.V_8F80),A
- 713  F58A 03                   INC   BC
- 714  F58B CD B2 F5     SUB15:  CALL  SUB16
- 715  F58E 22 81 8F             LD    (vars1.V_8F81),HL
- 716  F591 CD B2 F5             CALL  SUB16
- 717  F594 22 83 8F             LD    (vars1.V_8F83),HL
- 718  F597 CD B2 F5             CALL  SUB16
- 719  F59A 22 85 8F             LD    (vars1.V_8F85),HL
- 720  F59D 69                   LD    L,C
- 721  F59E 60                   LD    H,B
- 722  F59F 22 87 8F             LD    (vars1.V_8F87),HL
- 723  F5A2 2A 85 8F             LD    HL,(vars1.V_8F85)
- 724  F5A5 4D                   LD    C,L
- 725  F5A6 44                   LD    B,H
- 726  F5A7 2A 83 8F             LD    HL,(vars1.V_8F83)
- 727  F5AA EB                   EX    DE,HL
- 728  F5AB 2A 81 8F             LD    HL,(vars1.V_8F81)
- 729  F5AE 3A 80 8F             LD    A,(vars1.V_8F80)
- 730  F5B1 C9                   RET
- 731  F5B2 21 00 00     SUB16:  LD    HL,0000H    ; [3]
- 732  F5B5 0A           LBL44:  LD    A,(BC)
- 733  F5B6 FE 0D                CP    0DH           ; 13
- 734  F5B8 C8                   RET   Z
- 735  F5B9 FE 2C                CP    2CH           ; 44 ','
- 736  F5BB CA CB F5             JP    Z,LBL45
- 737  F5BE CD CD F5             CALL  SUB17
- 738  F5C1 29                   ADD   HL,HL
- 739  F5C2 29                   ADD   HL,HL
- 740  F5C3 29                   ADD   HL,HL
- 741  F5C4 29                   ADD   HL,HL
- 742  F5C5 85                   ADD   A,L
- 743  F5C6 6F                   LD    L,A
- 744  F5C7 03                   INC   BC
- 745  F5C8 C3 B5 F5             JP    LBL44
- 746  F5CB 03           LBL45:  INC   BC
- 747  F5CC C9                   RET
- 748  F5CD D6 30        SUB17:  SUB   30H           ; 48 '0'
- 749  F5CF FE 0A                CP    0AH           ; 10
- 750  F5D1 D8                   RET   C
- 751  F5D2 D6 11                SUB   11H           ; 17
- 752  F5D4 FE 06                CP    06H           ; 6
- 753  F5D6 D2 8A F6             JP    NC,LBL52
- 754  F5D9 C6 0A                ADD   A,0AH         ; 10
- 755  F5DB C9                   RET
- 756  F5DC C5           SUB18:  PUSH  BC
- 757  F5DD 0E 19                LD    C,19H         ; 25
- 758  F5DF CD 09 F8             CALL  mon2_printChar
- 759  F5E2 C1                   POP   BC
- 760  F5E3 C9                   RET
- 761  F5E4 E5           SUB19:  PUSH  HL
- 762  F5E5 21 60 8F             LD    HL,8F60H    ; 36704
- 763  F5E8 C3 93 F6             JP    LBL53
- 764  F5EB
- 765  F5EB                      ; Печать перевода строки (0Ah, 0Dh)
- 766  F5EB              printNewLine:
- 767  F5EB 0E 0A                LD    C,0AH
- 768  F5ED CD 09 F8             CALL  mon2_printChar
- 769  F5F0 0E 0D                LD    C,0DH
- 770  F5F2 CD 09 F8             CALL  mon2_printChar
- 771  F5F5 C9                   RET
- 772  F5F6
- 773  F5F6                      ; Русский текст в кодировке КОИ-8
- 774  F5F6 20 20 3F 00  txtSpaceQuestMark:  DB  "  ?",00H
- 775  F5FA 0A 0D 00     txtNewLine:         DB  0AH,0DH,00H
- 776  F5FD 0D 18 18 18  txtHomeRight11Dot:  DB  0DH,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,2EH,00H
- 776  F601 18 18 18 18
- 776  F605 18 18 18 18
- 776  F609 2E 00
- 777  F60B 66 61 6A 6C  txtFileQuestMark:   DB  "fajl ? ",00H
- 777  F60F 20 3F 20 00
- 778  F613 0A 66 61 6A                      DB  0AH,"fajl: ",00H
- 778  F617 6C 3A 20 00
- 779  F61B
- 780  F61B CD DC F5     LBL46:  CALL  SUB18
- 781  F61E CD EB F5     LBL47:  CALL  printNewLine         ; [2]
- 782  F621 CD 35 F5             CALL  printHexWordHL
- 783  F624 7E                   LD    A,(HL)
- 784  F625 CD 15 F8             CALL  mon2_printHexByte
- 785  F628 CD 9F F6             CALL  printSpace
- 786  F62B CD 03 F8             CALL  mon2_getch
- 787  F62E CD AE F6             CALL  SUB25
- 788  F631 FE 1A                CP    1AH           ; 26
- 789  F633 CA 3F F6             JP    Z,LBL48
- 790  F636 FE 08                CP    08H           ; 8
- 791  F638 CA 43 F6             JP    Z,LBL49
- 792  F63B CD 47 F6             CALL  SUB21
- 793  F63E 77                   LD    (HL),A
- 794  F63F 23           LBL48:  INC   HL
- 795  F640 C3 1E F6             JP    LBL47
- 796  F643 2B           LBL49:  DEC   HL
- 797  F644 C3 1E F6             JP    LBL47
- 798  F647 C5           SUB21:  PUSH  BC
- 799  F648 C3 4F F6             JP    LBL50
- 800  F64B C5                   PUSH  BC
- 801  F64C CD 03 F8             CALL  mon2_getch
- 802  F64F CD 60 F6     LBL50:  CALL  SUB22
- 803  F652 07                   RLCA
- 804  F653 07                   RLCA
- 805  F654 07                   RLCA
- 806  F655 07                   RLCA
- 807  F656 47                   LD    B,A
- 808  F657 CD 03 F8             CALL  mon2_getch
- 809  F65A CD 60 F6             CALL  SUB22
- 810  F65D B0                   OR    B
- 811  F65E C1                   POP   BC
- 812  F65F C9                   RET
- 813  F660 FE 20        SUB22:  CP    20H           ; 32 ' '; [2]
- 814  F662 DA 05 F1             JP    C,restartNoCls
- 815  F665 FE 3A                CP    3AH           ; 58 ':'
- 816  F667 DA 7F F6             JP    C,LBL51
- 817  F66A E6 5F                AND   5FH           ; 95 '_'
- 818  F66C FE 41                CP    41H           ; 65 'A'
- 819  F66E DA 8A F6             JP    C,LBL52
- 820  F671 FE 47                CP    47H           ; 71 'G'
- 821  F673 D2 8A F6             JP    NC,LBL52
- 822  F676 F5                   PUSH  AF
- 823  F677 4F                   LD    C,A
- 824  F678 CD 09 F8             CALL  mon2_printChar
- 825  F67B F1                   POP   AF
- 826  F67C D6 37                SUB   37H           ; 55 '7'
- 827  F67E C9                   RET
- 828  F67F F6 10        LBL51:  OR    10H           ; 16
- 829  F681 F5                   PUSH  AF
- 830  F682 4F                   LD    C,A
- 831  F683 CD 09 F8             CALL  mon2_printChar
- 832  F686 F1                   POP   AF
- 833  F687 D6 30                SUB   30H           ; 48 '0'
- 834  F689 C9                   RET
- 835  F68A 21 F6 F5     LBL52:  LD    HL,txtSpaceQuestMark             ; 62966; [4]
- 836  F68D CD 38 C4             CALL  bios_printStringOld
- 837  F690 C3 05 F1             JP    restartNoCls
- 838  F693 C5           LBL53:  PUSH  BC
- 839  F694 D5                   PUSH  DE
- 840  F695 11 80 8F             LD    DE,vars1.V_8F80   ; 36736
- 841  F698 CD 93 F7             CALL  SUB28
- 842  F69B D1                   POP   DE
- 843  F69C C1                   POP   BC
- 844  F69D E1                   POP   HL
- 845  F69E C9                   RET
- 846  F69F
- 847  F69F                      ; Печать пробела
- 848  F69F              printSpace:
- 849  F69F 0E 20                LD    C,20H
- 850  F6A1 CD 09 F8             CALL  mon2_printChar
- 851  F6A4 C9                   RET
- 852  F6A5
- 853  F6A5 CD 1B F8     SUB24:  CALL  mon2_keyScan         ; [5]
- 854  F6A8 FE 1F                CP    1FH           ; 31
- 855  F6AA C0                   RET   NZ
- 856  F6AB CD 03 F8             CALL  mon2_getch
- 857  F6AE FE 1F        SUB25:  CP    1FH           ; 31
- 858  F6B0 C0                   RET   NZ
- 859  F6B1 C3 05 F1             JP    restartNoCls
- 860  F6B4 CD 36 F8     LBL54:  CALL  mon2_printHexWord
- 861  F6B7 7D                   LD    A,L
- 862  F6B8 E6 0F                AND   0FH           ; 15
- 863  F6BA 4F                   LD    C,A
- 864  F6BB 2F                   CPL
- 865  F6BC E6 0F                AND   0FH           ; 15
- 866  F6BE 3C                   INC   A
- 867  F6BF 47                   LD    B,A
- 868  F6C0 79                   LD    A,C
- 869  F6C1 87                   ADD   A,A
- 870  F6C2 87                   ADD   A,A
- 871  F6C3 87                   ADD   A,A
- 872  F6C4 81                   ADD   A,C
- 873  F6C5 C6 0F                ADD   A,0FH         ; 15
- 874  F6C7 32 FD 8F             LD    (bios_vars.cursorX),A
- 875  F6CA 7E           LBL55:  LD    A,(HL)
- 876  F6CB CD 15 F8             CALL  mon2_printHexByte
- 877  F6CE 78                   LD    A,B
- 878  F6CF FE 09                CP    09H           ; 9
- 879  F6D1 C2 DC F6             JP    NZ,LBL56
- 880  F6D4 0E 2D                LD    C,2DH         ; 45 '-'
- 881  F6D6 CD 09 F8             CALL  mon2_printChar
- 882  F6D9 C3 DF F6             JP    LBL57
- 883  F6DC CD 9F F6     LBL56:  CALL  printSpace
- 884  F6DF CD 27 C4     LBL57:  CALL  bios_cmp_hl_de
- 885  F6E2 C8                   RET   Z
- 886  F6E3 05                   DEC   B
- 887  F6E4 23                   INC   HL
- 888  F6E5 C2 CA F6             JP    NZ,LBL55
- 889  F6E8 CD A5 F6             CALL  SUB24
- 890  F6EB CD EB F5             CALL  printNewLine
- 891  F6EE C3 B4 F6             JP    LBL54
- 892  F6F1 5F                   LD    E,A
- 893  F6F2 0F                   RRCA
- 894  F6F3 0F                   RRCA
- 895  F6F4 0F                   RRCA
- 896  F6F5 0F                   RRCA
- 897  F6F6 CD 00 F7             CALL  SUB26
- 898  F6F9 57                   LD    D,A
- 899  F6FA 7B                   LD    A,E
- 900  F6FB CD 00 F7             CALL  SUB26
- 901  F6FE 5F                   LD    E,A
- 902  F6FF C9                   RET
- 903  F700 E6 0F        SUB26:  AND   0FH           ; 15; [2]
- 904  F702 FE 0A                CP    0AH           ; 10
- 905  F704 DA 09 F7             JP    C,LBL58
- 906  F707 C6 07                ADD   A,07H         ; 7
- 907  F709 C6 30        LBL58:  ADD   A,30H         ; 48 '0'
- 908  F70B C9                   RET
- 909  F70C
- 910  F70C              txtRegisters:
- 911  F70C 41 3D 00             DB    "A=",0
- 912  F70F 46 3D 00             DB    "F=",0
- 913  F712 42 3D 00             DB    "B=",0
- 914  F715 43 3D 00             DB    "C=",0
- 915  F718 44 3D 00             DB    "D=",0
- 916  F71B 45 3D 00             DB    "E=",0
- 917  F71E 48 3D 00             DB    "H=",0
- 918  F721 4C 3D 00             DB    "L=",0
- 919  F724 0A 0D 20 4D          DB    0AH,0DH," M(HL)=",0
- 919  F728 28 48 4C 29
- 919  F72C 3D 00
- 920  F72E 50 43 3D 00          DB    "PC=",0
- 921  F732 53 50 3D 00          DB    "SP=",0
- 922  F736
- 923  F736 F5           SUB27:  PUSH  AF            ; [2]
- 924  F737 3A E6 F0     LBL59:  LD    A,(vars2.V_F0E6)
- 925  F73A E6 0C                AND   0CH           ; 12
- 926  F73C C2 37 F7             JP    NZ,LBL59
- 927  F73F 79                   LD    A,C
- 928  F740 32 E5 F0             LD    (vars2.V_F0E5),A
- 929  F743 3A E6 F0             LD    A,(vars2.V_F0E6)
- 930  F746 F6 20                OR    20H           ; 32 ' '
- 931  F748 32 E6 F0             LD    (vars2.V_F0E6),A
- 932  F74B 3A E6 F0     LBL60:  LD    A,(vars2.V_F0E6)
- 933  F74E E6 04                AND   04H           ; 4
- 934  F750 CA 4B F7             JP    Z,LBL60
- 935  F753 AF                   XOR   A
- 936  F754 32 E6 F0             LD    (vars2.V_F0E6),A
- 937  F757 F1                   POP   AF
- 938  F758 C9                   RET
- 939  F759 E5                   PUSH  HL
- 940  F75A 7E           LBL61:  LD    A,(HL)
- 941  F75B B7                   OR    A
- 942  F75C CA 67 F7             JP    Z,LBL62
- 943  F75F 4F                   LD    C,A
- 944  F760 CD 36 F7             CALL  SUB27
- 945  F763 23                   INC   HL
- 946  F764 C3 5A F7             JP    LBL61
- 947  F767 E1           LBL62:  POP   HL
- 948  F768 C9                   RET
- 949  F769 F5                   PUSH  AF
- 950  F76A 3E 91                LD    A,91H         ; 145
- 951  F76C 32 E7 F0             LD    (vars2.V_F0E7),A
- 952  F76F 3A E6 F0             LD    A,(vars2.V_F0E6)
- 953  F772 F6 10                OR    10H           ; 16
- 954  F774 32 E6 F0             LD    (vars2.V_F0E6),A
- 955  F777 E6 EF                AND   0EFH          ; 239
- 956  F779 32 E6 F0             LD    (vars2.V_F0E6),A
- 957  F77C 0E 0F                LD    C,0FH         ; 15
- 958  F77E CD 36 F7             CALL  SUB27
- 959  F781 F1                   POP   AF
- 960  F782 C9                   RET
- 961  F783 32 E9 8F     LBL63:  LD    (bios_vars.cursorCfg),A
- 962  F786 CD 06 C0             CALL  bios_drawCursorOld
- 963  F789 F1                   POP   AF
- 964  F78A 32 E9 8F             LD    (bios_vars.cursorCfg),A
- 965  F78D 0E 18                LD    C,18H         ; 24
- 966  F78F F1                   POP   AF
- 967  F790 C3 09 F8             JP    mon2_printChar
- 968  F793 44           SUB28:  LD    B,H
- 969  F794 4D                   LD    C,L
- 970  F795 CD 03 F8     LBL64:  CALL  mon2_getch         ; [4]
- 971  F798 FE 08                CP    08H           ; 8
- 972  F79A CA B9 F7             JP    Z,LBL65
- 973  F79D FE 0D                CP    0DH           ; 13
- 974  F79F CA D8 F7             JP    Z,LBL67
- 975  F7A2 32 95 8F             LD    (vars1.V_8F95),A
- 976  F7A5 CD 27 C4             CALL  bios_cmp_hl_de
- 977  F7A8 CA 95 F7             JP    Z,LBL64
- 978  F7AB 3A 95 8F             LD    A,(vars1.V_8F95)
- 979  F7AE 77                   LD    (HL),A
- 980  F7AF C5                   PUSH  BC
- 981  F7B0 4F                   LD    C,A
- 982  F7B1 CD 09 F8             CALL  mon2_printChar
- 983  F7B4 C1                   POP   BC
- 984  F7B5 23                   INC   HL
- 985  F7B6 C3 95 F7             JP    LBL64
- 986  F7B9 7C           LBL65:  LD    A,H
- 987  F7BA B8                   CP    B
- 988  F7BB C2 C3 F7             JP    NZ,LBL66
- 989  F7BE 7D                   LD    A,L
- 990  F7BF B9                   CP    C
- 991  F7C0 CA 95 F7             JP    Z,LBL64
- 992  F7C3 2B           LBL66:  DEC   HL
- 993  F7C4 C5                   PUSH  BC
- 994  F7C5 0E 08                LD    C,08H         ; 8
- 995  F7C7 CD 09 F8             CALL  mon2_printChar
- 996  F7CA 0E 20                LD    C,20H         ; 32 ' '
- 997  F7CC CD 09 F8             CALL  mon2_printChar
- 998  F7CF 0E 08                LD    C,08H         ; 8
- 999  F7D1 CD 09 F8             CALL  mon2_printChar
-1000  F7D4 C1                   POP   BC
-1001  F7D5 C3 95 F7             JP    LBL64
-1002  F7D8              LBL67:
-1003  F7D8 77                   LD    (HL),A
-1004  F7D9 C9                   RET
-1005  F7DA E5                   PUSH  HL
-1006  F7DB 21 E3 FF             LD    HL,0FFE3H   ; 65507
-1007  F7DE 36 0D                LD    (HL),0DH    ; 13
-1008  F7E0 36 0C                LD    (HL),0CH    ; 12
-1009  F7E2 E1                   POP   HL
-1010  F7E3 C9                   RET
-1011  F7E4
-1012  F7E4              ;----------------------------------------------------------------------------
-1013  F7E4              ; Таблица переходов F800h
-1014  F7E4              ;----------------------------------------------------------------------------
-1015  F7E4                  ORG_PAD0 0F800h
-1015  F7E4             >         IF $ > 0F800h
-1015  F7E4 ~           >           ; вывод сообщения об ошибке
-1015  F7E4 ~           >           ASSERT 0
-1015  F7E4 ~           >           DISPLAY /l, "Error! ORG_PAD0 failed! ", $, " is more than ", adr
-1015  F7E4             >         ELSE
-1015  F7E4             >           ; заполнение памяти
-1015  F7E4 00 00 00... >           BLOCK 0F800h-$, 0
-1015  F7E8             >         ENDIF
-1015  F800             >         ORG 0F800h
-1016  F800
-1017  F800
-1018  F800 C3 05 F1     mon2_restart:       JP    restartNoCls          ; F800
-1019  F803 C3 37 C3     mon2_getch:         JP    bios_getchOld         ; F803
-1020  F806 C3 77 C3                         JP    bios_tapeReadOld      ; F806
-1021  F809 C3 37 C0     mon2_printChar:     JP    bios_printCharOld     ; F809
-1022  F80C C3 D0 C3                         JP    bios_tapeWriteOld     ; F80C
-1023  F80F C3 36 C8                         JP    bios_printer          ; F80F
-1024  F812 C3 95 F3                         JP    setMIfKeyPressed      ; F812
-1025  F815 C3 15 C8     mon2_printHexByte:  JP    bios_printHexByte     ; F815
-1026  F818 C3 38 C4     mon2_printString:   JP    bios_printStringOld   ; F818
-1027  F81B C3 03 C0     mon2_keyScan:       JP    bios_keyScanOld       ; F81B
-1028  F81E C3 1E C8                         JP    bios_getCursorPos     ; F81E
-1029  F821 C9                               RET                         ; F821 - не используется
-1030  F822 00                               NOP
-1031  F823 00                               NOP
-1032  F824 C3 24 C8     SUB34:              JP    bios_tapeLoad         ; F824
-1033  F827 C3 27 C8     mon2_tapeSave:      JP    bios_tapeSave         ; F827
-1034  F82A C3 2A C8     mon2_calcCS:        JP    bios_calcCS           ; F82A
-1035  F82D C3 70 C1                         JP    bios_beep_Old         ; F82D
-1036  F830 C3 30 C8                         JP    bios_getMemTop        ; F830
-1037  F833 C3 33 C8                         JP    bios_setMemTop        ; F833
-1038  F836 C5           mon2_printHexWord:  PUSH  BC                    ; F836 - печать слова из HL в HEX формате, дополняется пробелом
-1039  F837 C3 39 F5                         JP    printHexWordHL_noSpace
-1040  F83A
-1041  F83A                  END
+  51  0000              ;----------------------------------------------------------------------------
+  52  0000              ; Собственные переменные
+  53  0000              INPUT_BUF     = 8F60h
+  54  0000              INPUT_BUF_END = 8F6Dh
+  55  0000
+  56  0000                  STRUCT MON2_VARS_1
+  57  0000 ~            Directive:      DS    1
+  58  0000 ~            FirstParam:     DS    2
+  59  0000 ~            SecondParam:    DS    2
+  60  0000 ~            ThirdParam:     DS    2
+  61  0000 ~            V_8F87:         DS    2
+  62  0000 ~            V_8F89:         DS    1
+  63  0000 ~            V_8F8A:         DS    1
+  64  0000 ~            V_8F8B:         DS    1
+  65  0000 ~            V_8F8C:         DS    2
+  66  0000 ~            V_8F8E:         DS    2
+  67  0000 ~            V_8F90:         DS    1
+  68  0000 ~            V_8F91:         DS    4
+  69  0000 ~            V_8F95:         DS    1
+  70  0000 ~            V_8F96:         DS    1
+  71  0000 ~            V_8F97:         DS    2
+  72  0000 ~            V_8F99:         DS    1
+  73  0000 ~            V_8F9A:         DS    3
+  74  0000 ~            V_8F9D:         DS    2
+  75  0000 ~            V_8F9F:         DS    2
+  76  0000 ~            V_8FA1:         DS    2
+  77  0000 ~            V_8FA3:         DS    2
+  78  0000 ~            V_8FA5:         DS    2
+  79  0000 ~            V_8FA7:         DS    4
+  80  0000 ~            V_8FAB:         DS    2
+  81  0000                  ENDS
+  82  0000
+  83  0000                  STRUCT MON2_VARS_2
+  84  0000 ~            V_F0E0:         DS    5
+  85  0000 ~            V_F0E5:         DS    1
+  86  0000 ~            V_F0E6:         DS    1
+  87  0000 ~            V_F0E7:         DS    1
+  88  0000                  ENDS
+  89  0000
+  90  0000              ;----------------------------------------------------------------------------
+  91  0000              ; Начало программы
+  92  0000                  ORG   0F100h
+  93  F100
+  94  F100              ; Адреса блоков переменных
+  95  F100              vars1       MON2_VARS_1     = 08F80H
+  96  F100              vars2       MON2_VARS_2     = 0F0E0H
+  97  F100              v_fileDescr FILE_DESCRIPTOR = 0F900H
+  98  F100
+  99  F100              ; Буфер для листинга директории
+ 100  F100              ; В новой карте памяти можно расположить его
+ 101  F100              ; перед Монитором - там больше места
+ 102  F100                  IF  NEW_MEMORY_MAP
+ 103  F100              v_fileInfo  FILE_INFO = 0E800H
+ 104  F100              DIR_BUFFER_SIZE = ($ - v_fileInfo) / FILE_INFO_SIZE - 1
+ 105  F100                  ELSE
+ 106  F100 ~            v_fileInfo  FILE_INFO = v_fileDescr + FILE_DESCRIPTOR_SIZE
+ 107  F100 ~            DIR_BUFFER_SIZE = (0FB00h - v_fileInfo) / FILE_INFO_SIZE - 1
+ 108  F100                  ENDIF
+ 109  F100
+ 110  F100              ;----------------------------------------------------------------------------
+ 111  F100              ; Код
+ 112  F100
+ 113  F100                      ; Начинаем с очистки экрана
+ 114  F100 0E 1F                LD    C,1FH ; rjl символа очистки экрана
+ 115  F102 CD 09 C8             CALL  bios_printChar
+ 116  F105
+ 117  F105                      ; Рестарт без очистки экрана
+ 118  F105              RestartNoCls:
+ 119  F105 31 BF FF             LD    SP,0FFBFH
+ 120  F108 21 00 F8             LD    HL,mon2_restart           ; установить обработчик ошибки магнитофона
+ 121  F10B 22 E1 8F             LD    (bios_vars.tapeError),HL  ; на рестарт монитора
+ 122  F10E 21 FF 7E             LD    HL,7EFFH    ; 32511
+ 123  F111 22 AB 8F             LD    (vars1.V_8FAB),HL
+ 124  F114 CD 1A F1             CALL  MonitorMain
+ 125  F117 C3 05 F1             JP    RestartNoCls
+ 126  F11A
+ 127  F11A              ;----------------------------------------------------------------------------
+ 128  F11A              ; Главная подпрограмма - ввод директивы, анализ, выполнение
+ 129  F11A
+ 130  F11A              MonitorMain:
+ 131  F11A                      ; перевод строки
+ 132  F11A 21 08 F6             LD    HL,txtNewLine
+ 133  F11D CD 38 C4             CALL  bios_printStringOld
+ 134  F120
+ 135  F120                      ; узнать текущий диск
+ 136  F120 1E 02                LD    E,02H
+ 137  F122 CD 42 C8             CALL  bios_fileGetSetDrive
+ 138  F125
+ 139  F125                      ; печать промпта A:\>
+ 140  F125 C6 41                ADD   A,'A'
+ 141  F127 4F                   LD    C,A
+ 142  F128 CD 09 C8             CALL  bios_printChar
+ 143  F12B 0E 3A                LD    C,':'
+ 144  F12D CD 09 C8             CALL  bios_printChar
+ 145  F130 0E 5C                LD    C,'\'
+ 146  F132 CD 09 C8             CALL  bios_printChar
+ 147  F135 0E 3E                LD    C,'>'
+ 148  F137 CD 09 C8             CALL  bios_printChar
+ 149  F13A
+ 150  F13A                      ; очистка буфера
+ 151  F13A CD DF F1             CALL  ClearInputBuf
+ 152  F13D
+ 153  F13D                      ; ввод строки
+ 154  F13D CD F2 F5             CALL  SUB19
+ 155  F140
+ 156  F140 E5                   PUSH  HL
+ 157  F141 D5                   PUSH  DE
+ 158  F142 C5                   PUSH  BC
+ 159  F143
+ 160  F143                      ; узнать текущий диск
+ 161  F143 1E 02                LD    E,02H
+ 162  F145 CD 42 C8             CALL  bios_fileGetSetDrive
+ 163  F148 F5                   PUSH  AF
+ 164  F149
+ 165  F149                      ; преобразовать имя файла в буфере
+ 166  F149 21 60 8F             LD    HL,INPUT_BUF
+ 167  F14C 11 00 E8             LD    DE,v_fileInfo.name
+ 168  F14F CD 5A C8             CALL  bios_fileNamePrepare
+ 169  F152
+ 170  F152                      ; узнать текущий диск
+ 171  F152 1E 02                LD    E,02H
+ 172  F154 CD 42 C8             CALL  bios_fileGetSetDrive
+ 173  F157
+ 174  F157 5F                   LD    E,A
+ 175  F158 F1                   POP   AF
+ 176  F159 BB                   CP    E
+ 177  F15A C1                   POP   BC
+ 178  F15B D1                   POP   DE
+ 179  F15C E1                   POP   HL
+ 180  F15D C0                   RET   NZ
+ 181  F15E
+ 182  F15E                      ; перевод строки
+ 183  F15E CD F9 F5             CALL  printNewLine
+ 184  F161
+ 185  F161                      ; анализ строки
+ 186  F161 CD 91 F5             CALL  Tokenizer
+ 187  F164
+ 188  F164                      ; анализ дуквы директивы
+ 189  F164 FE 44                CP    44H           ; Директива D - дамп блока памяти в HEX виде
+ 190  F166 CA C1 F6             JP    Z,Dir_D
+ 191  F169 FE 4D                CP    4DH           ; Директива M - редактирование блока памяти
+ 192  F16B CA 28 F6             JP    Z,Dir_M
+ 193  F16E FE 4C                CP    4CH           ; Директива L - дамп блока памяти в текстовом виде
+ 194  F170 CA 5D F5             JP    Z,Dir_L
+ 195  F173 FE 4B                CP    4BH           ; Директива K - подсчет контрольной суммы блока памяти
+ 196  F175 CA 54 F5             JP    Z,Dir_K
+ 197  F178 FE 54                CP    54H           ; Директива T - копирование блока памяти на новый адрес
+ 198  F17A CA 12 F5             JP    Z,Dir_T
+ 199  F17D FE 58                CP    58H           ; Директива X - печать содержимого регистров процессора
+ 200  F17F CA 76 F3             JP    Z,Dir_X
+ 201  F182 FE 57                CP    57H           ; Директива W - запись блока памяти на ленту без имени
+ 202  F184 CA 27 F8             JP    Z,mon2_tapeSave
+ 203  F187 FE 52                CP    52H           ; Директива R - чтение файла с ленты
+ 204  F189 CA 2E F3             JP    Z,Dir_R
+ 205  F18C FE 43                CP    43H           ; Директива C - сравнение двух блоков памяти
+ 206  F18E CA 1D F5             JP    Z,Dir_C
+ 207  F191 FE 48                CP    48H           ; Директива H - печать суммы и разности двух HEX слов
+ 208  F193 CA 61 F3             JP    Z,Dir_H
+ 209  F196 FE 4E                CP    4EH           ; Директива N - ???
+ 210  F198 CA ED F4             JP    Z,Dir_N
+ 211  F19B FE 47                CP    47H           ; Директива G - запуск программы по адресу
+ 212  F19D CA CC F3             JP    Z,Dir_G
+ 213  F1A0 FE 46                CP    46H           ; Директива F - заполнить блок памяти байтом
+ 214  F1A2 CA 09 F5             JP    Z,Dir_F
+ 215  F1A5 FE 53                CP    53H           ; Директива S - ???
+ 216  F1A7 CA 38 F4             JP    Z,Dir_S
+ 217  F1AA FE 4A                CP    4AH           ; Директива J - выход из Mонитора
+ 218  F1AC CA D5 F1             JP    Z,Dir_J
+ 219  F1AF FE 3F                CP    3FH           ; Директива ? - листинг директории
+ 220  F1B1 CA E8 F1             JP    Z,Dir_DirDisk
+ 221  F1B4 FE 42                CP    42H           ; Директива B - сохранить область памяти в файл
+ 222  F1B6 CA 3E F2             JP    Z,Dir_B
+ 223  F1B9 FE 41                CP    41H           ; Директива A - изменение адреса загрузки файла
+ 224  F1BB CA 8D F2             JP    Z,Dir_A
+ 225  F1BE FE 56                CP    56H           ; Директива V - загрузка файла в память по указанному адресу
+ 226  F1C0 CA 9E F2             JP    Z,Dir_V
+ 227  F1C3 FE 55                CP    55H           ; Директива U - загрузка файла в память
+ 228  F1C5 CA C5 F2             JP    Z,Dir_U
+ 229  F1C8 FE 59                CP    59H           ; Директива Y - установка атрибутов файла
+ 230  F1CA CA ED F2             JP    Z,Dir_Y
+ 231  F1CD FE 51                CP    51H           ; Директива Q - печать атрибутов файла
+ 232  F1CF CA 00 F3             JP    Z,Dir_Q
+ 233  F1D2
+ 234  F1D2                      ; директива не распознана - печать знака вопроса и перезапуск
+ 235  F1D2 C3 97 F6             JP    TypeErrorRestart
+ 236  F1D5
+ 237  F1D5              ;----------------------------------------------------------------------------
+ 238  F1D5              ; Директива J - выход из Mонитора
+ 239  F1D5
+ 240  F1D5 CD 12 C8     Dir_J:  CALL  bios_keyCheck
+ 241  F1D8 3C                   INC   A
+ 242  F1D9 CA 00 C8             JP    Z,bios_reboot
+ 243  F1DC C3 D5 F1             JP    Dir_J
+ 244  F1DF
+ 245  F1DF              ;----------------------------------------------------------------------------
+ 246  F1DF              ; Запись слова 0000h в начало буфера для ввода строки INPUT_BUF
+ 247  F1DF
+ 248  F1DF              ClearInputBuf:
+ 249  F1DF 21 60 8F             LD    HL,INPUT_BUF
+ 250  F1E2 36 00                LD    (HL),00H
+ 251  F1E4 23                   INC   HL
+ 252  F1E5 36 00                LD    (HL),00H
+ 253  F1E7 C9                   RET
+ 254  F1E8
+ 255  F1E8              ;----------------------------------------------------------------------------
+ 256  F1E8              ; Директива ? - вывод каталога диска
+ 257  F1E8
+ 258  F1E8              Dir_DirDisk:
+ 259  F1E8 01 00 00             LD    BC, 0                 ; начинаем с 0 файла
+ 260  F1EB 21 00 E8             LD    HL, v_fileInfo.name   ; адрес буфера
+ 261  F1EE 11 8F 00             LD    DE, DIR_BUFFER_SIZE   ; размер буфера в штуках
+ 262  F1F1 CD 3F C8             CALL  bios_fileList
+ 263  F1F4              DirDiskLoop:
+ 264  F1F4 7E                   LD    A,(HL)            ; первый символ имени файла
+ 265  F1F5 3C                   INC   A
+ 266  F1F6 C8                   RET   Z                 ; если FF (конец каталога) - выходим
+ 267  F1F7 CD 12 C8             CALL  bios_keyCheck     ; Проверяем, не нажата ли клавиша
+ 268  F1FA FE 1F                CP    1FH               ; СТР
+ 269  F1FC CC 03 C8             CALL  Z,bios_getch      ; если нажата СТР, ждем нажатия СТР еще раз
+ 270  F1FF FE 1F                CP    1FH               ; СТР
+ 271  F201 C8                   RET   Z                 ; выход, если СТР нажата еще раз
+ 272  F202 06 08                LD    B,08H             ; печатаем 8 символов имени файла
+ 273  F204 CD 34 F2             CALL  printStringB
+ 274  F207 0E 2E                LD    C,2EH             ; печатаем точку
+ 275  F209 CD 09 C8             CALL  bios_printChar
+ 276  F20C 06 03                LD    B,03H             ; печатаем 3 символа расширения файла
+ 277  F20E CD 34 F2             CALL  printStringB
+ 278  F211 CD AC F6             CALL  printSpace
+ 279  F214 23                   INC   HL                ; переходим через байт атрибута файла
+ 280  F215 5E                   LD    E,(HL)            ; DE = адрес загрузки файла
+ 281  F216 23                   INC   HL
+ 282  F217 56                   LD    D,(HL)
+ 283  F218 D5                   PUSH  DE                ; адрес загрузки файла в стеке
+ 284  F219 23                   INC   HL
+ 285  F21A 5E                   LD    E,(HL)            ; DE = размер файла
+ 286  F21B 23                   INC   HL
+ 287  F21C 56                   LD    D,(HL)
+ 288  F21D E3                   EX    (SP),HL           ; текущий указатель дескриптора в стек, а HL = адрес загрузки файла
+ 289  F21E CD 43 F5             CALL  printHexWordHL    ; печатаем начальный адрес загрузки файла
+ 290  F221 19                   ADD   HL,DE
+ 291  F222 CD 43 F5             CALL  printHexWordHL    ; печатаем конечынй адрес загрузки файла
+ 292  F225 E1                   POP   HL                ; HL = указатель дескриптора
+ 293  F226 7D                   LD    A,L
+ 294  F227 E6 F0                AND   0F0H
+ 295  F229 6F                   LD    L,A               ; Обнуляем младшие 4 бита HL - переход на начало текущего дескриптора файла
+ 296  F22A 11 10 00             LD    DE,0010H
+ 297  F22D 19                   ADD   HL,DE             ; HL += 16 - переход на следующий дескриптор файла
+ 298  F22E CD F9 F5             CALL  printNewLine
+ 299  F231 C3 F4 F1             JP    DirDiskLoop
+ 300  F234
+ 301  F234              ;----------------------------------------------------------------------------
+ 302  F234              ; Печать строки по адресу HL длиной B
+ 303  F234
+ 304  F234              printStringB:
+ 305  F234 4E                   LD    C,(HL)
+ 306  F235 CD 09 C8             CALL  bios_printChar
+ 307  F238 23                   INC   HL
+ 308  F239 05                   DEC   B
+ 309  F23A C2 34 F2             JP    NZ,printStringB
+ 310  F23D C9                   RET
+ 311  F23E
+ 312  F23E              ;----------------------------------------------------------------------------
+ 313  F23E              ; Директива B - сохранение области памяити в файл
+ 314  F23E
+ 315  F23E              Dir_B:  ; адрес начала - в дескриптор
+ 316  F23E 22 12 F9             LD    (v_fileDescr.loadAddress), HL
+ 317  F241
+ 318  F241                      ; DE = -HL
+ 319  F241 EB                   EX    DE,HL
+ 320  F242 7A                   LD    A,D
+ 321  F243 2F                   CPL
+ 322  F244 57                   LD    D,A
+ 323  F245 7B                   LD    A,E
+ 324  F246 2F                   CPL
+ 325  F247 5F                   LD    E,A
+ 326  F248 13                   INC   DE
+ 327  F249
+ 328  F249                      ; HL = адрес_конца - адрес_начала = размер - 1
+ 329  F249 19                   ADD   HL,DE
+ 330  F24A
+ 331  F24A                      ; размер - в дескриптор
+ 332  F24A 22 1C F9             LD    (v_fileDescr.size),HL
+ 333  F24D
+ 334  F24D                      ; запрос именя файла
+ 335  F24D CD 17 F3             CALL  EnterFileName
+ 336  F250
+ 337  F250                      ; сохранение файла
+ 338  F250 CD 45 C8             CALL  bios_fileCreate
+ 339  F253
+ 340  F253                      ; в случае ошибки печатаем надпись "МАЛ ДИСК"
+ 341  F253 21 67 F2             LD    HL,txtSmallDisk
+ 342  F256 DC 5A F2             CALL  C,SUB4
+ 343  F259 C9                   RET
+ 344  F25A
+ 345  F25A                      ; или "МАЛ DIR"
+ 346  F25A B7           SUB4:   OR    A
+ 347  F25B CA 61 F2             JP    Z,LBL6
+ 348  F25E C3 18 C8             JP    bios_printString
+ 349  F261
+ 350  F261 21 75 F2     LBL6:   LD    HL, txtSmallDir
+ 351  F264 C3 18 C8             JP    bios_printString
+ 352  F267
+ 353  F267              ;----------------------------------------------------------------------------
+ 354  F267              ; Русский текст в кодировке КОИ-7
+ 355  F267
+ 356  F267 0A 0D 53 4D  txtSmallDisk:   DB  0AH,0DH,"SMALL DISK!",00H
+ 356  F26B 41 4C 4C 20
+ 356  F26F 44 49 53 4B
+ 356  F273 21 00
+ 357  F275 0A 0D 53 4D  txtSmallDir:    DB  0AH,0DH,"SMALL DIR!",00H
+ 357  F279 41 4C 4C 20
+ 357  F27D 44 49 52 21
+ 357  F281 00
+ 358  F282 0A 0D 4E 4F  txtNoFile:      DB  0AH,0DH,"NO FILE ",00H
+ 358  F286 20 46 49 4C
+ 358  F28A 45 20 00
+ 359  F28D
+ 360  F28D              ;----------------------------------------------------------------------------
+ 361  F28D              ; Директива A - изменение адреса загрузки файла
+ 362  F28D
+ 363  F28D E5           Dir_A:  PUSH  HL
+ 364  F28E CD 17 F3             CALL  EnterFileName
+ 365  F291 D1                   POP   DE
+ 366  F292 0E 01                LD    C,01H
+ 367  F294 CD 54 C8             CALL  bios_fileGetSetAddr
+ 368  F297 21 82 F2             LD    HL,txtNoFile
+ 369  F29A DC 18 C8             CALL  C,bios_printString
+ 370  F29D C9                   RET
+ 371  F29E
+ 372  F29E              ;----------------------------------------------------------------------------
+ 373  F29E              ; Директива V - загрузка файла в память по указанному адресу
+ 374  F29E
+ 375  F29E              Dir_V:  ; запоминаем первый параметр директивы в стеке
+ 376  F29E E5                   PUSH  HL
+ 377  F29F
+ 378  F29F                      ; запрос имени файла
+ 379  F29F CD 17 F3             CALL  EnterFileName
+ 380  F2A2
+ 381  F2A2                      ; вытаскиваем первый параметр директивы из стеке
+ 382  F2A2 D1                   POP   DE
+ 383  F2A3 D5                   PUSH  DE
+ 384  F2A4
+ 385  F2A4                      ; загружаем файл по адресу, указанному в директиве
+ 386  F2A4 CD 66 C8             CALL  bios_fileLoad2
+ 387  F2A7
+ 388  F2A7                      ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
+ 389  F2A7 F5                   PUSH  AF
+ 390  F2A8 21 82 F2             LD    HL,txtNoFile
+ 391  F2AB DC 18 C8             CALL  C,bios_printString
+ 392  F2AE F1                   POP   AF
+ 393  F2AF D1                   POP   DE
+ 394  F2B0 D8                   RET   C
+ 395  F2B1
+ 396  F2B1                      ; получение информации о файле
+ 397  F2B1 D5                   PUSH  DE
+ 398  F2B2 21 00 F9             LD    HL,v_fileDescr.name
+ 399  F2B5 CD 51 C8             CALL  bios_fileLoadInfo
+ 400  F2B8
+ 401  F2B8                      ; размер файла
+ 402  F2B8 2A 1C F9             LD    HL,(v_fileDescr.size)
+ 403  F2BB EB                   EX    DE,HL
+ 404  F2BC
+ 405  F2BC                      ; печать начального адреса
+ 406  F2BC E1                   POP   HL
+ 407  F2BD CD 43 F5             CALL  printHexWordHL
+ 408  F2C0
+ 409  F2C0                      ; печать конечного адреса
+ 410  F2C0 19                   ADD   HL,DE
+ 411  F2C1 CD 43 F5             CALL  printHexWordHL
+ 412  F2C4 C9                   RET
+ 413  F2C5
+ 414  F2C5              ;----------------------------------------------------------------------------
+ 415  F2C5              ; Директива U - загрузка файла в память
+ 416  F2C5
+ 417  F2C5              Dir_U:  ; запрос имени файла
+ 418  F2C5 CD 17 F3             CALL  EnterFileName
+ 419  F2C8 CD 48 C8             CALL  bios_fileLoad
+ 420  F2CB
+ 421  F2CB                      ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
+ 422  F2CB F5                   PUSH  AF
+ 423  F2CC 21 82 F2             LD    HL,txtNoFile
+ 424  F2CF DC 18 C8             CALL  C,bios_printString
+ 425  F2D2 CD AC F6             CALL  printSpace
+ 426  F2D5 F1                   POP   AF
+ 427  F2D6 D8                   RET   C
+ 428  F2D7
+ 429  F2D7                      ; получение информации о файле
+ 430  F2D7 21 00 F9             LD    HL,v_fileDescr.name
+ 431  F2DA CD 51 C8             CALL  bios_fileLoadInfo
+ 432  F2DD
+ 433  F2DD                      ; печать адреса загрузки
+ 434  F2DD 2A 12 F9             LD    HL,(v_fileDescr.loadAddress)
+ 435  F2E0 E5                   PUSH  HL
+ 436  F2E1 CD 43 F5             CALL  printHexWordHL
+ 437  F2E4 D1                   POP   DE
+ 438  F2E5
+ 439  F2E5                      ; печать размера файла
+ 440  F2E5 2A 1C F9             LD    HL,(v_fileDescr.size)
+ 441  F2E8 19                   ADD   HL,DE
+ 442  F2E9 CD 43 F5             CALL  printHexWordHL
+ 443  F2EC C9                   RET
+ 444  F2ED
+ 445  F2ED              ;----------------------------------------------------------------------------
+ 446  F2ED              ; Директива Y - установка атрибутов файла
+ 447  F2ED
+ 448  F2ED E5           Dir_Y:  PUSH  HL
+ 449  F2EE CD 17 F3             CALL  EnterFileName         ; ввод имени файла
+ 450  F2F1 0E 01                LD    C,01H                 ; режим для фаункции bios_fileGetSetAttr - установка байта атрибутов файла
+ 451  F2F3 E3                   EX    (SP),HL
+ 452  F2F4 7D                   LD    A,L
+ 453  F2F5 E1                   POP   HL
+ 454  F2F6 CD 57 C8             CALL  bios_fileGetSetAttr   ; установка байта атрибутов файла
+ 455  F2F9 21 82 F2             LD    HL,txtNoFile
+ 456  F2FC DC 18 C8             CALL  C,bios_printString    ; если файл не найден - вывести сообщение
+ 457  F2FF C9                   RET
+ 458  F300
+ 459  F300              ;----------------------------------------------------------------------------
+ 460  F300              ; Директива Q - печать атрибутов файла
+ 461  F300
+ 462  F300              Dir_Q:
+ 463  F300 CD 17 F3             CALL  EnterFileName         ; ввод имени файла
+ 464  F303 0E 02                LD    C,02H                 ; режим для фаункции bios_fileGetSetAttr - чтение байта атрибутов файла
+ 465  F305 CD 57 C8             CALL  bios_fileGetSetAttr   ; чтение байта атрибутов файла
+ 466  F308 F5                   PUSH  AF                    ; результат и флаг ошибки (cf) - в стек
+ 467  F309 21 82 F2             LD    HL,txtNoFile
+ 468  F30C DC 18 C8             CALL  C,bios_printString    ; если файл не найден - вывести сообщение
+ 469  F30F CD AC F6             CALL  printSpace
+ 470  F312 F1                   POP   AF                    ; вытаскиваем байт атрибутов
+ 471  F313 D4 15 C8             CALL  NC,bios_printHexByte  ; печатаем байт атрибутов, если не было ошибки
+ 472  F316 C9                   RET
+ 473  F317
+ 474  F317              ;----------------------------------------------------------------------------
+ 475  F317              ; Запрос имени файла
+ 476  F317              ; выход:
+ 477  F317              ;   HL = адрес буфера с подготовленным именем файла
+ 478  F317
+ 479  F317              EnterFileName:
+ 480  F317 21 19 F6             LD    HL,txtFileQuestMark   ; печать приглашеиня ввести имя файла
+ 481  F31A CD 18 C8             CALL  bios_printString
+ 482  F31D 21 60 8F             LD    HL,INPUT_BUF          ; буфер для ввода строки
+ 483  F320 11 6D 8F             LD    DE,INPUT_BUF_END
+ 484  F323 CD 0F C8             CALL  bios_input
+ 485  F326 11 00 F9             LD    DE,v_fileDescr.name   ; буфер для подготовленного имени файла
+ 486  F329 CD 5A C8             CALL  bios_fileNamePrepare  ; подготавливаем имя файла
+ 487  F32C EB                   EX    DE,HL                 ; HL = подготовленное имя файла
+ 488  F32D C9                   RET
+ 489  F32E
+ 490  F32E              ;----------------------------------------------------------------------------
+ 491  F32E              ; Директива R - чтеине файла с ленты
+ 492  F32E
+ 493  F32E              Dir_R:  ; загрузка файла
+ 494  F32E CD 24 F8             CALL  mon2_tapeLoad
+ 495  F331 C5                   PUSH  BC
+ 496  F332 D5                   PUSH  DE
+ 497  F333 E5                   PUSH  HL
+ 498  F334
+ 499  F334                      ; расчет контрольной суммы
+ 500  F334 CD 2A C8             CALL  bios_calcCS
+ 501  F337
+ 502  F337                      ; печать начального адреса
+ 503  F337 E1                   POP   HL
+ 504  F338 CD 43 F5             CALL  printHexWordHL
+ 505  F33B
+ 506  F33B                      ; печать конечного адреса
+ 507  F33B E1                   POP   HL
+ 508  F33C CD 43 F5             CALL  printHexWordHL
+ 509  F33F
+ 510  F33F                      ; сравнение контрольной суммы из файла и рассчитанной
+ 511  F33F E1                   POP   HL
+ 512  F340 50                   LD    D,B
+ 513  F341 59                   LD    E,C
+ 514  F342 CD 27 C4             CALL  bios_cmp_hl_de
+ 515  F345
+ 516  F345                      ; если не совпадают - переход
+ 517  F345 C2 4C F3             JP    NZ,LBL13
+ 518  F348
+ 519  F348                      ; иначе печать контрольной суммы и выход
+ 520  F348 CD 43 F5             CALL  printHexWordHL
+ 521  F34B C9                   RET
+ 522  F34C
+ 523  F34C              LBL13:  ; печать знака вопроса и выход
+ 524  F34C CD AC F6             CALL  printSpace
+ 525  F34F 0E 3F                LD    C, '?'
+ 526  F351 CD 09 C8             CALL  bios_printChar
+ 527  F354 C9                   RET
+ 528  F355
+ 529  F355              ;----------------------------------------------------------------------------
+ 530  F355
+ 531  F355 F5           SUB6:   PUSH  AF
+ 532  F356 3A E9 8F             LD    A,(bios_vars.cursorCfg)
+ 533  F359 F5                   PUSH  AF
+ 534  F35A 3E 11                LD    A,11H
+ 535  F35C C3 90 F7             JP    LBL63
+ 536  F35F
+ 537  F35F                      ; ???
+ 538  F35F 00                   NOP
+ 539  F360 00                   NOP
+ 540  F361
+ 541  F361              ;----------------------------------------------------------------------------
+ 542  F361              ; Директива H - печать суммы и разности двух HEX слов
+ 543  F361
+ 544  F361 E5           Dir_H:  PUSH  HL
+ 545  F362 19                   ADD   HL,DE             ; сумма
+ 546  F363 CD 43 F5             CALL  printHexWordHL    ; печатаем ее
+ 547  F366 CD AC F6             CALL  printSpace        ; печатаем проблел
+ 548  F369
+ 549  F369                      ; DE = -DE
+ 550  F369 7B                   LD    A,E
+ 551  F36A 2F                   CPL
+ 552  F36B 5F                   LD    E,A
+ 553  F36C 7A                   LD    A,D
+ 554  F36D 2F                   CPL
+ 555  F36E 57                   LD    D,A
+ 556  F36F 13                   INC   DE
+ 557  F370
+ 558  F370 E1                   POP   HL
+ 559  F371 19                   ADD   HL,DE             ; разность
+ 560  F372 CD 43 F5             CALL  printHexWordHL    ; печатаем ее
+ 561  F375 C9                   RET
+ 562  F376
+ 563  F376              ;----------------------------------------------------------------------------
+ 564  F376              ; Директива X - печать содержимого регистров процессора
+ 565  F376
+ 566  F376 21 A4 8F     Dir_X:  LD    HL,vars1.V_8FA3+1 ; 36772
+ 567  F379 11 19 F7             LD    DE,txtRegisters             ; 63244
+ 568  F37C 0E 04                LD    C,04H         ; 4
+ 569  F37E C5           LBL16:  PUSH  BC
+ 570  F37F CD AB F3             CALL  SUB7
+ 571  F382 C1                   POP   BC
+ 572  F383 0D                   DEC   C
+ 573  F384 C2 7E F3             JP    NZ,LBL16
+ 574  F387 CD C0 F3             CALL  SUB8
+ 575  F38A 2A 9D 8F             LD    HL,(vars1.V_8F9D)
+ 576  F38D CD 43 F5             CALL  printHexWordHL
+ 577  F390 CD C0 F3             CALL  SUB8
+ 578  F393 2A 97 8F             LD    HL,(vars1.V_8F97)
+ 579  F396 CD 43 F5             CALL  printHexWordHL
+ 580  F399 CD C0 F3             CALL  SUB8
+ 581  F39C 2A A5 8F             LD    HL,(vars1.V_8FA5)
+ 582  F39F CD 43 F5             CALL  printHexWordHL
+ 583  F3A2 C9                   RET
+ 584  F3A3
+ 585  F3A3              ;----------------------------------------------------------------------------
+ 586  F3A3              ; Если нажата клавиша, записать 0FFh по адресу (HL)
+ 587  F3A3
+ 588  F3A3              setMIfKeyPressed:
+ 589  F3A3 CD 1B C8             CALL  bios_keyScan
+ 590  F3A6 3C                   INC   A
+ 591  F3A7 C8                   RET   Z
+ 592  F3A8 36 FF                LD    (HL), 0FFh
+ 593  F3AA C9                   RET
+ 594  F3AB
+ 595  F3AB              ;----------------------------------------------------------------------------
+ 596  F3AB
+ 597  F3AB 46           SUB7:   LD    B,(HL)
+ 598  F3AC 2B                   DEC   HL
+ 599  F3AD 4E                   LD    C,(HL)
+ 600  F3AE 2B                   DEC   HL
+ 601  F3AF C5                   PUSH  BC
+ 602  F3B0 CD C0 F3             CALL  SUB8
+ 603  F3B3 78                   LD    A,B
+ 604  F3B4 CD 15 F8             CALL  mon2_printHexByte
+ 605  F3B7 CD C0 F3             CALL  SUB8
+ 606  F3BA C1                   POP   BC
+ 607  F3BB 79                   LD    A,C
+ 608  F3BC CD 15 F8             CALL  mon2_printHexByte
+ 609  F3BF C9                   RET
+ 610  F3C0 EB           SUB8:   EX    DE,HL         ; [5]
+ 611  F3C1 C5                   PUSH  BC
+ 612  F3C2 CD AC F6             CALL  printSpace
+ 613  F3C5 CD 38 C4             CALL  bios_printStringOld
+ 614  F3C8 23                   INC   HL
+ 615  F3C9 C1                   POP   BC
+ 616  F3CA EB                   EX    DE,HL
+ 617  F3CB C9                   RET
+ 618  F3CC
+ 619  F3CC              ;----------------------------------------------------------------------------
+ 620  F3CC              ; Директива G - запуск программы по адресу (первый параметр)
+ 621  F3CC              ; Второй параметр - точка перехвата?
+ 622  F3CC
+ 623  F3CC 7B           Dir_G:  LD    A,E
+ 624  F3CD B7                   OR    A
+ 625  F3CE C2 D6 F3             JP    NZ,LBL19  ; если в E не ноль
+ 626  F3D1 7A                   LD    A,D
+ 627  F3D2 B7                   OR    A
+ 628  F3D3 CA F9 F3             JP    Z,LBL20   ; если в D не ноль
+ 629  F3D6
+ 630  F3D6 E5           LBL19:  PUSH  HL
+ 631  F3D7 EB                   EX    DE,HL
+ 632  F3D8 22 97 8F             LD    (vars1.V_8F97),HL
+ 633  F3DB 7E                   LD    A,(HL)
+ 634  F3DC 36 FF                LD    (HL),0FFH
+ 635  F3DE 32 99 8F             LD    (vars1.V_8F99),A
+ 636  F3E1 21 38 00             LD    HL,0038H
+ 637  F3E4 11 9A 8F             LD    DE,vars1.V_8F9A
+ 638  F3E7 01 05 F4             LD    BC,REF4
+ 639  F3EA CD 02 F4             CALL  SUB11
+ 640  F3ED 36 C3                LD    (HL),0C3H
+ 641  F3EF CD 00 F4             CALL  SUB10
+ 642  F3F2 CD 00 F4             CALL  SUB10
+ 643  F3F5 70                   LD    (HL),B
+ 644  F3F6 2B                   DEC   HL
+ 645  F3F7 71                   LD    (HL),C
+ 646  F3F8 E1                   POP   HL
+ 647  F3F9 CD FF F3     LBL20:  CALL  SUB9
+ 648  F3FC C3 05 F1             JP    RestartNoCls
+ 649  F3FF E9           SUB9:   JP    (HL)
+ 650  F400 23           SUB10:  INC   HL
+ 651  F401 13                   INC   DE
+ 652  F402 7E           SUB11:  LD    A,(HL)
+ 653  F403 12                   LD    (DE),A
+ 654  F404 C9                   RET
+ 655  F405
+ 656  F405 22 9D 8F     REF4:   LD    (vars1.V_8F9D),HL
+ 657  F408 EB                   EX    DE,HL
+ 658  F409 22 9F 8F             LD    (vars1.V_8F9F),HL
+ 659  F40C C5                   PUSH  BC
+ 660  F40D E1                   POP   HL
+ 661  F40E 22 A1 8F             LD    (vars1.V_8FA1),HL
+ 662  F411 F5                   PUSH  AF
+ 663  F412 E1                   POP   HL
+ 664  F413 22 A3 8F             LD    (vars1.V_8FA3),HL
+ 665  F416 21 00 00             LD    HL,0000H
+ 666  F419 39                   ADD   HL,SP
+ 667  F41A 23                   INC   HL
+ 668  F41B 23                   INC   HL
+ 669  F41C 22 A5 8F             LD    (vars1.V_8FA5),HL
+ 670  F41F 2A 97 8F             LD    HL,(vars1.V_8F97)
+ 671  F422 3A 99 8F             LD    A,(vars1.V_8F99)
+ 672  F425 77                   LD    (HL),A
+ 673  F426 21 9A 8F             LD    HL,vars1.V_8F9A
+ 674  F429 11 38 00             LD    DE,0038H
+ 675  F42C CD 02 F4             CALL  SUB11
+ 676  F42F CD 00 F4             CALL  SUB10
+ 677  F432 CD 00 F4             CALL  SUB10
+ 678  F435 C3 05 F1             JP    RestartNoCls
+ 679  F438
+ 680  F438              ;----------------------------------------------------------------------------
+ 681  F438              ; Директива S - ???
+ 682  F438
+ 683  F438 E5           Dir_S:  PUSH  HL
+ 684  F439 C5                   PUSH  BC
+ 685  F43A 21 60 8F             LD    HL,INPUT_BUF
+ 686  F43D 0E 00                LD    C,00H
+ 687  F43F 7E           LBL22:  LD    A,(HL)
+ 688  F440 FE 2C                CP    2CH           ; символ ','
+ 689  F442 C2 46 F4             JP    NZ,LBL23
+ 690  F445 0C                   INC   C             ; пропускаем ','
+ 691  F446 23           LBL23:  INC   HL
+ 692  F447 FE 0D                CP    0DH           ; пеервод строки
+ 693  F449 C2 3F F4             JP    NZ,LBL22
+ 694  F44C 0D                   DEC   C
+ 695  F44D 79                   LD    A,C
+ 696  F44E 32 89 8F             LD    (vars1.V_8F89),A
+ 697  F451 FE 01                CP    01H
+ 698  F453 C1                   POP   BC
+ 699  F454 E1                   POP   HL
+ 700  F455 CA 70 F4             JP    Z,LBL24
+ 701  F458 E5                   PUSH  HL
+ 702  F459 D5                   PUSH  DE
+ 703  F45A C5                   PUSH  BC
+ 704  F45B 2A 87 8F             LD    HL,(vars1.V_8F87)
+ 705  F45E 4D                   LD    C,L
+ 706  F45F 44                   LD    B,H
+ 707  F460 CD 99 F5             CALL  SUB15
+ 708  F463 7D                   LD    A,L
+ 709  F464 32 8B 8F             LD    (vars1.V_8F8B),A
+ 710  F467 21 8C 8F             LD    HL,vars1.V_8F8C
+ 711  F46A 73                   LD    (HL),E
+ 712  F46B 23                   INC   HL
+ 713  F46C 71                   LD    (HL),C
+ 714  F46D C1                   POP   BC
+ 715  F46E D1                   POP   DE
+ 716  F46F E1                   POP   HL
+ 717  F470 79           LBL24:  LD    A,C
+ 718  F471 32 8A 8F             LD    (vars1.V_8F8A),A
+ 719  F474 E5           LBL25:  PUSH  HL
+ 720  F475 21 8A 8F             LD    HL,vars1.V_8F8A
+ 721  F478 22 8E 8F             LD    (vars1.V_8F8E),HL
+ 722  F47B E1                   POP   HL
+ 723  F47C CD 27 C4             CALL  bios_cmp_hl_de
+ 724  F47F C8                   RET   Z
+ 725  F480 CD B2 F6             CALL  WaitClsKey
+ 726  F483 3A 89 8F             LD    A,(vars1.V_8F89)
+ 727  F486 32 90 8F             LD    (vars1.V_8F90),A
+ 728  F489 47                   LD    B,A
+ 729  F48A 4E           LBL26:  LD    C,(HL)
+ 730  F48B E5                   PUSH  HL
+ 731  F48C 2A 8E 8F             LD    HL,(vars1.V_8F8E)
+ 732  F48F 7E                   LD    A,(HL)
+ 733  F490 B9                   CP    C
+ 734  F491 C2 DE F4             JP    NZ,LBL30
+ 735  F494 23                   INC   HL
+ 736  F495 22 8E 8F             LD    (vars1.V_8F8E),HL
+ 737  F498 E1                   POP   HL
+ 738  F499 23                   INC   HL
+ 739  F49A 05                   DEC   B
+ 740  F49B C2 8A F4             JP    NZ,LBL26
+ 741  F49E E5                   PUSH  HL
+ 742  F49F D5                   PUSH  DE
+ 743  F4A0 C5                   PUSH  BC
+ 744  F4A1 F5                   PUSH  AF
+ 745  F4A2 3A 89 8F             LD    A,(vars1.V_8F89)
+ 746  F4A5 2B           LBL27:  DEC   HL
+ 747  F4A6 3D                   DEC   A
+ 748  F4A7 C2 A5 F4             JP    NZ,LBL27
+ 749  F4AA CD 43 F5             CALL  printHexWordHL
+ 750  F4AD 2B                   DEC   HL
+ 751  F4AE 2B                   DEC   HL
+ 752  F4AF 3A 89 8F             LD    A,(vars1.V_8F89)
+ 753  F4B2 C6 04                ADD   A,04H         ; 4
+ 754  F4B4 47                   LD    B,A
+ 755  F4B5 CD E3 F4     LBL28:  CALL  SUB12
+ 756  F4B8 23                   INC   HL
+ 757  F4B9 05                   DEC   B
+ 758  F4BA C2 B5 F4             JP    NZ,LBL28
+ 759  F4BD 21 0B F6             LD    HL,txtHomeRight11Dot
+ 760  F4C0 CD 18 F8             CALL  mon2_printString
+ 761  F4C3 3A 89 8F             LD    A,(vars1.V_8F89)
+ 762  F4C6 47                   LD    B,A
+ 763  F4C7 80                   ADD   A,B
+ 764  F4C8 80                   ADD   A,B
+ 765  F4C9 3D                   DEC   A
+ 766  F4CA 5F                   LD    E,A
+ 767  F4CB 0E 18                LD    C,18H         ; 24
+ 768  F4CD CD 55 F3     LBL29:  CALL  SUB6
+ 769  F4D0 1D                   DEC   E
+ 770  F4D1 C2 CD F4             JP    NZ,LBL29
+ 771  F4D4 CD F9 F5             CALL  printNewLine
+ 772  F4D7 F1                   POP   AF
+ 773  F4D8 C1                   POP   BC
+ 774  F4D9 D1                   POP   DE
+ 775  F4DA E1                   POP   HL
+ 776  F4DB C3 74 F4             JP    LBL25
+ 777  F4DE E1           LBL30:  POP   HL
+ 778  F4DF 23                   INC   HL
+ 779  F4E0 C3 74 F4             JP    LBL25
+ 780  F4E3 7E           SUB12:  LD    A,(HL)
+ 781  F4E4 C5                   PUSH  BC
+ 782  F4E5 CD 15 F8             CALL  mon2_printHexByte
+ 783  F4E8 CD AC F6             CALL  printSpace
+ 784  F4EB C1                   POP   BC
+ 785  F4EC C9                   RET
+ 786  F4ED
+ 787  F4ED              ;----------------------------------------------------------------------------
+ 788  F4ED
+ 789  F4ED 7E           Dir_N:  LD    A,(HL)
+ 790  F4EE B9                   CP    C
+ 791  F4EF CA 01 F5             JP    Z,LBL32
+ 792  F4F2 CD 43 F5             CALL  printHexWordHL
+ 793  F4F5 7E                   LD    A,(HL)
+ 794  F4F6 C5                   PUSH  BC
+ 795  F4F7 CD 15 F8             CALL  mon2_printHexByte
+ 796  F4FA CD B2 F6             CALL  WaitClsKey
+ 797  F4FD CD F9 F5             CALL  printNewLine
+ 798  F500 C1                   POP   BC
+ 799  F501 CD 27 C4     LBL32:  CALL  bios_cmp_hl_de
+ 800  F504 C8                   RET   Z
+ 801  F505 23                   INC   HL
+ 802  F506 C3 ED F4             JP    Dir_N
+ 803  F509
+ 804  F509              ;----------------------------------------------------------------------------
+ 805  F509              ; Директива F - заполнить блок памяти байтом
+ 806  F509
+ 807  F509 71           Dir_F:  LD    (HL),C
+ 808  F50A CD 27 C4             CALL  bios_cmp_hl_de
+ 809  F50D C8                   RET   Z
+ 810  F50E 23                   INC   HL
+ 811  F50F C3 09 F5             JP    Dir_F
+ 812  F512
+ 813  F512              ;----------------------------------------------------------------------------
+ 814  F512              ; Директива T - копирование блока памяти на новый адрес
+ 815  F512              ; Перекрывающиеся области памяти будут испорчены
+ 816  F512
+ 817  F512 7E           Dir_T:  LD    A,(HL)
+ 818  F513 02                   LD    (BC),A
+ 819  F514 CD 27 C4             CALL  bios_cmp_hl_de
+ 820  F517 C8                   RET   Z
+ 821  F518 23                   INC   HL
+ 822  F519 03                   INC   BC
+ 823  F51A C3 12 F5             JP    Dir_T
+ 824  F51D
+ 825  F51D              ;----------------------------------------------------------------------------
+ 826  F51D              ; Директива C - сравнение двух блоков памяти
+ 827  F51D
+ 828  F51D 0A           Dir_C:  LD    A,(BC)
+ 829  F51E BE                   CP    (HL)
+ 830  F51F CA 3A F5             JP    Z,LBL36
+ 831  F522 C5                   PUSH  BC
+ 832  F523 CD 43 F5             CALL  printHexWordHL
+ 833  F526 7E                   LD    A,(HL)
+ 834  F527 CD 15 F8             CALL  mon2_printHexByte
+ 835  F52A CD AC F6             CALL  printSpace
+ 836  F52D C1                   POP   BC
+ 837  F52E C5                   PUSH  BC
+ 838  F52F 0A                   LD    A,(BC)
+ 839  F530 CD 15 F8             CALL  mon2_printHexByte
+ 840  F533 CD B2 F6             CALL  WaitClsKey
+ 841  F536 CD F9 F5             CALL  printNewLine
+ 842  F539 C1                   POP   BC
+ 843  F53A CD 27 C4     LBL36:  CALL  bios_cmp_hl_de
+ 844  F53D C8                   RET   Z
+ 845  F53E 23                   INC   HL
+ 846  F53F 03                   INC   BC
+ 847  F540 C3 1D F5             JP    Dir_C
+ 848  F543
+ 849  F543              ;----------------------------------------------------------------------------
+ 850  F543              ; Печать слова в HEX формате из HL, обрамляется пробелами
+ 851  F543
+ 852  F543              printHexWordHL:
+ 853  F543 C5                   PUSH  BC
+ 854  F544 CD AC F6             CALL  printSpace
+ 855  F547              printHexWordHL_noSpace:
+ 856  F547 7C                   LD    A,H
+ 857  F548 CD 15 F8             CALL  mon2_printHexByte
+ 858  F54B 7D                   LD    A,L
+ 859  F54C CD 15 F8             CALL  mon2_printHexByte
+ 860  F54F CD AC F6             CALL  printSpace
+ 861  F552 C1                   POP   BC
+ 862  F553 C9                   RET
+ 863  F554
+ 864  F554              ;----------------------------------------------------------------------------
+ 865  F554              ; Расчет и печать контрольной суммы
+ 866  F554              ; вход:
+ 867  F554              ;   hl = начальный адрес
+ 868  F554              ;   de = конечный адрес
+ 869  F554
+ 870  F554              Dir_K:
+ 871  F554 CD 2A F8             CALL  mon2_calcCS
+ 872  F557 C5                   PUSH  BC
+ 873  F558 E1                   POP   HL    ; hl = bc
+ 874  F559 CD 43 F5             CALL  printHexWordHL
+ 875  F55C C9                   RET
+ 876  F55D
+ 877  F55D              ;----------------------------------------------------------------------------
+ 878  F55D              ; Директива L - дамп блока памяти в текстовом виде
+ 879  F55D
+ 880  F55D CD 43 F5     Dir_L:  CALL  printHexWordHL
+ 881  F560 06 10                LD    B,10H         ; 16
+ 882  F562 4E           LBL40:  LD    C,(HL)
+ 883  F563 3A 85 8F             LD    A,(vars1.ThirdParam)
+ 884  F566 B7                   OR    A
+ 885  F567 CA 6C F5             JP    Z,LBL41
+ 886  F56A A1                   AND   C
+ 887  F56B 4F                   LD    C,A
+ 888  F56C 79           LBL41:  LD    A,C
+ 889  F56D FE 20                CP    20H           ; 32 ' '
+ 890  F56F DA 77 F5             JP    C,LBL42
+ 891  F572 FE 7F                CP    7FH           ; 127
+ 892  F574 DA 79 F5             JP    C,LBL43
+ 893  F577 0E 2E        LBL42:  LD    C,2EH         ; 46 '.'
+ 894  F579 CD 09 F8     LBL43:  CALL  mon2_printChar
+ 895  F57C CD AC F6             CALL  printSpace
+ 896  F57F CD 27 C4             CALL  bios_cmp_hl_de
+ 897  F582 C8                   RET   Z
+ 898  F583 05                   DEC   B
+ 899  F584 23                   INC   HL
+ 900  F585 C2 62 F5             JP    NZ,LBL40
+ 901  F588 CD B2 F6             CALL  WaitClsKey
+ 902  F58B CD F9 F5             CALL  printNewLine
+ 903  F58E C3 5D F5             JP    Dir_L
+ 904  F591
+ 905  F591              ;----------------------------------------------------------------------------
+ 906  F591              ; Анализ строки в буфере и разбивка на компоненты:
+ 907  F591              ; A = буква директивы
+ 908  F591              ; HL = первый HEX параметр
+ 909  F591              ; DE = второй HEX параметр
+ 910  F591              ; BC = третий HEX параметр
+ 911  F591
+ 912  F591              Tokenizer:
+ 913  F591                      ; читаем букву директивы
+ 914  F591 01 60 8F             LD    BC,INPUT_BUF
+ 915  F594 0A                   LD    A,(BC)
+ 916  F595
+ 917  F595                      ; сохраняем букву директивы
+ 918  F595 32 80 8F             LD    (vars1.Directive),A
+ 919  F598 03                   INC   BC
+ 920  F599
+ 921  F599              SUB15:  ; читаем и сохраняем три HEX параметра
+ 922  F599 CD C0 F5             CALL  ReadHexWord
+ 923  F59C 22 81 8F             LD    (vars1.FirstParam),HL
+ 924  F59F CD C0 F5             CALL  ReadHexWord
+ 925  F5A2 22 83 8F             LD    (vars1.SecondParam),HL
+ 926  F5A5 CD C0 F5             CALL  ReadHexWord
+ 927  F5A8 22 85 8F             LD    (vars1.ThirdParam),HL
+ 928  F5AB
+ 929  F5AB 69                   LD    L,C
+ 930  F5AC 60                   LD    H,B
+ 931  F5AD 22 87 8F             LD    (vars1.V_8F87),HL
+ 932  F5B0
+ 933  F5B0                      ; помещаем три HEX параметра в регитсры HL, DE, BC
+ 934  F5B0 2A 85 8F             LD    HL,(vars1.ThirdParam)
+ 935  F5B3 4D                   LD    C,L
+ 936  F5B4 44                   LD    B,H
+ 937  F5B5 2A 83 8F             LD    HL,(vars1.SecondParam)
+ 938  F5B8 EB                   EX    DE,HL
+ 939  F5B9 2A 81 8F             LD    HL,(vars1.FirstParam)
+ 940  F5BC
+ 941  F5BC                      ; и букву директиры - в регистр A
+ 942  F5BC 3A 80 8F             LD    A,(vars1.Directive)
+ 943  F5BF
+ 944  F5BF                      ; выходим
+ 945  F5BF C9                   RET
+ 946  F5C0
+ 947  F5C0              ;----------------------------------------------------------------------------
+ 948  F5C0              ; Преобразование строки по адресу BC в HEX число в HL
+ 949  F5C0
+ 950  F5C0              ReadHexWord:
+ 951  F5C0 21 00 00             LD    HL,0000H
+ 952  F5C3 0A           LBL44:  LD    A,(BC)
+ 953  F5C4 FE 0D                CP    0DH           ; 13
+ 954  F5C6 C8                   RET   Z
+ 955  F5C7 FE 2C                CP    2CH           ; 44 ','
+ 956  F5C9 CA D9 F5             JP    Z,LBL45
+ 957  F5CC CD DB F5             CALL  SUB17
+ 958  F5CF 29                   ADD   HL,HL
+ 959  F5D0 29                   ADD   HL,HL
+ 960  F5D1 29                   ADD   HL,HL
+ 961  F5D2 29                   ADD   HL,HL
+ 962  F5D3 85                   ADD   A,L
+ 963  F5D4 6F                   LD    L,A
+ 964  F5D5 03                   INC   BC
+ 965  F5D6 C3 C3 F5             JP    LBL44
+ 966  F5D9 03           LBL45:  INC   BC
+ 967  F5DA C9                   RET
+ 968  F5DB
+ 969  F5DB              ;----------------------------------------------------------------------------
+ 970  F5DB
+ 971  F5DB D6 30        SUB17:  SUB   '0'
+ 972  F5DD FE 0A                CP    0Ah
+ 973  F5DF D8                   RET   C
+ 974  F5E0 D6 11                SUB   11h
+ 975  F5E2 FE 06                CP    06h
+ 976  F5E4 D2 97 F6             JP    NC,TypeErrorRestart
+ 977  F5E7 C6 0A                ADD   A,10
+ 978  F5E9 C9                   RET
+ 979  F5EA
+ 980  F5EA              ;----------------------------------------------------------------------------
+ 981  F5EA
+ 982  F5EA C5           SUB18:  PUSH  BC
+ 983  F5EB 0E 19                LD    C,19h
+ 984  F5ED CD 09 F8             CALL  mon2_printChar
+ 985  F5F0 C1                   POP   BC
+ 986  F5F1 C9                   RET
+ 987  F5F2
+ 988  F5F2              ;----------------------------------------------------------------------------
+ 989  F5F2
+ 990  F5F2 E5           SUB19:  PUSH  HL
+ 991  F5F3 21 60 8F             LD    HL,INPUT_BUF
+ 992  F5F6 C3 A0 F6             JP    LBL53
+ 993  F5F9
+ 994  F5F9              ;----------------------------------------------------------------------------
+ 995  F5F9              ; Печать перевода строки (0Ah, 0Dh)
+ 996  F5F9
+ 997  F5F9              printNewLine:
+ 998  F5F9 0E 0A                LD    C,0AH
+ 999  F5FB CD 09 F8             CALL  mon2_printChar
+1000  F5FE 0E 0D                LD    C,0DH
+1001  F600 CD 09 F8             CALL  mon2_printChar
+1002  F603 C9                   RET
+1003  F604
+1004  F604              ;----------------------------------------------------------------------------
+1005  F604              ; Русский текст в кодировке КОИ-7
+1006  F604
+1007  F604 20 20 3F 00  txtSpaceQuestMark:  DB  "  ?",00H
+1008  F608 0A 0D 00     txtNewLine:         DB  0AH,0DH,00H
+1009  F60B 0D 18 18 18  txtHomeRight11Dot:  DB  0DH,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,2EH,00H
+1009  F60F 18 18 18 18
+1009  F613 18 18 18 18
+1009  F617 2E 00
+1010  F619 46 49 4C 45  txtFileQuestMark:   DB  "FILE? ",00H
+1010  F61D 3F 20 00
+1011  F620 0A 46 49 4C                      DB  0AH,"FILE: ",00H
+1011  F624 45 3A 20 00
+1012  F628
+1013  F628              ;----------------------------------------------------------------------------
+1014  F628              ; Директива M - редактирование блока памяти
+1015  F628
+1016  F628 CD EA F5     Dir_M:  CALL  SUB18
+1017  F62B CD F9 F5     LBL47:  CALL  printNewLine
+1018  F62E CD 43 F5             CALL  printHexWordHL
+1019  F631 7E                   LD    A,(HL)
+1020  F632 CD 15 F8             CALL  mon2_printHexByte
+1021  F635 CD AC F6             CALL  printSpace
+1022  F638 CD 03 F8             CALL  mon2_getch
+1023  F63B CD BB F6             CALL  RestartIfCls
+1024  F63E FE 1A                CP    1AH           ; кнопка вниз
+1025  F640 CA 4C F6             JP    Z,LBL48
+1026  F643 FE 08                CP    08H           ; кнопка влева
+1027  F645 CA 50 F6             JP    Z,LBL49
+1028  F648 CD 54 F6             CALL  SUB21
+1029  F64B 77                   LD    (HL),A
+1030  F64C 23           LBL48:  INC   HL
+1031  F64D C3 2B F6             JP    LBL47
+1032  F650 2B           LBL49:  DEC   HL
+1033  F651 C3 2B F6             JP    LBL47
+1034  F654 C5           SUB21:  PUSH  BC
+1035  F655 C3 5C F6             JP    LBL50
+1036  F658 C5                   PUSH  BC
+1037  F659 CD 03 F8             CALL  mon2_getch
+1038  F65C CD 6D F6     LBL50:  CALL  SUB22
+1039  F65F 07                   RLCA
+1040  F660 07                   RLCA
+1041  F661 07                   RLCA
+1042  F662 07                   RLCA
+1043  F663 47                   LD    B,A
+1044  F664 CD 03 F8             CALL  mon2_getch
+1045  F667 CD 6D F6             CALL  SUB22
+1046  F66A B0                   OR    B
+1047  F66B C1                   POP   BC
+1048  F66C C9                   RET
+1049  F66D
+1050  F66D FE 20        SUB22:  CP    20H           ; 32 ' '; [2]
+1051  F66F DA 05 F1             JP    C,RestartNoCls
+1052  F672 FE 3A                CP    3AH           ; 58 ':'
+1053  F674 DA 8C F6             JP    C,LBL51
+1054  F677 E6 5F                AND   5FH           ; 95 '_'
+1055  F679 FE 41                CP    41H           ; 65 'A'
+1056  F67B DA 97 F6             JP    C,TypeErrorRestart
+1057  F67E FE 47                CP    47H           ; 71 'G'
+1058  F680 D2 97 F6             JP    NC,TypeErrorRestart
+1059  F683 F5                   PUSH  AF
+1060  F684 4F                   LD    C,A
+1061  F685 CD 09 F8             CALL  mon2_printChar
+1062  F688 F1                   POP   AF
+1063  F689 D6 37                SUB   37H           ; 55 '7'
+1064  F68B C9                   RET
+1065  F68C F6 10        LBL51:  OR    10H           ; 16
+1066  F68E F5                   PUSH  AF
+1067  F68F 4F                   LD    C,A
+1068  F690 CD 09 F8             CALL  mon2_printChar
+1069  F693 F1                   POP   AF
+1070  F694 D6 30                SUB   30H           ; 48 '0'
+1071  F696 C9                   RET
+1072  F697
+1073  F697              ;----------------------------------------------------------------------------
+1074  F697              ; Печать знака вопроса и перезапуск
+1075  F697
+1076  F697              TypeErrorRestart:
+1077  F697 21 04 F6             LD    HL,txtSpaceQuestMark
+1078  F69A CD 38 C4             CALL  bios_printStringOld
+1079  F69D C3 05 F1             JP    RestartNoCls
+1080  F6A0
+1081  F6A0              ;----------------------------------------------------------------------------
+1082  F6A0
+1083  F6A0 C5           LBL53:  PUSH  BC
+1084  F6A1 D5                   PUSH  DE
+1085  F6A2 11 80 8F             LD    DE,vars1.Directive
+1086  F6A5 CD A0 F7             CALL  SUB28
+1087  F6A8 D1                   POP   DE
+1088  F6A9 C1                   POP   BC
+1089  F6AA E1                   POP   HL
+1090  F6AB C9                   RET
+1091  F6AC
+1092  F6AC              ;----------------------------------------------------------------------------
+1093  F6AC              ; Печать пробела
+1094  F6AC
+1095  F6AC              printSpace:
+1096  F6AC 0E 20                LD    C,20H
+1097  F6AE CD 09 F8             CALL  mon2_printChar
+1098  F6B1 C9                   RET
+1099  F6B2
+1100  F6B2              ;----------------------------------------------------------------------------
+1101  F6B2              ; Ожидание нажатия клавиши СТР
+1102  F6B2
+1103  F6B2              WaitClsKey:
+1104  F6B2 CD 1B F8             CALL  mon2_keyScan
+1105  F6B5 FE 1F                CP    1FH
+1106  F6B7 C0                   RET   NZ
+1107  F6B8 CD 03 F8             CALL  mon2_getch
+1108  F6BB                      ; продолжение в RestartIfCls
+1109  F6BB
+1110  F6BB              ;----------------------------------------------------------------------------
+1111  F6BB              ; Перезапуск Монитора, если A == 1Fh
+1112  F6BB
+1113  F6BB              RestartIfCls:
+1114  F6BB FE 1F                CP    1FH
+1115  F6BD C0                   RET   NZ
+1116  F6BE C3 05 F1             JP    RestartNoCls
+1117  F6C1
+1118  F6C1              ;----------------------------------------------------------------------------
+1119  F6C1              ; Директива D - дамп блока памяти в HEX виде
+1120  F6C1
+1121  F6C1 CD 36 F8     Dir_D:  CALL  mon2_printHexWord
+1122  F6C4 7D                   LD    A,L
+1123  F6C5 E6 0F                AND   0FH
+1124  F6C7 4F                   LD    C,A
+1125  F6C8 2F                   CPL
+1126  F6C9 E6 0F                AND   0FH
+1127  F6CB 3C                   INC   A
+1128  F6CC 47                   LD    B,A
+1129  F6CD 79                   LD    A,C
+1130  F6CE 87                   ADD   A,A
+1131  F6CF 87                   ADD   A,A
+1132  F6D0 87                   ADD   A,A
+1133  F6D1 81                   ADD   A,C
+1134  F6D2 C6 0F                ADD   A,0FH
+1135  F6D4 32 FD 8F             LD    (bios_vars.cursorX),A
+1136  F6D7 7E           LBL55:  LD    A,(HL)
+1137  F6D8 CD 15 F8             CALL  mon2_printHexByte
+1138  F6DB 78                   LD    A,B
+1139  F6DC FE 09                CP    09H
+1140  F6DE C2 E9 F6             JP    NZ,LBL56
+1141  F6E1 0E 2D                LD    C,2DH         ; печать символа '-'
+1142  F6E3 CD 09 F8             CALL  mon2_printChar
+1143  F6E6 C3 EC F6             JP    LBL57
+1144  F6E9 CD AC F6     LBL56:  CALL  printSpace
+1145  F6EC CD 27 C4     LBL57:  CALL  bios_cmp_hl_de
+1146  F6EF C8                   RET   Z
+1147  F6F0 05                   DEC   B
+1148  F6F1 23                   INC   HL
+1149  F6F2 C2 D7 F6             JP    NZ,LBL55
+1150  F6F5 CD B2 F6             CALL  WaitClsKey
+1151  F6F8 CD F9 F5             CALL  printNewLine
+1152  F6FB C3 C1 F6             JP    Dir_D
+1153  F6FE 5F                   LD    E,A
+1154  F6FF 0F                   RRCA
+1155  F700 0F                   RRCA
+1156  F701 0F                   RRCA
+1157  F702 0F                   RRCA
+1158  F703 CD 0D F7             CALL  SUB26
+1159  F706 57                   LD    D,A
+1160  F707 7B                   LD    A,E
+1161  F708 CD 0D F7             CALL  SUB26
+1162  F70B 5F                   LD    E,A
+1163  F70C C9                   RET
+1164  F70D E6 0F        SUB26:  AND   0FH           ; 15; [2]
+1165  F70F FE 0A                CP    0AH           ; 10
+1166  F711 DA 16 F7             JP    C,LBL58
+1167  F714 C6 07                ADD   A,07H         ; 7
+1168  F716 C6 30        LBL58:  ADD   A,30H         ; 48 '0'
+1169  F718 C9                   RET
+1170  F719
+1171  F719              ;----------------------------------------------------------------------------
+1172  F719
+1173  F719              txtRegisters:
+1174  F719 41 3D 00             DB    "A=",0
+1175  F71C 46 3D 00             DB    "F=",0
+1176  F71F 42 3D 00             DB    "B=",0
+1177  F722 43 3D 00             DB    "C=",0
+1178  F725 44 3D 00             DB    "D=",0
+1179  F728 45 3D 00             DB    "E=",0
+1180  F72B 48 3D 00             DB    "H=",0
+1181  F72E 4C 3D 00             DB    "L=",0
+1182  F731 0A 0D 20 4D          DB    0AH,0DH," M(HL)=",0
+1182  F735 28 48 4C 29
+1182  F739 3D 00
+1183  F73B 50 43 3D 00          DB    "PC=",0
+1184  F73F 53 50 3D 00          DB    "SP=",0
+1185  F743
+1186  F743              ;----------------------------------------------------------------------------
+1187  F743
+1188  F743 F5           SUB27:  PUSH  AF            ; [2]
+1189  F744 3A E6 F0     LBL59:  LD    A,(vars2.V_F0E6)
+1190  F747 E6 0C                AND   0CH           ; 12
+1191  F749 C2 44 F7             JP    NZ,LBL59
+1192  F74C 79                   LD    A,C
+1193  F74D 32 E5 F0             LD    (vars2.V_F0E5),A
+1194  F750 3A E6 F0             LD    A,(vars2.V_F0E6)
+1195  F753 F6 20                OR    20H           ; 32 ' '
+1196  F755 32 E6 F0             LD    (vars2.V_F0E6),A
+1197  F758 3A E6 F0     LBL60:  LD    A,(vars2.V_F0E6)
+1198  F75B E6 04                AND   04H           ; 4
+1199  F75D CA 58 F7             JP    Z,LBL60
+1200  F760 AF                   XOR   A
+1201  F761 32 E6 F0             LD    (vars2.V_F0E6),A
+1202  F764 F1                   POP   AF
+1203  F765 C9                   RET
+1204  F766 E5                   PUSH  HL
+1205  F767 7E           LBL61:  LD    A,(HL)
+1206  F768 B7                   OR    A
+1207  F769 CA 74 F7             JP    Z,LBL62
+1208  F76C 4F                   LD    C,A
+1209  F76D CD 43 F7             CALL  SUB27
+1210  F770 23                   INC   HL
+1211  F771 C3 67 F7             JP    LBL61
+1212  F774 E1           LBL62:  POP   HL
+1213  F775 C9                   RET
+1214  F776 F5                   PUSH  AF
+1215  F777 3E 91                LD    A,91H         ; 145
+1216  F779 32 E7 F0             LD    (vars2.V_F0E7),A
+1217  F77C 3A E6 F0             LD    A,(vars2.V_F0E6)
+1218  F77F F6 10                OR    10H           ; 16
+1219  F781 32 E6 F0             LD    (vars2.V_F0E6),A
+1220  F784 E6 EF                AND   0EFH          ; 239
+1221  F786 32 E6 F0             LD    (vars2.V_F0E6),A
+1222  F789 0E 0F                LD    C,0FH         ; 15
+1223  F78B CD 43 F7             CALL  SUB27
+1224  F78E F1                   POP   AF
+1225  F78F C9                   RET
+1226  F790 32 E9 8F     LBL63:  LD    (bios_vars.cursorCfg),A
+1227  F793 CD 06 C0             CALL  bios_drawCursorOld
+1228  F796 F1                   POP   AF
+1229  F797 32 E9 8F             LD    (bios_vars.cursorCfg),A
+1230  F79A 0E 18                LD    C,18H         ; 24
+1231  F79C F1                   POP   AF
+1232  F79D C3 09 F8             JP    mon2_printChar
+1233  F7A0              ;----------------------------------------------------------------------------
+1234  F7A0
+1235  F7A0 44           SUB28:  LD    B,H
+1236  F7A1 4D                   LD    C,L
+1237  F7A2 CD 03 F8     LBL64:  CALL  mon2_getch
+1238  F7A5 FE 08                CP    08H           ; клавиша влево
+1239  F7A7 CA C6 F7             JP    Z,LBL65
+1240  F7AA FE 0D                CP    0DH           ; клавиша Enter
+1241  F7AC CA E5 F7             JP    Z,LBL67
+1242  F7AF 32 95 8F             LD    (vars1.V_8F95),A
+1243  F7B2 CD 27 C4             CALL  bios_cmp_hl_de
+1244  F7B5 CA A2 F7             JP    Z,LBL64
+1245  F7B8 3A 95 8F             LD    A,(vars1.V_8F95)
+1246  F7BB 77                   LD    (HL),A
+1247  F7BC C5                   PUSH  BC
+1248  F7BD 4F                   LD    C,A
+1249  F7BE CD 09 F8             CALL  mon2_printChar
+1250  F7C1 C1                   POP   BC
+1251  F7C2 23                   INC   HL
+1252  F7C3 C3 A2 F7             JP    LBL64
+1253  F7C6
+1254  F7C6              ;----------------------------------------------------------------------------
+1255  F7C6
+1256  F7C6 7C           LBL65:  LD    A,H
+1257  F7C7 B8                   CP    B
+1258  F7C8 C2 D0 F7             JP    NZ,LBL66
+1259  F7CB 7D                   LD    A,L
+1260  F7CC B9                   CP    C
+1261  F7CD CA A2 F7             JP    Z,LBL64
+1262  F7D0 2B           LBL66:  DEC   HL
+1263  F7D1 C5                   PUSH  BC
+1264  F7D2 0E 08                LD    C,08H         ; 8
+1265  F7D4 CD 09 F8             CALL  mon2_printChar
+1266  F7D7 0E 20                LD    C,20H         ; 32 ' '
+1267  F7D9 CD 09 F8             CALL  mon2_printChar
+1268  F7DC 0E 08                LD    C,08H         ; 8
+1269  F7DE CD 09 F8             CALL  mon2_printChar
+1270  F7E1 C1                   POP   BC
+1271  F7E2 C3 A2 F7             JP    LBL64
+1272  F7E5              LBL67:
+1273  F7E5 77                   LD    (HL),A
+1274  F7E6 C9                   RET
+1275  F7E7 E5                   PUSH  HL
+1276  F7E8 21 E3 FF             LD    HL,0FFE3H   ; 65507
+1277  F7EB 36 0D                LD    (HL),0DH    ; 13
+1278  F7ED 36 0C                LD    (HL),0CH    ; 12
+1279  F7EF E1                   POP   HL
+1280  F7F0 C9                   RET
+1281  F7F1
+1282  F7F1              ;----------------------------------------------------------------------------
+1283  F7F1              ; Таблица переходов F800h
+1284  F7F1              ;----------------------------------------------------------------------------
+1285  F7F1                  ORG_PAD0 0F800h
+1285  F7F1             >         IF $ > 0F800h
+1285  F7F1 ~           >           ; вывод сообщения об ошибке
+1285  F7F1 ~           >           ASSERT 0
+1285  F7F1 ~           >           DISPLAY /l, "Error! ORG_PAD0 failed! ", $, " is more than ", adr
+1285  F7F1             >         ELSE
+1285  F7F1             >           ; заполнение памяти
+1285  F7F1 00 00 00... >           BLOCK 0F800h-$, 0
+1285  F7F5             >         ENDIF
+1285  F800             >         ORG 0F800h
+1286  F800
+1287  F800
+1288  F800 C3 05 F1     mon2_restart:       JP    RestartNoCls          ; F800
+1289  F803 C3 37 C3     mon2_getch:         JP    bios_getchOld         ; F803
+1290  F806 C3 77 C3                         JP    bios_tapeReadOld      ; F806
+1291  F809 C3 37 C0     mon2_printChar:     JP    bios_printCharOld     ; F809
+1292  F80C C3 D0 C3                         JP    bios_tapeWriteOld     ; F80C
+1293  F80F C3 36 C8                         JP    bios_printer          ; F80F
+1294  F812 C3 A3 F3                         JP    setMIfKeyPressed      ; F812
+1295  F815 C3 15 C8     mon2_printHexByte:  JP    bios_printHexByte     ; F815
+1296  F818 C3 38 C4     mon2_printString:   JP    bios_printStringOld   ; F818
+1297  F81B C3 03 C0     mon2_keyScan:       JP    bios_keyScanOld       ; F81B
+1298  F81E C3 1E C8                         JP    bios_getCursorPos     ; F81E
+1299  F821 C9                               RET                         ; F821 - не используется
+1300  F822 00                               NOP
+1301  F823 00                               NOP
+1302  F824 C3 24 C8     mon2_tapeLoad:      JP    bios_tapeLoad         ; F824
+1303  F827 C3 27 C8     mon2_tapeSave:      JP    bios_tapeSave         ; F827
+1304  F82A C3 2A C8     mon2_calcCS:        JP    bios_calcCS           ; F82A
+1305  F82D C3 70 C1                         JP    bios_beep_Old         ; F82D
+1306  F830 C3 30 C8                         JP    bios_getMemTop        ; F830
+1307  F833 C3 33 C8                         JP    bios_setMemTop        ; F833
+1308  F836 C5           mon2_printHexWord:  PUSH  BC                    ; F836 - печать слова из HL в HEX формате, дополняется пробелом
+1309  F837 C3 47 F5                         JP    printHexWordHL_noSpace
+1310  F83A
+1311  F83A              ;----------------------------------------------------------------------------
+1312  F83A
+1313  F83A                  END

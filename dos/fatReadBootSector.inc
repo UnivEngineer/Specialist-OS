@@ -110,7 +110,7 @@ frbs_DriverOk:
             ld      (v_diskInfo.rootDirMaxFiles), hl    ; максимум файлов в корневом каталоге
 
             ld      hl, (v_diskInfo.sectorSize)
-            ld      de, DIR_DESCR_SIZE  ; de = 32
+            ld      de, FILE_DESCR_SIZE ; de = 32
             call    div_hl_de;
             ld      (v_diskInfo.descrPerSector), hl     ; сколько дескрипторов файлов вмещается в один сектор
 
