@@ -15,7 +15,7 @@
     STRUCT  FAT_BOOT_SECTOR
 BS_JmpBoot      BLOCK   3   ; смещение  00h,   3 байт - Jump instruction to the bootstrap code (x86 instruction): EBh, ??h, 90h (Short jump + NOP) or E9h, ??h, ??h (Near jump).
 BS_OEMName      BLOCK   8   ; смещение  03h,   8 байт - "MSWIN 4.1" is recommended but also "MSDOS 5.0" is often used.
-BPB_BytsPerSec  BLOCK   2   ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But must drivers use 512.
+BPB_BytsPerSec  BLOCK   2   ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But most drivers use 512.
 BPB_SecPerClus  BLOCK   1   ; смещение  0Dh,   1 байт - Number of sectors per cluster. Valid values are 1, 2, 4, 8, ... 128.
 BPB_RsvdSecCnt  BLOCK   2   ; смещение  0Eh,   2 байт - Number of sectors in reserved area. This field hould be 1 on FAT12/16 volume.
 BPB_NumFATs     BLOCK   1   ; смещение  10h,   1 байт - Number of FATs. The value of this field should always be 2. On memory cards, it may be 1, but some FAT driver may not recognize such a volume properly.

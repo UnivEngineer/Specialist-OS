@@ -1,0 +1,398 @@
+{
+  "folders": [
+    {
+      "name": "Specialist-OS",
+      "path": "."
+    }
+  ],
+  "extensions": {
+    "recommendations": [
+      "mborik.z80-macroasm"
+    ]
+  },
+  "settings": {
+    "files.autoGuessEncoding": true,
+    "files.eol": "\r\n",
+    "files.insertFinalNewline": false,
+    "files.trimFinalNewlines": false,
+    "files.trimTrailingWhitespace": false,
+    "files.associations": {
+      "*.lst": "plaintext",
+      "*.fix.lst": "plaintext"
+    },
+    "explorer.compactFolders": false,
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.detectIndentation": true,
+    "z80-macroasm.files.include": "**/*.{asm,inc}",
+    "z80-macroasm.files.exclude": "**/*.{lst,fix.lst}",
+    "z80-macroasm.seekSymbolsThroughWorkspace": true,
+    "z80-macroasm.suggestOnInstructions": true,
+    "z80-macroasm.format.enabled": false,
+    "search.exclude": {
+      "**/.vs/**": true,
+      "**/*.lst": true,
+      "**/*.fix.lst": true,
+      "**/Release/**/*.tlog/**": true,
+      "**/Release/**/*.lastbuildstate": true,
+      "**/Release/**/*.recipe": true,
+      "**/Release/**/*.log": true
+    },
+    "files.watcherExclude": {
+      "**/.vs/**": true,
+      "**/*.lst": true,
+      "**/*.fix.lst": true,
+      "**/Release/**/*.tlog/**": true
+    }
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build: dos",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat DOS sys 0xC000"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\dos"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: editor",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat E com 0xE800"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\E"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: flash",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat Flash com 0xDE00"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\flash"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: flash-rom",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat Rom com 0xDE00"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\flash"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: format",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat FORMAT com 0xF100"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\format"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: launch",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat LAUNCH com 0xF800"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\launch"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: mon2",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat mon2 com 0xF100"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\mon2"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: nc",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat NC com 0xE800"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\nc"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: tape",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat tape com 0xEC00"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\tape"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: test-scr",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat test-scr exe 0"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\test-scr"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: OS",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\tasm\\build-project.ps1",
+          "OS"
+        ],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
+        "label": "build: all",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\tasm\\build-project.ps1",
+          "All"
+        ],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
+        "label": "image: system ROM",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "$rom = '${workspaceFolder}\\ROM\\MXOS_MY.bin'; Remove-Item -LiteralPath $rom -Force -ErrorAction SilentlyContinue; Push-Location '${workspaceFolder}\\ROM\\makeRom'; try { & cscript.exe '//nologo' '.\\-makeRom.js'; $exitCode = $LASTEXITCODE } finally { Pop-Location }; if (-not (Test-Path -LiteralPath $rom)) { if ($exitCode -eq 0) { $exitCode = 1 }; exit $exitCode }; exit 0"
+        ],
+        "dependsOn": "build: OS",
+        "dependsOrder": "sequence",
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "image: flash",
+        "type": "process",
+        "command": "cscript.exe",
+        "args": [
+          "//nologo",
+          ".\\-makeRom.js"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\FlashDrive\\${input:flashImageSet}"
+        },
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "listings: emu",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "fix_listings_for_emu.bat"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\Release"
+        },
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "run: emu",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          "$emuDir = $env:SPECIALIST_EMU_DIR; if ([string]::IsNullOrWhiteSpace($emuDir)) { throw 'Set SPECIALIST_EMU_DIR to the directory containing EMU.exe' }; $exe = Join-Path $emuDir 'EMU.exe'; if (-not (Test-Path -LiteralPath $exe)) { throw \"EMU.exe not found: $exe\" }; $targetDir = Join-Path $emuDir 'Specialist'; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null; Copy-Item -LiteralPath '${workspaceFolder}\\ROM\\MXOS_MY.bin' -Destination (Join-Path $targetDir 'MXOS_MY.bin') -Force; Push-Location $emuDir; try { & $exe '/c' 'SpecialistMX2_My_MXOS'; exit $LASTEXITCODE } finally { Pop-Location }"
+        ],
+        "dependsOrder": "sequence",
+        "dependsOn": [
+          "image: system ROM",
+          "listings: emu"
+        ],
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "dedicated",
+          "clear": true
+        }
+      }
+    ],
+    "inputs": [
+      {
+        "id": "flashImageSet",
+        "type": "pickString",
+        "description": "Набор файлов для образа flash-диска",
+        "options": [
+          "Games64k",
+          "Games",
+          "Games2M"
+        ],
+        "default": "Games2M"
+      }
+    ]
+  }
+}

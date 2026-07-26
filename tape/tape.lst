@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tape.asm
+# file opened: D:\Projects\Specialist-OS\tape\tape.asm
   1   0000              ;+---------------------------------------------------------------------------
   2   0000              ; MXOS
   3   0000              ; TAPE.COM - драйвер магнитофона, вынесенный из DOS.SYS
@@ -7,7 +7,7 @@
   6   0000              ;----------------------------------------------------------------------------
   7   0000
   8   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\tape\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -287,7 +287,7 @@
 277+  0000                  ENDS
 278+  0000
 279+  0000              ;-----------------------------------------------------------------------
-280+  0000              ; Информация о активном накопителе (диске)
+280+  0000              ; Информация об активном накопителе (диске)
 281+  0000              ;-----------------------------------------------------------------------
 282+  0000
 283+  0000                  STRUCT DISK_INFO
@@ -378,12 +378,12 @@
 368+  0000              ; Конец
 369+  0000              ;-----------------------------------------------------------------------
 370+  0000
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\tape\../include/mxos.inc
   9   0000
  10   0000                  ORG     0DC00h
  11   DC00
  12   DC00              	INCLUDE "tapeInit.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeInit.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeInit.inc
   1+  DC00              ;+---------------------------------------------------------------------------
   2+  DC00              ; MXOS
   3+  DC00              ; TAPE.SYS - Инициализация
@@ -408,9 +408,9 @@
  22+  DC1B C3 D2 DC             jp      tapeReadError
  23+  DC1E              jumpsEnd:
  24+  DC1E
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeInit.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeInit.inc
  13   DC1E              	INCLUDE "tapeWriteDelay.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeWriteDelay.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeWriteDelay.inc
   1+  DC1E              ;+---------------------------------------------------------------------------
   2+  DC1E              ; MXOS
   3+  DC1E              ; Задержка при записи на ленту
@@ -421,9 +421,9 @@
   8+  DC1E 3A FE 8F     writeDelay: ld    a, (bios_vars.writeDelay)
   9+  DC21 C3 79 DC                 jp    delay_a
  10+  DC24
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeWriteDelay.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeWriteDelay.inc
  14   DC24              	INCLUDE "tapeRead.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeRead.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeRead.inc
   1+  DC24              ;+---------------------------------------------------------------------------
   2+  DC24              ; MXOS
   3+  DC24              ; Чтение байта с ленты
@@ -523,9 +523,9 @@
  97+  DC74 C1                       pop   bc
  98+  DC75 C9                       ret
  99+  DC76
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeRead.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeRead.inc
  15   DC76              	INCLUDE "tapeReadDelay.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeReadDelay.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeReadDelay.inc
   1+  DC76              ;+---------------------------------------------------------------------------
   2+  DC76              ; MXOS
   3+  DC76              ; Задержка при чтении с ленты
@@ -539,9 +539,9 @@
  11+  DC7B C2 7A DC                 jp nz,  delay_l_0
  12+  DC7E C9                       ret
  13+  DC7F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeReadDelay.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeReadDelay.inc
  16   DC7F              	INCLUDE "tapeWrite.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeWrite.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeWrite.inc
   1+  DC7F              ;+---------------------------------------------------------------------------
   2+  DC7F              ; MXOS
   3+  DC7F              ; Запись байта на ленту
@@ -598,9 +598,9 @@
  54+  DCA2 C1                       pop   bc
  55+  DCA3 C9                       ret
  56+  DCA4
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeWrite.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeWrite.inc
  17   DCA4              	INCLUDE "tapeLoadInt.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeLoadInt.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeLoadInt.inc
   1+  DCA4              ;+---------------------------------------------------------------------------
   2+  DCA4              ; MXOS
   3+  DCA4              ; Загрузка программы с ленты. КС не загружается.
@@ -649,9 +649,9 @@
  46+  DCCD 3E FF                    ld    a, 0FFh
  47+  DCCF C3 C1 DC                 jp    loc_C416
  48+  DCD2
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeLoadInt.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeLoadInt.inc
  18   DCD2              	INCLUDE "tapeReadError.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeReadError.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeReadError.inc
   1+  DCD2              ;+---------------------------------------------------------------------------
   2+  DCD2              ; MXOS
   3+  DCD2              ; Вызывается при ошибке чтения с ленты
@@ -664,9 +664,9 @@
  10+  DCD4 2A E1 8F                 ld    hl, (bios_vars.tapeError)
  11+  DCD7 E9                       jp    (hl)
  12+  DCD8
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeReadError.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeReadError.inc
  19   DCD8              	INCLUDE "tapeSave.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeSave.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeSave.inc
   1+  DCD8              ;+---------------------------------------------------------------------------
   2+  DCD8              ; MXOS
   3+  DCD8              ; Запись программы на ленту
@@ -728,9 +728,9 @@
  59+  DD07 E1                       pop     hl
  60+  DD08 C9                       ret
  61+  DD09
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeSave.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeSave.inc
  20   DD09              	INCLUDE "tapeWriteWord.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeWriteWord.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeWriteWord.inc
   1+  DD09              ;+---------------------------------------------------------------------------
   2+  DD09              ; MXOS
   3+  DD09              ; Запись слова на ленту
@@ -750,9 +750,9 @@
  17+  DD0D 7C                       ld    a, h
  18+  DD0E C3 7F DC                 jp    tapeWrite
  19+  DD11
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeWriteWord.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeWriteWord.inc
  21   DD11              	INCLUDE "tapeLoad.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeLoad.inc
+# file opened: D:\Projects\Specialist-OS\tape\tapeLoad.inc
   1+  DD11              ;+---------------------------------------------------------------------------
   2+  DD11              ; MXOS
   3+  DD11              ; Загрузка программы с ленты. КС загружается, но не проверяется.
@@ -781,9 +781,9 @@
  26+  DD20 2A E3 8F                 ld    hl, (bios_vars.tapeAddr)
  27+  DD23 C9                       ret
  28+  DD24
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tapeLoad.inc
+# file closed: D:\Projects\Specialist-OS\tape\tapeLoad.inc
  22   DD24              	INCLUDE "cmp_hl_de_2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\cmp_hl_de_2.inc
+# file opened: D:\Projects\Specialist-OS\tape\cmp_hl_de_2.inc
   1+  DD24              ;+---------------------------------------------------------------------------
   2+  DD24              ; MXOS
   3+  DD24              ; Сравнить hl и de
@@ -800,7 +800,7 @@
  14+  DD29 BB                   cp    e
  15+  DD2A C9                   ret
  16+  DD2B
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\cmp_hl_de_2.inc
+# file closed: D:\Projects\Specialist-OS\tape\cmp_hl_de_2.inc
  23   DD2B
  24   DD2B                  ; Проверка - TAPE.COM не должен вылезать за эти пределы
  25   DD2B                  ASSERT_DONT_FIT 0DE00h
@@ -810,4 +810,4 @@
  25   DD2B             >         ENDIF
  26   DD2B
  27   DD2B                  END
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\tape\tape.asm
+# file closed: D:\Projects\Specialist-OS\tape\tape.asm

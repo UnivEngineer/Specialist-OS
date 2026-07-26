@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\NC.asm
+# file opened: D:\Projects\Specialist-OS\nc\NC.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS - Файловый менеджер NC.COM
   3   0000              ;
@@ -7,7 +7,7 @@
   6   0000              ;----------------------------------------------------------------------------
   7   0000
   8   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\nc\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -287,7 +287,7 @@
 277+  0000                  ENDS
 278+  0000
 279+  0000              ;-----------------------------------------------------------------------
-280+  0000              ; Информация о активном накопителе (диске)
+280+  0000              ; Информация об активном накопителе (диске)
 281+  0000              ;-----------------------------------------------------------------------
 282+  0000
 283+  0000                  STRUCT DISK_INFO
@@ -378,7 +378,7 @@
 368+  0000              ; Конец
 369+  0000              ;-----------------------------------------------------------------------
 370+  0000
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\nc\../include/mxos.inc
   9   0000
  10   0000                  IF NEW_MEMORY_MAP
  11   0000                      ORG 0E800h
@@ -468,7 +468,7 @@
  95   E800              ;---------------------------------------------------------------------------
  96   E800
  97   E800                  INCLUDE "start.inc"     ; Продолжается в main
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\start.inc
+# file opened: D:\Projects\Specialist-OS\nc\start.inc
   1+  E800              ;----------------------------------------------------------------------------
   2+  E800              ; MXOS NC.COM
   3+  E800              ; Запуск
@@ -523,9 +523,9 @@
  44+  E83B                          ; Очищаем командную строку
  45+  E83B CD 3E F0                 call    clearCmdLine
  46+  E83E
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\start.inc
+# file closed: D:\Projects\Specialist-OS\nc\start.inc
  98   E83E                  INCLUDE "main.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\main.inc
+# file opened: D:\Projects\Specialist-OS\nc\main.inc
   1+  E83E              ;----------------------------------------------------------------------------
   2+  E83E              ; MXOS NC.COM
   3+  E83E              ; Основной цикл
@@ -709,9 +709,9 @@
 157+  E938 CD 5E E9                 call    selFileToCmdLine
 158+  E93B C3 6B E8                 jp      mainLoop
 159+  E93E
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\main.inc
+# file closed: D:\Projects\Specialist-OS\nc\main.inc
  99   E93E                  INCLUDE "selFileToCmdLine.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\selFileToCmdLine.inc
+# file opened: D:\Projects\Specialist-OS\nc\selFileToCmdLine.inc
   1+  E93E              ;----------------------------------------------------------------------------
   2+  E93E              ; MXOS NC.COM
   3+  E93E              ; Сформировать строку пути выбраного файла
@@ -786,9 +786,9 @@
  68+  E973 22 C6 F7             ld      (vars.cmdLinePos), hl
  69+  E976 C9                   ret
  70+  E977
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\selFileToCmdLine.inc
+# file closed: D:\Projects\Specialist-OS\nc\selFileToCmdLine.inc
 100   E977                  INCLUDE "butF4.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF4.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF4.inc
   1+  E977              ;----------------------------------------------------------------------------
   2+  E977              ; MXOS NC.COM
   3+  E977              ; Клавиша F4 - запуск редактора
@@ -808,9 +808,9 @@
  17+  E981 11 56 F7             ld      de, aEditor   ; "A:E.COM\r"
  18+  E984 C3 CB E9             jp      Enter_5
  19+  E987
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF4.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF4.inc
 101   E987                  INCLUDE "butEnter.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butEnter.inc
+# file opened: D:\Projects\Specialist-OS\nc\butEnter.inc
   1+  E987              ;----------------------------------------------------------------------------
   2+  E987              ; MXOS NC.COM
   3+  E987              ; Клавиша ENTER
@@ -950,9 +950,9 @@
 129+  EA1D C2 15 EA                 jp      nz, Enter_2
 130+  EA20 C3 F1 E9                 jp      Enter_stdExec
 131+  EA23
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butEnter.inc
+# file closed: D:\Projects\Specialist-OS\nc\butEnter.inc
 102   EA23                  INCLUDE "saveLoadState.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\saveLoadState.inc
+# file opened: D:\Projects\Specialist-OS\nc\saveLoadState.inc
   1+  EA23              ;----------------------------------------------------------------------------
   2+  EA23              ; MXOS NC.COM
   3+  EA23              ; Cохранение состояния в ДОЗУ
@@ -1032,9 +1032,9 @@
  77+  EA66 AF                       xor     a   ; для выхода с флагом z
  78+  EA67 C9                       ret
  79+  EA68
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\saveLoadState.inc
+# file closed: D:\Projects\Specialist-OS\nc\saveLoadState.inc
 103   EA68                  INCLUDE "drawWindow.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\drawWindow.inc
+# file opened: D:\Projects\Specialist-OS\nc\drawWindow.inc
   1+  EA68              ;----------------------------------------------------------------------------
   2+  EA68              ; MXOS NC.COM
   3+  EA68              ; Рисование окошек
@@ -1090,9 +1090,9 @@
  45+  EA96 01 0B 14             ld      bc, (20 << 8) + 11  ; w=160 h=11
  46+  EA99 C3 F2 F0             jp      inverseRect
  47+  EA9C
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\drawWindow.inc
+# file closed: D:\Projects\Specialist-OS\nc\drawWindow.inc
 104   EA9C                  INCLUDE "printStringInv.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printStringInv.inc
+# file opened: D:\Projects\Specialist-OS\nc\printStringInv.inc
   1+  EA9C              ;----------------------------------------------------------------------------
   2+  EA9C              ; MXOS NC.COM
   3+  EA9C              ; Вывод инверсной строки
@@ -1107,9 +1107,9 @@
  12+  EAA5 32 FA 8F                 ld    (bios_vars.inverse),a
  13+  EAA8 C9                       ret
  14+  EAA9
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printStringInv.inc
+# file closed: D:\Projects\Specialist-OS\nc\printStringInv.inc
 105   EAA9                  INCLUDE "inputForCopyMove.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\inputForCopyMove.inc
+# file opened: D:\Projects\Specialist-OS\nc\inputForCopyMove.inc
   1+  EAA9              ;----------------------------------------------------------------------------
   2+  EAA9              ; MXOS NC.COM
   3+  EAA9              ; Ввод строки в которой изначально содержится имя выбранного файла
@@ -1163,9 +1163,9 @@
  51+  EAD7                          ; Перейти к редакированию
  52+  EAD7 C3 FB F4                 jp      input
  53+  EADA
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\inputForCopyMove.inc
+# file closed: D:\Projects\Specialist-OS\nc\inputForCopyMove.inc
 106   EADA                  INCLUDE "printSelDrive.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printSelDrive.inc
+# file opened: D:\Projects\Specialist-OS\nc\printSelDrive.inc
   1+  EADA              ;----------------------------------------------------------------------------
   2+  EADA              ; MXOS NC.COM
   3+  EADA              ; Вывод текущего накопителя
@@ -1179,9 +1179,9 @@
  11+  EADD CD DD F3                 call  readBytePanel
  12+  EAE0 C3 C1 F3                 jp    printDrive
  13+  EAE3
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printSelDrive.inc
+# file closed: D:\Projects\Specialist-OS\nc\printSelDrive.inc
 107   EAE3                  INCLUDE "butF7.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF7.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF7.inc
   1+  EAE3              ;----------------------------------------------------------------------------
   2+  EAE3              ; MXOS NC.COM
   3+  EAE3              ; Клавиша F7. Загрузка файла с ленты на накопитель
@@ -1387,9 +1387,9 @@
 191+  EBE6 C2 E2 EB                 jp nz,      tapeReadAppendName
 192+  EBE9 C3 3E EB                 jp          loc_D2D6
 193+  EBEC
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF7.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF7.inc
 108   EBEC                  INCLUDE "tapeErrorHandler.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\tapeErrorHandler.inc
+# file opened: D:\Projects\Specialist-OS\nc\tapeErrorHandler.inc
   1+  EBEC              ;----------------------------------------------------------------------------
   2+  EBEC              ; MXOS NC.COM
   3+  EBEC              ; Вызывается при ошибке загрузки с ленты
@@ -1409,9 +1409,9 @@
  17+  EBF6                          ; Перезагрузка файлов и продолжение работы
  18+  EBF6 C3 3E E8                 jp    mainReload
  19+  EBF9
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\tapeErrorHandler.inc
+# file closed: D:\Projects\Specialist-OS\nc\tapeErrorHandler.inc
 109   EBF9                  INCLUDE "butF9.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF9.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF9.inc
   1+  EBF9              ;----------------------------------------------------------------------------
   2+  EBF9              ; MXOS NC.COM
   3+  EBF9              ; Клавиша F9 - Сохранение файла на магнитофон
@@ -1511,9 +1511,9 @@
  93+  EC79
  94+  EC79 C3 3E E8                 jp      mainReload
  95+  EC7C
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF9.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF9.inc
 110   EC7C                  INCLUDE "tapeWrite.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\tapeWrite.inc
+# file opened: D:\Projects\Specialist-OS\nc\tapeWrite.inc
   1+  EC7C              ;----------------------------------------------------------------------------
   2+  EC7C              ; MXOS NC.COM
   3+  EC7C              ; Запись слова на ленту
@@ -1568,9 +1568,9 @@
  52+  ECAD F2 EC EB                 jp p,  tapeErrorHandler
  53+  ECB0 C9                       ret
  54+  ECB1
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\tapeWrite.inc
+# file closed: D:\Projects\Specialist-OS\nc\tapeWrite.inc
 111   ECB1                  INCLUDE "butF6.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF6.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF6.inc
   1+  ECB1              ;----------------------------------------------------------------------------
   2+  ECB1              ; MXOS NC.COM
   3+  ECB1              ; Клавиша F6 - переименование
@@ -1634,9 +1634,9 @@
  59+  ED16 CD 4B C8                 call        bios_fileDelete
  60+  ED19 C3 3E E8                 jp          mainReload
  61+  ED1C
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF6.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF6.inc
 112   ED1C                  INCLUDE "butF5.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF5.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF5.inc
   1+  ED1C              ;----------------------------------------------------------------------------
   2+  ED1C              ; MXOS NC.COM
   3+  ED1C              ; Клавиша F5 - копирование
@@ -1663,9 +1663,9 @@
  22+  ED39 CD 50 ED             call    copyFileInt
  23+  ED3C C3 3E E8             jp      mainReload
  24+  ED3F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF5.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF5.inc
 113   ED3F                  INCLUDE "loadSelFileAt0.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\loadSelFileAt0.inc
+# file opened: D:\Projects\Specialist-OS\nc\loadSelFileAt0.inc
   1+  ED3F              ;----------------------------------------------------------------------------
   2+  ED3F              ; MXOS NC.COM
   3+  ED3F              ; Загрузить выбранный файл по адресу 0
@@ -1691,9 +1691,9 @@
  23+  ED4E D1                       pop   de
  24+  ED4F C9                       ret
  25+  ED50
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\loadSelFileAt0.inc
+# file closed: D:\Projects\Specialist-OS\nc\loadSelFileAt0.inc
 114   ED50                  INCLUDE "copyFileInt.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\copyFileInt.inc
+# file opened: D:\Projects\Specialist-OS\nc\copyFileInt.inc
   1+  ED50              ;----------------------------------------------------------------------------
   2+  ED50              ; MXOS NC.COM
   3+  ED50              ; Общая функция для копирования и переноса файла
@@ -1771,9 +1771,9 @@
  65+  ED9E E1                       pop   hl
  66+  ED9F C3 3E E8                 jp    mainReload
  67+  EDA2
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\copyFileInt.inc
+# file closed: D:\Projects\Specialist-OS\nc\copyFileInt.inc
 115   EDA2                  INCLUDE "printInvSelFile.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printInvSelFile.inc
+# file opened: D:\Projects\Specialist-OS\nc\printInvSelFile.inc
   1+  EDA2              ;----------------------------------------------------------------------------
   2+  EDA2              ; MXOS NC.COM
   3+  EDA2              ; Инверсный вывод имени выбранного файла
@@ -1792,9 +1792,9 @@
  16+  EDB3 21 1C F8                 ld    hl, vars.input
  17+  EDB6 C3 9C EA                 jp    printStringInv
  18+  EDB9
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printInvSelFile.inc
+# file closed: D:\Projects\Specialist-OS\nc\printInvSelFile.inc
 116   EDB9                  INCLUDE "butF8.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF8.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF8.inc
   1+  EDB9              ;----------------------------------------------------------------------------
   2+  EDB9              ; MXOS NC.COM
   3+  EDB9              ; Клавиша F8 - удаление файла
@@ -1879,9 +1879,9 @@
  70+  EE31
  71+  EE31 C3 3E E8                 jp          mainReload
  72+  EE34
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF8.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF8.inc
 117   EE34                  INCLUDE "butF2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF2.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF2.inc
   1+  EE34              ;----------------------------------------------------------------------------
   2+  EE34              ; MXOS NC.COM
   3+  EE34              ; Клавиши F1, F2. Выбор накопителя для панели
@@ -2103,9 +2103,9 @@
 215+  EF51 C3 F2 F0                 jp    inverseRect       ; hl = адрес
 216+  EF54
 217+  EF54
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF2.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF2.inc
 118   EF54                  INCLUDE "butTab.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butTab.inc
+# file opened: D:\Projects\Specialist-OS\nc\butTab.inc
   1+  EF54              ;----------------------------------------------------------------------------
   2+  EF54              ; MXOS NC.COM
   3+  EF54              ; Клавиша TAB - Смена активной панели
@@ -2138,9 +2138,9 @@
  30+  EF74
  31+  EF74 C3 95 EE                 jp      saveStateAndReload
  32+  EF77
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butTab.inc
+# file closed: D:\Projects\Specialist-OS\nc\butTab.inc
 119   EF77                  INCLUDE "butF3.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF3.inc
+# file opened: D:\Projects\Specialist-OS\nc\butF3.inc
   1+  EF77              ;----------------------------------------------------------------------------
   2+  EF77              ; MXOS NC.COM
   3+  EF77              ; Клавиша F3 - отобразить информацию о накопителе
@@ -2176,9 +2176,9 @@
  33+  EF99 CD 24 F1     loc_D701:   call  loadAndPrintB
  34+  EF9C C3 95 EE                 jp    saveStateAndReload
  35+  EF9F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butF3.inc
+# file closed: D:\Projects\Specialist-OS\nc\butF3.inc
 120   EF9F                  INCLUDE "butArrows.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butArrows.inc
+# file opened: D:\Projects\Specialist-OS\nc\butArrows.inc
   1+  EF9F              ;----------------------------------------------------------------------------
   2+  EF9F              ; MXOS NC.COM
   3+  EF9F              ; Клавиши перемещения курсора
@@ -2350,9 +2350,9 @@
 169+  F03E
 170+  F03E              ; ---------------------------------------------------------------------------
 171+  F03E
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\butArrows.inc
+# file closed: D:\Projects\Specialist-OS\nc\butArrows.inc
 121   F03E                  INCLUDE "clearCmdLine.inc"    ; Продолжается в printSpaces
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\clearCmdLine.inc
+# file opened: D:\Projects\Specialist-OS\nc\clearCmdLine.inc
   1+  F03E              ;----------------------------------------------------------------------------
   2+  F03E              ; MXOS NC.COM
   3+  F03E              ; Очистка ком строки
@@ -2383,9 +2383,9 @@
  24+  F05B
  25+  F05B                          ; Продолжение на printSpaces
  26+  F05B
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\clearCmdLine.inc
+# file closed: D:\Projects\Specialist-OS\nc\clearCmdLine.inc
 122   F05B                  INCLUDE "printSpaces.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printSpaces.inc
+# file opened: D:\Projects\Specialist-OS\nc\printSpaces.inc
   1+  F05B              ;----------------------------------------------------------------------------
   2+  F05B              ; MXOS NC.COM
   3+  F05B              ; Вывод пробелов
@@ -2403,9 +2403,9 @@
  15+  F061 C2 5D F0                 jp nz,  printSpaces_1
  16+  F064 C9                       ret
  17+  F065
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printSpaces.inc
+# file closed: D:\Projects\Specialist-OS\nc\printSpaces.inc
 123   F065                  INCLUDE "drawCursor.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\drawCursor.inc
+# file opened: D:\Projects\Specialist-OS\nc\drawCursor.inc
   1+  F065              ;----------------------------------------------------------------------------
   2+  F065              ; MXOS NC.COM
   3+  F065              ; Рисование курсора
@@ -2478,9 +2478,9 @@
  70+  F0A0 ~                        jp    drawCursor_2
  71+  F0A0                  ENDIF
  72+  F0A0
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\drawCursor.inc
+# file closed: D:\Projects\Specialist-OS\nc\drawCursor.inc
 124   F0A0                  INCLUDE "printInfoLine.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printInfoLine.inc
+# file opened: D:\Projects\Specialist-OS\nc\printInfoLine.inc
   1+  F0A0              ;----------------------------------------------------------------------------
   2+  F0A0              ; MXOS NC.COM
   3+  F0A0              ; Вывод инфомарции о файле внизу окна
@@ -2560,9 +2560,9 @@
  73+  F0ED 06 20                ld      b, 20h
  74+  F0EF C3 6C C8             jp      bios_printDecWord
  75+  F0F2
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printInfoLine.inc
+# file closed: D:\Projects\Specialist-OS\nc\printInfoLine.inc
 125   F0F2                  INCLUDE "inverseRect.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\inverseRect.inc
+# file opened: D:\Projects\Specialist-OS\nc\inverseRect.inc
   1+  F0F2              ;----------------------------------------------------------------------------
   2+  F0F2              ; MXOS NC.COM
   3+  F0F2              ; Инвертирвоание прямоугольной области на экране
@@ -2602,9 +2602,9 @@
  37+  F104 D1                       pop     de
  38+  F105 C9                       ret
  39+  F106
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\inverseRect.inc
+# file closed: D:\Projects\Specialist-OS\nc\inverseRect.inc
 126   F106                  INCLUDE "getSelectedFile.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\getSelectedFile.inc
+# file opened: D:\Projects\Specialist-OS\nc\getSelectedFile.inc
   1+  F106              ;----------------------------------------------------------------------------
   2+  F106              ; MXOS NC.COM
   3+  F106              ; Получить информацию о выбранном файле (FILE_INFO)
@@ -2642,9 +2642,9 @@
  35+  F122 D1                   pop     de
  36+  F123 C9                   ret
  37+  F124
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\getSelectedFile.inc
+# file closed: D:\Projects\Specialist-OS\nc\getSelectedFile.inc
 127   F124                  INCLUDE "loadAndPrint.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\loadAndPrint.inc
+# file opened: D:\Projects\Specialist-OS\nc\loadAndPrint.inc
   1+  F124              ;----------------------------------------------------------------------------
   2+  F124              ; MXOS NC.COM
   3+  F124              ; Загрузить файлы и нарисовать
@@ -2699,9 +2699,9 @@
  52+  F156 CD 5A F1                 call    loadFiles   ; На входе a должен содержать номер накопителя
  53+  F159 C9                       ret
  54+  F15A
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\loadAndPrint.inc
+# file closed: D:\Projects\Specialist-OS\nc\loadAndPrint.inc
 128   F15A                  INCLUDE "loadFiles.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\loadFiles.inc
+# file opened: D:\Projects\Specialist-OS\nc\loadFiles.inc
   1+  F15A              ;----------------------------------------------------------------------------
   2+  F15A              ; MXOS NC.COM
   3+  F15A              ; Загрузить список файлов с накопителя
@@ -2735,9 +2735,9 @@
  31+  F172 21 C0 F7                 ld      hl, state.panelA_filesCnt
  32+  F175 C3 CC F3                 jp      writeBytePanel
  33+  F178
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\loadFiles.inc
+# file closed: D:\Projects\Specialist-OS\nc\loadFiles.inc
 129   F178                  INCLUDE "printInfoPanel.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printInfoPanel.inc
+# file opened: D:\Projects\Specialist-OS\nc\printInfoPanel.inc
   1+  F178              ;----------------------------------------------------------------------------
   2+  F178              ; MXOS NC.COM
   3+  F178              ; Рисование информационной панели
@@ -3080,9 +3080,9 @@
 240+  F31A
 241+  F31A                          ; ^^^ выход
 242+  F31A
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printInfoPanel.inc
+# file closed: D:\Projects\Specialist-OS\nc\printInfoPanel.inc
 130   F31A                  INCLUDE "printFilePanel.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printFilePanel.inc
+# file opened: D:\Projects\Specialist-OS\nc\printFilePanel.inc
   1+  F31A              ;----------------------------------------------------------------------------
   2+  F31A              ; MXOS NC.COM
   3+  F31A              ; Вывод списка файлов на панель
@@ -3247,9 +3247,9 @@
 146+  F3BB
 147+  F3BB C9                   ret
 148+  F3BC
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printFilePanel.inc
+# file closed: D:\Projects\Specialist-OS\nc\printFilePanel.inc
 131   F3BC                  INCLUDE "printCurDrive.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printCurDrive.inc
+# file opened: D:\Projects\Specialist-OS\nc\printCurDrive.inc
   1+  F3BC              ;----------------------------------------------------------------------------
   2+  F3BC              ; MXOS NC.COM
   3+  F3BC              ; Вывод текущего накопителя
@@ -3270,9 +3270,9 @@
  18+  F3C7 0E 3A                    ld    c, ':'
  19+  F3C9 C3 09 C8                 jp    bios_printChar
  20+  F3CC
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printCurDrive.inc
+# file closed: D:\Projects\Specialist-OS\nc\printCurDrive.inc
 132   F3CC                  INCLUDE "rwBytePanel.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\rwBytePanel.inc
+# file opened: D:\Projects\Specialist-OS\nc\rwBytePanel.inc
   1+  F3CC              ;----------------------------------------------------------------------------
   2+  F3CC              ; MXOS NC.COM
   3+  F3CC              ; Запись значения в переменную панели
@@ -3324,9 +3324,9 @@
  49+  F3E7 E1                       pop   hl
  50+  F3E8 C9                       ret
  51+  F3E9
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\rwBytePanel.inc
+# file closed: D:\Projects\Specialist-OS\nc\rwBytePanel.inc
 133   F3E9                  INCLUDE "printFileName.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printFileName.inc
+# file opened: D:\Projects\Specialist-OS\nc\printFileName.inc
   1+  F3E9              ;----------------------------------------------------------------------------
   2+  F3E9              ; MXOS NC.COM
   3+  F3E9              ; Вывод имени файла в обычном виде с точкой
@@ -3379,9 +3379,9 @@
  50+  F3FD E1                   pop     hl
  51+  F3FE C9                   ret
  52+  F3FF
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printFileName.inc
+# file closed: D:\Projects\Specialist-OS\nc\printFileName.inc
 134   F3FF                  INCLUDE "printString2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printString2.inc
+# file opened: D:\Projects\Specialist-OS\nc\printString2.inc
   1+  F3FF              ;----------------------------------------------------------------------------
   2+  F3FF              ; MXOS NC.COM
   3+  F3FF              ; Вывод строки по адресу hl длиной b или до терминатора.
@@ -3425,9 +3425,9 @@
  41+  F413 F1               pop     af
  42+  F414 C9               ret
  43+  F415
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\printString2.inc
+# file closed: D:\Projects\Specialist-OS\nc\printString2.inc
 135   F415                  INCLUDE "setCursorPosPanel.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\setCursorPosPanel.inc
+# file opened: D:\Projects\Specialist-OS\nc\setCursorPosPanel.inc
   1+  F415              ;----------------------------------------------------------------------------
   2+  F415              ; MXOS NC.COM
   3+  F415              ; Установка положения курсора с учетом активной панели
@@ -3455,9 +3455,9 @@
  25+  F426 E1                       pop   hl
  26+  F427 C9                       ret
  27+  F428
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\setCursorPosPanel.inc
+# file closed: D:\Projects\Specialist-OS\nc\setCursorPosPanel.inc
 136   F428                  INCLUDE "draw.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\draw.inc
+# file opened: D:\Projects\Specialist-OS\nc\draw.inc
   1+  F428              ;----------------------------------------------------------------------------
   2+  F428              ; MXOS NC.COM
   3+  F428              ; Рисование окошек
@@ -3618,9 +3618,9 @@
 158+  F4A8 24                       inc   h
 159+  F4A9 C9                       ret
 160+  F4AA
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\draw.inc
+# file closed: D:\Projects\Specialist-OS\nc\draw.inc
 137   F4AA                  INCLUDE "tools.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\tools.inc
+# file opened: D:\Projects\Specialist-OS\nc\tools.inc
   1+  F4AA              ;----------------------------------------------------------------------------
   2+  F4AA              ; MXOS NC.COM
   3+  F4AA              ; Копирвоание 3-х байт из адреса de в адрес hl
@@ -3660,9 +3660,9 @@
  37+  F4BA C2 B7 F4             jp nz,  memset_hl_a_c
  38+  F4BD C9                   ret
  39+  F4BE
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\tools.inc
+# file closed: D:\Projects\Specialist-OS\nc\tools.inc
 138   F4BE                  INCLUDE "compactName.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\compactName.inc
+# file opened: D:\Projects\Specialist-OS\nc\compactName.inc
   1+  F4BE              ;----------------------------------------------------------------------------
   2+  F4BE              ; MXOS NC.COM
   3+  F4BE              ; Убрать из имени пробелы
@@ -3742,9 +3742,9 @@
  77+  F4F9 E1                       pop   hl
  78+  F4FA C9                       ret
  79+  F4FB
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\compactName.inc
+# file closed: D:\Projects\Specialist-OS\nc\compactName.inc
 139   F4FB                  INCLUDE "input.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\input.inc
+# file opened: D:\Projects\Specialist-OS\nc\input.inc
   1+  F4FB              ;----------------------------------------------------------------------------
   2+  F4FB              ; MXOS NC.COM
   3+  F4FB              ; Ввод строки
@@ -3837,7 +3837,7 @@
  90+  F54A 79                       ld      a, c
  91+  F54B C9                       ret
  92+  F54C
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\input.inc
+# file closed: D:\Projects\Specialist-OS\nc\input.inc
 140   F54C
 141   F54C              ;---------------------------------------------------------------------------
 142   F54C              ; Константы и переменные
@@ -4194,4 +4194,4 @@
 356   F7C6                  ENDIF
 357   F7C6
 358   F7C6                  END
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\nc\NC.asm
+# file closed: D:\Projects\Specialist-OS\nc\NC.asm

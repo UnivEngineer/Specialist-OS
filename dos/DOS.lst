@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\DOS.asm
+# file opened: D:\Projects\Specialist-OS\dos\DOS.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS - BIOS и DOS
   3   0000              ;
@@ -7,7 +7,7 @@
   6   0000              ;----------------------------------------------------------------------------
   7   0000
   8   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\dos\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -287,7 +287,7 @@
 277+  0000                  ENDS
 278+  0000
 279+  0000              ;-----------------------------------------------------------------------
-280+  0000              ; Информация о активном накопителе (диске)
+280+  0000              ; Информация об активном накопителе (диске)
 281+  0000              ;-----------------------------------------------------------------------
 282+  0000
 283+  0000                  STRUCT DISK_INFO
@@ -378,7 +378,7 @@
 368+  0000              ; Конец
 369+  0000              ;-----------------------------------------------------------------------
 370+  0000
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\dos\../include/mxos.inc
   9   0000
  10   0000              ; -----------------------------------------------------------------------
  11   0000              ; Код
@@ -389,7 +389,7 @@
  16   0000
  17   0000              	ORG     0C000h
  18   C000              	INCLUDE "jmps_c000.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\jmps_c000.inc
+# file opened: D:\Projects\Specialist-OS\dos\jmps_c000.inc
   1+  C000              ;+---------------------------------------------------------------------------
   2+  C000              ; MXOS
   3+  C000              ; Стандартные точки входа C000
@@ -403,7 +403,7 @@
  11+  C009 31 C0 FF     reboot:     ld    sp, STACK_ADDR; C009: Теплая перезагрузка
  12+  C00C C3 34 C5                 jp    reboot1
  13+  C00F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\jmps_c000.inc
+# file closed: D:\Projects\Specialist-OS\dos\jmps_c000.inc
  19   C00F
  20   C00F                  ORG_PAD 0C010h
  20   C00F             >         IF $ > 0C010h
@@ -416,7 +416,7 @@
  20   C010             >         ENDIF
  20   C010             >         ORG 0C010h
  21   C010              	INCLUDE "clearScreen.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\clearScreen.inc
+# file opened: D:\Projects\Specialist-OS\dos\clearScreen.inc
   1+  C010              ;+---------------------------------------------------------------------------
   2+  C010              ; MXOS
   3+  C010              ; Очистить экран
@@ -468,7 +468,7 @@
  49+  C035 E1                       pop   hl
  50+  C036 C9                       ret
  51+  C037
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\clearScreen.inc
+# file closed: D:\Projects\Specialist-OS\dos\clearScreen.inc
  22   C037
  23   C037                  ORG_PAD 0C037h
  23   C037             >         IF $ > 0C037h
@@ -481,7 +481,7 @@
  23   C037             >         ENDIF
  23   C037             >         ORG 0C037h
  24   C037              	INCLUDE "printChar.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar.inc
+# file opened: D:\Projects\Specialist-OS\dos\printChar.inc
   1+  C037              ;+---------------------------------------------------------------------------
   2+  C037              ; MXOS
   3+  C037              ; Вывод символа на экран (или принтер)
@@ -506,7 +506,7 @@
  22+  C041 F1                       pop   af
  23+  C042 C9                       ret
  24+  C043
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar.inc
+# file closed: D:\Projects\Specialist-OS\dos\printChar.inc
  25   C043
  26   C043                  ORG_PAD 0C045h
  26   C043             >         IF $ > 0C045h
@@ -519,7 +519,7 @@
  26   C045             >         ENDIF
  26   C045             >         ORG 0C045h
  27   C045              	INCLUDE "printChar5.inc" ; Продолжается в drawChar
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar5.inc
+# file opened: D:\Projects\Specialist-OS\dos\printChar5.inc
   1+  C045              ;+---------------------------------------------------------------------------
   2+  C045              ; MXOS
   3+  C045              ; Обработка служебных кодов при выводе символа (продолжение)
@@ -590,9 +590,9 @@
  68+  C06E
  69+  C06E                          ; Продолжение в drawChar
  70+  C06E
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar5.inc
+# file closed: D:\Projects\Specialist-OS\dos\printChar5.inc
  28   C06E              	INCLUDE "drawChar.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\drawChar.inc
+# file opened: D:\Projects\Specialist-OS\dos\drawChar.inc
   1+  C06E              ;+---------------------------------------------------------------------------
   2+  C06E              ; MXOS
   3+  C06E              ; Рисование символа на экране
@@ -766,9 +766,9 @@
 171+  C117 3E 2F                    ld    a, 2Fh
 172+  C119 C3 F8 C0                 jp    normalVideo_1
 173+  C11C
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\drawChar.inc
+# file closed: D:\Projects\Specialist-OS\dos\drawChar.inc
  29   C11C              	INCLUDE "printChar3.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar3.inc
+# file opened: D:\Projects\Specialist-OS\dos\printChar3.inc
   1+  C11C              ;+---------------------------------------------------------------------------
   2+  C11C              ; MXOS
   3+  C11C              ; Обработка служебных кодов при выводе символа
@@ -873,7 +873,7 @@
 102+  C169 DA 49 C1                 jp c, saveVCursorHA
 103+  C16C C3 96 C1                 jp    printChar_c0A
 104+  C16F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar3.inc
+# file closed: D:\Projects\Specialist-OS\dos\printChar3.inc
  30   C16F
  31   C16F                  ORG_PAD 0C170h
  31   C16F             >         IF $ > 0C170h
@@ -886,7 +886,7 @@
  31   C170             >         ENDIF
  31   C170             >         ORG 0C170h
  32   C170              	INCLUDE "beep.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\beep.inc
+# file opened: D:\Projects\Specialist-OS\dos\beep.inc
   1+  C170              ;+---------------------------------------------------------------------------
   2+  C170              ; MXOS
   3+  C170              ; Звуковой сигнал (вызывается при выводе кода 7)
@@ -931,7 +931,7 @@
  42+  C18D F1                       pop   af
  43+  C18E C9                       ret
  44+  C18F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\beep.inc
+# file closed: D:\Projects\Specialist-OS\dos\beep.inc
  33   C18F
  34   C18F                  ORG_PAD 0C18Fh
  34   C18F             >         IF $ > 0C18Fh
@@ -944,7 +944,7 @@
  34   C18F             >         ENDIF
  34   C18F             >         ORG 0C18Fh
  35   C18F              	INCLUDE "delay_l.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\delay_l.inc
+# file opened: D:\Projects\Specialist-OS\dos\delay_l.inc
   1+  C18F              ;+---------------------------------------------------------------------------
   2+  C18F              ; MXOS
   3+  C18F              ; Задержка
@@ -963,7 +963,7 @@
  16+  C191 C2 90 C1                 jp nz,  delay_b
  17+  C194 C9                       ret
  18+  C195
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\delay_l.inc
+# file closed: D:\Projects\Specialist-OS\dos\delay_l.inc
  36   C195
  37   C195                  ORG_PAD 0C196h
  37   C195             >         IF $ > 0C196h
@@ -976,7 +976,7 @@
  37   C196             >         ENDIF
  37   C196             >         ORG 0C196h
  38   C196              	INCLUDE "printChar4.inc" ; Продолжается в scrollUp
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar4.inc
+# file opened: D:\Projects\Specialist-OS\dos\printChar4.inc
   1+  C196              ;+---------------------------------------------------------------------------
   2+  C196              ; MXOS
   3+  C196              ; Обработка служебных кодов при выводе символа (продолжение)
@@ -1005,9 +1005,9 @@
  26+  C1A1
  27+  C1A1                          ; Далее прокрутка экрана вверх
  28+  C1A1
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar4.inc
+# file closed: D:\Projects\Specialist-OS\dos\printChar4.inc
  39   C1A1              	INCLUDE "scrollUp.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\scrollUp.inc
+# file opened: D:\Projects\Specialist-OS\dos\scrollUp.inc
   1+  C1A1              ;+---------------------------------------------------------------------------
   2+  C1A1              ; MXOS
   3+  C1A1              ; Прокрутка экрана вверх
@@ -1033,9 +1033,9 @@
  23+  C1AF 06 30                    ld    b, 48       ; Столбцов
  24+  C1B1 C3 99 C7                 jp    scrollUp2
  25+  C1B4
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\scrollUp.inc
+# file closed: D:\Projects\Specialist-OS\dos\scrollUp.inc
  40   C1B4              	INCLUDE "keyScan.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\keyScan.inc
+# file opened: D:\Projects\Specialist-OS\dos\keyScan.inc
   1+  C1B4              ;+---------------------------------------------------------------------------
   2+  C1B4              ; MXOS
   3+  C1B4              ; Получить код нажатой клавиши
@@ -1134,9 +1134,9 @@
  96+  C20D D1                       pop     de
  97+  C20E C9                       ret
  98+  C20F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\keyScan.inc
+# file closed: D:\Projects\Specialist-OS\dos\keyScan.inc
  41   C20F              	INCLUDE "getch2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\getch2.inc
+# file opened: D:\Projects\Specialist-OS\dos\getch2.inc
   1+  C20F              ;----------------------------------------------------------------------------
   2+  C20F              ; MXOS
   3+  C20F              ; Ожидание ввода с клавиатуры
@@ -1400,9 +1400,9 @@
 261+  C312 E1                       pop     hl
 262+  C313 C9                       ret
 263+  C314
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\getch2.inc
+# file closed: D:\Projects\Specialist-OS\dos\getch2.inc
  42   C314              	INCLUDE "calcCursorAddr.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\calcCursorAddr.inc
+# file opened: D:\Projects\Specialist-OS\dos\calcCursorAddr.inc
   1+  C314              ;+---------------------------------------------------------------------------
   2+  C314              ; MXOS
   3+  C314              ; Расчет адреса курсора в видеопамяти. И перевод строки, если курсор был
@@ -1426,7 +1426,7 @@
  21+  C31D 0E 0A                    ld    c, 10
  22+  C31F C3 3A C3                 jp    calcCursorAd_0
  23+  C322
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\calcCursorAddr.inc
+# file closed: D:\Projects\Specialist-OS\dos\calcCursorAddr.inc
  43   C322
  44   C322                  ; тут есть место 15 байт
  45   C322
@@ -1441,7 +1441,7 @@
  46   C326             >         ENDIF
  46   C337             >         ORG 0C337h
  47   C337              	INCLUDE "getch.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\getch.inc
+# file opened: D:\Projects\Specialist-OS\dos\getch.inc
   1+  C337              ;----------------------------------------------------------------------------
   2+  C337              ; MXOS
   3+  C337              ; Ожидание ввода с клавиатуры
@@ -1454,9 +1454,9 @@
  10+  C337
  11+  C337 C3 0F C2     getch:            jp    getch2
  12+  C33A
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\getch.inc
+# file closed: D:\Projects\Specialist-OS\dos\getch.inc
  48   C33A              	INCLUDE "calcCursorAddr2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\calcCursorAddr2.inc
+# file opened: D:\Projects\Specialist-OS\dos\calcCursorAddr2.inc
   1+  C33A              ;+---------------------------------------------------------------------------
   2+  C33A              ; MXOS
   3+  C33A              ; Расчет адреса курсора в видеопамяти (продолжение);
@@ -1479,9 +1479,9 @@
  20+  C345 C6 90                    add   a,90h
  21+  C347 C9                       ret
  22+  C348
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\calcCursorAddr2.inc
+# file closed: D:\Projects\Specialist-OS\dos\calcCursorAddr2.inc
  49   C348              	INCLUDE "drawCursor.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\drawCursor.inc
+# file opened: D:\Projects\Specialist-OS\dos\drawCursor.inc
   1+  C348              ;+---------------------------------------------------------------------------
   2+  C348              ; MXOS
   3+  C348              ; Рисование курсора на экране
@@ -1535,7 +1535,7 @@
  51+  C36D 29                       add   hl, hl
  52+  C36E C3 43 C4                 jp    drawCursor_1
  53+  C371
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\drawCursor.inc
+# file closed: D:\Projects\Specialist-OS\dos\drawCursor.inc
  50   C371
  51   C371                  ; тут есть место 6 байт
  52   C371
@@ -1550,7 +1550,7 @@
  53   C375             >         ENDIF
  53   C377             >         ORG 0C377h
  54   C377                  INCLUDE "tape.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\tape.inc
+# file opened: D:\Projects\Specialist-OS\dos\tape.inc
   1+  C377              ;----------------------------------------------------------------------------
   2+  C377              ; MXOS
   3+  C377              ; Таблица перехвата вызовов драйвера магнитофона
@@ -1568,9 +1568,9 @@
  15+  C383 C3 00 C8     t_tapeLoadInt:   jp bios_reboot
  16+  C386 C3 00 C8     t_tapeReadError: jp bios_reboot
  17+  C389
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\tape.inc
+# file closed: D:\Projects\Specialist-OS\dos\tape.inc
  55   C389              	INCLUDE "cmp_hl_de_2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\cmp_hl_de_2.inc
+# file opened: D:\Projects\Specialist-OS\dos\cmp_hl_de_2.inc
   1+  C389              ;+---------------------------------------------------------------------------
   2+  C389              ; MXOS
   3+  C389              ; Сравнить hl и de
@@ -1587,9 +1587,9 @@
  14+  C38E BB                   cp    e
  15+  C38F C9                   ret
  16+  C390
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\cmp_hl_de_2.inc
+# file closed: D:\Projects\Specialist-OS\dos\cmp_hl_de_2.inc
  56   C390              	INCLUDE "sbb_de_hl_to_hl.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\sbb_de_hl_to_hl.inc
+# file opened: D:\Projects\Specialist-OS\dos\sbb_de_hl_to_hl.inc
   1+  C390              ;+---------------------------------------------------------------------------
   2+  C390              ; MXOS
   3+  C390              ; hl = de - hl
@@ -1606,9 +1606,9 @@
  14+  C395 67                       ld    h, a
  15+  C396 C9                       ret
  16+  C397
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\sbb_de_hl_to_hl.inc
+# file closed: D:\Projects\Specialist-OS\dos\sbb_de_hl_to_hl.inc
  57   C397              	INCLUDE "memmove_bc_hl.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\memmove_bc_hl.inc
+# file opened: D:\Projects\Specialist-OS\dos\memmove_bc_hl.inc
   1+  C397              ;+---------------------------------------------------------------------------
   2+  C397              ; MXOS
   3+  C397              ; Копирование накладывающихся блоков памяти (с ошибкой)
@@ -1674,9 +1674,9 @@
  63+  C3C5 E1                       pop     hl
  64+  C3C6 C9                       ret
  65+  C3C7
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\memmove_bc_hl.inc
+# file closed: D:\Projects\Specialist-OS\dos\memmove_bc_hl.inc
  58   C3C7              	INCLUDE "memset_de_20_b.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\memset_de_20_b.inc
+# file opened: D:\Projects\Specialist-OS\dos\memset_de_20_b.inc
   1+  C3C7              ;+---------------------------------------------------------------------------
   2+  C3C7              ; MXOS
   3+  C3C7              ; Заполнить память пробелами
@@ -1697,7 +1697,7 @@
  18+  C3CC C2 C9 C3                 jp nz,  memset_de_a_b
  19+  C3CF C9                       ret
  20+  C3D0
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\memset_de_20_b.inc
+# file closed: D:\Projects\Specialist-OS\dos\memset_de_20_b.inc
  59   C3D0
  60   C3D0                  ORG_PAD 0C3D0h
  60   C3D0             >         IF $ > 0C3D0h
@@ -1713,7 +1713,7 @@
  62   C3D3
  63   C3D3                  IF RAMFOS_COMPATIBILITY
  64   C3D3              	INCLUDE "strToHex.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\strToHex.inc
+# file opened: D:\Projects\Specialist-OS\dos\strToHex.inc
   1+  C3D3              ;+---------------------------------------------------------------------------
   2+  C3D3              ; MXOS
   3+  C3D3              ; Преобразвоние строки в 16-ричное число
@@ -1800,7 +1800,7 @@
  84+  C416 B7                       or  a
  85+  C417 C9                       ret
  86+  C418
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\strToHex.inc
+# file closed: D:\Projects\Specialist-OS\dos\strToHex.inc
  65   C418                  ENDIF
  66   C418
  67   C418                  ; тут есть место 15 байт
@@ -1816,7 +1816,7 @@
  69   C41C             >         ENDIF
  69   C427             >         ORG 0C427h
  70   C427              	INCLUDE "cmp_hl_de.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\cmp_hl_de.inc
+# file opened: D:\Projects\Specialist-OS\dos\cmp_hl_de.inc
   1+  C427              ;+---------------------------------------------------------------------------
   2+  C427              ; MXOS
   3+  C427              ; Сравнить hl и de
@@ -1832,7 +1832,7 @@
  13+  C42B BB                   cp    e
  14+  C42C C9                   ret
  15+  C42D
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\cmp_hl_de.inc
+# file closed: D:\Projects\Specialist-OS\dos\cmp_hl_de.inc
  71   C42D
  72   C42D                  ORG_PAD 0C42Dh
  72   C42D             >         IF $ > 0C42Dh
@@ -1845,7 +1845,7 @@
  72   C42D             >         ENDIF
  72   C42D             >         ORG 0C42Dh
  73   C42D              	INCLUDE "memcpy_bc_hl.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\memcpy_bc_hl.inc
+# file opened: D:\Projects\Specialist-OS\dos\memcpy_bc_hl.inc
   1+  C42D              ;+---------------------------------------------------------------------------
   2+  C42D              ; MXOS
   3+  C42D              ; Скопировать блок памяти
@@ -1871,7 +1871,7 @@
  23+  C434 C2 2D C4                 jp nz,  memcpy_bc_hl
  24+  C437 C9                       ret
  25+  C438
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\memcpy_bc_hl.inc
+# file closed: D:\Projects\Specialist-OS\dos\memcpy_bc_hl.inc
  74   C438
  75   C438                  ORG_PAD 0C438h
  75   C438             >         IF $ > 0C438h
@@ -1884,7 +1884,7 @@
  75   C438             >         ENDIF
  75   C438             >         ORG 0C438h
  76   C438              	INCLUDE "printString1.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printString1.inc
+# file opened: D:\Projects\Specialist-OS\dos\printString1.inc
   1+  C438              ;+---------------------------------------------------------------------------
   2+  C438              ; MXOS
   3+  C438              ; Вывод строки на экран
@@ -1900,9 +1900,9 @@
  13+  C438
  14+  C438 C3 22 C5     printString1:     jp    printString
  15+  C43B
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printString1.inc
+# file closed: D:\Projects\Specialist-OS\dos\printString1.inc
  77   C43B              	INCLUDE "printChar6.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar6.inc
+# file opened: D:\Projects\Specialist-OS\dos\printChar6.inc
   1+  C43B              ;+---------------------------------------------------------------------------
   2+  C43B              ; MXOS
   3+  C43B              ; Обработка служебных кодов при выводе символа (продолжение)
@@ -1917,7 +1917,7 @@
  12+  C43D 32 EB 8F                     ld    (bios_vars.escMode), a
  13+  C440 C9                           ret
  14+  C441
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar6.inc
+# file closed: D:\Projects\Specialist-OS\dos\printChar6.inc
  78   C441
  79   C441                  ORG_PAD 0C443h
  79   C441             >         IF $ > 0C443h
@@ -1930,7 +1930,7 @@
  79   C443             >         ENDIF
  79   C443             >         ORG 0C443h
  80   C443                  INCLUDE "drawCursor2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\drawCursor2.inc
+# file opened: D:\Projects\Specialist-OS\dos\drawCursor2.inc
   1+  C443              ;+---------------------------------------------------------------------------
   2+  C443              ; MXOS
   3+  C443              ; Рисование курсора на экране (продолжение)
@@ -1965,7 +1965,7 @@
  32+  C457 1D                       dec   e
  33+  C458 C3 4B C4                 jp    drawCursor_2
  34+  C45B
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\drawCursor2.inc
+# file closed: D:\Projects\Specialist-OS\dos\drawCursor2.inc
  81   C45B
  82   C45B                  ; тут есть место 29 байт
  83   C45B
@@ -2031,7 +2031,7 @@
 108   C4FC
 109   C4FC                  ;ORG_PAD 0C500h
 110   C4FC              	INCLUDE "printer.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printer.inc
+# file opened: D:\Projects\Specialist-OS\dos\printer.inc
   1+  C4FC              ;+---------------------------------------------------------------------------
   2+  C4FC              ; MXOS
   3+  C4FC              ; Вывод байта на принтер
@@ -2077,9 +2077,9 @@
  43+  C520 F1                       pop   af
  44+  C521 C9                       ret
  45+  C522
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printer.inc
+# file closed: D:\Projects\Specialist-OS\dos\printer.inc
 111   C522              	INCLUDE "printString.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printString.inc
+# file opened: D:\Projects\Specialist-OS\dos\printString.inc
   1+  C522              ;+---------------------------------------------------------------------------
   2+  C522              ; MXOS
   3+  C522              ; Вывод строки на экран
@@ -2119,9 +2119,9 @@
  37+  C532 C1                       pop   bc
  38+  C533 C9                       ret
  39+  C534
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printString.inc
+# file closed: D:\Projects\Specialist-OS\dos\printString.inc
 112   C534              	INCLUDE "reboot1.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\reboot1.inc
+# file opened: D:\Projects\Specialist-OS\dos\reboot1.inc
   1+  C534              ;+---------------------------------------------------------------------------
   2+  C534              ; MXOS
   3+  C534              ; Перезагрузка (продолжение)
@@ -2166,9 +2166,9 @@
  42+  C556 ~                        jp    reboot2
  43+  C556                  ENDIF
  44+  C556
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\reboot1.inc
+# file closed: D:\Projects\Specialist-OS\dos\reboot1.inc
 113   C556              	INCLUDE "reboot2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\reboot2.inc
+# file opened: D:\Projects\Specialist-OS\dos\reboot2.inc
   1+  C556              ;+---------------------------------------------------------------------------
   2+  C556              ; MXOS
   3+  C556              ; Перезагрузка (продолжение)
@@ -2235,9 +2235,9 @@
  64+  C585 ~
  65+  C585                      ENDIF
  66+  C585
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\reboot2.inc
+# file closed: D:\Projects\Specialist-OS\dos\reboot2.inc
 114   C585              	INCLUDE "getch3.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\getch3.inc
+# file opened: D:\Projects\Specialist-OS\dos\getch3.inc
   1+  C585              ;----------------------------------------------------------------------------
   2+  C585              ; MXOS
   3+  C585              ; Ожидание ввода с клавиатуры (продолжение)
@@ -2326,9 +2326,9 @@
  86+  C5E1
  87+  C5E1 C3 FD C2                 jp    loc_C311
  88+  C5E4
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\getch3.inc
+# file closed: D:\Projects\Specialist-OS\dos\getch3.inc
 115   C5E4              	INCLUDE "printChar2.inc"	; Продолжается в scrollDown
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar2.inc
+# file opened: D:\Projects\Specialist-OS\dos\printChar2.inc
   1+  C5E4              ;+---------------------------------------------------------------------------
   2+  C5E4              ; MXOS
   3+  C5E4              ; Вывод символа на экран (или принтер)
@@ -2720,9 +2720,9 @@
 389+  C758 FE 08                    cp    8
 390+  C75A C2 48 C7                 jp nz,  printChar_eI_2
 391+  C75D
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printChar2.inc
+# file closed: D:\Projects\Specialist-OS\dos\printChar2.inc
 116   C75D              	INCLUDE "scrollDown.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\scrollDown.inc
+# file opened: D:\Projects\Specialist-OS\dos\scrollDown.inc
   1+  C75D              ;+---------------------------------------------------------------------------
   2+  C75D              ; MXOS
   3+  C75D              ; Прокрутка экрана вниз
@@ -2793,9 +2793,9 @@
  68+  C797 C1                       pop     bc
  69+  C798 C9                       ret
  70+  C799
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\scrollDown.inc
+# file closed: D:\Projects\Specialist-OS\dos\scrollDown.inc
 117   C799              	INCLUDE "scrollUp2.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\scrollUp2.inc
+# file opened: D:\Projects\Specialist-OS\dos\scrollUp2.inc
   1+  C799              ;+---------------------------------------------------------------------------
   2+  C799              ; MXOS
   3+  C799              ; Прокрутка экрана вверх (продолжение)
@@ -2861,9 +2861,9 @@
  63+  C7C9 C1                       pop   bc
  64+  C7CA C9                       ret
  65+  C7CB
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\scrollUp2.inc
+# file closed: D:\Projects\Specialist-OS\dos\scrollUp2.inc
 118   C7CB              	INCLUDE "checkRAMD.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\checkRAMD.inc
+# file opened: D:\Projects\Specialist-OS\dos\checkRAMD.inc
   1+  C7CB              ;+---------------------------------------------------------------------------
   2+  C7CB              ; MXOS
   3+  C7CB              ; Исправленная функция определения размера ДОЗУ
@@ -2927,7 +2927,7 @@
  61+  C7EE 32 F8 8F                 ld      (bios_vars.ramPageCount), a
  62+  C7F1 C9                       ret
  63+  C7F2
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\checkRAMD.inc
+# file closed: D:\Projects\Specialist-OS\dos\checkRAMD.inc
 119   C7F2
 120   C7F2                  ; тут есть место 17 байт
 121   C7F2
@@ -2946,7 +2946,7 @@
 126   C7F6             >         ENDIF
 126   C800             >         ORG 0C800h
 127   C800              	INCLUDE "jmps_c800.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\jmps_c800.inc
+# file opened: D:\Projects\Specialist-OS\dos\jmps_c800.inc
   1+  C800              ;+---------------------------------------------------------------------------
   2+  C800              ; MXOS
   3+  C800              ; Стандартные точки входа C800
@@ -3005,9 +3005,9 @@
  56+  C884 C3 3C D2                     jp  mul_hl_de           ; C884: [MXOS2] Умножение hl на de: hl = hl * de
  57+  C887 C3 61 D2                     jp  div_hl_de           ; C887: [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
  58+  C88A
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\jmps_c800.inc
+# file closed: D:\Projects\Specialist-OS\dos\jmps_c800.inc
 128   C88A              	INCLUDE "setGetCursorPos.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\setGetCursorPos.inc
+# file opened: D:\Projects\Specialist-OS\dos\setGetCursorPos.inc
   1+  C88A              ;+---------------------------------------------------------------------------
   2+  C88A              ; MXOS
   3+  C88A              ; Установить положение курсора
@@ -3036,9 +3036,9 @@
  26+  C88D 2A FC 8F     getCursorPos:     ld    hl, (bios_vars.cursorY)
  27+  C890 C9                       ret
  28+  C891
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\setGetCursorPos.inc
+# file closed: D:\Projects\Specialist-OS\dos\setGetCursorPos.inc
 129   C891              	INCLUDE "setGetMemTop.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\setGetMemTop.inc
+# file opened: D:\Projects\Specialist-OS\dos\setGetMemTop.inc
   1+  C891              ;+---------------------------------------------------------------------------
   2+  C891              ; MXOS
   3+  C891              ; Установить объем доступной памяти
@@ -3073,9 +3073,9 @@
  32+  C89D 2A A9 D2     getMemTop:  ld    hl, (v_memTop)
  33+  C8A0 C9                       ret
  34+  C8A1
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\setGetMemTop.inc
+# file closed: D:\Projects\Specialist-OS\dos\setGetMemTop.inc
 130   C8A1              	INCLUDE "printHex.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printHex.inc
+# file opened: D:\Projects\Specialist-OS\dos\printHex.inc
   1+  C8A1              ;+---------------------------------------------------------------------------
   2+  C8A1              ; MXOS
   3+  C8A1              ; Вывод 16-ричного числа на экран (слово)
@@ -3155,9 +3155,9 @@
  77+  C8C8 4F           printHexNib_0:    ld    c, a
  78+  C8C9 C3 09 C8                 jp    j_printChar
  79+  C8CC
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printHex.inc
+# file closed: D:\Projects\Specialist-OS\dos\printHex.inc
 131   C8CC              	INCLUDE "input.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\input.inc
+# file opened: D:\Projects\Specialist-OS\dos\input.inc
   1+  C8CC              ;+---------------------------------------------------------------------------
   2+  C8CC              ; MXOS
   3+  C8CC              ; Ввод строки
@@ -3315,9 +3315,9 @@
 155+  C961                          ; Общее продолжение
 156+  C961 C3 54 C9                 jp    input_lr
 157+  C964
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\input.inc
+# file closed: D:\Projects\Specialist-OS\dos\input.inc
 132   C964              	INCLUDE "calcCS.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\calcCS.inc
+# file opened: D:\Projects\Specialist-OS\dos\calcCS.inc
   1+  C964              ;+---------------------------------------------------------------------------
   2+  C964              ; MXOS
   3+  C964              ; Расчет контрольной суммы
@@ -3348,9 +3348,9 @@
  28+  C979 F1           calcCS_2:   pop     af
  29+  C97A C9                       ret
  30+  C97B
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\calcCS.inc
+# file closed: D:\Projects\Specialist-OS\dos\calcCS.inc
 133   C97B              	INCLUDE "reboot3.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\reboot3.inc
+# file opened: D:\Projects\Specialist-OS\dos\reboot3.inc
   1+  C97B              ;+---------------------------------------------------------------------------
   2+  C97B              ; MXOS
   3+  C97B              ; Обновление драйвера по адресу 0FFC0h и запуск NC.COM,
@@ -3428,9 +3428,9 @@
  75+  C9C9                          ; Теплая перезагрузка
  76+  C9C9 C3 00 C8                 jp      j_reboot3
  77+  C9CC
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\reboot3.inc
+# file closed: D:\Projects\Specialist-OS\dos\reboot3.inc
 134   C9CC              	INCLUDE "fileExecBat.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileExecBat.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileExecBat.inc
   1+  C9CC              ;+---------------------------------------------------------------------------
   2+  C9CC              ; MXOS
   3+  C9CC              ; Запустить BAT файл. Вызывается функцией fileExec
@@ -3516,9 +3516,9 @@
  83+  CA1D
  84+  CA1D C3 F1 C9                 jp      execBat_loop
  85+  CA20
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileExecBat.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileExecBat.inc
 135   CA20              	INCLUDE "fileExec.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileExec.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileExec.inc
   1+  CA20              ;+---------------------------------------------------------------------------
   2+  CA20              ; MXOS
   3+  CA20              ; Запустить файл
@@ -3645,9 +3645,9 @@
 124+  CA89 0E 0A                    ld  c, 0Ah
 125+  CA8B C3 09 C8                 jp  j_printChar
 126+  CA8E
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileExec.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileExec.inc
 136   CA8E              	INCLUDE "driverFFC0.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\driverFFC0.inc
+# file opened: D:\Projects\Specialist-OS\dos\driverFFC0.inc
   1+  CA8E              ;+---------------------------------------------------------------------------
   2+  CA8E              ; MXOS
   3+  CA8E              ; Драйверы диска в ДОЗУ (часть, которая копируется на адрес 0FFC0h)
@@ -3825,9 +3825,9 @@
 175+  CAF0 ~                    DISPLAY /d, "Error! Byte briver did not fit: ", driverByteEnd-driverByteStart, " > 32 bytes"
 176+  CAF0                  ENDIF
 177+  CAF0
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\driverFFC0.inc
+# file closed: D:\Projects\Specialist-OS\dos\driverFFC0.inc
 137   CAF0              	INCLUDE "driver.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\driver.inc
+# file opened: D:\Projects\Specialist-OS\dos\driver.inc
   1+  CAF0              ;+---------------------------------------------------------------------------
   2+  CAF0              ; MXOS
   3+  CAF0              ; Встроенный драйвер ROM-диска (в ПЗУ) и RAM-диска (в ДОЗУ)
@@ -4046,9 +4046,9 @@
 216+  CB90 F1                       pop     af
 217+  CB91 C9                       ret
 218+  CB92
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\driver.inc
+# file closed: D:\Projects\Specialist-OS\dos\driver.inc
 138   CB92              	INCLUDE "installDriver.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\installDriver.inc
+# file opened: D:\Projects\Specialist-OS\dos\installDriver.inc
   1+  CB92              ;+---------------------------------------------------------------------------
   2+  CB92              ; MXOS
   3+  CB92              ; Установить драйвер устройства
@@ -4094,9 +4094,9 @@
  43+  CBA8                          ; Выход
  44+  CBA8 C9                       ret
  45+  CBA9
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\installDriver.inc
+# file closed: D:\Projects\Specialist-OS\dos\installDriver.inc
 139   CBA9              	INCLUDE "fileGetSetDrive.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetSetDrive.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileGetSetDrive.inc
   1+  CBA9              ;+---------------------------------------------------------------------------
   2+  CBA9              ; MXOS
   3+  CBA9              ; Получение/установка текущего накопителя.
@@ -4172,9 +4172,9 @@
  73+  CBD9 E1                       pop     hl
  74+  CBDA C9                       ret
  75+  CBDB
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetSetDrive.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileGetSetDrive.inc
 140   CBDB                  INCLUDE "strcmp.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\strcmp.inc
+# file opened: D:\Projects\Specialist-OS\dos\strcmp.inc
   1+  CBDB              ;----------------------------------------------------------------------------
   2+  CBDB              ; MXOS
   3+  CBDB              ; Сравнение строк, чувстсвительное к регистру
@@ -4326,9 +4326,9 @@
 149+  CC26                          ; Выход
 150+  CC26 C9                       ret
 151+  CC27
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\strcmp.inc
+# file closed: D:\Projects\Specialist-OS\dos\strcmp.inc
 141   CC27              	INCLUDE "fatCache.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatCache.inc
+# file opened: D:\Projects\Specialist-OS\dos\fatCache.inc
   1+  CC27              ;----------------------------------------------------------------------------
   2+  CC27              ; MXOS
   3+  CC27              ; Кэш секторов fat
@@ -4839,9 +4839,9 @@
 508+  CD70 BB                   cp    e
 509+  CD71 C9                   ret
 510+  CD72
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatCache.inc
+# file closed: D:\Projects\Specialist-OS\dos\fatCache.inc
 142   CD72              	INCLUDE "fatFindCluster.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatFindCluster.inc
+# file opened: D:\Projects\Specialist-OS\dos\fatFindCluster.inc
   1+  CD72              ;+---------------------------------------------------------------------------
   2+  CD72              ; MXOS
   3+  CD72              ; Поиск свободного кластера
@@ -4943,9 +4943,9 @@
  99+  CDA4 E1                       pop     hl
 100+  CDA5 C9                       ret
 101+  CDA6
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatFindCluster.inc
+# file closed: D:\Projects\Specialist-OS\dos\fatFindCluster.inc
 143   CDA6                  INCLUDE "fatReadWriteCluster.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatReadWriteCluster.inc
+# file opened: D:\Projects\Specialist-OS\dos\fatReadWriteCluster.inc
   1+  CDA6              ;----------------------------------------------------------------------------
   2+  CDA6              ; MXOS
   3+  CDA6              ;
@@ -5058,9 +5058,9 @@
 110+  CDCF C9                       ret
 111+  CDD0
 112+  CDD0
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatReadWriteCluster.inc
+# file closed: D:\Projects\Specialist-OS\dos\fatReadWriteCluster.inc
 144   CDD0                  INCLUDE "fatGetFreeSpace.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatGetFreeSpace.inc
+# file opened: D:\Projects\Specialist-OS\dos\fatGetFreeSpace.inc
   1+  CDD0              ;----------------------------------------------------------------------------
   2+  CDD0              ; MXOS
   3+  CDD0              ; Определение свободного объема накопителя
@@ -5127,9 +5127,9 @@
  64+  CDFF
  65+  CDFF C9                       ret
  66+  CE00
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatGetFreeSpace.inc
+# file closed: D:\Projects\Specialist-OS\dos\fatGetFreeSpace.inc
 145   CE00                  INCLUDE "fatReadBootSector.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatReadBootSector.inc
+# file opened: D:\Projects\Specialist-OS\dos\fatReadBootSector.inc
   1+  CE00              ;----------------------------------------------------------------------------
   2+  CE00              ; MXOS
   3+  CE00              ; Считывание загрузочного сектора и инициализация структуры v_diskInfo.
@@ -5147,7 +5147,7 @@
  15+  CE00                  STRUCT  FAT_BOOT_SECTOR
  16+  CE00 ~            BS_JmpBoot      BLOCK   3   ; смещение  00h,   3 байт - Jump instruction to the bootstrap code (x86 instruction): EBh, ??h, 90h (Short jump + NOP) or E9h, ??h, ??h (Near jump).
  17+  CE00 ~            BS_OEMName      BLOCK   8   ; смещение  03h,   8 байт - "MSWIN 4.1" is recommended but also "MSDOS 5.0" is often used.
- 18+  CE00 ~            BPB_BytsPerSec  BLOCK   2   ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But must drivers use 512.
+ 18+  CE00 ~            BPB_BytsPerSec  BLOCK   2   ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But most drivers use 512.
  19+  CE00 ~            BPB_SecPerClus  BLOCK   1   ; смещение  0Dh,   1 байт - Number of sectors per cluster. Valid values are 1, 2, 4, 8, ... 128.
  20+  CE00 ~            BPB_RsvdSecCnt  BLOCK   2   ; смещение  0Eh,   2 байт - Number of sectors in reserved area. This field hould be 1 on FAT12/16 volume.
  21+  CE00 ~            BPB_NumFATs     BLOCK   1   ; смещение  10h,   1 байт - Number of FATs. The value of this field should always be 2. On memory cards, it may be 1, but some FAT driver may not recognize such a volume properly.
@@ -5275,9 +5275,9 @@
 143+  CEA3 E1                       pop     hl
 144+  CEA4 C9                       ret
 145+  CEA5
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fatReadBootSector.inc
+# file closed: D:\Projects\Specialist-OS\dos\fatReadBootSector.inc
 146   CEA5              	INCLUDE "fileCreate.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileCreate.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileCreate.inc
   1+  CEA5              ;----------------------------------------------------------------------------
   2+  CEA5              ; MXOS
   3+  CEA5              ; Создать файл
@@ -5539,9 +5539,9 @@
 259+  CF5B B7                       or      a               ; выходим с флагом cf = 0
 260+  CF5C C3 D2 CE                 jp      popDBH_ret
 261+  CF5F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileCreate.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileCreate.inc
 147   CF5F              	INCLUDE "fileFind.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileFind.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileFind.inc
   1+  CF5F              ;+---------------------------------------------------------------------------
   2+  CF5F              ; MXOS
   3+  CF5F              ; Найти файл
@@ -5666,9 +5666,9 @@
 122+  CFB0 37                       scf
 123+  CFB1 C9                       ret
 124+  CFB2
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileFind.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileFind.inc
 148   CFB2              	INCLUDE "fileLoad.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileLoad.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileLoad.inc
   1+  CFB2              ;+---------------------------------------------------------------------------
   2+  CFB2              ; MXOS
   3+  CFB2              ; Загрузить файл по указанному адресу
@@ -5837,9 +5837,9 @@
 166+  D01F B7                       or      a
 167+  D020 C3 D2 CE                 jp      popDBH_ret
 168+  D023
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileLoad.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileLoad.inc
 149   D023              	INCLUDE "fileDelete.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileDelete.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileDelete.inc
   1+  D023              ;+---------------------------------------------------------------------------
   2+  D023              ; MXOS
   3+  D023              ; Удаление файла
@@ -5912,9 +5912,9 @@
  70+  D052                          ; Восстаналиваем регистры и выходим
  71+  D052 C3 D2 CE                 jp      popDBH_ret
  72+  D055
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileDelete.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileDelete.inc
 150   D055              	INCLUDE "fileRename.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileRename.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileRename.inc
   1+  D055              ;+---------------------------------------------------------------------------
   2+  D055              ; MXOS
   3+  D055              ; Переименовать файл
@@ -5967,9 +5967,9 @@
  50+  D076 B7                       or      a
  51+  D077 C3 D2 CE                 jp      popDBH_ret
  52+  D07A
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileRename.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileRename.inc
 151   D07A              	INCLUDE "fileGetSetAttr.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetSetAttr.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileGetSetAttr.inc
   1+  D07A              ;+---------------------------------------------------------------------------
   2+  D07A              ; MXOS
   3+  D07A              ; Получение/изменение атрибутов файла
@@ -6036,9 +6036,9 @@
  64+  D09D C1                       pop     bc
  65+  D09E C9                       ret
  66+  D09F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetSetAttr.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileGetSetAttr.inc
 152   D09F              	INCLUDE "fileGetSetAddr.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetSetAddr.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileGetSetAddr.inc
   1+  D09F              ;+---------------------------------------------------------------------------
   2+  D09F              ; MXOS
   3+  D09F              ; Получение/изменение адреса загрузки файла
@@ -6101,9 +6101,9 @@
  60+  D0C2 B7                       or      a
  61+  D0C3 C9                       ret
  62+  D0C4
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetSetAddr.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileGetSetAddr.inc
 153   D0C4              	INCLUDE "fileGetInfoAddr.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetInfoAddr.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileGetInfoAddr.inc
   1+  D0C4              ;+---------------------------------------------------------------------------
   2+  D0C4              ; MXOS
   3+  D0C4              ; Получить указатель на информацию о a==1
@@ -6139,9 +6139,9 @@
  33+  D0C4              ;            ret
  34+  D0C4              ;
  35+  D0C4
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileGetInfoAddr.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileGetInfoAddr.inc
 154   D0C4              	INCLUDE "fileList.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileList.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileList.inc
   1+  D0C4              ;+---------------------------------------------------------------------------
   2+  D0C4              ; MXOS
   3+  D0C4              ; Получить список файлов каталога.
@@ -6304,9 +6304,9 @@
 160+  D14D C1                       pop     bc  ; [1]
 161+  D14E C9                       ret
 162+  D14F
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileList.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileList.inc
 155   D14F              	INCLUDE "fileNamePrepare.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileNamePrepare.inc
+# file opened: D:\Projects\Specialist-OS\dos\fileNamePrepare.inc
   1+  D14F              ;+---------------------------------------------------------------------------
   2+  D14F              ; MXOS
   3+  D14F              ; Подготовить имя файла для функций ОС
@@ -6429,9 +6429,9 @@
 120+  D1B5 C1                       pop     bc
 121+  D1B6 C9                       ret
 122+  D1B7
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\fileNamePrepare.inc
+# file closed: D:\Projects\Specialist-OS\dos\fileNamePrepare.inc
 156   D1B7                  INCLUDE "copyDescriptor.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\copyDescriptor.inc
+# file opened: D:\Projects\Specialist-OS\dos\copyDescriptor.inc
   1+  D1B7              ;----------------------------------------------------------------------------
   2+  D1B7              ; MXOS
   3+  D1B7              ; Копирование дескриптора файла (FILE_DESCRIPTOR)
@@ -6518,9 +6518,9 @@
  84+  D1E7 D1                       pop     de
  85+  D1E8 C9                       ret
  86+  D1E9
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\copyDescriptor.inc
+# file closed: D:\Projects\Specialist-OS\dos\copyDescriptor.inc
 157   D1E9              	INCLUDE "printDecWord.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printDecWord.inc
+# file opened: D:\Projects\Specialist-OS\dos\printDecWord.inc
   1+  D1E9              ;----------------------------------------------------------------------------
   2+  D1E9              ; MXOS DOS.SYS
   3+  D1E9              ; Вывод десятичного числа из de
@@ -6588,9 +6588,9 @@
  65+  D229 4F                       ld    c, a
  66+  D22A C3 37 C0                 jp    printChar
  67+  D22D
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\printDecWord.inc
+# file closed: D:\Projects\Specialist-OS\dos\printDecWord.inc
 158   D22D                  INCLUDE "math.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\math.inc
+# file opened: D:\Projects\Specialist-OS\dos\math.inc
   1+  D22D              ;+---------------------------------------------------------------------------
   2+  D22D              ; MXOS
   3+  D22D              ; Математические фуннкции
@@ -6735,7 +6735,7 @@
 142+  D292 D1           _div4:  pop     de
 143+  D293 C3 7E D2             jp      _div3
 144+  D296
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\math.inc
+# file closed: D:\Projects\Specialist-OS\dos\math.inc
 159   D296
 160   D296              ;---------------------------------------------------------------------------
 161   D296              ; Константы и Переменные
@@ -6854,7 +6854,7 @@
 225   D3C3
 226   D3C3                  IF LOAD_FONT
 227   D3C3              	    INCLUDE "initFont.inc"
-# file opened: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\initFont.inc
+# file opened: D:\Projects\Specialist-OS\dos\initFont.inc
   1+  D3C3              ;+---------------------------------------------------------------------------
   2+  D3C3              ; MXOS
   3+  D3C3              ; Загрузка шрифта в память
@@ -7152,8 +7152,8 @@
 295+  D3DF ~
 296+  D3DF                  ENDIF
 297+  D3DF
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\initFont.inc
+# file closed: D:\Projects\Specialist-OS\dos\initFont.inc
 228   D3DF                  ENDIF
 229   D3DF
 230   D3DF                  END
-# file closed: D:\Projects\Retro-PC\Specialist\MySoft\MXOS-Z80\dos\DOS.asm
+# file closed: D:\Projects\Specialist-OS\dos\DOS.asm

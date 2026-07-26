@@ -34,9 +34,8 @@ romFormat = 1
 // Имя файла образа ПЗУ
 romFileName = "MXOS_MY.bin"
 
-// Путь к папкам, куда сохранять образ ПЗУ
+// Путь к папке, куда сохранять образ ПЗУ
 destinationPath = "..\\";
-emulatorPath    = "..\\..\\..\\..\\Emulator\\emu\\Specialist\\";
 
 //----------------------------------------------------------------------------
 
@@ -61,6 +60,14 @@ function kill(name) { if(fso.FileExists(name)) fso.DeleteFile(name); }
 function fileSize(name) { return fso.GetFile(name).Size; }
 function loadAll(name) { return fso.OpenTextFile(name, 1, false, 0).Read(fileSize(name)); } // File.LoadAll глючит 
 function save(fileName, data) { fso.CreateTextFile(fileName).Write(data); }
+function fail(message)
+{
+    if (/cscript\.exe$/i.test(WScript.FullName))
+        WScript.Echo(message);
+    else
+        shell.Popup(message, 0, "Ошибка", 16);
+    WScript.Quit(1);
+}
 src = loadAll("tbl.bin"); encode = []; decode = []; for(i=0; i<256; i++) { encode[i] = src.charAt(i); decode[src.charCodeAt(i)] = i; }
 
 // Расчет контрольной суммы файла
@@ -92,6 +99,12 @@ dosSize     = 0;
 dosAddr     = 0;
 fontCluster = 0;
 numFiles    = 0;
+allocatedClusters = 0;
+currentFileName = "";
+currentFileSize = 0;
+currentFileClustersNeeded = 0;
+currentFileClustersAllocated = 0;
+currentFileUsedClustersBefore = 0;
 
 // Загружаем образ boot сектора
 bootSector = "BOOT.BIN";
@@ -125,18 +138,33 @@ function allocCluster(cluster)
                 
                 fat[i2]   = (i & 0xFF);
                 fat[i2+1] = (i >> 8) & 0xFF;
+                allocatedClusters++;
                 return i;
             }
         }
 
-        shell.Popup("Не хватило места!\n" + numFiles, 0, "Error", 0)
-        throw "Нет места";
+        missingClusters = currentFileClustersNeeded - currentFileClustersAllocated;
+        fail(
+            "Не хватает места в области данных ROM-диска.\n\n" +
+            "Файл: " + currentFileName + "\n" +
+            "Номер файла: " + numFiles + " из " + maxFiles + "\n" +
+            "Размер данных в образе: " + currentFileSize + " байт\n" +
+            "Требуется кластеров для файла: " + currentFileClustersNeeded + "\n" +
+            "Выделено кластеров для файла: " + currentFileClustersAllocated + "\n" +
+            "Не хватает кластеров: " + missingClusters + " (" +
+                missingClusters * sectorSize * secPerClus + " байт)\n\n" +
+            "Доступно кластеров для файлов на томе: " + (dataClusters - 2) + " (" +
+                (dataClusters - 2) * sectorSize * secPerClus + " байт)\n" +
+            "Было занято кластеров до этого файла: " + currentFileUsedClustersBefore + " (" +
+                currentFileUsedClustersBefore * sectorSize * secPerClus + " байт)"
+        );
     }
 }
 
 // Добавление файла
 function putFile(fileName, isBoot)
 {
+    sourceFileName = fileName;
     data = loadAll(fileName);
     data_size = data.length;
 
@@ -144,10 +172,14 @@ function putFile(fileName, isBoot)
     //if (data_size==0) return;
 
     // Проверяем объем
-    if (numFiles+1==maxFiles)
+    if (numFiles >= maxFiles)
     {
-        shell.Popup("Максимум файлов: " + maxFiles, 0, "Ошибка", 0);
-        throw "Максимум файлов "+maxFiles;
+        fail(
+            "Не хватает места в корневом каталоге ROM-диска.\n\n" +
+            "Файл: " + sourceFileName + "\n" +
+            "Максимум файлов в каталоге: " + maxFiles + "\n" +
+            "Уже добавлено файлов: " + numFiles
+        );
     }
     numFiles++;
 
@@ -174,6 +206,12 @@ function putFile(fileName, isBoot)
     // Отрезаем всё лишнее
     fileName = fso.GetBaseName(fileName);
 
+    currentFileName = sourceFileName;
+    currentFileSize = data.length;
+    currentFileClustersNeeded = Math.ceil(data.length / (sectorSize * secPerClus));
+    currentFileClustersAllocated = 0;
+    currentFileUsedClustersBefore = allocatedClusters;
+
     //shell.Popup(
     //    fileName + "." + ext + "\n" +
     //    startAddr + "\n" +
@@ -185,6 +223,7 @@ function putFile(fileName, isBoot)
     while (data.length != 0)
     {
         cluster = allocCluster(cluster); 
+        currentFileClustersAllocated++;
         if (firstCluster == 0) firstCluster = cluster;
         block = data.substr(0, 256);
         data = data.substr(256);
@@ -307,7 +346,6 @@ if (romFormat == 0)
 
     // Сохраняем результат
     save(destinationPath + romFileName, rom);
-    save(emulatorPath    + romFileName, rom);
 }
 else if (romFormat == 1)
 {
@@ -326,7 +364,6 @@ else if (romFormat == 1)
 
     // Сохраняем результат
     save(destinationPath + romFileName, rom);
-    save(emulatorPath    + romFileName, rom);
 }
 else if (romFormat == 2)
 {

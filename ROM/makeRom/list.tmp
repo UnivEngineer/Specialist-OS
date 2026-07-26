@@ -14,9 +14,9 @@ list.tmp
 -makeRom.js
 mon2.0xC000.mon
 mon2.0xF100.com
+Music.rks
 nc.0xE800.com
 nc.ext
-Ramfos.0.exe
 rom.0xDE00.com
 tape.0xEC00.com
 tbl.bin
