@@ -31,7 +31,7 @@ firstFiles = [];
 romFormat = 2
 
 // Имя файла образа ПЗУ
-romFileName = "FALSH64k.BIN"
+romFileName = "FLASH64k.BIN"
 
 // Путь к папкам, куда сохранять образ ПЗУ
 destinationPath = "..\\";
@@ -60,6 +60,14 @@ function kill(name) { if(fso.FileExists(name)) fso.DeleteFile(name); }
 function fileSize(name) { return fso.GetFile(name).Size; }
 function loadAll(name) { return fso.OpenTextFile(name, 1, false, 0).Read(fileSize(name)); } // File.LoadAll глючит 
 function save(fileName, data) { fso.CreateTextFile(fileName).Write(data); }
+function fail(message)
+{
+    if (/cscript\.exe$/i.test(WScript.FullName))
+        WScript.Echo(message);
+    else
+        shell.Popup(message, 0, "Ошибка", 16);
+    WScript.Quit(1);
+}
 src = loadAll("tbl.bin"); encode = []; decode = []; for(i=0; i<256; i++) { encode[i] = src.charAt(i); decode[src.charCodeAt(i)] = i; }
 
 // Расчет контрольной суммы файла
@@ -128,8 +136,7 @@ function allocCluster(cluster)
             }
         }
 
-        shell.Popup("Не хватило места!\n" + numFiles, 0, "Error", 0)
-        throw "Нет места";
+        fail("Не хватило места!\n" + numFiles);
     }
 }
 
@@ -145,8 +152,7 @@ function putFile(fileName, isBoot)
     // Проверяем объем
     if (numFiles+1==maxFiles)
     {
-        shell.Popup("Максимум файлов: " + maxFiles, 0, "Ошибка", 0);
-        throw "Максимум файлов "+maxFiles;
+        fail("Максимум файлов: " + maxFiles);
     }
     numFiles++;
 

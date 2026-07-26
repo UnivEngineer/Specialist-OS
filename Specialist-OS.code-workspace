@@ -334,6 +334,26 @@
         }
       },
       {
+        "label": "image: flash 64k",
+        "type": "process",
+        "command": "cscript.exe",
+        "args": [
+          "//nologo",
+          ".\\-makeRom.js"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\FlashDrive\\Games64k"
+        },
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
         "label": "listings: emu",
         "type": "process",
         "command": "${env:ComSpec}",
@@ -363,12 +383,13 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
-          "-Command",
-          "$emuDir = $env:SPECIALIST_EMU_DIR; if ([string]::IsNullOrWhiteSpace($emuDir)) { throw 'Set SPECIALIST_EMU_DIR to the directory containing EMU.exe' }; $exe = Join-Path $emuDir 'EMU.exe'; if (-not (Test-Path -LiteralPath $exe)) { throw \"EMU.exe not found: $exe\" }; $targetDir = Join-Path $emuDir 'Specialist'; New-Item -ItemType Directory -Path $targetDir -Force | Out-Null; Copy-Item -LiteralPath '${workspaceFolder}\\ROM\\MXOS_MY.bin' -Destination (Join-Path $targetDir 'MXOS_MY.bin') -Force; Push-Location $emuDir; try { & $exe '/c' 'SpecialistMX2_My_MXOS'; exit $LASTEXITCODE } finally { Pop-Location }"
+          "-File",
+          "${workspaceFolder}\\Release\\run.ps1"
         ],
         "dependsOrder": "sequence",
         "dependsOn": [
           "image: system ROM",
+          "image: flash 64k",
           "listings: emu"
         ],
         "problemMatcher": [],
