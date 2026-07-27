@@ -105,12 +105,8 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подсказки
     INCLUDE "inputForCopyMove.inc"
     INCLUDE "printSelDrive.inc"
     INCLUDE "butF7.inc"
-    INCLUDE "tapeErrorHandler.inc"
-    INCLUDE "butF9.inc"
-    INCLUDE "tapeWrite.inc"
     INCLUDE "butF6.inc"
     INCLUDE "butF5.inc"
-    INCLUDE "loadSelFileAt0.inc"
     INCLUDE "copyFileInt.inc"
     INCLUDE "printInvSelFile.inc"
     INCLUDE "butF8.inc"
@@ -142,18 +138,23 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подсказки
 ; Константы и переменные
 ;---------------------------------------------------------------------------
 
-aF1LeftF2RighF3:    DB "F1 Left F2 Rght F3 Info F4 Edit F5 Copy F6 RMov F7 Load F8 Del",0
+aF1LeftF2RighF3:    DB "F1 Left F2 Rght F3 Info F4 Edit F5 Copy F6 Ren  F7 MkDr F8 Del",0
 aCommanderVer:      DB "Commander version 2.0",0
 aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
 aFileIsReanOnly:    DB "File is read-only!",0
-aABCD:              DB "A   B   C   D",0
-aEFGH:              DB "E   F   G   H",0
 aChooseDrive:       DB "Choose drive:",0
 aDeleteFrom:        DB "Delete from ",0
 asc_DC17:           DB 8, ' ',8, 0
 aCopyFromTo:        DB "Copy from    to",8,8,8,8,8, 0
-aCantCreateFile:    DB "Can",39,"t create file!",0
-aRemoveFromTo:      DB "Rename/move from    to",8,8,8,8,8, 0
+aRootDirFull:       DB "Root directory full",0
+aCantReadFile:      DB "Can",39,"t read source",0
+aCantSetFileAddr:   DB "Can",39,"t set address",0
+aDiskIsFull:        DB "Disk is full!",0
+aDestNoDriver:      DB "Target has no driver",0
+aDestNotFormatted:   DB "Target not formatted",0
+aFileTooLarge:      DB "File exceeds 36 KB",0
+aCantRenameFile:    DB "Can",39,"t rename file!",0
+aRenameOn:          DB "Rename on ",0
 aKBytesExtMemory:   DB 18h,"KB extended memory",0   ; здесь и далее 18h вместо ведущего пробела,
 aKBytesMemory:      DB 18h,"bytes Memory",0         ; чтобы не портить цвет предыдущего символа
 aKBytesFree:        DB 18h,"bytes Free",0
@@ -163,12 +164,7 @@ aFilesUse:          DB 18h,"files use ",0
 aKBytesIn:          DB 18h,"KB in ",0
 aVolumeLabel:       DB "Volume label: ",0
 aDrive:             DB "Drive ",0
-aHasNoDriver:       DB 18h,"has no driver",0
 aNotFormatted:      DB 18h,"is not formatted",0
-aSaveFromToTape:    DB "Save from    to tape",8,8,8,8,8,8,8,8,8,8, 0
-aSavingToTape:      DB "Saving to tape",0
-aLoadingFromTapeTo: DB "Loading from tape to ",0
-aErrorLoadingTa:    DB "Error loading from tape",0
 
     IF FULL_PANELS==0
 aNameName:          DB "Name",0
@@ -315,13 +311,14 @@ stateEnd:           ; адрес конца блока переменных состояния
 cmdLinePos      DW    0
 cmdLineEnd      DW    0
 chooseDrive     DB    0
-tapeSaveCRC     DW    0         ; контрольная сумма файла с ленты
-savedSP         DW    0
-tapeLoadAddr    DW    0         ; адрес загрузки файла с ленты
+copyLoadAddr    DW    0
 diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
 cmdLine         BLOCK 59, 0FFh  ; командная строка
 cmdLineCtrl     DB    0FFh      ; контроль переполнения командной строки
-                BLOCK 13, 0FFh
+driveCount     DB    0         ; число установленных дисковых драйверов
+driveList      BLOCK 8, 0     ; номера дисков с установленным драйвером
+                BLOCK 4, 0FFh ; резерв внутри прежнего блока переменных
+
 input           BLOCK 21, 0FFh
                 BLOCK 11
 tempFileDescr   FILE_DESCRIPTOR

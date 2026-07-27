@@ -88,7 +88,7 @@ mainLoop:   ; Рисуем курсор выбранного файла
             cp      7Fh   ; Del/ЗБ (7Fh)
             jp z,   but_Bkspc
             cp      8Ah   ; F9 (8Ah)
-            jp z,   but_F9
+            jp z,   mainLoop
 mainLoop_e: cp      20h   ; Пробел (20h)
             jp c,   mainLoop
 

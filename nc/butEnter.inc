@@ -99,6 +99,46 @@ Enter_stdExec:
             call    selFileToCmdLine
 
 EnterCmdLine:
+            ; Команда X: без имени переключает активную панель на диск X.
+            ld      hl, (vars.cmdLineEnd)
+            ld      de, vars.cmdLine + 2
+            call    bios_cmp_hl_de
+            jp nz,  EnterExec
+
+            ld      a, (vars.cmdLine + 1)
+            cp      ':'
+            jp nz,  EnterExec
+
+            ld      a, (vars.cmdLine)
+            and     0DFh
+            sub     'A'
+            cp      8
+            jp nc,  EnterExec
+            ld      c, a
+
+            ; Не переключаться на букву без установленного драйвера.
+            push    bc
+            call    buildDriveList
+            pop     bc
+            call    findDrive
+            jp c,   EnterExec
+
+            ld      a, c
+            ld      hl, state.panelA_drive
+            call    writeBytePanel
+            xor     a
+            ld      hl, state.panelA_info
+            call    writeBytePanel
+            ld      hl, state.panelA_firstFile
+            call    writeBytePanel
+            ld      hl, state.panelA_curFile
+            call    writeBytePanel
+
+            call    clearCmdLine
+            call    saveState
+            jp      mainReload
+
+EnterExec:
             ; Очистка экрана
             COLOR   COLOR_CMDSCREEN
             ld      c, 1Fh

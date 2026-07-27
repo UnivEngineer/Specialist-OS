@@ -1,27 +1,27 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; TAPE.COM - драйвер магнитофона, вынесенный из DOS.SYS
-;
-; 2022-02-02 SpaceEngineer
+; TAPE.COM - самостоятельная утилита работы с магнитофоном.
+; Загружается вместо NC.COM и использует локальный низкоуровневый драйвер.
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
 
-    ORG     0DC00h
+    ORG     0E800h
 
-	INCLUDE "tapeInit.inc"
-	INCLUDE "tapeWriteDelay.inc"
-	INCLUDE "tapeRead.inc"
-	INCLUDE "tapeReadDelay.inc"
-	INCLUDE "tapeWrite.inc"
-	INCLUDE "tapeLoadInt.inc"
-	INCLUDE "tapeReadError.inc"
-	INCLUDE "tapeSave.inc"
-	INCLUDE "tapeWriteWord.inc"
-	INCLUDE "tapeLoad.inc"
-	INCLUDE "cmp_hl_de_2.inc"
+    INCLUDE "tapeUi.inc"
 
-    ; Проверка - TAPE.COM не должен вылезать за эти пределы
-    ASSERT_DONT_FIT 0DE00h
+    ; Фиксированная область низкоуровневых процедур нужна эмулятору:
+    ; адреса этих диапазонов заданы в SpecialistMX2_My_MXOS.cfg.
+    ORG_PAD 0ED00h
+
+    INCLUDE "tapeWriteDelay.inc"
+    INCLUDE "tapeRead.inc"
+    INCLUDE "tapeReadDelay.inc"
+    INCLUDE "tapeWrite.inc"
+    INCLUDE "tapeReadError.inc"
+    INCLUDE "tapeWriteWord.inc"
+
+    ; TAPE.COM не должен попасть в кэш FAT.
+    ASSERT_DONT_FIT 0FB00h
 
     END

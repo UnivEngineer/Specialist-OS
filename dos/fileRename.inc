@@ -1,52 +1,62 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; Переименовать файл
+; Переименовать файл в пределах текущего диска.
 ;
-; На входе 
-;  hl - исходное имя
-;  de - новое имя
+; Вход:
+;   hl - старое имя;
+;   de - новое имя.
+; Выход:
+;   CF - ошибка;
+;   bc, de, hl разрушаются.
 ;
-; На выходе
-;  cf - ошибка
-;  bc, de, hl - сохраняются
-;
-; 2013-12-12 Дизассемблировано vinxru
+; Важно: поиск нового имени может вытеснить сектор исходного дескриптора из
+; кэша. Поэтому перед записью имени исходный файл ищется повторно.
 ;----------------------------------------------------------------------------
 
-fileRename: ; Найти файл с именем из hl
+fileRename:
+            ; Найти исходный файл.
             call    fileFind
-            ret c 
+            ret c
 
-            ; Сохранить регистры
+            ; Переименование в то же имя ничего не меняет.
+            push    hl
+            push    de
+            ld      c, FILE_NAME_LENGTH + 3
+            call    stricmp
+            pop     de
+            pop     hl
+            ret z
+
+            ; Сохранить входные регистры для общего выхода popDBH_ret.
             push    hl
             push    bc
             push    de
-            
-            ld      hl, (v_cachedDescrPtr)
 
-            ; Попытаться найти файл с новым именем
-            ex      de, hl
+            ; Если файл с новым именем уже существует, удалить его.
+            ex      de, hl                  ; hl = новое, de = старое
             call    fileFind
-
-            ; Если такой файл есть, то удалить
             call nc,deleteFileInt
-            
-            ; Заменяем имя
-            ld      c, FILE_NAME_LENGTH + 3        
-loc_CD2C:   ld      a, (hl)
-            ld      (de),a
+
+            ; Повторно найти исходный файл: предыдущий поиск мог вытеснить
+            ; его сектор и сделать v_cachedDescrPtr недействительным.
+            ex      de, hl                  ; hl = старое, de = новое
+            call    fileFind
+            jp c,   popDBH_ret
+
+            ; hl = новое имя, de = актуальный дескриптор исходного файла.
+            ld      hl, (v_cachedDescrPtr)
+            ex      de, hl
+
+            ld      c, FILE_NAME_LENGTH + 3
+fileRenameCopyName:
+            ld      a, (hl)
+            ld      (de), a
             inc     hl
             inc     de
             dec     c
-            jp nz,  loc_CD2C
+            jp nz,  fileRenameCopyName
 
-            ; Ставим сектору каталога флаг isModified
             call    markDirSectorAsModified
-
-            ; Сохраняем изменения на диск
             call    saveSectorCache
-
-            ; Выход
             or      a
             jp      popDBH_ret
-

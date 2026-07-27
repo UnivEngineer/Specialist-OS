@@ -60,14 +60,12 @@
     <None Include="butF6.inc" />
     <None Include="butF7.inc" />
     <None Include="butF8.inc" />
-    <None Include="butF9.inc" />
     <None Include="getSelectedFile.inc" />
     <None Include="input.inc" />
     <None Include="inputForCopyMove.inc" />
     <None Include="inverseRect.inc" />
     <None Include="loadAndPrint.inc" />
     <None Include="loadFiles.inc" />
-    <None Include="loadSelFileAt0.inc" />
     <None Include="main.inc" />
     <None Include="tools.inc" />
     <CustomBuild Include="NC.asm">
@@ -94,8 +92,6 @@
     <None Include="setCursorPosPanel.inc" />
     <None Include="start.inc" />
     <None Include="butTab.inc" />
-    <None Include="tapeErrorHandler.inc" />
-    <None Include="tapeWrite.inc" />
     <None Include="butArrows.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

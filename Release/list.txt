@@ -1,6 +1,8 @@
 D:\Projects\Specialist-OS\dos\DOS.lst
 D:\Projects\Specialist-OS\E\E.lst
 D:\Projects\Specialist-OS\flash\Flash.lst
+D:\Projects\Specialist-OS\flash\FlashSys.lst
+D:\Projects\Specialist-OS\flash\FlshFast.lst
 D:\Projects\Specialist-OS\flash\Rom.lst
 D:\Projects\Specialist-OS\format\FORMAT.lst
 D:\Projects\Specialist-OS\launch\LAUNCH.lst

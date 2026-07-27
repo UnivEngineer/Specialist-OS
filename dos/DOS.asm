@@ -227,5 +227,6 @@ v_char:             BLOCK   13, 0FFh
 	    INCLUDE "initFont.inc"
     ENDIF
 
-    END
+    ASSERT_DONT_FIT 0DC00h
 
+    END

@@ -55,7 +55,7 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat DOS sys 0xC000"
+          "..\\tasm\\make.bat DOSChecked sys 0xC000 DOS"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\dos"
@@ -97,7 +97,49 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat Flash com 0xDE00"
+          "..\\tasm\\make.bat FlashChecked com 0xDE00 Flash"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\flash"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: flash-fast",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat FLSHFAST com 0xDE00"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\flash"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: flash-sys",
+        "type": "process",
+        "command": "${env:ComSpec}",
+        "args": [
+          "/d",
+          "/c",
+          "..\\tasm\\make.bat FlashSys com 0xDC00"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\flash"
@@ -223,7 +265,7 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat tape com 0xEC00"
+          "..\\tasm\\make.bat tape com 0xE800"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\tape"
@@ -302,6 +344,30 @@
           "-Command",
           "$rom = '${workspaceFolder}\\ROM\\MXOS_MY.bin'; Remove-Item -LiteralPath $rom -Force -ErrorAction SilentlyContinue; Push-Location '${workspaceFolder}\\ROM\\makeRom'; try { & cscript.exe '//nologo' '.\\-makeRom.js'; $exitCode = $LASTEXITCODE } finally { Pop-Location }; if (-not (Test-Path -LiteralPath $rom)) { if ($exitCode -eq 0) { $exitCode = 1 }; exit $exitCode }; exit 0"
         ],
+        "dependsOn": "build: OS",
+        "dependsOrder": "sequence",
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "image: writable system ROM",
+        "type": "process",
+        "command": "cscript.exe",
+        "args": [
+          "//nologo",
+          ".\\-makeRom.js",
+          "hardware",
+          "${input:systemRomSizeKB}"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\ROM\\makeRom"
+        },
         "dependsOn": "build: OS",
         "dependsOrder": "sequence",
         "problemMatcher": [],
@@ -403,6 +469,17 @@
       }
     ],
     "inputs": [
+      {
+        "id": "systemRomSizeKB",
+        "type": "pickString",
+        "description": "Размер перезаписываемой системной ПЗУ, КБ",
+        "options": [
+          "128",
+          "256",
+          "512"
+        ],
+        "default": "512"
+      },
       {
         "id": "flashImageSet",
         "type": "pickString",

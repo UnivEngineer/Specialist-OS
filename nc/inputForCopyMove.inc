@@ -5,6 +5,13 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
+inputForRename:
+            ; Буква диска показана в заголовке и в поле не редактируется.
+            ld      hl, 3D6Eh
+            ld      (bios_vars.cursorY), hl
+            ld      de, vars.input
+            jp      inputForCopyMoveName
+
 inputForCopyMove:
             ; Положение курсора
             ld      hl, 3D6Eh
@@ -38,7 +45,9 @@ loc_D255:   ld      a, (hl)
             ld      (de),a
             inc     de
 
-loc_D265:   ; Записать выбранный файл
+loc_D265:
+inputForCopyMoveName:
+            ; Записать выбранный файл
             call    getSelectedFile
             call    compactName
 

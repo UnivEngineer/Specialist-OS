@@ -56,7 +56,7 @@ fatReadBootSector:
             cp      h
             jp nz,  frbs_DriverOk
             ld      a, diskDriverDummy & 0FFh
-            cp      h
+            cp      l
             jp z,   frbs_Exit
 
 frbs_DriverOk:

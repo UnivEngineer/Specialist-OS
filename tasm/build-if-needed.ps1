@@ -7,7 +7,10 @@ param(
     [string] $Extension,
 
     [Parameter(Mandatory = $true, Position = 2)]
-    [string] $Address
+    [string] $Address,
+
+    [Parameter(Position = 3)]
+    [string] $OutputBase = $SourceBase
 )
 
 $ErrorActionPreference = "Stop"
@@ -94,10 +97,10 @@ function Get-SourceDependencies {
 
 $buildDirectory = (Get-Location).ProviderPath
 $sourcePath = Get-FullPath -Path ($SourceBase + ".asm") -BaseDirectory $buildDirectory
-$outputPath = Get-FullPath -Path ($SourceBase + "." + $Extension) -BaseDirectory $buildDirectory
-$listingPath = Get-FullPath -Path ($SourceBase + ".lst") -BaseDirectory $buildDirectory
+$outputPath = Get-FullPath -Path ($OutputBase + "." + $Extension) -BaseDirectory $buildDirectory
+$listingPath = Get-FullPath -Path ($OutputBase + ".lst") -BaseDirectory $buildDirectory
 $assemblerPath = Join-Path $PSScriptRoot "sjasmplus.exe"
-$fileName = [System.IO.Path]::GetFileNameWithoutExtension($sourcePath)
+$fileName = [System.IO.Path]::GetFileNameWithoutExtension($OutputBase)
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $romOutputPath = Join-Path $repositoryRoot ("ROM\makeRom\{0}.{1}.{2}" -f $fileName, $Address, $Extension)
 

@@ -68,7 +68,7 @@ Specialist-OS — операционная система и набор сист
 - `format/` — форматирование RAM-, flash- и будущих дискетных накопителей.
 - `launch/` — запуск `.rks` через загрузку Monitor-2.
 - `mon2/` — Monitor-2, загружаемый вместо DOS для программ стандартного «Специалиста».
-- `tape/` — внешний магнитофонный драйвер.
+- `tape/` — самостоятельная магнитофонная утилита со встроенным низкоуровневым драйвером.
 - `ROM/makeRom/` — входные файлы и скрипт сборки системного ROM-образа.
 - `FlashDrive/` — наборы файлов и скрипты сборки flash-образов.
 - `Release/` — запуск emu и преобразование листингов.
@@ -109,7 +109,7 @@ ROM\makeRom\<name>.<load-address>.<extension>
 | `build: launch` | `launch/LAUNCH.asm` | `LAUNCH.com` | `0xF800` |
 | `build: mon2` | `mon2/mon2.asm` | `mon2.com` | `0xF100` |
 | `build: nc` | `nc/NC.asm` | `NC.com` | `0xE800` |
-| `build: tape` | `tape/tape.asm` | `tape.com` | `0xEC00` |
+| `build: tape` | `tape/tape.asm` | `tape.com` | `0xE800` |
 | `build: test-scr` | `test-scr/test-scr.asm` | `test-scr.exe` | `0` |
 
 Используй задачи из `Specialist-OS.code-workspace`:

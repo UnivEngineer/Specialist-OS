@@ -62,6 +62,11 @@ execBat_0:
             cp      0Dh         
             jp z,   execBat_1
 
+            ; Принимать также Unix-перевод строки. Файлы из Git и
+            ; современных редакторов часто заканчиваются байтом 0Ah.
+            cp      0Ah
+            jp z,   execBat_1
+
             ; Конец файла
             cp      0FFh        
             jp nz,  execBat_0

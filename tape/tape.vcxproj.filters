@@ -18,10 +18,7 @@
     <None Include="tape.lst">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="tapeLoad.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeLoadInt.inc">
+    <None Include="tapeUi.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="tapeRead.inc">
@@ -33,9 +30,6 @@
     <None Include="tapeReadError.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="tapeSave.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="tapeWrite.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -43,12 +37,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="tapeWriteWord.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="cmp_hl_de_2.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeInit.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

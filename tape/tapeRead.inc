@@ -24,6 +24,10 @@ tapeRead:   ; Сохраняем регистры
             ld    d, a
 
 tapeRead_0: ; Получаем состояние
+            ; Счётчик отсутствия фронтов. Если лента остановлена или
+            ; файловое окно эмулятора отменено, периодически проверяем
+            ; обычную клавиатуру. При нормальном фронте полного сканирования нет.
+            ld    b, 0
             ld    a, (IO_KEYB_B)
             and   1
             ld    e, a
@@ -44,9 +48,25 @@ tapeRead_1: ; Получаем состояние
             ; Ждем изменения сигнала
             and   1
             cp    e
-            jp z, tapeRead_1
+            jp nz, tapeRead_edge
+
+            dec   b
+            jp nz, tapeRead_1
+
+            ; Около 8,5 мс без фронта при 2 МГц. Полное сканирование
+            ; клавиатуры выполняется только при остановившемся сигнале.
+            call  bios_keyCheck
+            cp    0FFh
+            jp nz, tapeReadError
+            call  tapePrepareHardware
+            ld    a, (IO_KEYB_B)
+            and   1
+            ld    e, a
+            ld    b, 0
+            jp    tapeRead_1
 
             ; Сохраняем бит
+tapeRead_edge:
             or    c
             ld    c, a
 

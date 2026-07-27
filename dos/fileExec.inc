@@ -114,6 +114,7 @@ execError:
 badCommand:
             ld      hl, txtBadCommand; "\nBAD COMMAND or FILE NAME"
             call    j_printString
+            call    j_getch          ; дать пользователю прочитать сообщение
 stc_ret:
             scf
             ret

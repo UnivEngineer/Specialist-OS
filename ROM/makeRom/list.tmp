@@ -1,11 +1,14 @@
 abcd0123.txt
 Almaz-2.0.exe
-autoexec.0x8000.bat
+autoexec.emu.0x8000.bat
+autoexec.hardware.0x8000.bat
 boot.bin
 DL-red.0xD000.COM
 DOS.0xC000.sys
 E.0xE800.com
 flash.0xDE00.com
+FlashSys.0xDC00.com
+FlshFast.0xDE00.com
 FONT.FNT
 format.0x8000.bat
 FORMAT.0xF100.com
@@ -18,7 +21,7 @@ MUSIC.RKS
 nc.0xE800.com
 NC.EXT
 rom.0xDE00.com
-tape.0xEC00.com
+tape.0xE800.com
 tbl.bin
 Test-Col.54272.com
 Test-Fif.0.COM

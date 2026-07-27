@@ -51,9 +51,6 @@
     <None Include="loadFiles.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="loadSelFileAt0.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="main.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -99,12 +96,6 @@
     <None Include="start.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="tapeErrorHandler.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="tapeWrite.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="NC.lst">
       <Filter>Resource Files</Filter>
     </None>
@@ -136,9 +127,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="butF8.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="butF9.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="butEnter.inc">

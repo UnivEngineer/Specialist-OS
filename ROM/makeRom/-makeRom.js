@@ -7,6 +7,15 @@
 //----------------------------------------------------------------------------
 
 // Основные настройки
+buildTarget = WScript.Arguments.length > 0
+    ? String(WScript.Arguments.Item(0)).toLowerCase()
+    : "emu";
+if (buildTarget != "emu" && buildTarget != "hardware")
+{
+    WScript.Echo("Usage: -makeRom.js [emu | hardware <128|256|512>]");
+    WScript.Quit(1);
+}
+
 volumeSize    = 64*1024         // Размер всего диска в байтах
 chipSize      = 64*1024         // Размер одной микросхемы ПЗУ в байтах
 maxFiles      = 64;             // Максимум файлов в корневом каталоге
@@ -29,6 +38,7 @@ firstFiles["NC.COM"] = 1;
 // 0 - 32 кб для Специалиста-MX
 // 1 - 64 кб для Специалиста-MX2
 // 2 - флеш-диск (нарезать на файлы размером chipSize)
+// 3 - сырой образ перезаписываемого системного ROM
 romFormat = 1
 
 // Имя файла образа ПЗУ
@@ -36,6 +46,24 @@ romFileName = "MXOS_MY.bin"
 
 // Путь к папке, куда сохранять образ ПЗУ
 destinationPath = "..\\";
+
+if (buildTarget == "hardware")
+{
+    if (WScript.Arguments.length < 2)
+    {
+        WScript.Echo("Hardware image size is required: 128, 256 or 512 KB.");
+        WScript.Quit(1);
+    }
+    hardwareSizeKB = parseInt(WScript.Arguments.Item(1), 10);
+    if (hardwareSizeKB != 128 && hardwareSizeKB != 256 && hardwareSizeKB != 512)
+    {
+        WScript.Echo("Hardware image size must be 128, 256 or 512 KB.");
+        WScript.Quit(1);
+    }
+    volumeSize = hardwareSizeKB * 1024;
+    romFormat = 3;
+    romFileName = "MXOS_SYS_" + hardwareSizeKB + ".bin";
+}
 
 //----------------------------------------------------------------------------
 
@@ -88,6 +116,13 @@ ignore["LIST.TMP"] = 1;
 ignore["TBL.BIN"] = 1;
 ignore["BOOT.BIN"] = 1;
 ignore["-MAKEROM.JS"] = 1;
+if (buildTarget == "hardware")
+    ignore["AUTOEXEC.EMU.0X8000.BAT"] = 1;
+else
+    ignore["AUTOEXEC.HARDWARE.0X8000.BAT"] = 1;
+ignore["DOSCHECKED.0XC000.SYS"] = 1;
+ignore["FLASHCHECKED.0XDE00.COM"] = 1;
+ignore["FLASHSYS.0XDE00.COM"] = 1;
 ignore["SPECSVGA.BIN"] = 1;
 ignore["SPMX.BIN"] = 1;
 if (makeRomFont == 1)
@@ -321,6 +356,8 @@ for (i=0; i<11; i++)                // BS_VolLab
 if (makeBootDisk)
 {
     dosROMAddr = ((dosCluster - 2) * secPerClus + dataStartSector) * sectorSize;
+    if (romFormat == 3 && (dosCluster != 2 || dosROMAddr + dosSize * sectorSize > 32768))
+        fail("DOS.SYS must be first and fit in the first 32-KB hardware ROM page.");
     boot[0x3F] = dosROMAddr & 0xFF;         // начальный адрес DOS.SYS в ПЗУ (откуда копировать)
     boot[0x40] = dosROMAddr >> 8;
     boot[0x42] = dosAddr & 0xFF;            // начальный адрес DOS.SYS в памяти (куда копировать)
@@ -388,4 +425,11 @@ else if (romFormat == 2)
         
         partNum++;
     }
+}
+else if (romFormat == 3)
+{
+    // Сырой образ для перезаписываемого системного ROM.
+    rom = start + dest;
+    while (rom.length < volumeSize) rom += encode[0xFF];
+    save(destinationPath + romFileName, rom);
 }

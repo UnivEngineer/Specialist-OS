@@ -211,31 +211,21 @@ pip_filesPresent:
             ;---------------------------------------------------------
 
 pip_printDiskError:
-            push    af  ; в a - код 0 (нет драйвера) или 1 (диск не отформатирован)
+            ; Панель без драйвера теперь недостижима: выбор дисков и
+            ; начальная инициализация оставляют только установленные драйверы.
 
             ; Положение курсора
             ld      hl, 0B5Ch
             call    setCursorPosPanel
 
-            ; Печать "DRIVE A:"
+            ; Печать "DRIVE A: IS NOT FORMATTED"
             COLOR   COLOR_INFOTEXT
             ld      hl, aDrive
             call    bios_printString
             COLOR   COLOR_INFONUMBER
             call    printCurDrive
             COLOR   COLOR_INFOTEXT
-
-            ; Печать " HAS NO DRIVER" или " IS NOT FORMATTED"
-            pop     af
-            or      a
-            jp z,   pip_printDiskNoDriver
             ld      hl, aNotFormatted
-            jp      bios_printString
-
-            ; ^^^ выход
-
-pip_printDiskNoDriver:
-            ld      hl, aHasNoDriver
             jp      bios_printString
 
             ; ^^^ выход
