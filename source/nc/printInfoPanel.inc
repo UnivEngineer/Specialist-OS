@@ -1,40 +1,40 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Рисование информационной панели
+; Р РёСЃРѕРІР°РЅРёРµ РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅРѕР№ РїР°РЅРµР»Рё
 ;
-; 2013-12-18 Дизассемблировано vinxru
+; 2013-12-18 Р”РёР·Р°СЃСЃРµРјР±Р»РёСЂРѕРІР°РЅРѕ vinxru
 ;----------------------------------------------------------------------------
 
 printInfoPanel:
             COLOR   COLOR_BORDER
 
-            ; Рисуем панель
+            ; Р РёСЃСѓРµРј РїР°РЅРµР»СЊ
             ld      hl, g_infoPanel
             call    draw
 
             COLOR   COLOR_INFOHEADER
 
-            ; Печать "COMMANDER VERSION XXX"
+            ; РџРµС‡Р°С‚СЊ "COMMANDER VERSION XXX"
             ld      hl, 1110h
             call    setCursorPosPanel
             ld      hl, aCommanderVer
             call    bios_printString
 
-            ; Печать "(C) OMSK 1992"
+            ; РџРµС‡Р°С‚СЊ "(C) OMSK 1992"
             ;ld      hl, 1D1Ah
             ld      hl, 0E1Ah
             call    setCursorPosPanel
             ld      hl, aCopyright    
             call    bios_printString
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0B30h
             call    setCursorPosPanel
 
-            ; Общий объем ОЗУ
-            ld      de, 65504   ; Специалист-MX/MX2
+            ; РћР±С‰РёР№ РѕР±СЉРµРј РћР—РЈ
+            ld      de, 65504   ; РЎРїРµС†РёР°Р»РёСЃС‚-MX/MX2
 
-            ; Печать "XXXX BYTES MEMORY"
+            ; РџРµС‡Р°С‚СЊ "XXXX BYTES MEMORY"
             COLOR   COLOR_INFONUMBER
             ld      b, 20h
             call    bios_printDecWord
@@ -42,16 +42,16 @@ printInfoPanel:
             ld      hl, aKBytesMemory
             call    bios_printString
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0B3Ch
             call    setCursorPosPanel
 
-            ; Свободный объем ОЗУ
+            ; РЎРІРѕР±РѕРґРЅС‹Р№ РѕР±СЉРµРј РћР—РЈ
             call    bios_getMemTop
-            inc     hl  ; сободно на 1 байт больше, чем memTop
+            inc     hl  ; СЃРѕР±РѕРґРЅРѕ РЅР° 1 Р±Р°Р№С‚ Р±РѕР»СЊС€Рµ, С‡РµРј memTop
             ex      hl, de
 
-            ; Печать "XXXX BYTES FREE"
+            ; РџРµС‡Р°С‚СЊ "XXXX BYTES FREE"
             COLOR   COLOR_INFONUMBER
             ld      b, 20h
             call    bios_printDecWord
@@ -59,11 +59,11 @@ printInfoPanel:
             ld      hl, aKBytesFree
             call    bios_printString
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0548h
             call    setCursorPosPanel
 
-            ; Общий объем ДОЗУ в кб
+            ; РћР±С‰РёР№ РѕР±СЉРµРј Р”РћР—РЈ РІ РєР±
             ld      a, (bios_vars.ramPageCount)
             ; hl = a * 256
             ld      h, a
@@ -73,7 +73,7 @@ printInfoPanel:
             call    bios_div_hl_2
             ex      hl, de
 
-            ; Печать "XXXX KB EXTENDED MEMORY"
+            ; РџРµС‡Р°С‚СЊ "XXXX KB EXTENDED MEMORY"
             COLOR   COLOR_INFONUMBER
             ld      b, 20h
             call    bios_printDecWord
@@ -81,34 +81,34 @@ printInfoPanel:
             ld      hl, aKBytesExtMemory
             call    bios_printString
 
-            ; Получить размер диска
-            ld      b, 3    ; режим
-            call    bios_diskDriver             ; de = количество кластеров на диске, hl = адрес DISK_INFO
-            ld      (vars.diskInfoPtr), hl   ; cохраним адрес структуры DISK_INFO
+            ; РџРѕР»СѓС‡РёС‚СЊ СЂР°Р·РјРµСЂ РґРёСЃРєР°
+            ld      b, 3    ; СЂРµР¶РёРј
+            call    bios_diskDriver             ; de = РєРѕР»РёС‡РµСЃС‚РІРѕ РєР»Р°СЃС‚РµСЂРѕРІ РЅР° РґРёСЃРєРµ, hl = Р°РґСЂРµСЃ DISK_INFO
+            ld      (vars.diskInfoPtr), hl   ; cРѕС…СЂР°РЅРёРј Р°РґСЂРµСЃ СЃС‚СЂСѓРєС‚СѓСЂС‹ DISK_INFO
 
-            ; Проверяем, распознан ли диск
+            ; РџСЂРѕРІРµСЂСЏРµРј, СЂР°СЃРїРѕР·РЅР°РЅ Р»Рё РґРёСЃРє
             ld      bc, DISK_INFO.isValid
-            add     hl, bc                  ; hl = адрес поля isValid
+            add     hl, bc                  ; hl = Р°РґСЂРµСЃ РїРѕР»СЏ isValid
             ld      a, (hl)                 ; a = isValid
-            cp      DISK_VALID              ; если значение меньше, чем DISK_VALID (2)
-            jp c,   pip_printDiskError      ; то переходим сюда
+            cp      DISK_VALID              ; РµСЃР»Рё Р·РЅР°С‡РµРЅРёРµ РјРµРЅСЊС€Рµ, С‡РµРј DISK_VALID (2)
+            jp c,   pip_printDiskError      ; С‚Рѕ РїРµСЂРµС…РѕРґРёРј СЃСЋРґР°
 
             ;---------------------------------------------------------
 
 pip_printDiskInfo:
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 055Ch
             call    setCursorPosPanel
 
-            ; Считаем объем в килобайтах
+            ; РЎС‡РёС‚Р°РµРј РѕР±СЉРµРј РІ РєРёР»РѕР±Р°Р№С‚Р°С…
             ; de = de * 256 / 1024 = hl / 4
             ex      hl, de
             call    bios_div_hl_2
             call    bios_div_hl_2
             ex      hl, de
-            push    de  ; в стеке - объем диска в кб
+            push    de  ; РІ СЃС‚РµРєРµ - РѕР±СЉРµРј РґРёСЃРєР° РІ РєР±
 
-            ; Печать "XXXX KBYTES TOTAL ON DRIVE A:"
+            ; РџРµС‡Р°С‚СЊ "XXXX KBYTES TOTAL ON DRIVE A:"
             COLOR   COLOR_INFONUMBER
             ld      b, 20h
             call    bios_printDecWord
@@ -119,40 +119,40 @@ pip_printDiskInfo:
             call    printCurDrive
             COLOR   COLOR_INFOTEXT
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0B98h
             call    setCursorPosPanel
 
-            ; Печать "Volume label: XXXXXXXXXXX"
+            ; РџРµС‡Р°С‚СЊ "Volume label: XXXXXXXXXXX"
             COLOR   COLOR_INFOTEXT
             ld      hl, aVolumeLabel
             call    bios_printString
             COLOR   COLOR_INFONUMBER
-            ; hl = адрес поля v_diskInfo.volumeLabel
+            ; hl = Р°РґСЂРµСЃ РїРѕР»СЏ v_diskInfo.volumeLabel
             ld      hl, (vars.diskInfoPtr)
             ld      de, DISK_INFO.volumeLabel
             add     hl, de
             call    bios_printString
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0568h
             call    setCursorPosPanel
             
-            ; Подсчет свободного места на диске.
-            ; Эта п/п может работать довольно долго,
-            ; в зависимости от размера fat на диске
-            ; Результат: de = количество свободных кластеров
+            ; РџРѕРґСЃС‡РµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р° РЅР° РґРёСЃРєРµ.
+            ; Р­С‚Р° Рї/Рї РјРѕР¶РµС‚ СЂР°Р±РѕС‚Р°С‚СЊ РґРѕРІРѕР»СЊРЅРѕ РґРѕР»РіРѕ,
+            ; РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂР°Р·РјРµСЂР° fat РЅР° РґРёСЃРєРµ
+            ; Р РµР·СѓР»СЊС‚Р°С‚: de = РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРІРѕР±РѕРґРЅС‹С… РєР»Р°СЃС‚РµСЂРѕРІ
             call    bios_getDriveFreeSpace
 
-            ; Считаем объем в килобайтах
+            ; РЎС‡РёС‚Р°РµРј РѕР±СЉРµРј РІ РєРёР»РѕР±Р°Р№С‚Р°С…
             ; hl = hl * 256 / 1024 = hl / 4
             ex      hl, de
             call    bios_div_hl_2
             call    bios_div_hl_2
             ex      hl, de
-            push    de  ; в стеке - объем свободного места в кб
+            push    de  ; РІ СЃС‚РµРєРµ - РѕР±СЉРµРј СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р° РІ РєР±
 
-            ; Печать "XXXX KBYTES FREE ON DRIVE A:"
+            ; РџРµС‡Р°С‚СЊ "XXXX KBYTES FREE ON DRIVE A:"
             COLOR   COLOR_INFONUMBER
             ld      b, 20h
             call    bios_printDecWord
@@ -162,11 +162,11 @@ pip_printDiskInfo:
             COLOR   COLOR_INFONUMBER
             call    printCurDrive
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0574h
             call    setCursorPosPanel
 
-            ; de = кол-во файлов          
+            ; de = РєРѕР»-РІРѕ С„Р°Р№Р»РѕРІ          
             ld      hl, state.panelA_filesCnt
             ld      a, (state.activePanel)
             and     a
@@ -176,7 +176,7 @@ pip_filesPresent:
             ld      e, (hl)
             ld      d, 0
 
-            ; Печать "XX FILES USE"
+            ; РџРµС‡Р°С‚СЊ "XX FILES USE"
             COLOR   COLOR_INFONUMBER
             ld      b, 20h
             call    bios_printDecWord
@@ -184,41 +184,41 @@ pip_filesPresent:
             ld      hl, aFilesUse
             call    bios_printString
 
-            pop     de  ; из стека - объем свободного места в кб
-            pop     hl  ; из стека - объем диска в кб
+            pop     de  ; РёР· СЃС‚РµРєР° - РѕР±СЉРµРј СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р° РІ РєР±
+            pop     hl  ; РёР· СЃС‚РµРєР° - РѕР±СЉРµРј РґРёСЃРєР° РІ РєР±
             call    bios_sub_hl_de
             ex      hl, de
 
-            ; Печать "XXXX BYTES IN"
+            ; РџРµС‡Р°С‚СЊ "XXXX BYTES IN"
             COLOR   COLOR_INFONUMBER
-            ld      b, 0    ; не дополнять пробелами
+            ld      b, 0    ; РЅРµ РґРѕРїРѕР»РЅСЏС‚СЊ РїСЂРѕР±РµР»Р°РјРё
             call    bios_printDecWord
             COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesIn
             call    bios_printString
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 2C80h
             call    setCursorPosPanel
 
-            ; Печать "A:"
-            ; Здесь будет печататься путь к текущей папке...
+            ; РџРµС‡Р°С‚СЊ "A:"
+            ; Р—РґРµСЃСЊ Р±СѓРґРµС‚ РїРµС‡Р°С‚Р°С‚СЊСЃСЏ РїСѓС‚СЊ Рє С‚РµРєСѓС‰РµР№ РїР°РїРєРµ...
             COLOR   COLOR_INFONUMBER
             jp      printCurDrive
 
-            ; ^^^ выход
+            ; ^^^ РІС‹С…РѕРґ
 
             ;---------------------------------------------------------
 
 pip_printDiskError:
-            ; Панель без драйвера теперь недостижима: выбор дисков и
-            ; начальная инициализация оставляют только установленные драйверы.
+            ; РџР°РЅРµР»СЊ Р±РµР· РґСЂР°Р№РІРµСЂР° С‚РµРїРµСЂСЊ РЅРµРґРѕСЃС‚РёР¶РёРјР°: РІС‹Р±РѕСЂ РґРёСЃРєРѕРІ Рё
+            ; РЅР°С‡Р°Р»СЊРЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕСЃС‚Р°РІР»СЏСЋС‚ С‚РѕР»СЊРєРѕ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РґСЂР°Р№РІРµСЂС‹.
 
-            ; Положение курсора
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
             ld      hl, 0B5Ch
             call    setCursorPosPanel
 
-            ; Печать "DRIVE A: IS NOT FORMATTED"
+            ; РџРµС‡Р°С‚СЊ "DRIVE A: IS NOT FORMATTED"
             COLOR   COLOR_INFOTEXT
             ld      hl, aDrive
             call    bios_printString
@@ -228,4 +228,4 @@ pip_printDiskError:
             ld      hl, aNotFormatted
             jp      bios_printString
 
-            ; ^^^ выход
+            ; ^^^ РІС‹С…РѕРґ

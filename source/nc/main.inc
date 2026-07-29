@@ -1,11 +1,11 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Основной цикл
+; РћСЃРЅРѕРІРЅРѕР№ С†РёРєР»
 ;
-; 2013-12-18 Дизассемблировано vinxru
+; 2013-12-18 Р”РёР·Р°СЃСЃРµРјР±Р»РёСЂРѕРІР°РЅРѕ vinxru
 ;----------------------------------------------------------------------------
 
-mainReload: ; Перерисовываем обе панели
+mainReload: ; РџРµСЂРµСЂРёСЃРѕРІС‹РІР°РµРј РѕР±Рµ РїР°РЅРµР»Рё
             ld      a, (state.activePanel)
             and     a
             jp      nz, mainReload_0
@@ -18,7 +18,7 @@ mainReload_0:
             call    loadAndPrintA
             
 mainDriveChanged:
-            ; Вывод накопителя в ком строку
+            ; Р’С‹РІРѕРґ РЅР°РєРѕРїРёС‚РµР»СЏ РІ РєРѕРј СЃС‚СЂРѕРєСѓ
             COLOR   COLOR_CMDLINE
             ld      hl, 1F3h
             ld      (bios_vars.cursorY), hl
@@ -26,28 +26,28 @@ mainDriveChanged:
             call    readBytePanel
             call    printDrive
 
-            ; Вывод информации о файле
+            ; Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ С„Р°Р№Р»Рµ
             call    printInfoLine
 
-mainLoop:   ; Рисуем курсор выбранного файла
+mainLoop:   ; Р РёСЃСѓРµРј РєСѓСЂСЃРѕСЂ РІС‹Р±СЂР°РЅРЅРѕРіРѕ С„Р°Р№Р»Р°
             COLOR   COLOR_CURSOR
             call    drawCursor
 
-            ; Положение курсора в ком строке
+            ; РџРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР° РІ РєРѕРј СЃС‚СЂРѕРєРµ
             ld      hl, (vars.cmdLinePos)
             ld      (bios_vars.cursorY), hl
 
-            ; Ждем нажатия клавиши
+            ; Р–РґРµРј РЅР°Р¶Р°С‚РёСЏ РєР»Р°РІРёС€Рё
             COLOR   COLOR_CMDLINE
             call    bios_getch
 
-            ; Стираем курсор выбранного файла
+            ; РЎС‚РёСЂР°РµРј РєСѓСЂСЃРѕСЂ РІС‹Р±СЂР°РЅРЅРѕРіРѕ С„Р°Р№Р»Р°
             push    af
             COLOR   COLOR_FILE
             call    drawCursor
             pop     af
 
-            ; Анализ нажатой клавиши
+            ; РђРЅР°Р»РёР· РЅР°Р¶Р°С‚РѕР№ РєР»Р°РІРёС€Рё
             ld      c, a
             jp c,   but_ctrl
             and     a     ; F1 (00h)
@@ -66,47 +66,47 @@ mainLoop:   ; Рисуем курсор выбранного файла
             jp z,   but_F7
             dec     a     ; F8 (07h)
             jp z,   but_F8
-            dec     a     ; стрелка влево (08h)
+            dec     a     ; СЃС‚СЂРµР»РєР° РІР»РµРІРѕ (08h)
             jp z,   but_Left
-            dec     a     ; Tab/Таб (09h)
+            dec     a     ; Tab/РўР°Р± (09h)
             jp z,   but_Tab
-            dec     a     ; End/ПС (0Ah)
+            dec     a     ; End/РџРЎ (0Ah)
             jp z,   but_End
-            sub     2     ; Home/стрелка влево-вверх (0Ch)
+            sub     2     ; Home/СЃС‚СЂРµР»РєР° РІР»РµРІРѕ-РІРІРµСЂС… (0Ch)
             jp z,   but_Home
-            dec     a     ; Enter/ВК (0Dh)
+            dec     a     ; Enter/Р’Рљ (0Dh)
             jp z,   but_Enter
-            sub     0Bh   ; стрелка вправо (18h)
+            sub     0Bh   ; СЃС‚СЂРµР»РєР° РІРїСЂР°РІРѕ (18h)
             jp z,   but_Right
-            dec     a     ; стрелка вверх (19h)
+            dec     a     ; СЃС‚СЂРµР»РєР° РІРІРµСЂС… (19h)
             jp z,   but_Up
-            dec     a     ; стрелка вниз (1Ah)
+            dec     a     ; СЃС‚СЂРµР»РєР° РІРЅРёР· (1Ah)
             jp z,   but_Down
-            dec     a     ; Esc/АР2 (1Bh)
+            dec     a     ; Esc/РђР 2 (1Bh)
             jp z,   but_Esc
             add     1Bh
-            cp      7Fh   ; Del/ЗБ (7Fh)
+            cp      7Fh   ; Del/Р—Р‘ (7Fh)
             jp z,   but_Bkspc
             cp      8Ah   ; F9 (8Ah)
             jp z,   mainLoop
-mainLoop_e: cp      20h   ; Пробел (20h)
+mainLoop_e: cp      20h   ; РџСЂРѕР±РµР» (20h)
             jp c,   mainLoop
 
-            ; Вывод символов в ком строку
+            ; Р’С‹РІРѕРґ СЃРёРјРІРѕР»РѕРІ РІ РєРѕРј СЃС‚СЂРѕРєСѓ
             ld      hl, (vars.cmdLineEnd)
             ld      c, a
             ld      (hl), a
 
-            ; Если ком строка переполнена, выходим
+            ; Р•СЃР»Рё РєРѕРј СЃС‚СЂРѕРєР° РїРµСЂРµРїРѕР»РЅРµРЅР°, РІС‹С…РѕРґРёРј
             ld      a, vars.cmdLineCtrl & 0FFh
             cp      l
             jp z,   mainLoop
 
-            ; Увеличиваем длину
+            ; РЈРІРµР»РёС‡РёРІР°РµРј РґР»РёРЅСѓ
             inc     hl
             ld      (vars.cmdLineEnd), hl
 
-            ; Выводим символ на экран
+            ; Р’С‹РІРѕРґРёРј СЃРёРјРІРѕР» РЅР° СЌРєСЂР°РЅ
             COLOR   COLOR_CMDLINE
             call    bios_printChar
 
@@ -118,17 +118,17 @@ mainLoop_savePos: ; ?
 
 ; ---------------------------------------------------------------------------
 
-but_Bkspc:  ; Если ком строка пустая, выходим
+but_Bkspc:  ; Р•СЃР»Рё РєРѕРј СЃС‚СЂРѕРєР° РїСѓСЃС‚Р°СЏ, РІС‹С…РѕРґРёРј
             ld      hl, (vars.cmdLineEnd)
             ld      a, vars.cmdLine & 0FFh
             cp      l
             jp z,   mainLoop
 
-            ; Удаляем один символ
+            ; РЈРґР°Р»СЏРµРј РѕРґРёРЅ СЃРёРјРІРѕР»
             dec     hl
             ld      (vars.cmdLineEnd), hl
             
-            ; Стираем символ на экране
+            ; РЎС‚РёСЂР°РµРј СЃРёРјРІРѕР» РЅР° СЌРєСЂР°РЅРµ
             COLOR   070h
             ld      hl, asc_DC17
             call    bios_printString
@@ -148,7 +148,7 @@ but_ctrl:   cp    0Dh
 
 ; ---------------------------------------------------------------------------
 
-ctrlEnter:  ; Если файл не выбран, выход
+ctrlEnter:  ; Р•СЃР»Рё С„Р°Р№Р» РЅРµ РІС‹Р±СЂР°РЅ, РІС‹С…РѕРґ
             call    getSelectedFile
             ld      a, (hl)
             cp      0FFh

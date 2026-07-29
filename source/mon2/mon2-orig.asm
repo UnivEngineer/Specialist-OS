@@ -1,12 +1,12 @@
 ;----------------------------------------------------------------------------
 ; MXOS - MON2.COM
 ;
-; 2022-02-07 Дизассемблировано SpaceEngineer
+; 2022-02-07 Р”РёР·Р°СЃСЃРµРјР±Р»РёСЂРѕРІР°РЅРѕ SpaceEngineer
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
 
-; Используемые подпрограммы DOS.SYS:
+; РСЃРїРѕР»СЊР·СѓРµРјС‹Рµ РїРѕРґРїСЂРѕРіСЂР°РјРјС‹ DOS.SYS:
 ; bios_keyScanOld        = 0C003h
 ; bios_drawCursorOld   = 0C006h
 ; bios_printCharOld    = 0C037h
@@ -41,14 +41,14 @@
 ; bios_fileNamePrepare = 0C85Ah
 ; bios_fileLoad2         = 0C866h
 
-; Используемые переменные DOS.SYS:
+; РСЃРїРѕР»СЊР·СѓРµРјС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ DOS.SYS:
 ; bios_vars.tapeError  = 8FE1h
 ; bios_vars.tapeAddr   = 8FE3h
 ; bios_vars.cursorCfg  = 8FE9h
 ; bios_vars.koi8         = 8FEAh
 ; bios_vars.cursorX    = 8FFCh
 
-; Собственные переменные
+; РЎРѕР±СЃС‚РІРµРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
     STRUCT MON2_VARS_1
 V_8F80:     DS    1
 V_8F81:     DS    2
@@ -89,13 +89,13 @@ V_F90A:     DS    2
 V_F90C:     DS    2
     ENDS
 
-; Адреса блоков переменных
+; РђРґСЂРµСЃР° Р±Р»РѕРєРѕРІ РїРµСЂРµРјРµРЅРЅС‹С…
 vars1 MON2_VARS_1 = 08F80H
 vars2 MON2_VARS_2 = 0F0E0H
 vars3 MON2_VARS_3 = 0F900H
 
 
-; Начало программы
+; РќР°С‡Р°Р»Рѕ РїСЂРѕРіСЂР°РјРјС‹
     ORG   0F100h
 
         LD    C,1FH         ; 31
@@ -260,7 +260,7 @@ LBL6:   LD    HL,REF2             ; 62054
         CALL  bios_printString
         RET
 
-        ; Русский текст в кодировке КОИ-8
+        ; Р СѓСЃСЃРєРёР№ С‚РµРєСЃС‚ РІ РєРѕРґРёСЂРѕРІРєРµ РљРћР-8
 REF1:   DB    0AH,0DH,"mal disk !",00H
 REF2:   DB    0AH,0DH,"mal DIR !", 00H
 REF3:   DB    0AH,0DH,"net fajla ",00H
@@ -728,7 +728,7 @@ SUB20:  LD    C,0AH         ; 10; [8]
         CALL  SUB30
         RET
 
-        ; Русский текст в кодировке КОИ-8
+        ; Р СѓСЃСЃРєРёР№ С‚РµРєСЃС‚ РІ РєРѕРґРёСЂРѕРІРєРµ РљРћР-8
 REF5:   DB    "  ?",00H
 REF6:   DB    0AH,0DH,00H
 REF7:   DB    0DH,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,2EH,00H
@@ -963,7 +963,7 @@ LBL67:
         RET
 
 ;----------------------------------------------------------------------------
-; Таблица переходов F800h
+; РўР°Р±Р»РёС†Р° РїРµСЂРµС…РѕРґРѕРІ F800h
 ;----------------------------------------------------------------------------
     ORG_PAD0 0F800h
 
@@ -979,7 +979,7 @@ SUB31:  JP    bios_printHexByte     ; F815
 SUB32:  JP    bios_printStringOld   ; F818
 SUB33:  JP    bios_keyScanOld       ; F81B
         JP    bios_getCursorPos     ; F81E
-        RET                         ; F821 - не используется
+        RET                         ; F821 - РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
         NOP
         NOP
 SUB34:  JP    bios_tapeLoad         ; F824

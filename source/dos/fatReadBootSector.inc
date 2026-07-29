@@ -1,57 +1,57 @@
 ;----------------------------------------------------------------------------
 ; MXOS
-; Считывание загрузочного сектора и инициализация структуры v_diskInfo.
-; Подпрограмма затирает дисковый кэш!
+; РЎС‡РёС‚С‹РІР°РЅРёРµ Р·Р°РіСЂСѓР·РѕС‡РЅРѕРіРѕ СЃРµРєС‚РѕСЂР° Рё РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃС‚СЂСѓРєС‚СѓСЂС‹ v_diskInfo.
+; РџРѕРґРїСЂРѕРіСЂР°РјРјР° Р·Р°С‚РёСЂР°РµС‚ РґРёСЃРєРѕРІС‹Р№ РєСЌС€!
 ;
-; На выходе
-;  cf - ошибка
-;  регистры bc, de, hl сохраняются
+; РќР° РІС‹С…РѕРґРµ
+;  cf - РѕС€РёР±РєР°
+;  СЂРµРіРёСЃС‚СЂС‹ bc, de, hl СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ
 ;
-; 2022-02-13 Разработано SpaceEngineer
+; 2022-02-13 Р Р°Р·СЂР°Р±РѕС‚Р°РЅРѕ SpaceEngineer
 ;----------------------------------------------------------------------------
 
-; Структура загрузочного сектора FAT12/16
+; РЎС‚СЂСѓРєС‚СѓСЂР° Р·Р°РіСЂСѓР·РѕС‡РЅРѕРіРѕ СЃРµРєС‚РѕСЂР° FAT12/16
 
     STRUCT  FAT_BOOT_SECTOR
-BS_JmpBoot      BLOCK   3   ; смещение  00h,   3 байт - Jump instruction to the bootstrap code (x86 instruction): EBh, ??h, 90h (Short jump + NOP) or E9h, ??h, ??h (Near jump).
-BS_OEMName      BLOCK   8   ; смещение  03h,   8 байт - "MSWIN 4.1" is recommended but also "MSDOS 5.0" is often used.
-BPB_BytsPerSec  BLOCK   2   ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But most drivers use 512.
-BPB_SecPerClus  BLOCK   1   ; смещение  0Dh,   1 байт - Number of sectors per cluster. Valid values are 1, 2, 4, 8, ... 128.
-BPB_RsvdSecCnt  BLOCK   2   ; смещение  0Eh,   2 байт - Number of sectors in reserved area. This field hould be 1 on FAT12/16 volume.
-BPB_NumFATs     BLOCK   1   ; смещение  10h,   1 байт - Number of FATs. The value of this field should always be 2. On memory cards, it may be 1, but some FAT driver may not recognize such a volume properly.
-BPB_RootEntCnt  BLOCK   2   ; смещение  11h,   2 байт - Number of 32-byte directory entries in the root directory. For max compatibility, must be 512 on FAT16 volume.
-BPB_TotSec16    BLOCK   2   ; смещение  13h,   2 байт - Total number of sectors of the volume in old 16-bit field. If >= 0x10000, this field = 0, and the true value is set to BPB_TotSec32.
-BPB_Media       BLOCK   1   ; смещение  15h,   1 байт - Valid values are F0h, F8h ... FFh. The same value must be put in the lower 8-bits of FAT[0].
-BPB_FATSz16     BLOCK   2   ; смещение  16h,   2 байт - Number of sectors occupied by a FAT. The size of the FAT area becomes BPB_FATSz16 * BPB_NumFATs sectors.
-BPB_SecPerTrk   BLOCK   2   ; смещение  18h,   2 байт - Number of sectors per track. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
-BPB_NumHeads    BLOCK   2   ; смещение  1Ah,   2 байт - Number of heads. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
-BPB_HiddSec     BLOCK   4   ; смещение  1Ch,   4 байт - Number of hidden physical sectors preceding the FAT volume. Should always be 0 if the volume starts at the beginning of the storage.
-BPB_TotSec32    BLOCK   4   ; смещение  20h,   4 байт - Total number of sectors of the FAT volume in new 32-bit field. 
-BS_DrvNum       BLOCK   1   ; смещение  24h,   1 байт - Drive number used by disk BIOS of IBM PC. This field is used in MS-DOS bootstrap, 0x00 for floppy disk and 0x80 for fixed disk.
-BS_Reserved     BLOCK   1   ; смещение  25h,   1 байт - Reserved (used by Windows NT). It should be set 0 when create the volume.
-BS_BootSig      BLOCK   1   ; смещение  26h,   1 байт - Extended boot signature (0x29). This is a signature byte indicates that the following three fields are present.
-BS_VolID        BLOCK   4   ; смещение  27h,   4 байт - Volume serial number used with BS_VolLab to track a volume on the removable storage. It enables to detect a wrong media change by FAT driver.
-BS_VolLab       BLOCK  11   ; смещение  2Bh,  11 байт - Volume label, matches volume label recorded in the root directory. When volume label is not present, "NO NAME " should be set.
-BS_FilSysType   BLOCK   8   ; смещение  36h,   8 байт - "FAT12   ", "FAT16   " or "FAT     ". Microsoft's FAT driver does not use this field to determine the FAT type.
-BS_BootCode     BLOCK 448   ; смещение  3Eh, 448 байт - Bootstrap program. It is platform dependent and filled with zero when not used.
-BS_BootSign     BLOCK   2   ; смещение 1FEh,   2 байт - 0xAA55. A boot signature indicating that this is a valid boot sector.
+BS_JmpBoot      BLOCK   3   ; СЃРјРµС‰РµРЅРёРµ  00h,   3 Р±Р°Р№С‚ - Jump instruction to the bootstrap code (x86 instruction): EBh, ??h, 90h (Short jump + NOP) or E9h, ??h, ??h (Near jump).
+BS_OEMName      BLOCK   8   ; СЃРјРµС‰РµРЅРёРµ  03h,   8 Р±Р°Р№С‚ - "MSWIN 4.1" is recommended but also "MSDOS 5.0" is often used.
+BPB_BytsPerSec  BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  0Bh,   2 Р±Р°Р№С‚ - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But most drivers use 512.
+BPB_SecPerClus  BLOCK   1   ; СЃРјРµС‰РµРЅРёРµ  0Dh,   1 Р±Р°Р№С‚ - Number of sectors per cluster. Valid values are 1, 2, 4, 8, ... 128.
+BPB_RsvdSecCnt  BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  0Eh,   2 Р±Р°Р№С‚ - Number of sectors in reserved area. This field hould be 1 on FAT12/16 volume.
+BPB_NumFATs     BLOCK   1   ; СЃРјРµС‰РµРЅРёРµ  10h,   1 Р±Р°Р№С‚ - Number of FATs. The value of this field should always be 2. On memory cards, it may be 1, but some FAT driver may not recognize such a volume properly.
+BPB_RootEntCnt  BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  11h,   2 Р±Р°Р№С‚ - Number of 32-byte directory entries in the root directory. For max compatibility, must be 512 on FAT16 volume.
+BPB_TotSec16    BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  13h,   2 Р±Р°Р№С‚ - Total number of sectors of the volume in old 16-bit field. If >= 0x10000, this field = 0, and the true value is set to BPB_TotSec32.
+BPB_Media       BLOCK   1   ; СЃРјРµС‰РµРЅРёРµ  15h,   1 Р±Р°Р№С‚ - Valid values are F0h, F8h ... FFh. The same value must be put in the lower 8-bits of FAT[0].
+BPB_FATSz16     BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  16h,   2 Р±Р°Р№С‚ - Number of sectors occupied by a FAT. The size of the FAT area becomes BPB_FATSz16 * BPB_NumFATs sectors.
+BPB_SecPerTrk   BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  18h,   2 Р±Р°Р№С‚ - Number of sectors per track. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
+BPB_NumHeads    BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ  1Ah,   2 Р±Р°Р№С‚ - Number of heads. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
+BPB_HiddSec     BLOCK   4   ; СЃРјРµС‰РµРЅРёРµ  1Ch,   4 Р±Р°Р№С‚ - Number of hidden physical sectors preceding the FAT volume. Should always be 0 if the volume starts at the beginning of the storage.
+BPB_TotSec32    BLOCK   4   ; СЃРјРµС‰РµРЅРёРµ  20h,   4 Р±Р°Р№С‚ - Total number of sectors of the FAT volume in new 32-bit field. 
+BS_DrvNum       BLOCK   1   ; СЃРјРµС‰РµРЅРёРµ  24h,   1 Р±Р°Р№С‚ - Drive number used by disk BIOS of IBM PC. This field is used in MS-DOS bootstrap, 0x00 for floppy disk and 0x80 for fixed disk.
+BS_Reserved     BLOCK   1   ; СЃРјРµС‰РµРЅРёРµ  25h,   1 Р±Р°Р№С‚ - Reserved (used by Windows NT). It should be set 0 when create the volume.
+BS_BootSig      BLOCK   1   ; СЃРјРµС‰РµРЅРёРµ  26h,   1 Р±Р°Р№С‚ - Extended boot signature (0x29). This is a signature byte indicates that the following three fields are present.
+BS_VolID        BLOCK   4   ; СЃРјРµС‰РµРЅРёРµ  27h,   4 Р±Р°Р№С‚ - Volume serial number used with BS_VolLab to track a volume on the removable storage. It enables to detect a wrong media change by FAT driver.
+BS_VolLab       BLOCK  11   ; СЃРјРµС‰РµРЅРёРµ  2Bh,  11 Р±Р°Р№С‚ - Volume label, matches volume label recorded in the root directory. When volume label is not present, "NO NAME " should be set.
+BS_FilSysType   BLOCK   8   ; СЃРјРµС‰РµРЅРёРµ  36h,   8 Р±Р°Р№С‚ - "FAT12   ", "FAT16   " or "FAT     ". Microsoft's FAT driver does not use this field to determine the FAT type.
+BS_BootCode     BLOCK 448   ; СЃРјРµС‰РµРЅРёРµ  3Eh, 448 Р±Р°Р№С‚ - Bootstrap program. It is platform dependent and filled with zero when not used.
+BS_BootSign     BLOCK   2   ; СЃРјРµС‰РµРЅРёРµ 1FEh,   2 Р±Р°Р№С‚ - 0xAA55. A boot signature indicating that this is a valid boot sector.
     ENDS
 
 ;----------------------------------------------------------------------------
 
 fatReadBootSector:
-            ; Сохраняем регистры
+            ; РЎРѕС…СЂР°РЅСЏРµРј СЂРµРіРёСЃС‚СЂС‹
             push    hl
             push    de
             push    bc
 
-            ; Помещаем значение DISK_NO_DRIVER в v_diskInfo.isValid
+            ; РџРѕРјРµС‰Р°РµРј Р·РЅР°С‡РµРЅРёРµ DISK_NO_DRIVER РІ v_diskInfo.isValid
             ld      a, DISK_NO_DRIVER
             ld      (v_diskInfo.isValid), a
 
-            ; Проверяем, установлен ли драйвер: сравниваем
-            ; с адресом пустого драйвера diskDriverDummy
-            ld      hl, (j_diskDriver + 1)  ; hl = адрес драйвера
+            ; РџСЂРѕРІРµСЂСЏРµРј, СѓСЃС‚Р°РЅРѕРІР»РµРЅ Р»Рё РґСЂР°Р№РІРµСЂ: СЃСЂР°РІРЅРёРІР°РµРј
+            ; СЃ Р°РґСЂРµСЃРѕРј РїСѓСЃС‚РѕРіРѕ РґСЂР°Р№РІРµСЂР° diskDriverDummy
+            ld      hl, (j_diskDriver + 1)  ; hl = Р°РґСЂРµСЃ РґСЂР°Р№РІРµСЂР°
             ld      a, diskDriverDummy >> 8
             cp      h
             jp nz,  frbs_DriverOk
@@ -60,84 +60,84 @@ fatReadBootSector:
             jp z,   frbs_Exit
 
 frbs_DriverOk:
-            ; Драйвер установлен; загружаем boot сектор в дисковый кэш, затирая его
-            ld      hl, FAT_CACHE_ADDR  ; адрес буфера
-            ld      de, 0               ; номер сектора - 0
-            ld      b, 2                ; режим драйвера - чтение
-            call    j_diskDriver        ; читаем сектор в память
+            ; Р”СЂР°Р№РІРµСЂ СѓСЃС‚Р°РЅРѕРІР»РµРЅ; Р·Р°РіСЂСѓР¶Р°РµРј boot СЃРµРєС‚РѕСЂ РІ РґРёСЃРєРѕРІС‹Р№ РєСЌС€, Р·Р°С‚РёСЂР°СЏ РµРіРѕ
+            ld      hl, FAT_CACHE_ADDR  ; Р°РґСЂРµСЃ Р±СѓС„РµСЂР°
+            ld      de, 0               ; РЅРѕРјРµСЂ СЃРµРєС‚РѕСЂР° - 0
+            ld      b, 2                ; СЂРµР¶РёРј РґСЂР°Р№РІРµСЂР° - С‡С‚РµРЅРёРµ
+            call    j_diskDriver        ; С‡РёС‚Р°РµРј СЃРµРєС‚РѕСЂ РІ РїР°РјСЏС‚СЊ
 
-            ; Помещаем значение DISK_INVALID в v_diskInfo.isValid
+            ; РџРѕРјРµС‰Р°РµРј Р·РЅР°С‡РµРЅРёРµ DISK_INVALID РІ v_diskInfo.isValid
             ld      a, DISK_INVALID
             ld      (v_diskInfo.isValid), a
 
-            ; Проверяем, корректный ли это FAT12/16 диск:
-            ; поле BS_FilSysType должно содержить текст "FAT"
+            ; РџСЂРѕРІРµСЂСЏРµРј, РєРѕСЂСЂРµРєС‚РЅС‹Р№ Р»Рё СЌС‚Рѕ FAT12/16 РґРёСЃРє:
+            ; РїРѕР»Рµ BS_FilSysType РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶РёС‚СЊ С‚РµРєСЃС‚ "FAT"
             ld      hl, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_FilSysType
             ld      de, aFat
             ld      c, 3
             call    strcmp
-            jp nz,  frbs_Exit   ; это не FAT диск, или не отформатирован - выходим
+            jp nz,  frbs_Exit   ; СЌС‚Рѕ РЅРµ FAT РґРёСЃРє, РёР»Рё РЅРµ РѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅ - РІС‹С…РѕРґРёРј
 
-            ; Помещаем значение DISK_VALID в v_diskInfo.isValid
+            ; РџРѕРјРµС‰Р°РµРј Р·РЅР°С‡РµРЅРёРµ DISK_VALID РІ v_diskInfo.isValid
             ld      a, DISK_VALID
             ld      (v_diskInfo.isValid), a
 
-            ; Копируем и рассчитываем необходимые значения
+            ; РљРѕРїРёСЂСѓРµРј Рё СЂР°СЃСЃС‡РёС‚С‹РІР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
             ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_BytsPerSec)
-            ld      (v_diskInfo.sectorSize), hl         ; размер сектора
+            ld      (v_diskInfo.sectorSize), hl         ; СЂР°Р·РјРµСЂ СЃРµРєС‚РѕСЂР°
 
             ld      a, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_SecPerClus)
             ld      (v_diskInfo.sectorsPerCluster), a
             xor     a
-            ld      (v_diskInfo.sectorsPerCluster+1), a ; секторов на кластер (16-битным словом)
+            ld      (v_diskInfo.sectorsPerCluster+1), a ; СЃРµРєС‚РѕСЂРѕРІ РЅР° РєР»Р°СЃС‚РµСЂ (16-Р±РёС‚РЅС‹Рј СЃР»РѕРІРѕРј)
 
             ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_TotSec16)
-            ld      (v_diskInfo.totalSectors), hl       ; сколько всего секторов на диске
+            ld      (v_diskInfo.totalSectors), hl       ; СЃРєРѕР»СЊРєРѕ РІСЃРµРіРѕ СЃРµРєС‚РѕСЂРѕРІ РЅР° РґРёСЃРєРµ
 
             ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_RsvdSecCnt)
-            ld      (v_diskInfo.resSectors), hl         ; сколько секторов занимает зарезервированная область
+            ld      (v_diskInfo.resSectors), hl         ; СЃРєРѕР»СЊРєРѕ СЃРµРєС‚РѕСЂРѕРІ Р·Р°РЅРёРјР°РµС‚ Р·Р°СЂРµР·РµСЂРІРёСЂРѕРІР°РЅРЅР°СЏ РѕР±Р»Р°СЃС‚СЊ
 
             ex      hl, de
 
             ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_FATSz16)
-            ld      (v_diskInfo.fatSectors), hl         ; сколько секторов занимает таблица fat
+            ld      (v_diskInfo.fatSectors), hl         ; СЃРєРѕР»СЊРєРѕ СЃРµРєС‚РѕСЂРѕРІ Р·Р°РЅРёРјР°РµС‚ С‚Р°Р±Р»РёС†Р° fat
 
             add     hl, de
-            ld      (v_diskInfo.dirStartSector), hl     ; первый сектор корневого каталога
+            ld      (v_diskInfo.dirStartSector), hl     ; РїРµСЂРІС‹Р№ СЃРµРєС‚РѕСЂ РєРѕСЂРЅРµРІРѕРіРѕ РєР°С‚Р°Р»РѕРіР°
             push    hl
 
             ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_RootEntCnt)
-            ld      (v_diskInfo.rootDirMaxFiles), hl    ; максимум файлов в корневом каталоге
+            ld      (v_diskInfo.rootDirMaxFiles), hl    ; РјР°РєСЃРёРјСѓРј С„Р°Р№Р»РѕРІ РІ РєРѕСЂРЅРµРІРѕРј РєР°С‚Р°Р»РѕРіРµ
 
             ld      hl, (v_diskInfo.sectorSize)
             ld      de, FILE_DESCR_SIZE ; de = 32
             call    div_hl_de;
-            ld      (v_diskInfo.descrPerSector), hl     ; сколько дескрипторов файлов вмещается в один сектор
+            ld      (v_diskInfo.descrPerSector), hl     ; СЃРєРѕР»СЊРєРѕ РґРµСЃРєСЂРёРїС‚РѕСЂРѕРІ С„Р°Р№Р»РѕРІ РІРјРµС‰Р°РµС‚СЃСЏ РІ РѕРґРёРЅ СЃРµРєС‚РѕСЂ
 
             ex      hl, de
             ld      hl, (v_diskInfo.rootDirMaxFiles)
             call    div_hl_de;
-            ld      (v_diskInfo.dirSectors), hl         ; сколько секторов занимает корневой каталог
+            ld      (v_diskInfo.dirSectors), hl         ; СЃРєРѕР»СЊРєРѕ СЃРµРєС‚РѕСЂРѕРІ Р·Р°РЅРёРјР°РµС‚ РєРѕСЂРЅРµРІРѕР№ РєР°С‚Р°Р»РѕРі
 
             pop     de
             add     hl, de
-            ld      (v_diskInfo.dataStartSector), hl    ; первый сектор области данных
+            ld      (v_diskInfo.dataStartSector), hl    ; РїРµСЂРІС‹Р№ СЃРµРєС‚РѕСЂ РѕР±Р»Р°СЃС‚Рё РґР°РЅРЅС‹С…
 
             ld      hl, (v_diskInfo.sectorSize)
             call    div_hl_2
             ex      hl, de
             ld      hl, (v_diskInfo.fatSectors)
             call    mul_hl_de;
-            ld      (v_diskInfo.fatNumCells), hl        ; количество ячеек в таблице fat (= fatSectors * sectorSize / 2)
+            ld      (v_diskInfo.fatNumCells), hl        ; РєРѕР»РёС‡РµСЃС‚РІРѕ СЏС‡РµРµРє РІ С‚Р°Р±Р»РёС†Рµ fat (= fatSectors * sectorSize / 2)
 
-            ; Копируем метку тома
-            ld      hl, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_VolLab          ; откуда - начало
-            ld      de, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_FilSysType      ; откуда - конец
-            ld      bc, v_diskInfo.volumeLabel                              ; куда
+            ; РљРѕРїРёСЂСѓРµРј РјРµС‚РєСѓ С‚РѕРјР°
+            ld      hl, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_VolLab          ; РѕС‚РєСѓРґР° - РЅР°С‡Р°Р»Рѕ
+            ld      de, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_FilSysType      ; РѕС‚РєСѓРґР° - РєРѕРЅРµС†
+            ld      bc, v_diskInfo.volumeLabel                              ; РєСѓРґР°
             call    memcpy_bc_hl
-            ld      (hl), 0                                                 ; в конце байт-терминатор строки
+            ld      (hl), 0                                                 ; РІ РєРѕРЅС†Рµ Р±Р°Р№С‚-С‚РµСЂРјРёРЅР°С‚РѕСЂ СЃС‚СЂРѕРєРё
 
-frbs_Exit:  ; Восстанавливаем регистры и выходим
+frbs_Exit:  ; Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЂРµРіРёСЃС‚СЂС‹ Рё РІС‹С…РѕРґРёРј
             pop     bc
             pop     de
             pop     hl

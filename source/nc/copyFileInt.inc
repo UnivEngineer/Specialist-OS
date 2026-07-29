@@ -1,13 +1,13 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Потоковое копирование через ОЗУ пользователя 0000h-7FFFh.
+; РџРѕС‚РѕРєРѕРІРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ С‡РµСЂРµР· РћР—РЈ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ 0000h-7FFFh.
 ;----------------------------------------------------------------------------
 
 COPY_BUFFER         = 0000h
 COPY_BUFFER_SECTORS = 128
 
 copyFileInt:
-            ; Выбрать диск-источник и запомнить выбранную запись каталога.
+            ; Р’С‹Р±СЂР°С‚СЊ РґРёСЃРє-РёСЃС‚РѕС‡РЅРёРє Рё Р·Р°РїРѕРјРЅРёС‚СЊ РІС‹Р±СЂР°РЅРЅСѓСЋ Р·Р°РїРёСЃСЊ РєР°С‚Р°Р»РѕРіР°.
             ld      hl, state.panelA_drive
             call    readBytePanel
             ld      (vars.copySourceDrive), a
@@ -17,7 +17,7 @@ copyFileInt:
             call    getSelectedFile
             ld      (vars.copySourceName), hl
 
-            ; Загрузить полный дескриптор источника во временную запись.
+            ; Р—Р°РіСЂСѓР·РёС‚СЊ РїРѕР»РЅС‹Р№ РґРµСЃРєСЂРёРїС‚РѕСЂ РёСЃС‚РѕС‡РЅРёРєР° РІРѕ РІСЂРµРјРµРЅРЅСѓСЋ Р·Р°РїРёСЃСЊ.
             ld      de, vars.tempFileDescr
             ld      c, FILE_NAME_LENGTH + 3
 copyFileNameLoop:
@@ -35,8 +35,8 @@ copyFileNameLoop:
             ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
             ld      (vars.copySourceCluster), hl
 
-            ; Размер хранится как size-1. Число секторов должно помещаться
-            ; в 16-битное адресное пространство текущей DOS.
+            ; Р Р°Р·РјРµСЂ С…СЂР°РЅРёС‚СЃСЏ РєР°Рє size-1. Р§РёСЃР»Рѕ СЃРµРєС‚РѕСЂРѕРІ РґРѕР»Р¶РЅРѕ РїРѕРјРµС‰Р°С‚СЊСЃСЏ
+            ; РІ 16-Р±РёС‚РЅРѕРµ Р°РґСЂРµСЃРЅРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ С‚РµРєСѓС‰РµР№ DOS.
             ld      hl, vars.tempFileDescr + FILE_DESCRIPTOR.size + 1
             ld      e, (hl)
             inc     hl
@@ -52,8 +52,8 @@ copyFileNameLoop:
             ex      de, hl
             ld      (vars.copyBlocksLeft), hl
 
-            ; Подготовить имя назначения. Явный префикс X: также выбирает
-            ; соответствующий диск.
+            ; РџРѕРґРіРѕС‚РѕРІРёС‚СЊ РёРјСЏ РЅР°Р·РЅР°С‡РµРЅРёСЏ. РЇРІРЅС‹Р№ РїСЂРµС„РёРєСЃ X: С‚Р°РєР¶Рµ РІС‹Р±РёСЂР°РµС‚
+            ; СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёР№ РґРёСЃРє.
             ld      hl, vars.input
             ld      de, vars.tempFileDescr
             call    bios_fileNamePrepare
@@ -63,7 +63,7 @@ copyFileNameLoop:
             call    bios_fileGetSetDrive
             ld      (vars.copyDestDrive), a
 
-            ; Не позволять fileCreatePrepare удалить сам источник.
+            ; РќРµ РїРѕР·РІРѕР»СЏС‚СЊ fileCreatePrepare СѓРґР°Р»РёС‚СЊ СЃР°Рј РёСЃС‚РѕС‡РЅРёРє.
             ld      hl, vars.copySourceDrive
             cp      (hl)
             jp nz,  copyFileCheckDest
@@ -74,7 +74,7 @@ copyFileNameLoop:
             jp z,   copyFileError
 
 copyFileCheckDest:
-            ; Введённый префикс может указывать на диск без драйвера.
+            ; Р’РІРµРґС‘РЅРЅС‹Р№ РїСЂРµС„РёРєСЃ РјРѕР¶РµС‚ СѓРєР°Р·С‹РІР°С‚СЊ РЅР° РґРёСЃРє Р±РµР· РґСЂР°Р№РІРµСЂР°.
             ld      b, 3
             call    bios_diskDriver
             ld      a, d
@@ -86,7 +86,7 @@ copyFileCheckDest:
             cp      DISK_VALID
             jp nz,  copyFileError
 
-            ; Создать запись каталога и выделить полную цепочку FAT.
+            ; РЎРѕР·РґР°С‚СЊ Р·Р°РїРёСЃСЊ РєР°С‚Р°Р»РѕРіР° Рё РІС‹РґРµР»РёС‚СЊ РїРѕР»РЅСѓСЋ С†РµРїРѕС‡РєСѓ FAT.
             xor     a
             ld      (bios_vars.diskWriteErr), a
             ld      hl, (vars.copyBlocksLeft)
@@ -102,8 +102,8 @@ copyFileCheckDest:
             ld      (vars.copyDestCluster), hl
 
 copyFileLoop:
-            ; Один проход переносит до 32 КБ: в обычном случае диск
-            ; переключается один раз для чтения и один раз для записи.
+            ; РћРґРёРЅ РїСЂРѕС…РѕРґ РїРµСЂРµРЅРѕСЃРёС‚ РґРѕ 32 РљР‘: РІ РѕР±С‹С‡РЅРѕРј СЃР»СѓС‡Р°Рµ РґРёСЃРє
+            ; РїРµСЂРµРєР»СЋС‡Р°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· РґР»СЏ С‡С‚РµРЅРёСЏ Рё РѕРґРёРЅ СЂР°Р· РґР»СЏ Р·Р°РїРёСЃРё.
             ld      hl, (vars.copyBlocksLeft)
             ld      c, COPY_BUFFER_SECTORS
             ld      a, h

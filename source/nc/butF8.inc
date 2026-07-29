@@ -1,14 +1,14 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Клавиша F8 - удаление файла
+; РљР»Р°РІРёС€Р° F8 - СѓРґР°Р»РµРЅРёРµ С„Р°Р№Р»Р°
 ;
-; 2013-12-18 Дизассемблировано vinxru
+; 2013-12-18 Р”РёР·Р°СЃСЃРµРјР±Р»РёСЂРѕРІР°РЅРѕ vinxru
 ;----------------------------------------------------------------------------
 
-but_F8:     ; Рисуем окно
+but_F8:     ; Р РёСЃСѓРµРј РѕРєРЅРѕ
             call    drawWindowIfSel
 
-            ; Выводим "DELETE FROM A:"
+            ; Р’С‹РІРѕРґРёРј "DELETE FROM A:"
             CENTER_LINE 14, 5Eh
             ld          hl, aDeleteFrom
             call        bios_printString
@@ -16,14 +16,14 @@ but_F8:     ; Рисуем окно
 
             call        printInvSelFile
 
-loc_D54C:   ; Ждем нажатия Enter или ESC
+loc_D54C:   ; Р–РґРµРј РЅР°Р¶Р°С‚РёСЏ Enter РёР»Рё ESC
             call        bios_keyScan
             cp          1Bh
             jp z,       mainReload
             cp          0Dh
             jp nz,      loc_D54C
 
-            ; Если файл только для чтения
+            ; Р•СЃР»Рё С„Р°Р№Р» С‚РѕР»СЊРєРѕ РґР»СЏ С‡С‚РµРЅРёСЏ
             call        getSelectedFile         
             ld          de, FILE_DESCRIPTOR.attrib
             add         hl, de
@@ -33,36 +33,36 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
 
             call        drawWindow2
 
-            ; Выводим текст "FILE IS READ-ONLY"
+            ; Р’С‹РІРѕРґРёРј С‚РµРєСЃС‚ "FILE IS READ-ONLY"
             COLOR       COLOR_DIALOG_ERR
             CENTER_LINE 18, 80h
             ld          hl, aFileIsReanOnly
             call        bios_printString
 
-            ; Выводим vars.input
+            ; Р’С‹РІРѕРґРёРј vars.input
             COLOR       COLOR_DIALOG
             ld          hl, 5090h
             ld          (bios_vars.cursorY), hl         
             ld          hl, vars.input
             call        printStringInv
 
-loc_D581:   ; Цикл ожидания нажатия любой клавиши
+loc_D581:   ; Р¦РёРєР» РѕР¶РёРґР°РЅРёСЏ РЅР°Р¶Р°С‚РёСЏ Р»СЋР±РѕР№ РєР»Р°РІРёС€Рё
             call        bios_keyScan
             inc         a
             jp nz,      loc_D581
 
-loc_D588:   ; Цикл ожидания нажатия Esc или Enter
+loc_D588:   ; Р¦РёРєР» РѕР¶РёРґР°РЅРёСЏ РЅР°Р¶Р°С‚РёСЏ Esc РёР»Рё Enter
             call        bios_keyScan
             cp          1Bh             ; Esc
-            jp z,       mainReload      ; Если Esc - выход
+            jp z,       mainReload      ; Р•СЃР»Рё Esc - РІС‹С…РѕРґ
             cp          0Dh             ; Enter
-            jp nz,      loc_D588        ; Если Enter - всё равно удалить
+            jp nz,      loc_D588        ; Р•СЃР»Рё Enter - РІСЃС‘ СЂР°РІРЅРѕ СѓРґР°Р»РёС‚СЊ
 
-loc_D595:   ; Удаляем текущий файл
+loc_D595:   ; РЈРґР°Р»СЏРµРј С‚РµРєСѓС‰РёР№ С„Р°Р№Р»
             call        getSelectedFile
             call        bios_fileDelete
 
-            ; Уменьшаем счетчик файлов
+            ; РЈРјРµРЅСЊС€Р°РµРј СЃС‡РµС‚С‡РёРє С„Р°Р№Р»РѕРІ
             ld          hl, state.panelA_filesCnt
             call        readBytePanel
             dec         a

@@ -1,19 +1,19 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
-; Рисование символа на экране
+; Р РёСЃРѕРІР°РЅРёРµ СЃРёРјРІРѕР»Р° РЅР° СЌРєСЂР°РЅРµ
 ;
-; На входе 
-;  bc - адрес символа
-;  de - адрес в видеопамяти
-;  h  - координата X в пикселях / 2
+; РќР° РІС…РѕРґРµ 
+;  bc - Р°РґСЂРµСЃ СЃРёРјРІРѕР»Р°
+;  de - Р°РґСЂРµСЃ РІ РІРёРґРµРѕРїР°РјСЏС‚Рё
+;  h  - РєРѕРѕСЂРґРёРЅР°С‚Р° X РІ РїРёРєСЃРµР»СЏС… / 2
 ;
-; 2013-12-12 Дизассемблировано vinxru
+; 2013-12-12 Р”РёР·Р°СЃСЃРµРјР±Р»РёСЂРѕРІР°РЅРѕ vinxru
 ;----------------------------------------------------------------------------
 
-            ; Высота символа
+            ; Р’С‹СЃРѕС‚Р° СЃРёРјРІРѕР»Р°
             ld    l, 8
 
-            ; Переходим к одной из функций вывода
+            ; РџРµСЂРµС…РѕРґРёРј Рє РѕРґРЅРѕР№ РёР· С„СѓРЅРєС†РёР№ РІС‹РІРѕРґР°
             ld    a, h
             and   3
             jp z, drawChar0   ; a==0
@@ -23,7 +23,7 @@
             jp z, drawChar2   ; a==2
             dec   a
             jp z, drawChar3   ; a==3
-            ; Продолжение на drawChar2
+            ; РџСЂРѕРґРѕР»Р¶РµРЅРёРµ РЅР° drawChar2
 
 ; ---------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ drawChar2_cma:
             ld    (bc),a
             dec   b
 
-            ; Цикл
+            ; Р¦РёРєР»
             inc   bc
             inc   de
             dec   l
@@ -71,7 +71,7 @@ drawChar3_xri:
             xor   h
             ld    (bc),a
 
-            ; Цикл
+            ; Р¦РёРєР»
             inc   de
             inc   bc
             dec   l
@@ -89,7 +89,7 @@ drawChar0_xri:
             xor   h
             ld    (bc),a
 
-            ; Цикл
+            ; Р¦РёРєР»
             inc   de
             inc   bc
             dec   l
@@ -123,7 +123,7 @@ drawChar1_cma2:
             ld    (bc),a
             dec   b
 
-            ; Цикл
+            ; Р¦РёРєР»
             inc   bc
             inc   de
             dec   l
@@ -131,43 +131,43 @@ drawChar1_cma2:
             ret
 
 ; ---------------------------------------------------------------------------
-; Вызывается из printChar_real2
+; Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· printChar_real2
 
 normalVideo:
-            ; Меняем CZ normalVideo на CNZ inverseVideo
+            ; РњРµРЅСЏРµРј CZ normalVideo РЅР° CNZ inverseVideo
             ld    hl, inverseVideo
             ld    (printChar_poly+1), hl
             ld    a, 0C4h
             ld    (printChar_poly),a
 
-            ; Аргумент XRI
+            ; РђСЂРіСѓРјРµРЅС‚ XRI
             xor   a
             ld    (drawChar0_xri+1),a
             ld    (drawChar3_xri+1),a
 normalVideo_1:
-            ; Меняем CMA на NOP
+            ; РњРµРЅСЏРµРј CMA РЅР° NOP
             ld    (drawChar2_cma),a       
             ld    (drawChar1_cma),a
             ld    (drawChar1_cma2),a
             ret
 
 ; ---------------------------------------------------------------------------
-; Вызывается из printChar_real2
+; Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· printChar_real2
 
 inverseVideo:
-            ; Меняем CNZ inverseVideo на CZ normalVideo
+            ; РњРµРЅСЏРµРј CNZ inverseVideo РЅР° CZ normalVideo
             ld    hl, normalVideo
             ld    (printChar_poly+1), hl
             ld    a, 0CCh           
             ld    (printChar_poly),a
 
-            ; Меняем аргумент XRI
+            ; РњРµРЅСЏРµРј Р°СЂРіСѓРјРµРЅС‚ XRI
             ld    a, 0FCh
             ld    (drawChar3_xri+1),a
             ld    a, 3Fh
             ld    (drawChar0_xri+1),a
 
-            ; Меняем NOP на CMA
+            ; РњРµРЅСЏРµРј NOP РЅР° CMA
             ld    a, 2Fh
             jp    normalVideo_1
 
