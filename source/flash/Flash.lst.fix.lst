@@ -1,3 +1,4 @@
+# file opened: D:\Projects\Specialist-OS\source\flash\FlashChecked.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS
   3   0000              ; FLASH.COM - Ð¿Ñ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼Ñ‹Ð¹ Ð´Ñ€Ð°Ð¹Ð²ÐµÑ€ Ð²Ð½ÐµÑˆÐ½ÐµÐ³Ð¾ flash-Ð´Ð¸ÑÐºÐ° AT29C040A
@@ -12,6 +13,7 @@
  12   0000              ;----------------------------------------------------------------------------
  13   0000
  14   0000                  INCLUDE "../include/mxos.inc"
+# file opened: D:\Projects\Specialist-OS\source\flash\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Òî÷êè âõîäà è íàñòðîéêè ñáîðêè MXOS
@@ -383,6 +385,7 @@
 369+  0000              ; Êîíåö
 370+  0000              ;-----------------------------------------------------------------------
 371+  0000
+# file closed: D:\Projects\Specialist-OS\source\flash\../include/mxos.inc
  15   0000
  16   0000              LATCH_0 = 00Ah
  17   0000              LATCH_1 = 00Bh
@@ -660,3 +663,4 @@
 285   DF59             >         ENDIF
 286   DF59
 287   DF59                  END
+# file closed: D:\Projects\Specialist-OS\source\flash\FlashChecked.asm

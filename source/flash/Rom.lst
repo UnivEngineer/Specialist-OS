@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Specialist-OS\flash\Rom.asm
+# file opened: D:\Projects\Specialist-OS\source\flash\Rom.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS
   3   0000              ; ROM.COM - драйвер ром-диска через ВВ55
@@ -14,7 +14,7 @@
  13   0000              ;----------------------------------------------------------------------------
  14   0000
  15   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Specialist-OS\flash\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\source\flash\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -386,7 +386,7 @@
 369+  0000              ; Конец
 370+  0000              ;-----------------------------------------------------------------------
 371+  0000
-# file closed: D:\Projects\Specialist-OS\flash\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\source\flash\../include/mxos.inc
  16   0000
  17   0000              ; Команды для дрыгания ножками ВВ55
  18   0000              LATCH_0 = 0Ah   ; пин защёлки ИР22 = 0
@@ -546,4 +546,4 @@
 168   DE79             >         ENDIF
 169   DE79
 170   DE79                  END
-# file closed: D:\Projects\Specialist-OS\flash\Rom.asm
+# file closed: D:\Projects\Specialist-OS\source\flash\Rom.asm

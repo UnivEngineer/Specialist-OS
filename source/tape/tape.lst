@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Specialist-OS\tape\tape.asm
+# file opened: D:\Projects\Specialist-OS\source\tape\tape.asm
   1   0000              ;+---------------------------------------------------------------------------
   2   0000              ; MXOS
   3   0000              ; TAPE.COM - самостоятельная утилита работы с магнитофоном.
@@ -6,7 +6,7 @@
   5   0000              ;----------------------------------------------------------------------------
   6   0000
   7   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Specialist-OS\tape\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -378,12 +378,12 @@
 369+  0000              ; Конец
 370+  0000              ;-----------------------------------------------------------------------
 371+  0000
-# file closed: D:\Projects\Specialist-OS\tape\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\../include/mxos.inc
   8   0000
   9   0000                  ORG     0E800h
  10   E800
  11   E800                  INCLUDE "tapeUi.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeUi.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeUi.inc
   1+  E800              ;----------------------------------------------------------------------------
   2+  E800              ; MXOS TAPE.COM
   3+  E800              ; РўРµРєСЃС‚РѕРІС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ Р·Р°РіСЂСѓР·РєРё Рё СЃРѕС…СЂР°РЅРµРЅРёСЏ С„Р°Р№Р»РѕРІ РЅР° РјР°РіРЅРёС‚РѕС„РѕРЅ.
@@ -923,7 +923,7 @@
 448+  EC2F 00 00 00 00
 448+  EC33 00 00 00 00
 449+  EC37
-# file closed: D:\Projects\Specialist-OS\tape\tapeUi.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeUi.inc
  12   EC37
  13   EC37                  ; Фиксированная область низкоуровневых процедур нужна эмулятору:
  14   EC37                  ; адреса этих диапазонов заданы в SpecialistMX2_My_MXOS.cfg.
@@ -939,7 +939,7 @@
  15   ED00             >         ORG 0ED00h
  16   ED00
  17   ED00                  INCLUDE "tapeWriteDelay.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeWriteDelay.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeWriteDelay.inc
   1+  ED00              ;+---------------------------------------------------------------------------
   2+  ED00              ; MXOS
   3+  ED00              ; Задержка при записи на ленту
@@ -950,9 +950,9 @@
   8+  ED00 3A FE 8F     writeDelay: ld    a, (bios_vars.writeDelay)
   9+  ED03 C3 77 ED                 jp    delay_a
  10+  ED06
-# file closed: D:\Projects\Specialist-OS\tape\tapeWriteDelay.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeWriteDelay.inc
  18   ED06                  INCLUDE "tapeRead.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeRead.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeRead.inc
   1+  ED06              ;+---------------------------------------------------------------------------
   2+  ED06              ; MXOS
   3+  ED06              ; Чтение байта с ленты
@@ -1072,9 +1072,9 @@
 117+  ED72 C1                       pop   bc
 118+  ED73 C9                       ret
 119+  ED74
-# file closed: D:\Projects\Specialist-OS\tape\tapeRead.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeRead.inc
  19   ED74                  INCLUDE "tapeReadDelay.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeReadDelay.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeReadDelay.inc
   1+  ED74              ;+---------------------------------------------------------------------------
   2+  ED74              ; MXOS
   3+  ED74              ; Задержка при чтении с ленты
@@ -1088,9 +1088,9 @@
  11+  ED79 C2 78 ED                 jp nz,  delay_l_0
  12+  ED7C C9                       ret
  13+  ED7D
-# file closed: D:\Projects\Specialist-OS\tape\tapeReadDelay.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeReadDelay.inc
  20   ED7D                  INCLUDE "tapeWrite.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeWrite.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeWrite.inc
   1+  ED7D              ;+---------------------------------------------------------------------------
   2+  ED7D              ; MXOS
   3+  ED7D              ; Запись байта на ленту
@@ -1147,9 +1147,9 @@
  54+  EDA0 C1                       pop   bc
  55+  EDA1 C9                       ret
  56+  EDA2
-# file closed: D:\Projects\Specialist-OS\tape\tapeWrite.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeWrite.inc
  21   EDA2                  INCLUDE "tapeReadError.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeReadError.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeReadError.inc
   1+  EDA2              ;+---------------------------------------------------------------------------
   2+  EDA2              ; MXOS
   3+  EDA2              ; Вызывается при ошибке чтения с ленты
@@ -1162,9 +1162,9 @@
  10+  EDA4 2A E1 8F                 ld    hl, (bios_vars.tapeError)
  11+  EDA7 E9                       jp    (hl)
  12+  EDA8
-# file closed: D:\Projects\Specialist-OS\tape\tapeReadError.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeReadError.inc
  22   EDA8                  INCLUDE "tapeWriteWord.inc"
-# file opened: D:\Projects\Specialist-OS\tape\tapeWriteWord.inc
+# file opened: D:\Projects\Specialist-OS\source\tape\tapeWriteWord.inc
   1+  EDA8              ;+---------------------------------------------------------------------------
   2+  EDA8              ; MXOS
   3+  EDA8              ; Запись слова на ленту
@@ -1184,7 +1184,7 @@
  17+  EDAC 7C                       ld    a, h
  18+  EDAD C3 7D ED                 jp    tapeWrite
  19+  EDB0
-# file closed: D:\Projects\Specialist-OS\tape\tapeWriteWord.inc
+# file closed: D:\Projects\Specialist-OS\source\tape\tapeWriteWord.inc
  23   EDB0
  24   EDB0                  ; TAPE.COM не должен попасть в кэш FAT.
  25   EDB0                  ASSERT_DONT_FIT 0FB00h
@@ -1194,4 +1194,4 @@
  25   EDB0             >         ENDIF
  26   EDB0
  27   EDB0                  END
-# file closed: D:\Projects\Specialist-OS\tape\tape.asm
+# file closed: D:\Projects\Specialist-OS\source\tape\tape.asm

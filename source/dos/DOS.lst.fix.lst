@@ -1,3 +1,4 @@
+# file opened: D:\Projects\Specialist-OS\source\dos\DOSChecked.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS BIOS/DOS.
   3   0000              ;
@@ -7,6 +8,7 @@
   7   0000              ;----------------------------------------------------------------------------
   8   0000
   9   0000                  INCLUDE "../include/mxos.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -378,9 +380,11 @@
 369+  0000              ; Конец
 370+  0000              ;-----------------------------------------------------------------------
 371+  0000
+# file closed: D:\Projects\Specialist-OS\source\dos\../include/mxos.inc
  10   0000
  11   0000                  ORG     0C000h
  12   C000                  INCLUDE "jmps_c000.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\jmps_c000.inc
   1+  C000              ;+---------------------------------------------------------------------------
   2+  C000              ; MXOS
   3+  C000              ; Стандартные точки входа C000
@@ -394,6 +398,7 @@
  11+  C009 31 C0 FF     reboot:     ld    sp, STACK_ADDR; C009: Теплая перезагрузка
  12+  C00C C3 34 C5                 jp    reboot1
  13+  C00F
+# file closed: D:\Projects\Specialist-OS\source\dos\jmps_c000.inc
  13   C00F
  14   C00F                  ORG_PAD 0C010h
  14   C00F             >         IF $ > 0C010h
@@ -406,6 +411,7 @@
  14   C010             >         ENDIF
  14   C010             >         ORG 0C010h
  15   C010                  INCLUDE "clearScreen.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\clearScreen.inc
   1+  C010              ;+---------------------------------------------------------------------------
   2+  C010              ; MXOS
   3+  C010              ; Очистить экран
@@ -457,6 +463,7 @@
  49+  C035 E1                       pop   hl
  50+  C036 C9                       ret
  51+  C037
+# file closed: D:\Projects\Specialist-OS\source\dos\clearScreen.inc
  16   C037
  17   C037                  ORG_PAD 0C037h
  17   C037             >         IF $ > 0C037h
@@ -469,6 +476,7 @@
  17   C037             >         ENDIF
  17   C037             >         ORG 0C037h
  18   C037                  INCLUDE "printChar.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printChar.inc
   1+  C037              ;+---------------------------------------------------------------------------
   2+  C037              ; MXOS
   3+  C037              ; Вывод символа на экран (или принтер)
@@ -493,6 +501,7 @@
  22+  C041 F1                       pop   af
  23+  C042 C9                       ret
  24+  C043
+# file closed: D:\Projects\Specialist-OS\source\dos\printChar.inc
  19   C043
  20   C043                  ORG_PAD 0C045h
  20   C043             >         IF $ > 0C045h
@@ -505,6 +514,7 @@
  20   C045             >         ENDIF
  20   C045             >         ORG 0C045h
  21   C045                  INCLUDE "printChar5.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printChar5.inc
   1+  C045              ;+---------------------------------------------------------------------------
   2+  C045              ; MXOS
   3+  C045              ; Обработка служебных кодов при выводе символа (продолжение)
@@ -575,7 +585,9 @@
  68+  C06E
  69+  C06E                          ; Продолжение в drawChar
  70+  C06E
+# file closed: D:\Projects\Specialist-OS\source\dos\printChar5.inc
  22   C06E                  INCLUDE "drawChar.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\drawChar.inc
   1+  C06E              ;+---------------------------------------------------------------------------
   2+  C06E              ; MXOS
   3+  C06E              ; Рисование символа на экране
@@ -749,7 +761,9 @@
 171+  C117 3E 2F                    ld    a, 2Fh
 172+  C119 C3 F8 C0                 jp    normalVideo_1
 173+  C11C
+# file closed: D:\Projects\Specialist-OS\source\dos\drawChar.inc
  23   C11C                  INCLUDE "printChar3.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printChar3.inc
   1+  C11C              ;+---------------------------------------------------------------------------
   2+  C11C              ; MXOS
   3+  C11C              ; Обработка служебных кодов при выводе символа
@@ -854,6 +868,7 @@
 102+  C169 DA 49 C1                 jp c, saveVCursorHA
 103+  C16C C3 96 C1                 jp    printChar_c0A
 104+  C16F
+# file closed: D:\Projects\Specialist-OS\source\dos\printChar3.inc
  24   C16F
  25   C16F                  ORG_PAD 0C170h
  25   C16F             >         IF $ > 0C170h
@@ -866,6 +881,7 @@
  25   C170             >         ENDIF
  25   C170             >         ORG 0C170h
  26   C170                  INCLUDE "beep.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\beep.inc
   1+  C170              ;+---------------------------------------------------------------------------
   2+  C170              ; MXOS
   3+  C170              ; Звуковой сигнал (вызывается при выводе кода 7)
@@ -910,6 +926,7 @@
  42+  C18D F1                       pop   af
  43+  C18E C9                       ret
  44+  C18F
+# file closed: D:\Projects\Specialist-OS\source\dos\beep.inc
  27   C18F
  28   C18F                  ORG_PAD 0C18Fh
  28   C18F             >         IF $ > 0C18Fh
@@ -922,6 +939,7 @@
  28   C18F             >         ENDIF
  28   C18F             >         ORG 0C18Fh
  29   C18F                  INCLUDE "delay_l.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\delay_l.inc
   1+  C18F              ;+---------------------------------------------------------------------------
   2+  C18F              ; MXOS
   3+  C18F              ; Задержка
@@ -940,6 +958,7 @@
  16+  C191 C2 90 C1                 jp nz,  delay_b
  17+  C194 C9                       ret
  18+  C195
+# file closed: D:\Projects\Specialist-OS\source\dos\delay_l.inc
  30   C195
  31   C195                  ORG_PAD 0C196h
  31   C195             >         IF $ > 0C196h
@@ -952,6 +971,7 @@
  31   C196             >         ENDIF
  31   C196             >         ORG 0C196h
  32   C196                  INCLUDE "printChar4.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printChar4.inc
   1+  C196              ;+---------------------------------------------------------------------------
   2+  C196              ; MXOS
   3+  C196              ; Обработка служебных кодов при выводе символа (продолжение)
@@ -980,7 +1000,9 @@
  26+  C1A1
  27+  C1A1                          ; Далее прокрутка экрана вверх
  28+  C1A1
+# file closed: D:\Projects\Specialist-OS\source\dos\printChar4.inc
  33   C1A1                  INCLUDE "scrollUp.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\scrollUp.inc
   1+  C1A1              ;+---------------------------------------------------------------------------
   2+  C1A1              ; MXOS
   3+  C1A1              ; Прокрутка экрана вверх
@@ -1006,7 +1028,9 @@
  23+  C1AF 06 30                    ld    b, 48       ; Столбцов
  24+  C1B1 C3 99 C7                 jp    scrollUp2
  25+  C1B4
+# file closed: D:\Projects\Specialist-OS\source\dos\scrollUp.inc
  34   C1B4                  INCLUDE "keyScan.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\keyScan.inc
   1+  C1B4              ;+---------------------------------------------------------------------------
   2+  C1B4              ; MXOS
   3+  C1B4              ; Получить код нажатой клавиши
@@ -1105,7 +1129,9 @@
  96+  C20D D1                       pop     de
  97+  C20E C9                       ret
  98+  C20F
+# file closed: D:\Projects\Specialist-OS\source\dos\keyScan.inc
  35   C20F                  INCLUDE "getch2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\getch2.inc
   1+  C20F              ;----------------------------------------------------------------------------
   2+  C20F              ; MXOS
   3+  C20F              ; Ожидание ввода с клавиатуры
@@ -1369,7 +1395,9 @@
 261+  C312 E1                       pop     hl
 262+  C313 C9                       ret
 263+  C314
+# file closed: D:\Projects\Specialist-OS\source\dos\getch2.inc
  36   C314                  INCLUDE "calcCursorAddr.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\calcCursorAddr.inc
   1+  C314              ;+---------------------------------------------------------------------------
   2+  C314              ; MXOS
   3+  C314              ; Расчет адреса курсора в видеопамяти. И перевод строки, если курсор был
@@ -1393,6 +1421,7 @@
  21+  C31D 0E 0A                    ld    c, 10
  22+  C31F C3 3A C3                 jp    calcCursorAd_0
  23+  C322
+# file closed: D:\Projects\Specialist-OS\source\dos\calcCursorAddr.inc
  37   C322
  38   C322                  ORG_PAD 0C337h
  38   C322             >         IF $ > 0C337h
@@ -1405,6 +1434,7 @@
  38   C326             >         ENDIF
  38   C337             >         ORG 0C337h
  39   C337                  INCLUDE "getch.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\getch.inc
   1+  C337              ;----------------------------------------------------------------------------
   2+  C337              ; MXOS
   3+  C337              ; Ожидание ввода с клавиатуры
@@ -1417,7 +1447,9 @@
  10+  C337
  11+  C337 C3 0F C2     getch:            jp    getch2
  12+  C33A
+# file closed: D:\Projects\Specialist-OS\source\dos\getch.inc
  40   C33A                  INCLUDE "calcCursorAddr2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\calcCursorAddr2.inc
   1+  C33A              ;+---------------------------------------------------------------------------
   2+  C33A              ; MXOS
   3+  C33A              ; Расчет адреса курсора в видеопамяти (продолжение);
@@ -1440,7 +1472,9 @@
  20+  C345 C6 90                    add   a,90h
  21+  C347 C9                       ret
  22+  C348
+# file closed: D:\Projects\Specialist-OS\source\dos\calcCursorAddr2.inc
  41   C348                  INCLUDE "drawCursor.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\drawCursor.inc
   1+  C348              ;+---------------------------------------------------------------------------
   2+  C348              ; MXOS
   3+  C348              ; Рисование курсора на экране
@@ -1494,6 +1528,7 @@
  51+  C36D 29                       add   hl, hl
  52+  C36E C3 43 C4                 jp    drawCursor_1
  53+  C371
+# file closed: D:\Projects\Specialist-OS\source\dos\drawCursor.inc
  42   C371
  43   C371                  ORG_PAD 0C377h
  43   C371             >         IF $ > 0C377h
@@ -1506,6 +1541,7 @@
  43   C375             >         ENDIF
  43   C377             >         ORG 0C377h
  44   C377                  INCLUDE "tape.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\tape.inc
   1+  C377              ;----------------------------------------------------------------------------
   2+  C377              ; MXOS
   3+  C377              ; Таблица перехвата вызовов драйвера магнитофона
@@ -1523,7 +1559,9 @@
  15+  C383 C3 00 C8     t_tapeLoadInt:   jp bios_reboot
  16+  C386 C3 00 C8     t_tapeReadError: jp bios_reboot
  17+  C389
+# file closed: D:\Projects\Specialist-OS\source\dos\tape.inc
  45   C389                  INCLUDE "cmp_hl_de_2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\cmp_hl_de_2.inc
   1+  C389              ;+---------------------------------------------------------------------------
   2+  C389              ; MXOS
   3+  C389              ; Сравнить hl и de
@@ -1540,7 +1578,9 @@
  14+  C38E BB                   cp    e
  15+  C38F C9                   ret
  16+  C390
+# file closed: D:\Projects\Specialist-OS\source\dos\cmp_hl_de_2.inc
  46   C390                  INCLUDE "sbb_de_hl_to_hl.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\sbb_de_hl_to_hl.inc
   1+  C390              ;+---------------------------------------------------------------------------
   2+  C390              ; MXOS
   3+  C390              ; hl = de - hl
@@ -1557,7 +1597,9 @@
  14+  C395 67                       ld    h, a
  15+  C396 C9                       ret
  16+  C397
+# file closed: D:\Projects\Specialist-OS\source\dos\sbb_de_hl_to_hl.inc
  47   C397                  INCLUDE "memmove_bc_hl.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\memmove_bc_hl.inc
   1+  C397              ;+---------------------------------------------------------------------------
   2+  C397              ; MXOS
   3+  C397              ; Копирование накладывающихся блоков памяти (с ошибкой)
@@ -1623,7 +1665,9 @@
  63+  C3C5 E1                       pop     hl
  64+  C3C6 C9                       ret
  65+  C3C7
+# file closed: D:\Projects\Specialist-OS\source\dos\memmove_bc_hl.inc
  48   C3C7                  INCLUDE "memset_de_20_b.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\memset_de_20_b.inc
   1+  C3C7              ;+---------------------------------------------------------------------------
   2+  C3C7              ; MXOS
   3+  C3C7              ; Заполнить память пробелами
@@ -1644,6 +1688,7 @@
  18+  C3CC C2 C9 C3                 jp nz,  memset_de_a_b
  19+  C3CF C9                       ret
  20+  C3D0
+# file closed: D:\Projects\Specialist-OS\source\dos\memset_de_20_b.inc
  49   C3D0
  50   C3D0                  ORG_PAD 0C3D0h
  50   C3D0             >         IF $ > 0C3D0h
@@ -1659,6 +1704,7 @@
  52   C3D3
  53   C3D3                  IF RAMFOS_COMPATIBILITY
  54   C3D3                      INCLUDE "strToHex.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\strToHex.inc
   1+  C3D3              ;+---------------------------------------------------------------------------
   2+  C3D3              ; MXOS
   3+  C3D3              ; Преобразвоние строки в 16-ричное число
@@ -1745,6 +1791,7 @@
  84+  C416 B7                       or  a
  85+  C417 C9                       ret
  86+  C418
+# file closed: D:\Projects\Specialist-OS\source\dos\strToHex.inc
  55   C418                  ENDIF
  56   C418
  57   C418                  ORG_PAD 0C427h
@@ -1758,6 +1805,7 @@
  57   C41C             >         ENDIF
  57   C427             >         ORG 0C427h
  58   C427                  INCLUDE "cmp_hl_de.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\cmp_hl_de.inc
   1+  C427              ;+---------------------------------------------------------------------------
   2+  C427              ; MXOS
   3+  C427              ; Сравнить hl и de
@@ -1773,6 +1821,7 @@
  13+  C42B BB                   cp    e
  14+  C42C C9                   ret
  15+  C42D
+# file closed: D:\Projects\Specialist-OS\source\dos\cmp_hl_de.inc
  59   C42D
  60   C42D                  ORG_PAD 0C42Dh
  60   C42D             >         IF $ > 0C42Dh
@@ -1785,6 +1834,7 @@
  60   C42D             >         ENDIF
  60   C42D             >         ORG 0C42Dh
  61   C42D                  INCLUDE "memcpy_bc_hl.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\memcpy_bc_hl.inc
   1+  C42D              ;+---------------------------------------------------------------------------
   2+  C42D              ; MXOS
   3+  C42D              ; Скопировать блок памяти
@@ -1810,6 +1860,7 @@
  23+  C434 C2 2D C4                 jp nz,  memcpy_bc_hl
  24+  C437 C9                       ret
  25+  C438
+# file closed: D:\Projects\Specialist-OS\source\dos\memcpy_bc_hl.inc
  62   C438
  63   C438                  ORG_PAD 0C438h
  63   C438             >         IF $ > 0C438h
@@ -1822,6 +1873,7 @@
  63   C438             >         ENDIF
  63   C438             >         ORG 0C438h
  64   C438                  INCLUDE "printString1.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printString1.inc
   1+  C438              ;+---------------------------------------------------------------------------
   2+  C438              ; MXOS
   3+  C438              ; Вывод строки на экран
@@ -1837,7 +1889,9 @@
  13+  C438
  14+  C438 C3 22 C5     printString1:     jp    printString
  15+  C43B
+# file closed: D:\Projects\Specialist-OS\source\dos\printString1.inc
  65   C43B                  INCLUDE "printChar6.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printChar6.inc
   1+  C43B              ;+---------------------------------------------------------------------------
   2+  C43B              ; MXOS
   3+  C43B              ; Обработка служебных кодов при выводе символа (продолжение)
@@ -1852,6 +1906,7 @@
  12+  C43D 32 EB 8F                     ld    (bios_vars.escMode), a
  13+  C440 C9                           ret
  14+  C441
+# file closed: D:\Projects\Specialist-OS\source\dos\printChar6.inc
  66   C441
  67   C441                  ORG_PAD 0C443h
  67   C441             >         IF $ > 0C443h
@@ -1864,6 +1919,7 @@
  67   C443             >         ENDIF
  67   C443             >         ORG 0C443h
  68   C443                  INCLUDE "drawCursor2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\drawCursor2.inc
   1+  C443              ;+---------------------------------------------------------------------------
   2+  C443              ; MXOS
   3+  C443              ; Рисование курсора на экране (продолжение)
@@ -1898,6 +1954,7 @@
  32+  C457 1D                       dec   e
  33+  C458 C3 4B C4                 jp    drawCursor_2
  34+  C45B
+# file closed: D:\Projects\Specialist-OS\source\dos\drawCursor2.inc
  69   C45B
  70   C45B                  ORG_PAD 0C478h
  70   C45B             >         IF $ > 0C478h
@@ -1949,6 +2006,7 @@
  82   C4F8 00 00 00 00
  83   C4FC
  84   C4FC                  INCLUDE "printer.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printer.inc
   1+  C4FC              ;+---------------------------------------------------------------------------
   2+  C4FC              ; MXOS
   3+  C4FC              ; Вывод байта на принтер
@@ -1994,7 +2052,9 @@
  43+  C520 F1                       pop   af
  44+  C521 C9                       ret
  45+  C522
+# file closed: D:\Projects\Specialist-OS\source\dos\printer.inc
  85   C522                  INCLUDE "printString.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printString.inc
   1+  C522              ;+---------------------------------------------------------------------------
   2+  C522              ; MXOS
   3+  C522              ; Вывод строки на экран
@@ -2034,7 +2094,9 @@
  37+  C532 C1                       pop   bc
  38+  C533 C9                       ret
  39+  C534
+# file closed: D:\Projects\Specialist-OS\source\dos\printString.inc
  86   C534                  INCLUDE "reboot1.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\reboot1.inc
   1+  C534              ;+---------------------------------------------------------------------------
   2+  C534              ; MXOS
   3+  C534              ; Перезагрузка (продолжение)
@@ -2079,7 +2141,9 @@
  42+  C556 ~                        jp    reboot2
  43+  C556                  ENDIF
  44+  C556
+# file closed: D:\Projects\Specialist-OS\source\dos\reboot1.inc
  87   C556                  INCLUDE "reboot2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\reboot2.inc
   1+  C556              ;+---------------------------------------------------------------------------
   2+  C556              ; MXOS
   3+  C556              ; Перезагрузка (продолжение)
@@ -2146,7 +2210,9 @@
  64+  C585 ~
  65+  C585                      ENDIF
  66+  C585
+# file closed: D:\Projects\Specialist-OS\source\dos\reboot2.inc
  88   C585                  INCLUDE "getch3.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\getch3.inc
   1+  C585              ;----------------------------------------------------------------------------
   2+  C585              ; MXOS
   3+  C585              ; Ожидание ввода с клавиатуры (продолжение)
@@ -2235,7 +2301,9 @@
  86+  C5E1
  87+  C5E1 C3 FD C2                 jp    loc_C311
  88+  C5E4
+# file closed: D:\Projects\Specialist-OS\source\dos\getch3.inc
  89   C5E4                  INCLUDE "printChar2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printChar2.inc
   1+  C5E4              ;+---------------------------------------------------------------------------
   2+  C5E4              ; MXOS
   3+  C5E4              ; Вывод символа на экран (или принтер)
@@ -2627,7 +2695,9 @@
 389+  C758 FE 08                    cp    8
 390+  C75A C2 48 C7                 jp nz,  printChar_eI_2
 391+  C75D
+# file closed: D:\Projects\Specialist-OS\source\dos\printChar2.inc
  90   C75D                  INCLUDE "scrollDown.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\scrollDown.inc
   1+  C75D              ;+---------------------------------------------------------------------------
   2+  C75D              ; MXOS
   3+  C75D              ; Прокрутка экрана вниз
@@ -2698,7 +2768,9 @@
  68+  C797 C1                       pop     bc
  69+  C798 C9                       ret
  70+  C799
+# file closed: D:\Projects\Specialist-OS\source\dos\scrollDown.inc
  91   C799                  INCLUDE "scrollUp2.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\scrollUp2.inc
   1+  C799              ;+---------------------------------------------------------------------------
   2+  C799              ; MXOS
   3+  C799              ; Прокрутка экрана вверх (продолжение)
@@ -2764,7 +2836,9 @@
  63+  C7C9 C1                       pop   bc
  64+  C7CA C9                       ret
  65+  C7CB
+# file closed: D:\Projects\Specialist-OS\source\dos\scrollUp2.inc
  92   C7CB                  INCLUDE "checkRAMD.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\checkRAMD.inc
   1+  C7CB              ;+---------------------------------------------------------------------------
   2+  C7CB              ; MXOS
   3+  C7CB              ; Исправленная функция определения размера ДОЗУ
@@ -2828,6 +2902,7 @@
  61+  C7EE 32 F8 8F                 ld      (bios_vars.ramPageCount), a
  62+  C7F1 C9                       ret
  63+  C7F2
+# file closed: D:\Projects\Specialist-OS\source\dos\checkRAMD.inc
  93   C7F2
  94   C7F2                  ORG_PAD 0C800h
  94   C7F2             >         IF $ > 0C800h
@@ -2840,6 +2915,7 @@
  94   C7F6             >         ENDIF
  94   C800             >         ORG 0C800h
  95   C800                  INCLUDE "jmps_c800.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\jmps_c800.inc
   1+  C800              ;+---------------------------------------------------------------------------
   2+  C800              ; MXOS
   3+  C800              ; Стандартные точки входа C800
@@ -2900,7 +2976,9 @@
  58+  C88A C3 BF CE                     jp  fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
  59+  C88D C3 41 D0                     jp  fileTransferClusters ; C88D: [MXOS2] передать кластеры
  60+  C890
+# file closed: D:\Projects\Specialist-OS\source\dos\jmps_c800.inc
  96   C890                  INCLUDE "setGetCursorPos.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\setGetCursorPos.inc
   1+  C890              ;+---------------------------------------------------------------------------
   2+  C890              ; MXOS
   3+  C890              ; Установить положение курсора
@@ -2929,7 +3007,9 @@
  26+  C893 2A FC 8F     getCursorPos:     ld    hl, (bios_vars.cursorY)
  27+  C896 C9                       ret
  28+  C897
+# file closed: D:\Projects\Specialist-OS\source\dos\setGetCursorPos.inc
  97   C897                  INCLUDE "setGetMemTop.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\setGetMemTop.inc
   1+  C897              ;+---------------------------------------------------------------------------
   2+  C897              ; MXOS
   3+  C897              ; Установить объем доступной памяти
@@ -2964,7 +3044,9 @@
  32+  C8A3 2A 12 D3     getMemTop:  ld    hl, (v_memTop)
  33+  C8A6 C9                       ret
  34+  C8A7
+# file closed: D:\Projects\Specialist-OS\source\dos\setGetMemTop.inc
  98   C8A7                  INCLUDE "printHex.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printHex.inc
   1+  C8A7              ;+---------------------------------------------------------------------------
   2+  C8A7              ; MXOS
   3+  C8A7              ; Вывод 16-ричного числа на экран (слово)
@@ -3044,7 +3126,9 @@
  77+  C8CE 4F           printHexNib_0:    ld    c, a
  78+  C8CF C3 09 C8                 jp    j_printChar
  79+  C8D2
+# file closed: D:\Projects\Specialist-OS\source\dos\printHex.inc
  99   C8D2                  INCLUDE "input.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\input.inc
   1+  C8D2              ;+---------------------------------------------------------------------------
   2+  C8D2              ; MXOS
   3+  C8D2              ; Ввод строки
@@ -3202,7 +3286,9 @@
 155+  C967                          ; Общее продолжение
 156+  C967 C3 5A C9                 jp    input_lr
 157+  C96A
+# file closed: D:\Projects\Specialist-OS\source\dos\input.inc
 100   C96A                  INCLUDE "calcCS.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\calcCS.inc
   1+  C96A              ;+---------------------------------------------------------------------------
   2+  C96A              ; MXOS
   3+  C96A              ; Расчет контрольной суммы
@@ -3233,7 +3319,9 @@
  28+  C97F F1           calcCS_2:   pop     af
  29+  C980 C9                       ret
  30+  C981
+# file closed: D:\Projects\Specialist-OS\source\dos\calcCS.inc
 101   C981                  INCLUDE "reboot3.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\reboot3.inc
   1+  C981              ;+---------------------------------------------------------------------------
   2+  C981              ; MXOS
   3+  C981              ; Обновление драйвера по адресу 0FFC0h и запуск NC.COM,
@@ -3311,7 +3399,9 @@
  75+  C9CF                          ; Теплая перезагрузка
  76+  C9CF C3 00 C8                 jp      j_reboot3
  77+  C9D2
+# file closed: D:\Projects\Specialist-OS\source\dos\reboot3.inc
 102   C9D2                  INCLUDE "fileExecBat.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileExecBat.inc
   1+  C9D2              ;+---------------------------------------------------------------------------
   2+  C9D2              ; MXOS
   3+  C9D2              ; Запустить BAT файл. Вызывается функцией fileExec
@@ -3402,7 +3492,9 @@
  88+  CA28
  89+  CA28 C3 F7 C9                 jp      execBat_loop
  90+  CA2B
+# file closed: D:\Projects\Specialist-OS\source\dos\fileExecBat.inc
 103   CA2B                  INCLUDE "fileExec.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileExec.inc
   1+  CA2B              ;+---------------------------------------------------------------------------
   2+  CA2B              ; MXOS
   3+  CA2B              ; Запустить файл
@@ -3530,7 +3622,9 @@
 125+  CA97 0E 0A                    ld  c, 0Ah
 126+  CA99 C3 09 C8                 jp  j_printChar
 127+  CA9C
+# file closed: D:\Projects\Specialist-OS\source\dos\fileExec.inc
 104   CA9C                  INCLUDE "driverFFC0.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\driverFFC0.inc
   1+  CA9C              ;+---------------------------------------------------------------------------
   2+  CA9C              ; MXOS
   3+  CA9C              ; Драйверы диска в ДОЗУ (часть, которая копируется на адрес 0FFC0h)
@@ -3708,7 +3802,9 @@
 175+  CAFE ~                    DISPLAY /d, "Error! Byte briver did not fit: ", driverByteEnd-driverByteStart, " > 32 bytes"
 176+  CAFE                  ENDIF
 177+  CAFE
+# file closed: D:\Projects\Specialist-OS\source\dos\driverFFC0.inc
 105   CAFE                  INCLUDE "driverChecked.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\driverChecked.inc
   1+  CAFE              ;+---------------------------------------------------------------------------
   2+  CAFE              ; Р’СЃС‚СЂРѕРµРЅРЅС‹Р№ РґСЂР°Р№РІРµСЂ ROM/RAM-РґРёСЃРєР°.
   3+  CAFE              ;
@@ -3874,7 +3970,9 @@
 163+  CBAA F1                       pop     af
 164+  CBAB C9                       ret
 165+  CBAC
+# file closed: D:\Projects\Specialist-OS\source\dos\driverChecked.inc
 106   CBAC                  INCLUDE "installDriver.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\installDriver.inc
   1+  CBAC              ;+---------------------------------------------------------------------------
   2+  CBAC              ; MXOS
   3+  CBAC              ; Установить драйвер устройства
@@ -3920,7 +4018,9 @@
  43+  CBC2                          ; Выход
  44+  CBC2 C9                       ret
  45+  CBC3
+# file closed: D:\Projects\Specialist-OS\source\dos\installDriver.inc
 107   CBC3                  INCLUDE "fileGetSetDrive.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileGetSetDrive.inc
   1+  CBC3              ;+---------------------------------------------------------------------------
   2+  CBC3              ; MXOS
   3+  CBC3              ; Получение/установка текущего накопителя.
@@ -3996,7 +4096,9 @@
  73+  CBF3 E1                       pop     hl
  74+  CBF4 C9                       ret
  75+  CBF5
+# file closed: D:\Projects\Specialist-OS\source\dos\fileGetSetDrive.inc
 108   CBF5                  INCLUDE "strcmp.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\strcmp.inc
   1+  CBF5              ;----------------------------------------------------------------------------
   2+  CBF5              ; MXOS
   3+  CBF5              ; Сравнение строк, чувстсвительное к регистру
@@ -4148,7 +4250,9 @@
 149+  CC40                          ; Выход
 150+  CC40 C9                       ret
 151+  CC41
+# file closed: D:\Projects\Specialist-OS\source\dos\strcmp.inc
 109   CC41                  INCLUDE "fatCache.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fatCache.inc
   1+  CC41              ;----------------------------------------------------------------------------
   2+  CC41              ; MXOS
   3+  CC41              ; Кэш секторов fat
@@ -4659,7 +4763,9 @@
 508+  CD8A BB                   cp    e
 509+  CD8B C9                   ret
 510+  CD8C
+# file closed: D:\Projects\Specialist-OS\source\dos\fatCache.inc
 110   CD8C                  INCLUDE "fatFindCluster.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fatFindCluster.inc
   1+  CD8C              ;+---------------------------------------------------------------------------
   2+  CD8C              ; MXOS
   3+  CD8C              ; Поиск свободного кластера
@@ -4761,7 +4867,9 @@
  99+  CDBE E1                       pop     hl
 100+  CDBF C9                       ret
 101+  CDC0
+# file closed: D:\Projects\Specialist-OS\source\dos\fatFindCluster.inc
 111   CDC0                  INCLUDE "fatReadWriteCluster.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fatReadWriteCluster.inc
   1+  CDC0              ;----------------------------------------------------------------------------
   2+  CDC0              ; MXOS
   3+  CDC0              ;
@@ -4874,7 +4982,9 @@
 110+  CDE9 C9                       ret
 111+  CDEA
 112+  CDEA
+# file closed: D:\Projects\Specialist-OS\source\dos\fatReadWriteCluster.inc
 112   CDEA                  INCLUDE "fatGetFreeSpace.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fatGetFreeSpace.inc
   1+  CDEA              ;----------------------------------------------------------------------------
   2+  CDEA              ; MXOS
   3+  CDEA              ; Определение свободного объема накопителя
@@ -4941,7 +5051,9 @@
  64+  CE19
  65+  CE19 C9                       ret
  66+  CE1A
+# file closed: D:\Projects\Specialist-OS\source\dos\fatGetFreeSpace.inc
 113   CE1A                  INCLUDE "fatReadBootSector.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fatReadBootSector.inc
   1+  CE1A              ;----------------------------------------------------------------------------
   2+  CE1A              ; MXOS
   3+  CE1A              ; Считывание загрузочного сектора и инициализация структуры v_diskInfo.
@@ -5087,7 +5199,9 @@
 143+  CEBD E1                       pop     hl
 144+  CEBE C9                       ret
 145+  CEBF
+# file closed: D:\Projects\Specialist-OS\source\dos\fatReadBootSector.inc
 114   CEBF                  INCLUDE "fileCreate.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileCreate.inc
   1+  CEBF              ;----------------------------------------------------------------------------
   2+  CEBF              ; MXOS
   3+  CEBF              ; Создать файл
@@ -5379,7 +5493,9 @@
 289+  CFAB
 290+  CFAB 00           v_fileCreatePrepare: DB 0
 291+  CFAC
+# file closed: D:\Projects\Specialist-OS\source\dos\fileCreate.inc
 115   CFAC                  INCLUDE "fileFind.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileFind.inc
   1+  CFAC              ;+---------------------------------------------------------------------------
   2+  CFAC              ; MXOS
   3+  CFAC              ; Найти файл
@@ -5504,7 +5620,9 @@
 122+  CFFD 37                       scf
 123+  CFFE C9                       ret
 124+  CFFF
+# file closed: D:\Projects\Specialist-OS\source\dos\fileFind.inc
 116   CFFF                  INCLUDE "fileLoad.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileLoad.inc
   1+  CFFF              ;+---------------------------------------------------------------------------
   2+  CFFF              ; MXOS
   3+  CFFF              ; Загрузить файл по указанному адресу
@@ -5647,7 +5765,9 @@
 140+  D076 B7                       or      a
 141+  D077 C3 FD CE                 jp      popDBH_ret
 142+  D07A
+# file closed: D:\Projects\Specialist-OS\source\dos\fileLoad.inc
 117   D07A                  INCLUDE "fileDelete.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileDelete.inc
   1+  D07A              ;+---------------------------------------------------------------------------
   2+  D07A              ; MXOS
   3+  D07A              ; Удаление файла
@@ -5720,7 +5840,9 @@
  70+  D0A9                          ; Восстаналиваем регистры и выходим
  71+  D0A9 C3 FD CE                 jp      popDBH_ret
  72+  D0AC
+# file closed: D:\Projects\Specialist-OS\source\dos\fileDelete.inc
 118   D0AC                  INCLUDE "fileRename.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileRename.inc
   1+  D0AC              ;+---------------------------------------------------------------------------
   2+  D0AC              ; MXOS
   3+  D0AC              ; Переименовать файл в пределах текущего диска.
@@ -5783,7 +5905,9 @@
  60+  D0DC CD 3C CD                 call    saveSectorCache
  61+  D0DF B7                       or      a
  62+  D0E0 C3 FD CE                 jp      popDBH_ret
+# file closed: D:\Projects\Specialist-OS\source\dos\fileRename.inc
 119   D0E3                  INCLUDE "fileGetSetAttr.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileGetSetAttr.inc
   1+  D0E3              ;+---------------------------------------------------------------------------
   2+  D0E3              ; MXOS
   3+  D0E3              ; Получение/изменение атрибутов файла
@@ -5850,7 +5974,9 @@
  64+  D106 C1                       pop     bc
  65+  D107 C9                       ret
  66+  D108
+# file closed: D:\Projects\Specialist-OS\source\dos\fileGetSetAttr.inc
 120   D108                  INCLUDE "fileGetSetAddr.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileGetSetAddr.inc
   1+  D108              ;+---------------------------------------------------------------------------
   2+  D108              ; MXOS
   3+  D108              ; Получение/изменение адреса загрузки файла
@@ -5913,7 +6039,9 @@
  60+  D12B B7                       or      a
  61+  D12C C9                       ret
  62+  D12D
+# file closed: D:\Projects\Specialist-OS\source\dos\fileGetSetAddr.inc
 121   D12D                  INCLUDE "fileGetInfoAddr.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileGetInfoAddr.inc
   1+  D12D              ;+---------------------------------------------------------------------------
   2+  D12D              ; MXOS
   3+  D12D              ; Получить указатель на информацию о a==1
@@ -5949,7 +6077,9 @@
  33+  D12D              ;            ret
  34+  D12D              ;
  35+  D12D
+# file closed: D:\Projects\Specialist-OS\source\dos\fileGetInfoAddr.inc
 122   D12D                  INCLUDE "fileList.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileList.inc
   1+  D12D              ;+---------------------------------------------------------------------------
   2+  D12D              ; MXOS
   3+  D12D              ; Получить список файлов каталога.
@@ -6112,7 +6242,9 @@
 160+  D1B6 C1                       pop     bc  ; [1]
 161+  D1B7 C9                       ret
 162+  D1B8
+# file closed: D:\Projects\Specialist-OS\source\dos\fileList.inc
 123   D1B8                  INCLUDE "fileNamePrepare.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\fileNamePrepare.inc
   1+  D1B8              ;+---------------------------------------------------------------------------
   2+  D1B8              ; MXOS
   3+  D1B8              ; Подготовить имя файла для функций ОС
@@ -6235,7 +6367,9 @@
 120+  D21E C1                       pop     bc
 121+  D21F C9                       ret
 122+  D220
+# file closed: D:\Projects\Specialist-OS\source\dos\fileNamePrepare.inc
 124   D220                  INCLUDE "copyDescriptor.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\copyDescriptor.inc
   1+  D220              ;----------------------------------------------------------------------------
   2+  D220              ; MXOS
   3+  D220              ; Копирование дескриптора файла (FILE_DESCRIPTOR)
@@ -6322,7 +6456,9 @@
  84+  D250 D1                       pop     de
  85+  D251 C9                       ret
  86+  D252
+# file closed: D:\Projects\Specialist-OS\source\dos\copyDescriptor.inc
 125   D252                  INCLUDE "printDecWord.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\printDecWord.inc
   1+  D252              ;----------------------------------------------------------------------------
   2+  D252              ; MXOS DOS.SYS
   3+  D252              ; Вывод десятичного числа из de
@@ -6390,7 +6526,9 @@
  65+  D292 4F                       ld    c, a
  66+  D293 C3 37 C0                 jp    printChar
  67+  D296
+# file closed: D:\Projects\Specialist-OS\source\dos\printDecWord.inc
 126   D296                  INCLUDE "math.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\math.inc
   1+  D296              ;+---------------------------------------------------------------------------
   2+  D296              ; MXOS
   3+  D296              ; Математические фуннкции
@@ -6535,6 +6673,7 @@
 142+  D2FB D1           _div4:  pop     de
 143+  D2FC C3 E7 D2             jp      _div3
 144+  D2FF
+# file closed: D:\Projects\Specialist-OS\source\dos\math.inc
 127   D2FF
 128   D2FF 01           v_drive:            DB 1
 129   D300 00 00        v_findCluster:      DW 0
@@ -6639,6 +6778,7 @@
 179   D42C
 180   D42C                  IF LOAD_FONT
 181   D42C                      INCLUDE "initFont.inc"
+# file opened: D:\Projects\Specialist-OS\source\dos\initFont.inc
   1+  D42C              ;+---------------------------------------------------------------------------
   2+  D42C              ; MXOS
   3+  D42C              ; Загрузка шрифта в память
@@ -6936,6 +7076,7 @@
 295+  D448 ~
 296+  D448                  ENDIF
 297+  D448
+# file closed: D:\Projects\Specialist-OS\source\dos\initFont.inc
 182   D448                  ENDIF
 183   D448
 184   D448                  ASSERT_DONT_FIT 0DC00h
@@ -6945,3 +7086,4 @@
 184   D448             >         ENDIF
 185   D448
 186   D448                  END
+# file closed: D:\Projects\Specialist-OS\source\dos\DOSChecked.asm

@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
 $components = @(
     @{ Directory = "source\\dos";    Source = "DOSChecked"; Output = "DOS"; Extension = "sys"; Address = "0xC000" },

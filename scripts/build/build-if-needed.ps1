@@ -99,9 +99,9 @@ $buildDirectory = (Get-Location).ProviderPath
 $sourcePath = Get-FullPath -Path ($SourceBase + ".asm") -BaseDirectory $buildDirectory
 $outputPath = Get-FullPath -Path ($OutputBase + "." + $Extension) -BaseDirectory $buildDirectory
 $listingPath = Get-FullPath -Path ($OutputBase + ".lst") -BaseDirectory $buildDirectory
-$assemblerPath = Join-Path $PSScriptRoot "sjasmplus.exe"
 $fileName = [System.IO.Path]::GetFileNameWithoutExtension($OutputBase)
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 $romOutputPath = Join-Path $repositoryRoot ("ROM\makeRom\{0}.{1}.{2}" -f $fileName, $Address, $Extension)
 
 $dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)

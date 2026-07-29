@@ -17,7 +17,7 @@ if (-not (Test-Path -LiteralPath $emulatorPath -PathType Leaf)) {
     throw "EMU.exe not found: $emulatorPath"
 }
 
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $systemRomSource = Join-Path $repositoryRoot "ROM\MXOS_MY.bin"
 $flashRomSource = Join-Path $repositoryRoot "FlashDrive\FLASH64k0.BIN"
 $configSource = Join-Path $PSScriptRoot "SpecialistMX2_My_MXOS.cfg"

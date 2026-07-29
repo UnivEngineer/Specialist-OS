@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Specialist-OS\flash\FlashFst.asm
+# file opened: D:\Projects\Specialist-OS\source\flash\FlashFst.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS
   3   0000              ; FLASHFST.COM - конвейерный драйвер flash-диска на четырёх AT29C040A
@@ -22,7 +22,7 @@
  21   0000              ;----------------------------------------------------------------------------
  22   0000
  23   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Specialist-OS\flash\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\source\flash\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; ����� ����� � ��������� ������ MXOS
@@ -394,7 +394,7 @@
 369+  0000              ; �����
 370+  0000              ;-----------------------------------------------------------------------
 371+  0000
-# file closed: D:\Projects\Specialist-OS\flash\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\source\flash\../include/mxos.inc
  24   0000
  25   0000              ; Команды bit set/reset управляющего регистра КР580ВВ55
  26   0000              LATCH_0 = 0Ah   ; выход защёлки КР580ИР22 = 0
@@ -859,4 +859,4 @@
 481   DFBF             >         ENDIF
 482   DFBF
 483   DFBF                  END
-# file closed: D:\Projects\Specialist-OS\flash\FlashFst.asm
+# file closed: D:\Projects\Specialist-OS\source\flash\FlashFst.asm

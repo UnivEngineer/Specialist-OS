@@ -71,9 +71,11 @@ Specialist-OS — операционная система и набор сист
 - `source/tape/` — самостоятельная магнитофонная утилита со встроенным низкоуровневым драйвером.
 - `ROM/makeRom/` — входные файлы и скрипт сборки системного ROM-образа.
 - `FlashDrive/` — наборы файлов и скрипты сборки flash-образов.
-- `Release/` — запуск emu и преобразование листингов.
+- `scripts/emulator/` — запуск emu и его конфигурация.
+- `scripts/listings/` — подготовка листингов для emu.
 - `source/test-scr/` — автономный тест экрана.
-- `tasm/` — локальная копия SjASMPlus и legacy-скрипт сборки.
+- `scripts/build/` — PowerShell-сценарии сборки компонентов и всего проекта.
+- `tasm/` — локальные исполняемые файлы ассемблеров и таблицы legacy TASM.
 
 Не смешивай код разных ядер прямыми переходами. Взаимодействие MXOS, Monitor-2 и Ramfos оформляй через загрузчик, таблицу ABI или отдельный адаптер.
 
@@ -85,13 +87,13 @@ Specialist-OS — операционная система и набор сист
 sjasmplus.exe --i8080 -Wno-rdlow --lst=<file>.lst --raw=<file>.<ext> <file>.asm
 ```
 
-Legacy-обёртка:
+PowerShell-сценарий сборки отдельного компонента:
 
 ```text
-..\..\tasm\make.bat <file-without-extension> <output-extension> <load-address>
+powershell.exe -NoProfile -File ..\..\scripts\build\build-if-needed.ps1 <file-without-extension> <output-extension> <load-address>
 ```
 
-Она собирает компонент и копирует результат в:
+Он собирает компонент и копирует результат в:
 
 ```text
 ROM\makeRom\<name>.<load-address>.<extension>

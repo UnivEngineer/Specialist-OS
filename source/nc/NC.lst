@@ -1,4 +1,4 @@
-# file opened: D:\Projects\Specialist-OS\nc\NC.asm
+# file opened: D:\Projects\Specialist-OS\source\nc\NC.asm
   1   0000              ;----------------------------------------------------------------------------
   2   0000              ; MXOS - Файловый менеджер NC.COM
   3   0000              ;
@@ -7,7 +7,7 @@
   6   0000              ;----------------------------------------------------------------------------
   7   0000
   8   0000                  INCLUDE "../include/mxos.inc"
-# file opened: D:\Projects\Specialist-OS\nc\../include/mxos.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\../include/mxos.inc
   1+  0000              ;-----------------------------------------------------------------------
   2+  0000              ; MXOS
   3+  0000              ; Точки входа и настройки сборки MXOS
@@ -379,7 +379,7 @@
 369+  0000              ; Конец
 370+  0000              ;-----------------------------------------------------------------------
 371+  0000
-# file closed: D:\Projects\Specialist-OS\nc\../include/mxos.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\../include/mxos.inc
   9   0000
  10   0000                  IF NEW_MEMORY_MAP
  11   0000                      ORG 0E800h
@@ -469,7 +469,7 @@
  95   E800              ;---------------------------------------------------------------------------
  96   E800
  97   E800                  INCLUDE "start.inc"     ; Продолжается в main
-# file opened: D:\Projects\Specialist-OS\nc\start.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\start.inc
   1+  E800              ;----------------------------------------------------------------------------
   2+  E800              ; MXOS NC.COM
   3+  E800              ; Запуск
@@ -531,9 +531,9 @@
  51+  E843                          ; Очищаем командную строку
  52+  E843 CD 69 F0                 call    clearCmdLine
  53+  E846
-# file closed: D:\Projects\Specialist-OS\nc\start.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\start.inc
  98   E846                  INCLUDE "main.inc"
-# file opened: D:\Projects\Specialist-OS\nc\main.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\main.inc
   1+  E846              ;----------------------------------------------------------------------------
   2+  E846              ; MXOS NC.COM
   3+  E846              ; Основной цикл
@@ -717,9 +717,9 @@
 157+  E940 CD 66 E9                 call    selFileToCmdLine
 158+  E943 C3 73 E8                 jp      mainLoop
 159+  E946
-# file closed: D:\Projects\Specialist-OS\nc\main.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\main.inc
  99   E946                  INCLUDE "selFileToCmdLine.inc"
-# file opened: D:\Projects\Specialist-OS\nc\selFileToCmdLine.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\selFileToCmdLine.inc
   1+  E946              ;----------------------------------------------------------------------------
   2+  E946              ; MXOS NC.COM
   3+  E946              ; Сформировать строку пути выбраного файла
@@ -794,9 +794,9 @@
  68+  E97B 22 59 F7             ld      (vars.cmdLinePos), hl
  69+  E97E C9                   ret
  70+  E97F
-# file closed: D:\Projects\Specialist-OS\nc\selFileToCmdLine.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\selFileToCmdLine.inc
 100   E97F                  INCLUDE "butF4.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF4.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF4.inc
   1+  E97F              ;----------------------------------------------------------------------------
   2+  E97F              ; MXOS NC.COM
   3+  E97F              ; Клавиша F4 - запуск редактора
@@ -816,9 +816,9 @@
  17+  E989 11 E9 F6             ld      de, aEditor   ; "A:E.COM\r"
  18+  E98C C3 D3 E9             jp      Enter_5
  19+  E98F
-# file closed: D:\Projects\Specialist-OS\nc\butF4.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF4.inc
 101   E98F                  INCLUDE "butEnter.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butEnter.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butEnter.inc
   1+  E98F              ;----------------------------------------------------------------------------
   2+  E98F              ; MXOS NC.COM
   3+  E98F              ; Клавиша ENTER
@@ -998,9 +998,9 @@
 169+  EA74 C2 6C EA                 jp      nz, Enter_2
 170+  EA77 C3 F9 E9                 jp      Enter_stdExec
 171+  EA7A
-# file closed: D:\Projects\Specialist-OS\nc\butEnter.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butEnter.inc
 102   EA7A                  INCLUDE "saveLoadState.inc"
-# file opened: D:\Projects\Specialist-OS\nc\saveLoadState.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\saveLoadState.inc
   1+  EA7A              ;----------------------------------------------------------------------------
   2+  EA7A              ; MXOS NC.COM
   3+  EA7A              ; Cохранение состояния в ДОЗУ
@@ -1080,9 +1080,9 @@
  77+  EABD AF                       xor     a   ; для выхода с флагом z
  78+  EABE C9                       ret
  79+  EABF
-# file closed: D:\Projects\Specialist-OS\nc\saveLoadState.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\saveLoadState.inc
 103   EABF                  INCLUDE "drawWindow.inc"
-# file opened: D:\Projects\Specialist-OS\nc\drawWindow.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\drawWindow.inc
   1+  EABF              ;----------------------------------------------------------------------------
   2+  EABF              ; MXOS NC.COM
   3+  EABF              ; Рисование окошек
@@ -1138,9 +1138,9 @@
  45+  EAED 01 0B 14             ld      bc, (20 << 8) + 11  ; w=160 h=11
  46+  EAF0 C3 1D F1             jp      inverseRect
  47+  EAF3
-# file closed: D:\Projects\Specialist-OS\nc\drawWindow.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\drawWindow.inc
 104   EAF3                  INCLUDE "printStringInv.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printStringInv.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printStringInv.inc
   1+  EAF3              ;----------------------------------------------------------------------------
   2+  EAF3              ; MXOS NC.COM
   3+  EAF3              ; Вывод инверсной строки
@@ -1155,9 +1155,9 @@
  12+  EAFC 32 FA 8F                 ld    (bios_vars.inverse),a
  13+  EAFF C9                       ret
  14+  EB00
-# file closed: D:\Projects\Specialist-OS\nc\printStringInv.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printStringInv.inc
 105   EB00                  INCLUDE "inputForCopyMove.inc"
-# file opened: D:\Projects\Specialist-OS\nc\inputForCopyMove.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\inputForCopyMove.inc
   1+  EB00              ;----------------------------------------------------------------------------
   2+  EB00              ; MXOS NC.COM
   3+  EB00              ; Ввод строки в которой изначально содержится имя выбранного файла
@@ -1220,9 +1220,9 @@
  60+  EB3A                          ; Перейти к редакированию
  61+  EB3A C3 1A F5                 jp      input
  62+  EB3D
-# file closed: D:\Projects\Specialist-OS\nc\inputForCopyMove.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\inputForCopyMove.inc
 106   EB3D                  INCLUDE "printSelDrive.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printSelDrive.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printSelDrive.inc
   1+  EB3D              ;----------------------------------------------------------------------------
   2+  EB3D              ; MXOS NC.COM
   3+  EB3D              ; Вывод текущего накопителя
@@ -1236,9 +1236,9 @@
  11+  EB40 CD FC F3                 call  readBytePanel
  12+  EB43 C3 E0 F3                 jp    printDrive
  13+  EB46
-# file closed: D:\Projects\Specialist-OS\nc\printSelDrive.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printSelDrive.inc
 107   EB46                  INCLUDE "butF7.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF7.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF7.inc
   1+  EB46              ;----------------------------------------------------------------------------
   2+  EB46              ; MXOS NC.COM
   3+  EB46              ; F7 - MkDir. Резерв для будущей реализации создания каталога.
@@ -1246,9 +1246,9 @@
   5+  EB46
   6+  EB46              but_F7:
   7+  EB46 C3 73 E8                 jp      mainLoop
-# file closed: D:\Projects\Specialist-OS\nc\butF7.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF7.inc
 108   EB49                  INCLUDE "butF6.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF6.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF6.inc
   1+  EB49              ;----------------------------------------------------------------------------
   2+  EB49              ; MXOS NC.COM
   3+  EB49              ; F6 - переименование файла на исходном диске.
@@ -1288,9 +1288,9 @@
  35+  EB86              renameFileError:
  36+  EB86 21 2B F6                 ld      hl, aCantRenameFile
  37+  EB89 C3 C2 EC                 jp      copyFileShowError
-# file closed: D:\Projects\Specialist-OS\nc\butF6.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF6.inc
 109   EB8C                  INCLUDE "butF5.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF5.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF5.inc
   1+  EB8C              ;----------------------------------------------------------------------------
   2+  EB8C              ; MXOS NC.COM
   3+  EB8C              ; Клавиша F5 - копирование
@@ -1317,9 +1317,9 @@
  22+  EBA9 CD AF EB             call    copyFileInt
  23+  EBAC C3 46 E8             jp      mainReload
  24+  EBAF
-# file closed: D:\Projects\Specialist-OS\nc\butF5.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF5.inc
 110   EBAF                  INCLUDE "copyFileInt.inc"
-# file opened: D:\Projects\Specialist-OS\nc\copyFileInt.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\copyFileInt.inc
   1+  EBAF              ;----------------------------------------------------------------------------
   2+  EBAF              ; MXOS NC.COM
   3+  EBAF              ; Потоковое копирование через ОЗУ пользователя 0000h-7FFFh.
@@ -1520,9 +1520,9 @@
 188+  ECF0 3C                       inc     a
 189+  ECF1 CA ED EC                 jp z,   copyFileAnyKey
 190+  ECF4 C3 46 E8                 jp      mainReload
-# file closed: D:\Projects\Specialist-OS\nc\copyFileInt.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\copyFileInt.inc
 111   ECF7                  INCLUDE "printInvSelFile.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printInvSelFile.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printInvSelFile.inc
   1+  ECF7              ;----------------------------------------------------------------------------
   2+  ECF7              ; MXOS NC.COM
   3+  ECF7              ; Инверсный вывод имени выбранного файла
@@ -1541,9 +1541,9 @@
  16+  ED08 21 B3 F7                 ld    hl, vars.input
  17+  ED0B C3 F3 EA                 jp    printStringInv
  18+  ED0E
-# file closed: D:\Projects\Specialist-OS\nc\printInvSelFile.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printInvSelFile.inc
 112   ED0E                  INCLUDE "butF8.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF8.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF8.inc
   1+  ED0E              ;----------------------------------------------------------------------------
   2+  ED0E              ; MXOS NC.COM
   3+  ED0E              ; Клавиша F8 - удаление файла
@@ -1628,9 +1628,9 @@
  70+  ED86
  71+  ED86 C3 46 E8                 jp          mainReload
  72+  ED89
-# file closed: D:\Projects\Specialist-OS\nc\butF8.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF8.inc
 113   ED89                  INCLUDE "butF2.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF2.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF2.inc
   1+  ED89              ;----------------------------------------------------------------------------
   2+  ED89              ; MXOS NC.COM
   3+  ED89              ; Клавиши F1, F2. Выбор накопителя для панели
@@ -1997,9 +1997,9 @@
 360+  EF79 01 09 01                 ld    bc, (1 << 8) + 9
 361+  EF7C C3 1D F1                 jp    inverseRect
 362+  EF7F
-# file closed: D:\Projects\Specialist-OS\nc\butF2.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF2.inc
 114   EF7F                  INCLUDE "butTab.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butTab.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butTab.inc
   1+  EF7F              ;----------------------------------------------------------------------------
   2+  EF7F              ; MXOS NC.COM
   3+  EF7F              ; Клавиша TAB - Смена активной панели
@@ -2032,9 +2032,9 @@
  30+  EF9F
  31+  EF9F C3 EA ED                 jp      saveStateAndReload
  32+  EFA2
-# file closed: D:\Projects\Specialist-OS\nc\butTab.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butTab.inc
 115   EFA2                  INCLUDE "butF3.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butF3.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butF3.inc
   1+  EFA2              ;----------------------------------------------------------------------------
   2+  EFA2              ; MXOS NC.COM
   3+  EFA2              ; Клавиша F3 - отобразить информацию о накопителе
@@ -2070,9 +2070,9 @@
  33+  EFC4 CD 4F F1     loc_D701:   call  loadAndPrintB
  34+  EFC7 C3 EA ED                 jp    saveStateAndReload
  35+  EFCA
-# file closed: D:\Projects\Specialist-OS\nc\butF3.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butF3.inc
 116   EFCA                  INCLUDE "butArrows.inc"
-# file opened: D:\Projects\Specialist-OS\nc\butArrows.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\butArrows.inc
   1+  EFCA              ;----------------------------------------------------------------------------
   2+  EFCA              ; MXOS NC.COM
   3+  EFCA              ; Клавиши перемещения курсора
@@ -2244,9 +2244,9 @@
 169+  F069
 170+  F069              ; ---------------------------------------------------------------------------
 171+  F069
-# file closed: D:\Projects\Specialist-OS\nc\butArrows.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\butArrows.inc
 117   F069                  INCLUDE "clearCmdLine.inc"    ; Продолжается в printSpaces
-# file opened: D:\Projects\Specialist-OS\nc\clearCmdLine.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\clearCmdLine.inc
   1+  F069              ;----------------------------------------------------------------------------
   2+  F069              ; MXOS NC.COM
   3+  F069              ; Очистка ком строки
@@ -2277,9 +2277,9 @@
  24+  F086
  25+  F086                          ; Продолжение на printSpaces
  26+  F086
-# file closed: D:\Projects\Specialist-OS\nc\clearCmdLine.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\clearCmdLine.inc
 118   F086                  INCLUDE "printSpaces.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printSpaces.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printSpaces.inc
   1+  F086              ;----------------------------------------------------------------------------
   2+  F086              ; MXOS NC.COM
   3+  F086              ; Вывод пробелов
@@ -2297,9 +2297,9 @@
  15+  F08C C2 88 F0                 jp nz,  printSpaces_1
  16+  F08F C9                       ret
  17+  F090
-# file closed: D:\Projects\Specialist-OS\nc\printSpaces.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printSpaces.inc
 119   F090                  INCLUDE "drawCursor.inc"
-# file opened: D:\Projects\Specialist-OS\nc\drawCursor.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\drawCursor.inc
   1+  F090              ;----------------------------------------------------------------------------
   2+  F090              ; MXOS NC.COM
   3+  F090              ; Рисование курсора
@@ -2372,9 +2372,9 @@
  70+  F0CB ~                        jp    drawCursor_2
  71+  F0CB                  ENDIF
  72+  F0CB
-# file closed: D:\Projects\Specialist-OS\nc\drawCursor.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\drawCursor.inc
 120   F0CB                  INCLUDE "printInfoLine.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printInfoLine.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printInfoLine.inc
   1+  F0CB              ;----------------------------------------------------------------------------
   2+  F0CB              ; MXOS NC.COM
   3+  F0CB              ; Вывод инфомарции о файле внизу окна
@@ -2454,9 +2454,9 @@
  73+  F118 06 20                ld      b, 20h
  74+  F11A C3 6C C8             jp      bios_printDecWord
  75+  F11D
-# file closed: D:\Projects\Specialist-OS\nc\printInfoLine.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printInfoLine.inc
 121   F11D                  INCLUDE "inverseRect.inc"
-# file opened: D:\Projects\Specialist-OS\nc\inverseRect.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\inverseRect.inc
   1+  F11D              ;----------------------------------------------------------------------------
   2+  F11D              ; MXOS NC.COM
   3+  F11D              ; Инвертирвоание прямоугольной области на экране
@@ -2496,9 +2496,9 @@
  37+  F12F D1                       pop     de
  38+  F130 C9                       ret
  39+  F131
-# file closed: D:\Projects\Specialist-OS\nc\inverseRect.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\inverseRect.inc
 122   F131                  INCLUDE "getSelectedFile.inc"
-# file opened: D:\Projects\Specialist-OS\nc\getSelectedFile.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\getSelectedFile.inc
   1+  F131              ;----------------------------------------------------------------------------
   2+  F131              ; MXOS NC.COM
   3+  F131              ; Получить информацию о выбранном файле (FILE_INFO)
@@ -2536,9 +2536,9 @@
  35+  F14D D1                   pop     de
  36+  F14E C9                   ret
  37+  F14F
-# file closed: D:\Projects\Specialist-OS\nc\getSelectedFile.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\getSelectedFile.inc
 123   F14F                  INCLUDE "loadAndPrint.inc"
-# file opened: D:\Projects\Specialist-OS\nc\loadAndPrint.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\loadAndPrint.inc
   1+  F14F              ;----------------------------------------------------------------------------
   2+  F14F              ; MXOS NC.COM
   3+  F14F              ; Загрузить файлы и нарисовать
@@ -2593,9 +2593,9 @@
  52+  F181 CD 85 F1                 call    loadFiles   ; На входе a должен содержать номер накопителя
  53+  F184 C9                       ret
  54+  F185
-# file closed: D:\Projects\Specialist-OS\nc\loadAndPrint.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\loadAndPrint.inc
 124   F185                  INCLUDE "loadFiles.inc"
-# file opened: D:\Projects\Specialist-OS\nc\loadFiles.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\loadFiles.inc
   1+  F185              ;----------------------------------------------------------------------------
   2+  F185              ; MXOS NC.COM
   3+  F185              ; Загрузить список файлов с накопителя
@@ -2629,9 +2629,9 @@
  31+  F19D 21 53 F7                 ld      hl, state.panelA_filesCnt
  32+  F1A0 C3 EB F3                 jp      writeBytePanel
  33+  F1A3
-# file closed: D:\Projects\Specialist-OS\nc\loadFiles.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\loadFiles.inc
 125   F1A3                  INCLUDE "printInfoPanel.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printInfoPanel.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printInfoPanel.inc
   1+  F1A3              ;----------------------------------------------------------------------------
   2+  F1A3              ; MXOS NC.COM
   3+  F1A3              ; Рисование информационной панели
@@ -2964,9 +2964,9 @@
 230+  F339
 231+  F339                          ; ^^^ выход
 232+  F339
-# file closed: D:\Projects\Specialist-OS\nc\printInfoPanel.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printInfoPanel.inc
 126   F339                  INCLUDE "printFilePanel.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printFilePanel.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printFilePanel.inc
   1+  F339              ;----------------------------------------------------------------------------
   2+  F339              ; MXOS NC.COM
   3+  F339              ; Вывод списка файлов на панель
@@ -3131,9 +3131,9 @@
 146+  F3DA
 147+  F3DA C9                   ret
 148+  F3DB
-# file closed: D:\Projects\Specialist-OS\nc\printFilePanel.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printFilePanel.inc
 127   F3DB                  INCLUDE "printCurDrive.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printCurDrive.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printCurDrive.inc
   1+  F3DB              ;----------------------------------------------------------------------------
   2+  F3DB              ; MXOS NC.COM
   3+  F3DB              ; Вывод текущего накопителя
@@ -3154,9 +3154,9 @@
  18+  F3E6 0E 3A                    ld    c, ':'
  19+  F3E8 C3 09 C8                 jp    bios_printChar
  20+  F3EB
-# file closed: D:\Projects\Specialist-OS\nc\printCurDrive.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printCurDrive.inc
 128   F3EB                  INCLUDE "rwBytePanel.inc"
-# file opened: D:\Projects\Specialist-OS\nc\rwBytePanel.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\rwBytePanel.inc
   1+  F3EB              ;----------------------------------------------------------------------------
   2+  F3EB              ; MXOS NC.COM
   3+  F3EB              ; Запись значения в переменную панели
@@ -3208,9 +3208,9 @@
  49+  F406 E1                       pop   hl
  50+  F407 C9                       ret
  51+  F408
-# file closed: D:\Projects\Specialist-OS\nc\rwBytePanel.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\rwBytePanel.inc
 129   F408                  INCLUDE "printFileName.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printFileName.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printFileName.inc
   1+  F408              ;----------------------------------------------------------------------------
   2+  F408              ; MXOS NC.COM
   3+  F408              ; Вывод имени файла в обычном виде с точкой
@@ -3263,9 +3263,9 @@
  50+  F41C E1                   pop     hl
  51+  F41D C9                   ret
  52+  F41E
-# file closed: D:\Projects\Specialist-OS\nc\printFileName.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printFileName.inc
 130   F41E                  INCLUDE "printString2.inc"
-# file opened: D:\Projects\Specialist-OS\nc\printString2.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\printString2.inc
   1+  F41E              ;----------------------------------------------------------------------------
   2+  F41E              ; MXOS NC.COM
   3+  F41E              ; Вывод строки по адресу hl длиной b или до терминатора.
@@ -3309,9 +3309,9 @@
  41+  F432 F1               pop     af
  42+  F433 C9               ret
  43+  F434
-# file closed: D:\Projects\Specialist-OS\nc\printString2.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\printString2.inc
 131   F434                  INCLUDE "setCursorPosPanel.inc"
-# file opened: D:\Projects\Specialist-OS\nc\setCursorPosPanel.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\setCursorPosPanel.inc
   1+  F434              ;----------------------------------------------------------------------------
   2+  F434              ; MXOS NC.COM
   3+  F434              ; Установка положения курсора с учетом активной панели
@@ -3339,9 +3339,9 @@
  25+  F445 E1                       pop   hl
  26+  F446 C9                       ret
  27+  F447
-# file closed: D:\Projects\Specialist-OS\nc\setCursorPosPanel.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\setCursorPosPanel.inc
 132   F447                  INCLUDE "draw.inc"
-# file opened: D:\Projects\Specialist-OS\nc\draw.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\draw.inc
   1+  F447              ;----------------------------------------------------------------------------
   2+  F447              ; MXOS NC.COM
   3+  F447              ; Рисование окошек
@@ -3502,9 +3502,9 @@
 158+  F4C7 24                       inc   h
 159+  F4C8 C9                       ret
 160+  F4C9
-# file closed: D:\Projects\Specialist-OS\nc\draw.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\draw.inc
 133   F4C9                  INCLUDE "tools.inc"
-# file opened: D:\Projects\Specialist-OS\nc\tools.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\tools.inc
   1+  F4C9              ;----------------------------------------------------------------------------
   2+  F4C9              ; MXOS NC.COM
   3+  F4C9              ; Копирвоание 3-х байт из адреса de в адрес hl
@@ -3544,9 +3544,9 @@
  37+  F4D9 C2 D6 F4             jp nz,  memset_hl_a_c
  38+  F4DC C9                   ret
  39+  F4DD
-# file closed: D:\Projects\Specialist-OS\nc\tools.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\tools.inc
 134   F4DD                  INCLUDE "compactName.inc"
-# file opened: D:\Projects\Specialist-OS\nc\compactName.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\compactName.inc
   1+  F4DD              ;----------------------------------------------------------------------------
   2+  F4DD              ; MXOS NC.COM
   3+  F4DD              ; Убрать из имени пробелы
@@ -3626,9 +3626,9 @@
  77+  F518 E1                       pop   hl
  78+  F519 C9                       ret
  79+  F51A
-# file closed: D:\Projects\Specialist-OS\nc\compactName.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\compactName.inc
 135   F51A                  INCLUDE "input.inc"
-# file opened: D:\Projects\Specialist-OS\nc\input.inc
+# file opened: D:\Projects\Specialist-OS\source\nc\input.inc
   1+  F51A              ;----------------------------------------------------------------------------
   2+  F51A              ; MXOS NC.COM
   3+  F51A              ; Ввод строки
@@ -3721,7 +3721,7 @@
  90+  F569 79                       ld      a, c
  91+  F56A C9                       ret
  92+  F56B
-# file closed: D:\Projects\Specialist-OS\nc\input.inc
+# file closed: D:\Projects\Specialist-OS\source\nc\input.inc
 136   F56B
 137   F56B              ;---------------------------------------------------------------------------
 138   F56B              ; Константы и переменные
@@ -4049,4 +4049,4 @@
 354   F759                  ENDIF
 355   F759
 356   F759                  END
-# file closed: D:\Projects\Specialist-OS\nc\NC.asm
+# file closed: D:\Projects\Specialist-OS\source\nc\NC.asm
