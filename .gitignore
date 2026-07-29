@@ -1,5 +1,4 @@
 ﻿.vs/mxos/v15
 .vs
-ROM/MXOS_MY.bin
-ROM/MXOS_SYS_*.bin
+images/*.bin
 .tmp_pdf

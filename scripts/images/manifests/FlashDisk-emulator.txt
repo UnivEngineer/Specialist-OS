@@ -1,0 +1,7 @@
+# Небольшой flash-диск H: для эмулятора.
+Almaz-2.exe
+Almaz2X.exe
+StarWars.rks
+Nardy.rks
+Pacman2.rks
+Tetris2.rks

@@ -13,6 +13,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$imageDirectory = Join-Path $repositoryRoot "images"
 $sectorSize = 256
 $sectorsPerCluster = 1
 
@@ -108,40 +109,46 @@ switch ($Target) {
         $manifestPath = Join-Path $PSScriptRoot "manifests\system.csv"
         $manifest = Get-SystemManifest $manifestPath "emu"
         $manifestHasMetadata = $true
-        $bootPath = Join-Path $repositoryRoot "assets\system-rom\system-boot.bin"
+        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
         $maxFiles = 64
         $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Mx2"
-        $outputPath = Join-Path $repositoryRoot "ROM\MXOS_MY.bin"
+        $outputPath = Join-Path $imageDirectory "SystemRom_emulator.bin"
         $makeBootDisk = $true
     }
     "SystemHardware" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\system.csv"
         $manifest = Get-SystemManifest $manifestPath "hardware"
         $manifestHasMetadata = $true
-        $bootPath = Join-Path $repositoryRoot "assets\system-rom\system-boot.bin"
+        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = $HardwareSizeKB * 1KB
         $chipSize = 64KB
         $maxFiles = 64
         $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Raw"
-        $outputPath = Join-Path $repositoryRoot ("ROM\MXOS_SYS_{0}.bin" -f $HardwareSizeKB)
+        $outputName = switch ($HardwareSizeKB) {
+            128 { "SystemRom_128K.bin" }
+            256 { "SystemRom_256K.bin" }
+            512 { "SystemRom_512K.bin" }
+        }
+        $outputPath = Join-Path $imageDirectory $outputName
         $makeBootDisk = $true
     }
     "Games64k" {
         $inputDirectory = Join-Path $repositoryRoot "assets\games"
-        $manifestPath = Join-Path $PSScriptRoot "manifests\flash-64k.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk-emulator.txt"
         $manifest = Get-Manifest $manifestPath
         $manifestHasMetadata = $false
-        $bootPath = Join-Path $repositoryRoot "assets\system-rom\flash-boot.bin"
+        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
         $maxFiles = 64
         $volumeLabel = "ROM DISK 64"
         $imageFormat = "Split"
-        $outputPath = Join-Path $repositoryRoot "FlashDrive\FLASH64k.BIN"
+        $outputPath = Join-Path $imageDirectory "FlashDisk_emulator.bin"
+        $partNamePattern = "FlashDisk_emulator.bin"
         $makeBootDisk = $false
     }
     "Games2M" {
@@ -149,16 +156,19 @@ switch ($Target) {
         $manifestPath = Join-Path $PSScriptRoot "manifests\flash-games.txt"
         $manifest = Get-Manifest $manifestPath
         $manifestHasMetadata = $false
-        $bootPath = Join-Path $repositoryRoot "assets\system-rom\flash-boot.bin"
+        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 2MB
         $chipSize = 512KB
         $maxFiles = 192
         $volumeLabel = "FLASH DISK "
         $imageFormat = "Split"
-        $outputPath = Join-Path $repositoryRoot "FlashDrive\FLASH2M.BIN"
+        $outputPath = Join-Path $imageDirectory "FlashDisk_512K.bin"
+        $partNamePattern = "FlashDisk_chip{0}_512K.bin"
         $makeBootDisk = $false
     }
 }
+
+New-Item -ItemType Directory -Path $imageDirectory -Force | Out-Null
 
 $filesByName = @{}
 if (-not $manifestHasMetadata) {
@@ -194,6 +204,7 @@ $fileCount = 0
 $dosCluster = 0
 $dosAddress = 0
 $dosSectors = 0
+$imageNames = @{}
 
 try {
     foreach ($manifestEntry in $manifest) {
@@ -245,6 +256,15 @@ try {
                 $loadAddress = 0
             }
         }
+
+        if ($baseName.Length -gt 8 -or $extension.Length -gt 3) {
+            throw "Image name '$sourceName' does not fit FAT 8.3. Specify a separate short image name."
+        }
+        $imageNameKey = "$baseName.$extension".ToUpperInvariant()
+        if ($imageNames.ContainsKey($imageNameKey)) {
+            throw "FAT 8.3 name conflict '$baseName.$extension': '$($imageNames[$imageNameKey])' and '$sourceName'."
+        }
+        $imageNames[$imageNameKey] = $sourceName
 
         if ($fileCount -ge $maxFiles) {
             throw "Root directory is full while adding $sourceName ($fileCount of $maxFiles files)"
@@ -352,8 +372,6 @@ try {
         }
         "Split" {
             $image = Join-Bytes $start $data
-            $baseName = [IO.Path]::GetFileNameWithoutExtension($outputPath)
-            $extension = [IO.Path]::GetExtension($outputPath)
             $outputDirectory = Split-Path -Parent $outputPath
             $partNumber = 0
             for ($offset = 0; $offset -lt $image.Length; $offset += $chipSize) {
@@ -361,7 +379,7 @@ try {
                 $part = New-Object byte[] $count
                 [Array]::Copy($image, $offset, $part, 0, $count)
                 $part = Expand-Bytes $part $chipSize
-                $partPath = Join-Path $outputDirectory ("{0}{1}{2}" -f $baseName, $partNumber, $extension)
+                $partPath = Join-Path $outputDirectory ($partNamePattern -f ($partNumber + 1))
                 [IO.File]::WriteAllBytes($partPath, $part)
                 Write-Host ("[image] {0}" -f $partPath)
                 $partNumber++

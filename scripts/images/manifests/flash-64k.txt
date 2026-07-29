@@ -1,6 +1,0 @@
-Almaz-2.exe
-Buran.rks
-Lines.rks
-Nardy.rks
-Pacman2.rks
-Tetris2.rks

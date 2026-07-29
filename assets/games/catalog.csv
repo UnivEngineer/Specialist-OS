@@ -1,8 +1,7 @@
 File,LoadAddress,Status,OriginalName,Notes
-Almaz-2-MX.exe,0,unverified,Almaz-2.0.exe,MX variant
-Budi-MX.exe,0,unverified,Budi.0.EXE,MX variant
-Exolon-MX.exe,0,unverified,Exolon.0.exe,MX variant
-StarW2-MX.exe,0,unverified,StarW2.0.EXE,MX variant
-Buran-STD.exe,0,unverified,Buran.0.EXE,Standard Specialist variant
-StarWars-STD.exe,0,unverified,STARW.0.EXE,Standard Specialist variant
-StarWar2-STD.exe,0,unverified,STARW2.0.EXE,Standard Specialist variant
+Almaz2X.exe,0,unverified,Almaz-2.0.exe,Версия для Специалиста MX
+Budi-MX.exe,0,unverified,Budi.0.EXE,Версия для Специалиста MX
+StarW2X.exe,0,unverified,StarW2.0.EXE,Версия для Специалиста MX
+Buran.exe,0,unverified,Buran.0.EXE,Чёрно-белый Buran/StarWars; совпадает с StarWars.rks без заголовка
+StarW.exe,0,unverified,STARW.0.EXE,Другая игра с названием StarWars
+StarW2.exe,0,unverified,STARW2.0.EXE,Стандартная версия трёхмерного космического шутера
