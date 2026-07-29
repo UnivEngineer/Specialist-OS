@@ -1,21 +1,23 @@
 ;----------------------------------------------------------------------------
 ; MXOS NC.COM
-; Копирование выбранного файла через временный 32-байтовый дескриптор.
-;
-; Файл пока целиком загружается в 0000h. Размер ограничен 36 КБ, чтобы не
-; затереть экран и системную область. Потоковое копирование будет отдельным
-; изменением DOS ABI.
+; Потоковое копирование через ОЗУ пользователя 0000h-7FFFh.
 ;----------------------------------------------------------------------------
 
+COPY_BUFFER         = 0000h
+COPY_BUFFER_SECTORS = 128
+
 copyFileInt:
-            ; Явно выбрать диск активной панели.
+            ; Выбрать диск-источник и запомнить выбранную запись каталога.
             ld      hl, state.panelA_drive
             call    readBytePanel
+            ld      (vars.copySourceDrive), a
             ld      e, 1
             call    bios_fileGetSetDrive
 
-            ; Скопировать имя выбранного файла в полный дескриптор.
             call    getSelectedFile
+            ld      (vars.copySourceName), hl
+
+            ; Загрузить полный дескриптор источника во временную запись.
             ld      de, vars.tempFileDescr
             ld      c, FILE_NAME_LENGTH + 3
 copyFileNameLoop:
@@ -26,89 +28,141 @@ copyFileNameLoop:
             dec     c
             jp nz,  copyFileNameLoop
 
-            ; Получить полный дескриптор до загрузки и проверить размер.
             ld      hl, vars.tempFileDescr
             call    bios_fileLoadInfo
-            jp c,   copyFileReadError
+            jp c,   copyFileError
 
-            ld      hl, vars.tempFileDescr + FILE_DESCRIPTOR.size + 2
-            ld      a, (hl)
+            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
+            ld      (vars.copySourceCluster), hl
+
+            ; Размер хранится как size-1. Число секторов должно помещаться
+            ; в 16-битное адресное пространство текущей DOS.
+            ld      hl, vars.tempFileDescr + FILE_DESCRIPTOR.size + 1
+            ld      e, (hl)
             inc     hl
-            or      (hl)
-            jp nz,  copyFileTooLarge
-            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.size)
-            ld      a, h
-            cp      090h
-            jp nc,  copyFileTooLarge
+            ld      d, (hl)
+            inc     hl
+            ld      a, (hl)
+            or      a
+            jp nz,  copyFileError
+            inc     de
+            ld      a, d
+            or      e
+            jp z,   copyFileError
+            ex      de, hl
+            ld      (vars.copyBlocksLeft), hl
 
-            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.loadAddress)
-            ld      (vars.copyLoadAddr), hl
-
-            ; Загрузить исходный файл в буфер 0000h.
-            ld      hl, vars.tempFileDescr
-            ld      de, 0
-            call    bios_fileLoad2
-            jp c,   copyFileReadError
-
-            ; Подготовить имя назначения. fileNamePrepare одновременно
-            ; выбирает диск из префикса X:.
+            ; Подготовить имя назначения. Явный префикс X: также выбирает
+            ; соответствующий диск.
             ld      hl, vars.input
             ld      de, vars.tempFileDescr
             call    bios_fileNamePrepare
 
-            ; Не передавать невалидный v_diskInfo файловым функциям.
+            xor     a
+            ld      e, a
+            call    bios_fileGetSetDrive
+            ld      (vars.copyDestDrive), a
+
+            ; Не позволять fileCreatePrepare удалить сам источник.
+            ld      hl, vars.copySourceDrive
+            cp      (hl)
+            jp nz,  copyFileCheckDest
+            ld      hl, (vars.copySourceName)
+            ld      de, vars.tempFileDescr
+            ld      c, FILE_NAME_LENGTH + 3
+            call    bios_stricmp
+            jp z,   copyFileError
+
+copyFileCheckDest:
+            ; Введённый префикс может указывать на диск без драйвера.
             ld      b, 3
             call    bios_diskDriver
             ld      a, d
             or      e
-            jp z,   copyFileNoDriver
-            ld      bc, DISK_INFO.isValid
-            add     hl, bc
+            jp z,   copyFileError
+            ld      de, DISK_INFO.isValid
+            add     hl, de
             ld      a, (hl)
             cp      DISK_VALID
-            jp nz,  copyFileNotFormatted
+            jp nz,  copyFileError
 
-            ; fileCreate берёт данные по loadAddress, поэтому источник 0000h.
+            ; Создать запись каталога и выделить полную цепочку FAT.
             xor     a
-            ld      (vars.tempFileDescr + FILE_DESCRIPTOR.loadAddress), a
-            ld      (vars.tempFileDescr + FILE_DESCRIPTOR.loadAddress + 1), a
-
-            ld      hl, vars.tempFileDescr
-            call    bios_fileCreate
-            jp c,   copyFileCreateError
-
-            ; Вернуть файлу исходный адрес загрузки.
-            ld      hl, (vars.copyLoadAddr)
+            ld      (bios_vars.diskWriteErr), a
+            ld      hl, (vars.copyBlocksLeft)
             ex      de, hl
             ld      hl, vars.tempFileDescr
-            ld      c, 1
-            call    bios_fileGetSetAddr
-            ret nc
+            call    bios_fileCreatePrepare
+            jp c,   copyFileCleanup
+            ld      a, (bios_vars.diskWriteErr)
+            or      a
+            jp nz,  copyFileCleanup
 
-            ld      hl, aCantSetFileAddr
-            jp      copyFileShowError
+            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
+            ld      (vars.copyDestCluster), hl
 
-copyFileReadError:
-            ld      hl, aCantReadFile
-            jp      copyFileShowError
+copyFileLoop:
+            ; Один проход переносит до 32 КБ: в обычном случае диск
+            ; переключается один раз для чтения и один раз для записи.
+            ld      hl, (vars.copyBlocksLeft)
+            ld      c, COPY_BUFFER_SECTORS
+            ld      a, h
+            or      a
+            jp nz,  copyFileBatchReady
+            ld      a, l
+            cp      COPY_BUFFER_SECTORS + 1
+            jp nc,  copyFileBatchReady
+            ld      c, a
 
-copyFileNoDriver:
-            ld      hl, aDestNoDriver
-            jp      copyFileShowError
+copyFileBatchReady:
+            ld      a, (vars.copySourceDrive)
+            ld      e, 1
+            call    bios_fileGetSetDrive
+            ld      hl, (vars.copySourceCluster)
+            ex      de, hl
+            ld      hl, COPY_BUFFER
+            ld      b, 2
+            call    bios_fileTransfer
+            jp c,   copyFileCleanup
+            ex      de, hl
+            ld      (vars.copySourceCluster), hl
 
-copyFileNotFormatted:
-            ld      hl, aDestNotFormatted
-            jp      copyFileShowError
+            ld      a, (vars.copyDestDrive)
+            ld      e, 1
+            call    bios_fileGetSetDrive
+            xor     a
+            ld      (bios_vars.diskWriteErr), a
+            ld      hl, (vars.copyDestCluster)
+            ex      de, hl
+            ld      hl, COPY_BUFFER
+            ld      b, 1
+            call    bios_fileTransfer
+            jp c,   copyFileCleanup
+            ex      de, hl
+            ld      (vars.copyDestCluster), hl
+            ld      a, (bios_vars.diskWriteErr)
+            or      a
+            jp nz,  copyFileCleanup
 
-copyFileCreateError:
-            and     a
-            ld      hl, aRootDirFull
-            jp z,   copyFileShowError
-            ld      hl, aDiskIsFull
-            jp      copyFileShowError
+            ld      hl, (vars.copyBlocksLeft)
+            ld      d, 0
+            ld      e, c
+            call    bios_sub_hl_de
+            ld      (vars.copyBlocksLeft), hl
+            ld      a, h
+            or      l
+            jp nz,  copyFileLoop
+            ret
 
-copyFileTooLarge:
-            ld      hl, aFileTooLarge
+copyFileCleanup:
+            ld      a, (vars.copyDestDrive)
+            ld      e, 1
+            call    bios_fileGetSetDrive
+            ld      hl, vars.tempFileDescr
+            call    bios_fileDelete
+
+copyFileError:
+            ld      hl, aCopyFailed
 
 copyFileShowError:
             push    hl
@@ -123,6 +177,11 @@ copyFileShowError:
             ld      (bios_vars.cursorY), hl
             ld      hl, vars.input
             call    printStringInv
+
+copyFileWaitRelease:
+            call    bios_keyScan
+            inc     a
+            jp nz,  copyFileWaitRelease
 
 copyFileAnyKey:
             call    bios_keyScan

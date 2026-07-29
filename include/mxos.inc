@@ -176,6 +176,8 @@ bios_sub_hl_de          = 0C87Eh ; [MXOS2] Вычитание hl и de: hl = hl - de
 bios_div_hl_2           = 0C881h ; [MXOS2] Деление hl на 2: hl = hl / 2
 bios_mul_hl_de          = 0C884h ; [MXOS2] Умножение hl на de: hl = hl * de
 bios_div_hl_de          = 0C887h ; [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
+bios_fileCreatePrepare  = 0C88Ah ; [MXOS2] Создать файл и выделить цепочку FAT без записи данных
+bios_fileTransfer       = 0C88Dh ; [MXOS2] Передать последовательные кластеры на выбранном диске
 
 ;-----------------------------------------------------------------------
 ; Адрес таблицы переходов драйвера магнитофона

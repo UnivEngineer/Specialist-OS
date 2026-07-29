@@ -56,7 +56,11 @@ Driver:
     ; Анализ номера функции
     ld      a, b
     cp      1
-    ret z               ; запись - не поддерживается
+    jp nz,  DriverNotWrite
+    ld      (bios_vars.diskWriteErr), a
+    scf
+    ret                 ; запись - не поддерживается
+DriverNotWrite:
     cp      2
     jp z,   FuncRead    ; чтение
     cp      3

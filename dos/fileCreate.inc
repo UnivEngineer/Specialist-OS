@@ -15,7 +15,22 @@
 ; 2022-02-11 Переработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
+; Внутренний вход для потокового копирования.
+; HL=FILE_DESCRIPTOR, DE=число 256-байтных кластеров.
+; Создаёт запись каталога и FAT-цепочку, но не пишет данные.
+fileCreatePrepare:
+            ld      a, 1
+            ld      (v_fileCreatePrepare), a
+            ex      de, hl
+            ld      (v_input_end), hl
+            ex      de, hl
+            jp      fileCreateEntry
+
 fileCreate: ; Сохраняем регистры
+            xor     a
+            ld      (v_fileCreatePrepare), a
+
+fileCreateEntry:
             push    hl  ; [1]
             push    bc  ; [2]
             push    de  ; [3]
@@ -133,6 +148,10 @@ fileCreate_placeFound:
             call    copyDescriptor
             pop     bc
 
+            ld      a, (v_fileCreatePrepare)
+            or      a
+            jp nz,  fileCreate_allocate
+
             ;---------------------------------------------------------------------
 
 		    ; Читаем адрес загрузки файла
@@ -162,11 +181,18 @@ fileCreate_placeFound:
             ld      (v_input_end), hl   ; v_input_end = размер файла
 
             ; Счётчик кластеров файла
-            ld      c, h        ; c  = старший байт размера = количество кластеров файла - 1, т.к. кластер размером 256 байт.
-            inc     c           ; c  = количество кластеров файла. TODO: это не будет работать с другим размером кластера!
-            ld      b, c        ; сохраняем в b - пригодится позже
+            ld      c, h        ; c = число 256-байтных блоков (0 означает 256)
+            inc     c
+            ld      l, c
+            ld      h, 0
+            ld      a, c
+            or      a
+            jp nz,  fileCreate_countReady
+            inc     h
+fileCreate_countReady:
+            ld      (v_input_end), hl
 
-            ; Первый кластер файла в fat
+fileCreate_allocate:            ; Первый кластер файла в fat
             ld      hl, (v_fileFirstCluster)    ; hl = номер первого кластера файла
             ld      d, h
             ld      e, l                        ; de = hl - если файл состоит из одного кластера, ячейка fat будет указывать на саму себя
@@ -178,52 +204,53 @@ fileCreate_placeFound:
 
 allocClusters:
             call    fatFindClusterNext  ; de = следующий свободный кластер
-            jp c,   stc_popDBH_ret      ; если больше нет свободных кластеров - выходим с ошибкой
+            jp nc,  writeFirstCluster
 
-writeFirstCluster:
-            ; записываем номер кластера в fat
+fileCreate_allocFailed:
+            ; Замыкаем уже созданную часть цепочки для безопасного удаления.
+            ld      d, h
+            ld      e, l
+            call    fatWriteCluster
+            jp      stc_popDBH_ret
+
+writeFirstCluster:            ; записываем номер кластера в fat
             ; hl = номер ячейки fat
             ; de = номер кластера
             call    fatWriteCluster
 
-            dec     c                   ; счётчик записанных кластеров
+            push    hl
+            ld      hl, (v_input_end)
+            dec     hl
+            ld      (v_input_end), hl
+            ld      a, h
+            or      l
+            pop     hl
             jp nz,  allocClusters       ; повтор цикла
 
             ; Конец, последний кластер файла указывает сам на себя
             ; hl == de
             call    fatWriteCluster
 
+            ld      a, (v_fileCreatePrepare)
+            or      a
+            jp nz,  fileCreate_prepareDone
+
 ; ---------------------------------------------------------------------------
 ; Сохраняем файл на диск
 
             ; Номер первого кластера
             ld      hl, (v_fileFirstCluster)
-            ex      hl, de                      ; de = номер первого кластера файла
-            push    de
+            ex      hl, de
 
-            ; Переводим в номер сектора
-            call    fatClusterToSector          ; de = номер первого сектора файла
+            ld      hl, (v_newDescrPtr)
+            ld      bc, FILE_DESCRIPTOR.size + 1
+            add     hl, bc
+            ld      c, (hl)
+            inc     c
 
-            ld      hl, (v_input_start)         ; hl = адрес загрузки файла
-            ld      c, b                        ; c = количество кластеров файла
-            ld      b, 1                        ; режим драйвера 1 - запись
-
-writeFileLoop:
-            call    j_diskDriver
-            inc     h                   ; cледующий блок файла в памяти (TODO: это работает только для кластера 256 байт)
-
-            ; Находим следующий кластер в fat
-            pop     de                  ; de = номер текущего кластера
-            call    fatReadCluster      ; de = номер следующего кластера
-            push    de
-
-            ; Переводим в номер сектора
-            call    fatClusterToSector  ; de = следующий сектор файла в области данных
-
-            dec     c                   ; счётчик записанных кластеров
-            jp nz,  writeFileLoop       ; повтор цикла
-
-            pop     de
+            ld      hl, (v_input_start)
+            ld      b, 1
+            call    fileTransferClusters
 
 ; ---------------------------------------------------------------------------
 ; Расчет однобайтовой контрольной суммы
@@ -255,7 +282,10 @@ writeFileLoop:
 ; ------------------------------------------------------------------------------------------------------------------------
 ; Сохраняем кэш и выходим
 
+fileCreate_prepareDone:
             call    saveSectorCache ; сохраняем изменения в кэше на диск
             or      a               ; выходим с флагом cf = 0
             jp      popDBH_ret
+
+v_fileCreatePrepare: DB 0
 

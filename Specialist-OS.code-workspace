@@ -118,7 +118,7 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat FLSHFAST com 0xDE00"
+          "..\\tasm\\make.bat FlashFst com 0xDE00"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\flash"

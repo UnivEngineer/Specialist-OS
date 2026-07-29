@@ -34,6 +34,27 @@ fontFile      = "FONT.FNT";
 firstFiles = [];
 firstFiles["NC.COM"] = 1;
 
+// Имена системных файлов в FAT-каталоге всегда записываются в верхнем регистре.
+// Регистр имён пользовательских файлов сохраняется.
+systemFiles = [];
+systemFiles["AUTOEXEC.EMU.BAT"] = 1;
+systemFiles["AUTOEXEC.HARDWARE.BAT"] = 1;
+systemFiles["DOS.SYS"] = 1;
+systemFiles["NC.COM"] = 1;
+systemFiles["NC.EXT"] = 1;
+systemFiles["E.COM"] = 1;
+systemFiles["FLASH.COM"] = 1;
+systemFiles["FLASHSYS.COM"] = 1;
+systemFiles["FLASHFST.COM"] = 1;
+systemFiles["ROM.COM"] = 1;
+systemFiles["TAPE.COM"] = 1;
+systemFiles["FORMAT.COM"] = 1;
+systemFiles["FORMAT.BAT"] = 1;
+systemFiles["LAUNCH.COM"] = 1;
+systemFiles["MON2.COM"] = 1;
+systemFiles["MON2.MON"] = 1;
+systemFiles["FONT.FNT"] = 1;
+
 // формат образа ПЗУ:
 // 0 - 32 кб для Специалиста-MX
 // 1 - 64 кб для Специалиста-MX2
@@ -240,6 +261,13 @@ function putFile(fileName, isBoot)
 
     // Отрезаем всё лишнее
     fileName = fso.GetBaseName(fileName);
+
+    logicalFileName = (fileName + "." + ext).toUpperCase();
+    if (systemFiles[logicalFileName])
+    {
+        fileName = fileName.toUpperCase();
+        ext = ext.toUpperCase();
+    }
 
     currentFileName = sourceFileName;
     currentFileSize = data.length;

@@ -7,8 +7,8 @@ DL-red.0xD000.COM
 DOS.0xC000.sys
 E.0xE800.com
 flash.0xDE00.com
+FlashFst.0xDE00.com
 FlashSys.0xDC00.com
-FlshFast.0xDE00.com
 FONT.FNT
 format.0x8000.bat
 FORMAT.0xF100.com

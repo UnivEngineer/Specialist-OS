@@ -146,13 +146,7 @@ aChooseDrive:       DB "Choose drive:",0
 aDeleteFrom:        DB "Delete from ",0
 asc_DC17:           DB 8, ' ',8, 0
 aCopyFromTo:        DB "Copy from    to",8,8,8,8,8, 0
-aRootDirFull:       DB "Root directory full",0
-aCantReadFile:      DB "Can",39,"t read source",0
-aCantSetFileAddr:   DB "Can",39,"t set address",0
-aDiskIsFull:        DB "Disk is full!",0
-aDestNoDriver:      DB "Target has no driver",0
-aDestNotFormatted:   DB "Target not formatted",0
-aFileTooLarge:      DB "File exceeds 36 KB",0
+aCopyFailed:        DB "Copy failed",0
 aCantRenameFile:    DB "Can",39,"t rename file!",0
 aRenameOn:          DB "Rename on ",0
 aKBytesExtMemory:   DB 18h,"KB extended memory",0   ; здесь и далее 18h вместо ведущего пробела,
@@ -311,7 +305,12 @@ stateEnd:           ; адрес конца блока переменных состояния
 cmdLinePos      DW    0
 cmdLineEnd      DW    0
 chooseDrive     DB    0
-copyLoadAddr    DW    0
+copySourceName    DW    0
+copyBlocksLeft    DW    0
+copySourceCluster DW    0
+copyDestCluster   DW    0
+copySourceDrive   DB    0
+copyDestDrive     DB    0
 diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
 cmdLine         BLOCK 59, 0FFh  ; командная строка
 cmdLineCtrl     DB    0FFh      ; контроль переполнения командной строки
@@ -339,7 +338,9 @@ FILE_LIST_BUFFER_SIZE = FILE_LIST_SIZE * FILE_INFO_SIZE + 1
 ; Конец NC.COM после разворачивания в памяти
 NC_END = FILE_LIST_BUFFER + FILE_LIST_BUFFER_SIZE
 
-; Максимальный допустимый размер NC.COM
+; Максимальный допустимый размер NC.COM. Последняя страница перед FAT-кэшем
+; зарезервирована как секторный буфер потокового копирования.
+
     IF NEW_MEMORY_MAP
 NC_END_MAX = FAT_CACHE_ADDR  ; до дискового кэша
     ELSE

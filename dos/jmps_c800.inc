@@ -55,3 +55,5 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранного диска
                 jp  div_hl_2            ; C881: [MXOS2] Деление hl на 2: hl = hl / 2
                 jp  mul_hl_de           ; C884: [MXOS2] Умножение hl на de: hl = hl * de
                 jp  div_hl_de           ; C887: [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
+                jp  fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
+                jp  fileTransferClusters ; C88D: [MXOS2] передать кластеры

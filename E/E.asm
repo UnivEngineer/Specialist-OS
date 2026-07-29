@@ -79,6 +79,8 @@ editor_vars EDITOR_VARIABLES = 8F80H
 BUFFER1 = $ + 0F0Ah ; 0DF0AH
 BUFFER2 = $ + 0F00h ; 0DF00H
 
+EDITOR_BUFFER_SIZE = 08500h - 01800h
+
 ;----------------------------------------------------------------------------
 
 SMC1:
@@ -1763,11 +1765,20 @@ LBL126: LD    HL,inputBuf
 
 openFile:
         CALL  prepareFileName
+        LD    HL,fileDescName
+        CALL  bios_fileLoadInfo
+        JP    C,LBL135
+        CALL  editorCheckFileSize
+        JP    C,editorFileTooLarge
         LD    HL,(VAR01)
         EX    DE,HL
         LD    HL,fileDescName
         CALL  bios_fileLoad2
         JP    C,LBL135
+        JP    LBL126
+
+editorFileTooLarge:
+        CALL  editorShowFileTooLarge
         JP    LBL126
 
 ;----------------------------------------------------------------------
@@ -1880,6 +1891,9 @@ insertFile:
 
         ; Запрашиваем дескриптор файла
         CALL  bios_fileLoadInfo
+        JP    C,LBL135
+        CALL  editorCheckFileSize
+        JP    C,editorFileTooLarge
         LD    HL,(fileDescSize)
         EX    DE,HL         ; de = размер файла
         PUSH  DE
@@ -1992,15 +2006,48 @@ SUB63:
         CALL  SUB15
         LD    HL,BUFFER2
         RET
+; Проверка до загрузки: fileLoad2 пишет полные секторы и не знает границ редактора.
+; OUT: CF=1 - файл не помещается в буфер 01800h-084FFh.
+editorCheckFileSize:
+    IF !STANDARD_EDITOR
+        LD    HL,(fileDescSize + 2)
+        LD    A,H
+        OR    L
+        JP    NZ,editorCheckFileSizeError
+    ENDIF
+        LD    HL,(fileDescSize)
+        LD    DE,EDITOR_BUFFER_SIZE
+        CALL  bios_cmp_hl_de
+        JP    NC,editorCheckFileSizeError
+        OR    A
+        RET
+
+editorCheckFileSizeError:
+        SCF
+        RET
+
+editorShowFileTooLarge:
+        LD    HL,REF8
+        CALL  bios_printString
+        JP    bios_getch
+
 LBL145:
         EX    DE,HL
-        LD    DE,REF29
+        LD    DE,fileDescName
         CALL  bios_fileNamePrepare
+        LD    HL,fileDescName
+        CALL  bios_fileLoadInfo
+        JP    C,LBL2
+        CALL  editorCheckFileSize
+        JP    C,LBL145FileTooLarge
         LD    HL,(VAR01)
         EX    DE,HL
-        LD    HL,REF29
+        LD    HL,fileDescName
         CALL  bios_fileLoad2
         JP    LBL2
 
+LBL145FileTooLarge:
+        CALL  editorShowFileTooLarge
+        JP    bios_reboot
+
         DB    00H,00H
-REF29:  DB    00H,00H,00H,00H
