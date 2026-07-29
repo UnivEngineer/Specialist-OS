@@ -40,7 +40,7 @@ Specialist-OS — операционная система и набор сист
 
 ## Карта памяти и ABI
 
-`include/mxos.inc` — главный источник истины для:
+`source/include/mxos.inc` — главный источник истины для:
 
 - конфигурации сборки;
 - карты памяти;
@@ -54,25 +54,25 @@ Specialist-OS — операционная система и набор сист
 1. Не перемещай стандартную точку входа без прямого задания.
 2. Не удаляй и не переиспользуй зарезервированный адрес без проверки всех программ и драйверов.
 3. Сохраняй `ORG` и `ORG_PAD` для фиксированных участков DOS.
-4. Любое изменение ABI синхронно отражай в `include/mxos.inc`, таблицах переходов и вызывающих компонентах.
+4. Любое изменение ABI синхронно отражай в `source/include/mxos.inc`, таблицах переходов и вызывающих компонентах.
 5. После изменения DOS проверяй листинг на наложение участков и размер свободных промежутков.
 6. Не размещай долговременные переменные в экранной, подэкранной, стековой или аппаратной области без явного обоснования.
 
 ## Компоненты
 
-- `dos/` — ядро BIOS/DOS и стандартные точки входа.
-- `include/mxos.inc` — глобальная конфигурация, ABI и карта памяти.
-- `nc/` — командная оболочка и файловый менеджер.
-- `E/` — текстовый редактор.
-- `flash/` — драйвер flash-диска и ROM-вариант драйвера.
-- `format/` — форматирование RAM-, flash- и будущих дискетных накопителей.
-- `launch/` — запуск `.rks` через загрузку Monitor-2.
-- `mon2/` — Monitor-2, загружаемый вместо DOS для программ стандартного «Специалиста».
-- `tape/` — самостоятельная магнитофонная утилита со встроенным низкоуровневым драйвером.
+- `source/dos/` — ядро BIOS/DOS и стандартные точки входа.
+- `source/include/mxos.inc` — глобальная конфигурация, ABI и карта памяти.
+- `source/nc/` — командная оболочка и файловый менеджер.
+- `source/E/` — текстовый редактор.
+- `source/flash/` — драйверы flash-диска и ROM-вариант драйвера.
+- `source/format/` — форматирование RAM-, flash- и будущих дискетных накопителей.
+- `source/launch/` — запуск `.rks` через загрузку Monitor-2.
+- `source/mon2/` — Monitor-2, загружаемый вместо DOS для программ стандартного «Специалиста».
+- `source/tape/` — самостоятельная магнитофонная утилита со встроенным низкоуровневым драйвером.
 - `ROM/makeRom/` — входные файлы и скрипт сборки системного ROM-образа.
 - `FlashDrive/` — наборы файлов и скрипты сборки flash-образов.
 - `Release/` — запуск emu и преобразование листингов.
-- `test-scr/` — автономный тест экрана.
+- `source/test-scr/` — автономный тест экрана.
 - `tasm/` — локальная копия SjASMPlus и legacy-скрипт сборки.
 
 Не смешивай код разных ядер прямыми переходами. Взаимодействие MXOS, Monitor-2 и Ramfos оформляй через загрузчик, таблицу ABI или отдельный адаптер.
@@ -88,7 +88,7 @@ sjasmplus.exe --i8080 -Wno-rdlow --lst=<file>.lst --raw=<file>.<ext> <file>.asm
 Legacy-обёртка:
 
 ```text
-tasm\make.bat <file-without-extension> <output-extension> <load-address>
+..\..\tasm\make.bat <file-without-extension> <output-extension> <load-address>
 ```
 
 Она собирает компонент и копирует результат в:
@@ -101,16 +101,16 @@ ROM\makeRom\<name>.<load-address>.<extension>
 
 | Task | Исходник | Результат | Адрес |
 |---|---|---|---:|
-| `build: dos` | `dos/DOS.asm` | `DOS.sys` | `0xC000` |
-| `build: editor` | `E/E.asm` | `E.com` | `0xE800` |
-| `build: flash` | `flash/Flash.asm` | `Flash.com` | `0xDE00` |
-| `build: flash-rom` | `flash/Rom.asm` | `Rom.com` | `0xDE00` |
-| `build: format` | `format/FORMAT.asm` | `FORMAT.com` | `0xF100` |
-| `build: launch` | `launch/LAUNCH.asm` | `LAUNCH.com` | `0xF800` |
-| `build: mon2` | `mon2/mon2.asm` | `mon2.com` | `0xF100` |
-| `build: nc` | `nc/NC.asm` | `NC.com` | `0xE800` |
-| `build: tape` | `tape/tape.asm` | `tape.com` | `0xE800` |
-| `build: test-scr` | `test-scr/test-scr.asm` | `test-scr.exe` | `0` |
+| `build: dos` | `source/dos/DOS.asm` | `DOS.sys` | `0xC000` |
+| `build: editor` | `source/E/E.asm` | `E.com` | `0xE800` |
+| `build: flash` | `source/flash/Flash.asm` | `Flash.com` | `0xDE00` |
+| `build: flash-rom` | `source/flash/Rom.asm` | `Rom.com` | `0xDE00` |
+| `build: format` | `source/format/FORMAT.asm` | `FORMAT.com` | `0xF100` |
+| `build: launch` | `source/launch/LAUNCH.asm` | `LAUNCH.com` | `0xF800` |
+| `build: mon2` | `source/mon2/mon2.asm` | `mon2.com` | `0xF100` |
+| `build: nc` | `source/nc/NC.asm` | `NC.com` | `0xE800` |
+| `build: tape` | `source/tape/tape.asm` | `tape.com` | `0xE800` |
+| `build: test-scr` | `source/test-scr/test-scr.asm` | `test-scr.exe` | `0` |
 
 Используй задачи из `Specialist-OS.code-workspace`:
 
@@ -282,7 +282,7 @@ bytes used. Keep the remaining directory entry fields standards-compliant.
 
 ## Порядок работы агента
 
-1. Прочитай `include/mxos.inc`.
+1. Прочитай `source/include/mxos.inc`.
 2. Прочитай главный `.asm` компонента и только связанные `.inc`.
 3. Найди фиксированные адреса, вызывающие стороны и формат данных.
 4. Внеси минимальное изменение.

@@ -55,10 +55,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat DOSChecked sys 0xC000 DOS"
+          "..\\..\\tasm\\make.bat DOSChecked sys 0xC000 DOS"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\dos"
+          "cwd": "${workspaceFolder}\\source\\dos"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -76,10 +76,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat E com 0xE800"
+          "..\\..\\tasm\\make.bat E com 0xE800"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\E"
+          "cwd": "${workspaceFolder}\\source\\E"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -97,10 +97,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat FlashChecked com 0xDE00 Flash"
+          "..\\..\\tasm\\make.bat FlashChecked com 0xDE00 Flash"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\flash"
+          "cwd": "${workspaceFolder}\\source\\flash"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -118,10 +118,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat FlashFst com 0xDE00"
+          "..\\..\\tasm\\make.bat FlashFst com 0xDE00"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\flash"
+          "cwd": "${workspaceFolder}\\source\\flash"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -139,10 +139,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat FlashSys com 0xDC00"
+          "..\\..\\tasm\\make.bat FlashSys com 0xDC00"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\flash"
+          "cwd": "${workspaceFolder}\\source\\flash"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -160,10 +160,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat Rom com 0xDE00"
+          "..\\..\\tasm\\make.bat Rom com 0xDE00"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\flash"
+          "cwd": "${workspaceFolder}\\source\\flash"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -181,10 +181,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat FORMAT com 0xF100"
+          "..\\..\\tasm\\make.bat FORMAT com 0xF100"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\format"
+          "cwd": "${workspaceFolder}\\source\\format"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -202,10 +202,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat LAUNCH com 0xF800"
+          "..\\..\\tasm\\make.bat LAUNCH com 0xF800"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\launch"
+          "cwd": "${workspaceFolder}\\source\\launch"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -223,10 +223,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat mon2 com 0xF100"
+          "..\\..\\tasm\\make.bat mon2 com 0xF100"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\mon2"
+          "cwd": "${workspaceFolder}\\source\\mon2"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -244,10 +244,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat NC com 0xE800"
+          "..\\..\\tasm\\make.bat NC com 0xE800"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\nc"
+          "cwd": "${workspaceFolder}\\source\\nc"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -265,10 +265,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat tape com 0xE800"
+          "..\\..\\tasm\\make.bat tape com 0xE800"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\tape"
+          "cwd": "${workspaceFolder}\\source\\tape"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -286,10 +286,10 @@
         "args": [
           "/d",
           "/c",
-          "..\\tasm\\make.bat test-scr exe 0"
+          "..\\..\\tasm\\make.bat test-scr exe 0"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\test-scr"
+          "cwd": "${workspaceFolder}\\source\\test-scr"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
