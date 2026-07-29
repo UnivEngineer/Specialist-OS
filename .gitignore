@@ -1,4 +1,6 @@
 ﻿.vs/mxos/v15
 .vs
 images/*.bin
+bin/
 .tmp_pdf
+.codex-tmp

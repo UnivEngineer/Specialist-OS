@@ -106,7 +106,7 @@ function Get-SystemManifest {
 
 switch ($Target) {
     "SystemEmu" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\system.csv"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
         $manifest = Get-SystemManifest $manifestPath "emu"
         $manifestHasMetadata = $true
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
@@ -119,7 +119,7 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "SystemHardware" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\system.csv"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
         $manifest = Get-SystemManifest $manifestPath "hardware"
         $manifestHasMetadata = $true
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
@@ -153,7 +153,7 @@ switch ($Target) {
     }
     "Games2M" {
         $inputDirectory = Join-Path $repositoryRoot "assets\games"
-        $manifestPath = Join-Path $PSScriptRoot "manifests\flash-games.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk.txt"
         $manifest = Get-Manifest $manifestPath
         $manifestHasMetadata = $false
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"

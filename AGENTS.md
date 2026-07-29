@@ -71,7 +71,8 @@ Specialist-OS — операционная система и набор сист
 - `source/tape/` — самостоятельная магнитофонная утилита со встроенным низкоуровневым драйвером.
 - `assets/games/` — канонические игровые бинарники и каталог вариантов.
 - `assets/programs/` — внешние программы, тесты и их адреса загрузки.
-- `assets/system-rom/` — boot sectors, AUTOEXEC/FORMAT, NC.EXT и шрифты.
+- `assets/system-rom/` — загрузочные секторы, AUTOEXEC/FORMAT, NC.EXT и шрифты.
+- `bin/` — генерируемые бинарники компонентов, обычные и исправленные листинги.
 - `images/` — генерируемые системные ROM- и flash-образы.
 - `scripts/images/` — общий PowerShell-сборщик ROM/flash и явные манифесты.
 - `scripts/emulator/` — запуск emu и его конфигурация.
@@ -96,29 +97,29 @@ PowerShell-сценарий сборки отдельного компонент
 powershell.exe -NoProfile -File ..\..\scripts\build\build-if-needed.ps1 <file-without-extension> <output-extension> <load-address>
 ```
 
-Он собирает компонент в каталоге его исходников. Системный манифест обращается
-к этому результату напрямую; промежуточное копирование в ROM staging не
-используется.
+Он читает исходники из текущего каталога компонента, а бинарник и листинг
+записывает в `bin/`. Системный манифест обращается к результатам в `bin/`
+напрямую.
 
 Стандартные компоненты:
 
 | Task | Исходник | Результат | Адрес |
 |---|---|---|---:|
-| `build: dos` | `source/dos/DOS.asm` | `DOS.sys` | `0xC000` |
-| `build: editor` | `source/E/E.asm` | `E.com` | `0xE800` |
-| `build: flash` | `source/flash/Flash.asm` | `Flash.com` | `0xDE00` |
-| `build: flash-rom` | `source/flash/Rom.asm` | `Rom.com` | `0xDE00` |
-| `build: format` | `source/format/FORMAT.asm` | `FORMAT.com` | `0xF100` |
-| `build: launch` | `source/launch/LAUNCH.asm` | `LAUNCH.com` | `0xF800` |
-| `build: mon2` | `source/mon2/mon2.asm` | `mon2.com` | `0xF100` |
-| `build: nc` | `source/nc/NC.asm` | `NC.com` | `0xE800` |
-| `build: tape` | `source/tape/tape.asm` | `tape.com` | `0xE800` |
-| `build: test-scr` | `source/test-scr/test-scr.asm` | `test-scr.exe` | `0` |
+| `build: dos` | `source/dos/DOS.asm` | `bin/DOS.sys` | `0xC000` |
+| `build: editor` | `source/E/E.asm` | `bin/E.com` | `0xE800` |
+| `build: flash` | `source/flash/Flash.asm` | `bin/Flash.com` | `0xDE00` |
+| `build: flash-rom` | `source/flash/Rom.asm` | `bin/Rom.com` | `0xDE00` |
+| `build: format` | `source/format/FORMAT.asm` | `bin/FORMAT.com` | `0xF100` |
+| `build: launch` | `source/launch/LAUNCH.asm` | `bin/LAUNCH.com` | `0xF800` |
+| `build: mon2` | `source/mon2/mon2.asm` | `bin/mon2.com` | `0xF100` |
+| `build: nc` | `source/nc/NC.asm` | `bin/NC.com` | `0xE800` |
+| `build: tape` | `source/tape/tape.asm` | `bin/tape.com` | `0xE800` |
+| `build: test-scr` | `source/test-scr/test-scr.asm` | `bin/test-scr.exe` | `0` |
 
 Используй задачи из `Specialist-OS.code-workspace`:
 
-- `build: OS` — все компоненты системного ROM;
-- `build: all` — ОС и `test-scr`;
+- `build: OS` — системные компоненты без автономного `test-scr`;
+- `build: all` — системные компоненты и `test-scr`;
 - `image: system ROM` — сборка компонентов и
   `images/SystemRom_emulator.bin`;
 - `image: flash` — выбор набора `Games64k` или `Games2M`;

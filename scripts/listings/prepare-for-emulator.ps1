@@ -11,14 +11,19 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
     $RepositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 }
 $RepositoryRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
+$binDirectory = Join-Path $RepositoryRoot "bin"
 
-$fixedListings = Get-ChildItem -LiteralPath $RepositoryRoot -Recurse -File |
+if (-not (Test-Path -LiteralPath $binDirectory -PathType Container)) {
+    throw "Build output directory not found: $binDirectory"
+}
+
+$fixedListings = Get-ChildItem -LiteralPath $binDirectory -File |
     Where-Object { $_.Name.EndsWith(".fix.lst", [System.StringComparison]::OrdinalIgnoreCase) }
 foreach ($fixedListing in $fixedListings) {
     Remove-Item -LiteralPath $fixedListing.FullName -Force
 }
 
-$listings = Get-ChildItem -LiteralPath $RepositoryRoot -Recurse -File -Filter "*.lst"
+$listings = Get-ChildItem -LiteralPath $binDirectory -File -Filter "*.lst"
 foreach ($listing in $listings) {
     $outputPath = $listing.FullName + ".fix.lst"
     Write-Host ("[listing] {0}" -f $listing.FullName)
@@ -33,13 +38,13 @@ foreach ($listing in $listings) {
             }
 
             $lineLength = $position - $lineStart + 1
-            if ($lineLength -gt 0 -and $inputBytes[$lineStart] -ne 23) {
+            if ($lineLength -gt 0 -and $inputBytes[$lineStart] -ne 0x23) {
                 $output.Write($inputBytes, $lineStart, $lineLength)
             }
             $lineStart = $position + 1
         }
 
-        if ($lineStart -lt $inputBytes.Length -and $inputBytes[$lineStart] -ne 23) {
+        if ($lineStart -lt $inputBytes.Length -and $inputBytes[$lineStart] -ne 0x23) {
             $output.Write($inputBytes, $lineStart, $inputBytes.Length - $lineStart)
         }
 

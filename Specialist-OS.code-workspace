@@ -32,17 +32,12 @@
     "search.exclude": {
       "**/.vs/**": true,
       "**/*.lst": true,
-      "**/*.fix.lst": true,
-      "**/Release/**/*.tlog/**": true,
-      "**/Release/**/*.lastbuildstate": true,
-      "**/Release/**/*.recipe": true,
-      "**/Release/**/*.log": true
+      "**/*.fix.lst": true
     },
     "files.watcherExclude": {
       "**/.vs/**": true,
       "**/*.lst": true,
-      "**/*.fix.lst": true,
-      "**/Release/**/*.tlog/**": true
+      "**/*.fix.lst": true
     }
   },
   "tasks": {
@@ -419,7 +414,7 @@
           "${workspaceFolder}\\scripts\\images\\build-image.ps1",
           "SystemEmu"
         ],
-        "dependsOn": "build: OS",
+        "dependsOn": "build: all",
         "dependsOrder": "sequence",
         "problemMatcher": [],
         "group": "build",
@@ -444,7 +439,7 @@
           "SystemHardware",
           "${input:systemRomSizeKB}"
         ],
-        "dependsOn": "build: OS",
+        "dependsOn": "build: all",
         "dependsOrder": "sequence",
         "problemMatcher": [],
         "group": "build",

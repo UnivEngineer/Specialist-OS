@@ -97,10 +97,13 @@ function Get-SourceDependencies {
 
 $buildDirectory = (Get-Location).ProviderPath
 $sourcePath = Get-FullPath -Path ($SourceBase + ".asm") -BaseDirectory $buildDirectory
-$outputPath = Get-FullPath -Path ($OutputBase + "." + $Extension) -BaseDirectory $buildDirectory
-$listingPath = Get-FullPath -Path ($OutputBase + ".lst") -BaseDirectory $buildDirectory
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$outputDirectory = Join-Path $repositoryRoot "bin"
+$outputPath = Join-Path $outputDirectory ($OutputBase + "." + $Extension)
+$listingPath = Join-Path $outputDirectory ($OutputBase + ".lst")
 $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
+
+New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 $dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)
 $buildInputs = @($dependencies + $assemblerPath + $PSCommandPath)
