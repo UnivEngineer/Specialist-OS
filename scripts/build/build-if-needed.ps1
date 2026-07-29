@@ -99,10 +99,8 @@ $buildDirectory = (Get-Location).ProviderPath
 $sourcePath = Get-FullPath -Path ($SourceBase + ".asm") -BaseDirectory $buildDirectory
 $outputPath = Get-FullPath -Path ($OutputBase + "." + $Extension) -BaseDirectory $buildDirectory
 $listingPath = Get-FullPath -Path ($OutputBase + ".lst") -BaseDirectory $buildDirectory
-$fileName = [System.IO.Path]::GetFileNameWithoutExtension($OutputBase)
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
-$romOutputPath = Join-Path $repositoryRoot ("ROM\makeRom\{0}.{1}.{2}" -f $fileName, $Address, $Extension)
 
 $dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)
 $buildInputs = @($dependencies + $assemblerPath + $PSCommandPath)
@@ -136,18 +134,4 @@ if ($needsCompile) {
 }
 else {
     Write-Host ("[up-to-date] {0}" -f $outputPath)
-}
-
-$needsCopy = -not (Test-Path -LiteralPath $romOutputPath -PathType Leaf)
-if (-not $needsCopy) {
-    $needsCopy = (Get-Item -LiteralPath $romOutputPath).LastWriteTimeUtc -lt
-        (Get-Item -LiteralPath $outputPath).LastWriteTimeUtc
-}
-
-if ($needsCopy) {
-    Write-Host ("[copy] {0} -> {1}" -f $outputPath, $romOutputPath)
-    Copy-Item -LiteralPath $outputPath -Destination $romOutputPath -Force
-}
-else {
-    Write-Host ("[up-to-date] {0}" -f $romOutputPath)
 }

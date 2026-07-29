@@ -69,8 +69,12 @@ Specialist-OS — операционная система и набор сист
 - `source/launch/` — запуск `.rks` через загрузку Monitor-2.
 - `source/mon2/` — Monitor-2, загружаемый вместо DOS для программ стандартного «Специалиста».
 - `source/tape/` — самостоятельная магнитофонная утилита со встроенным низкоуровневым драйвером.
-- `ROM/makeRom/` — входные файлы и скрипт сборки системного ROM-образа.
-- `FlashDrive/` — наборы файлов и скрипты сборки flash-образов.
+- `assets/games/` — канонические игровые бинарники и каталог вариантов.
+- `assets/programs/` — внешние программы, тесты и их адреса загрузки.
+- `assets/system-rom/` — boot sectors, AUTOEXEC/FORMAT, NC.EXT и шрифты.
+- `ROM/` — готовые системные ROM-образы.
+- `FlashDrive/` — готовые flash-образы.
+- `scripts/images/` — общий PowerShell-сборщик ROM/flash и явные манифесты.
 - `scripts/emulator/` — запуск emu и его конфигурация.
 - `scripts/listings/` — подготовка листингов для emu.
 - `source/test-scr/` — автономный тест экрана.
@@ -93,11 +97,9 @@ PowerShell-сценарий сборки отдельного компонент
 powershell.exe -NoProfile -File ..\..\scripts\build\build-if-needed.ps1 <file-without-extension> <output-extension> <load-address>
 ```
 
-Он собирает компонент и копирует результат в:
-
-```text
-ROM\makeRom\<name>.<load-address>.<extension>
-```
+Он собирает компонент в каталоге его исходников. Системный манифест обращается
+к этому результату напрямую; промежуточное копирование в ROM staging не
+используется.
 
 Стандартные компоненты:
 
@@ -119,7 +121,7 @@ ROM\makeRom\<name>.<load-address>.<extension>
 - `build: OS` — все компоненты системного ROM;
 - `build: all` — ОС и `test-scr`;
 - `image: system ROM` — сборка компонентов и `ROM/MXOS_MY.bin`;
-- `image: flash` — выбор набора `Games64k`, `Games` или `Games2M`;
+- `image: flash` — выбор набора `Games64k` или `Games2M`;
 - `run: emu` — сборка, подготовка листингов, копирование ROM в emu и запуск конфигурации `SpecialistMX2_My_MXOS`.
 
 Для `run: emu` переменная окружения `SPECIALIST_EMU_DIR` должна указывать на каталог, содержащий `EMU.exe`.

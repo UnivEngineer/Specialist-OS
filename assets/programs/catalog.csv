@@ -1,0 +1,22 @@
+File,LoadAddress,Status,OriginalName,Notes
+DL-red.COM,0xD000,included,DL-red.0xD000.COM,System ROM
+MON2.MON,0xC000,included,Mon2.0xC000.mon,Alternative Monitor-2 kernel
+Test-Col.COM,0xD400,included,Test-Col.54272.com,System ROM test
+Test-Fif.COM,0,included,Test-Fif.0.COM,System ROM test
+Test-Kb.COM,0,included,Test-Kb.0.com,System ROM test
+Test-M.COM,0xD400,included,Test-M.54272.COM,System ROM test
+Test-MX.COM,0,included,Test-MX.0.COM,System ROM test
+ASM-HQ.COM,0xD000,unverified,ASM-HQ.53248.COM,
+BAS-p.COM,0,unverified,BAS-p.0.COM,
+C-TEST.EXE,0,unverified,C-TEST.0.EXE,
+FAT.EXE,0,unverified,FAT.0.EXE,
+MON-88.COM,0xD800,unverified,MON-88.55296.COM,
+MON2-original.COM,0xF100,unverified,MON2orig.0xF100.COM,Historical binary
+prak32.EXE,0x6FFF,unverified,prak32.28671.EXE,
+PRG171.EXE,0x7FFF,unverified,PRG171.32767.EXE,
+R63V8.EXE,0x7FFF,unverified,R63V8.32767.EXE,
+RAMFOS.COM,0,unverified,RAMFOS.0.COM,
+Ramfos.EXE,0,unverified,Ramfos.0.exe,
+RBAS1.EXE,0x8672,unverified,RBAS1.34418.EXE,
+romfnt.COM,0,unverified,romfnt.0.com,
+SP-580.COM,0xD800,unverified,SP-580.55296.COM,

@@ -43,11 +43,8 @@ Copy-Item -LiteralPath $configSource `
     -Destination (Join-Path $configDirectory "SpecialistMX2_My_MXOS.cfg") `
     -Force
 
-Push-Location $emulatorDirectoryPath
-try {
-    & $emulatorPath "/c" "SpecialistMX2_My_MXOS"
-    exit $LASTEXITCODE
-}
-finally {
-    Pop-Location
-}
+Start-Process `
+    -FilePath $emulatorPath `
+    -ArgumentList "/c", "SpecialistMX2_My_MXOS" `
+    -WorkingDirectory $emulatorDirectoryPath `
+    -WindowStyle Normal

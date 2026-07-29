@@ -415,8 +415,9 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
-          "-Command",
-          "$rom = '${workspaceFolder}\\ROM\\MXOS_MY.bin'; Remove-Item -LiteralPath $rom -Force -ErrorAction SilentlyContinue; Push-Location '${workspaceFolder}\\ROM\\makeRom'; try { & cscript.exe '//nologo' '.\\-makeRom.js'; $exitCode = $LASTEXITCODE } finally { Pop-Location }; if (-not (Test-Path -LiteralPath $rom)) { if ($exitCode -eq 0) { $exitCode = 1 }; exit $exitCode }; exit 0"
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "SystemEmu"
         ],
         "dependsOn": "build: OS",
         "dependsOrder": "sequence",
@@ -432,16 +433,17 @@
       {
         "label": "image: writable system ROM",
         "type": "process",
-        "command": "cscript.exe",
+        "command": "powershell.exe",
         "args": [
-          "//nologo",
-          ".\\-makeRom.js",
-          "hardware",
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "SystemHardware",
           "${input:systemRomSizeKB}"
         ],
-        "options": {
-          "cwd": "${workspaceFolder}\\ROM\\makeRom"
-        },
         "dependsOn": "build: OS",
         "dependsOrder": "sequence",
         "problemMatcher": [],
@@ -456,14 +458,16 @@
       {
         "label": "image: flash",
         "type": "process",
-        "command": "cscript.exe",
+        "command": "powershell.exe",
         "args": [
-          "//nologo",
-          ".\\-makeRom.js"
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "${input:flashImageSet}"
         ],
-        "options": {
-          "cwd": "${workspaceFolder}\\FlashDrive\\${input:flashImageSet}"
-        },
         "problemMatcher": [],
         "group": "build",
         "presentation": {
@@ -476,14 +480,16 @@
       {
         "label": "image: flash 64k",
         "type": "process",
-        "command": "cscript.exe",
+        "command": "powershell.exe",
         "args": [
-          "//nologo",
-          ".\\-makeRom.js"
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "Games64k"
         ],
-        "options": {
-          "cwd": "${workspaceFolder}\\FlashDrive\\Games64k"
-        },
         "problemMatcher": [],
         "group": "build",
         "presentation": {
@@ -560,7 +566,6 @@
         "description": "Набор файлов для образа flash-диска",
         "options": [
           "Games64k",
-          "Games",
           "Games2M"
         ],
         "default": "Games2M"
