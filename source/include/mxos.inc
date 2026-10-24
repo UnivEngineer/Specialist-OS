@@ -124,7 +124,7 @@ bios_memcpy_bc_hl       = 0C42Dh ; [OLD] Скопировать блок пам�
 bios_printStringOld     = 0C438h ; [OLD] Вывод строки на экран
 
 ; Стандартные точки C800h
-bios_reboot             = 0C800h ; Запустить NC.COM
+bios_reboot             = 0C800h ; Восстановить звук и запустить NC.COM
 bios_getch              = 0C803h ; Ожидание ввода с клавиатуры
 bios_tapeRead           = 0C806h ; Чтение байта с магнитофона
 bios_printChar          = 0C809h ; Вывод символа на экран
@@ -148,7 +148,7 @@ bios_strToHex           = 0C839h ; [MXOS2] Преобразвоние строк
     ELSE
 bios_rebootAlt          = 0C839h ; Запустить NC.COM
     ENDIF
-bios_rebootAlt2         = 0C83Ch ; Запустить NC.COM
+bios_rebootAlt2         = 0C83Ch ; Восстановить звук и запустить NC.COM
 bios_fileList           = 0C83Fh ; Получить список файлов
 bios_fileGetSetDrive    = 0C842h ; Получить/установить активное устройство
 bios_fileCreate         = 0C845h ; Создать файл

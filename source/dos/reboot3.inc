@@ -9,6 +9,9 @@
 reboot3:    ; Инициализация стека
             ld      sp, STACK_ADDR
 
+            ; Приложение могло изменить таймер и параметры BIOS-звука.
+            call    bios_reset_sound
+
             ; Устанавливаем блочный драйвер
             ld      b, 0
             call    setRAMDDriver
@@ -75,3 +78,25 @@ reboot3_2:
             ; Теплая перезагрузка
             jp      j_reboot3
 
+
+; Общий сброс звука при холодной и горячей перезагрузке.
+; Входа нет. A/HL разрушаются; BC/DE и флаги сохраняются.
+; 27 байт, 122 такта (139 с CALL); четыре записи аппаратных регистров,
+; два чтения шаблона и две записи переменных BIOS. Новых переменных нет.
+; Режим 3 без загрузки счёта останавливает каждый канал ВИ53, OUT=1.
+; BSR-команда 0Ah выключает программный звук PC5, не меняя режим ВВ55.
+; Параметры берутся из общего шаблона, а не из состояния чужой программы.
+bios_reset_sound:
+            ld      a, 0B6h
+            ld      (IO_TIMER_MODE), a
+            ld      a, 076h
+            ld      (IO_TIMER_MODE), a
+            ld      a, 036h
+            ld      (IO_TIMER_MODE), a
+            ld      a, 00Ah
+            ld      (IO_KEYB_MODE), a
+            ld      hl, (initVars.beepFreq)
+            ld      (bios_vars.beepFreq), hl
+            ret
+
+            ASSERT bios_vars.beepDuration == bios_vars.beepFreq+1

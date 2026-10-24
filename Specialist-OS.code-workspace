@@ -45,6 +45,29 @@
     "version": "2.0.0",
     "tasks": [
       {
+        "label": "build: almaz2",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-almaz2.ps1",
+          "All",
+          "-PublishMxTimer"
+        ],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
+        "label": "build: apps",
+        "dependsOn": "build: almaz2",
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
         "label": "build: dos",
         "type": "process",
         "command": "powershell.exe",
@@ -388,6 +411,8 @@
       },
       {
         "label": "build: all",
+        "dependsOn": "build: apps",
+        "dependsOrder": "sequence",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -453,6 +478,8 @@
       },
       {
         "label": "image: flash",
+        "dependsOn": "build: almaz2",
+        "dependsOrder": "sequence",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -475,6 +502,8 @@
       },
       {
         "label": "image: flash 64k",
+        "dependsOn": "build: almaz2",
+        "dependsOrder": "sequence",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -514,6 +543,27 @@
           "focus": false,
           "panel": "shared",
           "clear": false
+        }
+      },
+      {
+        "label": "run: emu (no build)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emulator\\run.ps1"
+        ],
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "dedicated",
+          "clear": true
         }
       },
       {
