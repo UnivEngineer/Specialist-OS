@@ -1212,7 +1212,7 @@ player_move_down:
     inc     c ; 075Ah
 
 player_test_destination:
-    IF PLAYER_DIAGONAL_MOVEMENT
+    IF PLAYER_DIAGONAL_MOVEMENT && ALMAZ_OPTIMIZE
     call    player_diagonal_destination
     ELSE
     call    map_get_cell ; 075Bh
