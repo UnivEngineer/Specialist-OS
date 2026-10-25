@@ -178,6 +178,33 @@ bios_mul_hl_de          = 0C884h ; [MXOS2] Умножение hl на de: hl = h
 bios_div_hl_de          = 0C887h ; [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
 bios_fileCreatePrepare  = 0C88Ah ; [MXOS2] Создать файл и выделить цепочку FAT без записи данных
 bios_fileTransfer       = 0C88Dh ; [MXOS2] Передать последовательные кластеры на выбранном диске
+bios_installVolume      = 0C890h ; [MXOS2] Зарегистрировать драйвер файловой системы тома
+bios_getVolume          = 0C893h ; [MXOS2] Получить таблицу и контекст драйвера тома
+bios_mountVolume        = 0C896h ; [MXOS2] Повторно смонтировать выбранный том
+bios_flushVolume        = 0C899h ; [MXOS2] Сохранить изменения выбранного тома
+
+; ABI 1 драйвера тома. Аппаратный ABI bios_diskDriver остаётся отдельным.
+; Таблица начинается с DB "FS",1,15; далее 15 адресов DW в этом порядке.
+; Файловые операции пока сохраняют исторические контракты DOS (8.3, N-1).
+; Это ещё не независимый байтовый поток и не готовый драйвер RAMFOS.
+VOLUME_DRIVER_VERSION = 1
+VOLUME_DRIVER_COUNT   = 15
+VOLUME_DRIVER_HEADER  = 4
+VOL_MOUNT             = 0
+VOL_LIST              = 2
+VOL_CREATE            = 4
+VOL_LOAD              = 6
+VOL_DELETE            = 8
+VOL_RENAME            = 10
+VOL_STAT              = 12
+VOL_LOAD_ADDRESS      = 14
+VOL_ATTRIBUTES        = 16
+VOL_LOAD_AT           = 18
+VOL_FREE_SPACE        = 20
+VOL_PREPARE_NAME      = 22
+VOL_CREATE_PREPARE    = 24
+VOL_TRANSFER_LEGACY   = 26
+VOL_FLUSH             = 28
 
 ;-----------------------------------------------------------------------
 ; Адрес таблицы переходов драйвера магнитофона

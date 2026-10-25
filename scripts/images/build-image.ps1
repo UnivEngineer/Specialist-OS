@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("SystemEmu", "SystemHardware", "Games64k", "Games2M")]
+    [ValidateSet("SystemEmu", "SystemRamfos", "SystemHardware", "Games64k", "Games2M")]
     [string] $Target,
 
     [Parameter(Position = 1)]
@@ -105,6 +105,22 @@ function Get-SystemManifest {
 }
 
 switch ($Target) {
+    "SystemRamfos" {
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
+        $manifest = @(Get-SystemManifest $manifestPath "emu" |
+            Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM") })
+        $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\Ramfos.csv"
+        $manifest += @(Get-SystemManifest $ramfosManifestPath "emu")
+        $manifestHasMetadata = $true
+        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
+        $volumeSize = 64KB
+        $chipSize = 64KB
+        $maxFiles = 64
+        $volumeLabel = "SYSTEM ROM "
+        $imageFormat = "Mx2"
+        $outputPath = Join-Path $imageDirectory "SystemRom_ramfos_emulator.bin"
+        $makeBootDisk = $true
+    }
     "SystemEmu" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
         $manifest = Get-SystemManifest $manifestPath "emu"

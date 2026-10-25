@@ -427,7 +427,12 @@ def main():
             require(all(bytes((0x3E, mask)) in body for mask in (0xFB, 0xEF, 0x0E, 0x0D)),
                     f"{stem}: arrow column selection")
             require(symbols["v_input_pending"] < 0x7F00, f"{stem}: input buffer range")
-            require(data[symbols["input_service"] + 3] == symbols["app_input_stride"] - 1,
+            service = symbols["input_service"]
+            cells = symbols["v_input_poll_cells_left"]
+            stride = symbols["app_input_cell_stride"]
+            body = (b"\xf5\x3a" + cells.to_bytes(2, "little") + b"\x3d\x32" +
+                    cells.to_bytes(2, "little") + b"\xc2")
+            require(data[service:service+len(body)] == body and stride == 43,
                     f"{stem}: input polling interval")
         else:
             require("input_poll" not in symbols, f"{stem}: input module was not excluded")

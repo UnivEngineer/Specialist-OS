@@ -1156,6 +1156,7 @@ player_update:
     ELSE
     call    app_bios_keycheck ; 06E9h
     ENDIF
+player_direction_code:
     cp      08h ; 06ECh
     jp      nz,player_push_right ; 06EEh
     dec     b ; 06F1h
@@ -1211,7 +1212,11 @@ player_move_down:
     inc     c ; 075Ah
 
 player_test_destination:
+    IF PLAYER_DIAGONAL_MOVEMENT
+    call    player_diagonal_destination
+    ELSE
     call    map_get_cell ; 075Bh
+    ENDIF
     cp      00h ; 075Eh
     jp      nz,player_test_soil ; 0760h
 

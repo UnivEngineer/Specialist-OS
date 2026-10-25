@@ -9,29 +9,10 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileNamePrepare:
-            ; Сохраняем регистры
-            push    bc
-            push    de
+fatFileNamePrepare:
+            push bc
+            push de
 
-            ; Если второй символ исходной строки ':', то меняем диск
-            inc     hl          
-            ld      a, (hl)
-            cp      ':'
-            dec     hl
-            jp nz,  fileNamePr_1
-
-            ; Меняем диск
-            ld      a, (hl)       
-            sub     'A'
-            push    hl
-            call    fileSelectDrive
-            pop     hl
-
-            ; Диск не входит в имя файла
-            inc     hl          
-            inc     hl          
-            
 fileNamePr_1:
             ; b = длина имени, c = 3 - длина расширения
             ld      bc, (FILE_NAME_LENGTH << 8) + 3

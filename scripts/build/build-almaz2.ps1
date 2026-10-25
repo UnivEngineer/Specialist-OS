@@ -5,8 +5,8 @@ param(
     [ValidateSet(0, 2000000, 2500000)]
     [int] $PitClockHz = 0,
     [int] $StepHz = 0,
-    [ValidateSet(0, 4, 8)]
-    [int] $InputStride = 0,
+    [ValidateRange(0, 345)]
+    [int] $InputCellStride = 0,
     [switch] $NoOptimizations,
     [switch] $PublishMxTimer
 )
@@ -40,7 +40,7 @@ foreach ($variant in $selected) {
     $extraDefines = @()
     if ($variant.Name -eq "Reference" -or $NoOptimizations) { $extraDefines += "-DALMAZ_OPTIMIZE=0" }
     if ($StepHz -gt 0) { $extraDefines += "-DALMAZ_STEP_HZ=$StepHz" }
-    if ($InputStride -gt 0) { $extraDefines += "-DINPUT_POLL_STRIDE=$InputStride" }
+    if ($InputCellStride -gt 0) { $extraDefines += "-DINPUT_POLL_CELL_STRIDE=$InputCellStride" }
     if ($PitClockHz -gt 0) { $extraDefines += "-DPIT_CLOCK_HZ=$PitClockHz" }
     $clockDescription = if ($PitClockHz -gt 0) { "$PitClockHz Hz" } else { "config.inc" }
     Write-Host ("[app] {0}, PIT input {1}" -f $variant.Name, $clockDescription)

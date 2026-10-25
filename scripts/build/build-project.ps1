@@ -19,6 +19,8 @@ $components = @(
     @{ Directory = "source\\flash";  Source = "Rom";     Extension = "com"; Address = "0xDE00" },
     @{ Directory = "source\\mon2";   Source = "mon2";    Extension = "com"; Address = "0xF100" },
     @{ Directory = "source\\launch"; Source = "LAUNCH";  Extension = "com"; Address = "0xF800" },
+    @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "sys"; Address = "0xC000" },
+    @{ Directory = "source\\ramfos"; Source = "RAMRUN";  Extension = "com"; Address = "0xF800" },
     @{ Directory = "source\\format"; Source = "FORMAT";  Extension = "com"; Address = "0xF100" },
     @{ Directory = "source\\E";      Source = "E";       Extension = "com"; Address = "0xE800" },
     @{ Directory = "source\\nc";     Source = "NC";      Extension = "com"; Address = "0xE800" }
@@ -30,6 +32,12 @@ if ($Target -eq "All") {
         Source = "test-scr"
         Extension = "exe"
         Address = "0"
+    }
+    $components += @{
+        Directory = "source\\ramfos"; Source = "test-low"; Output = "RFTEST"; Extension = "com"; Address = "0"
+    }
+    $components += @{
+        Directory = "source\\ramfos"; Source = "test-high"; Output = "RFTESTHI"; Extension = "com"; Address = "0xE800"
     }
 }
 

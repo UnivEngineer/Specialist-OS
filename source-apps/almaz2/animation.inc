@@ -237,9 +237,6 @@ animation_service:
     IF ALMAZ_PIT
         CALL audio_update
     ENDIF
-    IF ALMAZ_OPTIMIZE
-        CALL input_poll
-    ENDIF
     JP animation_scan
 animation_scan_done:
     LD (v_animation_cursor),HL
@@ -297,9 +294,6 @@ animation_count_row:
     JP NZ,animation_count_cell
     IF ALMAZ_PIT
         CALL audio_update
-    ENDIF
-    IF ALMAZ_OPTIMIZE
-        CALL input_poll
     ENDIF
     JP animation_count_cell
     ENDIF

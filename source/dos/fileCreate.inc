@@ -18,7 +18,7 @@
 ; Внутренний вход для потокового копирования.
 ; HL=FILE_DESCRIPTOR, DE=число 256-байтных кластеров.
 ; Создаёт запись каталога и FAT-цепочку, но не пишет данные.
-fileCreatePrepare:
+fatFileCreatePrepare:
             ld      a, 1
             ld      (v_fileCreatePrepare), a
             ex      de, hl
@@ -26,7 +26,7 @@ fileCreatePrepare:
             ex      de, hl
             jp      fileCreateEntry
 
-fileCreate: ; Сохраняем регистры
+fatFileCreate: ; Сохраняем регистры
             xor     a
             ld      (v_fileCreatePrepare), a
 
@@ -250,7 +250,7 @@ writeFirstCluster:            ; записываем номер кластера
 
             ld      hl, (v_input_start)
             ld      b, 1
-            call    fileTransferClusters
+            call    fatFileTransferClusters
 
 ; ---------------------------------------------------------------------------
 ; Расчет однобайтовой контрольной суммы

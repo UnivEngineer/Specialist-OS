@@ -1,4 +1,4 @@
-; Конфигурация прикладной игры. Флаги независимы от одноимённых настроек ОС.
+; Конфигурация игры. Флаги независимы от одноимённых настроек ОС.
     INCLUDE "../../source/include/mxos.inc"
 
     IFNDEF ALMAZ_COLOR
@@ -30,8 +30,11 @@ ANIMATION_MIN_QUOTA = 3
     IFNDEF ANIMATION_SCAN_LIMIT
 ANIMATION_SCAN_LIMIT = 64       ; Ограничить и поиск кандидатов за один проход.
     ENDIF
-    IFNDEF INPUT_POLL_STRIDE
-INPUT_POLL_STRIDE = 4
+    IFNDEF INPUT_POLL_CELL_STRIDE
+INPUT_POLL_CELL_STRIDE = 43     ; 345/43*8 = около 64 опросов стрелок в секунду.
+    ENDIF
+    IFNDEF PLAYER_DIAGONAL_MOVEMENT
+PLAYER_DIAGONAL_MOVEMENT = 0   ; Эксперимент: одновременное движение по двум осям.
     ENDIF
     IFNDEF PIT_CLOCK_HZ
 PIT_CLOCK_HZ = 2000000         ; Вход ВИ53 для эффектов и часов, не для музыки.
@@ -47,7 +50,8 @@ app_pit_clock_hz = PIT_CLOCK_HZ
 app_realtime_enabled = USE_FRAME_CLOCK
 app_animation_enabled = ALMAZ_OPTIMIZE
 app_phases_enabled = ALMAZ_OPTIMIZE
-app_input_stride = INPUT_POLL_STRIDE
+app_input_cell_stride = INPUT_POLL_CELL_STRIDE
+app_player_diagonal_movement = PLAYER_DIAGONAL_MOVEMENT
 app_animation_quota = ANIMATION_QUOTA
 app_animation_min_quota = ANIMATION_MIN_QUOTA
 app_animation_scan = ANIMATION_SCAN_LIMIT
@@ -100,7 +104,8 @@ EDITOR_CURRENT_PORT_C = 00Fh ^ (1 << (EDITOR_CURRENT_COLUMN-8))
     ASSERT ANIMATION_QUOTA >= 1 && ANIMATION_QUOTA <= 64
     ASSERT ANIMATION_MIN_QUOTA >= 1 && ANIMATION_MIN_QUOTA <= ANIMATION_QUOTA
     ASSERT ANIMATION_SCAN_LIMIT >= 1 && ANIMATION_SCAN_LIMIT <= 255
-    ASSERT INPUT_POLL_STRIDE == 4 || INPUT_POLL_STRIDE == 8
+    ASSERT INPUT_POLL_CELL_STRIDE >= 1 && INPUT_POLL_CELL_STRIDE <= 345
+    ASSERT PLAYER_DIAGONAL_MOVEMENT == 0 || PLAYER_DIAGONAL_MOVEMENT == 1
     ASSERT !USE_FRAME_CLOCK || ALMAZ_PIT
     ASSERT ALMAZ_STEP_HZ >= 1 && ALMAZ_STEP_HZ <= 50
     ASSERT FRAME_STEP_TICKS < 08000h

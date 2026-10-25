@@ -286,6 +286,61 @@
         }
       },
       {
+        "label": "build: ramfos",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
+          "ramfos",
+          "sys",
+          "0xC000",
+          "RAMFOS"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\source\\ramfos"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "build: ramrun",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
+          "RAMRUN",
+          "com",
+          "0xF800"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\source\\ramfos"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
         "label": "build: mon2",
         "type": "process",
         "command": "powershell.exe",
@@ -439,6 +494,30 @@
           "-File",
           "${workspaceFolder}\\scripts\\images\\build-image.ps1",
           "SystemEmu"
+        ],
+        "dependsOn": "build: all",
+        "dependsOrder": "sequence",
+        "problemMatcher": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
+        "label": "image: ramfos ROM",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "SystemRamfos"
         ],
         "dependsOn": "build: all",
         "dependsOrder": "sequence",

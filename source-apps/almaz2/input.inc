@@ -5,23 +5,32 @@
 ; Входа нет. Все регистры и флаги сохраняются.
 input_initialize:
     PUSH AF
+    IF PLAYER_DIAGONAL_MOVEMENT
+    XOR A
+    ELSE
     LD A,0FFh
+    ENDIF
     LD (v_input_pending),A
     LD (v_input_held_code),A
     XOR A
     LD (v_input_mask),A
     LD (v_input_selected),A
+    LD A,INPUT_POLL_CELL_STRIDE
+    LD (v_input_poll_cells_left),A
     POP AF
     RET
 
-; Вход B=X. Опрос на столбцах, кратных INPUT_POLL_STRIDE: по умолчанию
-; не более 4 клеток внутри строки и 7 на стыке. Регистры и флаги сохраняются.
-; 53 такта без опроса; до 852 с опросом; 13 обращений к ВВ55 при опросе.
+; Вход B=X. Вызывается для каждой клетки и читает стрелки раз в
+; INPUT_POLL_CELL_STRIDE клеток. 14 байт, 79 тактов с CALL без чтения;
+; 611..898 тактов с чтением, 13 обращений к ВВ55. Регистры и флаги сохраняются.
 input_service:
     PUSH AF
-    LD A,B
-    AND INPUT_POLL_STRIDE-1
+    LD A,(v_input_poll_cells_left)
+    DEC A
+    LD (v_input_poll_cells_left),A
     JP NZ,input_service_done
+    LD A,INPUT_POLL_CELL_STRIDE
+    LD (v_input_poll_cells_left),A
     CALL input_poll
 input_service_done:
     POP AF
@@ -87,6 +96,18 @@ input_poll_restore:
     LD E,A
     LD A,D
     LD (v_input_mask),A
+    IF PLAYER_DIAGONAL_MOVEMENT
+    OR A
+    JP Z,input_released
+    LD (v_input_held_code),A
+    LD A,E
+    OR A
+    JP Z,input_poll_done
+    LD A,(v_input_pending)
+    OR D
+    LD (v_input_pending),A
+    JP input_poll_done
+    ELSE
     LD C,1
     LD A,E
     OR A
@@ -128,11 +149,16 @@ input_selected:
     LD A,E
     LD (v_input_pending),A
     JP input_poll_done
+    ENDIF
 input_released:
     XOR A
     LD (v_input_selected),A
+    IF PLAYER_DIAGONAL_MOVEMENT
+    LD (v_input_held_code),A
+    ELSE
     LD A,0FFh
     LD (v_input_held_code),A
+    ENDIF
 input_poll_done:
     POP HL
     POP DE
@@ -141,10 +167,23 @@ input_poll_done:
     RET
 
 ; Выход A: последнее новое нажатие, иначе удерживаемая стрелка, иначе FFh.
+; При PLAYER_DIAGONAL_MOVEMENT A — маска направлений 1/2/4/8 либо ноль.
 ; Накопленное нажатие расходуется ровно один раз. BC/DE/HL сохраняются;
 ; флаги меняются. Удержание даёт движение на каждом шаге без BIOS-повтора.
 input_take_direction:
-    CALL input_poll
+    IF PLAYER_DIAGONAL_MOVEMENT
+    LD A,(v_input_pending)
+    OR A
+    JP Z,input_take_held
+    PUSH AF
+    XOR A
+    LD (v_input_pending),A
+    POP AF
+    JP player_mask_to_direction
+input_take_held:
+    LD A,(v_input_held_code)
+    JP player_mask_to_direction
+    ELSE
     LD A,(v_input_pending)
     CP 0FFh
     JP NZ,input_take_pending
@@ -156,6 +195,7 @@ input_take_pending:
     LD (v_input_pending),A
     POP AF
     RET
+    ENDIF
 
 ; После полной перерисовки не переносить старый ввод на новую карту.
 input_map_drawn:
@@ -183,6 +223,91 @@ input_editor_existing:
     CALL input_editor_release
     CALL input_initialize
     JP editor_open
+    ENDIF
+
+v_input_poll_cells_left: DB INPUT_POLL_CELL_STRIDE
+
+    IF PLAYER_DIAGONAL_MOVEMENT
+; Вход A=маска направлений. Выход A=один исторический код стрелки либо FFh.
+; При диагонали сначала выполняется вертикальная часть, а горизонтальная
+; сохраняется для player_diagonal_destination. Противоположные клавиши
+; сводятся к первой в историческом порядке. DE сохраняется.
+player_mask_to_direction:
+    PUSH DE
+    LD D,A
+    AND 03h
+    CP 03h
+    JP NZ,player_mask_vertical_normalized
+    LD A,D
+    AND 0FDh
+    LD D,A
+player_mask_vertical_normalized:
+    LD A,D
+    AND 0Ch
+    CP 0Ch
+    JP NZ,player_mask_axes_ready
+    LD A,D
+    AND 0FBh
+    LD D,A
+player_mask_axes_ready:
+    LD A,D
+    AND 03h
+    LD E,A
+    LD A,D
+    AND 0Ch
+    JP Z,player_mask_horizontal_only
+    LD D,A
+    LD A,E
+    OR A
+    JP Z,player_mask_no_diagonal
+    LD (v_player_diagonal_horizontal),A
+    JP player_mask_vertical_code
+player_mask_no_diagonal:
+    XOR A
+    LD (v_player_diagonal_horizontal),A
+player_mask_vertical_code:
+    LD A,D
+    AND 4
+    LD A,019h
+    JP NZ,player_mask_done
+    LD A,01Ah
+    JP player_mask_done
+player_mask_horizontal_only:
+    XOR A
+    LD (v_player_diagonal_horizontal),A
+    LD A,E
+    AND 1
+    LD A,08h
+    JP NZ,player_mask_done
+    LD A,E
+    AND 2
+    LD A,018h
+    JP NZ,player_mask_done
+    LD A,0FFh
+player_mask_done:
+    POP DE
+    RET
+
+; Вход B/C=вертикально сдвинутая позиция игрока. Горизонтальная часть
+; диагонали прибавляется один раз, затем вызывается исходный map_get_cell.
+; Диагональное толкание камня невозможно: до этого места его не проверяют.
+player_diagonal_destination:
+    LD A,(v_player_diagonal_horizontal)
+    OR A
+    JP Z,map_get_cell
+    LD E,A
+    XOR A
+    LD (v_player_diagonal_horizontal),A
+    LD A,E
+    AND 1
+    JP NZ,player_diagonal_left
+    INC B
+    JP map_get_cell
+player_diagonal_left:
+    DEC B
+    JP map_get_cell
+
+v_player_diagonal_horizontal: DB 0
     ENDIF
 
 ; Выход A=команда либо FFh; BC/DE/HL сохраняются, флаги меняются.

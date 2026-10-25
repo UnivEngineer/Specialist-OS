@@ -105,6 +105,7 @@ v_keybTbl:
     INCLUDE "driverChecked.inc"
     INCLUDE "installDriver.inc"
     INCLUDE "fileGetSetDrive.inc"
+    INCLUDE "volume.inc"
     INCLUDE "strcmp.inc"
     INCLUDE "fatCache.inc"
     INCLUDE "fatFindCluster.inc"
@@ -124,6 +125,8 @@ v_keybTbl:
     INCLUDE "copyDescriptor.inc"
     INCLUDE "printDecWord.inc"
     INCLUDE "math.inc"
+
+    INCLUDE "volumeData.inc"
 
 v_drive:            DB 1
 v_findCluster:      DW 0

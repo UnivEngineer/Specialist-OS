@@ -52,109 +52,109 @@ editor_vars EDITOR_VARIABLES = 8F80H
     ENDIF
 
 ; Буферы в конце программы
-BUFFER1 = $ + 0F0Ah ; 0DF0AH
-BUFFER2 = $ + 0F00h ; 0DF00H
+FILE_NAME_RECALL_END = $ + 0F0Ah ; 0DF0AH
+FILE_NAME_HISTORY = $ + 0F00h ; 0DF00H
 
-SMC1:
-        JP    LBL145    ; адрес этого перехода изменяется п/п LBL3
-        JP    LBL103
+smc_entryDispatch:
+        JP    openCommandLineFile    ; адрес этого перехода изменяется п/п restartAfterLoad
+        JP    resumeAtTextPointer
 
         ; Что-то непонятное, границы буфера текста?
-VAR01:  DB    0
-VAR02:  DB    18h
-VAR03:  DB    0
-VAR04:  DB    85h
+v_textBeginLo:  DB    0
+v_textBeginHi:  DB    18h
+v_textLimitLo:  DB    0
+v_textLimitHi:  DB    85h
 
-LBL2:   LD    HL,REF2
+startupBannerAndLineBuffer:   LD    HL,txtBanner
         CALL  bios_printString
 
         ; Похоже на обработчик ошибки ввода/вывода с ленты
-LBL3:   ; ??? Считаем контрольную сумму блока 7000-8EFF
+restartAfterLoad:   ; ??? Считаем контрольную сумму блока 7000-8EFF
         LD    HL,7000H
         LD    DE,8F00H
         CALL  bios_calcCS
         ; Суровая самомодификация кода:
-        ; Меняем адрес в первой инстукции JP в начале редактора на LBL4
-SMC6:   LD    HL, LBL4
-        LD    (SMC1+1),HL
+        ; Меняем адрес в первой инстукции JP в начале редактора на beginSession
+smc_sessionTarget:   LD    HL, beginSession
+        LD    (smc_entryDispatch+1),HL
 
-        ; И прыгаем на LBL4
-        JP    LBL4
+        ; И прыгаем на beginSession
+        JP    beginSession
 
-REF2:   DB    0AH,"          EDITOR VERSION 4.1, (C) OM"
-REF3:   DB    "S"
-REF4:   DB    "K"
-REF5:   DB    " "
-REF6:   DB    "KSOFT ",27H,"92",2EH,00H
-VAR1:   DW    0000H
-VAR2:   DW    0000H
-VAR3:   DW    0000H
-VAR4:   DB    00H
-VAR5:   DB    00H
-VAR6:   DW    0000H
-VAR7:   DW    0000H
-VAR8:   DW    0000H
-REF7:   DB    04H,05H,08H
-VAR9:   DB    00H
-REF8:   DB    1FH,0AH,"  OUT OF MEMORY",2EH,00H
-REF9:   DB    1FH
-REF10:  DB    0AH," FILE: ",00H
-REF11:  DB    08H,20H,08H,00H           ; <-, ' ', <-
-REF12:  DB    0AH," MISTAKE",2EH,00H
-REF13:  DB    "SEARCH: "
-REF14:  DB    00H,"ALL V33",00H,"RLN]N",00H,"y"
-REF15:  DB    1FH,0AH," NEW ?",00H
-REF16:  DB    "INSERT   ",00H
-REF17:  DB    "OVERWRITE",00H
-REF18:  DB    "LINE",00H
-REF19:  DB    "COL",00H
+txtBanner:   DB    0AH,"          EDITOR VERSION 4.1, (C) OM"
+lineJoinLimit:   DB    "S"
+lineWordRightLimit:   DB    "K"
+lineBufferLast:   DB    " "
+lineBufferEnd:   DB    "KSOFT ",27H,"92",2EH,00H
+v_topLine:   DW    0000H
+v_textEnd:   DW    0000H
+v_currentLine:   DW    0000H
+v_lineDirty:   DB    00H
+v_insertMode:   DB    00H
+v_selectionBegin:   DW    0000H
+v_selectionEnd:   DW    0000H
+v_lineNumber:   DW    0000H
+t_tabSteps:   DB    04H,05H,08H
+v_tapeMode:   DB    00H
+txtOutOfMemory:   DB    1FH,0AH,"  OUT OF MEMORY",2EH,00H
+txtTapePrompt:   DB    1FH
+txtTapeFile:  DB    0AH," FILE: ",00H
+txtEraseChar:  DB    08H,20H,08H,00H           ; <-, ' ', <-
+txtTapeError:  DB    0AH," MISTAKE",2EH,00H
+txtSearchPrompt:  DB    "SEARCH: "
+v_searchText:  DB    00H,"ALL V33",00H,"RLN]N",00H,"y"
+txtNew:  DB    1FH,0AH," NEW ?",00H
+txtIns:  DB    "INSERT   ",00H
+txtOvr:  DB    "OVERWRITE",00H
+txtLine:  DB    "LINE",00H
+txtCol:  DB    "COL",00H
 
-LBL4:   ; Читаем указатель стека в hl
+beginSession:   ; Читаем указатель стека в hl
         LD    HL,0000H
         ADD   HL,SP
-        ; И записываем его в код п/п SMC4
-        LD    (SMC4+1),HL
+        ; И записываем его в код п/п smc_resetSessionStack
+        LD    (smc_resetSessionStack+1),HL
 
-LBL5:   LD    A,10H         ; 16
+scanDocument:   LD    A,10H         ; 16
         LD    (editor_vars.last),A
         XOR   A
-        LD    (VAR4),A
+        LD    (v_lineDirty),A
         LD    H,A
         LD    L,A
-        LD    (VAR6),HL
+        LD    (v_selectionBegin),HL
         LD    (bios_vars.inverse),HL
         LD    HL,0001H    ; 1
-        LD    (VAR8),HL
-        LD    HL,(VAR01)
-        LD    (VAR1),HL
-        LD    (VAR3),HL
+        LD    (v_lineNumber),HL
+        LD    HL,(v_textBeginLo)
+        LD    (v_topLine),HL
+        LD    (v_currentLine),HL
         LD    E,L
         LD    D,H
-LBL6:   LD    A,(HL)
+scanDocumentByte:   LD    A,(HL)
         OR    A
-        JP    NZ,LBL7
+        JP    NZ,testDocumentEnd
         DEC   A
         LD    (HL),A
-LBL7:   INC   A
-        JP    Z,LBL8
+testDocumentEnd:   INC   A
+        JP    Z,ensureNonemptyDocument
         INC   HL
-        JP    LBL6
-LBL8:   CALL  SUB38
-        JP    NZ,LBL9
+        JP    scanDocumentByte
+ensureNonemptyDocument:   CALL  compareHLDE
+        JP    NZ,rememberDocumentEnd
         LD    (HL),0DH    ; 13
         INC   HL
         LD    (HL),0FFH   ; 255
-LBL9:   LD    (VAR2),HL
-LBL10:  LD    C,1FH         ; 31
+rememberDocumentEnd:   LD    (v_textEnd),HL
+clearAndRedrawDocument:  LD    C,1FH         ; 31
         CALL  bios_printChar
-        CALL  SUB1
-REF21:  LD    HL,REF21    ; 53535
+        CALL  synchronizeTopAndRedraw
+editorStatusLoop:  LD    HL,editorStatusLoop    ; 53535
         PUSH  HL
         LD    HL,(bios_vars.cursorY)
         PUSH  HL
-        CALL  SUB56
+        CALL  enableInverse
         LD    HL,0000H
-        CALL  SUB14
+        CALL  addCursorColumn
         EX    DE,HL
         LD    HL,8CF9H    ; 36089
         LD    (bios_vars.cursorY),HL
@@ -162,12 +162,12 @@ REF21:  LD    HL,REF21    ; 53535
         LD    DE,0FFF6H   ; 65526
         LD    B,20H         ; 32 ' '
         INC   HL
-        CALL  SUB51
+        CALL  printDecimalDigit
         LD    A,L
         ADD   A,3AH         ; 58 ':'
         LD    C,A
         CALL  bios_printChar
-        CALL  SUB57
+        CALL  disableInverse
         POP   HL
         LD    (bios_vars.cursorY),HL
         JP    keyInput
@@ -234,7 +234,7 @@ KeyHendlerTable:
 
         ; Обработка нажатия Esc
 keyHandler_Esc:
-        CALL    SUB15
+        CALL    commitLineEdit
 
         ; Ожидаем ввод второго символа Esc-последовательности
         CALL    bios_getch
@@ -270,142 +270,142 @@ KeyHendlerTable2:
 keyHandler_CTP:
         LD    C,1FH         ; 31
         CALL  bios_printChar
-        CALL  SUB15
-        CALL  SUB54
+        CALL  commitLineEdit
+        CALL  resetSessionStack
         JP    bios_reboot
 
 keyHandler_F3_2:
-        CALL  SUB15
+        CALL  commitLineEdit
         LD    C,1FH         ; 31
         CALL  bios_printChar
-        CALL  SUB54
+        CALL  resetSessionStack
         RET
 
 keyHandler_Esc_Home:
         LD    HL,0001H    ; 1; [4]
-        LD    (VAR8),HL
-        LD    HL,(VAR01)
-        LD    (VAR1),HL
-        LD    (VAR3),HL
-SUB1:   LD    HL,(VAR1)   ; [10]
+        LD    (v_lineNumber),HL
+        LD    HL,(v_textBeginLo)
+        LD    (v_topLine),HL
+        LD    (v_currentLine),HL
+synchronizeTopAndRedraw:   LD    HL,(v_topLine)   ; [10]
         EX    DE,HL
-        LD    HL,(VAR3)
-        CALL  SUB38
-        JP    Z,SUB2
-        CALL  SUB49
-        JP    SUB1
-SUB2:   CALL  SUB55         ; [2]
-SUB3:   LD    BC,180CH    ; 6156; [2]
-LBL14:  CALL  bios_printChar
-        CALL  SUB7
+        LD    HL,(v_currentLine)
+        CALL  compareHLDE
+        JP    Z,clearAndDrawPage
+        CALL  previousCurrentLine
+        JP    synchronizeTopAndRedraw
+clearAndDrawPage:   CALL  clearTextViewport         ; [2]
+drawPage:   LD    BC,180CH    ; 6156; [2]
+drawPageLine:  CALL  bios_printChar
+        CALL  drawTextLine
         INC   A
-        JP    Z,SUB4
+        JP    Z,finishPageAndHome
         DEC   B
         LD    C,0AH         ; 10
-        JP    NZ,LBL14
-SUB4:   CALL  SUB53         ; [2]
+        JP    NZ,drawPageLine
+finishPageAndHome:   CALL  drawStatusBar         ; [2]
         LD    C,0CH         ; 12
         JP    bios_printChar
-LBL15:  CALL  SUB15         ; [3]
-SUB5:   CALL  SUB43         ; [5]
-        LD    HL,(VAR1)
-        CALL  SUB2
-        JP    SUB44
+commitAndRedraw:  CALL  commitLineEdit         ; [3]
+redrawPreservingCursor:   CALL  saveCursor         ; [5]
+        LD    HL,(v_topLine)
+        CALL  clearAndDrawPage
+        JP    restoreCursor
 
 keyHandler_Down:
-        CALL  SUB15
-        CALL  SUB48
+        CALL  commitLineEdit
+        CALL  nextCurrentLine
         RET   Z
-        CALL  SUB50
+        CALL  updateLineNumber
         LD    A,(bios_vars.cursorY)
         CP    0EEH          ; 238
         JP    NZ,bios_printChar
-        LD    HL,(VAR1)
-        CALL  SUB42
-        LD    (VAR1),HL
-        CALL  SUB43
-        CALL  SUB45
-        LD    HL,(VAR3)
-        CALL  SUB7
-        JP    SUB44
+        LD    HL,(v_topLine)
+        CALL  nextLine
+        LD    (v_topLine),HL
+        CALL  saveCursor
+        CALL  scrollTextUp
+        LD    HL,(v_currentLine)
+        CALL  drawTextLine
+        JP    restoreCursor
 
 keyHandler_Up
-        CALL  SUB15
-        CALL  SUB49
+        CALL  commitLineEdit
+        CALL  previousCurrentLine
         RET   Z
-        CALL  SUB50
+        CALL  updateLineNumber
         LD    A,(bios_vars.cursorY)
         CP    08H           ; 8
         JP    NZ,bios_printChar
-        LD    HL,(VAR3)
-        LD    (VAR1),HL
+        LD    HL,(v_currentLine)
+        LD    (v_topLine),HL
         PUSH  HL
-        CALL  SUB46
+        CALL  insertScreenRow
         POP   HL
-        CALL  SUB43
-        CALL  SUB7
-        JP    SUB44
-SUB7:   CALL  keyHandler_Home          ; [4]
-        CALL  SUB8
-        JP    NC,LBL16
+        CALL  saveCursor
+        CALL  drawTextLine
+        JP    restoreCursor
+drawTextLine:   CALL  keyHandler_Home          ; [4]
+        CALL  testLineSelected
+        JP    NC,drawLineByte
         LD    A,0FFH                ; 255
         LD    (bios_vars.inverse),A
-LBL16:  LD    A,(HL)
+drawLineByte:  LD    A,(HL)
         CP    0DH           ; 13
         LD    C,20H         ; 32 ' '
         CALL  Z,bios_printChar
-LBL17:  LD    A,(HL)
+drawLineLoop:  LD    A,(HL)
         LD    C,A
         INC   A
-        JP    Z,LBL18
+        JP    Z,finishDrawLine
         INC   HL
         CALL  bios_printChar
         CP    0EH           ; 14
-        JP    NZ,LBL17
-LBL18:  XOR   A
+        JP    NZ,drawLineLoop
+finishDrawLine:  XOR   A
         LD    (bios_vars.inverse),A
         LD    (bios_vars.inverse+1),A
         LD    A,C
         RET
-SUB8: PUSH  DE            ; [7]
+testLineSelected: PUSH  DE            ; [7]
         EX    DE,HL
-        LD    HL,(VAR6)
+        LD    HL,(v_selectionBegin)
         LD    A,H
         OR    L
-        JP    Z,LBL19
+        JP    Z,selectionTestDone
         DEC   HL
-        CALL  SUB38
-        JP    NC,LBL19
-        LD    HL,(VAR7)
+        CALL  compareHLDE
+        JP    NC,selectionTestDone
+        LD    HL,(v_selectionEnd)
         DEC   HL
-        CALL  SUB38
+        CALL  compareHLDE
         CCF
-LBL19:  EX    DE,HL         ; [2]
+selectionTestDone:  EX    DE,HL         ; [2]
         POP   DE
         RET
 
 keyHandler_Right:
-        CALL  SUB36
-        JP    Z,LBL117
-LBL20:  LD    B,0BAH                ; 186
-        JP    LBL21
+        CALL  testShiftKey
+        JP    Z,moveNextWord
+moveRightWithinLine:  LD    B,0BAH                ; 186
+        JP    moveHorizontalWithinLine
 
 keyHandler_Left:
-        CALL  SUB36
-        JP    Z,LBL120
+        CALL  testShiftKey
+        JP    Z,movePreviousWord
         LD    B,00H
-LBL21:  LD    A,(bios_vars.cursorY+1)
+moveHorizontalWithinLine:  LD    A,(bios_vars.cursorY+1)
         CP    B
         RET   Z
         JP    bios_printChar
 
 keyHandler_End:
-        CALL  SUB12
-        CALL  SUB10
-        LD    HL,LBL2             ; 53258
-        CALL  SUB39
+        CALL  beginLineEdit
+        CALL  trimLineBuffer
+        LD    HL,startupBannerAndLineBuffer             ; 53258
+        CALL  subtractHLFromDE
         LD    A,E
-        JP    LBL48
+        JP    clampCursorColumn
 
 keyHandler_Home:
         XOR   A             ; [4]
@@ -413,29 +413,29 @@ keyHandler_Home:
         RET
 
 keyHandler_Enter:
-        LD    HL,(VAR3)
-        CALL  SUB8
+        LD    HL,(v_currentLine)
+        CALL  testLineSelected
         JP    C,Beep4
-        CALL  SUB12
-        CALL  SUB10
+        CALL  beginLineEdit
+        CALL  trimLineBuffer
         LD    A,0DH         ; 13
         LD    (DE),A
-        CALL  SUB15
+        CALL  commitLineEdit
         CALL  keyHandler_Home
-        LD    HL,(VAR3)
+        LD    HL,(v_currentLine)
         LD    C,18H         ; 24
-LBL23:  LD    A,(HL)
+indentInsertedLine:  LD    A,(HL)
         CP    20H           ; 32 ' '
-        JP    NZ,LBL24
+        JP    NZ,moveToInsertedLine
         CALL  bios_printChar
         INC   HL
-        JP    LBL23
-LBL24:  LD    C,1AH         ; 26
+        JP    indentInsertedLine
+moveToInsertedLine:  LD    C,1AH         ; 26
         CALL  keyHandler_Down
-        JP    SUB46
+        JP    insertScreenRow
 
-        ; В REF6 изначально текст "KSOFT '92"
-SUB10:  LD    DE, REF6
+        ; В lineBufferEnd изначально текст "KSOFT '92"
+trimLineBuffer:  LD    DE, lineBufferEnd
 
         ; Пропус пробелов в строке по адресу de
 SkipSpaces:
@@ -446,21 +446,21 @@ SkipSpaces:
         INC   DE
         RET
 
-SUB12:  LD    A,(VAR4)    ; [7]
+beginLineEdit:  LD    A,(v_lineDirty)    ; [7]
         OR    A
         RET   NZ
         cpl
-        LD    (VAR4),A
-        LD    HL,LBL2             ; 53258
+        LD    (v_lineDirty),A
+        LD    HL,startupBannerAndLineBuffer             ; 53258
         LD    A,40H         ; 64 '@'
-LBL25:  LD    (HL),20H    ; 32 ' '
+clearLineBufferLoop:  LD    (HL),20H    ; 32 ' '
         INC   HL
         DEC   A
-        JP    NZ,LBL25
-        LD    DE,LBL2             ; 53258
-        LD    HL,(VAR3)
+        JP    NZ,clearLineBufferLoop
+        LD    DE,startupBannerAndLineBuffer             ; 53258
+        LD    HL,(v_currentLine)
         LD    B,40H         ; 64 '@'
-LBL26:  LD    A,(HL)
+copyLineToBufferLoop:  LD    A,(HL)
         CP    0DH           ; 13
         RET   Z
         CP    0FFH          ; 255
@@ -470,17 +470,17 @@ LBL26:  LD    A,(HL)
         LD    (DE),A
         INC   HL
         INC   DE
-        JP    LBL26
+        JP    copyLineToBufferLoop
 
 keyHandler_Space:
-        LD    HL,(VAR3)
-        CALL  SUB8
+        LD    HL,(v_currentLine)
+        CALL  testLineSelected
         JP    C,Beep4
-        CALL  SUB12
-        CALL  SUB13
-        LD    A,(VAR5)
+        CALL  beginLineEdit
+        CALL  getLineBufferCursor
+        LD    A,(v_insertMode)
         OR    A
-        JP    NZ,LBL28
+        JP    NZ,insertTypedCharacter
         LD    (HL),C
         CALL  bios_printChar
         LD    A,(bios_vars.cursorY+1)
@@ -488,126 +488,126 @@ keyHandler_Space:
         RET   NZ
         LD    C,08H         ; 8
         JP    bios_printChar
-LBL28:  LD    DE,REF5             ; 53321
+insertTypedCharacter:  LD    DE,lineBufferLast             ; 53321
         CALL  SkipSpaces
         PUSH  HL
-        LD    HL,REF5             ; 53321
-        CALL  SUB38
-        JP    Z,LBL29
+        LD    HL,lineBufferLast             ; 53321
+        CALL  compareHLDE
+        JP    Z,drawInsertedTail
         INC   DE
-LBL29:  POP   HL
-        CALL  SUB43
-LBL30:  LD    B,(HL)
+drawInsertedTail:  POP   HL
+        CALL  saveCursor
+insertCharacterLoop:  LD    B,(HL)
         LD    (HL),C
         CALL  bios_printChar
         LD    C,B
         INC   HL
-        CALL  SUB38
-        JP    C,LBL30
-        CALL  SUB44
+        CALL  compareHLDE
+        JP    C,insertCharacterLoop
+        CALL  restoreCursor
         LD    C,18H         ; 24
-        JP    LBL20
+        JP    moveRightWithinLine
 
 keyHandler_F1:
-        LD    HL,VAR5             ; 53340
+        LD    HL,v_insertMode             ; 53340
         LD    A,(HL)
         cpl
         LD    (HL),A
-        JP    SUB47
-SUB13:  LD    HL,LBL2             ; 53258; [4]
-SUB14:  LD    A,(bios_vars.cursorY+1)        ; [4]
+        JP    updateEditMode
+getLineBufferCursor:  LD    HL,startupBannerAndLineBuffer             ; 53258; [4]
+addCursorColumn:  LD    A,(bios_vars.cursorY+1)        ; [4]
         OR    A
-LBL32:  RET   Z
+cursorColumnLoop:  RET   Z
         INC   HL
         SUB   03H           ; 3
-        JP    LBL32
+        JP    cursorColumnLoop
 
 keyHandler_Del:
-        CALL  SUB12
-        CALL  SUB13
+        CALL  beginLineEdit
+        CALL  getLineBufferCursor
         PUSH  HL
         LD    C,L
         LD    B,H
         INC   BC
-        LD    DE,REF5             ; 53321
-        CALL  SUB37
+        LD    DE,lineBufferLast             ; 53321
+        CALL  copyUntilDE
         POP   HL
-        LD    DE,REF5             ; 53321
+        LD    DE,lineBufferLast             ; 53321
         CALL  SkipSpaces
         PUSH  HL
-        LD    HL,REF5             ; 53321
-        CALL  SUB38
-        JP    Z,LBL34
+        LD    HL,lineBufferLast             ; 53321
+        CALL  compareHLDE
+        JP    Z,drawDeletedTail
         INC   DE
-LBL34:  POP   HL
-        CALL  SUB43
-LBL35:  LD    C,(HL)
+drawDeletedTail:  POP   HL
+        CALL  saveCursor
+redrawTailLoop:  LD    C,(HL)
         CALL  bios_printChar
-        CALL  SUB38
+        CALL  compareHLDE
         INC   HL
-        JP    C,LBL35
-        JP    SUB44
+        JP    C,redrawTailLoop
+        JP    restoreCursor
 
-SUB15:  LD    A,(VAR4)  ; читаем VAR4
+commitLineEdit:  LD    A,(v_lineDirty)  ; читаем v_lineDirty
         OR    A
-        RET   Z         ; если VAR4 == 0, выходим
+        RET   Z         ; если v_lineDirty == 0, выходим
         XOR   A         ; инвертируем
-        LD    (VAR4),A  ; сохраняем обртано
+        LD    (v_lineDirty),A  ; сохраняем обртано
         PUSH  BC
-        CALL  SUB10
-        LD    HL,LBL2
-        CALL  SUB39
-        LD    HL,(VAR3)
+        CALL  trimLineBuffer
+        LD    HL,startupBannerAndLineBuffer
+        CALL  subtractHLFromDE
+        LD    HL,(v_currentLine)
         EX    DE,HL
         ADD   HL,DE
         EX    DE,HL
-        CALL  SUB42
+        CALL  nextLine
         INC   A
-        JP    Z,LBL36
+        JP    Z,resizeEditedLine
         DEC   HL
-LBL36:  CALL  SUB16
-        LD    HL,(VAR3)
-        LD    BC,LBL2             ; 53258
-        CALL  SUB38
-        CALL  NZ,SUB37
+resizeEditedLine:  CALL  resizeTextRange
+        LD    HL,(v_currentLine)
+        LD    BC,startupBannerAndLineBuffer             ; 53258
+        CALL  compareHLDE
+        CALL  NZ,copyUntilDE
         POP   BC
         RET
-SUB16:  CALL  SUB38         ; [5]
+resizeTextRange:  CALL  compareHLDE         ; [5]
         RET   Z
         PUSH  AF
         PUSH  DE
-        CALL  SUB39
+        CALL  subtractHLFromDE
         LD    B,D
         LD    C,E
         EX    DE,HL
-        LD    HL,(VAR6)
-        CALL  SUB38
-        JP    C,LBL37
+        LD    HL,(v_selectionBegin)
+        CALL  compareHLDE
+        JP    C,adjustSelectionEnd
         ADD   HL,BC
-        LD    (VAR6),HL
-LBL37:  LD    HL,(VAR7)
+        LD    (v_selectionBegin),HL
+adjustSelectionEnd:  LD    HL,(v_selectionEnd)
         EX    DE,HL
-        CALL  SUB38
+        CALL  compareHLDE
         EX    DE,HL
-        JP    NC,LBL38
+        JP    NC,moveDocumentTail
         ADD   HL,BC
-        LD    (VAR7),HL
-LBL38:  EX    DE,HL
+        LD    (v_selectionEnd),HL
+moveDocumentTail:  EX    DE,HL
         POP   DE
         POP   AF
-        JP    C,LBL42
+        JP    C,expandDocumentTail
         PUSH  DE
         LD    C,E
         LD    B,D
         EX    DE,HL
-        LD    HL,(VAR2)
+        LD    HL,(v_textEnd)
         INC   HL
         EX    DE,HL
-        CALL  SUB39
-LBL39:  LD    A,E
+        CALL  subtractHLFromDE
+compactTailPairs:  LD    A,E
         AND   0FEH          ; 254
         OR    D
-        JP    Z,LBL40
+        JP    Z,compactTailRemainder
         LD    A,(HL)
         LD    (BC),A
         INC   BC
@@ -618,21 +618,21 @@ LBL39:  LD    A,E
         INC   BC
         INC   HL
         DEC   DE
-        JP    LBL39
-LBL40:  CP    E
-        JP    Z,LBL41
+        JP    compactTailPairs
+compactTailRemainder:  CP    E
+        JP    Z,rememberCompactedEnd
         LD    A,(HL)
         LD    (BC),A
         INC   BC
-LBL41:  DEC   BC
+rememberCompactedEnd:  DEC   BC
         LD    L,C
         LD    H,B
-        LD    (VAR2),HL
+        LD    (v_textEnd),HL
         POP   DE
         RET
-LBL42:  PUSH  DE
-        CALL  SUB39
-        LD    HL,(VAR2)
+expandDocumentTail:  PUSH  DE
+        CALL  subtractHLFromDE
+        LD    HL,(v_textEnd)
         LD    B,H
         LD    C,L
         ADD   HL,DE
@@ -640,21 +640,21 @@ LBL42:  PUSH  DE
         PUSH  DE
         PUSH  HL
         EX    DE,HL
-        LD    HL,(VAR03)
-        CALL  SUB38
-        JP    C,LBL71
+        LD    HL,(v_textLimitLo)
+        CALL  compareHLDE
+        JP    C,documentOutOfMemory
         POP   HL
         POP   DE
-        LD    (VAR2),HL
+        LD    (v_textEnd),HL
         PUSH  HL
         EX    DE,HL
-        CALL  SUB39
+        CALL  subtractHLFromDE
         EX    (SP),HL
         INC   DE
-LBL43:  LD    A,E
+expandTailQuads:  LD    A,E
         AND   0FCH          ; 252
         OR    D
-        JP    Z,LBL44
+        JP    Z,expandTailRemainder
         LD    A,(BC)
         LD    (HL),A
         DEC   HL
@@ -675,397 +675,397 @@ LBL43:  LD    A,E
         DEC   HL
         DEC   BC
         DEC   DE
-        JP    LBL43
-LBL44:  LD    A,E
+        JP    expandTailQuads
+expandTailRemainder:  LD    A,E
         OR    A
-        JP    Z,LBL46
-LBL45:  LD    A,(BC)
+        JP    Z,finishExpandTail
+expandTailByte:  LD    A,(BC)
         LD    (HL),A
         DEC   HL
         DEC   BC
         DEC   E
-        JP    NZ,LBL45
-LBL46:  POP   DE
+        JP    NZ,expandTailByte
+finishExpandTail:  POP   DE
         RET
 
 keyHandler_Tab:
-        CALL  SUB36
-        JP    Z,LBL51
+        CALL  testShiftKey
+        JP    Z,tabPreviousStop
         LD    HL,0001H    ; 1
-        CALL  SUB14
+        CALL  addCursorColumn
         LD    E,L
-        LD    HL,REF7             ; 53347
+        LD    HL,t_tabSteps             ; 53347
         LD    C,03H         ; 3
         XOR   A
-LBL47:  DEC   C
-        JP    Z,LBL50
+tabNextInitialStop:  DEC   C
+        JP    Z,tabNextRepeatedStop
         ADD   A,(HL)
         CP    E
         INC   HL
-        JP    C,LBL47
-LBL48:  CP    3EH           ; 62 '>'; [2]
-        JP    C,LBL49
+        JP    C,tabNextInitialStop
+clampCursorColumn:  CP    3EH           ; 62 '>'; [2]
+        JP    C,setCursorColumn
         LD    A,3EH         ; 62 '>'
-LBL49:  LD    L,A           ; [3]
+setCursorColumn:  LD    L,A           ; [3]
         ADD   A,A
         ADD   A,L
         LD    (bios_vars.cursorY+1),A
         RET
-LBL50:  ADD   A,(HL)                ; [2]
+tabNextRepeatedStop:  ADD   A,(HL)                ; [2]
         CP    E
-        JP    C,LBL50
-        JP    LBL48
-LBL51:  LD    HL,0000H
-        CALL  SUB14
+        JP    C,tabNextRepeatedStop
+        JP    clampCursorColumn
+tabPreviousStop:  LD    HL,0000H
+        CALL  addCursorColumn
         LD    E,L
-        LD    HL,REF7             ; 53347
+        LD    HL,t_tabSteps             ; 53347
         LD    C,03H         ; 3
         XOR   A
-LBL52:  DEC   C
-        JP    Z,LBL53
+tabPreviousInitialStop:  DEC   C
+        JP    Z,tabPreviousRepeatedStop
         ADD   A,(HL)
         CP    E
         INC   HL
-        JP    C,LBL52
+        JP    C,tabPreviousInitialStop
         DEC   HL
         SUB   (HL)
-        JP    LBL49
-LBL53:  ADD   A,(HL)                ; [2]
+        JP    setCursorColumn
+tabPreviousRepeatedStop:  ADD   A,(HL)                ; [2]
         CP    E
-        JP    C,LBL53
+        JP    C,tabPreviousRepeatedStop
         SUB   (HL)
-        JP    LBL49
+        JP    setCursorColumn
 
 keyHandler_F2:
-        CALL  SUB15         ; [2]
-        LD    HL,(VAR01)
+        CALL  commitLineEdit         ; [2]
+        LD    HL,(v_textBeginLo)
         EX    DE,HL
-        LD    HL,(VAR1)
+        LD    HL,(v_topLine)
         LD    B,16H         ; 22
-LBL55:  CALL  SUB38
-        JP    Z,LBL56
-        CALL  SUB35
+pageUpLineLoop:  CALL  compareHLDE
+        JP    Z,pageUpRedraw
+        CALL  previousLine
         PUSH  HL
-        CALL  SUB49
+        CALL  previousCurrentLine
         POP   HL
         DEC   B
-        JP    NZ,LBL55
-LBL56:  LD    (VAR1),HL
-        CALL  SUB5
+        JP    NZ,pageUpLineLoop
+pageUpRedraw:  LD    (v_topLine),HL
+        CALL  redrawPreservingCursor
         RET
 
 keyHandler_F3:
-        CALL  SUB15
-        LD    HL,(VAR1)
+        CALL  commitLineEdit
+        LD    HL,(v_topLine)
         LD    BC,1619H    ; 5657
-LBL58:  LD    E,L
+pageDownLineLoop:  LD    E,L
         LD    D,H
-        CALL  SUB42
+        CALL  nextLine
         LD    A,(HL)
         INC   A
-        JP    NZ,LBL59
+        JP    NZ,pageDownAdvance
         LD    L,E
         LD    H,D
-        JP    LBL60
-LBL59:  PUSH  HL
-        CALL  SUB48
+        JP    pageDownRedraw
+pageDownAdvance:  PUSH  HL
+        CALL  nextCurrentLine
         CALL  Z,bios_printChar
         POP   HL
         DEC   B
-        JP    NZ,LBL58
-LBL60:  LD    (VAR1),HL
-        CALL  SUB5
+        JP    NZ,pageDownLineLoop
+pageDownRedraw:  LD    (v_topLine),HL
+        CALL  redrawPreservingCursor
         RET
 
 keyHandler_Esc_End:
-        CALL  SUB48
+        CALL  nextCurrentLine
         JP    NZ,keyHandler_Esc_End
-        LD    HL,(VAR3)
-        LD    (VAR1),HL
+        LD    HL,(v_currentLine)
+        LD    (v_topLine),HL
         LD    A,08H         ; 8
         LD    (bios_vars.cursorY),A
         JP    keyHandler_F2
 
 keyHandler_Esc_L:
-        LD    HL,REF23    ; 54885
+        LD    HL,redrawSelection    ; 54885
         PUSH  HL
-        LD    HL,(VAR6)
+        LD    HL,(v_selectionBegin)
         LD    A,H
         OR    L
-        JP    NZ,LBL62
-        CALL  SUB17
-        JP    LBL63
+        JP    NZ,extendSelection
+        CALL  setSelectionBegin
+        JP    setSelectionEnd
 
-LBL62:  EX    DE,HL
-        LD    HL,(VAR3)
-        CALL  SUB42
+extendSelection:  EX    DE,HL
+        LD    HL,(v_currentLine)
+        CALL  nextLine
         EX    DE,HL
-        CALL  SUB38
-        JP    C,LBL63
-SUB17:  LD    HL,(VAR3)
-        LD    (VAR6),HL
+        CALL  compareHLDE
+        JP    C,setSelectionEnd
+setSelectionBegin:  LD    HL,(v_currentLine)
+        LD    (v_selectionBegin),HL
         RET
 
-LBL63:  LD    HL,(VAR3)   ; [2]
-        CALL  SUB42
-        LD    (VAR7),HL
+setSelectionEnd:  LD    HL,(v_currentLine)   ; [2]
+        CALL  nextLine
+        LD    (v_selectionEnd),HL
         RET
 
 keyHandler_Esc_D:
-        LD    HL,(VAR6)
+        LD    HL,(v_selectionBegin)
         LD    A,L
         OR    H
         JP    Z,Beep4
         EX    DE,HL
-        LD    HL,(VAR3)
-LBL64:  CALL  SUB8
-        JP    NC,LBL65
-        CALL  SUB35
-        JP    NZ,LBL64
-LBL65:  LD    (VAR3),HL
+        LD    HL,(v_currentLine)
+findLineBeforeSelection:  CALL  testLineSelected
+        JP    NC,deleteSelectionRange
+        CALL  previousLine
+        JP    NZ,findLineBeforeSelection
+deleteSelectionRange:  LD    (v_currentLine),HL
         LD    HL,0000H
-        LD    (VAR6),HL
-        LD    HL,(VAR7)
-LBL66:  PUSH  DE
-        CALL  SUB39
+        LD    (v_selectionBegin),HL
+        LD    HL,(v_selectionEnd)
+deleteRangeAndReposition:  PUSH  DE
+        CALL  subtractHLFromDE
         LD    B,D
         LD    C,E
         EX    DE,HL
-        LD    HL,(VAR1)
-        CALL  SUB38
-        JP    C,LBL67
+        LD    HL,(v_topLine)
+        CALL  compareHLDE
+        JP    C,adjustCurrentAfterDelete
         ADD   HL,BC
-        LD    (VAR1),HL
-LBL67:  LD    HL,(VAR3)
-        CALL  SUB38
-        JP    C,LBL68
+        LD    (v_topLine),HL
+adjustCurrentAfterDelete:  LD    HL,(v_currentLine)
+        CALL  compareHLDE
+        JP    C,collapseDeletedRange
         ADD   HL,BC
-        LD    (VAR3),HL
-LBL68:  EX    DE,HL
+        LD    (v_currentLine),HL
+collapseDeletedRange:  EX    DE,HL
         POP   DE
-        CALL  SUB16
-        CALL  SUB52
+        CALL  resizeTextRange
+        CALL  recountCurrentLine
         LD    A,(bios_vars.cursorY)
         SUB   08H           ; 8
         LD    B,A
-        JP    Z,LBL70
-LBL69:  CALL  SUB35
-        CALL  Z,SUB18
+        JP    Z,redrawAfterDelete
+findTopAfterDelete:  CALL  previousLine
+        CALL  Z,moveUpIfAtDocumentEnd
         LD    A,B
         SUB   0AH           ; 10
         LD    B,A
-        JP    NZ,LBL69
-LBL70:  LD    (VAR1),HL
-        JP    SUB5
-SUB18:  PUSH  HL
-        CALL  SUB48
+        JP    NZ,findTopAfterDelete
+redrawAfterDelete:  LD    (v_topLine),HL
+        JP    redrawPreservingCursor
+moveUpIfAtDocumentEnd:  PUSH  HL
+        CALL  nextCurrentLine
         POP   HL
         RET   NZ
         LD    C,19H         ; 25
         JP    bios_printChar
 
 keyHandler_Esc_U:
-        LD    HL,(VAR6)
+        LD    HL,(v_selectionBegin)
         LD    DE,0000H
-        CALL  SUB38
+        CALL  compareHLDE
         RET   Z
         EX    DE,HL
-        LD    (VAR6),HL
-REF23:  CALL  SUB43
-        LD    HL,(VAR1)
-        CALL  SUB3
-        JP    SUB44
-LBL71:  LD    HL,REF8             ; 53351; [2]
+        LD    (v_selectionBegin),HL
+redrawSelection:  CALL  saveCursor
+        LD    HL,(v_topLine)
+        CALL  drawPage
+        JP    restoreCursor
+documentOutOfMemory:  LD    HL,txtOutOfMemory             ; 53351; [2]
         CALL  bios_printString
         CALL  Beep4
         CALL  bios_getch
-        JP    LBL5
+        JP    scanDocument
 
 keyHandler_Esc_O:
-        LD    HL,REF9             ; 53370
+        LD    HL,txtTapePrompt             ; 53370
         CALL  bios_printString
-        CALL  SUB33
-        JP    NZ,SUB1
-        LD    HL,(VAR01)
-        CALL  SUB32
+        CALL  promptTapeName
+        JP    NZ,synchronizeTopAndRedraw
+        LD    HL,(v_textBeginLo)
+        CALL  sumTextUntilEnd
         PUSH  BC
         PUSH  DE
-        CALL  SUB19
+        CALL  writeTapeLeader
         EX    (SP),HL
         EX    DE,HL
-        LD    HL,LBL2
+        LD    HL,startupBannerAndLineBuffer
         LD    A,0E6H
         LD    B,05H
-LBL72:  CALL  SUB24
+writeTapeNameSync:  CALL  writeTapeByte
         DEC   B
-        JP    NZ,LBL72
-LBL73:  LD    A,(HL)
-        CALL  SUB24
+        JP    NZ,writeTapeNameSync
+writeTapeNameLoop:  LD    A,(HL)
+        CALL  writeTapeByte
         OR    A
-        JP    Z,LBL74
+        JP    Z,writeTapePayload
         INC   HL
-        JP    LBL73
-LBL74:  CALL  SUB20
+        JP    writeTapeNameLoop
+writeTapePayload:  CALL  writeTapeGap
         POP   DE
-        LD    A,(VAR01)
+        LD    A,(v_textBeginLo)
         cpl
         INC   A
         LD    L,A
-        LD    A,(VAR02)
+        LD    A,(v_textBeginHi)
         cpl
         INC   A
         LD    H,A
         ADD   HL,DE
         LD    A,0E6H
-        CALL  SUB24
+        CALL  writeTapeByte
         LD    A,L
         cpl
-        CALL  SUB24
+        CALL  writeTapeByte
         LD    A,H
         cpl
-        LD    HL,(VAR01)
-        CALL  SUB23
+        LD    HL,(v_textBeginLo)
+        CALL  writeTapeRange
         POP   BC
         LD    A,C
-        CALL  SUB24
+        CALL  writeTapeByte
         LD    A,B
-        CALL  SUB24
-        JP    SUB1
-SUB19:  LD    D,04H         ; 4
+        CALL  writeTapeByte
+        JP    synchronizeTopAndRedraw
+writeTapeLeader:  LD    D,04H         ; 4
         XOR   A
-LBL75:  LD    E,40H         ; 64 '@'
+writeLeaderBlock:  LD    E,40H         ; 64 '@'
         XOR   55H           ; 85 'U'
-        CALL  SUB22
+        CALL  writeTapeRepeat
         DEC   D
-        JP    NZ,LBL75
+        JP    NZ,writeLeaderBlock
         RET
-SUB20:  CALL  SUB21
-SUB21:  XOR   A
+writeTapeGap:  CALL  writeTapeZeroBlock
+writeTapeZeroBlock:  XOR   A
         LD    E,A
-SUB22:  CALL  SUB24         ; [2]
+writeTapeRepeat:  CALL  writeTapeByte         ; [2]
         DEC   E
-        JP    NZ,SUB22
+        JP    NZ,writeTapeRepeat
         RET
-SUB23:  CALL  SUB24         ; [2]
-        CALL  SUB38
+writeTapeRange:  CALL  writeTapeByte         ; [2]
+        CALL  compareHLDE
         LD    A,(HL)
         INC   HL
-        JP    NZ,SUB23
-        JP    SUB24
-SUB24:  LD    C,A           ; [9]
+        JP    NZ,writeTapeRange
+        JP    writeTapeByte
+writeTapeByte:  LD    C,A           ; [9]
         JP    bios_tapeWrite
 
 keyHandler_Esc_I:
         LD    B,00H
 
-LBL76:  LD    A,B           ; [2]
-        LD    (VAR9),A
+readOrVerifyTape:  LD    A,B           ; [2]
+        LD    (v_tapeMode),A
         LD    HL,0000H
-        LD    (VAR6),HL
-        LD    HL,REF9             ; 53370
+        LD    (v_selectionBegin),HL
+        LD    HL,txtTapePrompt             ; 53370
         CALL  bios_printString
-        CALL  SUB33
-        JP    NZ,SUB1
-        CALL  SUB31
+        CALL  promptTapeName
+        JP    NZ,synchronizeTopAndRedraw
+        CALL  readTapeHeader
         PUSH  HL
-LBL77:  CALL  SUB30
+readTapeTextLoop:  CALL  readTapeByte
         LD    B,A
-        LD    A,(VAR9)
+        LD    A,(v_tapeMode)
         INC   A
-        JP    NZ,LBL78
+        JP    NZ,storeTapeTextByte
         LD    A,B
         CP    (HL)
-        JP    NZ,LBL79
-LBL78:  LD    (HL),B
+        JP    NZ,tapeReadMismatch
+storeTapeTextByte:  LD    (HL),B
         INC   HL
         INC   B
-        JP    NZ,LBL77
+        JP    NZ,readTapeTextLoop
         LD    A,08H
-        CALL  SUB28
+        CALL  readTapeWord
         POP   HL
         PUSH  BC
-        CALL  SUB32
+        CALL  sumTextUntilEnd
         EX    (SP),HL
         LD    D,B
         LD    E,C
-        CALL  SUB38
-        JP    NZ,LBL79
+        CALL  compareHLDE
+        JP    NZ,tapeReadMismatch
         POP   HL
-        LD    (VAR2),HL
+        LD    (v_textEnd),HL
         JP    keyHandler_Esc_Home
 
-LBL79:  POP   HL
-        LD    HL,REF12
+tapeReadMismatch:  POP   HL
+        LD    HL,txtTapeError
         CALL  bios_printString
         CALL  Beep4
         CALL  bios_getch
-        LD    HL,(VAR2)
+        LD    HL,(v_textEnd)
         LD    (HL),0FFH
         JP    keyHandler_Esc_Home
 
-SUB25:  LD    HL,SMC6+1 ; тут адрес перехода в п/п LBL3
-        CALL  SUB29
-LBL80:  CALL  SUB30
+readAndCompareTapeName:  LD    HL,smc_sessionTarget+1 ; тут адрес перехода в п/п restartAfterLoad
+        CALL  findTapeNameSync
+readTapeNameLoop:  CALL  readTapeByte
         LD    (HL),A
         OR    A
-        JP    Z,LBL81
+        JP    Z,showTapeName
         INC   HL
-        JP    LBL80
+        JP    readTapeNameLoop
 
-LBL81:  LD    HL,REF10
+showTapeName:  LD    HL,txtTapeFile
         CALL  bios_printString
-        LD    HL,SMC6+1 ; тут адрес перехода в п/п LBL3
+        LD    HL,smc_sessionTarget+1 ; тут адрес перехода в п/п restartAfterLoad
         PUSH  HL
         CALL  bios_printString
-        CALL  SUB26
+        CALL  tapeNamePause
         POP   HL
-        LD    DE,LBL2
-LBL82:  LD    A,(DE)
+        LD    DE,startupBannerAndLineBuffer
+compareTapeNameLoop:  LD    A,(DE)
         OR    A
         RET   Z
         CP    (HL)
         INC   HL
         INC   DE
-        JP    Z,LBL82
+        JP    Z,compareTapeNameLoop
         RET
-SUB26:  LD    HL,0000H
+tapeNamePause:  LD    HL,0000H
         LD    E,L
         LD    D,H
-LBL83:  DEC   HL
-        CALL  SUB38
+tapePauseLoop:  DEC   HL
+        CALL  compareHLDE
         RET   Z
-        JP    LBL83
-SUB27:  LD    A,0FFH
-SUB28:  CALL  bios_tapeRead
+        JP    tapePauseLoop
+readTapeWordSync:  LD    A,0FFH
+readTapeWord:  CALL  bios_tapeRead
         LD    C,A
-        CALL  SUB30
+        CALL  readTapeByte
         LD    B,A
         RET
-LBL84:  XOR   A
+resetTapePolarity:  XOR   A
         LD    (bios_vars.tapeInverse),A
 
-SUB29:  LD    B,04H
+findTapeNameSync:  LD    B,04H
         LD    A,0FFH
-LBL85:  CALL  bios_tapeRead
+findTapeSyncLoop:  CALL  bios_tapeRead
         CP    0E6H
-        JP    NZ,LBL84
+        JP    NZ,resetTapePolarity
         DEC   B
         LD    A,08H
-        JP    NZ,LBL85
+        JP    NZ,findTapeSyncLoop
         RET
 
-SUB30:  LD    A,08H
+readTapeByte:  LD    A,08H
         JP    bios_tapeRead
 
-SUB31:  CALL  SUB25
-        JP    NZ,SUB31
-        CALL  SUB27
-        LD    HL,(VAR01)
-        LD    A,(VAR9)
+readTapeHeader:  CALL  readAndCompareTapeName
+        JP    NZ,readTapeHeader
+        CALL  readTapeWordSync
+        LD    HL,(v_textBeginLo)
+        LD    A,(v_tapeMode)
         DEC   A
-        JP    M,LBL86
-        LD    HL,(VAR2)
-LBL86:  LD    A,B
+        JP    M,checkTapeCapacity
+        LD    HL,(v_textEnd)
+checkTapeCapacity:  LD    A,B
         cpl
         LD    B,A
         LD    A,C
@@ -1073,24 +1073,24 @@ LBL86:  LD    A,B
         LD    C,A
         PUSH  HL
         EX    DE,HL
-        LD    HL,(VAR03)
+        LD    HL,(v_textLimitLo)
         EX    DE,HL
         ADD   HL,BC
-        CALL  SUB38
+        CALL  compareHLDE
         POP   HL
         RET   C
-        JP    LBL71
+        JP    documentOutOfMemory
 
 keyHandler_Esc_V:
         LD    B,0FFH                ; 255
-        JP    LBL76
+        JP    readOrVerifyTape
 
 keyHandler_Esc_G:
         LD    B,01H         ; 1
-        JP    LBL76
+        JP    readOrVerifyTape
 
-SUB32:  LD    BC,0000H    ; [2]
-LBL87:  LD    A,(HL)
+sumTextUntilEnd:  LD    BC,0000H    ; [2]
+sumTextByte:  LD    A,(HL)
         CP    0FFH          ; 255
         RET   Z
         ADD   A,C
@@ -1099,98 +1099,98 @@ LBL87:  LD    A,(HL)
         ADC   A,B
         LD    B,A
         INC   HL
-        JP    LBL87
-SUB33:  LD    B,30H         ; 48 '0'; [2]
-        LD    HL,LBL2             ; 53258
+        JP    sumTextByte
+promptTapeName:  LD    B,30H         ; 48 '0'; [2]
+        LD    HL,startupBannerAndLineBuffer             ; 53258
         LD    E,L
         LD    D,H
-LBL88:  CALL  bios_getch          ; [5]
-SUB34:  CP    20H           ; 32 ' '
-        JP    C,LBL90
+promptTextKey:  CALL  bios_getch          ; [5]
+promptTextInput:  CP    20H           ; 32 ' '
+        JP    C,promptControlKey
         DEC   B
-        JP    NZ,LBL89
+        JP    NZ,storePromptCharacter
         INC   B
-        JP    LBL88
-LBL89:  LD    C,A
+        JP    promptTextKey
+storePromptCharacter:  LD    C,A
         CALL  bios_printChar
         LD    (HL),A
         INC   HL
-        JP    LBL88
+        JP    promptTextKey
         LD    BC,2A20H    ; 10784
         CALL  keyHandler_Home
         JP    TypeCharCtimesB
-LBL90:  CP    1FH           ; 31
-        JP    NZ,LBL91
+promptControlKey:  CP    1FH           ; 31
+        JP    NZ,promptBackspace
         OR    A
         RET
-LBL91:  CP    08H           ; 8
-        JP    NZ,LBL92
-        CALL  SUB38
-        JP    Z,LBL88
+promptBackspace:  CP    08H           ; 8
+        JP    NZ,promptEnter
+        CALL  compareHLDE
+        JP    Z,promptTextKey
         PUSH  HL
-        LD    HL,REF11    ; 53380
+        LD    HL,txtEraseChar    ; 53380
         CALL  bios_printString
         POP   HL
         DEC   HL
         INC   B
-        JP    LBL88
-LBL92:  CP    0DH           ; 13
-        JP    NZ,LBL88
+        JP    promptTextKey
+promptEnter:  CP    0DH           ; 13
+        JP    NZ,promptTextKey
         XOR   A
         LD    (HL),A
         RET
 
 keyHandler_F7:
-        CALL  SUB15
+        CALL  commitLineEdit
         LD    HL,06F9H    ; 1785
         LD    (bios_vars.cursorY),HL
-        CALL  SUB56
-        LD    HL,REF13    ; 53395
+        CALL  enableInverse
+        LD    HL,txtSearchPrompt    ; 53395
         CALL  bios_printString
         LD    HL,1EF9H    ; 7929
         LD    (bios_vars.cursorY),HL
         CALL  bios_getch
         CP    0DH           ; 13
-        JP    Z,LBL93
+        JP    Z,repeatSearch
         LD    BC,1020H    ; 4128
         CALL  TypeCharCtimesB
         LD    (bios_vars.cursorY),HL
-        LD    HL,REF14    ; 53403
+        LD    HL,v_searchText    ; 53403
         LD    E,L
         LD    D,H
         LD    B,0FH         ; 15
-        CALL  SUB34
+        CALL  promptTextInput
         PUSH  AF
-        CALL  SUB57
+        CALL  disableInverse
         POP   AF
-        JP    NZ,SUB1
-LBL93:  CALL  SUB57
-        LD    HL,(VAR1)
-        CALL  SUB42
-LBL94:  LD    DE,REF14    ; 53403
-LBL95:  LD    B,(HL)
+        JP    NZ,synchronizeTopAndRedraw
+repeatSearch:  CALL  disableInverse
+        LD    HL,(v_topLine)
+        CALL  nextLine
+searchCandidate:  LD    DE,v_searchText    ; 53403
+compareSearchByte:  LD    B,(HL)
         LD    A,(DE)
         OR    A
-        JP    Z,LBL96
+        JP    Z,searchFound
         CP    B
         INC   HL
         INC   DE
-        JP    Z,LBL95
+        JP    Z,compareSearchByte
         INC   B
-        JP    NZ,LBL94
+        JP    NZ,searchCandidate
         CALL  Beep4
         JP    keyHandler_Esc_Home
-LBL96:  CALL  SUB35
-        LD    (VAR1),HL
-        LD    (VAR3),HL
-        CALL  SUB52
-        JP    SUB1
+searchFound:  CALL  previousLine
+        LD    (v_topLine),HL
+        LD    (v_currentLine),HL
+        CALL  recountCurrentLine
+        JP    synchronizeTopAndRedraw
 
 keyHandler_Esc_J:
-        CALL  SUB12
-        CALL  SUB10
-        LD    HL,(VAR3)
-        CALL  SUB42
+        CALL  beginLineEdit
+        CALL  trimLineBuffer
+        LD    HL,(v_currentLine)
+        CALL  nextLine
         LD    A,(HL)
         INC   A
         RET   Z
@@ -1199,94 +1199,94 @@ keyHandler_Esc_J:
         INC   HL
         LD    C,L
         LD    B,H
-        LD    HL,REF3             ; 53319
-LBL97:  CALL  SUB38
-        JP    C,LBL15
+        LD    HL,lineJoinLimit             ; 53319
+joinLineByte:  CALL  compareHLDE
+        JP    C,commitAndRedraw
         LD    A,(BC)
         CP    0DH           ; 13
-        JP    Z,LBL15
+        JP    Z,commitAndRedraw
         CP    0FFH          ; 255
-        JP    Z,LBL15
+        JP    Z,commitAndRedraw
         LD    (DE),A
         INC   DE
         INC   BC
-        JP    LBL97
+        JP    joinLineByte
 
 keyHandler_Esc_S:
-        LD    HL,(VAR3)
-        CALL  SUB14
+        LD    HL,(v_currentLine)
+        CALL  addCursorColumn
         LD    E,L
         LD    D,H
         INC   DE
         PUSH  HL
-        CALL  SUB16
+        CALL  resizeTextRange
         POP   HL
         LD    (HL),0DH    ; 13
-        JP    SUB5
+        JP    redrawPreservingCursor
 
-SUB35:  PUSH  DE            ; [6]
+previousLine:  PUSH  DE            ; [6]
         EX    DE,HL
-        LD    HL,(VAR01)
+        LD    HL,(v_textBeginLo)
         EX    DE,HL
-        CALL  SUB38
-        JP    Z,LBL101
+        CALL  compareHLDE
+        JP    Z,previousLineReturn
         DEC   HL
-        CALL  SUB38
-        JP    Z,LBL100
+        CALL  compareHLDE
+        JP    Z,previousLineFound
         DEC   HL
-LBL98:  LD    A,(HL)
+findPreviousLineLoop:  LD    A,(HL)
         CP    0DH           ; 13
-        JP    Z,LBL99
-        CALL  SUB38
+        JP    Z,previousLineAfterCR
+        CALL  compareHLDE
         DEC   HL
-        JP    NZ,LBL98
+        JP    NZ,findPreviousLineLoop
 
-LBL99:  INC   HL
-LBL100: XOR   A
+previousLineAfterCR:  INC   HL
+previousLineFound: XOR   A
         INC   A
 
-LBL101: POP   DE
+previousLineReturn: POP   DE
         RET
 
 keyHandler_Esc_C:
-        LD    HL,(VAR7)
+        LD    HL,(v_selectionEnd)
         EX    DE,HL
-        LD    HL,(VAR6)
+        LD    HL,(v_selectionBegin)
         LD    A,H
         OR    L
         JP    Z,Beep4
-        CALL  SUB39
-        LD    HL,(VAR3)
-        CALL  SUB8
+        CALL  subtractHLFromDE
+        LD    HL,(v_currentLine)
+        CALL  testLineSelected
         PUSH  AF
-        CALL  SUB42
+        CALL  nextLine
         POP   AF
-        CALL  C,SUB8
+        CALL  C,testLineSelected
         JP    C,Beep4
         PUSH  HL
         EX    DE,HL
         ADD   HL,DE
         EX    DE,HL
-        CALL  SUB16
-        LD    HL,(VAR6)
+        CALL  resizeTextRange
+        LD    HL,(v_selectionBegin)
         LD    C,L
         LD    B,H
         POP   HL
-        CALL  SUB37
-        JP    SUB5
+        CALL  copyUntilDE
+        JP    redrawPreservingCursor
 
 keyHandler_Esc_M:
-        LD    HL,(VAR7)
+        LD    HL,(v_selectionEnd)
         EX    DE,HL
-        LD    HL,(VAR6)
+        LD    HL,(v_selectionBegin)
         LD    A,H
         OR    L
         JP    Z,Beep4
-        CALL  SUB39
-        LD    HL,(VAR3)
-        CALL  SUB8
+        CALL  subtractHLFromDE
+        LD    HL,(v_currentLine)
+        CALL  testLineSelected
         JP    C,Beep4
-        CALL  SUB42
+        CALL  nextLine
         PUSH  HL
         EX    DE,HL
         ADD   HL,DE
@@ -1295,62 +1295,62 @@ keyHandler_Esc_M:
         PUSH  DE
         PUSH  HL
         PUSH  BC
-        CALL  SUB16
-        LD    HL,(VAR6)
+        CALL  resizeTextRange
+        LD    HL,(v_selectionBegin)
         LD    C,L
         LD    B,H
         POP   HL
-        CALL  SUB37
-        LD    HL,(VAR6)
+        CALL  copyUntilDE
+        LD    HL,(v_selectionBegin)
         EX    DE,HL
         POP   HL
-        LD    (VAR6),HL
-        LD    HL,(VAR7)
+        LD    (v_selectionBegin),HL
+        LD    HL,(v_selectionEnd)
         EX    (SP),HL
-        LD    (VAR7),HL
+        LD    (v_selectionEnd),HL
         POP   HL
-        JP    LBL66
+        JP    deleteRangeAndReposition
 
 keyHandler_Esc_N:
-        LD    HL,REF15    ; 53419
+        LD    HL,txtNew    ; 53419
         CALL  bios_printString
         CALL  bios_getch
         CP    59H           ; 89 'Y'
-        JP    NZ,SUB1
-        LD    HL,(VAR01)
+        JP    NZ,synchronizeTopAndRedraw
+        LD    HL,(v_textBeginLo)
         LD    (HL),0DH    ; 13
         INC   HL
         LD    (HL),0FFH   ; 255
-        LD    (VAR2),HL
+        LD    (v_textEnd),HL
         JP    keyHandler_Esc_Home
 
 keyHandler_F8:
         XOR   A
-        LD    (VAR4),A
-        CALL  SUB43
+        LD    (v_lineDirty),A
+        CALL  saveCursor
         CALL  keyHandler_Home
         LD    BC,3F20H    ; 16160
         CALL  TypeCharCtimesB
-        LD    HL,(VAR3)
-        CALL  SUB7
-        JP    SUB44
-SUB36:  LD    A,(IO_KEYB_B)  ; [3]
+        LD    HL,(v_currentLine)
+        CALL  drawTextLine
+        JP    restoreCursor
+testShiftKey:  LD    A,(IO_KEYB_B)  ; [3]
         AND   02H           ; 2
         RET
-SUB37:  LD    A,(BC)                ; [5]
+copyUntilDE:  LD    A,(BC)                ; [5]
         LD    (HL),A
         INC   HL
         INC   BC
-        CALL  SUB38
-        JP    NZ,SUB37
+        CALL  compareHLDE
+        JP    NZ,copyUntilDE
         RET
-SUB38:  LD    A,H           ; [34]
+compareHLDE:  LD    A,H           ; [34]
         CP    D
         RET   NZ
         LD    A,L
         CP    E
         RET
-SUB39:  LD    A,E           ; [9]
+subtractHLFromDE:  LD    A,E           ; [9]
         SUB   L
         LD    E,A
         LD    A,D
@@ -1369,47 +1369,47 @@ TypeCharCtimesB:
         JP    NZ,TypeCharCtimesB
         RET
 
-SUB42:  LD    A,(HL)                ; [11]
+nextLine:  LD    A,(HL)                ; [11]
         CP    0FFH          ; 255
         RET   Z
         CP    0DH           ; 13
         INC   HL
-        JP    NZ,SUB42
+        JP    NZ,nextLine
         RET
-SUB43:  PUSH  HL            ; [7]
+saveCursor:  PUSH  HL            ; [7]
         LD    HL,(bios_vars.cursorY)
-        LD    (SMC2+1),HL
+        LD    (smc_restoreCursor+1),HL
         POP   HL
         RET
-SUB44:  PUSH  HL            ; [7]
-SMC2:   LD    HL,0000H
+restoreCursor:  PUSH  HL            ; [7]
+smc_restoreCursor:   LD    HL,0000H
         LD    (bios_vars.cursorY),HL
         POP   HL
         RET
-LBL103: CALL  SUB54
-        CALL  SUB35
-        LD    (VAR3),HL
-        LD    (VAR1),HL
-        CALL  SUB52
-        CALL  SUB53
-        CALL  SUB3
+resumeAtTextPointer: CALL  resetSessionStack
+        CALL  previousLine
+        LD    (v_currentLine),HL
+        LD    (v_topLine),HL
+        CALL  recountCurrentLine
+        CALL  drawStatusBar
+        CALL  drawPage
         CALL  bios_getch
         PUSH  AF
         LD    HL,06F9H    ; 1785
         LD    (bios_vars.cursorY),HL
         LD    BC,3020H    ; 12320
         CALL  TypeCharCtimesB
-        CALL  SUB4
+        CALL  finishPageAndHome
         POP   AF
-        LD    HL,REF21    ; 53535
+        LD    HL,editorStatusLoop    ; 53535
         PUSH  HL
         JP    keyInput2
-SUB45:  LD    H,90H         ; 144
+scrollTextUp:  LD    H,90H         ; 144
         LD    D,H
-LBL104: LD    C,39H         ; 57 '9'
+scrollUpColumn: LD    C,39H         ; 57 '9'
         LD    L,01H         ; 1
         LD    E,0BH         ; 11
-LBL105: LD    A,(DE)
+scrollUpFourBytes: LD    A,(DE)
         LD    (HL),A
         INC   HL
         INC   DE
@@ -1426,36 +1426,36 @@ LBL105: LD    A,(DE)
         INC   HL
         INC   DE
         DEC   C
-        JP    NZ,LBL105
+        JP    NZ,scrollUpFourBytes
         LD    C,0AH         ; 10
         XOR   A
-LBL106: LD    (HL),A
+clearScrollUpBottom: LD    (HL),A
         INC   HL
         DEC   C
-        JP    NZ,LBL106
+        JP    NZ,clearScrollUpBottom
         LD    A,H
         CP    0BFH          ; 191
         RET   Z
         INC   H
         INC   D
-        JP    LBL104
-SUB46:  LD    A,(bios_vars.cursorY)  ; [2]
+        JP    scrollUpColumn
+insertScreenRow:  LD    A,(bios_vars.cursorY)  ; [2]
         LD    L,A
         LD    A,0EEH                ; 238
         SUB   L
         OR    A
         rra
-        LD    (SMC3+1),A
+        LD    (smc_scrollPairCount+1),A
         LD    H,0BFH                ; 191
         LD    D,H
         LD    B,30H         ; 48 '0'
-LBL107: LD    L,0EFH                ; 239
+scrollDownColumn: LD    L,0EFH                ; 239
         LD    E,0E5H                ; 229
-SMC3:   LD    A,00H
+smc_scrollPairCount:   LD    A,00H
         LD    C,A
         OR    A
-        JP    Z,LBL109
-LBL108: LD    A,(DE)
+        JP    Z,clearInsertedRow
+scrollDownPair: LD    A,(DE)
         LD    (HL),A
         DEC   HL
         DEC   DE
@@ -1464,203 +1464,203 @@ LBL108: LD    A,(DE)
         DEC   HL
         DEC   DE
         DEC   C
-        JP    NZ,LBL108
-LBL109: LD    C,09H         ; 9
+        JP    NZ,scrollDownPair
+clearInsertedRow: LD    C,09H         ; 9
         XOR   A
-LBL110: LD    (HL),A
+clearInsertedRowByte: LD    (HL),A
         DEC   HL
         DEC   DE
         DEC   C
-        JP    NZ,LBL110
+        JP    NZ,clearInsertedRowByte
         DEC   H
         LD    D,H
         DEC   B
-        JP    NZ,LBL107
+        JP    NZ,scrollDownColumn
         RET
-SUB47:  PUSH  HL            ; [2]
+updateEditMode:  PUSH  HL            ; [2]
         LD    HL,(bios_vars.cursorY)
         PUSH  HL
-        CALL  SUB56
+        CALL  enableInverse
         LD    HL,9DF9H    ; 40441
         LD    (bios_vars.cursorY),HL
-        LD    A,(VAR5)
+        LD    A,(v_insertMode)
         OR    A
-        LD    HL,REF16    ; 53428
-        JP    NZ,LBL111
-        LD    HL,REF17    ; 53438
-LBL111: CALL  bios_printString
-        CALL  SUB57
+        LD    HL,txtIns    ; 53428
+        JP    NZ,printEditMode
+        LD    HL,txtOvr    ; 53438
+printEditMode: CALL  bios_printString
+        CALL  disableInverse
         POP   HL
         LD    (bios_vars.cursorY),HL
         POP   HL
         RET
-SUB48:  LD    HL,(VAR3)   ; [5]
-        CALL  SUB42
+nextCurrentLine:  LD    HL,(v_currentLine)   ; [5]
+        CALL  nextLine
         LD    A,(HL)
         INC   A
         RET   Z
-        LD    (VAR3),HL
-        LD    HL,(VAR8)
+        LD    (v_currentLine),HL
+        LD    HL,(v_lineNumber)
         INC   HL
-        LD    (VAR8),HL
+        LD    (v_lineNumber),HL
         XOR   A
         INC   A
         RET
-SUB49:  LD    HL,(VAR3)   ; [3]
-        CALL  SUB35
+previousCurrentLine:  LD    HL,(v_currentLine)   ; [3]
+        CALL  previousLine
         RET   Z
-        LD    (VAR3),HL
-        LD    HL,(VAR8)
+        LD    (v_currentLine),HL
+        LD    HL,(v_lineNumber)
         DEC   HL
-        LD    (VAR8),HL
+        LD    (v_lineNumber),HL
         RET
-SUB50:  PUSH  DE            ; [3]
+updateLineNumber:  PUSH  DE            ; [3]
         PUSH  BC
         PUSH  HL
         LD    HL,(bios_vars.cursorY)
         PUSH  HL
-        CALL  SUB56
+        CALL  enableInverse
         LD    HL,67F9H    ; 26617
         LD    (bios_vars.cursorY),HL
-        LD    HL,(VAR8)
+        LD    HL,(v_lineNumber)
         LD    B,20H         ; 32 ' '
         LD    DE,0FC18H   ; 64536
-        CALL  SUB51
+        CALL  printDecimalDigit
         LD    DE,03E8H    ; 1000
         ADD   HL,DE
         LD    DE,0FF9CH   ; 65436
-        CALL  SUB51
+        CALL  printDecimalDigit
         LD    DE,0064H    ; 100
         ADD   HL,DE
         LD    DE,0FFF6H   ; 65526
-        CALL  SUB51
+        CALL  printDecimalDigit
         LD    A,L
         ADD   A,3AH         ; 58 ':'
         LD    C,A
         CALL  bios_printChar
-        CALL  SUB57
+        CALL  disableInverse
         POP   HL
         LD    (bios_vars.cursorY),HL
         POP   HL
         POP   BC
         POP   DE
         RET
-SUB51:  LD    C,2FH         ; 47 '/'; [4]
-LBL112: INC   C
+printDecimalDigit:  LD    C,2FH         ; 47 '/'; [4]
+decimalDigitLoop: INC   C
         ADD   HL,DE
-        JP    C,LBL112
+        JP    C,decimalDigitLoop
         LD    A,C
         CP    30H           ; 48 '0'
-        JP    Z,LBL113
+        JP    Z,decimalDigitPrint
         LD    B,0FFH                ; 255
-LBL113: AND   B
+decimalDigitPrint: AND   B
         LD    C,A
         JP    bios_printChar
-SUB52:  LD    HL,(VAR3)   ; [3]
+recountCurrentLine:  LD    HL,(v_currentLine)   ; [3]
         EX    DE,HL
-        LD    HL,(VAR01)
-        LD    (VAR3),HL
+        LD    HL,(v_textBeginLo)
+        LD    (v_currentLine),HL
         LD    HL,0001H    ; 1
-        LD    (VAR8),HL
-LBL114: LD    HL,(VAR3)
-        CALL  SUB38
+        LD    (v_lineNumber),HL
+recountLineLoop: LD    HL,(v_currentLine)
+        CALL  compareHLDE
         RET   Z
-        CALL  SUB48
-        JP    LBL114
-SUB53:  PUSH  HL            ; [2]
+        CALL  nextCurrentLine
+        JP    recountLineLoop
+drawStatusBar:  PUSH  HL            ; [2]
         LD    HL,(bios_vars.cursorY)
         PUSH  HL
-        CALL  SUB56
+        CALL  enableInverse
         LD    H,90H         ; 144
         LD    C,30H         ; 48 '0'
-LBL115: LD    L,0F1H                ; 241
+statusBarColumn: LD    L,0F1H                ; 241
         LD    A,09H         ; 9
-LBL116: LD    (HL),0FFH   ; 255
+statusBarPixel: LD    (HL),0FFH   ; 255
         INC   L
         DEC   A
-        JP    NZ,LBL116
+        JP    NZ,statusBarPixel
         INC   H
         DEC   C
-        JP    NZ,LBL115
+        JP    NZ,statusBarColumn
         LD    HL,58F9H    ; 22777
         LD    (bios_vars.cursorY),HL
-        LD    HL,REF18    ; 53448
+        LD    HL,txtLine    ; 53448
         CALL  bios_printString
         LD    HL,80F9H    ; 33017
         LD    (bios_vars.cursorY),HL
-        LD    HL,REF19    ; 53453
+        LD    HL,txtCol    ; 53453
         CALL  bios_printString
-        CALL  SUB50
-        CALL  SUB47
-        CALL  SUB57
+        CALL  updateLineNumber
+        CALL  updateEditMode
+        CALL  disableInverse
         POP   HL
         LD    (bios_vars.cursorY),HL
         POP   HL
         RET
 
-SUB54:  POP   HL
+resetSessionStack:  POP   HL
 
         ; Установка указателя стека, агрумент этой инструкции
-        ; может меняться из п/п LBL4
-SMC4:   LD    SP,8F50H
+        ; может меняться из п/п beginSession
+smc_resetSessionStack:   LD    SP,8F50H
         ; Переход по адресу в hl
         JP    (HL)
 
-LBL117: CALL  SUB12
-        CALL  SUB13
-        LD    DE,REF4             ; 53320
+moveNextWord: CALL  beginLineEdit
+        CALL  getLineBufferCursor
+        LD    DE,lineWordRightLimit             ; 53320
         LD    C,18H         ; 24
-LBL118: CALL  SUB38
+skipCurrentWordRight: CALL  compareHLDE
         RET   Z
         LD    A,(HL)
         CP    20H           ; 32 ' '
-        JP    Z,LBL119
+        JP    Z,skipSpacesRight
         INC   HL
         CALL  bios_printChar
-        JP    LBL118
-LBL119: CALL  SUB38         ; [2]
+        JP    skipCurrentWordRight
+skipSpacesRight: CALL  compareHLDE         ; [2]
         JP    Z,keyHandler_End
         LD    A,(HL)
         CP    20H           ; 32 ' '
         RET   NZ
         INC   HL
         CALL  bios_printChar
-        JP    LBL119
-LBL120: CALL  SUB12
-        CALL  SUB13
-        LD    DE,LBL2             ; 53258
+        JP    skipSpacesRight
+movePreviousWord: CALL  beginLineEdit
+        CALL  getLineBufferCursor
+        LD    DE,startupBannerAndLineBuffer             ; 53258
         LD    C,08H         ; 8
-        CALL  SUB38
+        CALL  compareHLDE
         RET   Z
         DEC   HL
         DEC   DE
-LBL121: CALL  SUB38
+skipSpacesLeft: CALL  compareHLDE
         RET   Z
         LD    A,(HL)
         CP    20H           ; 32 ' '
-        JP    NZ,LBL122
+        JP    NZ,skipCurrentWordLeft
         CALL  bios_printChar
         DEC   HL
-        JP    LBL121
-LBL122: CALL  SUB38         ; [2]
+        JP    skipSpacesLeft
+skipCurrentWordLeft: CALL  compareHLDE         ; [2]
         RET   Z
         LD    A,(HL)
         CP    20H           ; 32 ' '
         RET   Z
         DEC   HL
         CALL  bios_printChar
-        JP    LBL122
-SUB55:  PUSH  HL
+        JP    skipCurrentWordLeft
+clearTextViewport:  PUSH  HL
         PUSH  DE
         LD    HL,0000H
         ADD   HL,SP
-        LD    (SMC5+1),HL
+        LD    (smc_restoreClearStack+1),HL
         LD    DE,0000H
         LD    HL,0BFF0H   ; 49136
         LD    C,30H         ; 48 '0'
-LBL123: LD    SP,HL
+clearTextColumn: LD    SP,HL
         LD    A,0FH         ; 15
-LBL124: PUSH  DE
+clearTextPushLoop: PUSH  DE
         PUSH  DE
         PUSH  DE
         PUSH  DE
@@ -1669,29 +1669,29 @@ LBL124: PUSH  DE
         PUSH  DE
         PUSH  DE
         DEC   A
-        JP    NZ,LBL124
+        JP    NZ,clearTextPushLoop
         DEC   H
         DEC   C
-        JP    NZ,LBL123
-SMC5:   LD    SP,0FFFFH   ; 65535
+        JP    NZ,clearTextColumn
+smc_restoreClearStack:   LD    SP,0FFFFH   ; 65535
         POP   DE
         POP   HL
         RET
-SUB56:  PUSH  HL            ; [5]
+enableInverse:  PUSH  HL            ; [5]
         LD    HL,0FFFFH   ; 65535
-LBL125: LD    (bios_vars.inverse),HL
+setVideoInverse: LD    (bios_vars.inverse),HL
         POP   HL
         RET
-SUB57:  PUSH  HL            ; [6]
+disableInverse:  PUSH  HL            ; [6]
         LD    HL,0000H
-        JP    LBL125
+        JP    setVideoInverse
 
 ;----------------------------------------------------------------------
 ; Запрос имени файла в строке состояния
 
 inputFileName:
-        CALL  SUB63
-        LD    DE,BUFFER1
+        CALL  prepareFilePrompt
+        LD    DE,FILE_NAME_RECALL_END
         LD    BC,inputFileNameBuffer    ; 56771
         CALL  bios_memcpy_bc_hl
         LD    HL,00F9H    ; 249
@@ -1704,21 +1704,21 @@ inputFileName:
         LD    HL,0FF9H    ; 4089
         LD    (bios_vars.cursorY),HL
         CP    0DH           ; 13
-        JP    Z,LBL126
+        JP    Z,finishFilePrompt
         PUSH  AF
-        LD    HL,REF28    ; 56800
+        LD    HL,txtSpace12    ; 56800
         CALL  bios_printString
         LD    HL,0FF9H    ; 4089
         LD    (bios_vars.cursorY),HL
         LD    HL,inputFileNameBuffer    ; 56771
         LD    BC,inputFileNameBuffer    ; 56771
-        LD    DE,REF26    ; 56781
+        LD    DE,inputBufEnd    ; 56781
         POP   AF
-        JP    LBL131
+        JP    fileNameInputKey
 
-LBL126: LD    HL,inputFileNameBuffer
-        LD    DE,REF26
-        LD    BC,BUFFER2
+finishFilePrompt: LD    HL,inputFileNameBuffer
+        LD    DE,inputBufEnd
+        LD    BC,FILE_NAME_HISTORY
         CALL  bios_memcpy_bc_hl
         LD    HL,0000H
         LD    (bios_vars.inverse),HL
@@ -1729,12 +1729,12 @@ LBL126: LD    HL,inputFileNameBuffer
 
 openFile:
         CALL  prepareFileName
-        LD    HL,(VAR01)
+        LD    HL,(v_textBeginLo)
         EX    DE,HL
         LD    HL,fileDescName
         CALL  bios_fileLoad2
-        JP    C,LBL135
-        JP    LBL126
+        JP    C,fileOperationError
+        JP    finishFilePrompt
 
 ;----------------------------------------------------------------------
 ; Подготовка имени файла для файловых операций
@@ -1752,21 +1752,21 @@ saveFile:
         CALL  prepareFileName
         LD    DE,0000H
         LD    B,00H
-        LD    HL,(VAR01)
+        LD    HL,(v_textBeginLo)
 
         ; Подсчет контрольной суммы
-LBL127: LD    A,B
+getCRC: LD    A,B
         ADD   A,(HL)
         LD    B,A
         INC   DE
         LD    A,(HL)
         INC   A
-        JP    Z,LBL128
+        JP    Z,buildSaveDescriptor
         INC   HL
-        JP    LBL127
+        JP    getCRC
 
         ; Формирование дескриптора файла
-LBL128: LD    HL,(VAR01)
+buildSaveDescriptor: LD    HL,(v_textBeginLo)
         LD    (fileDescAddr),HL
         EX    DE,HL
         LD    (fileDescSize),HL
@@ -1776,27 +1776,27 @@ LBL128: LD    HL,(VAR01)
         ; Сохранение файла
         LD    HL,fileDescName
         CALL  bios_fileCreate
-        JP    C,LBL135
-        JP    LBL126
+        JP    C,fileOperationError
+        JP    finishFilePrompt
 
 ;----------------------------------------------------------------------
 
-LBL129: POP   AF
-        JP    SUB1
+fileNameOverflow: POP   AF
+        JP    synchronizeTopAndRedraw
         LD    B,H
         LD    C,L
-LBL130: CALL  bios_getch          ; [4]
-LBL131: CP    08H           ; 8
-        JP    Z,LBL132
+fileNameInputLoop: CALL  bios_getch          ; [4]
+fileNameInputKey: CP    08H           ; 8
+        JP    Z,fileNameBackspace
         CP    0DH           ; 13
-        JP    Z,LBL134
+        JP    Z,terminateFileName
         CP    1FH           ; 31
-        JP    Z,LBL140
+        JP    Z,cancelFilePrompt
         CP    20H           ; 32 ' '
-        JP    C,LBL130
+        JP    C,fileNameInputLoop
         PUSH  AF
         CALL  bios_cmp_hl_de
-        JP    Z,LBL129
+        JP    Z,fileNameOverflow
         POP   AF
         LD    (HL),A
         PUSH  BC
@@ -1804,14 +1804,14 @@ LBL131: CP    08H           ; 8
         CALL  bios_printChar
         POP   BC
         INC   HL
-        JP    LBL130
-LBL132: LD    A,H
+        JP    fileNameInputLoop
+fileNameBackspace: LD    A,H
         CP    B
-        JP    NZ,LBL133
+        JP    NZ,eraseFileNameCharacter
         LD    A,L
         CP    C
-        JP    Z,LBL130
-LBL133: DEC   HL
+        JP    Z,fileNameInputLoop
+eraseFileNameCharacter: DEC   HL
         PUSH  BC
         LD    C,08H         ; 8
         CALL  bios_printChar
@@ -1820,17 +1820,17 @@ LBL133: DEC   HL
         LD    C,08H         ; 8
         CALL  bios_printChar
         POP   BC
-        JP    LBL130
-LBL134: LD    (HL),00H
-        JP    LBL126
-LBL135:  LD    C,05H         ; 5; [5]
-LBL136: CALL  bios_beep_Old
+        JP    fileNameInputLoop
+terminateFileName: LD    (HL),00H
+        JP    finishFilePrompt
+fileOperationError:  LD    C,05H         ; 5; [5]
+fileErrorBeepLoop: CALL  bios_beep_Old
         LD    B,0FFH                ; 255
         CALL  bios_delay_b
         CALL  bios_delay_b
         DEC   C
-        JP    NZ,LBL136
-        JP    LBL126
+        JP    NZ,fileErrorBeepLoop
+        JP    finishFilePrompt
 ;----------------------------------------------------------------------
 
 insertFile:
@@ -1842,41 +1842,41 @@ insertFile:
         LD    HL,(fileDescSize)
         EX    DE,HL         ; de = размер файла
         PUSH  DE
-        LD    HL,(VAR01)    ; hl = адрес буфера
+        LD    HL,(v_textBeginLo)    ; hl = адрес буфера
 
         ; Сканируем буфер, пока не найдем конец текста (0FFh)
-LBL137: LD    A,(HL)
+findAppendPosition: LD    A,(HL)
         INC   A
-        JP    Z,LBL138
+        JP    Z,checkAppendCapacity
         INC   HL
-        JP    LBL137
+        JP    findAppendPosition
 
-LBL138: POP   DE    ; de = размер файла
+checkAppendCapacity: POP   DE    ; de = размер файла
         PUSH  HL    ; hl = адрес конца буфера
         ADD   HL,DE
         EX    DE,HL
-        LD    HL,(VAR03)
+        LD    HL,(v_textLimitLo)
         LD    A,H
         CP    D
-        JP    C,LBL135
-        JP    NZ,LBL139
+        JP    C,fileOperationError
+        JP    NZ,loadAppendFile
         LD    A,L
         CP    E
-        JP    C,LBL135
+        JP    C,fileOperationError
 
         ; загрузка файла по адресу de
-LBL139: POP   DE
+loadAppendFile: POP   DE
         LD    HL,fileDescName
         CALL  bios_fileLoad2
-        JP    C,LBL135
-        JP    LBL126
+        JP    C,fileOperationError
+        JP    finishFilePrompt
 
 ;----------------------------------------------------------------------
 
-LBL140: POP   DE
+cancelFilePrompt: POP   DE
         LD    HL,0000H
         LD    (bios_vars.inverse),HL
-        JP    LBL10
+        JP    clearAndRedrawDocument
 
 ;----------------------------------------------------------------------
 
@@ -1886,7 +1886,7 @@ txtFile:
 inputFileNameBuffer:
         BLOCK 10, 00h
 
-REF26:  DB    00H,00H,00H         ; "..."
+inputBufEnd:  DB    00H,00H,00H         ; "..."
 
 ; Дескриптор файла (запись в каталоге MXOS)
 fileDescName:   BLOCK 10, 20h   ; имя, расширение и атрибуты
@@ -1895,7 +1895,7 @@ fileDescSize:   DW    2020H     ; размер
 fileDescCRC:    DB    20H       ; контрольная сумма
                 DB    20H       ; первый сектор
 
-REF28:  DB    20H,20H,20H,20H     ; "    "
+txtSpace12:  DB    20H,20H,20H,20H     ; "    "
         DB    20H,20H,20H,20H     ; "    "
         DB    20H,20H,20H,20H     ; "    "
         DB    00H                 ; "."
@@ -1919,36 +1919,36 @@ keyInput:
 keyHandler_F4:
         CALL  inputFileName
         CALL  openFile
-        JP    LBL3
+        JP    restartAfterLoad
 
 keyHandler_F5:
         CALL  inputFileName
         CALL  saveFile
-        JP    SUB1
+        JP    synchronizeTopAndRedraw
 
 keyHandler_F6:
         CALL  inputFileName
         CALL  insertFile
-        JP    LBL3
+        JP    restartAfterLoad
 
 ;----------------------------------------------------------------------
 
         ; ???
         NOP
 
-SUB63:
-        CALL  SUB15
-        LD    HL,BUFFER2
+prepareFilePrompt:
+        CALL  commitLineEdit
+        LD    HL,FILE_NAME_HISTORY
         RET
-LBL145:
+openCommandLineFile:
         EX    DE,HL
-        LD    DE,REF29
+        LD    DE,commandLineFileNameBuffer
         CALL  bios_fileNamePrepare
-        LD    HL,(VAR01)
+        LD    HL,(v_textBeginLo)
         EX    DE,HL
-        LD    HL,REF29
+        LD    HL,commandLineFileNameBuffer
         CALL  bios_fileLoad2
-        JP    LBL2
+        JP    startupBannerAndLineBuffer
 
         DB    00H,00H
-REF29:  DB    00H,00H,00H,00H
+commandLineFileNameBuffer:  DB    00H,00H,00H,00H

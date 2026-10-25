@@ -60,13 +60,8 @@ fileSelectDrive:
             ; Восстаналвиаем a
             rrca
 
-            ; Очищаем кэш fat
-            push    bc
-            call    resetSectorCache
-            pop     bc
-
-            ; Считываем загрузочный сектор и инициализируем структуру v_diskInfo
-            call    fatReadBootSector
+            ; Файловая система выбирается отдельно от физического драйвера.
+            call    mountVolume
 
             ; Восстанавливаем регистры и выходим
             pop     de

@@ -137,6 +137,7 @@ v_keybTbl:
 	INCLUDE "driver.inc"
 	INCLUDE "installDriver.inc"
 	INCLUDE "fileGetSetDrive.inc"
+    INCLUDE "volume.inc"
     INCLUDE "strcmp.inc"
 	INCLUDE "fatCache.inc"
 	INCLUDE "fatFindCluster.inc"
@@ -160,6 +161,8 @@ v_keybTbl:
 ;---------------------------------------------------------------------------
 ; Константы и Переменные
 ;---------------------------------------------------------------------------
+
+    INCLUDE "volumeData.inc"
 
 v_drive:            DB 1            ; Текущий накопитель
 v_findCluster:      DW 0            ; Используется в fileFindClusterFirst/fileFindClusterNext

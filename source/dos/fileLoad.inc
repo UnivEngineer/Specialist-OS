@@ -15,7 +15,7 @@
 ; 2022-02-11 Переработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-fileLoad2:  ; загрузить файл с именем HL по адресу DE
+fatFileLoad2:  ; загрузить файл с именем HL по адресу DE
             call    fileFind
             ret c
 
@@ -24,7 +24,7 @@ fileLoad2:  ; загрузить файл с именем HL по адресу D
             push    de
             jp      fileLoadStep2
 
-fileLoad:   ; загрузить файл с именем HL по адресу из дескриптора
+fatFileLoad:   ; загрузить файл с именем HL по адресу из дескриптора
             call    fileFind
             ret c
 
@@ -59,7 +59,7 @@ fileLoadStep2:
 
             ld      hl, (v_input_start)
             ld      b, 2
-            call    fileTransferClusters
+            call    fatFileTransferClusters
 
             pop     de
             pop     bc
@@ -79,7 +79,7 @@ fileLoadStep2:
 ; в кластере. Диск выбирает вызывающая сторона.
 ;----------------------------------------------------------------------------
 
-fileTransferClusters:
+fatFileTransferClusters:
             push    bc
 fileTransferClusters_loop:
             push    de
@@ -104,7 +104,7 @@ fileTransferClusters_error:
             ret
 
 ; ---------------------------------------------------------------------------
-fileLoadInfo:
+fatFileLoadInfo:
             ; Ищем файл с именем в hl
             call    fileFind
             ret c 

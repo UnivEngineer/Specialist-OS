@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [string] $EmulatorDirectory = $env:SPECIALIST_EMU_DIR
+    [string] $EmulatorDirectory = $env:SPECIALIST_EMU_DIR,
+
+    [ValidateSet("SystemRom_emulator.bin", "SystemRom_ramfos_emulator.bin")]
+    [string] $SystemImage = "SystemRom_emulator.bin"
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,7 +21,7 @@ if (-not (Test-Path -LiteralPath $emulatorPath -PathType Leaf)) {
 }
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$systemRomSource = Join-Path $repositoryRoot "images\SystemRom_emulator.bin"
+$systemRomSource = Join-Path (Join-Path $repositoryRoot "images") $SystemImage
 $flashRomSource = Join-Path $repositoryRoot "images\FlashDisk_emulator.bin"
 $configSource = Join-Path $PSScriptRoot "SpecialistMX2_My_MXOS.cfg"
 

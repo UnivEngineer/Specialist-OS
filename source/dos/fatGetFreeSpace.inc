@@ -8,7 +8,7 @@
 ; 2022-02-09 Разработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-getDriveFreeSpace:
+fatGetDriveFreeSpace:
             ; Сохраняем регистры
             push    hl
             push    bc

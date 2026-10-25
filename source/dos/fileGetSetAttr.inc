@@ -16,7 +16,7 @@
 ; 2022-01-31 Доработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-fileGetSetAttr:
+fatFileGetSetAttr:
             push    bc
             ld      b, a        
 

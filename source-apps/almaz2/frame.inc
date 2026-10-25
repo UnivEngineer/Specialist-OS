@@ -95,9 +95,6 @@ frame_begin_check:
     SBC A,HIGH(FRAME_STEP_TICKS)
     JP NC,frame_begin_ready
     CALL audio_update
-    IF ALMAZ_OPTIMIZE
-        CALL input_poll
-    ENDIF
     CALL frame_clock_sample
     CALL frame_elapsed
     JP frame_begin_check

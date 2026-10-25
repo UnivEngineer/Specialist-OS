@@ -57,3 +57,9 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  div_hl_de           ; C887: [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
                 jp  fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
                 jp  fileTransferClusters ; C88D: [MXOS2] передать кластеры
+                jp  installVolume       ; C890: зарегистрировать драйвер тома
+                jp  getVolume           ; C893: таблица и контекст драйвера тома
+                jp  mountVolume         ; C896: повторное монтирование тома
+                jp  flushVolume         ; C899: сохранить изменения тома
+
+                ASSERT $ == 0C89Ch
