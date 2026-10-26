@@ -25,10 +25,10 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 $modes = @(
     @{ Name = "Base";        Output = "Almaz2-base";        Color = 0; Pit = 0; Ramfos = 0; Hud = 1 },
     @{ Name = "MXSoft";      Output = "Almaz2-mx-soft";     Color = 1; Pit = 0; Ramfos = 0; Hud = 1 },
-    @{ Name = "MXTimer";     Output = "Almaz2X";            Color = 1; Pit = 1; Ramfos = 0; Hud = 1 },
+    @{ Name = "MXTimer";     Output = "Almaz2-optimized-mx"; Color = 1; Pit = 1; Ramfos = 0; Hud = 1 },
     @{ Name = "RamfosSoft";  Output = "Almaz2-ramfos-soft"; Color = 1; Pit = 0; Ramfos = 1; Hud = 1 },
-    @{ Name = "RamfosTimer"; Output = "Almaz2-ramfos-pit";  Color = 1; Pit = 1; Ramfos = 1; Hud = 1 },
-    @{ Name = "Reference";   Output = "Almaz2-reference";   Color = 0; Pit = 0; Ramfos = 0; Hud = 0 }
+    @{ Name = "RamfosTimer"; Output = "Almaz2-optimized-ramfos"; Color = 1; Pit = 1; Ramfos = 1; Hud = 1 },
+    @{ Name = "Reference";   Output = "Almaz2-original";    Color = 0; Pit = 0; Ramfos = 0; Hud = 0 }
 )
 $selected = @($modes | Where-Object { $Mode -eq "All" -or $_.Name -eq $Mode })
 if ($PublishMxTimer -and -not ($selected | Where-Object { $_.Name -eq "MXTimer" })) {
@@ -57,18 +57,30 @@ foreach ($variant in $selected) {
 
 if ($PublishMxTimer) {
     # Историческая исправленная версия должна остаться независимым эталоном.
-    $legacy = Join-Path $repositoryRoot "assets\games\originals\Almaz2X-mxos-legacy.bin"
-    $target = Join-Path $repositoryRoot "assets\games\Almaz2X.exe"
+    $archive = Join-Path $repositoryRoot "assets\games\Almaz-2"
+    $legacy = Join-Path $archive "legacy\Almaz2X-mxos-legacy.bin"
+    $target = Join-Path $repositoryRoot "assets\games\Almaz2MX.exe"
     $legacyHash = "DF73430DD8F6D17A40AAB8FEDFA75BA21663DA13EF0C2F888DBCCB5D4B0A6713"
     if (-not (Test-Path -LiteralPath $legacy)) {
         if ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ne $legacyHash) {
-            throw "Cannot create legacy backup from an unknown Almaz2X.exe"
+            throw "Cannot create legacy backup from an unknown Almaz2MX.exe"
         }
         Copy-Item -LiteralPath $target -Destination $legacy
     }
     if ((Get-FileHash -LiteralPath $legacy -Algorithm SHA256).Hash -ne $legacyHash) {
         throw "Legacy Almaz2X backup SHA-256 differs"
     }
-    Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2X.exe") -Destination $target -Force
+    if ($selected | Where-Object { $_.Name -eq "Reference" }) {
+        Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-original.exe") `
+            -Destination (Join-Path $archive "Almaz2-original.exe") -Force
+    }
+    Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-optimized-mx.exe") `
+        -Destination (Join-Path $archive "Almaz2-optimized-mx.exe") -Force
+    Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-optimized-mx.exe") `
+        -Destination $target -Force
+    if ($selected | Where-Object { $_.Name -eq "RamfosTimer" }) {
+        Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-optimized-ramfos.exe") `
+            -Destination (Join-Path $archive "Almaz2-optimized-ramfos.exe") -Force
+    }
     Write-Host ("[app] Published {0}" -f $target)
 }

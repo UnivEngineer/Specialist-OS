@@ -1,7 +1,6 @@
 # Небольшой flash-диск H: для эмулятора.
-# Монохромный Almaz-2.exe уже доступен на системном ROM-диске A:.
-Almaz2D.exe
-Almaz2X.exe
+# Ускоренная MX-версия также доступна на системном ROM-диске A:.
+Almaz2MX.exe
 StarWars.rks
 Nardy.rks
 Pacman2.rks

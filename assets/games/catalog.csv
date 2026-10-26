@@ -1,7 +1,10 @@
 File,LoadAddress,Status,OriginalName,Notes
-Almaz2X.exe,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цвет MXOS; эффекты ВИ53 2 МГц, музыка BIOS; 8 шагов/с; TIME в секундах; квота анимации с учётом динамики; малые наборы каждый проход; новые изменения требуют игрового прогона
-Almaz2R.exe,0,cpu-checked,Almaz-2.0.exe,Восстановленная цветная версия Ramfos; 29 байт исправлены; системные вызовы сохранены
-Almaz2D.exe,0,cpu-checked,Almaz2X.exe,Палитра пользователя MXOS; чёрный фон; текст цвета рамки; цветные тайлы; дым тёмно-серый
+Almaz-2/Almaz2-original.exe,0,reference,Almaz-2.exe,Оригинальная чёрно-белая версия
+Almaz-2/Almaz2-original-ramfos-broken.exe,0,broken,Almaz-2.0.exe,Исторический цветной оригинал Ramfos с повреждёнными картами и надписями
+Almaz-2/Almaz2-original-ramfos.exe,0,cpu-checked,Almaz-2.0.exe,Восстановленная цветная версия Ramfos; 29 байт исправлены; системные вызовы сохранены
+Almaz-2/Almaz2-optimized-ramfos.exe,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; ускоренная цветная версия Ramfos с эффектами ВИ53
+Almaz-2/Almaz2-optimized-mx.exe,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цвет MXOS; эффекты ВИ53 2 МГц, музыка BIOS; 8 шагов/с; TIME в секундах; квота анимации с учётом динамики; малые наборы каждый проход; новые изменения требуют игрового прогона; в корне публикуется как Almaz2MX.exe
+Almaz-2/legacy/Almaz2D.exe,0,cpu-checked,Almaz2MX.exe,Архивная палитра пользователя MXOS; чёрный фон; текст цвета рамки; цветные тайлы; дым тёмно-серый
 Budi-MX.exe,0,unverified,Budi.0.EXE,Версия для Специалиста MX
 StarW2X.exe,0,unverified,StarW2.0.EXE,Версия для Специалиста MX
 Buran.exe,0,unverified,Buran.0.EXE,Чёрно-белый Buran/StarWars; совпадает с StarWars.rks без заголовка

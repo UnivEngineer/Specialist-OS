@@ -367,7 +367,7 @@ def main():
     for total in range(65536, 65536 + 10000):
         require(divmod(total, 10000) == (6 + (total - 60000) // 10000, (total - 60000) % 10000),
                 "Real-time carry decomposition differs")
-    reference = (ROOT / "assets/games/Almaz-2.exe").read_bytes()
+    reference = (ROOT / "assets/games/Almaz-2/Almaz2-original.exe").read_bytes()
     bios_source = (ROOT / "source/dos/DOS.asm").read_text(encoding="utf-8")
     row = bios_source.split("v_keybTbl:", 1)[1].splitlines()[1]
     bios_codes = [int(value, 16) for value in re.findall(r"([0-9A-Fa-f]+)h", row)]
@@ -380,7 +380,7 @@ def main():
         actual = ((0xFF ^ (1 << column), 0x0F) if column < 8 else
                   (0xFF, 0x0F ^ (1 << (column - 8))))
         require(actual == expected, f"Arrow matrix differs from BIOS: {key:02X}")
-    data, _ = load("Almaz2-reference")
+    data, _ = load("Almaz2-original")
     require(data == reference, "Historical monochrome round-trip differs")
     report = {"reference_sha256": sha256(data).hexdigest(), "pit_clock_hz": None,
               "variants": [], "runtime_emulation": False}
@@ -388,9 +388,9 @@ def main():
     for stem, color, pit, ramfos in (
         ("Almaz2-base", False, False, False),
         ("Almaz2-mx-soft", True, False, False),
-        ("Almaz2X", True, True, False),
+        ("Almaz2-optimized-mx", True, True, False),
         ("Almaz2-ramfos-soft", True, False, True),
-        ("Almaz2-ramfos-pit", True, True, True),
+        ("Almaz2-optimized-ramfos", True, True, True),
     ):
         data, symbols = load(stem)
         calls = calls_from_listing(stem)

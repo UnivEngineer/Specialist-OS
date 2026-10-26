@@ -108,7 +108,7 @@ switch ($Target) {
     "SystemRamfos" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
         $manifest = @(Get-SystemManifest $manifestPath "emu" |
-            Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM") })
+            Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM", "Test-MX.COM") })
         $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\Ramfos.csv"
         $manifest += @(Get-SystemManifest $ramfosManifestPath "emu")
         $manifestHasMetadata = $true

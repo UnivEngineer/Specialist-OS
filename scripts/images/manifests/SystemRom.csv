@@ -1,8 +1,7 @@
 Source,ImageName,LoadAddress,Format
 bin/DOS.sys,DOS.SYS,0xC000,raw
 bin/NC.com,NC.COM,0xE800,raw
-assets/system-rom/abcd0123.txt,abcd0123.txt,0,raw
-assets/games/Almaz-2.exe,Almaz-2.exe,0,raw
+assets/games/Almaz2MX.exe,Almaz2MX.exe,0,raw
 {AUTOEXEC},AUTOEXEC.BAT,0x8000,raw
 assets/programs/DL-red.COM,DL-red.COM,0xD000,raw
 bin/E.com,E.COM,0xE800,raw
@@ -24,4 +23,3 @@ assets/programs/Test-Fif.COM,Test-Fif.COM,0,raw
 assets/programs/Test-Kb.COM,Test-Kb.com,0,raw
 assets/programs/Test-M.COM,Test-M.COM,0xD400,raw
 assets/programs/Test-MX.COM,Test-MX.COM,0,raw
-bin/test-scr.exe,test-scr.exe,0,raw
