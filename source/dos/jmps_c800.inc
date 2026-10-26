@@ -61,5 +61,6 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  getVolume           ; C893: таблица и контекст драйвера тома
                 jp  mountVolume         ; C896: повторное монтирование тома
                 jp  flushVolume         ; C899: сохранить изменения тома
+                jp  beepTimer           ; C89C: звук ВИ53 с ABI RAMFOS beep
 
-                ASSERT $ == 0C89Ch
+                ASSERT $ == 0C89Fh

@@ -182,6 +182,7 @@ bios_installVolume      = 0C890h ; [MXOS2] Зарегистрировать др
 bios_getVolume          = 0C893h ; [MXOS2] Получить таблицу и контекст драйвера тома
 bios_mountVolume        = 0C896h ; [MXOS2] Повторно смонтировать выбранный том
 bios_flushVolume        = 0C899h ; [MXOS2] Сохранить изменения выбранного тома
+bios_beepTimer          = 0C89Ch ; [MXOS2] Звуковой сигнал через ВИ53, ABI RAMFOS beep
 
 ; ABI 1 драйвера тома. Аппаратный ABI bios_diskDriver остаётся отдельным.
 ; Таблица начинается с DB "FS",1,15; далее 15 адресов DW в этом порядке.

@@ -131,6 +131,7 @@ v_keybTbl:
 	INCLUDE "input.inc"
 	INCLUDE "calcCS.inc"
 	INCLUDE "reboot3.inc"
+	INCLUDE "beepTimer.inc"
 	INCLUDE "fileExecBat.inc"
 	INCLUDE "fileExec.inc"
 	INCLUDE "driverFFC0.inc"
