@@ -75,8 +75,8 @@ def main():
     repair = module_from_spec(spec)
     spec.loader.exec_module(repair)
     games = ROOT / "assets/games"
-    mono = repair.checked_read(games / "Almaz-2/Almaz2-original.exe", repair.MONO_HASH)
-    original = repair.checked_read(games / "Almaz-2/Almaz2-original-ramfos-broken.exe", repair.ORIGINAL_HASH)
+    mono = repair.checked_read(games / "Almaz-2/legacy/Almaz2-original.exe", repair.MONO_HASH)
+    original = repair.checked_read(games / "Almaz-2/legacy/Almaz2-original-ramfos-broken.exe", repair.ORIGINAL_HASH)
     fixed = repair.checked_read(games / "Almaz-2/legacy/Almaz2X-mxos-legacy.bin", repair.FIXED_HASH)
     dark = repair.checked_read(games / "Almaz-2/legacy/Almaz2D.exe", repair.USER_HASH)
     ramfos_game = repair.checked_read(games / "Almaz-2/Almaz2-original-ramfos.exe", repair.RAMFOS_HASH)

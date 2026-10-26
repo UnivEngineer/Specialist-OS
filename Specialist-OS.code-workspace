@@ -45,6 +45,21 @@
     "version": "2.0.0",
     "tasks": [
       {
+        "label": "build: almaz",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-almaz.ps1"
+        ],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
         "label": "build: almaz2",
         "type": "process",
         "command": "powershell.exe",
@@ -63,7 +78,7 @@
       },
       {
         "label": "build: apps",
-        "dependsOn": "build: almaz2",
+        "dependsOn": ["build: almaz", "build: almaz2"],
         "problemMatcher": [],
         "group": "build"
       },

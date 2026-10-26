@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet("All", "Base", "MXSoft", "MXTimer", "RamfosSoft", "RamfosTimer", "Reference")]
+    [ValidateSet("All", "Base", "MX", "MXOptimized", "Ramfos", "RamfosOptimized", "Reference")]
     [string] $Mode = "All",
     [ValidateSet(0, 2000000, 2500000)]
     [int] $PitClockHz = 0,
@@ -23,16 +23,39 @@ $outputDirectory = Join-Path $repositoryRoot "bin"
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 $modes = @(
-    @{ Name = "Base";        Output = "Almaz2-base";        Color = 0; Pit = 0; Ramfos = 0; Hud = 1 },
-    @{ Name = "MXSoft";      Output = "Almaz2-mx-soft";     Color = 1; Pit = 0; Ramfos = 0; Hud = 1 },
-    @{ Name = "MXTimer";     Output = "Almaz2-optimized-mx"; Color = 1; Pit = 1; Ramfos = 0; Hud = 1 },
-    @{ Name = "RamfosSoft";  Output = "Almaz2-ramfos-soft"; Color = 1; Pit = 0; Ramfos = 1; Hud = 1 },
-    @{ Name = "RamfosTimer"; Output = "Almaz2-optimized-ramfos"; Color = 1; Pit = 1; Ramfos = 1; Hud = 1 },
-    @{ Name = "Reference";   Output = "Almaz2-original";    Color = 0; Pit = 0; Ramfos = 0; Hud = 0 }
+    @{ Name = "Base";        Output = "Almaz2-optimized";   Color = 0; Pit = 0; Ramfos = 0; Hud = 1 },
+    @{ Name = "MX";          Output = "Almaz2-mx";           Color = 1; Pit = 0; Ramfos = 0; Hud = 1 },
+    @{ Name = "MXOptimized"; Output = "Almaz2-mx-optimized"; Color = 1; Pit = 1; Ramfos = 0; Hud = 1 },
+    @{ Name = "Ramfos";      Output = "Almaz2-ramfos";       Color = 1; Pit = 0; Ramfos = 1; Hud = 1 },
+    @{ Name = "RamfosOptimized"; Output = "Almaz2-ramfos-optimized"; Color = 1; Pit = 1; Ramfos = 1; Hud = 1 },
+    @{ Name = "Reference";   Output = "Almaz2";              Color = 0; Pit = 0; Ramfos = 0; Hud = 0 }
 )
 $selected = @($modes | Where-Object { $Mode -eq "All" -or $_.Name -eq $Mode })
-if ($PublishMxTimer -and -not ($selected | Where-Object { $_.Name -eq "MXTimer" })) {
-    throw "PublishMxTimer requires Mode=All or MXTimer"
+if ($PublishMxTimer -and -not ($selected | Where-Object { $_.Name -eq "MXOptimized" })) {
+    throw "PublishMxTimer requires Mode=All or MXOptimized"
+}
+
+function Write-AlmazRks([string] $Executable, [string] $Destination) {
+    # Начало 0000h и включительный конец — слова little-endian.
+    # Контрольная сумма Монитора: перенос в старший байт, кроме последнего.
+    $payload = [System.IO.File]::ReadAllBytes($Executable)
+    if ($payload.Length -lt 1 -or $payload.Length -ge 0x7F00) {
+        throw "Unexpected Almaz2 payload size: $($payload.Length)"
+    }
+    $endAddress = $payload.Length - 1
+    $low = 0
+    $high = 0
+    for ($i = 0; $i -lt $payload.Length; $i++) {
+        $sum = $low + [int]$payload[$i]
+        $low = $sum -band 0xFF
+        if ($i -lt $payload.Length - 1) {
+            $high = ($high + [int]$payload[$i] + ($sum -shr 8)) -band 0xFF
+        }
+    }
+    [byte[]]$rks = @([byte]0, [byte]0, [byte]($endAddress -band 0xFF),
+        [byte]($endAddress -shr 8)) + $payload + @([byte]$low, [byte]$high)
+    [System.IO.File]::WriteAllBytes($Destination, $rks)
+    Write-Host "[app] $Destination ($($rks.Length) bytes)"
 }
 
 foreach ($variant in $selected) {
@@ -53,34 +76,19 @@ foreach ($variant in $selected) {
         ("--raw={0}.exe" -f $prefix) ("--lst={0}.lst" -f $prefix) `
         ("--sym={0}.sym" -f $prefix) $sourcePath
     if ($LASTEXITCODE -ne 0) { throw "Assembly failed: $($variant.Name)" }
+    Write-AlmazRks "$prefix.exe" "$prefix.rks"
 }
 
 if ($PublishMxTimer) {
-    # Историческая исправленная версия должна остаться независимым эталоном.
     $archive = Join-Path $repositoryRoot "assets\games\Almaz-2"
-    $legacy = Join-Path $archive "legacy\Almaz2X-mxos-legacy.bin"
-    $target = Join-Path $repositoryRoot "assets\games\Almaz2MX.exe"
-    $legacyHash = "DF73430DD8F6D17A40AAB8FEDFA75BA21663DA13EF0C2F888DBCCB5D4B0A6713"
-    if (-not (Test-Path -LiteralPath $legacy)) {
-        if ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ne $legacyHash) {
-            throw "Cannot create legacy backup from an unknown Almaz2MX.exe"
+    # Публикация всех выбранных вариантов в обоих форматах.
+    foreach ($variant in $selected) {
+        $destinationDirectory = $archive
+        foreach ($extension in @("exe", "rks")) {
+            $fileName = "$($variant.Output).$extension"
+            Copy-Item -LiteralPath (Join-Path $outputDirectory $fileName) `
+                -Destination (Join-Path $destinationDirectory $fileName) -Force
         }
-        Copy-Item -LiteralPath $target -Destination $legacy
     }
-    if ((Get-FileHash -LiteralPath $legacy -Algorithm SHA256).Hash -ne $legacyHash) {
-        throw "Legacy Almaz2X backup SHA-256 differs"
-    }
-    if ($selected | Where-Object { $_.Name -eq "Reference" }) {
-        Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-original.exe") `
-            -Destination (Join-Path $archive "Almaz2-original.exe") -Force
-    }
-    Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-optimized-mx.exe") `
-        -Destination (Join-Path $archive "Almaz2-optimized-mx.exe") -Force
-    Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-optimized-mx.exe") `
-        -Destination $target -Force
-    if ($selected | Where-Object { $_.Name -eq "RamfosTimer" }) {
-        Copy-Item -LiteralPath (Join-Path $outputDirectory "Almaz2-optimized-ramfos.exe") `
-            -Destination (Join-Path $archive "Almaz2-optimized-ramfos.exe") -Force
-    }
-    Write-Host ("[app] Published {0}" -f $target)
+    Write-Host ("[app] Published {0}" -f $archive)
 }

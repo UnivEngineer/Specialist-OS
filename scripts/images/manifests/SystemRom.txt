@@ -1,0 +1,24 @@
+# Имя на диске    Путь относительно assets                    Адрес RAW (необязательно)
+DOS.SYS          ../bin/DOS.sys                               0xC000
+NC.COM           ../bin/NC.com                                0xE800
+AUTOEXEC.BAT     {AUTOEXEC}                                   0x8000
+DL-red.COM       programs/DL-red.COM                          0xD000
+E.COM            ../bin/E.com                                 0xE800
+FLASH.COM        ../bin/Flash.com                             0xDE00
+FLASHFST.COM     ../bin/FlashFst.com                          0xDE00
+FLASHSYS.COM     ../bin/FlashSys.com                          0xDC00
+FONT.FNT         system-rom/FONT.FNT
+FORMAT.BAT       system-rom/FORMAT.BAT                        0x8000
+FORMAT.COM       ../bin/FORMAT.com                            0xF100
+LAUNCH.COM       ../bin/LAUNCH.com                            0xF800
+MON2.MON         programs/MON2.MON                            0xC000
+MON2.COM         ../bin/mon2.com                              0xF100
+MUSIC.RKS        games/Music.rks
+NC.EXT           system-rom/NC.EXT
+ROM.COM          ../bin/Rom.com                               0xDE00
+TAPE.COM         ../bin/tape.com                              0xE800
+Test-Col.com     programs/Test-Col.COM                        0xD400
+Test-Fif.COM     programs/Test-Fif.COM
+Test-Kb.com      programs/Test-Kb.COM
+Test-M.COM       programs/Test-M.COM                          0xD400
+Test-MX.COM      programs/Test-MX.COM

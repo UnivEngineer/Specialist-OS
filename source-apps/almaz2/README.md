@@ -1,15 +1,16 @@
 # Алмаз-2
 
 Восстановленный исходник игры для Intel 8080, загрузка и запуск с `0000h`.
-Код дизассемблирован из `assets/games/Almaz-2/Almaz2-original.exe`; процедуры, переходы,
+Код дизассемблирован из `assets/games/Almaz-2/legacy/Almaz2-original.exe`; процедуры, переходы,
 состояние, карты, спрайты и звуковые таблицы получили смысловые имена.
 Сборка `Reference` побайтно воспроизводит все 13312 байт этого оригинала.
 Внешних бинарных включений для сборки нет.
 
 Новая цветная версия с асинхронными эффектами ВИ53 публикуется как
-`assets/games/Almaz2MX.exe`. Пять основных вариантов собраны в
-`assets/games/Almaz-2`: чёрно-белый оригинал, битый цветной оригинал RAMFOS,
-исправленная версия RAMFOS и ускоренные версии MXOS/RAMFOS. Промежуточные
+`assets/games/Almaz-2/Almaz2-mx-optimized.exe`. Варианты собраны в
+`assets/games/Almaz-2`: чёрно-белый оригинал и его оптимизированная версия,
+битый цветной оригинал RAMFOS, исправленная версия RAMFOS,
+цветные версии с программным звуком и ускоренные версии MXOS/RAMFOS. Промежуточные
 варианты восстановления сохранены в `assets/games/Almaz-2/legacy`.
 
 ## Сборка
@@ -23,15 +24,20 @@ python scripts/games/check-almaz2-source.py
 
 В VS Code: `build: almaz2` или `build: apps`. Ассемблер — локальный
 SjASMPlus с `--i8080`; бинарники, листинги и символы записываются в `bin/`.
+Каждый режим также создаёт одноимённый `.rks`: начало `0000h`, включительный
+конец по размеру бинарника и контрольная сумма Монитора. С ключом
+`-PublishMxTimer` все выбранные EXE/RKS, включая оригинал `Almaz2.exe/.rks`,
+копируются в `assets/games/Almaz-2`. Сборщик не создаёт резервных копий
+и не записывает файлы в `legacy`.
 
 | Режим `-Mode` | Файл в `bin/` | Графика | Звук | BIOS | Размер |
 |---|---|---|---|---|---:|
-| Base | Almaz2-base.exe | ч/б | программный | стандартный | 14848 |
-| MXSoft | Almaz2-mx-soft.exe | цвет | программный | стандартный | 14848 |
-| MXTimer | Almaz2-optimized-mx.exe | цвет | эффекты ВИ53, музыка BIOS | стандартный | 16384 |
-| RamfosSoft | Almaz2-ramfos-soft.exe | цвет | программный | Ramfos | 14848 |
-| RamfosTimer | Almaz2-optimized-ramfos.exe | цвет | эффекты ВИ53, музыка BIOS | Ramfos | 16384 |
-| Reference | Almaz2-original.exe | ч/б | программный | стандартный | 13312 |
+| Base | Almaz2-optimized.exe | ч/б | программный | стандартный | 14848 |
+| MX | Almaz2-mx.exe | цвет | программный | стандартный | 14848 |
+| MXOptimized | Almaz2-mx-optimized.exe | цвет | эффекты ВИ53, музыка BIOS | стандартный | 16384 |
+| Ramfos | Almaz2-ramfos.exe | цвет | программный | Ramfos | 14848 |
+| RamfosOptimized | Almaz2-ramfos-optimized.exe | цвет | эффекты ВИ53, музыка BIOS | Ramfos | 16384 |
+| Reference | Almaz2.exe | ч/б | программный | стандартный | 13312 |
 
 Параметры `config.inc` независимы: `ALMAZ_COLOR`, `ALMAZ_PIT`,
 `ALMAZ_RAMFOS` равны 0 или 1. Поэтому можно собрать и другие сочетания.
@@ -57,7 +63,7 @@ SjASMPlus с `--i8080`; бинарники, листинги и символы �
 Например, непосредственная сборка ч/б варианта:
 
 ```powershell
-tasm/sjasmplus.exe --i8080 -Wno-rdlow -DALMAZ_COLOR=0 -DALMAZ_PIT=0 -DALMAZ_RAMFOS=0 --raw=bin/Almaz2-base.exe source-apps/almaz2/Almaz2.asm
+tasm/sjasmplus.exe --i8080 -Wno-rdlow -DALMAZ_COLOR=0 -DALMAZ_PIT=0 -DALMAZ_RAMFOS=0 --raw=bin/Almaz2-optimized.exe source-apps/almaz2/Almaz2.asm
 ```
 
 ## BIOS и память
@@ -170,7 +176,7 @@ python scripts/games/check-almaz2-source.py --pit-clock-hz 2500000
 Например, задать десять шагов в секунду:
 
 ```powershell
-powershell.exe -NoProfile -File scripts/build/build-almaz2.ps1 MXTimer -StepHz 10 -PublishMxTimer
+powershell.exe -NoProfile -File scripts/build/build-almaz2.ps1 MXOptimized -StepHz 10 -PublishMxTimer
 ```
 
 Ожидание начинается перед каждым проходом и учитывает время обработки
@@ -557,7 +563,7 @@ ANIMATION_MIN_QUOTA)` необязательных перерисовок на �
 BIOS. Для команд проверяются все 2048 сочетаний семи команд
 и четырёх стрелок, а также переходники редактора и ожидание отпускания.
 Проверены входные частоты ВИ53 2 и 2,5 МГц; финальный
-`Almaz2MX.exe` собран для 2 МГц. Все сборки проходят без ошибок и
+`Almaz2-mx-optimized.exe` собран для 2 МГц. Все сборки проходят без ошибок и
 предупреждений. Отчёт — `.codex-tmp/almaz2-source-checks.json`.
 
 Начальная печать TIME использует переходник `level_timer_print`:

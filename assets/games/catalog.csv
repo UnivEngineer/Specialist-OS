@@ -1,9 +1,13 @@
 File,LoadAddress,Status,OriginalName,Notes
-Almaz-2/Almaz2-original.exe,0,reference,Almaz-2.exe,Оригинальная чёрно-белая версия
-Almaz-2/Almaz2-original-ramfos-broken.exe,0,broken,Almaz-2.0.exe,Исторический цветной оригинал Ramfos с повреждёнными картами и надписями
+Almaz-2/Almaz2.exe,0,reference,Almaz-2.exe,Сборка исходной чёрно-белой версии без оптимизаций
+Almaz-2/legacy/Almaz2-original.exe,0,reference,Almaz-2.exe,Сохранённый оригинальный чёрно-белый бинарник
+Almaz-2/Almaz2-optimized.exe,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; чёрно-белая версия для классического Специалиста со всеми программными оптимизациями
+Almaz-2/Almaz2-mx.exe,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цветная версия для Специалиста-MX с программным звуком
+Almaz-2/Almaz2-mx-optimized.exe,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цвет MXOS; эффекты ВИ53 2 МГц; музыка BIOS; TIME в секундах; квота анимации; в flash-манифесте имя Almaz2MX.exe
+Almaz-2/legacy/Almaz2-original-ramfos-broken.exe,0,broken,Almaz-2.0.exe,Исторический цветной оригинал Ramfos с повреждёнными картами и надписями
 Almaz-2/Almaz2-original-ramfos.exe,0,cpu-checked,Almaz-2.0.exe,Восстановленная цветная версия Ramfos; 29 байт исправлены; системные вызовы сохранены
-Almaz-2/Almaz2-optimized-ramfos.exe,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; ускоренная цветная версия Ramfos с эффектами ВИ53
-Almaz-2/Almaz2-optimized-mx.exe,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цвет MXOS; эффекты ВИ53 2 МГц, музыка BIOS; 8 шагов/с; TIME в секундах; квота анимации с учётом динамики; малые наборы каждый проход; новые изменения требуют игрового прогона; в корне публикуется как Almaz2MX.exe
+Almaz-2/Almaz2-ramfos.exe,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; цветная версия для Ramfos с программным звуком
+Almaz-2/Almaz2-ramfos-optimized.exe,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; ускоренная цветная версия Ramfos с эффектами ВИ53
 Almaz-2/legacy/Almaz2D.exe,0,cpu-checked,Almaz2MX.exe,Архивная палитра пользователя MXOS; чёрный фон; текст цвета рамки; цветные тайлы; дым тёмно-серый
 Budi-MX.exe,0,unverified,Budi.0.EXE,Версия для Специалиста MX
 StarW2X.exe,0,unverified,StarW2.0.EXE,Версия для Специалиста MX

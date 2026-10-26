@@ -2,9 +2,9 @@
 
 Запуск из любого каталога: python scripts/games/repair-almaz2x.py
 Проверка готового файла: python scripts/games/repair-almaz2x.py --check
-Оригинал сохранён в assets/games/Almaz-2/Almaz2-original-ramfos-broken.exe.
+Оригинал сохранён в assets/games/Almaz-2/legacy/Almaz2-original-ramfos-broken.exe.
 Старый MXOS-вариант: Almaz-2/legacy/Almaz2X-mxos-legacy.bin.
-Новый assets/games/Almaz2MX.exe собирается из source-apps/almaz2 отдельно.
+Новый assets/games/Almaz-2/Almaz2-mx-optimized.exe собирается из source-apps/almaz2 отдельно.
 """
 
 import argparse
@@ -76,7 +76,7 @@ def repair(original, mono, *, mxos=True):
 
     # 16 карт по 512 байт: 16 строк с шагом 32, видимая ширина 24 клетки.
     # Восстанавливаются 27 отличающихся клеток, включая рамки. Авторская
-    # структура уровней принимается по Almaz2-original.exe. Невидимые столбцы 24..31,
+    # структура уровней принимается по Almaz2.exe. Невидимые столбцы 24..31,
     # сохранённые рабочие переменные и вся цветная подпрограмма сохраняются.
     for offset in range(0x1400, 0x3400):
         if offset % 32 < 24:
@@ -145,8 +145,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="только проверить готовый файл")
     args = parser.parse_args()
-    original = checked_read(GAMES / "Almaz-2/Almaz2-original-ramfos-broken.exe", ORIGINAL_HASH)
-    mono = checked_read(GAMES / "Almaz-2/Almaz2-original.exe", MONO_HASH)
+    original = checked_read(GAMES / "Almaz-2/legacy/Almaz2-original-ramfos-broken.exe", ORIGINAL_HASH)
+    mono = checked_read(GAMES / "Almaz-2/legacy/Almaz2-original.exe", MONO_HASH)
     variants = (
         ("Almaz-2/Almaz2-original-ramfos.exe", repair(original, mono, mxos=False), RAMFOS_HASH, 29),
         ("Almaz-2/legacy/Almaz2X-mxos-legacy.bin", repair(original, mono), FIXED_HASH, 42),

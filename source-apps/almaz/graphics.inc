@@ -1,0 +1,111 @@
+; Восстановлено из assets/games/Almaz.rks; без внешних бинарных включений.
+
+; 16 рисунков по 32 байта (16*16), два столбца по 16 байт.
+; 00h..07h игрок, 08h алмаз, 09h камень, 0Ah/0Bh противник,
+; 0Ch дверь, 0Dh грунт, 0Eh пусто, 0Fh стена; логический 10h — открытая дверь.
+
+t_tiles:
+    db      000h,007h,008h,008h,004h,003h,001h,002h,002h,002h,002h,005h,00Ah,014h,07Eh,000h ; 2B00h
+    db      000h,0C0h,020h,0BCh,020h,040h,080h,040h,0A0h,070h,058h,000h,000h,000h,000h,000h ; 2B10h
+    db      000h,007h,008h,008h,004h,003h,001h,002h,005h,00Eh,01Ah,000h,000h,000h,000h,000h ; 2B20h
+    db      000h,0C0h,020h,0BCh,020h,040h,080h,040h,040h,040h,040h,0A0h,050h,028h,07Ch,000h ; 2B30h
+    db      000h,003h,004h,03Dh,004h,003h,001h,002h,002h,002h,002h,005h,00Ah,014h,07Eh,000h ; 2B40h
+    db      000h,0E0h,010h,010h,020h,040h,080h,040h,0A0h,070h,058h,000h,000h,000h,000h,000h ; 2B50h
+    db      000h,003h,004h,03Dh,004h,003h,001h,002h,005h,00Eh,01Ah,000h,000h,000h,000h,000h ; 2B60h
+    db      000h,0E0h,010h,010h,020h,040h,080h,040h,040h,040h,040h,0A0h,050h,028h,07Ch,000h ; 2B70h
+    db      000h,03Fh,061h,040h,047h,04Ah,034h,008h,008h,008h,008h,001h,000h,000h,000h,000h ; 2B80h
+    db      000h,030h,048h,084h,094h,084h,038h,050h,090h,090h,080h,040h,0A0h,050h,0F8h,000h ; 2B90h
+    db      000h,03Fh,061h,040h,047h,04Ah,034h,008h,008h,008h,009h,00Ah,014h,028h,07Ch,000h ; 2BA0h
+    db      000h,030h,048h,084h,094h,084h,038h,050h,090h,090h,080h,000h,000h,000h,000h,000h ; 2BB0h
+    db      000h,008h,014h,023h,02Ah,020h,01Ch,00Ah,009h,009h,001h,000h,000h,000h,000h,000h ; 2BC0h
+    db      000h,07Ch,082h,002h,0E2h,092h,04Ch,020h,010h,010h,090h,050h,028h,014h,03Fh,000h ; 2BD0h
+    db      000h,008h,014h,023h,02Ah,020h,01Ch,00Ah,009h,009h,001h,002h,005h,00Ah,03Fh,000h ; 2BE0h
+    db      000h,07Ch,082h,002h,0E2h,092h,04Ch,020h,010h,010h,010h,0A0h,000h,000h,000h,000h ; 2BF0h
+    db      008h,008h,008h,008h,008h,008h,008h,008h,008h,009h,008h,00Fh,010h,020h,040h,080h ; 2C00h
+    db      000h,000h,000h,000h,000h,000h,020h,070h,0D8h,0ACh,0D8h,073h,020h,000h,000h,000h ; 2C10h
+    db      000h,007h,01Dh,032h,027h,072h,04Dh,04Ah,076h,051h,06Eh,025h,033h,01Ch,007h,000h ; 2C20h
+    db      000h,0E0h,0B8h,08Ch,066h,092h,0DAh,022h,0EEh,026h,0DCh,04Ch,0B8h,0E0h,080h,000h ; 2C30h
+    db      000h,000h,03Fh,020h,02Fh,028h,028h,029h,029h,028h,028h,02Fh,020h,03Fh,000h,000h ; 2C40h
+    db      000h,000h,0FCh,004h,0F4h,014h,014h,094h,094h,014h,014h,0F4h,004h,0FCh,000h,000h ; 2C50h
+    db      000h,07Fh,040h,05Fh,050h,057h,054h,055h,055h,054h,057h,050h,05Fh,040h,07Fh,000h ; 2C60h
+    db      000h,0FEh,002h,0FAh,00Ah,0EAh,02Ah,0AAh,0AAh,02Ah,0EAh,00Ah,0FAh,002h,0FEh,000h ; 2C70h
+    db      000h,000h,001h,002h,004h,009h,010h,03Fh,010h,011h,011h,010h,010h,01Fh,000h,000h ; 2C80h
+    db      000h,000h,080h,040h,020h,090h,008h,0FCh,008h,0C8h,0C8h,008h,008h,0F8h,000h,000h ; 2C90h
+    db      055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh ; 2CA0h
+    db      055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh,055h,0AAh ; 2CB0h
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2CC0h
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2CD0h
+    db      0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh ; 2CE0h
+    db      0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh,0FFh ; 2CF0h
+
+; Фаза взрыва: шесть столбцов по 48 байт, затем исходный заполнитель.
+
+t_explosion_first:
+    db      000h,000h,000h,000h,000h,000h,000h,001h,007h,00Dh,00Dh,018h,010h,010h,015h,010h ; 2D00h
+    db      004h,050h,051h,040h,044h,040h,051h,040h,044h,050h,045h,070h,024h,030h,011h,010h ; 2D10h
+    db      01Ch,008h,00Dh,004h,006h,003h,003h,001h,000h,000h,000h,000h,000h,000h,000h,000h ; 2D20h
+    db      000h,000h,000h,000h,000h,007h,03Dh,0F0h,044h,000h,011h,000h,044h,000h,011h,000h ; 2D30h
+    db      044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h ; 2D40h
+    db      044h,000h,011h,000h,044h,000h,011h,000h,0C4h,0C0h,071h,038h,00Eh,001h,000h,000h ; 2D50h
+    db      000h,000h,000h,00Fh,0E4h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h ; 2D60h
+    db      044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h ; 2D70h
+    db      044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h,044h,0BBh,000h,000h ; 2D80h
+    db      000h,000h,000h,0E0h,06Ch,006h,017h,000h,044h,000h,011h,000h,044h,001h,017h,000h ; 2D90h
+    db      044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,000h ; 2DA0h
+    db      044h,000h,011h,000h,044h,000h,011h,000h,044h,000h,011h,01Bh,0F4h,080h,000h,000h ; 2DB0h
+    db      000h,000h,000h,000h,000h,000h,080h,0C0h,060h,020h,020h,02Fh,07Ch,0F1h,051h,000h ; 2DC0h
+    db      044h,000h,011h,000h,044h,011h,013h,001h,044h,000h,011h,000h,044h,000h,011h,001h ; 2DD0h
+    db      044h,001h,010h,001h,045h,002h,012h,002h,046h,038h,0C0h,000h,000h,000h,000h,000h ; 2DE0h
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,080h,040h,060h,010h ; 2DF0h
+    db      050h,010h,010h,010h,078h,088h,098h,008h,048h,008h,018h,018h,058h,010h,040h,000h ; 2E00h
+    db      040h,080h,080h,080h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2E10h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E20h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E30h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E40h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E50h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E60h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E70h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E80h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2E90h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2EA0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2EB0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2EC0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2ED0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2EE0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 2EF0h
+
+; Вторая фаза взрыва; исходный заполнитель до 3100h сохранён.
+
+t_explosion_second:
+    db      000h,000h,000h,000h,000h,000h,000h,001h,007h,00Fh,00Eh,01Bh,01Bh,01Bh,03Eh,03Fh ; 2F00h
+    db      02Bh,07Fh,06Eh,07Fh,07Bh,07Fh,06Eh,07Fh,07Bh,07Fh,06Eh,07Fh,02Bh,03Fh,01Eh,01Fh ; 2F10h
+    db      01Bh,00Fh,00Eh,007h,007h,003h,003h,001h,000h,000h,000h,000h,000h,000h,000h,000h ; 2F20h
+    db      000h,000h,000h,000h,000h,007h,03Eh,0FFh,0FBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2F30h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2F40h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0FBh,0FFh,06Eh,03Fh,00Fh,001h,000h,000h ; 2F50h
+    db      000h,000h,000h,01Fh,0FFh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2F60h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2F70h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,000h,000h ; 2F80h
+    db      000h,000h,000h,0F0h,0FCh,0FEh,0EFh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2F90h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2FA0h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0F0h,080h,000h,000h ; 2FB0h
+    db      000h,000h,000h,000h,000h,000h,080h,0C0h,0A0h,0E0h,0E0h,0EFh,0BEh,0FFh,0EEh,0FFh ; 2FC0h
+    db      0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh,0BBh,0FFh,0EEh,0FFh ; 2FD0h
+    db      0BAh,0FFh,0EEh,0FFh,0BBh,0FEh,0EEh,0FEh,0BEh,0F8h,0C0h,000h,000h,000h,000h,000h ; 2FE0h
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,080h,0C0h,0E0h,0F0h ; 2FF0h
+    db      0B0h,0F0h,0F0h,0F0h,0B8h,0E8h,0E8h,0F8h,0B8h,0F8h,0E8h,0F8h,0B8h,0F0h,0E0h,0A0h ; 3000h
+    db      0E0h,080h,080h,080h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 3010h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3020h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3030h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3040h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3050h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3060h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3070h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3080h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 3090h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 30A0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 30B0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 30C0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 30D0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 30E0h
+    db      000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h,000h,0FFh,000h,0FFh,0FFh,000h,0FFh,000h ; 30F0h

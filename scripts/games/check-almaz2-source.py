@@ -367,7 +367,7 @@ def main():
     for total in range(65536, 65536 + 10000):
         require(divmod(total, 10000) == (6 + (total - 60000) // 10000, (total - 60000) % 10000),
                 "Real-time carry decomposition differs")
-    reference = (ROOT / "assets/games/Almaz-2/Almaz2-original.exe").read_bytes()
+    reference = (ROOT / "assets/games/Almaz-2/legacy/Almaz2-original.exe").read_bytes()
     bios_source = (ROOT / "source/dos/DOS.asm").read_text(encoding="utf-8")
     row = bios_source.split("v_keybTbl:", 1)[1].splitlines()[1]
     bios_codes = [int(value, 16) for value in re.findall(r"([0-9A-Fa-f]+)h", row)]
@@ -380,17 +380,33 @@ def main():
         actual = ((0xFF ^ (1 << column), 0x0F) if column < 8 else
                   (0xFF, 0x0F ^ (1 << (column - 8))))
         require(actual == expected, f"Arrow matrix differs from BIOS: {key:02X}")
-    data, _ = load("Almaz2-original")
+    data, _ = load("Almaz2")
     require(data == reference, "Historical monochrome round-trip differs")
+    # Проверить заголовок, всё тело и сумму RKS независимо от сборщика.
+    for stem in ("Almaz2", "Almaz2-optimized", "Almaz2-mx",
+                 "Almaz2-mx-optimized", "Almaz2-ramfos", "Almaz2-ramfos-optimized"):
+        payload, _ = load(stem)
+        rks = (ROOT / "bin" / (stem + ".rks")).read_bytes()
+        require(rks[:4] == b"\0\0" + (len(payload) - 1).to_bytes(2, "little"),
+                f"{stem}: RKS address range differs")
+        require(rks[4:-2] == payload, f"{stem}: RKS payload differs")
+        running_sum = 0
+        high = 0
+        for value in payload[:-1]:
+            running_sum += value
+            high += value + (running_sum >> 8)
+            running_sum &= 0xFF
+        checksum = bytes(((running_sum + payload[-1]) & 0xFF, high & 0xFF))
+        require(rks[-2:] == checksum, f"{stem}: RKS checksum differs")
     report = {"reference_sha256": sha256(data).hexdigest(), "pit_clock_hz": None,
               "variants": [], "runtime_emulation": False}
 
     for stem, color, pit, ramfos in (
-        ("Almaz2-base", False, False, False),
-        ("Almaz2-mx-soft", True, False, False),
-        ("Almaz2-optimized-mx", True, True, False),
-        ("Almaz2-ramfos-soft", True, False, True),
-        ("Almaz2-optimized-ramfos", True, True, True),
+        ("Almaz2-optimized", False, False, False),
+        ("Almaz2-mx", True, False, False),
+        ("Almaz2-mx-optimized", True, True, False),
+        ("Almaz2-ramfos", True, False, True),
+        ("Almaz2-ramfos-optimized", True, True, True),
     ):
         data, symbols = load(stem)
         calls = calls_from_listing(stem)

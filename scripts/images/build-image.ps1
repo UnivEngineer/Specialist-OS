@@ -13,6 +13,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$assetDirectory = Join-Path $repositoryRoot "assets"
 $imageDirectory = Join-Path $repositoryRoot "images"
 $sectorSize = 256
 $sectorsPerCluster = 1
@@ -75,43 +76,41 @@ function Set-Word {
 }
 
 function Get-Manifest {
-    param([string] $Path)
+    param([string] $Path, [string] $AutoexecVariant = "emu")
 
+    $lineNumber = 0
     $entries = foreach ($line in [IO.File]::ReadAllLines($Path)) {
+        $lineNumber++
         $entry = $line.Trim()
         if ($entry.Length -eq 0 -or $entry.StartsWith("#")) {
             continue
         }
-        $entry
+        $fields = @($entry -split '\s+')
+        if ($fields.Count -lt 2 -or $fields.Count -gt 3) {
+            throw "Invalid manifest entry at ${Path}:${lineNumber}: expected ImageName Source [LoadAddress]"
+        }
+        $source = $fields[1]
+        if ($source -eq "{AUTOEXEC}") {
+            $source = "system-rom/autoexec.$AutoexecVariant.bat"
+        }
+        $format = if ([IO.Path]::GetExtension($source).Equals(
+            ".rks", [StringComparison]::OrdinalIgnoreCase)) { "rks" } else { "raw" }
+        $address = if ($fields.Count -eq 3) { $fields[2] } else { "0" }
+        if ($format -eq "rks" -and $fields.Count -eq 3) {
+            throw "RKS load address comes from its header at ${Path}:${lineNumber}"
+        }
+        [pscustomobject]@{ ImageName = $fields[0]; Source = $source; LoadAddress = $address; Format = $format }
     }
     return @($entries)
 }
 
-function Get-SystemManifest {
-    param([string] $Path, [string] $AutoexecVariant)
-
-    $entries = @(Import-Csv -LiteralPath $Path)
-    foreach ($entry in $entries) {
-        if ($entry.Source -eq "{AUTOEXEC}") {
-            $entry.Source = "assets/system-rom/autoexec.$AutoexecVariant.bat"
-        }
-        if ([string]::IsNullOrWhiteSpace($entry.Source) -or
-            [string]::IsNullOrWhiteSpace($entry.ImageName) -or
-            [string]::IsNullOrWhiteSpace($entry.Format)) {
-            throw "Invalid system manifest entry in $Path"
-        }
-    }
-    return $entries
-}
-
 switch ($Target) {
     "SystemRamfos" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
-        $manifest = @(Get-SystemManifest $manifestPath "emu" |
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifest = @(Get-Manifest $manifestPath "emu" |
             Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM", "Test-MX.COM") })
-        $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\Ramfos.csv"
-        $manifest += @(Get-SystemManifest $ramfosManifestPath "emu")
-        $manifestHasMetadata = $true
+        $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\Ramfos.txt"
+        $manifest += @(Get-Manifest $ramfosManifestPath "emu")
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
@@ -122,9 +121,8 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "SystemEmu" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
-        $manifest = Get-SystemManifest $manifestPath "emu"
-        $manifestHasMetadata = $true
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifest = Get-Manifest $manifestPath "emu"
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
@@ -135,9 +133,8 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "SystemHardware" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.csv"
-        $manifest = Get-SystemManifest $manifestPath "hardware"
-        $manifestHasMetadata = $true
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifest = Get-Manifest $manifestPath "hardware"
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = $HardwareSizeKB * 1KB
         $chipSize = 64KB
@@ -153,10 +150,8 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "Games64k" {
-        $inputDirectory = Join-Path $repositoryRoot "assets\games"
         $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk-emulator.txt"
         $manifest = Get-Manifest $manifestPath
-        $manifestHasMetadata = $false
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
@@ -168,10 +163,8 @@ switch ($Target) {
         $makeBootDisk = $false
     }
     "Games2M" {
-        $inputDirectory = Join-Path $repositoryRoot "assets\games"
         $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk.txt"
         $manifest = Get-Manifest $manifestPath
-        $manifestHasMetadata = $false
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 2MB
         $chipSize = 512KB
@@ -185,17 +178,6 @@ switch ($Target) {
 }
 
 New-Item -ItemType Directory -Path $imageDirectory -Force | Out-Null
-
-$filesByName = @{}
-if (-not $manifestHasMetadata) {
-    foreach ($file in Get-ChildItem -LiteralPath $inputDirectory -File) {
-        $key = $file.Name.ToUpperInvariant()
-        if ($filesByName.ContainsKey($key)) {
-            throw "Input names differ only by case: $($file.Name)"
-        }
-        $filesByName[$key] = $file
-    }
-}
 
 $volumeSectors = [int]($volumeSize / $sectorSize)
 $fatSectors = [int]($volumeSectors * 2 / $sectorSize)
@@ -224,25 +206,13 @@ $imageNames = @{}
 
 try {
     foreach ($manifestEntry in $manifest) {
-        if ($manifestHasMetadata) {
-            $sourcePath = Join-Path $repositoryRoot $manifestEntry.Source
-            if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
-                throw "Manifest input not found: $($manifestEntry.Source)"
-            }
-            $sourceFile = Get-Item -LiteralPath $sourcePath
-            $sourceName = $manifestEntry.ImageName
-            $entryFormat = $manifestEntry.Format
+        $sourcePath = Join-Path $assetDirectory $manifestEntry.Source
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+            throw "Manifest input not found: $($manifestEntry.Source)"
         }
-        else {
-            $key = $manifestEntry.ToUpperInvariant()
-            if (-not $filesByName.ContainsKey($key)) {
-                throw "Manifest input not found: $manifestEntry in $inputDirectory"
-            }
-            $sourceFile = $filesByName[$key]
-            $sourceName = $sourceFile.Name
-            $entryFormat = if ([IO.Path]::GetExtension($sourceName).Equals(
-                ".RKS", [StringComparison]::OrdinalIgnoreCase)) { "rks" } else { "raw" }
-        }
+        $sourceFile = Get-Item -LiteralPath $sourcePath
+        $sourceName = $manifestEntry.ImageName
+        $entryFormat = $manifestEntry.Format
         $sourceBytes = [IO.File]::ReadAllBytes($sourceFile.FullName)
         $storedBytes = $sourceBytes
         $originalSize = $sourceBytes.Length
@@ -265,12 +235,7 @@ try {
         }
         else {
             $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
-            if ($manifestHasMetadata) {
-                $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
-            }
-            else {
-                $loadAddress = 0
-            }
+            $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
         }
 
         if ($baseName.Length -gt 8 -or $extension.Length -gt 3) {

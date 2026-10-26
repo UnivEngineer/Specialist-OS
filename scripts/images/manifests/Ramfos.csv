@@ -1,5 +1,0 @@
-Source,ImageName,LoadAddress,Format
-bin/RAMFOS.sys,RAMFOS.SYS,0xC000,raw
-bin/RAMRUN.com,RAMRUN.COM,0xF800,raw
-bin/RFTEST.com,RFTEST.COM,0,raw
-bin/RFTESTHI.com,RFTESTHI.COM,0xE800,raw
