@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet("All", "Base", "MX", "MXOptimized", "Ramfos", "RamfosOptimized", "Reference")]
+    [ValidateSet("All", "Base", "Color8", "Color8Optimized", "MX", "MXOptimized", "Ramfos", "RamfosOptimized", "Reference")]
     [string] $Mode = "All",
     [ValidateSet(0, 2000000, 2500000)]
     [int] $PitClockHz = 0,
@@ -24,9 +24,11 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 $modes = @(
     @{ Name = "Base";        Output = "Almaz2-optimized";   Color = 0; Pit = 0; Ramfos = 0; Hud = 1 },
-    @{ Name = "MX";          Output = "Almaz2-mx";           Color = 1; Pit = 0; Ramfos = 0; Hud = 1 },
+    @{ Name = "Color8";      Output = "Almaz2-8color";       Color = 2; Pit = 0; Ramfos = 0; Hud = 0 },
+    @{ Name = "Color8Optimized"; Output = "Almaz2-8color-optimized"; Color = 2; Pit = 0; Ramfos = 0; Hud = 1 },
+    @{ Name = "MX";          Output = "Almaz2-mx";           Color = 1; Pit = 0; Ramfos = 0; Hud = 0 },
     @{ Name = "MXOptimized"; Output = "Almaz2-mx-optimized"; Color = 1; Pit = 1; Ramfos = 0; Hud = 1 },
-    @{ Name = "Ramfos";      Output = "Almaz2-ramfos";       Color = 1; Pit = 0; Ramfos = 1; Hud = 1 },
+    @{ Name = "Ramfos";      Output = "Almaz2-ramfos";       Color = 1; Pit = 0; Ramfos = 1; Hud = 0 },
     @{ Name = "RamfosOptimized"; Output = "Almaz2-ramfos-optimized"; Color = 1; Pit = 1; Ramfos = 1; Hud = 1 },
     @{ Name = "Reference";   Output = "Almaz2";              Color = 0; Pit = 0; Ramfos = 0; Hud = 0 }
 )
@@ -61,7 +63,10 @@ function Write-AlmazRks([string] $Executable, [string] $Destination) {
 foreach ($variant in $selected) {
     $prefix = Join-Path $outputDirectory $variant.Output
     $extraDefines = @()
-    if ($variant.Name -eq "Reference" -or $NoOptimizations) { $extraDefines += "-DALMAZ_OPTIMIZE=0" }
+    $optimize = if ($variant.Name -in @("Reference", "Color8", "MX", "Ramfos") -or $NoOptimizations) { 0 } else { 1 }
+    $extraDefines += "-DALMAZ_OPTIMIZE=$optimize"
+    $monitorTarget = if ($variant.Name -in @("Reference", "Base", "Color8", "Color8Optimized")) { 1 } else { 0 }
+    $extraDefines += "-DALMAZ_MONITOR_TARGET=$monitorTarget"
     if ($StepHz -gt 0) { $extraDefines += "-DALMAZ_STEP_HZ=$StepHz" }
     if ($InputCellStride -gt 0) { $extraDefines += "-DINPUT_POLL_CELL_STRIDE=$InputCellStride" }
     if ($PitClockHz -gt 0) { $extraDefines += "-DPIT_CLOCK_HZ=$PitClockHz" }

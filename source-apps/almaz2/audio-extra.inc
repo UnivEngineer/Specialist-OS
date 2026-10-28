@@ -10,6 +10,9 @@ audio_game_start:
     JP game_initialize
 audio_game_exit:
     CALL audio_stop
+    IF ALMAZ_OPTIMIZE && !ALMAZ_MONITOR_TARGET && ALMAZ_COLOR == 1
+        CALL color_exit_clear
+    ENDIF
     JP app_bios_return
 audio_editor_new:
     LD SP,07FFFh

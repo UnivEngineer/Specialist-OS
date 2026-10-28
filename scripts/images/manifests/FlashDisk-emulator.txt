@@ -5,4 +5,3 @@ Almaz2X.exe       games/Almaz-2/Almaz2-optimized.exe
 Almaz2MX.exe      games/Almaz-2/Almaz2-mx-optimized.exe
 StarWars.rks      games/StarWars.rks
 Pacman2.rks       games/Pacman2.rks
-Tetris2.rks       games/Tetris2.rks

@@ -16,6 +16,9 @@ ALMAZ_HUD = 1
     IFNDEF ALMAZ_OPTIMIZE
 ALMAZ_OPTIMIZE = 1             ; Общий флаг оптимизаций игры и адресного ввода.
     ENDIF
+    IFNDEF ALMAZ_MONITOR_TARGET
+ALMAZ_MONITOR_TARGET = 0       ; Целевая оболочка — классический Монитор.
+    ENDIF
     IFNDEF ALMAZ_STEP_HZ
 ALMAZ_STEP_HZ = 8              ; Один проход карты; полный цикл содержит четыре.
     ENDIF
@@ -42,7 +45,14 @@ PIT_CLOCK_HZ = 2000000         ; Вход ВИ53 для эффектов и ча
 CPU_CLOCK_HZ = 2000000
 PIT_TICK_HZ = 10000
 FRAME_STEP_TICKS = PIT_TICK_HZ/ALMAZ_STEP_HZ
+; 2/5 при 8 проходах/с: частота попыток относительно реального времени.
+FUNGUS_GATE_PERIOD = 5*ALMAZ_STEP_HZ
+FUNGUS_GATE_INCREMENT = 16
+    IF FUNGUS_GATE_INCREMENT > FUNGUS_GATE_PERIOD
+FUNGUS_GATE_INCREMENT = FUNGUS_GATE_PERIOD
+    ENDIF
 app_optimizations_enabled = ALMAZ_OPTIMIZE
+app_monitor_target = ALMAZ_MONITOR_TARGET
 app_input_enabled = ALMAZ_OPTIMIZE
 app_frame_pacing_enabled = USE_FRAME_CLOCK
 app_step_hz = ALMAZ_STEP_HZ
@@ -96,11 +106,19 @@ EDITOR_CURRENT_PORT_C = 00Fh ^ (1 << (EDITOR_CURRENT_COLUMN-8))
     ENDIF
 
 
-    ASSERT ALMAZ_COLOR == 0 || ALMAZ_COLOR == 1
+; 0 — монохром, 1 — цвет MX, 2 — восьмицветный контроллер «М-К».
+    ASSERT ALMAZ_COLOR >= 0 && ALMAZ_COLOR <= 2
+app_color_port = IO_COLOR
+app_hud_color = 070h
+    IF ALMAZ_COLOR == 2
+app_color_port = 0FF02h
+app_hud_color = 000h
+    ENDIF
     ASSERT ALMAZ_PIT == 0 || ALMAZ_PIT == 1
     ASSERT ALMAZ_RAMFOS == 0 || ALMAZ_RAMFOS == 1
     ASSERT ALMAZ_HUD == 0 || ALMAZ_HUD == 1
     ASSERT ALMAZ_OPTIMIZE == 0 || ALMAZ_OPTIMIZE == 1
+    ASSERT ALMAZ_MONITOR_TARGET == 0 || ALMAZ_MONITOR_TARGET == 1
     ASSERT ANIMATION_QUOTA >= 1 && ANIMATION_QUOTA <= 64
     ASSERT ANIMATION_MIN_QUOTA >= 1 && ANIMATION_MIN_QUOTA <= ANIMATION_QUOTA
     ASSERT ANIMATION_SCAN_LIMIT >= 1 && ANIMATION_SCAN_LIMIT <= 255

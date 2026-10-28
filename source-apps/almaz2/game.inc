@@ -41,10 +41,14 @@ game_start:
 
 game_initialize:
     ld      hl,t_music_intro ; 000Ch
+    IF ALMAZ_OPTIMIZE
+        CALL startup_mark
+    ELSE
     IF ALMAZ_PIT
         CALL audio_music
     ELSE
     call    sound_sequence
+    ENDIF
     ENDIF
     xor     a ; 0012h
     ld      (v_level),a ; 0013h
@@ -61,16 +65,28 @@ game_reload:
     ld      hl,t_sprites_phase_zero ; 002Ch
     ld      (v_sprite_bank),hl ; 002Fh
     call    level_load ; 0032h
+    IF ALMAZ_OPTIMIZE
+        CALL startup_map_draw
+    ELSE
     call    map_draw ; 0035h
+    ENDIF
 
 ; Игровой кадр: ввод, таймер, четыре прохода по 23*15 клеткам.
 game_frame:
     call    keyboard_commands ; 0038h
     cp      01Fh ; 003Bh
+    IF ALMAZ_OPTIMIZE && ALMAZ_MONITOR_TARGET
+        JP Z,monitor_game_exit
+    ELSE
     IF ALMAZ_PIT
         JP Z,audio_game_exit
     ELSE
+    IF ALMAZ_OPTIMIZE && ALMAZ_COLOR == 1
+        JP Z,soft_color_game_exit
+    ELSE
     jp      z,app_bios_return
+    ENDIF
+    ENDIF
     ENDIF
     IF USE_FRAME_CLOCK
         NOP                    ; TIME обновляется перед каждым проходом по ВИ53.
@@ -407,10 +423,14 @@ level_previous:
 level_store:
     push    bc ; 0211h
     ld      hl,t_music_level ; 0212h
+    IF ALMAZ_OPTIMIZE
+        CALL game_music_play
+    ELSE
     IF ALMAZ_PIT
         CALL audio_music
     ELSE
     call    sound_sequence
+    ENDIF
     ENDIF
     ld      hl,(v_level_pointer) ; 0218h
     ld      de,MAP_BUFFER ; 021Bh
@@ -436,10 +456,14 @@ level_store_loop:
 level_load:
     push    bc ; 0236h
     ld      hl,t_music_level ; 0237h
+    IF ALMAZ_OPTIMIZE
+        CALL startup_level_music
+    ELSE
     IF ALMAZ_PIT
         CALL audio_music
     ELSE
     call    sound_sequence
+    ENDIF
     ENDIF
     ld      hl,(v_level_pointer) ; 023Dh
     ld      de,MAP_BUFFER ; 0240h
@@ -1080,7 +1104,11 @@ fungus_update:
     ELSE
     call    tile_draw ; 067Dh
     ENDIF
+    IF USE_FRAME_CLOCK
+        CALL fungus_timed_event
+    ELSE
     call    random_sparse_event ; 0680h
+    ENDIF
     and     01h ; 0683h
     ret     z ; 0685h
     push    bc ; 0686h

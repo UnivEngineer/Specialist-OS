@@ -31,6 +31,225 @@ def word(data, address):
     return int.from_bytes(data[address:address + 2], "little")
 
 
+def check_color_exit_clear(data, symbols):
+    """Выполнить машинный код очистки с контролем каждой экранной записи и SP."""
+    mem = bytearray([0xA5])*0x10000
+    mem[:len(data)] = data
+    pc, sp, initial_sp = symbols["color_exit_clear"], 0x7E00, 0x7E00
+    a = hl = bc = 0
+    zero = False
+    color = None
+    screen_writes = set()
+    for _ in range(15000):
+        opcode = mem[pc]
+        pc += 1
+        if opcode == 0x3E:
+            a, pc = mem[pc], pc+1
+        elif opcode == 0x32:
+            addr, pc = word(mem, pc), pc+2
+            require(addr == 0xFFF8, "Unexpected screen clear port")
+            color = a
+        elif opcode == 0x21:
+            hl, pc = word(mem, pc), pc+2
+        elif opcode == 0x39:
+            hl = (hl+sp) & 0xFFFF
+        elif opcode == 0x22:
+            addr, pc = word(mem, pc), pc+2
+            require(addr == symbols["v_exit_stack"], "Unexpected stack save address")
+            mem[addr:addr+2] = hl.to_bytes(2, "little")
+        elif opcode == 0x31:
+            sp, pc = word(mem, pc), pc+2
+        elif opcode == 0x01:
+            bc, pc = word(mem, pc), pc+2
+        elif opcode == 0xE5:
+            for value in (hl >> 8, hl & 0xFF):
+                sp = (sp-1) & 0xFFFF
+                require(0x9000 <= sp < 0xC000 and sp not in screen_writes,
+                        f"Screen clear writes out of bounds or twice: {sp:04X}")
+                mem[sp] = value
+                screen_writes.add(sp)
+        elif opcode == 0x0B:
+            bc = (bc-1) & 0xFFFF
+        elif opcode == 0x78:
+            a = bc >> 8
+        elif opcode == 0xB1:
+            a |= bc & 0xFF
+            zero = a == 0
+        elif opcode == 0xC2:
+            target = word(mem, pc)
+            pc = pc+2 if zero else target
+        elif opcode == 0x2A:
+            addr, pc = word(mem, pc), pc+2
+            require(addr == symbols["v_exit_stack"], "Unexpected stack restore address")
+            hl = word(mem, addr)
+        elif opcode == 0xF9:
+            sp = hl
+        elif opcode == 0xC9:
+            break
+        else:
+            raise ValueError(f"Unexpected screen clear opcode {opcode:02X} at {pc-1:04X}")
+    else:
+        raise ValueError("Screen clear did not return")
+    require(color == 0xF0 and sp == initial_sp and len(screen_writes) == 0x3000 and
+            mem[0x9000:0xC000] == bytes(0x3000), "Screen clear, color or SP differs")
+
+
+def check_music_control(data, symbols, pit):
+    """Исполнить переходники с подставными результатами мелодий и клавиатуры."""
+    player = symbols["audio_music" if pit else "sound_sequence"]
+    pending_addr = symbols["v_startup_pending"]
+
+    def run(entry, pending, outcomes, key_reads, initial_hl=0):
+        pc, hl, a = symbols[entry], initial_hl, 0
+        zero = False
+        stack, events, ports = [], [], {}
+        outcomes, key_reads = iter(outcomes), iter(key_reads)
+        syncs = reads = 0
+        for _ in range(300):
+            opcode, pc = data[pc], pc+1
+            if opcode == 0xCD:
+                target, pc = word(data, pc), pc+2
+                if target == symbols["map_draw"]:
+                    events.append("map")
+                elif target == player:
+                    events.append("intro" if hl == symbols["t_music_intro"] else
+                                  "level" if hl == symbols["t_music_level"] else "unknown")
+                    a = next(outcomes)
+                elif pit and target == symbols["level_timer_sync"]:
+                    syncs += 1
+                else:
+                    stack.append(pc)
+                    pc = target
+            elif opcode == 0xC3:
+                pc = word(data, pc)
+            elif opcode == 0x3A:
+                addr, pc = word(data, pc), pc+2
+                if addr == pending_addr:
+                    a = pending
+                elif addr == 0xFFE1:
+                    require(ports.get(0xFFE3) == 0x82 and ports.get(0xFFE2) == 0x0F and
+                            ports.get(0xFFE0) == 0xFE, "STOP matrix position differs")
+                    a = next(key_reads)
+                    reads += 1
+                else:
+                    raise ValueError(f"Unexpected music input address {addr:04X}")
+            elif opcode == 0xB7:
+                zero = a == 0
+            elif opcode in (0xC8, 0xC0, 0xC9):
+                do_return = opcode == 0xC9 or (opcode == 0xC8 and zero) or (opcode == 0xC0 and not zero)
+                if do_return:
+                    if not stack:
+                        return events, ports, syncs, reads, pending, zero
+                    pc = stack.pop()
+            elif opcode == 0xAF:
+                a, zero = 0, True
+            elif opcode == 0x32:
+                addr, pc = word(data, pc), pc+2
+                if addr == pending_addr:
+                    pending = a
+                else:
+                    require(addr in (0xFFE0, 0xFFE2, 0xFFE3), "Unexpected music output")
+                    ports[addr] = a
+            elif opcode == 0x21:
+                hl, pc = word(data, pc), pc+2
+            elif opcode == 0xFE:
+                zero, pc = a == data[pc], pc+1
+            elif opcode == 0x3E:
+                a, pc = data[pc], pc+1
+            elif opcode == 0xE6:
+                a, pc = a & data[pc], pc+1
+                zero = a == 0
+            elif opcode == 0xCA:
+                target = word(data, pc)
+                pc = target if zero else pc+2
+            else:
+                raise ValueError(f"Unexpected music opcode {opcode:02X} at {pc-1:04X}")
+        raise ValueError("Music control did not return")
+
+    for outcomes, expected in (([0xFF, 0xFF], ["map", "intro", "level"]),
+                               ([0x1F], ["map", "intro"]),
+                               ([0xFF, 0x1F], ["map", "intro", "level"])):
+        canceled = outcomes[-1] == 0x1F
+        events, ports, syncs, reads, pending, zero = run(
+            "startup_map_draw", 1, outcomes, [0x00, 0x00, 0x80] if canceled else [])
+        require(events == expected and pending == 0 and zero == canceled,
+                "Intro/level music order or cancellation differs")
+        if canceled:
+            require(reads == 3 and ports == {0xFFE3: 0x82, 0xFFE2: 0, 0xFFE0: 0} and
+                    syncs == int(pit), "STOP release or level clock synchronization differs")
+        else:
+            require(reads == 0 and not ports and syncs == 0, "Unnecessary STOP wait")
+    events, _, _, _, _, _ = run("startup_level_music", 0, [0xFF], [], symbols["t_music_level"])
+    require(events == ["level"], "Normal level transition must play only level music")
+    events, _, _, _, _, _ = run("startup_level_music", 1, [], [], symbols["t_music_level"])
+    require(not events, "First level music must be deferred until after map drawing")
+
+
+def check_fungus_gate(data, symbols):
+    """Исполнить машинный код фильтра, подставляя результат исходного ГПСЧ."""
+    period = symbols["FUNGUS_GATE_PERIOD"]
+    increment = symbols["FUNGUS_GATE_INCREMENT"]
+    state_addr = symbols["v_fungus_event_phase"]
+    require(period == 5*symbols["app_step_hz"] and increment == min(16, period),
+            "Unexpected fungus growth scaling")
+    for initial in range(period):
+        for random_value in (0, 1, 0xFE, 0xFF):
+            pc = symbols["fungus_timed_event"]
+            phase = initial
+            a = 0
+            carry = zero = False
+            for _ in range(30):
+                opcode = data[pc]
+                pc += 1
+                if opcode == 0xCD:  # Вызов случайного события заменён результатом.
+                    require(word(data, pc) == symbols["random_sparse_event"], "Unexpected fungus CALL")
+                    pc += 2
+                    a = random_value
+                elif opcode == 0xE6:
+                    a &= data[pc]
+                    pc += 1
+                    zero = a == 0
+                elif opcode == 0xC8:
+                    if zero:
+                        break
+                elif opcode == 0x3A:
+                    require(word(data, pc) == state_addr, "Unexpected fungus state read")
+                    pc += 2
+                    a = phase
+                elif opcode == 0xC6:
+                    total = a + data[pc]
+                    pc += 1
+                    a, carry = total & 0xFF, total > 0xFF
+                elif opcode == 0xDA:
+                    target = word(data, pc)
+                    pc = target if carry else pc + 2
+                elif opcode == 0xFE:
+                    carry = a < data[pc]
+                    pc += 1
+                elif opcode == 0xD6:
+                    a = (a - data[pc]) & 0xFF
+                    pc += 1
+                elif opcode == 0x32:
+                    require(word(data, pc) == state_addr, "Unexpected fungus state write")
+                    pc += 2
+                    phase = a
+                elif opcode == 0x3E:
+                    a = data[pc]
+                    pc += 1
+                elif opcode == 0xAF:
+                    a = 0
+                elif opcode == 0xC9:
+                    break
+                else:
+                    raise ValueError(f"Unexpected fungus opcode {opcode:02X} at {pc-1:04X}")
+            else:
+                raise ValueError("Fungus gate did not return")
+            expected_phase = (initial + increment) % period if random_value & 1 else initial
+            expected_event = bool(random_value & 1) and initial + increment >= period
+            require(phase == expected_phase and bool(a & 1) == expected_event,
+                    f"Fungus gate failure at phase={initial}, random={random_value:02X}")
+
+
 def load(stem):
     data = (ROOT / "bin" / (stem + ".exe")).read_bytes()
     symbols = dict((name, int(value, 16)) for name, value in re.findall(
@@ -91,12 +310,17 @@ def check_hud_panels(data, symbols, color):
     require(body[:4] == bytes.fromhex("f5 c5 d5 e5") and body[-5:] == bytes.fromhex("e1 d1 c1 f1 c9"),
             "Panel clearing must preserve all registers and flags")
     written = set()
-    for start, width in ((0x9403, 8), (0xA403, 9)):
+    for start, width in ((0x9403, 8), (0xA403, 8)):
         require(b"\x21" + u16(start) + b"\x06" + bytes((width,)) + b"\xcd" + u16(rectangle) in body,
                 "HUD rectangle position or width differs")
         written.update(start+column*256+row for column in range(width) for row in range(10))
-    require(len(written) == 170 and all(0x9000 <= a < 0xC000 and 3 <= a % 256 <= 12 for a in written),
+    require(len(written) == 160 and all(0x9000 <= a < 0xC000 and 3 <= a % 256 <= 12 for a in written),
             "HUD clearing reaches gameplay rows or leaves the screen")
+    edge = symbols["hud_clear_time_edge"]
+    edge_code = bytes.fromhex("7e e6 0f 77 2c 0d c2") + u16(edge)
+    require(data[edge:edge+len(edge_code)] == edge_code and
+            data[edge-2:edge] == bytes.fromhex("0e 0a"),
+            "TIME edge must clear only the left four pixels over ten rows")
     clear = (b"\xaf\x0e\x0a\x77\x2c\x0d\xc2" + u16(symbols["hud_clear_row"]) +
              b"\x2e\x03\x24\x05\xc2" + u16(symbols["hud_clear_column"]) + b"\xc9")
     require(data[rectangle:rectangle+len(clear)] == clear,
@@ -340,8 +564,15 @@ def check_legacy_music(data, symbols, reference):
         wrapper += b"\xcd" + u16("level_timer_sync")
     wrapper += b"\xc9"
     require(data[at:at+len(wrapper)] == wrapper, "Music must stop PIT effects and resync level TIME")
-    for operand in (0x0010, 0x0216, 0x023B):
-        require(word(data, operand) == symbols["audio_music"], "A music caller bypasses legacy player")
+    require(word(data, 0x0216) == symbols["game_music_play" if symbols["app_optimizations_enabled"] else "audio_music"],
+            "Level save music caller differs")
+    if symbols["app_optimizations_enabled"]:
+        require(word(data, 0x0010) == symbols["startup_mark"] and
+                word(data, 0x023B) == symbols["startup_level_music"],
+                "Optimized music startup hooks differ")
+    else:
+        require(word(data, 0x0010) == symbols["audio_music"] and
+                word(data, 0x023B) == symbols["audio_music"], "Original music hooks differ")
     for name, start, end in (("t_music_intro", 0x0B13, 0x0B51), ("t_music_level", 0x0B51, 0x0B74)):
         at = symbols[name]
         require(data[at:at+end-start] == reference[start:end], "Music bytes must match the original without PIT conversion")
@@ -351,7 +582,11 @@ def check_legacy_music(data, symbols, reference):
 def check_audio_exit(data, symbols):
     u16 = lambda name: symbols[name].to_bytes(2, "little")
     at = symbols["audio_game_exit"]
-    require(data[at:at+6] == b"\xcd" + u16("audio_stop") + b"\xc3" + u16("app_bios_return"),
+    expected = b"\xcd" + u16("audio_stop")
+    if symbols["app_optimizations_enabled"] and not symbols["app_monitor_target"]:
+        expected += b"\xcd" + u16("color_exit_clear")
+    expected += b"\xc3" + u16("app_bios_return")
+    require(data[at:at+len(expected)] == expected,
             "Game exit must stop its effect and return through the selected BIOS ABI")
     require(not any(name in symbols for name in ("audio_shutdown", "audio_save_bios_sound", "v_audio_bios_saved")),
             "Application must not duplicate BIOS warm-reboot sound initialization")
@@ -382,8 +617,48 @@ def main():
         require(actual == expected, f"Arrow matrix differs from BIOS: {key:02X}")
     data, _ = load("Almaz2")
     require(data == reference, "Historical monochrome round-trip differs")
+    # Цвет и ABI меняют только точки вывода и адреса BIOS; вся остальная
+    # исполняемая часть неускоренных вариантов совпадает с оригиналом.
+    color_hooks = {0x0146, 0x0147, 0x014F, 0x0150, 0x0158, 0x0159,
+                   0x0161, 0x0162, 0x019F, 0x01A0, 0x01A8, 0x01A9,
+                   0x0886, 0x0887, 0x0888}
+    ramfos_hooks = {0x003F, 0x0134, 0x0135, 0x0137, 0x0138, 0x0140, 0x0141,
+                    0x0166, 0x06EA, 0x099F, 0x09A0, 0x09A4, 0x09A5,
+                    0x09AA, 0x09B6, 0x09B7}
+    for stem in ("Almaz2-8color", "Almaz2-mx", "Almaz2-ramfos"):
+        payload, _ = load(stem)
+        allowed = color_hooks | (ramfos_hooks if stem == "Almaz2-ramfos" else set())
+        differences = {i for i in range(0x09D4) if payload[i] != reference[i]}
+        require(differences <= allowed, f"{stem}: original logic differs at {sorted(differences-allowed)}")
+    # Оптимизированные сборки очищают экран перед возвратом в свою оболочку.
+    for stem, monitor, optimized, color8, pit in (
+        ("Almaz2", True, False, False, False),
+        ("Almaz2-optimized", True, True, False, False),
+        ("Almaz2-8color", True, False, True, False),
+        ("Almaz2-8color-optimized", True, True, True, False),
+        ("Almaz2-mx", False, False, False, False),
+        ("Almaz2-mx-optimized", False, True, False, True),
+        ("Almaz2-ramfos", False, False, False, False),
+        ("Almaz2-ramfos-optimized", False, True, False, True),
+    ):
+        payload, symbols = load(stem)
+        require(bool(symbols["app_monitor_target"]) == monitor, f"{stem}: monitor target")
+        if monitor and optimized:
+            exit_address = symbols["monitor_game_exit"]
+            require(payload[0x003D] == 0xCA and word(payload, 0x003E) == exit_address,
+                    f"{stem}: monitor exit hook")
+            prefix = bytes.fromhex("3e 82 32 03 ff af 32 02 ff") if color8 else b""
+            expected = prefix + bytes.fromhex("cd 10 c0 c3 00 c8")
+            require(payload[exit_address:exit_address+len(expected)] == expected,
+                    f"{stem}: screen clear or monitor colour differs")
+        else:
+            require("monitor_game_exit" not in symbols and
+                    word(payload, 0x003E) == symbols["audio_game_exit" if pit else "app_bios_return"],
+                    f"{stem}: unexpected monitor exit hook")
+        if pit and optimized:
+            check_color_exit_clear(payload, symbols)
     # Проверить заголовок, всё тело и сумму RKS независимо от сборщика.
-    for stem in ("Almaz2", "Almaz2-optimized", "Almaz2-mx",
+    for stem in ("Almaz2", "Almaz2-optimized", "Almaz2-8color", "Almaz2-8color-optimized", "Almaz2-mx",
                  "Almaz2-mx-optimized", "Almaz2-ramfos", "Almaz2-ramfos-optimized"):
         payload, _ = load(stem)
         rks = (ROOT / "bin" / (stem + ".rks")).read_bytes()
@@ -400,6 +675,40 @@ def main():
         require(rks[-2:] == checksum, f"{stem}: RKS checksum differs")
     report = {"reference_sha256": sha256(data).hexdigest(), "pit_clock_hz": None,
               "variants": [], "runtime_emulation": False}
+
+    # Контроллер «М-К»: цвет в PC4/PC6/PC7 ВВ55, фон всегда чёрный.
+    palette8 = bytes.fromhex("d0 c0 00 00 50 80 10 00 40 10 90 00 d0 c0 00 00")
+    for stem, optimized in (("Almaz2-8color", False), ("Almaz2-8color-optimized", True)):
+        payload, symbols = load(stem)
+        palette = symbols["t_tile_colors"]
+        require(payload[palette:palette+16] == palette8, f"{stem}: 8-colour palette differs")
+        require(symbols["app_color_port"] == 0xFF02 and symbols["app_hud_color"] == 0,
+                f"{stem}: 8-colour port or HUD colour differs")
+        draw = payload[symbols["tile_draw_color"]:palette]
+        require(bytes.fromhex("3e 82 32 03 ff f1 32 02 ff") in draw,
+                f"{stem}: 8255 mode or colour latch differs")
+        require(bool(symbols["app_optimizations_enabled"]) == optimized and
+                not symbols["app_frame_pacing_enabled"] and "audio_update" not in symbols,
+                f"{stem}: unexpected optimization or PIT dependency")
+        require(("hud_clear_panels" in symbols) == optimized,
+                f"{stem}: original or optimized HUD differs")
+        require(word(payload, 0x0681) == symbols["random_sparse_event"] and
+                "fungus_timed_event" not in symbols, f"{stem}: software fungus behavior changed")
+        require(word(payload, 0x0036) == symbols["startup_map_draw" if optimized else "map_draw"],
+                f"{stem}: startup draw hook differs")
+        if optimized:
+            check_hud_panels(payload, symbols, True)
+            check_music_control(payload, symbols, False)
+            require(word(payload, 0x0216) == symbols["game_music_play"],
+                    f"{stem}: level save music bypasses STOP handling")
+            player = symbols["game_music_play"].to_bytes(2, "little")
+            sequence = (b"\x21" + symbols["t_music_intro"].to_bytes(2, "little") + b"\xcd" + player + b"\xc8" +
+                        b"\x21" + symbols["t_music_level"].to_bytes(2, "little") + b"\xc3" + player)
+            require(sequence in payload[symbols["startup_map_draw"]:symbols["v_startup_pending"]],
+                    f"{stem}: startup music sequence differs")
+        require(payload[0x0C00:0x3400] == reference[0x0C00:0x3400] and
+                len(payload) == symbols["game_end"] < 0x7F00,
+                f"{stem}: graphics data or memory layout differs")
 
     for stem, color, pit, ramfos in (
         ("Almaz2-optimized", False, False, False),
@@ -420,9 +729,60 @@ def main():
         phases = bool(symbols["app_phases_enabled"])
         fast = bool(symbols["app_fast_enabled"])
         optimized = bool(symbols["app_optimizations_enabled"])
-        require(buffered == quota == phases == fast == optimized and paced == realtime == (optimized and pit),
+        require(optimized == (stem.endswith("-optimized")) and
+                buffered == quota == phases == fast == optimized and paced == realtime == (optimized and pit),
                 f"{stem}: optimization group is inconsistent")
         check_fast_logic(data, symbols, reference, pit, buffered, quota, calls)
+        if optimized:
+            check_music_control(data, symbols, pit)
+            require(word(data, 0x0216) == symbols["game_music_play"],
+                    f"{stem}: level save music bypasses STOP handling")
+            require(word(data, 0x0010) == symbols["startup_mark"] and
+                    word(data, 0x0036) == symbols["startup_map_draw"] and
+                    word(data, 0x023B) == symbols["startup_level_music"],
+                    f"{stem}: startup music hooks differ")
+            at = symbols["startup_map_draw"]
+            end = symbols["v_startup_pending"]
+            code = data[at:end]
+            player = symbols["game_music_play"]
+            sequence = (b"\x21" + symbols["t_music_intro"].to_bytes(2, "little") +
+                        b"\xcd" + player.to_bytes(2, "little") + b"\xc8" +
+                        b"\x21" + symbols["t_music_level"].to_bytes(2, "little") +
+                        b"\xc3" + player.to_bytes(2, "little"))
+            require(code[:3] == b"\xcd" + symbols["map_draw"].to_bytes(2, "little") and
+                    sequence in code, f"{stem}: startup music sequence differs")
+            at = symbols["startup_level_music"]
+            level_path = (b"\x3a" + symbols["v_startup_pending"].to_bytes(2, "little") +
+                          b"\xb7\xc0\xc3" + player.to_bytes(2, "little"))
+            require(data[at:at+len(level_path)] == level_path,
+                    f"{stem}: subsequent level must play level music")
+        else:
+            require("startup_mark" not in symbols and word(data, 0x0036) == symbols["map_draw"],
+                    f"{stem}: original startup changed")
+        if paced:
+            require(word(data, 0x0681) == symbols["fungus_timed_event"], f"{stem}: fungus timing hook")
+            check_fungus_gate(data, symbols)
+            period = symbols["FUNGUS_GATE_PERIOD"]
+            increment = symbols["FUNGUS_GATE_INCREMENT"]
+            require(period == 5*symbols["app_step_hz"] and increment == min(16, period),
+                    f"{stem}: fungus growth scaling differs")
+            phase = 0
+            accepted = 0
+            for _ in range(period):
+                phase += increment
+                if phase >= period:
+                    phase -= period
+                    accepted += 1
+            require(accepted == increment and phase == 0, f"{stem}: fungus fractional gate")
+            at = symbols["fungus_timed_event"]
+            body = data[at:symbols["v_fungus_event_phase"]]
+            require(body[:4] == b"\xcd" + symbols["random_sparse_event"].to_bytes(2, "little") + b"\xe6" and
+                    bytes((0xC6, increment)) in body and bytes((0xFE, period)) in body and
+                    bytes((0xD6, period)) in body,
+                    f"{stem}: fungus gate implementation differs")
+        else:
+            require(word(data, 0x0681) == symbols["random_sparse_event"] and
+                    "fungus_timed_event" not in symbols, f"{stem}: original fungus behavior changed")
         check_command_input(data, symbols, matrix, pit, calls)
         require(len(data) == symbols["game_end"] < 0x7F00, f"{stem}: size/stack overlap")
         require(data[0x0C00:0x3400] == reference[0x0C00:0x3400], f"{stem}: graphics/maps changed")
@@ -431,9 +791,14 @@ def main():
         require(word(data, 0x0140) == (0xC63E if ramfos else 0x8FFC), f"{stem}: cursor ABI")
         require(word(data, 0x0166) == (symbols["input_game_command"] if optimized else
                                      (0xC81B if ramfos else 0xC812)), f"{stem}: keyboard ABI")
-        require(data[0x013C:0x013F] == bytes.fromhex("21 0b 50"), f"{stem}: TIME baseline")
-        require(word(data, 0x019C) == symbols["hud_screen_position"], f"{stem}: SCREEN baseline")
-        check_hud_panels(data, symbols, color)
+        if optimized:
+            require(data[0x013C:0x013F] == bytes.fromhex("21 0b 50"), f"{stem}: TIME baseline")
+            require(word(data, 0x019C) == symbols["hud_screen_position"], f"{stem}: SCREEN baseline")
+            check_hud_panels(data, symbols, color)
+        else:
+            require(data[0x013C:0x013F] == reference[0x013C:0x013F] and
+                    data[0x019B:0x019E] == reference[0x019B:0x019E] and
+                    "hud_clear_panels" not in symbols, f"{stem}: original HUD differs")
         require(word(data, 0x06EA) == (symbols["input_take_direction"] if buffered else
                                      (0xC81B if ramfos else 0xC812)), f"{stem}: player input hook")
         if buffered:
@@ -553,6 +918,7 @@ def main():
             require(data[0x0886] == 0xC3 and word(data, 0x0887) == symbols["tile_draw_color"], f"{stem}: color hook")
             address = symbols["t_tile_colors"]
             require(data[address:address + 16] == PALETTE and address % 16 == 0, f"{stem}: palette")
+            require(symbols["app_hud_color"] == PALETTE[3], f"{stem}: HUD and wall colors differ")
         else:
             require(data[0x0886:0x0889] == bytes.fromhex("f5 e6 0f"), f"{stem}: monochrome renderer")
             require("t_tile_colors" not in symbols, f"{stem}: color code was not excluded")
@@ -567,7 +933,7 @@ def main():
             require(word(data, 0x098C) == symbols["audio_start"], f"{stem}: nonblocking effect hook")
             require(word(data, 0x0272) == symbols["fast_cell_update" if fast else "audio_read_cell"], f"{stem}: game service hook")
             require(word(data, 0x094A) == symbols["audio_read_cell"], f"{stem}: redraw service hook")
-            require(word(data, 0x000D + 3) == symbols["audio_music"], f"{stem}: intro music hook")
+            require(word(data, 0x000D + 3) == symbols["startup_mark" if optimized else "audio_music"], f"{stem}: intro music hook")
             require(word(data, 0x003E) == symbols["audio_game_exit"], f"{stem}: exit cleanup")
             check_audio_exit(data, symbols)
             require(0x09D4 <= symbols["audio_update"] < symbols["v_audio_active"] < 0x0B74,

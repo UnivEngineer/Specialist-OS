@@ -37,6 +37,7 @@
     ENDIF
     IF ALMAZ_OPTIMIZE
         INCLUDE "animation.inc"
+        INCLUDE "game-extra.inc"
     ENDIF
 game_end:
     ASSERT game_end < 07F00h    ; Оставить не менее 256 байт под стек.
