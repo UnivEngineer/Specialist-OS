@@ -260,12 +260,16 @@ timer_draw:
 ; Прямой CALL запрещён; отдельная печать использует level_timer_print.
 timer_print_value:
     IF ALMAZ_HUD
-        LD HL,0500Bh
+        LD HL,0520Bh           ; TIME по центру подложки из четырёх блоков.
     ELSE
     ld      hl,0500Ah
     ENDIF
     ld      (app_cursor_position),hl ; 013Fh
+    IF ALMAZ_HUD
+        LD HL,t_time_text+1    ; Начальный пробел не нужен при центрировании.
+    ELSE
     ld      hl,t_time_text ; 0142h
+    ENDIF
     IF ALMAZ_COLOR
         CALL hud_print_string
     ELSE

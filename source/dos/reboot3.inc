@@ -64,8 +64,49 @@ skipFormat:
             and     2
             jp z,   reboot3_2
 
+            ; На системной flash больше 64 КБ встроенный драйвер видит
+            ; только начальную область. Подключаем FlashSys до чтения BAT.
+            xor     a
+            call    fileSelectDrive
+            ld      a, (v_diskInfo.totalSectors + 1)
+            cp      2
+            jp c,   reboot3_autoexec
+            ld      a, 1
+            ld      (v_bootAutoexec), a
+            ld      hl, pathFlashSysCom
+            call    fileExec
+            ld      a, 0
+            ld      (v_bootAutoexec), a
+            jp c,   reboot3_fallback
+            ; Установленный драйвер должен стать активным и для текущего A:.
+            ld      hl, (v_drives)
+            ld      (j_diskDriver+1), hl
+            xor     a
+            ld      (v_drive), a
+            call    mountVolume
+            jp c,   reboot3_fallback
+
+reboot3_autoexec:
             ; Запуск файла A:AUTOEXEC.BAT
+            ld      a, 1
+            ld      (v_bootAutoexec), a
             ld      hl, pathAutoexecBat
+            call    fileExec
+            ld      a, 0
+            ld      (v_bootAutoexec), a ; LD сохраняет CF после fileExec
+            jp nc,  reboot3_2
+
+reboot3_fallback:
+            ; Отменяем установленный AUTOEXEC драйвер A: и заново монтируем том.
+            ld      hl, diskDriver
+            ld      (v_drives), hl
+            ld      (j_diskDriver+1), hl
+            xor     a
+            ld      (v_drive), a
+            call    mountVolume
+
+            ; Драйвер H: заменяется стандартным ROM.COM.
+            ld      hl, pathRomCom
             call    fileExec
 
 ; -------------------------------------

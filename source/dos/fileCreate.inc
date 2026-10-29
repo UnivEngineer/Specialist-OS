@@ -31,6 +31,8 @@ fatFileCreate: ; Сохраняем регистры
             ld      (v_fileCreatePrepare), a
 
 fileCreateEntry:
+            xor     a
+            ld      (bios_vars.diskWriteErr), a
             push    hl  ; [1]
             push    bc  ; [2]
             push    de  ; [3]
@@ -40,7 +42,20 @@ fileCreateEntry:
 
             ; Если файл существует, то удаляем его
             call    fileFind
-            call nc,deleteFileInt
+            jp c,   fileCreate_noExisting
+            ; System защищает от удаления, но допускает изменение содержимого.
+            ld      a, (v_tmpFileDescr + FILE_DESCRIPTOR.attrib)
+            and     001h
+            jp nz,  stc_popDBH_ret
+
+            ; При замене сохраняем атрибуты существующего файла.
+            ld      a, (v_tmpFileDescr + FILE_DESCRIPTOR.attrib)
+            ld      hl, (v_newDescrPtr)
+            ld      de, FILE_DESCRIPTOR.attrib
+            add     hl, de
+            ld      (hl), a
+            call    deleteFileInt
+fileCreate_noExisting:
 
             ; de = номер первого сектора каталога
             ; с  = количество секторов каталога (мл. байт)
@@ -133,10 +148,18 @@ fileCreate_placeFound:
 
 
             ;---------------------------------------------------------------------
-            ; Записываем дескриптор в каталог, пока сектор каталога все еще в кэше
+            ; Поиск свободного кластера мог вытеснить сектор каталога из кэша.
 
             ; Ставим сектору каталога флаг isModified
             call    markDirSectorAsModified
+
+            ; HL теперь указывает на актуальный буфер сектора каталога.
+            ; При секторах по 256 байт младший байт старого указателя —
+            ; смещение записи внутри сектора. Восстанавливаем адрес после
+            ; возможного перемещения сектора в другой слот кэша.
+            ld      a, (v_cachedDescrPtr)
+            ld      l, a
+            ld      (v_cachedDescrPtr), hl
 
             ; Копируем подготовленный дескриптор файла в закешированный сектор каталога
             ld      hl, (v_newDescrPtr)     ; адрес подготовленного дескриптора
@@ -284,7 +307,7 @@ writeFirstCluster:            ; записываем номер кластера
 
 fileCreate_prepareDone:
             call    saveSectorCache ; сохраняем изменения в кэше на диск
-            or      a               ; выходим с флагом cf = 0
+            call    fatFinishWrite
             jp      popDBH_ret
 
 v_fileCreatePrepare: DB 0

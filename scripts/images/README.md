@@ -9,7 +9,7 @@
 Almaz2.exe        games/Almaz-2/Almaz2.exe
 Almaz2MX.exe      games/Almaz-2/Almaz2-mx-optimized.exe
 ALM2OPT.RKS       games/Almaz-2/Almaz2-optimized.rks
-DOS.SYS           ../bin/DOS.sys                               0xC000
+DOS.SYS           ../bin/DOS.sys                               0xC000 RS
 AUTOEXEC.BAT      {AUTOEXEC}                                   0x8000
 ```
 
@@ -23,6 +23,9 @@ AUTOEXEC.BAT      {AUTOEXEC}                                   0x8000
 не указывается. Для RAW адрес по умолчанию равен нулю; явный адрес задаётся
 десятичным числом или с префиксом `0x`. `{AUTOEXEC}` заменяется на
 `system-rom/autoexec.emu.bat` или `system-rom/autoexec.hardware.bat`.
+Необязательный четвёртый столбец RAW задаёт атрибуты: `R` — read-only,
+`S` — системный, `RS` — оба. Если адрес не нужен, укажите `0`.
+Без столбца атрибуты равны нулю.
 
 `SystemRom.txt` задаёт системный состав, `Ramfos.txt` — дополнение для Ramfos.
 `FlashDisk-emulator.txt` и `FlashDisk.txt` задают flash-диски 64 КБ и 2 МБ.

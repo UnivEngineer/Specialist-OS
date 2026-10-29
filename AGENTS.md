@@ -76,6 +76,9 @@ Specialist-OS — операционная система и набор сист
 - `images/` — генерируемые системные ROM- и flash-образы.
 - `scripts/images/` — общий PowerShell-сборщик ROM/flash и явные манифесты.
 - `scripts/emulator/` — запуск emu и его конфигурация.
+- `scripts/emu80/` — профиль MX2, установка и запуск Emu80; runtime хранится снаружи проекта.
+- `source-emulators/emu80/` — собственные аппаратные модели для сборки с Emu80.
+- `hardware/` — исходники DipTrace, версионируемые PDF/XML схем и панели.
 - `scripts/listings/` — подготовка листингов для emu.
 - `source/test-scr/` — автономный тест экрана.
 - `scripts/build/` — PowerShell-сценарии сборки компонентов и всего проекта.
@@ -107,7 +110,7 @@ powershell.exe -NoProfile -File ..\..\scripts\build\build-if-needed.ps1 <file-wi
 |---|---|---|---:|
 | `build: dos` | `source/dos/DOS.asm` | `bin/DOS.sys` | `0xC000` |
 | `build: editor` | `source/E/E.asm` | `bin/E.com` | `0xE800` |
-| `build: flash` | `source/flash/Flash.asm` | `bin/Flash.com` | `0xDE00` |
+| `build: flash` | `source/flash/FlashChk.asm` | `bin/FlashChk.com` | `0xDE00` |
 | `build: flash-rom` | `source/flash/Rom.asm` | `bin/Rom.com` | `0xDE00` |
 | `build: format` | `source/format/FORMAT.asm` | `bin/FORMAT.com` | `0xF100` |
 | `build: launch` | `source/launch/LAUNCH.asm` | `bin/LAUNCH.com` | `0xF800` |
@@ -126,6 +129,21 @@ powershell.exe -NoProfile -File ..\..\scripts\build\build-if-needed.ps1 <file-wi
 - `run: emu` — сборка, подготовка листингов, копирование ROM в emu и запуск конфигурации `SpecialistMX2_My_MXOS`.
 
 Для `run: emu` переменная окружения `SPECIALIST_EMU_DIR` должна указывать на каталог, содержащий `EMU.exe`.
+
+Для `run: Emu80` переменная `SPECIALIST_EMU80_DIR` указывает на отдельный
+runtime с `Emu80qt.exe` версии 4.0.571 или новее. Подробности находятся в
+`scripts/emu80/README.md`. Обычный профиль H: использует ROM.COM;
+`run: Emu80 flash` требует собственной сборки с моделями системной flash A:
+и внешней flash H: и устанавливает FLASHSYS.COM и FLASHCHK.COM.
+`run: Emu80 flash` пересобирает и заменяет оба диска, сохраняя старые образы и SDP;
+`run: Emu80 flash (no build)` сохраняет рабочие A: и H: между запусками.
+Не выдавай успешную загрузку MXOS за проверку flash-записи или всей схемы MX2.
+
+При изменении схем сохраняй стабильные имена в `hardware/boards/`, обновляй
+PDF/XML вместе с исходным `.dch`. Не перекодируй и не нормализуй бинарные
+проекты. `import-manifest.json` фиксирует первоначальный импорт и не заменяет
+историю дальнейших изменений в Git. Полный upstream Emu80 и runtime не копируй
+в отслеживаемые каталоги; собственный код хранится в `source-emulators/emu80/`.
 
 ## Проверка изменений
 

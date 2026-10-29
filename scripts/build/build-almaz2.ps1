@@ -8,7 +8,8 @@ param(
     [ValidateRange(0, 345)]
     [int] $InputCellStride = 0,
     [switch] $NoOptimizations,
-    [switch] $PublishMxTimer
+    [switch] $PublishMxTimer,
+    [switch] $Force
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,6 +22,23 @@ $assembler = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 $sourcePath = Join-Path $repositoryRoot "source-apps\almaz2\Almaz2.asm"
 $outputDirectory = Join-Path $repositoryRoot "bin"
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+
+# Учитываем все исходники игры, включая условные INCLUDE, общий ABI, сборщик
+# и ассемблер. Хеш содержимого не зависит от времени файла и смены ветки Git.
+$inputPaths = @(
+    Get-ChildItem -LiteralPath (Split-Path -Parent $sourcePath) -File |
+        Where-Object { $_.Extension -in @('.asm', '.inc') } |
+        ForEach-Object { $_.FullName }
+)
+$inputPaths += @((Join-Path $repositoryRoot 'source\include\mxos.inc'), $assembler, $PSCommandPath)
+$inputSignature = (($inputPaths | Sort-Object | ForEach-Object {
+    '{0}|{1}' -f $_, (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash
+}) -join "`n")
+
+function Get-FileSignature([string] $Path) {
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $null }
+    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash
+}
 
 $modes = @(
     @{ Name = "Base";        Output = "Almaz2-optimized";   Color = 0; Pit = 0; Ramfos = 0; Hud = 1 },
@@ -70,6 +88,29 @@ foreach ($variant in $selected) {
     if ($StepHz -gt 0) { $extraDefines += "-DALMAZ_STEP_HZ=$StepHz" }
     if ($InputCellStride -gt 0) { $extraDefines += "-DINPUT_POLL_CELL_STRIDE=$InputCellStride" }
     if ($PitClockHz -gt 0) { $extraDefines += "-DPIT_CLOCK_HZ=$PitClockHz" }
+    $stampPath = "$prefix.build.json"
+    $variantSignature = @($inputSignature, $variant.Name, $variant.Color, $variant.Pit,
+        $variant.Ramfos, $variant.Hud, ($extraDefines -join ' ')) -join "`n"
+    $outputs = @("$prefix.exe", "$prefix.rks", "$prefix.lst", "$prefix.sym")
+    $needsBuild = $true
+    if (-not $Force -and (Test-Path -LiteralPath $stampPath -PathType Leaf)) {
+        try {
+            $stamp = Get-Content -LiteralPath $stampPath -Raw | ConvertFrom-Json
+            $needsBuild = $stamp.signature -ne $variantSignature
+            foreach ($output in $outputs) {
+                $currentHash = Get-FileSignature $output
+                $name = [IO.Path]::GetExtension($output).TrimStart('.')
+                if (-not $currentHash -or $currentHash -ne $stamp.outputs.$name) { $needsBuild = $true }
+            }
+        }
+        catch { $needsBuild = $true }
+    }
+    if (-not $needsBuild) {
+        Write-Host ("[up-to-date] {0}" -f $variant.Name)
+        continue
+    }
+    # При ошибке сборки старый штамп не должен подтверждать частичные результаты.
+    Remove-Item -LiteralPath $stampPath -Force -ErrorAction SilentlyContinue
     $clockDescription = if ($PitClockHz -gt 0) { "$PitClockHz Hz" } else { "config.inc" }
     Write-Host ("[app] {0}, PIT input {1}" -f $variant.Name, $clockDescription)
     & $assembler "--i8080" "-Wno-rdlow" `
@@ -82,6 +123,14 @@ foreach ($variant in $selected) {
         ("--sym={0}.sym" -f $prefix) $sourcePath
     if ($LASTEXITCODE -ne 0) { throw "Assembly failed: $($variant.Name)" }
     Write-AlmazRks "$prefix.exe" "$prefix.rks"
+    $outputHashes = @{}
+    foreach ($output in $outputs) {
+        $name = [IO.Path]::GetExtension($output).TrimStart('.')
+        $outputHashes[$name] = Get-FileSignature $output
+        if (-not $outputHashes[$name]) { throw "Build output missing: $output" }
+    }
+    @{ signature = $variantSignature; outputs = $outputHashes } | ConvertTo-Json |
+        Set-Content -LiteralPath $stampPath -Encoding UTF8
 }
 
 if ($PublishMxTimer) {
@@ -91,8 +140,11 @@ if ($PublishMxTimer) {
         $destinationDirectory = $archive
         foreach ($extension in @("exe", "rks")) {
             $fileName = "$($variant.Output).$extension"
-            Copy-Item -LiteralPath (Join-Path $outputDirectory $fileName) `
-                -Destination (Join-Path $destinationDirectory $fileName) -Force
+            $source = Join-Path $outputDirectory $fileName
+            $destination = Join-Path $destinationDirectory $fileName
+            if ((Get-FileSignature $source) -ne (Get-FileSignature $destination)) {
+                Copy-Item -LiteralPath $source -Destination $destination -Force
+            }
         }
     }
     Write-Host ("[app] Published {0}" -f $archive)

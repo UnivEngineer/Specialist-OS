@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "name": "COPYCHK TXT",
+      "size": 512,
+      "sha256": "110009dcee21620b166f3abfecb5eff7a873be729d1c2d53822e7acc5f34eb9b"
+    },
+    {
+      "name": "NCCOPY  FNT",
+      "size": 2048,
+      "sha256": "ff70ca8129fb01aba716976975a5fa772d4ee3d1039fc55007daf76d341d2522"
+    }
+  ],
+  "ncCopyProcedureTested": true,
+  "verifiedAfterRestart": false,
+  "existingCopiesRejectedWithoutDiskChanges": [
+    "same name",
+    "different case",
+    "source itself"
+  ],
+  "date": "2026-10-29",
+  "ncBytesBefore": 3987,
+  "ncBytesAfter": 4022,
+  "ncSha256": "8fe8183cd9943351f027e4a965900f35b88ab85a9f507c08c78092afdb012af9"
+}

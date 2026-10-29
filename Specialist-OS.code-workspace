@@ -148,10 +148,9 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "FlashChecked",
+          "FlashChk",
           "com",
-          "0xDE00",
-          "Flash"
+          "0xDE00"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -686,6 +685,76 @@
           "panel": "dedicated",
           "clear": true
         }
+      },
+      {
+        "label": "build: Emu80 adapter",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\build.ps1", "-Deploy"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "image: Emu80 system flash",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\images\\build-image.ps1", "SystemEmuWritable"],
+        "dependsOn": ["build: OS"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "image: flash 2M",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\images\\build-image.ps1", "Games2M"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "image: Emu80 flash seed",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\seed-flash.ps1"],
+        "dependsOn": ["image: flash 2M"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80 flash",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1", "-Flash", "-ResetFlash"],
+        "dependsOrder": "sequence",
+        "dependsOn": ["image: Emu80 system flash", "image: Emu80 flash seed"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80 flash (no build)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1", "-Flash"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80 (no build)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1"],
+        "dependsOrder": "sequence",
+        "dependsOn": ["image: system ROM", "image: flash 64k"],
+        "problemMatcher": [],
+        "group": "build"
       }
     ],
     "inputs": [

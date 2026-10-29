@@ -13,14 +13,9 @@ hud_screen_position:
     RET
 
 ; Вход C=последняя цифра TIME. Выход и разрушение регистров — как у BIOS.
-; Обычный CALL в последней точке вывода сохраняет исходный POP BC/RET.
+; Все три цифры печатаются всегда; дополнительный пробел не нужен. CALL
+; в последней точке вывода сохраняет исходный POP BC/RET.
 hud_time_last_char:
-    IF ALMAZ_COLOR
-        CALL hud_print_char
-    ELSE
-        CALL app_bios_print_char
-    ENDIF
-    LD C,020h
     IF ALMAZ_COLOR
         JP hud_print_char
     ELSE
@@ -28,9 +23,9 @@ hud_time_last_char:
     ENDIF
 
 ; Входа нет. Все регистры и флаги сохраняются. Две подложки:
-; SCREEN X=32..95, TIME X=160..227; Y=3..12. Цвет текста совпадает с рамкой
+; SCREEN X=32..95, TIME X=160..223; Y=3..12. Цвет текста совпадает с рамкой
 ; (70h на MX, 00h на 8-цветном контроллере); цвет фона задаётся адаптером.
-; 160 полных и 10 частичных записей экрана; последние 4 пикселя сохранены.
+; 160 полных записей экрана; границы TIME совпадают с границами блоков 16*16.
 hud_clear_panels:
     PUSH AF
     PUSH BC
@@ -50,14 +45,6 @@ hud_clear_panels:
     LD HL,0A403h
     LD B,8
     CALL hud_clear_rectangle
-    LD C,10
-hud_clear_time_edge:
-    LD A,(HL)
-    AND 00Fh
-    LD (HL),A
-    INC L
-    DEC C
-    JP NZ,hud_clear_time_edge
     POP HL
     POP DE
     POP BC

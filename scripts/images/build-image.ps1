@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("SystemEmu", "SystemRamfos", "SystemHardware", "Games64k", "Games2M")]
+    [ValidateSet("SystemEmu", "SystemEmuFlash", "SystemEmuWritable", "SystemRamfos", "SystemHardware", "Games64k", "Games2M")]
     [string] $Target,
 
     [Parameter(Position = 1)]
@@ -86,8 +86,8 @@ function Get-Manifest {
             continue
         }
         $fields = @($entry -split '\s+')
-        if ($fields.Count -lt 2 -or $fields.Count -gt 3) {
-            throw "Invalid manifest entry at ${Path}:${lineNumber}: expected ImageName Source [LoadAddress]"
+        if ($fields.Count -lt 2 -or $fields.Count -gt 4) {
+            throw "Invalid manifest entry at ${Path}:${lineNumber}: expected ImageName Source [LoadAddress [Attributes]]"
         }
         $source = $fields[1]
         if ($source -eq "{AUTOEXEC}") {
@@ -95,11 +95,20 @@ function Get-Manifest {
         }
         $format = if ([IO.Path]::GetExtension($source).Equals(
             ".rks", [StringComparison]::OrdinalIgnoreCase)) { "rks" } else { "raw" }
-        $address = if ($fields.Count -eq 3) { $fields[2] } else { "0" }
-        if ($format -eq "rks" -and $fields.Count -eq 3) {
+        $address = if ($fields.Count -ge 3) { $fields[2] } else { "0" }
+        if ($format -eq "rks" -and $fields.Count -ge 3) {
             throw "RKS load address comes from its header at ${Path}:${lineNumber}"
         }
-        [pscustomobject]@{ ImageName = $fields[0]; Source = $source; LoadAddress = $address; Format = $format }
+        $attributes = 0
+        if ($fields.Count -eq 4) {
+            switch ($fields[3]) {
+                "R"  { $attributes = 0x01 }
+                "S"  { $attributes = 0x04 }
+                "RS" { $attributes = 0x05 }
+                default { throw "Invalid attributes at ${Path}:${lineNumber}: use R, S or RS" }
+            }
+        }
+        [pscustomobject]@{ ImageName = $fields[0]; Source = $source; LoadAddress = $address; Format = $format; Attributes = $attributes }
     }
     return @($entries)
 }
@@ -120,21 +129,50 @@ switch ($Target) {
         $outputPath = Join-Path $imageDirectory "SystemRom_ramfos_emulator.bin"
         $makeBootDisk = $true
     }
-    "SystemEmu" {
+    { $_ -in @('SystemEmu', 'SystemEmuFlash') } {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
-        $manifest = Get-Manifest $manifestPath "emu"
+        $autoexecVariant = if ($Target -eq 'SystemEmuFlash') { 'emu-flash' } else { 'emu' }
+        $manifest = Get-Manifest $manifestPath $autoexecVariant
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
         $maxFiles = 64
         $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Mx2"
-        $outputPath = Join-Path $imageDirectory "SystemRom_emulator.bin"
+        $outputName = if ($Target -eq 'SystemEmuFlash') { 'SystemRom_emu80_flash.bin' } else { 'SystemRom_emulator.bin' }
+        $outputPath = Join-Path $imageDirectory $outputName
+        $makeBootDisk = $true
+    }
+    "SystemEmuWritable" {
+        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $allEntries = @(Get-Manifest $manifestPath "emu-writable")
+        # До установки FlashSys встроенный драйвер должен прочитать эти файлы
+        # в первой 32-КБ странице линейного образа.
+        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASHCHK.COM','NC.COM','ROM.COM')
+        foreach ($name in $early) {
+            if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
+        }
+        $manifest = @($early | ForEach-Object { $name = $_; $allEntries | Where-Object { $_.ImageName -eq $name } })
+        $manifest += @($allEntries | Where-Object { $_.ImageName -notin $early })
+        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
+        $volumeSize = 512KB
+        $chipSize = 64KB
+        $maxFiles = 64
+        $volumeLabel = "SYSTEM ROM "
+        $imageFormat = "Raw"
+        $outputPath = Join-Path $imageDirectory "SystemRom_emu80_writable.bin"
         $makeBootDisk = $true
     }
     "SystemHardware" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
-        $manifest = Get-Manifest $manifestPath "hardware"
+        $allEntries = @(Get-Manifest $manifestPath "hardware")
+        # Встроенный драйвер читает загрузочные файлы из первой страницы.
+        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASHCHK.COM','NC.COM','ROM.COM')
+        foreach ($name in $early) {
+            if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
+        }
+        $manifest = @($early | ForEach-Object { $name = $_; $allEntries | Where-Object { $_.ImageName -eq $name } })
+        $manifest += @($allEntries | Where-Object { $_.ImageName -notin $early })
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = $HardwareSizeKB * 1KB
         $chipSize = 64KB
@@ -279,11 +317,17 @@ try {
             $fileData.Write($block, 0, $block.Length)
         }
 
+        if ($Target -in @('SystemEmuWritable', 'SystemHardware') -and $sourceName -in $early -and
+            ($firstCluster -eq 0 -or ($dataStartSector + $nextCluster - 2) * $sectorSize -gt 32768)) {
+            throw "Boot file must fit in the first 32-KB page: $sourceName"
+        }
+
         $entry = New-Object byte[] 32
         $nameBytes = [Text.Encoding]::ASCII.GetBytes(($baseName + "        ").Substring(0, 8))
         $extensionBytes = [Text.Encoding]::ASCII.GetBytes(($extension + "   ").Substring(0, 3))
         [Array]::Copy($nameBytes, 0, $entry, 0, 8)
         [Array]::Copy($extensionBytes, 0, $entry, 8, 3)
+        $entry[11] = $manifestEntry.Attributes
         Set-Word $entry 18 $loadAddress
         Set-Word $entry 26 $firstCluster
         Set-Word $entry 28 ($originalSize - 1)

@@ -14,8 +14,14 @@
 ;----------------------------------------------------------------------------
 
 fatFileDelete: ; Найти файл с именем из hl
+            xor     a
+            ld      (bios_vars.diskWriteErr), a
             call    fileFind
             ret     c 
+
+            ; Флаги System и Read-only запрещают удаление.
+            call    fileCheckDeleteAllowed
+            ret c
 
             ; Удалить файл
             call    deleteFileInt
@@ -24,10 +30,18 @@ fatFileDelete: ; Найти файл с именем из hl
             call    saveSectorCache
 
             ; Результат
-            or      a
-            ret
+            jp      fatFinishWrite
             
 ; ---------------------------------------------------------------------------
+
+; Проверить атрибуты найденной записи. CF=1: удаление запрещено.
+; AF разрушается; BC, DE и HL сохраняются.
+fileCheckDeleteAllowed:
+            ld      a, (v_tmpFileDescr + FILE_DESCRIPTOR.attrib)
+            and     005h
+            ret z
+            scf
+            ret
 
 deleteFileInt:
             ; Сохраняем регистры
@@ -69,4 +83,24 @@ deleteFileLoop:
 
             ; Восстаналиваем регистры и выходим
             jp      popDBH_ret
+
+; Завершение изменения файла после сохранения кэша.
+; Вход: diskWriteErr от аппаратных записей, в том числе при вытеснении.
+; Выход: CF=1 при отказе записи, CF=0 при успехе; AF разрушается.
+; BC, DE, HL сохраняются. При отказе сбрасываем неподтверждённый кэш:
+; последующее чтение должно отражать носитель, а не неудачную операцию.
+; Уже записанные на носитель секторы это не откатывает.
+fatFinishWrite:
+            ld      a, (bios_vars.diskWriteErr)
+            or      a
+            ret z
+            push    bc
+            push    de
+            push    hl
+            call    resetSectorCache
+            pop     hl
+            pop     de
+            pop     bc
+            scf
+            ret
 

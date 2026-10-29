@@ -29,9 +29,9 @@ ROM_128K_SECTORS_HI = 2     ; старший байт числа секторо�
 
 ;----------------------------------------------------------------------------
 
-    ; Отладочное размещение. Окно 0DC00h-0DDFFh штатно зарезервировано для
-    ; TAPE.COM, поэтому до встраивания драйвера в DOS одновременно можно
-    ; использовать FlashSys и Flash.com, но не внешний магнитофонный драйвер.
+    ; Окно 0DC00h-0DDFFh зарезервировано для драйверных расширений.
+    ; FlashSys и FlashChk.com могут работать одновременно; другое расширение,
+    ; использующее то же окно, с FlashSys несовместимо.
     ORG     0DC00h
 
     ; Заменяем встроенный драйвер системного ROM-диска A:.
@@ -39,145 +39,7 @@ ROM_128K_SECTORS_HI = 2     ; старший байт числа секторо�
     ld      hl, Driver
     call    bios_installDriver
     ld      (v_diskInfo), hl
-    call    InstallProtection
     ret
-
-;----------------------------------------------------------------------------
-
-; Устанавливаем защитные обёртки стандартных файловых функций. Благодаря
-; этому подтверждение работает не только в NC.COM, но и в любой программе,
-; использующей штатный BIOS ABI. Повторный запуск драйвера не поддерживается,
-; как и у остальных драйверов, загружаемых по адресу 0DE00h.
-
-InstallProtection:
-    ld      hl, (bios_fileCreate + 1)
-    ld      (CallFileCreate + 1), hl
-    ld      hl, (bios_fileDelete + 1)
-    ld      (CallFileDelete + 1), hl
-    ld      hl, (bios_fileRename + 1)
-    ld      (CallFileRename + 1), hl
-
-    ld      hl, ProtectedFileCreate
-    ld      (bios_fileCreate + 1), hl
-    ld      hl, ProtectedFileDelete
-    ld      (bios_fileDelete + 1), hl
-    ld      hl, ProtectedFileRename
-    ld      (bios_fileRename + 1), hl
-    ret
-
-;----------------------------------------------------------------------------
-; Подтверждение изменения файлов системного диска A:.
-;
-; Выход:
-;   CF=0 - разрешить операцию;
-;   CF=1 - отменить операцию.
-;
-; Сохраняет:
-;   bc, de, hl.
-;
-; Разрушает:
-;   af.
-
-ConfirmSystemChange:
-    push    hl
-    push    de
-    push    bc
-
-    ld      e, 2
-    call    bios_fileGetSetDrive
-    or      a
-    jp nz,  ConfirmAllowed
-
-    ; Строка помещается в командную строку NC. После операции NC перерисует её.
-    ld      hl, 001F3h
-    ld      (bios_vars.cursorY), hl
-    ld      hl, aConfirmSystemChange
-    call    bios_printString
-
-ConfirmRelease:
-    call    bios_keyScan
-    inc     a
-    jp nz,  ConfirmRelease
-
-ConfirmWait:
-    call    bios_keyScan
-    cp      01Bh
-    jp z,   ConfirmDenied
-    cp      00Dh
-    jp nz,  ConfirmWait
-
-ConfirmAllowed:
-    pop     bc
-    pop     de
-    pop     hl
-    or      a
-    ret
-
-ConfirmDenied:
-    pop     bc
-    pop     de
-    pop     hl
-    scf
-    ret
-
-ProtectedFileCreate:
-    call    ConfirmSystemChange
-    ret c
-    xor     a
-    ld      (bios_vars.diskWriteErr), a
-CallFileCreate:
-    call    0
-    jp      CheckWriteResult
-
-ProtectedFileDelete:
-    call    ConfirmSystemChange
-    ret c
-    xor     a
-    ld      (bios_vars.diskWriteErr), a
-CallFileDelete:
-    call    0
-    jp      CheckWriteResult
-
-ProtectedFileRename:
-    call    ConfirmSystemChange
-    ret c
-    xor     a
-    ld      (bios_vars.diskWriteErr), a
-CallFileRename:
-    call    0
-    jp      CheckWriteResult
-
-; Сохраняем штатный результат файловой функции, если физический драйвер не
-; обнаружил ошибку. При ошибке показываем сообщение и возвращаем CF=1.
-CheckWriteResult:
-    push    af
-    ld      a, (bios_vars.diskWriteErr)
-    or      a
-    jp z,   CheckWriteOk
-    pop     af
-
-    push    hl
-    push    de
-    push    bc
-    ld      hl, 001F3h
-    ld      (bios_vars.cursorY), hl
-    ld      hl, aWriteError
-    call    bios_printString
-    call    bios_getch
-    pop     bc
-    pop     de
-    pop     hl
-    scf
-    ret
-
-CheckWriteOk:
-    pop     af
-    ret
-
-aConfirmSystemChange:
-    DB      "SYSTEM DISK: MODIFY? ENTER/ESC", 0
-aWriteError:
-    DB      "DISK WRITE ERROR", 0
 
 ;----------------------------------------------------------------------------
 

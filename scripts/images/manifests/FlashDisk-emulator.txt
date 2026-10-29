@@ -1,7 +1,8 @@
 # Небольшой flash-диск H: для эмулятора.
 # Имя на диске    Путь относительно assets
-Almaz2.exe        games/Almaz-2/Almaz2.exe
-Almaz2X.exe       games/Almaz-2/Almaz2-optimized.exe
+AlmazyMX.rks        games/AlmazyMX.rks
+#Almaz2X.exe       games/Almaz-2/Almaz2-8color-optimized.exe
 Almaz2MX.exe      games/Almaz-2/Almaz2-mx-optimized.exe
-StarWars.rks      games/StarWars.rks
-Pacman2.rks       games/Pacman2.rks
+#StarWars.rks      games/StarWars.rks
+#Pacman2.rks       games/Pacman2.rks
+Tetris.rks        games/tetris.rks

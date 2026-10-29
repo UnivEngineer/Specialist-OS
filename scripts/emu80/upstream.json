@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/vpyk/emu80v4.git",
+  "referenceCommit": "e5cfece5ce16e8da01d0fc68b97cc510234246b7",
+  "runtimeVersion": "4.0.571",
+  "archiveUrl": "https://emu80.org/v4beta/Emu80qt_40571.zip",
+  "archiveSha256": "4aa4e6a7e597e9f958a47c4241fa885ef247c2b12f0d786c1fedd90c7f7dcc7d",
+  "archiveDirectory": "Emu80qt_40571"
+}

@@ -116,11 +116,11 @@ romStdReadLoop:
 
 romMXRead:
 romMXReadDrv:
-            ld      a, c    ; c = номер страницы = 0
             ld      d, e    ; d = номер блока 
             ld      e, 0    ; e = 0
                             ; hl = адрес буфера в памяти
 romMXReadLoop:
+            ld      a, c    ; c = номер страницы = 0 для каждого байта
             ld      (IO_PAGE_ROM), a
             ld      a, (de)
             ld      (IO_PAGE_RAM), a

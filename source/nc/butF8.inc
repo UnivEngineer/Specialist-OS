@@ -23,20 +23,20 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
             cp          0Dh
             jp nz,      loc_D54C
 
-            ; Если файл только для чтения
+            ; Если файл системный или только для чтения
             call        getSelectedFile         
             ld          de, FILE_DESCRIPTOR.attrib
             add         hl, de
             ld          a, (hl)
-            and         1
+            and         005h
             jp z,       loc_D595
 
             call        drawWindow2
 
-            ; Выводим текст "FILE IS READ-ONLY"
+            ; Выводим предупреждение о защищённом файле
             COLOR       COLOR_DIALOG_ERR
-            CENTER_LINE 18, 80h
-            ld          hl, aFileIsReanOnly
+            CENTER_LINE 24, 80h
+            ld          hl, aFileProtected
             call        bios_printString
 
             ; Выводим vars.input
@@ -56,17 +56,17 @@ loc_D588:   ; Цикл ожидания нажатия Esc или Enter
             cp          1Bh             ; Esc
             jp z,       mainReload      ; Если Esc - выход
             cp          0Dh             ; Enter
-            jp nz,      loc_D588        ; Если Enter - всё равно удалить
+            jp nz,      loc_D588
+            jp          mainReload      ; Защищённый файл не удаляется
 
 loc_D595:   ; Удаляем текущий файл
             call        getSelectedFile
             call        bios_fileDelete
-
-            ; Уменьшаем счетчик файлов
-            ld          hl, state.panelA_filesCnt
-            call        readBytePanel
-            dec         a
-            call        writeBytePanel
-
+            jp c,       deleteFileError
+            ; Количество файлов и курсор обновляются по реальному каталогу.
             jp          mainReload
+
+deleteFileError:
+            ld          hl, aDeleteFailed
+            jp          copyFileShowError
 

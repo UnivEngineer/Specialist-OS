@@ -159,7 +159,7 @@ bios_fileLoadInfo       = 0C851h ; Загрузить информацию о ф
 bios_fileGetSetAddr     = 0C854h ; Получить/установить адрес загрузки файла
 bios_fileGetSetAttr     = 0C857h ; Получить/установить атрибуты файла
 bios_fileNamePrepare    = 0C85Ah ; Преобразовать имя файла во внутренний формат
-bios_fileExec           = 0C85Dh ; Запустить файл
+bios_fileExec           = 0C85Dh ; Запустить файл; BAT затирает ОЗУ 0000h-8000h
 bios_installDriver      = 0C860h ; Установить драйвер накопителя
 bios_diskDriver         = 0C863h ; Драйвер выбранного диска
 bios_fileLoad2          = 0C866h ; Загрузить файл по адресу de
@@ -338,12 +338,10 @@ FAT_CACHE_ADDR = 0FB00h ; адрес кэша секторов fat в памят
 FAT_CACHE_SIZE = 1024   ; размер кэша в байтах
 FAT_CACHE_CAPACITY = FAT_CACHE_SIZE / SECTOR_SIZE   ; сколько секторов вмещается в кэш
 
-; Буфер для загрузки BAT файла
-    IF NEW_MEMORY_MAP
-BAT_BUFFER = 0E800h
-    ELSE
-BAT_BUFFER = 0FC00h
-    ENDIF
+; Временный буфер BAT: 0000h-7FFFh и байт терминатора по 8000h.
+; Программы могут затереть буфер: исполнитель перечитывает BAT после команды.
+BAT_BUFFER = 0000h
+BAT_BUFFER_SIZE = 08000h
 
 ; Командная строка и стек
 CMD_LINE   = 0FF00h  ; 192 байта, но в конце стек

@@ -13,7 +13,7 @@ $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
 $components = @(
     @{ Directory = "source\\dos";    Source = "DOSChecked"; Output = "DOS"; Extension = "sys"; Address = "0xC000" },
     @{ Directory = "source\\tape";   Source = "tape";    Extension = "com"; Address = "0xE800" },
-    @{ Directory = "source\\flash";  Source = "FlashChecked"; Output = "Flash"; Extension = "com"; Address = "0xDE00" },
+    @{ Directory = "source\\flash";  Source = "FlashChk"; Extension = "com"; Address = "0xDE00" },
     @{ Directory = "source\\flash";  Source = "FlashFst"; Extension = "com"; Address = "0xDE00" },
     @{ Directory = "source\\flash";  Source = "FlashSys"; Extension = "com"; Address = "0xDC00" },
     @{ Directory = "source\\flash";  Source = "Rom";     Extension = "com"; Address = "0xDE00" },

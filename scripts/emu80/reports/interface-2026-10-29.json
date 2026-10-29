@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-29",
+  "checks": [
+    "NC cursor clamped after deleting last listed file",
+    "NC empty panel positions reset to zero",
+    "NC scrolled panel start clamped and list reloaded",
+    "MX latch survives keyboard PPI port C writes",
+    "STD color output still works",
+    "MX latch restored after STD mode and color-mode writes",
+    "NC drive selector tested with F1 and right key",
+    "E.COM tested with right key and F3 page change; no black pixels"
+  ],
+  "oldMxPixels": [
+    [
+      0,
+      255,
+      255,
+      255
+    ],
+    [
+      0,
+      0,
+      0,
+      255
+    ]
+  ],
+  "fixedEditorColors": [
+    [
+      0,
+      255,
+      255,
+      255
+    ],
+    [
+      0,
+      0,
+      192,
+      255
+    ]
+  ],
+  "ncBytesBefore": 3929,
+  "ncBytesAfter": 3974,
+  "modelBuild": {
+    "executableSha256": "2b20cdab5492f7109413b143c14b5bd0d1e23ea52b64fee52d04f313bb71697b",
+    "sources": [
+      {
+        "path": "At29Flash.cpp",
+        "sha256": "9031258120883655a1d1bbf453ce5358d034ce3e436506979bca3d43cd33ad39"
+      },
+      {
+        "path": "At29Flash.h",
+        "sha256": "9cf15455d00ec5ae94c5d02226d8f110a86aa441dc77151c7db66f5f90157bf7"
+      },
+      {
+        "path": "SpecialistFlashDisk.cpp",
+        "sha256": "282a38ff4dac4e22a3f530291c8ae0c37d0da8e3da8b99de57ec7774c317ee05"
+      },
+      {
+        "path": "SpecialistFlashDisk.h",
+        "sha256": "5cb01e66270b9df0afac94d963df5214792aff2bfc232417f6f1f90153ab0beb"
+      },
+      {
+        "path": "SpecialistMx2VideoRam.cpp",
+        "sha256": "90c3f14383ee6e28a1d48dff14a202c5abd1868428b5f74ff43ec26252e9a01c"
+      },
+      {
+        "path": "SpecialistMx2VideoRam.h",
+        "sha256": "a6a38dc4f0bf4640423d1536222f29618dd93dffe04262e6d3194c53f8a90ddb"
+      }
+    ]
+  },
+  "binaries": [
+    {
+      "name": "DOS.sys",
+      "size": 5655,
+      "sha256": "107a13d973fc1d604b81e5c17b4f9a990b695957ba9f1055ad0bcd0c9cc65d34"
+    },
+    {
+      "name": "NC.com",
+      "size": 3974,
+      "sha256": "6e0827ce290e70a830952f9fcc529ede2193cf9f02eec6f6713cfa36d83aaa41"
+    },
+    {
+      "name": "E.com",
+      "size": 3758,
+      "sha256": "8462715ac758be086aba2d0938e5f95a59051becd3267b0556d5670fb3018366"
+    }
+  ]
+}

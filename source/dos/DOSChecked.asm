@@ -139,6 +139,7 @@ v_cachedSector:     DW 0
 v_newDescrPtr:      DW 0
 v_foundDescrPtr:    DW 0
 v_batPtr:           DW 0
+v_bootAutoexec:     DB 0
 v_memTop:           DW bios_vars-1
 v_dirFirstFile      DW 0
 v_dirMaxFiles       DW 0
@@ -156,6 +157,8 @@ v_diskInfo          DISK_INFO
 pathFontFnt:        DB "A:FONT.FNT",0
 pathNcCom:          DB "A:NC.COM",0
 pathAutoexecBat:    DB "A:AUTOEXEC.BAT",0
+pathRomCom:         DB "A:ROM.COM",0
+pathFlashSysCom:    DB "A:FLASHSYS.COM",0
 pathFormatBat:      DB "A:FORMAT.BAT",0
 aBat:               DB "BAT"
 aCom:               DB "COM"

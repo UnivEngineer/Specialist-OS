@@ -14,6 +14,8 @@
 ;----------------------------------------------------------------------------
 
 fatFileRename:
+            xor     a
+            ld      (bios_vars.diskWriteErr), a
             ; Найти исходный файл.
             call    fileFind
             ret c
@@ -35,7 +37,11 @@ fatFileRename:
             ; Если файл с новым именем уже существует, удалить его.
             ex      de, hl                  ; hl = новое, de = старое
             call    fileFind
-            call nc,deleteFileInt
+            jp c,   fileRename_noExisting
+            call    fileCheckDeleteAllowed
+            jp c,   stc_popDBH_ret
+            call    deleteFileInt
+fileRename_noExisting:
 
             ; Повторно найти исходный файл: предыдущий поиск мог вытеснить
             ; его сектор и сделать v_cachedDescrPtr недействительным.
@@ -58,5 +64,5 @@ fileRenameCopyName:
 
             call    markDirSectorAsModified
             call    saveSectorCache
-            or      a
+            call    fatFinishWrite
             jp      popDBH_ret

@@ -71,7 +71,7 @@ copyFileNameLoop:
             ld      de, vars.tempFileDescr
             ld      c, FILE_NAME_LENGTH + 3
             call    bios_stricmp
-            jp z,   copyFileError
+            jp z,   copyFileExists
 
 copyFileCheckDest:
             ; Введённый префикс может указывать на диск без драйвера.
@@ -86,14 +86,30 @@ copyFileCheckDest:
             cp      DISK_VALID
             jp nz,  copyFileError
 
+            ; Не заменять существующий файл, в том числе с другим регистром
+            ; букв имени. Проверяем до выделения кластеров и изменения FAT.
+            ld      hl, vars.tempFileDescr
+            call    bios_fileLoadInfo
+            jp nc,  copyFileExists
+
             ; Создать запись каталога и выделить полную цепочку FAT.
             xor     a
             ld      (bios_vars.diskWriteErr), a
+            ; При отмене до создания записи первый кластер остаётся нулевым.
+            ; Не запускать удаление, которое вызвало бы повторный запрос A:.
+            ld      (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster), a
+            ld      (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster + 1), a
             ld      hl, (vars.copyBlocksLeft)
             ex      de, hl
             ld      hl, vars.tempFileDescr
             call    bios_fileCreatePrepare
-            jp c,   copyFileCleanup
+            jp nc,  copyFilePrepareOk
+            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
+            ld      a, h
+            or      l
+            jp z,   copyFileError
+            jp      copyFileCleanup
+copyFilePrepareOk:
             ld      a, (bios_vars.diskWriteErr)
             or      a
             jp nz,  copyFileCleanup
@@ -163,6 +179,10 @@ copyFileCleanup:
 
 copyFileError:
             ld      hl, aCopyFailed
+            jp      copyFileShowError
+
+copyFileExists:
+            ld      hl, aFileAlreadyExists
 
 copyFileShowError:
             push    hl
@@ -173,7 +193,8 @@ copyFileShowError:
             call    bios_printString
 
             COLOR   COLOR_DIALOG
-            ld      hl, 5090h
+            ; Имя выводится от левого края поля окна.
+            ld      hl, 05090h
             ld      (bios_vars.cursorY), hl
             ld      hl, vars.input
             call    printStringInv

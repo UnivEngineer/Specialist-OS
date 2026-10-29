@@ -8,19 +8,9 @@
 execBat:
             pop     de
 
-            ; Устанавливаем адрес загрузки BAT-файла на BAT_BUFFER (= FC00h)
+            ; Загружаем BAT во временный буфер без изменения записи каталога.
             ld      hl, BAT_BUFFER
             ld      (v_batPtr), hl
-            ex      de, hl
-
-            ; Изменяем адрес загрузки BAT-файла
-            ; TODO: это не работает с ром-диском (A: без поддержки записи). Поэтому
-            ; нельзя запустить BAT-файл с диска A:, если его адрес загрузки в каталоге
-            ; уже не прошит как FC00h (= BAT_BUFFER)
-            ld      hl, v_curFileDescr
-            ld      c, 1
-            call    fileGetSetAddr
-            jp c,   badCommand
 
             ; Сохраняем имя BAT-файла
             ld      hl, v_curFileDescr      
@@ -44,9 +34,30 @@ v_batDrive:
             ld      a, 1 ; << сюда вместо 1 пишется диск, содержащий BAT файл
             call    fileSelectDrive
 
-            ; Загрузить BAT-файл в память
-            ld      hl, v_batFileDescr 
-            call    fileLoad
+            ; Проверяем размер до загрузки, оставляя место для терминатора.
+            ld      hl, v_batFileDescr
+            call    fileLoadInfo
+            jp c,   badCommand
+            ld      a, (v_batFileDescr + FILE_DESCRIPTOR.size + 3)
+            or      a
+            jp nz,  badCommand
+            ld      a, (v_batFileDescr + FILE_DESCRIPTOR.size + 2)
+            or      a
+            jp nz,  badCommand
+            ld      a, (v_batFileDescr + FILE_DESCRIPTOR.size + 1)
+            cp      BAT_BUFFER_SIZE / 256 ; максимум 32 КБ
+            jp nc,  badCommand
+
+            ; Загружаем BAT и завершаем его даже на границе сектора.
+            ld      hl, v_batFileDescr
+            ld      de, BAT_BUFFER
+            call    fileLoad2
+            jp c,   badCommand
+            ld      hl, (v_batFileDescr + FILE_DESCRIPTOR.size)
+            inc     hl              ; размер в каталоге хранится как N-1
+            ld      de, BAT_BUFFER
+            add     hl, de
+            ld      (hl), 0FFh
             ld      hl, (v_batPtr)
 
             ; Сохраняем начало строки
@@ -67,10 +78,19 @@ execBat_0:
             cp      0Ah
             jp z,   execBat_1
 
-            ; Конец файла
-            cp      0FFh        
+            ; Конец файла; непустую последнюю строку выполняем без CR/LF.
+            cp      0FFh
             jp nz,  execBat_0
-            ret
+            dec     hl
+            ld      a, h
+            cp      d
+            jp nz,  execBat_lastLine
+            ld      a, l
+            cp      e
+            ret z
+execBat_lastLine:
+            ld      (hl), 0Dh
+            jp      execBat_1
 
 ; ---------------------------------------------------------------------------
 
@@ -82,9 +102,17 @@ execBat_1:
             ld      a, b         
             call    fileSelectDrive
 
+            ; Пустые строки и второй байт CR/LF не являются командами.
+            ld      a, (de)
+            cp      0Dh
+            jp z,   execBat_loop
+            cp      0Ah
+            jp z,   execBat_loop
+
             ; Запустить файл
             ex      de, hl             
             call    fileExec
+            ret c                       ; ошибка прерывает пакетный файл
 
             jp      execBat_loop
 

@@ -141,12 +141,14 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
 aF1LeftF2RighF3:    DB "F1 Left F2 Rght F3 Info F4 Edit F5 Copy F6 Ren  F7 MkDr F8 Del",0
 aCommanderVer:      DB "Commander version 2.0",0
 aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
-aFileIsReanOnly:    DB "File is read-only!",0
+aFileProtected:     DB "System or read-only file",0
 aChooseDrive:       DB "Choose drive:",0
 aDeleteFrom:        DB "Delete from ",0
 asc_DC17:           DB 8, ' ',8, 0
 aCopyFromTo:        DB "Copy from    to",8,8,8,8,8, 0
 aCopyFailed:        DB "Copy failed",0
+aFileAlreadyExists: DB "File already exists",0
+aDeleteFailed:      DB "Delete failed",0
 aCantRenameFile:    DB "Can",39,"t rename file!",0
 aRenameOn:          DB "Rename on ",0
 aKBytesExtMemory:   DB 18h,"KB extended memory",0   ; здесь и далее 18h вместо ведущего пробела,

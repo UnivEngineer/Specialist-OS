@@ -1,0 +1,161 @@
+{
+  "writes": [
+    {
+      "sector": 127,
+      "sha256": "a6e6d715fd48d41126e75ea94fd78f4fa3c9b624b4eaf45f6be58f3d75041a59"
+    },
+    {
+      "sector": 128,
+      "sha256": "46d2df1f5e19e2b61a3b150cc2ebce82e638037abff122274c569f720f84885b"
+    },
+    {
+      "sector": 255,
+      "sha256": "2d8a4a147b95c19c137dcbc5ccfd41629ceafcd7427f88c1e8d8d72b4a99b188"
+    },
+    {
+      "sector": 256,
+      "sha256": "0ed4e30b7d4362e3d42d2c28be84399f47c4cdcc4f8d4367d3de66d2d90c2057"
+    },
+    {
+      "sector": 2047,
+      "sha256": "2d8a4a147b95c19c137dcbc5ccfd41629ceafcd7427f88c1e8d8d72b4a99b188"
+    },
+    {
+      "sector": 2048,
+      "sha256": "0ed4e30b7d4362e3d42d2c28be84399f47c4cdcc4f8d4367d3de66d2d90c2057"
+    },
+    {
+      "sector": 4095,
+      "sha256": "2d8a4a147b95c19c137dcbc5ccfd41629ceafcd7427f88c1e8d8d72b4a99b188"
+    },
+    {
+      "sector": 4096,
+      "sha256": "0ed4e30b7d4362e3d42d2c28be84399f47c4cdcc4f8d4367d3de66d2d90c2057"
+    },
+    {
+      "sector": 6143,
+      "sha256": "2d8a4a147b95c19c137dcbc5ccfd41629ceafcd7427f88c1e8d8d72b4a99b188"
+    },
+    {
+      "sector": 6144,
+      "sha256": "0ed4e30b7d4362e3d42d2c28be84399f47c4cdcc4f8d4367d3de66d2d90c2057"
+    },
+    {
+      "sector": 8191,
+      "sha256": "2d8a4a147b95c19c137dcbc5ccfd41629ceafcd7427f88c1e8d8d72b4a99b188"
+    },
+    {
+      "sector": 2044,
+      "sha256": "dd8ebf1645d6c0cdd77b613ce7a89435bfafdd888d32567a31a41d47ea09dc9e"
+    },
+    {
+      "sector": 4092,
+      "sha256": "c2ca21c6c30d736c13d87e4316c300fed0a44a503ca85647d742157f08546574"
+    },
+    {
+      "sector": 6140,
+      "sha256": "01c152a487833701066907550c415c7c063747ac47d6f571e73a4f8f22a00f01"
+    },
+    {
+      "sector": 8188,
+      "sha256": "9f1d51167a6b05385ce1fae0db03d015460f502b78f93c74eab8d0a54eb8ac73"
+    },
+    {
+      "sector": 2045,
+      "sha256": "b0820a83c2f467e1bfab6eb62e1be534a659a6fc187c378b100b51a2ec438640"
+    },
+    {
+      "sector": 2046,
+      "sha256": "cdff1ec95a94f407646a6c5ca6985199e04f378bd676e167e9b2e13dbeed8ee1"
+    }
+  ],
+  "drivers": [
+    {
+      "name": "Flash",
+      "sectors": 11,
+      "deferred": 0,
+      "cpuTicks": 874115
+    },
+    {
+      "name": "FlashFst",
+      "sectors": 11,
+      "deferred": 11,
+      "cpuTicks": 675907
+    },
+    {
+      "name": "FlashLegacy",
+      "sectors": 11,
+      "deferred": 0,
+      "cpuTicks": 680878
+    }
+  ],
+  "checks": [
+    "seed reads at sector/64K/chip/end boundaries",
+    "transparent latch, held address, disabled output",
+    "6 queued writes: four chips, then repeated writes to one chip, final flush"
+  ],
+  "persistenceAfterRestart": true,
+  "flashSys": {
+    "readSectors": [
+      0,
+      1,
+      63,
+      127
+    ],
+    "readOnlyWriteRejected": true,
+    "systemFlashProgrammingTested": false
+  },
+  "date": "2026-10-29",
+  "upstream": {
+    "repository": "https://github.com/vpyk/emu80v4.git",
+    "referenceCommit": "e5cfece5ce16e8da01d0fc68b97cc510234246b7",
+    "runtimeVersion": "4.0.571",
+    "archiveUrl": "https://emu80.org/v4beta/Emu80qt_40571.zip",
+    "archiveSha256": "4aa4e6a7e597e9f958a47c4241fa885ef247c2b12f0d786c1fedd90c7f7dcc7d",
+    "archiveDirectory": "Emu80qt_40571"
+  },
+  "build": {
+    "executableSha256": "0655f8006aaa74431d92a18d2a14488e9787c12cb2110ccb13e6e00397f7ed6b",
+    "sources": [
+      {
+        "path": "At29Flash.cpp",
+        "sha256": "9031258120883655a1d1bbf453ce5358d034ce3e436506979bca3d43cd33ad39"
+      },
+      {
+        "path": "At29Flash.h",
+        "sha256": "9cf15455d00ec5ae94c5d02226d8f110a86aa441dc77151c7db66f5f90157bf7"
+      },
+      {
+        "path": "SpecialistFlashDisk.cpp",
+        "sha256": "282a38ff4dac4e22a3f530291c8ae0c37d0da8e3da8b99de57ec7774c317ee05"
+      },
+      {
+        "path": "SpecialistFlashDisk.h",
+        "sha256": "5cb01e66270b9df0afac94d963df5214792aff2bfc232417f6f1f90153ab0beb"
+      }
+    ]
+  },
+  "driverBinaries": [
+    {
+      "name": "Flash",
+      "size": 345,
+      "sha256": "9c590e6b2937065b859471313eb68d14e53912184e7b08e6be9fb9b55ec284e6"
+    },
+    {
+      "name": "FlashFst",
+      "size": 447,
+      "sha256": "639d82b55948f9b62b68eef58bd3d1c9948941050e5b53da26c5a6c9c527edbe"
+    },
+    {
+      "name": "FlashLegacy",
+      "size": 267,
+      "sha256": "b9a2df28116f3a99cdcea98d112bac6cfe9d8302a677fe588962f273e47194f9"
+    },
+    {
+      "name": "FlashSys",
+      "size": 512,
+      "sha256": "060909e9a294713bf84331b38c1665589a7413d520843b589c66bc1f687658c7"
+    }
+  ],
+  "chipUnitTestsPassed": true
+}

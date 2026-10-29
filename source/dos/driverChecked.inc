@@ -75,10 +75,12 @@ romStdReadLoop:
 
 romMXRead:
 romMXReadDrv:
-            ld      a, c
             ld      d, e
             ld      e, 0
+            ; 14 байт, 65 тактов на байт при 8080: чтение ROM,
+            ; запись ОЗУ и два переключения маппера. C=0 - страница ROM.
 romMXReadLoop:
+            ld      a, c
             ld      (IO_PAGE_ROM), a
             ld      a, (de)
             ld      (IO_PAGE_RAM), a

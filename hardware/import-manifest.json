@@ -1,0 +1,168 @@
+{
+    "schema":  1,
+    "importedOn":  "2026-10-28",
+    "files":  [
+                  {
+                      "source":  "Specialist-M.dch",
+                      "path":  "boards/specialist-m/specialist-m.dch",
+                      "bytes":  1200930,
+                      "sha256":  "0846e1aabc20ed1ab0062e0032d3e7067e3653938e12d11c33b48aa408a41aa8"
+                  },
+                  {
+                      "source":  "Specialist-M.dip",
+                      "path":  "boards/specialist-m/specialist-m.dip",
+                      "bytes":  2316994,
+                      "sha256":  "b8fcea98cfd9d3226dc33cb120c6cd0efbd11f86e26670da9ae39b86439e9251"
+                  },
+                  {
+                      "source":  "AI/Specialist-M.dchxml",
+                      "path":  "boards/specialist-m/specialist-m.dchxml",
+                      "bytes":  1375351,
+                      "sha256":  "fa5ecbf032367ae882fef170a395f3b9284d2b2fbd9f5ed868d38230dfda0b23"
+                  },
+                  {
+                      "source":  "AI/Specialist-M.pdf",
+                      "path":  "boards/specialist-m/specialist-m.pdf",
+                      "bytes":  662053,
+                      "sha256":  "b882f7baa5514a21c47a6baa27ff83d111050e7edfd512ecaa9576d686feab5f"
+                  },
+                  {
+                      "source":  "Final-crossboard-rev1.dch",
+                      "path":  "boards/crossboard/crossboard.dch",
+                      "bytes":  1722040,
+                      "sha256":  "b803fe37fed48f1c1d99907b5836b7c6071360218ae7a7343386ccff6f196910"
+                  },
+                  {
+                      "source":  "Final-crossboard-rev1.dip",
+                      "path":  "boards/crossboard/crossboard.dip",
+                      "bytes":  1665054,
+                      "sha256":  "e6bd546c77c049c3122d3d74f338119f86223b01ad9faaeaaafe4527c686d43a"
+                  },
+                  {
+                      "source":  "AI/Final-crossboard-rev1.dchxml",
+                      "path":  "boards/crossboard/crossboard.dchxml",
+                      "bytes":  2509768,
+                      "sha256":  "b18d759232d73e2e5a476db22a582c9001f67ac83c9d431d2ba9669ca92ee12e"
+                  },
+                  {
+                      "source":  "AI/Final-crossboard-rev1.pdf",
+                      "path":  "boards/crossboard/crossboard.pdf",
+                      "bytes":  410788,
+                      "sha256":  "3f77b1fcd1e39258c2b807d393d15db7aa139c0b5e861d9805b0653d39cc02e6"
+                  },
+                  {
+                      "source":  "Final-mapper-rev0.dch",
+                      "path":  "boards/mapper/mapper.dch",
+                      "bytes":  1608837,
+                      "sha256":  "0db7e18cabaa6bc4b4b6143fe5f5da45f0be50cfdd53527aaf4abc77c527b8f1"
+                  },
+                  {
+                      "source":  "Final-mapper-rev0.dip",
+                      "path":  "boards/mapper/mapper.dip",
+                      "bytes":  1466377,
+                      "sha256":  "382577f3e2efa4138498926c1e40b2f57e287536fad82e3a62083dbf3b686c5d"
+                  },
+                  {
+                      "source":  "AI/Final-mapper-rev0.dchxml",
+                      "path":  "boards/mapper/mapper.dchxml",
+                      "bytes":  2264144,
+                      "sha256":  "305c2fbff42164ec334d179db8ba1447b78f97ab8b0c7db45cb4eb1148579bdc"
+                  },
+                  {
+                      "source":  "AI/Final-mapper-rev0.pdf",
+                      "path":  "boards/mapper/mapper.pdf",
+                      "bytes":  302718,
+                      "sha256":  "6def41cbba5ba42ab5f6e0010b70d2b91e578f74c0e9fdc3a774fba9766c1165"
+                  },
+                  {
+                      "source":  "Final-RAM-slots-rev1.dch",
+                      "path":  "boards/ram-slots/ram-slots.dch",
+                      "bytes":  1158956,
+                      "sha256":  "9f419e7e33902b71a2f0e71c2bd80d0d81e040b48fefe5e6fcdef1f1f1e4c57c"
+                  },
+                  {
+                      "source":  "Final-RAM-slots-rev1.dip",
+                      "path":  "boards/ram-slots/ram-slots.dip",
+                      "bytes":  1118615,
+                      "sha256":  "fbbd8a9fa7dabab3f5db2debe9b9d100cbe6cffceaabeb864a268823a6e8adfd"
+                  },
+                  {
+                      "source":  "AI/Final-RAM-slots-rev1.dchxml",
+                      "path":  "boards/ram-slots/ram-slots.dchxml",
+                      "bytes":  1573339,
+                      "sha256":  "883f2c1c9fa26dbf35ac6b0591b215009358e599e22ab03d8ebf8fb702a248f3"
+                  },
+                  {
+                      "source":  "AI/Final-RAM-slots-rev1.pdf",
+                      "path":  "boards/ram-slots/ram-slots.pdf",
+                      "bytes":  291523,
+                      "sha256":  "b3b833b2816ab886d0bf0114d31aa638c860e8b7c3d879b7f5be46c8d01de9da"
+                  },
+                  {
+                      "source":  "Final-RAM-module-rev0.dch",
+                      "path":  "boards/ram-module/ram-module.dch",
+                      "bytes":  252606,
+                      "sha256":  "6f0a2a8e825aa222050af15845c55afc2c6294e21931f981ac88a6747310f478"
+                  },
+                  {
+                      "source":  "Final-RAM-module-rev0.dip",
+                      "path":  "boards/ram-module/ram-module.dip",
+                      "bytes":  598031,
+                      "sha256":  "9b2b360c255e9aad978bc69b8df8917bc8b1d3a5f88fae00ea2e4d1c3cefa6bf"
+                  },
+                  {
+                      "source":  "AI/Final-RAM-module-rev0.dchxml",
+                      "path":  "boards/ram-module/ram-module.dchxml",
+                      "bytes":  278616,
+                      "sha256":  "deac57020de58042116c55d35bdd54c6ad8b6bcec37574bfc017d1d82666b22a"
+                  },
+                  {
+                      "source":  "AI/Final-RAM-module-rev0.pdf",
+                      "path":  "boards/ram-module/ram-module.pdf",
+                      "bytes":  85901,
+                      "sha256":  "a9a6b5f5271923bdb649e6c3ac4f5fa897f124883497ec76cfb186dee7d7817e"
+                  },
+                  {
+                      "source":  "Final-flash-disk-rev0.dch",
+                      "path":  "boards/flash-disk/flash-disk.dch",
+                      "bytes":  1079845,
+                      "sha256":  "660ae970b6f950e38651c2790c7849e1d5d79a33d54e9f4f0b03beed305d0d39"
+                  },
+                  {
+                      "source":  "Final-flash-disk-rev0.dip",
+                      "path":  "boards/flash-disk/flash-disk.dip",
+                      "bytes":  1037039,
+                      "sha256":  "fbec51a7979aa4dc2394c95bc0b392866ced15c2c6f0616dad7a92f1bdedfd76"
+                  },
+                  {
+                      "source":  "AI/Final-flash-disk-rev0.dchxml",
+                      "path":  "boards/flash-disk/flash-disk.dchxml",
+                      "bytes":  1541605,
+                      "sha256":  "6fc0dd3a1681c1538b55e573bc0b25205e277878e609657f6e4012889d4358fb"
+                  },
+                  {
+                      "source":  "AI/Final-flash-disk-rev0.pdf",
+                      "path":  "boards/flash-disk/flash-disk.pdf",
+                      "bytes":  148810,
+                      "sha256":  "472f74adf247321caa1db871e1c03912463ab2b8d37616c3a39bc40ede5011d5"
+                  },
+                  {
+                      "source":  "Final-panel-1.dip",
+                      "path":  "panels/panel-1.dip",
+                      "bytes":  1807882,
+                      "sha256":  "941d9e33cc501fa9b976b6f7c9269daee2d64ea42edb13f740eae3b61bcba3e3"
+                  },
+                  {
+                      "source":  "Final-panel-2.dip",
+                      "path":  "panels/panel-2.dip",
+                      "bytes":  1911443,
+                      "sha256":  "c33438cc71bdc92626edd3bef003125b0ce97a512965f75fb103a7d1d05e660b"
+                  },
+                  {
+                      "source":  "AI/README.md",
+                      "path":  "import-notes.md",
+                      "bytes":  3041,
+                      "sha256":  "79726c75909d7dafa9ff1f1b304b23f92d3110e3de2bd119a991974f061a075c"
+                  }
+              ]
+}

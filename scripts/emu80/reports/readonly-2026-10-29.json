@@ -1,0 +1,49 @@
+{
+  "checks": [
+    "delete refusal and immediate stat/load",
+    "rename refusal",
+    "create refusal",
+    "overwrite refusal preserves original",
+    "NC Delete failed without decrement",
+    "NC H-to-A Copy failed without phantom entry"
+  ],
+  "systemSha256": "0ca25f1d416a73b2cde0d7210f4a376ac9b7e15f11ad01cbdd8867ae7a0662ed",
+  "date": "2026-10-29",
+  "writableCopyRegression": {
+    "files": [
+      {
+        "name": "COPYCHK TXT",
+        "size": 512,
+        "sha256": "110009dcee21620b166f3abfecb5eff7a873be729d1c2d53822e7acc5f34eb9b"
+      },
+      {
+        "name": "NCCOPY  FNT",
+        "size": 2048,
+        "sha256": "ff70ca8129fb01aba716976975a5fa772d4ee3d1039fc55007daf76d341d2522"
+      }
+    ],
+    "ncCopyProcedureTested": true,
+    "verifiedAfterRestart": false
+  },
+  "interfaceRegressionPassed": true,
+  "sizes": {
+    "dosBefore": 5655,
+    "dosAfter": 5696,
+    "ncBefore": 3974,
+    "ncAfter": 3987
+  },
+  "binaries": [
+    {
+      "name": "DOS.sys",
+      "sha256": "6344007f262262d5a9ccde4537477e106812d6c3337906c4b80d8198d2011a30"
+    },
+    {
+      "name": "NC.com",
+      "sha256": "91c9c0c60c9c85ea67fddd8bdb98261e688913c4dd421057485e29c6ac4306cb"
+    },
+    {
+      "name": "FlashChk.com",
+      "sha256": "9c590e6b2937065b859471313eb68d14e53912184e7b08e6be9fb9b55ec284e6"
+    }
+  ]
+}

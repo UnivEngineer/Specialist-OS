@@ -1,0 +1,9 @@
+# Бинарные проекты и документы сохраняем побайтно.
+hardware/**/*.dch binary
+hardware/**/*.dip binary
+hardware/**/*.pdf binary
+# Сохраняем оригинальные байты экспорта для проверки манифеста импорта.
+hardware/**/*.dchxml -text diff
+hardware/import-notes.md -text
+# Текст для чтения на Специалисте: KOI8-R, строки разделены CR.
+assets/system-rom/README.TXT -text

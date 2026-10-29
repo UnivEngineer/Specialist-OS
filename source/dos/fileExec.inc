@@ -114,7 +114,9 @@ execError:
 badCommand:
             ld      hl, txtBadCommand; "\nBAD COMMAND or FILE NAME"
             call    j_printString
-            call    j_getch          ; дать пользователю прочитать сообщение
+            ld      a, (v_bootAutoexec)
+            or      a
+            call z, j_getch          ; при автозагрузке не задерживать fallback
 stc_ret:
             scf
             ret

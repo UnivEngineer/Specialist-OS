@@ -19,7 +19,7 @@ TABLES = (
     ("t_sound_diamond_explosion", 0x0AFE, 3),
     ("t_music_intro", 0x0B13, 4), ("t_music_level", 0x0B51, 4),
 )
-PALETTE = bytes.fromhex("00 10 48 70 40 b0 e4 f0 50 a0 20 80 00 10 48 70")
+PALETTE = bytes.fromhex("00 10 48 70 40 b0 e4 f0 50 a0 40 80 00 10 48 70")
 
 
 def require(condition, message):
@@ -29,6 +29,69 @@ def require(condition, message):
 
 def word(data, address):
     return int.from_bytes(data[address:address + 2], "little")
+
+
+def check_soil_draw(data, symbols, color8):
+    """Исполнить отрисовку земли для всех банков и проверить цвета и стек."""
+    for bank_name in ("t_sprites_phase_zero", "t_sprites_phase_one",
+                      "t_sprites_phase_two", "t_sprites_phase_three"):
+        mem = bytearray(65536)
+        mem[:len(data)] = data
+        bank = symbols[bank_name]
+        pointer = symbols["v_sprite_bank"]
+        mem[pointer:pointer+2] = bank.to_bytes(2, "little")
+        pc, a, b, c, d, e, h, l = symbols["tile_draw_soil"], 10, 7, 9, 0, 0, 0, 0
+        stack = [0x4567, 0x0AD7]  # Исходные HL и AF, сохранённые вызывающим кодом.
+        writes, ports, zero = [], [], False
+        for _ in range(2000):
+            op = mem[pc]
+            pc += 1
+            if op == 0xC5: stack.append(b*256+c)
+            elif op == 0xE5: stack.append(h*256+l)
+            elif op == 0xC1: b, c = divmod(stack.pop(), 256)
+            elif op == 0xE1: h, l = divmod(stack.pop(), 256)
+            elif op == 0xF1: a, flags = divmod(stack.pop(), 256)
+            elif op == 0x2A:
+                h, l = divmod(word(mem, word(mem, pc)), 256); pc += 2
+            elif op == 0x11: d, e = divmod(word(mem, pc), 256); pc += 2
+            elif op == 0x19: h, l = divmod((h*256+l+d*256+e) & 0xFFFF, 256)
+            elif op == 0xEB: d, e, h, l = h, l, d, e
+            elif op == 0x78: a = b
+            elif op == 0x79: a = c
+            elif op == 0x87: a = a*2 & 255
+            elif op == 0xC6: a = (a+mem[pc]) & 255; pc += 1
+            elif op == 0x67: h = a
+            elif op == 0x07: a = ((a << 1) | (a >> 7)) & 255
+            elif op == 0xE6: a &= mem[pc]; pc += 1
+            elif op == 0x6F: l = a
+            elif op == 0x24: h = (h+1) & 255
+            elif op == 0x2C: l = (l+1) & 255
+            elif op == 0x13: d, e = divmod((d*256+e+1) & 65535, 256)
+            elif op == 0x06: b = mem[pc]; pc += 1
+            elif op == 0x3E: a = mem[pc]; pc += 1
+            elif op == 0x32: ports.append((word(mem, pc), a)); pc += 2
+            elif op == 0x1A: a = mem[d*256+e]
+            elif op == 0x77: writes.append((h*256+l, a, ports[-1]))
+            elif op == 0x05: b = (b-1) & 255; zero = b == 0
+            elif op == 0xC2:
+                target = word(mem, pc); pc = pc+2 if zero else target
+            elif op == 0xCD:
+                target = word(mem, pc); pc += 2; stack.append(pc); pc = target
+            elif op == 0xC9:
+                if not stack: break
+                pc = stack.pop()
+            else: raise ValueError(f"Unexpected soil opcode {op:02X} at {pc-1:04X}")
+        else:
+            raise ValueError("Soil drawing did not return")
+        base = 0x9000 + 7*512 + 9*16
+        red, yellow = ((0x50, 0x10) if color8 else (0x40, 0xE0))
+        expected = [(base+column*256+row, data[bank+0x140+column*16+row],
+                     (symbols["app_color_port"], red if row % 2 == 0 else yellow))
+                    for column in range(2) for row in range(16)]
+        require(writes == expected and (a, flags, b, c, h, l) ==
+                (10, 0xD7, 7, 9, 0x45, 0x67), "Soil pixels, colours or registers differ")
+        require(len(ports) == 32 + int(color8) and
+                (not color8 or ports[0] == (0xFF03, 0x82)), "Soil colour writes differ")
 
 
 def check_color_exit_clear(data, symbols):
@@ -297,10 +360,10 @@ def check_hud_panels(data, symbols, color):
     u16 = lambda value: value.to_bytes(2, "little")
     final_char = symbols["hud_time_last_char"]
     require(data[0x0160] == 0xCD and word(data, 0x0161) == final_char,
-            "Last TIME digit does not append a blank through the HUD adapter")
+            "Last TIME digit does not use the HUD adapter")
     printer = symbols["hud_print_char" if color else "app_bios_print_char"]
-    require(data[final_char:final_char+8] == b"\xcd" + u16(printer) + b"\x0e\x20\xc3" + u16(printer),
-            "TIME adapter must print the digit, tail-print a blank and keep the stack balanced")
+    require(data[final_char:final_char+3] == b"\xc3" + u16(printer),
+            "TIME adapter must tail-print the final digit without an extra blank")
     panel = symbols["hud_clear_panels"]
     position = symbols["hud_screen_position"]
     require(data[position:position+6] == b"\xcd" + u16(panel) + bytes.fromhex("21 0b 00"),
@@ -316,11 +379,26 @@ def check_hud_panels(data, symbols, color):
         written.update(start+column*256+row for column in range(width) for row in range(10))
     require(len(written) == 160 and all(0x9000 <= a < 0xC000 and 3 <= a % 256 <= 12 for a in written),
             "HUD clearing reaches gameplay rows or leaves the screen")
-    edge = symbols["hud_clear_time_edge"]
-    edge_code = bytes.fromhex("7e e6 0f 77 2c 0d c2") + u16(edge)
-    require(data[edge:edge+len(edge_code)] == edge_code and
-            data[edge-2:edge] == bytes.fromhex("0e 0a"),
-            "TIME edge must clear only the left four pixels over ten rows")
+    require("hud_clear_time_edge" not in symbols and all(a not in written for a in range(0xAC03, 0xAC0D)),
+            "TIME panel must not alter the next wall byte")
+    time_text = symbols["t_time_text"]
+    require(data[time_text:time_text+8] == b" TIME  \x00" and
+            data[0x013C:0x013F] == bytes.fromhex("21 0b 52") and
+            data[0x0142:0x0145] == b"\x21" + u16(time_text + 1), "TIME text or position differs")
+    for offset, digit in ((0x0148, "v_time_hundreds"), (0x0151, "v_time_tens"),
+                          (0x015A, "v_time_units")):
+        expected = b"\x3a" + u16(symbols[digit]) + bytes.fromhex("c6 30 4f")
+        require(data[offset:offset+6] == expected,
+                "TIME must always print all three digits, including leading zeros")
+    # Начало строки берём из байта координаты BIOS (в полупикселях).
+    start_x = data[0x013E] * 2
+    string_length = len(data[time_text+1:time_text+8].split(b"\x00", 1)[0])
+    panel_start = 160
+    panel_end = 224
+    text_end = start_x + (string_length + 3)*6
+    require(start_x - panel_start == 4 and panel_end - text_end == 6 and
+            panel_start + panel_end == 384 and panel_start % 16 == panel_end % 16 == 0,
+            "TIME text or block-aligned panel position differs")
     clear = (b"\xaf\x0e\x0a\x77\x2c\x0d\xc2" + u16(symbols["hud_clear_row"]) +
              b"\x2e\x03\x24\x05\xc2" + u16(symbols["hud_clear_column"]) + b"\xc9")
     require(data[rectangle:rectangle+len(clear)] == clear,
@@ -682,6 +760,7 @@ def main():
         payload, symbols = load(stem)
         palette = symbols["t_tile_colors"]
         require(payload[palette:palette+16] == palette8, f"{stem}: 8-colour palette differs")
+        check_soil_draw(payload, symbols, True)
         require(symbols["app_color_port"] == 0xFF02 and symbols["app_hud_color"] == 0,
                 f"{stem}: 8-colour port or HUD colour differs")
         draw = payload[symbols["tile_draw_color"]:palette]
@@ -792,7 +871,7 @@ def main():
         require(word(data, 0x0166) == (symbols["input_game_command"] if optimized else
                                      (0xC81B if ramfos else 0xC812)), f"{stem}: keyboard ABI")
         if optimized:
-            require(data[0x013C:0x013F] == bytes.fromhex("21 0b 50"), f"{stem}: TIME baseline")
+            require(data[0x013C:0x013F] == bytes.fromhex("21 0b 52"), f"{stem}: TIME baseline")
             require(word(data, 0x019C) == symbols["hud_screen_position"], f"{stem}: SCREEN baseline")
             check_hud_panels(data, symbols, color)
         else:
@@ -918,6 +997,7 @@ def main():
             require(data[0x0886] == 0xC3 and word(data, 0x0887) == symbols["tile_draw_color"], f"{stem}: color hook")
             address = symbols["t_tile_colors"]
             require(data[address:address + 16] == PALETTE and address % 16 == 0, f"{stem}: palette")
+            check_soil_draw(data, symbols, False)
             require(symbols["app_hud_color"] == PALETTE[3], f"{stem}: HUD and wall colors differ")
         else:
             require(data[0x0886:0x0889] == bytes.fromhex("f5 e6 0f"), f"{stem}: monochrome renderer")

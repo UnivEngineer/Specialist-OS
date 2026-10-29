@@ -174,7 +174,8 @@ v_cachedDescrPtr:   DW 0            ; Используется в findFile, crea
 v_cachedSector:     DW 0            ; Используется в findFile, createFile
 v_newDescrPtr:      DW 0            ; Адрес дескриптора созданного файла
 v_foundDescrPtr:    DW 0            ; Адрес дескриптора найденного файла
-v_batPtr:           DW 0            ; Адрес буфра, где находится содержимое BAT файла
+v_batPtr:           DW 0
+v_bootAutoexec:     DB 0            ; Адрес буфра, где находится содержимое BAT файла
 v_memTop:           DW bios_vars-1  ; Максимальный доступный программам адрес в памяти (в оригинале почему-то 0FAFFh)
 v_dirFirstFile      DW 0            ; Используется в fileList
 v_dirMaxFiles       DW 0            ; Используется в fileList
@@ -199,6 +200,8 @@ v_diskInfo          DISK_INFO
 pathFontFnt:        DB "A:FONT.FNT",0
 pathNcCom:          DB "A:NC.COM",0
 pathAutoexecBat:    DB "A:AUTOEXEC.BAT",0
+pathRomCom:         DB "A:ROM.COM",0
+pathFlashSysCom:    DB "A:FLASHSYS.COM",0
 pathFormatBat:      DB "A:FORMAT.BAT",0
 aBat:               DB "BAT"
 aCom:               DB "COM"
