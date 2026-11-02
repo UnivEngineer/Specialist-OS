@@ -36,7 +36,26 @@ class Machine:
             self.call("mem_write", addr=addr + offset, data=data[offset:offset + 4096].hex())
 
     def read(self, addr, length):
-        return bytes.fromhex(self.call("mem_read", addr=addr, len=length)["hex"])
+        # MCP ограничивает одно чтение 4096 байтами; код NC теперь больше.
+        return b''.join(bytes.fromhex(self.call("mem_read", addr=addr+offset,
+                        len=min(4096,length-offset))["hex"])
+                        for offset in range(0,length,4096))
+
+    def install_flash_binary(self, binary):
+        self.write(0, binary)
+        state = self.subroutine(0)
+        if state['flags']['C']:
+            raise RuntimeError('Flash installer rejected the device')
+        return state
+
+    def install_flash(self, name):
+        return self.install_flash_binary((ROOT / 'bin' / (name + '.com')).read_bytes())
+
+    @staticmethod
+    def resident_bytes(name):
+        syms = dict((k,int(v,16)) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
+                    (ROOT/'bin'/(name+'.sym')).read_text(),re.M))
+        return (ROOT/'bin'/(name+'.com')).read_bytes()[syms['resident_file']:syms['resident_file_end']]
 
     def subroutine(self, address, **registers):
         self.write(0x8000, bytes((0xCD, address & 255, address >> 8, 0xC3, 0, 0x81)))
@@ -65,7 +84,7 @@ def main():
     parser.add_argument("--resume", action="store_true", help="Продолжить запись после предыдущего прогона без проверки seed")
     parser.add_argument("--pipeline-only", action="store_true", help="Записать пакет в разные и повторно в одну микросхему")
     parser.add_argument("--system-rom", action="store_true", help="Проверить FlashSys с системной ПЗУ без записи")
-    parser.add_argument("--drivers", nargs="+", choices=("FlashChk", "FlashFst", "FlashLegacy"), default=["FlashChk", "FlashFst"])
+    parser.add_argument("--drivers", nargs="+", choices=("Flash", "FlashFst"), default=["Flash", "FlashFst"])
     args = parser.parse_args()
     machine = Machine(args.url)
     image_path = args.runtime / "specialist-os/flash-disk.bin"
@@ -80,9 +99,10 @@ def main():
         if (args.runtime / 'specialist-os/system-flash.bin').exists():
             raise ValueError('For the system-flash profile use check-system-flash.py --locked; do not reinstall FlashSys.')
         # Устанавливаем один раз: установщик сохраняет старые адреса обёрток ABI.
-        machine.write(0xDC00, (ROOT / "bin/FlashSys.com").read_bytes())
-        machine.subroutine(0xDC00)
-        entry = driver_entry("FlashSys")
+        machine.write(0, (ROOT / "bin/FlashSys.com").read_bytes())
+        assert machine.subroutine(0)["flags"]["C"], "ROM must reject software ID"
+        machine.subroutine(0xC842, af=0x0000, de=1)
+        entry = 0xC863
         image = (args.runtime / "specialist-os/system.bin").read_bytes()
         # MX ROM занимает вторую половину образа; старшие страницы пока не моделируются.
         for sector in [0, 1, 0x3F, 0x7F]:
@@ -107,8 +127,7 @@ def main():
 
     if args.pipeline_only:
         results = json.loads(args.report.read_text())
-        machine.write(0xDE00, (ROOT / "bin/FlashFst.com").read_bytes())
-        machine.subroutine(0xDE00)
+        machine.install_flash("FlashFst")
         entry = driver_entry("FlashFst")
         queued = {}
         for sector in [0x07FC, 0x0FFC, 0x17FC, 0x1FFC, 0x07FD, 0x07FE]:
@@ -132,9 +151,8 @@ def main():
 
     if args.verify_persisted:
         report = json.loads(args.report.read_text())
-        machine.write(0xDE00, (ROOT / "bin/FlashChk.com").read_bytes())
-        machine.subroutine(0xDE00)
-        entry = driver_entry("FlashChk")
+        machine.install_flash("Flash")
+        entry = driver_entry("Flash")
         for case in report["writes"]:
             machine.subroutine(entry, bc=0x0200, de=case["sector"], hl=0x4000)
             assert hashlib.sha256(machine.read(0x4000, 256)).hexdigest() == case["sha256"]
@@ -148,7 +166,7 @@ def main():
     results = {"writes": [], "drivers": [], "checks": []}
     sectors = [0, 1, 0x7F, 0x80, 0xFF, 0x100, 0x7FF, 0x800, 0xFFF, 0x1000, 0x17FF, 0x1800, 0x1FFF]
     # Чтение всех границ через установленный DOS-драйвер, до изменения диска.
-    entry = driver_entry("FlashChk")
+    entry = driver_entry("Flash")
     for sector in ([] if args.resume else sectors):
         state = machine.subroutine(entry, bc=0x0200, de=sector, hl=0x4000)
         assert not state["flags"]["C"]
@@ -175,8 +193,7 @@ def main():
     test_sectors = [0x7F, 0x80, 0xFF, 0x100, 0x7FF, 0x800, 0xFFF, 0x1000, 0x17FF, 0x1800, 0x1FFF]
     final_writes = {}
     for number, name in enumerate(args.drivers):
-        machine.write(0xDE00, (ROOT / "bin" / (name + ".com")).read_bytes())
-        machine.subroutine(0xDE00)
+        machine.install_flash(name)
         entry = driver_entry(name)
         start_ticks = machine.call("cpu_state")["cpu_ticks"]
         deferred = 0
@@ -184,7 +201,7 @@ def main():
             payload = bytes((i * 73 + sector + number * 101) & 255 for i in range(256))
             machine.write(0x4000, payload)
             state = machine.subroutine(entry, bc=0x0100, de=sector, hl=0x4000)
-            if name == "FlashChk":
+            if name == "Flash":
                 assert not state["flags"]["C"], f"Write failed: {sector:04X}"
             else:
                 # Возврат конвейерного драйвера раньше фиксации массива — реальная отложенная запись.

@@ -59,3 +59,6 @@ foreach ($component in $components) {
         Pop-Location
     }
 }
+
+& (Join-Path $repositoryRoot 'source-apps/diskbench/build.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'DISKBEN assembly failed.' }

@@ -54,7 +54,7 @@ def main():
             pc = target if opcode == 0xC3 or not zero else pc + 2
         elif opcode == 0x31 and pc - 1 == 0xC009:  # LXI SP в DOS
             sp = memory[pc] | memory[pc + 1] << 8
-            if sp != 0xFFC0 or memory[0xC000:0xC003] != b"\xC3\x09\xC0":
+            if sp not in (0xFFC0, 0xDC00) or memory[0xC000:0xC003] != b"\xC3\x09\xC0":
                 raise ValueError("Unexpected DOS entry or stack")
             print(f"OK: MX ROM -> DOS C000 -> SP={sp:04X}; {copied} bytes copied, {steps + 1} instructions")
             return

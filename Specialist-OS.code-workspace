@@ -45,6 +45,14 @@
     "version": "2.0.0",
     "tasks": [
       {
+        "label": "build: diskbench",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\source-apps\\diskbench\\build.ps1"],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
         "label": "build: almaz",
         "type": "process",
         "command": "powershell.exe",

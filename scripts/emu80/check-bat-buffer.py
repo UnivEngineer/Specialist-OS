@@ -56,7 +56,7 @@ def main():
     assert not call(0xC84B, hl=0x8500)['flags']['C']
     create(b'LONG    BAT', 0, b'X' * 32769)
     listing = (ROOT / 'bin/DOS.lst').read_text(encoding='utf-8-sig')
-    match = re.search(r'^\s*\d+\s+([0-9A-F]{4})\s+(?:[0-9A-F]{2}\s+)*v_bootAutoexec:', listing, re.M)
+    match = re.search(r'^\s*\d+\+*\s*([0-9A-F]{4})\s+(?:[0-9A-F]{2}\s+)*v_bootAutoexec:', listing, re.M)
     assert match
     m.write(int(match[1], 16), b'\1')  # Не ждать клавишу при штатной ошибке загрузки.
     m.write(0x8400, b'B:LONG.BAT\0')

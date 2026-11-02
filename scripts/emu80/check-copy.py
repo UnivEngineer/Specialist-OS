@@ -63,8 +63,7 @@ def main():
     if not args.verify_only:
         # Предыдущие секторные тесты могли оставить другой драйвер и активный H:.
         m.subroutine(0xC842, af=0x0000, de=1)
-        m.write(0xDE00, (ROOT / 'bin/FlashChk.com').read_bytes())
-        m.subroutine(0xDE00)
+        m.install_flash('Flash')
         m.subroutine(0xC842, af=0x0700, de=1)
         descriptor = bytearray(32)
         descriptor[:11] = names[0][0]
@@ -86,9 +85,11 @@ def main():
             return int(re.search(r'^\s*\d+\+?\s+([0-9A-F]{4})\s+(?:[0-9A-F]{2}\s+)*' + name + r'[: ]', listing, re.M)[1], 16)
         copy = label('copyFileInt')
         state_addr = label('state')
-        operand = re.search(r'21 ([0-9A-F]{2}) ([0-9A-F]{2})\s+ld\s+hl, vars.input', listing)
-        input_addr = int(operand[2] + operand[1], 16)
-        buffer_addr = input_addr + 64  # input[32], FILE_DESCRIPTOR[32], затем FILE_LIST_BUFFER.
+        nc_symbols = {name:int(value,16) for name,value in re.findall(
+            r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
+            (ROOT/'bin/NC.sym').read_text('utf-8-sig'),re.M)}
+        input_addr = nc_symbols['vars.input']
+        buffer_addr = nc_symbols['FILE_LIST_BUFFER']
         system_path = args.runtime / 'specialist-os/system-flash.bin'
         if system_path.exists():
             logical = system_path.read_bytes()  # Линейный образ системной AT29.

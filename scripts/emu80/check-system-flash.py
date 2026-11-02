@@ -31,10 +31,11 @@ def main():
     m.call('debug_break')
     m.call('bp_clear')
     m.call('bp_set', addr=0x8100, type='exec')
-    assert m.read(0xDC00, 8) == (ROOT / 'bin/FlashSys.com').read_bytes()[:8], 'FlashSys не установлен при загрузке'
+    if not args.locked:
+        assert m.read(0xDC00, 8) == m.resident_bytes('FlashSys')[:8], 'FlashSys не установлен при загрузке'
     m.subroutine(0xC842, af=0x0100, de=1)
     m.subroutine(0xC842, af=0x0000, de=1)
-    driver = entry('FlashSys')
+    driver = 0xC863 if args.locked else entry('FlashSys')
     if args.locked:
         before = image.read_bytes()
         sector = 0x7FF
@@ -44,7 +45,7 @@ def main():
         state = m.subroutine(driver, bc=0x0100, de=sector, hl=0x4000)
         assert state['flags']['C'] and m.read(0x8FF9, 1) == b'\1'
         assert image.read_bytes() == before
-        print('J4 read-only: FlashSys write rejected, image unchanged')
+        print('J4: software ID unavailable, native ROM write rejected, image unchanged')
         return
     if args.verify_persisted:
         report = json.loads(args.report.read_text())
