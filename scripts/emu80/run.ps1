@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string] $EmulatorDirectory,
-    [ValidateSet('SystemRom_emulator.bin', 'SystemRom_ramfos_emulator.bin', 'SystemRom_emu80_flash.bin', 'SystemRom_emu80_writable.bin')]
+    [ValidateSet('SystemRom_emulator.bin', 'SystemRom_ramfos_emulator.bin', 'SystemRom_emu80_flash.bin', 'SystemRom_emu80_writable.bin', 'SystemRom_128K.bin', 'SystemRom_256K.bin', 'SystemRom_512K.bin')]
     [string] $SystemImage = 'SystemRom_emulator.bin',
     [switch] $PrepareOnly,
     [switch] $Hidden,
@@ -37,7 +37,12 @@ $version = (Get-Item -LiteralPath $executable).VersionInfo
 if ($version.FileMajorPart -lt 4 -or ($version.FileMajorPart -eq 4 -and $version.FileMinorPart -eq 0 -and $version.FileBuildPart -lt 571)) {
     throw "Emu80 4.0.571 or newer is required; found $($version.FileVersion)."
 }
-$systemSize = if ($Flash) { 524288 } else { 65536 }
+$systemSize = if ($Flash) {
+    $sizedImage = if ($needsSystemSource) { $systemSource } else { $persistentSystem }
+    $capacity = (Get-Item -LiteralPath $sizedImage).Length
+    if ($capacity -notin @(131072, 262144, 524288)) { throw "System ROM/flash must be 128, 256 or 512 KiB: $sizedImage" }
+    $capacity
+} else { 65536 }
 if ($needsSystemSource -and (Get-Item -LiteralPath $systemSource).Length -ne $systemSize) { throw "Unexpected system image size: $systemSource" }
 $diskSize = if ($Flash) { 2097152 } else { 65536 }
 if ($needsDiskSource -and (Get-Item -LiteralPath $diskSource).Length -ne $diskSize) { throw "Unexpected disk image size: $diskSource" }

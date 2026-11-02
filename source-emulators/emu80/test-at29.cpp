@@ -1,4 +1,4 @@
-// Регрессии автомата AT29C040A; запускать также с отключённым NDEBUG.
+// Регрессии автомата AT29C010A/C020/C040A; запускать также с отключённым NDEBUG.
 #include "At29Flash.h"
 #include <cassert>
 #include <iostream>
@@ -11,7 +11,43 @@ static void unlock(At29Flash& chip, uint64_t t) {
     pulse(chip, 0x2AAA, 0x55, t + 50);
     pulse(chip, 0x5555, 0xA0, t + 100);
 }
+static void geometry(unsigned capacity, unsigned pageSize, uint8_t id) {
+    At29Flash chip(capacity);
+    assert(chip.bytes().size() == capacity && chip.pageSize() == pageSize);
+    chip.bytes()[0] = 0x5A;
+    const unsigned sector = capacity - 256;
+    chip.bytes()[sector + 128] = 0x5A;
+    uint64_t time = 0;
+    for (unsigned part = 0; part < 256; part += pageSize) {
+        unlock(chip, time);
+        for (unsigned i = 0; i < pageSize; ++i)
+            pulse(chip, sector + part + i, static_cast<uint8_t>(part + i), time + 150 + i * 50);
+        time += 150 + pageSize * 50 + 11000;
+        chip.advance(time);
+        if (pageSize == 128 && part == 0)
+            assert(chip.read(sector + 128, time) == 0x5A); // Вторая половина не стирается.
+    }
+    for (unsigned i = 0; i < 256; ++i)
+        assert(chip.read(sector + i, time) == static_cast<uint8_t>(i));
+    assert(chip.read(0, time) == 0x5A && chip.read(capacity, time) == 0x5A);
+    assert(chip.read(capacity * 2 - 1, time) == 0xFF); // Старшие неподключённые линии зеркалятся.
+    // Пересечение реальной физической страницы отвергается, включая границу 128 байт.
+    unlock(chip, time + 100);
+    pulse(chip, 0x100 + pageSize - 1, 0x12, time + 250);
+    pulse(chip, 0x100 + pageSize, 0x34, time + 300);
+    time += 12000;
+    chip.advance(time);
+    assert(chip.read(0x100 + pageSize - 1, time) == 0xFF && chip.errors() > 0);
+    pulse(chip, 0x5555, 0xAA, time);
+    pulse(chip, 0x2AAA, 0x55, time + 50);
+    pulse(chip, 0x5555, 0x90, time + 100);
+    assert(chip.read(0, time + 101) == 0x1F && chip.read(1, time + 101) == id);
+}
+
 int main() {
+    geometry(128 * 1024, 128, 0xD5);
+    geometry(256 * 1024, 256, 0xDA);
+    geometry(512 * 1024, 256, 0xA4);
     At29Flash a, b;
     assert(a.read(0, 0) == 0xFF);
     unlock(a, 0);
@@ -72,5 +108,5 @@ int main() {
     pulse(a, 0x300, 0xA5, 93000);
     a.advance(104000);
     assert(a.read(0x300, 104000) == 0xA5);
-    std::cout << "AT29: program/polling/SDP/timeout/erase/boundaries/independent chips OK\n";
+    std::cout << "AT29 128/256/512 KiB: program/polling/SDP/timeout/erase/boundaries/independent chips OK\n";
 }

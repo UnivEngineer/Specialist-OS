@@ -17,8 +17,11 @@ void SpecialistSystemFlash::init() {
     PalFile file;
     if (!file.open(m_imageName, m_readOnly ? "r" : "r+"))
         throw std::runtime_error("Cannot open system flash image: " + m_imageName);
-    if (file.getSize() != At29Flash::Size)
-        throw std::runtime_error("System flash image must be 524288 bytes");
+    const auto size = file.getSize();
+    if (size != 128 * 1024 && size != 256 * 1024 && size != 512 * 1024)
+        throw std::runtime_error("System ROM/flash image must be 128, 256 or 512 KiB");
+    // Образ представляет весь чип, BPB может описывать меньший том.
+    m_chip = At29Flash(static_cast<unsigned>(size));
     for (auto& value : m_chip.bytes()) value = file.read8();
     PalFile protection;
     if (protection.open(m_imageName + ".sdp", "r")) {
@@ -47,7 +50,7 @@ void SpecialistSystemFlash::updateStorage() {
     PalFile file;
     if (!file.open(m_imageName, "r+")) { m_ioError = true; return; }
     file.seek(page);
-    for (unsigned i = 0; i < 256; ++i) file.write8(m_chip.bytes()[page + i]);
+    for (unsigned i = 0; i < m_chip.pageSize(); ++i) file.write8(m_chip.bytes()[page + i]);
     PalFile protection;
     if (!protection.open(m_imageName + ".sdp", "w")) { m_ioError = true; return; }
     protection.write8(m_chip.protectedData() ? 1 : 0);
@@ -76,6 +79,8 @@ bool SpecialistSystemFlash::setProperty(const std::string& name, const EmuValues
 
 std::string SpecialistSystemFlash::getPropertyStringValue(const std::string& name) {
     if (name == "image") return m_imageName;
+    if (name == "capacity") return std::to_string(m_chip.bytes().size());
+    if (name == "pageSize") return std::to_string(m_chip.pageSize());
     if (name == "ioError") return m_ioError ? "yes" : "no";
     return AddressableDevice::getPropertyStringValue(name);
 }

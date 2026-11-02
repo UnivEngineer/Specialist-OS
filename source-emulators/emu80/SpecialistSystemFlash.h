@@ -3,7 +3,7 @@
 #include "EmuObjects.h"
 #include "At29Flash.h"
 
-// AT29C040A на маппере: адрес в чипе задаётся отображением страниц.
+// AT29C010A/C020/C040A на маппере: адрес в чипе задаётся отображением страниц.
 class SpecialistSystemFlash : public AddressableDevice, public IActive {
 public:
     SpecialistSystemFlash();

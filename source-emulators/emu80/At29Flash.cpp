@@ -3,8 +3,15 @@
  */
 #include "At29Flash.h"
 #include <algorithm>
+#include <stdexcept>
 
-At29Flash::At29Flash() : m_bytes(Size, 0xFF) { m_page.fill(0xFF); }
+At29Flash::At29Flash(unsigned capacity) : m_bytes(capacity, 0xFF),
+    m_pageSize(capacity == 128 * 1024 ? 128 : 256),
+    m_deviceId(capacity == 128 * 1024 ? 0xD5 : capacity == 256 * 1024 ? 0xDA : 0xA4) {
+    if (capacity != 128 * 1024 && capacity != 256 * 1024 && capacity != Size)
+        throw std::invalid_argument("AT29 capacity must be 128, 256 or 512 KiB");
+    m_page.fill(0xFF);
+}
 
 void At29Flash::advance(uint64_t now) {
     if (m_loading && !m_pulse && now >= m_deadline) {
@@ -14,7 +21,7 @@ void At29Flash::advance(uint64_t now) {
     }
     if (m_programming && now >= m_finish) {
         if (!m_discard) {
-            std::copy(m_page.begin(), m_page.end(), m_bytes.begin() + m_pageBase);
+            std::copy(m_page.begin(), m_page.begin() + m_pageSize, m_bytes.begin() + m_pageBase);
             m_dirty = true;
         }
         if (m_enableProtection) m_protected = true;
@@ -33,7 +40,7 @@ void At29Flash::advance(uint64_t now) {
 void At29Flash::beginWrite(unsigned address, uint64_t now) {
     // Спад /WE ровно через tBLC ещё принадлежит текущей загрузке.
     if (!(m_loading && !m_pulse && now == m_deadline)) advance(now);
-    m_address = address & (Size - 1);
+    m_address = address & (static_cast<unsigned>(m_bytes.size()) - 1);
     m_acceptPulse = !m_programming;
     m_pulse = true;
 }
@@ -48,14 +55,14 @@ void At29Flash::endWrite(uint8_t value, uint64_t now) {
 
 void At29Flash::dataByte(unsigned address, uint8_t value, uint64_t now) {
     if (!m_loading) {
-        m_pageBase = address & ~255u;
+        m_pageBase = address & ~(m_pageSize - 1);
         m_page.fill(0xFF);
         m_loading = true;
         m_discard = m_protected && !m_authorized;
     }
     // Смена сектора в одной загрузке недопустима; такой цикл не меняет массив.
-    if ((address & ~255u) != m_pageBase) { m_discard = true; ++m_errors; }
-    m_page[address & 255] = value;
+    if ((address & ~(m_pageSize - 1)) != m_pageBase) { m_discard = true; ++m_errors; }
+    m_page[address & (m_pageSize - 1)] = value;
     m_lastAddress = address;
     m_lastData = value;
     m_deadline = now + 150;
@@ -92,7 +99,7 @@ void At29Flash::commandByte(unsigned address, uint8_t value, uint64_t now) {
 
 uint8_t At29Flash::read(unsigned address, uint64_t now) {
     advance(now);
-    address &= Size - 1;
+    address &= static_cast<unsigned>(m_bytes.size()) - 1;
     if (m_loading || m_programming) {
         m_toggle = !m_toggle;
         // Достоверный DATA polling — по последнему загруженному адресу.
@@ -101,7 +108,7 @@ uint8_t At29Flash::read(unsigned address, uint64_t now) {
         result |= (m_lastData ^ 0x80) & 0x80;
         return result;
     }
-    if (m_identification) return (address & 1) ? 0xA4 : 0x1F;
+    if (m_identification) return (address & 1) ? m_deviceId : 0x1F;
     return m_bytes[address];
 }
 

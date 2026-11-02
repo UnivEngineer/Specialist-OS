@@ -6,12 +6,13 @@
 #include <cstdint>
 #include <vector>
 
-// Одна AT29C040A. Время передаётся в микросекундах эмулируемой машины.
+// Одна AT29C010A/C020/C040A. Время передаётся в микросекундах эмулируемой машины.
 // begin/end соответствуют спаду и подъёму /WE или /CE при /OE=1.
 class At29Flash {
 public:
     static const unsigned Size = 512 * 1024;
-    At29Flash();
+    explicit At29Flash(unsigned capacity = Size);
+    unsigned pageSize() const { return m_pageSize; }
     void beginWrite(unsigned address, uint64_t now);
     void endWrite(uint8_t value, uint64_t now);
     uint8_t read(unsigned address, uint64_t now);
@@ -26,6 +27,8 @@ private:
     void dataByte(unsigned address, uint8_t value, uint64_t now);
     void commandByte(unsigned address, uint8_t value, uint64_t now);
     std::vector<uint8_t> m_bytes;
+    unsigned m_pageSize;
+    uint8_t m_deviceId;
     std::array<uint8_t, 256> m_page;
     unsigned m_pageBase = 0, m_address = 0, m_lastAddress = 0;
     unsigned m_sequence = 0, m_errors = 0;
