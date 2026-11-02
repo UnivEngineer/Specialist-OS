@@ -21,3 +21,4 @@ NC.COM           ../bin/NC.com                                0xE800 RS
 NC.EXT           system-rom/NC.EXT 0 RS
 Test-MX.COM      programs/Test-MX.COM
 DISKBEN.COM      ../bin/DISKBEN.com                           0
+CHKDSK.COM       ../bin/CHKDSK.com                            0

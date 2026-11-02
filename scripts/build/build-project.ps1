@@ -13,6 +13,7 @@ Set-StrictMode -Version 2.0
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
 $components = @(
+    @{ Directory = "source-apps\\chkdsk"; Source = "CHKDSK"; Extension = "com"; Address = "0" },
     @{ Directory = "source\\dos";    Source = "DOS"; Extension = "sys"; Address = "0xC000" },
     @{ Directory = "source\\tape";   Source = "tape";    Extension = "com"; Address = "0xE800" },
     @{ Directory = "source\\flash";  Source = "Flash"; Extension = "com"; Address = "0" },
