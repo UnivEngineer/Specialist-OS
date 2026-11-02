@@ -63,9 +63,9 @@ tile_draw_soil_column:
     LD B,8
 tile_draw_soil_rows:
     IF ALMAZ_COLOR == 2
-        LD A,050h              ; Красный на чёрном.
+        LD A,090h              ; Зелёный на чёрном.
     ELSE
-        LD A,040h
+        LD A,020h              ; Тёмно-зелёный на чёрном.
     ENDIF
     LD (app_color_port),A
     LD A,(DE)
@@ -73,9 +73,9 @@ tile_draw_soil_rows:
     INC DE
     INC L
     IF ALMAZ_COLOR == 2
-        LD A,010h              ; Жёлтый на чёрном.
+        LD A,090h              ; У восьмицветного контроллера нет яркости.
     ELSE
-        LD A,0E0h
+        LD A,0A0h              ; Светло-зелёный на чёрном.
     ENDIF
     LD (app_color_port),A
     LD A,(DE)
@@ -97,7 +97,7 @@ t_tile_colors:
     ELSE
     DB 000h, 010h, 048h, 070h ; Пустота, выход, кирпичи, неразрушаемая стена.
     DB 040h, 0B0h, 0E4h, 0F0h ; Камни, алмазы, квадратики, бабочки.
-    DB 050h, 0A0h, 040h, 080h ; Грибы, игрок, земля (чёрный фон), дым.
+    DB 050h, 0A0h, 020h, 080h ; Грибы, игрок, земля (чёрный фон), дым.
     DB 000h, 010h, 048h, 070h
     ENDIF
     ASSERT LOW(t_tile_colors) <= 0F0h

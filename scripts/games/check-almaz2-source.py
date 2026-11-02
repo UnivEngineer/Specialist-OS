@@ -19,7 +19,7 @@ TABLES = (
     ("t_sound_diamond_explosion", 0x0AFE, 3),
     ("t_music_intro", 0x0B13, 4), ("t_music_level", 0x0B51, 4),
 )
-PALETTE = bytes.fromhex("00 10 48 70 40 b0 e4 f0 50 a0 40 80 00 10 48 70")
+PALETTE = bytes.fromhex("00 10 48 70 40 b0 e4 f0 50 a0 20 80 00 10 48 70")
 
 
 def require(condition, message):
@@ -84,9 +84,9 @@ def check_soil_draw(data, symbols, color8):
         else:
             raise ValueError("Soil drawing did not return")
         base = 0x9000 + 7*512 + 9*16
-        red, yellow = ((0x50, 0x10) if color8 else (0x40, 0xE0))
+        dark_green, light_green = ((0x90, 0x90) if color8 else (0x20, 0xA0))
         expected = [(base+column*256+row, data[bank+0x140+column*16+row],
-                     (symbols["app_color_port"], red if row % 2 == 0 else yellow))
+                     (symbols["app_color_port"], dark_green if row % 2 == 0 else light_green))
                     for column in range(2) for row in range(16)]
         require(writes == expected and (a, flags, b, c, h, l) ==
                 (10, 0xD7, 7, 9, 0x45, 0x67), "Soil pixels, colours or registers differ")
