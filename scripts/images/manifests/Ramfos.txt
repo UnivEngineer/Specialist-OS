@@ -1,3 +1,5 @@
+@label SYSTEM
+
 # Имя на диске    Путь относительно assets                    Адрес RAW (необязательно)
 RAMFOS.SYS       ../bin/RAMFOS.sys                            0xC000 RS
 RAMRUN.COM       ../bin/RAMRUN.com                            0xF800 RS

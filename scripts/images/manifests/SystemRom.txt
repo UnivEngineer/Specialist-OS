@@ -1,26 +1,22 @@
-# Имя на диске    Путь относительно assets                    Адрес RAW (необязательно)
+@label SYSTEM
+
+# Имя на диске    Путь относительно assets                    Адрес RAW (необязательно), флаги доступа
 DOS.SYS          ../bin/DOS.sys                               0xC000 RS
-NC.COM           ../bin/NC.com                                0xE800 RS
 AUTOEXEC.BAT     {AUTOEXEC}                                   0x8000 S
 README.TXT       system-rom/README.TXT
-DL-red.COM       programs/DL-red.COM                          0xD000
 E.COM            ../bin/E.com                                 0xE800 RS
-FLASH.COM     ../bin/Flash.com                          0 RS
+ROM.COM          ../bin/Rom.com                               0xDE00 RS
+FLASH.COM        ../bin/Flash.com                             0 RS
 FLASHFST.COM     ../bin/FlashFst.com                          0 RS
 FLASHSYS.COM     ../bin/FlashSys.com                          0 RS
+RAMD.COM         ../bin/RAMD.com                              0 RS
+TAPE.COM         ../bin/tape.com                              0xE800 RS
 FONT.FNT         system-rom/FONT.FNT 0 RS
 FORMAT.BAT       system-rom/FORMAT.BAT                        0x8000 RS
 FORMAT.COM       ../bin/FORMAT.com                            0xF100 RS
 LAUNCH.COM       ../bin/LAUNCH.com                            0xF800 RS
-MONITOR2.MON         programs/Monitor2.mon                            0xC000 RS
-DEBUG.COM         ../bin/Debug.com                              0xF100 RS
-MUSIC.RKS        games/Music.rks
+MONITOR2.MON     programs/Monitor2.mon                        0xC000 RS
+DEBUG.COM        ../bin/Debug.com                             0xF100 RS
+NC.COM           ../bin/NC.com                                0xE800 RS
 NC.EXT           system-rom/NC.EXT 0 RS
-ROM.COM          ../bin/Rom.com                               0xDE00 RS
-TAPE.COM         ../bin/tape.com                              0xE800 RS
-Test-Col.com     programs/Test-Col.COM                        0xD400
-Test-Fif.COM     programs/Test-Fif.COM
-Test-Kb.com      programs/Test-Kb.COM
-Test-M.COM       programs/Test-M.COM                          0xD400
 Test-MX.COM      programs/Test-MX.COM
-RAMD.COM         ../bin/RAMD.com                              0 RS

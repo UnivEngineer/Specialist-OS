@@ -79,10 +79,26 @@ function Get-Manifest {
     param([string] $Path, [string] $AutoexecVariant = "emu")
 
     $lineNumber = 0
+    $volumeLabel = $null
     $entries = foreach ($line in [IO.File]::ReadAllLines($Path)) {
         $lineNumber++
         $entry = $line.Trim()
         if ($entry.Length -eq 0 -or $entry.StartsWith("#")) {
+            continue
+        }
+        if ($entry.StartsWith("@")) {
+            if ($entry -notmatch '^@label\s+(.+)$') {
+                throw "Invalid manifest directive at ${Path}:${lineNumber}: expected @label Volume label"
+            }
+            if ($null -ne $volumeLabel) {
+                throw "Duplicate @label at ${Path}:${lineNumber}"
+            }
+            $label = $Matches[1].Trim()
+            if ($label.Length -eq 0 -or $label.Length -gt 11 -or
+                $label -match '[^\x20-\x7E]' -or $label -match '["*+,./:;<=>?\[\]\\|]') {
+                throw "Invalid volume label at ${Path}:${lineNumber}: use 1-11 ASCII characters without FAT-reserved characters"
+            }
+            $volumeLabel = $label.PadRight(11)
             continue
         }
         $fields = @($entry -split '\s+')
@@ -110,21 +126,24 @@ function Get-Manifest {
         }
         [pscustomobject]@{ ImageName = $fields[0]; Source = $source; LoadAddress = $address; Format = $format; Attributes = $attributes }
     }
-    return @($entries)
+    if ($null -eq $volumeLabel) {
+        throw "Missing @label in manifest: $Path"
+    }
+    return [pscustomobject]@{ Entries = @($entries); VolumeLabel = $volumeLabel }
 }
 
 switch ($Target) {
     "SystemRamfos" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
-        $manifest = @(Get-Manifest $manifestPath "emu" |
+        $manifest = @((Get-Manifest $manifestPath "emu").Entries |
             Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM", "Test-MX.COM") })
         $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\Ramfos.txt"
-        $manifest += @(Get-Manifest $ramfosManifestPath "emu")
+        $manifestData = Get-Manifest $ramfosManifestPath "emu"
+        $manifest += @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
         $maxFiles = 64
-        $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Mx2"
         $outputPath = Join-Path $imageDirectory "SystemRom_ramfos_emulator.bin"
         $makeBootDisk = $true
@@ -132,12 +151,12 @@ switch ($Target) {
     { $_ -in @('SystemEmu', 'SystemEmuFlash') } {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
         $autoexecVariant = if ($Target -eq 'SystemEmuFlash') { 'emu-flash' } else { 'emu' }
-        $manifest = Get-Manifest $manifestPath $autoexecVariant
+        $manifestData = Get-Manifest $manifestPath $autoexecVariant
+        $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
         $maxFiles = 64
-        $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Mx2"
         $outputName = if ($Target -eq 'SystemEmuFlash') { 'SystemRom_emu80_flash.bin' } else { 'SystemRom_emulator.bin' }
         $outputPath = Join-Path $imageDirectory $outputName
@@ -145,10 +164,11 @@ switch ($Target) {
     }
     "SystemEmuWritable" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
-        $allEntries = @(Get-Manifest $manifestPath "emu-writable")
-        # До установки FlashSys встроенный драйвер должен прочитать эти файлы
-        # в первой 32-КБ странице линейного образа.
-        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASHCHK.COM','NC.COM','ROM.COM')
+        $manifestData = Get-Manifest $manifestPath "emu-writable"
+        $allEntries = @($manifestData.Entries)
+        # Стабильный порядок загрузочных файлов; лишь DOS обязан находиться
+        # в первой 32-КБ странице для начального загрузчика без стека.
+        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -158,16 +178,16 @@ switch ($Target) {
         $volumeSize = 512KB
         $chipSize = 64KB
         $maxFiles = 64
-        $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Raw"
         $outputPath = Join-Path $imageDirectory "SystemRom_emu80_writable.bin"
         $makeBootDisk = $true
     }
     "SystemHardware" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
-        $allEntries = @(Get-Manifest $manifestPath "hardware")
-        # Встроенный драйвер читает загрузочные файлы из первой страницы.
-        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASHCHK.COM','NC.COM','ROM.COM')
+        $manifestData = Get-Manifest $manifestPath "hardware"
+        $allEntries = @($manifestData.Entries)
+        # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
+        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -177,7 +197,6 @@ switch ($Target) {
         $volumeSize = $HardwareSizeKB * 1KB
         $chipSize = 64KB
         $maxFiles = 64
-        $volumeLabel = "SYSTEM ROM "
         $imageFormat = "Raw"
         $outputName = switch ($HardwareSizeKB) {
             128 { "SystemRom_128K.bin" }
@@ -189,12 +208,12 @@ switch ($Target) {
     }
     "Games64k" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk-emulator.txt"
-        $manifest = Get-Manifest $manifestPath
+        $manifestData = Get-Manifest $manifestPath
+        $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 64KB
         $chipSize = 64KB
         $maxFiles = 64
-        $volumeLabel = "ROM DISK 64"
         $imageFormat = "Split"
         $outputPath = Join-Path $imageDirectory "FlashDisk_emulator.bin"
         $partNamePattern = "FlashDisk_emulator.bin"
@@ -202,18 +221,20 @@ switch ($Target) {
     }
     "Games2M" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk.txt"
-        $manifest = Get-Manifest $manifestPath
+        $manifestData = Get-Manifest $manifestPath
+        $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 2MB
         $chipSize = 512KB
         $maxFiles = 192
-        $volumeLabel = "FLASH DISK "
         $imageFormat = "Split"
         $outputPath = Join-Path $imageDirectory "FlashDisk_512K.bin"
         $partNamePattern = "FlashDisk_chip{0}_512K.bin"
         $makeBootDisk = $false
     }
 }
+
+$volumeLabel = $manifestData.VolumeLabel
 
 New-Item -ItemType Directory -Path $imageDirectory -Force | Out-Null
 
@@ -222,6 +243,11 @@ $fatSectors = [int]($volumeSectors * 2 / $sectorSize)
 $directorySectors = [int]($maxFiles * 32 / $sectorSize)
 $dataStartSector = 1 + $fatSectors + $directorySectors
 $dataSectors = $volumeSectors - $fatSectors - $directorySectors - 1
+if ($imageFormat -eq 'Mx2') {
+    # STD-вход занимает первые четыре байта физической половины ROM.
+    # Последний логический сектор доступен не целиком; файлы в него не кладём.
+    $dataSectors--
+}
 $dataClusters = [int]($dataSectors / $sectorsPerCluster)
 
 $boot = [IO.File]::ReadAllBytes($bootPath)
@@ -235,6 +261,24 @@ for ($index = 0; $index -lt 4; $index++) {
 $directory = New-Object IO.MemoryStream
 $fileData = New-Object IO.MemoryStream
 
+# Физическая нумерация остаётся обычной. В 2-МБ образе чередуем только
+# кластеры данных через FAT; загрузочный сектор, FAT и корень остаются на чипе 0.
+$interleaveFiles = $Target -eq 'Games2M'
+$chipSectors = [int]($chipSize / $sectorSize)
+$usedClusters = New-Object bool[] ($dataClusters + 2)
+if ($interleaveFiles) {
+    $emptyData = Expand-Bytes ([byte[]]@()) ($dataSectors * $sectorSize)
+    $fileData.Write($emptyData, 0, $emptyData.Length)
+}
+# Запас таблицы не относится к области данных и не должен считаться свободным.
+for ($index = $dataClusters + 2; $index -lt $fat.Length / 2; $index++) {
+    Set-Word $fat ($index * 2) 0xFFFF
+}
+if ($imageFormat -eq 'Mx2') {
+    # Частично недоступный сектор внутри объявленного тома — bad cluster,
+    # а не занятый кластер без владельца (его CHKDSK счёл бы потерянным).
+    Set-Word $fat (($dataClusters + 2) * 2) 0xFFF7
+}
 $nextCluster = 2
 $fileCount = 0
 $dosCluster = 0
@@ -269,6 +313,10 @@ try {
             $payloadLength = [Math]::Min($payloadLength, $sourceBytes.Length - 4)
             $storedBytes = New-Object byte[] $payloadLength
             [Array]::Copy($sourceBytes, 4, $storedBytes, 0, $payloadLength)
+            # EXE из RKS — сырой образ нынешнего MXOS, без заголовка и суммы RKS.
+            if ($extension.Equals("exe", [StringComparison]::OrdinalIgnoreCase)) {
+                $originalSize = $payloadLength
+            }
             $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
         }
         else {
@@ -293,12 +341,25 @@ try {
         $firstCluster = 0
         $previousCluster = 0
         for ($offset = 0; $offset -lt $storedBytes.Length; $offset += $sectorSize) {
-            if ($nextCluster -ge $dataClusters) {
-                throw "Image data area is full while adding $sourceName"
+            $searched = 0
+            while ($true) {
+                if ($nextCluster -ge $dataClusters + 2) { $nextCluster = 2 }
+                if (-not $usedClusters[$nextCluster]) { break }
+                $nextCluster++
+                $searched++
+                if ($searched -ge $dataClusters) {
+                    throw "Image data area is full while adding $sourceName"
+                }
             }
-
             $cluster = $nextCluster
-            $nextCluster++
+            $usedClusters[$cluster] = $true
+            if ($interleaveFiles) {
+                $sector = $dataStartSector + $cluster - 2 + $chipSectors
+                if ($sector -ge $volumeSectors) { $sector = $sector - $volumeSectors + 1 }
+                $nextCluster = [Math]::Max(2, $sector - $dataStartSector + 2)
+            } else {
+                $nextCluster++
+            }
             if ($firstCluster -eq 0) {
                 $firstCluster = $cluster
             }
@@ -314,10 +375,11 @@ try {
             }
             $count = [Math]::Min($sectorSize, $storedBytes.Length - $offset)
             [Array]::Copy($storedBytes, $offset, $block, 0, $count)
+            $fileData.Position = ($cluster - 2) * $sectorSize
             $fileData.Write($block, 0, $block.Length)
         }
 
-        if ($Target -in @('SystemEmuWritable', 'SystemHardware') -and $sourceName -in $early -and
+        if ($Target -in @('SystemEmuWritable', 'SystemHardware') -and $sourceName -eq 'DOS.SYS' -and
             ($firstCluster -eq 0 -or ($dataStartSector + $nextCluster - 2) * $sectorSize -gt 32768)) {
             throw "Boot file must fit in the first 32-KB page: $sourceName"
         }
@@ -375,7 +437,9 @@ try {
     switch ($imageFormat) {
         "Mx2" {
             $dataPageOffset = 32768 - $start.Length
-            $upperLength = $dataPageOffset - 4
+            # Boot/FAT/корень уже входят в нижнюю MX-половину. STD-половина
+            # вмещает полные 32 КБ минус вход, а не остаток после этих таблиц.
+            $upperLength = 32768 - 4
             $upperAvailable = [Math]::Max(0, $data.Length - $dataPageOffset)
             $upperCount = [Math]::Min($upperLength, $upperAvailable)
             $upperData = New-Object byte[] $upperCount
