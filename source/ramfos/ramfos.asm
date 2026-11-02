@@ -25,12 +25,16 @@ ALL_CHARS			= 1			 ; 0			Печатать все символы шрифта ч�
 RKS_LOADER			= 1			 ; 0			Запускать RKS
 BIG_ROM				= 1			 ; 0			Использовать все 64 КБ ПЗУ MX2 как ROM-диск
 WORK_WITHOUT_ARAM	= 0			 ; 32			Размер буфера в основном ОЗУ при отсутствии RAM-диска
+    IFNDEF ROM_PAGE_START
 ROM_PAGE_START		= 01880h	 ; 04000h	Первый байт страницы ПЗУ
+    ENDIF
 ROM_PAGE_END		= 0FFFCh	 ; 0C000h	Конец страницы ПЗУ плюс один
 CURSOR_BLINK_SPEED	= 767		 ; 767		Задержка мигания курсора
 ARAM_MAX_PAGE		= 0Fh		 ; 6			Максимальный номер страницы RAM-диска
 ARAM_PAGE_END		= 0FFBBh	 ; 0FFBBh	Конец страницы RAM-диска, далее общее ОЗУ
+    IFNDEF DLG_START_PAGE
 DLG_START_PAGE		= 80h		 ; 0			Начальная страница
+    ENDIF
 INIT_SCREEN_CUR_COL	= 1			 ; 1			Очищать экран текущим цветом
 INIT_SCREEN_COLOR	= 0F1h		 ; 0F1h		Цвет очистки экрана
 FAST_PRINT			= 1			 ; 0			Быстрый вывод шрифта с непрерывными линиями и сохранением цвета справа

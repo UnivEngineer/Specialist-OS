@@ -783,6 +783,23 @@
         "group": "build"
       },
       {
+        "label": "image: RAMFOS games",
+        "type": "process",
+        "command": "python",
+        "args": ["-X", "utf8", "${workspaceFolder}\\scripts\\images\\build-ramfos.py"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80 RAMFOS",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run-ramfos.ps1"],
+        "dependsOn": ["image: RAMFOS games"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
         "label": "run: Emu80",
         "type": "process",
         "command": "powershell.exe",
