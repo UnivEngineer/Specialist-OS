@@ -2,7 +2,17 @@
 .vs
 images/*.bin
 bin/
+docs/
 .tmp_pdf
 .codex-tmp
 # Необязательные локальные установки/checkout эмуляторов.
 /.local/
+# Локальный эксперимент LLM80, пока не включённый в историю проекта.
+/source-apps/llm80/
+/assets/programs/LLM80.EXE
+# Генерируемые файлы Python и образ RAMFOS с описаниями состава.
+__pycache__/
+*.pyc
+/images/RAMFOS-games.ramdisk
+/images/RAMFOS-games.json
+/images/RAMFOS-games.md
