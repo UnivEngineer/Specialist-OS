@@ -37,6 +37,18 @@ installDriver:    ; Сохранение регистров
             pop de
             rrca
 
+            ; Замена активного драйвера вступает в силу сразу, даже если
+            ; следующий выбор диска совпадёт с уже выбранным.
+            push af
+            push hl
+            ld   hl, v_drive
+            cp   (hl)
+            pop  hl
+            jp nz, installDriverInactive
+            ld   (j_diskDriver+1), hl
+installDriverInactive:
+            pop af
+
             ; Передача адреса структуры v_diskInfo
             ld  hl, v_diskInfo
 

@@ -93,7 +93,7 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "DOSChecked",
+          "DOS",
           "sys",
           "0xC000",
           "DOS"
@@ -138,6 +138,33 @@
         }
       },
       {
+        "label": "build: ramd",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
+          "RAMD",
+          "com",
+          "0"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\source\\ramd"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
         "label": "build: flash",
         "type": "process",
         "command": "powershell.exe",
@@ -148,9 +175,9 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "FlashChk",
+          "Flash",
           "com",
-          "0xDE00"
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -177,7 +204,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FlashFst",
           "com",
-          "0xDE00"
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -204,7 +231,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FlashSys",
           "com",
-          "0xDC00"
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -367,7 +394,8 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Debug",
           "com",
-          "0xF100"
+          "0xF100",
+          "Debug"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\debug"

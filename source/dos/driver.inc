@@ -34,6 +34,9 @@ diskDriver: ; Сохраняем регистры
 
             ; Функция 3 - Получение размера диска
             ld      a, b
+            inc     a
+            jp z,   diskDriverInfo
+            dec     a
             cp      3
             jp z,   diskDriver_s
 
@@ -70,8 +73,15 @@ diskDriver_r:
             ; Это ROM-диск?
             or      a
             jp nz,  ramDRead ; нет, переходим к драйверу RAM-диска
+    IF ROM_64K == 0
+            jp      romBankRead
+    ENDIF
 
     IF ROM_64K
+            ; Том от 128 КБ использует линейные MX-банки, а не STD-половину MX2.
+            ld      a, (v_diskInfo.totalSectors + 1)
+            cp      2
+            jp nc,  romBankRead
 
             ; Это старшая часть ПЗУ?
             ld      a, 80h
@@ -89,6 +99,16 @@ diskDriver_r:
             ; Включаем ПЗУ STD (да, надо регистр цвета сбросить для этого)
             xor     a
             ld      (IO_COLOR), a
+            ld      a, h
+            or      a
+            jp p,   romStdReadLow
+            ; Последний STD-сектор неполон: 7F04h..8003h. Сохраняем
+            ; прежнее побайтовое поведение и на границе отображения.
+            ld      a, d
+            cp      07Fh
+            jp nz,  romStdMappedRead
+romStdReadLow:
+            xor     a
 romStdReadLoop:
             ; Включаем режим STD
             ld      (IO_PAGE_STD), a
@@ -106,6 +126,7 @@ romStdReadLoop:
             jp nz,  romStdReadLoop
 
             ; Восстаналиваем цвет
+romStdReadExit:
             ld      a, COLOR_BIOS
             ld      (IO_COLOR), a
 
@@ -114,16 +135,41 @@ romStdReadLoop:
             
     ENDIF
 
+; Линейный ROM/flash до 512 КБ: банк = DE >> 7, адрес = (E & 7Fh) << 8.
+; 14 байт, 57 тактов настройки; горячий цикл ниже остаётся общим.
+romBankRead:
+            ld      a, e
+            add     a, a              ; CF = бит 7 младшего байта сектора
+            ld      a, d
+            rla
+            ld      c, a              ; D0-D3 номера 32-КБ банка для FFFEh
+            ld      a, e
+            and     07Fh
+            ld      d, a
+            ld      e, 0
+            jp      romMXReadBuffer
+
 romMXRead:
 romMXReadDrv:
             ld      d, e    ; d = номер блока 
             ld      e, 0    ; e = 0
                             ; hl = адрес буфера в памяти
+romMXReadBuffer:
+            ld      a, h
+            or      a
+            jp m,   romMappedRead
+; Нижнее назначение: C=банк, B/A=пара данных. 19 байт, 94 такта/пару.
+; На сектор 256 чтений/записей и 256 переключений маппера.
 romMXReadLoop:
-            ld      a, c    ; c = номер страницы = 0 для каждого байта
+            ld      a, c
             ld      (IO_PAGE_ROM), a
             ld      a, (de)
+            ld      b, a
+            inc     e
+            ld      a, (de)
             ld      (IO_PAGE_RAM), a
+            ld      (hl), b
+            inc     hl
             ld      (hl), a
             inc     hl
             inc     e
@@ -131,12 +177,17 @@ romMXReadLoop:
             jp      popDBHA_ret
 
 ramDRead:
+    IF RAMD_BUFFERED
+            call    ramDByteRead
+    ELSE
             ; Вызываем драйвер чтения RAM-диска
             ld      c, d        ; c = номер страницы
             ld      d, e        ; d = номер блока 
             ld      e, 0        ; e = 0
                                 ; hl = адрес буфера в памяти
             call    bios_RAMDRead
+
+    ENDIF
 
             ; Восстановливаем регистры и выходим
             jp      popDBHA_ret
@@ -148,12 +199,17 @@ diskDriver_w:
             or      a           ; это ROM-диск?
             jp z,   popDBHA_ret ; да, запись не поддерживается
 
+    IF RAMD_BUFFERED
+            call    ramDByteWrite
+    ELSE
             ; Вызываем драйвер записи RAM-диска
             ld      c, d        ; c = номер страницы
             ld      d, e        ; d = номер блока 
             ld      e, 0        ; e = 0
                                 ; hl = адрес буфера в памяти
             call    bios_RAMDWrite
+
+    ENDIF
 
             ; Восстановливаем регистры и выходим
             jp      popDBHA_ret
@@ -179,6 +235,7 @@ diskDriver_s_rom:
             ld      hl, (v_diskInfo.totalSectors)
 
 diskDriver_s_exit:
+            ld      bc, 0
             ; Возвращаем в de размер диска в секторах
             ex      hl, de
 
@@ -202,6 +259,9 @@ diskDriverDummy:
 
             ; Функция 3 - Получение размера диска
             ld      a, b
+            inc     a
+            jp z,   diskDriverNoInfo
+            dec     a
             cp      3
             jp nz,  diskDriverDummyExit
 
@@ -209,6 +269,7 @@ diskDriverDummy:
 
             ; Остальные функции просто ничего не делают
 diskDriverDummyExit:
+            ld      bc, 0
 
             ; Возвращаем в hl адрес структуры v_diskInfo
             ld      hl, v_diskInfo

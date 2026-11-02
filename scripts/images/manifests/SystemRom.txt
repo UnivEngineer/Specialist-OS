@@ -5,9 +5,9 @@ AUTOEXEC.BAT     {AUTOEXEC}                                   0x8000 S
 README.TXT       system-rom/README.TXT
 DL-red.COM       programs/DL-red.COM                          0xD000
 E.COM            ../bin/E.com                                 0xE800 RS
-FLASHCHK.COM     ../bin/FlashChk.com                          0xDE00 RS
-FLASHFST.COM     ../bin/FlashFst.com                          0xDE00 RS
-FLASHSYS.COM     ../bin/FlashSys.com                          0xDC00 RS
+FLASH.COM     ../bin/Flash.com                          0 RS
+FLASHFST.COM     ../bin/FlashFst.com                          0 RS
+FLASHSYS.COM     ../bin/FlashSys.com                          0 RS
 FONT.FNT         system-rom/FONT.FNT 0 RS
 FORMAT.BAT       system-rom/FORMAT.BAT                        0x8000 RS
 FORMAT.COM       ../bin/FORMAT.com                            0xF100 RS
@@ -23,3 +23,4 @@ Test-Fif.COM     programs/Test-Fif.COM
 Test-Kb.com      programs/Test-Kb.COM
 Test-M.COM       programs/Test-M.COM                          0xD400
 Test-MX.COM      programs/Test-MX.COM
+RAMD.COM         ../bin/RAMD.com                              0 RS

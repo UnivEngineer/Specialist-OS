@@ -14,7 +14,13 @@ _align:         DB  0               ; для выравнивания
     ENDS
 
 ; Массив из FAT_CACHE_CAPACITY структур длиной FAT_CACHE_DATA, инициализирован нулями
+    IFDEF FAT_CACHE_TABLE_ADDR
+; Экспериментальная таблица слотов вне резидентного кода DOS.
+cacheData = FAT_CACHE_TABLE_ADDR
+    ASSERT cacheData + FAT_CACHE_CAPACITY * FAT_CACHE_DATA <= FAT_CACHE_ADDR
+    ELSE
 cacheData:      BLOCK   FAT_CACHE_CAPACITY * FAT_CACHE_DATA, 0
+    ENDIF
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -158,6 +164,11 @@ getFatCellAddress:
 ;----------------------------------------------------------------------------
 
 cacheSector:
+    IFDEF FAT_CACHE_BENCH_SAMPLE
+        ; Только измерительная сборка: RET заменяется на JP таймера DISKBEN.
+        ; Частые отсчёты исключают потерю оборотов ВИ53 при попаданиях в кэш.
+        call    cacheBenchmarkSample
+    ENDIF
         ; Сохраняем регистры
         push    de
         push    bc
@@ -202,6 +213,16 @@ cff_next:
         ; Нашли наиболее давно использовавашийся сектор
         ld      a, FAT_CACHE_CAPACITY
         sub     b       ; a = индекс найденного сектора
+    IF FAT_CACHE_CAPACITY > 32
+        ; Смещение таблицы больше байта: HL = индекс * 8.
+        ld      l, a
+        ld      h, 0
+        add     hl, hl
+        add     hl, hl
+        add     hl, hl
+        ld      bc, cacheData
+        add     hl, bc
+    ELSE
         rla
         rla
         rla             ; a = a * 8 (размер структуры FAT_CACHE_DATA)
@@ -209,6 +230,7 @@ cff_next:
         ld      b, 0    ; bc = смещение сектора в массиве cacheData
         ld      hl, cacheData
         add     hl, bc  ; hl = адрес элемента массива
+    ENDIF
 
         ; Прежде чем загрузить новый сектор, старый надо сохранить, если его isModified не ноль
         call    saveSectorFromCache    ; записываем сектор на накопитель
@@ -512,3 +534,9 @@ cmp_m_de:
         ld    a, (hl)
         cp    e
         ret
+    IFDEF FAT_CACHE_BENCH_SAMPLE
+cacheBenchmarkSample:
+        ret
+        nop
+        nop
+    ENDIF

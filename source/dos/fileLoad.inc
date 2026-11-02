@@ -95,6 +95,9 @@ fileTransferClusters_loop:
             jp nz,  fileTransferClusters_loop
 
             pop     bc
+            ld      a, b
+            dec     a
+            jp z,   fatFlushPhysical    ; Файловая запись завершена и на носителе
             or      a
             ret
 

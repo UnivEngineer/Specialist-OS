@@ -59,7 +59,9 @@ loc_C8DE:   push  bc
             ld    b, h
             ld    c, l
             inc   bc
+            inc   de          ; Включаем терминатор строки в полуинтервал.
             call  memmove_bc_hl
+            dec   de
             pop   bc
             ld  (hl), c       ; *hl++     = c;
             call  j_printChar ; Вывод     символа     на экран
@@ -90,7 +92,9 @@ input_bkspc:      ; Если курсор в начале строки ниче�
             ld    b, h
             ld    c, l
             inc   hl
+            inc   de          ; Включаем терминатор строки в полуинтервал.
             call  memmove_bc_hl
+            dec   de
 
             ; Уменьшаем положение курсора
             dec   hl

@@ -1,50 +1,69 @@
 ;----------------------------------------------------------------------------
 ; MXOS
-; FLASHSYS.COM - драйвер перезаписываемого системного ROM-диска
+; FLASHSYS.COM - драйвер системного flash-диска AT29C010A/C020/C040A
 ;
-; Функции драйвера (номер в регистре b):
+; Номер функции передаётся в регистре b:
 ;   b == 1 - записать сектор (256 байт, номер сектора в de, буфер в hl);
 ;   b == 2 - прочитать сектор (256 байт, номер сектора в de, буфер в hl);
-;   b == 3 - получить размер диска в секторах (de) и DISK_INFO (hl).
+;   b == 5 - записать сектор, затем прочитать и сравнить все 256 байт;
+;   b == 3 - размер диска в de, DISK_INFO в hl, bc=0 (линейное выделение);
+;   b == 0FFh - адрес имени и описания в hl (две строки с нулём).
+;
+; Для чтения и записи CF=0 означает успех, CF=1 - ошибку. После загрузки
+; страницы ожидается завершение по DATA polling. Полное сравнение выполняется
+; в функции B=5; обычная запись B=1 не выполняет полного сравнения.
 ;
 ; Системная ПЗУ отображается в 0000h-7FFFh страницами по 32 КБ:
 ;   FFFCh - вернуть основное ОЗУ;
-;   FFFEh - подключить страницу ROM-диска, D0-D3 = номер страницы.
+;   FFFEh - подключить страницу ROM/flash-диска, D0-D3 = номер страницы.
 ; Регистр FFF8h здесь не используется: его D0 выбирает ROM/RAM только в
 ; стандартном режиме "Специалиста", а D1 переключает 4/8 цветов.
+; Чтение в 8000h и выше выполняется одним отображением ROM через memcpy DOS;
+; в нижнее ОЗУ — парами через BC. Стек и исполняемый код находятся выше 8000h.
+; Для функций 1/2/5 BC, DE, HL сохраняются; AF и флаги разрушаются.
 ;
 ; Поддерживаются AT29C010A (128 КБ, физическая страница записи 128 байт),
 ; AT29C020 и AT29C040A (256/512 КБ, страница записи 256 байт).
-; Размер физической страницы определяется по BPB уже загруженного системного
-; диска: том 128 КБ содержит 0200h логических секторов.
+; Ёмкость и физическая страница определяются по software ID, независимо от BPB.
+; COM загружается с 0000h; ID выполняется временным кодом в 8200h–82FFh,
+; после успешного ID резидент копируется в DC00h–DD3Fh.
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
 
 DRIVE             = 0       ; A:
-DISK_SECTORS_MAX  = 2048    ; 512 КБ / 256 байт
 ROM_PAGE_MASK     = 00Fh
 ROM_ADDR_HI_MASK  = 07Fh
-ROM_128K_SECTORS_HI = 2     ; старший байт числа секторов 0200h
+
+    ; Варианты нижнего чтения для воспроизводимого сравнения на стенде.
+    ; 0 — старый цикл; 1 — пара через BC (штатный); 2 — через верхний буфер.
+    IFNDEF FLASHSYS_READ_MODE
+FLASHSYS_READ_MODE = 1
+    ENDIF
+    ASSERT FLASHSYS_READ_MODE >= 0 && FLASHSYS_READ_MODE <= 2
+    IF FLASHSYS_READ_MODE == 2
+    ; Буфер принадлежит стенду/вызывающей системе, не общему драйверу.
+    ASSERT FLASHSYS_READ_BUFFER >= 08000h && FLASHSYS_READ_BUFFER <= 08E00h
+    ENDIF
 
 ;----------------------------------------------------------------------------
 
-    ; Окно 0DC00h-0DDFFh зарезервировано для драйверных расширений.
-    ; FlashSys и FlashChk.com могут работать одновременно; другое расширение,
-    ; использующее то же окно, с FlashSys несовместимо.
-    ORG     0DC00h
+    ; DC00h-DD3Fh — FLASHSYS, DD40h-DDFFh — RAMD.COM.
+    ; FlashSys, RAMD и внешний Flash в DE00h-DFFFh работают одновременно.
+RESIDENT_ADDRESS = 0DC00h
+SYSTEM_FLASH = 1
 
-    ; Заменяем встроенный драйвер системного ROM-диска A:.
-    ld      a, DRIVE
-    ld      hl, Driver
-    call    bios_installDriver
-    ld      (v_diskInfo), hl
-    ret
-
-;----------------------------------------------------------------------------
+    ORG 0
+    jp Install
+resident_file:
+    DISP RESIDENT_ADDRESS
 
 Driver:
     ld      a, b
+    cp      0FFh
+    jp z,   FuncInfo
+    cp      5
+    jp z,   FuncWriteChecked
     cp      3
     jp z,   FuncSize
 
@@ -52,10 +71,17 @@ Driver:
     push    de
     push    bc
 
+    ld      a, d
+SectorLimit:
+    cp      0                     ; старший байт физической ёмкости
+    jp nc,  InvalidFunction
+    ld      a, b
     dec     a
     jp z,   FuncWrite
     dec     a
     jp z,   FuncRead
+InvalidFunction:
+    scf
 
 Exit:
     ; При любом выходе основное ОЗУ должно быть подключено обратно.
@@ -68,31 +94,17 @@ Exit:
     ret
 
 ;----------------------------------------------------------------------------
-; Функция 3 - размер накопителя.
+; Функция 3 - определение объёма накопителя.
 ;
 ; Выход:
 ;   de = число секторов;
 ;   hl = адрес DISK_INFO.
 
 FuncSize:
-    ld      hl, (v_diskInfo)
-    ld      de, DISK_INFO.isValid
-    add     hl, de
-    ld      a, (hl)
-
-    ld      de, DISK_SECTORS_MAX
-    cp      DISK_VALID
-    jp nz,  fsExit
-
-    ld      hl, (v_diskInfo)
-    ld      de, DISK_INFO.totalSectors
-    add     hl, de
-    ld      e, (hl)
-    inc     hl
-    ld      d, (hl)
-
-fsExit:
-    ld      hl, (v_diskInfo)
+    ld      de, 0                 ; физическая ёмкость, патчит установщик
+    ld      hl, 0                 ; DISK_INFO, патчит установщик
+    ld      bc, 0
+    or      a
     ret
 
 ;----------------------------------------------------------------------------
@@ -124,7 +136,7 @@ PrepareAddress:
     ret
 
 ;----------------------------------------------------------------------------
-; Функция 2 - чтение сектора.
+; Функция 2 - чтение сектора из системной flash-памяти.
 ;
 ; Вход:
 ;   de = номер сектора;
@@ -132,6 +144,47 @@ PrepareAddress:
 
 FuncRead:
     call    PrepareAddress
+
+    ; Верхняя половина ОЗУ доступна при подключённом ROM. Код memcpy и
+    ; стек также выше 8000h; нижний стек не допускается контрактом MXOS.
+    ld      a, h
+    or      a
+    jp m,   ReadMapped
+
+    IF FLASHSYS_READ_MODE == 2
+    push    hl                  ; назначение в нижней памяти
+    ld      hl, FLASHSYS_READ_BUFFER
+    call    ReadMappedCopy
+    ld      (IO_PAGE_RAM), a
+    pop     bc
+    ld      hl, FLASHSYS_READ_BUFFER
+    ld      de, FLASHSYS_READ_BUFFER + 256
+    call    bios_memcpy_bc_hl
+    or      a
+    jp      Exit
+    ENDIF
+
+    IF FLASHSYS_READ_MODE == 1
+    ld      a, (v_page)
+    ld      b, a
+; Пара: 19 байт, 94 такта/2 байта; 256 чтений/записей и 256
+; переключений на сектор. B=банк, C=первый байт; входные BC на стеке.
+ReadPair:
+    ld      a, b
+    ld      (IO_PAGE_ROM), a
+    ld      a, (de)
+    ld      c, a
+    inc     e
+    ld      a, (de)
+    ld      (IO_PAGE_RAM), a
+    ld      (hl), c
+    inc     hl
+    ld      (hl), a
+    inc     hl
+    inc     e
+    jp nz,  ReadPair
+    ELSE
+    IF FLASHSYS_READ_MODE == 0
 
 ; Горячий цикл: 16 байт, 73 такта/байт, около 9,34 мс на сектор при 2 МГц.
 ; На байт: одно чтение ПЗУ, одна запись ОЗУ и два переключения маппера.
@@ -144,37 +197,43 @@ ReadLoop:
     inc     hl
     inc     e
     jp nz,  ReadLoop
+    ENDIF
+    ENDIF
 
     or      a
     jp      Exit
 
+ReadMapped:
+    call    ReadMappedCopy
+    or      a
+    jp      Exit
+
+; DE=адрес ROM-сектора, HL=верхнее назначение. AF/BC/DE/HL разрушаются.
+; Копирует 256 байт новым движком DOS, оставляет ROM подключённым.
+; На сектор 256 чтений/записей, одно подключение ROM; RAM вернёт вызывающий.
+; Пары движка: 64 такта/2 байта (назад), плюс постоянная настройка.
+ReadMappedCopy:
+    ld      b, h
+    ld      c, l
+    ex      de, hl
+    ld      d, h
+    inc     d
+    ld      e, l
+    ld      a, (v_page)
+    ld      (IO_PAGE_ROM), a
+    jp      bios_memcpy_bc_hl
+
 ;----------------------------------------------------------------------------
-; Функция 1 - запись сектора.
+; Функция 1 - запись сектора в системную flash-память.
 ;
 ; Вход:
 ;   de = номер сектора;
 ;   hl = адрес буфера.
 
 FuncWrite:
-    ; AT29C010A имеет 128-байтную физическую страницу. Системный том на таком
-    ; чипе содержит 0200h логических секторов, поэтому сектор делится пополам.
-    push    hl
-    push    de
-    ld      hl, (v_diskInfo)
-    ld      de, DISK_INFO.totalSectors + 1
-    add     hl, de
-    ld      a, (hl)
-    pop     de
-    pop     hl
-
-    ld      c, 0
-    cp      ROM_128K_SECTORS_HI
-    jp nz,  fwChunkReady
-    ld      c, 080h
-fwChunkReady:
-    ld      a, c
+    ; Размер страницы определяется ID физического чипа, а не размером тома.
+    ld      a, (v_halfPage)
     ld      (v_chunkEnd), a
-    ld      (v_chunkCount), a
 
     call    PrepareAddress
     call    ProgramChunk
@@ -190,7 +249,7 @@ fwChunkReady:
     jp      Exit
 
 ;----------------------------------------------------------------------------
-; Запись одной физической страницы AT29C.
+; Запись одной физической страницы AT29C и ожидание готовности.
 ;
 ; Вход:
 ;   de = адрес первого байта в отображённой странице ПЗУ;
@@ -204,7 +263,7 @@ fwChunkReady:
 ;   af, bc.
 
 ProgramChunk:
-    ; Software Data Protection: AAh@5555h, 55h@2AAAh, A0h@5555h.
+    ; Отключение программной защиты от записи: AAh@5555h, 55h@2AAAh, A0h@5555h.
     ld      a, (v_page)
     ld      (IO_PAGE_ROM), a
     ld      a, 0AAh
@@ -232,7 +291,7 @@ ProgramLoop:
     cp      e
     jp nz,  ProgramLoop
 
-    ; DATA polling последнего записанного байта. Худший путь (768 проверок)
+    ; Ожидание окончания программирования по DQ7 последнего байта. Худший путь (768 проверок)
     ; длится около 16,5 мс и превышает максимальное tWC=10 мс.
     dec     e
     ld      a, (v_page)
@@ -261,34 +320,8 @@ PollDone:
     pop     hl
     inc     e
 
-    ; DATA polling подтверждает окончание внутреннего цикла, после него
-    ; дополнительно сравниваем каждый байт физической страницы.
-    push    hl
-    push    de
-    ld      a, (v_chunkCount)
-    ld      b, a
-VerifyLoop:
-    dec     hl
-    dec     e
-    ld      a, (hl)
-    ld      c, a
-    ld      a, (v_page)
-    ld      (IO_PAGE_ROM), a
-    ld      a, (de)
-    ld      (IO_PAGE_RAM), a
-    cp      c
-    jp nz,  VerifyFailed
-    dec     b
-    jp nz,  VerifyLoop
-
-    pop     de
-    pop     hl
     or      a
     ret
-
-VerifyFailed:
-    pop     de
-    pop     hl
 
 WriteFailed:
     ld      a, 1
@@ -298,13 +331,36 @@ WriteFailed:
 
 ;----------------------------------------------------------------------------
 
-v_diskInfo: DW 0
-v_page:     DB 0
-v_chunkEnd: DB 0
-v_chunkCount: DB 0
+
+; B=0FFh: HL=две строки, B=технология, C=возможности (DISK_CAP_*).
+FuncInfo:
+    ld      bc, DISK_TECH_FLASH * 256 + DISK_CAP_READ + DISK_CAP_WRITE + DISK_CAP_VERIFY
+    ld      hl, DriverInfo
+    or      a
+    ret
+DriverInfo:        DB "FLASHSYS",0
+DriverDescription: DB "000K mapped",0
+
+; B=5: общий синхронный цикл B=1, B=2 и сравнения в DOS.
+; BC/DE/HL сохраняются; CF=1 и diskWriteErr=1 при отказе.
+FuncWriteChecked:
+    push    bc
+    ld      bc, Driver
+    call    bios_diskWriteChecked
+    pop     bc
+    ret
+
+v_page:         DB 0
+v_chunkEnd:     DB 0
+v_halfPage:     DB 0
 
 ;----------------------------------------------------------------------------
 
-    ASSERT_DONT_FIT 0DE00h
+resident_end:
+    ASSERT_DONT_FIT RAMD_RESIDENT_ADDR
+    ENT
+resident_file_end:
+    INCLUDE "flash-install.inc"
+
 
     END

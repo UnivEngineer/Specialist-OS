@@ -59,13 +59,17 @@ reboot3_1:
             call    fileExec
 
 skipFormat:
+            ; Проверка метки могла оставить сервисный побайтовый режим.
+            ld      b, 0
+            call    setRAMDDriver
+
             ; Если нажата клавиша, пропустить запуск A:AUTOEX.BAT
             ld      a, (IO_KEYB_B)     
             and     2
             jp z,   reboot3_2
 
-            ; На системной flash больше 64 КБ встроенный драйвер видит
-            ; только начальную область. Подключаем FlashSys до чтения BAT.
+            ; Встроенный драйвер читает все MX-банки. FlashSys подключаем
+            ; до AUTOEXEC для разрешения записи на системный A:.
             xor     a
             call    fileSelectDrive
             ld      a, (v_diskInfo.totalSectors + 1)

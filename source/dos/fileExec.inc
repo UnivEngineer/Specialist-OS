@@ -59,7 +59,7 @@ fileExec_1: ; В конец имени помещаем 13, 0
             push    hl
 
             ; Если это BAT файл
-            ld      de, aBat ; "BAT"
+            ld      de, aBat
             call    cmpFileExt
             jp z,   execBat
 

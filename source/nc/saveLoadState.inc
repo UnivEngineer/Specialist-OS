@@ -11,7 +11,7 @@ saveState:
             call    bios_setRAMDDriver
 
             ld      de, state           ; откуда (в ОЗУ)
-            ld      hl, 0FF00h          ; куда (в ДОЗУ)
+            ld      hl, NC_STATE_ADDR          ; куда (в ДОЗУ)
             ld      b,  stateEnd-state  ; сколько байт
 
 saveStateLoop:
@@ -46,9 +46,9 @@ loadState:
             ld      b, 1
             call    bios_setRAMDDriver
 
-            ; Если в рам-диске по адресу 0FF00h (последний неполный сектор)
+            ; Если в рам-диске по адресу NC_STATE_ADDR (последний неполный сектор)
             ; нет специальной метки, значит, не запускали форматирование.
-            ld      hl, 0FF00h          ; адрес в странице
+            ld      hl, NC_STATE_ADDR          ; адрес в странице
             xor     a                   ; 0 страница ДОЗУ
             call    bios_RAMDRead
             ld      a, c                ; считанный байт в c
@@ -57,7 +57,7 @@ loadState:
 
             ; Иначе загружаем состояние
             ld      de, state           ; куда (в ОЗУ)
-            ld      hl, 0FF00h          ; откуда (в ДОЗУ)
+            ld      hl, NC_STATE_ADDR          ; откуда (в ДОЗУ)
             ld      b,  stateEnd-state  ; сколько байт байт
 
 loadStateLoop:

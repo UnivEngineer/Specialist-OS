@@ -1,6 +1,7 @@
 ;+---------------------------------------------------------------------------
 ; MXOS
 ; Драйверы диска в ДОЗУ (часть, которая копируется на адрес 0FFC0h)
+; Метаданные RAMD (B=0FFh) выдаёт диспетчер C863h, driverInfo.inc.
 ;
 ; 2013-12-12 Дизассемблировано и доработано vinxru
 ; 2022-02-02 Доработано SpaceEngineer
@@ -11,7 +12,9 @@
 ; Специалиста-MX (FFC0h-FFDEh)
 ;
 ; вход:
-;  b = 0 - установить блочный драйвер, b = 1 - установить побайтовый драйвер
+;  B=0 — обычный режим (без RAMD.COM — побайтовый), B=1 — сервисный.
+;  B=2, HL=адрес 32-байтного шаблона — регистрация обычного режима.
+;  Все регистры и флаги сохраняются; шаблон должен быть резидентным.
 ;
 ; 2022-02-02 SpaceEngineer
 ;----------------------------------------------------------------------------
@@ -21,18 +24,33 @@ setRAMDDriver:
             push  de
             push  bc
             push  af
+            ld    a, b
+            cp    2
+            jp z, setRAMDRegister
             dec   b
             jp z, setRAMDDriver_1
 
-            ; Адреса блочного драйвера
+; Операнд хранит шаблон, зарегистрированный RAMD.COM. Без него — байтовый.
+setRAMDBlockTemplate:
+    IF RAMD_BUFFERED
+            ld    hl, driverByteStart
+    ELSE
             ld    hl, driverBlockStart
-            ld    de, driverBlockEnd
-            jp    setRAMDDriver_2
+    ENDIF
+            jp    setRAMDTemplate
+setRAMDRegister:
+            ld    (setRAMDBlockTemplate+1), hl
+            jp    setRAMDDone
 
 setRAMDDriver_1:
             ; Адреса побайтового драйвера
             ld    hl, driverByteStart
-            ld    de, driverByteEnd
+setRAMDTemplate:
+            push  hl
+            ld    de, 32
+            add   hl, de
+            ex    de, hl
+            pop   hl
 
             ; Копируем драйвер на адрес bc = bios_RAMDRead = 0FFC0h
 setRAMDDriver_2:
@@ -40,6 +58,7 @@ setRAMDDriver_2:
             call  memcpy_bc_hl
 
             ; Восстанавливаем регистры и выходим
+setRAMDDone:
             pop   af
             pop   bc
             pop   de
@@ -67,6 +86,7 @@ setRAMDDriver_2:
 
 ; Чтение 256-байтного блока с диска
 
+    IF RAMD_BUFFERED == 0
 driverBlockStart: ; эта п/п копируется на FFC0h
             ld      a, c
             ld      (IO_PAGE_RAMD), a
@@ -98,6 +118,7 @@ driverBlockWrite: ; эта п/п копируется на FFD0h
             ; осталось места: 0 байт
 
 driverBlockEnd:
+    ENDIF
 
 ;----------------------------------------------------------------------------
 ; Побайтовый драйвер, обрабатывает только 1 байт
@@ -151,13 +172,19 @@ driverByteWrite: ; эта п/п копируется на FFD0h
 
 driverByteEnd:
 
+    IF RAMD_BUFFERED
+        INCLUDE "ramdByteSector.inc"
+    ENDIF
+
 ; ---------------------------------------------------------------------------
 
 ; Проверка, что драйверы влезаеют в 32 байта разделяемой памяти Специалиста-MX
 
+    IF RAMD_BUFFERED == 0
     IF driverBlockWrite-driverBlockStart+bios_RAMDRead != bios_RAMDWrite
         ASSERT 0
         DISPLAY /l, "Error! Block briver entry point FFD0 has been shifted: ", driverBlockWrite-driverBlockStart+bios_RAMDRead, " != 0xFFD0"
+    ENDIF
     ENDIF
 
     IF driverByteWrite-driverByteStart+bios_RAMDRead != bios_RAMDWrite
@@ -165,9 +192,11 @@ driverByteEnd:
         DISPLAY /l, "Error! Byte briver entry point FFD0 has been shifted: ", driverByteWrite-driverByteStart+bios_RAMDRead, " != 0xFFD0"
     ENDIF
 
+    IF RAMD_BUFFERED == 0
     IF driverBlockEnd-driverBlockStart > 32
         ASSERT 0
         DISPLAY /d, "Error! Block briver did not fit: ", driverBlockEnd-driverBlockStart, " > 32 bytes"
+    ENDIF
     ENDIF
 
     IF driverByteEnd-driverByteStart > 32

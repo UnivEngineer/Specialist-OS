@@ -48,6 +48,9 @@ fatReadBootSector:
             ; Помещаем значение DISK_NO_DRIVER в v_diskInfo.isValid
             ld      a, DISK_NO_DRIVER
             ld      (v_diskInfo.isValid), a
+            ld      hl, 0
+            ld      (v_diskInfo.allocationStep), hl
+            ld      (v_diskInfo.dataClusters), hl
 
             ; Проверяем, установлен ли драйвер: сравниваем
             ; с адресом пустого драйвера diskDriverDummy
@@ -129,6 +132,34 @@ frbs_DriverOk:
             ld      hl, (v_diskInfo.fatSectors)
             call    mul_hl_de;
             ld      (v_diskInfo.fatNumCells), hl        ; количество ячеек в таблице fat (= fatSectors * sectorSize / 2)
+
+            ; Число допустимых кластеров данных, ограниченное ёмкостью FAT.
+            ld      hl, (v_diskInfo.dataStartSector)
+            ex      de, hl
+            ld      hl, (v_diskInfo.totalSectors)
+            call    sub_hl_de
+            push    hl
+            ld      hl, (v_diskInfo.sectorsPerCluster)
+            ex      de, hl
+            pop     hl
+            call    div_hl_de
+            push    hl
+            ld      hl, (v_diskInfo.fatNumCells)
+            dec     hl
+            dec     hl
+            ex      de, hl
+            pop     hl
+            call    cmp_hl_de
+            jp c,   frbs_ClustersReady
+            ex      de, hl
+frbs_ClustersReady:
+            ld      (v_diskInfo.dataClusters), hl
+            ; Физический B=3 возвращает BC=шаг чипов; 0 отключает распределение.
+            ld      b, 3
+            call    j_diskDriver
+            ld      h, b
+            ld      l, c
+            ld      (v_diskInfo.allocationStep), hl
 
             ; Копируем метку тома
             ld      hl, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_VolLab          ; откуда - начало

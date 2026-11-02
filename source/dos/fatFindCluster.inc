@@ -1,101 +1,112 @@
-;+---------------------------------------------------------------------------
-; MXOS
-; Поиск свободного кластера 
-;
-; На выходе
-;  cf - ошибка
-;  de - номер кластера
-;  регистры bc, hl сохраняются
-;
-; 2013-12-12 Дизассемблировано vinxru
-; 2022-02-04 Переработано SpaceEngineer
 ;----------------------------------------------------------------------------
-
+; MXOS: выделение свободных кластеров. BC/HL сохраняются, DE=кластер,
+; CF=1 и A=1 при заполненном томе. AF/флаги разрушаются.
+; На диске сохраняется обычная FAT-цепочка с физическими номерами кластеров.
+; Подсказка allocationStep меняет только начало поиска следующего кластера.
+;----------------------------------------------------------------------------
 fatFindClusterFirst:
-            ; Сохраняем регистры
-            push  hl
-
-            ; de = номер первого кластера для поиска
-            ; Первые 2 ячейки fat зарезервированы
-            ld    de, 2
-
-            jp    fatFindClusterCommon
-
-;----------------------------------------------------------------------------
-; Поиск следующего свободного кластера 
-;
-; На выходе
-;  cf - ошибка
-;  de - номер кластера
-;  регистры bc, hl сохраняются
-;----------------------------------------------------------------------------
+            push    hl
+            push    bc
+            ld      de, 2
+            jp      fatFindClusterCommon
 
 fatFindClusterNext:
-            ; Сохраняем регистры
             push    hl
-
-            ; Предыдущий найденный кластер
-            ld      hl, (v_findCluster)
-
-            ; Начинаем поиск со следующего кластера
-            inc     hl
-            ex      hl, de
-
-            ; Ищем свободный кластер: перебераем все ячейки fat, пока не найдём 0
-fatFindClusterCommon:
             push    bc
-            ld      hl, (v_diskInfo.fatNumCells)
-            ld      b, h
-            ld      c, l    ; bc = кол-во ячеек fat
+            ld      hl, (v_findCluster)
+            ex      de, hl
+            ld      hl, (v_diskInfo.allocationStep)
+            ld      a, h
+            or      l
+            jp z,   fatFindLinear
+            ; При одном чипе или многосекторном кластере используем общий поиск.
+            push    de
+            ex      de, hl
+            ld      hl, (v_diskInfo.totalSectors)
+            call    cmp_hl_de
+            pop     de
+            jp c,   fatFindLinear
+            jp z,   fatFindLinear
+            ld      hl, (v_diskInfo.sectorsPerCluster)
+            dec     hl
+            ld      a, h
+            or      l
+            jp nz,  fatFindLinear
 
+            ; Следующий чип, тот же адрес внутри него. После последнего чипа
+            ; переходим на следующий сектор первого. Метаданные не адресуем.
+            call    fatClusterToSector
+            ld      hl, (v_diskInfo.allocationStep)
+            add     hl, de
+            push    hl
+            ld      hl, (v_diskInfo.totalSectors)
+            ex      de, hl
+            pop     hl
+            call    cmp_hl_de
+            jp c,   fatFindSectorReady
+            call    sub_hl_de
+            inc     hl
+fatFindSectorReady:
+            push    hl
+            ld      hl, (v_diskInfo.dataStartSector)
+            ex      de, hl
+            pop     hl
+            call    sub_hl_de
+            jp nc,  fatFindClusterReady
+            ld      hl, 0
+fatFindClusterReady:
+            inc     hl
+            inc     hl
+            ex      de, hl
+            jp      fatFindClusterCommon
+fatFindLinear:
+            ld      hl, (v_findCluster)
+            inc     hl
+            ex      de, hl
+
+fatFindClusterCommon:
+            ld      hl, (v_diskInfo.dataClusters)
+            ld      b, h
+            ld      c, l
+            ld      a, b
+            or      c
+            jp z,   fatFindClusterFailed
+; Цикл 36 байт: 168-191 такт на занятую ячейку сверх тела fatReadCluster.
+; Одно чтение FAT-элемента (2 байта) через кэш; промах добавляет чтение сектора.
 fatFindClusterLoop:
-            ; Запоминаем номер последнего кластера в hl
+            ; Полный ограниченный обход 2..dataClusters+1 с возвратом к 2.
+            ld      hl, (v_diskInfo.dataClusters)
+            inc     hl
+            inc     hl
+            call    cmp_hl_de
+            jp c,   fatFindWrap
+            jp nz,  fatFindCandidate
+fatFindWrap:
+            ld      de, 2
+fatFindCandidate:
             ld      h, d
             ld      l, e
-
-            ; de = fat[de]
             call    fatReadCluster
-
-            ; Сравниваем de с нулем
             ld      a, d
             or      e
-            jp z,   fatFindClusterOk  ; найден
-
-            ; Следующий кластер
+            jp z,   fatFindClusterOk
             ld      d, h
             ld      e, l
             inc     de
-
-            ; Счётчик просмотренных ячеек fat
             dec     bc
             ld      a, b
             or      c
-            jp nz,  fatFindClusterLoop  ; повтор цикла
-
-;---------------------------------------------------------------------------
-
-            ; Свободный кластер не найден
-            ; Восстанавливаем регистры и выходим с a=1, CF=1, ZF=0
+            jp nz,  fatFindClusterLoop
+fatFindClusterFailed:
             pop     bc
             pop     hl
             ld      a, 1
             scf
             ret
-
-;---------------------------------------------------------------------------
-
-            ; Свободный кластер найден
 fatFindClusterOk:
-            ; Устаналиваем ZF=0. Номер кластера не может быть нулевым.
-            ; В случае ошибки мы тоже выходим с ZF=1
-            or      a
-
-            ; Для ускорения поиска сохраняем номер найденного кластера в v_findCluster
             ld      (v_findCluster), hl
-            ex      hl, de
-
-            ; Восстанавливаем регистры и выходим с CF=0, ZF=0
+            ex      de, hl
             pop     bc
             pop     hl
+            or      a
             ret
-

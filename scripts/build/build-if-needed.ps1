@@ -10,7 +10,10 @@ param(
     [string] $Address,
 
     [Parameter(Position = 3)]
-    [string] $OutputBase = $SourceBase
+    [string] $OutputBase = $SourceBase,
+
+    [ValidateSet('Configured', 'Legacy', 'Buffered')]
+    [string] $RamDiskDriver = 'Configured'
 )
 
 $ErrorActionPreference = "Stop"
@@ -101,9 +104,23 @@ $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $outputDirectory = Join-Path $repositoryRoot "bin"
 $outputPath = Join-Path $outputDirectory ($OutputBase + "." + $Extension)
 $listingPath = Join-Path $outputDirectory ($OutputBase + ".lst")
+$symbolPath = Join-Path $outputDirectory ($OutputBase + '.sym')
+$configurationPath = $outputPath + '.build-config'
+$configuration = $RamDiskDriver
+$defines = @()
+if ($RamDiskDriver -eq 'Legacy') { $defines = @('-DRAMD_BUFFERED=0') }
+if ($RamDiskDriver -eq 'Buffered') { $defines = @('-DRAMD_BUFFERED=1') }
 $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+
+# DOS требует предварительного измерения блоков и размещения между входами ABI.
+if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')) {
+    $packingArguments = @('--output', $outputPath, '--configuration', $configuration)
+    foreach ($define in $defines) { $packingArguments += '--define=' + $define.Substring(2) }
+    & python (Join-Path $PSScriptRoot 'pack-dos.py') @packingArguments
+    exit $LASTEXITCODE
+}
 
 $dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)
 $buildInputs = @($dependencies + $assemblerPath + $PSCommandPath)
@@ -113,7 +130,13 @@ $newestInput = $buildInputs |
     Select-Object -First 1
 
 $needsCompile = -not (Test-Path -LiteralPath $outputPath -PathType Leaf) -or
-    -not (Test-Path -LiteralPath $listingPath -PathType Leaf)
+    -not (Test-Path -LiteralPath $listingPath -PathType Leaf) -or
+    -not (Test-Path -LiteralPath $symbolPath -PathType Leaf) -or
+    -not (Test-Path -LiteralPath $configurationPath -PathType Leaf)
+
+if (-not $needsCompile) {
+    $needsCompile = [IO.File]::ReadAllText($configurationPath) -ne $configuration
+}
 
 if (-not $needsCompile) {
     $output = Get-Item -LiteralPath $outputPath
@@ -123,18 +146,23 @@ if (-not $needsCompile) {
 }
 
 if ($needsCompile) {
+    if (Test-Path -LiteralPath $configurationPath) { Remove-Item -LiteralPath $configurationPath }
     Write-Host ("[build] {0} (newest input: {1})" -f $sourcePath, $newestInput.FullName)
     & $assemblerPath `
         "--i8080" `
         "-Wno-rdlow" `
+        @defines `
         ("--lst={0}" -f $listingPath) `
+        ("--sym={0}" -f $symbolPath) `
         ("--raw={0}" -f $outputPath) `
         $sourcePath
 
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
+    [IO.File]::WriteAllText($configurationPath, $configuration)
 }
 else {
     Write-Host ("[up-to-date] {0}" -f $outputPath)
 }
+exit 0

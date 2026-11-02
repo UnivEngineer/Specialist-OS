@@ -63,4 +63,9 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  flushVolume         ; C899: сохранить изменения тома
                 jp  beepTimer           ; C89C: звук ВИ53 с ABI RAMFOS beep
 
-                ASSERT $ == 0C89Fh
+                jp  diskWriteChecked    ; C89F: запись сектора с чтением и сравнением
+
+                jp  pitTimerInit        ; C8A2: настроить измерительный каскад ВИ53
+                jp  pitTimerRead        ; C8A5: защёлкнуть и прочитать счётчик
+
+                ASSERT $ == 0C8A8h

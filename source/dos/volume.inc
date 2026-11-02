@@ -250,6 +250,7 @@ fatVolumeFlush:
             xor a
             ld (bios_vars.diskWriteErr), a
             call saveSectorCache
+            call fatFlushPhysical
             ld a, (bios_vars.diskWriteErr)
             or a
             ret z

@@ -681,7 +681,7 @@ def main():
         require(divmod(total, 10000) == (6 + (total - 60000) // 10000, (total - 60000) % 10000),
                 "Real-time carry decomposition differs")
     reference = (ROOT / "assets/games/Almaz-2/legacy/Almaz2-original.exe").read_bytes()
-    bios_source = (ROOT / "source/dos/DOS.asm").read_text(encoding="utf-8")
+    bios_source = (ROOT / "source/dos/keyTable.inc").read_text(encoding="utf-8")
     row = bios_source.split("v_keybTbl:", 1)[1].splitlines()[1]
     bios_codes = [int(value, 16) for value in re.findall(r"([0-9A-Fa-f]+)h", row)]
     matrix = [[int(value, 16) for value in re.findall(r"([0-9A-Fa-f]+)h", line)]
