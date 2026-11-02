@@ -78,7 +78,7 @@ highProgramValid:
 rangeValid:
     ld (appBuffer), hl
 
-    ; Проверить ядро до загрузки программы и до разрушения шрифта/драйверов.
+    ; Проверить ядро до загрузки программы.
     call prepareKernel
     call bios_fileLoadInfo
     ld de, txtKernel
@@ -124,6 +124,11 @@ endArguments:
     ld hl, (appSize)
     ld (RAMFOS_CONTEXT+2), hl
 
+    ; Ядро читается в экран: загрузка на DC00h затёрла бы работающий FlashSys.
+    ; Чёрный на чёрном скрывает данные; очистка задаёт атрибут всему экрану.
+    xor a
+    ld (IO_COLOR), a
+    call bios_clearScreenOld
     call prepareKernel
     ld de, RAMFOS_TEMP
     call bios_fileLoad2
@@ -159,7 +164,7 @@ printError:
     ex de, hl
     jp bios_printString
 
-; Нужен холодный старт: временный буфер уже мог затереть шрифт и драйверы.
+; После ошибки позднего чтения перезапускаем ОС, восстанавливая экран и среду.
 coldReturn:
     di
     ld hl, romStub

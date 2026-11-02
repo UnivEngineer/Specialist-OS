@@ -22,3 +22,5 @@ NC.EXT           system-rom/NC.EXT 0 RS
 Test-MX.COM      programs/Test-MX.COM
 DISKBEN.COM      ../bin/DISKBEN.com                           0
 CHKDSK.COM       ../bin/CHKDSK.com                            0
+RAMRUN.COM       ../bin/RAMRUN.com                            0xF800 RS
+RAMFOS.SYS       ../bin/RAMFOS.sys                            0xC000 RS
