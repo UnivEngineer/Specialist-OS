@@ -3,8 +3,8 @@
 ; FORMAT.COM
 ;
 ; Доработки:
-; - "тихий режим" по параметру Y (форматировать без cпроcа)
-;    например FORMAT.COM B: Y
+; - ключи -R (RAM-диск), -Y (без подтверждения), диск в виде B:.
+;   Например FORMAT.COM B: -R -Y; порядок ключей и диска произвольный.
 ;
 ; 2022-01-14 Дизассемблировано и переработано SpaceEngineer
 ;----------------------------------------------------------------------------
@@ -15,9 +15,9 @@ SECTOR_SIZE = 256           ; размер сектора в байтах
 
     ORG 0F100h
 
-    ld      a, (de)         ; в de передаётся адрес строки аргументов
-    cp      20h
-    jp nc,  ReadParams      ; прыжок, если есть параметр
+    ; DE — строка аргументов, B=0 — диск пока не задан.
+    ld      b, 0
+    jp      ReadParams
 
     ; Запрос буквы диска для форматирования
 chooseDrive:
@@ -30,48 +30,66 @@ chooseDrive:
     jp c,   errAbort        ; выход в ОС, если меньше или равно
     call    bios_upperCase  ; превод буквы в верхний регистр
     ld      b, a            ; запомнить букву диска в b
-    jp      ConfirmRequest
+    jp      SearchExit
 
 ReadParams:
-    call    bios_upperCase  ; превод буквы в верхний регистр
-    ld      b, a            ; запомнить букву диска в b
-
-SearchLoop1:                ; поиск первого пробела в строке параметров
     ld      a, (de)
+    cp      ' '
+    jp z,   NextParam
     cp      21h
-    jp c,   SearchLoop2
+    jp c,   ParamsDone
+    cp      '-'
+    jp z,   ReadSwitch
+    call    bios_upperCase
+    cp      'A'
+    jp c,   errInvalidDrive
+    cp      'I'
+    jp nc,  errInvalidDrive
+    ld      h, a
+    ld      a, b
+    or      a
+    jp nz,  errParams      ; второй диск не допускается
+    ld      b, h
     inc     de
-    jp      SearchLoop1
-
-SearchLoop2:                ; пропуск последующих пробелов
     ld      a, (de)
-    cp      20h
-    jp nz,  AnalyzeParam
+    cp      ':'
+    jp nz,  errInvalidDrive
     inc     de
-    jp      SearchLoop2
-
-AnalyzeParam:
+    jp      ParamEnd
+ReadSwitch:
+    inc     de
+    ld      a, (de)
+    call    bios_upperCase
+    ld      hl, v_FormatConfirmed
+    cp      'Y'
+    jp z,   SetSwitch
+    cp      'R'
+    jp nz,  errParams
+    ld      hl, v_FormatRAMdisk
+SetSwitch:
+    ld      (hl), 0FFh
+    inc     de
+ParamEnd:
+    ld      a, (de)
+    cp      ' '
+    jp z,   NextParam
     cp      21h
-    jp c,   SearchExit      ; конец строки параметров
-    call    bios_upperCase  ; превод буквы в верхний регистр
-    cp      'Y'             ; если найден параметр 'Y', установим флаг "форматировать без подтверждения"
-    jp nz,  AnalyzeParam1
-    ld      a, 0FFh
-    ld      (v_FormatConfirmed), a
-    jp      SearchLoop1     ; продолжаем анализировать строку параметров
-AnalyzeParam1:
-    cp      'R'             ; если найден параметр 'R', установим флаг "форматировать как RAM-диск"
-    jp nz,  SearchLoop1     ; иначе продолжаем анализировать строку параметров
-    ld      a, 0FFh
-    ld      (v_FormatRAMdisk), a
-    jp      SearchLoop1     ; продолжаем анализировать строку параметров
+    jp nc,  errParams      ; ключ — отдельный токен, не начало другого слова
+ParamsDone:
+    ld      a, b
+    or      a
+    jp z,   chooseDrive
+    jp      SearchExit
+NextParam:
+    inc     de
+    jp      ReadParams
 
 SearchExit:
     ld      a, (v_FormatConfirmed)
     or      a
     jp nz,  Confirmed
 
-    ; Параметр Y не найден - вывод запроса на подтверждение форматирования
+    ; Ключ -Y не задан — запрос подтверждения.
 ConfirmRequest:
     ld      a, b
     ld      (str_A_Y_N), a  ; заменить 'A' в строке сообщения на введённую букву
@@ -343,6 +361,13 @@ errAbort:
 ;----------------------------------------------------------------------------
 ; Данные
 
+errParams:
+    ld      hl, str_Usage
+    call    bios_printString
+    scf
+    ret
+
+str_Usage:          DB 0Ah,"FORMAT.COM [A:-H:] [-R] [-Y]",0
 str_Format:         DB 0Ah,"Format drive "
 str_A_Y_N:          DB "A: [Y/N]? ",0
 str_ChoseDrive:     DB 0Ah,"Choose drive: ",0
