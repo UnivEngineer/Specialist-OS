@@ -1,0 +1,3129 @@
+{
+  "date": "2026-11-02",
+  "scope": "Игровые программы с RAMFOS-подобными ABI-признаками; без ROM/дисковых образов и утилит. Не является списком подтверждённо совместимых игр.",
+  "source_scan": "docs/compat/ramfos-archive-scan-001",
+  "points": "Вызовы C80F/C821/C82D/C836/C83C/C83F/C842/C845/C848/C84B/C84E/C851/C854/C857/C85A и F8xx-зеркал; SHLD C63E.",
+  "entries": [
+    {
+      "name": "Almaz_2.COM",
+      "display_name": "Almaz_2.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "d012d118da2f7f2760cda0f22319487439da94195b15b8984d07c766ad22ca09",
+      "payload_bytes": 13313,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "09B5",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "013F"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Almaz_2.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Almaz_2.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Almaz_2.COM",
+      "source_verified_now": true,
+      "id": "RF-001"
+    },
+    {
+      "name": "BEAT.I80",
+      "display_name": "BEAT.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "4af03900c7eec8aae11da8957f02adad987020d6bbed64150841c10cecec18f5",
+      "payload_bytes": 4502,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84B",
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0542",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "054E",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0870",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1116",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1119",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "111E",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1126",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1147",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\BEAT.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Beat_3..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Beat_3.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: BEAT.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\BEAT.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\BEAT.I80",
+      "source_verified_now": true,
+      "id": "RF-002"
+    },
+    {
+      "name": "Beat2.COM",
+      "display_name": "Beat2.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "6b44437f91d3ba78529e80c855fd9857257ff3e4c00bffab37675f2fd6aa6466",
+      "payload_bytes": 4352,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0009",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "04A0",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0542",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "054E",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0870",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Beat2.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Beat2.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Beat2.COM",
+      "source_verified_now": true,
+      "id": "RF-003"
+    },
+    {
+      "name": "Beat_3.COM",
+      "display_name": "Beat_3.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "3f11720991f693a23a1634ce26ab5d7e948107199caac72c4ea7f49e64222c5a",
+      "payload_bytes": 4372,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0009",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "04A0",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0542",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "054E",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0870",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Beat_3.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Beat_3.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Beat_3.COM",
+      "source_verified_now": true,
+      "id": "RF-004"
+    },
+    {
+      "name": "Boulder1.COM",
+      "display_name": "Boulder1.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "8a0521243ade5271236ca868afdf6b243d528d0ea4a41c4e95fde81ee724ac30",
+      "payload_bytes": 32524,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "1D01",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1DF2",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1DFA",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1E02",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2014",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "4993",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "5F92",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6734",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6740",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6EAC",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6FCC",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6FD4",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "7F00",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0190",
+        "01B6",
+        "01C2"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Boulder1.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Boulder1.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Boulder1.COM",
+      "source_verified_now": true,
+      "id": "RF-005"
+    },
+    {
+      "name": "Budi-mx.exe",
+      "display_name": "Budi-mx.exe",
+      "status": "strong-candidate",
+      "payload_sha256": "569192f641e7e9bf612d8accd8cd4998c3554ba352a9947f23af0c64ba8348ff",
+      "payload_bytes": 28501,
+      "load_address": "0000",
+      "load_evidence": "catalog",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0285",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0779",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "07AB",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\legacy\\Budi-MX.exe",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS\\ROM\\disabled\\games-mx\\Budi.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS-Z80\\ROM\\disabled\\games-mx\\Budi.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\Games-MX\\Budi.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\MXOS-master\\ROM-disabled\\games-mx\\Budi.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\ROM-disabled\\Games-MX\\Budi.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Budi..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\budi.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Budi.rks"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
+      "source_verified_now": true,
+      "id": "RF-006"
+    },
+    {
+      "name": "Budi.COM",
+      "display_name": "Budi.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "e9701e55624a7f611c7d56b1264bad5e9eee1d43b814f5efa8ff0061f2a8b29b",
+      "payload_bytes": 30005,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0285",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0779",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "07AB",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "7000",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "703B",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "72C3",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "7134"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi.COM",
+      "source_verified_now": true,
+      "id": "RF-007"
+    },
+    {
+      "name": "Budi_NEW.EXE",
+      "display_name": "Budi_NEW.EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "d5fd19ab740f40ac52950b5789257ad0b4d084662923ae39f714c26943b4b972",
+      "payload_bytes": 30005,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0285",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0779",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "07AB",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "7000",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "703B",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "72C3",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "7134"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi_NEW.EXE",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi_NEW.EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Budi_NEW.EXE",
+      "source_verified_now": true,
+      "id": "RF-008"
+    },
+    {
+      "name": "DIGGER.I80",
+      "display_name": "DIGGER.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "51c469b76fa8843731d62dd59c550307ca4589af509c8f98ebfcd59492f2c059",
+      "payload_bytes": 10297,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84B"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "2802",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "280F",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2821",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2833",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DIGGER.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Digger..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Digger.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\digger.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: DIGGER.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DIGGER.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DIGGER.I80",
+      "source_verified_now": true,
+      "id": "RF-009"
+    },
+    {
+      "name": "DOWN_E.I80",
+      "display_name": "DOWN_E.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "a9b477717ed5c85125b9cf361862dd7f9f6a7dec6e8d787be88b744b239857d8",
+      "payload_bytes": 30420,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [],
+      "call_sites": [],
+      "cursor_write_offsets": [
+        "13AE"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DOWN_E.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\d_t_e.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Down_E..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Down_E..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spmx_v42.rar :: d_t_e.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\down_e.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Down_to_Earth.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: DOWN_E.I80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: d_t_e.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DOWN_E.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DOWN_E.I80",
+      "source_verified_now": true,
+      "id": "RF-010"
+    },
+    {
+      "name": "DUNGEON.I80",
+      "display_name": "DUNGEON.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "c541a5a8efe62b12a729451eb0a12ae0cbd2cc69d3aecf3c831f1d717b392f8a",
+      "payload_bytes": 24709,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "6019",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6025",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6033",
+          "target": "C80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DUNGEON.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: DUNGEON.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DUNGEON.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DUNGEON.I80",
+      "source_verified_now": true,
+      "id": "RF-011"
+    },
+    {
+      "name": "Klad_M..EXE",
+      "display_name": "Klad_M..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "56e9491f5e3c2d557c414b755e8430edc0f0ccaba83fffa63833cf9ac6b4494c",
+      "payload_bytes": 12638,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84E",
+        "C851",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "01A0",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "01C5",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "0346",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0365",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "04CE",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0500",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0520",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0642",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "071B",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0786",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1557",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2CEE",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2CF7",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "2D11",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "2D31",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "2D61",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "2D8B",
+          "target": "C84E",
+          "opcode": "C3"
+        }
+      ],
+      "cursor_write_offsets": [
+        "003A",
+        "01B2",
+        "03A2",
+        "03B1",
+        "047C",
+        "065A",
+        "0792",
+        "07D4",
+        "16AA"
+      ],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh",
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Klad_M..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Klad_M..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Klad_M..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Klad_M..EXE",
+      "source_verified_now": true,
+      "id": "RF-012"
+    },
+    {
+      "name": "Krot..EXE",
+      "display_name": "Krot..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "b4cd8e163877fe7f2ee528ae954ce1bd1f85aabe96bdb5159431e9fac28c05b3",
+      "payload_bytes": 6528,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0007",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0057",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "01F5",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "01FE",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0207",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0210",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0219",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0222",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "022B",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0234",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "023D",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03D1",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0460",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "04CF",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "053B",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "10BA",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "002B",
+        "00F3",
+        "0109"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Krot..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Krot.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Krot..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Krot..EXE",
+      "source_verified_now": true,
+      "id": "RF-013"
+    },
+    {
+      "name": "Krot.COM",
+      "display_name": "Krot.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "63cc815b714ba1f23afce9d90d96789080ca7159c0db305a8e6f87189beb2f3a",
+      "payload_bytes": 6528,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0007",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0057",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "01F5",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "01FE",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0207",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0210",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0219",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0222",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "022B",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0234",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "023D",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03D1",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0460",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "04CF",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "053B",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "10BA",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "002B",
+        "00F3",
+        "0109"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Krot.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Krot.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Krot.COM",
+      "source_verified_now": true,
+      "id": "RF-014"
+    },
+    {
+      "name": "Lode_Run.COM",
+      "display_name": "Lode_Run.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "aca4042bd0f9eead87c79a77b421b18e39ee14aed64764a8952ad55de48a14ec",
+      "payload_bytes": 30176,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0000",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0674",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "08E1",
+          "target": "C854",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0023",
+        "02AF"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Lode_Run.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Lode_Run.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Lode_Run.COM",
+      "source_verified_now": true,
+      "id": "RF-015"
+    },
+    {
+      "name": "Mars..EXE",
+      "display_name": "Mars..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "38c4f9f5d5f9e9b4b60648499b4904db5bdedd523e7a0d5b29476abd781a3580",
+      "payload_bytes": 4502,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "001A",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "001F",
+          "target": "C80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Mars..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Mars..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Марс.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Mars..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Mars..EXE",
+      "source_verified_now": true,
+      "id": "RF-016"
+    },
+    {
+      "name": "Nardy..EXE",
+      "display_name": "Nardy..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "3e8c25cca9a58da2be45b324efb3c9193e8093ff476500046cd945c2a24f2bfa",
+      "payload_bytes": 5553,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "1473",
+          "target": "C80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "000C",
+        "0041",
+        "019A",
+        "03AB",
+        "08F4",
+        "0A0B",
+        "0AE4"
+      ],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh",
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Nardy..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Nardy..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Nardy..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Nardy..EXE",
+      "source_verified_now": true,
+      "id": "RF-017"
+    },
+    {
+      "name": "Piton_.COM",
+      "display_name": "Piton_.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "5f13edd38c366063dd2c8531cabadb3c6e50f4195f60b70c147bcff006f8a274",
+      "payload_bytes": 13838,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0265",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0287",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "02A6",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "3600",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Piton_.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Piton_.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Piton_.COM",
+      "source_verified_now": true,
+      "id": "RF-018"
+    },
+    {
+      "name": "Pqtna{k..EXE",
+      "display_name": "Pqtna{k..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "c10a719df276c21cd98e851877528643c213c43863180ed471a82fa8f7909edc",
+      "payload_bytes": 6150,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84B",
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0226",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "17E2",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "17E5",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "17F2",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Pqtna{k..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Pqtna{k..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Pqtna{k..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Pqtna{k..EXE",
+      "source_verified_now": true,
+      "id": "RF-019"
+    },
+    {
+      "name": "Pqtna{ki.COM",
+      "display_name": "Pqtna{ki.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "d91d1f0af7cbfdcd37179d2c6388597096687c61180db82a5a119c414144a51f",
+      "payload_bytes": 6112,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0000",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "000F",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0226",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Pqtna{ki.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Pqtna{ki.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Pqtna{ki.COM",
+      "source_verified_now": true,
+      "id": "RF-020"
+    },
+    {
+      "name": "Presled..COM",
+      "display_name": "Presled..COM",
+      "status": "strong-candidate",
+      "payload_sha256": "5b516fed1305523220baf48834089b79061c222852eb644c127810282e2f4c90",
+      "payload_bytes": 2577,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0000",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03E4",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03FB",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "07A1",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0840",
+        "084D",
+        "085A"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Presled..COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Presled..COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Presled..COM",
+      "source_verified_now": true,
+      "id": "RF-021"
+    },
+    {
+      "name": "Ralli..EXE",
+      "display_name": "Ralli..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "abbfbecaa514630cede2c311fe493339654a497a9f404aac1de6b91178339795",
+      "payload_bytes": 3519,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "00F9",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0102",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0123",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0559",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0D22",
+          "target": "C80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Ralli..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Ralli..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Ralli..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Ralli..EXE",
+      "source_verified_now": true,
+      "id": "RF-022"
+    },
+    {
+      "name": "RISEOUT.COM",
+      "display_name": "RISEOUT.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "32b97131c4fac45bd5a2df1e9cc6996c44bd4be4811e3b68b178414e9144362e",
+      "payload_bytes": 11393,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0017",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "02C1",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "04F3",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0502",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0896",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0958",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\RISEOUT.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\RISEOUT.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\RISEOUT.COM",
+      "source_verified_now": true,
+      "id": "RF-023"
+    },
+    {
+      "name": "Saboteur.EXE",
+      "display_name": "Saboteur.EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "fb10fcbb4433904ab3d3532675cfe8d18d880b8334ebc2aa89e53fe28540657c",
+      "payload_bytes": 32684,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [],
+      "call_sites": [],
+      "cursor_write_offsets": [
+        "0190",
+        "01B6",
+        "01C2",
+        "2C6F",
+        "6010",
+        "6029",
+        "6CE8",
+        "6F93"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Saboteur.EXE",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Saboteur.EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Saboteur.EXE",
+      "source_verified_now": true,
+      "id": "RF-024"
+    },
+    {
+      "name": "Samantha.COM",
+      "display_name": "Samantha.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "0b65c0045961eab5762ac2ca3b124214b54910684239aa172b51f7fe0fcc1e43",
+      "payload_bytes": 25985,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "00A4",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "00D2",
+          "target": "C854",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "6578",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0006",
+        "0012",
+        "005C",
+        "0068",
+        "0074"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Samantha.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Samantha.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Samantha.COM",
+      "source_verified_now": true,
+      "id": "RF-025"
+    },
+    {
+      "name": "shahm_mx.i80",
+      "display_name": "shahm_mx.i80",
+      "status": "strong-candidate",
+      "payload_sha256": "f38359a824d45a5b3f1f528119aeec069d40b6f98e8dbd1ef7449e07870465b1",
+      "payload_bytes": 6378,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84B",
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0002",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0005",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0360",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0406",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0452",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\shahm_mx.i80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\[ah_MX.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ah_MX.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spmx_v42.rar :: shahm_mx.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\shahm_mx.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: shahm_mx.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\shahm_mx.i80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\shahm_mx.i80",
+      "source_verified_now": true,
+      "id": "RF-026"
+    },
+    {
+      "name": "Sky_scr..EXE",
+      "display_name": "Sky_scr..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "516a0122fad3abf2eeae5d3ae331dc72177a96de5ce8116e13e6366285a369c5",
+      "payload_bytes": 32256,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84B"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0026",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "69DD",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0190",
+        "01B6",
+        "01C2",
+        "68AF",
+        "68BB",
+        "68C7",
+        "68D3",
+        "69E8"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Sky_scr..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Sky_scr.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Sky_scr..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Sky_scr..EXE",
+      "source_verified_now": true,
+      "id": "RF-027"
+    },
+    {
+      "name": "Sky_Scra.COM",
+      "display_name": "Sky_Scra.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "d2558b8a59f682a69e9c546c6b461c23719b39600b7e91866d02b700bfe336dc",
+      "payload_bytes": 32256,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0152",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "275B",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2763",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2CF0",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2CFE",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2D0C",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2D1A",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2D28",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2D36",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2E1E",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2E88",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2EE4",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "78AE",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "78B6",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0190",
+        "01B6",
+        "01C2",
+        "68AF",
+        "68BB",
+        "68C7",
+        "68D3",
+        "69E8"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Sky_Scra.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Sky_Scra.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Sky_Scra.COM",
+      "source_verified_now": true,
+      "id": "RF-028"
+    },
+    {
+      "name": "Stena_1.COM",
+      "display_name": "Stena_1.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "d79252f9412938d83223b45278eaf90719337728cdb9bcf161516336ec5f5420",
+      "payload_bytes": 2073,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0184",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "021F",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "06EE",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "003A",
+        "0046",
+        "005B",
+        "0067",
+        "00B6",
+        "00DA",
+        "0322",
+        "0342",
+        "057F",
+        "0749"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Stena_1.COM",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Stena_1.COM"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Stena_1.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Stena_1.COM",
+      "source_verified_now": true,
+      "id": "RF-029"
+    },
+    {
+      "name": "Tetris1..EXE",
+      "display_name": "Tetris1..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "4b76d65c3c639e93f3a238928104a6ed5c496f787ef5cf5b28155dbdc20e12d9",
+      "payload_bytes": 1446,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0002",
+          "target": "C80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris1..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Tetris1..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris1..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris1..EXE",
+      "source_verified_now": true,
+      "id": "RF-030"
+    },
+    {
+      "name": "Tetris2..EXE",
+      "display_name": "Tetris2..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "9190cbf6a85fcc01962245e9413711a3ed6714f8c1e2f6f3758c555fb47a7a0e",
+      "payload_bytes": 1853,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "03AF",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "044B",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "05A3",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "03EF"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris2..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Tetris2..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris2..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris2..EXE",
+      "source_verified_now": true,
+      "id": "RF-031"
+    },
+    {
+      "name": "Tetris3..EXE",
+      "display_name": "Tetris3..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "62eb70f8a92336c059d79c322644003938685c0e80e1903614cbd38a4e033bb8",
+      "payload_bytes": 3168,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84B",
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0BE2",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0BE5",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "0BEB",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0BF5",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0BFF",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C09",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C13",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C31",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C35",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "0C3B",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C3F",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "0C45",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C4F",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0C53",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "0C59",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris3..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Tetris3..EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris3..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris3..EXE",
+      "source_verified_now": true,
+      "id": "RF-032"
+    },
+    {
+      "name": "Tetris_s.COM",
+      "display_name": "Tetris_s.COM",
+      "status": "strong-candidate",
+      "payload_sha256": "078f5d205a722024455498d402deb07c429801434f98270925b674be426341a7",
+      "payload_bytes": 1792,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0000",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03AF",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "044B",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "05A3",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "03EF"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Tetris_s.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Tetris_s.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Tetris_s.COM",
+      "source_verified_now": true,
+      "id": "RF-033"
+    },
+    {
+      "name": "Titan.EXE",
+      "display_name": "Titan.EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "bee43a5a0db6696aa050469b5362b95f8ccb256cc0a9f9d19646f6878a865a4c",
+      "payload_bytes": 2491,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0003",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03E4",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "08AB",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0959",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0970",
+          "target": "C84E",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "099F",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09A2",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09A5",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09AE",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09B7",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Titan.EXE",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Titan.EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Titan.EXE",
+      "source_verified_now": true,
+      "id": "RF-034"
+    },
+    {
+      "name": "TUTANK.I80",
+      "display_name": "TUTANK.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "e20c1a37a17bf023d7def4dbb73102b27039f84fdf908c0f0f2d7b5980fcf855",
+      "payload_bytes": 12187,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84B"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "2F12",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2F17",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2F1F",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2F27",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2F2F",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2F37",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\TUTANK.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Tutank..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Tutank.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\emu_tests\\ВИ53_аудио\\tutank.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\tutank.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Tutankhamun.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: TUTANK.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\TUTANK.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\TUTANK.I80",
+      "source_verified_now": true,
+      "id": "RF-035"
+    },
+    {
+      "name": "UDAV.I80",
+      "display_name": "UDAV.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "cfa0250652dc352ba2c4bf4dbf2b0cc88d5337ce29b3236b38c8ae9193b5c7ed",
+      "payload_bytes": 4117,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0227",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0619",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0621",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0629",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "1002",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "100A",
+          "target": "C84E",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "1012",
+          "target": "C84E",
+          "opcode": "C3"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\UDAV.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Udaw..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\Udaw.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\udav.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: UDAV.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\UDAV.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\UDAV.I80",
+      "source_verified_now": true,
+      "id": "RF-036"
+    },
+    {
+      "name": "Wertole..EXE",
+      "display_name": "Wertole..EXE",
+      "status": "strong-candidate",
+      "payload_sha256": "794149bb4c86c825cde0d31b79d435ec229257393611f55f35fc7ab495db5dcd",
+      "payload_bytes": 2342,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [],
+      "call_sites": [],
+      "cursor_write_offsets": [
+        "0011",
+        "0023",
+        "0035",
+        "0055"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Wertole..EXE",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Wertolet.EXE"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Wertole..EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Wertole..EXE",
+      "source_verified_now": true,
+      "id": "RF-037"
+    },
+    {
+      "name": "ZOO_.I80",
+      "display_name": "ZOO_.I80",
+      "status": "strong-candidate",
+      "payload_sha256": "2636bbd7bbb462c41d9a545c631e01a9744b267d285d66c83da3cd64eadff382",
+      "payload_bytes": 6312,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E",
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "06C9",
+          "target": "C851",
+          "opcode": "C3"
+        },
+        {
+          "payload_offset": "18A2",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0619"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "сочетание C84Eh/C851h"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\ZOO_.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\zoo.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: ZOO_.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\ZOO_.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\ZOO_.I80",
+      "source_verified_now": true,
+      "id": "RF-038"
+    },
+    {
+      "name": "[ahmaty2.EXE",
+      "display_name": "Шахматы2",
+      "status": "strong-candidate",
+      "payload_sha256": "95143a60077e13e998dd11f9f61307677d5c3e8fcc3a58dc820f1e94f3a8f462",
+      "payload_bytes": 8192,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C80F",
+        "C84B"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0F02",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0F0A",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0F12",
+          "target": "C80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0F1A",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0F22",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0F2A",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ahmaty2.EXE",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ahmaty2.EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ahmaty2.EXE",
+      "source_verified_now": true,
+      "id": "RF-039"
+    },
+    {
+      "name": "Buran-ramfos.exe",
+      "display_name": "Buran-ramfos.exe",
+      "status": "user-tested-issues",
+      "payload_sha256": "471e61f6702042ffc007b7b408297108c546a6198a679c4bd185361654260e66",
+      "payload_bytes": 5893,
+      "load_address": "0000",
+      "load_evidence": "catalog",
+      "abi_points": [
+        "C80F"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "02D1",
+          "target": "C80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "0006",
+        "001F",
+        "002B",
+        "005B",
+        "0235",
+        "03C8",
+        "0784",
+        "0797"
+      ],
+      "evidence": [
+        "передача символа/управляющего кода в A перед C80Fh",
+        "запись курсора SHLD C63Eh",
+        "пользователь сообщил об ошибках под текущей MXOS"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\legacy\\Buran-ramfos.exe",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Buran..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Buran..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\emu_tests\\ВИ53_аудио\\Буран.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Буран.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
+      "source_verified_now": true,
+      "id": "RF-040"
+    },
+    {
+      "name": "StarWars2-ramfos.exe",
+      "display_name": "StarWars2-ramfos.exe",
+      "status": "user-tested-issues",
+      "payload_sha256": "b7dd022fc87f3280a7f54ea1a4d0fc87916d4f2d5cb91a80f8afa6c518f4cd5c",
+      "payload_bytes": 9353,
+      "load_address": "0000",
+      "load_evidence": "catalog",
+      "abi_points": [
+        "C84B"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "2440",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2454",
+          "target": "C84B",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "2475",
+          "target": "C84B",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "1CAE"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "уже известный RAMFOS-вариант; запись сохраняется для полноты",
+        "пользователь сообщил об ошибках под текущей MXOS"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\legacy\\StarWars2-ramfos.exe",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS\\ROM\\disabled\\games-mx\\StarW2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS-Z80\\ROM\\disabled\\games-mx\\StarW2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\Games-MX\\Star-W2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\Star-W2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\MXOS-master\\ROM-disabled\\games-mx\\StarW2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\ROM-disabled\\Games-MX\\Star-W2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\RomDisk\\Star-W2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Starwar..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Starwar..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Starwar.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
+      "source_verified_now": true,
+      "id": "RF-041"
+    },
+    {
+      "name": "30.rks",
+      "display_name": "30.rks",
+      "status": "weak-candidate",
+      "payload_sha256": "5a3d938f3fce0752a877279da6d6872bab9a2881289397afd4ea5d2a0c390b9d",
+      "payload_bytes": 5280,
+      "load_address": "0000",
+      "load_evidence": "rks",
+      "abi_points": [
+        "C836"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "1385",
+          "target": "C836",
+          "opcode": "C3"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_rks\\30.rks",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\rks_games.rar :: 30.rks"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_rks\\30.rks",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_rks\\30.rks",
+      "source_verified_now": true,
+      "id": "RF-042"
+    },
+    {
+      "name": "Boulder2.COM",
+      "display_name": "Boulder2.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "65ba85a9451f435f42731433599968af350082a38e13d2c59c506c7c790b1b85",
+      "payload_bytes": 4880,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0005",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Boulder2.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Boulder2.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Boulder2.COM",
+      "source_verified_now": true,
+      "id": "RF-043"
+    },
+    {
+      "name": "GOLD.I80",
+      "display_name": "GOLD.I80",
+      "status": "weak-candidate",
+      "payload_sha256": "ef52e6642157e734dc6ca44272ed41c52fcd93cc05fe21defcf16e1fd241b656",
+      "payload_bytes": 14849,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C854"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "000D",
+          "target": "C854",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\GOLD.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\gold.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: GOLD.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\GOLD.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\GOLD.I80",
+      "source_verified_now": true,
+      "id": "RF-044"
+    },
+    {
+      "name": "JET_SET.EXE",
+      "display_name": "JET_SET.EXE",
+      "status": "weak-candidate",
+      "payload_sha256": "05704733d3839550c89150deab7a9f8c43dd15cbad5516d8fa56362c93c69dfb",
+      "payload_bytes": 31257,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "F80F"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "7A0E",
+          "target": "F80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "7A13",
+          "target": "F80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\JET_SET.EXE",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\JET_SET.EXE",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\JET_SET.EXE",
+      "source_verified_now": true,
+      "id": "RF-045"
+    },
+    {
+      "name": "LABIRINT.I80",
+      "display_name": "LABIRINT.I80",
+      "status": "weak-candidate",
+      "payload_sha256": "194d566dc26a58565d918049fd74e96e05eead39d70b5f386913d7312108447d",
+      "payload_bytes": 4386,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C836"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0C5F",
+          "target": "C836",
+          "opcode": "C3"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\LABIRINT.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\labirint.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: LABIRINT.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\LABIRINT.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\LABIRINT.I80",
+      "source_verified_now": true,
+      "id": "RF-046"
+    },
+    {
+      "name": "PACMAN2.I80",
+      "display_name": "PACMAN2.I80",
+      "status": "weak-candidate",
+      "payload_sha256": "9d7f6529a43ac50fa06ce62d0f545c07362ff0f4192a800d8e8f338650914e23",
+      "payload_bytes": 14381,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C851",
+        "F83C"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "02F4",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "02F7",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "02FD",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0300",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0399",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "08E1",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09AF",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09E0",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09F0",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "09F7",
+          "target": "C851",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0BE1",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\PACMAN2.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\pacman2.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: PACMAN2.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\PACMAN2.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\PACMAN2.I80",
+      "source_verified_now": true,
+      "id": "RF-047"
+    },
+    {
+      "name": "Paket.rks",
+      "display_name": "Paket.rks",
+      "status": "weak-candidate",
+      "payload_sha256": "9351576e0a10527aed99d21c4d5178fa59e68aff382ed0783ee36b8a908da127",
+      "payload_bytes": 5280,
+      "load_address": "0000",
+      "load_evidence": "rks",
+      "abi_points": [
+        "C836"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "1385",
+          "target": "C836",
+          "opcode": "C3"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Paket.rks",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\Emulator\\Emu80-flash-test\\spec\\sdcard\\GAMES\\paket.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\Emulator\\Emu80-MXOS\\Emu80qt_40571\\spec\\sdcard\\GAMES\\paket.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\Emulator\\Emu80-MXOS-flash\\spec\\sdcard\\GAMES\\paket.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\Emulator\\emu80-src\\dist\\spec\\sdcard\\GAMES\\paket.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS-Z80\\FlashDrive\\Games\\Paket.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\games1_rks\\PAKET.RKS",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_my\\PAKET.RKS",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games1_rks.rar :: PAKET.RKS"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Paket.rks",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Paket.rks",
+      "source_verified_now": true,
+      "id": "RF-048"
+    },
+    {
+      "name": "PIKFAMA.I80",
+      "display_name": "PIKFAMA.I80",
+      "status": "weak-candidate",
+      "payload_sha256": "576f9cc1d07d143bab16bc33a700e6765d9a4595d0bf25260570e6efe6eb2b6d",
+      "payload_bytes": 2342,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "F83C"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0076",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0219",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0226",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0254",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0261",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "034F",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "03AD",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "040D",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "041A",
+          "target": "F83C",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0427",
+          "target": "F83C",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\PIKFAMA.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\pikfama.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: PIKFAMA.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\PIKFAMA.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\PIKFAMA.I80",
+      "source_verified_now": true,
+      "id": "RF-049"
+    },
+    {
+      "name": "Poker.COM",
+      "display_name": "Poker.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "7d40d3bf8bb0507f58378ea8847593ee02009f3af13e6705d465cb5e4d869ffb",
+      "payload_bytes": 8209,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "200B",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Poker.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Poker.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\Poker.COM",
+      "source_verified_now": true,
+      "id": "RF-050"
+    },
+    {
+      "name": "POKER.I80",
+      "display_name": "POKER.I80",
+      "status": "weak-candidate",
+      "payload_sha256": "a00eac800b48e1dd25d3d90e75e523eb877af8dcf202808ad3b19a162273dcc1",
+      "payload_bytes": 8236,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "201B",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\POKER.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\poker.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: POKER.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\POKER.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\POKER.I80",
+      "source_verified_now": true,
+      "id": "RF-051"
+    },
+    {
+      "name": "SAPPER.RK",
+      "display_name": "SAPPER.RK",
+      "status": "weak-candidate",
+      "payload_sha256": "270c621d0b8935fc7c5baa65c3a262c7044a53991960abb9690b688e32c96352",
+      "payload_bytes": 2347,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "F836"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "00AF",
+          "target": "F836",
+          "opcode": "C3"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Emulator\\Emu80\\rk86\\sdcard\\GAMES\\SAPPER.RK",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Emulator\\Emu80\\rk86\\sdcard\\GAMES\\SAPPER.RK",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Emulator\\Emu80\\rk86\\sdcard\\GAMES\\SAPPER.RK",
+      "source_verified_now": true,
+      "id": "RF-052"
+    },
+    {
+      "name": "SEX1.COM",
+      "display_name": "SEX1.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "0e15551156d2d81de099d05923f364f602b323be475c4f956642dd6ada29374b",
+      "payload_bytes": 25116,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "6206",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\SEX1.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\SEX1.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\SEX1.COM",
+      "source_verified_now": true,
+      "id": "RF-053"
+    },
+    {
+      "name": "SEX2.COM",
+      "display_name": "SEX2.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "eab3e64e952fa20b3158f98ad922a810250376e76efd81f9b23257f915ed09e8",
+      "payload_bytes": 25116,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "6206",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\SEX2.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\SEX2.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX2\\SEX2.COM",
+      "source_verified_now": true,
+      "id": "RF-054"
+    },
+    {
+      "name": "Ska~ki.COM",
+      "display_name": "Ska~ki.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "bbf09c3983db31a63140aea3bfd8b64859ebf0f19664bd4f91dc2e4b6b2f054a",
+      "payload_bytes": 2905,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0B49",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Ska~ki.COM",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\skachki.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Ska~ki.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Ska~ki.COM",
+      "source_verified_now": true,
+      "id": "RF-055"
+    },
+    {
+      "name": "Sohrani.COM",
+      "display_name": "Sohrani.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "d9f48b27dd1cab17b074d7f92e181ccbab12676ba6a641bc224ae63c622ee978",
+      "payload_bytes": 3938,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0F51",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Sohrani.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Sohrani.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Sohrani.COM",
+      "source_verified_now": true,
+      "id": "RF-056"
+    },
+    {
+      "name": "VAVILON.I80",
+      "display_name": "VAVILON.I80",
+      "status": "weak-candidate",
+      "payload_sha256": "4dfa4edcf93f70f6fb76553f56f8df2692805aaf86bdc2ce21d3e82bb65e535b",
+      "payload_bytes": 18908,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "F80F"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "08B5",
+          "target": "F80F",
+          "opcode": "CD"
+        },
+        {
+          "payload_offset": "0E7E",
+          "target": "F80F",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\VAVILON.I80",
+      "aliases": [
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\vavilon.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: VAVILON.I80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\VAVILON.I80",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\VAVILON.I80",
+      "source_verified_now": true,
+      "id": "RF-057"
+    },
+    {
+      "name": "XTREE.COM",
+      "display_name": "XTREE.COM",
+      "status": "weak-candidate",
+      "payload_sha256": "8193245a9e3e5473cb459385177a832b8259a219519b29eeed1a2b5880817a9e",
+      "payload_bytes": 14816,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C84E"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "0056",
+          "target": "C84E",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [],
+      "evidence": [
+        "совпадение характерной точки; назначение вызова требует проверки"
+      ],
+      "origin": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\XTREE.COM",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\XTREE.COM",
+      "verified_source": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\XTREE.COM",
+      "source_verified_now": true,
+      "id": "RF-058"
+    },
+    {
+      "name": "Almaz2-ramfos-optimized.exe",
+      "display_name": "Almaz2-ramfos-optimized.exe",
+      "status": "known-ramfos",
+      "payload_sha256": "0bb927c615fb7fdc582f9fa59d826af1458f2b8362fbf9ca678f74b4d60c73ed",
+      "payload_bytes": 16802,
+      "load_address": "0000",
+      "load_evidence": "catalog",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "3657",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "013F",
+        "348A"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "уже известный RAMFOS-вариант; запись сохраняется для полноты"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.rks"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
+      "source_verified_now": true,
+      "id": "RF-059"
+    },
+    {
+      "name": "Almaz2-ramfos-original-broken.exe",
+      "display_name": "Almaz2-ramfos-original-broken.exe",
+      "status": "known-ramfos",
+      "payload_sha256": "e2e0193a23656a4063d7966b912090bd553edf74f1bd2405ec9ef7a8cd48472c",
+      "payload_bytes": 13348,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "09B5",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "013F"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "уже известный RAMFOS-вариант; запись сохраняется для полноты"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.rks",
+        "D:\\Projects\\Specialist-OS\\assets\\games\\originals\\almaz2\\Almaz2-ramfos-original-broken.exe.bin",
+        "D:\\Projects\\Specialist-OS\\assets\\games\\originals\\almaz2\\Almaz2-ramfos-original-broken.rks.bin",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS\\ROM\\disabled\\games-mx\\Almaz2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS-Z80\\ROM\\disabled\\games-mx\\Almaz2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\Games-MX\\Almaz-3.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\Games-MX\\Almaz_2_bug.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\Almaz-2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\MXOS-master\\ROM-disabled\\games-mx\\Almaz2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\ROM-disabled\\Games-MX\\Almaz-3.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\ROM-disabled\\Games-MX\\Almaz_2_bug.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\RomDisk\\Almaz-2.0.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Almaz_2..EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Almaz_3.EXE",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Almaz_2.i80",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Алмаз.rks",
+        "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Emu80_4.rar :: Emu80_40250\\_stuff\\spmx\\cpu\\Almaz_2.i80"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
+      "source_verified_now": true,
+      "id": "RF-060"
+    },
+    {
+      "name": "Almaz2-ramfos-original-fixed.exe",
+      "display_name": "Almaz2-ramfos-original-fixed.exe",
+      "status": "known-ramfos",
+      "payload_sha256": "3ff4b12a3a213edfd11a076a375231bcb56ebe51b630aec4a06ec22a9c0eee52",
+      "payload_bytes": 13348,
+      "load_address": "0000",
+      "load_evidence": "assumed_zero",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "09B5",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "013F"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "уже известный RAMFOS-вариант; запись сохраняется для полноты"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.rks"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
+      "source_verified_now": true,
+      "id": "RF-061"
+    },
+    {
+      "name": "Almaz2-ramfos.exe",
+      "display_name": "Almaz2-ramfos.exe",
+      "status": "known-ramfos",
+      "payload_sha256": "2211d08c76c6867cd5e79cfe2d2fa165997b2f8275d3b9084dda3aa0abc8ed4d",
+      "payload_bytes": 13444,
+      "load_address": "0000",
+      "load_evidence": "catalog",
+      "abi_points": [
+        "C851"
+      ],
+      "call_sites": [
+        {
+          "payload_offset": "09B5",
+          "target": "C851",
+          "opcode": "CD"
+        }
+      ],
+      "cursor_write_offsets": [
+        "013F"
+      ],
+      "evidence": [
+        "запись курсора SHLD C63Eh",
+        "уже известный RAMFOS-вариант; запись сохраняется для полноты"
+      ],
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
+      "aliases": [
+        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.rks"
+      ],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
+      "source_verified_now": true,
+      "id": "RF-062"
+    }
+  ]
+}

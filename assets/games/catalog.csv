@@ -9,8 +9,29 @@ Almaz-2/Almaz2-original-ramfos.exe,0,cpu-checked,Almaz-2.0.exe,Восстано�
 Almaz-2/Almaz2-ramfos.exe,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; цветная версия для Ramfos с программным звуком
 Almaz-2/Almaz2-ramfos-optimized.exe,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; ускоренная цветная версия Ramfos с эффектами ВИ53
 Almaz-2/legacy/Almaz2D.exe,0,cpu-checked,Almaz2MX.exe,Архивная палитра пользователя MXOS; чёрный фон; текст цвета рамки; цветные тайлы; дым тёмно-серый
-Budi-MX.exe,0,unverified,Budi.0.EXE,Версия для Специалиста MX
-StarW2X.exe,0,unverified,StarW2.0.EXE,Версия для Специалиста MX
-Buran.exe,0,unverified,Buran.0.EXE,Чёрно-белый Buran/StarWars; совпадает с StarWars.rks без заголовка
-StarW.exe,0,unverified,STARW.0.EXE,Другая игра с названием StarWars
-StarW2.exe,0,unverified,STARW2.0.EXE,Стандартная версия трёхмерного космического шутера
+BUDI/Budi-mx.exe,0,unverified,Budi.0.EXE,Историческая версия для Специалиста MX; побайтная копия legacy/Budi-MX.exe; не патч BUDI2; в Games2M имя BUDI-MX.EXE
+BUDI/Budi-std.rks,0,static-checked,BUDI.rks,Историческая STD-версия; клавиатура требует процедур и таблицы Загрузчика; автор подтвердил работу в MON; в Games2M имя BUDI.RKS
+BUDI/Budi2-color-f000.rks,0,static-checked,BUDI2.rks,Кандидат на незавершённую RAMFOS-адаптацию по уточнению автора; назначение F000h не установлено; в MON без цвета; в Games2M имя BUDI2-F0.RKS
+BUDI/Budi2-mx.rks,0,static-checked,BUDI2.rks,Отдельный патч MX: пять записей F000h перенесены на FFF8h без изменения кодов цвета; запуск LAUNCH -MX BUDI-MX.RKS; игровой прогон патча не выполнен; в Games2M имя BUDI-MX.RKS
+StarWars/StarWars-std-C800.rks,0,static-checked,STARW.0.EXE;STARWARS_MY.RKS,W1; STD FF00-FF03; BIOS C800h; контейнер RKS создан из исходной нагрузки без патча кода; полная игровая и аппаратная приёмка не выполнена; в Games2M имя SW-C800.rks
+StarWars/StarWars-std.rks,0,static-checked,StarWar2.rks;STARWAR2.RKS,W1; STD; Monitor-совместимый BIOS; исходный RKS сохранён; полная игровая и аппаратная приёмка не выполнена; в Games2M имя StarWars.rks
+StarWars/StarWars2-mx.exe,0,static-checked,StarW2.exe;STARW2.0.EXE;STAR_W2.I80,W2; монохромная MX-адресация FFE0-FFE3; Monitor-совместимый ABI; в Games2M имя StarWar2.exe; полная игровая и аппаратная приёмка не выполнена
+StarWars/StarWars2-ramfos.exe,0,static-checked,StarW2X.exe;Star-W2.0.EXE;Starwar..EXE;Starwar.i80,W2; цвет MX; ABI RAMFOS включая C63E и C84B; с текущим MXOS ABI несовместим; звук программный; полная игровая и аппаратная приёмка не выполнена; в Games2M имя SW2-RF.exe
+StarWars/StarWars2-std.rks,0,static-checked,12.rks,W2; STD FF00-FF03; нагрузка извлечена с +782 из ленточного файла; создан стандартный RKS; полная игровая и аппаратная приёмка не выполнена; в Games2M имя StarWar2.rks
+StarWars/StarWars2-std-germanovitsh.rks,0,static-checked,STAR WAR 0_23FF_B8A2.rks;STAR WAR-2 0_23FF_B8A2.rks,W2; STD; germanovitsh.rar; другое сохранённое состояние; исходный RKS сохранён; полная игровая и аппаратная приёмка не выполнена; в Games2M имя SW2-GERM.rks
+StarWars/legacy/StarWars-std-C800.exe,0,reference,StarW.exe,Исторический сырой W1 STD с BIOS C800h; неизменяемый эталон; не публикуется в образы
+StarWars/legacy/StarWars-std.rks,0,reference,StarWar2.rks,Исторический W1 STD; неизменяемый эталон; не публикуется в образы
+StarWars/legacy/StarWars2-mx.exe,0,reference,StarW2.exe,Исторический сырой W2 с MX-адресами ВВ55; неизменяемый эталон; не публикуется в образы
+StarWars/legacy/StarWars2-mx.rks,0,reference,StarW2.rks,Исторический MX-вариант в RKS; исправлена только сумма 31.10.2026; оригинал суммы в originals/rks-checksums; неизменяемый эталон; не публикуется в образы
+StarWars/legacy/StarWars2-ramfos.exe,0,reference,StarW2X.exe,Исторический цветной W2 RAMFOS; неизменяемый эталон; не публикуется в образы
+StarWars/legacy/StarWars2-std-tape.rks.bin,0,reference,12.rks,Полный ленточный файл 10000 байт; загрузочный заголовок начинается с +778; не включать в образы; неизменяемый эталон; не публикуется в образы
+StarWars/legacy/StarWars2-std-germanovitsh.rks,0,reference,STAR WAR 0_23FF_B8A2.rks,Исходный RKS из germanovitsh.rar; неизменяемый эталон; не публикуется в образы
+Buran/Buran-std.rks,0,user-tested,Buran.rks,Цветной; логотип Звёздные войны; меню с плашкой; вход по пробелу; пользователь подтвердил работу STD/MON 02.11.2026; в Games2M имя Buran.rks
+Buran/Buran-starwars-std.rks,0,user-tested,StarWars.rks;Buran.exe,Монохромный; старое меню с выбором цифрой; пользователь подтвердил вход в игру 02.11.2026; в Games2M имя Buran-SW.rks
+Buran/Buran-ramfos.exe,0,user-tested-issues,Buran..EXE,Пользователь 02.11.2026: цвет и выстрел есть; в текущей MXOS глючит; отличия C80F и C63E; выход F800 и запись F802; бинарник не исправлен; в Games2M имя Buran-RF.exe
+Buran/legacy/Buran-std.rks,0,reference,Buran.rks,Побайтный исторический файл статического Бурана; не включается в образы
+Buran/legacy/Buran-starwars-std.rks,0,reference,StarWars.rks,Побайтный исторический файл статического Бурана; не включается в образы
+Buran/legacy/Buran-starwars-std.exe,0,reference,Buran.exe,Побайтный исторический файл статического Бурана; не включается в образы
+Buran/legacy/Buran-starwars-std-tape.rks.bin,0,reference,17.rks,Побайтный исторический файл статического Бурана; не включается в образы
+Buran/legacy/Buran-starwars-std-germanovitsh.rks,0,reference,*0_16D8_1627.rks,Побайтный исторический файл статического Бурана; не включается в образы
+Buran/legacy/Buran-ramfos.exe,0,reference,Buran..EXE,Побайтный исторический файл статического Бурана; не включается в образы
