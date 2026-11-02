@@ -11,29 +11,16 @@ but_Enter:  ; Если ком строка не пустая
             cp      l
             jp nz,  EnterCmdLine
 
-            ; Запомнить текущий диск в регистре b
-            ld      e, 0
-            call    bios_fileGetSetDrive
-            ld      b, a
-
             ; Подготовить имя файла A:NC.EXT
             ld      hl, aNcExt
             ld      de, vars.tempFileDescr; vars.tempFileDescr используется как буфер
             call    bios_fileNamePrepare
             ex      de, hl
 
-            ; Загрузить файл A:NC.EXT по адресу 0
-            ld      hl, vars.tempFileDescr
+            ; DOS сразу загружает NC.EXT в 0000h, не меняя метаданные файла.
             ld      de, 0
-            ld      c, 1
-            call    bios_fileGetSetAddr ; изменить адрес загрузки файла на de = 0
-            call    bios_fileLoad
+            call    bios_fileLoad2
             jp c,   Enter_stdExec
-
-            ; Переключить диск обратно
-            ;mov    a, b
-            ;mvi    e, 1
-            ;call   bios_fileGetSetDrive
 
             ; Получить имя выбранного файла
             call    getSelectedFile

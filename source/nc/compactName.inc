@@ -19,14 +19,7 @@ compactName:
 
             ; Копируем до пробела, но не более FILE_NAME_LENGTH букв
             ld      bc, FILE_NAME_LENGTH
-compactName_1:      ld  a, (hl)
-            cp      ' '
-            jp z,   compactName_2           
-            ld      (de),a
-            inc     hl
-            inc     de
-            dec     c
-            jp nz,  compactName_1
+            call    compactNamePart
 
 compactName_2:
             ; Пропущенные символы исходной строки
@@ -39,15 +32,7 @@ compactName_2:
 
             ; Копируем до пробела, но не более 3 букв
             ld      c, 3
-compactName_3:
-            ld      a, (hl)
-            cp      ' '
-            jp z,   compactName_4
-            ld      (de),a
-            inc     hl
-            inc     de
-            dec     c
-            jp nz,  compactName_3
+            call    compactNamePart
 
 compactName_4:
             ex      de, hl
@@ -75,4 +60,17 @@ compactName_5:
             pop   af
             pop   bc
             pop   hl
+            ret
+
+; C=длина поля, HL=источник, DE=назначение. B сохраняется для ADD HL,BC.
+; Выход HL/DE продвинуты, C=остаток; AF и флаги разрушаются.
+compactNamePart:
+            ld      a, (hl)
+            cp      ' '
+            ret z
+            ld      (de), a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  compactNamePart
             ret

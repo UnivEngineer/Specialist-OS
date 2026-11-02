@@ -31,20 +31,9 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
             and         005h
             jp z,       loc_D595
 
-            call        drawWindow2
-
-            ; Выводим предупреждение о защищённом файле
-            COLOR       COLOR_DIALOG_ERR
-            CENTER_LINE 24, 80h
             ld          hl, aFileProtected
-            call        bios_printString
-
-            ; Выводим vars.input
-            COLOR       COLOR_DIALOG
-            ld          hl, 5090h
-            ld          (bios_vars.cursorY), hl         
-            ld          hl, vars.input
-            call        printStringInv
+            ld          de, 03C80h      ; CENTER_LINE 24,80h
+            call        showFileErrorWindow
 
 loc_D581:   ; Цикл ожидания нажатия любой клавиши
             call        bios_keyScan

@@ -49,18 +49,10 @@ drawCursor_1:
 
             ; Если правая панель, сдвигаем курсор на пол экрана
 drawCursor_2:
-            ld    a, (state.activePanel)
-            and   a
-            jp z, drawCursor_3
-            ld    a, 18h
-drawCursor_3:
-            add   a, h
-            ld    h, a
+            call  activePanelPos
 
             ; Рисуем курсор (hl = адрес, b = ширина, c = высота)
-            call  inverseRect
-            ret
-
+            jp      inverseRect
 ; ---------------------------------------------------------------------------
 
     IF ENABLE_COLOR==0

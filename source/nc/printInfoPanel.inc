@@ -35,12 +35,8 @@ printInfoPanel:
             ld      de, 65504   ; Специалист-MX/MX2
 
             ; Печать "XXXX BYTES MEMORY"
-            COLOR   COLOR_INFONUMBER
-            ld      b, 20h
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesMemory
-            call    bios_printString
+            call    pip_printNumberSpace
 
             ; Положение курсора
             ld      hl, 0B3Ch
@@ -52,12 +48,8 @@ printInfoPanel:
             ex      hl, de
 
             ; Печать "XXXX BYTES FREE"
-            COLOR   COLOR_INFONUMBER
-            ld      b, 20h
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesFree
-            call    bios_printString
+            call    pip_printNumberSpace
 
             ; Положение курсора
             ld      hl, 0548h
@@ -74,17 +66,19 @@ printInfoPanel:
             ex      hl, de
 
             ; Печать "XXXX KB EXTENDED MEMORY"
-            COLOR   COLOR_INFONUMBER
-            ld      b, 20h
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesExtMemory
-            call    bios_printString
+            call    pip_printNumberSpace
 
             ; Получить размер диска
             ld      b, 3    ; режим
             call    bios_diskDriver             ; de = количество кластеров на диске, hl = адрес DISK_INFO
             ld      (vars.diskInfoPtr), hl   ; cохраним адрес структуры DISK_INFO
+
+            ; Печатаем фактический драйвер и для неформатированного диска.
+            push    de
+            call    pip_printDriver
+            pop     de
+            ld      hl, (vars.diskInfoPtr)
 
             ; Проверяем, распознан ли диск
             ld      bc, DISK_INFO.isValid
@@ -109,12 +103,8 @@ pip_printDiskInfo:
             push    de  ; в стеке - объем диска в кб
 
             ; Печать "XXXX KBYTES TOTAL ON DRIVE A:"
-            COLOR   COLOR_INFONUMBER
-            ld      b, 20h
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesTotalOnDrv
-            call    bios_printString
+            call    pip_printNumberSpace
             COLOR   COLOR_INFONUMBER
             call    printCurDrive
             COLOR   COLOR_INFOTEXT
@@ -153,12 +143,8 @@ pip_printDiskInfo:
             push    de  ; в стеке - объем свободного места в кб
 
             ; Печать "XXXX KBYTES FREE ON DRIVE A:"
-            COLOR   COLOR_INFONUMBER
-            ld      b, 20h
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesFreeOnDrv
-            call    bios_printString
+            call    pip_printNumberSpace
             COLOR   COLOR_INFONUMBER
             call    printCurDrive
 
@@ -177,12 +163,8 @@ pip_filesPresent:
             ld      d, 0
 
             ; Печать "XX FILES USE"
-            COLOR   COLOR_INFONUMBER
-            ld      b, 20h
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aFilesUse
-            call    bios_printString
+            call    pip_printNumberSpace
 
             pop     de  ; из стека - объем свободного места в кб
             pop     hl  ; из стека - объем диска в кб
@@ -190,12 +172,9 @@ pip_filesPresent:
             ex      hl, de
 
             ; Печать "XXXX BYTES IN"
-            COLOR   COLOR_INFONUMBER
             ld      b, 0    ; не дополнять пробелами
-            call    bios_printDecWord
-            COLOR   COLOR_INFOTEXT
             ld      hl, aKBytesIn
-            call    bios_printString
+            call    pip_printNumberText
 
             ; Положение курсора
             ld      hl, 2C80h
@@ -229,3 +208,63 @@ pip_printDiskError:
             jp      bios_printString
 
             ; ^^^ выход
+
+; Общий вывод числа и подписи вместо семи одинаковых последовательностей.
+; Вход DE=число, HL=подпись, B=дополнение; Space задаёт ведущие пробелы.
+; Выход HL=конец подписи, DE сохранён; AF/флаги и B разрушаются.
+pip_printNumberSpace:
+            ld      b, 20h
+pip_printNumberText:
+            COLOR   COLOR_INFONUMBER
+            call    bios_printDecWord
+            COLOR   COLOR_INFOTEXT
+            jp      bios_printString
+
+; B=0FFh: HL=две строки, B=технология. AF/BC/DE/HL разрушаются.
+; Строки ограничены контрактом ABI (22/30 символов).
+pip_printDriver:
+            ld      hl, 05B0h
+            call    setCursorPosPanel
+            COLOR   COLOR_INFOTEXT
+            ld      hl, aDiskDriver
+            call    bios_printString
+            ld      hl, 0
+            ld      b, 0FFh
+            call    bios_diskDriver
+            jp c,   pip_driverUnknown
+            ld      a, h
+            or      l
+            jp nz,  pip_driverName
+pip_driverUnknown:
+            ld      b, 0
+            ld      hl, aDriverUnknown
+pip_driverName:
+            COLOR   COLOR_INFONUMBER
+            call    bios_printString
+            inc     hl
+            push    hl
+            ld      hl, 05BCh
+            call    setCursorPosPanel
+            COLOR   COLOR_INFOTEXT
+            pop     hl
+            call    bios_printString
+
+            ; BIOS печати сохраняет BC: тип из того же запроса B=FFh ещё в B.
+            ld      hl, 05C8h
+            call    setCursorPosPanel
+            ld      hl, aDiskTechnology
+            call    bios_printString
+            ld      a, b
+            ld      hl, aTypeROM
+            cp      DISK_TECH_ROM
+            jp z,   pip_driverType
+            ld      hl, aTypeRAM
+            cp      DISK_TECH_RAM
+            jp z,   pip_driverType
+            ld      hl, aTypeFlash
+            cp      DISK_TECH_FLASH
+            jp z,   pip_driverType
+            ld      hl, aDriverUnknown
+pip_driverType:
+            COLOR   COLOR_INFONUMBER
+            jp      bios_printString

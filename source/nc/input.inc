@@ -60,7 +60,7 @@ input_bkspc:
             jp z,   input_loop
 
             ; Уменьшаем длину строки
-            dec     e
+            dec     de
 
             ; Стираем символ с экрана
             push    hl

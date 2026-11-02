@@ -185,19 +185,8 @@ copyFileExists:
             ld      hl, aFileAlreadyExists
 
 copyFileShowError:
-            push    hl
-            call    drawWindow2
-            COLOR   COLOR_DIALOG_ERR
-            CENTER_LINE 20, 80h
-            pop     hl
-            call    bios_printString
-
-            COLOR   COLOR_DIALOG
-            ; Имя выводится от левого края поля окна.
-            ld      hl, 05090h
-            ld      (bios_vars.cursorY), hl
-            ld      hl, vars.input
-            call    printStringInv
+            ld      de, 04280h          ; CENTER_LINE 20,80h
+            call    showFileErrorWindow
 
 copyFileWaitRelease:
             call    bios_keyScan
@@ -209,3 +198,21 @@ copyFileAnyKey:
             inc     a
             jp z,   copyFileAnyKey
             jp      mainReload
+
+; Общий баннер ошибок копирования/удаления и защиты файла.
+; Вход HL=сообщение, DE=координаты заголовка BIOS; имя в vars.input.
+; AF/BC/DE/HL и флаги разрушаются. Ожидание клавиши выполняет вызывающий код.
+showFileErrorWindow:
+            push    hl
+            push    de
+            call    drawWindow2
+            COLOR   COLOR_DIALOG_ERR
+            pop     hl
+            ld      (bios_vars.cursorY), hl
+            pop     hl
+            call    bios_printString
+            COLOR   COLOR_DIALOG
+            ld      hl, 05090h
+            ld      (bios_vars.cursorY), hl
+            ld      hl, vars.input
+            jp      printStringInv

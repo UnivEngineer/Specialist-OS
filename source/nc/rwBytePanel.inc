@@ -11,18 +11,16 @@
 ;----------------------------------------------------------------------------
 
 writeBytePanel:
-            push  bc
-            push  hl
-            push  af
-            ld    c, a
-            ld    a, (state.activePanel)
-            and   a
-            jp z, loc_D97E
-            inc   hl
-loc_D97E:   ld    (hl), c
-            pop   af
-            pop   hl
-            pop   bc
+            push    hl
+            push    af
+            ld      a, (state.activePanel)
+            or      a
+            jp z,   wbp_Store
+            inc     hl
+wbp_Store:
+            pop     af
+            ld      (hl), a
+            pop     hl
             ret
 
 ;----------------------------------------------------------------------------

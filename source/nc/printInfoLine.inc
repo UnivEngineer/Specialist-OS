@@ -45,16 +45,15 @@ printInfoLine:
         ; Устанавливаем hl на поле адреса загрузки
         pop     hl
         push    hl
-        ld      bc, FILE_INFO.loadAddress + 1 ; bc = смещение
+        ld      bc, FILE_INFO.loadAddress ; bc = смещение
         add     hl, bc
 
-        ; Читаем старший и младший байты адреса загрузки
-        ; и тут же печатаем их в HEX форме
-        ld      a, (hl)
-        call    bios_printHexByte
-        dec     hl
-        ld      a, (hl)
-        call    bios_printHexByte
+        ; Готовая печать слова BIOS; исходный описатель остаётся в стеке.
+        ld      e, (hl)
+        inc     hl
+        ld      d, (hl)
+        ex      de, hl
+        call    bios_printHexWord
 
         ; Смещаем курсор
 		LD 	    c, 18h  ; код символа "вправо"

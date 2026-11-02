@@ -6,19 +6,16 @@
 ;----------------------------------------------------------------------------
 
 inputForRename:
-            ; Буква диска показана в заголовке и в поле не редактируется.
-            ld      hl, 3D6Eh
-            ld      (bios_vars.cursorY), hl
-            ld      de, vars.input
-            jp      inputForCopyMoveName
-
+            ld      a, 1
+            jp      inputForFile
 inputForCopyMove:
-            ; Положение курсора
+            xor     a
+inputForFile:
             ld      hl, 3D6Eh
             ld      (bios_vars.cursorY), hl
-
-            ; Строка для редактирования   
             ld      de, vars.input
+            or      a
+            jp nz,  inputForCopyMoveName
 
             ; Отображается ли панель?
             ld      hl, state.panelA_info

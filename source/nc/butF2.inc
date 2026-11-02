@@ -5,29 +5,9 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-but_F2:     ; Временно устанавливаем state.activePanel=1
-            ld    a, (state.activePanel)
-            push  af
-            ld    a, 1
-            ld    (state.activePanel), a
-
-            ; Диалог
-            call  chooseDrive
-
-            ; Если выбрали устройство, то сохраняем его
-            cp    0FFh
-            jp z, loc_D5C3          
-            ld    (state.panelB_drive), a
-
-            ; А также делаем панель видимой и перемещаем курсор в начало
-            xor   a
-            ld    (state.panelB_info), a
-            ld    (state.panelB_curFile), a
-            ld    (state.panelB_firstFile), a
-
-loc_D5C3:   ; Восстанавливаем state.activePanel
-            pop   af
-            ld    (state.activePanel), a
+but_F2:
+            ld      c, 1
+            call    choosePanelDrive
 
             ; Перезагружаем и перерисовываем вторую панель
             call  loadAndPrintB
@@ -43,29 +23,9 @@ loc_D5C3:   ; Восстанавливаем state.activePanel
 
 ; ---------------------------------------------------------------------------
 
-but_F1:     ; Временно устанавливаем state.activePanel=2
-            ld    a, (state.activePanel)
-            push  af
-            ld    a, 0
-            ld    (state.activePanel), a
-
-            ; Диалог
-            call  chooseDrive
-
-            ; Если выбрали устройство, то сохраняем его
-            cp    0FFh
-            jp z, loc_D5F2
-            ld    (state.panelA_drive), a
-
-            ; А также делаем панель видимой и перемещаем курсор в начало
-            xor   a
-            ld    (state.panelA_info), a
-            ld    (state.panelA_curFile), a
-            ld    (state.panelA_firstFile), a
-
-loc_D5F2:   ; Восстанавливаем state.activePanel
-            pop   af
-            ld    (state.activePanel), a
+but_F1:
+            ld      c, 0
+            call    choosePanelDrive
 
             ; Перезагружаем и перерисовываем первую панель
             call  loadAndPrintA
@@ -82,6 +42,30 @@ saveStateAndReload:
             jp    mainDriveChanged
 
 ; ---------------------------------------------------------------------------
+
+; Общий диалог F1/F2. C=целевая панель; прежняя активная панель восстановлена.
+; AF/BC/DE/HL и флаги разрушаются. Отмена не изменяет параметры панели.
+choosePanelDrive:
+            ld      a, (state.activePanel)
+            push    af
+            ld      a, c
+            ld      (state.activePanel), a
+            call    chooseDrive
+            cp      0FFh
+            jp z,   cpd_Restore
+            ld      hl, state.panelA_drive
+            call    writeBytePanel
+            xor     a
+            ld      hl, state.panelA_info
+            call    writeBytePanel
+            ld      hl, state.panelA_curFile
+            call    writeBytePanel
+            ld      hl, state.panelA_firstFile
+            call    writeBytePanel
+cpd_Restore:
+            pop     af
+            ld      (state.activePanel), a
+            ret
 
 chooseDrive:
             call  buildDriveList
@@ -258,9 +242,7 @@ bdl_Next:
 
             pop   af
             ld    e, 1
-            call  bios_fileGetSetDrive
-            ret
-
+            jp      bios_fileGetSetDrive
 ;----------------------------------------------------------------------------
 ; Найти диск в компактном списке.
 ;

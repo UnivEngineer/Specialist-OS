@@ -79,8 +79,20 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
 ; Когда цвет включен, макрос вставляет такой код
     MACRO COLOR x
         IF ENABLE_COLOR
-            ld a, x
-            ld (IO_COLOR), a
+            IF x == COLOR_INFOTEXT
+                call ncColorText
+            ELSEIF x == COLOR_INFONUMBER
+                call ncColorNumber
+            ELSEIF x == COLOR_CMDLINE
+                call ncColorCommand
+            ELSEIF x == COLOR_DIALOG
+                call ncColorDialog
+            ELSEIF x == COLOR_FILE
+                call ncColorFile
+            ELSE
+                ld a, x
+                ld (IO_COLOR), a
+            ENDIF
         ENDIF
     ENDM
 
@@ -133,6 +145,7 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
     INCLUDE "tools.inc"
     INCLUDE "compactName.inc"
     INCLUDE "input.inc"
+    INCLUDE "colors.inc"
 
 ;---------------------------------------------------------------------------
 ; Константы и переменные
@@ -159,6 +172,12 @@ aKBytesFreeOnDrv:   DB 18h,"KB free  on drive ",0
 aFilesUse:          DB 18h,"files use ",0
 aKBytesIn:          DB 18h,"KB in ",0
 aVolumeLabel:       DB "Volume label: ",0
+aDiskDriver:        DB "Driver: ",0
+aDiskTechnology:    DB "Technology: ",0
+aTypeROM:           DB "ROM",0
+aTypeRAM:           DB "RAM",0
+aTypeFlash:         DB "Flash",0
+aDriverUnknown:     DB "n/a",0,0
 aDrive:             DB "Drive ",0
 aNotFormatted:      DB 18h,"is not formatted",0
 
@@ -314,18 +333,18 @@ copyDestCluster   DW    0
 copySourceDrive   DB    0
 copyDestDrive     DB    0
 diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
-cmdLine         BLOCK 59, 0FFh  ; командная строка
-cmdLineCtrl     DB    0FFh      ; контроль переполнения командной строки
 driveCount     DB    0         ; число установленных дисковых драйверов
 driveList      BLOCK 8, 0     ; номера дисков с установленным драйвером
-                BLOCK 4, 0FFh ; резерв внутри прежнего блока переменных
 
-input           BLOCK 21, 0FFh
-                BLOCK 11
+input           BLOCK P_INPUT_WIDTH + 2, 0FFh
 tempFileDescr   FILE_DESCRIPTOR
     ENDS
 
 vars    NC_VARIABLES = $        ; адрес начала блока переменнных
+; NC и исполнитель DOS используют строку по очереди. fileExec допускает
+; совпадение источника и CMD_LINE; собственный дубль на 60 байт не нужен.
+vars.cmdLine = CMD_LINE
+vars.cmdLineCtrl = CMD_LINE + 59
 varsEnd = vars + NC_VARIABLES   ; адрес конца  блока переменнных
 
 ; Адрес буфера для листинга директории (FILE_LIST_SIZE структур FILE_INFO + 1 = 577 байт)

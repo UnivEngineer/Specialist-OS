@@ -6,27 +6,17 @@
 ;----------------------------------------------------------------------------
 
 loadAndPrintB:
-            ; Времено меняем активную панель на правую
-            ld      a, (state.activePanel)
-            push    af
-            ld      a, 1
-            ld      (state.activePanel),a
-
-            ; Переходим к общему коду
-            ld      a, (state.panelB_info)
-            jp      loadAndPrint
-
-; ---------------------------------------------------------------------------
-
+            ld      c, 1
+            jp      loadAndPrintPanel
 loadAndPrintA:
-            ; Времено меняем активную панель на левую
+            ld      c, 0
+loadAndPrintPanel:
             ld      a, (state.activePanel)
             push    af
-            ld      a, 0
-            ld      (state.activePanel),a
-
-            ; Панель видима?
-            ld      a, (state.panelA_info)
+            ld      a, c
+            ld      (state.activePanel), a
+            ld      hl, state.panelA_info
+            call    readBytePanel
 
 loadAndPrint:
             and     a
@@ -49,6 +39,4 @@ loadAndPrint_3:   ; Восстанавливаем активную панель
             ; Загружаем список файлов
             ld      hl, state.panelA_drive
             call    readBytePanel
-            call    loadFiles   ; На входе a должен содержать номер накопителя
-            ret
-
+            jp      loadFiles
