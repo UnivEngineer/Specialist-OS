@@ -1,11 +1,11 @@
 ; Редактор памяти, ввод HEX, пауза и HEX-дамп
 ; Порядок включения задан главным .asm; см. README.md.
 
-txtSpaceQuestMark:  DB  "  ?",00H
-txtNewLine:         DB  0AH,0DH,00H
-txtHomeRight11Dot:  DB  0DH,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,2EH,00H
-txtFileQuestMark:   DB  "FILE? ",00H
-                    DB  0AH,"FILE: ",00H
+txtSpaceQuestMark: DB "  ?",00H
+txtNewLine:        DB 0AH,0DH,00H
+txtHomeRight11Dot: DB 0DH,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,18H,2EH,00H
+txtFileQuestMark:  DB "FILE? ",00H
+                   DB 0AH,"FILE: ",00H
 
 ;----------------------------------------------------------------------------
 ; Директива M - редактирование блока памяти
@@ -168,17 +168,17 @@ nibbleAsciiDigit:  ADD   A,30H         ; 48 '0'
 ;----------------------------------------------------------------------------
 
 txtRegisters:
-        DB    "A=",0
-        DB    "F=",0
-        DB    "B=",0
-        DB    "C=",0
-        DB    "D=",0
-        DB    "E=",0
-        DB    "H=",0
-        DB    "L=",0
-        DB    0AH,0DH," M(HL)=",0
-        DB    "PC=",0
-        DB    "SP=",0
+                   DB "A=",0
+                   DB "F=",0
+                   DB "B=",0
+                   DB "C=",0
+                   DB "D=",0
+                   DB "E=",0
+                   DB "H=",0
+                   DB "L=",0
+                   DB 0AH,0DH," M(HL)=",0
+                   DB "PC=",0
+                   DB "SP=",0
 
 ;----------------------------------------------------------------------------
 

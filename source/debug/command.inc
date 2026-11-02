@@ -7,7 +7,7 @@
 
         ; Рестарт без очистки экрана
 RestartNoCls:
-        LD    SP,0FFBFH
+        LD    SP,STACK_ADDR ; Системный стек снова вне переменных DEBUG.
         LD    HL,mon2_restart           ; установить обработчик ошибки магнитофона
         LD    (bios_vars.tapeError),HL  ; на рестарт монитора
         LD    HL,7EFFH    ; 32511

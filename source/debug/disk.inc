@@ -117,9 +117,9 @@ printDirectoryFull:   LD    HL, txtSmallDir
 ;----------------------------------------------------------------------------
 ; Русский текст в кодировке КОИ-7
 
-txtSmallDisk:   DB  0AH,0DH,"SMALL DISK!",00H
-txtSmallDir:    DB  0AH,0DH,"SMALL DIR!",00H
-txtNoFile:      DB  0AH,0DH,"NO FILE ",00H
+txtSmallDisk:   DB 0AH,0DH,"SMALL DISK!",00H
+txtSmallDir:    DB 0AH,0DH,"SMALL DIR!",00H
+txtNoFile:      DB 0AH,0DH,"NO FILE ",00H
 
 ;----------------------------------------------------------------------------
 ; Директива A - изменение адреса загрузки файла
