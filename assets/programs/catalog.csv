@@ -1,6 +1,6 @@
 File,LoadAddress,Status,OriginalName,Notes
 DL-red.COM,0xD000,included,DL-red.0xD000.COM,System ROM
-MON2.MON,0xC000,included,Mon2.0xC000.mon,Alternative Monitor-2 kernel
+Monitor2.mon,0xC000,included,Mon2.0xC000.mon,Alternative Monitor-2 kernel; previously MON2.MON
 Test-Col.COM,0xD400,included,Test-Col.54272.com,System ROM test
 Test-Fif.COM,0,included,Test-Fif.0.COM,System ROM test
 Test-Kb.COM,0,included,Test-Kb.0.com,System ROM test

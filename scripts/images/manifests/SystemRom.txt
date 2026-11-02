@@ -12,8 +12,8 @@ FONT.FNT         system-rom/FONT.FNT 0 RS
 FORMAT.BAT       system-rom/FORMAT.BAT                        0x8000 RS
 FORMAT.COM       ../bin/FORMAT.com                            0xF100 RS
 LAUNCH.COM       ../bin/LAUNCH.com                            0xF800 RS
-MON2.MON         programs/MON2.MON                            0xC000 RS
-MON2.COM         ../bin/mon2.com                              0xF100 RS
+MONITOR2.MON         programs/Monitor2.mon                            0xC000 RS
+DEBUG.COM         ../bin/Debug.com                              0xF100 RS
 MUSIC.RKS        games/Music.rks
 NC.EXT           system-rom/NC.EXT 0 RS
 ROM.COM          ../bin/Rom.com                               0xDE00 RS

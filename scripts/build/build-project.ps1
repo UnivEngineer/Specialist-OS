@@ -17,7 +17,7 @@ $components = @(
     @{ Directory = "source\\flash";  Source = "FlashFst"; Extension = "com"; Address = "0xDE00" },
     @{ Directory = "source\\flash";  Source = "FlashSys"; Extension = "com"; Address = "0xDC00" },
     @{ Directory = "source\\flash";  Source = "Rom";     Extension = "com"; Address = "0xDE00" },
-    @{ Directory = "source\\mon2";   Source = "mon2";    Extension = "com"; Address = "0xF100" },
+    @{ Directory = "source\\debug";   Source = "Debug";    Extension = "com"; Address = "0xF100" },
     @{ Directory = "source\\launch"; Source = "LAUNCH";  Extension = "com"; Address = "0xF800" },
     @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "sys"; Address = "0xC000" },
     @{ Directory = "source\\ramfos"; Source = "RAMRUN";  Extension = "com"; Address = "0xF800" },

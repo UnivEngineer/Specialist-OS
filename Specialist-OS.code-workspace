@@ -355,7 +355,7 @@
         }
       },
       {
-        "label": "build: mon2",
+        "label": "build: debug",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -365,12 +365,12 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "mon2",
+          "Debug",
           "com",
           "0xF100"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\source\\mon2"
+          "cwd": "${workspaceFolder}\\source\\debug"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
