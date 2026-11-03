@@ -32,7 +32,13 @@ LAYOUT_MECHANICAL = 2
     ORG 0
 entry:
     di
-    ld sp,08FDFh
+    ld hl,0
+    add hl,sp
+    ld (callerSP),hl
+    ld a,(bios_vars.koi7)
+    ld (callerKoi),a
+    xor a
+    ld (bios_vars.koi7),a       ; Имена файлов — KOI-8.
     ld hl,txtTitle
     call puts
 menu_drive:
@@ -41,9 +47,9 @@ menu_drive:
     call read_choice
     jp c,menu_drive
     or a
+    jp nz,drive_choice
     ld a,'A'
-    jp z,drive_value
-    ld a,(inputBuffer)
+drive_choice:
     and 0DFh
     cp 'Q'
     jp z,finished
@@ -112,9 +118,10 @@ write_budget:
     call read_choice
     jp c,write_budget
     or a
+    jp nz,budget_digit
     ld a,1
-    jp z,budget_value
-    ld a,(inputBuffer)
+    jp budget_value
+budget_digit:
     sub '0'
     cp 10
     jp nc,write_budget
@@ -135,7 +142,6 @@ file_size_menu:
     ld (v_fileSectors),a
     ld h,a
     ld l,0
-    dec hl
     ld (tmpDescriptor+FILE_DESCRIPTOR.size),hl
     ld a,h
     inc a
@@ -144,17 +150,20 @@ file_size_menu:
     jp prepare
 
 ; HL=строка десятичного размера; пустая строка = 8 КиБ.
-; Выход A=1..24, CF=ошибка; AF/BC/HL разрушены. Нет усечения/переполнения.
+; Выход A=1..24, CF=ошибка; AF/BC/DE/HL разрушены. Нет усечения/переполнения.
 parse_file_kib:
-    ld a,(hl)
-    or a
+    call bios_argNext
     ld a,DEFAULT_FILE_KIB
-    ret z
+    jp nc,parse_size_word
+    or a
+    ret
+parse_size_word:
+    ex de,hl
     ld c,0
 parse_size_digit:
     ld a,(hl)
-    or a
-    jp z,parse_size_done
+    cp ' '+1
+    jp c,parse_size_done
     sub '0'
     cp 10
     jp nc,bad_geometry
@@ -171,6 +180,8 @@ parse_size_digit:
     inc hl
     jp parse_size_digit
 parse_size_done:
+    call bios_argNext
+    jp nc,bad_geometry        ; Второе слово не является частью размера.
     ld a,c
     or a
     ret nz
@@ -323,7 +334,12 @@ done:
 exit_wait:
     call bios_getch
 finished:
-    jp bios_reboot
+    ld a,(callerKoi)
+    ld (bios_vars.koi7),a
+    ld hl,(callerSP)
+    ld sp,hl
+    or a
+    ret
 timer_error:
     ld hl,txtTimerError
     jp show_error
@@ -388,17 +404,23 @@ read_line:
 ; Выход A=символ/0, CF=1 при лишнем тексте; HL/BC/DE разрушаются.
 read_choice:
     call read_line
-    ld a,(hl)
+    call bios_argNext
+    jp nc,choice_word
+    xor a
+    ret
+choice_word:
+    ld a,b
+    dec a
+    jp nz,choice_bad
+    ld a,(de)
+    ld c,a
+    call bios_argNext
+    jp nc,choice_bad
+    ld a,c
     or a
-    ret z
-    inc hl
-    ld a,(hl)
-    or a
+    ret
+choice_bad:
     scf
-    ret nz
-    dec hl
-    ld a,(hl)
-    or a
     ret
 
 ; B=FFh возвращает описание, технологию и возможности самого драйвера.
@@ -757,6 +779,8 @@ rate_ready:
     jp puts
 
 inputBuffer:     BLOCK 17,0
+callerSP:        DW 0
+callerKoi:       DB 0
     INCLUDE "timer.inc"
 txtTitle:        DB 01Fh,"Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     IF PIT_HZ == 2000000

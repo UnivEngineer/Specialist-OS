@@ -11,17 +11,6 @@ but_Enter:  ; Если ком строка не пустая
             cp      l
             jp nz,  EnterCmdLine
 
-            ; Подготовить имя файла A:NC.EXT
-            ld      hl, aNcExt
-            ld      de, vars.tempFileDescr; vars.tempFileDescr используется как буфер
-            call    bios_fileNamePrepare
-            ex      de, hl
-
-            ; DOS сразу загружает NC.EXT в 0000h, не меняя метаданные файла.
-            ld      de, 0
-            call    bios_fileLoad2
-            jp c,   Enter_stdExec
-
             ; Получить имя выбранного файла
             call    getSelectedFile
             ld      a, (hl)
@@ -32,30 +21,26 @@ but_Enter:  ; Если ком строка не пустая
             ld      de, FILE_DESCRIPTOR.ext
             add     hl, de
 
-            ld      de, 0
+            ; Ассоциации — общий сервис DOS. Буфер временный, после кода NC.
+            ld      de, COPY_BUFFER
+            ld      bc, COPY_BUFFER_END - COPY_BUFFER
+            call    bios_fileAssociation
+            jp c,   Enter_stdExec
+            ex      de, hl
 
-            ; Сравниваем с расширеним из файла,
-            ; нечувствительно к регистру
-Enter_extLoop:
-            push    hl
-            ld      c, 3
-            call    bios_stricmp
-            jp nz,  Enter_nextExt
-
-            ; Найдено расширение
-            pop     hl
-            inc     de
-
-            ; Копирование имени выбранного файла в ком строку
 Enter_5:
+            ; Оставляем место для пробела, полного пути 8.3 и терминатора.
+            ld      b, 45
             ld      hl, vars.cmdLine
 Enter_4:
             ld      a, (de)
-            ld      (hl),a
+            ld      (hl), a
             cp      0Dh
             jp z,   Enter_3
             inc     a
             jp z,   Enter_3
+            dec     b
+            jp z,   Enter_stdExec
             inc     hl
             inc     de
             jp      Enter_4
@@ -139,19 +124,10 @@ EnterExec:
             call    saveState
 
             ; Запускаем файл
+            ; Текущий том команды — активная панель, а не последний прочитанный каталог.
+            ld      hl, state.panelA_drive
+            call    readBytePanel
+            ld      e, 1
+            call    bios_fileSelectDrive
             ld      hl, vars.cmdLine
             jp      bios_fileExec
-
-; ---------------------------------------------------------------------------
-
-Enter_nextExt:
-            pop     hl
-
-Enter_2:
-            ld      a, (de)
-            inc     de
-            cp      0Dh
-            jp z,   Enter_extLoop
-            inc     a
-            jp      nz, Enter_2
-            jp      Enter_stdExec

@@ -65,6 +65,9 @@ deleteFileInt:
             inc     hl
             ld      d, (hl)
 
+            ld a,d
+            or e
+            jp z,popDBH_ret
 deleteFileLoop:
             ld      h, d
             ld      l, e

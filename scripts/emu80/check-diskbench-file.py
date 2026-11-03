@@ -26,7 +26,7 @@ for name,drive,driver,choice,budget,size in scenarios:
         m.install_flash(driver)
     if drive=='b':
         # Независимая RAM-фикстура: не зависит от момента остановки холодного FORMAT.BAT.
-        m.write(0xF100,(ROOT/'bin/FORMAT.com').read_bytes())
+        m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes())
         m.write(0x8400,b'B R Y\r\0')
         m.write(0x8800,bytes.fromhex('CD00F1C30087'))
         m.stop_at(0x8700);m.call('regs_set',pc=0x8800,sp=0x8F00,de=0x8400);m.until(0x8700)
@@ -37,7 +37,7 @@ for name,drive,driver,choice,budget,size in scenarios:
         word=lambda n:struct.unpack_from('<H',before,n)[0]
         fs=word(14)*256;fe=fs+word(22)*256;rs=fs+(fe-fs)*before[16]
         data=rs+((word(17)*32+255)//256)*256
-    m.write(0,(ROOT/'bin/DISKBEN.com').read_bytes())
+    m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())
     for addr,value in [(0x1FFF,0xAA),(0x8100,0xBB),(0x8E00,0xCC)]:m.write(addr,bytes([value]))
     m.stop_at(s['menu_drive']);m.call('regs_set',pc=0);m.until(s['menu_drive'])
     m.stop_at(s['run_tests']);m.line(drive)

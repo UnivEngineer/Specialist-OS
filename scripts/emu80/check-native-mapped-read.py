@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 h = runpy.run_path(str(Path(__file__).with_name('check-mapped-read.py')))
 MappedBench, symbols = h['MappedBench'], h['symbols']
 
@@ -35,11 +36,12 @@ def main():
     m = MappedBench('http://127.0.0.1:19781/mcp')
     m.call('debug_break')
     ns = symbols(ROOT/'bin/NC.sym')
-    if m.read(0xE800,32) != (ROOT/'bin/NC.com').read_bytes()[:32]:
-        m.stop_at(0xE800);m.until(0xE800)
+    if m.read(SYSTEM['NC_LOAD_ADDR'],32) != (ROOT/'bin/NC.i80').read_bytes()[:32]:
+        m.stop_at(SYSTEM['NC_LOAD_ADDR']);m.until(SYSTEM['NC_LOAD_ADDR'])
     # До перезаписи DOS завершаем загрузку и фиксируем главный цикл NC.
     m.stop_at(ns['mainLoop'])
-    m.call('kbd_send', keys=['ESC'], action='tap', duration_ms=100)
+    if m.call('cpu_state')['registers']['pc']['dec'] != ns['mainLoop']:
+        m.call('kbd_send', keys=['ESC'], action='tap', duration_ms=100)
     m.until(ns['mainLoop'])
     m.screenshot(out/f'{args.layout}-boot.png')
     saved = m.read(0xC000,0x1A00)
@@ -76,7 +78,8 @@ def main():
             m.write(ds['v_diskInfo']+10,total.to_bytes(2,'little'))
             m.write(0xC864,ds['diskDriver'].to_bytes(2,'little'))
             cases = {}
-            for address in [0,1,0x2000,0x7F00,0x7F01,0x7FFF,0x8000,0x8001,0x8200,0x83FF,0x8C00]:
+            for address in [0,1,0x2000,0x7F00,0x7F01,0x7FFF,0x8000,0x8001,0x8200,0x83FF,0x8C00,
+                            0xEEFF,0xEF00,0xEF01,0xEFFF,0xF000,0xF100]:
                 counts = {}
                 for sector in sectors:
                     start = address-bool(address)

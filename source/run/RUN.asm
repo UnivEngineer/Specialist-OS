@@ -1,0 +1,887 @@
+; RUN.COM v2: общий запуск COM/EXE/RKS в MX/STD/MON/RAMFOS.
+; DE=аргументы, CF=ошибка до передачи. Регистры/флаги разрушаются.
+; Нижнее тело читается по месту; верхнее временно с 0000h.
+; MX/STD: переходник EA80h (верхняя нагрузка — 8C00h); MON/RF: AB00h.
+    INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/ramfos.inc"
+    MACRO GET_DE address
+        push hl
+        ld hl,(address)
+        ex de,hl
+        pop hl
+    ENDM
+    MACRO PUT_DE address
+        ex de,hl
+        ld (address),hl
+        ex de,hl
+    ENDM
+; После разбора команды первая страница кода больше не исполняется.
+; Она служит буфером только для суммы RKS, перенесённой в следующий сектор.
+sectorBuffer = SYSTEM_PROGRAM_ADDR
+    ORG SYSTEM_PROGRAM_ADDR
+start:
+    ld hl,0
+    add hl,sp
+    ld (callerSP),hl
+    ld a,(bios_vars.koi7)
+    ld (callerKoi),a
+    push de
+    ld e,2
+    call bios_fileGetSetDrive
+    ld (callerDrive),a
+    pop de
+    xor a
+    ld (bios_vars.koi7),a
+    ex de,hl
+    xor a
+    ld (appName),a
+    ld de,appArgs
+    ld b,127
+    ld a,0FFh
+    ld (mode),a
+; Один проход: ключи RUN удаляются, остальные аргументы сохраняют порядок.
+nextArgument:
+    push bc
+    push de
+    call bios_argNext
+    jp c,argumentsDone
+    push hl                 ; Курсор следующего слова, отдельно от его начала.
+    ex de,hl
+    ld a,(hl)
+    cp '-'
+    jp nz,argument
+    inc hl
+    ld de,keyMX
+    ld c,2
+    call option
+    ld a,0
+    jp z,shortOption
+    ld de,keyRF
+    call option
+    ld a,3
+    jp z,shortOption
+    ld de,keySTD
+    ld c,3
+    call option
+    ld a,1
+    jp z,longOption
+    ld de,keyMON
+    call option
+    jp nz,unknownOption
+    ld a,2
+    ld (mode),a
+    inc hl
+    inc hl
+    inc hl
+    ld a,(hl)
+    cp ':'
+    jp nz,endOption
+    inc hl
+    call coreName
+    jp c,argumentError
+    jp endOption
+shortOption:
+    ld (mode),a
+    inc hl
+    inc hl
+    jp endOption
+longOption:
+    ld (mode),a
+    inc hl
+    inc hl
+    inc hl
+endOption:
+    ld a,(hl)
+    cp ' '+1
+    jp c,argumentParsed
+    cp ' '
+    jp nz,argumentError
+argumentParsed:
+    pop hl
+    pop de
+    pop bc
+    jp nextArgument
+unknownOption:
+    dec hl
+    ld a,(appName)
+    or a
+    jp z,argumentError
+argument:
+    ld a,(appName)
+    or a
+    jp nz,programArgument
+filename:
+    push hl
+    ld de,appName
+    ld b,15
+nameCopy:
+    ld a,(hl)
+    cp ' '+1
+    jp c,nameDone
+    ld (de),a
+    inc hl
+    inc de
+    dec b
+    jp nz,nameCopy
+    pop hl
+    jp argumentError
+nameDone:
+    xor a
+    ld (de),a
+    pop hl
+    ld de,descriptor
+    call bios_fileNamePrepare
+    jp argumentParsed
+programArgument:
+    pop af                  ; Курсор восстановит проход копирования слова.
+    pop de
+    pop bc
+    ld a,b
+    cp 127
+    jp z,argsCopy
+    or a
+    jp z,usage
+    ld a,' '
+    ld (de),a
+    inc de
+    dec b
+argsCopy:
+    ld a,(hl)
+    cp ' '+1
+    jp c,nextArgument
+    inc b
+    dec b
+    jp z,usage
+    ld (de),a
+    inc hl
+    inc de
+    dec b
+    jp argsCopy
+argumentError:
+    pop hl
+    pop de
+    pop bc
+    jp usage
+argumentsDone:
+    pop de
+    pop bc
+    xor a
+    ld (de),a
+    ld a,(appName)
+    or a
+    jp z,usage
+    ld a,(descriptor+FILE_DESCRIPTOR.ext)
+    and 0DFh
+    cp 'R'
+    jp z,rksOpen
+    cp 'C'
+    jp z,nativeOpen
+    cp 'E'
+    jp nz,badImage
+nativeOpen:
+    ld hl,descriptor
+    ld a,16
+    call bios_imageOpen
+    jp c,badImage
+    ld (appEntry),hl
+    PUT_DE appLoad
+    ld h,b
+    ld l,c
+    ld (appSize),hl
+    ld a,(mode)
+    inc a
+    jp nz,ready
+    ld a,(descriptor+FILE_DESCRIPTOR.ext)
+    and 0DFh
+    cp 'C'
+    ld a,0
+    jp z,setDefault
+    jp chooseMode
+rksOpen:
+    ld hl,descriptor
+    ld a,4
+    call bios_imageOpen
+    jp c,badImage
+    ld (imageContext),hl
+    ld bc,28
+    add hl,bc
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    push hl
+    ld h,b
+    ld l,c
+    ld (fileSize),hl
+    pop hl
+    ex de,hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a
+    PUT_DE appLoad
+    PUT_DE appEntry
+    call bios_sub_hl_de
+    jp c,badImage
+    inc hl
+    ld (appSize),hl
+    ld a,h
+    or l
+    jp z,badImage
+    ld de,6
+    add hl,de
+    jp c,badImage
+    GET_DE fileSize
+    call bios_cmp_hl_de
+    jp nz,badImage
+    ; Нормализованный заголовок для общего секторного загрузчика DOS.
+    ld hl,(imageContext)
+    ld de,6
+    add hl,de
+    GET_DE appLoad
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    GET_DE appSize
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    ld a,(mode)
+    inc a
+    jp nz,ready
+    ld a,2
+setDefault:
+    ld (mode),a
+    jp ready
+chooseMode:
+    call bios_clearScreenOld
+    ld hl,txtTitle
+    call bios_printString
+    ld hl,appName
+    call bios_printString
+    ld hl,txtLoad
+    call bios_printString
+    ld hl,(appLoad)
+    call bios_printHexWord
+    ld hl,txtEntry
+    call bios_printString
+    ld hl,(appEntry)
+    call bios_printHexWord
+    ld hl,txtModes
+    call bios_printString
+modeKey:
+    call bios_getch
+    sub '1'
+    cp 5
+    jp nc,modeKey
+    cp 4
+    jp z,customMode
+    ld hl,modeMap
+    ld e,a
+    ld d,0
+    add hl,de
+    ld a,(hl)
+    jp setDefault
+customMode:
+    ld hl,txtCustom
+    call bios_printString
+    ld hl,coreInput
+    ld de,coreInput+21
+    call bios_input
+    ld hl,coreInput
+    call coreName
+    jp c,usage
+    ld a,2
+    jp setDefault
+ready:
+    ld hl,(appLoad)
+    GET_DE appSize
+    add hl,de
+    jp c,badImage
+    ld a,(mode)
+    cp 3
+    jp z,rfRange
+    ld de,bios_vars
+    ld a,(appLoad+1)
+    cp 0C0h
+    jp c,rangeEnd
+    ld a,(mode)
+    or a
+    jp nz,badImage
+    ld a,(appLoad+1)
+    cp SYSTEM_PROGRAM_ADDR >> 8
+    jp c,badImage
+    ld de,SYSTEM_FLASH_ADDR
+    jp rangeEnd
+rfRange:
+    ld de,bios_vars
+    ld a,(appLoad+1)
+    cp 0D3h
+    jp c,rangeEnd
+    ld de,RAMFOS_HIGH_ADDR
+rangeEnd:
+    call bios_cmp_hl_de
+    jp c,rangeOK
+    jp nz,badImage
+rangeOK:
+    ; Нижняя программа читается сразу по месту. Верхняя может затереть
+    ; RUN или DOS, поэтому только её тело временно занимает нижнее ОЗУ.
+    GET_DE appLoad
+    xor a
+    ld (staged),a
+    ld a,d
+    cp 0C0h
+    jp c,loadBody
+    ld a,1
+    ld (staged),a
+    ld de,0
+loadBody:
+    call bios_fileLoad
+    jp c,badImage
+    ld a,(descriptor+FILE_DESCRIPTOR.ext)
+    and 0DFh
+    cp 'R'
+    jp nz,bodyVerified
+    call rksChecksum
+    jp c,badImage
+bodyVerified:
+    ld a,(mode)
+    cp 2
+    jp c,install
+    ld hl,corePath
+    cp 3
+    jp nz,openCore
+    ld hl,rfPath
+openCore:
+    ld de,descriptor
+    call bios_fileNamePrepare
+    ld hl,descriptor
+    call bios_fileLoadInfo
+    jp c,notFound
+    ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
+    ld a,h
+    or l
+    jp nz,badImage
+    ld hl,(descriptor+FILE_DESCRIPTOR.size)
+    ld de,01000h
+    ld a,(mode)
+    cp 3
+    jp nz,coreSize
+    ld de,RAMFOS_IMAGE_SIZE
+coreSize:
+    call bios_cmp_hl_de
+    jp nz,badImage
+    xor a
+    ld (IO_COLOR),a
+    call bios_clearScreenOld
+    ld hl,descriptor
+    ld de,RAMFOS_TEMP
+    call bios_fileLoad2
+    jp c,notFound
+    ld a,(mode)
+    cp 3
+    jp z,install
+    ; Два известных пролога Monitor-2: оригинальный JMP и старый POP B.
+    ld hl,RAMFOS_TEMP+4
+    ld a,(RAMFOS_TEMP)
+    cp 0C1h
+    jp z,monitorOld
+    cp 0C3h
+    jp nz,badImage
+    dec hl
+monitorOld:
+    ld a,(hl)
+    cp 031h
+    jp nz,badImage
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    PUT_DE monSP
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+    ; После LXI SP идут MVI A,03h; STA F7FAh; PUSH B; JMP init.
+    inc hl
+    inc hl
+    ld a,(hl)
+    cp 0C3h
+    jp nz,badImage
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    PUT_DE monInit
+install:
+    ; Исходный том восстанавливается до последнего копирования тела/ядра.
+    ld a,(callerDrive)
+    ld e,1
+    call bios_fileGetSetDrive
+    ld hl,SYSTEM_PROGRAM_ADDR+080h
+    ld de,SYSTEM_PROGRAM_ADDR
+    ld bc,STACK_ADDR
+    ld a,(staged)
+    or a
+    jp z,bridgeLowImage
+    ld hl,RAMFOS_BRIDGE
+    ld de,RAMFOS_ARGS
+    ld bc,RAMFOS_BRIDGE_SP
+bridgeLowImage:
+    ld (bridgeBase),hl
+    PUT_DE argAddress
+    ld h,b
+    ld l,c
+    ld (bridgeTemporarySP+1-bridge+bridgeImage),hl
+    ld a,(mode)
+    cp 2
+    jp c,prepareBridge
+    ld hl,RAMFOS_VIDEO_BRIDGE
+    ld (bridgeBase),hl
+    ld hl,RAMFOS_VIDEO_SP
+    ld (bridgeTemporarySP+1-bridge+bridgeImage),hl
+prepareBridge:
+    ld hl,0
+    ld (bridgeSource+1-bridge+bridgeImage),hl
+    ld a,(staged)
+    or a
+    jp z,bridgeNoBodyCopy
+    ld hl,(appSize)
+bridgeNoBodyCopy:
+    ld (bridgeSize+1-bridge+bridgeImage),hl
+    ld hl,(appLoad)
+    ld (bridgeLoad+1-bridge+bridgeImage),hl
+    ld hl,(appEntry)
+    ld (bridgeEntry+1-bridge+bridgeImage),hl
+    ld (monAfterInitEntry+1),hl
+    ld hl,(callerSP)
+    ld (bridgeCallerSP+1-bridge+bridgeImage),hl
+    ld (bridgeGameSP+1-bridge+bridgeImage),hl
+    ld hl,(monSP)
+    ld (monAfterInitSP+1),hl
+    ld hl,(monInit)
+    ld (bridgeInit+1-bridge+bridgeImage),hl
+    ld a,(mode)
+    ld (bridgeMode-bridge+bridgeImage),a
+    ld a,(callerKoi)
+    ld (bridgeRestoreKoi+1-bridge+bridgeImage),a
+    ld hl,(argAddress)
+    ld (bridgeArguments+1-bridge+bridgeImage),hl
+    ld (monAfterInitArgs+1),hl
+    ; Все внутренние адреса переходника корректируются один раз при установке.
+    ld hl,(bridgeBase)
+    ld de,bridge
+    call bios_sub_hl_de
+    ld (bridgeDelta),hl
+    ld hl,bridgeRelocations
+    ld a,bridgeRelocationsEnd-bridgeRelocations
+bridgeRelocate:
+    ld e,(hl)
+    ld d,0
+    push hl
+    ld hl,bridgeImage
+    add hl,de
+    push hl
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    ld hl,(bridgeDelta)
+    add hl,bc
+    ex de,hl
+    pop hl
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    pop hl
+    inc hl
+    dec a
+    jp nz,bridgeRelocate
+    ; MON не возвращается в экранный код: его инициализация стирает экран.
+    ld a,(mode)
+    cp 2
+    jp c,copyBridge
+    xor a
+    ld (IO_COLOR),a
+    ld hl,coldStub
+    ld de,SYSTEM_PROGRAM_ADDR+080h
+    ld bc,monAfterInitEnd-coldStub
+    call copyBytes
+copyBridge:
+    ld hl,appArgs
+    GET_DE argAddress
+    ld bc,128
+    call copyBytes
+    ld hl,bridgeImage
+    GET_DE bridgeBase
+    ld bc,bridgeEnd-bridge
+    call copyBytes
+    ld hl,(bridgeBase)
+    jp (hl)
+
+; Хвост RKS не записывается в программу. Если сумма пересекает сектор,
+; недостающие байты читаются в собственный буфер RUN, без видеопамяти.
+rksChecksum:
+    push bc
+    ld a,l
+    or a
+    call z,rksNextSector
+    jp c,rksChecksumError
+    ld a,(hl)
+    inc hl
+    push af
+    ld a,l
+    or a
+    call z,rksNextSector
+    jp c,rksChecksumByteError
+    ld d,(hl)
+    pop af
+    ld e,a
+    pop bc
+    ld h,b
+    ld l,c
+    call bios_cmp_hl_de
+    ret z
+    scf
+    ret
+rksChecksumByteError:
+    pop af
+rksChecksumError:
+    pop bc
+    scf
+    ret
+rksNextSector:
+    ld hl,sectorBuffer
+    ld bc,0201h
+    call bios_fileTransfer
+    ld hl,sectorBuffer
+    ret
+coldStub:
+    xor a
+    ld (IO_PAGE_ROM-0800h),a
+    jp 0
+coldStubEnd:
+; Monitor-2 может очистить и экранный код, и весь экранный стек.
+; После его инициализации продолжаем из EAxx, затем ставим стек игры.
+monAfterInitSP:
+    ld sp,0
+    ld hl,SYSTEM_PROGRAM_ADDR+080h
+    push hl
+monAfterInitArgs:
+    ld de,0
+monAfterInitEntry:
+    ld hl,0
+    jp (hl)
+monAfterInitEnd:
+option:
+    push hl
+    call bios_stricmp
+    pop hl
+    ret
+; HL — имя до пробела/терминатора, сохраняется позиция разделителя.
+coreName:
+    ld de,corePath
+    push hl
+    inc hl
+    ld a,(hl)
+    cp ':'
+    pop hl
+    jp z,coreCopyStart
+    ld a,'A'
+    ld (de),a
+    inc de
+    ld a,':'
+    ld (de),a
+    inc de
+coreCopyStart:
+    ld b,18
+    ld c,0
+coreCopy:
+    ld a,(hl)
+    cp ' '+1
+    jp c,coreEnd
+    cp '.'
+    jp nz,coreChar
+    inc c
+coreChar:
+    ld (de),a
+    inc de
+    inc hl
+    dec b
+    jp nz,coreCopy
+    scf
+    ret
+coreEnd:
+    ld a,b
+    cp 18
+    jp z,coreBad
+    ld a,c
+    or a
+    jp nz,coreTerm
+    push hl
+    ld hl,monSuffix
+    ld bc,4
+    call copyBytes
+    pop hl
+coreTerm:
+    xor a
+    ld (de),a
+    ret
+coreBad:
+    scf
+    ret
+copyBytes:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    dec bc
+    ld a,b
+    or c
+    jp nz,copyBytes
+    ret
+usage:
+    ld hl,txtUsage
+    jp error
+notFound:
+    ld hl,txtNotFound
+    jp error
+badImage:
+    ld hl,txtBad
+error:
+    ld a,COLOR_BIOS
+    ld (IO_COLOR),a
+    call bios_printString
+    ld a,(callerKoi)
+    ld (bios_vars.koi7),a
+    scf
+    ret
+
+bridgeImage:
+    DISP RAMFOS_BRIDGE
+bridge:
+bridgeTemporarySP:
+    ld sp,RAMFOS_BRIDGE_SP
+bridgeSource:
+    ld hl,0
+bridgeSize:
+    ld bc,0
+bridgeLoad:
+    ld de,0
+    ld a,b
+    or c
+bridgeReloc0:
+    call nz,bridgeMove
+bridgeReloc1:
+    ld a,(bridgeMode)
+    cp 2
+bridgeReloc2:
+    jp c,bridgeNative
+    ld hl,RAMFOS_TEMP
+    ld de,0C000h
+    ld bc,01000h
+    cp 3
+bridgeReloc3:
+    jp nz,bridgeCore
+    ld bc,RAMFOS_CORE_SIZE
+bridgeCore:
+bridgeReloc4:
+    call bridgeMove
+bridgeReloc5:
+    ld a,(bridgeMode)
+    cp 3
+bridgeReloc6:
+    jp nz,bridgeSTD
+    ld hl,RAMFOS_TEMP+RAMFOS_CORE_SIZE
+    ld de,RAMFOS_HIGH_ADDR
+    ld bc,RAMFOS_HIGH_SIZE
+bridgeReloc7:
+    call bridgeMove
+bridgeReloc8:
+    jp bridgeEntry
+bridgeNative:
+    or a
+bridgeReloc9:
+    jp z,bridgeStart
+    ld a,0FFh
+    ld (bios_vars.koi7),a
+bridgeSTD:
+    ld a,0B6h
+    ld (IO_TIMER_MODE),a
+    ld a,076h
+    ld (IO_TIMER_MODE),a
+    ld a,036h
+    ld (IO_TIMER_MODE),a
+    ld a,00Ah
+    ld (IO_KEYB_MODE),a
+    ld a,3
+    ld (IO_PAGE_STD),a
+    ld (IO_COLOR-07FEh),a
+    ld a,082h
+    ld (0F803h),a
+    xor a
+    ld (0F802h),a
+bridgeReloc10:
+    ld a,(bridgeMode)
+    cp 2
+bridgeReloc11:
+    jp nz,bridgeStart
+bridgeMonSP:
+    ld sp,STACK_ADDR
+    ld hl,SYSTEM_PROGRAM_ADDR+080h+coldStubEnd-coldStub
+    push hl
+bridgeInit:
+    jp 0C444h
+bridgeStart:
+bridgeGameSP:
+    ld sp,0
+bridgeReloc12:
+    ld hl,bridgeReturn
+    push hl
+bridgeEntry:
+    ld hl,0
+bridgeArguments:
+    ld de,RAMFOS_ARGS
+bridgeReloc13:
+    ld a,(bridgeMode)
+    cp 3
+    jp z,RAMFOS_START
+    jp (hl)
+bridgeReturn:
+bridgeReloc14:
+    ld a,(bridgeMode)
+    or a
+bridgeReloc15:
+    jp z,bridgeReturnedMX
+    ld (IO_PAGE_RAM-0800h),a
+bridgeReturnedMX:
+bridgeCallerSP:
+    ld sp,0
+bridgeRestoreKoi:
+    ld a,0
+    ld (bios_vars.koi7),a
+    ld a,COLOR_BIOS
+    ld (IO_COLOR),a
+    or a
+    ret
+; Неперекрывающиеся диапазоны: тело 0000h -> верхнее ОЗУ,
+; ядро 9000h -> C000h/F800h. BC>0; AF/BC/DE/HL разрушаются.
+; Свой копировальщик, без вызовов уже заменяемого DOS.
+; Полный блок: 135 тактов/4 байта, четыре чтения и четыре записи.
+bridgeMove:
+    ld a,c
+    and 3
+bridgeReloc16:
+    jp z,bridgeCopyBlocks
+bridgeCopyByte:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    dec bc
+    ld a,c
+    and 3
+bridgeReloc17:
+    jp nz,bridgeCopyByte
+    ld a,b
+    or c
+    ret z
+bridgeCopyBlocks:
+    DUP 4
+        ld a,(hl)
+        ld (de),a
+        inc hl
+        inc de
+    EDUP
+    dec bc
+    dec bc
+    dec bc
+    dec bc
+    ld a,b
+    or c
+bridgeReloc18:
+    jp nz,bridgeCopyBlocks
+    ret
+bridgeMode: DB 0
+bridgeEnd:
+    ENT
+    ASSERT bridgeEnd-bridge <= 0100h
+
+bridgeRelocations:
+    DB bridgeReloc0+1-bridge
+    DB bridgeReloc1+1-bridge
+    DB bridgeReloc2+1-bridge
+    DB bridgeReloc3+1-bridge
+    DB bridgeReloc4+1-bridge
+    DB bridgeReloc5+1-bridge
+    DB bridgeReloc6+1-bridge
+    DB bridgeReloc7+1-bridge
+    DB bridgeReloc8+1-bridge
+    DB bridgeReloc9+1-bridge
+    DB bridgeReloc10+1-bridge
+    DB bridgeReloc11+1-bridge
+    DB bridgeReloc12+1-bridge
+    DB bridgeReloc13+1-bridge
+    DB bridgeReloc14+1-bridge
+    DB bridgeReloc15+1-bridge
+    DB bridgeReloc16+1-bridge
+    DB bridgeReloc17+1-bridge
+    DB bridgeReloc18+1-bridge
+bridgeRelocationsEnd:
+
+keyMX: DB "MX"
+keyRF: DB "RF"
+keySTD: DB "STD"
+keyMON: DB "MON"
+modeMap: DB 0,1,3,2
+monSuffix: DB ".MON"
+rfPath: DB "A:RAMFOS.MON",0
+corePath: DB "A:MONITOR2.MON",0
+    BLOCK 18,0
+coreInput: BLOCK 24,0
+appName: BLOCK 16,0
+appArgs: BLOCK 128,0
+mode: DB 0FFh
+callerSP: DW 0
+appLoad: DW 0
+appEntry: DW 0
+appSize: DW 0
+imageContext: DW 0
+bridgeBase: DW 0
+bridgeDelta: DW 0
+argAddress: DW 0
+staged: DB 0
+callerDrive: DB 0
+callerKoi: DB 0
+fileSize: DW 0
+monSP: DW 07FFFh
+monInit: DW 0C444h
+descriptor: BLOCK FILE_DESCR_SIZE,0
+txtTitle: DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
+txtLoad: DB ": LOAD ADDRESS ",0
+txtEntry: DB ", RUN ADDRESS ",0
+txtModes: DB 0Ah,"PLEASE CHOOSE THE RUNTIME MODE:",0Ah
+    DB "1 - MX:  MX  HARDWARE, MXOS2 CORE",0Ah
+    DB "2 - STD: STD HARDWARE, MXOS2 CORE",0Ah
+    DB "3 - RF:  MX  HARDWARE, RAMFOS CORE",0Ah
+    DB "4 - MON: STD HARDWARE, MONITOR-2 CORE",0Ah
+    DB "5 - MON:CUSTOM: STD HARDWARE, CUSTOM CORE",0Ah,"> ",0
+txtCustom: DB 0Ah,"MONITOR FILE: ",0
+txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]]",0
+txtNotFound: DB 0Ah,"FILE NOT FOUND",0
+txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
+    ASSERT loadBody >= sectorBuffer + 0100h
+    ASSERT rksChecksum >= sectorBuffer + 0100h
+    ASSERT install >= sectorBuffer + 0100h
+    ASSERT copyBytes >= sectorBuffer + 0100h
+    ASSERT error >= sectorBuffer + 0100h
+    ASSERT_DONT_FIT SYSTEM_FLASH_ADDR
+    END

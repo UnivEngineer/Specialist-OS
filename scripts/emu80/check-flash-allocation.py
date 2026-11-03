@@ -7,6 +7,7 @@ import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 helpers = runpy.run_path(str(Path(__file__).with_name('check-copy.py')))
 Machine, get_file = helpers['FileMachine'], helpers['get_file']
 
@@ -36,10 +37,10 @@ def main():
     m.call('debug_break')
     m.call('bp_clear')
     ncstate = symbols(ROOT / 'bin/NC.lst')['state']
-    nc = (ROOT / 'bin/NC.com').read_bytes()[:ncstate - 0xE800]
+    nc = (ROOT / 'bin/NC.i80').read_bytes()[:ncstate - SYSTEM['NC_LOAD_ADDR']]
     for _ in range(180):
         m.call('emu_run_for', ms=500)
-        if m.read(0xE800, len(nc)) == nc:
+        if m.read(SYSTEM['NC_LOAD_ADDR'], len(nc)) == nc:
             break
     else:
         raise RuntimeError('NC не загружен')
@@ -63,13 +64,13 @@ def main():
     payload = bytes((i * 71 + i // 256) & 255 for i in range(12 * 256))
     desc = bytearray(32)
     desc[:11] = name
-    struct.pack_into('<H', desc, 18, 0x4000)
-    struct.pack_into('<I', desc, 28, len(payload) - 1)
+    # Адрес буфера передаётся в DE, поле даты доступа остаётся нулевым.
+    struct.pack_into('<I', desc, 28, len(payload))
     install('FlashFst')
     m.write(0x7000, desc)
     m.write(0x4000, payload)
     before = m.call('cpu_state')['cpu_ticks']
-    result = m.subroutine(0xC845, hl=0x7000)
+    result = m.subroutine(0xC845, hl=0x7000, de=0x4000)
     assert not result['flags']['C'], result
     create_ticks = result['cpu_ticks'] - before
     entry, actual = get_file(image.read_bytes(), name)

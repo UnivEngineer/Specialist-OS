@@ -42,23 +42,7 @@ printInfoLine:
         ld      hl, (P_FILE_DATA_X << 8) + P_FILE_DATA_Y
         call    setCursorPosPanel
 
-        ; Устанавливаем hl на поле адреса загрузки
-        pop     hl
-        push    hl
-        ld      bc, FILE_INFO.loadAddress ; bc = смещение
-        add     hl, bc
-
-        ; Готовая печать слова BIOS; исходный описатель остаётся в стеке.
-        ld      e, (hl)
-        inc     hl
-        ld      d, (hl)
-        ex      de, hl
-        call    bios_printHexWord
-
-        ; Смещаем курсор
-		LD 	    c, 18h  ; код символа "вправо"
-		call	bios_printChar
-
+        ; Адрес не является метаданными FAT. Печатать только точный размер.
         ; Устанавливаем hl на поле размера файла
         pop     hl
         ld      bc, FILE_INFO.size ; bc = смещение
@@ -68,6 +52,5 @@ printInfoLine:
         ld      e, (hl)
         inc     hl
         ld      d, (hl)
-        inc     de          ; в дескрипторе файла хранится размер-1
         ld      b, 20h
         jp      bios_printDecWord

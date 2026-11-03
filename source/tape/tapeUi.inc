@@ -10,6 +10,8 @@ TAPE_BUFFER_END = 08FFFh
 
 Start:
 tapeMenu:
+            xor     a
+            ld      (bios_vars.koi7), a    ; Имена файлов — KOI-8.
             ; После магнитофонной операции экран и состояние курсора могут
             ; остаться произвольными. Меню всегда начинает с чистого экрана.
             ld      hl, 0
@@ -104,17 +106,18 @@ tapeReadNameStore:
             jp nc,  tapeTooLarge
 
             ld      (v_fileSize), hl
+            ld de,7
+            add hl,de
             ld      (v_fileDescr + FILE_DESCRIPTOR.size), hl
             xor     a
             ld      (v_fileDescr + FILE_DESCRIPTOR.size + 2), a
             ld      (v_fileDescr + FILE_DESCRIPTOR.size + 3), a
-            ld      (v_fileDescr + FILE_DESCRIPTOR.loadAddress), a
-            ld      (v_fileDescr + FILE_DESCRIPTOR.loadAddress + 1), a
 
             ; Прочитать size+1 байт в нижнюю память.
-            inc     hl
-            ex      de, hl
-            ld      hl, 0
+            ld hl,(v_fileSize)
+            inc hl
+            ex de,hl
+            ld hl,4
 tapeReadData:
             ld      a, 8
             call    tapeRead
@@ -129,10 +132,12 @@ tapeReadData:
             call    tapeReadWordA
             ld      (v_tapeCRC), hl
 
-            ld      hl, (v_fileSize)
-            ex      de, hl
-            ld      hl, 0
-            call    bios_calcCS
+            ld hl,(v_fileSize)
+            ld de,4
+            add hl,de
+            ex de,hl
+            ld hl,4
+            call bios_calcCS
             ld      hl, (v_tapeCRC)
             ld      a, b
             cp      h
@@ -141,18 +146,35 @@ tapeReadData:
             cp      l
             jp nz,  tapeBadCRC
 
-            ; Создать файл из буфера 0000h и восстановить исходный адрес
-            ; загрузки, записанный на ленте.
-            ld      hl, v_fileDescr
-            call    bios_fileCreate
-            jp c,   tapeCreateError
-
-            ld      hl, (v_tapeLoadAddr)
-            ex      de, hl
-            ld      hl, v_fileDescr
-            ld      c, 1
-            call    bios_fileGetSetAddr
-            jp c,   tapeCreateError
+            ; Сохранить стандартный RKS вместе с адресами и суммой.
+            ld hl,(v_tapeLoadAddr)
+            ld (0),hl
+            push hl
+            ld hl,(v_fileSize)
+            ex de,hl
+            pop hl
+            add hl,de
+            ld (2),hl
+            ld hl,(v_fileSize)
+            ld de,5
+            add hl,de
+            push hl
+            ld hl,(v_tapeCRC)
+            ex de,hl
+            pop hl
+            ld (hl),e
+            inc hl
+            ld (hl),d
+            ld hl,v_fileDescr+8
+            ld (hl),'R'
+            inc hl
+            ld (hl),'K'
+            inc hl
+            ld (hl),'S'
+            ld hl,v_fileDescr
+            ld de,0
+            call bios_fileCreate
+            jp c,tapeCreateError
 
             ld      hl, txtLoadComplete
             jp      tapeMessageAndMenu
@@ -177,7 +199,7 @@ tapeSaveFile:
             call    bios_fileLoadInfo
             jp c,   tapeFileNotFound
 
-            ; Текущая реализация DOS хранит размер как size-1.
+            ; В каталоге хранится точная длина контейнера RKS.
             ld      hl, v_fileDescr + FILE_DESCRIPTOR.size
             ld      e, (hl)
             inc     hl
@@ -193,7 +215,7 @@ tapeSaveFile:
             ex      de, hl
             ld      (v_fileSize), hl
 
-            ld      hl, (v_fileDescr + FILE_DESCRIPTOR.loadAddress)
+            ld      hl,0
             ld      (v_tapeLoadAddr), hl
 
             ; Загрузить файл в буфер 0000h.
@@ -202,13 +224,48 @@ tapeSaveFile:
             call    bios_fileLoad2
             jp c,   tapeFileNotFound
 
+            ld hl,(0)
+            ld (v_tapeLoadAddr),hl
+            ex de,hl
+            ld hl,(2)
+            call bios_sub_hl_de
+            jp c,tapeBadCRC
+            ld (v_fileSize),hl
+            ld de,7
+            add hl,de
+            push hl
+            ld hl,(v_fileDescr+FILE_DESCRIPTOR.size)
+            ex de,hl
+            pop hl
+            call bios_cmp_hl_de
+            jp nz,tapeBadCRC
+            ld hl,(v_fileSize)
+            ld de,5
+            add hl,de
+            ld b,(hl)
+            inc hl
+            ld c,(hl)
+            ld h,c
+            ld l,b
+            ld (v_tapeCRC),hl
+            ld hl,(v_fileSize)
+            ld de,5
+            add hl,de
+            ex de,hl
+            ld hl,4
+            ld bc,0
+            call bios_memcpy_bc_hl
             ld      hl, (v_fileSize)
             ex      de, hl
             ld      hl, 0
             call    bios_calcCS
-            ld      h, b
-            ld      l, c
-            ld      (v_tapeCRC), hl
+            ld      hl,(v_tapeCRC)
+            ld      a,h
+            cp      b
+            jp nz,  tapeBadCRC
+            ld      a,l
+            cp      c
+            jp nz,  tapeBadCRC
 
             ld      hl, txtSaving
             call    bios_printString

@@ -18,7 +18,7 @@ def main():
     m=Bench('http://127.0.0.1:19781/mcp')
     m.call('debug_break');m.stop_at(0x8100)
     s=symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
-    binary=(ROOT/'bin/DISKBEN.com').read_bytes()
+    binary=(ROOT/'bin/DISKBEN.i80').read_bytes()
     m.write(0,binary)
     matrix=[]
     for technology,drive,size,expected in [('F',0,256,1),('O',0,256,1),

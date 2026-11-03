@@ -33,6 +33,14 @@
       ]
     },
     {
+      "address": 49748,
+      "size": 12,
+      "files": [
+        "keybModes.inc"
+      ],
+      "abi": "bios_setKeybMode82"
+    },
+    {
       "address": 49975,
       "size": 3,
       "target": "getch",
@@ -76,8 +84,16 @@
       "target": "t_tapeReadError"
     },
     {
+      "address": 50336,
+      "size": 96,
+      "files": [
+        "keyTable.inc"
+      ],
+      "abi": "bios_keybTable"
+    },
+    {
       "address": 51200,
-      "size": 168,
+      "size": 201,
       "files": [
         "jmps_c800.inc"
       ],
@@ -221,13 +237,6 @@
       "files": [
         "initVars.inc"
       ]
-    },
-    {
-      "name": "keyTable",
-      "files": [
-        "keyTable.inc"
-      ],
-      "same_page": true
     },
     {
       "name": "printer",
@@ -512,6 +521,54 @@
       "name": "pitTimer",
       "files": [
         "pitTimer.inc"
+      ]
+    },
+    {
+      "name": "imageLoader",
+      "files": [
+        "imageLoader.inc"
+      ]
+    },
+    {
+      "name": "uiDraw",
+      "files": [
+        "ui/draw.inc"
+      ]
+    },
+    {
+      "name": "uiInverse",
+      "files": [
+        "ui/inverse.inc"
+      ]
+    },
+    {
+      "name": "uiToolbar",
+      "files": [
+        "ui/toolbar.inc"
+      ]
+    },
+    {
+      "name": "uiCopyRect",
+      "files": [
+        "ui/copyRect.inc"
+      ]
+    },
+    {
+      "name": "argNext",
+      "files": [
+        "argNext.inc"
+      ]
+    },
+    {
+      "name": "fileAssociation",
+      "files": [
+        "fileAssociation.inc"
+      ]
+    },
+    {
+      "name": "fileOperations",
+      "files": [
+        "fileOperations.inc"
       ]
     }
   ]

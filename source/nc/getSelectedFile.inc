@@ -22,14 +22,15 @@ getSelectedFile:
         sub     e
 
         ; Адрес описателя текущего файла в буфере:
-        ; hl = FILE_LIST_BUFFER + FILE_INFO_SIZE * curFile[state.activePanel];
+        ; hl = видимое окно + FILE_INFO_SIZE * относительный индекс;
 
         ld      hl, FILE_INFO_SIZE
         ld      e, a
         ld      d, 0
         call    bios_mul_hl_de
 
-        ld      de, FILE_LIST_BUFFER
+        ex      de, hl
+        ld      hl, (vars.fileListPtr)
         add     hl, de
 
         pop     de

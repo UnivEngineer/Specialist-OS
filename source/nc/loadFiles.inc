@@ -1,63 +1,98 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Загрузить список файлов с накопителя
-;
-; вход:
-;   a = номер накопителя
-;
-; 2013-12-18 Дизассемблировано vinxru
-; 2022-02-16 Доработано SpaceEngineer
-;----------------------------------------------------------------------------
-
-loadFiles:  ; Получение спика файлов в буфере
-           
-            ld      e, 1
-            call    bios_fileGetSetDrive  ; устанавливем активные накопитель
-
-            ; bc = файл, с которого начинается спосок файлов панели
-            ld      hl, state.panelA_firstFile
-            call    readBytePanel
+; Каталог панели кэшируется целиком до предела 8-разрядной навигации.
+; Вход A=диск, активная панель задаёт отдельный кэш. AF/BC/DE/HL разрушены.
+; На попадании кэша дисковый список не читается; выбирается окно указателем.
+; Горячий путь со штатным выбором уже активного диска: 867 тактов в CPU-тесте
+; 8080 (около 0,43 мс при 2 МГц), 0 обращений к носителю. Вместо него
+; перечитывание H: на 140 файлов занимало 491253 такта. Временного буфера
+; и копирования окна нет; чтение полного каталога выполняется только на miss.
+loadFiles:
             ld      c, a
-            ld      b, 0    ; считаем, что файлов в каталоге меньше 256
+            ld      e, 1
+            call    bios_fileSelectDrive
+            ld      hl, vars.cacheValidA
+            call    readBytePanel
+            or      a
+            jp z,   lf_ReadCatalog
+            ld      hl, vars.cacheDriveA
+            call    readBytePanel
+            cp      c
+            jp z,   lf_Cached
 
-            ; Получаем список файлов в буфере и общее
-            ; количество файлов в каталоге в de
-            ld      hl, FILE_LIST_BUFFER  ; адрес буфера
-            ld      de, FILE_LIST_SIZE    ; размер буфера
+lf_ReadCatalog:
+            ld      a, c
+            ld      hl, vars.cacheDriveA
+            call    writeBytePanel
+            call    fileCacheBase
+            ld      bc, 0
+            ld      de, FILE_CACHE_CAPACITY
             call    bios_fileList
 
-            ; Сохранение количествава файлов
-            ld      a, e                ; считаем, что файлов в каталоге меньше 256
+            ; Индексы NC пока байтовые. Больше 255 файлов не оборачиваем в 0.
+            ld      a, d
+            or      a
+            ld      a, e
+            jp z,   lf_StoreCount
+            ld      a, FILE_CACHE_CAPACITY
+lf_StoreCount:
             ld      hl, state.panelA_filesCnt
             call    writeBytePanel
+            ld      a, 1
+            ld      hl, vars.cacheValidA
+            call    writeBytePanel
 
-            ; После удаления последнего файла старый индекс может оказаться
-            ; за концом списка. Для пустой панели обе позиции равны нулю.
+lf_Cached:
+            ; Удаление могло сократить каталог. Пустая панель имеет позиции 0.
+            ld      hl, state.panelA_filesCnt
+            call    readBytePanel
             ld      c, a
             or      a
             jp z,   lf_StoreCursor
             dec     a
-            ld      b, a                ; последний допустимый индекс
+            ld      b, a
             ld      hl, state.panelA_curFile
             call    readBytePanel
             cp      c
-            ret c
+            jp c,   lf_CursorReady
             ld      a, b
 lf_StoreCursor:
             ld      hl, state.panelA_curFile
             call    writeBytePanel
+lf_CursorReady:
             ld      c, a
             ld      hl, state.panelA_firstFile
             call    readBytePanel
             cp      c
-            ret c
-            ret z
-
-            ; Начало видимой части тоже вышло за конец: сдвигаем его
-            ; к выбранному файлу и заново загружаем буфер списка.
+            jp c,   lf_View
+            jp z,   lf_View
             ld      a, c
             call    writeBytePanel
-            ld      hl, state.panelA_drive
-            call    readBytePanel
-            jp      loadFiles
 
+lf_View:
+            ; HL = начало видимого окна, без копирования дескрипторов.
+            ld      l, a
+            ld      h, 0
+            add     hl, hl
+            add     hl, hl
+            add     hl, hl
+            add     hl, hl
+            ex      de, hl
+            call    fileCacheBase
+            add     hl, de
+            ld      (vars.fileListPtr), hl
+            ret
+
+; HL = база кэша активной панели; A/HL/флаги разрушены, BC/DE сохранены.
+fileCacheBase:
+            ld      hl, FILE_CACHE_A
+            ld      a, (state.activePanel)
+            or      a
+            ret z
+            ld      hl, FILE_CACHE_B
+            ret
+
+; Полная перерисовка вызывается после файловых операций и выбора диска.
+; Помечает только кэш активной панели; A/HL/флаги разрушены.
+invalidateFileCache:
+            xor     a
+            ld      hl, vars.cacheValidA
+            jp      writeBytePanel

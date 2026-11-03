@@ -45,6 +45,7 @@ file_pass:
     ld (v_fileOwned),a
     call measure_begin
     ld hl,tmpDescriptor
+    ld de,sectorBuffer
     call bios_fileCreate
     call c,measure_end
     jp c,error
@@ -575,9 +576,9 @@ statRawVerify:   DD 0
 statFileVerify:  DD 0
 tmpDescriptor:    DB "DISKBEN TMP",0
                   BLOCK 6,0
-                  DW sectorBuffer
+                  DW 0
                   BLOCK 8,0
-                  DD DEFAULT_FILE_KIB*1024-1
+                  DD DEFAULT_FILE_KIB*1024
     ASSERT $-tmpDescriptor == FILE_DESCRIPTOR
 v_rawOp:          DB 0
 v_rawCluster:     DW 0

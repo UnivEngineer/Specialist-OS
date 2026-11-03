@@ -5,6 +5,7 @@ import runpy
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 h=runpy.run_path(str(ROOT/'scripts/emu80/check-flash-allocation.py'))
 Machine,symbols=h['Machine'],h['symbols']
 Bench=runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))['Bench']
@@ -18,11 +19,11 @@ def main():
     assert args.runtime.name=='Emu80-flash-test'
     m=Machine('http://127.0.0.1:19781/mcp')
     ns=symbols(ROOT/'bin/NC.lst');ds=symbols(ROOT/'bin/DOS.lst')
-    code=(ROOT/'bin/NC.com').read_bytes()[:ns['state']-0xE800]
+    code=(ROOT/'bin/NC.i80').read_bytes()[:ns['state']-SYSTEM['NC_LOAD_ADDR']]
     m.call('debug_break');m.call('bp_clear')
     for _ in range(180):
         m.call('emu_run_for',ms=500)
-        if m.read(0xE800,len(code))==code:break
+        if m.read(SYSTEM['NC_LOAD_ADDR'],len(code))==code:break
     else:raise RuntimeError('NC не загружен')
     out=ROOT/'docs/nc/technology'
     out.mkdir(parents=True,exist_ok=True)

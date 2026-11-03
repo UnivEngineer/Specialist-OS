@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
     [string] $SourceBase,
@@ -10,10 +10,7 @@ param(
     [string] $Address,
 
     [Parameter(Position = 3)]
-    [string] $OutputBase = $SourceBase,
-
-    [ValidateSet('Configured', 'Legacy', 'Buffered')]
-    [string] $RamDiskDriver = 'Configured'
+    [string] $OutputBase = $SourceBase
 )
 
 $ErrorActionPreference = "Stop"
@@ -106,10 +103,9 @@ $outputPath = Join-Path $outputDirectory ($OutputBase + "." + $Extension)
 $listingPath = Join-Path $outputDirectory ($OutputBase + ".lst")
 $symbolPath = Join-Path $outputDirectory ($OutputBase + '.sym')
 $configurationPath = $outputPath + '.build-config'
-$configuration = $RamDiskDriver
-$defines = @()
-if ($RamDiskDriver -eq 'Legacy') { $defines = @('-DRAMD_BUFFERED=0') }
-if ($RamDiskDriver -eq 'Buffered') { $defines = @('-DRAMD_BUFFERED=1') }
+$rawOutputPath = $outputPath
+if ($Extension -eq 'cpu') { $rawOutputPath = Join-Path $outputDirectory ($OutputBase + '.i80') }
+$configuration = 'Configured'
 $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
@@ -117,7 +113,6 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 # DOS требует предварительного измерения блоков и размещения между входами ABI.
 if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')) {
     $packingArguments = @('--output', $outputPath, '--configuration', $configuration)
-    foreach ($define in $defines) { $packingArguments += '--define=' + $define.Substring(2) }
     & python (Join-Path $PSScriptRoot 'pack-dos.py') @packingArguments
     exit $LASTEXITCODE
 }
@@ -129,7 +124,8 @@ $newestInput = $buildInputs |
     Sort-Object LastWriteTimeUtc -Descending |
     Select-Object -First 1
 
-$needsCompile = -not (Test-Path -LiteralPath $outputPath -PathType Leaf) -or
+$needsCompile = -not (Test-Path -LiteralPath $rawOutputPath -PathType Leaf) -or
+    -not (Test-Path -LiteralPath $outputPath -PathType Leaf) -or
     -not (Test-Path -LiteralPath $listingPath -PathType Leaf) -or
     -not (Test-Path -LiteralPath $symbolPath -PathType Leaf) -or
     -not (Test-Path -LiteralPath $configurationPath -PathType Leaf)
@@ -151,10 +147,9 @@ if ($needsCompile) {
     & $assemblerPath `
         "--i8080" `
         "-Wno-rdlow" `
-        @defines `
         ("--lst={0}" -f $listingPath) `
         ("--sym={0}" -f $symbolPath) `
-        ("--raw={0}" -f $outputPath) `
+        ("--raw={0}" -f $rawOutputPath) `
         $sourcePath
 
     if ($LASTEXITCODE -ne 0) {
@@ -164,5 +159,49 @@ if ($needsCompile) {
 }
 else {
     Write-Host ("[up-to-date] {0}" -f $outputPath)
+}
+
+# CPU — текстовые адреса, машинный образ находится в соседнем I80.
+if ($Extension -eq 'cpu') {
+    $numericAddress = if ($Address -match '^0x') {
+        [Convert]::ToInt32($Address.Substring(2), 16)
+    } elseif ($Address -match '^\d+$') {
+        [int]$Address
+    } else {
+        # Адреса карты памяти берутся из символов именно собранного компонента.
+        $symbolText = [IO.File]::ReadAllText((Join-Path $outputDirectory ($OutputBase + '.sym')))
+        $symbolMatch = [regex]::Match($symbolText, '(?m)^' + [regex]::Escape($Address) + ': EQU 0x([0-9A-Fa-f]+)')
+        if (-not $symbolMatch.Success) { throw "Unknown load-address symbol: $Address" }
+        [Convert]::ToInt32($symbolMatch.Groups[1].Value, 16)
+    }
+    $cpuText = ("{0:X4}`r`n{0:X4}`r`n" -f $numericAddress)
+    [IO.File]::WriteAllText($outputPath, $cpuText, [Text.Encoding]::ASCII)
+}
+
+# Monitor-2 должен точно воспроизводить сохранённое историческое ядро.
+# Проверяем и после пропуска компиляции: подменённый результат недопустим.
+if ($SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor2')) {
+    $referencePath = Join-Path $buildDirectory 'originals\Monitor2.mon'
+    $referenceHash = 'E8EABDEE87CBBB679F0D6E7C30BCDB2E48A793FC0A7938D8D9411F8BCAA9555A'
+    $referenceBytes = [IO.File]::ReadAllBytes($referencePath)
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try {
+        $actualReferenceHash = [BitConverter]::ToString($hasher.ComputeHash($referenceBytes)).Replace('-', '')
+    }
+    finally { $hasher.Dispose() }
+    if ($actualReferenceHash -ne $referenceHash) {
+        throw "Monitor-2 reference has changed: $referencePath"
+    }
+    $compiledBytes = [IO.File]::ReadAllBytes($outputPath)
+    if ($compiledBytes.Length -ne $referenceBytes.Length) {
+        throw "Monitor-2 size mismatch: compiled $($compiledBytes.Length), original $($referenceBytes.Length)"
+    }
+    for ($index = 0; $index -lt $referenceBytes.Length; $index++) {
+        if ($compiledBytes[$index] -ne $referenceBytes[$index]) {
+            throw ("Monitor-2 mismatch at offset {0:X4}h (address {1:X4}h): compiled {2:X2}, original {3:X2}" -f `
+                $index, (0xC000 + $index), $compiledBytes[$index], $referenceBytes[$index])
+        }
+    }
+    Write-Host ("[verified] Monitor-2: {0} bytes identical to original" -f $compiledBytes.Length)
 }
 exit 0

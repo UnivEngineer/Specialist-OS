@@ -4,7 +4,7 @@
         jp target
         ASSERT $ == address + 3
         ASSERT target != address
-        ASSERT target >= 0C000h && target < 0DC00h
+        ASSERT target >= 0C000h && target < DOS_END_MAX
     ENDM
 
 ; Обход фиксированного входа между двумя частями реализации.
@@ -13,5 +13,5 @@
         ASSERT $ + 3 <= limit
         jp target
         ASSERT $ <= limit
-        ASSERT target >= 0C000h && target < 0DC00h
+        ASSERT target >= 0C000h && target < DOS_END_MAX
     ENDM

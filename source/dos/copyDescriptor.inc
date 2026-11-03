@@ -53,26 +53,16 @@ cfdc_loop:  ld      a, (de)
             dec     b
             jp nz,  cfdc_loop
 
-            ; Копируем поле адреса загрузки
-            ex      hl, de
-            ld      bc, FILE_DESCRIPTOR.loadAddress - FILE_DESCRIPTOR.attrib - 1   ; относительное смещение поля loadAddr
-            add     hl, bc
-            ex      hl, de
-
-            ld      a, (de)
-            ld      (hl), a
-            inc     hl
-            inc     de
-            ld      a, (de)
-            ld      (hl), a
-            inc     hl
-
-            ; Копируем поле размера
-            ex      hl, de
-            ld      bc, FILE_DESCRIPTOR.size - FILE_DESCRIPTOR.loadAddress - 1  ; относительное смещение поля size
-            add     hl, bc
-            ex      hl, de
-
+            ; В компактной записи адреса загрузки больше нет.
+            xor a
+            ld (hl),a
+            inc hl
+            ld (hl),a
+            inc hl
+            ex hl,de
+            ld bc,FILE_DESCRIPTOR.size-FILE_DESCRIPTOR.attrib-1
+            add hl,bc
+            ex hl,de
             ld      a, (de)
             ld      (hl), a
             inc     hl

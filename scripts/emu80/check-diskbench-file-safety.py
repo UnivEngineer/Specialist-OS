@@ -16,7 +16,7 @@ m.call('debug_break');m.stop_at(0x8100)
 m.subroutine(0xC842,af=0x0700,de=1)
 image=Path(query).parent/'specialist-os/flash-disk.bin'
 def setup():
-    m.write(0,(ROOT/'bin/DISKBEN.com').read_bytes())
+    m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())
     m.stop_at(0x8100)
     m.subroutine(s['detect_driver'])
     m.write(s['v_drive'],b'\7');m.write(s['v_budget'],b'\1');m.write(s['v_case'],b'\2')
@@ -26,7 +26,7 @@ def setup():
     m.subroutine(0xC8A2)
 setup()
 m.write(0x2000,b'\x3C'*8192)
-assert not m.subroutine(0xC845,hl=s['tmpDescriptor'])['flags']['C']
+assert not m.subroutine(0xC845,hl=s['tmpDescriptor'],de=0x2000)['flags']['C']
 before=image.read_bytes();original=m.read(0xC864,2)
 m.stop_at(s['exit_wait']);m.call('regs_set',pc=s['file_write_case'],sp=0x8FDF);m.until(s['exit_wait'])
 assert m.read(s['v_fileOwned'],1)==b'\0'

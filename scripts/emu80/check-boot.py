@@ -1,11 +1,13 @@
 """Проверка входа с MX-страницы ROM до установки стека DOS, без эмуляции ОС."""
 
 import argparse
+import runpy
 from pathlib import Path
 
 
 def main():
     root = Path(__file__).resolve().parents[2]
+    system = runpy.run_path(str(root/'scripts/emu80/system-map.py'))['MEMORY_MAP']
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("image", nargs="?", type=Path,
                         default=root / "images/SystemRom_emulator.bin")
@@ -54,7 +56,7 @@ def main():
             pc = target if opcode == 0xC3 or not zero else pc + 2
         elif opcode == 0x31 and pc - 1 == 0xC009:  # LXI SP в DOS
             sp = memory[pc] | memory[pc + 1] << 8
-            if sp not in (0xFFC0, 0xDC00) or memory[0xC000:0xC003] != b"\xC3\x09\xC0":
+            if sp not in (0xFFC0, system['STACK_ADDR']) or memory[0xC000:0xC003] != b"\xC3\x09\xC0":
                 raise ValueError("Unexpected DOS entry or stack")
             print(f"OK: MX ROM -> DOS C000 -> SP={sp:04X}; {copied} bytes copied, {steps + 1} instructions")
             return

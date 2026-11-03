@@ -102,6 +102,15 @@ diskDriver_r:
             ld      a, h
             or      a
             jp p,   romStdReadLow
+            ; В STD F000h–F7FFh отображаются устройства, а не RAM.
+            ; Сектор EF00h ещё помещается целиком; EF01h уже пересекает границу.
+            cp      0EFh
+            jp c,   romStdCheckEnd
+            jp nz,  romStdReadLow
+            ld      a, l
+            or      a
+            jp nz,  romStdReadLow
+romStdCheckEnd:
             ; Последний STD-сектор неполон: 7F04h..8003h. Сохраняем
             ; прежнее побайтовое поведение и на границе отображения.
             ld      a, d
@@ -177,17 +186,7 @@ romMXReadLoop:
             jp      popDBHA_ret
 
 ramDRead:
-    IF RAMD_BUFFERED
             call    ramDByteRead
-    ELSE
-            ; Вызываем драйвер чтения RAM-диска
-            ld      c, d        ; c = номер страницы
-            ld      d, e        ; d = номер блока 
-            ld      e, 0        ; e = 0
-                                ; hl = адрес буфера в памяти
-            call    bios_RAMDRead
-
-    ENDIF
 
             ; Восстановливаем регистры и выходим
             jp      popDBHA_ret
@@ -199,17 +198,7 @@ diskDriver_w:
             or      a           ; это ROM-диск?
             jp z,   popDBHA_ret ; да, запись не поддерживается
 
-    IF RAMD_BUFFERED
             call    ramDByteWrite
-    ELSE
-            ; Вызываем драйвер записи RAM-диска
-            ld      c, d        ; c = номер страницы
-            ld      d, e        ; d = номер блока 
-            ld      e, 0        ; e = 0
-                                ; hl = адрес буфера в памяти
-            call    bios_RAMDWrite
-
-    ENDIF
 
             ; Восстановливаем регистры и выходим
             jp      popDBHA_ret

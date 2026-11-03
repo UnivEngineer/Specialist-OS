@@ -5,6 +5,7 @@ import runpy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 helpers = runpy.run_path(str(ROOT/'scripts/emu80/check-flash-allocation.py'))
 Machine, symbols = helpers['Machine'], helpers['symbols']
 Bench = runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))['Bench']
@@ -13,7 +14,7 @@ Bench = runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))['Ben
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime', type=Path, required=True)
-    p.add_argument('--ram-only',action='store_true',help='Проверить B=FFh RAMD Per-byte, R4 и Legacy без записи')
+    p.add_argument('--ram-only',action='store_true',help='Проверить B=FFh RAMD Per-byte и R4 без записи')
     p.add_argument('--report-directory',type=Path,default=ROOT/'docs/flash/driver-api')
     p.add_argument('--locked', action='store_true', help='Проверить отказ B=5 при запрете J4')
     args = p.parse_args()
@@ -22,10 +23,10 @@ def main():
     m.call('debug_break'); m.call('bp_clear')
     ncsyms = symbols(ROOT/'bin/NC.lst')
     ds = symbols(ROOT/'bin/DOS.lst')
-    code = (ROOT/'bin/NC.com').read_bytes()[:ncsyms['state']-0xE800]
+    code = (ROOT/'bin/NC.i80').read_bytes()[:ncsyms['state']-SYSTEM['NC_LOAD_ADDR']]
     for _ in range(180):
         m.call('emu_run_for', ms=500)
-        if m.read(0xE800,len(code)) == code:
+        if m.read(SYSTEM['NC_LOAD_ADDR'],len(code)) == code:
             break
     else:
         raise RuntimeError('NC не загружен')
@@ -71,13 +72,8 @@ def main():
         select(1)
         info('RAMD')
         assert 'RAMD/R4 banked' in report['descriptors']
-        # Метаданные Legacy проверяются без обращения к его RAMD-переносу.
-        # После подмены тестовый процесс завершается, файлы дисков не меняются.
-        m.write(0xC000,(ROOT/'bin/DOS-cap-legacy.sys').read_bytes())
-        info('RAMD')
-        assert 'RAMD/Legacy' in report['descriptors']
         (out/'ramd.json').write_text(json.dumps(report['descriptors'],indent=2)+'\n')
-        print('RAMD R4/Legacy B=FFh: name, description, technology R, capabilities 03h OK')
+        print('RAMD Per-byte/R4 B=FFh: name, description, technology R, capabilities 03h OK')
         return
 
     if args.locked:
@@ -165,8 +161,8 @@ def main():
         m.subroutine(ncsyms['printInfoPanel'])
         Bench(m.url).screenshot(out/f'info-{name}.png')
     select(0)
-    m.write(0xDE00,(ROOT/'bin/Rom.com').read_bytes())
-    m.subroutine(0xDE00)
+    m.write(SYSTEM['DISK_DRIVER_ADDR'],(ROOT/'bin/Rom.i80').read_bytes())
+    m.subroutine(SYSTEM['DISK_DRIVER_ADDR'])
     info('ROM',symbols(ROOT/'bin/Rom.lst')['Driver'])
     (out/'results.json').write_text(json.dumps(report,indent=2)+'\n')
     (out/f"results-{report['systemImageBytes']//1024}.json").write_text(json.dumps(report,indent=2)+'\n')

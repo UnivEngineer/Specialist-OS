@@ -4,6 +4,7 @@ from datetime import datetime,timezone
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 HELPERS=runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))
 Bench,symbols=HELPERS['Bench'],HELPERS['symbols']
 def app_symbols(path):
@@ -39,35 +40,31 @@ def prepare_fixtures():
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','SystemEmu'])
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','Games2M'])
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','Games64k'])
-    command(['python','scripts/build/pack-dos.py','--output',OUT/'legacy/DOS.sys','--define=RAMD_BUFFERED=0','--configuration=Legacy'])
     payload=OUT/'readonly.tmp';payload.write_bytes(bytes(1^(a>>8)^(a&255) for a in range(0x2000,0x4000)))
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
-    base=(ROOT/'scripts/images/manifests/SystemRom.txt').read_text(encoding='utf-8-sig')
+    base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
     keep={'DOS.SYS','NC.COM','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
-    legacy=base.replace('../bin/DOS.sys',os.path.relpath(OUT/'legacy/DOS.sys',ROOT/'assets'))
-    (OUT/'system-legacy.txt').write_text(legacy,encoding='utf-8')
     builder=(ROOT/'scripts/images/build-image.ps1').read_text(encoding='utf-8-sig')
     def build(name,manifest,target):
         folder=OUT/name;folder.mkdir(exist_ok=True)
         text=builder.replace('$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)','$repositoryRoot = '+ps(ROOT))
         text=text.replace('$imageDirectory = Join-Path $repositoryRoot "images"','$imageDirectory = '+ps(folder))
-        for key in ['SystemRom.txt','FlashDisk-emulator.txt']:
+        for key in ['A-System.txt','H-ROM64k.txt']:
             text=text.replace('Join-Path $PSScriptRoot "manifests\\'+key+'"',ps(OUT/manifest))
         script=folder/'build-fixture.ps1';script.write_text(text,encoding='utf-8-sig')
         command(['powershell.exe','-NoProfile','-File',script,target])
     build('rom512','system-ro-full.txt','SystemEmuWritable')
     build('rom64','system-ro-small.txt','SystemEmu')
     build('external-rom64','disk-ro.txt','Games64k')
-    build('legacy-image','system-legacy.txt','SystemEmuWritable')
 
 class Matrix:
     def __init__(self):
         self.m=Bench('http://127.0.0.1:19781/mcp');self.pid=None
-        self.appBinary=ROOT/'bin/DISKBEN.com'
+        self.appBinary=ROOT/'bin/DISKBEN.i80'
         self.s=app_symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
         self.report={'startedUtc':datetime.now(timezone.utc).isoformat(),'cpuHz':2000000,'pitHz':2000000,'fileBytes':SIZE,'passes':PASSES,'units':'decimal kB/s; ms','rows':[],'inventory':{},'phases':{}}
     def save(self):
@@ -93,7 +90,7 @@ class Matrix:
                 (RUNTIME/'specialist-os/flash-disk.bin.sdp').write_bytes(bytes(chip_count))
             if disk_locked:text+='\nflashDisk.readOnly = yes\n'
             config.write_text(text,encoding='utf-8')
-        self.pid=int(shell('$p=Start-Process -FilePath '+ps(RUNTIME/'Emu80qt-mcp.exe')+" -ArgumentList '--conf-file','specialist-os/launch.conf','--platform','specialist-os' -WorkingDirectory "+ps(RUNTIME)+" -WindowStyle Hidden -PassThru; $p.Id"))
+        self.pid=int(shell('$p=Start-Process -FilePath '+ps(RUNTIME/'Emu80qt-mcp.exe')+" -ArgumentList '--conf-file','specialist-os/launch.conf','--platform','specialist-os' -WorkingDirectory "+ps(RUNTIME)+" -WindowStyle Normal -PassThru; $p.Id"))
         for _ in range(30):
             try:
                 owner=mcp_owner()
@@ -119,12 +116,12 @@ class Matrix:
         assert not self.func(0xC842,af=drive<<8,de=1)['flags']['C']
         assert not self.func(0xC896)['flags']['C']
     def install(self,name):
-        address=0 if name in ['Flash','FlashFst','FlashSys'] else 0xDE00
-        self.m.write(address,(ROOT/f'bin/{name}.com').read_bytes());self.func(address)
+        address=0 if name in ['Flash','FlashFst','FlashSys'] else SYSTEM['DISK_DRIVER_ADDR']
+        self.m.write(address,(ROOT/f'bin/{name}.i80').read_bytes());self.func(address)
         # Смена буквы обновляет рабочий JP после установки драйвера.
         self.func(0xC842,af=0x0100,de=1)
     def format_ram(self):
-        self.m.write(0xF100,(ROOT/'bin/FORMAT.com').read_bytes());self.m.write(0x8400,b'B: -R -Y\r\0')
+        self.m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes());self.m.write(0x8400,b'B: -R -Y\r\0')
         assert not self.func(0xF100,de=0x8400)['flags']['C']
         self.select(1)
     def init_app(self,drive,mode=1):
@@ -267,9 +264,6 @@ def main():
             for mode in [1,5,6]:matrix.writable(7,name,mode)
         matrix.format_ram()
         for mode in [1,6]:matrix.writable(1,'RAMD',mode)
-        matrix.start('writable-legacy',system=OUT/'legacy-image/SystemRom_emu80_writable.bin',dos=OUT/'legacy/DOS.sys')
-        matrix.format_ram()
-        for mode in [1,6]:matrix.writable(1,'RAMD',mode,'Legacy')
         matrix.start('rom512',system=OUT/'rom512/SystemRom_emu80_writable.bin',locked=True)
         matrix.func(0xC860,af=0,hl=matrix.ds['diskDriver']);matrix.func(0xC842,af=0x0100,de=1)
         matrix.readonly(0,'A-native-ROM-512K',RUNTIME/'specialist-os/system-flash.bin')

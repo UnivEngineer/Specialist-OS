@@ -48,7 +48,11 @@
         "label": "build: diskbench",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\source-apps\\diskbench\\build.ps1"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\source-apps\\diskbench\\build.ps1"
+        ],
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build"
       },
@@ -86,7 +90,10 @@
       },
       {
         "label": "build: apps",
-        "dependsOn": ["build: almaz", "build: almaz2"],
+        "dependsOn": [
+          "build: almaz",
+          "build: almaz2"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
@@ -130,8 +137,8 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "E",
-          "com",
-          "0xE800"
+          "cpu",
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\E"
@@ -157,7 +164,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "RAMD",
-          "com",
+          "cpu",
           "0"
         ],
         "options": {
@@ -184,7 +191,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Flash",
-          "com",
+          "cpu",
           "0"
         ],
         "options": {
@@ -211,7 +218,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FlashFst",
-          "com",
+          "cpu",
           "0"
         ],
         "options": {
@@ -238,7 +245,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FlashSys",
-          "com",
+          "cpu",
           "0"
         ],
         "options": {
@@ -265,8 +272,8 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Rom",
-          "com",
-          "0xDE00"
+          "cpu",
+          "DISK_DRIVER_ADDR"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -292,7 +299,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FORMAT",
-          "com",
+          "cpu",
           "0xF100"
         ],
         "options": {
@@ -308,7 +315,7 @@
         }
       },
       {
-        "label": "build: launch",
+        "label": "build: run",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -318,12 +325,12 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "LAUNCH",
-          "com",
-          "0xF800"
+          "RUN",
+          "cpu",
+          "SYSTEM_PROGRAM_ADDR"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\source\\launch"
+          "cwd": "${workspaceFolder}\\source\\run"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -346,7 +353,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "ramfos",
-          "sys",
+          "mon",
           "0xC000",
           "RAMFOS"
         ],
@@ -363,31 +370,22 @@
         }
       },
       {
-        "label": "build: ramrun",
+        "label": "build: monitor2",
         "type": "process",
         "command": "powershell.exe",
         "args": [
-          "-NoLogo",
           "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "RAMRUN",
-          "com",
-          "0xF800"
+          "Monitor2",
+          "mon",
+          "0xC000"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\source\\ramfos"
+          "cwd": "${workspaceFolder}\\source\\monitor2"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
+        "group": "build"
       },
       {
         "label": "build: debug",
@@ -401,8 +399,8 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Debug",
-          "com",
-          "0xF100",
+          "cpu",
+          "SYSTEM_PROGRAM_ADDR",
           "Debug"
         ],
         "options": {
@@ -429,8 +427,8 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "NC",
-          "com",
-          "0xE800"
+          "cpu",
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\nc"
@@ -456,8 +454,8 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "tape",
-          "com",
-          "0xE800"
+          "cpu",
+          "SYSTEM_PROGRAM_ADDR"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\tape"
@@ -483,7 +481,7 @@
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "test-scr",
-          "exe",
+          "cpu",
           "0"
         ],
         "options": {
@@ -726,7 +724,12 @@
         "label": "build: Emu80 adapter",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\build.ps1", "-Deploy"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\build.ps1",
+          "-Deploy"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
@@ -734,8 +737,15 @@
         "label": "image: Emu80 system flash",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\images\\build-image.ps1", "SystemEmuWritable"],
-        "dependsOn": ["build: OS"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "SystemEmuWritable"
+        ],
+        "dependsOn": [
+          "build: OS"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
@@ -743,7 +753,12 @@
         "label": "image: flash 2M",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\images\\build-image.ps1", "Games2M"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
+          "Games2M"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
@@ -751,34 +766,61 @@
         "label": "image: Emu80 flash seed",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\seed-flash.ps1"],
-        "dependsOn": ["image: flash 2M"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\seed-flash.ps1"
+        ],
+        "dependsOn": [
+          "image: flash 2M"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
       {
-        "label": "run: Emu80 flash",
+        "label": "run: Emu80 H-Flash2M",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1", "-Flash", "-ResetFlash"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run.ps1",
+          "-Flash",
+          "-ResetFlash"
+        ],
         "dependsOrder": "sequence",
-        "dependsOn": ["image: Emu80 system flash", "image: Emu80 flash seed"],
+        "dependsOn": [
+          "image: Emu80 system flash",
+          "image: Emu80 flash seed"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
       {
-        "label": "run: Emu80 flash (no build)",
+        "label": "run: Emu80 H-Flash2M (no build)",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1", "-Flash"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run.ps1",
+          "-Flash"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
       {
-        "label": "run: Emu80 (no build)",
+        "label": "run: Emu80 H-ROM64k (no build)",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1"],
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run.ps1"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
@@ -786,7 +828,11 @@
         "label": "image: RAMFOS games",
         "type": "process",
         "command": "python",
-        "args": ["-X", "utf8", "${workspaceFolder}\\scripts\\images\\build-ramfos.py"],
+        "args": [
+          "-X",
+          "utf8",
+          "${workspaceFolder}\\scripts\\images\\build-ramfos.py"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
@@ -794,18 +840,34 @@
         "label": "run: Emu80 RAMFOS",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run-ramfos.ps1"],
-        "dependsOn": ["image: RAMFOS games"],
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run-ramfos.ps1"
+        ],
+        "dependsOn": [
+          "image: RAMFOS games"
+        ],
         "problemMatcher": [],
         "group": "build"
       },
       {
-        "label": "run: Emu80",
+        "label": "run: Emu80 H-ROM64k",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\scripts\\emu80\\run.ps1"],
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run.ps1"
+        ],
         "dependsOrder": "sequence",
-        "dependsOn": ["image: system ROM", "image: flash 64k"],
+        "dependsOn": [
+          "image: system ROM",
+          "image: flash 64k"
+        ],
         "problemMatcher": [],
         "group": "build"
       }

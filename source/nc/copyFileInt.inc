@@ -1,24 +1,16 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Потоковое копирование через ОЗУ пользователя 0000h-7FFFh.
-;----------------------------------------------------------------------------
-
-COPY_BUFFER         = 0000h
-COPY_BUFFER_SECTORS = 128
+; Копирование выполняет DOS. NC задаёт имена, диски и собственный буфер.
+COPY_BUFFER_END     EQU 08F00h
+COPY_BUFFER         EQU (NC_END + 255) & 0FF00h
+COPY_BUFFER_SECTORS EQU (COPY_BUFFER_END - COPY_BUFFER) / 256
 
 copyFileInt:
-            ; Выбрать диск-источник и запомнить выбранную запись каталога.
             ld      hl, state.panelA_drive
             call    readBytePanel
-            ld      (vars.copySourceDrive), a
-            ld      e, 1
-            call    bios_fileGetSetDrive
-
+            ld      (vars.copyRequest.sourceDrive), a
+            call    bios_fileSelectDrive
+            jp c,   copyFileError
             call    getSelectedFile
-            ld      (vars.copySourceName), hl
-
-            ; Загрузить полный дескриптор источника во временную запись.
-            ld      de, vars.tempFileDescr
+            ld      de, vars.copyRequest.source
             ld      c, FILE_NAME_LENGTH + 3
 copyFileNameLoop:
             ld      a, (hl)
@@ -27,155 +19,22 @@ copyFileNameLoop:
             inc     de
             dec     c
             jp nz,  copyFileNameLoop
-
-            ld      hl, vars.tempFileDescr
-            call    bios_fileLoadInfo
-            jp c,   copyFileError
-
-            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
-            ld      (vars.copySourceCluster), hl
-
-            ; Размер хранится как size-1. Число секторов должно помещаться
-            ; в 16-битное адресное пространство текущей DOS.
-            ld      hl, vars.tempFileDescr + FILE_DESCRIPTOR.size + 1
-            ld      e, (hl)
-            inc     hl
-            ld      d, (hl)
-            inc     hl
-            ld      a, (hl)
-            or      a
-            jp nz,  copyFileError
-            inc     de
-            ld      a, d
-            or      e
-            jp z,   copyFileError
-            ex      de, hl
-            ld      (vars.copyBlocksLeft), hl
-
-            ; Подготовить имя назначения. Явный префикс X: также выбирает
-            ; соответствующий диск.
             ld      hl, vars.input
-            ld      de, vars.tempFileDescr
+            ld      de, vars.copyRequest.destination
             call    bios_fileNamePrepare
-
-            xor     a
-            ld      e, a
+            ld      e, 0
             call    bios_fileGetSetDrive
-            ld      (vars.copyDestDrive), a
-
-            ; Не позволять fileCreatePrepare удалить сам источник.
-            ld      hl, vars.copySourceDrive
-            cp      (hl)
-            jp nz,  copyFileCheckDest
-            ld      hl, (vars.copySourceName)
-            ld      de, vars.tempFileDescr
-            ld      c, FILE_NAME_LENGTH + 3
-            call    bios_stricmp
+            ld      (vars.copyRequest.destinationDrive), a
+            ld      hl, COPY_BUFFER
+            ld      (vars.copyRequest.buffer), hl
+            ld      hl, COPY_BUFFER_END - COPY_BUFFER
+            ld      (vars.copyRequest.bufferSize), hl
+            ld      hl, vars.copyRequest
+            call    bios_fileCopy
+            ret nc
+            cp      FILE_OP_EXISTS
             jp z,   copyFileExists
-
-copyFileCheckDest:
-            ; Введённый префикс может указывать на диск без драйвера.
-            ld      b, 3
-            call    bios_diskDriver
-            ld      a, d
-            or      e
-            jp z,   copyFileError
-            ld      de, DISK_INFO.isValid
-            add     hl, de
-            ld      a, (hl)
-            cp      DISK_VALID
-            jp nz,  copyFileError
-
-            ; Не заменять существующий файл, в том числе с другим регистром
-            ; букв имени. Проверяем до выделения кластеров и изменения FAT.
-            ld      hl, vars.tempFileDescr
-            call    bios_fileLoadInfo
-            jp nc,  copyFileExists
-
-            ; Создать запись каталога и выделить полную цепочку FAT.
-            xor     a
-            ld      (bios_vars.diskWriteErr), a
-            ; При отмене до создания записи первый кластер остаётся нулевым.
-            ; Не запускать удаление, которое вызвало бы повторный запрос A:.
-            ld      (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster), a
-            ld      (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster + 1), a
-            ld      hl, (vars.copyBlocksLeft)
-            ex      de, hl
-            ld      hl, vars.tempFileDescr
-            call    bios_fileCreatePrepare
-            jp nc,  copyFilePrepareOk
-            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
-            ld      a, h
-            or      l
-            jp z,   copyFileError
-            jp      copyFileCleanup
-copyFilePrepareOk:
-            ld      a, (bios_vars.diskWriteErr)
-            or      a
-            jp nz,  copyFileCleanup
-
-            ld      hl, (vars.tempFileDescr + FILE_DESCRIPTOR.firstCluster)
-            ld      (vars.copyDestCluster), hl
-
-copyFileLoop:
-            ; Один проход переносит до 32 КБ: в обычном случае диск
-            ; переключается один раз для чтения и один раз для записи.
-            ld      hl, (vars.copyBlocksLeft)
-            ld      c, COPY_BUFFER_SECTORS
-            ld      a, h
-            or      a
-            jp nz,  copyFileBatchReady
-            ld      a, l
-            cp      COPY_BUFFER_SECTORS + 1
-            jp nc,  copyFileBatchReady
-            ld      c, a
-
-copyFileBatchReady:
-            ld      a, (vars.copySourceDrive)
-            ld      e, 1
-            call    bios_fileGetSetDrive
-            ld      hl, (vars.copySourceCluster)
-            ex      de, hl
-            ld      hl, COPY_BUFFER
-            ld      b, 2
-            call    bios_fileTransfer
-            jp c,   copyFileCleanup
-            ex      de, hl
-            ld      (vars.copySourceCluster), hl
-
-            ld      a, (vars.copyDestDrive)
-            ld      e, 1
-            call    bios_fileGetSetDrive
-            xor     a
-            ld      (bios_vars.diskWriteErr), a
-            ld      hl, (vars.copyDestCluster)
-            ex      de, hl
-            ld      hl, COPY_BUFFER
-            ld      b, 1
-            call    bios_fileTransfer
-            jp c,   copyFileCleanup
-            ex      de, hl
-            ld      (vars.copyDestCluster), hl
-            ld      a, (bios_vars.diskWriteErr)
-            or      a
-            jp nz,  copyFileCleanup
-
-            ld      hl, (vars.copyBlocksLeft)
-            ld      d, 0
-            ld      e, c
-            call    bios_sub_hl_de
-            ld      (vars.copyBlocksLeft), hl
-            ld      a, h
-            or      l
-            jp nz,  copyFileLoop
-            ret
-
-copyFileCleanup:
-            ld      a, (vars.copyDestDrive)
-            ld      e, 1
-            call    bios_fileGetSetDrive
-            ld      hl, vars.tempFileDescr
-            call    bios_fileDelete
+            jp      copyFileError
 
 copyFileError:
             ld      hl, aCopyFailed

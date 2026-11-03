@@ -11,6 +11,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 helpers = runpy.run_path(str(ROOT / 'source-apps/diskbench/check-emulator.py'))
 Bench, symbols = helpers['Bench'], helpers['symbols']
 
@@ -54,17 +55,17 @@ def main():
         variants = {'before': args.baseline, **variants}
     m = MappedBench('http://127.0.0.1:19781/mcp')
     m.call('debug_break')
-    m.stop_at(0xE800)
+    m.stop_at(SYSTEM['NC_LOAD_ADDR'])
     # Сначала реальная холодная загрузка NC, затем независимые секторные вызовы.
-    nc = (ROOT / 'bin/NC.com').read_bytes()
-    if m.read(0xE800, 32) != nc[:32]:
-        m.until(0xE800, 60)
+    nc = (ROOT / 'bin/NC.i80').read_bytes()
+    if m.read(SYSTEM['NC_LOAD_ADDR'], 32) != nc[:32]:
+        m.until(SYSTEM['NC_LOAD_ADDR'], 60)
     assert m.read(0xC000, 32) == (ROOT / 'bin/DOS.sys').read_bytes()[:32]
     image_path = args.runtime / 'specialist-os/system-flash.bin'
     original = image_path.read_bytes()
     assert len(original) == 524288
     driver = symbols(ROOT / 'bin/FlashSys.sym')['Driver']
-    canonical = (ROOT / 'bin/FlashSys.com').read_bytes()
+    canonical = (ROOT / 'bin/FlashSys.i80').read_bytes()
 
     def install(binary):
         m.write(0xFFFC, b'\0')
@@ -122,7 +123,7 @@ def main():
 
     # Проходим штатный строковый интерфейс, два чтения и явный пропуск записи.
     s = symbols(ROOT / 'source-apps/diskbench/build/DISKBEN.sym')
-    m.write(0, (ROOT / 'bin/DISKBEN.com').read_bytes())
+    m.write(0, (ROOT / 'bin/DISKBEN.i80').read_bytes())
     m.stop_at(s['menu_drive']);m.call('regs_set',pc=0);m.until(s['menu_drive'])
     m.stop_at(s['run_tests'])
     m.line('a');m.line('0');m.line('0')  # B=1, бюджет 0: только чтение.

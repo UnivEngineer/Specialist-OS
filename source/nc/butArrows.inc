@@ -142,7 +142,7 @@ scrollDown: ; скроллинг списка вниз
             jp nc,  mainDriveChanged
 
             ; направление перерисовки списока файлов - сверху вниз
-            ld      b, 0
+            ld      b, 2
             jp      scrollExit
 
 scrollUp:   ; скроллинг списка вверх
@@ -158,13 +158,34 @@ scrollUp:   ; скроллинг списка вверх
 
 scrollExit: ; сохраняем новое значение panelA_firstFile
             ld      hl, state.panelA_firstFile
+    IF NC_BITMAP_SCROLL
+            ; Модуль шага по CF unsigned-вычитания: Home/End могут
+            ; перескочить больше 127 файлов. B сохраняет направление.
+            ld      d, a
+            call    readBytePanel
+            ld      e, a
+            ld      a, d
+            sub     e
+            jp nc,  scrollDeltaReady
+            cpl
+            inc     a
+scrollDeltaReady:
+            ld      (vars.scrollRows), a
+            ld      a, d
+    ENDIF
             call    writeBytePanel
 
+    IF NC_BITMAP_SCROLL
+            call    scrollBitmapPanel
+            jp c,   scrollFinished
+    ENDIF
             ; перерисовываем только список файлов
             ; b = направление
             call    printFilePanel
 
-            ; выходим
-            jp      mainDriveChanged
+scrollFinished:
+            ; Курсор уже нарисован после первой строки списка.
+            call    printInfoLine
+            jp      mainLoop_cursorReady
 
 ; ---------------------------------------------------------------------------

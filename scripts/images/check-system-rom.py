@@ -4,6 +4,7 @@ import json
 import runpy
 import struct
 from pathlib import Path
+from executable import convert
 
 ROOT=Path(__file__).resolve().parents[2]
 get_file=runpy.run_path(str(ROOT/'scripts/emu80/check-copy.py'))['get_file']
@@ -25,21 +26,23 @@ def main():
     entries={image[i:i+11].upper():image[i:i+32] for i in
              range(root*256,root*256+word(17)*32,32) if image[i] not in (0,0xE5,0xFF)}
     label_lines = [line.strip()[7:].strip() for line in
-                   (ROOT/'scripts/images/manifests/SystemRom.txt').read_text('utf-8-sig').splitlines()
+                   (ROOT/'scripts/images/manifests/A-System.txt').read_text('utf-8-sig').splitlines()
                    if line.strip().startswith('@label ')]
     assert len(label_lines) == 1
     assert image[0x2B:0x36] == label_lines[0].ljust(11).encode('ascii')
     checked=[]
-    for line in (ROOT/'scripts/images/manifests/SystemRom.txt').read_text('utf-8-sig').splitlines():
+    for line in (ROOT/'scripts/images/manifests/A-System.txt').read_text('utf-8-sig').splitlines():
         if not line.strip() or line.lstrip().startswith(('#','@')):continue
-        name,source,*_=line.split()
+        name,source,*options=line.split()
         if source=='{AUTOEXEC}':source=f'system-rom/autoexec.{args.autoexec}.bat'
         path=ROOT/'assets'/source
-        expected=path.read_bytes()
-        assert path.suffix.lower()!='.rks','Системный манифест ожидается без снятия RKS-контейнера'
+        ext=name.rsplit('.',1)[-1].lower()
+        expected=(convert(path,ext,int(options[0],0) if options else 0)[0]
+                  if ext in ('com','exe','rks') else path.read_bytes())
         base,ext=name.rsplit('.',1)
         key=(base.ljust(8)+ext.ljust(3)).upper().encode('ascii')
         _,actual=get_file(image,entries[key][:11])
+        assert entries[key][18:20]==bytes(2), name
         assert actual==expected,f'{name}: содержимое образа отличается от {path}'
         checked.append(name)
     if args.mx2:

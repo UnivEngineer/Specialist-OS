@@ -52,7 +52,7 @@ openFile:
         LD    HL,(v_textBeginLo)
         EX    DE,HL
         LD    HL,fileDescName
-        CALL  bios_fileLoad2
+        CALL  loadTextFile
         JP    C,fileOperationError
         JP    finishFilePrompt
 
@@ -94,7 +94,6 @@ getCRC: ; Поиск конца буфера и подсчет контроль�
 
         ; Формирование дескриптора файла
 buildSaveDescriptor: LD    HL,(v_textBeginLo)
-        LD    (fileDescAddr),HL
         EX    DE,HL
         LD    (fileDescSize),HL
 
@@ -105,6 +104,8 @@ buildSaveDescriptor: LD    HL,(v_textBeginLo)
     ENDIF
 
         ; Сохранение файла
+        LD    HL,(v_textBeginLo)
+        EX    DE,HL
         LD    HL,fileDescName
         CALL  bios_fileCreate
         JP    C,fileOperationError
@@ -205,11 +206,22 @@ checkAppendCapacity: POP   DE    ; de = размер файла
         ; загрузка файла по адресу de
 loadAppendFile: POP   DE
         LD    HL,fileDescName
-        CALL  bios_fileLoad2
+        CALL  loadTextFile
         JP    C,fileOperationError
         JP    finishFilePrompt
 
 ;----------------------------------------------------------------------
+
+; HL=дескриптор, DE=буфер. Нулевой файл тоже получает маркер конца текста.
+; Сохраняет BC/DE, разрушает AF/HL; CF=ошибка чтения.
+loadTextFile:
+        CALL  bios_fileLoad2
+        RET   C
+        LD    HL,(fileDescSize)
+        ADD   HL,DE
+        LD    (HL),0FFh
+        OR    A
+        RET
 
 cancelFilePrompt: POP   DE
         LD    HL,0000H
@@ -227,7 +239,7 @@ inputBufEnd:    DB    00H,00H,00H
 
 ; Дескриптор файла (запись в каталоге MXOS FAT8)
 fileDescName:   BLOCK 10, 20h   ; имя, расширение и атрибуты
-fileDescAddr:   DW    2020H     ; адрес загрузки
+fileDescDate:   DW    0         ; дата доступа, не адрес
 fileDescSize:   DW    2020H     ; размер
 fileDescCRC:    DB    20H       ; контрольная сумма
                 DB    20H       ; первый сектор
@@ -240,7 +252,7 @@ inputBufEnd:    DB    00H,00H,00H
 ; Дескриптор файла (запись в каталоге FAT16)
 fileDescName:   BLOCK 12, 20h   ; имя, расширение и атрибуты
                 BLOCK 6, 0
-fileDescAddr:   DW    2020H     ; адрес загрузки
+fileDescDate:   DW    0         ; дата доступа, не адрес
                 BLOCK 8, 0
 fileDescSize:   DW    2020H     ; размер
                 BLOCK 2, 0

@@ -7,6 +7,7 @@ import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 Machine = runpy.run_path(str(Path(__file__).with_name('check-copy.py')))['FileMachine']
 symbols = runpy.run_path(str(Path(__file__).with_name('check-flash-allocation.py')))['symbols']
 BOUNDARIES = [0, 1, 127, 128, 255, 256, 511, 512, 1023, 1024, 1535, 1536, 2047]
@@ -63,11 +64,11 @@ def main():
     m = Machine('http://127.0.0.1:19781/mcp')
     m.call('debug_break')
     m.call('bp_clear')
-    nc = (ROOT / 'bin/NC.com').read_bytes()
-    nccode = nc[:symbols(ROOT / 'bin/NC.lst')['state']-0xE800]
+    nc = (ROOT / 'bin/NC.i80').read_bytes()
+    nccode = nc[:symbols(ROOT / 'bin/NC.lst')['state']-SYSTEM['NC_LOAD_ADDR']]
     for _ in range(180):
         m.call('emu_run_for', ms=500)
-        if m.read(0xE800, len(nccode)) == nccode:
+        if m.read(SYSTEM['NC_LOAD_ADDR'], len(nccode)) == nccode:
             break
     else:
         raise RuntimeError('NC не загружен')
@@ -80,17 +81,17 @@ def main():
         m.subroutine(0xC860, af=0, hl=syms['diskDriver'])
         select(0)
     if args.phase == 'boot':
-        assert m.read(0xE000, 2048) == (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
-        assert m.read(0xDC00,8)==m.resident_bytes('FlashSys')[:8]
-        assert m.read(0xDE00,8)==m.resident_bytes('Flash')[:8]
+        assert m.read(SYSTEM['FONT_ADDR'], 2048) == (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
+        assert m.read(SYSTEM['SYSTEM_FLASH_ADDR'],8)==m.resident_bytes('FlashSys')[:8]
+        assert m.read(SYSTEM['DISK_DRIVER_ADDR'],8)==m.resident_bytes('Flash')[:8]
         # Запускаем высоко размещённый AUTOEXEC непосредственно встроенным драйвером.
         select(1)
-        m.write(0xDE00, (ROOT / 'bin/Rom.com').read_bytes())
-        m.subroutine(0xDE00)
+        m.write(SYSTEM['DISK_DRIVER_ADDR'], (ROOT / 'bin/Rom.i80').read_bytes())
+        m.subroutine(SYSTEM['DISK_DRIVER_ADDR'])
         native()
         m.write(0x7000, b'A:AUTOEXEC.BAT\0')
         assert not m.subroutine(0xC85D, hl=0x7000)['flags']['C']
-        assert m.read(0xDE00,8)==m.resident_bytes('Flash')[:8]
+        assert m.read(SYSTEM['DISK_DRIVER_ADDR'],8)==m.resident_bytes('Flash')[:8]
         report = dict(boot=True, font=True, highFlashSysLoaded=True, nativeHighAutoexec=True)
         (reportdir / 'boot.json').write_text(json.dumps(report, indent=2)+'\n')
         print(report)

@@ -32,7 +32,7 @@ def get_file(image, name):
     root = image[root_start * sector_size:(root_start + root_size) * sector_size]
     entry = next(root[i:i + 32] for i in range(0, len(root), 32) if root[i:i + 11] == name)
     cluster = struct.unpack_from('<H', entry, 26)[0]
-    length = struct.unpack_from('<I', entry, 28)[0] + 1  # Исторический формат MXOS: N-1.
+    length = struct.unpack_from('<I', entry, 28)[0]
     data = bytearray()
     visited = set()
     while len(data) < length:
@@ -67,12 +67,12 @@ def main():
         m.subroutine(0xC842, af=0x0700, de=1)
         descriptor = bytearray(32)
         descriptor[:11] = names[0][0]
-        struct.pack_into('<H', descriptor, 18, 0x4000)
-        struct.pack_into('<I', descriptor, 28, len(expected) - 1)
+        # Адрес буфера передаётся в DE, поле даты доступа остаётся нулевым.
+        struct.pack_into('<I', descriptor, 28, len(expected))
         m.write(0x7000, descriptor)
         m.write(0x4000, expected)
         m.write(0x8FF9, b'\0')
-        state = m.subroutine(0xC845, hl=0x7000)
+        state = m.subroutine(0xC845, hl=0x7000, de=0x4000)
         assert not state['flags']['C'] and m.read(0x8FF9, 1) == b'\0'
         assert get_file(image_path.read_bytes(), names[0][0])[1] == expected
         # Удаляем только результат предыдущего прогона в тестовой установке.
@@ -89,7 +89,8 @@ def main():
             r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
             (ROOT/'bin/NC.sym').read_text('utf-8-sig'),re.M)}
         input_addr = nc_symbols['vars.input']
-        buffer_addr = nc_symbols['FILE_LIST_BUFFER']
+        buffer_addr = nc_symbols['FILE_CACHE_A']
+        m.write(nc_symbols['vars.fileListPtr'], buffer_addr.to_bytes(2, 'little'))
         system_path = args.runtime / 'specialist-os/system-flash.bin'
         if system_path.exists():
             logical = system_path.read_bytes()  # Линейный образ системной AT29.

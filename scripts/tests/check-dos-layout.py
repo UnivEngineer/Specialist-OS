@@ -28,9 +28,34 @@ def main():
     spans.sort()
     assert all(a[1] <= b[0] for a,b in zip(spans,spans[1:]))
     assert len(image) == layout['bytes'] == layout['end']-0xC000
-    assert ds['dosImageEnd'] == layout['end'] <= 0xDA00
+    assert ds['dosImageEnd'] == layout['end'] <= min(ds['DOS_END_MAX'], ds['CMD_LINE'])
+    assert ds['STD_IO_ADDR'] == 0xF000 and ds['STD_KEYB_ADDR'] == 0xF800
+    assert ds['CMD_LINE'] == ds['DOS_END_MAX'] and ds['CMD_LINE_SIZE'] == 130
+    assert ds['STACK_BOTTOM'] == ds['CMD_LINE']+130
+    assert ds['STACK_ADDR']-ds['STACK_BOTTOM'] == 382
+    assert ds['dosImageEnd'] <= ds['CMD_LINE'] < ds['STACK_BOTTOM'] < ds['STACK_ADDR'] <= ds['STD_IO_ADDR']
+    assert ds['FONT_ADDR']+2048 <= ds['STD_IO_ADDR']
     assert ds['delay_l'] == 0xC18F and ds['delay_b'] == 0xC190
     assert image[0x18F:0x195] == bytes.fromhex('45 05 C2 90 C1 C9')
+    assert ds['setKeybMode82'] == ds['bios_setKeybMode82'] == 0xC254
+    assert ds['setKeybMode91'] == ds['bios_setKeybMode91'] == 0xC25A
+    assert ds['v_keybTbl'] == ds['bios_keybTable'] == 0xC4A0
+    assert image[0x254:0x260] == bytes.fromhex('3E 82 32 E3 FF C9 3E 91 32 E3 FF C9')
+    monitor = (ROOT/'assets/programs/Monitor2.mon').read_bytes()
+    table = monitor[0x4A0:0x500]
+    assert len(table) == 96 and image[0x4A0:0x500] == table
+    assert image.count(table) == 1
+    assert ds['bios_reboot'] == 0xC800 and ds['bios_div_hl_de'] == 0xC887
+    assert ds['bios_setMemTop'] == 0xC830 and ds['bios_getMemTop'] == 0xC833
+    for offset, label in [(0x830, 'setMemTop'), (0x833, 'getMemTop')]:
+        assert image[offset:offset+3] == b'\xC3'+ds[label].to_bytes(2,'little')
+    address = ds['v_memTop'].to_bytes(2,'little')
+    assert image[ds['setMemTop']-0xC000:ds['setMemTop']-0xC000+4] == b'\x22'+address+b'\xC9'
+    assert image[ds['getMemTop']-0xC000:ds['getMemTop']-0xC000+4] == b'\x2A'+address+b'\xC9'
+    assert image[0x800] == image[0x887] == 0xC3
+    addresses = [int(v,16) for v in re.findall(r'^bios_\w+\s*=\s*0([0-9A-Fa-f]+)h',
+                  (ROOT/'source/include/mxos.inc').read_text('utf-8'),re.M)]
+    assert addresses == sorted(addresses)
     assert ds['keybScan3'] and ds['v_keybTbl']>>8 == (ds['v_keybTbl']+95)>>8
     for v in layout['windows']:
         if v.get('target'):
@@ -46,7 +71,10 @@ def main():
     abi = {k:v for k,v in ds.items() if k in declared}
     if args.baseline:
         before = symbols(args.baseline.with_suffix('.sym'))
-        assert abi == {k:v for k,v in before.items() if k in declared}
+        expected = {k:v for k,v in before.items() if k in declared}
+        # Единственная намеренная смена прежних адресов: порядок Monitor-2.
+        expected.update(bios_setMemTop=0xC830, bios_getMemTop=0xC833)
+        assert {k:v for k,v in abi.items() if k in before} == expected
 
     negative = out/'negative'
     negative.mkdir(exist_ok=True)
@@ -57,6 +85,9 @@ def main():
         'gate_self_loop': include(ROOT/'source/dos/layoutMacros.inc')+'\n ORG 0C000h\n DOS_ABI_GATE 0C000h, 0C000h\n END\n',
         'key_table_crosses_page': ' ORG 0C0D0h\n'+include(ROOT/'source/dos/keyTable.inc')+'\n END\n',
     }
+    memory_map = (ROOT/'source/include/mxos.inc').read_text('utf-8')
+    cases['std_stack_in_io'] = re.sub(r'(?m)^(STACK_ADDR\s*=\s*)0[0-9A-Fa-f]+h',r'\g<1>0FFC0h',memory_map)+'\n END\n'
+    cases['std_font_in_io'] = memory_map.replace('FONT_ADDR = 0E200h','FONT_ADDR = 0F800h')+'\n END\n'
     source = args.image.with_suffix('.layout.inc').read_text('utf-8')
     # Измерение изменилось, а размещение осталось прежним.
     stale = re.sub(r'(ASSERT dos_piece_\w+_end - dos_piece_\w+_start == )(\d+)',

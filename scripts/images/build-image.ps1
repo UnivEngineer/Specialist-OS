@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
     [ValidateSet("SystemEmu", "SystemEmuFlash", "SystemEmuWritable", "SystemRamfos", "SystemHardware", "Games64k", "Games2M")]
@@ -17,6 +17,7 @@ $assetDirectory = Join-Path $repositoryRoot "assets"
 $imageDirectory = Join-Path $repositoryRoot "images"
 $sectorSize = 256
 $sectorsPerCluster = 1
+. (Join-Path $PSScriptRoot 'executable.ps1')
 
 function Join-Bytes {
     param([Parameter(ValueFromRemainingArguments = $true)][byte[][]] $Arrays)
@@ -32,7 +33,7 @@ function Join-Bytes {
         [Array]::Copy($array, 0, $result, $position, $array.Length)
         $position += $array.Length
     }
-    return $result
+    return ,$result
 }
 
 function Expand-Bytes {
@@ -47,13 +48,18 @@ function Expand-Bytes {
     }
 
     $result = New-Object byte[] $Length
-    if ($Fill -ne 0) {
-        for ($index = 0; $index -lt $result.Length; $index++) {
-            $result[$index] = $Fill
+    if ($Fill -ne 0 -and $Length -gt 0) {
+        # Удвоение заполненного участка вместо побайтового цикла PowerShell.
+        $result[0] = $Fill
+        $filled = 1
+        while ($filled -lt $Length) {
+            $count = [Math]::Min($filled, $Length - $filled)
+            [Array]::Copy($result, 0, $result, $filled, $count)
+            $filled += $count
         }
     }
     [Array]::Copy($Data, $result, $Data.Length)
-    return $result
+    return ,$result
 }
 
 function Get-LoadAddress {
@@ -66,13 +72,6 @@ function Get-LoadAddress {
         return [Convert]::ToInt32($Text.Substring(2), 16)
     }
     return [int]$Text
-}
-
-function Set-Word {
-    param([byte[]] $Data, [int] $Offset, [int] $Value)
-
-    $Data[$Offset] = $Value -band 0xFF
-    $Data[$Offset + 1] = ($Value -shr 8) -band 0xFF
 }
 
 function Get-Manifest {
@@ -134,10 +133,10 @@ function Get-Manifest {
 
 switch ($Target) {
     "SystemRamfos" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
         $manifest = @((Get-Manifest $manifestPath "emu").Entries |
             Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM", "Test-MX.COM") })
-        $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\Ramfos.txt"
+        $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\A-RAMFOS.txt"
         $manifestData = Get-Manifest $ramfosManifestPath "emu"
         $manifest += @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
@@ -149,7 +148,7 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     { $_ -in @('SystemEmu', 'SystemEmuFlash') } {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
         $autoexecVariant = if ($Target -eq 'SystemEmuFlash') { 'emu-flash' } else { 'emu' }
         $manifestData = Get-Manifest $manifestPath $autoexecVariant
         $manifest = @($manifestData.Entries)
@@ -163,7 +162,7 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "SystemEmuWritable" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
         $manifestData = Get-Manifest $manifestPath "emu-writable"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; лишь DOS обязан находиться
@@ -183,7 +182,7 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "SystemHardware" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\SystemRom.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
         $manifestData = Get-Manifest $manifestPath "hardware"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
@@ -207,7 +206,7 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "Games64k" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk-emulator.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\H-ROM64k.txt"
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
@@ -220,7 +219,7 @@ switch ($Target) {
         $makeBootDisk = $false
     }
     "Games2M" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\FlashDisk.txt"
+        $manifestPath = Join-Path $PSScriptRoot "manifests\H-Games2M.txt"
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
@@ -285,6 +284,7 @@ $dosCluster = 0
 $dosAddress = 0
 $dosSectors = 0
 $imageNames = @{}
+$sectorPadding = Expand-Bytes ([byte[]]@()) $sectorSize
 
 try {
     foreach ($manifestEntry in $manifest) {
@@ -292,37 +292,17 @@ try {
         if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
             throw "Manifest input not found: $($manifestEntry.Source)"
         }
-        $sourceFile = Get-Item -LiteralPath $sourcePath
         $sourceName = $manifestEntry.ImageName
-        $entryFormat = $manifestEntry.Format
-        $sourceBytes = [IO.File]::ReadAllBytes($sourceFile.FullName)
-        $storedBytes = $sourceBytes
-        $originalSize = $sourceBytes.Length
         $extension = [IO.Path]::GetExtension($sourceName).TrimStart(".")
 
-        if ($entryFormat.Equals("rks", [StringComparison]::OrdinalIgnoreCase)) {
-            if ($sourceBytes.Length -lt 4) {
-                throw "Invalid RKS header: $sourceName"
-            }
-            $loadAddress = [int]$sourceBytes[0] + ([int]$sourceBytes[1] -shl 8)
-            $endAddress = [int]$sourceBytes[2] + ([int]$sourceBytes[3] -shl 8)
-            $payloadLength = $endAddress - $loadAddress + 1
-            if ($payloadLength -lt 0) {
-                throw "Invalid RKS payload length: $sourceName"
-            }
-            $payloadLength = [Math]::Min($payloadLength, $sourceBytes.Length - 4)
-            $storedBytes = New-Object byte[] $payloadLength
-            [Array]::Copy($sourceBytes, 4, $storedBytes, 0, $payloadLength)
-            # EXE из RKS — сырой образ нынешнего MXOS, без заголовка и суммы RKS.
-            if ($extension.Equals("exe", [StringComparison]::OrdinalIgnoreCase)) {
-                $originalSize = $payloadLength
-            }
-            $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
+        $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
+        $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
+        if ($extension.ToLowerInvariant() -in @('com', 'exe', 'rks')) {
+            $storedBytes = Convert-ExecutableFile $sourcePath $extension $loadAddress
+        } else {
+            $storedBytes = [IO.File]::ReadAllBytes($sourcePath)
         }
-        else {
-            $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
-            $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
-        }
+        $originalSize = $storedBytes.Length
 
         if ($baseName.Length -gt 8 -or $extension.Length -gt 3) {
             throw "Image name '$sourceName' does not fit FAT 8.3. Specify a separate short image name."
@@ -369,14 +349,12 @@ try {
             Set-Word $fat ($cluster * 2) $cluster
             $previousCluster = $cluster
 
-            $block = New-Object byte[] $sectorSize
-            for ($index = 0; $index -lt $block.Length; $index++) {
-                $block[$index] = 0xFF
-            }
             $count = [Math]::Min($sectorSize, $storedBytes.Length - $offset)
-            [Array]::Copy($storedBytes, $offset, $block, 0, $count)
             $fileData.Position = ($cluster - 2) * $sectorSize
-            $fileData.Write($block, 0, $block.Length)
+            $fileData.Write($storedBytes, $offset, $count)
+            if ($count -lt $sectorSize) {
+                $fileData.Write($sectorPadding, 0, $sectorSize - $count)
+            }
         }
 
         if ($Target -in @('SystemEmuWritable', 'SystemHardware') -and $sourceName -eq 'DOS.SYS' -and
@@ -390,15 +368,15 @@ try {
         [Array]::Copy($nameBytes, 0, $entry, 0, 8)
         [Array]::Copy($extensionBytes, 0, $entry, 8, 3)
         $entry[11] = $manifestEntry.Attributes
-        Set-Word $entry 18 $loadAddress
         Set-Word $entry 26 $firstCluster
-        Set-Word $entry 28 ($originalSize - 1)
+        Set-Word $entry 28 ($originalSize -band 0xFFFF)
+        Set-Word $entry 30 ($originalSize -shr 16)
         $directory.Write($entry, 0, $entry.Length)
 
         if ($makeBootDisk -and "$baseName.$extension".Equals("DOS.SYS", [StringComparison]::OrdinalIgnoreCase)) {
             $dosCluster = $firstCluster
             $dosAddress = $loadAddress
-            $dosSectors = [int](($originalSize + 255) / 256)
+            $dosSectors = [int][Math]::Ceiling($originalSize / 256.0)
         }
     }
 

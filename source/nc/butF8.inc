@@ -23,39 +23,25 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
             cp          0Dh
             jp nz,      loc_D54C
 
-            ; Если файл системный или только для чтения
-            call        getSelectedFile         
-            ld          de, FILE_DESCRIPTOR.attrib
-            add         hl, de
-            ld          a, (hl)
-            and         005h
-            jp z,       loc_D595
-
-            ld          hl, aFileProtected
-            ld          de, 03C80h      ; CENTER_LINE 24,80h
-            call        showFileErrorWindow
-
-loc_D581:   ; Цикл ожидания нажатия любой клавиши
-            call        bios_keyScan
-            inc         a
-            jp nz,      loc_D581
-
-loc_D588:   ; Цикл ожидания нажатия Esc или Enter
-            call        bios_keyScan
-            cp          1Bh             ; Esc
-            jp z,       mainReload      ; Если Esc - выход
-            cp          0Dh             ; Enter
-            jp nz,      loc_D588
-            jp          mainReload      ; Защищённый файл не удаляется
-
 loc_D595:   ; Удаляем текущий файл
+            ld          hl, state.panelA_drive
+            call        readBytePanel
+            call        bios_fileSelectDrive
+            jp c,       deleteFileError
             call        getSelectedFile
-            call        bios_fileDelete
+            call        bios_fileDeleteOnDrive
             jp c,       deleteFileError
             ; Количество файлов и курсор обновляются по реальному каталогу.
             jp          mainReload
 
 deleteFileError:
+            call        getSelectedFile
+            ld          de, FILE_DESCRIPTOR.attrib
+            add         hl, de
+            ld          a, (hl)
+            and         005h
             ld          hl, aDeleteFailed
+            jp z,       copyFileShowError
+            ld          hl, aFileProtected
             jp          copyFileShowError
 

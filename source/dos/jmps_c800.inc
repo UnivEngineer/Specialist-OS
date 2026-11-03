@@ -21,8 +21,8 @@ j_printString:  jp  printString1        ; C818: Вывести строку на
                 jp  t_tapeSave          ; C827: Сохранить программу на магнитофон
                 jp  calcCS              ; C82A: Расчет контрольной суммы
                 jp  printHexWord        ; C82D: Вывести 16-ричное число (слово)
-                jp  getMemTop           ; C830: Получить объем доступной памяти
-                jp  setMemTop           ; C833: Установить объем доступной памяти
+                jp  setMemTop           ; C830: Установить границу памяти из HL (Monitor-2)
+                jp  getMemTop           ; C833: Получить границу памяти в HL (Monitor-2)
                 jp  printer             ; C836: Напечатать байт на принтере
     IF RAMFOS_COMPATIBILITY
                 jp  strToHex            ; C839: [MXOS2] Преобразвоние строки в HEX формате в число
@@ -33,11 +33,11 @@ j_printString:  jp  printString1        ; C818: Вывести строку на
                 jp  fileList            ; C83F: Получить список файлов
                 jp  fileGetSetDrive     ; C842: Получить/установить активное устройство
                 jp  fileCreate          ; C845: Создать файл
-                jp  fileLoad            ; C848: Загрузить файл по адресу из заголовка этого файла
+                jp  fileLoad            ; C848: Читать подготовленное тело по DE, без промежуточного образа
                 jp  fileDelete          ; C84B: Удалить файл
                 jp  fileRename          ; C84E: Переименовать файл
                 jp  fileLoadInfo        ; C851: Загрузить информацию о файле
-                jp  fileGetSetAddr      ; C854: Получить/установить адрес загрузки файла
+                jp  imageOpen           ; C854: A=16/4, открыть COM или первый сектор RKS
                 jp  fileGetSetAttr      ; C857: Получить/установить атрибуты файла
                 jp  fileNamePrepare     ; C85A: Преобразовать имя файла во внутренний формат
                 jp  fileExec            ; C85D: Запустить файл
@@ -68,4 +68,19 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  pitTimerInit        ; C8A2: настроить измерительный каскад ВИ53
                 jp  pitTimerRead        ; C8A5: защёлкнуть и прочитать счётчик
 
-                ASSERT $ == 0C8A8h
+                jp  uiDraw              ; C8A8: список графических объектов
+                jp  uiInverseRect       ; C8AB: инверсия прямоугольника
+                jp  uiToolbar           ; C8AE: строка F1-F8
+                jp  uiCopyRect          ; C8B1: копирование битмапа
+
+                jp  fileAssociation     ; C8B4: поиск ассоциации в A:NC.EXT
+
+                jp  argNext             ; C8B7: следующее слово без изменения строки
+
+                jp  fileChangeDrive     ; C8BA: выбрать диск
+                jp  fileRename          ; C8BD: переименование на выбранном диске
+                jp  fileDelete          ; C8C0: удаление на выбранном диске
+                jp  fileCopy            ; C8C3: копирование с явным буфером
+                jp  fileGetDrives       ; C8C6: список доступных дисков
+
+                ASSERT $ == 0C8C9h

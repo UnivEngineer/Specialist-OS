@@ -26,7 +26,7 @@
 ; AT29C020 и AT29C040A (256/512 КБ, страница записи 256 байт).
 ; Ёмкость и физическая страница определяются по software ID, независимо от BPB.
 ; COM загружается с 0000h; ID выполняется временным кодом в 8200h–82FFh,
-; после успешного ID резидент копируется в DC00h–DD3Fh.
+; после успешного ID резидент копируется в F400h–F53Fh.
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
@@ -48,9 +48,9 @@ FLASHSYS_READ_MODE = 1
 
 ;----------------------------------------------------------------------------
 
-    ; DC00h-DD3Fh — FLASHSYS, DD40h-DDFFh — RAMD.COM.
-    ; FlashSys, RAMD и внешний Flash в DE00h-DFFFh работают одновременно.
-RESIDENT_ADDRESS = 0DC00h
+    ; F400h-F53Fh — FLASHSYS, F540h-F5FFh — RAMD.COM.
+    ; FlashSys, RAMD и внешний Flash в F600h-F7FFh работают одновременно.
+RESIDENT_ADDRESS = SYSTEM_FLASH_ADDR
 SYSTEM_FLASH = 1
 
     ORG 0

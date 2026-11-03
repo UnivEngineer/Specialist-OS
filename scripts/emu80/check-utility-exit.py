@@ -23,16 +23,21 @@ def main():
         ('DISKBEN','done','exit_wait',ROOT/'source-apps/diskbench/build/DISKBEN.sym'),
         ('CHKDSK','waitPrompt','waitKey',ROOT/'bin/CHKDSK.sym')]:
         s=symbols(sympath)
-        binary=(ROOT/f'bin/{name}.com').read_bytes()
+        binary=(ROOT/f'bin/{name}.i80').read_bytes()
         m.write(0,binary)
-        assert m.read(s['txtDone']+1,22)==b'Press any key to exit\0'
-        m.stop_at(s[wait]);m.call('regs_set',pc=s[prompt],sp=0x8FDF)
+        text=m.read(s['txtDone']+1,64).split(b'\0',1)[0]
+        assert text.upper()==b'PRESS ANY KEY TO EXIT'
+        m.write(s['callerSP'],(0x8F00).to_bytes(2,'little'))
+        m.write(s['callerKoi'],b'\xff');m.write(0x8FEA,b'\0')
+        m.write(0x8F00,(0x8310).to_bytes(2,'little'))
+        m.stop_at(s[wait]);m.call('regs_set',pc=s[prompt],sp=0x8F00)
         m.until(s[wait])
         m.screenshot(args.report_directory/(name.lower()+'-exit.png'))
-        m.stop_at(0xC800);m.call('emu_run_for',ms=100)
-        assert m.call('cpu_state')['registers']['pc']['dec']!=0xC800
-        m.tap('x');m.until(0xC800)
-        results[name]=dict(prompt='Press any key to exit',waited=True,nonEnterKeyExited=True)
+        m.stop_at(0x8310);m.call('emu_run_for',ms=100)
+        assert m.call('cpu_state')['registers']['pc']['dec']!=0x8310
+        m.tap('x');state=m.until(0x8310)
+        assert m.read(0x8FEA,1)==b'\xff' and state['registers']['sp']['dec']==0x8F02
+        results[name]=dict(prompt=text.decode('ascii'),waited=True,nonEnterKeyExited=True,koiRestored=True)
     (args.report_directory/'exit.json').write_text(json.dumps(results,indent=2)+'\n')
     print(results)
 

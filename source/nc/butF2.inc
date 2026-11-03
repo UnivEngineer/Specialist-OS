@@ -204,45 +204,15 @@ initRightDrive:
 ; Разрушает: AF, BC, DE, HL.
 
 buildDriveList:
-            ld    e, 2
-            call  bios_fileGetSetDrive
-            push  af
+            ld      hl, vars.driveList
+            ld      bc, 8
+            call    bios_fileGetDrives
+            ld      a, b
+            ld      (vars.driveCount), a
+            xor     a
+            ld      (vars.chooseDrive), a
+            ret
 
-            xor   a
-            ld    (vars.driveCount), a
-            ld    (vars.chooseDrive), a
-
-bdl_Scan:
-            ld    a, (vars.chooseDrive)
-            ld    e, 1
-            call  bios_fileGetSetDrive
-            ld    b, 3
-            call  bios_diskDriver
-            ld    a, d
-            or    e
-            jp z, bdl_Next
-
-            ld    a, (vars.driveCount)
-            ld    l, a
-            ld    h, 0
-            ld    de, vars.driveList
-            add   hl, de
-            ld    a, (vars.chooseDrive)
-            ld    (hl), a
-            ld    a, (vars.driveCount)
-            inc   a
-            ld    (vars.driveCount), a
-
-bdl_Next:
-            ld    a, (vars.chooseDrive)
-            inc   a
-            ld    (vars.chooseDrive), a
-            cp    8
-            jp c, bdl_Scan
-
-            pop   af
-            ld    e, 1
-            jp      bios_fileGetSetDrive
 ;----------------------------------------------------------------------------
 ; Найти диск в компактном списке.
 ;

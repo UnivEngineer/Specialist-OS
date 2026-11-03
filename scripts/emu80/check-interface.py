@@ -72,11 +72,11 @@ def main():
     for name in [b'UITEST1 TXT', b'UITEST2 TXT']:
         descriptor = bytearray(32)
         descriptor[:11] = name
-        descriptor[18:20] = b'\0\x40'
-        descriptor[28] = 255
+        descriptor[18:20] = bytes(2)
+        descriptor[28:32] = (256).to_bytes(4, "little")
         m.write(0x7000, descriptor)
         m.write(0x4000, bytes(range(256)))
-        assert not m.subroutine(0xC845, hl=0x7000)['flags']['C']
+        assert not m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C']
     m.write(state + 4, b'\x01')
     m.write(state + 8, b'\0')
     m.write(state + 10, b'\x01')

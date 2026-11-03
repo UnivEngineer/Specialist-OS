@@ -13,6 +13,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 Machine = runpy.run_path(str(ROOT / 'scripts/emu80/check-flash.py'))['Machine']
 
 
@@ -73,16 +74,16 @@ def main():
     assert 'SYSTEM_FLASH' not in (args.runtime/'specialist-os/launch.conf').read_text()
     m = Bench(args.url)
     m.call('debug_break')
-    m.stop_at(0xE800)
-    if m.read(0xE800, 32) != (ROOT/'bin/NC.com').read_bytes()[:32]:
-        m.until(0xE800, 30)
+    m.stop_at(SYSTEM['NC_LOAD_ADDR'])
+    if m.read(SYSTEM['NC_LOAD_ADDR'], 32) != (ROOT/'bin/NC.i80').read_bytes()[:32]:
+        m.until(SYSTEM['NC_LOAD_ADDR'], 30)
     # Проверяем текущую сборку; full throttle выявляет последующая сверка ВИ53/CPU.
     assert m.read(0xC000, 32) == (ROOT/'bin/DOS.sys').read_bytes()[:32]
     s = symbols(HERE/'build/DISKBEN.sym')
     ds = symbols(ROOT/'bin/DOS.sym')
     out = args.report_directory or HERE/'build'/args.variant
     out.mkdir(parents=True,exist_ok=True)
-    for src in [ROOT/'bin/DOS.sys', ROOT/'bin/DOS.lst', ROOT/'bin/DOS.sym', ROOT/'bin/NC.com',
+    for src in [ROOT/'bin/DOS.sys', ROOT/'bin/DOS.lst', ROOT/'bin/DOS.sym', ROOT/'bin/NC.i80',
                 HERE/'build/DISKBEN.com']:
         (out/src.name).write_bytes(src.read_bytes())
     boot_rom = (args.runtime/'specialist-os/system.bin').read_bytes()

@@ -27,21 +27,21 @@ def main():
             desc = bytearray(32)
             desc[:11] = name
             desc[11] = attrs
-            struct.pack_into('<H', desc, 18, 0x4000)
-            struct.pack_into('<I', desc, 28, len(payload) - 1)
+            # Адрес буфера передаётся в DE, поле даты доступа остаётся нулевым.
+            struct.pack_into('<I', desc, 28, len(payload))
             m.write(0x7000, desc)
-            assert not m.subroutine(0xC845, hl=0x7000)['flags']['C']
+            assert not m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C']
             m.write(0x7000, desc)
             before = (args.runtime / 'specialist-os' / ('system-flash.bin' if drive == 0 else 'flash-disk.bin')).read_bytes()
             deleted = m.subroutine(0xC84B, hl=0x7000)['flags']['C']
             assert deleted == bool(attrs), (drive, attrs, 'delete')
             if attrs:
                 if attrs & 1:
-                    assert m.subroutine(0xC845, hl=0x7000)['flags']['C'], (drive, attrs, 'overwrite')
+                    assert m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C'], (drive, attrs, 'overwrite')
                     assert m.subroutine(0xC88A, hl=0x7000, de=1)['flags']['C'], (drive, attrs, 'stream overwrite')
                     assert (args.runtime / 'specialist-os' / ('system-flash.bin' if drive == 0 else 'flash-disk.bin')).read_bytes() == before
                 else:
-                    assert not m.subroutine(0xC845, hl=0x7000)['flags']['C'], (drive, attrs, 'system overwrite')
+                    assert not m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C'], (drive, attrs, 'system overwrite')
                     get_file = runpy.run_path(str(Path(__file__).with_name('check-copy.py')))['get_file']
                     disk = args.runtime / 'specialist-os' / ('system-flash.bin' if drive == 0 else 'flash-disk.bin')
                     assert get_file(disk.read_bytes(), name)[0][11] == attrs
@@ -50,7 +50,7 @@ def main():
                 source[:11] = ('Q%d%d     TXT' % (drive, attrs)).encode('ascii')
                 source[11] = 0
                 m.write(0x7100, source)
-                assert not m.subroutine(0xC845, hl=0x7100)['flags']['C']
+                assert not m.subroutine(0xC845, hl=0x7100, de=0x4000)['flags']['C']
                 after_source = (args.runtime / 'specialist-os' / ('system-flash.bin' if drive == 0 else 'flash-disk.bin')).read_bytes()
                 assert m.subroutine(0xC84E, hl=0x7100, de=0x7000)['flags']['C']
                 assert (args.runtime / 'specialist-os' / ('system-flash.bin' if drive == 0 else 'flash-disk.bin')).read_bytes() == after_source

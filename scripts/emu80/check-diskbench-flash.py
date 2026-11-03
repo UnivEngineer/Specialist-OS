@@ -6,6 +6,7 @@ import struct
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 helpers=runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))
 Bench,symbols=helpers['Bench'],helpers['symbols']
 
@@ -18,8 +19,8 @@ def main():
     args=p.parse_args()
     assert args.runtime.name=='Emu80-flash-test'
     m=Bench('http://127.0.0.1:19781/mcp')
-    m.call('debug_break');m.stop_at(0xE800)
-    if m.read(0xE800,32)!=(ROOT/'bin/NC.com').read_bytes()[:32]:m.until(0xE800)
+    m.call('debug_break');m.stop_at(SYSTEM['NC_LOAD_ADDR'])
+    if m.read(SYSTEM['NC_LOAD_ADDR'],32)!=(ROOT/'bin/NC.i80').read_bytes()[:32]:m.until(SYSTEM['NC_LOAD_ADDR'])
     m.stop_at(0x8100)
     if not args.rom_only:
         m.subroutine(0xC842,af=0,de=1)
@@ -43,7 +44,7 @@ def main():
         else:logical=initial
         word=lambda n:struct.unpack_from('<H',logical,n)[0]
         data=word(14)+logical[16]*word(22)+(word(17)*32+255)//256
-        m.write(0,(ROOT/'bin/DISKBEN.com').read_bytes())
+        m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())
         m.stop_at(s['menu_drive']);m.call('regs_set',pc=0);m.until(s['menu_drive'])
         m.stop_at(s['run_tests'])
         m.line(drive)

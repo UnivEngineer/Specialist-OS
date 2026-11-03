@@ -14,12 +14,14 @@
     INCLUDE "cmp_hl_de_2.inc"
     ASSERT delay_l == bios_delay_l
     ASSERT delay_b == bios_delay_b
-    ASSERT reboot == 0C009h
+    ASSERT reboot == bios_restartOld
+    ASSERT setKeybMode82 == bios_setKeybMode82
+    ASSERT setKeybMode91 == bios_setKeybMode91
+    ASSERT v_keybTbl == bios_keybTable
     IF NEW_MEMORY_MAP == 0
         ASSERT_DONT_FIT 0D000h
     ENDIF
-    IF RAMD_BUFFERED
-        ASSERT_DONT_FIT CMD_LINE
-    ENDIF
-    ASSERT_DONT_FIT 0DC00h
+    ASSERT_DONT_FIT CMD_LINE
+    ASSERT_DONT_FIT STD_IO_ADDR
+    ASSERT_DONT_FIT DOS_END_MAX
     END

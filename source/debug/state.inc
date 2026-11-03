@@ -42,19 +42,19 @@ LegacyIoControl:         DS    1
 
 ;----------------------------------------------------------------------------
 ; Начало программы
-    ORG   0F100h
+    ORG   SYSTEM_PROGRAM_ADDR
 
 ; Адреса блоков переменных
 vars1       MON2_VARS_1     = 08F80H
-vars2       MON2_VARS_2     = 0F0E0H
+vars2       MON2_VARS_2     = 08F50H
 v_fileDescr FILE_DESCRIPTOR = 0F900H
 
 ; Буфер для листинга директории
 ; В новой карте памяти можно расположить его
 ; перед Монитором - там больше места
     IF  NEW_MEMORY_MAP
-v_fileInfo  FILE_INFO = 0E800H
-DIR_BUFFER_SIZE = ($ - v_fileInfo) / FILE_INFO_SIZE - 1
+v_fileInfo  FILE_INFO = 08000h
+DIR_BUFFER_SIZE = (08F20h - v_fileInfo) / FILE_INFO_SIZE - 1
     ELSE
 v_fileInfo  FILE_INFO = v_fileDescr + FILE_DESCRIPTOR_SIZE
 DIR_BUFFER_SIZE = (0FB00h - v_fileInfo) / FILE_INFO_SIZE - 1

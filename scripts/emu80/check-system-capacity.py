@@ -6,6 +6,7 @@ import runpy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 Machine = runpy.run_path(str(Path(__file__).with_name('check-copy.py')))['FileMachine']
 symbols = runpy.run_path(str(Path(__file__).with_name('check-flash-allocation.py')))['symbols']
 
@@ -25,10 +26,10 @@ def main():
     m = Machine('http://127.0.0.1:19781/mcp')
     m.call('debug_break')
     m.call('bp_clear')
-    nc = (ROOT / 'bin/NC.com').read_bytes()[:symbols(ROOT / 'bin/NC.lst')['state']-0xE800]
+    nc = (ROOT / 'bin/NC.i80').read_bytes()[:symbols(ROOT / 'bin/NC.lst')['state']-SYSTEM['NC_LOAD_ADDR']]
     for _ in range(180):
         m.call('emu_run_for', ms=500)
-        if m.read(0xE800,len(nc)) == nc:
+        if m.read(SYSTEM['NC_LOAD_ADDR'],len(nc)) == nc:
             break
     else:
         raise RuntimeError('NC не загружен')

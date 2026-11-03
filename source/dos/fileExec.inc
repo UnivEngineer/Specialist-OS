@@ -58,48 +58,114 @@ fileExec_1: ; В конец имени помещаем 13, 0
             ; Запоминаем в стеке текущий адрес командной строки (начало списка аргументов)
             push    hl
 
+            ; Голая команда — только A:ИМЯ.COM. Диск аргументов не меняем.
+            ld a,(v_curFileDescr + FILE_DESCRIPTOR.ext)
+            cp ' '
+            jp nz,execExplicitName
+            ld a,(CMD_LINE+1)
+            cp ':'
+            jp z,execExplicitName
+            ld hl,04F43h             ; ASCII CO
+            ld (v_curFileDescr + FILE_DESCRIPTOR.ext),hl
+            ld a,'M'
+            ld (v_curFileDescr + FILE_DESCRIPTOR.ext+2),a
+            ld a,(v_drive)
+            push af
+            xor a
+            call fileSelectDrive
+            jp execImageOpen
+
+execExplicitName:
             ; Если это BAT файл
             ld      de, aBat
             call    cmpFileExt
             jp z,   execBat
 
-            ; Если это COM или EXE файл
-            call    cmpFileExt
-            jp z,   execExeCom
+            ; EXE/RKS выбирает NC.EXT; DOS непосредственно исполняет только COM.
             call    cmpFileExt
             jp nz,  execError
-
 execExeCom:
-            ; Вытаскиваем из стека текущий адрес командной строки (начало списка аргументов)
-            pop     de
-
-            ; Загрузить файл
-            ld      hl, v_curFileDescr
-            call    fileLoad
-            jp c,   badCommand
-
-            ; Адрес командной строки
-            push    de
-
-            ; Выводим на экран 0Ah
-            ;call printCharA
-
-            ; hl = указатель на адрес загрузки (= адрес запуска) файла
-            ld      de, FILE_DESCRIPTOR.loadAddress   ; смещение поля с адресом загрузки
-            add     hl, de
-
-            ; de = адрес загрузки (= адрес запуска) файла
-            ld      e, (hl)
-            inc     hl
-            ld      d, (hl)
-
-            ; Адрес возврата
-            ld      hl, defAppReturn
-            ex      (sp), hl
-
-            ; Запуск программы (переход на de)
-            ex      de, hl  ; hl <--> de
-            jp      (hl)    ; pc <-- hl
+            ld a,(v_drive)
+            push af
+execImageOpen:
+            ld hl,v_curFileDescr
+            ld a,16
+            call imageOpen
+            jp c,execImageError
+            push de
+            ld h,b
+            ld l,c
+            add hl,de
+            jp c,execRangeError
+            ld a,d
+            cp 0C0h
+            ld de,bios_vars
+            jp c,execCheckEnd
+            cp SYSTEM_PROGRAM_ADDR >> 8
+            jp c,execRangeError
+            cp SYSTEM_FLASH_ADDR >> 8
+            ld de,SYSTEM_FLASH_ADDR
+            jp c,execCheckEnd
+            pop de
+            push de
+            ld a,d
+            cp DISK_DRIVER_ADDR >> 8
+            jp c,execRangeError
+            ld de,DISK_DRIVER_ADDR + 0200h
+execCheckEnd:
+            call cmp_hl_de
+            jp c,execRangeOK
+            jp nz,execRangeError
+execRangeOK:
+            pop de
+            ld a,d
+            cp DISK_DRIVER_ADDR >> 8
+            jp nc,execDriverImage
+            call imageLoad
+            jp c,execImageError
+            call execRestoreDrive
+            jp execTransfer
+execDriverImage:
+            ; Драйвер читается сначала в нижнее ОЗУ: его прежний код
+            ; ещё может обслуживать текущий накопитель до конца чтения.
+            push de
+            ld de,0
+            call imageLoad
+            pop de
+            jp c,execImageError
+            push hl
+            ex de,hl
+            ld (v_input_start),hl
+            pop hl
+            call execRestoreDrive
+            push hl
+            ld hl,(v_input_start)
+            ld b,h
+            ld c,l
+            ld hl,(v_tmpFileDescr+10)
+            ex de,hl
+            ld hl,0
+            call memcpy_bc_hl
+            pop hl
+execTransfer:
+            ex de,hl
+            pop hl
+            ex de,hl
+            ld bc,defAppReturn
+            push bc
+            jp (hl)
+; Исходный диск на стеке под адресом возврата. HL=вход программы сохраняется.
+execRestoreDrive:
+            pop bc
+            pop af
+            push bc
+            jp fileSelectDrive
+execRangeError:
+            pop de
+execImageError:
+            pop af
+            call fileSelectDrive
+            jp execError
 
 ; ---------------------------------------------------------------------------
 

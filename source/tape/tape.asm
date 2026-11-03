@@ -6,13 +6,13 @@
 
     INCLUDE "../include/mxos.inc"
 
-    ORG     0E800h
+    ORG     SYSTEM_PROGRAM_ADDR
 
     INCLUDE "tapeUi.inc"
 
     ; Фиксированная область низкоуровневых процедур нужна эмулятору:
     ; адреса этих диапазонов заданы в SpecialistMX2_My_MXOS.cfg.
-    ORG_PAD 0ED00h
+    ORG_PAD SYSTEM_PROGRAM_ADDR + 0500h
 
     INCLUDE "tapeWriteDelay.inc"
     INCLUDE "tapeRead.inc"

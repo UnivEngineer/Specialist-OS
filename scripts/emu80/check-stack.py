@@ -7,6 +7,7 @@ import runpy
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 Machine = runpy.run_path(str(Path(__file__).with_name('check-flash.py')))['Machine']
 
 
@@ -29,7 +30,7 @@ def main():
     results = {'image_sha256': hashlib.sha256(image).hexdigest(), 'rom_verified': True}
     try:
         m.call('emu_run_for', ms=2000)
-        assert m.read(0xE800, 32) == (ROOT / 'bin/NC.com').read_bytes()[:32]
+        assert m.read(SYSTEM['NC_LOAD_ADDR'], 32) == (ROOT / 'bin/NC.i80').read_bytes()[:32]
         state = m.call('cpu_state')
         assert 0x8DDF <= state['registers']['sp']['dec'] < 0x8FDF
         results['nc_boot_sp'] = state['registers']['sp']['hex']
@@ -45,14 +46,14 @@ def main():
             assert s['registers']['sp']['dec'] == 0x8FDF, s
             return s
 
-        s = execute(bytes.fromhex('CD 30 C8 C3 00 83'))
+        s = execute(bytes.fromhex('CD 33 C8 C3 00 83'))
         assert s['registers']['hl']['dec'] == 0x8DDE
         results['mem_top'] = s['registers']['hl']['hex']
         # Имя готовится штатно; затем весь NC читается с A: в нижнее RAM.
         m.write(0x8400, b'A:NC.COM\0' + bytes(32))
         s = execute(bytes.fromhex('21 00 84 11 00 85 CD 5A C8 21 00 85 11 00 40 CD 66 C8 C3 00 83'))
         assert not s['flags']['C']
-        nc = (ROOT / 'bin/NC.com').read_bytes()
+        nc = (ROOT / 'bin/NC.i80').read_bytes()
         assert m.read(0x4000, len(nc)) == nc
         results['file_load2_A_NC'] = True
         # STD: код выше 8000h остаётся видимым; сумма не обращается к портам.
@@ -62,7 +63,7 @@ def main():
         assert s['registers']['bc']['dec'] == 0x0306
         results['std_call_ret_checksum'] = s['registers']['bc']['hex']
         # DEBUG: не перекрывает собственные переменные новым верхом стека.
-        debug = (ROOT / 'bin/Debug.com').read_bytes()
+        debug = (ROOT / 'bin/Debug.i80').read_bytes()
         m.write(0xF100, debug)
         m.call('regs_set', pc=0xF100, sp=0x8FDF)
         m.call('bp_clear')

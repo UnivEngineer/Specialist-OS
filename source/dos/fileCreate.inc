@@ -4,6 +4,7 @@
 ;
 ; На входе
 ;  hl - адрес дескриптора файла в формате FAT (имя, фтрибуты, размер и т.д.)
+;  de - адрес исходного буфера; размер в дескрипторе равен N
 ;
 ; На выходе
 ;  сf - ошибка
@@ -26,7 +27,11 @@ fatFileCreatePrepare:
             ex      de, hl
             jp      fileCreateEntry
 
-fatFileCreate: ; Сохраняем регистры
+fatFileCreate: ; HL=дескриптор с точным размером, DE=буфер данных.
+            ex de,hl
+            ld (v_input_start),hl
+            ex de,hl
+            ; Сохраняем регистры
             xor     a
             ld      (v_fileCreatePrepare), a
 
@@ -128,9 +133,23 @@ fileCreate_placeFound:
             ld      (v_cachedSector), hl
 
             ; Находим первый свободный кластер
+            ld hl,(v_newDescrPtr)
+            ld de,FILE_DESCRIPTOR.size
+            add hl,de
+            ld b,4
+            xor a
+fileCreate_checkEmpty:
+            or (hl)
+            inc hl
+            dec b
+            jp nz,fileCreate_checkEmpty
+            or a
+            ld de,0
+            jp z,fileCreate_firstReady
             call    fatFindClusterFirst ; de = первый свободный кластер
             jp c,   stc_popDBH_ret      ; если нет свободных кластеров - выходим с ошибкой
 
+fileCreate_firstReady:
             ; Сохраняем его в переменную v_fileFirstCluster
             ex      hl, de
             ld      (v_fileFirstCluster), hl
@@ -171,24 +190,15 @@ fileCreate_placeFound:
             call    copyDescriptor
             pop     bc
 
+            ld hl,(v_fileFirstCluster)
+            ld a,h
+            or l
+            jp z,fileCreate_prepareDone
             ld      a, (v_fileCreatePrepare)
             or      a
             jp nz,  fileCreate_allocate
 
             ;---------------------------------------------------------------------
-
-		    ; Читаем адрес загрузки файла
-            ; de = адрес загрузки файла
-            ld      hl, (v_newDescrPtr)
-            ld      bc, FILE_DESCRIPTOR.loadAddress
-            add     hl, bc  ; hl = адрес поля loadAddress (мл. байт) в дескрипторе файла
-            ld      e, (hl)
-            inc     hl      ; hl = адрес поля loadAddress (ст. байт) в дескрипторе файла
-            ld      d, (hl) ; de = адрес загрузки
-
-            ; Сохраняем адрес загрузки в переменную v_input_start
-            ex      de, hl
-            ld      (v_input_start), hl ; v_input_start = адрес загрузки файла
 
             ; Читаем размер файла
             ; de = размер файла
@@ -199,11 +209,11 @@ fileCreate_placeFound:
             inc     hl      ; hl = адрес поля size (ст. байт) в дескрипторе файла
             ld      d, (hl)
 
-            ; Сохраняем размер файла в переменную v_input_end
+            ; В HL точный размер; ниже сохраняется уже число кластеров.
             ex      de, hl
-            ld      (v_input_end), hl   ; v_input_end = размер файла
 
-            ; Счётчик кластеров файла
+            ; ceil(N/256), нулевой размер обработан отдельно.
+            dec hl
             ld      c, h        ; c = число 256-байтных блоков (0 означает 256)
             inc     c
             ld      l, c
@@ -265,11 +275,18 @@ writeFirstCluster:            ; записываем номер кластера
             ld      hl, (v_fileFirstCluster)
             ex      hl, de
 
-            ld      hl, (v_newDescrPtr)
-            ld      bc, FILE_DESCRIPTOR.size + 1
-            add     hl, bc
-            ld      c, (hl)
-            inc     c
+            push de
+            ld hl,(v_newDescrPtr)
+            ld bc,FILE_DESCRIPTOR.size
+            add hl,bc
+            ld e,(hl)
+            inc hl
+            ld d,(hl)
+            ex de,hl
+            pop de
+            dec hl
+            ld c,h
+            inc c
 
             ld      hl, (v_input_start)
             ld      b, 1

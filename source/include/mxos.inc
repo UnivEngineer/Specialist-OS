@@ -4,26 +4,32 @@
 ; DOS.SYS — историческое имя единого ядра MXOS. Префикс bios_ сохранён
 ; для совместимости ABI; аппаратные и файловые сервисы входят в одно ядро.
 ;
-; Новая карта памяти:
-;   8FDF-8FFF - [  33 B] Переменные
+; Карта памяти:
+;   0000-8EFF - NC.COM, его данные, кэши каталогов и буфер копирования
+;   8FDF-8FFF - [  33 B] Переменные BIOS
 ;   9000-BFFF - [12  KB] Экран
-;   C000-DBFF - [7168 B] DOS.SYS
-;   DC00-DD3F - [ 320 B] FLASHSYS.COM
-;   DD40-DDFF - [ 192 B] устанавливаемый RAMD.COM
-;   DE00-DFFF - [ 512 B] Драйвер флеш-диска
-;   E000-E7FF - [2048 B] Шрифт
-;   E800-FAFF - [4864 B] Системные программы (NC.COM, E.COM, DL-RED.COM, FORMAT.COM, DEBUG.COM, ...)
-;   FB00-FEFF - [1024 B] Дисковый кэш (fat + каталог)
-;   FF00-FF81 - [ 130 B] Командная строка
-;   FF82-FFBF - [  62 B] Стек при RAMD_BUFFERED=0
-;   FFC0-FFDF - [  32 B] Непереключаемое ОЗУ, драйвер обмена с RAM диском
-;   FFE0-FFFF - [  32 B] Оборудование
+;   C000-DFFF - [8192 B] DOS.SYS
+;   E000-E081 - [ 130 B] Командная строка
+;   E082-E1FF - [ 382 B] Стек, SP=E200h
+;   E200-E9FF - [2048 B] Шрифт
+;   EA00-F3FF - [2560 B] Верхние утилиты; E.COM находится в нижнем ОЗУ
+;   F400-F53F - [ 320 B] FLASHSYS.COM
+;   F540-F5FF - [ 192 B] Устанавливаемый RAMD.COM
+;   F600-F7FF - [ 512 B] Драйвер flash-/ROM-диска H:
+;   F800-FAFF - [ 768 B] Резерв MX
+;   FB00-FEFF - [1024 B] Дисковый кэш (FAT + каталог)
+;   FF00-FFAF - [ 176 B] Резерв хвостов RAMD.COM
+;   FFB0-FFBB - [  12 B] Состояние NC
+;   FFBE-FFBF - [   2 B] Детектор ДОЗУ, FFBF — метка FORMAT
+;   FFC0-FFDF - [  32 B] Непереключаемое ОЗУ, драйвер ДОЗУ
+;   FFE0-FFFF - [  32 B] Регистры оборудования
 ;
-; При RAMD_BUFFERED=1: DOS заканчивается не позднее DA00h;
-; DA00-DA81 — командная строка, DA82-DBFF — стек (SP=DC00h);
-; FF00-FFAF — резерв RAMD.COM (без него свободен), FFB0-FFBB — состояние NC,
-; FFBE — тестовый байт определения ДОЗУ, FFBF — метка FORMAT.
-; FFC0-FFDF остаётся общим окном.
+; В STD ОЗУ заканчивается на EFFFh: F000-F7FF — устройства с зеркалами
+; по 32 байта, F800-FFFF — ВВ55 клавиатуры с зеркалами по 4 байта.
+; DOS, системная строка, стек и шрифт остаются доступны; дисковый кэш,
+; хвосты RAMD и состояние NC в верхней области доступны только в MX.
+; Верхние утилиты EA00-F3FF также не обязаны работать в STD целиком.
+; RAMD.COM устанавливается отдельно; строка и стек принадлежат DOS.
 ;
 ; Старая карта памяти:
 ;   8FDF-8FFF - [  32 B] Переменные
@@ -41,7 +47,7 @@
 ;   FF00-FF81 - [ 130 B] Командная строка
 ;   FF82-FFBF - [  62 B] Стек
 ;   FFC0-FFDF - [  32 B] Непереключаемое ОЗУ, драйвер обмена с RAM диском
-;   FFE0-FFFF - [  32 B] Оборудование
+;   FFE0-FFFF - [  32 B] Регистры оборудования
 ;-----------------------------------------------------------------------
 
 
@@ -55,10 +61,6 @@ NEW_MEMORY_MAP       =  1       ; Новая карта памяти
 DISK_DRIVER_CHECKED =  1       ; Встроенный ROM/RAM-драйвер: CF и проверка аргументов
     ENDIF
     ASSERT DISK_DRIVER_CHECKED == 0 || DISK_DRIVER_CHECKED == 1
-    IFNDEF RAMD_BUFFERED
-RAMD_BUFFERED       =  1       ; 0: исторический блок; 1: байтовый + устанавливаемый RAMD.COM
-    ENDIF
-    ASSERT RAMD_BUFFERED == 0 || RAMD_BUFFERED == 1
 RAMD_MAX_PAGE        =  16      ; Максимальное количество страниц RAM диска
 RAMD_PAGE_END        =  0FFBEh  ; Тестовый байт вне кода и состояния NC
 ROM_64K              =  1       ; Включить поддержку ПЗУ 64 Кб Специалиста МХ2
@@ -70,7 +72,7 @@ RAMFOS_COMPATIBILITY =  1       ; Совместимость с RAMFOS (WIP)
 BOOT_FROM_TAPE       =  0       ; Включить загрузку с ленты при нажатой клавише после сброса
 
     IF  NEW_MEMORY_MAP
-FONT_ADDR = 0E000h  ; Адрес шрфита
+FONT_ADDR = 0E200h  ; Адрес шрфита
     ELSE
 FONT_ADDR = 0E900h  ; Адрес шрфита
     ENDIF
@@ -129,17 +131,22 @@ bios_init               = 0C000h ; Теплая перезагрузка
 ; Устаревшие точки, лечше не применять
 bios_keyScanOld         = 0C003h ; [OLD] Получить код нажатой клавиши, = bios_keyScan
 bios_drawCursorOld      = 0C006h ; [OLD] Нарисовать/стереть курсор
+bios_restartOld         = 0C009h ; [OLD] Тёплая перезагрузка, устанавливает системный стек
 bios_clearScreenOld     = 0C010h ; [OLD] Оистка экрана
 bios_printCharOld       = 0C037h ; [OLD] Вывод символа на экран
 bios_beep_Old           = 0C170h ; [OLD] Звуковой сигнал
 bios_delay_l            = 0C18Fh ; [OLD] Задержка l циклов
 bios_delay_b            = 0C190h ; [OLD] Задержка b циклов
+bios_setKeybMode82      = 0C254h ; [OLD] Загрузчик: A=82h, флаги/BC/DE/HL сохраняются
+bios_setKeybMode91      = 0C25Ah ; [OLD] Загрузчик: A=91h, флаги/BC/DE/HL сохраняются
 bios_getchOld           = 0C337h ; [OLD] Ожидание ввода с клавиатуры
 bios_tapeReadOld        = 0C377h ; [OLD] Чтение байта с магнитофона
 bios_tapeWriteOld       = 0C3D0h ; [OLD] Запись байта на магнитофон
 bios_cmp_hl_de          = 0C427h ; [OLD] Сравнить hl и de
-bios_memcpy_bc_hl       = 0C42Dh ; HL..DE исключительно -> BC, с учётом перекрытия
+bios_memcpy_bc_hl       = 0C42Dh ; [OLD] HL..DE исключительно -> BC, с учётом перекрытия
 bios_printStringOld     = 0C438h ; [OLD] Вывод строки на экран
+
+bios_keybTable          = 0C4A0h ; [OLD] Матрица клавиатуры Загрузчика, 96 байт до C4FFh
 
 ; Стандартные точки C800h
 bios_reboot             = 0C800h ; Восстановить звук и запустить NC.COM
@@ -158,8 +165,8 @@ bios_tapeLoad           = 0C824h ; Загрузить программу с ма
 bios_tapeSave           = 0C827h ; Сохранить программу на магнитофон
 bios_calcCS             = 0C82Ah ; Расчет контрольной суммы
 bios_printHexWord       = 0C82Dh ; Вывод HEX числа на экран (слово)
-bios_getMemTop          = 0C830h ; Получить объем доступной памяти
-bios_setMemTop          = 0C833h ; Установить объем доступной памяти
+bios_setMemTop          = 0C830h ; Monitor-2: установить границу из HL; регистры/флаги сохранены
+bios_getMemTop          = 0C833h ; Monitor-2: HL=граница памяти; AF/BC/DE и флаги сохранены
 bios_printer            = 0C836h ; Напечатать байт на принтере
     IF RAMFOS_COMPATIBILITY
 bios_strToHex           = 0C839h ; [MXOS2] Преобразвоние строки в HEX формате в число
@@ -169,17 +176,19 @@ bios_rebootAlt          = 0C839h ; Запустить NC.COM
 bios_rebootAlt2         = 0C83Ch ; Восстановить звук и запустить NC.COM
 bios_fileList           = 0C83Fh ; Получить список файлов
 bios_fileGetSetDrive    = 0C842h ; Получить/установить активное устройство
-bios_fileCreate         = 0C845h ; Создать файл
-bios_fileLoad           = 0C848h ; Загрузить файл по адресу из заголовка этого файла
+bios_fileCreate         = 0C845h ; HL=дескриптор с точным N, DE=исходный буфер
+bios_fileLoad           = 0C848h ; DE=назначение; читать подготовленное тело по месту, CF=ошибка
 bios_fileDelete         = 0C84Bh ; Удалить файл
 bios_fileRename         = 0C84Eh ; Переименовать файл
 bios_fileLoadInfo       = 0C851h ; Загрузить информацию о файле
-bios_fileGetSetAddr     = 0C854h ; Получить/установить адрес загрузки файла
+bios_imageOpen          = 0C854h ; HL=дескриптор, A=16 COM/EXE или 4 RKS; открыть первый сектор
 bios_fileGetSetAttr     = 0C857h ; Получить/установить атрибуты файла
 bios_fileNamePrepare    = 0C85Ah ; Преобразовать имя файла во внутренний формат
 bios_fileExec           = 0C85Dh ; Запустить файл; BAT затирает ОЗУ 0000h-8000h
 bios_installDriver      = 0C860h ; Установить драйвер накопителя
 bios_diskDriver         = 0C863h ; Драйвер выбранного диска
+
+bios_fileLoad2          = 0C866h ; Загрузить файл по адресу de
 
 ; Новые точки C800h MXOS2
 bios_printCharReal      = 0C869h ; [MXOS2] Вывод символа на экран (только реальные символы)
@@ -203,6 +212,17 @@ bios_beepTimer          = 0C89Ch ; [MXOS2] Звуковой сигнал чер�
 bios_diskWriteChecked   = 0C89Fh ; [MXOS2] Общий B=5: BC=адрес драйвера, DE=сектор, HL=данные
 bios_timerInit          = 0C8A2h ; [MXOS2] ВИ53: каскад CLK1/256/65536; AF/HL разрушены
 bios_timerRead          = 0C8A5h ; [MXOS2] HL=убывающий счётчик ВИ53; AF/HL разрушены
+bios_uiDraw             = 0C8A8h ; [MXOS2] HL=список объектов, A=смещение X в байтах; AF/BC/DE/HL разрушены
+bios_uiInverseRect      = 0C8ABh ; [MXOS2] HL=экран, B=ширина, C=высота; DE сохранён, AF/BC/HL разрушены
+bios_uiToolbar          = 0C8AEh ; [MXOS2] HL=строка F1-F8, B/C=цвет клавиш/подписей; AF/BC/DE/HL разрушены
+bios_uiCopyRect         = 0C8B1h ; [MXOS2] HL/BC=источник/назначение, D/E=ширина/высота; AF/BC/DE/HL разрушены
+bios_fileAssociation    = 0C8B4h ; [MXOS2] HL=расширение, DE/BC=буфер/ёмкость; CF=0 HL=команда, диск сохранён
+bios_argNext            = 0C8B7h ; [MXOS2] HL=курсор -> HL=разделитель, DE=слово, B=длина; CF=конец, C сохранён
+bios_fileSelectDrive    = 0C8BAh ; [MXOS2] A=диск 0..7; BC/DE/HL сохранены, CF=ошибка
+bios_fileRenameOnDrive  = 0C8BDh ; [MXOS2] HL/DE=старое/новое компактное имя на текущем диске
+bios_fileDeleteOnDrive  = 0C8C0h ; [MXOS2] HL=компактное имя на текущем диске, CF=ошибка
+bios_fileCopy           = 0C8C3h ; [MXOS2] HL=FILE_COPY_REQUEST, CF/A=результат; диск восстановлен
+bios_fileGetDrives      = 0C8C6h ; [MXOS2] HL/BC=буфер/ёмкость в байтах (>=8); B=количество
 
 ;-----------------------------------------------------------------------
 ; Адрес таблицы переходов драйвера магнитофона
@@ -274,11 +294,10 @@ DISK_CAP_READ          = 01h
 DISK_CAP_WRITE         = 02h
 DISK_CAP_VERIFY        = 04h    ; B=5: синхронная запись с чтением и сравнением
 DISK_CAP_FLUSH         = 08h    ; B=4: завершение отложенной записи
-bios_fileLoad2          = 0C866h ; Загрузить файл по адресу de
 
 ; ABI 1 драйвера тома. Аппаратный ABI bios_diskDriver остаётся отдельным.
 ; Таблица начинается с DB "FS",1,15; далее 15 адресов DW в этом порядке.
-; Файловые операции пока сохраняют исторические контракты DOS (8.3, N-1).
+; Файловые операции пока сохраняют исторические контракты DOS (8.3, точный размер N).
 ; Это ещё не независимый байтовый поток и не готовый драйвер RAMFOS.
 VOLUME_DRIVER_VERSION = 1
 VOLUME_DRIVER_COUNT   = 15
@@ -290,7 +309,7 @@ VOL_LOAD              = 6
 VOL_DELETE            = 8
 VOL_RENAME            = 10
 VOL_STAT              = 12
-VOL_LOAD_ADDRESS      = 14
+VOL_LOAD_ADDRESS      = 14  ; Зарезервирован: адреса перенесены из FAT в контейнер
 VOL_ATTRIBUTES        = 16
 VOL_LOAD_AT           = 18
 VOL_FREE_SPACE        = 20
@@ -304,6 +323,7 @@ VOL_FLUSH             = 28
 ;-----------------------------------------------------------------------
 
 ; Структура каталога
+IMAGE_HEADER_SIZE = 16
 FILE_DESCR_SIZE  = 32   ; размер дескриптора файла в каталоге (байт)
 FILE_NAME_LENGTH = 8    ; длина имени файла  (байт)
 FAT_ITEM_SIZE    = 2    ; размер записи в таблице FAT (байт)
@@ -331,7 +351,7 @@ ntReserved      BLOCK   1                   ; смещение 0Ch, 1 байт  
 createTimeTenth BLOCK   1                   ; смещение 0Dh, 1 байт  - (только FAT32) время создания файла, десятки миллисекунд (0-199)
 createTime      BLOCK   2                   ; смещение 0Eh, 2 байта - (только FAT32) время создания файла, секунды*2 (0-43200)
 createDate      BLOCK   2                   ; смещение 10h, 2 байта - (только FAT32) дата  создания файла
-loadAddress     BLOCK   2  ; accDate        ; смещение 12h, 2 байта - начальный адрес загрузки в ОЗУ, он же и стартовый (!!! временный костыль, в FAT32 это accDate - дата доступа к файлу !!!)
+accessDate      BLOCK   2                   ; смещение 12h: дата последнего доступа FAT16
 firstClusterHi  BLOCK   2                   ; смещение 14h, 2 байта - номер первого кластера в FAT, старшее слово
 writeTime       BLOCK   2                   ; смещение 16h, 2 байта - время модификации файла, секунды*2 (0-43200)
 writeDate       BLOCK   2                   ; смещение 18h, 2 байта - дата  модификации файла
@@ -339,10 +359,45 @@ firstCluster    BLOCK   2                   ; смещение 1Ah, 2 байта
 size            BLOCK   4                   ; смещение 1Ch, 4 байта - размер файла в байтах
     ENDS
 
+; Вызывающая программа выделяет запрос копирования и независимый буфер.
+; Имена source/destination — компактные 8.3, первые 11 байт дескриптора.
+    STRUCT FILE_COPY_REQUEST
+buffer              DW 0
+bufferSize          DW 0        ; Байты, минимум 256; неполный сектор не используется.
+sourceDrive         DB 0
+destinationDrive    DB 0
+source              FILE_DESCRIPTOR
+destination         FILE_DESCRIPTOR
+sourceCluster       DW 0        ; Рабочие поля изменяет только DOS.
+destinationCluster  DW 0
+blocksLeft          DW 0
+    ENDS
+FILE_OP_ERROR  = 1
+FILE_OP_EXISTS = 2
+
 ;-----------------------------------------------------------------------
 ; Информация о файле (компактный вариант дескриптора)
 ; Почти совместимо с дескриптором оригинального Коммандера
 ;-----------------------------------------------------------------------
+
+    ; Временный контекст C854h/C848h; в формате A=4 адрес возвращён в HL.
+    ; Он действителен до следующей файловой операции и не является записью FAT.
+    STRUCT IMAGE_LOAD_CONTEXT
+prefix          BLOCK 6
+loadAddress     DW 0
+entryAddress    DW 0
+bodySize        DW 0
+bodyChecksum    DW 0
+headerChecksum  DW 0
+skip            DB 0
+_reserved       DB 0
+tail            DW 0
+_reserved2      BLOCK 6
+nextCluster     DW 0
+fileSize        DW 0
+fileSizeHi      DW 0
+    ENDS
+    ASSERT IMAGE_LOAD_CONTEXT == FILE_DESCR_SIZE
 
 FILE_INFO_SIZE = 16     ; размер структуры (байт)
 
@@ -350,8 +405,8 @@ FILE_INFO_SIZE = 16     ; размер структуры (байт)
 name            BLOCK   FILE_NAME_LENGTH    ; смещение 00h, 8 байт  - имя файла
 ext             BLOCK   3                   ; смещение 08h, 3 байта - расширение имени файла
 attrib          BLOCK   1                   ; смещение 0Bh, 1 байт  - атрибуты файла
-loadAddress     BLOCK   2                   ; смещение 0Eh, 2 байта - начальный адрес загрузки в ОЗУ, он же и стартовый
-size            BLOCK   2                   ; смещение 0Ch, 2 байта - размер файла в байтах
+reserved        BLOCK   2                   ; два нулевых байта компактной записи, не адрес
+size            BLOCK   2                   ; смещение 0Eh, младшие 16 бит точного размера файла
     ENDS
 
 ;-----------------------------------------------------------------------
@@ -384,7 +439,11 @@ DISK_VALID     = 2
 ; Буферы в памяти
 ;-----------------------------------------------------------------------
 
-; Дисковый кэш
+; Границы STD по мапперу MMX: вся верхняя страница 4 КБ — устройства.
+STD_IO_ADDR = 0F000h
+STD_KEYB_ADDR = 0F800h
+
+; Дисковый кэш, в STD недоступен.
     IFNDEF FAT_CACHE_ADDR
 FAT_CACHE_ADDR = 0FB00h ; адрес кэша секторов fat в памяти
     ENDIF
@@ -403,18 +462,28 @@ BAT_BUFFER = 0000h
 BAT_BUFFER_SIZE = 08000h
 
 ; Резидент RAMD.COM делит окно расширений с FLASHSYS.COM.
-RAMD_RESIDENT_ADDR = 0DD40h ; DD40h-DDFFh (192 байта), FLASHSYS ниже
+RAMD_RESIDENT_ADDR = 0F540h ; F540h-F5FFh (192 байта), FLASHSYS ниже
 
-; Командная строка. Её расположение пока сохраняется.
-    IF RAMD_BUFFERED
+SYSTEM_FLASH_ADDR = 0F400h ; F400h-F53Fh
+DISK_DRIVER_ADDR = 0F600h  ; F600h-F7FFh
+NC_LOAD_ADDR = 00000h      ; NC — обычная программа с собственными буферами
+SYSTEM_PROGRAM_ADDR = 0EA00h ; EA00h-F3FFh
+DOS_END_MAX = 0E000h       ; Далее командная строка и стек
+
+; Системные данные нужны и в STD, независимо от варианта драйвера RAM.
     ASSERT NEW_MEMORY_MAP
-CMD_LINE   = 0DA00h  ; 130 байт строки, далее 382 байта стека
-STACK_ADDR = 0DC00h
+CMD_LINE   = 0E000h  ; 130 байт строки, далее 382 байта стека
+CMD_LINE_SIZE = 130
+STACK_BOTTOM = CMD_LINE + CMD_LINE_SIZE
+STACK_ADDR = 0E200h
 NC_STATE_ADDR = 0FFB0h ; 12 байт; FFBEh — детектор, FFBFh — метка FORMAT
-    ELSE
-CMD_LINE   = 0FF00h  ; 130 байт строки, далее исторический стек
-STACK_ADDR = 0FFC0h
-NC_STATE_ADDR = 0FF00h
+
+    ASSERT DOS_END_MAX <= CMD_LINE
+    ASSERT CMD_LINE_SIZE == 130
+    ASSERT STACK_BOTTOM < STACK_ADDR && STACK_ADDR <= STD_IO_ADDR
+    ASSERT DOS_END_MAX <= STD_IO_ADDR
+    IF LOAD_FONT
+        ASSERT FONT_ADDR + 0800h <= STD_IO_ADDR
     ENDIF
 
 

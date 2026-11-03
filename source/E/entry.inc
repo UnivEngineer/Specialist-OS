@@ -70,6 +70,11 @@ editorShowFileTooLarge:
         JP    bios_getch
 
 openCommandLineFile:
+        XOR   A
+        LD    (bios_vars.koi7),A      ; Файлы MXOS хранятся в KOI-8.
+        EX    DE,HL
+        CALL  bios_argNext
+        JP    C,startupBannerAndLineBuffer
         EX    DE,HL
         LD    DE,fileDescName
         CALL  bios_fileNamePrepare
@@ -81,7 +86,7 @@ openCommandLineFile:
         LD    HL,(v_textBeginLo)
         EX    DE,HL
         LD    HL,fileDescName
-        CALL  bios_fileLoad2
+        CALL  loadTextFile
         JP    startupBannerAndLineBuffer
 
 commandLineFileTooLarge:

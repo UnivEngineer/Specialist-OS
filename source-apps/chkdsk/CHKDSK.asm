@@ -17,21 +17,23 @@
     ORG 0
 entry:
     di
-    ld sp,08FDFh
+    ld hl,0
+    add hl,sp
+    ld (callerSP),hl
+    ld a,(bios_vars.koi7)
+    ld (callerKoi),a
+    xor a
+    ld (bios_vars.koi7),a       ; Имена файлов на диске хранятся в KOI-8.
     ld c,01Fh
     call bios_printChar
     ld hl,txtTitle
     call puts
     ; MXOS передаёт адрес аргументов в DE, длина в BC не определена.
 readArgument:
-    ld a,(de)
-    cp ' '
-    jp nz,argumentReady
-    inc de
-    jp readArgument
-argumentReady:
-    cp ' '
+    ex de,hl
+    call bios_argNext
     jp c,askDrive
+    ld a,(de)
     jp chooseDrive
 askDrive:
     ld hl,txtDrive
@@ -137,7 +139,12 @@ waitPrompt:
     call puts
 waitKey:
     call bios_getch
-    jp bios_reboot
+    ld a,(callerKoi)
+    ld (bios_vars.koi7),a
+    ld hl,(callerSP)
+    ld sp,hl
+    or a
+    ret
 badGeometry:
     ld a,3
     ld (result),a
@@ -453,7 +460,7 @@ mapDivide:
     pop af
     ret
 checkChain:
-    ; Только текущее 16-битное N-1, старшие слова не используются MXOS.
+    ; Точный 16-битный размер N; старшее слово пока не поддерживается сканером.
     ld hl,(entryCopy+30)
     ld a,h
     or l
@@ -462,10 +469,23 @@ checkChain:
     ld a,h
     or l
     jp nz,chainError
-    ld a,(entryCopy+29)
-    ld l,a
+    ld hl,(entryCopy+28)
+    ld a,h
+    or l
+    jp nz,chainNonempty
+    LOAD_DE entryCopy+26
+    ld a,d
+    or e
+    ret z
+    jp chainError
+chainNonempty:
+    ld a,l
+    ld l,h
     ld h,0
+    or a
+    jp z,chainCountReady
     inc hl
+chainCountReady:
     ld (chainLeft),hl
     LOAD_DE entryCopy+26
 chainLoop:
@@ -607,11 +627,11 @@ checksumFile:
     ld (streamPtr),hl
     ; Первые 64 байта читаем только если файл не короче этого заголовка.
     ld hl,(entryCopy+28)
-    ld de,63
+    ld de,16
     call compare
     jp c,tryRKS
     ld hl,header
-    ld b,64
+    ld b,16
 headerRead:
     call streamByte
     ld (hl),a
@@ -629,37 +649,28 @@ magicLoop:
     inc de
     dec b
     jp nz,magicLoop
-    ld a,(header+6)
-    cp 1
-    jp nz,sumBad
-    ld hl,(header+8)
-    ld de,64
-    call compare
-    jp nz,sumBad
-    ld hl,(header+14)
+    ld hl,(header+10)
     ld a,h
     or l
     jp z,sumBad
     ld (payloadLeft),hl
-    ld de,63
+    ld de,16
     add hl,de
     jp c,sumBad
     LOAD_DE entryCopy+28
     call compare
     jp nz,sumBad
-    ld hl,(header+20)
+    ld hl,(header+14)
     ld (expected),hl
-    ld hl,0
-    ld (header+20),hl
     ld hl,header
-    ld de,header+63
+    ld de,header+13
     call bios_calcCS
     ld hl,(expected)
     ld d,b
     ld e,c
     call compare
     jp nz,sumBad
-    ld hl,(header+18)
+    ld hl,(header+12)
     ld (expected),hl
     jp sumPayload
 resetRKS:
@@ -672,8 +683,11 @@ tryRKS:
     ld de,rksExt
     ld b,3
 rksExtension:
+    ld a,(hl)
+    and 0DFh
+    ld c,a
     ld a,(de)
-    cp (hl)
+    cp c
     jp nz,noSum
     inc de
     inc hl
@@ -696,7 +710,7 @@ rksExtension:
     or l
     jp z,noSum
     ld (payloadLeft),hl
-    ld de,5
+    ld de,6
     add hl,de
     jp c,noSum
     LOAD_DE entryCopy+28
@@ -790,10 +804,21 @@ sumPrint:
     jp skipEntry
 printRecord:
     ld hl,entryCopy
-    ld b,11
-printName:
-    ld c,(hl)
+    ld b,8
+    call printName
+    ld a,(hl)
+    cp ' '
+    ret z
+    ld c,'.'
     call bios_printChar
+    ld b,3
+printName:
+    ld a,(hl)
+    cp ' '
+    jp z,printNameNext
+    ld c,a
+    call bios_printChar
+printNameNext:
     inc hl
     dec b
     jp nz,printName
@@ -805,12 +830,12 @@ streamWord:
     ld h,a
     ret
 
-mxMagic:        DB 0CDh,020h,"MXEX"
+mxMagic:        DB 0CDh,020h,"MX",1,0
 rksExt:         DB "RKS"
 txtFat:         DB "FAT16   "
-txtTitle:       DB "CHKDSK - READ ONLY",10,0
-txtDone:        DB 10,"Press any key to exit",0
-txtDrive:       DB 10,"CHKDSK drive [A-H], ENTER: ",0
+txtTitle:       DB "CHKDSK - READ ONLY",0
+txtDone:        DB 10,"PRESS ANY KEY TO EXIT",0
+txtDrive:       DB 10,"CHKDSK DRIVE [A-H], ENTER: ",0
 txtStructure:   DB 10,"STRUCTURE...",0
 txtReserved:    DB 10,"INVALID RESERVED FAT CELL",0
 txtEntry:       DB 10,"UNSUPPORTED DIRECTORY ENTRY: ",0
@@ -858,6 +883,8 @@ runningSum:     DW 0
 rksMode:        DB 0
 sumLastByte:    DB 0
 driveInput:     DB 0,0
+callerSP:       DW 0
+callerKoi:      DB 0
 codeEnd:
     ASSERT codeEnd < 02000h
 names = 02000h

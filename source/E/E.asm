@@ -68,7 +68,7 @@ editor_vars EDITOR_VARIABLES = 8F80H
 
 ; Начало программы
     IF NEW_MEMORY_MAP && !STANDARD_EDITOR
-        ORG 0E800h
+        ORG 0
     ELSE
         ORG 0D000h
     ENDIF
@@ -76,8 +76,10 @@ editor_vars EDITOR_VARIABLES = 8F80H
 ;----------------------------------------------------------------------------
 
 ; Буферы в конце программы
-FILE_NAME_RECALL_END = $ + 0F0Ah ; 0DF0AH
-FILE_NAME_HISTORY = $ + 0F00h ; 0DF00H
+; История имени вне кода и кэша; текст заканчивается перед 8500h.
+FILE_NAME_HISTORY = 08500h
+FILE_NAME_RECALL_END = FILE_NAME_HISTORY + 10
+    ASSERT FILE_NAME_HISTORY + 16 <= editor_vars
 
 EDITOR_BUFFER_SIZE = 08500h - 01800h
 
@@ -92,3 +94,7 @@ EDITOR_BUFFER_SIZE = 08500h - 01800h
     INCLUDE "screen.inc" ; Примитивы памяти, курсор, экран и строка состояния
     INCLUDE "files.inc" ; Дисковые операции, ввод имени и дескриптор файла
     INCLUDE "entry.inc" ; Файловые клавиши и вход с аргументом командной строки
+
+    IF !STANDARD_EDITOR
+        ASSERT $ <= 01800h
+    ENDIF

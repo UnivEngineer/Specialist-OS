@@ -49,13 +49,13 @@ class Machine:
         return state
 
     def install_flash(self, name):
-        return self.install_flash_binary((ROOT / 'bin' / (name + '.com')).read_bytes())
+        return self.install_flash_binary((ROOT / 'bin' / (name + '.i80')).read_bytes())
 
     @staticmethod
     def resident_bytes(name):
         syms = dict((k,int(v,16)) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
                     (ROOT/'bin'/(name+'.sym')).read_text(),re.M))
-        return (ROOT/'bin'/(name+'.com')).read_bytes()[syms['resident_file']:syms['resident_file_end']]
+        return (ROOT/'bin'/(name+'.i80')).read_bytes()[syms['resident_file']:syms['resident_file_end']]
 
     def subroutine(self, address, **registers):
         self.write(0x8000, bytes((0xCD, address & 255, address >> 8, 0xC3, 0, 0x81)))
@@ -99,7 +99,7 @@ def main():
         if (args.runtime / 'specialist-os/system-flash.bin').exists():
             raise ValueError('For the system-flash profile use check-system-flash.py --locked; do not reinstall FlashSys.')
         # Устанавливаем один раз: установщик сохраняет старые адреса обёрток ABI.
-        machine.write(0, (ROOT / "bin/FlashSys.com").read_bytes())
+        machine.write(0, (ROOT / "bin/FlashSys.i80").read_bytes())
         assert machine.subroutine(0)["flags"]["C"], "ROM must reject software ID"
         machine.subroutine(0xC842, af=0x0000, de=1)
         entry = 0xC863

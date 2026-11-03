@@ -118,3 +118,11 @@ moveRestoreSP:
             ld      sp, 0
             ret
 moveCoreEnd:
+
+; Внутреннее копирование неперекрывающегося фрагмента: HL -> DE, BC>0.
+; HL=конец источника, BC=конец назначения, AF/DE разрушены.
+moveBytesForward:
+            push hl
+            add hl,bc
+            ex (sp),hl
+            jp moveForward

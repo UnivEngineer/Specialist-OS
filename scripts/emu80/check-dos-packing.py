@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 h = runpy.run_path(str(Path(__file__).with_name('check-mapped-read.py')))
 Machine, symbols = h['MappedBench'], h['symbols']
 
@@ -39,9 +40,9 @@ def main():
             m.stop_at(ns['mainLoop'])
             m.call('regs_set',pc=0xC009,sp=0)
             m.until(ns['mainLoop'])
-            assert m.read(0xE800,32)==(ROOT/'bin/NC.com').read_bytes()[:32]
-            assert m.read(0xDC00,8)==m.resident_bytes('FlashSys')[:8]
-            assert m.read(0xDE00,8)==m.resident_bytes('Flash')[:8]
+            assert m.read(SYSTEM['NC_LOAD_ADDR'],32)==(ROOT/'bin/NC.i80').read_bytes()[:32]
+            assert m.read(SYSTEM['SYSTEM_FLASH_ADDR'],8)==m.resident_bytes('FlashSys')[:8]
+            assert m.read(SYSTEM['DISK_DRIVER_ADDR'],8)==m.resident_bytes('Flash')[:8]
             m.screenshot(out/f'{name}-boot.png')
             # Курсор без мигания; дальнейшие проверки полностью детерминированы.
             m.write(0x8FE9,b'\0')

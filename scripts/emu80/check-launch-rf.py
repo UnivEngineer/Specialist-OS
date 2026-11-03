@@ -1,4 +1,4 @@
-"""LAUNCH -RF -> RAMRUN -> RAMFOS в отдельном тестовом runtime Emu80.
+"""RUN -RF -> RAMFOS в отдельном тестовом runtime Emu80.
 
 Проверяются чтения файлов, замена/инициализация ядра, нагрузка и аргументы.
 Вместо исполнения игры в RAM ставится RET для проверки возврата; файлы игр
@@ -12,6 +12,7 @@ import runpy
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 Machine = runpy.run_path(str(Path(__file__).with_name('check-flash.py')))['Machine']
 
 
@@ -33,9 +34,9 @@ def main():
     owner()
     m = Machine('http://127.0.0.1:19781/mcp')
     image = (ROOT / 'images/SystemRom_emu80_writable.bin').read_bytes()
-    kernel = (ROOT / 'bin/RAMFOS.sys').read_bytes()
-    cases = [('H:BUDI-MX.RKS', 'assets/games/BUDI/Budi2-mx.rks'),
-             ('H:BURAN-RF.EXE', 'assets/games/Buran/Buran-ramfos.exe')]
+    kernel = (ROOT / 'bin/RAMFOS.mon').read_bytes()
+    cases = [('H:BUDI2-MX.EXE', 'assets/games/BUDI/Budi2-mx.rks'),
+             ('H:BURAN-RF.EXE', 'assets/games/Buran/Buran-ramfos.cpu')]
     results = {'system_sha256': hashlib.sha256(image).hexdigest(), 'cases': []}
     for name, source in cases:
         owner()
@@ -43,13 +44,13 @@ def main():
         m.call('emu_reset')
         assert m.read(0, 32768) == image[:32768]
         m.call('emu_run_for', ms=2500)
-        assert m.read(0xE800, 32) == (ROOT / 'bin/NC.com').read_bytes()[:32]
-        command = f'A:LAUNCH.COM -RF {name} /X one\0'.encode('ascii')
+        assert m.read(SYSTEM['NC_LOAD_ADDR'], 32) == (ROOT / 'bin/NC.i80').read_bytes()[:32]
+        command = f'A:RUN.COM -RF {name} /X one\0'.encode('ascii')
         m.write(0x7300, command)
         m.write(0x8000, bytes.fromhex('21 00 73 cd 5d c8 c3 00 81'))
         m.call('bp_set', addr=0x8100, type='exec')
         m.call('bp_set', addr=0x8C00, type='exec')
-        m.call('regs_set', pc=0x8000, sp=0xDC00)
+        m.call('regs_set', pc=0x8000, sp=SYSTEM['STACK_ADDR'])
         for _ in range(120):
             m.call('emu_run_for', ms=500)
             state = m.call('cpu_state')['registers']
@@ -70,19 +71,19 @@ def main():
         if source.endswith('.rks'):
             expected = expected[4:-2]
         assert m.read(0, len(expected)) == expected
-        actual_args = m.read(0x8D00, 128).split(b'\0', 1)[0]
+        actual_args = m.read(0x8E00, 128).split(b'\0', 1)[0]
         assert actual_args.lstrip(b' ') == b'/X one', actual_args
-        assert state['hl']['dec'] == 0 and state['de']['dec'] == 0x8D00
+        assert state['hl']['dec'] == 0 and state['de']['dec'] == 0x8E00
         m.call('bp_clear')
         m.call('bp_set', addr=0, type='exec')
         m.call('emu_run_for', ms=500)
         state = m.call('cpu_state')['registers']
-        assert state['pc']['dec'] == 0 and state['de']['dec'] == 0x8D00
+        assert state['pc']['dec'] == 0 and state['de']['dec'] == 0x8E00
         assert m.read(0, 16) == expected[:16]
         m.write(0, b'\xC9')
         m.call('bp_clear')
         m.call('emu_run_for', ms=2500)
-        assert m.read(0xE800, 32) == (ROOT / 'bin/NC.com').read_bytes()[:32]
+        assert m.read(SYSTEM['NC_LOAD_ADDR'], 32) == (ROOT / 'bin/NC.i80').read_bytes()[:32]
         results['cases'].append({'file': name, 'payload_bytes': len(expected),
             'kernel_matches': True, 'payload_matches': True,
             'args': actual_args.decode('ascii'), 'init_and_entry': True,

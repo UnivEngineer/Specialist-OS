@@ -50,7 +50,7 @@ def main():
         'source/dos/driverFFC0.inc','source/dos/driverBuffered.inc','source/dos/driverChecked.inc',
         'source/dos/reboot2.inc','source/dos/reboot3.inc','source/nc/saveLoadState.inc',
         'scripts/build/build-if-needed.ps1','scripts/build/build-project.ps1','scripts/emu80/check-boot.py',
-        'scripts/images/manifests/SystemRom.txt','source-apps/diskbench/','source-apps/README.md',
+        'scripts/images/manifests/A-System.txt','source-apps/diskbench/','source-apps/README.md',
         'Specialist-OS.code-workspace','README.md','docs/MXOS-banked-kernel.md']
     text=f'''# RAM-драйверы MXOS: DISKBEN / ramd-001
 
@@ -175,7 +175,7 @@ COM в обоих сравнениях загружался через MCP из 
 `check-boot.py` для обоих ROM. Ошибок и предупреждений SjASMPlus нет.
 Финальные проверки и выбранный вариант сборки указаны в сообщении о завершении.
 
-Генерируемые выходы: `bin/DISKBEN.com`, `images/SystemRom_ramd-legacy.bin`,
+Генерируемые выходы: `bin/DISKBEN.i80`, `images/SystemRom_ramd-legacy.bin`,
 `images/SystemRom_ramd-buffered.bin`; архивы листингов/символов/бинарников
 находятся в `source-apps/diskbench/build/Legacy/` и `Buffered/`.
 

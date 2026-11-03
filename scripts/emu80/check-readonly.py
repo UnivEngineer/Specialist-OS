@@ -49,17 +49,17 @@ def main():
     assert stat(b'RORENAMEFNT')['flags']['C']
     descriptor = bytearray(32)
     descriptor[:11] = b'RODEST  TXT'
-    descriptor[18:20] = b'\0\x40'
-    descriptor[28:30] = b'\xff\1'
+    descriptor[18:20] = bytes(2)
+    descriptor[28:32] = (512).to_bytes(4, "little")
     m.write(0x7000, descriptor)
     m.write(0x4000, bytes(range(256)) * 2)
-    assert m.subroutine(0xC845, hl=0x7000)['flags']['C']
+    assert m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C']
     assert stat(b'RODEST  TXT')['flags']['C']
     check_original()
     # Отказ перезаписи должен сохранить старый файл в доступном каталоге.
     m.write(0x7000, entry)
     m.write(0x4000, bytes(value ^ 255 for value in payload))
-    assert m.subroutine(0xC845, hl=0x7000)['flags']['C']
+    assert m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C']
     check_original()
 
     listing = (ROOT / 'bin/NC.lst').read_text(encoding='utf-8-sig')
@@ -105,7 +105,7 @@ def main():
     descriptor[:11] = b'ROFROM  TXT'
     m.write(0x7000, descriptor)
     m.write(0x4000, bytes(range(256)) * 2)
-    assert not m.subroutine(0xC845, hl=0x7000)['flags']['C']
+    assert not m.subroutine(0xC845, hl=0x7000, de=0x4000)['flags']['C']
     assert not stat(b'ROFROM  TXT')['flags']['C']
     source = m.read(0x7000, 32)
     selected(7, source)

@@ -44,14 +44,20 @@ aATape_com:         DB "A:TAPE.COM",0
 txtLoadingFromTape: DB 0Ah,"LOADING FROM TAPE...",0
     ENDIF
 
-txtBiosVer:         DB 0Ch,"BIOS 5.00",0Ah,0
+txtBiosVer:         DB 0Ch,"MXOS2",0Ah,0
 txtRAM:             DB 0Ah,"RAM: ",0
 txtKB:              DB " KB",0Ah,0
-txtBadCommand:      DB 0Ah,"BAD COMMAND OR FILE NAME",0
+txtBadCommand:      DB 0Ah,"BAD COMMAND",0
 
-v_tmpFileDescr 		FILE_DESCRIPTOR ; Копия дескриптора текущего файла
-v_curFileDescr 		FILE_DESCRIPTOR ; Копия дескриптора текущего файла
-v_batFileDescr 		FILE_DESCRIPTOR ; Копия дескриптора текущего BAT файла
+; Имена BAT и команды живут отдельно, их метаданные нужны только до запуска.
+; Хвосты 32-байтных дескрипторов перекрываются со следующими буферами.
+; fileLoadExit копирует вперёд из v_tmpFileDescr: назначение всегда ниже.
+; После запуска дочерней команды BAT заново читает свои метаданные с диска.
+v_batFileDescr:      BLOCK FILE_NAME_LENGTH+3,0
+v_curFileDescr:      BLOCK FILE_NAME_LENGTH+3,0
+v_tmpFileDescr      FILE_DESCRIPTOR ; Независимая копия найденной записи FAT
+    ASSERT v_batFileDescr+FILE_DESCR_SIZE <= v_tmpFileDescr+FILE_DESCR_SIZE
+    ASSERT v_curFileDescr+FILE_DESCR_SIZE <= v_tmpFileDescr+FILE_DESCR_SIZE
 
 ; Буфер для копирования изображения символов при использовании шрифта из ПЗУ
 v_char:             BLOCK   13, 0FFh

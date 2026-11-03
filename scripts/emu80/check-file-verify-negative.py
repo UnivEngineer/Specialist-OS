@@ -12,7 +12,7 @@ try:
  image=ns['RUNTIME']/'specialist-os/flash-disk.bin';before=image.read_bytes()
  m.write(s['v_pass'],b'\1');x.func(s['fill_payload'],af=0)
  original=m.read(0x2000,8192)
- assert not x.func(0xC845,hl=s['tmpDescriptor'])['flags']['C']
+ assert not x.func(0xC845,hl=s['tmpDescriptor'],de=0x2000)['flags']['C']
  assert not x.func(s['raw_build_chain'])['flags']['C']
  chain=struct.unpack('<32H',m.read(s['rawSectors'],64))
  def verify(label):

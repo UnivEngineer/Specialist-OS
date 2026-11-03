@@ -1,7 +1,7 @@
 ;----------------------------------------------------------------------------
 ; MXOS
 ; FLASHFST.COM - конвейерный драйвер flash-диска на 1–4 AT29C040A.
-; COM загружается с 0000h; после ID резидент копируется в DE00h–DFFFh.
+; COM загружается с 0000h; после ID резидент копируется в F600h–F7FFh.
 ;
 ; Номер функции передаётся в регистре b:
 ;   b == 1 - записать сектор (256 байт, номер сектора в de, буфер в hl);
@@ -51,7 +51,7 @@ CHIP_STATE.data       = 3
 
 ;----------------------------------------------------------------------------
 
-RESIDENT_ADDRESS = 0DE00h
+RESIDENT_ADDRESS = DISK_DRIVER_ADDR
 SYSTEM_FLASH = 0
 
     ORG 0
@@ -479,7 +479,7 @@ v_chipStates:
 ;----------------------------------------------------------------------------
 
 resident_end:
-    ASSERT_DONT_FIT 0E000h
+    ASSERT_DONT_FIT DISK_DRIVER_ADDR + 0200h
     ENT
 resident_file_end:
     INCLUDE "flash-install.inc"

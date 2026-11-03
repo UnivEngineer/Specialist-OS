@@ -13,9 +13,7 @@ fileCreate:
             ld a, VOL_CREATE
             jp volumeDispatch
 fileLoad:
-            push af
-            ld a, VOL_LOAD
-            jp volumeDispatch
+            jp imageLoad
 fileDelete:
             push af
             ld a, VOL_DELETE
@@ -27,10 +25,6 @@ fileRename:
 fileLoadInfo:
             push af
             ld a, VOL_STAT
-            jp volumeDispatch
-fileGetSetAddr:
-            push af
-            ld a, VOL_LOAD_ADDRESS
             jp volumeDispatch
 fileGetSetAttr:
             push af

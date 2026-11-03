@@ -8,6 +8,9 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0,str(ROOT/'scripts/images'))
+from executable import Image, encode
 Bench = runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))['Bench']
 
 
@@ -127,11 +130,12 @@ def main():
     report['checks'].append('service byte read/write, full register preservation, R4 restored')
 
     # Установка с B:, который уже активен. Проверяет немедленную регистрацию.
-    module=(ROOT/'bin/RAMD.com').read_bytes()
+    module=(ROOT/'bin/RAMD.i80').read_bytes()
     desc=bytearray(32);desc[:11]=b'RAMD    COM'
-    desc[28:32]=(len(module)-1).to_bytes(4,'little')
-    m.write(0,module);m.write(0x7000,desc)
-    assert not sub(0xC845,hl=0x7000)['flags']['C']
+    packed=encode(Image(module),'com')
+    desc[28:32]=len(packed).to_bytes(4,'little')
+    m.write(0,packed);m.write(0x7000,desc)
+    assert not sub(0xC845,hl=0x7000,de=0)['flags']['C']
     execute('B:RAMD.COM')
     assert int.from_bytes(m.read(0xC864,2),'little')==rs['Driver']
     assert description()==[b'RAMD',b'R4 banked']
@@ -140,10 +144,10 @@ def main():
 
     # Файл проходит через штатные FAT/каталог и оба способа обмена.
     payload=bytes((i*29+7)&255 for i in range(768))
-    desc[:11]=b'RAMDCHK BIN';desc[18:20]=(0x4000).to_bytes(2,'little')
-    desc[28:32]=(len(payload)-1).to_bytes(4,'little')
+    desc[:11]=b'RAMDCHK BIN';desc[18:20]=bytes(2)
+    desc[28:32]=len(payload).to_bytes(4,'little')
     m.write(0x4000,payload);m.write(0x7000,desc)
-    assert not sub(0xC845,hl=0x7000)['flags']['C']
+    assert not sub(0xC845,hl=0x7000,de=0x4000)['flags']['C']
     for addr in [0xC800,0xC000]:
         m.stop_at(ns['mainLoop']);m.call('regs_set',pc=addr);m.until(ns['mainLoop'],60)
         select(1);assert description()==[b'RAMD',b'R4 banked']
@@ -186,7 +190,7 @@ def main():
     report['checks'].append('same FAT file readable through restored built-in Per-byte')
     # FORMAT только тестового B:, после проверки сохранённого файла.
     m.write(0,module);assert not sub(0)['flags']['C']
-    m.write(0xF100,(ROOT/'bin/FORMAT.com').read_bytes())
+    m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes())
     m.write(0x7000,b'B: Y R\0')
     assert not sub(0xF100,de=0x7000)['flags']['C']
     assert tails()==expected and m.sector(0)[54:62]==b'FAT16   '
@@ -199,7 +203,7 @@ def main():
             sub(0xC86F,bc=0x0200,hl=ds['driverByteStart']);sub(0xC86F,bc=0)
         else:
             m.write(0,module);assert not sub(0)['flags']['C']
-        m.write(0,(ROOT/'bin/DISKBEN.com').read_bytes())
+        m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())
         m.stop_at(bs['menu_drive']);m.call('regs_set',pc=0);m.until(bs['menu_drive'])
         m.line('b');m.line('0')
         m.stop_at(bs['run_tests']);m.line('0');m.until(bs['run_tests'],60)

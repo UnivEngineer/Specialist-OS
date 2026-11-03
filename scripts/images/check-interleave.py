@@ -2,6 +2,7 @@
 import json
 import struct
 from pathlib import Path
+from executable import convert
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -17,14 +18,14 @@ def main():
     entries = {image[i:i+11].decode('ascii').strip(): image[i:i+32]
                for i in range(rootsector * secsize, datastart * secsize, 32) if image[i] != 255}
     label_lines = [line.strip()[7:].strip() for line in
-                   (ROOT/'scripts/images/manifests/FlashDisk.txt').read_text('utf-8-sig').splitlines()
+                   (ROOT/'scripts/images/manifests/H-Games2M.txt').read_text('utf-8-sig').splitlines()
                    if line.strip().startswith('@label ')]
     assert len(label_lines) == 1
     assert image[0x2B:0x36] == label_lines[0].ljust(11).encode('ascii')
     allclusters = set()
     chips = [0] * 4
     files = 0
-    for line in (ROOT / 'scripts/images/manifests/FlashDisk.txt').read_text(encoding='utf-8-sig').splitlines():
+    for line in (ROOT / 'scripts/images/manifests/H-Games2M.txt').read_text(encoding='utf-8-sig').splitlines():
         if not line.strip() or line.lstrip().startswith(('#','@')):
             continue
         fields = line.split()
@@ -32,10 +33,13 @@ def main():
         stem, _, ext = name.rpartition('.')
         key = stem.ljust(8) + ext.ljust(3)
         entry = entries[key.strip()]
-        expected = (ROOT / 'assets' / source).read_bytes()
-        if Path(source).suffix.lower() == '.rks':
-            start, end = struct.unpack_from('<HH', expected)
-            expected = expected[4:4 + max(0, end - start + 1)]
+        path = ROOT / 'assets' / source
+        address = int(fields[2], 0) if len(fields) >= 3 else 0
+        expected = (convert(path, ext, address)[0] if ext.lower() in ('com','exe','rks')
+                    else path.read_bytes())
+        stored_size = struct.unpack_from('<I', entry, 28)[0]
+        assert entry[18:20] == bytes(2), name
+        assert stored_size == len(expected), (name, stored_size, len(expected))
         count = (len(expected) + secsize - 1) // secsize
         c = struct.unpack_from('<H', entry, 26)[0]
         data = bytearray()

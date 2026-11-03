@@ -2,6 +2,7 @@
 import argparse,json,runpy,subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 h=runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))
 
 def main():
@@ -40,7 +41,7 @@ def main():
     assert m.read(0x3001,6).upper()==b'ABXC\r\0'
     assert m.read(0x3000,1)==b'\xa6' and m.read(0x3012,1)==b'\xc9'
     (out/'interface.json').write_text(json.dumps({'native_fileExec':True,'no_argument_prompt_and_keyboard':True,'drive_input_echo_and_enter':True,'input_middle_insert_and_guards':True})+'\n')
-    m.stop_at(0xE800);m.call('regs_set',pc=0xC000);m.until(0xE800,30);m.call('bp_clear');m.call('emu_run_for',ms=500)
+    m.stop_at(SYSTEM['NC_LOAD_ADDR']);m.call('regs_set',pc=0xC000);m.until(SYSTEM['NC_LOAD_ADDR'],30);m.call('bp_clear');m.call('emu_run_for',ms=500)
     print('CHKDSK fileExec/keyboard + MXOS middle insertion: OK')
 
 if __name__=='__main__':main()

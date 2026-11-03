@@ -77,7 +77,7 @@ printStringB:
 ; Директива B - сохранение области памяити в файл
 
 Dir_B:  ; адрес начала - в дескриптор
-        LD    (v_fileDescr.loadAddress), HL
+        LD    (v_dumpAddress), HL
 
         ; DE = -HL
         EX    DE,HL
@@ -92,13 +92,18 @@ Dir_B:  ; адрес начала - в дескриптор
         ; HL = адрес_конца - адрес_начала = размер - 1
         ADD   HL,DE
 
-        ; размер - в дескриптор
+        ; Точный размер N, конец директивы включительный.
+        INC HL
         LD    (v_fileDescr.size),HL
 
         ; запрос именя файла
         CALL  EnterFileName
 
-        ; сохранение файла
+        ; DE — буфер, адрес не записывается в FAT.
+        PUSH HL
+        LD HL,(v_dumpAddress)
+        EX DE,HL
+        POP HL
         CALL  bios_fileCreate
 
         ; в случае ошибки печатаем надпись "МАЛ ДИСК"
@@ -124,14 +129,10 @@ txtNoFile:      DB 0AH,0DH,"NO FILE ",00H
 ;----------------------------------------------------------------------------
 ; Директива A - изменение адреса загрузки файла
 
-Dir_A:  PUSH  HL
-        CALL  EnterFileName
-        POP   DE
-        LD    C,01H
-        CALL  bios_fileGetSetAddr
-        LD    HL,txtNoFile
-        CALL  C,bios_printString
-        RET
+Dir_A:  LD HL,txtHeaderAddress
+        JP bios_printString
+txtHeaderAddress: DB 0AH,"ADDRESS IS IN FILE HEADER",0
+v_dumpAddress: DW 0
 
 ;----------------------------------------------------------------------------
 ; Директива V - загрузка файла в память по указанному адресу
@@ -178,33 +179,22 @@ Dir_V:  ; запоминаем первый параметр директивы 
 ;----------------------------------------------------------------------------
 ; Директива U - загрузка файла в память
 
-Dir_U:  ; запрос имени файла
-        CALL  EnterFileName
-        CALL  bios_fileLoad
-
-        ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
-        PUSH  AF
-        LD    HL,txtNoFile
-        CALL  C,bios_printString
-        CALL  printSpace
-        POP   AF
-        RET   C
-
-        ; получение информации о файле
-        LD    HL,v_fileDescr.name
-        CALL  bios_fileLoadInfo
-
-        ; печать адреса загрузки
-        LD    HL,(v_fileDescr.loadAddress)
-        PUSH  HL
-        CALL  printHexWordHL
-        POP   DE
-
-        ; печать размера файла
-        LD    HL,(v_fileDescr.size)
-        ADD   HL,DE
-        CALL  printHexWordHL
-        RET
+Dir_U:
+        CALL EnterFileName
+        CALL bios_imageOpen
+        RET C
+        PUSH DE
+        PUSH BC
+        CALL bios_fileLoad
+        POP DE
+        POP HL
+        RET C
+        PUSH HL
+        CALL printHexWordHL
+        POP HL
+        ADD HL,DE
+        DEC HL
+        JP printHexWordHL
 
 ;----------------------------------------------------------------------------
 ; Директива Y - установка атрибутов файла

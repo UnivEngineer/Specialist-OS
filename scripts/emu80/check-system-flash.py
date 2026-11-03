@@ -7,6 +7,7 @@ import runpy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 helpers = runpy.run_path(str(Path(__file__).with_name('check-copy.py')))
 FileMachine, get_file = helpers['FileMachine'], helpers['get_file']
 
@@ -32,7 +33,7 @@ def main():
     m.call('bp_clear')
     m.call('bp_set', addr=0x8100, type='exec')
     if not args.locked:
-        assert m.read(0xDC00, 8) == m.resident_bytes('FlashSys')[:8], 'FlashSys не установлен при загрузке'
+        assert m.read(SYSTEM['SYSTEM_FLASH_ADDR'], 8) == m.resident_bytes('FlashSys')[:8], 'FlashSys не установлен при загрузке'
     m.subroutine(0xC842, af=0x0100, de=1)
     m.subroutine(0xC842, af=0x0000, de=1)
     driver = 0xC863 if args.locked else entry('FlashSys')

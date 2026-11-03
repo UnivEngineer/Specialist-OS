@@ -1,10 +1,9 @@
 ; RAMD.COM — устанавливаемый блочный драйвер RAM-диска B:.
-; Загрузка/запуск с 0000h; резидент DD40h–DDFFh, хвосты FF00h.
+; Загрузка/запуск с 0000h; резидент F540h–F5FFh, хвосты FF00h.
 ; Вход установщика: стек вне нижних 32 КБ, прерывания запрещены MXOS.
 ; Выход CF=0 — установлен, CF=1 — отказ flush или нет RAM-диска.
 ; AF/BC/DE/HL разрушаются. AUTOEXEC не изменяется.
     INCLUDE "../include/mxos.inc"
-    ASSERT RAMD_BUFFERED
     ORG 0
     jp Install
 
@@ -99,7 +98,7 @@ Info:
     ret
 DriverInfo: DB "RAMD",0,"R4 banked",0
 resident_end:
-    ASSERT resident_end <= 0DE00h
+    ASSERT resident_end <= RAMD_RESIDENT_ADDR + 0C0h
     ENT
 resident_file_end:
 

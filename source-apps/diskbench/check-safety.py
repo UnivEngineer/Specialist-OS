@@ -8,6 +8,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 helpers = runpy.run_path(str(HERE/'check-emulator.py'))
 
 
@@ -24,9 +25,9 @@ def main():
     s=helpers['symbols'](HERE/'build/DISKBEN.sym')
     ds=helpers['symbols'](ROOT/'bin/DOS.sym')
     rs=helpers['symbols'](ROOT/'bin/RAMD.sym')
-    m.call('debug_break');m.stop_at(0xE800)
-    if m.read(0xE800,32)!=(ROOT/'bin/NC.com').read_bytes()[:32]:
-        m.until(0xE800,30)
+    m.call('debug_break');m.stop_at(SYSTEM['NC_LOAD_ADDR'])
+    if m.read(SYSTEM['NC_LOAD_ADDR'],32)!=(ROOT/'bin/NC.i80').read_bytes()[:32]:
+        m.until(SYSTEM['NC_LOAD_ADDR'],30)
     m.stop_at(0x8100)
     m.write(0x7000,b'A:RAMD.COM\0')
     assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
@@ -106,7 +107,7 @@ def main():
     replicas=[]
     for page in range(16):
         m.write(0xFFFD,bytes([page]));replicas.append(m.read(0xFF00,n));m.write(0xFFFC,b'\0')
-    m.write(0xF100,(ROOT/'bin/FORMAT.com').read_bytes())
+    m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes())
     m.write(0x7000,b'B: Y R\0')
     m.write(0x8000,b'\xCD\0\xF1\xC3\0\x81')
     m.call('regs_set',pc=0x8000,sp=0x8F00,de=0x7000)

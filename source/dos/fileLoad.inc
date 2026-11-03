@@ -24,20 +24,8 @@ fatFileLoad2:  ; загрузить файл с именем HL по адрес�
             push    de
             jp      fileLoadStep2
 
-fatFileLoad:   ; загрузить файл с именем HL по адресу из дескриптора
-            call    fileFind
-            ret c
-
-            push    hl
-            push    bc
-            push    de
-
-            ld      hl, (v_foundDescrPtr)
-            ld      de, FILE_DESCRIPTOR.loadAddress
-            add     hl, de
-            ld      e, (hl)
-            inc     hl
-            ld      d, (hl)
+fatFileLoad:
+            jp imageLoad
 
 fileLoadStep2:
             ex      hl, de
@@ -51,16 +39,23 @@ fileLoadStep2:
             inc     hl
             ld      d, (hl)
 
-            ld      hl, (v_foundDescrPtr)
-            ld      bc, FILE_DESCRIPTOR.size + 1
-            add     hl, bc
-            ld      c, (hl)
-            inc     c
+            ; После старшего байта firstCluster сразу идёт точный размер N.
+            inc     hl
+            ld      c,(hl)
+            inc     hl
+            ld      b,(hl)
+            ld      a,b
+            or      c
+            jp z,fileLoadEmpty
+            dec bc
+            ld c,b
+            inc c
 
             ld      hl, (v_input_start)
             ld      b, 2
             call    fatFileTransferClusters
 
+fileLoadEmpty:
             pop     de
             pop     bc
             pop     hl

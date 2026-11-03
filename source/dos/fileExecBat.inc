@@ -54,7 +54,6 @@ v_batDrive:
             call    fileLoad2
             jp c,   badCommand
             ld      hl, (v_batFileDescr + FILE_DESCRIPTOR.size)
-            inc     hl              ; размер в каталоге хранится как N-1
             ld      de, BAT_BUFFER
             add     hl, de
             ld      (hl), 0FFh

@@ -70,6 +70,15 @@ diskDriver_r:
             ld      a, h
             or      a
             jp p,   romStdReadLow
+            ; В STD F000h–F7FFh отображаются устройства, а не RAM.
+            ; Сектор EF00h ещё помещается целиком; EF01h уже пересекает границу.
+            cp      0EFh
+            jp c,   romStdCheckEnd
+            jp nz,  romStdReadLow
+            ld      a, l
+            or      a
+            jp nz,  romStdReadLow
+romStdCheckEnd:
             ; Последний STD-сектор неполон: 7F04h..8003h. Сохраняем
             ; прежнее побайтовое поведение и на границе отображения.
             ld      a, d
@@ -137,14 +146,7 @@ romMXReadLoop:
 ramDRead:
             call    ramDValidate
             jp c,   popDBHA_error
-    IF RAMD_BUFFERED
             call    ramDByteRead
-    ELSE
-            ld      c, d
-            ld      d, e
-            ld      e, 0
-            call    bios_RAMDRead
-    ENDIF
             jp      popDBHA_success
 
 ;----------------------------------------------------------------------------
@@ -157,18 +159,8 @@ diskDriver_w:
             call    ramDValidate
             jp c,   diskWriteFailed
 
-    IF RAMD_BUFFERED
             call    ramDByteWrite
-    ELSE
-            ld      c, d
-            ld      d, e
-            ld      e, 0
-            call    bios_RAMDWrite
-    ENDIF
             ; bios_RAMDWrite возвращает основную страницу перед RET.
-            ; Legacy: 70 тактов/байт, 17920 тактов на сектор
-            ; (около 9 мс при 2 МГц): 256 чтений ОЗУ, 256 записей
-            ; RAM-диска и 512 переключений маппера.
 
 popDBHA_success:
             pop     de
@@ -194,7 +186,6 @@ ramDValidate:
             ld      a, e
             cp      0FFh
             jp z,   ramDInvalid
-    IF RAMD_BUFFERED
             ld      a, h
             cp      0FEh
             jp c,   ramDValid
@@ -208,13 +199,6 @@ ramDInvalid:
 ramDValid:
             or      a
             ret
-    ELSE
-            or      a
-            ret
-ramDInvalid:
-            scf
-            ret
-    ENDIF
 
 ;----------------------------------------------------------------------------
 ; Размер накопителя.

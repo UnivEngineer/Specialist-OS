@@ -20,7 +20,8 @@ but_F6:
             ld      hl, state.panelA_drive
             call    readBytePanel
             ld      e, 1
-            call    bios_fileGetSetDrive
+            call    bios_fileSelectDrive
+            jp c,   renameFileError
 
             ld      hl, vars.input
             ld      de, vars.tempFileDescr
@@ -28,7 +29,7 @@ but_F6:
 
             call    getSelectedFile
             ld      de, vars.tempFileDescr
-            call    bios_fileRename
+            call    bios_fileRenameOnDrive
             jp c,   renameFileError
             jp      mainReload
 

@@ -1,5 +1,7 @@
+; ABI: HL = экранный адрес, B = ширина в байтах, C = высота (1..255).
+; DE сохраняется; AF/BC/HL и флаги разрушаются. Цвет задаёт вызывающий.
 ;----------------------------------------------------------------------------
-; MXOS NC.COM
+; MXOS DOS
 ; Инвертирвоание прямоугольной области на экране
 ;
 ; вход:
@@ -10,29 +12,29 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-inverseRect:
+uiInverseRect:
             push    de
             ld      e, c
 
             ; Цикл по горизонтали
-ir_loop_x:  ld      c, e    ; c = высота
+uiInverseLoop_x:  ld      c, e    ; c = высота
             push    hl
 
             ; Цикл по вертикали
-ir_loop_y:  ld      a, (hl)
+uiInverseLoop_y:  ld      a, (hl)
             cpl
             ld      (hl), a
 
             ; Повтор цикла по вертикали
             inc     hl
             dec     c
-            jp nz,  ir_loop_y
+            jp nz,  uiInverseLoop_y
 
             ; Повтор цикла по горизонтали
             pop     hl
             inc     h
             dec     b
-            jp nz,  ir_loop_x
+            jp nz,  uiInverseLoop_x
 
             pop     de
             ret

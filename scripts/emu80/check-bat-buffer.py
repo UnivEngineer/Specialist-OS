@@ -1,4 +1,5 @@
 """BAT в 0000h: 32-КБ граница и команда, которая затирает буфер."""
+import sys
 import argparse
 import re
 import runpy
@@ -6,6 +7,8 @@ import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'scripts/images'))
+from executable import Image, encode
 Machine = runpy.run_path(str(Path(__file__).with_name('check-copy.py')))['FileMachine']
 
 
@@ -32,24 +35,24 @@ def main():
     def create(name, address, data):
         desc = bytearray(32)
         desc[:11] = name
-        struct.pack_into('<H', desc, 18, address)
-        struct.pack_into('<I', desc, 28, len(data) - 1)
+        # Адрес буфера передаётся в DE, поле даты доступа остаётся нулевым.
+        struct.pack_into('<I', desc, 28, len(data))
         m.write(address, data)
         m.write(0x8500, desc)
-        assert not call(0xC845, hl=0x8500)['flags']['C'], name
+        assert not call(0xC845, hl=0x8500, de=address)['flags']['C'], name
     assert not call(0xC842, af=0x0100, de=1)['flags']['C']
     # COM по 0000h портит начало BAT и ставит контрольный байт вне буфера.
     prog = bytes.fromhex('3e4232018f3e00320000c9')
-    create(b'ZERO    COM', 0, prog)
+    create(b'ZERO    COM', 0, encode(Image(prog), 'com'))
     # Размер ровно 32 КБ; вторая строка выполняется после перезагрузки BAT.
     prefix = b'B:ZERO.COM\r\nA:ROM.COM'
-    payload = prefix + b' ' * (32768 - len(prefix))
+    payload = prefix + b' ' * (32767 - len(prefix))
     create(b'LONG    BAT', 0, payload)
     m.write(0x8f01, b'\0')
     m.write(0x8400, b'B:LONG.BAT\0')
     result = call(0xC85D, hl=0x8400)
     assert not result['flags']['C'] and m.read(0x8f01, 1) == b'\x42'
-    assert m.read(0xDE0C, 40) == (ROOT / 'bin/Rom.com').read_bytes()[12:52]
+    assert m.read(0xDE0C, 40) == (ROOT / 'bin/Rom.i80').read_bytes()[12:52]
     assert m.read(0x8000, 1) == b'\xff'  # Терминатор вне буфера.
     # Сверх границы загрузка должна быть отклонена до записи в буфер.
     m.write(0x8500, b'LONG    BAT' + bytes(21))

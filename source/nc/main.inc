@@ -33,6 +33,7 @@ mainLoop:   ; Рисуем курсор выбранного файла
             COLOR   COLOR_CURSOR
             call    drawCursor
 
+mainLoop_cursorReady:
             ; Положение курсора в ком строке
             ld      hl, (vars.cmdLinePos)
             ld      (bios_vars.cursorY), hl
@@ -41,10 +42,14 @@ mainLoop:   ; Рисуем курсор выбранного файла
             COLOR   COLOR_CMDLINE
             call    bios_getch
 
-            ; Стираем курсор выбранного файла
+            ; Ввод команды не затрагивает инверсное выделение.
+            ; При шаге за край окна старый курсор также можно сохранить.
             push    af
+            call    keepCursorForKey
+            jp c,   mainLoop_keyKept
             COLOR   COLOR_FILE
             call    drawCursor
+mainLoop_keyKept:
             pop     af
 
             ; Анализ нажатой клавиши
@@ -88,9 +93,9 @@ mainLoop:   ; Рисуем курсор выбранного файла
             cp      7Fh   ; Del/ЗБ (7Fh)
             jp z,   but_Bkspc
             cp      8Ah   ; F9 (8Ah)
-            jp z,   mainLoop
+            jp z,   mainLoop_editDone
 mainLoop_e: cp      20h   ; Пробел (20h)
-            jp c,   mainLoop
+            jp c,   mainLoop_editDone
 
             ; Вывод символов в ком строку
             ld      hl, (vars.cmdLineEnd)
@@ -100,7 +105,7 @@ mainLoop_e: cp      20h   ; Пробел (20h)
             ; Если ком строка переполнена, выходим
             ld      a, vars.cmdLineCtrl & 0FFh
             cp      l
-            jp z,   mainLoop
+            jp z,   mainLoop_editDone
 
             ; Увеличиваем длину
             inc     hl
@@ -114,7 +119,7 @@ mainLoop_savePos: ; ?
             ld      hl, (bios_vars.cursorY)
             ld      (vars.cmdLinePos), hl
 
-            jp      mainLoop
+            jp      mainLoop_editDone
 
 ; ---------------------------------------------------------------------------
 
@@ -122,7 +127,7 @@ but_Bkspc:  ; Если ком строка пустая, выходим
             ld      hl, (vars.cmdLineEnd)
             ld      a, vars.cmdLine & 0FFh
             cp      l
-            jp z,   mainLoop
+            jp z,   mainLoop_editDone
 
             ; Удаляем один символ
             dec     hl
@@ -138,7 +143,7 @@ but_Bkspc:  ; Если ком строка пустая, выходим
 ; ---------------------------------------------------------------------------
 
 but_Esc:    call    clearCmdLine
-            jp      mainLoop
+            jp      mainLoop_editDone
 
 ; ---------------------------------------------------------------------------
 
@@ -152,8 +157,10 @@ ctrlEnter:  ; Если файл не выбран, выход
             call    getSelectedFile
             ld      a, (hl)
             cp      0FFh
-            jp z,   mainLoop
+            jp z,   mainLoop_editDone
 
             call    selFileToCmdLine
-            jp      mainLoop
+            jp      mainLoop_editDone
 
+
+mainLoop_editDone EQU mainLoop_cursorReady

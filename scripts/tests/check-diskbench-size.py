@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 s={k:int(v,16) for k,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'source-apps/diskbench/build/DISKBEN.sym').read_text(),re.M)}
 out=ROOT/'docs/diskbench/file-003';out.mkdir(parents=True,exist_ok=True)
-code=(ROOT/'bin/DISKBEN.com').read_bytes();cpu=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe')
+code=(ROOT/'bin/DISKBEN.i80').read_bytes();cpu=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe')
 def run(label,setup):
     mem=bytearray(65536);mem[:len(code)]=code;setup(mem)
     addr=s[label]

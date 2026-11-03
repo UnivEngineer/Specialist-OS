@@ -65,7 +65,7 @@ def main():
     # Внутренний memmove сохраняет регистры, DEBUG T использует тот же движок.
     m.write(0x2000,bytes(range(256)));state=m.subroutine(ds['memmove_bc_hl'],hl=0x2000,de=0x2011,bc=0x2001)
     assert all(state['registers'][k]['dec']==v for k,v in {'hl':0x2000,'de':0x2011,'bc':0x2001}.items())
-    m.write(0xF100,(ROOT/'bin/Debug.com').read_bytes());debug=helpers['symbols'](ROOT/'bin/Debug.sym')
+    m.write(0xF100,(ROOT/'bin/Debug.i80').read_bytes());debug=helpers['symbols'](ROOT/'bin/Debug.sym')
     m.write(0x2000,bytes(range(256)));m.subroutine(debug['Dir_T'],hl=0x2000,de=0x2010,bc=0x2001)
     assert m.read(0x2001,17)==bytes(range(17))
     report['move_cases']=len(cases)+2
@@ -107,10 +107,12 @@ def main():
       ('high-size',mutation(3*256+30,b'\1\0'),1),
       ('missing-first-cluster',mutation(3*256+26,b'\0\0'),1)]
     scenarios += [('checksum-length-'+str(n),image(n),0) for n in [1,255,256,257,511,512,513,16000]]
+    scenarios += [('lowercase-rks-extension',mutation(3*256+8,b'rks'),0),
+                  ('mixedcase-rks-extension',mutation(3*256+8,b'RkS'),0)]
     try:
         for name,data,want in scenarios:
             m.write(0xFFFD,b'\0');m.write(0,data[:0xFF00]);m.write(0xFFFC,b'\0')
-            m.write(0,(ROOT/'bin/CHKDSK.com').read_bytes());m.stop_at(s['waitKey']);m.call('regs_set',pc=s['scan'],sp=0x8F00)
+            m.write(0,(ROOT/'bin/CHKDSK.i80').read_bytes());m.stop_at(s['waitKey']);m.call('regs_set',pc=s['scan'],sp=0x8F00)
             m.until(s['waitKey'],60)
             got=m.read(s['result'],1)[0];errors=int.from_bytes(m.read(s['errors'],2),'little')
             checked=int.from_bytes(m.read(s['checked'],2),'little');skipped=int.from_bytes(m.read(s['skipped'],2),'little')
@@ -124,7 +126,7 @@ def main():
     # Отказ физического чтения: выполнение прерывается с отдельным статусом.
     dispatch=m.read(0xC863,3)
     try:
-        m.write(0xC863,b'\x37\xc9\0');m.write(0,(ROOT/'bin/CHKDSK.com').read_bytes())
+        m.write(0xC863,b'\x37\xc9\0');m.write(0,(ROOT/'bin/CHKDSK.i80').read_bytes())
         m.stop_at(s['waitKey']);m.call('regs_set',pc=s['scan'],sp=0x8F00);m.until(s['waitKey'],30)
         assert m.read(s['result'],1)==b'\4'
         report['io_error_status']=4

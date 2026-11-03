@@ -1,160 +1,22 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Рисование окошек
-;
-; 2013-12-18 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
+; Адаптер координат NC к общему оконному ABI DOS.
+; HL = список объектов. AF/BC/DE/HL и флаги разрушаются.
+draw:
+            ld      a, (state.activePanel)
+            or      a
+            jp z,   drawPanelOffset
+            ld      a, 24
+drawPanelOffset:
+            jp      bios_uiDraw
 
-draw:       ; Читаем 5 байт из hl в a, hl, c, b. 
-            ; При этом de = hl+5
-            ld    a, (hl)
-            inc   hl
-            ld    e, (hl)
-            inc   hl
-            ld    d, (hl)
-            inc   hl
-            ld    c, (hl)
-            inc   hl
-            ld    b, (hl)
-            inc   hl          
-            ex    de, hl
-
-            ; Если a=0 (первый байт), то выйти
-            and   a
-            ret z 
-
-            ; Если не установлен 7-ой бит и активная панель правая, то X += 192
-            jp M, draw_0
-            call  activePanelPos
-draw_0:
-
-            ; Если a&0xF==3, то заполнить c байт памяти байтом b
-            and   0Fh
-            cp    3
-            jp z, draw3
-
-            ; Если a&0xF==1, то нарисовать веритикальную линию
-            ; b-первый байт, c-средняя длина, *de++ - последний байт 
-            cp    1
-            jp z, draw1
-
-            ; Нарисовать окно
-            call  draw_window
-
-draw_next:  ; hl=de и следующий цикл
-            ex    de, hl
-            jp    draw
-
-; ---------------------------------------------------------------------------
-; Заполнить c байт памяти байтом b
-
-draw3:      ld    a, b
-            call  memset_hl_a_c
-            jp    draw_next
-
-; ---------------------------------------------------------------------------
-; Линия hl-адрес, b-первый байт, c-средняя длина, *de++ - последний байт 
-
-draw1:      ; *hl++ |= b
-            ld    a, b
-            or    (hl)
-            ld    (hl), a
-            inc   h
-            
-loc_D9F3:
-            ld    (hl), 0FFh
-            inc   h
-            dec   c
-            jp nz, loc_D9F3
-
-            ; hl |= *de++
-            ld    a, (de)
-            inc   de
-            or    (hl)
-            ld    (hl), a
-
-            jp    draw_next
-
-; ---------------------------------------------------------------------------
-; Если активная правая панель, сдвинуть адрес на пол экрана
-
+; HL = экранный адрес, сместить на активную панель; AF сохраняется.
 activePanelPos:
-            push  af
-            ld    a, (state.activePanel)
-            and   a
-            jp z, loc_DA0B
-            ld    a, 24
-loc_DA0B:   add   a, h
-            ld    h, a
-            pop   af
+            push    af
+            ld      a, (state.activePanel)
+            or      a
+            jp z,   activePanelOffset
+            ld      a, 24
+activePanelOffset:
+            add     a, h
+            ld      h, a
+            pop     af
             ret
-
-; ---------------------------------------------------------------------------
-; Рисуем окно (b=ширина-2, с=высота-6)
-
-draw_window:
-            ; Если h - 90h + b >= 0x2F, то есть X + b + 2 > ширина экрана, то выйти
-            ld    a, h
-            sub   90h
-            add   a, b
-            cp    2Fh
-            ret nc      
-
-            ; Сохранить регистры
-            push  hl
-            push  bc
-            push  de
-
-            ; Линия
-            ld    de, v_window
-            call  line313
-
-            ; Повтор b раз
-draw_window_2:
-            push  de
-            call  line313
-            dec   b
-            jp z, draw_window_3
-            pop   de          
-            jp    draw_window_2
-
-; ---------------------------------------------------------------------------
-
-draw_window_3:
-            pop   af
-
-            ; Линия
-            call  line313
-
-            ; Восстановить регистры и выйти
-            pop   de
-            pop   bc
-            pop   hl
-            ret
-
-; ---------------------------------------------------------------------------
-; Вертикальная линия. Задается три верхних байта, заполнитель и три нижних
-
-line313:    ; Сохраняем регистры
-            push  bc
-            push  hl
-
-            ; Копируем 3 байта (сверху-вниз)
-            call  memcpy_hl_de_3
-
-            ; 4 ый байт повторяем С-раз (сверху-вниз)
-            ld    a, (de)
-            call  memset_hl_a_c
-            inc   de
-
-            ; Копируем 3 байта (сверху-вниз)
-            call  memcpy_hl_de_3
-                  
-            ; Восстаналиваем регистры
-            pop   hl
-            pop   bc
-
-            ; Вправо
-            inc   h
-            ret
-

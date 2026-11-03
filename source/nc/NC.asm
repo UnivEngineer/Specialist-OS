@@ -7,14 +7,18 @@
 
     INCLUDE "../include/mxos.inc"
 
-    IF NEW_MEMORY_MAP
-        ORG 0E800h
-    ELSE
-        ORG 0D000h
-    ENDIF
+    ORG NC_LOAD_ADDR
 
 ; Список файлов на всю высоту панелей
+    IFNDEF FULL_PANELS
 FULL_PANELS = 0
+    ENDIF
+
+; 1: битмап при едином атрибуте файлов, 0: печать всех имён.
+    IFNDEF NC_BITMAP_SCROLL
+NC_BITMAP_SCROLL = 1
+    ENDIF
+    ASSERT NC_BITMAP_SCROLL == 0 || NC_BITMAP_SCROLL == 1
 
 ; Предустановки цветов:
 ; 0 = vinxru
@@ -129,20 +133,24 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
     INCLUDE "clearCmdLine.inc"    ; Продолжается в printSpaces
     INCLUDE "printSpaces.inc"
     INCLUDE "drawCursor.inc"
+    INCLUDE "keepCursorForKey.inc"
     INCLUDE "printInfoLine.inc"
-    INCLUDE "inverseRect.inc"
+inverseRect = bios_uiInverseRect
     INCLUDE "getSelectedFile.inc"
     INCLUDE "loadAndPrint.inc"
     INCLUDE "loadFiles.inc"
     INCLUDE "printInfoPanel.inc"
     INCLUDE "printFilePanel.inc"
+    IF NC_BITMAP_SCROLL
+    INCLUDE "scrollBitmap.inc"
+    ENDIF
     INCLUDE "printCurDrive.inc"
     INCLUDE "rwBytePanel.inc"
     INCLUDE "printFileName.inc"
     INCLUDE "printString2.inc"
     INCLUDE "setCursorPosPanel.inc"
     INCLUDE "draw.inc"
-    INCLUDE "tools.inc"
+
     INCLUDE "compactName.inc"
     INCLUDE "input.inc"
     INCLUDE "colors.inc"
@@ -185,49 +193,12 @@ aNotFormatted:      DB 18h,"is not formatted",0
 aNameName:          DB "Name",0
     ENDIF
 
-aNcExt:             DB "A:NC.EXT",0
 aEditor:            DB "A:E.COM",0Dh      ; терминатором тут должно быть 0Dh
 
 ;-----------------------------------------------------------------------
 ; Описания окон
 
-v_window:   DB 01111111b            ; Верхний левый угол
-            DB 01000000b
-            DB 01011111b
-            DB 01010000b            ; Левый край
-            DB 01011111b            ; Нижний левый угол
-            DB 01000000b
-            DB 01111111b
-
-            DB 11111111b            ; Верх окна
-            DB 00000000b
-            DB 11111111b
-
-            DB 00000000b            ; Содержимое окна
-
-            DB 11111111b            ; Низ окна
-            DB 00000000b
-            DB 11111111b
-
-            DB 11111110b            ; Правый верхний угол
-            DB 00000010b
-            DB 11111010b
-            DB 00001010b            ; Правая граница
-            DB 11111010b            ; Правый нижний угол
-            DB 00000010b
-            DB 11111110b
-
-            MACRO G_WINDOW A,X,Y,W,H
-                DB A|2, Y, 90h+(X>>3), H-6, (W>>3)-2
-            ENDM
-
-            MACRO G_LINE A,X,Y,W
-                DB A|1, Y, 90h+(X>>3), (((X&7)+W+7)>>3)-2, 0FFh>>(X&7), (0FF00h>>((W+X)&7)) & 0FFh
-            ENDM
-
-            MACRO G_VLINE A,X,Y,H
-                DB A|3, Y, 90h+(X>>3), H, 80h>>(X&7)
-            ENDM
+    INCLUDE "../include/ui.inc"
 
 g_filePanel:
             G_WINDOW 0, 0, 0, 192, 230        ; 2, 0, 90h, 0E0h, 16h
@@ -323,50 +294,52 @@ stateEnd:           ; адрес конца блока переменных со
 ; генерируется, при первом запуске переменные могут содержать мусор)
 
     STRUCT NC_VARIABLES
+fileListPtr     DW    0         ; Видимое окно внутри кэша активной панели.
+cacheValidA     DB    0
+cacheValidB     DB    0
+cacheDriveA     DB    0
+cacheDriveB     DB    0
 cmdLinePos      DW    0
 cmdLineEnd      DW    0
 chooseDrive     DB    0
-copySourceName    DW    0
-copyBlocksLeft    DW    0
-copySourceCluster DW    0
-copyDestCluster   DW    0
-copySourceDrive   DB    0
-copyDestDrive     DB    0
+copyRequest     FILE_COPY_REQUEST
+scrollCursorKept DB   0         ; Старый курсор остаётся на краю при шаге 1.
+scrollRows      DB    0         ; Модуль изменения начала списка (1..255).
+scrollPixels    DB    0         ; Высота новых строк, не более одной колонки.
+scrollRemain    DB    0         ; Высота сохраняемой части колонки.
 diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
 driveCount     DB    0         ; число установленных дисковых драйверов
 driveList      BLOCK 8, 0     ; номера дисков с установленным драйвером
 
 input           BLOCK P_INPUT_WIDTH + 2, 0FFh
-tempFileDescr   FILE_DESCRIPTOR
     ENDS
 
 vars    NC_VARIABLES = $        ; адрес начала блока переменнных
-; NC и исполнитель DOS используют строку по очереди. fileExec допускает
-; совпадение источника и CMD_LINE; собственный дубль на 60 байт не нужен.
+varsEnd = vars + NC_VARIABLES
+vars.tempFileDescr = vars.copyRequest.destination
+
+; Все рабочие буферы принадлежат NC и находятся после его кода.
+FILE_CACHE_CAPACITY   = 255     ; Нынешние индексы NC — 8-разрядные.
+FILE_CACHE_BYTES      = FILE_CACHE_CAPACITY * FILE_INFO_SIZE + 1
+FILE_CACHE_A          = varsEnd
+FILE_CACHE_B          = FILE_CACHE_A + FILE_CACHE_BYTES
+    ASSERT FILE_INFO_SIZE == 16
+
+; Единая системная строка принадлежит DOS и не входит в область NC.
 vars.cmdLine = CMD_LINE
 vars.cmdLineCtrl = CMD_LINE + 59
-varsEnd = vars + NC_VARIABLES   ; адрес конца  блока переменнных
-
-; Адрес буфера для листинга директории (FILE_LIST_SIZE структур FILE_INFO + 1 = 577 байт)
-;FILE_LIST_BUFFER = 8800h
-FILE_LIST_BUFFER      = varsEnd
-FILE_LIST_BUFFER_SIZE = FILE_LIST_SIZE * FILE_INFO_SIZE + 1
+NC_END = FILE_CACHE_B + FILE_CACHE_BYTES
 
 ;-----------------------------------------------------------------------
 ; Проверяем, что программа помещается в память вместе со своими буферами
 ;-----------------------------------------------------------------------
 
-; Конец NC.COM после разворачивания в памяти
-NC_END = FILE_LIST_BUFFER + FILE_LIST_BUFFER_SIZE
-
-; Максимальный допустимый размер NC.COM. Последняя страница перед FAT-кэшем
-; зарезервирована как секторный буфер потокового копирования.
-
-    IF NEW_MEMORY_MAP
-NC_END_MAX = FAT_CACHE_ADDR  ; до дискового кэша
-    ELSE
-NC_END_MAX = 0E200h          ; до адреса 0E200h
-    ENDIF
+; Код, переменные, список и строка должны поместиться перед буфером обмена.
+NC_END_MAX = COPY_BUFFER_END
+    ASSERT COPY_BUFFER >= NC_END
+    ASSERT COPY_BUFFER_SECTORS > 0 && COPY_BUFFER_SECTORS <= 255
+    ASSERT COPY_BUFFER + COPY_BUFFER_SECTORS * 256 == COPY_BUFFER_END
+    ASSERT COPY_BUFFER_END <= bios_vars
 
 ; Проверка
     IF NC_END >= NC_END_MAX

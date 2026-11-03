@@ -15,8 +15,11 @@ SECTOR_SIZE = 256           ; размер сектора в байтах
 
     ORG 0F100h
 
-    ; DE — строка аргументов, B=0 — диск пока не задан.
-    ld      b, 0
+    xor     a
+    ld      (bios_vars.koi7), a      ; Файловые утилиты работают в KOI-8.
+    ; DE — строка аргументов, C=0 — диск пока не задан.
+    ex      de, hl
+    ld      c, 0
     jp      ReadParams
 
     ; Запрос буквы диска для форматирования
@@ -33,11 +36,12 @@ chooseDrive:
     jp      SearchExit
 
 ReadParams:
-    ld      a, (de)
-    cp      ' '
-    jp z,   NextParam
-    cp      21h
+    call    bios_argNext
     jp c,   ParamsDone
+    ld      a, b
+    cp      2               ; Диск B: и ключи -R/-Y занимают два байта.
+    jp nz,  errParams
+    ld      a, (de)
     cp      '-'
     jp z,   ReadSwitch
     call    bios_upperCase
@@ -45,44 +49,36 @@ ReadParams:
     jp c,   errInvalidDrive
     cp      'I'
     jp nc,  errInvalidDrive
-    ld      h, a
-    ld      a, b
+    ld      b, a
+    ld      a, c
     or      a
-    jp nz,  errParams      ; второй диск не допускается
-    ld      b, h
+    jp nz,  errParams       ; Второй диск не допускается.
+    ld      c, b
     inc     de
     ld      a, (de)
     cp      ':'
     jp nz,  errInvalidDrive
-    inc     de
-    jp      ParamEnd
+    jp      ReadParams
 ReadSwitch:
     inc     de
     ld      a, (de)
     call    bios_upperCase
-    ld      hl, v_FormatConfirmed
+    ld      de, v_FormatConfirmed
     cp      'Y'
     jp z,   SetSwitch
     cp      'R'
     jp nz,  errParams
-    ld      hl, v_FormatRAMdisk
+    ld      de, v_FormatRAMdisk
 SetSwitch:
-    ld      (hl), 0FFh
-    inc     de
-ParamEnd:
-    ld      a, (de)
-    cp      ' '
-    jp z,   NextParam
-    cp      21h
-    jp nc,  errParams      ; ключ — отдельный токен, не начало другого слова
+    ld      a, 0FFh
+    ld      (de), a
+    jp      ReadParams
 ParamsDone:
+    ld      b, c
     ld      a, b
     or      a
     jp z,   chooseDrive
     jp      SearchExit
-NextParam:
-    inc     de
-    jp      ReadParams
 
 SearchExit:
     ld      a, (v_FormatConfirmed)

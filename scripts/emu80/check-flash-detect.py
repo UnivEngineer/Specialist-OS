@@ -3,6 +3,7 @@ import argparse, hashlib, json, runpy, struct
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
+SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 n=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
 Matrix=n['Matrix']; out=ROOT/'docs/flash/detect-001';out.mkdir(parents=True,exist_ok=True)
 Matrix.__init__.__globals__['OUT']=out
@@ -54,7 +55,7 @@ try:
             save();print(rows[-1],flush=True)
         if count==2:
             # FORMAT получает физический размер от B=3, не от старого BPB 2 МиБ.
-            x.m.write(0xF100,(ROOT/'bin/FORMAT.com').read_bytes());x.m.write(0x8400,b'H: -Y\r\0')
+            x.m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes());x.m.write(0x8400,b'H: -Y\r\0')
             assert not x.func(0xF100,de=0x8400)['flags']['C']
             assert struct.unpack_from('<H',image.read_bytes(),19)[0]==4096
             size(7,1048576,2048)
@@ -84,10 +85,10 @@ try:
         rows.append(dict(driver='FlashSys',physicalKiB=kib,pageBytes=128 if kib==128 else 256,idDoesNotWrite=True,readWriteVerified=True,boundsRejected=True));save();print(rows[-1],flush=True)
     # /WE запрещён: software ID недоступен, старые драйверы/данные сохраняются.
     x.start('no-software-id',locked=True,disk_locked=True)
-    for name,drive,address in [('FlashSys',0,0xDC00),('Flash',7,0xDE00),('FlashFst',7,0xDE00)]:
+    for name,drive,address in [('FlashSys',0,SYSTEM['SYSTEM_FLASH_ADDR']),('Flash',7,SYSTEM['DISK_DRIVER_ADDR']),('FlashFst',7,SYSTEM['DISK_DRIVER_ADDR'])]:
         # H: без установленного драйвера не обязан монтироваться.
         x.select(0);old=x.m.read(x.ds['v_drives']+drive*2,2);resident=x.m.read(address,512)
-        x.m.write(0,(ROOT/f'bin/{name}.com').read_bytes());state=x.func(0)
+        x.m.write(0,(ROOT/f'bin/{name}.i80').read_bytes());state=x.func(0)
         assert state['flags']['C'];assert x.m.read(address,512)==resident
         assert x.m.read(x.ds['v_drives']+drive*2,2)==old
         rows.append(dict(driver=name,noIdRejected=True,oldDriverPreserved=True));save();print(rows[-1],flush=True)

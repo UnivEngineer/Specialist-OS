@@ -32,11 +32,7 @@ setRAMDDriver:
 
 ; Операнд хранит шаблон, зарегистрированный RAMD.COM. Без него — байтовый.
 setRAMDBlockTemplate:
-    IF RAMD_BUFFERED
             ld    hl, driverByteStart
-    ELSE
-            ld    hl, driverBlockStart
-    ENDIF
             jp    setRAMDTemplate
 setRAMDRegister:
             ld    (setRAMDBlockTemplate+1), hl
@@ -64,61 +60,6 @@ setRAMDDone:
             pop   de
             pop   hl
             ret
-
-;----------------------------------------------------------------------------
-; Блочный драйвер, обрабатывает сразу блок 256 байт
-;
-; FFC0h - чтение 256-байтного блока
-;   вход:
-;     c = номер страницы
-;     d = номер блока 
-;     e = 0
-;     hl = адрес буфера в памяти
-;
-; FFD0h - запись 256-байтного блока
-;   вход:
-;     c = номер страницы
-;     d = номер блока 
-;     e = 0
-;     hl = адрес буфера в памяти
-;
-;----------------------------------------------------------------------------
-
-; Чтение 256-байтного блока с диска
-
-    IF RAMD_BUFFERED == 0
-driverBlockStart: ; эта п/п копируется на FFC0h
-            ld      a, c
-            ld      (IO_PAGE_RAMD), a
-            ld      a, (de)
-            ld      (IO_PAGE_RAM), a
-            ld      (hl), a
-            inc     hl
-            inc     e
-            jp nz,  0FFC0h
-            ret
-
-            ; осталось места: 1 байт
-            nop
-
-; Запись 256-байтного блока на диск
-
-driverBlockWrite: ; эта п/п копируется на FFD0h
-            ld      b, (hl)
-            ld      a, c
-            ld      (IO_PAGE_RAMD), a
-            ld      a, b
-            ld      (de), a
-            ld      (IO_PAGE_RAM), a
-            inc     hl
-            inc     e
-            jp nz,  0FFD0h
-            ret
-
-            ; осталось места: 0 байт
-
-driverBlockEnd:
-    ENDIF
 
 ;----------------------------------------------------------------------------
 ; Побайтовый драйвер, обрабатывает только 1 байт
@@ -172,31 +113,16 @@ driverByteWrite: ; эта п/п копируется на FFD0h
 
 driverByteEnd:
 
-    IF RAMD_BUFFERED
-        INCLUDE "ramdByteSector.inc"
-    ENDIF
+    INCLUDE "ramdByteSector.inc"
 
 ; ---------------------------------------------------------------------------
 
 ; Проверка, что драйверы влезаеют в 32 байта разделяемой памяти Специалиста-MX
 
-    IF RAMD_BUFFERED == 0
-    IF driverBlockWrite-driverBlockStart+bios_RAMDRead != bios_RAMDWrite
-        ASSERT 0
-        DISPLAY /l, "Error! Block briver entry point FFD0 has been shifted: ", driverBlockWrite-driverBlockStart+bios_RAMDRead, " != 0xFFD0"
-    ENDIF
-    ENDIF
 
     IF driverByteWrite-driverByteStart+bios_RAMDRead != bios_RAMDWrite
         ASSERT 0
         DISPLAY /l, "Error! Byte briver entry point FFD0 has been shifted: ", driverByteWrite-driverByteStart+bios_RAMDRead, " != 0xFFD0"
-    ENDIF
-
-    IF RAMD_BUFFERED == 0
-    IF driverBlockEnd-driverBlockStart > 32
-        ASSERT 0
-        DISPLAY /d, "Error! Block briver did not fit: ", driverBlockEnd-driverBlockStart, " > 32 bytes"
-    ENDIF
     ENDIF
 
     IF driverByteEnd-driverByteStart > 32
