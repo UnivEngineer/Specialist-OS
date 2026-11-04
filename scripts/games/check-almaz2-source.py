@@ -31,6 +31,76 @@ def word(data, address):
     return int.from_bytes(data[address:address + 2], "little")
 
 
+def check_diamond_explosion(data, symbols):
+    """Выполнить взрыв со стенами: проверить все девять клеток и возврат BC."""
+    def run(x, y, blocked=None):
+        cells = {(cx, cy): (3 if cx in (0, 23) or cy in (0, 15) else 0)
+                 for cy in range(16) for cx in range(24)}
+        if blocked is not None:
+            cells[blocked] = 3
+        cells[x, y] = 0x74  # Камень перед столкновением.
+        if cells[x, y+1] != 3:
+            cells[x, y+1] = 7  # Бабочка непосредственно под камнем.
+        before = cells.copy()
+        pc, b, c, a, zero = symbols["explosion_diamonds"], x, y, 0, False
+        stack, drawn = [], []
+        for _ in range(500):
+            if pc in (symbols["sound_sequence"], symbols["map_get_cell"],
+                      symbols["map_put_cell"], symbols["tile_draw"]):
+                if pc == symbols["map_get_cell"]:
+                    require((b, c) in cells, "Explosion reads outside the visible map")
+                    a = cells[b, c] & 15
+                elif pc == symbols["map_put_cell"]:
+                    require((b, c) in cells, "Explosion writes outside the visible map")
+                    cells[b, c] = a
+                elif pc == symbols["tile_draw"]:
+                    drawn.append((b, c))
+                if not stack:
+                    return cells, before, drawn, (b, c)
+                pc = stack.pop()
+                continue
+            op = data[pc]
+            pc += 1
+            if op == 0x21: pc += 2
+            elif op == 0xCD:
+                target = word(data, pc); stack.append(pc+2); pc = target
+            elif op == 0xC3: pc = word(data, pc)
+            elif op == 0x04: b = (b+1) & 255
+            elif op == 0x05: b = (b-1) & 255
+            elif op == 0x0C: c = (c+1) & 255
+            elif op == 0x0D: c = (c-1) & 255
+            elif op == 0x3E: a = data[pc]; pc += 1
+            elif op == 0xFE: zero = a == data[pc]; pc += 1
+            elif op == 0xC9 or (op == 0xC8 and zero):
+                if not stack:
+                    return cells, before, drawn, (b, c)
+                pc = stack.pop()
+            elif op != 0xC8:
+                raise ValueError(f"Unexpected explosion opcode {op:02X} at {pc-1:04X}")
+        raise ValueError("Diamond explosion did not return")
+
+    if not symbols["app_optimizations_enabled"]:
+        cells, _, _, coords = run(1, 13)
+        require(cells[1, 14] == 7 and coords != (1, 13),
+                "Historical left-wall explosion regression no longer reproduces")
+        return
+    require(symbols["diamond_update"] == 0x0495, "Explosion changes fixed code addresses")
+    for y in range(1, 15):
+        for x in range(1, 23):
+            for blocked in [None] + [(x+dx, y+dy) for dx, dy in
+                                    ((1, 0), (1, -1), (0, -1), (-1, -1),
+                                     (-1, 0), (-1, 1), (0, 1), (1, 1))]:
+                cells, before, drawn, coords = run(x, y, blocked)
+                expected = before.copy()
+                affected = {(x+dx, y+dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                            if before[x+dx, y+dy] != 3}
+                for pos in affected:
+                    expected[pos] = 5
+                require(cells == expected and len(drawn) == len(affected) and
+                        set(drawn) == affected and coords == (x, y),
+                        f"Incomplete diamond explosion at {x},{y}, wall={blocked}")
+
+
 def check_soil_draw(data, symbols, color8):
     """Исполнить отрисовку земли для всех банков и проверить цвета и стек."""
     for bank_name in ("t_sprites_phase_zero", "t_sprites_phase_one",
@@ -314,7 +384,7 @@ def check_fungus_gate(data, symbols):
 
 
 def load(stem):
-    data = (ROOT / "bin" / (stem + ".exe")).read_bytes()
+    data = (ROOT / "bin" / (stem + ".cpu")).read_bytes()
     symbols = dict((name, int(value, 16)) for name, value in re.findall(
         r"(?m)^(\w+): EQU 0x([0-9A-Fa-f]+)",
         (ROOT / "bin" / (stem + ".sym")).read_text()))
@@ -680,7 +750,7 @@ def main():
     for total in range(65536, 65536 + 10000):
         require(divmod(total, 10000) == (6 + (total - 60000) // 10000, (total - 60000) % 10000),
                 "Real-time carry decomposition differs")
-    reference = (ROOT / "assets/games/Almaz-2/legacy/Almaz2-original.exe").read_bytes()
+    reference = (ROOT / "assets/games/Almaz-2/legacy/Almaz2-original.cpu").read_bytes()
     bios_source = (ROOT / "source/dos/keyTable.inc").read_text(encoding="utf-8")
     row = bios_source.split("v_keybTbl:", 1)[1].splitlines()[1]
     bios_codes = [int(value, 16) for value in re.findall(r"([0-9A-Fa-f]+)h", row)]
@@ -720,6 +790,7 @@ def main():
         ("Almaz2-ramfos-optimized", False, True, False, True),
     ):
         payload, symbols = load(stem)
+        check_diamond_explosion(payload, symbols)
         require(bool(symbols["app_monitor_target"]) == monitor, f"{stem}: monitor target")
         if monitor and optimized:
             exit_address = symbols["monitor_game_exit"]

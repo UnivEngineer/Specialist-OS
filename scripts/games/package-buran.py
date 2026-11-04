@@ -9,10 +9,10 @@ GAMES = ROOT / 'assets/games/Buran'
 SOURCES = {
     'Buran-std.rks': '092f321c30b6d89d7df4136a28ca9512d0285782e992ad7a841c4d52399fe1fa',
     'Buran-starwars-std.rks': '8706c2ae313ccdc1ea23368524d1a02b9213a727f906f484fb00b1671790bd68',
-    'Buran-starwars-std.exe': 'cbcc725cb0916a3b88600650f4b2a2398353e9e074429d0fdbfeccc029180380',
+    'Buran-starwars-std.cpu': 'cbcc725cb0916a3b88600650f4b2a2398353e9e074429d0fdbfeccc029180380',
     'Buran-starwars-std-tape.rks.bin': '30243a274207e3ce88d5bfb3cbbf5a4c6db564c549a0256246afaa6abd68a6e8',
     'Buran-starwars-std-germanovitsh.rks': '31b15797983393e9c3b9c5e7ea80eeb54c35a249a99fb457304ee40e3803853a',
-    'Buran-ramfos.exe': '471e61f6702042ffc007b7b408297108c546a6198a679c4bd185361654260e66',
+    'Buran-ramfos.cpu': '471e61f6702042ffc007b7b408297108c546a6198a679c4bd185361654260e66',
 }
 
 
@@ -29,7 +29,7 @@ def main():
             raise ValueError(f'Неизвестный оригинал: {name}')
         original[name] = data
     # Старый EXE фактически содержит нагрузку STD и её хвост суммы RKS.
-    if original['Buran-starwars-std.exe'] != original['Buran-starwars-std.rks'][4:]:
+    if original['Buran-starwars-std.cpu'] != original['Buran-starwars-std.rks'][4:]:
         raise ValueError('Исторические EXE/RKS не соответствуют друг другу')
     prepared = {}
     for name in ('Buran-std.rks', 'Buran-starwars-std.rks'):
@@ -38,7 +38,7 @@ def main():
         if start != 0 or len(tail) != 2:
             raise ValueError(f'Неизвестная структура RKS: {name}')
         prepared[name] = source[:4] + data + checksum(data).to_bytes(2, 'little')
-    prepared['Buran-ramfos.exe'] = original['Buran-ramfos.exe']
+    prepared['Buran-ramfos.cpu'] = original['Buran-ramfos.cpu']
     for name, data in prepared.items():
         target = GAMES / name
         if args.check:

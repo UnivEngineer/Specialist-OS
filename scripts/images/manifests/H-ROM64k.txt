@@ -27,6 +27,8 @@
 # Порядок строк задаёт порядок файлов; в больших системных образах загрузочные записи идут первыми.
 
 # Имя на диске    Источник относительно assets/                          Адрес RAW Атрибуты
-AlmazyMX.rks        games/AlmazyMX.rks
-Almaz2MX.exe      games/Almaz-2/Almaz2-mx-optimized.exe
-Tetris.rks        games/tetris.rks
+AlmazyMX.rks     games/AlmazyMX.rks
+# Almaz2X.exe      games/Almaz-2/Almaz2-8color-optimized.cpu
+Almaz2MX.exe     games/Almaz-2/Almaz2-mx-optimized.cpu
+# Pacman2.rks      games/Pacman2.rks
+Tetris.rks       games/tetris.rks

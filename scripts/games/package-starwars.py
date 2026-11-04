@@ -10,11 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 GAMES = ROOT / 'assets/games/StarWars'
 SOURCES = {
-    'StarWars-std-C800.exe': 'a8ac2914135e32f47aea3c2408565974dceac8d51a3c615515c93dc911d21bab',
+    'StarWars-std-C800.cpu': 'a8ac2914135e32f47aea3c2408565974dceac8d51a3c615515c93dc911d21bab',
     'StarWars-std.rks': '45f28d909c77d0bae25cdd69bf83c8b96e2f9bb90b0bf87becfdc24a8cd57177',
-    'StarWars2-mx.exe': 'de9287ea25309a25bcc796246d55c1938729823ed76f4f977b9a742b78af2796',
+    'StarWars2-mx.cpu': 'de9287ea25309a25bcc796246d55c1938729823ed76f4f977b9a742b78af2796',
     'StarWars2-mx.rks': '642326f85a1b6009a80a08d47b7c62a7fc0042e6c2f6c8f9076704ce4bf43b15',
-    'StarWars2-ramfos.exe': 'b7dd022fc87f3280a7f54ea1a4d0fc87916d4f2d5cb91a80f8afa6c518f4cd5c',
+    'StarWars2-ramfos.cpu': 'b7dd022fc87f3280a7f54ea1a4d0fc87916d4f2d5cb91a80f8afa6c518f4cd5c',
     'StarWars2-std-tape.rks.bin': '51d6a9babdec423f8489db7fb0cb2a959ef0b273f42bc0824c2d6a3dcc3bbb8f',
     'StarWars2-std-germanovitsh.rks': 'b119f11eb438dcf7b15dfd96531b7ec95dcc5ab736287b92d0d0d19ad9992708',
 }
@@ -48,14 +48,14 @@ def main():
     if tape[:3] != b'\xd9\xd9\xd9' or tape[778:782] != bytes.fromhex('00 00 ff 23'):
         raise ValueError('Неизвестный ленточный заголовок')
     payloads = {
-        'StarWars-std-C800.rks': original['StarWars-std-C800.exe'],
+        'StarWars-std-C800.rks': original['StarWars-std-C800.cpu'],
         'StarWars-std.rks': original['StarWars-std.rks'][4:-2],
-        'StarWars2-mx.exe': original['StarWars2-mx.exe'],
-        'StarWars2-ramfos.exe': original['StarWars2-ramfos.exe'],
+        'StarWars2-mx.cpu': original['StarWars2-mx.cpu'],
+        'StarWars2-ramfos.cpu': original['StarWars2-ramfos.cpu'],
         'StarWars2-std.rks': tape[782:782 + 9216],
         'StarWars2-std-germanovitsh.rks': original['StarWars2-std-germanovitsh.rks'][4:-2],
     }
-    if original['StarWars2-mx.rks'] != rks(payloads['StarWars2-mx.exe']):
+    if original['StarWars2-mx.rks'] != rks(payloads['StarWars2-mx.cpu']):
         raise ValueError('Исторические EXE/RKS MX не соответствуют друг другу')
     if len({hashlib.sha256(data).digest() for data in payloads.values()}) != 6:
         raise ValueError('Ожидались шесть различных нагрузок')

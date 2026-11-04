@@ -747,6 +747,44 @@ explosion_mark_smoke:
 
 ; Взрыв бабочки с превращением соседей в алмазы.
 explosion_diamonds:
+    IF ALMAZ_OPTIMIZE
+    LD HL,t_sound_diamond_explosion
+    CALL sound_sequence
+    CALL explosion_mark_diamond
+    INC B
+    CALL explosion_mark_diamond
+    DEC C
+    CALL explosion_mark_diamond
+    DEC B
+    CALL explosion_mark_diamond
+    DEC B
+    CALL explosion_mark_diamond
+    INC C
+    CALL explosion_mark_diamond
+    INC C
+    CALL explosion_mark_diamond
+    INC B
+    CALL explosion_mark_diamond
+    INC B
+    CALL explosion_mark_diamond
+    DEC C
+    DEC B
+    RET
+
+; Стена пропускается без прерывания всего взрыва.
+; Вход B/C=координаты; BC сохраняется, AF/DE меняются, HL — как у рисователя.
+; Взрыв проверяет девять клеток и рисует до девяти тайлов; координаты центра
+; восстанавливаются. Обработчик клетки: 14 байт, без дополнительных обходов.
+explosion_mark_diamond:
+    CALL map_get_cell
+    CP 03h
+    RET Z
+    LD A,05h
+    CALL map_put_cell
+    JP tile_draw
+    ASSERT $-explosion_diamonds <= 08Fh
+    DS 08Fh-($-explosion_diamonds), 0FFh
+    ELSE
     ld      hl,t_sound_diamond_explosion ; 0406h
     call    sound_sequence ; 0409h
     call    map_get_cell ; 040Ch
@@ -814,6 +852,7 @@ explosion_diamonds:
     dec     c ; 0492h
     dec     b ; 0493h
     ret ; 0494h
+    ENDIF
 
 ; Гравитация алмазов, симметричная обработке камней.
 diamond_update:

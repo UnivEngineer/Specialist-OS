@@ -37,7 +37,9 @@ def main():
     args = parser.parse_args()
     current = TARGET.read_bytes()
     original = ORIGINAL.read_bytes() if ORIGINAL.exists() else current
-    fixed = patch(original)
+    color_only = patch(original)
+    game_over = runpy.run_path(str(Path(__file__).with_name('patch-budi-game-over.py')))
+    fixed = game_over['patch'](color_only, TARGET.name)
     if current not in (original, fixed):
         raise ValueError('BUDI2 изменена вне этого патча')
     if args.check:

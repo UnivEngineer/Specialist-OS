@@ -13,6 +13,9 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0,str(ROOT/'scripts/images'))
+from executable import convert
 UNDEFINED = {0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38,
              0xCB, 0xD9, 0xDD, 0xED, 0xFD}
 JUMPS = {0xC3} | set(range(0xC2, 0x100, 8))
@@ -53,42 +56,21 @@ def inventory():
                     addresses[source.relative_to(ROOT).as_posix().lower()] = address
     for folder in ('games', 'programs'):
         for path in sorted((ROOT / 'assets' / folder).rglob('*')):
-            if path.is_file() and path.suffix.lower() in ('.rks', '.exe', '.com'):
-                name = path.relative_to(ROOT).as_posix()
-                raw = path.read_bytes()
-                result = {'file': name, 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
-                if path.suffix.lower() == '.rks':
-                    if len(raw) < 4:
-                        yield result | {'error': 'short_header'}, None
-                        continue
-                    load = int.from_bytes(raw[:2], 'little')
-                    end = int.from_bytes(raw[2:4], 'little')
-                    size = end - load + 1
-                    if size <= 0 or len(raw) < 4 + size:
-                        yield result | {'error': 'invalid_payload'}, None
-                        continue
-                    data = raw[4:4 + size]
-                    tail = raw[4 + size:]
-                    result['container_sum_ok'] = len(tail) == 2 and int.from_bytes(tail, 'little') == checksum(data)
-                else:
-                    load = addresses.get(name.lower())
-                    data = raw
-                    if load is None:
-                        # Адрес из канонического RKS допустим только при точном
-                        # совпадении его заявленной нагрузки с raw-бинарником.
-                        sibling = path.with_suffix('.rks')
-                        if sibling.exists():
-                            container = sibling.read_bytes()
-                            first = int.from_bytes(container[:2], 'little')
-                            last = int.from_bytes(container[2:4], 'little')
-                            if last - first + 1 == len(raw) and container[4:4 + len(raw)] == raw:
-                                load = first
-                                result['load_address_evidence'] = sibling.relative_to(ROOT).as_posix()
-                    if load is None:
-                        yield result | {'error': 'unknown_load_address'}, None
-                        continue
-                result.update(load=load, end=load + len(data) - 1, entry=load, payload_bytes=len(data))
-                yield result, data
+            if not path.is_file() or path.suffix.lower() not in ('.rks','.exe','.com','.cpu'):
+                continue
+            name=path.relative_to(ROOT).as_posix()
+            raw=path.read_bytes()
+            record={'file':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+            try:
+                _, image=convert(path,'exe',load=addresses.get(name.lower()))
+            except ValueError as error:
+                yield record | {'error':str(error)}, None
+                continue
+            if path.suffix.lower()=='.rks':
+                record['container_sum_ok']=True
+            record.update(load=image.load,end=image.load+len(image.data)-1,
+                          entry=image.entry,payload_bytes=len(image.data))
+            yield record,image.data
 
 
 def analyse(record, data, public):

@@ -72,7 +72,7 @@ RAMFOS-порт меняет цвет, BIOS и клавиши. В его спр�
 | `StarWar2.exe` | [StarWars2-mx.exe](StarWars2-mx.exe) |
 | `SW2-RF.exe` | [StarWars2-ramfos.exe](StarWars2-ramfos.exe) |
 
-Имена задаёт `scripts/images/manifests/FlashDisk.txt`; код и нагрузка при включении в образ не меняются.
+Имена задаёт `scripts/images/manifests/H-Games2M.txt`; код и нагрузка при включении в образ не меняются.
 
 ## Воспроизведение контейнеров и проверка
 

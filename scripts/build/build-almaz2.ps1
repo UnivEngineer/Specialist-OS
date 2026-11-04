@@ -91,7 +91,7 @@ foreach ($variant in $selected) {
     $stampPath = "$prefix.build.json"
     $variantSignature = @($inputSignature, $variant.Name, $variant.Color, $variant.Pit,
         $variant.Ramfos, $variant.Hud, ($extraDefines -join ' ')) -join "`n"
-    $outputs = @("$prefix.exe", "$prefix.rks", "$prefix.lst", "$prefix.sym")
+    $outputs = @("$prefix.cpu", "$prefix.rks", "$prefix.lst", "$prefix.sym")
     $needsBuild = $true
     if (-not $Force -and (Test-Path -LiteralPath $stampPath -PathType Leaf)) {
         try {
@@ -119,10 +119,10 @@ foreach ($variant in $selected) {
         ("-DALMAZ_RAMFOS={0}" -f $variant.Ramfos) `
         ("-DALMAZ_HUD={0}" -f $variant.Hud) `
         @extraDefines `
-        ("--raw={0}.exe" -f $prefix) ("--lst={0}.lst" -f $prefix) `
+        ("--raw={0}.cpu" -f $prefix) ("--lst={0}.lst" -f $prefix) `
         ("--sym={0}.sym" -f $prefix) $sourcePath
     if ($LASTEXITCODE -ne 0) { throw "Assembly failed: $($variant.Name)" }
-    Write-AlmazRks "$prefix.exe" "$prefix.rks"
+    Write-AlmazRks "$prefix.cpu" "$prefix.rks"
     $outputHashes = @{}
     foreach ($output in $outputs) {
         $name = [IO.Path]::GetExtension($output).TrimStart('.')
@@ -138,7 +138,7 @@ if ($PublishMxTimer) {
     # Публикация всех выбранных вариантов в обоих форматах.
     foreach ($variant in $selected) {
         $destinationDirectory = $archive
-        foreach ($extension in @("exe", "rks")) {
+        foreach ($extension in @("cpu", "rks")) {
             $fileName = "$($variant.Output).$extension"
             $source = Join-Path $outputDirectory $fileName
             $destination = Join-Path $destinationDirectory $fileName

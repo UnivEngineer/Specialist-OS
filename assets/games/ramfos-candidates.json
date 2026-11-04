@@ -301,9 +301,9 @@
       "id": "RF-005"
     },
     {
-      "name": "Budi-mx.exe",
-      "display_name": "Budi-mx.exe",
-      "status": "strong-candidate",
+      "name": "Budi-ramfos.exe",
+      "display_name": "Budi-ramfos.exe",
+      "status": "user-confirmed",
       "payload_sha256": "569192f641e7e9bf612d8accd8cd4998c3554ba352a9947f23af0c64ba8348ff",
       "payload_bytes": 28501,
       "load_address": "0000",
@@ -347,9 +347,14 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Budi.rks"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\originals\\budi-game-over\\Budi-ramfos.cpu.bin",
       "source_verified_now": true,
-      "id": "RF-006"
+      "id": "RF-006",
+      "user_validation": {
+        "date": "2026-11-02",
+        "environment": "LAUNCH -RF / RAMFOS / Emu80",
+        "result": "Пользователь подтвердил цвет, голос и управление; прямоугольник после проигрыша соответствует пустому блоку изображения в оригинале."
+      }
     },
     {
       "name": "Budi.COM",

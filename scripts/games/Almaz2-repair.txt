@@ -1,16 +1,16 @@
 Восстановление цветного «Алмаза-2», 23.10.2026
 
-Дополнение: теперь assets/games/Almaz2MX.exe собирается из source-apps/almaz2
+Дополнение: теперь assets/games/Almaz-2/Almaz2-mx-optimized.cpu собирается из source-apps/almaz2
 с цветом и ВИ53. Описанный ниже вариант на 13348 байт сохранён отдельно:
 assets/games/Almaz-2/legacy/Almaz2X-mxos-legacy.bin. Далее — история восстановления.
 
 Результаты (все три файла загружаются и запускаются с 0000h):
 
-assets/games/Almaz-2/legacy/Almaz2-original-ramfos-broken.exe — неизменённый исторический файл Ramfos.
+assets/games/Almaz-2/legacy/Almaz2-ramfos-original-broken.cpu — неизменённый исторический файл Ramfos.
 13348 байт; SHA-256:
 e2e0193a23656a4063d7966b912090bd553edf74f1bd2405ec9ef7a8cd48472c
 
-assets/games/Almaz-2/Almaz2-original-ramfos.exe — восстановленные карты и надписи, ABI Ramfos.
+assets/games/Almaz-2/legacy/Almaz2-ramfos-original-fixed.cpu — восстановленные карты и надписи, ABI Ramfos.
 29 изменённых байт; размер 13348 байт; SHA-256:
 3ff4b12a3a213edfd11a076a375231bcb56ebe51b630aec4a06ec22a9c0eee52
 
@@ -18,7 +18,7 @@ assets/games/Almaz-2/legacy/Almaz2X-mxos-legacy.bin — те же исправл
 42 изменённых байта; размер 13348 байт; SHA-256:
 df73430dd8f6d17a40aab8fedfa75ba21663da13ef0c2f888dbccb5d4b0a6713
 
-База сравнения: assets/games/Almaz-2/legacy/Almaz2-original.exe, 13312 байт, SHA-256:
+База сравнения: assets/games/Almaz-2/legacy/Almaz2-original.cpu, 13312 байт, SHA-256:
 4099d26e24974f7aeb518bcbe0040142e71bd29ba38b66678e569d70bba7debc
 База не изменена. Адрес загрузки нулевой, смещения совпадают с адресами.
 
@@ -86,7 +86,7 @@ D052h, читающую параметры из C64Eh. Возврат F800h ве
 
 Ядра Ramfos в ассетах и их загрузчики
 
-assets/programs/Ramfos.EXE (6832 байта) загружается в 0000h:
+assets/programs/Ramfos.cpu (6832 байта) загружается в 0000h:
 0030h..12CFh -> C000h..D29Fh (12A0h байт);
 12D0h..1AAFh -> F800h..FFDFh (07E0h байт);
 после копирования — переход F800h. Исходный файл нельзя просто загружать
@@ -101,7 +101,7 @@ assets/programs/RAMFOS.COM (6144 байта) также стартует с 0000
 Это разные упаковки ядра, проверены оба загрузчика.
 
 Оба ядра подменяют системную память. Для ручной проверки нужна отдельная
-сессия Ramfos с загрузкой `assets/games/Almaz-2/Almaz2-original-ramfos.exe` по 0000h уже после запуска оболочки;
+сессия Ramfos с загрузкой `assets/games/Almaz-2/legacy/Almaz2-ramfos-original-fixed.cpu` по 0000h уже после запуска оболочки;
 запуск этого файла непосредственно под MXOS воспроизводит ошибочный ABI.
 В обычном эмуляторном flash-манифесте используется имя Almaz2MX.exe для MXOS.
 Вариант RAMFOS и ядра автоматически в этот образ не добавлялись.
