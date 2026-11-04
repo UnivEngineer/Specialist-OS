@@ -8,7 +8,8 @@ param(
     [switch] $Flash,
     [switch] $ResetFlash,
     [switch] $ProtectSystemFlash,
-    [switch] $Mcp
+    [switch] $Mcp,
+    [switch] $Mute
 )
 
 $ErrorActionPreference = 'Stop'
@@ -95,6 +96,9 @@ if ($Flash) {
 }
 Copy-Item -LiteralPath $configSource -Destination (Join-Path $deployment 'specialist-mx2.conf') -Force
 $launchConfig = $(if ($mx2Models) { "define MX2_MODELS`n" }) + $(if ($Flash) { "define FLASH_DISK`ndefine SYSTEM_FLASH`n" }) + $(if ($ProtectSystemFlash) { "define SYSTEM_FLASH_LOCKED`n" }) + "include specialist-os/specialist-mx2.conf`n"
+if ($Mcp -or $Mute) {
+    $launchConfig += "pitSoundSource.muted = yes`ntapeMonitor.muted = yes`n"
+}
 [IO.File]::WriteAllText((Join-Path $deployment 'launch.conf'), $launchConfig, (New-Object Text.UTF8Encoding($false)))
 $diskName = if ($Flash) { 'flash-disk.bin' } else { 'rom-disk.bin' }
 $systemName = if ($Flash) { 'system-flash.bin' } else { 'system.bin' }

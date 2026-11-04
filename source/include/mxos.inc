@@ -1,11 +1,12 @@
 ;-----------------------------------------------------------------------
 ; MXOS
 ; Точки входа и настройки сборки MXOS
-; DOS.SYS — историческое имя единого ядра MXOS. Префикс bios_ сохранён
-; для совместимости ABI; аппаратные и файловые сервисы входят в одно ядро.
+; DOS.SYS — резидентная часть MXOS, DOSMOD.COM — загружаемые общие службы.
+; Префикс bios_ сохранён для совместимости ABI обеих частей.
 ;
 ; Карта памяти (основное ОЗУ, MX):
-;   0000-8BFF - Прикладные программы и их буферы; DEBUG временно с 8000h
+;   0000-7FFF - Прикладные программы и буферы, в том числе NC/E/DEBUG
+;   8000-8BFF - [3072 B] DOSMOD; можно явно освободить без расширенных служб
 ;   8C00-8CFF - Переходник RUN, продолжение после инициализации Monitor-2
 ;   8D00-8D7F - Аргументы запуска; 8D80-8DFF - резерв контекста
 ;   8E00-8FDE - [ 479 B] Системный стек, SP=8FDFh
@@ -225,6 +226,9 @@ bios_getError           = 0C8C9h ; [MXOS2] A=код DOS, CF=ошибка; BC/DE/
 bios_installBlockDriver = 0C8CCh ; A=диск, HL=драйвер, C=log2 физического блока (7..9)
 bios_sectorIO           = 0C8CFh ; B=1/2, DE=логический сектор, HL=буфер; BC/DE/HL сохранены
 bios_fileStream         = 0C8D2h ; [MXOS2] A=1/2, DE=FILE_STREAM_CURSOR, HL=буфер, BC=байты
+bios_fileHandle         = 0C8D5h ; [MXOS2] A=FILE_OP_*, HL=FILE_HANDLE; CF/A=код DOS
+bios_loadDosModule      = 0C8D8h ; [MXOS2] загрузить A:DOSMOD.COM; BC/DE/HL сохранены, CF/A=ошибка
+bios_releaseDosModule   = 0C8DBh ; [MXOS2] освободить DOSMOD, memtop до 8BFFh; меньшее ограничение сохраняется
 
 
 ;-----------------------------------------------------------------------
@@ -380,6 +384,37 @@ size            BLOCK   4                   ; смещение 1Ch, 4 байта
 ; Имена source/destination — компактные 8.3, первые 11 байт дескриптора.
 ; Курсор потока активного FAT-тома; хранится у вызывающей программы.
 ; Не содержит размера файла: вызывающая сторона ограничивает чтение EOF.
+; Открытый файл хранится у вызывающего. Первые 32 байта — FILE_DESCRIPTOR.
+; Поля запроса изменяются DOS; структура не должна пересекать буфер обмена.
+FILE_OP_OPEN = 0
+FILE_OP_READ = 1
+FILE_OP_WRITE = 2
+FILE_OP_SEEK = 3
+FILE_OP_FLUSH = 4
+FILE_OP_CLOSE = 5
+FILE_MODE_READ = 1
+FILE_MODE_WRITE = 2
+FILE_MODE_CREATE = 4
+FILE_MODE_TRUNCATE = 8
+FILE_MODE_APPEND = 16
+FH_POSITION = 32
+FH_CURSOR = 36
+FH_DRIVE = 40
+FH_MODE = 41
+FH_STATE = 42
+FH_ERROR = 43
+FH_EOF = 44
+FH_DIR_SECTOR = 45
+FH_DIR_OFFSET = 47
+FH_BUFFER = 49
+FH_COUNT = 51
+FH_SEEK = 53
+FH_ORIGIN = 57
+FH_PREVIOUS = 58
+FH_VALID = 62
+FH_OPERATION = 63
+FILE_HANDLE = 64
+
     STRUCT FILE_STREAM_CURSOR
 cluster     DW 0
 offset      DW 0
@@ -514,7 +549,11 @@ DOS_CODE_END_MAX = DOS_END_MAX
     ASSERT NEW_MEMORY_MAP
 CMD_LINE   = 0FA00h ; FA00h-FA81h, только MX
 CMD_LINE_SIZE = 130
-APP_MEMORY_END = 08C00h   ; Далее переходники запуска и системный стек
+DOS_MODULE_ADDR = 08000h ; Загружаемые файловые и графические службы
+DOS_MODULE_END = 08C00h  ; Далее переходники запуска и системный стек
+DOS_MODULE_JUMPS = DOS_MODULE_ADDR+16
+APP_MEMORY_END = DOS_MODULE_ADDR ; Исключительная граница памяти программ
+LEGACY_APP_MEMORY_END = DOS_MODULE_END ; Классические программы могут затереть DOSMOD
 STACK_BOTTOM = 08E00h
 STACK_ADDR = 08FDFh
 NC_STATE_ADDR = 0FFB0h ; 12 байт; FFBEh — детектор, FFBFh — метка FORMAT

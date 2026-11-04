@@ -35,10 +35,21 @@ entry:
     ld hl,0
     add hl,sp
     ld (callerSP),hl
+    ; Бенчмарк использует только резидентный файловый API и занимает HIGH.
+    call bios_releaseDosModule
     ld a,(bios_vars.koi7)
     ld (callerKoi),a
     xor a
     ld (bios_vars.koi7),a       ; Имена файлов — KOI-8.
+    IF FAT_CACHE_ADDR == 0FB00h
+    call bios_getMemTop
+    ld de,program_end-1
+    call bios_cmp_hl_de
+    jp nc,benchMemoryReady
+    ld hl,txtNoMemory
+    jp show_error
+benchMemoryReady:
+    ENDIF
     ld hl,txtTitle
     call puts
 menu_drive:
@@ -349,6 +360,7 @@ error:
 show_error:
     call puts
     jp done
+txtNoMemory: DB "NOT ENOUGH MEMORY",0
 puts:
     jp bios_printString
 
@@ -954,7 +966,7 @@ lower_buffers_end = sectorBuffer + MAX_FILE_KIB*1024
 highBuffer = 08200h
     ENDIF
     IFNDEF HIGH_SECTORS
-HIGH_SECTORS = (APP_MEMORY_END-highBuffer)/256
+HIGH_SECTORS = (LEGACY_APP_MEMORY_END-highBuffer)/256
     ENDIF
     ASSERT fatBuffer+256 <= highBuffer || highBuffer+HIGH_SECTORS*256 <= fatBuffer
 program_end = highBuffer + HIGH_SECTORS*256

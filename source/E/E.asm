@@ -61,8 +61,8 @@ buffer  BLOCK  10, 0
 last    BLOCK  1,  0
     ENDS
 
-; Собственные переменные рядом с историей имени, вне системного стека
-editor_vars EDITOR_VARIABLES = 08510h
+; История имени и экземпляр переменных размещены после кода ниже 1800h.
+
 
 ;----------------------------------------------------------------------------
 
@@ -76,12 +76,9 @@ editor_vars EDITOR_VARIABLES = 08510h
 ;----------------------------------------------------------------------------
 
 ; Буферы в конце программы
-; История имени вне кода и кэша; текст заканчивается перед 8500h.
-FILE_NAME_HISTORY = 08500h
-FILE_NAME_RECALL_END = FILE_NAME_HISTORY + 10
-    ASSERT FILE_NAME_HISTORY + 16 <= editor_vars
+; Текст начинается с 1800h; фактический верхний предел берётся из memtop.
 
-EDITOR_BUFFER_SIZE = 08500h - 01800h
+EDITOR_BUFFER_SIZE = APP_MEMORY_END - 01800h
 
 ;----------------------------------------------------------------------------
 
@@ -94,6 +91,10 @@ EDITOR_BUFFER_SIZE = 08500h - 01800h
     INCLUDE "screen.inc" ; Примитивы памяти, курсор, экран и строка состояния
     INCLUDE "files.inc" ; Дисковые операции, ввод имени и дескриптор файла
     INCLUDE "entry.inc" ; Файловые клавиши и вход с аргументом командной строки
+
+FILE_NAME_HISTORY: DS 10,0
+FILE_NAME_RECALL_END: DS 6,0
+editor_vars EDITOR_VARIABLES
 
     IF !STANDARD_EDITOR
         ASSERT $ <= 01800h

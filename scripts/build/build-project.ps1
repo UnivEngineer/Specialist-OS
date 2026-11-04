@@ -21,7 +21,7 @@ $components = @(
     @{ Directory = "source\\flash";  Source = "FlashSys"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\ramd";   Source = "RAMD"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\flash";  Source = "Rom";     Extension = "cpu"; Address = "DISK_DRIVER_ADDR" },
-    @{ Directory = "source\\debug";   Source = "Debug"; Extension = "cpu"; Address = "0x8000" },
+    @{ Directory = "source\\debug";   Source = "Debug"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\monitor2"; Source = "Monitor2"; Extension = "mon"; Address = "0xC000" },
     @{ Directory = "source\\run"; Source = "RUN";  Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "mon"; Address = "0xC000" },

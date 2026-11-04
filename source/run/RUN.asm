@@ -203,6 +203,8 @@ nativeOpen:
     jp z,setDefault
     jp chooseMode
 rksOpen:
+    ; Классический контейнер может использовать всё ОЗУ до переходников.
+    call bios_releaseDosModule
     ld hl,descriptor
     call bios_fileLoadInfo
     jp c,notFound
@@ -292,6 +294,9 @@ customMode:
 upperSource:
     DISP SYSTEM_PROGRAM_ADDR
 ready:
+    ld a,(mode)
+    or a
+    call nz,bios_releaseDosModule
     ld hl,(appLoad)
     GET_DE appSize
     add hl,de
@@ -299,7 +304,25 @@ ready:
     ld a,(mode)
     cp 3
     jp z,rfRange
-    ld de,APP_MEMORY_END
+    ld de,LEGACY_APP_MEMORY_END
+    ld a,(descriptor+FILE_DESCRIPTOR.ext)
+    and 0DFh
+    cp 'R'
+    jp z,rangeLowReady
+    ld a,(mode)
+    or a
+    jp nz,rangeLowReady
+    push hl
+    call bios_getMemTop
+    ld de,APP_MEMORY_END-1
+    call bios_cmp_hl_de
+    jp c,rangeMemTopReady
+    ex de,hl
+rangeMemTopReady:
+    inc hl
+    ex de,hl
+    pop hl
+rangeLowReady:
     ld a,(appLoad+1)
     cp 0C0h
     jp c,rangeEnd
@@ -312,7 +335,7 @@ ready:
     ld de,SYSTEM_PROGRAM_END
     jp rangeEnd
 rfRange:
-    ld de,APP_MEMORY_END
+    ld de,LEGACY_APP_MEMORY_END
     ld a,(appLoad+1)
     cp 0D3h
     jp c,rangeEnd

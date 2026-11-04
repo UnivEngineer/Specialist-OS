@@ -20,10 +20,20 @@ entry:
     ld hl,0
     add hl,sp
     ld (callerSP),hl
+    ; Карта кластеров и секторные буферы требуют верхнего прикладного ОЗУ.
+    call bios_releaseDosModule
     ld a,(bios_vars.koi7)
     ld (callerKoi),a
     xor a
     ld (bios_vars.koi7),a       ; Имена файлов на диске хранятся в KOI-8.
+    call bios_getMemTop
+    ld de,header+256-1
+    call bios_cmp_hl_de
+    jp nc,checkMemoryReady
+    ld hl,txtNoMemory
+    call puts
+    jp waitKey
+checkMemoryReady:
     ld c,01Fh
     call bios_printChar
     ld hl,txtTitle
@@ -889,6 +899,7 @@ sumLastByte:    DB 0
 driveInput:     DB 0,0
 callerSP:       DW 0
 callerKoi:      DB 0
+txtNoMemory: DB "NOT ENOUGH MEMORY",0
 codeEnd:
     ASSERT codeEnd < 02000h
 names = 02000h

@@ -1,6 +1,8 @@
 ; Приглашение, ввод и диспетчер директив
 ; Порядок включения задан главным .asm; см. README.md.
 
+        JP    debugCheckMemory
+debugMemoryReady:
         ; Начинаем с очистки экрана
         XOR   A
         LD    (bios_vars.koi7),A      ; Имена и текстовые дампы — KOI-8.

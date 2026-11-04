@@ -88,4 +88,7 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp installBlockDriver   ; C8CC: физический блок 128/256/512
                 jp logicalSectorIO      ; C8CF: логический сектор активного тома
                 jp fileStream           ; C8D2: поток с курсором вызывающей программы
-                ASSERT $ == 0C8D5h
+                jp fileHandle           ; C8D5: открытый файл в памяти вызывающего
+                jp loadDosModule        ; C8D8: загрузить общие службы в верхнее ОЗУ
+                jp releaseDosModule     ; C8DB: отдать верхнее ОЗУ программе без расширенных служб
+                ASSERT $ == 0C8DEh

@@ -387,6 +387,7 @@ expandDocumentTail:  PUSH  DE
         LD    HL,(v_textLimitLo)
         CALL  compareHLDE
         JP    C,documentOutOfMemory
+        JP    Z,documentOutOfMemory
         POP   HL
         POP   DE
         LD    (v_textEnd),HL

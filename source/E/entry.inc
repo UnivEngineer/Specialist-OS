@@ -42,8 +42,8 @@ prepareFilePrompt:
         CALL  commitLineEdit
         LD    HL,FILE_NAME_HISTORY
         RET
-; Проверка до загрузки: fileLoad2 пишет полные секторы и не знает границ редактора.
-; Выход: CF=1 — файл не помещается в буфер 01800h-084FFh.
+; Проверка до загрузки: точный N и завершающий маркер должны войти в буфер.
+; Выход: CF=1 — файл не помещается между v_textBeginLo и v_textLimitLo.
 ; Разрушает AF, DE, HL, флаги; BC сохраняет.
 ; Учитывает верхнее слово размера, но не суммарный размер добавления F6.
 editorCheckFileSize:
@@ -53,8 +53,12 @@ editorCheckFileSize:
         OR    L
         JP    NZ,editorCheckFileSizeError
     ENDIF
+        LD    HL,(v_textBeginLo)
+        EX    DE,HL
+        LD    HL,(v_textLimitLo)
+        CALL  bios_sub_hl_de
+        EX    DE,HL
         LD    HL,(fileDescSize)
-        LD    DE,EDITOR_BUFFER_SIZE
         CALL  bios_cmp_hl_de
         JP    NC,editorCheckFileSizeError
         OR    A
@@ -70,6 +74,19 @@ editorShowFileTooLarge:
         JP    bios_getch
 
 openCommandLineFile:
+        PUSH  DE
+        CALL  bios_getMemTop
+        LD    DE,APP_MEMORY_END-1
+        CALL  bios_cmp_hl_de
+        JP    C,editorLimitReady
+        EX    DE,HL
+editorLimitReady:
+        INC   HL
+        LD    (v_textLimitLo),HL
+        LD    DE,01802h
+        CALL  bios_cmp_hl_de
+        POP   DE
+        JP    C,commandLineFileTooLarge
         XOR   A
         LD    (bios_vars.koi7),A      ; Файлы MXOS хранятся в KOI-8.
         EX    DE,HL

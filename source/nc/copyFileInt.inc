@@ -27,7 +27,8 @@ copyFileNameLoop:
             ld      (vars.copyRequest.destinationDrive), a
             ld      hl, COPY_BUFFER
             ld      (vars.copyRequest.buffer), hl
-            ld      hl, COPY_BUFFER_END - COPY_BUFFER
+            call    getCopyBufferSize
+            jp c,   copyFileError
             ld      (vars.copyRequest.bufferSize), hl
             ld      hl, vars.copyRequest
             call    bios_fileCopy
@@ -35,6 +36,26 @@ copyFileNameLoop:
             cp      FILE_OP_EXISTS
             jp z,   copyFileExists
             jp      copyFileError
+
+; HL=доступные целые секторы буфера; учитывает текущий системный memtop.
+; AF/DE/HL разрушены, BC сохранён; CF=нет хотя бы одного сектора.
+getCopyBufferSize:
+            call bios_getMemTop
+            ld de,COPY_BUFFER_END-1
+            call bios_cmp_hl_de
+            jp c,getCopyLimitReady
+            ex de,hl
+getCopyLimitReady:
+            inc hl
+            ld de,COPY_BUFFER
+            call bios_sub_hl_de
+            ret c
+            ld l,0
+            ld a,h
+            or a
+            ret nz
+            scf
+            ret
 
 copyFileError:
             ld      hl, aCopyFailed

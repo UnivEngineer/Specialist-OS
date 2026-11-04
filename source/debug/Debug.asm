@@ -59,5 +59,16 @@
     INCLUDE "legacy.inc" ; Остатки старого обмена и общий ввод строки
     INCLUDE "vectors.inc" ; Фиксированная таблица совместимости F800h
 
+; Собственные фиксированные буферы допустимы только ниже текущего memtop.
+debugCheckMemory:
+        CALL bios_getMemTop
+        LD DE,vars1+MON2_VARS_1-1
+        CALL bios_cmp_hl_de
+        JP NC,debugMemoryReady
+        LD HL,debugNoMemory
+        CALL bios_printString
+        RET
+debugNoMemory: DB "NOT ENOUGH MEMORY",0
+
     ASSERT $ <= APP_MEMORY_END
     END

@@ -5,11 +5,11 @@ smc_entryDispatch:
         JP    openCommandLineFile    ; адрес этого перехода изменяется п/п restartAfterLoad
         JP    resumeAtTextPointer
 
-        ; Две пары байтов: начало 01800h и верхняя граница 08500h.
+        ; Начало 1800h и исключительная верхняя граница, обновляемая из memtop.
 v_textBeginLo:  DB    0
 v_textBeginHi:  DB    18h
 v_textLimitLo:  DB    0
-v_textLimitHi:  DB    85h
+v_textLimitHi:  DB    APP_MEMORY_END >> 8
 
 ; САМОМОДИФИКАЦИЯ: первые 64 байта отсюда становятся буфером строки.
 ; Внутри лежат restartAfterLoad и smc_sessionTarget; повторный вызов опасен.
@@ -67,7 +67,7 @@ beginSession:   ; Читаем указатель стека в hl
         COLOR COLOR_TEXT
 
 ; Вход: границы текста в v_textBeginLo/v_textLimitLo. Выход: цикл редактора.
-; Разрушает AF, BC, DE, HL, флаги; сканирование не проверяет верхнюю границу.
+; Разрушает AF, BC, DE, HL, флаги; последний доступный байт резервируется под конец.
 ; Нулевой байт превращается в маркер 0FFh, остальные данные сохраняются.
 scanDocument:   LD    A,10H         ; 16
         LD    (editor_vars.last),A
@@ -84,7 +84,16 @@ scanDocument:   LD    A,10H         ; 16
         LD    (v_currentLine),HL
         LD    E,L
         LD    D,H
-scanDocumentByte:   LD    A,(HL)
+scanDocumentByte:
+        PUSH  DE
+        EX    DE,HL
+        LD    HL,(v_textLimitLo)
+        DEC   HL
+        CALL  compareHLDE
+        EX    DE,HL
+        POP   DE
+        JP    Z,scanDocumentLimit
+        LD    A,(HL)
         OR    A
         JP    NZ,testDocumentEnd
         DEC   A
@@ -93,6 +102,9 @@ testDocumentEnd:   INC   A
         JP    Z,ensureNonemptyDocument
         INC   HL
         JP    scanDocumentByte
+scanDocumentLimit:
+        LD    (HL),0FFh
+        JP    ensureNonemptyDocument
 ensureNonemptyDocument:   CALL  compareHLDE
         JP    NZ,rememberDocumentEnd
         LD    (HL),0DH    ; 13

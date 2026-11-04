@@ -155,6 +155,13 @@ inverseRect = bios_uiInverseRect
     INCLUDE "input.inc"
     INCLUDE "colors.inc"
 
+moduleLoadError:
+            ld hl,moduleLoadErrorText
+            call bios_printString
+            call bios_getch
+            jp bios_reboot
+moduleLoadErrorText: DB "DOSMOD.COM LOAD ERROR",0Dh,0
+
 ;---------------------------------------------------------------------------
 ; Константы и переменные
 ;---------------------------------------------------------------------------

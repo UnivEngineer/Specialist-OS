@@ -22,8 +22,13 @@ but_Enter:  ; Если ком строка не пустая
             add     hl, de
 
             ; Ассоциации — общий сервис DOS. Буфер временный, после кода NC.
+            push    hl
+            call    getCopyBufferSize
+            ld      b,h
+            ld      c,l
+            pop     hl
+            jp c,   Enter_stdExec
             ld      de, COPY_BUFFER
-            ld      bc, COPY_BUFFER_END - COPY_BUFFER
             call    bios_fileAssociation
             jp c,   Enter_stdExec
             ex      de, hl

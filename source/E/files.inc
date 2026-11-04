@@ -202,6 +202,7 @@ checkAppendCapacity: POP   DE    ; de = размер файла
         LD    A,L
         CP    E
         JP    C,fileOperationError
+        JP    Z,fileOperationError
 
         ; загрузка файла по адресу de
 loadAppendFile: POP   DE

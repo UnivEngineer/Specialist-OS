@@ -114,6 +114,10 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')) {
     $packingArguments = @('--output', $outputPath, '--configuration', $configuration)
     & python (Join-Path $PSScriptRoot 'pack-dos.py') @packingArguments
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    if ($OutputBase -eq 'DOS') {
+        & python (Join-Path $PSScriptRoot 'build-dos-module.py')
+    }
     exit $LASTEXITCODE
 }
 

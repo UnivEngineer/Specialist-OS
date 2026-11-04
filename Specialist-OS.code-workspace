@@ -408,7 +408,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Debug",
           "cpu",
-          "0x8000",
+          "0",
           "Debug"
         ],
         "options": {

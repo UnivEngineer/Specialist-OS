@@ -93,7 +93,7 @@
     },
     {
       "address": 51200,
-      "size": 213,
+      "size": 222,
       "files": [
         "jmps_c800.inc"
       ],
@@ -530,39 +530,9 @@
       ]
     },
     {
-      "name": "uiDraw",
-      "files": [
-        "ui/draw.inc"
-      ]
-    },
-    {
-      "name": "uiInverse",
-      "files": [
-        "ui/inverse.inc"
-      ]
-    },
-    {
-      "name": "uiToolbar",
-      "files": [
-        "ui/toolbar.inc"
-      ]
-    },
-    {
-      "name": "uiCopyRect",
-      "files": [
-        "ui/copyRect.inc"
-      ]
-    },
-    {
       "name": "argNext",
       "files": [
         "argNext.inc"
-      ]
-    },
-    {
-      "name": "fileAssociation",
-      "files": [
-        "fileAssociation.inc"
       ]
     },
     {
@@ -611,6 +581,12 @@
       "name": "fileStream",
       "files": [
         "fileStream.inc"
+      ]
+    },
+    {
+      "name": "dosModule",
+      "files": [
+        "dosModule.inc"
       ]
     }
   ]

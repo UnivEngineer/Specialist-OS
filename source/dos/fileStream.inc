@@ -372,6 +372,23 @@ streamFinishBad:
 ; HL/BC/DE сохранены, CF=ошибка. Обычная память либо резидентная утилита.
 ; DOS, драйверы, кэш и аппаратные области в разрешённые окна не входят.
 streamBufferRange:
+            ; Локальные буферы C располагаются в выделенном системном стеке.
+            ; Активные кадры вызовов не должны пересекаться с буфером.
+            push de
+            ld de,STACK_BOTTOM
+            call cmp_hl_de
+            pop de
+            jp c,streamResidentRange
+            push de
+            ld de,STACK_ADDR
+            call cmp_hl_de
+            pop de
+            jp nc,streamResidentRange
+            push hl
+            push de
+            ld de,STACK_ADDR
+            jp streamCheckUpper
+streamResidentRange:
             push de
             ld de,SYSTEM_PROGRAM_ADDR
             call cmp_hl_de
@@ -379,9 +396,10 @@ streamBufferRange:
             jp c,fileOpRange
             push hl
             push de
+            ld de,SYSTEM_PROGRAM_END
+streamCheckUpper:
             add hl,bc
             jp c,streamRangeBad
-            ld de,SYSTEM_PROGRAM_END
             call cmp_hl_de
             jp c,streamRangeGood
             jp z,streamRangeGood

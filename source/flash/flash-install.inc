@@ -1,6 +1,6 @@
 ; Нерезидентный установщик, COM загружается с 0000h. Резидент копируется
 ; только после успешного ID; при отказе прежний драйвер остаётся установлен.
-; Временный код системного ID занимает 8200h–82FFh, стек должен быть выше.
+; Временный ID использует 8C00h–8CFFh, общий системный резерв переходников.
 ; Выход CF=0: установлен; CF=1: ошибка flush, нет ID или неподдерживаемый чип.
 Install:
     call bios_flushVolume
@@ -9,7 +9,7 @@ Install:
     IF SYSTEM_FLASH
     ld hl,sys_probe_file
     ld de,sys_probe_file_end
-    ld bc,08200h
+    ld bc,08C00h
     call bios_memcpy_bc_hl
     call SysProbe
     call DecodeSystemID
@@ -208,7 +208,7 @@ txt256: DB "256"
 txt512: DB "512"
 
 sys_probe_file:
-    DISP 08200h
+    DISP 08C00h
 SysProbe:
     xor a
     ld (IO_PAGE_ROM),a
@@ -242,7 +242,7 @@ sysDelayLoop:
     or l
     jp nz,sysDelayLoop
     ret
-    ASSERT $ <= 08300h
+    ASSERT $ <= 08D00h
     ENT
 sys_probe_file_end:
     ENDIF

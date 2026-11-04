@@ -99,7 +99,7 @@ execImageOpen:
             jp c,execRangeError
             ld a,d
             cp 0C0h
-            ld de,APP_MEMORY_END
+            call getAppMemoryEnd
             jp c,execCheckEnd
             cp SYSTEM_PROGRAM_ADDR >> 8
             jp c,execRangeError

@@ -42,7 +42,7 @@ def prepare_fixtures():
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
     base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
-    keep={'DOS.SYS','NC.COM','FONT.FNT','FONTKOI.FNT','RAMD.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
+    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.FNT','FONTKOI.FNT','RAMD.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
@@ -99,13 +99,26 @@ class Matrix:
             except Exception:time.sleep(.2)
         else:raise RuntimeError('Owned test emulator did not acquire MCP port 19781')
         nc=symbols(ROOT/'bin/NC.sym');self.m.stop_at(nc['mainLoop'])
+        if 'moduleLoadError' in nc:self.m.call('bp_set',addr=nc['moduleLoadError'],type='exec')
+        diagnostic=symbols(ROOT/'bin/DOS.sym')
+        if 'dosModuleBad' in diagnostic:self.m.call('bp_set',addr=diagnostic['dosModuleBad'],type='exec')
         for _ in range(120):
             self.m.call('emu_run_for',ms=500)
             state=self.m.call('cpu_state')
+            if state['registers']['pc']['dec']==diagnostic.get('dosModuleBad'):
+                a=diagnostic['moduleImports'];n=diagnostic['moduleImportsEnd']-a
+                raise RuntimeError(('module header/import mismatch',state,self.m.read(a,n).hex()))
+            if state['registers']['pc']['dec']==nc.get('moduleLoadError'):
+                ds=symbols(ROOT/'bin/DOS.sym')
+                self.m.screenshot(OUT/'module-error.png')
+                raise RuntimeError(('DOS module load failed',self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
             if state['registers']['pc']['dec']==nc['mainLoop']:
                 if self.m.read(0,32)==(ROOT/'bin/NC.i80').read_bytes()[:32]:break
                 self.m.call('bp_clear');self.m.call('emu_run_for',ms=50);self.m.stop_at(nc['mainLoop'])
-        else:raise RuntimeError('NC boot timeout')
+        else:
+            self.m.call('debug_break');state=self.m.call('cpu_state')
+            ds=symbols(ROOT/'bin/DOS.sym');self.m.screenshot(OUT/'boot-timeout.png')
+            raise RuntimeError(('NC boot timeout',state,self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
         self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
         self.ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
         expected=(dos or ROOT/'bin/DOS.sys').read_bytes()
@@ -129,10 +142,11 @@ class Matrix:
         # Смена буквы обновляет рабочий JP после установки драйвера.
         self.func(0xC842,af=0x0100,de=1)
     def format_ram(self):
-        self.m.write(0,(ROOT/'bin/FORMAT.i80').read_bytes());self.m.write(0x8400,b'B: -R -Y\r\0')
-        assert not self.func(0,de=0x8400)['flags']['C']
+        self.m.write(0,(ROOT/'bin/FORMAT.i80').read_bytes());self.m.write(0x7E00,b'B: -R -Y\r\0')
+        assert not self.func(0,de=0x7E00)['flags']['C']
         self.select(1)
     def init_app(self,drive,mode=1):
+        self.func(0xC8DB) # Стенд HIGH явно освобождает загружаемые службы.
         self.m.write(0,self.appBinary.read_bytes());self.select(drive)
         info=self.func(0xC863,bc=0x0300);capacity=info['registers']['de']['dec'];pointer=info['registers']['hl']['dec']
         self.m.write(self.s['v_info'],pointer.to_bytes(2,'little'));self.m.write(self.s['v_capacity'],capacity.to_bytes(2,'little'))
