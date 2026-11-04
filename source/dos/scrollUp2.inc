@@ -1,65 +1,29 @@
-;+---------------------------------------------------------------------------
-; MXOS
-; Прокрутка экрана вверх (продолжение)
-;
-; 2013-12-12 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
-
-scrollUp2:  ; Копируем 246 байт из sp в H0 
-            ld    c, 246 / 6
-            ld    l, 0
-
-scrollUp2_0:      ; Копирование 6 байт из sp в hl
-            pop   de
-            ld  (hl), e
-            inc   hl
-            ld  (hl), d
-            inc   hl
-            pop   de
-            ld  (hl), e
-            inc   hl
-            ld  (hl), d
-            inc   hl
-            pop   de
-            ld  (hl), e
-            inc   hl
-            ld  (hl), d
-            inc   hl
-
-            ; Цикл
-            dec   c
-            jp nz,  scrollUp2_0
-
-            ; Сохраняем h
-            ld    a, h
-            
-            ; Заполняем 10 байт 
-            ld    hl, (bios_vars.inverse)
-            push  hl
-            push  hl
-            push  hl
-            push  hl
-            push  hl
-
-            ; Следующий столбец (sp += 20)
-            ld    hl, 14h
-            add   hl,sp
-            ld    sp, hl
-
-            ; Восстанавливаем h
-            ld    h, a
-
-            ; Следующий столбец
-            inc   h
-
-            ; Цикл
-            dec   b
-            jp nz,  scrollUp2
-
-            ; Восстановление регистров и выход
-            ld    hl, (bios_vars.oldSP)
-            ld    sp, hl
-            pop   af
-            pop   bc
+; Общий путь: один memmove битмапа и очистка десяти строк.
+; A = Y очищаемой области (0 или 246). AF/BC вызывающего лежат в стеке.
+; Переносы через границы столбцов закрываются заливкой.
+; Всего 12278 чтений и 12758 записей экрана.
+scrollUp2:
+scrollCopyFill:
+            push af
+            call bios_memcpy_bc_hl
+            pop af
+            ld hl, (bios_vars.inverse)
+            ex de, hl
+            ld l, a
+            ld h, 090h
+            ld b, 48
+scrollFillColumn:
+            push hl
+            DUP 5
+            ld (hl), e
+            inc l
+            ld (hl), d
+            inc l
+            EDUP
+            pop hl
+            inc h
+            dec b
+            jp nz, scrollFillColumn
+            pop af
+            pop bc
             ret
-

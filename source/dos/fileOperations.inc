@@ -5,7 +5,17 @@
 fileChangeDrive:
             cp      8
             jp nc,  fileOpError
-            jp      fileSelectDrive
+            call    fileSelectDrive
+            ret c
+            ld      a,(v_diskInfo.isValid)
+            cp      DISK_VALID
+    IFDEF DOS_SPLIT_BUILD
+            jp z,   dosClearError
+    ELSE
+            ret z
+    ENDIF
+            add     a,DOS_ERR_NO_DRIVER
+            jp      dosSetError
 
 ; HL=буфер минимум на 8 номеров, BC=ёмкость в байтах.
 ; Выход B=число установленных дисков, CF=ошибка параметров.
@@ -21,10 +31,11 @@ fgd_SizeReady:
             ld      bc, 8
             call    fileOpRange
             ret c
+            call    flushVolume
+            ret c
             ld      a, (v_drive)
             push    af
-            ld      c, 0
-            ld      b, 0
+            ld      bc, 0
 fgd_Loop:
             push    bc
             push    hl
@@ -47,8 +58,12 @@ fgd_Next:
             jp c,   fgd_Loop
             pop     af
             call    fileSelectDrive
+    IFDEF DOS_SPLIT_BUILD
+            jp      dosClearError
+    ELSE
             xor     a
             ret
+    ENDIF
 
 ; HL=начало, BC=число байтов; только обычное ОЗУ, без оборота адреса.
 ; HL/BC/DE сохранены; AF/флаги разрушены, CF=ошибка.
@@ -57,7 +72,7 @@ fileOpRange:
             push    de
             add     hl, bc
             jp c,   for_Bad
-            ld      de, bios_vars
+            ld      de, APP_MEMORY_END
             call    cmp_hl_de
             jp c,   for_Good
             jp z,   for_Good
@@ -65,12 +80,34 @@ for_Bad:
             pop     de
             pop     hl
 fileOpError:
+            ld      a,DOS_ERR_ARGUMENT
+            call    dosSetError
             ld      a, FILE_OP_ERROR
             scf
             ret
 for_Good:
             pop     de
             pop     hl
+    IFDEF DOS_SPLIT_BUILD
+            ; Временное размещение ядра в основной памяти: буфер и запрос
+            ; не должны перекрывать его, даже находясь ниже bios_vars.
+            push hl
+            push de
+            ld de,dosCoreEnd
+            call cmp_hl_de
+            jp nc,for_MainMemoryOk
+            add hl,bc
+            ld de,DOS_CODE_START
+            call cmp_hl_de
+            jp c,for_MainMemoryOk
+            jp z,for_MainMemoryOk
+            pop de
+            pop hl
+            jp fileOpError
+for_MainMemoryOk:
+            pop de
+            pop hl
+    ENDIF
             or      a
             ret
 
@@ -82,6 +119,8 @@ for_Good:
 ; CF=0,A=0: готово; CF=1,A=1: ошибка; CF=1,A=2: назначение существует.
 ; При ошибке после создания удаляется незавершённое назначение.
 fileCopy:
+            xor a
+            ld (v_dosError),a
             ld      bc, FILE_COPY_REQUEST
             call    fileOpRange
             ret c
@@ -119,6 +158,12 @@ fc_BufferAfter:
             call    cmp_hl_de
             jp c,   fileOpError
 fc_RangeReady:
+            ld hl,0
+            ld e,FILE_COPY_REQUEST.sourceOffset
+            call fc_WriteWord
+            ld hl,0
+            ld e,FILE_COPY_REQUEST.destinationOffset
+            call fc_WriteWord
             ld      a, (v_drive)
             push    af
             ld      e, FILE_COPY_REQUEST.sourceDrive
@@ -216,6 +261,28 @@ fc_Loop:
             jp nc,  fc_BatchReady
             ld      c, a
 fc_BatchReady:
+            ; Размер партии — байты, последний неполный блок не дополняется.
+            ld a,h
+            or a
+            jp nz,fc_FullBatch
+            ld a,l
+            cp c
+            jp nz,fc_FullBatch
+            ld e,FILE_COPY_REQUEST.source + FILE_DESCRIPTOR.size
+            call fc_Address
+            ld a,(hl)
+            or a
+            jp z,fc_FullBatch
+            ld l,a
+            ld a,c
+            dec a
+            ld h,a
+            jp fc_BytesReady
+fc_FullBatch:
+            ld h,c
+            ld l,0
+fc_BytesReady:
+            ld (v_copyBytes),hl
             push    bc
             ld      e, FILE_COPY_REQUEST.sourceDrive
             call    fc_Select
@@ -243,50 +310,92 @@ fc_BatchReady:
             call    fc_WriteWord
             jp      fc_Loop
 fc_Cleanup:
+            ld a,(v_dosError)
+            push af
             ld      e, FILE_COPY_REQUEST.destinationDrive
             call    fc_Select
-            jp c,   fc_Error
+            jp c,   fc_CleanupDone
             ld      e, FILE_COPY_REQUEST.destination
             call    fc_Address
             ; Незавершённая копия могла унаследовать R/S источника.
-            xor     a
+            ld      b, 0
             ld      c, 1
             call    fileGetSetAttr
             call    fileDelete
+fc_CleanupDone:
+            pop af
+            ld (v_dosError),a
 fc_Error:
+            call dosIoError
             ld      a, FILE_OP_ERROR
-            scf
             jp      fc_Return
 fc_Exists:
+            ld a,DOS_ERR_EXISTS
+            call dosSetError
             ld      a, FILE_OP_EXISTS
             scf
             jp      fc_Return
 fc_Success:
+            call flushVolume
+            jp c,fc_Cleanup
             xor     a
+            ld (v_dosError),a
 fc_Return:
             pop     bc              ; исходный AF, номер диска в B
             push    af
+            ld      a,(v_dosError)
+            push    af
             ld      a, b
             call    fileSelectDrive
+            pop     af
+            ld      (v_dosError),a
             pop     af
             ret
 
 ; E=поле кластера, B=режим, C=число секторов. BC сохранён.
 fc_Transfer:
-            push    de
-            call    fc_ReadWord
-            push    hl
-            ld      e, FILE_COPY_REQUEST.buffer
-            call    fc_ReadWord
-            pop     de
-            call    fileTransferClusters
-            pop     hl              ; L=смещение поля
+            push de
+            push bc
+            ld e,FILE_COPY_REQUEST.sourceOffset
+            ld a,b
+            dec a
+            jp nz,fc_OffsetRead
+            ld e,FILE_COPY_REQUEST.destinationOffset
+fc_OffsetRead:
+            call fc_ReadWord
+            ld (v_streamOffset),hl
+            pop bc
+            pop de
+            push de
+            push bc
+            call fc_ReadWord
+            push hl
+            ld e,FILE_COPY_REQUEST.buffer
+            call fc_ReadWord
+            pop de
+            push hl
+            ld a,b
+            ld hl,(v_copyBytes)
+            ld b,h
+            ld c,l
+            pop hl
+            call fatStream
+            pop bc
+            pop hl
             ret c
-            ld      a, l
-            ex      de, hl
-            ld      e, a
-            call    fc_WriteWord
-            or      a
+            ld a,l
+            ex de,hl
+            ld e,a
+            call fc_WriteWord
+            ld e,FILE_COPY_REQUEST.sourceOffset
+            ld a,b
+            dec a
+            jp nz,fc_OffsetWrite
+            ld e,FILE_COPY_REQUEST.destinationOffset
+fc_OffsetWrite:
+            ld hl,(v_streamOffset)
+            call fc_WriteWord
+            or a
             ret
 fc_Select:
             call    fc_Address
@@ -325,3 +434,5 @@ fc_WriteWord:
 
 v_copyRequest:  DW 0
 v_copyCapacity: DB 0
+
+v_copyBytes: DW 0

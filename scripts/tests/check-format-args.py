@@ -42,12 +42,12 @@ def main():
     results = []
     for number, (text, label, drive, ram, yes) in enumerate(cases):
         m = bytearray(65536)
-        for base, file in ((0xC000, 'DOS'), (0xF100, 'FORMAT')):
-            data = (ROOT / f'bin/{file}.{"sys" if file == "DOS" else "com"}').read_bytes()
+        for base, file in ((0xC000, 'DOS'), (0, 'FORMAT')):
+            data = (ROOT / f'bin/{file}.{"sys" if file == "DOS" else "i80"}').read_bytes()
             m[base:base+len(data)] = data
         m[0xC818] = 0xC9            # печать не нужна для проверки парсера
         m[0xC803:0xC806] = bytes.fromhex('3e 42 c9')  # интерактивный выбор B
-        m[0x8200:0x820C] = bytes.fromhex('31 df 8f 11 00 84 cd 00 f1 c3 00 83')
+        m[0x8200:0x820C] = bytes.fromhex('31 df 8f 11 00 84 cd 00 00 c3 00 83')
         arg = text.encode('ascii') + b'\r\0'
         m[0x8400:0x8400+len(arg)] = arg
         source, target = out / f'{number:02}-input.bin', out / f'{number:02}-out.bin'

@@ -40,137 +40,282 @@ BS_BootSign     BLOCK   2   ; смещение 1FEh,   2 байт - 0xAA55. A bo
 ;----------------------------------------------------------------------------
 
 fatReadBootSector:
-            ; Сохраняем регистры
-            push    hl
-            push    de
-            push    bc
-
-            ; Помещаем значение DISK_NO_DRIVER в v_diskInfo.isValid
-            ld      a, DISK_NO_DRIVER
-            ld      (v_diskInfo.isValid), a
-            ld      hl, 0
-            ld      (v_diskInfo.allocationStep), hl
-            ld      (v_diskInfo.dataClusters), hl
-
-            ; Проверяем, установлен ли драйвер: сравниваем
-            ; с адресом пустого драйвера diskDriverDummy
-            ld      hl, (j_diskDriver + 1)  ; hl = адрес драйвера
-            ld      a, diskDriverDummy >> 8
-            cp      h
-            jp nz,  frbs_DriverOk
-            ld      a, diskDriverDummy & 0FFh
-            cp      l
-            jp z,   frbs_Exit
-
-frbs_DriverOk:
-            ; Драйвер установлен; загружаем boot сектор в дисковый кэш, затирая его
-            ld      hl, FAT_CACHE_ADDR  ; адрес буфера
-            ld      de, 0               ; номер сектора - 0
-            ld      b, 2                ; режим драйвера - чтение
-            call    j_diskDriver        ; читаем сектор в память
-
-            ; Помещаем значение DISK_INVALID в v_diskInfo.isValid
-            ld      a, DISK_INVALID
-            ld      (v_diskInfo.isValid), a
-
-            ; Проверяем, корректный ли это FAT12/16 диск:
-            ; поле BS_FilSysType должно содержить текст "FAT"
-            ld      hl, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_FilSysType
-            ld      de, aFat
-            ld      c, 3
-            call    strcmp
-            jp nz,  frbs_Exit   ; это не FAT диск, или не отформатирован - выходим
-
-            ; Помещаем значение DISK_VALID в v_diskInfo.isValid
-            ld      a, DISK_VALID
-            ld      (v_diskInfo.isValid), a
-
-            ; Копируем и рассчитываем необходимые значения
-            ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_BytsPerSec)
-            ld      (v_diskInfo.sectorSize), hl         ; размер сектора
-
-            ld      a, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_SecPerClus)
-            ld      (v_diskInfo.sectorsPerCluster), a
-            xor     a
-            ld      (v_diskInfo.sectorsPerCluster+1), a ; секторов на кластер (16-битным словом)
-
-            ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_TotSec16)
-            ld      (v_diskInfo.totalSectors), hl       ; сколько всего секторов на диске
-
-            ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_RsvdSecCnt)
-            ld      (v_diskInfo.resSectors), hl         ; сколько секторов занимает зарезервированная область
-
-            ex      hl, de
-
-            ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_FATSz16)
-            ld      (v_diskInfo.fatSectors), hl         ; сколько секторов занимает таблица fat
-
-            add     hl, de
-            ld      (v_diskInfo.dirStartSector), hl     ; первый сектор корневого каталога
-            push    hl
-
-            ld      hl, (FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BPB_RootEntCnt)
-            ld      (v_diskInfo.rootDirMaxFiles), hl    ; максимум файлов в корневом каталоге
-
-            ld      hl, (v_diskInfo.sectorSize)
-            ld      de, FILE_DESCR_SIZE ; de = 32
-            call    div_hl_de;
-            ld      (v_diskInfo.descrPerSector), hl     ; сколько дескрипторов файлов вмещается в один сектор
-
-            ex      hl, de
-            ld      hl, (v_diskInfo.rootDirMaxFiles)
-            call    div_hl_de;
-            ld      (v_diskInfo.dirSectors), hl         ; сколько секторов занимает корневой каталог
-
-            pop     de
-            add     hl, de
-            ld      (v_diskInfo.dataStartSector), hl    ; первый сектор области данных
-
-            ld      hl, (v_diskInfo.sectorSize)
-            call    div_hl_2
-            ex      hl, de
-            ld      hl, (v_diskInfo.fatSectors)
-            call    mul_hl_de;
-            ld      (v_diskInfo.fatNumCells), hl        ; количество ячеек в таблице fat (= fatSectors * sectorSize / 2)
-
-            ; Число допустимых кластеров данных, ограниченное ёмкостью FAT.
-            ld      hl, (v_diskInfo.dataStartSector)
-            ex      de, hl
-            ld      hl, (v_diskInfo.totalSectors)
-            call    sub_hl_de
-            push    hl
-            ld      hl, (v_diskInfo.sectorsPerCluster)
-            ex      de, hl
-            pop     hl
-            call    div_hl_de
-            push    hl
-            ld      hl, (v_diskInfo.fatNumCells)
-            dec     hl
-            dec     hl
-            ex      de, hl
-            pop     hl
-            call    cmp_hl_de
-            jp c,   frbs_ClustersReady
-            ex      de, hl
-frbs_ClustersReady:
-            ld      (v_diskInfo.dataClusters), hl
-            ; Физический B=3 возвращает BC=шаг чипов; 0 отключает распределение.
-            ld      b, 3
-            call    j_diskDriver
-            ld      h, b
-            ld      l, c
-            ld      (v_diskInfo.allocationStep), hl
-
-            ; Копируем метку тома
-            ld      hl, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_VolLab          ; откуда - начало
-            ld      de, FAT_CACHE_ADDR + FAT_BOOT_SECTOR.BS_FilSysType      ; откуда - конец
-            ld      bc, v_diskInfo.volumeLabel                              ; куда
-            call    memcpy_bc_hl
-            ld      (hl), 0                                                 ; в конце байт-терминатор строки
-
-frbs_Exit:  ; Восстанавливаем регистры и выходим
-            pop     bc
-            pop     de
-            pop     hl
+            push hl
+            push de
+            push bc
+            ld hl,0
+            ld (v_diskInfo.rootDirMaxFiles),hl
+            ld (v_diskInfo.dataClusters),hl
+            ld a,DISK_NO_DRIVER
+            ld (v_diskInfo.isValid),a
+            ld hl,(j_diskDriver+1)
+            ld de,diskDriverDummy
+            call cmp_hl_de
+            jp z,frbs_NoDriver
+            ld a,DISK_INVALID
+            ld (v_diskInfo.isValid),a
+            ld a,(v_drive)
+            ld e,a
+            ld d,0
+            ld hl,v_blockShifts
+            add hl,de
+            ld a,(hl)
+            ld (v_diskInfo.blockShift),a
+            call sectorSizeFromShift
+            ld (v_diskInfo.blockSize),hl
+            ld b,2
+            ld hl,FAT_CACHE_ADDR
+            ld de,0
+            call j_diskDriver
+            jp c,frbs_Io
+            ; Старый встроенный ROM получает размер из BPB. Только для него
+            ; подготавливаем это поле после первого физического чтения.
+            ld a,(v_drive)
+            or a
+            jp nz,frbs_DriverInfo
+            ld hl,(j_diskDriver+1)
+            ld de,diskDriver
+            call cmp_hl_de
+            jp nz,frbs_DriverInfo
+            ld hl,(FAT_CACHE_ADDR+19)
+            ld (v_diskInfo.totalSectors),hl
+frbs_DriverInfo:
+            ld b,3
+            call j_diskDriver
+            jp c,frbs_Io
+            ex de,hl
+            ld (v_diskInfo.physicalBlocks),hl
+            ld h,b
+            ld l,c
+            ld (v_diskInfo.allocationStep),hl
+            ld hl,(FAT_CACHE_ADDR+11)
+            ld a,h
+            or a
+            jp nz,frbs_LargeSector
+            ld a,l
+            cp 080h
+            jp nz,frbs_Bad
+            ld a,7
+            jp frbs_SectorReady
+frbs_LargeSector:
+            ld a,l
+            or a
+            jp nz,frbs_Bad
+            ld a,h
+            cp 1
+            jp z,frbs_256
+            cp 2
+            jp nz,frbs_Bad
+            ld a,9
+            jp frbs_SectorReady
+frbs_256:
+            ld a,8
+frbs_SectorReady:
+            ld (v_diskInfo.sectorShift),a
+            ld (v_diskInfo.sectorSize),hl
+            ld hl,v_diskInfo.blockShift
+            sub (hl)
+            jp c,frbs_Bad
+            ld b,a
+            or a
+            jp z,frbs_StepReady
+            ld hl,(v_diskInfo.allocationStep)
+            ld a,h
+            or l
+            jp z,frbs_StepReady
+            ; При укрупнении сектора отключаем чередование, сохраняя B=4.
+            ld hl,1
+            ld (v_diskInfo.allocationStep),hl
+frbs_StepReady:
+            ld hl,(v_diskInfo.physicalBlocks)
+frbs_Capacity:
+            ld a,b
+            or a
+            jp z,frbs_CapacityReady
+            call div_hl_2
+            dec b
+            jp frbs_Capacity
+frbs_CapacityReady:
+            ld (v_logicalCapacity),hl
+            call configureSectorCache
+            ld hl,FAT_CACHE_ADDR
+            ld de,0
+            ld b,2
+            call logicalSectorIO
+            jp c,frbs_Io
+            ; 128/256 — явно обозначенные расширения. 512 — стандарт FAT16.
+            ld a,(v_diskInfo.sectorShift)
+            cp 9
+            jp z,frbs_Standard
+            ld de,aMxos256
+            cp 8
+            jp z,frbs_Oem
+            ld de,aMxos128
+frbs_Oem:
+            ld hl,FAT_CACHE_ADDR+3
+            ld c,8
+            call strcmp
+            jp nz,frbs_Bad
+            jp frbs_Geometry
+frbs_Standard:
+            ld hl,(FAT_CACHE_ADDR+510)
+            ld de,0AA55h
+            call cmp_hl_de
+            jp nz,frbs_Bad
+frbs_Geometry:
+            ld a,(FAT_CACHE_ADDR+13)
+            or a
+            jp z,frbs_Bad
+            ld b,a
+            dec a
+            and b
+            jp nz,frbs_Bad
+            ld l,b
+            ld h,0
+            ld (v_diskInfo.sectorsPerCluster),hl
+            ex de,hl
+            ld hl,(v_diskInfo.sectorSize)
+            call mul_hl_de
+            ld a,h
+            or l
+            jp z,frbs_Bad
+            ld de,08000h
+            call cmp_hl_de
+            jp c,frbs_ClusterReady
+            jp nz,frbs_Bad
+frbs_ClusterReady:
+            ld (v_diskInfo.clusterBytes),hl
+            ld a,(FAT_CACHE_ADDR+16)
+            dec a
+            cp 2
+            jp nc,frbs_Bad
+            inc a
+            ld (v_diskInfo.fatCount),a
+            ld hl,(FAT_CACHE_ADDR+19)
+            ld a,h
+            or l
+            jp nz,frbs_TotalReady
+            ld hl,(FAT_CACHE_ADDR+34)
+            ld a,h
+            or l
+            jp nz,frbs_Bad
+            ld hl,(FAT_CACHE_ADDR+32)
+frbs_TotalReady:
+            ld (v_diskInfo.totalSectors),hl
+            ex de,hl
+            ld hl,(v_logicalCapacity)
+            call cmp_hl_de
+            jp c,frbs_Bad
+            ld hl,(FAT_CACHE_ADDR+14)
+            ld (v_diskInfo.resSectors),hl
+            ld a,h
+            or l
+            jp z,frbs_Bad
+            ld hl,(FAT_CACHE_ADDR+22)
+            ld (v_diskInfo.fatSectors),hl
+            ld a,h
+            or l
+            jp z,frbs_Bad
+            ld a,(v_diskInfo.sectorShift)
+            dec a
+frbs_FatCapacity:
+            add hl,hl
+            jp c,frbs_FatSaturate
+            dec a
+            jp nz,frbs_FatCapacity
+            jp frbs_FatCapacityReady
+frbs_FatSaturate:
+            ld hl,0FFFFh
+frbs_FatCapacityReady:
+            ld (v_diskInfo.fatNumCells),hl
+            ld hl,(v_diskInfo.fatSectors)
+            ld a,(v_diskInfo.fatCount)
+            dec a
+            jp z,frbs_FatAreaReady
+            add hl,hl
+            jp c,frbs_Bad
+frbs_FatAreaReady:
+            ex de,hl
+            ld hl,(v_diskInfo.resSectors)
+            add hl,de
+            jp c,frbs_Bad
+            ld (v_diskInfo.dirStartSector),hl
+            ld hl,(v_diskInfo.sectorSize)
+            call div_hl_2
+            call div_hl_2
+            call div_hl_2
+            call div_hl_2
+            call div_hl_2
+            ld (v_diskInfo.descrPerSector),hl
+            ex de,hl
+            ld hl,(FAT_CACHE_ADDR+17)
+            ld (v_diskInfo.rootDirMaxFiles),hl
+            ld a,h
+            or l
+            jp z,frbs_Bad
+            dec hl
+            call div_hl_de
+            inc hl
+            ld (v_diskInfo.dirSectors),hl
+            ex de,hl
+            ld hl,(v_diskInfo.dirStartSector)
+            add hl,de
+            jp c,frbs_Bad
+            ld (v_diskInfo.dataStartSector),hl
+            ex de,hl
+            ld hl,(v_diskInfo.totalSectors)
+            call sub_hl_de
+            jp c,frbs_Bad
+            push hl
+            ld hl,(v_diskInfo.sectorsPerCluster)
+            ex de,hl
+            pop hl
+            call div_hl_de
+            ld a,h
+            or l
+            jp z,frbs_Bad
+            ld (v_diskInfo.dataClusters),hl
+            ld a,(v_diskInfo.sectorShift)
+            cp 9
+            jp nz,frbs_TypeReady
+            ld de,4085
+            call cmp_hl_de
+            jp c,frbs_Bad      ; FAT12 отдельно, не угадывать по строке FAT16
+            ld de,65525
+            call cmp_hl_de
+            jp nc,frbs_Bad
+frbs_TypeReady:
+            inc hl
+            inc hl
+            ex de,hl
+            ld hl,(v_diskInfo.fatNumCells)
+            call cmp_hl_de
+            jp c,frbs_Bad
+            ld hl,FAT_CACHE_ADDR+43
+            ld de,FAT_CACHE_ADDR+54
+            ld bc,v_diskInfo.volumeLabel
+            call memcpy_bc_hl
+            xor a
+            ld (v_diskInfo.volumeLabel+11),a
+            ld a,DISK_VALID
+            ld (v_diskInfo.isValid),a
+            xor a
+            jp frbs_Exit
+frbs_Bad:
+            ld a,DOS_ERR_UNSUPPORTED
+            call dosSetError
+            jp frbs_Exit
+frbs_NoDriver:
+            ld a,DOS_ERR_NO_DRIVER
+            call dosSetError
+            jp frbs_Exit
+frbs_Io:
+            call dosIoError
+frbs_Exit:
+            pop bc
+            pop de
+            pop hl
             ret
-
+aMxos256: DB "MXOS256 "
+aMxos128: DB "MXOS128 "
+v_logicalCapacity: DW 0

@@ -12,6 +12,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--ticks', type=Path, default=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
     p.add_argument('--image', type=Path, default=ROOT/'bin/DOS.sys')
+    p.add_argument('--memory-image',type=Path)
     p.add_argument('--report-directory', type=Path, default=ROOT/'docs/nc/ui-002/cpu')
     args = p.parse_args()
     out = args.report_directory.resolve()
@@ -21,7 +22,12 @@ def main():
     screen = bytes((i*37+(i>>8)*13)&255 for i in range(0x3000))
     def memory():
         m = bytearray(65536)
-        m[0xC000:0xC000+len(dos)] = dos
+        if args.memory_image:
+            data=args.memory_image.read_bytes()
+            assert len(data)==65536
+            m[:]=data
+        else:
+            m[0xC000:0xC000+len(dos)] = dos
         m[0x9000:0xC000] = screen
         return m
     def run(m, entry, hl=0, bc=0, de=0, a=0):

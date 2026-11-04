@@ -203,7 +203,7 @@ Dir_Y:  PUSH  HL
         CALL  EnterFileName         ; ввод имени файла
         LD    C,01H                 ; режим для фаункции bios_fileGetSetAttr - установка байта атрибутов файла
         EX    (SP),HL
-        LD    A,L
+        LD    B,L
         POP   HL
         CALL  bios_fileGetSetAttr   ; установка байта атрибутов файла
         LD    HL,txtNoFile

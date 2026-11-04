@@ -42,10 +42,6 @@ fileCreatePrepare:
             push af
             ld a, VOL_CREATE_PREPARE
             jp volumeDispatch
-fileTransferClusters:
-            push af
-            ld a, VOL_TRANSFER_LEGACY
-            jp volumeDispatch
 flushVolume:
             push af
             ld a, VOL_FLUSH
@@ -78,8 +74,10 @@ volumeNameReady:
 volumeDispatch:
             push hl
             push de
-            ld e, a
-            ld d, 0
+            ld e,a
+            xor a
+            ld (v_dosError),a
+            ld d,0
             ld hl, (v_volumeTable)
             add hl, de
             ld e, (hl)
@@ -91,7 +89,19 @@ volumeDispatch:
             pop hl
             pop af
 volumeJump:
-            jp 0
+            call 0
+            push af
+            jp c,volumeStatusError
+            xor a
+            ld (v_dosError),a
+            jp volumeStatusDone
+volumeStatusError:
+            ld a,(v_dosError)
+            or a
+            call z,dosIoError
+volumeStatusDone:
+            pop af
+            ret
 
 ;----------------------------------------------------------------------------
 ; Регистрация: A = диск 0..7, HL = таблица "FS",1,15 + DW обработчиков,
@@ -234,22 +244,12 @@ volumeMountDispatch:
 ; Существующий формат MXOS. Байты на носителе и файловые алгоритмы
 ; в этом этапе не меняются; новые драйверы не вызывают эти внутренние метки.
 fatVolumeMount:
-            call fatReadBootSector
-            ld a, (v_diskInfo.isValid)
-            cp DISK_VALID
-            ret z
-            scf
-            ret
+            jp fatReadBootSector
 fatVolumeFlush:
             xor a
-            ld (bios_vars.diskWriteErr), a
+            ld (bios_vars.diskWriteErr),a
             call saveSectorCache
-            call fatFlushPhysical
-            ld a, (bios_vars.diskWriteErr)
-            or a
-            ret z
-            scf
-            ret
+            jp fatFinishWrite
 
 fatVolumeDriver:
             DB "FS", VOLUME_DRIVER_VERSION, VOLUME_DRIVER_COUNT
@@ -257,5 +257,5 @@ fatVolumeDriver:
             DW fatFileDelete, fatFileRename, fatFileLoadInfo
             DW fatFileGetSetAddr, fatFileGetSetAttr, fatFileLoad2
             DW fatGetDriveFreeSpace, fatFileNamePrepare
-            DW fatFileCreatePrepare, fatFileTransferClusters, fatVolumeFlush
+            DW fatFileCreatePrepare, dosUnsupported, fatVolumeFlush
             ASSERT $-fatVolumeDriver == VOLUME_DRIVER_HEADER + VOLUME_DRIVER_COUNT*2

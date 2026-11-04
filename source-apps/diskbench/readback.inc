@@ -25,6 +25,28 @@ write_high:
     call nc,maybe_verify_raw
     jp measure_end
 
+; Полное создание файла через DOS с источником в верхнем окне.
+; Удаление предыдущего тестового файла и подготовка порций исключены;
+; выделение FAT/каталога, FileStream и flush входят в WRITE HIGH.
+file_write_high:
+    call file_cleanup
+    ret c
+    call measure_begin
+    ld a,1
+    ld (v_fileOwned),a
+    ld hl,tmpDescriptor
+    call bios_fileCreatePrepare
+    call c,measure_end
+    ret c
+    xor a
+    ld (v_streamKind),a
+    ld (v_streamVerify),a
+    ld a,1
+    ld (v_streamOp),a
+    call stream_read
+    call nc,maybe_verify_file
+    jp measure_end
+
 maybe_verify_file:
     ld a,(v_writeMode)
     cp 6
@@ -86,6 +108,8 @@ stream_read:
     ret c
     ld hl,(tmpDescriptor+FILE_DESCRIPTOR.firstCluster)
     ld (v_streamCluster),hl
+    ld hl,0
+    ld (v_streamOffset),hl
 stream_next:
     ld a,(v_streamLeft)
     cp HIGH_SECTORS+1
@@ -122,14 +146,14 @@ stream_source_ready:
     ld a,(v_streamKind)
     or a
     jp nz,stream_raw
-    LOAD_DE v_streamCluster
+    ld de,v_streamCluster
     ld hl,highBuffer
     ld a,(v_streamChunk)
-    ld c,a
-    ld b,2
-    call bios_fileTransfer
+    ld b,a
+    ld c,0
+    ld a,(v_streamOp)
+    call bios_fileStream
     ret c
-    STORE_DE v_streamCluster
     jp stream_compare
 stream_raw:
     ld a,(v_streamChunk)
@@ -188,6 +212,9 @@ stream_advance:
     ld a,(v_streamOp)
     dec a
     jp nz,stream_success
+    ld a,(v_streamKind)
+    or a
+    jp z,bios_flushVolume
     ld a,(v_caps)
     and DISK_CAP_FLUSH
     jp z,stream_success
@@ -207,12 +234,27 @@ print_verify:
     jp c,verify_print_value
     ld hl,statFileVerify
 verify_print_value:
-    call ticks_to_ms
-    call print_number
+    call print_time_ms
+    ld hl,txtVerifyIncluded
+    call puts
+    ld a,(v_layout)
+    cp LAYOUT_MAPPED
+    ret nz
+    ld hl,txtVerifyHigh
+    call puts
+    ld hl,(v_outputBase)
+    ld de,resultsLow+20
+    call bios_cmp_hl_de
+    ld hl,statRawVerifyHigh
+    jp c,verify_print_high
+    ld hl,statFileVerifyHigh
+verify_print_high:
+    call print_time_ms
     ld hl,txtVerifyIncluded
     jp puts
 
-txtVerifyTime:     DB "VERIFY:",009h,0
+txtVerifyTime:     DB "VERIFY: ",009h,009h,0
+txtVerifyHigh:     DB "VERIFY HIGH:",009h,0
 txtVerifyIncluded: DB " ms (included in WRITE)",00Ah,0
 v_verifyTicks:     DD 0
 v_verifyStart:     DD 0
@@ -222,6 +264,7 @@ v_streamVerify:    DB 0
 v_streamOriginal:  DW 0
 v_streamList:      DW 0
 v_streamCluster:   DW 0
+v_streamOffset:    DW 0
 v_streamLeft:      DB 0
 v_streamChunk:     DB 0
 v_streamEndHi:     DB 0

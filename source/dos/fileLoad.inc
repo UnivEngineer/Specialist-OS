@@ -15,91 +15,37 @@
 ; 2022-02-11 Переработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-fatFileLoad2:  ; загрузить файл с именем HL по адресу DE
-            call    fileFind
+fatFileLoad2:
+            call fileFind
             ret c
-
-            push    hl
-            push    bc
-            push    de
-            jp      fileLoadStep2
-
-fatFileLoad:
-            jp imageLoad
-
-fileLoadStep2:
-            ex      hl, de
-            ld      (v_input_start), hl
-            ex      hl, de
-
-            ld      hl, (v_foundDescrPtr)
-            ld      bc, FILE_DESCRIPTOR.firstCluster
-            add     hl, bc
-            ld      e, (hl)
-            inc     hl
-            ld      d, (hl)
-
-            ; После старшего байта firstCluster сразу идёт точный размер N.
-            inc     hl
-            ld      c,(hl)
-            inc     hl
-            ld      b,(hl)
-            ld      a,b
-            or      c
-            jp z,fileLoadEmpty
-            dec bc
-            ld c,b
-            inc c
-
-            ld      hl, (v_input_start)
-            ld      b, 2
-            call    fatFileTransferClusters
-
-fileLoadEmpty:
-            pop     de
-            pop     bc
-            pop     hl
-            ret c
-            jp      fileLoadExit
-
-;----------------------------------------------------------------------------
-; Передача последовательных кластеров текущего файла.
-;
-; Вход:  HL = буфер, DE = текущий кластер, B = 1 запись / 2 чтение,
-;         C = число кластеров (0 означает 256).
-; Выход: HL увеличен на C * 256, DE = следующий кластер,
-;         BC сохранён, CF = ошибка драйвера.
-;
-; Текущая файловая система предполагает сектор 256 байт и один сектор
-; в кластере. Диск выбирает вызывающая сторона.
-;----------------------------------------------------------------------------
-
-fatFileTransferClusters:
-            push    bc
-fileTransferClusters_loop:
-            push    de
-            call    fatClusterToSector
-            or      a
-            call    j_diskDriver
-            pop     de
-            jp c,   fileTransferClusters_error
-
-            call    fatReadCluster
-            inc     h
-            dec     c
-            jp nz,  fileTransferClusters_loop
-
-            pop     bc
-            ld      a, b
-            dec     a
-            jp z,   fatFlushPhysical    ; Файловая запись завершена и на носителе
-            or      a
-            ret
-
-fileTransferClusters_error:
-            pop     bc
-            scf
-            ret
+            push hl
+            push bc
+            push de
+            ex de,hl
+            ld (v_input_start),hl
+            ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.size+2)
+            ld a,h
+            or l
+            jp nz,fileLoadTooLarge
+            ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.size)
+            ld b,h
+            ld c,l
+            ld hl,0
+            ld (v_streamOffset),hl
+            ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.firstCluster)
+            ex de,hl
+            ld hl,(v_input_start)
+            ld a,2
+            call fatStream
+            call nc,fatStreamFinish
+            jp c,popDBH_ret
+            pop de
+            pop bc
+            pop hl
+            jp fileLoadExit
+fileLoadTooLarge:
+            call blockArgument
+            jp popDBH_ret
 
 ; ---------------------------------------------------------------------------
 fatFileLoadInfo:
@@ -138,3 +84,6 @@ fileLoadCDLoop:
             or      a
             jp      popDBH_ret
 
+
+fatFileLoad:
+            jp imageLoad

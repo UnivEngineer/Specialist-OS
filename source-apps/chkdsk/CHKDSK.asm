@@ -82,7 +82,8 @@ loadFat:
     dec c
     jp nz,loadFat
     ld hl,(fatBuffer)
-    inc hl
+    ld de,0FFF8h
+    call bios_sub_hl_de
     ld a,h
     or l
     call nz,reservedError
@@ -190,7 +191,7 @@ geometry:
     ld a,(sectorBuffer+16)
     cp 1
     jp nz,invalid
-    ld hl,sectorBuffer+54
+    ld hl,sectorBuffer+3
     ld de,txtFat
     ld b,8
 checkType:
@@ -243,12 +244,11 @@ totalOK:
     jp nz,invalid
 rootOK:
     ld (rootEntries),hl
-    ld a,l
-    and 7
-    jp nz,invalid
     ld a,h
     or l
     jp z,invalid
+    ld de,7
+    add hl,de
     ld b,3
 rootDivide:
     or a
@@ -293,6 +293,8 @@ invalid:
 ; Два прохода по корню. В phase=0 проверяются записи/цепочки,
 ; в phase=1 только контрольные суммы уже проверенных цепочек.
 directory:
+    ld hl,(rootEntries)
+    ld (dirEntriesLeft),hl
     ld hl,(dirStart)
     ld (dirSector),hl
     ld hl,(dirSectors)
@@ -306,6 +308,12 @@ nextDirSector:
     ld a,8
     ld (entriesLeft),a
 nextEntry:
+    ld hl,(dirEntriesLeft)
+    ld a,h
+    or l
+    ret z
+    dec hl
+    ld (dirEntriesLeft),hl
     ld hl,(entryPtr)
     ld a,(hl)
     cp 0FFh
@@ -313,7 +321,7 @@ nextEntry:
     cp 0E5h
     jp z,skipEntry
     or a
-    jp z,skipEntry
+    ret z
     ld de,entryCopy
     ld b,32
 copyEntry:
@@ -323,9 +331,15 @@ copyEntry:
     inc de
     dec b
     jp nz,copyEntry
+    ld a,(entryCopy)
+    cp 5
+    jp nz,entryFirstReady
+    ld a,0E5h
+    ld (entryCopy),a
+entryFirstReady:
     ld a,(entryCopy+11)
     cp 00Fh
-    jp z,badEntry
+    jp z,skipEntry
     and 018h
     jp z,regularFile
     cp 8
@@ -371,21 +385,13 @@ dupNext:
     call compare
     jp z,appendName
     ld de,entryCopy
-    ld b,11
-    ld c,0
-dupByte:
-    ld a,(de)
-    cp (hl)
-    jp z,dupEqual
-    inc c
-dupEqual:
-    inc hl
-    inc de
-    dec b
-    jp nz,dupByte
-    ld a,c
-    or a
+    push hl
+    ld c,11
+    call bios_stricmp
+    pop hl
     call z,duplicateError
+    ld de,11
+    add hl,de
     jp dupNext
 appendName:
     ld de,entryCopy
@@ -510,9 +516,6 @@ chainLoop:
     jp z,chainError
     jp chainLoop
 chainLast:
-    ld hl,(cluster)
-    call compare
-    ret z
     ld a,d
     cp 0FFh
     jp nz,chainError
@@ -832,7 +835,7 @@ streamWord:
 
 mxMagic:        DB 0CDh,020h,"MX",1,0
 rksExt:         DB "RKS"
-txtFat:         DB "FAT16   "
+txtFat:         DB "MXOS256 "
 txtTitle:       DB "CHKDSK - READ ONLY",0
 txtDone:        DB 10,"PRESS ANY KEY TO EXIT",0
 txtDrive:       DB 10,"CHKDSK DRIVE [A-H], ENTER: ",0
@@ -869,6 +872,7 @@ dataStart:      DW 0
 lastCluster:    DW 0
 dirSector:      DW 0
 dirLeft:        DW 0
+dirEntriesLeft: DW 0
 entryPtr:       DW 0
 entriesLeft:    DB 0
 phase:          DB 0

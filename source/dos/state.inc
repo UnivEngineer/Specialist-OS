@@ -1,18 +1,14 @@
 ; Резидентные данные и строки MXOS.
     INCLUDE "volumeData.inc"
 
-v_drive:            DB 1  ; Текущий накопитель
 v_findCluster:      DW 0  ; Используется в fileFindClusterFirst/fileFindClusterNext
 v_fileFirstCluster: DW 0  ; Первый кластер созданного файла
-v_input_start:      DW 0  ; Используется в input, createFile
-v_input_end:        DW 0  ; Используется в input, createFile
 v_cachedDescrPtr:   DW 0  ; Используется в findFile, createFile
 v_cachedSector:     DW 0  ; Используется в findFile, createFile
 v_newDescrPtr:      DW 0  ; Адрес дескриптора созданного файла
 v_foundDescrPtr:    DW 0  ; Адрес дескриптора найденного файла
 v_batPtr:           DW 0
 v_bootAutoexec:     DB 0  ; Адрес буфра, где находится содержимое BAT файла
-v_memTop:           DW bios_vars-1 ; Максимальный доступный программам адрес
 v_dirFirstFile      DW 0  ; Используется в fileList
 v_dirMaxFiles       DW 0  ; Используется в fileList
 v_dirListedFiles    DW 0  ; Используется в fileList
@@ -22,18 +18,7 @@ v_dirTotalFiles     DW 0  ; Используется в fileList
 ; В будущем может быть заменен на реальное время с RTC или таймера.
 v_fakeSystemTime:   DW 0
 
-; Адреса драйверов для 8 накопителей. Начальные значения:
-; = diskDriver для накопителей A: и B: (встроенный драйвер ROM и RAM диска),
-; = diskDriverDummy для отальных (пустой драйвер).
-v_drives:           DW diskDriver,      diskDriver  ; A:, B:
-                    DW diskDriverDummy, diskDriverDummy  ; C:, D:
-                    DW diskDriverDummy, diskDriverDummy  ; E:, F:
-                    DW diskDriverDummy, diskDriverDummy  ; G:, H:
-
-; Информация о текущем накопителе
-v_diskInfo          DISK_INFO
-
-pathFontFnt:        DB "A:FONT.FNT",0
+pathFontFnt:        DB "A:FONTKOI.FNT",0
 pathNcCom:          DB "A:NC.COM",0
 pathAutoexecBat:    DB "A:AUTOEXEC.BAT",0
 pathFlashSysCom:    DB "A:FLASHSYS.COM",0
@@ -60,7 +45,6 @@ v_tmpFileDescr      FILE_DESCRIPTOR ; Независимая копия найд
     ASSERT v_curFileDescr+FILE_DESCR_SIZE <= v_tmpFileDescr+FILE_DESCR_SIZE
 
 ; Буфер для копирования изображения символов при использовании шрифта из ПЗУ
-v_char:             BLOCK   13, 0FFh
 
     ; Проверка - DOS.SYS не должен вылезать за эти пределы
     IF NEW_MEMORY_MAP==0

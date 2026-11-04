@@ -28,10 +28,11 @@ def main():
  def create(name,data):
   drive(1);d=bytearray(32);d[:11]=name;d[28:32]=len(data).to_bytes(4,'little');m.write(0x7500,d)
   ok('bios_fileCreatePrepare',hl=0x7500,de=(len(data)+255)//256)
-  cluster=int.from_bytes(m.read(0x751A,2),'little')
+  m.write(0x7540,m.read(0x751A,2)+bytes(2))
   for at in range(0,len(data),8192):
-   chunk=data[at:at+8192];count=(len(chunk)+255)//256;m.write(0x4000,chunk+bytes(count*256-len(chunk)))
-   s=ok('bios_fileTransfer',hl=0x4000,de=cluster,bc=0x0100+count);cluster=s['registers']['de']['dec']
+   chunk=data[at:at+8192];m.write(0x4000,chunk)
+   ok('bios_fileStream',hl=0x4000,de=0x7540,bc=len(chunk),af=0x0100)
+  ok('bios_flushVolume')
  def request(source,dest,size=2065,buffer=0x4001,source_drive=1,dest_drive=7):
   req=bytearray(ds['FILE_COPY_REQUEST']);req[:4]=buffer.to_bytes(2,'little')+size.to_bytes(2,'little');req[4:6]=bytes((source_drive,dest_drive));req[6:17]=source;req[38:49]=dest;m.write(0x7200,req)
   m.write(buffer-1,bytes([0xA5])*(size+2))
@@ -70,9 +71,9 @@ def main():
   request(b'NOFILE  BIN',b'MISSING BIN');copy(1);absent(b'MISSING BIN');record(case='missing source',no_destination=True)
   request(source,b'ABSENT  BIN',dest_drive=2);copy(1);record(case='absent drive',rejected=True)
   # Ошибка записи после создания защищённой копии: очистка должна удалить её.
-  m.write(0x7500,source+bytes(21));ok('bios_fileGetSetAttr',hl=0x7500,af=0x0500,bc=1)
-  request(source,b'PARTIAL BIN');entry=int.from_bytes(m.read(ds['bios_fileTransfer']+1,2),'little');old_code=m.read(entry,3);assert old_code[:2]==bytes.fromhex('F5 3E')
-  stub=bytes.fromhex('F5 78 FE 01 C2 0A 88 F1 37 C9 F1')+old_code+b'\xC3'+(entry+3).to_bytes(2,'little');m.write(0x8800,stub)
+  m.write(0x7500,source+bytes(21));ok('bios_fileGetSetAttr',hl=0x7500,af=0x0000,bc=0x0501)
+  request(source,b'PARTIAL BIN');entry=ds['fatStream'];old_code=m.read(entry,3);assert old_code[0]==0x32
+  stub=bytes.fromhex('F5 FE 01 C2 09 88 F1 37 C9 F1')+old_code+b'\xC3'+(entry+3).to_bytes(2,'little');m.write(0x8800,stub)
   try:
    m.write(entry,bytes.fromhex('C3 00 88'));copy(1)
   finally:m.write(entry,old_code)

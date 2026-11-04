@@ -93,7 +93,7 @@
     },
     {
       "address": 51200,
-      "size": 201,
+      "size": 213,
       "files": [
         "jmps_c800.inc"
       ],
@@ -569,6 +569,48 @@
       "name": "fileOperations",
       "files": [
         "fileOperations.inc"
+      ]
+    },
+    {
+      "name": "errors",
+      "files": [
+        "errors.inc"
+      ]
+    },
+    {
+      "name": "directory",
+      "files": [
+        "directory.inc"
+      ]
+    },
+    {
+      "name": "biosState",
+      "files": [
+        "biosState.inc"
+      ]
+    },
+    {
+      "name": "cmpFileExt",
+      "files": [
+        "cmpFileExt.inc"
+      ]
+    },
+    {
+      "name": "biosDriverNames",
+      "files": [
+        "biosDriverNames.inc"
+      ]
+    },
+    {
+      "name": "logicalSectors",
+      "files": [
+        "logicalSectors.inc"
+      ]
+    },
+    {
+      "name": "fileStream",
+      "files": [
+        "fileStream.inc"
       ]
     }
   ]

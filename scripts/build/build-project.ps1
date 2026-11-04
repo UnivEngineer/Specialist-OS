@@ -10,6 +10,8 @@ Set-StrictMode -Version 2.0
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
+& python (Join-Path $PSScriptRoot 'build-compact-font.py')
+if ($LASTEXITCODE -ne 0) { throw 'Compact font generation failed.' }
 $components = @(
     @{ Directory = "source-apps\\chkdsk"; Source = "CHKDSK"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\dos";    Source = "DOS"; Extension = "sys"; Address = "0xC000" },
@@ -19,11 +21,11 @@ $components = @(
     @{ Directory = "source\\flash";  Source = "FlashSys"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\ramd";   Source = "RAMD"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\flash";  Source = "Rom";     Extension = "cpu"; Address = "DISK_DRIVER_ADDR" },
-    @{ Directory = "source\\debug";   Source = "Debug"; Extension = "cpu"; Address = "SYSTEM_PROGRAM_ADDR" },
+    @{ Directory = "source\\debug";   Source = "Debug"; Extension = "cpu"; Address = "0x8000" },
     @{ Directory = "source\\monitor2"; Source = "Monitor2"; Extension = "mon"; Address = "0xC000" },
-    @{ Directory = "source\\run"; Source = "RUN";  Extension = "cpu"; Address = "SYSTEM_PROGRAM_ADDR" },
+    @{ Directory = "source\\run"; Source = "RUN";  Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "mon"; Address = "0xC000" },
-    @{ Directory = "source\\format"; Source = "FORMAT";  Extension = "cpu"; Address = "0xF100" },
+    @{ Directory = "source\\format"; Source = "FORMAT";  Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\E";      Source = "E";       Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\nc";     Source = "NC";      Extension = "cpu"; Address = "0" }
 )

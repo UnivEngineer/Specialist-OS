@@ -99,12 +99,12 @@ execImageOpen:
             jp c,execRangeError
             ld a,d
             cp 0C0h
-            ld de,bios_vars
+            ld de,APP_MEMORY_END
             jp c,execCheckEnd
             cp SYSTEM_PROGRAM_ADDR >> 8
             jp c,execRangeError
             cp SYSTEM_FLASH_ADDR >> 8
-            ld de,SYSTEM_FLASH_ADDR
+            ld de,SYSTEM_PROGRAM_END
             jp c,execCheckEnd
             pop de
             push de

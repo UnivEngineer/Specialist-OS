@@ -59,4 +59,5 @@
     INCLUDE "legacy.inc" ; Остатки старого обмена и общий ввод строки
     INCLUDE "vectors.inc" ; Фиксированная таблица совместимости F800h
 
+    ASSERT $ <= APP_MEMORY_END
     END

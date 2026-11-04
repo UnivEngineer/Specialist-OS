@@ -87,6 +87,7 @@ fatFindCandidate:
             ld      h, d
             ld      l, e
             call    fatReadCluster
+            jp c,   fatFindClusterReturnError
             ld      a, d
             or      e
             jp z,   fatFindClusterOk
@@ -98,6 +99,9 @@ fatFindCandidate:
             or      c
             jp nz,  fatFindClusterLoop
 fatFindClusterFailed:
+            ld a,DOS_ERR_FULL
+            call dosSetError
+fatFindClusterReturnError:
             pop     bc
             pop     hl
             ld      a, 1

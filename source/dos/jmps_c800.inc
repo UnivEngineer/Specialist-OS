@@ -56,7 +56,7 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  mul_hl_de           ; C884: [MXOS2] Умножение hl на de: hl = hl * de
                 jp  div_hl_de           ; C887: [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
                 jp  fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
-                jp  fileTransferClusters ; C88D: [MXOS2] передать кластеры
+                jp  dosUnsupported      ; C88D: резерв после удаления кластерного переноса
                 jp  installVolume       ; C890: зарегистрировать драйвер тома
                 jp  getVolume           ; C893: таблица и контекст драйвера тома
                 jp  mountVolume         ; C896: повторное монтирование тома
@@ -83,4 +83,9 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  fileCopy            ; C8C3: копирование с явным буфером
                 jp  fileGetDrives       ; C8C6: список доступных дисков
 
-                ASSERT $ == 0C8C9h
+                jp  dosGetError         ; C8C9: последняя причина ошибки DOS
+
+                jp installBlockDriver   ; C8CC: физический блок 128/256/512
+                jp logicalSectorIO      ; C8CF: логический сектор активного тома
+                jp fileStream           ; C8D2: поток с курсором вызывающей программы
+                ASSERT $ == 0C8D5h

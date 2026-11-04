@@ -55,7 +55,7 @@ def main():
             data += image[sector * secsize:(sector + 1) * secsize]
             following = struct.unpack_from('<H', image, fatstart + 2*c)[0]
             if n == count - 1:
-                assert following == c, name
+                assert 0xFFF8 <= following <= 0xFFFF, name
             c = following
         assert bytes(data[:len(expected)]) == expected, name
         assert all(b == (a + 1) % 4 for a, b in zip(filechips, filechips[1:])), name

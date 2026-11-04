@@ -17,9 +17,9 @@ _align:         DB  0               ; для выравнивания
     IFDEF FAT_CACHE_TABLE_ADDR
 ; Экспериментальная таблица слотов вне резидентного кода DOS.
 cacheData = FAT_CACHE_TABLE_ADDR
-    ASSERT cacheData + FAT_CACHE_CAPACITY * FAT_CACHE_DATA <= FAT_CACHE_ADDR
+    ASSERT cacheData + (FAT_CACHE_SIZE / 128) * FAT_CACHE_DATA <= FAT_CACHE_ADDR
     ELSE
-cacheData:      BLOCK   FAT_CACHE_CAPACITY * FAT_CACHE_DATA, 0
+cacheData:      BLOCK   (FAT_CACHE_SIZE / 128) * FAT_CACHE_DATA, 0
     ENDIF
 
 ;----------------------------------------------------------------------------
@@ -38,7 +38,7 @@ resetSectorCache:
         ; В цикле записываем начальные значения во поля address
         ld      de, FAT_CACHE_ADDR      ; адрес буфера секторов
         ld      hl, cacheData           ; адрес первого элемента в массиве
-        ld      a,  FAT_CACHE_CAPACITY  ; счетчик цикла
+        ld      a,  (v_cacheCount)  ; счетчик цикла
 
 resetCacheLoop:
         ; Поле number = 0FFFFh
@@ -64,7 +64,11 @@ resetCacheLoop:
         inc     hl
 
         ; de += SECTOR_SIZE
-        inc     d   ; это работает только с секторами по 256 байт
+        push hl
+        ld hl,(v_cacheStride)
+        add hl,de
+        ex de,hl
+        pop hl
 
         ; Повтор чикла
         dec     a
@@ -123,18 +127,17 @@ getFatCellAddress:
         push    bc
         ld      b, a ; b = isModified
 
-        ; Вычисляем номер сектора, где находится искомая ячейка fat
-        ; fatSectorNum  = (N * 2) / v_diskInfo.sectorSize + v_diskInfo.resSectors;
-        ; fatCellOffset = (N * 2) % v_diskInfo.sectorSize;
-        ld      hl, (v_diskInfo.sectorSize)
-        ex      hl, de
-        add     hl, hl      ; hl = N * 2
-        call    div_hl_de   ; выход: hl = номер сектора от начала fat; de = смещение ячейки в секторе
-        push    de          ; de = смещение ячейки в секторе
-        ex      hl, de
-        ld      hl, (v_diskInfo.resSectors)
-        add     hl, de      ; hl += v_diskInfo.resSectors
-
+        ; Сначала делим номер записи: удвоение большого номера переполняет HL.
+        ld h,d
+        ld l,e
+        ld a,(v_diskInfo.sectorShift)
+        dec a
+        call splitSectorOffset
+        ex de,hl
+        add hl,hl
+        push hl                 ; двухбайтное смещение внутри сектора
+        ld hl,(v_diskInfo.resSectors)
+        add hl,de
         ; Находим сектор в кэше; если нету - кешируем
         ; вход:  hl = номер сектора на диске
         ; выход: hl = адрес сектора в ОЗУ
@@ -142,8 +145,10 @@ getFatCellAddress:
 
         ; Находим смещение ячейки fat в этом секторе
         pop     de      ; de = смещение ячейки в секторе
+        jp c,   fatCellExit
         add     hl, de  ; hl = адрес ячейки в секторе
 
+fatCellExit:
         pop     bc
         ret
 
@@ -176,7 +181,8 @@ cacheSector:
         ; Просматриваем массив структур cacheData в поисках сектора с номером hl
         ex      hl, de                                      ; de = номер для поиска
         ld      hl, cacheData + FAT_CACHE_DATA.number       ; hl = адрес поля number в первом элементе массива
-        ld      c,  FAT_CACHE_CAPACITY                      ; счетчик цикла
+        ld      a,(v_cacheCount)
+        ld      c,a                      ; счетчик цикла
 cff_FindSector:
         call    cmp_m_de            ; сравниваем [hl] и de
         jp z,   cff_SectorFound     ; если равно, значит есть такой сектор в кэше
@@ -193,7 +199,9 @@ cff_FindSector:
         ; Ищем наиболее давно использовавашийся сектор (т.е. у которого самый маленький accessTime)
         ld      de, 0FFFFh                                  ; de = максимальный найденый accessTime сектора
         ld      hl, cacheData + FAT_CACHE_DATA.accessTime   ; hl = адрес поля accessTime в первом элементе массива
-        ld      bc, FAT_CACHE_CAPACITY                      ; b  = 0, c = счетчик цикла
+        ld      a,(v_cacheCount)
+        ld      c,a
+        ld      b,0                      ; b  = 0, c = счетчик цикла
 cff_FindOldestSector:
         call    cmp_m_de            ; сравниваем [hl] и de
         jp nc,  cff_next            ; переход, если [hl] >= de
@@ -211,7 +219,7 @@ cff_next:
         jp      nz, cff_FindOldestSector
 
         ; Нашли наиболее давно использовавашийся сектор
-        ld      a, FAT_CACHE_CAPACITY
+        ld      a, (v_cacheCount)
         sub     b       ; a = индекс найденного сектора
     IF FAT_CACHE_CAPACITY > 32
         ; Смещение таблицы больше байта: HL = индекс * 8.
@@ -234,6 +242,8 @@ cff_next:
 
         ; Прежде чем загрузить новый сектор, старый надо сохранить, если его isModified не ноль
         call    saveSectorFromCache    ; записываем сектор на накопитель
+
+        jp c,   cff_WriteError
 
         ; Загружаем новый сектор на место старого
         pop     de              ; de = номер сектора, который надо загрузить
@@ -274,14 +284,19 @@ cff_SectorFound:
         pop     de
         ret
 
+cff_WriteError:
+        pop de
+        pop bc
+        pop de
+        jp dosIoError
+
 cff_ReadError:
         ld (hl),0FFh
         inc hl
         ld (hl),0FFh
         pop bc
         pop de
-        scf
-        ret
+        jp dosIoError
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -318,7 +333,7 @@ loadSectorToCache:
         pop     de      ; de = номер сектора
         ld      b, 2    ; режим - чтение
         or      a
-        call    j_diskDriver
+        call    logicalSectorIO
 
         ; Восстанавливаем регситры и выходим
         pop     hl
@@ -349,8 +364,8 @@ saveSectorFromCache:
         or      a           ; a == 0?
         jp z,   ssfc_Exit   ; если isModified == 0, сектор не был изменен, и его не надо сохранять
 
-        ; Обнуляем isModified
-        ld      (hl), 0
+        ; Dirty сохраняется до успешной записи.
+        push    hl
 
         dec     hl  ; теперь hl = адрес поля accessTime (ст. байт)
 
@@ -374,12 +389,17 @@ saveSectorFromCache:
         ; de = номер сектора
         pop     hl      ; hl = адрес загрузки сектора
         ld      b, 1    ; режим - запись
-        call    j_diskDriver
-        jp nc,  ssfc_Exit
+        call    fatCachedWrite
+        pop     hl
+        jp c,   ssfc_Failed
+        ld      (hl), 0
+        jp      ssfc_Exit
+ssfc_Failed:
         ; Не все внешние драйверы устанавливают общий признак ошибки.
         ; Сохраняем отказ независимо от результатов следующих записей.
         ld      a, 1
         ld      (bios_vars.diskWriteErr), a
+        call    dosIoError
 
 ssfc_Exit:
         ; Восстанавливаем регситры и выходим
@@ -404,12 +424,16 @@ saveSectorCache:
 
         ld      hl, cacheData           ; hl = первый элемент в массиве cacheData
         ld      de, FAT_CACHE_DATA      ; de = размер элемента массива cacheData
-        ld      c,  FAT_CACHE_CAPACITY  ; счетчик цикла
+        ld      a,(v_cacheCount)
+        ld      c,a  ; счетчик цикла
 saveSectorCacheLoop:
         call    saveSectorFromCache     ; записываем сектор на накопитель
+        jp c,   saveSectorCacheExit
         add     hl, de
         dec     c
         jp nz,  saveSectorCacheLoop
+        or      a
+saveSectorCacheExit:
 
         ; Восстанавливаем регситры и выходим
         pop     bc
@@ -442,9 +466,13 @@ fatClusterToSector:
         dec     de          ; de -= 2 (нумерация кластеров начинается с 2)
 
         ld      hl, (v_diskInfo.sectorsPerCluster)
+        ld a,l
+        dec a
+        jp z,fatClusterLinear
         call    mul_hl_de   ; hl = de * BPB_SecPerClus
         ex      hl, de
 
+fatClusterLinear:
         ld      hl, (v_diskInfo.dataStartSector)
         add     hl, de
         ex      hl, de
@@ -464,14 +492,6 @@ fatClusterToSector:
 ;
 ; 2022-02-14 Разработано SpaceEngineer
 ;----------------------------------------------------------------------------
-
-fatBeginDirLoop:
-        ex      hl, de
-        ld      hl, (v_diskInfo.dirStartSector)
-        ex      hl, de                      ; de = номер первого сектора каталога
-        ld      a, (v_diskInfo.dirSectors)  ; a = количество секторов каталога (мл. байт)
-        ld      c,  a                       ; с  = счетчик цикла
-        ret
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -495,7 +515,15 @@ markDirSectorAsModified:
 
         ; Загрузка сектора в кэш; если сектор уже в кэше,
         ; функция просто найдет его и изменит флаг
-        jp      getSectorAddressInCache
+        call    getSectorAddressInCache
+        ret c
+        push de
+        ex de,hl
+        ld hl,(v_cachedDescrOffset)
+        add hl,de
+        ld (v_cachedDescrPtr),hl
+        pop de
+        ret
 
 ;----------------------------------------------------------------------------
 ; MXOS

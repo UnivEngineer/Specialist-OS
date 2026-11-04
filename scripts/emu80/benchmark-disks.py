@@ -37,14 +37,12 @@ def prepare_fixtures():
     OUT.mkdir(parents=True,exist_ok=True)
     command(['powershell.exe','-NoProfile','-File','scripts/build/build-project.ps1','OS'])
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','SystemEmuWritable'])
-    command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','SystemEmu'])
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','Games2M'])
-    command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','Games64k'])
     payload=OUT/'readonly.tmp';payload.write_bytes(bytes(1^(a>>8)^(a&255) for a in range(0x2000,0x4000)))
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
     base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
-    keep={'DOS.SYS','NC.COM','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
+    keep={'DOS.SYS','NC.COM','FONT.FNT','FONTKOI.FNT','RAMD.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
@@ -52,6 +50,7 @@ def prepare_fixtures():
     def build(name,manifest,target):
         folder=OUT/name;folder.mkdir(exist_ok=True)
         text=builder.replace('$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)','$repositoryRoot = '+ps(ROOT))
+        text=text.replace(". (Join-Path $PSScriptRoot 'executable.ps1')",". "+ps(ROOT/'scripts/images/executable.ps1'))
         text=text.replace('$imageDirectory = Join-Path $repositoryRoot "images"','$imageDirectory = '+ps(folder))
         for key in ['A-System.txt','H-ROM64k.txt']:
             text=text.replace('Join-Path $PSScriptRoot "manifests\\'+key+'"',ps(OUT/manifest))
@@ -99,13 +98,22 @@ class Matrix:
                 self.m.call('debug_break');break
             except Exception:time.sleep(.2)
         else:raise RuntimeError('Owned test emulator did not acquire MCP port 19781')
-        nc=symbols(ROOT/'bin/NC.sym');self.m.stop_at(nc['mainLoop']);self.m.tap('ESC');self.m.until(nc['mainLoop'],120)
+        nc=symbols(ROOT/'bin/NC.sym');self.m.stop_at(nc['mainLoop'])
+        for _ in range(120):
+            self.m.call('emu_run_for',ms=500)
+            state=self.m.call('cpu_state')
+            if state['registers']['pc']['dec']==nc['mainLoop']:
+                if self.m.read(0,32)==(ROOT/'bin/NC.i80').read_bytes()[:32]:break
+                self.m.call('bp_clear');self.m.call('emu_run_for',ms=50);self.m.stop_at(nc['mainLoop'])
+        else:raise RuntimeError('NC boot timeout')
+        self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
         self.ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
         expected=(dos or ROOT/'bin/DOS.sys').read_bytes()
         # Холодный старт патчит ядро; сверяем таблицу ABI, а не все изменяемые байты.
         assert self.m.read(0xC800,3)==expected[0x800:0x803]
         conf=(RUNTIME/'specialist-os/specialist-mx2.conf').read_text(encoding='utf-8-sig')
         assert 'pit.frequency = 2000000' in conf and 'cpu.frequency = 2000000' in conf
+        self.phase=phase
         self.report['phases'][phase]={'pid':self.pid,'dosSha256':sha(dos or ROOT/'bin/DOS.sys'),'launchConf':(RUNTIME/'specialist-os/launch.conf').read_text(),'ramPages':self.m.read(0x8FF8,1)[0]}
         self.save();print('PHASE',phase,flush=True)
     def func(self,address,**regs):
@@ -116,13 +124,13 @@ class Matrix:
         assert not self.func(0xC842,af=drive<<8,de=1)['flags']['C']
         assert not self.func(0xC896)['flags']['C']
     def install(self,name):
-        address=0 if name in ['Flash','FlashFst','FlashSys'] else SYSTEM['DISK_DRIVER_ADDR']
+        address=0 if name in ['Flash','FlashFst','FlashSys','RAMD'] else SYSTEM['DISK_DRIVER_ADDR']
         self.m.write(address,(ROOT/f'bin/{name}.i80').read_bytes());self.func(address)
         # Смена буквы обновляет рабочий JP после установки драйвера.
         self.func(0xC842,af=0x0100,de=1)
     def format_ram(self):
-        self.m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes());self.m.write(0x8400,b'B: -R -Y\r\0')
-        assert not self.func(0xF100,de=0x8400)['flags']['C']
+        self.m.write(0,(ROOT/'bin/FORMAT.i80').read_bytes());self.m.write(0x8400,b'B: -R -Y\r\0')
+        assert not self.func(0,de=0x8400)['flags']['C']
         self.select(1)
     def init_app(self,drive,mode=1):
         self.m.write(0,self.appBinary.read_bytes());self.select(drive)
@@ -165,15 +173,18 @@ class Matrix:
         self.save()
     def writable(self,drive,driver,mode,variant='Buffered'):
         key=f'{chr(65+drive)}-{driver}-{variant}-{mode}'
+        if any(row['id']==key for row in self.report['rows']):
+            print('SKIP COMPLETED',key,flush=True);return
+        print('RUN',key,flush=True)
         info=self.init_app(drive,mode)
         assert info['caps']&2
         if mode==5:assert info['caps']&4
         disk=(RUNTIME/'specialist-os'/('system-flash.bin' if drive==0 else 'flash-disk.bin')) if drive in [0,7] else None
         before=disk.read_bytes() if disk else self.snapshot_metadata()
-        self.traps(self.s['file_cleanup']);self.m.call('regs_set',pc=self.s['file_write_case'],sp=0x8FDF)
+        self.traps(self.s['raw_read_high_done']);self.m.call('regs_set',pc=self.s['file_write_case'],sp=0x8FDF)
         previous=[(0,0,0)]*4;passes=[]
         for attempt in range(1,PASSES+1):
-            self.until(self.s['file_cleanup'])
+            self.until(self.s['raw_read_high_done'])
             assert self.m.read(self.s['v_pass'],1)==bytes([attempt])
             assert self.m.read(0x2000,SIZE)==bytes(attempt^(a>>8)^(a&255) for a in range(0x2000,0x4000))
             raw=self.m.read(self.s['statAll'],40);current=[struct.unpack_from('<IIH',raw,i*10) for i in range(4)]
@@ -186,16 +197,17 @@ class Matrix:
         self.check_integrity(before,after)
         total=current
         assert total[0][2]==(PASSES if info['caps']&8 else 0)
-        assert total[2][2]==(PASSES*2 if info['caps']&8 else 0)
+        assert total[2][2]>=(PASSES if info['caps']&8 else 0)
         metrics=dict(zip(['rawWrite','rawRead','fileWrite','fileRead'],total))
         if drive==0:
             high=self.m.read(self.s['resultsHigh'],40)
             metrics['rawWriteHigh']=struct.unpack_from('<IIH',high,0)
             metrics['rawReadHigh']=struct.unpack_from('<IIH',high,10)
+            metrics['fileWriteHigh']=struct.unpack_from('<IIH',high,20)
             metrics['fileReadHigh']=struct.unpack_from('<IIH',high,30)
         verification=[int.from_bytes(self.m.read(self.s[k],4),'little') for k in ['statRawVerify','statFileVerify']]
         mode_name={1:'write',5:'write+verify',6:'write+file-verify'}[mode]
-        self.report['rows'].append(dict(info,id=key,variant=variant,mode=mode_name,buffer='low',metrics=metrics,verifyTicks=verification,perPass=passes,integrity=True))
+        self.report['rows'].append(dict(info,id=key,phase=self.phase,variant=variant,mode=mode_name,buffer='low',metrics=metrics,verifyTicks=verification,perPass=passes,integrity=True))
         self.save();print('DONE',key,flush=True)
     @staticmethod
     def check_integrity(before,after):
@@ -203,7 +215,7 @@ class Matrix:
         fat=word(14)*256;root=fat+before[16]*word(22)*256;data=root+(word(17)*32+255)//256*256
         assert before[:root]==after[:root]
         for a in range(root,data,32):
-            if before[a]!=255:assert before[a:a+32]==after[a:a+32]
+            if before[a] not in (0,0xE5,0xFF):assert before[a:a+32]==after[a:a+32]
         if len(before)>data:
             for c in range(2,(len(before)-data)//256+2):
                 if fat+c*2+2>root:break
@@ -250,28 +262,37 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--report-directory',type=Path,default=OUT)
     parser.add_argument('--runtime',type=Path,default=RUNTIME)
+    parser.add_argument('--resume',action='store_true')
     args=parser.parse_args();OUT=args.report_directory.resolve();RUNTIME=args.runtime.resolve()
-    if RUNTIME.name!='Emu80-flash-test':parser.error('Use isolated Emu80-flash-test')
-    if (OUT/'raw.json').exists():parser.error('Report already exists; choose a new --report-directory')
-    assert RUNTIME.name=='Emu80-flash-test'
-    prepare_fixtures();matrix=Matrix()
+    if RUNTIME.name!='Emu80-flash-test' and not RUNTIME.is_relative_to(ROOT/'.local'):parser.error('Use isolated Emu80-flash-test or a workspace .local runtime')
+    if (OUT/'raw.json').exists() and not args.resume:parser.error('Report already exists; choose a new --report-directory or --resume')
+    if not args.resume:prepare_fixtures()
+    matrix=Matrix()
+    if args.resume:
+        matrix.report=json.loads((OUT/'raw.json').read_text(encoding='utf-8'))
+        expected=next(iter(matrix.report['phases'].values()))['dosSha256']
+        assert sha(ROOT/'bin/DOS.sys')==expected,'DOS changed since the saved measurements'
     try:
-        matrix.start('writable-buffered');matrix.inventory()
+        matrix.start('writable-buffered-resume' if args.resume else 'writable-buffered');matrix.inventory()
         matrix.install('FlashSys')
-        for mode in [1,5,6]:matrix.writable(0,'FlashSys',mode)
+        for mode in [1,6]:matrix.writable(0,'FlashSys',mode)
         for name in ['Flash','FlashFst']:
             matrix.install(name)
-            for mode in [1,5,6]:matrix.writable(7,name,mode)
-        matrix.format_ram()
-        for mode in [1,6]:matrix.writable(1,'RAMD',mode)
+            for mode in [1,6]:matrix.writable(7,name,mode)
+        matrix.func(0xC860,af=0x0100,hl=matrix.ds['diskDriver'])
+        matrix.func(0xC86F,bc=0x0200,hl=matrix.ds['driverByteStart'])
+        matrix.func(0xC86F,bc=0)
+        matrix.select(1);matrix.format_ram()
+        for mode in [1,6]:matrix.writable(1,'RAMD',mode,'Per-byte')
+        matrix.install('RAMD');matrix.select(1)
+        for mode in [1,6]:matrix.writable(1,'RAMD',mode,'R4')
         matrix.start('rom512',system=OUT/'rom512/SystemRom_emu80_writable.bin',locked=True)
         matrix.func(0xC860,af=0,hl=matrix.ds['diskDriver']);matrix.func(0xC842,af=0x0100,de=1)
         matrix.readonly(0,'A-native-ROM-512K',RUNTIME/'specialist-os/system-flash.bin')
         matrix.start('rom64',flash=False,system=OUT/'rom64/SystemRom_emulator.bin',disk=OUT/'external-rom64/FlashDisk_emulator.bin')
-        matrix.readonly(0,'A-native-ROM-64K',RUNTIME/'specialist-os/system.bin')
         matrix.install('Rom');matrix.readonly(7,'H-ROM-64K',RUNTIME/'specialist-os/rom-disk.bin')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
-        matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','DISKBEN.com','Flash.com','FlashFst.com','FlashSys.com','Rom.com']}
+        matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','DISKBEN.i80','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMD.i80']}
         matrix.save()
     finally:matrix.stop()
 

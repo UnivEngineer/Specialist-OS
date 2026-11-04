@@ -1,65 +1,74 @@
-;----------------------------------------------------------------------------
-; MXOS
-; Определение свободного объема накопителя
-;
-; выход:
-;   de = количество свободных кластеров
-;
-; 2022-02-09 Разработано SpaceEngineer
-;----------------------------------------------------------------------------
-
+; DE=число свободных кластеров, BC/HL сохранены, CF=ошибка.
+; Сектор FAT запрашивается один раз, затем записи читаются линейно.
+; Горячий путь занятой записи без границы сектора: 85 тактов 8080,
+; свободной: ещё 5 тактов INC DE. При совпадении младшего байта конца
+; добавляются 27 тактов проверки старшего (112/117). Два чтения FAT
+; и одно/два чтения границы из RAM, без портов; смена сектора зависит от I/O.
 fatGetDriveFreeSpace:
-            ; Сохраняем регистры
-            push    hl
-            push    bc
-
-            ; Счетчик свободных кластеров
-            ld      de, 0
-
-            ; Кэшируем по очереди все секторы таблицы fat,
-            ; и подсчитываем общее коичество свободных кластеров в них
-            ld      hl, (v_diskInfo.fatSectors) ; hl = количество секторов fat на устройстве
-            ld      a, l                        ; a  = количество секторов fat на устройстве (считаем, что их меньше 256)
-            push    af
-            ld      hl, (v_diskInfo.resSectors) ; hl = номер сектора: начинаем с resSectors
-fatSectorsLoop:
-            push    hl              ; hl = номер сектора
-            ld      b, 0            ; флаг - сектор не будет модифицироваться
-            call    cacheSector     ; теперь hl = адрес буфера с загруженным сектором fat
-
-            ; Цикл по кластерам сектора fat
-            ld      bc, SECTOR_SIZE/2   ; счетчик цикла
-sectorClustersLoop:
-            ; Читаем в a номер кластера из ячейки по адресу hl и сразу сравниваем с нулем
-            ld      a, (hl)
-            inc     hl
-            or      (hl)
-            inc     hl
-
-            ; Если кластер пустой, увеличиваем счетчик свободных кластеров
-            jp nz,  gdfs_nonEmpty
-            inc     de
-gdfs_nonEmpty:
-
-            ; Повтор цикла по кластерам сектора fat
-            dec     bc  ; счетчик просмотренных кластеров сектора
-            ld      a, b
-            or      c
-            jp nz,  sectorClustersLoop
-
-            ; Повтор цикла по секторам fat
-            pop     hl              ; hl = номер сектора
-            inc     hl              ; инкремент номера сектора
-
-            pop     af
-            dec     a               ; счетчик цикла
-            push    af
-
-            jp nz,  fatSectorsLoop  ; повтор цилкла по секторам
-
-            ; Восстанавливаем регистры и выходим
-            pop     af
-            pop     bc
-            pop     hl
-
+            call fatDirStart
+            ret c
+            push hl
+            push bc
+            ld hl,(v_diskInfo.dataClusters)
+            ld b,h
+            ld c,l
+            ld hl,(v_diskInfo.resSectors)
+            ld (v_freeSector),hl
+            ld de,0
+            call fatFreeSector
+            jp c,fatFreeReturn
+            inc hl
+            inc hl
+            inc hl
+            inc hl
+fatFreeLoop:
+            ld a,b
+            or c
+            jp z,fatFreeDone
+            ld a,(hl)
+            inc hl
+            or (hl)
+            inc hl
+            jp nz,fatFreeUsed
+            inc de
+fatFreeUsed:
+            dec bc
+            ld a,(v_freeEnd)
+            cp l
+            jp nz,fatFreeLoop
+            ld a,(v_freeEnd+1)
+            cp h
+            jp nz,fatFreeLoop
+            ld a,b
+            or c
+            jp z,fatFreeDone
+            ld hl,(v_freeSector)
+            inc hl
+            ld (v_freeSector),hl
+            call fatFreeSector
+            jp nc,fatFreeLoop
+fatFreeReturn:
+            pop bc
+            pop hl
             ret
+fatFreeDone:
+            xor a
+            jp fatFreeReturn
+fatFreeSector:
+            push de
+            ld hl,(v_freeSector)
+            ex de,hl
+            xor a
+            call getSectorAddressInCache
+            jp c,fatFreeSectorReturn
+            push hl
+            ex de,hl
+            ld hl,(v_diskInfo.sectorSize)
+            add hl,de
+            ld (v_freeEnd),hl
+            pop hl
+fatFreeSectorReturn:
+            pop de
+            ret
+v_freeSector: DW 0
+v_freeEnd: DW 0

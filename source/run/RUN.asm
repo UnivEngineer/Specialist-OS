@@ -1,7 +1,7 @@
 ; RUN.COM v2: общий запуск COM/EXE/RKS в MX/STD/MON/RAMFOS.
 ; DE=аргументы, CF=ошибка до передачи. Регистры/флаги разрушаются.
 ; Нижнее тело читается по месту; верхнее временно с 0000h.
-; MX/STD: переходник EA80h (верхняя нагрузка — 8C00h); MON/RF: AB00h.
+; Вход 0000h копирует верхний этап в F000h; MX/STD: 8C00h, MON/RF: AB00h.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/ramfos.inc"
     MACRO GET_DE address
@@ -15,10 +15,15 @@
         ld (address),hl
         ex de,hl
     ENDM
-; После разбора команды первая страница кода больше не исполняется.
-; Она служит буфером только для суммы RKS, перенесённой в следующий сектор.
-sectorBuffer = SYSTEM_PROGRAM_ADDR
-    ORG SYSTEM_PROGRAM_ADDR
+    ORG 0000h
+    ; Загружаемая программа: верхний этап устанавливается до разбора команды.
+    ; DE с аргументами сохраняется; нижнее тело позднее можно перезаписать.
+    push de
+    ld hl,upperSource
+    ld de,upperSource + upperEnd - ready
+    ld bc,SYSTEM_PROGRAM_ADDR
+    call bios_memcpy_bc_hl
+    pop de
 start:
     ld hl,0
     add hl,sp
@@ -199,29 +204,28 @@ nativeOpen:
     jp chooseMode
 rksOpen:
     ld hl,descriptor
-    ld a,4
-    call bios_imageOpen
-    jp c,badImage
-    ld (imageContext),hl
-    ld bc,28
-    add hl,bc
-    ld c,(hl)
-    inc hl
-    ld b,(hl)
-    push hl
-    ld h,b
-    ld l,c
+    call bios_fileLoadInfo
+    jp c,notFound
+    ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
+    ld a,h
+    or l
+    jp nz,badImage
+    ld hl,(descriptor+FILE_DESCRIPTOR.size)
     ld (fileSize),hl
-    pop hl
+    ld de,6
+    call bios_cmp_hl_de
+    jp c,badImage
+    ld hl,(descriptor+FILE_DESCRIPTOR.firstCluster)
+    ld (rksCursor),hl
+    ld hl,0
+    ld (rksCursor+2),hl
+    ld hl,rksHeader
+    ld bc,4
+    call rksRead
+    jp c,badImage
+    ld hl,(rksHeader)
     ex de,hl
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    inc hl
-    ld a,(hl)
-    inc hl
-    ld h,(hl)
-    ld l,a
+    ld hl,(rksHeader+2)
     PUT_DE appLoad
     PUT_DE appEntry
     call bios_sub_hl_de
@@ -237,23 +241,6 @@ rksOpen:
     GET_DE fileSize
     call bios_cmp_hl_de
     jp nz,badImage
-    ; Нормализованный заголовок для общего секторного загрузчика DOS.
-    ld hl,(imageContext)
-    ld de,6
-    add hl,de
-    GET_DE appLoad
-    ld (hl),e
-    inc hl
-    ld (hl),d
-    inc hl
-    ld (hl),e
-    inc hl
-    ld (hl),d
-    inc hl
-    GET_DE appSize
-    ld (hl),e
-    inc hl
-    ld (hl),d
     ld a,(mode)
     inc a
     jp nz,ready
@@ -301,6 +288,9 @@ customMode:
     jp c,usage
     ld a,2
     jp setDefault
+    jp ready
+upperSource:
+    DISP SYSTEM_PROGRAM_ADDR
 ready:
     ld hl,(appLoad)
     GET_DE appSize
@@ -309,7 +299,7 @@ ready:
     ld a,(mode)
     cp 3
     jp z,rfRange
-    ld de,bios_vars
+    ld de,APP_MEMORY_END
     ld a,(appLoad+1)
     cp 0C0h
     jp c,rangeEnd
@@ -319,10 +309,10 @@ ready:
     ld a,(appLoad+1)
     cp SYSTEM_PROGRAM_ADDR >> 8
     jp c,badImage
-    ld de,SYSTEM_FLASH_ADDR
+    ld de,SYSTEM_PROGRAM_END
     jp rangeEnd
 rfRange:
-    ld de,bios_vars
+    ld de,APP_MEMORY_END
     ld a,(appLoad+1)
     cp 0D3h
     jp c,rangeEnd
@@ -344,12 +334,34 @@ rangeOK:
     ld (staged),a
     ld de,0
 loadBody:
-    call bios_fileLoad
-    jp c,badImage
     ld a,(descriptor+FILE_DESCRIPTOR.ext)
     and 0DFh
     cp 'R'
-    jp nz,bodyVerified
+    jp z,loadRksBody
+    call bios_fileLoad
+    jp c,badImage
+    jp bodyVerified
+loadRksBody:
+    ex de,hl
+    ld (rksDestination),hl
+    push hl
+    ld hl,(appSize)
+    ld b,h
+    ld c,l
+    pop hl
+    call rksRead
+    jp c,badImage
+    dec hl
+    ex de,hl
+    ld hl,(rksDestination)
+    call bios_calcCS
+    push bc
+    ld hl,rksHeader
+    ld bc,2
+    call rksRead
+    pop bc
+    jp c,badImage
+    ld hl,rksHeader
     call rksChecksum
     jp c,badImage
 bodyVerified:
@@ -427,12 +439,7 @@ install:
     ld a,(callerDrive)
     ld e,1
     call bios_fileGetSetDrive
-    ld hl,SYSTEM_PROGRAM_ADDR+080h
-    ld de,SYSTEM_PROGRAM_ADDR
-    ld bc,STACK_ADDR
-    ld a,(staged)
-    or a
-    jp z,bridgeLowImage
+    ; Переходник остаётся доступным после переключения в STD.
     ld hl,RAMFOS_BRIDGE
     ld de,RAMFOS_ARGS
     ld bc,RAMFOS_BRIDGE_SP
@@ -512,7 +519,7 @@ bridgeRelocate:
     xor a
     ld (IO_COLOR),a
     ld hl,coldStub
-    ld de,SYSTEM_PROGRAM_ADDR+080h
+    ld de,RAMFOS_BRIDGE
     ld bc,monAfterInitEnd-coldStub
     call copyBytes
 copyBridge:
@@ -527,42 +534,22 @@ copyBridge:
     ld hl,(bridgeBase)
     jp (hl)
 
-; Хвост RKS не записывается в программу. Если сумма пересекает сектор,
-; недостающие байты читаются в собственный буфер RUN, без видеопамяти.
+; Формат RKS целиком принадлежит RUN. HL=буфер, BC=точная длина.
+; Курсор находится в собственной резидентной части RUN.
+rksRead:
+    ld de,rksCursor
+    ld a,2
+    jp bios_fileStream
+; BC=вычисленная сумма, HL=два байта суммы из RKS; CF=несовпадение.
 rksChecksum:
-    push bc
-    ld a,l
-    or a
-    call z,rksNextSector
-    jp c,rksChecksumError
-    ld a,(hl)
+    ld e,(hl)
     inc hl
-    push af
-    ld a,l
-    or a
-    call z,rksNextSector
-    jp c,rksChecksumByteError
     ld d,(hl)
-    pop af
-    ld e,a
-    pop bc
     ld h,b
     ld l,c
     call bios_cmp_hl_de
     ret z
     scf
-    ret
-rksChecksumByteError:
-    pop af
-rksChecksumError:
-    pop bc
-    scf
-    ret
-rksNextSector:
-    ld hl,sectorBuffer
-    ld bc,0201h
-    call bios_fileTransfer
-    ld hl,sectorBuffer
     ret
 coldStub:
     xor a
@@ -570,10 +557,10 @@ coldStub:
     jp 0
 coldStubEnd:
 ; Monitor-2 может очистить и экранный код, и весь экранный стек.
-; После его инициализации продолжаем из EAxx, затем ставим стек игры.
+; После его инициализации продолжаем из 8C00h, затем ставим стек игры.
 monAfterInitSP:
     ld sp,0
-    ld hl,SYSTEM_PROGRAM_ADDR+080h
+    ld hl,RAMFOS_BRIDGE
     push hl
 monAfterInitArgs:
     ld de,0
@@ -666,7 +653,6 @@ error:
     ret
 
 bridgeImage:
-    DISP RAMFOS_BRIDGE
 bridge:
 bridgeTemporarySP:
     ld sp,RAMFOS_BRIDGE_SP
@@ -736,7 +722,7 @@ bridgeReloc11:
     jp nz,bridgeStart
 bridgeMonSP:
     ld sp,STACK_ADDR
-    ld hl,SYSTEM_PROGRAM_ADDR+080h+coldStubEnd-coldStub
+    ld hl,RAMFOS_BRIDGE+coldStubEnd-coldStub
     push hl
 bridgeInit:
     jp 0C444h
@@ -812,7 +798,6 @@ bridgeReloc18:
     ret
 bridgeMode: DB 0
 bridgeEnd:
-    ENT
     ASSERT bridgeEnd-bridge <= 0100h
 
 bridgeRelocations:
@@ -854,7 +839,9 @@ callerSP: DW 0
 appLoad: DW 0
 appEntry: DW 0
 appSize: DW 0
-imageContext: DW 0
+rksCursor: FILE_STREAM_CURSOR
+rksHeader: BLOCK 4,0
+rksDestination: DW 0
 bridgeBase: DW 0
 bridgeDelta: DW 0
 argAddress: DW 0
@@ -865,6 +852,13 @@ fileSize: DW 0
 monSP: DW 07FFFh
 monInit: DW 0C444h
 descriptor: BLOCK FILE_DESCR_SIZE,0
+txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]]",0
+txtNotFound: DB 0Ah,"FILE NOT FOUND",0
+txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
+upperEnd:
+    ASSERT_DONT_FIT SYSTEM_FLASH_ADDR
+    ASSERT $ <= SYSTEM_PROGRAM_END
+    ENT
 txtTitle: DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
 txtLoad: DB ": LOAD ADDRESS ",0
 txtEntry: DB ", RUN ADDRESS ",0
@@ -875,13 +869,4 @@ txtModes: DB 0Ah,"PLEASE CHOOSE THE RUNTIME MODE:",0Ah
     DB "4 - MON: STD HARDWARE, MONITOR-2 CORE",0Ah
     DB "5 - MON:CUSTOM: STD HARDWARE, CUSTOM CORE",0Ah,"> ",0
 txtCustom: DB 0Ah,"MONITOR FILE: ",0
-txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]]",0
-txtNotFound: DB 0Ah,"FILE NOT FOUND",0
-txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
-    ASSERT loadBody >= sectorBuffer + 0100h
-    ASSERT rksChecksum >= sectorBuffer + 0100h
-    ASSERT install >= sectorBuffer + 0100h
-    ASSERT copyBytes >= sectorBuffer + 0100h
-    ASSERT error >= sectorBuffer + 0100h
-    ASSERT_DONT_FIT SYSTEM_FLASH_ADDR
     END

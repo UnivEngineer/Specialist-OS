@@ -167,7 +167,7 @@ switch ($Target) {
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; лишь DOS обязан находиться
         # в первой 32-КБ странице для начального загрузчика без стека.
-        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
+        $early = @('DOS.SYS','FONTKOI.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -186,7 +186,7 @@ switch ($Target) {
         $manifestData = Get-Manifest $manifestPath "hardware"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
-        $early = @('DOS.SYS','FONT.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
+        $early = @('DOS.SYS','FONTKOI.FNT','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -257,6 +257,7 @@ $fat = New-Object byte[] ($fatSectors * $sectorSize)
 for ($index = 0; $index -lt 4; $index++) {
     $fat[$index] = 0xFF
 }
+Set-Word $fat 0 0xFFF8
 $directory = New-Object IO.MemoryStream
 $fileData = New-Object IO.MemoryStream
 
@@ -279,7 +280,12 @@ if ($imageFormat -eq 'Mx2') {
     Set-Word $fat (($dataClusters + 2) * 2) 0xFFF7
 }
 $nextCluster = 2
-$fileCount = 0
+$fileCount = 1
+# Метка в BPB совпадает с единственной меткой в корне.
+$labelEntry = New-Object byte[] 32
+[Array]::Copy([Text.Encoding]::ASCII.GetBytes($volumeLabel), 0, $labelEntry, 0, 11)
+$labelEntry[11] = 0x08
+$directory.Write($labelEntry, 0, $labelEntry.Length)
 $dosCluster = 0
 $dosAddress = 0
 $dosSectors = 0
@@ -346,7 +352,7 @@ try {
             if ($previousCluster -ne 0) {
                 Set-Word $fat ($previousCluster * 2) $cluster
             }
-            Set-Word $fat ($cluster * 2) $cluster
+            Set-Word $fat ($cluster * 2) 0xFFFF
             $previousCluster = $cluster
 
             $count = [Math]::Min($sectorSize, $storedBytes.Length - $offset)
@@ -381,9 +387,10 @@ try {
     }
 
     while ($directory.Length -lt $directorySectors * $sectorSize) {
-        $directory.WriteByte(0xFF)
+        $directory.WriteByte(0)
     }
 
+    [Array]::Copy([Text.Encoding]::ASCII.GetBytes("MXOS256 "), 0, $boot, 3, 8)
     Set-Word $boot 0x0B $sectorSize
     $boot[0x0D] = $sectorsPerCluster
     Set-Word $boot 0x11 $maxFiles

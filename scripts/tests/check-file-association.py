@@ -14,16 +14,16 @@ def main():
      name=bytes.fromhex('AF 32')+s['v_drive'].to_bytes(2,'little')+b'\xC9';m[0x8400:0x8400+len(name)]=name
      m[0x8420:0x8422]=bytes((0x37 if size=='stat-error' else 0xAF,0xC9))
      count=(len(data)+255)//256
-     transfer=bytes.fromhex('79 32 00 85 44 4D 21 00 40 11')+(0x4000+count*256).to_bytes(2,'little')+b'\xCD'+s['bios_memcpy_bc_hl'].to_bytes(2,'little')+bytes.fromhex('B7 C9');m[0x8440:0x8440+len(transfer)]=transfer
+     transfer=bytes.fromhex('3E 01 32 00 85 EB 21 00 40 CD')+s['moveBytesForward'].to_bytes(2,'little')+bytes.fromhex('B7 C9');m[0x8440:0x8440+len(transfer)]=transfer
      sel=b'\x32'+s['v_drive'].to_bytes(2,'little')+bytes.fromhex('37 C9');m[0x8480:0x8480+len(sel)]=sel
-     for label,target in [('fileNamePrepare',0x8400),('fileLoadInfo',0x8420),('fileTransferClusters',0x8440),('fileSelectDrive',0x8480)]:m[s[label]:s[label]+3]=b'\xC3'+target.to_bytes(2,'little')
+     for label,target in [('fileNamePrepare',0x8400),('fileLoadInfo',0x8420),('fatStream',0x8440),('fileSelectDrive',0x8480)]:m[s[label]:s[label]+3]=b'\xC3'+target.to_bytes(2,'little')
      code=bytes.fromhex('31 00 8F 21 00 70 11 00 30 01 00 04 CD')+s['bios_fileAssociation'].to_bytes(2,'little')+bytes.fromhex('22 00 87 F5 E1 22 02 87 C3 00 83');m[0x8200:0x8200+len(code)]=code;(O/'in.bin').write_bytes(m)
      r=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8200','-end','8300','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,text=True,check=True,timeout=15)
      b=(O/'out.bin').read_bytes();assert int.from_bytes(b[65542:65544],'little')==0x8300,r.stdout;assert int.from_bytes(b[65544:65546],'little')==0x8F00
      assert bool(b[0x8702]&1)==(want is None),(ext,n,want,b[0x8702]);assert b[s['v_drive']]==7;assert b[0x3400]==0xA5
      if want:
       at=int.from_bytes(b[0x8700:0x8702],'little');actual=b[at:at+100].split(b'\r')[0].split(b'\xff')[0];assert actual==want,(actual,want)
-     if n<1024 and size!='stat-error':assert b[0x8500]==count
+     if n<1024 and size!='stat-error':assert b[0x8500]==1
      else:assert b[0x8500]==0
      rows.append(dict(extension=ext,size=n,stat_error=size=='stat-error',result=want.decode() if want else None,disk_restored=True,guard_preserved=True))
     (O/'result.json').write_text(json.dumps(rows,indent=2)+'\n');print('ASSOCIATION ABI PASS',len(rows))

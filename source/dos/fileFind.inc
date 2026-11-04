@@ -1,123 +1,68 @@
-;+---------------------------------------------------------------------------
-; MXOS
-; Найти файл
-;
-; На входе
-;  hl - имя
-;
-; На выходе
-;  bc, de, hl - сохраняются
-;  cf - ошибка
-;  v_foundDescrPtr - найденный файл
-;
-; 2013-12-12 Дизассемблировано vinxru
-; 2022-02-11 Переработано SpaceEngineer
-;----------------------------------------------------------------------------
-
-fileFind:   ; Сохраняем регистры
-            push    bc  ; [1]
-            push    de  ; [2]
-
-            ; de = номер первого сектора каталога
-            ; с  = количество секторов каталога (мл. байт)
-            call    fatBeginDirLoop
-
-            ; Цикл по секторам каталога
-fileFind_dirLoop:
-            ; Сохраняем номер сектора каталога
-            push    de  ; [3]               ; de = номер сектора каталога
-
-            ; Кэшируем сектор каталога
-            push    hl  ; [4*]
-            xor     a                       ; флаг - сектор не будет меняться
-            call    getSectorAddressInCache ; выход: hl = адрес сектора в буфере
-            ex      hl, de                  ; de = адрес сектора в буфере
-            pop     hl  ; [4*]              ; hl = адрес имени искомого файла
-
-            ; Кол-во дескрипторов файлов в одном секторе каталога (мл. байт)
-            ld      a, (v_diskInfo.descrPerSector)
-            ld      b, a
-            push    bc  ; [4]               ; b = счетчик секторов
-
-            ; Цикл по дескрипторам в закешированном секторе каталога
-fileFind_sectorLoop:
-
-            ; Сохраняем адрес начала имени в каталоге и адрес имени искомого файла
-            push    hl  ; [5]   hl = адрес имени искомого файла
-            push    de  ; [6]   de = адрес дескриптора файла в кэше
-
-            ; Если первый символ имени 0FFh, переходим к следующем файлу
-            ld      a, (de)
-            inc     a
-            jp z,   fileFind_next
-
-            ; Сравниваем имена файлов по адресам hl и de
-            ld      c, FILE_NAME_LENGTH + 3 ; длина имени + расширения
-            call    stricmp
-            jp nz,  fileFind_next           ; если имена не совпадают, переходим к следующему файлу
-
-            ;-----------------------------------------------------------
-            ; Файл найден
-            pop     hl  ; [6]   hl = адрес дескриптора файла в кэше
-
-            ; Сохраняем адрес дескриптора в кэше в переменную v_cachedDescrPtr
-            ld      (v_cachedDescrPtr), hl
-            ex      hl, de
-
-            ; Сохраняем адрес v_tmpFileDescr в переменную v_foundDescrPtr
-            ld      hl, v_tmpFileDescr
-            ld      (v_foundDescrPtr), hl
-
-            ; Копируем дескриптор файла в переменную v_tmpFileDescr
-            ; de = откуда (v_cachedDescrPtr), hl = куда (v_tmpFileDescr)
-            call    copyDescriptor
-
-            ; Восстаналиваем регистры
-            pop     hl  ; [5]   hl = адрес имени искомого файла
-            pop     bc  ; [4]   c  = счетчик секторов
-
-            ; Сохраняем номер сектора каталога в переменную v_cachedSector
-            pop     de  ; [3]   de = номер сектора каталога
-            ex      hl, de
-            ld      (v_cachedSector), hl
-            ex      hl, de
-
-            ; Восстаналиваем регистры и выходим с CF=0
-            pop     de  ; [2]   
-            pop     bc  ; [1]   
-            or      a   ;       для выхода с флагом
+; HL=компактное имя. BC/DE/HL сохранены, CF=ошибка.
+; Дескриптор копируется в v_tmpFileDescr; указатель кэша не долговечен.
+fileFind:
+            ld (v_foundDescrPtr),hl
+            push hl
+            push de
+            push bc
+            call fatDirStart
+            jp c,fileFind_end
+fileFind_loop:
+            call fatDirFile
+            jp c,fileFind_end
+            ex de,hl
+            ld hl,(v_foundDescrPtr)
+            push hl
+            ld c,FILE_NAME_LENGTH+3
+            ld a,(de)
+            cp 5
+            jp nz,fileFind_compare
+            ld a,(hl)
+            call upperCase
+            cp 0E5h
+            jp nz,fileFind_notEqual
+            inc hl
+            inc de
+            dec c
+fileFind_compare:
+            call stricmp
+fileFind_notEqual:
+            pop hl
+            jp nz,fileFind_loop
+            ld hl,(v_cachedDescrPtr)
+            ex de,hl
+            ld hl,v_tmpFileDescr
+            ld (v_foundDescrPtr),hl
+            call copyDescriptor
+    IFDEF DOS_SPLIT_BUILD
+            ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.firstClusterHi)
+            ld a,h
+            or l
+            jp z,fileFind_highClusterOk
+            call dosCorrupt
+            jp fileFind_returnError
+fileFind_highClusterOk:
+    ENDIF
+            ld a,(v_tmpFileDescr)
+            cp 5
+            jp nz,fileFind_found
+            ld a,0E5h
+            ld (v_tmpFileDescr),a
+fileFind_found:
+            pop bc
+            pop de
+            pop hl
+            or a
             ret
-            ;-----------------------------------------------------------
-
-fileFind_next:
-            ; Вычисляем адрес следующего дескриптора файла
-            pop     de  ; [6]   de = адрес дескриптора файла в кэше
-            ld      hl, FILE_DESCR_SIZE
-            add     hl, de
-            ex      de, hl
-
-            ; Восстанавливаем адрес искомого имени
-            pop     hl  ; [5]   hl = адрес имени искомого файла
-
-            ; Еще остались файлы в секторе каталога?
-            dec     b
-            jp nz,  fileFind_sectorLoop
-
-            ; Еще остались секторы каталога?
-            pop     bc  ; [4]   c  = счетчик секторов
-
-            ; Восстанавливаем номер сектора каталога
-            pop     de  ; [3]   de = номер сектора каталога
-            inc     de  ;       следующий сектор каталога
-
-            dec     c
-            jp nz,  fileFind_dirLoop
-
-            ;-----------------------------------------------------------
-            ; Файл не найден
-            ; Восстаналиваем регистры и выходим с CF=1 и a=3
-            pop     de  ; [2]
-            pop     bc  ; [1]
-            ld      a, 3
+fileFind_end:
+            or a
+            jp nz,fileFind_returnError
+            ld a,DOS_ERR_NOT_FOUND
+            call dosSetError
+            ld a,3
+fileFind_returnError:
+            pop bc
+            pop de
+            pop hl
             scf
             ret

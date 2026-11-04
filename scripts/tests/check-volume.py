@@ -195,7 +195,7 @@ def main():
                   (0xc84e, 'fatFileRename'), (0xc851, 'fatFileLoadInfo'),
                   (0xc854, 'fatFileGetSetAddr'), (0xc857, 'fatFileGetSetAttr'),
                   (0xc866, 'fatFileLoad2'), (0xc872, 'fatGetDriveFreeSpace'),
-                  (0xc88a, 'fatFileCreatePrepare'), (0xc88d, 'fatFileTransferClusters')]
+                  (0xc88a, 'fatFileCreatePrepare')]
     for entry, target in operations:
         c = CPU()
         before, flags = c.r[:], c.f

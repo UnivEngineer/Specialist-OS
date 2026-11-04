@@ -98,6 +98,14 @@
         "group": "build"
       },
       {
+        "label": "build: dos4000",
+        "type": "shell",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/build/build-dos4000.ps1"],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
         "label": "build: dos",
         "type": "process",
         "command": "powershell.exe",
@@ -300,7 +308,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FORMAT",
           "cpu",
-          "0xF100"
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\format"
@@ -327,7 +335,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "RUN",
           "cpu",
-          "SYSTEM_PROGRAM_ADDR"
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\run"
@@ -400,7 +408,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Debug",
           "cpu",
-          "SYSTEM_PROGRAM_ADDR",
+          "0x8000",
           "Debug"
         ],
         "options": {

@@ -45,7 +45,15 @@ copyDescriptorCompact:
             push    de
 
             ; Копируем имя файла + расширение + байт атрибутов
-            ld      b, FILE_NAME_LENGTH + 4
+            ld      a,(de)
+            cp      5
+            jp nz,  cfdc_first
+            ld      a,0E5h
+cfdc_first:
+            ld      (hl),a
+            inc     hl
+            inc     de
+            ld      b, FILE_NAME_LENGTH + 3
 cfdc_loop:  ld      a, (de)
             ld      (hl), a
             inc     hl

@@ -12,7 +12,24 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-installDriver:    ; Сохранение регистров
+installDriver:
+            push bc
+            ld c,8
+            call installDriverCommon
+            pop bc
+            ret
+installDriverCommon:
+            and 7
+            push hl
+            push de
+            ld e,a
+            ld d,0
+            ld hl,v_blockShifts
+            add hl,de
+            ld (hl),c
+            pop de
+            pop hl
+            ; Сохранение регистров
             push de
             push hl
 
@@ -51,7 +68,10 @@ installDriverInactive:
 
             ; Передача адреса структуры v_diskInfo
             ld  hl, v_diskInfo
+            or a
 
             ; Выход
             ret
 
+
+v_blockShifts: DB 8,8,8,8,8,8,8,8

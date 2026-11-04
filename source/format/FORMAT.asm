@@ -13,7 +13,7 @@
 
 SECTOR_SIZE = 256           ; размер сектора в байтах
 
-    ORG 0F100h
+    ORG 0000h
 
     xor     a
     ld      (bios_vars.koi7), a      ; Файловые утилиты работают в KOI-8.
@@ -122,6 +122,14 @@ Format:
     or      e
     jp z,   errNoDriver     ; выход в ОС, если нет драйвера
 
+    ; Пока поддерживается прежняя геометрия MXOS-256, до 8192 секторов.
+    ; Стандартные FAT12/16 и логические секторы 512 байт вводятся отдельно.
+    push de
+    ld hl,8192
+    call bios_cmp_hl_de
+    pop de
+    jp c,errSize
+
     ; Cохраняем количество секторов диска в структуру загрузочного сектора
     ex      hl, de
     ld      (v_TotalSectors), hl
@@ -141,12 +149,18 @@ Format:
 
 CalcParams:
 
-    ; Расчитываем размер таблицы fat
-    add     hl, hl              ; hl * 2 - размер fat в байтах
-    ld      (v_FatBytes), hl
-    ld      de, SECTOR_SIZE     ; de = размер сектора в байтах
-    call    bios_div_hl_de      ; hl = количество секторов fat
-    ld      (v_FatSectors), hl  ; сохраняем значение
+    ; FAT округляется вверх; её буфер соответствует целому числу секторов.
+    add     hl,hl
+    ld      de,SECTOR_SIZE-1
+    add     hl,de
+    ld      de,SECTOR_SIZE
+    call    bios_div_hl_de
+    ld      (v_FatSectors),hl
+    push    hl
+    ld      h,l
+    ld      l,0
+    ld      (v_FatBytes),hl
+    pop     hl
 
     ; Расчитываем номер первого сектора каталога
     inc     hl                      ; hl = размер fat + 1 загрузочный сектор
@@ -193,68 +207,129 @@ CalcParams:
     ld      de, 0               ; сектор номер 0
     ld      c,  1               ; сколько секторов
     call    WriteBuffer
+    jp c,   errIO
 
 ;----------------------------------------------------------------------------
 ; FAT
 
-    ; Сколько ячеек fat нельзя использовать
-    ld      hl, (v_DataStartSector) ; hl = сколько секторов заняты загрузочным сектором, fat и каталогом
-    dec     hl                      ; первые две ячейки fat зарезервированы
-    dec     hl
-    add     hl, hl                  ; hl *= 2 - столько байт в конце таблицы fat нельзя использовать (сектор = кластер!)
-    push    hl
-
-    ; Обнуляем все ячейки fat (пустой кластер), кроме последних
-    ld      hl, (v_FatBytes)    ; размер fat в байтах
-    pop     de                  ; столько байт в конце таблицы fat нельзя использовать
-    push    de
-    call    bios_sub_hl_de      ; уменьшаем fat на столько
-    ex      hl, de              ; de = сколько байт заполнять
-    ld      hl, buffer          ; адрес буфера
-    ld      b, 0                ; байт для заполнения
-    call    memset
-
-    ; Помещаем слово FFFFh (зарезервированный кластер) в последние ячейки fat
-    pop     de                  ; столько байт осталось до конца таблицы fat
-    ld      b, 0FFh             ; байт для заполнения
-    call    memset
-
-    ; Помещаем слово FFFFh (зарезервированный кластер) в первые две зарезервированнные ячейки fat
-    ld      hl, 0FFFFh
-    ld      (buffer),   hl
-    ld      (buffer+2), hl
-
-    ; Если это RAM-диск, помещаем слово FFF7h (плохой сектор) в ячейки fat,
-    ; соответсвующие неполным секторам в конце 64 кб блоков
-    ld      a, (v_FormatRAMdisk)
-    or      a                   ; был ли параметр 'R'?
-    call nz,MarkRamDiskBads
-
-    ; Записываем FAT на диск
-    ld      hl, (v_FatSectors)  ; количество секторов fat
-    ld      c, l                ; количество секторов fat (считаем, что их меньше 256)
-    ld      hl, buffer          ; адрес буфера
-    ld      de, 1               ; начинаем с сектора номер 1
-    call    WriteBuffer
+    ; FAT формируется по одному сектору, без буфера на весь том.
+    ld hl,0
+    ld (v_FatIndex),hl
+    ld hl,(v_DataSectors)
+    inc hl
+    inc hl
+    ld (v_FatEnd),hl
+    ld a,(v_FatSectors)
+    ld (v_FatRemaining),a
+    ; Первый BAD: cluster-2+dataStart имеет младший байт FFh.
+    ld a,(v_DataStartSector)
+    ld b,a
+    ld a,1
+    sub b
+    ld l,a
+    ld h,0
+    ld (v_NextBad),hl
+    ld de,1
+FormatFatSector:
+    push de                  ; номер записываемого сектора
+    call ClearSector
+    ; Нулевой сектор уже описывает все свободные кластеры.
+    ; Только последний сектор может содержать запас вне области данных.
+    ld hl,(v_FatIndex)
+    ex de,hl
+    ld hl,(v_FatEnd)
+    call bios_sub_hl_de
+    ld de,SECTOR_SIZE / FAT_ITEM_SIZE
+    call bios_cmp_hl_de
+    jp nc,FormatFatHeader
+    add hl,hl                ; смещение первого элемента запаса в байтах
+    ex de,hl
+    ld hl,buffer
+    add hl,de
+    push hl
+    ld hl,SECTOR_SIZE
+    call bios_sub_hl_de
+    ex de,hl
+    pop hl
+    ld b,0FFh
+    call memset
+FormatFatHeader:
+    ld hl,(v_FatIndex)
+    ld a,h
+    or l
+    jp nz,FormatFatBads
+    ld hl,0FFF8h
+    ld (buffer),hl
+    ld hl,0FFFFh
+    ld (buffer+2),hl
+FormatFatBads:
+    ld a,(v_FormatRAMdisk)
+    or a
+    jp z,FormatFatWrite
+    ld hl,(v_NextBad)
+    ex de,hl
+    ld hl,(v_FatEnd)
+    call bios_cmp_hl_de
+    jp c,FormatFatWrite
+    jp z,FormatFatWrite
+    ld hl,(v_FatIndex)
+    ex de,hl
+    call bios_sub_hl_de        ; расстояние до следующей BAD-записи
+    ld a,h
+    or a
+    jp nz,FormatFatWrite
+    ld a,l
+    cp SECTOR_SIZE / FAT_ITEM_SIZE
+    jp nc,FormatFatWrite
+    add hl,hl
+    ld de,buffer
+    add hl,de
+    ld (hl),FAT16_BAD & 0FFh
+    inc hl
+    ld (hl),FAT16_BAD >> 8
+    ld hl,(v_NextBad)
+    inc h                    ; следующая страница RAMD: ещё 256 кластеров
+    ld (v_NextBad),hl
+FormatFatWrite:
+    pop de
+    ld c,1
+    call WriteBuffer
+    jp c,errIO
+    push de
+    ld hl,(v_FatIndex)
+    ld de,SECTOR_SIZE / FAT_ITEM_SIZE
+    add hl,de
+    ld (v_FatIndex),hl
+    pop de
+    ld a,(v_FatRemaining)
+    dec a
+    ld (v_FatRemaining),a
+    jp nz,FormatFatSector
 
 ;----------------------------------------------------------------------------
 ; Корневой каталог
 
-    ; Создание пустого каталога (de байт 0FFh)
-    ld      hl, (v_DirBytes)    ; размер каталога в байтах
-    ex      hl, de
-    ld      hl, buffer          ; адрес буфера
-    ld      b, 0FFh             ; байт для заполнения
-    call    memset
-
-    ; Записываем каталог на диск
-    ld      a, (v_DirSectors)
-    ld      c, a                ; количество секторов каталога (считаем, что их меньше 256)
-    ld      hl, (v_FatSectors)  ; количество секторов fat
-    inc     hl                  ; количество секторов fat + 1 = начальный сектор каталога
-    ex      hl, de              ; начальный сектор каталога
-    ld      hl, buffer          ; адрес буфера
-    call    WriteBuffer
+    ; Первый сектор корня содержит метку; остальные повторяют нулевой буфер.
+    call ClearSector
+    ld hl,v_VolLabel
+    ld de,v_VolLabel+11
+    ld bc,buffer
+    call bios_memcpy_bc_hl
+    ld a,8
+    ld (buffer+11),a
+    ld hl,(v_DirStartSector)
+    ex de,hl
+    ld c,1
+    call WriteBuffer
+    jp c,errIO
+    push de
+    call ClearSector
+    pop de
+    ld a,(v_DirSectors)
+    dec a
+    ld c,a
+    call nz,WriteBuffer
+    ret c
 
     ; Выход в ОС
     ret
@@ -269,50 +344,19 @@ WriteBuffer:
     ld      hl, buffer
 WriteBufferLoop:
     call    bios_diskDriver
+    ret c
     inc     de      ; следующий сектор
-    inc     h       ; седующий блок в памяти (размер сектора 256 байт)
+    ; Следующий сектор получает тот же подготовленный буфер.
     dec     c
     jp nz,  WriteBufferLoop
     ret
 
-;----------------------------------------------------------------------------
-; Пометить неполные секторы RAM-диска как плохие
-; Формула вычисления номера сектора по номеру кластера
-; sector = (cluster - 2) * BPB_SecPerClus + v_DataStartSector
-; Обратная формула:
-; cluster = (sector - v_DataStartSector) / BPB_SecPerClus + 2
-
-
-MarkRamDiskBads:
-    ; Вычисляем номер кластера, соответствующий первому плохому сектору на RAM-диске
-    ld      hl, (v_DataStartSector)
-    ld      de, 255 ; плохой сектор - последний в 64к банке
-    ex      de, hl
-    call    bios_sub_hl_de
-    ; тут дожно быть hl = hl / BPB_SecPerClus, но у нас пока сектор = кластер
-    inc     hl
-    inc     hl
-
-    ; Переводим номер кластера в адрес ячейки в буфере fat
-    add     hl, hl  ; hl *= 2
-    ld      de, buffer
-    add     hl, de
-
-    ; Приращение адреса для перехода к следующему плохому сектору
-    ; -1 потому что в цикле один раз делается inc hl
-    ld      de, 65536/256 * 2 - 1   ; = 511 байт
-
-    ; В цикле помечаем плохие сектора каждой 64к банки
-    ld      a, (bios_vars.ramPageCount) ; a = количество 64к банок RAM-диска
-    ld      b, a                        ; счетчик цикла
-MarkRamDiskBadsLoop:
-    ld      (hl), FAT16_BAD & 0FFh
-    inc     hl
-    ld      (hl), FAT16_BAD >> 8
-    add     hl, de
-    dec     b
-    jp nz,  MarkRamDiskBadsLoop
-    ret
+; HL/DE/B/AF разрушаются, остальные регистры сохранены.
+ClearSector:
+    ld hl,buffer
+    ld de,SECTOR_SIZE
+    ld b,0
+    jp memset
 
 ;----------------------------------------------------------------------------
 ; Заполнение памяти по адресу hl байтом b количеством байт de
@@ -328,6 +372,19 @@ memset:
 
 ;----------------------------------------------------------------------------
 ; Вывод сообщения 'INVALID DRIVE LETTER'
+
+errIO:
+    ld hl,str_IO
+    call bios_printString
+    scf
+    ret
+errSize:
+    ld hl,str_Size
+    call bios_printString
+    scf
+    ret
+str_IO: DB 0Ah,"I/O ERROR",0
+str_Size: DB 0Ah,"TOO LARGE",0
 
 errInvalidDrive:
     ld      hl, str_InvalidDrive
@@ -375,6 +432,10 @@ str_RAM_DISK:       DB "RAM DISK   "
 
 v_FormatConfirmed:  DB 0
 v_FormatRAMdisk:    DB 0
+v_FatIndex:         DW 0
+v_FatEnd:           DW 0
+v_FatRemaining:     DB 0
+v_NextBad:          DW 0
 v_FatBytes:         DW 0
 v_DirBytes:         DW 0
 v_DirSectors:       DW 0
@@ -382,13 +443,13 @@ v_DirStartSector:   DW 0
 v_DataSectors:      DW 0
 v_DataStartSector:  DW 0
 
-buffer = 0000h ; 0D100h ; Адрес буфера
+buffer = 01000h ; Единственный секторный буфер, 256 байт
 
 ; Начало загрузочного сектора.
 ; Поля, отмеченные *, настраиваются этой программой.
 v_HeaderStart:
     DB 0, 0, 0          ; BS_JmpBoot     - смещение  00h,   3 байт - jmp на загрузчик - не использзуется
-    DB "SPETSMX2"       ; BS_OEMName     - смещение  03h,   8 байт - сигнатура "MSWIN 4.1" или "MSDOS 5.0", но можно и свою :)
+    DB "MXOS256 "       ; BS_OEMName     - смещение  03h,   8 байт - сигнатура "MSWIN 4.1" или "MSDOS 5.0", но можно и свою :)
     DW SECTOR_SIZE      ; BPB_BytsPerSec - смещение  0Bh,   2 байт - размер сектора в байтах
     DB 1                ; BPB_SecPerClus - смещение  0Dh,   1 байт - сколько секторов в кластере
     DW 1                ; BPB_RsvdSecCnt - смещение  0Eh,   2 байт - сколько секторов в арезервированной (загрузочной) области
@@ -416,4 +477,5 @@ v_HeaderEnd:            ; остальное заполняется байтом
 
 ;----------------------------------------------------------------------------
 
+    ASSERT_DONT_FIT buffer
     END

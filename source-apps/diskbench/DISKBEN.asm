@@ -143,8 +143,8 @@ file_size_menu:
     ld h,a
     ld l,0
     ld (tmpDescriptor+FILE_DESCRIPTOR.size),hl
+set_buffer_end:
     ld a,h
-    inc a
     add a,sectorBuffer / 256
     ld (v_bufferEndHi),a
     jp prepare
@@ -492,6 +492,24 @@ summary_type:
     ld c,' '
     call bios_printChar
     call puts
+    ld hl,txtCapacity
+    call puts
+    ld hl,(v_capacity)
+    call bios_div_hl_2
+    call bios_div_hl_2
+    ex de,hl
+    ld b,0
+    call bios_printDecWord
+    ld hl,txtSectorSize
+    call puts
+    LOAD_DE v_sectorSize
+    call bios_printDecWord
+    ld hl,txtSpc
+    call puts
+    ld a,(v_spc)
+    ld e,a
+    ld d,0
+    call bios_printDecWord
     ld hl,txtMode
     call puts
     ld a,(v_budget)
@@ -684,8 +702,7 @@ print_result:
     call print_case_name
 print_result_value:
     ld hl,v_elapsed
-    call ticks_to_ms
-    call print_number
+    call print_time_ms
     ld hl,txtRate
     call puts
     ; dividend = operations * (sectorSize/256) * floor(CLK1/1000).
@@ -719,6 +736,62 @@ rate_multiply:
     or d
     or e
     jp z,timer_error
+    call print_rate_value
+    ld hl,txtUnits
+    jp puts
+
+; Скорость в kB/s, два знака после точки. Исходный числитель в v_dividend,
+; делитель — U32 тики v_elapsed. Сначала целая часть, затем два десятичных
+; деления остатка: это не раздувает цикл вычитания в 100 раз.
+; Все регистры разрушены, печать целиком вне измеряемого интервала.
+print_rate_value:
+    call rate_quotient
+    ld h,b
+    ld l,c
+    ld (v_number),hl
+    ld hl,0
+    ld (v_number+2),hl
+    call print_number
+    ld a,'.'
+    call timing_printChar
+    ld a,2
+    ld (v_rateDigits),a
+rate_fraction:
+    ; 10*r = 8*r+2*r; r < TIMING_MAX_TICKS, результат помещается в U32.
+    call rate_double
+    ld hl,v_dividend
+    ld de,v_number
+    ld b,4
+    call copy_bytes
+    call rate_double
+    call rate_double
+    ld hl,v_number
+    ld de,v_dividend
+    ld b,4
+    call add_bytes
+    call rate_quotient
+    ld a,c
+    add a,'0'
+    call timing_printChar
+    ld hl,v_rateDigits
+    dec (hl)
+    jp nz,rate_fraction
+    ret
+rate_double:
+    ld hl,v_dividend
+    ld c,4
+    or a
+rate_double_byte:
+    ld a,(hl)
+    rla
+    ld (hl),a
+    inc hl
+    dec c
+    jp nz,rate_double_byte
+    ret
+v_rateDigits: DB 0
+
+rate_quotient:
     ld bc,0
 rate_divide:
     ; U32 сравнение от старших байтов, затем вычитание с переносом.
@@ -727,25 +800,25 @@ rate_divide:
     ld a,(de)
     cp (hl)
     jp c,rate_subtract
-    jp nz,rate_ready
+    jp nz,rate_quotient_done
     dec hl
     dec de
     ld a,(de)
     cp (hl)
     jp c,rate_subtract
-    jp nz,rate_ready
+    jp nz,rate_quotient_done
     dec hl
     dec de
     ld a,(de)
     cp (hl)
     jp c,rate_subtract
-    jp nz,rate_ready
+    jp nz,rate_quotient_done
     dec hl
     dec de
     ld a,(de)
     cp (hl)
     jp c,rate_subtract
-    jp nz,rate_ready
+    jp nz,rate_quotient_done
 rate_subtract:
     ld hl,v_dividend
     ld de,v_elapsed
@@ -771,12 +844,8 @@ rate_subtract:
     pop bc
     inc bc
     jp rate_divide
-rate_ready:
-    ld d,b
-    ld e,c
-    call bios_printDecWord
-    ld hl,txtUnits
-    jp puts
+rate_quotient_done:
+    ret
 
 inputBuffer:     BLOCK 17,0
 callerSP:        DW 0
@@ -795,8 +864,8 @@ txtWrites:       DB 00Ah,"Each pass uses and removes DISKBEN.TMP.",00Ah
                  DB "File WRITE includes metadata and flush.",00Ah
                  DB "Passes (0-9) [1], 0=skip: ",0
 txtFileSizePrompt: DB 00Ah,"File size in KiB (1-24) [8]: ",0
-txtFileSize:     DB 00Ah,"File size (KiB): ",0
-txtClusters:     DB "; clusters: ",0
+txtFileSize:     DB 00Ah,"File size (KiB):",009h,009h,0
+txtClusters:     DB 00Ah,"Clusters:   ",009h,009h,009h,0
 txtRegion:       DB 00Ah,"Sectors (hex): ",0
 txtDash:         DB "-",0
 txtError:        DB 00Ah,"I/O / FORMAT / FREE SPACE ERROR",0
@@ -804,13 +873,16 @@ txtTimerError:   DB 00Ah,"PIT CLOCK STOPPED / INVALID",0
 txtDone:         DB 00Ah,"Press any key to exit",0
 txtRate:         DB " ms",009h,0
 txtUnits:        DB " kB/s",00Ah,0
-txtSummaryDrive: DB 00Ah,"Drive ",0
-txtLabel:        DB ":",00Ah,"Label: ",0
-txtType:         DB 00Ah,"Type: ",0
-txtDriver:       DB 00Ah,"Driver: ",0
-txtMode:         DB 00Ah,"Test mode: ",0
-txtBuffers:      DB 00Ah,"READ + RAW WRITE: LOW / HIGH direct",0
-txtPasses:       DB 00Ah,"Passes: ",0
+txtSummaryDrive: DB 00Ah,"Drive:  ",009h,009h,009h,009h,0
+txtLabel:        DB 00Ah,"Label:  ",009h,009h,009h,009h,0
+txtCapacity:    DB 00Ah,"Size (KiB): ",009h,009h,009h,0
+txtSectorSize:  DB 00Ah,"Sector (bytes): ",009h,009h,0
+txtSpc:         DB 00Ah,"Sectors/cluster:",009h,009h,0
+txtType:         DB 00Ah,"Type:   ",009h,009h,009h,009h,0
+txtDriver:       DB 00Ah,"Driver: ",009h,009h,009h,009h,0
+txtMode:         DB 00Ah,"Test mode:  ",009h,009h,009h,0
+txtBuffers:      DB 00Ah,"Buffers:",009h,009h,009h,009h,"Low / High direct",0
+txtPasses:       DB 00Ah,"Passes: ",009h,009h,009h,009h,0
 txtLineBreak:    DB 00Ah,0
 txtBlankLines:   DB 00Ah,00Ah,0
 txtROM:          DB "ROM",0
@@ -826,12 +898,12 @@ txtUnknown:      DB "Unknown",0,0
 txtSkipped:      DB "skipped (read only / 0 passes)",00Ah,0
 
 txtFAT16:        DB "FAT16   "
-txtRead:         DB "READ: ",009h,0
-txtWriteRow:     DB "WRITE:",009h,0
-txtReadLow:      DB "READ LOW:  ",009h,0
-txtReadHigh:     DB "READ HIGH: ",009h,0
-txtWriteLow:     DB "WRITE LOW: ",009h,0
-txtWriteHigh:    DB "WRITE HIGH:",009h,0
+txtRead:         DB "READ:   ",009h,009h,0
+txtWriteRow:     DB "WRITE:  ",009h,009h,0
+txtReadLow:      DB "READ LOW:   ",009h,0
+txtReadHigh:     DB "READ HIGH:  ",009h,0
+txtWriteLow:     DB "WRITE LOW:  ",009h,0
+txtWriteHigh:    DB "WRITE HIGH: ",009h,0
 txtReadSeq:      DB 00Ah,"READ SEQ: ",0
 txtReadRnd:      DB "READ RND: ",0
 txtWriteSeq:     DB "WRITE SEQ: ",0
@@ -882,7 +954,7 @@ lower_buffers_end = sectorBuffer + MAX_FILE_KIB*1024
 highBuffer = 08200h
     ENDIF
     IFNDEF HIGH_SECTORS
-HIGH_SECTORS = 12
+HIGH_SECTORS = (APP_MEMORY_END-highBuffer)/256
     ENDIF
     ASSERT fatBuffer+256 <= highBuffer || highBuffer+HIGH_SECTORS*256 <= fatBuffer
 program_end = highBuffer + HIGH_SECTORS*256

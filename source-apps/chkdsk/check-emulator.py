@@ -1,7 +1,9 @@
 """CHKDSK и memmove на CPU Emu80; запись только в RAM отдельной тестовой установки."""
-import argparse,hashlib,json,random,runpy,struct,subprocess
+import argparse,hashlib,json,random,runpy,struct,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'scripts/images'))
+from executable import Image,encode
 helpers=runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))
 
 def cs(data):
@@ -14,24 +16,23 @@ def cs(data):
 def image(length=600):
     raw=bytearray(b'\xff'*65536)
     struct.pack_into('<HBHBHHBH',raw,11,256,1,1,1,16,256,0xF8,2)
+    raw[3:11]=b'MXOS256 '
     raw[54:62]=b'FAT16   '
+    raw[3*256:5*256]=bytes(512)
     raw[256:768]=bytes(512)
-    struct.pack_into('<HH',raw,256,65535,65535)
+    struct.pack_into('<HH',raw,256,0xFFF8,65535)
     struct.pack_into('<H',raw,256+252*2,0xFFF7)
     payload=bytes((i*71+17)&255 for i in range(length))
     rks=struct.pack('<HH',0x1000,0x1000+len(payload)-1)+payload+struct.pack('<H',cs(payload))
-    mx=bytearray(64);mx[:6]=b'\xcd\x20MXEX';mx[6]=1
-    struct.pack_into('<HHHHHHH',mx,8,64,0x1000,0x1000,len(payload),len(payload),cs(payload),0)
-    mx[22:30]=b'MXOS    ';mx[30]=1
-    struct.pack_into('<H',mx,20,cs(mx))
-    files=[(b'GOOD    RKS',rks),(b'APP     EXE',mx+payload),(b'PLAIN   COM',b'\xc9')]
+    mx=encode(Image(payload,0x1000,0x1000),'exe')
+    files=[(b'GOOD    RKS',rks),(b'APP     EXE',mx),(b'PLAIN   BIN',b'\xc9')]
     cluster=2
     for i,(name,data) in enumerate(files):
         off=3*256+i*32;raw[off:off+32]=bytes(32);raw[off:off+11]=name
-        struct.pack_into('<H',raw,off+26,cluster);struct.pack_into('<I',raw,off+28,len(data)-1)
+        struct.pack_into('<H',raw,off+26,cluster);struct.pack_into('<I',raw,off+28,len(data))
         for pos in range(0,len(data),256):
             last=pos+256>=len(data)
-            struct.pack_into('<H',raw,256+2*cluster,cluster if last else cluster+1)
+            struct.pack_into('<H',raw,256+2*cluster,0xFFFF if last else cluster+1)
             sector=5+cluster-2;raw[sector*256:sector*256+min(256,len(data)-pos)]=data[pos:pos+256]
             cluster+=1
     return raw
@@ -90,7 +91,7 @@ def main():
     def mutation(offset,data):
         x=bytearray(base);x[offset:offset+len(data)]=data;return x
     scenarios=[('good',base,0),('bad-rks',mutation(5*256+8,b'\x99'),2),
-      ('bad-mx-header',mutation(8*256+20,b'\0\0'),2),
+      ('bad-mx-header',mutation(8*256+14,b'\0\0'),2),
       ('cycle',mutation(256+2*3,struct.pack('<H',2)),1),
       ('cross-link',mutation(3*256+32+26,struct.pack('<H',2)),1),
       ('short-chain',mutation(256+4,struct.pack('<H',2)),1),
@@ -103,7 +104,7 @@ def main():
       ('unsupported-bpb',mutation(13,b'\x02'),3),
       ('reserved-fat',mutation(256,b'\0\0'),1),
       ('directory-not-supported',mutation(3*256+11,b'\x10'),1),
-      ('lfn-not-supported',mutation(3*256+11,b'\x0f'),1),
+      ('lfn-replaces-file-orphans-chain',mutation(3*256+11,b'\x0f'),1),
       ('high-size',mutation(3*256+30,b'\1\0'),1),
       ('missing-first-cluster',mutation(3*256+26,b'\0\0'),1)]
     scenarios += [('checksum-length-'+str(n),image(n),0) for n in [1,255,256,257,511,512,513,16000]]
@@ -131,7 +132,7 @@ def main():
         assert m.read(s['result'],1)==b'\4'
         report['io_error_status']=4
     finally:m.write(0xC863,dispatch)
-    report['sha256']={n:hashlib.sha256((ROOT/'bin'/n).read_bytes()).hexdigest() for n in ['DOS.sys','Debug.com','CHKDSK.com']}
+    report['sha256']={n:hashlib.sha256((ROOT/'bin'/n).read_bytes()).hexdigest() for n in ['DOS.sys','Debug.i80','CHKDSK.i80']}
     a.report.parent.mkdir(parents=True,exist_ok=True);a.report.write_text(json.dumps(report,indent=2)+'\n')
 
 if __name__=='__main__':main()

@@ -37,10 +37,16 @@ fatFileRename:
             ; Если файл с новым именем уже существует, удалить его.
             ex      de, hl                  ; hl = новое, de = старое
             call    fileFind
-            jp c,   fileRename_noExisting
+            jp c,   fileRename_missing
             call    fileCheckDeleteAllowed
             jp c,   stc_popDBH_ret
             call    deleteFileInt
+            jp c,   popDBH_ret
+            jp      fileRename_noExisting
+fileRename_missing:
+            ld a,(v_dosError)
+            cp DOS_ERR_NOT_FOUND
+            jp nz,stc_popDBH_ret
 fileRename_noExisting:
 
             ; Повторно найти исходный файл: предыдущий поиск мог вытеснить
@@ -62,7 +68,10 @@ fileRenameCopyName:
             dec     c
             jp nz,  fileRenameCopyName
 
+            ld      hl,(v_cachedDescrPtr)
+            call    fatEncodeName
             call    markDirSectorAsModified
+            jp c,   popDBH_ret
             call    saveSectorCache
             call    fatFinishWrite
             jp      popDBH_ret

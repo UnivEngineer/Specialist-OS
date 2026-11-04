@@ -71,8 +71,11 @@ moveEmpty:
             pop     hl
             ret
 
-; Пара вперёд: 63 такта / 2 байта; назад: 64 / 2 байта.
-; На пару одно чтение и одна запись каждого байта, без промежуточного буфера.
+; Хвост: 54 такта / 2 байта вперёд, 55 назад (8080).
+; Полный блок: 16 байт за 287 тактов вперёд, 295 назад;
+; ещё 22 такта управления на каждые 256 байт. Настройка считается отдельно.
+; Модуль целиком 261 байт, без промежуточного буфера.
+; На каждый байт одно чтение и одна запись, без обращения к портам.
 ; Вход BC=чётное ненулевое число; вперёд HL=назначение, DE=источник,
 ; назад HL=конец источника, DE=конец назначения. Разрушает AF/BC/DE.
 movePairsForward:
@@ -83,17 +86,37 @@ movePairsForward:
             ld      (moveRestoreSP+1), hl
             ex      de, hl
 moveReadSP: ld      sp, 0
+            ld      a, c
+            or      a
+            jp z,   moveForwardPageCheck
+; Сначала чётный хвост до 254 байт, затем полные блоки по 256.
 movePairForwardLoop:
             pop     de
             ld      (hl), e
             inc     hl
             ld      (hl), d
             inc     hl
-            dec     bc
-            dec     bc
-            ld      a, b
-            or      c
+            dec     c
+            dec     c
             jp nz,  movePairForwardLoop
+moveForwardPageCheck:
+            ld      a, b
+            or      a
+            jp z,   moveRestoreSP
+moveForwardPage:
+            ld      c, 16
+moveForwardBlock:
+            DUP 8
+            pop     de
+            ld      (hl), e
+            inc     hl
+            ld      (hl), d
+            inc     hl
+            EDUP
+            dec     c
+            jp nz,  moveForwardBlock
+            dec     b
+            jp nz,  moveForwardPage
             jp      moveRestoreSP
 movePairsBack:
             ex      de, hl
@@ -103,17 +126,36 @@ movePairsBack:
             ld      (moveRestoreSP+1), hl
             ex      de, hl
 moveWriteSP: ld      sp, 0
+            ld      a, c
+            or      a
+            jp z,   moveBackPageCheck
 movePairBackLoop:
             dec     hl
             ld      d, (hl)
             dec     hl
             ld      e, (hl)
             push    de
-            dec     bc
-            dec     bc
-            ld      a, b
-            or      c
+            dec     c
+            dec     c
             jp nz,  movePairBackLoop
+moveBackPageCheck:
+            ld      a, b
+            or      a
+            jp z,   moveRestoreSP
+moveBackPage:
+            ld      c, 16
+moveBackBlock:
+            DUP 8
+            dec     hl
+            ld      d, (hl)
+            dec     hl
+            ld      e, (hl)
+            push    de
+            EDUP
+            dec     c
+            jp nz,  moveBackBlock
+            dec     b
+            jp nz,  moveBackPage
 moveRestoreSP:
             ld      sp, 0
             ret

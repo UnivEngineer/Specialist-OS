@@ -1,66 +1,34 @@
-;+---------------------------------------------------------------------------
-; MXOS
-; Получение/изменение атрибутов файла
-;
-; На входе 
-;   hl - имя файла
-;   с  - 0=чтение, 1=изменение
-;   b  - новые атрибуты (если c==1)
-;
-; На выходе 
-;   cf - ошибка
-;   a  - атрибуты
-;   bc, de, hl - сохраняются
-;
-; 2013-12-12 Дизассемблировано vinxru
-; 2022-01-31 Доработано SpaceEngineer
-;----------------------------------------------------------------------------
-
+; HL=имя, C=1 запись / иначе чтение, B=новые атрибуты.
+; Выход A=атрибуты, CF=ошибка; BC/DE/HL сохранены.
 fatFileGetSetAttr:
-            push    bc
-            ld      b, a        
-
-            ; Ищем файл с именем в hl. Если найден, то переходим
-            call    fileFind
-            jp nc,  fileGetSetAt_0
-
-            ; Ошибка, выходим
-            pop     bc
-            ret
-
-; ---------------------------------------------------------------------------
-
-fileGetSetAt_0:
-            push    hl
-
-            ; Получаем адрес байта атрибутов
-            push    de
-            ld      hl, (v_cachedDescrPtr)
-            ld      de, FILE_DESCRIPTOR.attrib
-            add     hl, de
-            pop     de
-
-            ; Проверяем режим
-            ld      a, c
-            dec     c ; ZF=1 если режим 1
-            jp nz,  fileGetSetAt_1
-
-            ; Устанавливаем атрибуты
-            ld      (hl), b
-
-            ; Ставим сектору каталога флаг isModified
-            call    markDirSectorAsModified
-
-            ; Сохраняем изменения на диск
-            call    saveSectorCache
-
-fileGetSetAt_1:
-            ; Читаем атрибуты
-            ld      a, (hl)
-
-            ; Восстанавливаем регистры и выходим ;! А тут точно CF==0 будет?
-            or      a
-            pop     hl
-            pop     bc
-            ret
-
+            call fileFind
+            ret c
+            push hl
+            push bc
+            push de
+            ld a,(v_tmpFileDescr+FILE_DESCRIPTOR.attrib)
+            dec c
+            jp nz,fatAttrExit
+            ld a,b
+            and 0D8h
+            jp nz,fatAttrBad
+            call markDirSectorAsModified
+            jp c,fatAttrReturn
+            ld a,(v_cachedDescrPtr)
+            ld l,a
+            ld de,FILE_DESCRIPTOR.attrib
+            add hl,de
+            ld (hl),b
+            call saveSectorCache
+            jp c,fatAttrReturn
+            call fatFinishWrite
+            jp c,fatAttrReturn
+            ld a,b
+fatAttrExit:
+            or a
+fatAttrReturn:
+            jp popDBH_ret
+fatAttrBad:
+            ld a,DOS_ERR_ARGUMENT
+            call dosSetError
+            jp popDBH_ret

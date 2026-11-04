@@ -36,6 +36,60 @@ printChar_c9:
 ; курсора. Курсор при этом перемещается 
 
 printChar_alt:
+            ld a,h
+            cp FONT_ADDR_DIV_8 >> 8
+            jp nz,printChar_linear
+            ld a,l
+            cp FONT_ADDR_DIV_8 & 0FFh
+            jp nz,printChar_linear
+            ; Старшие три бита выбирают 256-байтный диапазон.
+            ; Отсутствующие диапазоны заменяются пробелом.
+            ld a,c
+            and 0E0h
+            rrca
+            rrca
+            rrca
+            rrca
+            ld e,a
+            ld d,0
+            ld hl,fontRanges
+            add hl,de
+            ld e,(hl)
+            inc hl
+            ld d,(hl)
+            ld a,d
+            or e
+            jp z,printChar_missing
+            ld a,c
+            and 01Fh
+            add a,a
+            add a,a
+            add a,a
+            ld l,a
+            ld h,0
+            add hl,de
+            ex de,hl
+            jp printChar_de
+printChar_missing:
+            ; Ё/ё в KOI8-R лежат вне пяти основных диапазонов.
+            ld a,c
+            cp 0A3h
+            ld de,fontYoLower
+            jp z,printChar_de
+            cp 0B3h
+            ld de,fontYoUpper
+            jp z,printChar_de
+            ld de,FONT_ADDR
+            jp printChar_de
+fontYoLower:
+            INCBIN "../../assets/system-rom/FONT.FNT", 0A3h*8, 8
+fontYoUpper:
+            INCBIN "../../assets/system-rom/FONT.FNT", 0B3h*8, 8
+fontMissing = 0
+fontRanges:
+            DW fontMissing, FONT_ADDR, FONT_ADDR+0100h, FONT_ADDR+0200h
+            DW fontMissing, fontMissing, FONT_ADDR+0300h, FONT_ADDR+0400h
+printChar_linear:
             ; de = (hl+c) * 8
             ld    b, 0
             add   hl, bc

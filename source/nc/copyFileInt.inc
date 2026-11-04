@@ -1,5 +1,5 @@
 ; Копирование выполняет DOS. NC задаёт имена, диски и собственный буфер.
-COPY_BUFFER_END     EQU 08F00h
+COPY_BUFFER_END     EQU APP_MEMORY_END
 COPY_BUFFER         EQU (NC_END + 255) & 0FF00h
 COPY_BUFFER_SECTORS EQU (COPY_BUFFER_END - COPY_BUFFER) / 256
 

@@ -4,32 +4,30 @@
 ; DOS.SYS — историческое имя единого ядра MXOS. Префикс bios_ сохранён
 ; для совместимости ABI; аппаратные и файловые сервисы входят в одно ядро.
 ;
-; Карта памяти:
-;   0000-8EFF - NC.COM, его данные, кэши каталогов и буфер копирования
+; Карта памяти (основное ОЗУ, MX):
+;   0000-8BFF - Прикладные программы и их буферы; DEBUG временно с 8000h
+;   8C00-8CFF - Переходник RUN, продолжение после инициализации Monitor-2
+;   8D00-8D7F - Аргументы запуска; 8D80-8DFF - резерв контекста
+;   8E00-8FDE - [ 479 B] Системный стек, SP=8FDFh
 ;   8FDF-8FFF - [  33 B] Переменные BIOS
-;   9000-BFFF - [12  KB] Экран
-;   C000-DFFF - [8192 B] DOS.SYS
-;   E000-E081 - [ 130 B] Командная строка
-;   E082-E1FF - [ 382 B] Стек, SP=E200h
-;   E200-E9FF - [2048 B] Шрифт
-;   EA00-F3FF - [2560 B] Верхние утилиты; E.COM находится в нижнем ОЗУ
-;   F400-F53F - [ 320 B] FLASHSYS.COM
-;   F540-F5FF - [ 192 B] Устанавливаемый RAMD.COM
-;   F600-F7FF - [ 512 B] Драйвер flash-/ROM-диска H:
-;   F800-FAFF - [ 768 B] Резерв MX
-;   FB00-FEFF - [1024 B] Дисковый кэш (FAT + каталог)
-;   FF00-FFAF - [ 176 B] Резерв хвостов RAMD.COM
+;   9000-BFFF - [12  KB] Экран; временный образ сменного ядра и переходник
+;   C000-EAFF - [11008 B] Бюджет BIOS/DOS
+;   EB00-EFFF - [1280 B] Компактный шрифт FONTKOI.FNT
+;   F000-F5FF - [1536 B] Загружаемый верхний этап RUN
+;   F600-F73F - [ 320 B] FLASHSYS.COM
+;   F740-F7FF - [ 192 B] RAMD.COM
+;   F800-F9FF - [ 512 B] Драйвер H:
+;   FA00-FA81 - [ 130 B] Общая командная строка DOS/NC
+;   FA82-FAFF - [ 126 B] Резерв MX
+;   FB00-FEFF - [1024 B] Дисковый кэш (четыре сектора)
+;   FF00-FFAF - [ 176 B] Хвост RAMD.COM
 ;   FFB0-FFBB - [  12 B] Состояние NC
-;   FFBE-FFBF - [   2 B] Детектор ДОЗУ, FFBF — метка FORMAT
-;   FFC0-FFDF - [  32 B] Непереключаемое ОЗУ, драйвер ДОЗУ
-;   FFE0-FFFF - [  32 B] Регистры оборудования
+;   FFBE-FFBF - Детектор ДОЗУ и метка FORMAT
+;   FFC0-FFDF - [  32 B] Общее окно, драйвер ДОЗУ
+;   FFE0-FFFF - Регистры оборудования
 ;
-; В STD ОЗУ заканчивается на EFFFh: F000-F7FF — устройства с зеркалами
-; по 32 байта, F800-FFFF — ВВ55 клавиатуры с зеркалами по 4 байта.
-; DOS, системная строка, стек и шрифт остаются доступны; дисковый кэш,
-; хвосты RAMD и состояние NC в верхней области доступны только в MX.
-; Верхние утилиты EA00-F3FF также не обязаны работать в STD целиком.
-; RAMD.COM устанавливается отдельно; строка и стек принадлежат DOS.
+; В STD верхние 4 КБ закрыты портами. BIOS, стек и шрифт доступны;
+; строка, файловые драйверы и кэш используются только после возврата в MX.
 ;
 ; Старая карта памяти:
 ;   8FDF-8FFF - [  32 B] Переменные
@@ -72,7 +70,7 @@ RAMFOS_COMPATIBILITY =  1       ; Совместимость с RAMFOS (WIP)
 BOOT_FROM_TAPE       =  0       ; Включить загрузку с ленты при нажатой клавише после сброса
 
     IF  NEW_MEMORY_MAP
-FONT_ADDR = 0E200h  ; Адрес шрфита
+FONT_ADDR = 0EB00h ; Пять диапазонов KOI-8, по 32 символа
     ELSE
 FONT_ADDR = 0E900h  ; Адрес шрфита
     ENDIF
@@ -181,7 +179,7 @@ bios_fileLoad           = 0C848h ; DE=назначение; читать под�
 bios_fileDelete         = 0C84Bh ; Удалить файл
 bios_fileRename         = 0C84Eh ; Переименовать файл
 bios_fileLoadInfo       = 0C851h ; Загрузить информацию о файле
-bios_imageOpen          = 0C854h ; HL=дескриптор, A=16 COM/EXE или 4 RKS; открыть первый сектор
+bios_imageOpen          = 0C854h ; HL=дескриптор, открыть родной COM/EXE MXOS
 bios_fileGetSetAttr     = 0C857h ; Получить/установить атрибуты файла
 bios_fileNamePrepare    = 0C85Ah ; Преобразовать имя файла во внутренний формат
 bios_fileExec           = 0C85Dh ; Запустить файл; BAT затирает ОЗУ 0000h-8000h
@@ -203,7 +201,7 @@ bios_div_hl_2           = 0C881h ; [MXOS2] Деление hl на 2: hl = hl / 2
 bios_mul_hl_de          = 0C884h ; [MXOS2] Умножение hl на de: hl = hl * de
 bios_div_hl_de          = 0C887h ; [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
 bios_fileCreatePrepare  = 0C88Ah ; [MXOS2] Создать файл и выделить цепочку FAT без записи данных
-bios_fileTransfer       = 0C88Dh ; [MXOS2] Передать последовательные кластеры на выбранном диске
+bios_reservedC88D       = 0C88Dh ; Зарезервировано; кластерный перенос удалён, используйте C8D2h
 bios_installVolume      = 0C890h ; [MXOS2] Зарегистрировать драйвер файловой системы тома
 bios_getVolume          = 0C893h ; [MXOS2] Получить таблицу и контекст драйвера тома
 bios_mountVolume        = 0C896h ; [MXOS2] Повторно смонтировать выбранный том
@@ -223,6 +221,11 @@ bios_fileRenameOnDrive  = 0C8BDh ; [MXOS2] HL/DE=старое/новое ком�
 bios_fileDeleteOnDrive  = 0C8C0h ; [MXOS2] HL=компактное имя на текущем диске, CF=ошибка
 bios_fileCopy           = 0C8C3h ; [MXOS2] HL=FILE_COPY_REQUEST, CF/A=результат; диск восстановлен
 bios_fileGetDrives      = 0C8C6h ; [MXOS2] HL/BC=буфер/ёмкость в байтах (>=8); B=количество
+bios_getError           = 0C8C9h ; [MXOS2] A=код DOS, CF=ошибка; BC/DE/HL сохранены
+bios_installBlockDriver = 0C8CCh ; A=диск, HL=драйвер, C=log2 физического блока (7..9)
+bios_sectorIO           = 0C8CFh ; B=1/2, DE=логический сектор, HL=буфер; BC/DE/HL сохранены
+bios_fileStream         = 0C8D2h ; [MXOS2] A=1/2, DE=FILE_STREAM_CURSOR, HL=буфер, BC=байты
+
 
 ;-----------------------------------------------------------------------
 ; Адрес таблицы переходов драйвера магнитофона
@@ -315,7 +318,7 @@ VOL_LOAD_AT           = 18
 VOL_FREE_SPACE        = 20
 VOL_PREPARE_NAME      = 22
 VOL_CREATE_PREPARE    = 24
-VOL_TRANSFER_LEGACY   = 26
+VOL_RESERVED_26       = 26
 VOL_FLUSH             = 28
 
 ;-----------------------------------------------------------------------
@@ -326,6 +329,18 @@ VOL_FLUSH             = 28
 IMAGE_HEADER_SIZE = 16
 FILE_DESCR_SIZE  = 32   ; размер дескриптора файла в каталоге (байт)
 FILE_NAME_LENGTH = 8    ; длина имени файла  (байт)
+DOS_ERR_IO = 1
+DOS_ERR_NOT_FOUND = 2
+DOS_ERR_EXISTS = 3
+DOS_ERR_FULL = 4
+DOS_ERR_DIR_FULL = 5
+DOS_ERR_ACCESS = 6
+DOS_ERR_ARGUMENT = 7
+DOS_ERR_CORRUPT = 8
+DOS_ERR_NO_DRIVER = 9
+DOS_ERR_UNSUPPORTED = 10
+DOS_ERR_BAD_IMAGE = 11
+
 FAT_ITEM_SIZE    = 2    ; размер записи в таблице FAT (байт)
 
 SECTOR_SIZE  = 00100h   ; размер сектора 256 байт
@@ -337,7 +352,9 @@ FAT16_BAD = 0FFF7h
 FAT12_EOC = 00FFFh  ; последний кластер файла
 FAT16_EOC = 0FFFFh
 FAT12_RES = 00FFFh  ; зарезервированный кластер
-FAT16_RES = 0FFFFh
+FAT16_RESERVED_MIN = 0FFF0h
+FAT16_EOC_MIN = 0FFF8h
+FAT16_RES = 0FFF0h
 
 ;-----------------------------------------------------------------------
 ; Дескриптор файла (одна запись в каталоге) FAT12/16/32
@@ -348,9 +365,9 @@ name            BLOCK   FILE_NAME_LENGTH    ; смещение 00h, 8 байт  
 ext             BLOCK   3                   ; смещение 08h, 3 байта - расширение имени файла
 attrib          BLOCK   1                   ; смещение 0Bh, 1 байт  - атрибуты файла
 ntReserved      BLOCK   1                   ; смещение 0Ch, 1 байт  - используются в Windows NT
-createTimeTenth BLOCK   1                   ; смещение 0Dh, 1 байт  - (только FAT32) время создания файла, десятки миллисекунд (0-199)
-createTime      BLOCK   2                   ; смещение 0Eh, 2 байта - (только FAT32) время создания файла, секунды*2 (0-43200)
-createDate      BLOCK   2                   ; смещение 10h, 2 байта - (только FAT32) дата  создания файла
+createTimeTenth BLOCK   1                   ; смещение 0Dh, 1 байт  - время создания файла, десятки миллисекунд (0-199)
+createTime      BLOCK   2                   ; смещение 0Eh, 2 байта - время создания файла, секунды*2 (0-43200)
+createDate      BLOCK   2                   ; смещение 10h, 2 байта - дата  создания файла
 accessDate      BLOCK   2                   ; смещение 12h: дата последнего доступа FAT16
 firstClusterHi  BLOCK   2                   ; смещение 14h, 2 байта - номер первого кластера в FAT, старшее слово
 writeTime       BLOCK   2                   ; смещение 16h, 2 байта - время модификации файла, секунды*2 (0-43200)
@@ -361,6 +378,13 @@ size            BLOCK   4                   ; смещение 1Ch, 4 байта
 
 ; Вызывающая программа выделяет запрос копирования и независимый буфер.
 ; Имена source/destination — компактные 8.3, первые 11 байт дескриптора.
+; Курсор потока активного FAT-тома; хранится у вызывающей программы.
+; Не содержит размера файла: вызывающая сторона ограничивает чтение EOF.
+    STRUCT FILE_STREAM_CURSOR
+cluster     DW 0
+offset      DW 0
+    ENDS
+
     STRUCT FILE_COPY_REQUEST
 buffer              DW 0
 bufferSize          DW 0        ; Байты, минимум 256; неполный сектор не используется.
@@ -371,6 +395,8 @@ destination         FILE_DESCRIPTOR
 sourceCluster       DW 0        ; Рабочие поля изменяет только DOS.
 destinationCluster  DW 0
 blocksLeft          DW 0
+sourceOffset        DW 0
+destinationOffset   DW 0
     ENDS
 FILE_OP_ERROR  = 1
 FILE_OP_EXISTS = 2
@@ -380,7 +406,7 @@ FILE_OP_EXISTS = 2
 ; Почти совместимо с дескриптором оригинального Коммандера
 ;-----------------------------------------------------------------------
 
-    ; Временный контекст C854h/C848h; в формате A=4 адрес возвращён в HL.
+    ; Временный внутренний контекст родного загрузчика C854h/C848h.
     ; Он действителен до следующей файловой операции и не является записью FAT.
     STRUCT IMAGE_LOAD_CONTEXT
 prefix          BLOCK 6
@@ -429,6 +455,12 @@ volumeLabel         BLOCK  12   ; метка тома и 0 в конце
 isValid             BLOCK   1   ; 0 = нет драйвера, 1 = диск не распознан, 2 = диск распознан, корректно отформатирован
 allocationStep      BLOCK   2   ; Подсказка физического драйвера B=3: шаг по чипам, секторов; 0 = линейно
 dataClusters        BLOCK   2   ; Допустимые кластеры данных, без двух резервных записей FAT
+blockSize           DW 256      ; Физический блок выбранного драйвера
+sectorShift         DB 8        ; log2 логического сектора
+blockShift          DB 8        ; log2 блока драйвера
+clusterBytes        DW 256      ; Размер кластера в байтах, до 32768
+fatCount            DB 1        ; Число копий FAT
+physicalBlocks      DW 0        ; Ёмкость драйвера B=3, в физических блоках
     ENDS
 
 DISK_NO_DRIVER = 0
@@ -462,28 +494,44 @@ BAT_BUFFER = 0000h
 BAT_BUFFER_SIZE = 08000h
 
 ; Резидент RAMD.COM делит окно расширений с FLASHSYS.COM.
-RAMD_RESIDENT_ADDR = 0F540h ; F540h-F5FFh (192 байта), FLASHSYS ниже
+RAMD_RESIDENT_ADDR = 0F740h ; F740h-F7FFh (192 байта), FLASHSYS ниже
 
-SYSTEM_FLASH_ADDR = 0F400h ; F400h-F53Fh
-DISK_DRIVER_ADDR = 0F600h  ; F600h-F7FFh
+SYSTEM_FLASH_ADDR = 0F600h ; F600h-F73Fh
+DISK_DRIVER_ADDR = 0F800h  ; F800h-F9FFh
 NC_LOAD_ADDR = 00000h      ; NC — обычная программа с собственными буферами
-SYSTEM_PROGRAM_ADDR = 0EA00h ; EA00h-F3FFh
-DOS_END_MAX = 0E000h       ; Далее командная строка и стек
+SYSTEM_PROGRAM_ADDR = 0F000h ; Верхний этап RUN
+SYSTEM_PROGRAM_END = 0F600h
+DOS_END_MAX = FONT_ADDR   ; Далее компактный системный шрифт
+    IFDEF DOS_SPLIT_BUILD
+DOS_CODE_START = 04000h   ; Промежуточная отдельная сборка, без подключения к NC
+DOS_CODE_END_MAX = 08C00h ; До переходников и системного стека
+    ELSE
+DOS_CODE_START = 0C000h
+DOS_CODE_END_MAX = DOS_END_MAX
+    ENDIF
 
-; Системные данные нужны и в STD, независимо от варианта драйвера RAM.
+; Стек доступен в STD, командная строка нужна только в MX.
     ASSERT NEW_MEMORY_MAP
-CMD_LINE   = 0E000h  ; 130 байт строки, далее 382 байта стека
+CMD_LINE   = 0FA00h ; FA00h-FA81h, только MX
 CMD_LINE_SIZE = 130
-STACK_BOTTOM = CMD_LINE + CMD_LINE_SIZE
-STACK_ADDR = 0E200h
+APP_MEMORY_END = 08C00h   ; Далее переходники запуска и системный стек
+STACK_BOTTOM = 08E00h
+STACK_ADDR = 08FDFh
 NC_STATE_ADDR = 0FFB0h ; 12 байт; FFBEh — детектор, FFBFh — метка FORMAT
 
-    ASSERT DOS_END_MAX <= CMD_LINE
+    ASSERT DOS_END_MAX <= FONT_ADDR
+    ASSERT SYSTEM_PROGRAM_END <= SYSTEM_FLASH_ADDR
+    ASSERT CMD_LINE >= DISK_DRIVER_ADDR + 0200h
+    ASSERT CMD_LINE + CMD_LINE_SIZE <= FAT_CACHE_ADDR
+    ASSERT SYSTEM_FLASH_ADDR + 0140h <= RAMD_RESIDENT_ADDR
+    ASSERT RAMD_RESIDENT_ADDR + 00C0h <= DISK_DRIVER_ADDR
+    ASSERT DISK_DRIVER_ADDR + 0200h <= FAT_CACHE_ADDR
+    ASSERT FAT_CACHE_ADDR + FAT_CACHE_SIZE <= 0FF00h
     ASSERT CMD_LINE_SIZE == 130
     ASSERT STACK_BOTTOM < STACK_ADDR && STACK_ADDR <= STD_IO_ADDR
     ASSERT DOS_END_MAX <= STD_IO_ADDR
     IF LOAD_FONT
-        ASSERT FONT_ADDR + 0800h <= STD_IO_ADDR
+        ASSERT FONT_ADDR + 0500h <= STD_IO_ADDR
     ENDIF
 
 

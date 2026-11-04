@@ -32,28 +32,19 @@ fileAssociation:
             pop     hl
             push    de              ; конец файла
             push    bc              ; начало буфера
-            ld      c, h
-            ld      a, l
-            or      a
-            jp z,   fa_CountReady
-            inc     c
-fa_CountReady:
-            ld      a, c
-            or      a
-            jp z,   fa_Empty
-            ld      hl, (v_tmpFileDescr + FILE_DESCRIPTOR.firstCluster)
-            ex      de, hl
-            pop     hl              ; буфер
-            push    hl
-            ld      b, 2
-            call    fileTransferClusters
-            pop     de              ; буфер
-            pop     hl              ; конец
-            jp c,   fa_LoadError
-            jp      fa_Terminate
-fa_Empty:
-            pop     de
-            pop     hl
+            ld b,h
+            ld c,l
+            ld hl,0
+            ld (v_streamOffset),hl
+            ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.firstCluster)
+            ex de,hl
+            pop hl
+            push hl
+            ld a,2
+            call fatStream
+            pop de
+            pop hl
+            jp c,fa_LoadError
 fa_Terminate:
             ld      (hl), 0FFh
             pop     hl              ; расширение

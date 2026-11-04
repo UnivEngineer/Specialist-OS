@@ -25,6 +25,7 @@ fatFileDelete: ; Найти файл с именем из hl
 
             ; Удалить файл
             call    deleteFileInt
+            ret c
 
             ; Сохранить изменения на диск
             call    saveSectorCache
@@ -40,8 +41,8 @@ fileCheckDeleteAllowed:
             ld      a, (v_tmpFileDescr + FILE_DESCRIPTOR.attrib)
             and     005h
             ret z
-            scf
-            ret
+            ld a,DOS_ERR_ACCESS
+            jp dosSetError
 
 deleteFileInt:
             ; Сохраняем регистры
@@ -49,43 +50,30 @@ deleteFileInt:
             push    bc
             push    de
 
-            ; Помечаем файл в кэше, как удаленный, заменяя первую букву его имени на 0FFh
-            ld      hl, (v_cachedDescrPtr)
-            ld      (hl), 0FFh
-            push    hl
-
-            ; Ставим сектору каталога флаг isModified
-            call    markDirSectorAsModified
-
-            ; Получаем первый кластер файла в de
-            pop     hl
-            ld      de, FILE_DESCRIPTOR.firstCluster
-            add     hl, de
-            ld      e, (hl)
-            inc     hl
-            ld      d, (hl)
-
+            ; Сначала сохраняем первый кластер: кэш может переместить запись.
+            ld hl,(v_tmpFileDescr + FILE_DESCRIPTOR.firstCluster)
+            ex de,hl
+            push de
+            call markDirSectorAsModified
+            pop de
+            jp c,popDBH_ret
+            ld (hl),0E5h
             ld a,d
             or e
             jp z,popDBH_ret
 deleteFileLoop:
-            ld      h, d
-            ld      l, e
-
-            ; Обнуляем кластер номер de и получаем номер
-            ; следующиего кластера файла в de
-            call    fatFreeCluster
-
-            ; Если это был не последний кластер, продолжаем.
-            ld      a, d
-            cp      h
-            jp nz,  deleteFileLoop
-            ld      a, e
-            cp      l
-            jp nz,  deleteFileLoop
-
-            ; Восстаналиваем регистры и выходим
-            jp      popDBH_ret
+            call fatCheckCluster
+            jp c,popDBH_ret
+            call fatFreeCluster
+            jp c,popDBH_ret
+            ld a,d
+            cp 0FFh
+            jp nz,deleteFileLoop
+            ld a,e
+            cp 0F8h
+            jp c,deleteFileLoop
+            or a
+            jp popDBH_ret
 
 ; Физический барьер. Без шага чипов драйвер синхронный.
 ; Выход CF=ошибка; AF разрушается, BC/DE/HL сохраняются.
@@ -114,13 +102,6 @@ fatFinishWrite:
             ld      a, (bios_vars.diskWriteErr)
             or      a
             ret z
-            push    bc
-            push    de
-            push    hl
-            call    resetSectorCache
-            pop     hl
-            pop     de
-            pop     bc
             scf
             ret
 

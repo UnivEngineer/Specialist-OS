@@ -23,12 +23,15 @@ fatReadCluster:
             xor     a ; флаг - сектор fat не будет модифицироваться
             call    getFatCellAddress
 
+            jp c,   fatReadExit
+
             ; читаем в de номер кластера из fat по адресу hl
             ld      e, (hl)
             inc     hl
             ld      d, (hl)
 
             ; восстанавливаем регистры и выходим
+fatReadExit:
             pop     hl
             ret
 
@@ -59,6 +62,7 @@ fatWriteCluster:
             ld      a, 1 ; флаг - сектр fat будет модифицироваться
             call    getFatCellAddress
             pop     de
+            ret c
 
             ; записываем номер кластера из de в fat по адресу hl
             ld      (hl), e
@@ -93,10 +97,11 @@ fatFreeCluster:
 
             ; вычисляем адрес ячейки, куда указывает hl
             push    de
-            ex      hl, de
             ld      a, 1 ; флаг - сектор fat будет модифицироваться
             call    getFatCellAddress
             pop     de
+
+            jp c,   fatFreeExit
 
             ; читаем номер кластера из fat, и сразу записываем туда нули
             ld      e, (hl)
@@ -106,7 +111,34 @@ fatFreeCluster:
             ld      (hl), 0
 
             ; восстанавливаем регистры и выходим
+fatFreeExit:
             pop     hl
             ret
 
 
+
+; DE=кластер данных. HL/BC/DE сохранены; AF разрушается, CF=ошибка.
+fatCheckCluster:
+            ld a,d
+            cp 0FFh
+            jp nz,fatCheckData
+            ld a,e
+            cp 0F0h
+            jp nc,dosCorrupt
+fatCheckData:
+            push hl
+            ld hl,2
+            call cmp_hl_de
+            jp c,fatCheckUpper
+            jp nz,fatCheckBad
+fatCheckUpper:
+            ld hl,(v_diskInfo.dataClusters)
+            inc hl
+            call cmp_hl_de
+            jp c,fatCheckBad
+            pop hl
+            or a
+            ret
+fatCheckBad:
+            pop hl
+            jp dosCorrupt

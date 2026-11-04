@@ -1,38 +1,20 @@
-; COM/EXE: A=16, HL=дескриптор; проверяет первый сектор/заголовок.
-; Выход HL=вход, DE=загрузка, BC=тело; CF=ошибка. Тело ещё не прочитано.
-; RKS: A=4; выход HL=IMAGE_LOAD_CONTEXT, DE=буфер первого сектора.
-; Вызывающий заполняет loadAddress/entryAddress/bodySize после разбора RKS.
-; imageLoad (C848h): DE=назначение, читает тело по месту. COM проверяет
-; сумму и возвращает HL=вход; RKS возвращает BC=сумма, HL=курсор хвоста,
-; DE=следующий кластер — сумму из файла проверяет RUN. CF=ошибка.
-; Краевые секторы в штатном кэше, экран и нижнее ОЗУ не служат буферами.
-; Контекст v_tmpFileDescr действителен до следующей файловой операции.
+; Родной контейнер COM/EXE MXOS: HL=имя/дескриптор.
+; imageOpen: HL=вход, DE=загрузка, BC=тело, CF=ошибка.
+; imageLoad: DE=приёмник, HL=вход после чтения и проверки суммы.
+; Контекст внутренний и действителен до следующей файловой операции.
 imageOpen:
-    push af
     call fileLoadInfo
-    pop bc
     ret c
-    ld a,b
-    ld (v_tmpFileDescr+16),a
     ld hl,(v_tmpFileDescr+30)
     ld a,h
     or l
     jp nz,imageError
-    ld a,(v_tmpFileDescr+16)
-    cp 4
     ld de,17
-    jp nz,imageMinimum
-    ld de,6
-imageMinimum:
     ld hl,(v_tmpFileDescr+28)
     call cmp_hl_de
     jp c,imageError
-    call imageCache
+    call imageReadPrefix
     ret c
-    ld (v_tmpFileDescr+18),hl
-    ld a,(v_tmpFileDescr+16)
-    cp 4
-    jp z,imageRawHeader
     ld de,v_tmpFileDescr
     ld bc,16
     call moveBytesForward
@@ -58,11 +40,6 @@ imageMagicLoop:
     ld hl,(v_tmpFileDescr+10)
     ld de,16
     jp imageLength
-imageRawHeader:
-    ex de,hl
-    ld hl,v_tmpFileDescr
-    or a
-    ret
 imageLength:
     ld a,h
     or l
@@ -100,116 +77,65 @@ imageLength:
     or a
     ret
 imageError:
+    IFDEF DOS_SPLIT_BUILD
+    ld a,DOS_ERR_BAD_IMAGE
+    jp dosSetError
+    ELSE
     scf
     ret
+    ENDIF
 
-; Следующий сектор через общий кэш; FAT читается до сектора данных,
-; чтобы его буфер оставался действителен даже с одной строкой кэша.
-; BC сохраняется, HL=буфер, +26 продвинут к следующему кластеру.
-imageCache:
-    push hl
+; Заголовок читается общим потоком; курсор сохраняется отдельно от кэша.
+imageReadPrefix:
+    ld hl,0
+    ld (v_streamOffset),hl
     ld hl,(v_tmpFileDescr+26)
     ex de,hl
-    pop hl
-    push de
-    call fatReadCluster
+    ld bc,16
+    ld hl,v_imageHeader
+    ld a,2
+    call fatStream
+    ret c
+    call imageSaveCursor
+    ld hl,v_imageHeader
+    ret
+imageSaveCursor:
     ex de,hl
     ld (v_tmpFileDescr+26),hl
-    pop de
-    call fatClusterToSector
-    xor a
-    jp getSectorAddressInCache
-
+    ld hl,(v_streamOffset)
+    ld (v_tmpFileDescr+20),hl
+    ret
 imageLoad:
     ex de,hl
     ld (v_input_end),hl
-    ex de,hl
-    ld a,(v_tmpFileDescr+16)
-    cpl
-    inc a
-    ld e,a
-    ld d,0
+    push hl
+    ld hl,(v_tmpFileDescr+20)
+    ld (v_streamOffset),hl
     ld hl,(v_tmpFileDescr+10)
-    call sub_hl_de
-    jp nc,imageFirstFull
-    add hl,de
     ld b,h
     ld c,l
-    ld hl,0
-    jp imageFirst
-imageFirstFull:
-    ld b,d
-    ld c,e
-imageFirst:
-    push hl
-    ld hl,(v_tmpFileDescr+18)
-    ld a,(v_tmpFileDescr+16)
-    ld e,a
-    ld d,0
-    add hl,de
-    push hl
-    ld hl,(v_input_end)
-    ex de,hl
-    pop hl
-    call moveBytesForward
-    ld (v_tmpFileDescr+18),hl
-    ld h,b
-    ld l,c
-    pop bc
-    ld a,b
-    or a
-    jp z,imageTail
-    push bc
-    ld c,b
-    ld b,2
-    push hl
     ld hl,(v_tmpFileDescr+26)
     ex de,hl
     pop hl
-    call fileTransferClusters
-    ex de,hl
-    ld (v_tmpFileDescr+26),hl
-    ex de,hl
-    pop bc
+    ld a,2
+    call fatStream
     ret c
-imageTail:
-    ld a,c
-    or a
-    jp z,imageChecksum
+    call fatStreamFinish
+    ret c
     push hl
-    call imageCache
-    pop de
-    ret c
-    ld b,0
-    call moveBytesForward
-    ld (v_tmpFileDescr+18),hl
-    ld h,b
-    ld l,c
-imageChecksum:
+    call imageSaveCursor
+    pop hl
     dec hl
     ex de,hl
     ld hl,(v_input_end)
     call calcCS
-    ld a,(v_tmpFileDescr+16)
-    cp 4
-    jp z,imageRksChecksum
-    push hl
     ld hl,(v_tmpFileDescr+12)
-    ex de,hl
-    pop hl
-    jp imageCompareChecksum
-imageRksChecksum:
-    ld hl,(v_tmpFileDescr+26)
-    ex de,hl
-    ld hl,(v_tmpFileDescr+18)
-    or a
-    ret
-imageCompareChecksum:
-    ld h,b
-    ld l,c
+    ld d,b
+    ld e,c
     call cmp_hl_de
     jp nz,imageError
     ld hl,(v_tmpFileDescr+8)
     or a
     ret
+v_imageHeader: BLOCK 16,0
 imageMagic: DB 0CDh,020h,"MX",1,0

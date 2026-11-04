@@ -34,6 +34,11 @@ fileSelectDrive:
             pop     hl
             ret z
 
+            push    af
+            call    flushVolume
+            jp c,   fileDriveFlushError
+            pop     af
+
             ; Сохраняем выбранное устройство
             ld      (v_drive), a
 
@@ -68,3 +73,8 @@ fileSelectDrive:
             pop     hl
             ret
 
+
+fileDriveFlushError:
+            pop af
+            scf
+            ret

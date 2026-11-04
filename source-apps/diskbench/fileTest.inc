@@ -32,7 +32,7 @@ file_write_case:
     ld b,40
     call clear_bytes
     ld hl,resultsHigh
-    ld b,48                    ; HIGH-статистика и два счётчика VERIFY.
+    ld b,56                    ; HIGH-статистика и четыре счётчика VERIFY.
     call clear_bytes
     inc a
     ld (v_pass),a
@@ -81,6 +81,18 @@ file_pass:
     ld de,resultsHigh+30
     call add_stats
 file_read_high_done:
+    ld a,(v_layout)
+    cp LAYOUT_MAPPED
+    jp nz,file_write_high_done
+    call file_write_high
+    jp c,error
+    ld de,resultsHigh+20
+    call add_stats
+    ld hl,v_verifyTicks
+    ld de,statFileVerifyHigh
+    ld b,4
+    call add_bytes
+file_write_high_done:
     call raw_build_chain
     jp c,error
     ld b,1
@@ -99,6 +111,10 @@ file_read_high_done:
     jp c,error
     ld de,resultsHigh
     call add_stats
+    ld hl,v_verifyTicks
+    ld de,statRawVerifyHigh
+    ld b,4
+    call add_bytes
 raw_write_high_done:
     ld a,0FFh
     call fill_payload
@@ -287,15 +303,8 @@ group_low:
     jp z,group_high
     or a
     ret nz
-    ; Верхний источник измеряется отдельно только для Raw WRITE.
-    ld a,h
-    cp resultsLow / 256
-    ret nz
-    push hl
-    ld de,resultsLow
-    call bios_cmp_hl_de
-    pop hl
-    ret nz
+    jp group_high
+
 group_high:
     ld de,resultsHigh-resultsLow
     add hl,de
@@ -357,8 +366,7 @@ print_flush:
 print_flush_label:
     call puts
     ld hl,v_flushTicks
-    call ticks_to_ms
-    call print_number
+    call print_time_ms
     ld hl,txtRate
     call puts
     ld hl,(v_flushCount)
@@ -549,11 +557,11 @@ file_cleanup:
     ret
 
 txtFileExists:    DB 00Ah,"DISKBEN.TMP exists; rename/delete.",0
-txtFlush:         DB "FLUSH:",009h,0
-txtFlushMapped:   DB "FLUSH:     ",009h,0
+txtFlush:         DB "FLUSH:  ",009h,009h,0
+txtFlushMapped:   DB "FLUSH:  ",009h,009h,0
 txtTimes:         DB " times",00Ah,0
-txtFileAccess:    DB 00Ah,"File access: writing and reading file with DOS",00Ah,0
-txtRawAccess:     DB 00Ah,"Raw access: direct writing/reading of sectors",00Ah,0
+txtFileAccess:    DB 00Ah,"File access: reading and writing file with DOS",00Ah,0
+txtRawAccess:     DB 00Ah,"Raw access: direct reading and writing of sectors",00Ah,0
 txtPass:          DB 00Ah,"Pass ",0
 txtPassDone:      DB " done",0
 v_outputBase:     DW 0
@@ -574,6 +582,8 @@ statFileRead:     BLOCK 10,0
 resultsHigh:     BLOCK 40,0
 statRawVerify:   DD 0
 statFileVerify:  DD 0
+statRawVerifyHigh: DD 0
+statFileVerifyHigh: DD 0
 tmpDescriptor:    DB "DISKBEN TMP",0
                   BLOCK 6,0
                   DW 0

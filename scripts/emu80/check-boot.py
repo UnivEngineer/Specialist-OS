@@ -38,7 +38,7 @@ def main():
         elif opcode == 0x7E:  # MOV A,M
             a = memory[hl]
         elif opcode == 0x12:  # STAX D
-            if not 0xC000 <= de < 0xE000:
+            if not 0xC000 <= de < system['DOS_END_MAX']:
                 raise ValueError(f"Unexpected bootstrap write: {de:04X}")
             memory[de] = a
             copied += 1

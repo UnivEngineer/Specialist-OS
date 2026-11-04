@@ -5,7 +5,7 @@ root=Path(__file__).resolve().parents[2];out=root/'docs/compat/sector-load-001/b
 def symbols(name):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(root/'bin'/name).with_suffix('.sym').read_text(),re.M)}
 ds=symbols('DOS');rs=symbols('RUN');results=[]
 for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,False,False),(3,False,False),(3,True,False),(0,False,True),(0,True,True),(1,False,True)):
- m=bytearray(65536);d=(root/'bin/DOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;r=(root/'bin/RUN.i80').read_bytes();m[rs['start']:rs['start']+len(r)]=r
+ m=bytearray(65536);d=(root/'bin/DOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;r=(root/'bin/RUN.i80').read_bytes();m[:len(r)]=r; m[rs['ready']:rs['upperEnd']]=r[rs['upperSource']:rs['upperSource']+rs['upperEnd']-rs['ready']]
  m[ds['bios_fileGetSetDrive']:ds['bios_fileGetSetDrive']+2]=bytes.fromhex('B7 C9')
  load=0xd300 if staged and mode==3 else 0xf100 if staged else 0x1000
  size=513
@@ -22,7 +22,7 @@ for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,
  p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{rs["install"]:x}','-end','8300','-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
  got=target.read_bytes();pc=int.from_bytes(got[65542:65544],'little');assert pc==0x8300,(mode,staged,hex(pc),p.stdout)
  assert got[load:load+size]==payload,(mode,staged,'payload')
- args=0x8e00 if staged else ds['SYSTEM_PROGRAM_ADDR'];assert got[args:args+6]==b'HELLO\0',(mode,staged,got[args:args+6])
+ args=rs['RAMFOS_ARGS'];assert got[args:args+6]==b'HELLO\0',(mode,staged,got[args:args+6])
  if not returning:assert int.from_bytes(got[65548:65550],'little')==args,(mode,staged,'DE arguments')
  if mode==2:
   assert got[0xc000:0xd000]==kernel

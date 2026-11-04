@@ -30,11 +30,12 @@ def main():
     assert len(image) == layout['bytes'] == layout['end']-0xC000
     assert ds['dosImageEnd'] == layout['end'] <= min(ds['DOS_END_MAX'], ds['CMD_LINE'])
     assert ds['STD_IO_ADDR'] == 0xF000 and ds['STD_KEYB_ADDR'] == 0xF800
-    assert ds['CMD_LINE'] == ds['DOS_END_MAX'] and ds['CMD_LINE_SIZE'] == 130
-    assert ds['STACK_BOTTOM'] == ds['CMD_LINE']+130
-    assert ds['STACK_ADDR']-ds['STACK_BOTTOM'] == 382
-    assert ds['dosImageEnd'] <= ds['CMD_LINE'] < ds['STACK_BOTTOM'] < ds['STACK_ADDR'] <= ds['STD_IO_ADDR']
-    assert ds['FONT_ADDR']+2048 <= ds['STD_IO_ADDR']
+    assert ds['CMD_LINE'] == 0xFA00 and ds['CMD_LINE_SIZE'] == 130
+    assert ds['APP_MEMORY_END'] <= ds['STACK_BOTTOM'] < ds['STACK_ADDR'] == ds['bios_vars']
+    assert ds['STACK_ADDR']-ds['STACK_BOTTOM'] == 479
+    assert ds['dosImageEnd'] <= ds['DOS_END_MAX'] == ds['FONT_ADDR']
+    assert ds['FONT_ADDR']+1280 == ds['STD_IO_ADDR']
+    assert ds['CMD_LINE'] >= ds['STD_IO_ADDR']
     assert ds['delay_l'] == 0xC18F and ds['delay_b'] == 0xC190
     assert image[0x18F:0x195] == bytes.fromhex('45 05 C2 90 C1 C9')
     assert ds['setKeybMode82'] == ds['bios_setKeybMode82'] == 0xC254
@@ -87,7 +88,7 @@ def main():
     }
     memory_map = (ROOT/'source/include/mxos.inc').read_text('utf-8')
     cases['std_stack_in_io'] = re.sub(r'(?m)^(STACK_ADDR\s*=\s*)0[0-9A-Fa-f]+h',r'\g<1>0FFC0h',memory_map)+'\n END\n'
-    cases['std_font_in_io'] = memory_map.replace('FONT_ADDR = 0E200h','FONT_ADDR = 0F800h')+'\n END\n'
+    cases['std_font_in_io'] = memory_map.replace('FONT_ADDR = 0EB00h','FONT_ADDR = 0F800h')+'\n END\n'
     source = args.image.with_suffix('.layout.inc').read_text('utf-8')
     # Измерение изменилось, а размещение осталось прежним.
     stale = re.sub(r'(ASSERT dos_piece_\w+_end - dos_piece_\w+_start == )(\d+)',
