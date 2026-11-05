@@ -84,9 +84,17 @@ loc_C8EC:   push  hl
 
 ; ---------------------------------------------------------------------------
 
-input_bkspc:      ; Если курсор в начале строки ничего не удаляем
-            call  cmp_hl_de_2
+input_bkspc:      ; 7Fh — Backspace: удалить символ слева от курсора.
+            push de
+            ex de,hl
+            ld hl,(v_input_start)
+            call cmp_hl_de_2
+            ex de,hl
+            pop de
             jp z, input_loop
+            dec hl
+            ld c,8
+            call j_printChar
 
             ; Сдвигаем строку
             ld    b, h

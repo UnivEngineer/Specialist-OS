@@ -118,7 +118,7 @@ argument:
 filename:
     push hl
     ld de,appName
-    ld b,15
+    ld b,MAX_PATH-1
 nameCopy:
     ld a,(hl)
     cp ' '+1
@@ -136,6 +136,7 @@ nameDone:
     pop hl
     ld de,descriptor
     call bios_fileNamePrepare
+    jp c,argumentError
     jp argumentParsed
 programArgument:
     pop af                  ; Курсор восстановит проход копирования слова.
@@ -251,7 +252,6 @@ setDefault:
     ld (mode),a
     jp ready
 chooseMode:
-    call bios_clearScreenOld
     ld hl,txtTitle
     call bios_printString
     ld hl,appName
@@ -283,7 +283,7 @@ customMode:
     ld hl,txtCustom
     call bios_printString
     ld hl,coreInput
-    ld de,coreInput+21
+    ld de,coreInput+MAX_PATH-1
     call bios_input
     ld hl,coreInput
     call coreName
@@ -598,6 +598,10 @@ option:
     ret
 ; HL — имя до пробела/терминатора, сохраняется позиция разделителя.
 coreName:
+    ld a,(hl)
+    cp 021h
+    jp c,coreBad
+    ld b,MAX_PATH-1
     ld de,corePath
     push hl
     inc hl
@@ -611,8 +615,11 @@ coreName:
     ld a,':'
     ld (de),a
     inc de
+    ld a,05Ch
+    ld (de),a
+    inc de
+    ld b,MAX_PATH-4
 coreCopyStart:
-    ld b,18
     ld c,0
 coreCopy:
     ld a,(hl)
@@ -630,12 +637,12 @@ coreChar:
     scf
     ret
 coreEnd:
-    ld a,b
-    cp 18
-    jp z,coreBad
     ld a,c
     or a
     jp nz,coreTerm
+    ld a,b
+    cp 4
+    jp c,coreBad
     push hl
     ld hl,monSuffix
     ld bc,4
@@ -851,11 +858,9 @@ keySTD: DB "STD"
 keyMON: DB "MON"
 modeMap: DB 0,1,3,2
 monSuffix: DB ".MON"
-rfPath: DB "A:RAMFOS.MON",0
-corePath: DB "A:MONITOR2.MON",0
-    BLOCK 18,0
-coreInput: BLOCK 24,0
-appName: BLOCK 16,0
+rfPath: DB "A:",05Ch,"RAMFOS.MON",0
+corePath: DB "A:",05Ch,"MONITOR2.MON",0
+    BLOCK MAX_PATH-($-corePath),0
 appArgs: BLOCK 128,0
 mode: DB 0FFh
 callerSP: DW 0
@@ -876,20 +881,22 @@ monSP: DW 07FFFh
 monInit: DW 0C444h
 descriptor: BLOCK FILE_DESCR_SIZE,0
 txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]]",0
-txtNotFound: DB 0Ah,"FILE NOT FOUND",0
-txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
+txtNotFound: DB 0Ah,"File not found",0
+txtBad: DB 0Ah,"Bad image or address range",0
 upperEnd:
     ASSERT_DONT_FIT SYSTEM_FLASH_ADDR
     ASSERT $ <= SYSTEM_PROGRAM_END
     ENT
-txtTitle: DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
-txtLoad: DB ": LOAD ADDRESS ",0
-txtEntry: DB ", RUN ADDRESS ",0
-txtModes: DB 0Ah,"PLEASE CHOOSE THE RUNTIME MODE:",0Ah
-    DB "1 - MX:  MX  HARDWARE, MXOS2 CORE",0Ah
-    DB "2 - STD: STD HARDWARE, MXOS2 CORE",0Ah
-    DB "3 - RF:  MX  HARDWARE, RAMFOS CORE",0Ah
-    DB "4 - MON: STD HARDWARE, MONITOR-2 CORE",0Ah
-    DB "5 - MON:CUSTOM: STD HARDWARE, CUSTOM CORE",0Ah,"> ",0
-txtCustom: DB 0Ah,"MONITOR FILE: ",0
+txtTitle: DB 0Ah,"MXOS2 executable launcher v2.0",0Ah,0
+txtLoad: DB ": Load address ",0
+txtEntry: DB ", Run address ",0
+txtModes: DB 0Ah,"Choose the runtime mode:",0Ah
+    DB "1 - MX:  MX  hardware, MXOS2 core",0Ah
+    DB "2 - STD: STD hardware, MXOS2 core",0Ah
+    DB "3 - RF:  MX  hardware, RAMFOS core",0Ah
+    DB "4 - MON: STD hardware, Monitor-2 core",0Ah
+    DB "5 - MON:CUSTOM: STD hardware, custom core",0Ah,"> ",0
+coreInput: BLOCK MAX_PATH,0
+appName: BLOCK MAX_PATH,0
+txtCustom: DB 0Ah,"Monitor file: ",0
     END

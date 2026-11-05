@@ -79,7 +79,7 @@ TypeErrorRestart:
 
 inputCommandLineBody:  PUSH  BC
         PUSH  DE
-        LD    DE,vars1.Directive
+        LD    DE,INPUT_BUF_END
         CALL  inputLineCR
         POP   DE
         POP   BC

@@ -93,7 +93,7 @@
     },
     {
       "address": 51200,
-      "size": 222,
+      "size": 234,
       "files": [
         "jmps_c800.inc"
       ],
@@ -550,7 +550,8 @@
     {
       "name": "directory",
       "files": [
-        "directory.inc"
+        "directory.inc",
+        "directoryService.inc"
       ]
     },
     {

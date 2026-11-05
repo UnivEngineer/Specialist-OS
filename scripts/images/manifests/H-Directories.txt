@@ -1,0 +1,7 @@
+# Тест вложенных каталогов; исходные игровые бинарники остаются на своих местах.
+@label DIR TEST
+Almaz/MXOS/Almaz2MX.exe     games/Almaz-2/Almaz2-mx-optimized.cpu
+Almaz/STD/Almaz2.rks        games/Almaz-2/Almaz2-optimized.rks
+Almaz/STD/Almaz2-8.rks      games/Almaz-2/Almaz2-8color.rks
+Almaz/RAMFOS/Almaz2RF.exe   games/Almaz-2/Almaz2-ramfos-optimized.cpu
+Almaz/RAMFOS/Almaz2RF.bat   programs/Almaz2RF.bat

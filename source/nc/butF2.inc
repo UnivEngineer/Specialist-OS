@@ -6,6 +6,9 @@
 ;----------------------------------------------------------------------------
 
 but_F2:
+            ld a,(ncShiftState)
+            or a
+            jp z,ncTapeStub
             ld      c, 1
             call    choosePanelDrive
 
@@ -24,6 +27,9 @@ but_F2:
 ; ---------------------------------------------------------------------------
 
 but_F1:
+            ld a,(ncShiftState)
+            or a
+            jp z,ncTapeStub
             ld      c, 0
             call    choosePanelDrive
 
@@ -55,6 +61,7 @@ choosePanelDrive:
             jp z,   cpd_Restore
             ld      hl, state.panelA_drive
             call    writeBytePanel
+            call    resetPanelDirectory
             xor     a
             ld      hl, state.panelA_info
             call    writeBytePanel

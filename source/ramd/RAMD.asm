@@ -105,12 +105,24 @@ resident_file_end:
     INCLUDE "r4.inc"
 
 Install:
+    ld a,(bios_vars.koi7)
+    push af
+    xor a
+    ld (bios_vars.koi7),a
+    call InstallBody
+    pop bc
+    push af
+    ld a,b
+    ld (bios_vars.koi7),a
+    pop af
+    ret
+InstallBody:
     call bios_flushVolume
     ret c
     ld a,(bios_vars.ramPageCount)
     or a
     jp z,InstallFailed
-    ld b,1
+    ld b,RAMD_DRIVER_BYTE
     call bios_setRAMDDriver
     ld hl,resident_file
     ld de,resident_file_end
@@ -150,9 +162,9 @@ InstallByte:
     call bios_installDriver
     ld (InfoPtr+1),hl
     ld hl,driverBufferedStart
-    ld b,2
+    ld b,RAMD_DRIVER_REGISTER
     call bios_setRAMDDriver
-    ld b,0
+    ld b,RAMD_DRIVER_RESTORE
     call bios_setRAMDDriver
     xor a
     ret

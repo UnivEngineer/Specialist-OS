@@ -16,33 +16,42 @@
 fatFileRename:
             xor     a
             ld      (bios_vars.diskWriteErr), a
-            ; Найти исходный файл.
-            call    fileFind
+            ; Служебные записи . и .. не переименовываются.
+            ld      a,(de)
+            cp      02Eh
+            jp z,   blockArgument
+            ld      a,(hl)
+            cp      02Eh
+            jp z,   blockArgument
+            ; Найти исходный файл или каталог.
+            call    fileFindAny
             ret c
 
-            ; Переименование в то же имя ничего не меняет.
+            call    fileCheckDeleteAllowed
+            ret c
+
+            ; Совпадение без учёта регистра разрешает обновить написание.
             push    hl
             push    de
             ld      c, FILE_NAME_LENGTH + 3
             call    stricmp
             pop     de
             pop     hl
-            ret z
 
             ; Сохранить входные регистры для общего выхода popDBH_ret.
             push    hl
             push    bc
             push    de
 
-            ; Если файл с новым именем уже существует, удалить его.
-            ex      de, hl                  ; hl = новое, de = старое
-            call    fileFind
+            ; Существующее назначение не перезаписываем. При смене только
+            ; регистра это та же запись; повторно ищем её перед записью.
+            ex      de, hl
+            jp z,   fileRename_noExisting
+            call    fileFindAny
             jp c,   fileRename_missing
-            call    fileCheckDeleteAllowed
-            jp c,   stc_popDBH_ret
-            call    deleteFileInt
-            jp c,   popDBH_ret
-            jp      fileRename_noExisting
+            ld      a,DOS_ERR_EXISTS
+            call    dosSetError
+            jp      popDBH_ret
 fileRename_missing:
             ld a,(v_dosError)
             cp DOS_ERR_NOT_FOUND
@@ -52,7 +61,7 @@ fileRename_noExisting:
             ; Повторно найти исходный файл: предыдущий поиск мог вытеснить
             ; его сектор и сделать v_cachedDescrPtr недействительным.
             ex      de, hl                  ; hl = старое, de = новое
-            call    fileFind
+            call    fileFindAny
             jp c,   popDBH_ret
 
             ; hl = новое имя, de = актуальный дескриптор исходного файла.

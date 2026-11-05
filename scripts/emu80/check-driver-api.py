@@ -14,7 +14,7 @@ Bench = runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))['Ben
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime', type=Path, required=True)
-    p.add_argument('--ram-only',action='store_true',help='Проверить B=FFh RAMD Per-byte и R4 без записи')
+    p.add_argument('--ram-only',action='store_true',help='Проверить B=FFh RAMD R3 и R4 без записи')
     p.add_argument('--report-directory',type=Path,default=ROOT/'docs/flash/driver-api')
     p.add_argument('--locked', action='store_true', help='Проверить отказ B=5 при запрете J4')
     args = p.parse_args()
@@ -61,19 +61,19 @@ def main():
 
     if args.ram_only:
         select(1)
-        # Штатный AUTOEXEC уже установил R4; явно выбираем встроенный Per-byte.
+        # Штатный AUTOEXEC уже установил R4; явно выбираем встроенный R3.
         m.subroutine(0xC860,af=0x0100,hl=ds['diskDriver'])
-        m.subroutine(0xC86F,bc=0x0200,hl=ds['driverByteStart'])
+        m.subroutine(0xC86F,bc=0x0200,hl=ds['driverBlockStart'])
         m.subroutine(0xC86F,bc=0)
         info('RAMD')
-        assert 'RAMD/Per-byte' in report['descriptors']
+        assert 'RAMD/R3' in report['descriptors']
         m.write(0x7000,b'A:RAMD.COM\0')
         assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
         select(1)
         info('RAMD')
         assert 'RAMD/R4 banked' in report['descriptors']
         (out/'ramd.json').write_text(json.dumps(report['descriptors'],indent=2)+'\n')
-        print('RAMD Per-byte/R4 B=FFh: name, description, technology R, capabilities 03h OK')
+        print('RAMD R3/R4 B=FFh: name, description, technology R, capabilities 03h OK')
         return
 
     if args.locked:

@@ -6,6 +6,8 @@
 ;----------------------------------------------------------------------------
 
 but_F5: ; Рисуем окно
+        ld a,CLI_OP_COPY
+        ld (copyFileOperation+1),a
         call    drawWindowIfSel
 
         ; Выводм "COPYING FROM A: TO"
@@ -17,8 +19,8 @@ but_F5: ; Рисуем окно
 
         call    inputForCopyMove
         cp      1Bh
-        jp z,   mainReload
+        jp z,   ncRefreshDirty
 
         call    copyFileInt
-        jp      mainReload
+        jp      ncRefreshDirty
 

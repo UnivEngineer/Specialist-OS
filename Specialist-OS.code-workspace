@@ -57,6 +57,30 @@
         "group": "build"
       },
       {
+        "label": "build: llm80",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\source-apps\\llm80\\build.ps1"
+        ],
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
+      },
+      {
+        "label": "run: LLM80 (test Emu80)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\source-apps\\llm80\\run.ps1"
+        ],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
         "label": "build: almaz",
         "type": "process",
         "command": "powershell.exe",

@@ -9,37 +9,49 @@
 ; Перерисовка всей панели
 
 redrawFilePanel:
-        call    invalidateFileCache
+        ld a,(ncSelectiveRefresh)
+        or a
+        call z,invalidateFileCache
         COLOR   COLOR_BORDER
+        ld a,(ncKeepFrames)
+        or a
+        jp nz,refreshFilePanel
+        call    drawPanelTop
 
         ; Рисование панели
         ld      hl, g_filePanel
         call    draw
 
-        ; Вывод буквы диска
-        COLOR   COLOR_INFOLINE
-        ld      hl, state.panelA_drive
-        call    readBytePanel
-        ld      hl, (P_DRIVE_LETTER_X << 8) + P_DRIVE_LETTER_Y
-        call    setCursorPosPanel
-        call    printDrive
-
-        ; Вывод NAME
-    IF FULL_PANELS==0
-        COLOR   COLOR_PANELNAME
-        ld      hl, (P_NAME_X1 << 8) + P_NAME_Y
-        call    setCursorPosPanel
-        ld      hl, aNameName
-        call    bios_printString
-
-        ld      hl, (P_NAME_X2 << 8) + P_NAME_Y
-        call    setCursorPosPanel
-        ld      hl, aNameName
-        call    bios_printString
-    ENDIF
-
         ; Выодим список файлов сверху вниз
         ld      b, 0
+        jp printFilePanel
+
+; После тихой команды обновляем только содержимое и заголовок панели.
+refreshFilePanel:
+        call drawPanelHeader
+        ld hl,0910Ah
+        call activePanelPos
+        call clearFileColumn
+        ld hl,09D0Ah
+        call activePanelPos
+        call clearFileColumn
+        ld b,0
+        jp printFilePanel
+clearFileColumn:
+        ld b,10
+clearFileColumnByte:
+        ld l,10
+        ld c,198
+        xor a
+clearFileColumnRow:
+        ld (hl),a
+        inc l
+        dec c
+        jp nz,clearFileColumnRow
+        inc h
+        dec b
+        jp nz,clearFileColumnByte
+        ret
 
 ;----------------------------------------------------------------------------
 ; Перерисовка списка файлов
@@ -56,6 +68,10 @@ printFilePanel:
         ld      hl, state.panelA_drive
         call    readBytePanel   ; a = номер накопителя
         call    loadFiles
+
+        pop af
+        push af
+        call z,printPanelPath
 
         ; Цвет для печати списка файлов
         COLOR   COLOR_FILE

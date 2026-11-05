@@ -23,7 +23,7 @@ but_Down:   ; c = количество файлов
 
             ; если курсор на последнем файле + 1, выходим
             cp      c
-            jp z,   mainDriveChanged
+            jp z,   mainSelectionChanged
 
             ; иначе сохраняем новое положение курсора
             ; и скроллим панель, если надо
@@ -38,7 +38,7 @@ but_Up:     ; a = файл, на котором курсор
 
             ; если курсор на нулевом файле, выходим
             or      a
-            jp z,   mainDriveChanged
+            jp z,   mainSelectionChanged
 
             ; курсор на предыдущий файл
             dec     a
@@ -133,13 +133,13 @@ scrollPanel:
             jp nc,  scrollUp
 
             ; иначе выходим
-            jp      mainDriveChanged
+            jp      mainSelectionChanged
 
 scrollDown: ; скроллинг списка вниз
             add     a, b
 
             ; если скроллить некуда, выходим
-            jp nc,  mainDriveChanged
+            jp nc,  mainSelectionChanged
 
             ; направление перерисовки списока файлов - сверху вниз
             ld      b, 2
@@ -151,7 +151,7 @@ scrollUp:   ; скроллинг списка вверх
 
             ; если скроллить некуда, выходим
             cp      c       ; c = количество файлов
-            jp nc,  mainDriveChanged
+            jp nc,  mainSelectionChanged
 
             ; направление перерисовки списока файлов - снизу вверх
             ld      b, 1

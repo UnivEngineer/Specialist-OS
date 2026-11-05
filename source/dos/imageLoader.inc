@@ -137,5 +137,5 @@ imageLoad:
     ld hl,(v_tmpFileDescr+8)
     or a
     ret
-v_imageHeader: BLOCK 16,0
+; v_imageHeader использует временный хвост dosModuleName (dosModule.inc).
 imageMagic: DB 0CDh,020h,"MX",1,0

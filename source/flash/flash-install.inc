@@ -3,6 +3,18 @@
 ; Временный ID использует 8C00h–8CFFh, общий системный резерв переходников.
 ; Выход CF=0: установлен; CF=1: ошибка flush, нет ID или неподдерживаемый чип.
 Install:
+    ld a,(bios_vars.koi7)
+    push af
+    xor a
+    ld (bios_vars.koi7),a
+    call InstallBody
+    pop bc
+    push af
+    ld a,b
+    ld (bios_vars.koi7),a
+    pop af
+    ret
+InstallBody:
     call bios_flushVolume
     ret c
     call ProbeDelay                  ; завершить ранее запущенное программирование

@@ -17,16 +17,23 @@ for sectors in (256,4096,8192):
     cp 3
     jp nz,write
     ld de,{sectors}
+    ld bc,0
     or a
     ret
 write:
     push hl
     push de
     push bc
+    ld c,b
     ld a,e
     add a,20h
     ld d,a
     ld e,0
+    ld a,c
+    cp 2
+    jp nz,copy
+    ex de,hl
+copy:
     ld b,0
 loop:
     ld a,(hl)
@@ -49,6 +56,7 @@ loop:
    b=p.read_bytes();m[at:at+len(b)]=b
   m[d['bios_fileGetSetDrive']:d['bios_fileGetSetDrive']+2]=bytes.fromhex('AF C9')
   m[d['bios_diskDriver']:d['bios_diskDriver']+3]=bytes.fromhex('C3 00 90')
+  m[d['j_diskDriver']+1:d['j_diskDriver']+3]=struct.pack('<H',0x9000)
   m[d['bios_printString']]=0xc9
   args=b'B: -Y'+(b' -R' if ram else b'')+b'\0';m[0x7000:0x7000+len(args)]=args
   m[0x8000:0x800c]=bytes.fromhex('31 DF 8F 11 00 70 CD 00 00 C3 00 81')

@@ -9,6 +9,10 @@ copyFileInt:
             ld      (vars.copyRequest.sourceDrive), a
             call    bios_fileSelectDrive
             jp c,   copyFileError
+            ld      a,DIR_OP_GET
+            call    bios_directory
+            ex      de,hl
+            ld      (vars.copyRequest.sourceDirectory),hl
             call    getSelectedFile
             ld      de, vars.copyRequest.source
             ld      c, FILE_NAME_LENGTH + 3
@@ -19,9 +23,25 @@ copyFileNameLoop:
             inc     de
             dec     c
             jp nz,  copyFileNameLoop
+            ; По умолчанию назначение — каталог противоположной панели.
+            ld      a,(state.activePanel)
+            xor     1
+            ld      (state.activePanel),a
+            ld      hl,state.panelA_drive
+            call    readBytePanel
+            call    bios_fileSelectDrive
+            call    restorePanelDirectory
+            ld      a,(state.activePanel)
+            xor     1
+            ld      (state.activePanel),a
             ld      hl, vars.input
             ld      de, vars.copyRequest.destination
             call    bios_fileNamePrepare
+            jp c,   copyFileError
+            ld      a,DIR_OP_RESOLVED
+            call    bios_directory
+            ex      de,hl
+            ld      (vars.copyRequest.destinationDirectory),hl
             ld      e, 0
             call    bios_fileGetSetDrive
             ld      (vars.copyRequest.destinationDrive), a
@@ -30,8 +50,12 @@ copyFileNameLoop:
             call    getCopyBufferSize
             jp c,   copyFileError
             ld      (vars.copyRequest.bufferSize), hl
+            ld      hl,ncOverwritePrompt
+            ld      (vars.copyRequest.onExists),hl
             ld      hl, vars.copyRequest
-            call    bios_fileCopy
+copyFileOperation:
+            ld a,CLI_OP_COPY
+            call    bios_cli
             ret nc
             cp      FILE_OP_EXISTS
             jp z,   copyFileExists
@@ -58,11 +82,14 @@ getCopyLimitReady:
             ret
 
 copyFileError:
-            ld      hl, aCopyFailed
+            call bios_getError
+copyFileErrorCode:
+            call dosErrorText
             jp      copyFileShowError
 
 copyFileExists:
-            ld      hl, aFileAlreadyExists
+            call bios_getError
+            call dosErrorText
 
 copyFileShowError:
             ld      de, 04280h          ; CENTER_LINE 20,80h
@@ -77,7 +104,7 @@ copyFileAnyKey:
             call    bios_keyScan
             inc     a
             jp z,   copyFileAnyKey
-            jp      mainReload
+            jp      ncRefreshDirty
 
 ; Общий баннер ошибок копирования/удаления и защиты файла.
 ; Вход HL=сообщение, DE=координаты заголовка BIOS; имя в vars.input.

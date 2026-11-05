@@ -5,5 +5,5 @@ ORG 02000h
 __Start:
  ld sp,08FDFh
  call _main
- ld (07E00h),hl
+ ld (05E80h),hl
  jp 06100h

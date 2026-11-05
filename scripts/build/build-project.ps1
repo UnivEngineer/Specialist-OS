@@ -27,6 +27,7 @@ $components = @(
     @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "mon"; Address = "0xC000" },
     @{ Directory = "source\\format"; Source = "FORMAT";  Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\E";      Source = "E";       Extension = "cpu"; Address = "0" },
+    @{ Directory = "source\\cli";     Source = "CLI"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\nc";     Source = "NC";      Extension = "cpu"; Address = "0" }
 )
 

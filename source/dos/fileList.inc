@@ -1,6 +1,12 @@
 ; HL=буфер FILE_INFO, DE=ёмкость записей, BC=начальный номер.
 ; DE=число файлов, BC/HL сохранены, FFh завершает буфер, CF=ошибка.
 fatFileList:
+            ld a,018h
+            jp fatListStart
+fatDirectoryList:
+            ld a,008h
+fatListStart:
+            ld (v_listMask),a
             push hl
             push bc
             ld h,b
@@ -19,7 +25,8 @@ fatFileList:
             call fatDirStart
             jp c,fileList_end
 fileList_loop:
-            call fatDirFile
+            ld a,(v_listMask)
+            call fatDirFiltered
             jp c,fileList_end
             push hl
             ld hl,(v_dirTotalFiles)
@@ -65,3 +72,4 @@ fileList_end:
             ret z
             scf
             ret
+v_listMask: DB 018h

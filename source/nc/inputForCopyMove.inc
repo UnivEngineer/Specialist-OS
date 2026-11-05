@@ -6,44 +6,46 @@
 ;----------------------------------------------------------------------------
 
 inputForRename:
-            ld      a, 1
             jp      inputForFile
 inputForCopyMove:
-            xor     a
+            ; Полный путь каталога другой панели, а не зависимое от CWD A:имя.
+            call    getSelectedFile
+            push    hl
+            call    inputSwitchPanel
+            pop     hl
+            call    buildSelectedFilePath
+            push    af
+            call    inputSwitchPanel
+            call    updateCommandPath
+            pop     af
+            ld      a,01Bh
+            ret c
+            ld      hl,vars.pathArg
+            ld      de,vars.input
+inputCopyPath:
+            ld      a,(hl)
+            ld      (de),a
+            inc     hl
+            inc     de
+            or      a
+            jp nz,inputCopyPath
+            dec     de
+            jp      input
+
+; Выбрать файловый контекст противоположной панели. AF/BC/DE/HL разрушены.
+inputSwitchPanel:
+            ld      a,(state.activePanel)
+            xor     1
+            ld      (state.activePanel),a
+            ld      hl,state.panelA_drive
+            call    readBytePanel
+            call    bios_fileSelectDrive
+            jp      restorePanelDirectory
+
 inputForFile:
             ld      hl, 3D6Eh
             ld      (bios_vars.cursorY), hl
             ld      de, vars.input
-            or      a
-            jp nz,  inputForCopyMoveName
-
-            ; Отображается ли панель?
-            ld      hl, state.panelA_info
-            ld      a, (state.activePanel)
-            and     a
-            jp nz,      loc_D255
-            inc     hl
-loc_D255:   ld      a, (hl)
-
-            ; Если не отображается, то накопитель в стркоу не помещать
-            and     a
-            jp nz,      loc_D265
-
-            ; Записываем букву накопителя
-            inc     hl
-            inc     hl
-            ld      a, (hl)
-            add     'A'
-            ld      (de),a
-            inc     de
-
-            ; Записываем ':'
-            ld      a, ':'
-            ld      (de),a
-            inc     de
-
-loc_D265:
-inputForCopyMoveName:
             ; Записать выбранный файл
             call    getSelectedFile
             call    compactName

@@ -32,7 +32,7 @@ fileSelectDrive:
             ld      hl, v_drive
             cp      a, (hl)
             pop     hl
-            ret z
+            jp z,   selectDirectory
 
             push    af
             call    flushVolume
@@ -71,7 +71,8 @@ fileSelectDrive:
             ; Восстанавливаем регистры и выходим
             pop     de
             pop     hl
-            ret
+            ret c
+            jp selectDirectory
 
 
 fileDriveFlushError:

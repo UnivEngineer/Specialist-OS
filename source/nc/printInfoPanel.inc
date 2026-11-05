@@ -7,6 +7,7 @@
 
 printInfoPanel:
             COLOR   COLOR_BORDER
+            call    drawPanelTop
 
             ; Рисуем панель
             ld      hl, g_infoPanel

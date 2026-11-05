@@ -15,8 +15,18 @@ SECTOR_SIZE = 256           ; размер сектора в байтах
 
     ORG 0000h
 
-    xor     a
-    ld      (bios_vars.koi7), a      ; Файловые утилиты работают в KOI-8.
+    ld a,(bios_vars.koi7)
+    push af
+    xor a
+    ld (bios_vars.koi7),a
+    call formatMain
+    pop bc
+    push af
+    ld a,b
+    ld (bios_vars.koi7),a
+    pop af
+    ret
+formatMain:
     ; DE — строка аргументов, C=0 — диск пока не задан.
     ex      de, hl
     ld      c, 0
@@ -331,8 +341,13 @@ FormatFatWrite:
     call nz,WriteBuffer
     ret c
 
-    ; Выход в ОС
-    ret
+    ; Форматирование меняет геометрию и уничтожает прежние каталоги.
+    ; Сбрасываем старый кэш через mount и выбираем корень нового тома.
+    call bios_mountVolume
+    ret c
+    ld de,0
+    ld a,DIR_OP_SET
+    jp bios_directory
 
 ;----------------------------------------------------------------------------
 ; Запись буфера на диск
@@ -353,10 +368,19 @@ WriteBufferLoop:
 
 ; HL/DE/B/AF разрушаются, остальные регистры сохранены.
 ClearSector:
+    ; Буфер выровнен на 256 байт: INC L не выходит за его границу.
+    ; Восемь байтов за итерацию без 16-битного счётчика memset.
     ld hl,buffer
-    ld de,SECTOR_SIZE
-    ld b,0
-    jp memset
+    ld b,SECTOR_SIZE / 8
+    xor a
+ClearSectorLoop:
+    DUP 8
+    ld (hl),a
+    inc l
+    EDUP
+    dec b
+    jp nz,ClearSectorLoop
+    ret
 
 ;----------------------------------------------------------------------------
 ; Заполнение памяти по адресу hl байтом b количеством байт de
@@ -383,8 +407,8 @@ errSize:
     call bios_printString
     scf
     ret
-str_IO: DB 0Ah,"I/O ERROR",0
-str_Size: DB 0Ah,"TOO LARGE",0
+str_IO: DB 0Ah,"I/O error",0
+str_Size: DB 0Ah,"Too large",0
 
 errInvalidDrive:
     ld      hl, str_InvalidDrive
@@ -444,6 +468,8 @@ v_DataSectors:      DW 0
 v_DataStartSector:  DW 0
 
 buffer = 01000h ; Единственный секторный буфер, 256 байт
+    ASSERT (buffer & 0FFh) == 0
+    ASSERT SECTOR_SIZE == 256
 
 ; Начало загрузочного сектора.
 ; Поля, отмеченные *, настраиваются этой программой.

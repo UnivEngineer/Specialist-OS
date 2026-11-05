@@ -92,8 +92,8 @@ EDITOR_BUFFER_SIZE = APP_MEMORY_END - 01800h
     INCLUDE "files.inc" ; Дисковые операции, ввод имени и дескриптор файла
     INCLUDE "entry.inc" ; Файловые клавиши и вход с аргументом командной строки
 
-FILE_NAME_HISTORY: DS 10,0
-FILE_NAME_RECALL_END: DS 6,0
+FILE_NAME_HISTORY: DS MAX_PATH,0
+FILE_NAME_RECALL_END:
 editor_vars EDITOR_VARIABLES
 
     IF !STANDARD_EDITOR

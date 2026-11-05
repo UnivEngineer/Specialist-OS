@@ -16,6 +16,9 @@ def main():
     parser.add_argument('--variant',choices=['DOS','DOS4000'],default='DOS')
     parser.add_argument('--stream-only', action='store_true')
     parser.add_argument('--logical-only', action='store_true')
+    parser.add_argument('--mount-only', action='store_true')
+    parser.add_argument('--directory-only', action='store_true')
+    parser.add_argument('--subdirectories-only', action='store_true')
     parser.add_argument('--timings', action='store_true')
     parser.add_argument('--binary-dir', type=Path, default=ROOT/'bin')
     args = parser.parse_args()
@@ -138,6 +141,8 @@ driverCopy:
         else:
             raw = (args.binary_dir/'DOS.sys').read_bytes()
             m[0xC000:0xC000+len(raw)] = raw
+        # Стенд не загружает DOSMOD: верхнее ОЗУ свободно для тестовых буферов.
+        m[sy['v_memTop']:sy['v_memTop']+2]=word(0x7FFF if args.variant=='DOS4000' else sy['LEGACY_APP_MEMORY_END']-1)
         m[0x8400:0x8400+len(driver)] = driver
         m[sy['j_diskDriver']+1:sy['j_diskDriver']+3] = word(0x8400)
         m[0x8602:0x8606]=word(physical)+word((5000 if sector==512 else 64)*sector//physical)
@@ -159,6 +164,194 @@ driverCopy:
         b = bytearray(32); b[:11] = name; b[11] = attr
         struct.pack_into('<HI', b, 26, cluster, size)
         return b
+    if args.subdirectories_only:
+        results=[]
+        def fixture(sector=256,physical=256,spc=1):
+            m=fresh(sector=sector,physical=physical,spc=spc)
+            if args.variant=='DOS4000':
+                # Стенд использует свободное окно 6000h–7FFFh над нижним ядром.
+                m[sy['v_memTop']:sy['v_memTop']+2]=word(0x7FFF)
+            get=lambda n:int.from_bytes(m[sy['v_diskInfo.'+n]:sy['v_diskInfo.'+n]+2],'little')
+            root=get('dirStartSector')*sector;data=get('dataStartSector')*sector;cluster_bytes=sector*spc
+            m[root:root+32]=entry(b'ALMAZ      ',2,attr=0x10)
+            for cluster,next_cluster in [(2,5),(3,0xFFFF),(4,0xFFFF),(5,0xFFFF),(6,0xFFFF)]:
+                m[sector+cluster*2:sector+cluster*2+2]=word(next_cluster)
+            def directory(cluster,parent):
+                start=data+(cluster-2)*cluster_bytes
+                m[start:start+64]=entry(b'.          ',cluster,attr=0x10)+entry(b'..         ',parent,attr=0x10)
+                return start
+            start=directory(2,0)
+            for i in range(2,cluster_bytes//32):m[start+i*32:start+(i+1)*32]=entry(f'IGNORE{i:02d}TXT'.encode(),attr=8)
+            start=data+3*cluster_bytes
+            m[start:start+64]=entry(b'MXOS       ',3,attr=0x10)+entry(b'STD        ',4,attr=0x10)
+            start=directory(3,2);m[start+64:start+96]=entry(b'FILE    BIN',6,5)
+            directory(4,2);m[data+4*cluster_bytes:data+4*cluster_bytes+5]=b'HELLO'
+            return m
+        m=fixture()
+        def current():
+            result=run(m,'bios_directory',a=0)
+            assert not result['carry'],result
+            return result['de']
+        def cd(path,cluster=None,error=0):
+            raw=path if isinstance(path,bytes) else path.encode()
+            m[0x7000:0x7080]=raw+bytes(128-len(raw))
+            m[0x6FFF]=0xA5;m[0x7080]=0x5A
+            saved=bytes(m[0x6FFF:0x7081])
+            before=current()
+            result=run(m,'bios_directory',a=2,hl=0x7000)
+            assert bytes(m[0x6FFF:0x7081])==saved,path
+            assert result['carry']==bool(error),(path,result)
+            if error:
+                assert result['error']==error,(path,result)
+                assert current()==before,path
+            else:assert current()==cluster,(path,current(),cluster)
+            results.append(dict(path=raw.decode('ascii'),cluster=cluster,error=error))
+        cd('/ALMAZ/MXOS',3)
+        m[0x7100:0x710B]=b'FILE    BIN'
+        result=run(m,'bios_fileLoad2',hl=0x7100,de=0x6000)
+        assert not result['carry'] and m[0x6000:0x6005]==b'HELLO',result
+        m[0x7100:0x7120]=entry(b'NEW     TXT',size=3);m[0x6000:0x6003]=b'NEW'
+        assert not run(m,'bios_fileCreate',hl=0x7100,de=0x6000)['carry']
+        assert m[1280+96:1280+107]==b'NEW     TXT'
+        assert not run(m,'bios_fileDelete',hl=0x7100)['carry']
+        assert m[1280+96]==0xE5
+        results.append(dict(fileReadCreateDelete=True))
+        cd('../STD',4);cd('./../MXOS/',3);cd('\\ALMAZ\\STD',4)
+        cd('../missing',error=sy['DOS_ERR_NOT_FOUND'])
+        cd('/ALMAZ/MXOS/FILE.BIN',error=sy['DOS_ERR_ACCESS'])
+        cd('/ALMAZ/TOOLONG99',error=sy['DOS_ERR_ARGUMENT'])
+        cd('/ALMAZ/*',error=sy['DOS_ERR_ARGUMENT'])
+        cd('/ALMAZ/A.B.C',error=sy['DOS_ERR_ARGUMENT'])
+        cd(bytes([65])*128,error=sy['DOS_ERR_ARGUMENT'])
+        cd('/',0);cd('..',0);cd('/ALMAZ/MXOS',3)
+        result=run(m,'bios_directory',a=1,de=2)
+        assert not result['carry'] and current()==2,result
+        result=run(m,'bios_directory',a=3,hl=0x6000,de=20)
+        assert not result['carry'] and result['de']==4,result
+        assert m[0x6000:0x600B]==b'.          ' and m[0x6020:0x602B]==b'MXOS       '
+        results.append(dict(directoryListIncludesDotsAndFolders=True))
+        m[256+5*2:258+5*2]=word(2)
+        for i in range(8):m[1792+i*32:1792+(i+1)*32]=entry(b'IGNORE  TXT',attr=8)
+        run(m,'resetSectorCache')
+        cd('MISSING',error=sy['DOS_ERR_CORRUPT'])
+        for sector,physical,spc in [(128,128,2),(256,256,4),(512,256,1)]:
+            m=fixture(sector,physical,spc);cd('/ALMAZ/MXOS',3)
+            m[0x7100:0x710B]=b'FILE    BIN'
+            result=run(m,'bios_fileLoad2',hl=0x7100,de=0x6000)
+            assert not result['carry'] and m[0x6000:0x6005]==b'HELLO',(sector,spc,result)
+            results.append(dict(sector=sector,physical=physical,clusterSectors=spc))
+        result=run(m,'bios_directory',a=2,hl=0xF000)
+        assert result['carry'] and result['error']==sy['DOS_ERR_ARGUMENT']
+        results.append(dict(invalidPathBufferRejected=True))
+        m=fixture();cd('/ALMAZ/MXOS',3)
+        m[544:576]=entry(b'ROOT    TXT')
+        m[0x7100:0x710C]=b'B:\\ROOT.TXT\0'
+        run(m,'resetSectorCache')
+        run(m,'bios_fileNamePrepare',hl=0x7100,de=0x7200)
+        assert m[0x7200:0x720B]==b'ROOT    TXT'
+        assert not run(m,'bios_fileLoadInfo',hl=0x7200)['carry']
+        assert current()==3
+        results.append(dict(explicitRootKeepsSavedCurrentDirectory=True))
+        m=fixture()
+        m[1792:1803]=b'COLLECT1MX2'
+        run(m,'resetSectorCache')
+        cd('B:/ALMAZ/COLLECT1.MX2',3)
+        cd('../COLLECTIONS',error=sy['DOS_ERR_ARGUMENT'])
+        m[0x7100:0x7180]=b'B:/ALMAZ/COLLECT1.MX2/FILE.BIN /Q\0'.ljust(128,b'\0')
+        r=run(m,'bios_fileNamePrepare',hl=0x7100,de=0x7200)
+        assert not r['carry'] and m[0x7200:0x720B]==b'FILE    BIN',r
+        assert not run(m,'bios_fileLoad2',hl=0x7200,de=0x6000)['carry']
+        assert m[0x6000:0x6005]==b'HELLO'
+        results.append(dict(fullFilePathAnd83Directory=True))
+        (OUT/'subdirectories.json').write_text(json.dumps(results,indent=2)+'\n',encoding='utf-8')
+        print('FAT SUBDIRECTORIES CPU PASS',len(results))
+        return
+    if args.directory_only:
+        results=[]
+        for sector,entries,slot in [(256,13,0),(256,13,7),(256,13,12),(128,13,3),(512,33,15),(512,33,32)]:
+            m=fresh(entries=entries,sector=sector,physical=min(sector,256))
+            root=int.from_bytes(m[sy['v_diskInfo.dirStartSector']:sy['v_diskInfo.dirStartSector']+2],'little')*sector
+            end=root+((entries*32+sector-1)//sector)*sector
+            for i in range(entries):m[root+i*32:root+(i+1)*32]=entry(f'F{i:07d}TXT'.encode())
+            m[root+slot*32]=0
+            after=bytes(m[root:end])
+            m[0x7000:0x7020]=entry(b'NEW     TXT')
+            result=run(m,'bios_fileCreate',hl=0x7000,de=0x6000)
+            assert not result['carry'],(slot,result)
+            assert m[root+slot*32:root+slot*32+11]==b'NEW     TXT'
+            if slot<entries-1:assert m[root+(slot+1)*32]==0,slot
+            else:assert m[root+entries*32:end]==after[entries*32:]
+            result=run(m,'bios_fileList',hl=0x6000,de=40)
+            assert not result['carry'],result
+            assert m[0x6000+(slot+1)*16]==0xFF,(slot,m[0x6000:0x6100].hex())
+            results.append(f'sector {sector}: new end marker at slot {slot}, root entries {entries}')
+        m=fresh();m[512:576]=entry(b'DELETED TXT')+entry(b'KEEP    TXT');m[512]=0xE5
+        m[0x7000:0x7020]=entry(b'NEW     TXT')
+        assert not run(m,'bios_fileCreate',hl=0x7000,de=0x6000)['carry']
+        assert m[544:555]==b'KEEP    TXT'
+        results.append('reusing E5 preserves subsequent live entries')
+        m=fresh()
+        for i in range(7):m[512+i*32:544+i*32]=entry(f'F{i:07d}TXT'.encode())
+        m[768:800]=entry(b'GARBAGE TXT');m[0x7000:0x7020]=entry(b'NEW     TXT')
+        m[0x8600:0x8602]=bytes((2,3))
+        result=run(m,'bios_fileCreate',hl=0x7000,de=0x6000)
+        assert result['carry'] and result['error']==sy['DOS_ERR_IO'],result
+        assert m[512+7*32]==0
+        results.append('next-sector read failure does not publish a new entry')
+        for operation in ('bios_fileLoadInfo','bios_fileDelete','bios_fileCreate'):
+            m=fresh();m[512:544]=entry(b'INVALID TXT');m[532:534]=word(1)
+            m[0x7000:0x7020]=entry(b'INVALID TXT')
+            disk=bytes(m[:8192])
+            result=run(m,operation,hl=0x7000,de=0x6000)
+            assert result['carry'] and result['error']==sy['DOS_ERR_CORRUPT'],(operation,result)
+            assert bytes(m[:8192])==disk,operation
+            results.append(f'{operation} rejects nonzero FAT16 FstClusHI without modifying disk')
+        (OUT/'directory.json').write_text(json.dumps(results,indent=2)+'\n',encoding='utf-8')
+        print('FAT DIRECTORY CPU PASS',len(results))
+        return
+    if args.mount_only:
+        results=[]
+        def mount_case(name, m, error=0):
+            disk=bytes(m[:8192])
+            result=run(m,'fatReadBootSector')
+            assert result['carry']==bool(error),(name,result)
+            assert m[sy['v_diskInfo.isValid']]==(sy['DISK_INVALID'] if error else sy['DISK_VALID']),(name,result)
+            if error:assert result['error']==error,(name,result)
+            assert bytes(m[:8192])==disk,name
+            results.append(dict(name=name,error=error))
+        for physical,sector in [(128,128),(128,256),(256,256),(128,512),(256,512),(512,512)]:
+            for fats in (1,2):
+                m=fresh(sector=sector,physical=physical,fats=fats)
+                mount_case(f'geometry {physical}/{sector}, FATs={fats}',m)
+        for flags in (0x3FFF,0x7FFF,0xBFFF,0xFFFF):
+            m=fresh(sector=512);m[514:516]=word(flags)
+            mount_case(f'FAT16 clean/error flags {flags:04X}',m)
+        for media in (0xF0,*range(0xF8,0x100)):
+            m=fresh();m[21]=m[256]=media
+            mount_case(f'media {media:02X}',m)
+        for media in (0,0xEF,0xF1,0xF7):
+            m=fresh();m[21]=m[256]=media
+            mount_case(f'invalid media {media:02X}',m,sy['DOS_ERR_UNSUPPORTED'])
+        for offset,value in [(256,0xF0),(257,0),(258,0xFE),(259,0xFC),(259,0xFF&~0x20)]:
+            m=fresh();m[offset]=value
+            mount_case(f'corrupt FAT header {offset}/{value:02X}',m,sy['DOS_ERR_CORRUPT'])
+        for count in (4084,4085):
+            m=fresh(sector=512);m[19:21]=word(count+22)
+            mount_case(f'cluster count {count}',m,sy['DOS_ERR_UNSUPPORTED'] if count<4085 else 0)
+        for offset,data in [(510,word(0)),(22,word(1)),(14,word(0xFFFF)),(16,bytes([0])),(19,word(5001))]:
+            m=fresh(sector=512);m[offset:offset+len(data)]=data
+            mount_case(f'invalid BPB {offset}/{data.hex()}',m,sy['DOS_ERR_UNSUPPORTED'])
+        m=fresh();m[19:21]=word(0);m[32:36]=struct.pack('<I',64)
+        mount_case('TotSec32 within 16-bit LBA',m)
+        m=fresh();m[19:21]=word(0);m[32:36]=struct.pack('<I',0x10000)
+        mount_case('TotSec32 exceeds supported LBA',m,sy['DOS_ERR_UNSUPPORTED'])
+        m=fresh();m[14:16]=word(3);m[3*256:3*256+4]=bytes.fromhex('F8 FF FF FF')
+        mount_case('reserved area contains three sectors',m)
+        m=fresh();m[0x8600:0x8602]=bytes((2,1))
+        mount_case('first FAT read failure',m,sy['DOS_ERR_IO'])
+        (OUT/'mount.json').write_text(json.dumps(results,indent=2)+'\n',encoding='utf-8')
+        print('FAT MOUNT CPU PASS',len(results))
+        return
     if args.timings:
         times={}
         m=fresh(entries=64)

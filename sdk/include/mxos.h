@@ -10,9 +10,25 @@ typedef struct {
 typedef struct { mxos_u8 bytes[32]; } MXOS_DESCRIPTOR;
 typedef struct { mxos_u8 bytes[16]; } MXOS_FILE_INFO;
 typedef struct { mxos_u8 bytes[48]; } MXOS_DISK_INFO;
-typedef struct { mxos_u8 bytes[80]; } MXOS_COPY_REQUEST;
+typedef struct { mxos_u8 bytes[86]; } MXOS_COPY_REQUEST;
+#define MXOS_MAX_PATH 128
+#define MXOS_COPY_REPLY_NO 0
+#define MXOS_COPY_REPLY_YES 1
+#define MXOS_COPY_REPLY_YES_ALL 2
+#define MXOS_COPY_REPLY_NO_ALL 3
+#define MXOS_CLI_OBSERVER 9
+#define MXOS_RAMD_DRIVER_RESTORE 0
+#define MXOS_RAMD_DRIVER_BYTE 1
+#define MXOS_RAMD_DRIVER_REGISTER 2
+#define MXOS_RAMD_DRIVER_BLOCK 3
+#define MXOS_RAMD_DRIVER_USER 4
+typedef struct { char bytes[MXOS_MAX_PATH]; } MXOS_PATH;
 
 #define MXOS_CF 0x0001
+#define MXOS_BIOS_DIRECTORY 0xC8DE
+#define MXOS_BIOS_CLI 0xC8E1
+#define MXOS_BIOS_SHELL 0xC8E4
+#define MXOS_BIOS_INPUT_HOOK 0xC8E7
 #define MXOS_ZF 0x0040
 #define MXOS_BIOS_MEMCPY 0xC42D
 #define MXOS_BIOS_GETCH 0xC803
@@ -37,6 +53,7 @@ typedef struct { mxos_u8 bytes[80]; } MXOS_COPY_REQUEST;
 #define MXOS_BIOS_FILE_NAME 0xC85A
 #define MXOS_BIOS_FILE_LOAD 0xC866
 #define MXOS_BIOS_DISK_DRIVER 0xC863
+#define MXOS_BIOS_RAMD_DRIVER 0xC86F
 #define MXOS_BIOS_PRINT_DEC 0xC86C
 #define MXOS_BIOS_UPPER 0xC875
 #define MXOS_BIOS_STRCMP 0xC878
@@ -85,6 +102,14 @@ mxos_u16 mxos_timer_read(void);
 /* Дескриптор/имена здесь уже в формате FAT 8.3; числовой код DOS — результат. */
 mxos_u8 mxos_drive_select(mxos_u8 drive);
 mxos_u8 mxos_volume_flush(void);
+/* CHDIR принимает полный буфер MXOS_MAX_PATH; диск выбирается отдельно. */
+mxos_u8 mxos_directory_get(mxos_u16 *cluster);
+mxos_u8 mxos_directory_set(mxos_u16 cluster);
+mxos_u8 mxos_getcwd(char path[MXOS_MAX_PATH]);
+mxos_u8 mxos_chdir(const char path[MXOS_MAX_PATH]);
+mxos_u8 mxos_mkdir(const char path[MXOS_MAX_PATH]);
+mxos_u8 mxos_rmdir(const char path[MXOS_MAX_PATH]);
+mxos_u8 mxos_directory_list(MXOS_FILE_INFO *buffer, mxos_u16 capacity, mxos_u16 start, mxos_u16 *total);
 mxos_u8 mxos_last_error(void);
 const MXOS_DISK_INFO *mxos_disk_info(mxos_u16 *physical_blocks);
 mxos_u8 mxos_file_list(MXOS_FILE_INFO *buffer, mxos_u16 capacity, mxos_u16 start, mxos_u16 *total);
@@ -94,6 +119,10 @@ mxos_u8 mxos_file_save(void *descriptor, const void *buffer);
 mxos_u8 mxos_file_delete(const void *name83);
 mxos_u8 mxos_file_rename(const void *old83, const void *new83);
 mxos_u8 mxos_file_copy(void *request);
+mxos_u8 mxos_file_move(void *request);
+/* Имя FAT 8.3; DIR сохраняется, изменяемые биты: R=1,H=2,S=4,A=32. */
+mxos_u8 mxos_file_getattr(const void *name83, mxos_u8 *attributes);
+mxos_u8 mxos_file_setattr(const void *name83, mxos_u8 attributes);
 mxos_u8 mxos_sector_io(mxos_u8 operation, mxos_u16 sector, void *buffer);
 void mxos_ui_draw(const void *objects, mxos_u8 x_offset);
 void mxos_ui_inverse(void *screen, mxos_u8 width, mxos_u8 height);

@@ -30,7 +30,6 @@ moduleImports:
             DW fileOpError
             DW fileOpRange
             DW fileSelectDrive
-            DW fileStream
             DW flushVolume
             DW markDirSectorAsModified
             DW memcpy_bc_hl
@@ -48,4 +47,24 @@ moduleImports:
             DW v_drive
             DW v_streamOffset
             DW v_tmpFileDescr
+            DW v_directory
+            DW fatDirStart
+            DW fatDirItem
+            DW fileFindAny
+            DW selectDirectory
+            DW directoryPathUnchecked
+            DW fatDirNext
+            DW fatDirPrepareEntry
+            DW deleteFileInt
+            DW fatFileRename
+            DW v_cachedDescrPtr
+            DW fileRename
+            DW v_directories
+            DW v_cliPath
+            DW fatEncodeName
+            DW fileLoadExit
+            DW v_dirCluster
+            DW fatDirClusterStart
+            DW fatClusterToSector
+            DW getSectorAddressInCache
 moduleImportsEnd:

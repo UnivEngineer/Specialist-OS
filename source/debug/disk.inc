@@ -98,6 +98,7 @@ Dir_B:  ; адрес начала - в дескриптор
 
         ; запрос именя файла
         CALL  EnterFileName
+        RET   C
 
         ; DE — буфер, адрес не записывается в FAT.
         PUSH HL
@@ -142,6 +143,7 @@ Dir_V:  ; запоминаем первый параметр директивы 
 
         ; запрос имени файла
         CALL  EnterFileName
+        RET   C
 
         ; вытаскиваем первый параметр директивы из стеке
         POP   DE
@@ -181,6 +183,7 @@ Dir_V:  ; запоминаем первый параметр директивы 
 
 Dir_U:
         CALL EnterFileName
+        RET   C
         CALL bios_imageOpen
         RET C
         PUSH DE
@@ -201,6 +204,7 @@ Dir_U:
 
 Dir_Y:  PUSH  HL
         CALL  EnterFileName         ; ввод имени файла
+        RET   C
         LD    C,01H                 ; режим для фаункции bios_fileGetSetAttr - установка байта атрибутов файла
         EX    (SP),HL
         LD    B,L
@@ -215,6 +219,7 @@ Dir_Y:  PUSH  HL
 
 Dir_Q:
         CALL  EnterFileName         ; ввод имени файла
+        RET   C
         LD    C,02H                 ; режим для фаункции bios_fileGetSetAttr - чтение байта атрибутов файла
         CALL  bios_fileGetSetAttr   ; чтение байта атрибутов файла
         PUSH  AF                    ; результат и флаг ошибки (cf) - в стек

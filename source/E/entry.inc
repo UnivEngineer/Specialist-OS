@@ -94,7 +94,24 @@ editorLimitReady:
         JP    C,startupBannerAndLineBuffer
         EX    DE,HL
         LD    DE,fileDescName
+        PUSH  HL
         CALL  bios_fileNamePrepare
+        POP   HL
+        JP    C,startupBannerAndLineBuffer
+        LD    DE,FILE_NAME_HISTORY
+        LD    B,MAX_PATH-1
+editorRememberPath:
+        LD    A,(HL)
+        CP    021h
+        JP    C,editorPathEnd
+        LD    (DE),A
+        INC   HL
+        INC   DE
+        DEC   B
+        JP    NZ,editorRememberPath
+editorPathEnd:
+        XOR   A
+        LD    (DE),A
         LD    HL,fileDescName
         CALL  bios_fileLoadInfo
         JP    C,startupBannerAndLineBuffer

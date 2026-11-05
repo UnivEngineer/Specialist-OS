@@ -11,7 +11,35 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-fileExec:   ; Сюда будем записывать результат
+fileExec:
+            ld a,(v_shell)
+            or a
+            jp nz,fileExecKeepShellDrive
+            ld a,(v_drive)
+            ld (v_shellDrive),a
+fileExecKeepShellDrive:
+            ; Встроенные команды доступны и вызывающему CLI/BAT через DOS.
+            ld a,(v_dosModuleReady)
+            or a
+            jp nz,fileExecModuleReady
+            push hl
+            call loadDosModule
+            pop hl
+            jp c,fileExecExternal
+fileExecModuleReady:
+            push hl
+            call directoryCommand
+            pop hl
+            ret c
+            cp 0FFh
+            jp nz,fileExecBuiltinDone
+            call cliResolveExternal
+            jp c,badCommand
+            jp fileExecExternal
+fileExecBuiltinDone:
+            or a
+            ret
+fileExecExternal:   ; Сюда будем записывать результат
             ld      de, CMD_LINE
             
             ; Если первый символ меньше пробела, выходим c CF
@@ -43,17 +71,23 @@ fileExec_1: ; В конец имени помещаем 13, 0
             xor     a
             ld      (de), a
 
-            ; Выводим на экран 0Ah
-            call    printCharA
+            ; В CLI команда уже напечатана редактором, повтор не нужен.
+            ld a,(v_shell)
+            or a
+            jp nz,fileExecPrepare
+            ; Выводим команду при запуске из панели и при автозагрузке.
+            call printCharA
 
             ; Выводим на экран имя файла
             ld      hl, CMD_LINE
             call    j_printString
 
+fileExecPrepare:
             ; Подготовка имени файла
             ld      hl, CMD_LINE
             ld      de, v_curFileDescr
             call    fileNamePrepare
+            jp c,badCommand
 
             ; Запоминаем в стеке текущий адрес командной строки (начало списка аргументов)
             push    hl
@@ -73,6 +107,8 @@ fileExec_1: ; В конец имени помещаем 13, 0
             push af
             xor a
             call fileSelectDrive
+            ld hl,0
+            ld (v_directory),hl
             jp execImageOpen
 
 execExplicitName:
@@ -81,9 +117,12 @@ execExplicitName:
             call    cmpFileExt
             jp z,   execBat
 
-            ; EXE/RKS выбирает NC.EXT; DOS непосредственно исполняет только COM.
-            call    cmpFileExt
-            jp nz,  execError
+            ; COM/EXE используют один контейнер и общий цикл загрузки.
+            ; Ассоциация CLI.EXT уже проверена до этого места и имеет приоритет.
+            call cmpFileExt
+            jp z,execExeCom
+            call cmpFileExt
+            jp nz,execError
 execExeCom:
             ld a,(v_drive)
             push af
@@ -178,11 +217,16 @@ defAppReturn:
 execError:
             pop     de
 badCommand:
-            ld      hl, txtBadCommand; "\nBAD COMMAND or FILE NAME"
+            ld      hl, txtBadCommand
             call    j_printString
+            ld a,(v_shell)
+            or a
+            jp nz,execCommandErrorDone
             ld      a, (v_bootAutoexec)
             or      a
             call z, j_getch          ; при автозагрузке не задерживать fallback
+execCommandErrorDone:
+            call printCharA
 stc_ret:
             scf
             ret

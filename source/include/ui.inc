@@ -10,3 +10,11 @@
     MACRO G_VLINE A,X,Y,H
         DB A|3, Y, 90h+(X>>3), H, 80h>>(X&7)
     ENDM
+
+; Поле тулбара: ширина 1..4 экранных байта, ASCII-текст до нуля.
+; F=0 — клавиша, F=80h — инверсная подпись; сумма ширин строки — 48.
+    MACRO UI_TOOLBAR_FIELD W,F,TEXT
+        ASSERT W >= 1 && W <= 4
+        ASSERT F == 0 || F == 080h
+        DB W|F,TEXT,0
+    ENDM

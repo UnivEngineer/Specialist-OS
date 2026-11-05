@@ -5,27 +5,64 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-mainReload: ; Перерисовываем обе панели
+mainReload: ; Сначала обновляем приглашение активной панели.
+            call mainPrepareReload
+            ; Затем перерисовываем обе панели.
             ld      a, (state.activePanel)
             and     a
             jp      nz, mainReload_0
             call    loadAndPrintA
             call    loadAndPrintB
-            jp      mainDriveChanged
+            jp      mainPanelsReady
+
+; Смена контекста не затрагивает другую файловую панель.
+mainReloadActive:
+            call mainPrepareReload
+            ld a,(state.activePanel)
+            ld c,a
+            call loadAndPrintPanel
+            ld hl,state.panelB_info
+            ld a,(state.activePanel)
+            or a
+            jp z,mainOtherPanelInfo
+            dec hl
+mainOtherPanelInfo:
+            ld a,(hl)
+            or a
+            jp z,mainPanelsReady
+            ld a,(state.activePanel)
+            xor 1
+            ld c,a
+            call loadAndPrintPanel
+            jp mainPanelsReady
+mainPrepareReload:
+            ld hl,state.panelA_drive
+            call readBytePanel
+            ld e,1
+            call bios_fileSelectDrive
+            call restorePanelDirectory
+            call updateCommandPath
+            call redrawCommandLine
+            ret
 
 mainReload_0:
             call    loadAndPrintB
             call    loadAndPrintA
             
+mainPanelsReady:
+            xor a
+            ld (ncDirtyMask),a
+            ld (ncDamageMask),a
+            ld (ncSelectiveRefresh),a
+            ld (ncKeepFrames),a
+            ; Заголовки использовали path как временный буфер.
+            call updateCommandPath
+            jp mainSelectionChanged
 mainDriveChanged:
-            ; Вывод накопителя в ком строку
-            COLOR   COLOR_CMDLINE
-            ld      hl, 1F3h
-            ld      (bios_vars.cursorY), hl
-            ld      hl, state.panelA_drive
-            call    readBytePanel
-            call    printDrive
+            call    updateCommandPath
+            call    redrawCommandLine
 
+mainSelectionChanged:
             ; Вывод информации о файле
             call    printInfoLine
 
@@ -40,7 +77,7 @@ mainLoop_cursorReady:
 
             ; Ждем нажатия клавиши
             COLOR   COLOR_CMDLINE
-            call    bios_getch
+            call    ncReadKey
 
             ; Ввод команды не затрагивает инверсное выделение.
             ; При шаге за край окна старый курсор также можно сохранить.
@@ -92,6 +129,8 @@ mainLoop_keyKept:
             add     1Bh
             cp      7Fh   ; Del/ЗБ (7Fh)
             jp z,   but_Bkspc
+            cp      8Bh   ; F10 — самостоятельный CLI
+            jp z,   ncExitToCli
             cp      8Ah   ; F9 (8Ah)
             jp z,   mainLoop_editDone
 mainLoop_e: cp      20h   ; Пробел (20h)
@@ -100,20 +139,31 @@ mainLoop_e: cp      20h   ; Пробел (20h)
             ; Вывод символов в ком строку
             ld      hl, (vars.cmdLineEnd)
             ld      c, a
-            ld      (hl), a
 
             ; Если ком строка переполнена, выходим
             ld      a, vars.cmdLineCtrl & 0FFh
             cp      l
             jp z,   mainLoop_editDone
+            ld      (hl), c
 
             ; Увеличиваем длину
             inc     hl
             ld      (vars.cmdLineEnd), hl
+            ld      (hl), 0
 
             ; Выводим символ на экран
-            COLOR   COLOR_CMDLINE
+            ld      a, (vars.cmdCapacity)
+            ld      b, a
+            ld      a, l
+            sub     vars.cmdLine & 0FFh
+            cp      b
+            jp c,   mainLoop_appendChar
+            jp z,   mainLoop_appendChar
+            call    redrawCommandText
+            jp      mainLoop_editDone
+mainLoop_appendChar:
             call    bios_printChar
+            jp      mainLoop_savePos
 
 mainLoop_savePos: ; ?
             ld      hl, (bios_vars.cursorY)
@@ -132,13 +182,16 @@ but_Bkspc:  ; Если ком строка пустая, выходим
             ; Удаляем один символ
             dec     hl
             ld      (vars.cmdLineEnd), hl
-            
-            ; Стираем символ на экране
-            COLOR   070h
+            ld      (hl), 0
+            ld      a, (vars.cmdOffset)
+            or      a
+            jp z,   mainLoop_eraseChar
+            call    redrawCommandText
+            jp      mainLoop_editDone
+mainLoop_eraseChar:
             ld      hl, asc_DC17
             call    bios_printString
-
-            jp    mainLoop_savePos
+            jp      mainLoop_savePos
 
 ; ---------------------------------------------------------------------------
 
@@ -164,3 +217,18 @@ ctrlEnter:  ; Если файл не выбран, выход
 
 
 mainLoop_editDone EQU mainLoop_cursorReady
+
+; F10 завершает панельную оболочку, сохраняя её контексты.
+ncExitToCli:
+            call ncStopObserver
+            call saveState
+            ld hl,state.panelA_drive
+            call readBytePanel
+            call bios_fileSelectDrive
+            call restorePanelDirectory
+            ld a,1
+            call bios_setShell
+            COLOR COLOR_CMDSCREEN
+            ld c,01Fh
+            call bios_printChar
+            jp bios_reboot

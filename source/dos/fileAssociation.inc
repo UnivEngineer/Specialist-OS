@@ -1,4 +1,4 @@
-; Поиск ассоциации в системном A:NC.EXT, независимо от NC/CLI.
+; Поиск ассоциации в системном A:CLI.EXT, независимо от NC/CLI.
 ; HL = три байта расширения, DE = временный буфер, BC = его ёмкость.
 ; Буфер выровнен на 256 байт, ёмкость кратна 256, диапазон внутри ОЗУ;
 ; он не пересекается с кодом вызывающего, расширением, стеком и DOS.
@@ -11,7 +11,7 @@ fileAssociation:
             push    hl
             push    de
             push    bc
-            ld      hl, pathNcExt
+            ld      hl, pathCliExt
             ld      de, v_tmpFileDescr
             call    fileNamePrepare
             ld      hl, v_tmpFileDescr
@@ -49,6 +49,12 @@ fa_Terminate:
             ld      (hl), 0FFh
             pop     hl              ; расширение
 fa_Search:
+            ; CLI.EXT допускает как прежний CR, так и текстовые строки CR/LF.
+            ld a,(de)
+            cp 00Ah
+            jp nz,fa_SearchLine
+            inc de
+fa_SearchLine:
             push    hl
             ld      c, 3
             call    stricmp
@@ -95,4 +101,4 @@ fa_Return:
             call    fileSelectDrive
             pop     af
             ret
-pathNcExt:  DB "A:NC.EXT",0
+pathCliExt:  DB "A:",05Ch,"CLI.EXT",0

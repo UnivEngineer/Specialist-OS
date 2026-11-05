@@ -26,14 +26,17 @@ def main():
         return bytearray(b[:65536])
     def memory(panel=0,first=0,selected=35):
         m=bytearray(65536);m[0xC000:0xC000+len(dos)]=dos;m[:len(nc)]=nc
-        module=(ROOT/'bin/DOSMOD.i80').read_bytes();m[0x8000:0x8000+len(module)]=module;m[ds['v_dosModuleReady']]=1
+        module=(ROOT/'bin/DOSMOD.i80').read_bytes();m[ds['DOS_MODULE_LOAD_ADDR']:ds['DOS_MODULE_LOAD_ADDR']+len(module)]=module;m[ds['v_dosModuleReady']]=1
         m[ns['FONT_ADDR']:ns['FONT_ADDR']+1280]=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes();m[0x8FE7:0x8FE9]=(ns['FONT_ADDR']//8).to_bytes(2,'little')
-        m[ns['state']+1]=panel;m[ns['state']+6+panel]=140;m[ns['state']+8+panel]=first;m[ns['state']+10+panel]=selected
+        m[ns['state']+1]=panel;m[ns['state.panelA_filesCnt']+panel]=140;m[ns['state']+8+panel]=first;m[ns['state']+10+panel]=selected
         m[ns['vars.cacheValidA']+panel]=1;m[ns['vars.cacheDriveA']+panel]=m[ns['state']+4+panel]
         base=ns['FILE_CACHE_B'] if panel else ns['FILE_CACHE_A']
         for i in range(140):m[base+i*16:base+(i+1)*16]=f'FILE{i:04}TXT'.encode()+bytes(5)
         m[base+140*16]=255;m[ns['vars.fileListPtr']:ns['vars.fileListPtr']+2]=(base+first*16).to_bytes(2,'little')
         m[ds['bios_fileGetSetDrive']]=0xC9
+        # Кэш изолирован от диска; контекст каталога уже задан фикстурой.
+        for entry in ['bios_fileSelectDrive', 'bios_directory']:
+            m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')
         # Считаем вызовы инверсии отдельно от окончательного вида пикселей.
         trace=bytes.fromhex('3A 10 65 3C 32 10 65 C3')+ms['uiInverseRect'].to_bytes(2,'little');m[0x6600:0x6600+len(trace)]=trace;m[ds['bios_uiInverseRect']:ds['bios_uiInverseRect']+3]=bytes.fromhex('C3 00 66')
         m=run(m,ns['printFilesUpDown'],bc=ns['FILE_LIST_SIZE']<<8);m=run(m,ns['drawCursor']);m=run(m,ns['clearCmdLine']);m[0x6510]=0

@@ -146,7 +146,7 @@ romMXReadLoop:
 ramDRead:
             call    ramDValidate
             jp c,   popDBHA_error
-            call    ramDByteRead
+            call    ramDReadSector
             jp      popDBHA_success
 
 ;----------------------------------------------------------------------------
@@ -159,7 +159,7 @@ diskDriver_w:
             call    ramDValidate
             jp c,   diskWriteFailed
 
-            call    ramDByteWrite
+            call    ramDWriteSector
             ; bios_RAMDWrite возвращает основную страницу перед RET.
 
 popDBHA_success:

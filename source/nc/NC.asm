@@ -6,6 +6,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/ui.inc"
 
     ORG NC_LOAD_ADDR
 
@@ -114,6 +115,8 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
     INCLUDE "main.inc"
     INCLUDE "selFileToCmdLine.inc"
     INCLUDE "butF4.inc"
+    INCLUDE "directories.inc"
+    INCLUDE "dirty.inc"
     INCLUDE "butEnter.inc"
     INCLUDE "saveLoadState.inc"
     INCLUDE "drawWindow.inc"
@@ -124,6 +127,8 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
     INCLUDE "butF6.inc"
     INCLUDE "butF5.inc"
     INCLUDE "copyFileInt.inc"
+    INCLUDE "overwrite.inc"
+    INCLUDE "../include/errors.inc"
     INCLUDE "printInvSelFile.inc"
     INCLUDE "butF8.inc"
     INCLUDE "butF2.inc"
@@ -153,6 +158,7 @@ inverseRect = bios_uiInverseRect
 
     INCLUDE "compactName.inc"
     INCLUDE "input.inc"
+    INCLUDE "shift.inc"
     INCLUDE "colors.inc"
 
 moduleLoadError:
@@ -166,13 +172,59 @@ moduleLoadErrorText: DB "DOSMOD.COM LOAD ERROR",0Dh,0
 ; Константы и переменные
 ;---------------------------------------------------------------------------
 
-aF1LeftF2RighF3:    DB "F1 Left F2 Rght F3 Info F4 Edit F5 Copy F6 Ren  F7 MkDr F8 Del",0
+aF1LeftF2RighF3:
+        UI_TOOLBAR_FIELD 2,0,"F1"
+        UI_TOOLBAR_FIELD 4,080h,"Left"
+        UI_TOOLBAR_FIELD 2,0,"F2"
+        UI_TOOLBAR_FIELD 4,080h,"Rght"
+        UI_TOOLBAR_FIELD 2,0,"F3"
+        UI_TOOLBAR_FIELD 4,080h,"Info"
+        UI_TOOLBAR_FIELD 2,0,"F4"
+        UI_TOOLBAR_FIELD 4,080h,"Edit"
+        UI_TOOLBAR_FIELD 2,0,"F5"
+        UI_TOOLBAR_FIELD 4,080h,"Copy"
+        UI_TOOLBAR_FIELD 2,0,"F6"
+        UI_TOOLBAR_FIELD 4,080h,"Move"
+        UI_TOOLBAR_FIELD 2,0,"F7"
+        UI_TOOLBAR_FIELD 4,080h,"MkDr"
+        UI_TOOLBAR_FIELD 2,0,"F8"
+        UI_TOOLBAR_FIELD 4,080h,"Del"
+        DB 0
+aShiftToolbar:
+        UI_TOOLBAR_FIELD 2,0,"F1"
+        UI_TOOLBAR_FIELD 4,080h,"TpLd"
+        UI_TOOLBAR_FIELD 2,0,"F2"
+        UI_TOOLBAR_FIELD 4,080h,"TpSv"
+        UI_TOOLBAR_FIELD 2,0,"F3"
+        UI_TOOLBAR_FIELD 4,080h,"Info"
+        UI_TOOLBAR_FIELD 2,0,"F4"
+        UI_TOOLBAR_FIELD 4,080h,"New"
+        UI_TOOLBAR_FIELD 2,0,"F5"
+        UI_TOOLBAR_FIELD 4,080h,"Copy"
+        UI_TOOLBAR_FIELD 2,0,"F6"
+        UI_TOOLBAR_FIELD 4,080h,"Ren"
+        UI_TOOLBAR_FIELD 2,0,"F7"
+        UI_TOOLBAR_FIELD 3,080h,"MD"
+        UI_TOOLBAR_FIELD 3,0,"F10"
+        UI_TOOLBAR_FIELD 4,080h,"Exit"
+        DB 0
 aCommanderVer:      DB "Commander version 2.0",0
 aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
 aFileProtected:     DB "System or read-only file",0
 aChooseDrive:       DB "Choose drive:",0
 aDeleteFrom:        DB "Delete from ",0
 asc_DC17:           DB 8, ' ',8, 0
+
+; Маркер пропущенных каталогов в заголовках и статусе, только для отображения.
+; Например, '...' можно заменить на ' '. Длины вычисляются при сборке.
+compactPathPrefix: DB ':',05Ch
+pathOmissionMark:   DB '...'
+PATH_OMISSION_LENGTH EQU $ - pathOmissionMark
+                   DB 05Ch
+PATH_PREFIX_LENGTH EQU $ - compactPathPrefix
+PATH_RESERVED_LENGTH EQU 1 + PATH_PREFIX_LENGTH ; Ещё один знак — буква диска.
+    ASSERT PATH_RESERVED_LENGTH + 12 <= 23     ; Полное имя FAT 8.3 в статусе.
+
 aCopyFromTo:        DB "Copy from    to",8,8,8,8,8, 0
 aCopyFailed:        DB "Copy failed",0
 aFileAlreadyExists: DB "File already exists",0
@@ -196,25 +248,21 @@ aDriverUnknown:     DB "n/a",0,0
 aDrive:             DB "Drive ",0
 aNotFormatted:      DB 18h,"is not formatted",0
 
-    IF FULL_PANELS==0
-aNameName:          DB "Name",0
-    ENDIF
 
-aEditor:            DB "A:E.COM",0Dh      ; терминатором тут должно быть 0Dh
+aEditor:            DB "A:",05Ch,"E.COM",0Dh      ; терминатором тут должно быть 0Dh
 
 ;-----------------------------------------------------------------------
 ; Описания окон
 
-    INCLUDE "../include/ui.inc"
 
 g_filePanel:
-            G_WINDOW 0, 0, 0, 192, 230        ; 2, 0, 90h, 0E0h, 16h
+            G_WINDOW 0, 0, 4, 192, 226        ; 2, 0, 90h, 0E0h, 16h
             G_LINE   0, 4, 208, 184           ; 1, 0D0h, 90h, 16h, 0Fh, 0F0h
-            G_VLINE  0, 96, 3, 205            ; 3, ?, 9Ch, 0CDh, 80h
+            G_VLINE  0, 96, 7, 201            ; 3, ?, 9Ch, 0CDh, 80h
             DB 0
 
 g_infoPanel:
-            G_WINDOW 0, 0, 0, 192, 230        ; 2, 0, 90h, 0E0h, 16h
+            G_WINDOW 0, 0, 4, 192, 226        ; 2, 0, 90h, 0E0h, 16h
             G_LINE   0, 4, 31, 184            ; 1, 1Fh, 90h, 16h, 0Fh, 0F0h
             G_LINE   0, 4, 136, 184           ; 1, 70h, 90h, 16h, 0Fh, 0F0h
             DB 0
@@ -240,16 +288,12 @@ g_window2:
     IF FULL_PANELS
 FILE_LIST_SIZE    = 40
     ELSE
-FILE_LIST_SIZE    = 36
+FILE_LIST_SIZE    = 38
     ENDIF
 
 ;-----------------------------------------------------------------------
 ; Коодинаты элементов панелей от левого верхнего угла экрана
 ; x - удвоенные пиксели, y - пиксели
-
-P_NAME_X1         = 17  ; Заголовок панели "NAME" (2 колонки)
-P_NAME_X2         = 65
-P_NAME_Y          = 16
 
 P_FILE_LIST_X1    = 6   ; Файловая таблица (2 колонки)
 P_FILE_LIST_X2    = 54
@@ -257,7 +301,7 @@ P_FILE_LIST_X2    = 54
     IF FULL_PANELS
 P_FILE_LIST_Y     = 12
     ELSE
-P_FILE_LIST_Y     = 32
+P_FILE_LIST_Y     = 22
     ENDIF
 
 P_FILE_LIST_H     = FILE_LIST_SIZE / 2  ; Высота файловой таблицы в строках
@@ -265,9 +309,9 @@ P_FILE_LIST_Y_MAX = P_FILE_LIST_H * 10 + P_FILE_LIST_Y
 
 P_DRIVE_LETTER_X  = 9   ; Буква имени диска внизу панели
 P_DRIVE_LETTER_Y  = 222
-P_FILE_NAME_X     = 15  ; Имя файла внизу панели
+P_FILE_NAME_X     = 3  ; Имя файла внизу панели
 P_FILE_NAME_Y     = 222
-P_FILE_DATA_X     = 57  ; Данные о файле (адрес загрузки, размер)
+P_FILE_DATA_X     = 75  ; Данные о файле (адрес загрузки, размер)
 P_FILE_DATA_Y     = 222
 
 P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла в символах
@@ -280,14 +324,14 @@ P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла �
 ; Сохраняется в неиспользуемом секторе нулевой страницs RAM-диска
 
     STRUCT NC_STATE
-initState           DB    5Ah   ; признак, что NC.COM уже запускался
+initState           DB    5Bh   ; признак, что NC.COM уже запускался
 activePanel         DB    0     ; номер активной панели
-panelA_info         DB    0     ; 1 = панель A в режиме информации
-panelB_info         DB    0     ; 1 = панель B в режиме информации
+panelA_dirLow       DB    0
+panelB_dirLow       DB    0
 panelA_drive        DB    0     ; номер диска панели A
 panelB_drive        DB    7     ; номер диска панели B
-panelA_filesCnt     DB    0     ; количество файлов на панели A
-panelB_filesCnt     DB    0     ; количество файлов на панели B
+panelA_dirHigh      DB    0
+panelB_dirHigh      DB    0
 panelA_firstFile    DB    0     ; c какого файла начинается панель A
 panelB_firstFile    DB    0     ; c какого файла начинается панель B
 panelA_curFile      DB    0     ; на каком файле курсор на панели A
@@ -301,6 +345,13 @@ stateEnd:           ; адрес конца блока переменных со
 ; генерируется, при первом запуске переменные могут содержать мусор)
 
     STRUCT NC_VARIABLES
+panelA_info     DB    0
+panelB_info     DB    0
+panelA_filesCnt DB    0
+panelB_filesCnt DB    0
+path           BLOCK MAX_PATH,0
+pathArg        BLOCK MAX_PATH,0
+displayPath    BLOCK MAX_PATH,0
 fileListPtr     DW    0         ; Видимое окно внутри кэша активной панели.
 cacheValidA     DB    0
 cacheValidB     DB    0
@@ -308,6 +359,9 @@ cacheDriveA     DB    0
 cacheDriveB     DB    0
 cmdLinePos      DW    0
 cmdLineEnd      DW    0
+cmdTextPos      DW    0         ; Начало видимой части команды после приглашения.
+cmdCapacity     DB    0         ; Число видимых символов команды.
+cmdOffset       DB    0         ; Смещение видимого окна в буфере команды.
 chooseDrive     DB    0
 copyRequest     FILE_COPY_REQUEST
 scrollCursorKept DB   0         ; Старый курсор остаётся на краю при шаге 1.
@@ -318,11 +372,15 @@ diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
 driveCount     DB    0         ; число установленных дисковых драйверов
 driveList      BLOCK 8, 0     ; номера дисков с установленным драйвером
 
-input           BLOCK P_INPUT_WIDTH + 2, 0FFh
+input           BLOCK MAX_PATH, 0
     ENDS
 
 vars    NC_VARIABLES = $        ; адрес начала блока переменнных
 varsEnd = vars + NC_VARIABLES
+state.panelA_info = vars.panelA_info
+state.panelB_info = vars.panelB_info
+state.panelA_filesCnt = vars.panelA_filesCnt
+state.panelB_filesCnt = vars.panelB_filesCnt
 vars.tempFileDescr = vars.copyRequest.destination
 
 ; Все рабочие буферы принадлежат NC и находятся после его кода.
@@ -334,7 +392,7 @@ FILE_CACHE_B          = FILE_CACHE_A + FILE_CACHE_BYTES
 
 ; Единая системная строка принадлежит DOS и не входит в область NC.
 vars.cmdLine = CMD_LINE
-vars.cmdLineCtrl = CMD_LINE + 59
+vars.cmdLineCtrl = CMD_LINE + 127
 NC_END = FILE_CACHE_B + FILE_CACHE_BYTES
 
 ;-----------------------------------------------------------------------

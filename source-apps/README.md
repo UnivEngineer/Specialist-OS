@@ -4,6 +4,7 @@
 
 - [Алмаз](almaz/README.md): точная реконструкция RKS для Intel 8080, управление и разбор исходных задержек.
 - [Алмаз-2](almaz2/README.md): восстановленный исходник Intel 8080, чёрно-белая и цветная графика, программный звук и ВИ53, ABI MXOS и Ramfos.
+- [LLM80](llm80/README.md): mockup инференса 8080: INT1–INT4, LUT/кэш, XOR/popcount, банковая память, KV/attention и чат. Задача `build: llm80` публикует `assets/programs/LLM80.cpu`.
 - [DISKBEN](diskbench/README.md): сравнение File access (создание настоящего TMP-файла через DOS) и Raw access (прямая запись его секторов), секторное чтение, ВИ53, строковый ввод BIOS, бюджет flash и отдельное измерение flush. Входит в `build: OS` и системный ROM.
 
 - [CHKDSK](chkdsk/README.md): проверка структуры диска и встроенных сумм файлов, без записи. Входит в системный ROM.

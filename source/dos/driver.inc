@@ -186,7 +186,7 @@ romMXReadLoop:
             jp      popDBHA_ret
 
 ramDRead:
-            call    ramDByteRead
+            call    ramDReadSector
 
             ; Восстановливаем регистры и выходим
             jp      popDBHA_ret
@@ -198,7 +198,7 @@ diskDriver_w:
             or      a           ; это ROM-диск?
             jp z,   popDBHA_ret ; да, запись не поддерживается
 
-            call    ramDByteWrite
+            call    ramDWriteSector
 
             ; Восстановливаем регистры и выходим
             jp      popDBHA_ret

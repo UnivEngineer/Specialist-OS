@@ -6,6 +6,10 @@
 
 Все манифесты `manifests/*.txt` используют один формат:
 
+Первый столбец теперь допускает путь из компонентов 8.3 с `/` или `\`. `nest-fat-image.py` строит цепочки подкаталогов и записи . / .., сохраняя уже выделенные цепочки файлов. Исходные файлы assets при этом не перемещаются. Общий путь ограничен MAX_PATH=128 с учётом начального разделителя и завершающего нуля. Тестовая коллекция находится в `manifests/H-Directories.txt`: Almaz/MXOS, Almaz/STD и Almaz/RAMFOS. Обычный H-Games2M пока остаётся плоским до добавления переходов в NC.
+
+Тестовая сборка: `powershell.exe -NoProfile -File scripts/images/build-image.ps1 Games2M -ManifestFile scripts/images/manifests/H-Directories.txt`. Она создаёт стандартные выходные chip-файлы и отдельный полный образ `bin/nested-Games2M.bin` для проверок. Повторная обычная сборка Games2M восстанавливает штатную коллекцию в chip-файлах. Параметр ManifestFile пока применяется только к Games2M. Независимый обход результата: `python scripts/tests/check-nested-image.py`; проверка файлов через DOS в собственном видимом Emu80: `python scripts/emu80/check-directories.py --runtime <свой runtime>`.
+
 ```text
 @label SYSTEM ROM
 
@@ -55,3 +59,5 @@ python -B scripts/images/check-system-rom.py --image images/SystemRom_emu80_writ
 Секторы пишутся непосредственно из подготовленных массивов; общий FFh-буфер дополняет только неполный хвост. В локальном замере 03.11.2026 медиана трёх запусков: Games2M — 0,86 с, SystemEmuWritable — 0,38 с, включая запуск PowerShell. Четыре чипа Games2M совпали с прежним сборщиком побайтно; системный образ совпал с вариантом на эталонном Python-конвертере при одинаковых входах. Проверена сборка при отсутствии Python в PATH.
 
 Проверки: `scripts/tests/check-executable-ps.py` сравнивает 204 случая конвертации с независимым эталоном, включая Unicode-пути, отдельный вход, предельные размеры и повреждённые контейнеры. Подробный локальный отчёт — docs/build/image-ps-001/.
+
+Тестовый H-Directories.txt теперь доступен через навигацию NC: Enter открывает каталог, `..` возвращает выше, CD/CHDIR работают из командной строки. Для повторного просмотра подготовленного отдельного тестового runtime можно запустить `powershell.exe -NoProfile -File scripts/emu80/run.ps1 -EmulatorDirectory .local/monitor2-001 -Flash -Mute`; без -ResetFlash этот запуск сохраняет его текущий H:. Штатные игровые манифесты пока остаются плоскими.

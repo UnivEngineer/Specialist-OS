@@ -1,4 +1,4 @@
-"""Четыре скорости встроенного Per-byte: файл 8 КиБ, три прохода DISKBEN."""
+"""Четыре скорости встроенного R3: файл 8 КиБ, три прохода DISKBEN."""
 import argparse
 import hashlib
 import json
@@ -13,7 +13,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime',type=Path,required=True)
     p.add_argument('--report-directory',type=Path,
-                   default=ROOT/'docs/diskbench/ramd-byte-001')
+                   default=ROOT/'docs/diskbench/ramd-r3-001')
     args=p.parse_args()
     assert args.runtime.name=='Emu80-flash-test'
     out=args.report_directory.resolve()
@@ -28,17 +28,17 @@ def main():
     context['RUNTIME']=args.runtime.resolve()
     matrix=Matrix()
     try:
-        matrix.start('ramd-per-byte')
+        matrix.start('ramd-r3')
         matrix.func(0xC860,af=0x0100,hl=matrix.ds['diskDriver'])
-        matrix.func(0xC86F,bc=0x0200,hl=matrix.ds['driverByteStart'])
+        matrix.func(0xC86F,bc=0x0200,hl=matrix.ds['driverBlockStart'])
         matrix.func(0xC86F,bc=0)
         matrix.select(1)
         state=matrix.func(0xC863,bc=0xFF00)
         assert not state['flags']['C']
         ptr=state['registers']['hl']['dec']
-        assert matrix.m.read(ptr,40).split(b'\0')[:2]==[b'RAMD',b'Per-byte']
+        assert matrix.m.read(ptr,40).split(b'\0')[:2]==[b'RAMD',b'R3']
         matrix.format_ram()  # Только тестовый B:, не пользовательский носитель.
-        matrix.writable(1,'RAMD',1,'Per-byte')
+        matrix.writable(1,'RAMD',1,'R3')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
         matrix.report['binaries']={f:hashlib.sha256((ROOT/'bin'/f).read_bytes()).hexdigest()
                                   for f in ['DOS.sys','DISKBEN.com','RAMD.com']}

@@ -163,6 +163,13 @@ frbs_Standard:
             call cmp_hl_de
             jp nz,frbs_Bad
 frbs_Geometry:
+            ; Media допускает F0h и F8h..FFh, остальные значения не FAT.
+            ld a,(FAT_CACHE_ADDR+21)
+            cp 0F0h
+            jp z,frbs_MediaReady
+            cp 0F8h
+            jp c,frbs_Bad
+frbs_MediaReady:
             ld a,(FAT_CACHE_ADDR+13)
             or a
             jp z,frbs_Bad
@@ -297,6 +304,33 @@ frbs_TypeReady:
             call memcpy_bc_hl
             xor a
             ld (v_diskInfo.volumeLabel+11),a
+            ; FAT[0] повторяет BPB_Media, FAT[1] резервирует нижние 14 бит.
+            ; Старшие два бита FAT[1] — clean/error flags, допустимы оба
+            ; состояния. Проверяем только заголовок, без обхода всего тома.
+            ld a,(FAT_CACHE_ADDR+21)
+            ld c,a
+            ld hl,(v_diskInfo.resSectors)
+            ex de,hl
+            ld hl,FAT_CACHE_ADDR
+            ld b,2
+            call logicalSectorIO
+            jp c,frbs_Io
+            ld a,(hl)
+            cp c
+            jp nz,frbs_Corrupt
+            inc hl
+            ld a,(hl)
+            cp 0FFh
+            jp nz,frbs_Corrupt
+            inc hl
+            ld a,(hl)
+            cp 0FFh
+            jp nz,frbs_Corrupt
+            inc hl
+            ld a,(hl)
+            or 0C0h
+            cp 0FFh
+            jp nz,frbs_Corrupt
             ld a,DISK_VALID
             ld (v_diskInfo.isValid),a
             xor a
@@ -308,6 +342,9 @@ frbs_Bad:
 frbs_NoDriver:
             ld a,DOS_ERR_NO_DRIVER
             call dosSetError
+            jp frbs_Exit
+frbs_Corrupt:
+            call dosCorrupt
             jp frbs_Exit
 frbs_Io:
             call dosIoError

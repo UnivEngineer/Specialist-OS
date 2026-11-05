@@ -50,21 +50,59 @@ flushVolume:
 ; HL = [диск:]имя, DE = буфер. Префикс диска принадлежит DOS,
 ; оставшуюся часть имени разбирает файловый драйвер выбранного тома.
 fileNamePrepare:
+            push bc
+            push de
+            call directoryDrive
+            jp c,volumePathReturn
             push hl
+            ld de,0
+            ld b,MAX_PATH
+volumePathScan:
+            ld a,(hl)
+            cp 021h
+            jp c,volumePathScanned
+            call directorySeparator
+            jp nz,volumePathNext
+            ld d,h
+            ld e,l
+volumePathNext:
             inc hl
-            ld a, (hl)
-            cp ':'
+            dec b
+            jp nz,volumePathScan
             pop hl
-            jp nz, volumeNameReady
-            ld a, (hl)
-            sub 'A'
-            call fileSelectDrive
+            call blockArgument
+            jp volumePathReturn
+volumePathScanned:
+            pop hl
+            ld a,d
+            or e
+            jp z,volumePathLeaf
+            ex de,hl
+            ld (v_pathEnd),hl
+            ex de,hl
+            ; Корневой разделитель тоже должен пройти через directoryParse.
+            call directoryParse
+            jp c,volumePathReturn
             inc hl
-            inc hl
-volumeNameReady:
+volumePathLeaf:
+            pop de
+            pop bc
+            call volumePrepareName
+            ; Исторический разбор короткого имени не задавал CF.
+            or a
+            ret
+volumePrepareName:
             push af
-            ld a, VOL_PREPARE_NAME
+            ld a,VOL_PREPARE_NAME
             jp volumeDispatch
+volumePathReturn:
+            pop de
+            pop bc
+            push af
+            ld a,0
+            ld (de),a
+            pop af
+            ret
 
 ; A = смещение обработчика, исходный AF уже лежит на стеке.
 ; 22 байта, 139 тактов до входа обработчика (плюс 28 у обёртки).

@@ -52,7 +52,7 @@ loadState:
             xor     a                   ; 0 страница ДОЗУ
             call    bios_RAMDRead
             ld      a, c                ; считанный байт в c
-            cp      5Ah
+            cp      5Bh
             ret nz                      ; метки нет - выходим с флагом nz
 
             ; Иначе загружаем состояние

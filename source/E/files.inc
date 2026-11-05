@@ -3,7 +3,7 @@
 
 ; Вход: прежнее имя в FILE_NAME_HISTORY. Выход: inputBuf с именем; Enter принимает его.
 ; СТР уходит в цикл редактора. Разрушает AF, BC, DE, HL, флаги.
-; Восстановление имени копирует 10 байт, сохранение после ввода — 16 байт.
+; Буфер и история имеют MAX_PATH байт, включая завершающий нуль.
 inputFileName:
         CALL  prepareFilePrompt
         LD    DE,FILE_NAME_RECALL_END
@@ -32,7 +32,7 @@ inputFileName:
         JP    fileNameInputKey
 
 finishFilePrompt: LD    HL,inputBuf
-        LD    DE,inputBufEnd
+        LD    DE,inputBuf+MAX_PATH
         LD    BC,FILE_NAME_HISTORY
         CALL  bios_memcpy_bc_hl
         LD    HL,0000H
@@ -44,6 +44,7 @@ finishFilePrompt: LD    HL,inputBuf
 
 openFile:
         CALL  prepareFileName
+        JP    C,fileOperationError
         LD    HL,fileDescName
         CALL  bios_fileLoadInfo
         JP    C,fileOperationError
@@ -74,6 +75,7 @@ prepareFileName:
 
 saveFile:
         CALL  prepareFileName
+        JP    C,fileOperationError
         LD    DE,0000H
         LD    B,00H
         LD    HL,(v_textBeginLo)
@@ -171,6 +173,7 @@ fileErrorBeepLoop: CALL  bios_beep_Old
 ; Проверка также не учитывает полносекторную запись fileLoad2.
 insertFile:
         CALL  prepareFileName
+        JP    C,fileOperationError
         LD    HL,fileDescName
 
         ; Запрашиваем дескриптор файла
@@ -247,8 +250,8 @@ fileDescCRC:    DB    20H       ; контрольная сумма
 
     ELSE
 
-inputBuf:       BLOCK 16, 00h
-inputBufEnd:    DB    00H,00H,00H
+inputBuf:       BLOCK MAX_PATH-1, 00h
+inputBufEnd:    DB    00H
 
 ; Дескриптор файла (запись в каталоге FAT16)
 fileDescName:   BLOCK 12, 20h   ; имя, расширение и атрибуты

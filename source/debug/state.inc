@@ -2,8 +2,9 @@
 ; Порядок включения задан главным .asm; см. README.md.
 
 ; Собственные переменные
-INPUT_BUF     = 07F60h
-INPUT_BUF_END = 07F6Dh
+INPUT_BUF     = APP_MEMORY_END - 0180h
+INPUT_BUF_END = INPUT_BUF + MAX_PATH - 1
+    ASSERT INPUT_BUF + MAX_PATH <= APP_MEMORY_END
 
     STRUCT MON2_VARS_1
 Directive:      DS    1
@@ -45,16 +46,17 @@ LegacyIoControl:         DS    1
     ORG   00000h
 
 ; Адреса блоков переменных
-vars1       MON2_VARS_1     = 07F80h
-vars2       MON2_VARS_2     = 07F50h
-v_fileDescr FILE_DESCRIPTOR = 07F00h
+vars1       MON2_VARS_1     = APP_MEMORY_END - 080h
+vars2       MON2_VARS_2     = APP_MEMORY_END - 0B0h
+v_fileDescr FILE_DESCRIPTOR = APP_MEMORY_END - 0100h
+    ASSERT INPUT_BUF + MAX_PATH <= v_fileDescr
 
 ; Буфер для листинга директории
 ; В новой карте памяти можно расположить его
 ; перед Монитором - там больше места
     IF  NEW_MEMORY_MAP
-v_fileInfo  FILE_INFO = 07000h
-DIR_BUFFER_SIZE = (07F00h - v_fileInfo) / FILE_INFO_SIZE - 1
+v_fileInfo  FILE_INFO = APP_MEMORY_END - 01000h
+DIR_BUFFER_SIZE = (INPUT_BUF - v_fileInfo) / FILE_INFO_SIZE - 1
     ELSE
 v_fileInfo  FILE_INFO = v_fileDescr + FILE_DESCRIPTOR_SIZE
 DIR_BUFFER_SIZE = (0FB00h - v_fileInfo) / FILE_INFO_SIZE - 1

@@ -863,7 +863,7 @@ inputBuffer:     BLOCK 17,0
 callerSP:        DW 0
 callerKoi:       DB 0
     INCLUDE "timer.inc"
-txtTitle:        DB 01Fh,"Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
+txtTitle:        DB "Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     IF PIT_HZ == 2000000
                  DB "2 MHz",00Ah,0
     ELSE
@@ -880,8 +880,8 @@ txtFileSize:     DB 00Ah,"File size (KiB):",009h,009h,0
 txtClusters:     DB 00Ah,"Clusters:   ",009h,009h,009h,0
 txtRegion:       DB 00Ah,"Sectors (hex): ",0
 txtDash:         DB "-",0
-txtError:        DB 00Ah,"I/O / FORMAT / FREE SPACE ERROR",0
-txtTimerError:   DB 00Ah,"PIT CLOCK STOPPED / INVALID",0
+txtError:        DB 00Ah,"I/O / format / free space error",0
+txtTimerError:   DB 00Ah,"PIT clock stopped / invalid",0
 txtDone:         DB 00Ah,"Press any key to exit",0
 txtRate:         DB " ms",009h,0
 txtUnits:        DB " kB/s",00Ah,0
@@ -910,16 +910,16 @@ txtUnknown:      DB "Unknown",0,0
 txtSkipped:      DB "skipped (read only / 0 passes)",00Ah,0
 
 txtFAT16:        DB "FAT16   "
-txtRead:         DB "READ:   ",009h,009h,0
-txtWriteRow:     DB "WRITE:  ",009h,009h,0
-txtReadLow:      DB "READ LOW:   ",009h,0
-txtReadHigh:     DB "READ HIGH:  ",009h,0
-txtWriteLow:     DB "WRITE LOW:  ",009h,0
-txtWriteHigh:    DB "WRITE HIGH: ",009h,0
-txtReadSeq:      DB 00Ah,"READ SEQ: ",0
-txtReadRnd:      DB "READ RND: ",0
-txtWriteSeq:     DB "WRITE SEQ: ",0
-txtWriteRnd:     DB "WRITE RND: ",0
+txtRead:         DB "Read:   ",009h,009h,0
+txtWriteRow:     DB "Write:  ",009h,009h,0
+txtReadLow:      DB "Read low:   ",009h,0
+txtReadHigh:     DB "Read high:  ",009h,0
+txtWriteLow:     DB "Write low:  ",009h,0
+txtWriteHigh:    DB "Write high: ",009h,0
+txtReadSeq:      DB 00Ah,"Read seq: ",0
+txtReadRnd:      DB "Read rnd: ",0
+txtWriteSeq:     DB "Write seq: ",0
+txtWriteRnd:     DB "Write rnd: ",0
 case_names:      DW txtRead,txtRead,txtWriteRow,txtWriteRow
                  DW txtReadLow,txtReadHigh,txtWriteLow,txtWriteHigh
                  DW txtReadSeq,txtReadRnd,txtWriteSeq,txtWriteRnd

@@ -90,11 +90,11 @@ fatCreateMetadataOk:
             ld      (v_newDescrPtr), hl
 
             ; Если файл существует, то удаляем его
-            call    fileFind
+            call    fileFindAny
             jp c,   fileCreate_noExisting
-            ; System защищает от удаления, но допускает изменение содержимого.
+            ; Каталог нельзя заменить файлом. System допускает изменение содержимого.
             ld      a, (v_tmpFileDescr + FILE_DESCRIPTOR.attrib)
-            and     001h
+            and     011h
             jp nz,  fileCreate_accessDenied
 
             ; При замене сохраняем атрибуты существующего файла.
@@ -129,8 +129,14 @@ fileCreate_dirLoop:
 fileCreate_dirEnd:
             or a
             jp nz,stc_popDBH_ret
+            ; Корень остаётся доступным без DOSMOD и никогда не расширяется.
+            ld hl,(v_directory)
+            ld a,h
+            or l
             ld a,DOS_ERR_DIR_FULL
-            call dosSetError
+            call z,dosSetError
+            call nz,directoryExtendGate
+            jp nc,fileCreate_placeFound
             jp popDBH_ret
 
 stc_popDBH_ret:
@@ -147,7 +153,8 @@ popDBH_ret: ; Восстановление регистров и выход
             ; Свободная запись найдена
 
 fileCreate_placeFound:
-
+            call fatDirPrepareEntry
+            jp c,popDBH_ret
             ; Сохраняем найденный в кэше адрес свободного дескриптора
             ld      (v_cachedDescrPtr), hl
 

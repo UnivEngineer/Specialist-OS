@@ -7,6 +7,13 @@
 ; При ошибке после создания удаляется незавершённое назначение.
 fileCopy:
             xor a
+            jp fileCopyMode
+fileCopyForMove:
+            ld a,1
+fileCopyMode:
+            ld (treeMoveMode),a
+fileCopyValidate:
+            xor a
             ld (v_dosError),a
             ld      bc, FILE_COPY_REQUEST
             call    fileOpRange
@@ -45,6 +52,12 @@ fc_BufferAfter:
             call    cmp_hl_de
             jp c,   fileOpError
 fc_RangeReady:
+            xor a
+            ld (copyAnswerAll),a
+            ld (treeHandled),a
+fc_FileRangeReady:
+            xor a
+            ld (copySkipped),a
             ld hl,0
             ld e,FILE_COPY_REQUEST.sourceOffset
             call fc_WriteWord
@@ -58,8 +71,12 @@ fc_RangeReady:
             jp c,   fc_Error
             ld      e, FILE_COPY_REQUEST.source
             call    fc_Address
-            call    fileLoadInfo
+            call    fileFindAny
             jp c,   fc_Error
+            call    fileLoadExit
+            ld      a,(v_tmpFileDescr+FILE_DESCRIPTOR.attrib)
+            and     010h
+            jp nz,  treeCopyStart
             ld      e, FILE_COPY_REQUEST.source + FILE_DESCRIPTOR.size + 3
             call    fc_Address
             ld      a, (hl)
@@ -85,6 +102,17 @@ fc_CountReady:
             call    fc_ReadWord
             ld      e, FILE_COPY_REQUEST.sourceCluster
             call    fc_WriteWord
+            ld      e, FILE_COPY_REQUEST.destinationDrive
+            call    fc_Select
+            jp c,   fc_Error
+            ld      e, FILE_COPY_REQUEST.destination
+            call    fc_Address
+            call    fileFindAny
+            jp nc,  fc_Exists
+            ld a,(v_dosError)
+            cp DOS_ERR_NOT_FOUND
+            jp nz,fc_Error
+fc_OverwriteReady:
             ; Копируем только метаданные, имя назначения оставляем прежним.
             ld      e, FILE_COPY_REQUEST.destination + FILE_DESCRIPTOR.attrib
             call    fc_Address
@@ -98,14 +126,8 @@ fc_CountReady:
             ex      de, hl
             pop     hl
             call    memcpy_bc_hl
-            ld      e, FILE_COPY_REQUEST.destinationDrive
-            call    fc_Select
-            jp c,   fc_Error
-            ld      e, FILE_COPY_REQUEST.destination
-            call    fc_Address
-            call    fileLoadInfo
-            jp nc,  fc_Exists
-            ; Даже то же имя/диск попадает в проверку существования выше.
+            ; Создание заменяет существующий файл только после разрешения.
+
             xor     a
             ld      (bios_vars.diskWriteErr), a
             ld      e, FILE_COPY_REQUEST.destination + FILE_DESCRIPTOR.firstCluster
@@ -119,6 +141,7 @@ fc_CountReady:
             ld      e, FILE_COPY_REQUEST.destination
             call    fc_Address
             pop     de
+            call cliChanged
             call    fileCreatePrepare
             jp nc,  fc_Prepared
             ld      e, FILE_COPY_REQUEST.destination + FILE_DESCRIPTOR.firstCluster
@@ -217,8 +240,19 @@ fc_Error:
             ld      a, FILE_OP_ERROR
             jp      fc_Return
 fc_Exists:
-            ld a,DOS_ERR_EXISTS
-            call dosSetError
+            call copyConfirm
+            jp c,fc_ExistsError
+            or a
+            jp nz,fc_OverwriteReady
+            inc a
+            ld (copySkipped),a
+            xor a
+            ld (v_dosError),a
+            jp fc_Return
+fc_ExistsError:
+            ld a,(v_dosError)
+            cp DOS_ERR_EXISTS
+            jp nz,fc_Error
             ld      a, FILE_OP_EXISTS
             scf
             jp      fc_Return
@@ -285,14 +319,21 @@ fc_OffsetWrite:
             or a
             ret
 fc_Select:
-            call    fc_Address
-            ld      a, (hl)
-            call    fileChangeDrive
+            push de
+            call fc_Address
+            ld a,(hl)
+            call fileChangeDrive
+            pop de
             ret c
-            ld      a, (v_diskInfo + DISK_INFO.isValid)
-            cp      DISK_VALID
-            ret z
-            scf
+            ; Диск и каталог — независимые части контекста копирования.
+            ld a,e
+            sub FILE_COPY_REQUEST.sourceDrive
+            add a,a
+            add a,FILE_COPY_REQUEST.sourceDirectory
+            ld e,a
+            call fc_ReadWord
+            ld (v_directory),hl
+            or a
             ret
 ; E=смещение поля запроса. AF/DE/HL разрушены, BC сохранён.
 ; 8080: Address 7 байт/43 такта; ReadWord 8 байт/94 такта;

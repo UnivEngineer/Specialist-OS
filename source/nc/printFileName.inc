@@ -42,7 +42,25 @@ printFileNamOnPanel:
         push    bc
         ld      bc, FILE_NAME_LENGTH << 8   ; b = длина имени, с = 0 (без терминатора)
         call    printString2
-        ld      c, 18h                      ; курсор вправо
+        push hl
+        inc hl
+        inc hl
+        inc hl
+        ld a,(hl)
+        and 010h
+        pop hl
+        ld c,18h
+        jp z,printFileGap
+        push hl
+        ld bc,-8
+        add hl,bc
+        ld a,(hl)
+        pop hl
+        ld c,18h
+        cp 05Ch
+        jp z,printFileGap
+        ld c,05Ch
+printFileGap:
         call    bios_printChar
         ld      bc, 3 << 8                  ; b = длина расширения, с = 0 (без терминатора)
         call    printString2

@@ -19,7 +19,7 @@ but_F8:     ; Рисуем окно
 loc_D54C:   ; Ждем нажатия Enter или ESC
             call        bios_keyScan
             cp          1Bh
-            jp z,       mainReload
+            jp z,       ncRefreshDirty
             cp          0Dh
             jp nz,      loc_D54C
 
@@ -29,19 +29,26 @@ loc_D595:   ; Удаляем текущий файл
             call        bios_fileSelectDrive
             jp c,       deleteFileError
             call        getSelectedFile
-            call        bios_fileDeleteOnDrive
+            push hl
+            ld de,FILE_INFO.attrib
+            add hl,de
+            ld a,(hl)
+            and 010h
+            pop hl
+            jp z,ncDeleteRegular
+            call buildSelectedFilePath
+            jp c,deleteFileError
+            ld a,CLI_OP_RMDIR
+            jp ncDeleteReady
+ncDeleteRegular:
+            ld a,CLI_OP_DELETE
+ncDeleteReady:
+            call bios_cli
             jp c,       deleteFileError
             ; Количество файлов и курсор обновляются по реальному каталогу.
-            jp          mainReload
+            jp          ncRefreshDirty
 
 deleteFileError:
-            call        getSelectedFile
-            ld          de, FILE_DESCRIPTOR.attrib
-            add         hl, de
-            ld          a, (hl)
-            and         005h
-            ld          hl, aDeleteFailed
-            jp z,       copyFileShowError
-            ld          hl, aFileProtected
-            jp          copyFileShowError
-
+            call bios_getError
+            call dosErrorText
+            jp copyFileShowError

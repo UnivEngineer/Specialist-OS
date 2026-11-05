@@ -8,6 +8,7 @@ v_cachedSector:     DW 0  ; Используется в findFile, createFile
 v_newDescrPtr:      DW 0  ; Адрес дескриптора созданного файла
 v_foundDescrPtr:    DW 0  ; Адрес дескриптора найденного файла
 v_batPtr:           DW 0
+v_batDirectory:     DW 0
 v_bootAutoexec:     DB 0  ; Адрес буфра, где находится содержимое BAT файла
 v_dirFirstFile      DW 0  ; Используется в fileList
 v_dirMaxFiles       DW 0  ; Используется в fileList
@@ -18,11 +19,11 @@ v_dirTotalFiles     DW 0  ; Используется в fileList
 ; В будущем может быть заменен на реальное время с RTC или таймера.
 v_fakeSystemTime:   DW 0
 
-pathFontFnt:        DB "A:FONTKOI.FNT",0
-pathNcCom:          DB "A:NC.COM",0
-pathAutoexecBat:    DB "A:AUTOEXEC.BAT",0
-pathFlashSysCom:    DB "A:FLASHSYS.COM",0
-pathFormatBat:      DB "A:FORMAT.BAT",0
+pathFontFnt:        DB "A:",05Ch,"FONTKOI.FNT",0
+pathNcCom:          DB "A:",05Ch,"NC.COM",0
+pathAutoexecBat:    DB "A:",05Ch,"AUTOEXEC.BAT",0
+pathFlashSysCom:    DB "A:",05Ch,"FLASHSYS.COM",0
+pathFormatBat:      DB "A:",05Ch,"FORMAT.BAT",0
 
     IF BOOT_FROM_TAPE
 aATape_com:         DB "A:TAPE.COM",0
@@ -32,7 +33,7 @@ txtLoadingFromTape: DB 0Ah,"LOADING FROM TAPE...",0
 txtBiosVer:         DB 0Ch,"MXOS2",0Ah,0
 txtRAM:             DB 0Ah,"RAM: ",0
 txtKB:              DB " KB",0Ah,0
-txtBadCommand:      DB 0Ah,"BAD COMMAND",0
+txtBadCommand:      DB "BAD COMMAND",0
 
 ; Имена BAT и команды живут отдельно, их метаданные нужны только до запуска.
 ; Хвосты 32-байтных дескрипторов перекрываются со следующими буферами.
@@ -50,3 +51,7 @@ v_tmpFileDescr      FILE_DESCRIPTOR ; Независимая копия найд
     IF NEW_MEMORY_MAP==0
         ASSERT_DONT_FIT 0D000h  ; с этого адреса начинается NC.COM
     ENDIF
+
+; PATH принадлежит окружению DOS и переживает перезагрузку оболочки.
+v_cliPath: DB "A:",05Ch,0
+           DS MAX_PATH-4,0

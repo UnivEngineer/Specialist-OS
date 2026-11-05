@@ -16,6 +16,7 @@
     ENDM
     ORG 0
 entry:
+    STORE_DE argumentPtr
     di
     ld hl,0
     add hl,sp
@@ -34,13 +35,11 @@ entry:
     call puts
     jp waitKey
 checkMemoryReady:
-    ld c,01Fh
-    call bios_printChar
     ld hl,txtTitle
     call puts
     ; MXOS передаёт адрес аргументов в DE, длина в BC не определена.
 readArgument:
-    ex de,hl
+    ld hl,(argumentPtr)
     call bios_argNext
     jp c,askDrive
     ld a,(de)
@@ -150,6 +149,8 @@ waitPrompt:
     call puts
 waitKey:
     call bios_getch
+    ld c,0Ah
+    call bios_printChar
     ld a,(callerKoi)
     ld (bios_vars.koi7),a
     ld hl,(callerSP)
@@ -303,6 +304,16 @@ invalid:
 ; Два прохода по корню. В phase=0 проверяются записи/цепочки,
 ; в phase=1 только контрольные суммы уже проверенных цепочек.
 directory:
+    xor a
+    ld (directoryDotMask),a
+    ld hl,directoryQueue
+    ld (queueRead),hl
+    ld (queueWrite),hl
+    ld hl,0
+    ld (currentDirectory),hl
+    ld (currentParent),hl
+    ld hl,names
+    ld (namesEnd),hl
     ld hl,(rootEntries)
     ld (dirEntriesLeft),hl
     ld hl,(dirStart)
@@ -321,7 +332,7 @@ nextEntry:
     ld hl,(dirEntriesLeft)
     ld a,h
     or l
-    ret z
+    jp z,directoryComplete
     dec hl
     ld (dirEntriesLeft),hl
     ld hl,(entryPtr)
@@ -331,7 +342,7 @@ nextEntry:
     cp 0E5h
     jp z,skipEntry
     or a
-    ret z
+    jp z,directoryComplete
     ld de,entryCopy
     ld b,32
 copyEntry:
@@ -354,6 +365,8 @@ entryFirstReady:
     jp z,regularFile
     cp 8
     jp z,skipEntry
+    cp 010h
+    jp z,subdirectoryEntry
     jp badEntry
 regularFile:
     ld a,(phase)
@@ -376,6 +389,10 @@ skipEntry:
     dec a
     ld (entriesLeft),a
     jp nz,nextEntry
+    ld hl,(currentDirectory)
+    ld a,h
+    or l
+    jp nz,subdirectoryNextCluster
     ld hl,(dirSector)
     inc hl
     ld (dirSector),hl
@@ -385,7 +402,151 @@ skipEntry:
     ld a,h
     or l
     jp nz,nextDirSector
+    jp directoryComplete
+subdirectoryNextCluster:
+    LOAD_DE scanCluster
+    call fatNext
+    ld a,d
+    cp 0FFh
+    jp nz,subdirectoryFollow
+    ld a,e
+    cp 0F8h
+    jp nc,directoryComplete
+subdirectoryFollow:
+    call validCluster
+    jp c,directoryComplete
+    STORE_DE scanCluster
+    call directorySectorFromCluster
+    jp nextDirSector
+; Очередь вместо рекурсии: глубина каталогов не расходует системный стек.
+directoryComplete:
+    ld hl,(currentDirectory)
+    ld a,h
+    or l
+    jp z,directoryQueueNext
+    ld a,(directoryDotMask)
+    cp 3
+    jp z,directoryQueueNext
+    call structureError
+    ld hl,txtDirectoryDots
+    call puts
+directoryQueueNext:
+    ld hl,(queueRead)
+    LOAD_DE queueWrite
+    call compare
+    ret z
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    STORE_DE currentDirectory
+    STORE_DE scanCluster
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    STORE_DE currentParent
+    ld (queueRead),hl
+    LOAD_DE scanCluster
+    call directorySectorFromCluster
+    ld hl,0FFFFh
+    ld (dirEntriesLeft),hl
+    xor a
+    ld (directoryDotMask),a
+    ld hl,names
+    ld (namesEnd),hl
+    jp nextDirSector
+; DE=кластер, один логический сектор на кластер в поддерживаемой геометрии.
+directorySectorFromCluster:
+    ld h,d
+    ld l,e
+    dec hl
+    dec hl
+    LOAD_DE dataStart
+    add hl,de
+    ld (dirSector),hl
     ret
+subdirectoryEntry:
+    ld hl,(entryCopy+20)
+    ld a,h
+    or l
+    jp nz,badEntry
+    ld hl,(entryCopy+28)
+    LOAD_DE entryCopy+30
+    ld a,h
+    or l
+    or d
+    or e
+    jp nz,badEntry
+    ld a,(entryCopy)
+    cp '.'
+    jp z,directoryDotEntry
+    ld a,(phase)
+    or a
+    jp nz,directoryEnqueue
+    call duplicateName
+    LOAD_DE entryCopy+26
+directoryCheckChain:
+    call validCluster
+    jp c,directoryChainBad
+    call markCluster
+    jp nz,directoryChainBad
+    call fatNext
+    ld a,d
+    cp 0FFh
+    jp nz,directoryCheckChain
+    ld a,e
+    cp 0F8h
+    jp c,directoryChainBad
+directoryEnqueue:
+    ld hl,(queueWrite)
+    ld de,directoryQueueEnd-4
+    call compare
+    jp c,directoryQueueRoom
+    jp nz,badEntry
+directoryQueueRoom:
+    LOAD_DE entryCopy+26
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    LOAD_DE currentDirectory
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    ld (queueWrite),hl
+    jp skipEntry
+directoryChainBad:
+    call chainError
+    jp skipEntry
+directoryDotEntry:
+    ld hl,(currentDirectory)
+    ld a,h
+    or l
+    jp z,badEntry
+    ld a,(entryCopy+1)
+    cp ' '
+    ld c,1
+    jp z,directoryDotCheck
+    cp '.'
+    jp nz,badEntry
+    ld a,(entryCopy+2)
+    cp ' '
+    jp nz,badEntry
+    ld hl,(currentParent)
+    ld c,2
+directoryDotCheck:
+    ld a,(directoryDotMask)
+    and c
+    jp nz,badEntry
+    ld a,(directoryDotMask)
+    or c
+    ld (directoryDotMask),a
+    LOAD_DE entryCopy+26
+    call compare
+    jp nz,badEntry
+    jp skipEntry
 
 ; Все имена в корне: до 256*11 байт, временная память приложения.
 duplicateName:
@@ -404,6 +565,19 @@ dupNext:
     add hl,de
     jp dupNext
 appendName:
+    push hl
+    ld de,11
+    add hl,de
+    ld de,directoryQueue
+    call compare
+    pop hl
+    jp c,appendNameRoom
+    jp z,appendNameRoom
+    call structureError
+    ld hl,txtDirectoryLimit
+    call puts
+    ret
+appendNameRoom:
     ld de,entryCopy
     ld b,11
 appendByte:
@@ -846,25 +1020,25 @@ streamWord:
 mxMagic:        DB 0CDh,020h,"MX",1,0
 rksExt:         DB "RKS"
 txtFat:         DB "MXOS256 "
-txtTitle:       DB "CHKDSK - READ ONLY",0
-txtDone:        DB 10,"PRESS ANY KEY TO EXIT",0
-txtDrive:       DB 10,"CHKDSK DRIVE [A-H], ENTER: ",0
-txtStructure:   DB 10,"STRUCTURE...",0
-txtReserved:    DB 10,"INVALID RESERVED FAT CELL",0
-txtEntry:       DB 10,"UNSUPPORTED DIRECTORY ENTRY: ",0
-txtSkipCS:      DB 10,"STRUCTURE ERRORS: CHECKSUMS SKIPPED",0
-txtChecksums:   DB 10,"FILE CHECKSUMS...",0
-txtErrors:      DB 10,"ERRORS: ",0
+txtTitle:       DB "CHKDSK - read only",0
+txtDone:        DB 10,"Press any key to exit",0
+txtDrive:       DB 10,"CHKDSK drive [A-H], Enter: ",0
+txtStructure:   DB 10,"Structure...",0
+txtReserved:    DB 10,"Invalid reserved FAT cell",0
+txtEntry:       DB 10,"Invalid directory entry: ",0
+txtSkipCS:      DB 10,"Structure errors: checksums skipped",0
+txtChecksums:   DB 10,"File checksums...",0
+txtErrors:      DB 10,"Errors: ",0
 txtChecked:     DB "  CS OK: ",0
 txtSkipped:     DB "  NO CS: ",0
-txtChain:       DB 10,"CHAIN/SIZE/CYCLE/CROSS-LINK: ",0
-txtDuplicate:   DB 10,"DUPLICATE NAME: ",0
-txtLost:        DB 10,"LOST CLUSTER: ",0
+txtChain:       DB 10,"Chain/size/cycle/cross-link: ",0
+txtDuplicate:   DB 10,"Duplicate name: ",0
+txtLost:        DB 10,"Lost cluster: ",0
 txtOK:          DB 10,"CS OK: ",0
-txtNoSum:       DB 10,"NO STORED CS: ",0
-txtBadSum:      DB 10,"BAD CS/HEADER: ",0
-txtFormat:      DB 10,"UNSUPPORTED/INVALID MXOS BPB",0
-txtIO:          DB 10,"DISK READ ERROR",0
+txtNoSum:       DB 10,"No stored checksum: ",0
+txtBadSum:      DB 10,"Bad checksum/header: ",0
+txtFormat:      DB 10,"Unsupported/invalid MXOS BPB",0
+txtIO:          DB 10,"Disk read error",0
 counts:
 errors:         DW 0
 checked:        DW 0
@@ -897,11 +1071,22 @@ runningSum:     DW 0
 rksMode:        DB 0
 sumLastByte:    DB 0
 driveInput:     DB 0,0
+directoryDotMask: DB 0
+txtDirectoryDots: DB 10,"Missing . or .. directory entry",0
+currentDirectory: DW 0
+currentParent: DW 0
+scanCluster: DW 0
+queueRead: DW 0
+queueWrite: DW 0
+txtDirectoryLimit: DB 10,"Directory scan limit",0
+argumentPtr:     DW 0
 callerSP:       DW 0
 callerKoi:      DB 0
-txtNoMemory: DB "NOT ENOUGH MEMORY",0
+txtNoMemory: DB "Not enough memory",0
 codeEnd:
     ASSERT codeEnd < 02000h
+directoryQueue = 03000h
+directoryQueueEnd = 04000h
 names = 02000h
 fatBuffer = 04000h
 usedMap = 08000h

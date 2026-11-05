@@ -1,6 +1,12 @@
 ; HL=компактное имя. BC/DE/HL сохранены, CF=ошибка.
 ; Дескриптор копируется в v_tmpFileDescr; указатель кэша не долговечен.
 fileFind:
+            ld a,018h
+            jp fileFindStart
+fileFindAny:
+            ld a,008h
+fileFindStart:
+            ld (v_findMask),a
             ld (v_foundDescrPtr),hl
             push hl
             push de
@@ -8,7 +14,8 @@ fileFind:
             call fatDirStart
             jp c,fileFind_end
 fileFind_loop:
-            call fatDirFile
+            ld a,(v_findMask)
+            call fatDirFiltered
             jp c,fileFind_end
             ex de,hl
             ld hl,(v_foundDescrPtr)
@@ -34,7 +41,7 @@ fileFind_notEqual:
             ld hl,v_tmpFileDescr
             ld (v_foundDescrPtr),hl
             call copyDescriptor
-    IFDEF DOS_SPLIT_BUILD
+            ; FstClusHI зарезервирован в FAT16, ненулевое значение — ошибка.
             ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.firstClusterHi)
             ld a,h
             or l
@@ -42,7 +49,6 @@ fileFind_notEqual:
             call dosCorrupt
             jp fileFind_returnError
 fileFind_highClusterOk:
-    ENDIF
             ld a,(v_tmpFileDescr)
             cp 5
             jp nz,fileFind_found
@@ -66,3 +72,4 @@ fileFind_returnError:
             pop hl
             scf
             ret
+v_findMask: DB 018h

@@ -37,7 +37,8 @@ loc_C236:   ; Рисуем/стираем курсор
             ; Задержка мерцания курсора
             ld      de, 500h
 
-loc_C23C:   ; Получаем код нажатой клавиши
+loc_C23C:   call inputIdle
+            ; Получаем код нажатой клавиши
             call    keyScan2
             ;cp      80h         ; х.з.
             cp      0FFh
@@ -249,3 +250,24 @@ popa_ret_2: ; Восстаналиваем регистры и выходим
             pop     hl
             ret
 
+
+; HL=обработчик ожидания или 0. Возврат HL=прежний, AF/DE разрушены.
+; Обработчик сохраняет регистры и состояние текстового вывода; не вызывает getch.
+setInputHook:
+            ex de,hl
+            ld hl,(inputHook)
+            ex de,hl
+            ld (inputHook),hl
+            ex de,hl
+            ret
+inputIdle:
+            push hl
+            ld hl,(inputHook)
+            ld a,h
+            or l
+            call nz,inputIdleCall
+            pop hl
+            ret
+inputIdleCall:
+            jp (hl)
+inputHook: DW 0

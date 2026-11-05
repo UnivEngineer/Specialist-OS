@@ -20,6 +20,61 @@ void *mxos_memcpy(void *dst, const void *src, mxos_u16 bytes)
     mxos_bios_call(&r); return dst;
 }
 void *mxos_memmove(void *dst, const void *src, mxos_u16 bytes) { return mxos_memcpy(dst,src,bytes); }
+mxos_u8 mxos_directory_get(mxos_u16 *cluster)
+{
+    MXOS_REGS r; mxos_u8 error;
+    prepare(&r,MXOS_BIOS_DIRECTORY); error=result(&r);
+    if (!error) *cluster=r.de;
+    return error;
+}
+mxos_u8 mxos_directory_set(mxos_u16 cluster)
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_DIRECTORY); r.af=0x0100; r.de=cluster;
+    return result(&r);
+}
+mxos_u8 mxos_getcwd(char path[MXOS_MAX_PATH])
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_DIRECTORY); r.af=0x0400; r.hl=(mxos_u16)path;
+    return result(&r);
+}
+mxos_u8 mxos_chdir(const char path[MXOS_MAX_PATH])
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_DIRECTORY); r.af=0x0200; r.hl=(mxos_u16)path;
+    return result(&r);
+}
+mxos_u8 mxos_mkdir(const char path[MXOS_MAX_PATH])
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_DIRECTORY); r.af=0x0700; r.hl=(mxos_u16)path;
+    return result(&r);
+}
+mxos_u8 mxos_rmdir(const char path[MXOS_MAX_PATH])
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_DIRECTORY); r.af=0x0800; r.hl=(mxos_u16)path;
+    return result(&r);
+}
+mxos_u8 mxos_file_move(void *request)
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_CLI); r.af=0x0700; r.hl=(mxos_u16)request;
+    return result(&r);
+}
+mxos_u8 mxos_file_getattr(const void *name83, mxos_u8 *attributes)
+{
+    MXOS_REGS r; mxos_u8 error;
+    prepare(&r,MXOS_BIOS_FILE_ATTR); r.hl=(mxos_u16)name83; error=result(&r);
+    if (!error) *attributes=r.af>>8;
+    return error;
+}
+mxos_u8 mxos_file_setattr(const void *name83, mxos_u8 attributes)
+{
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_FILE_ATTR); r.hl=(mxos_u16)name83;
+    r.bc=((mxos_u16)attributes<<8)|1; return result(&r);
+}
+mxos_u8 mxos_directory_list(MXOS_FILE_INFO *buffer, mxos_u16 capacity, mxos_u16 start, mxos_u16 *total)
+{
+    MXOS_REGS r; mxos_u8 error;
+    prepare(&r,MXOS_BIOS_DIRECTORY); r.af=0x0300; r.hl=(mxos_u16)buffer; r.de=capacity; r.bc=start;
+    error=result(&r); *total=r.de; return error;
+}
 mxos_u16 mxos_checksum(const void *buffer, mxos_u16 bytes)
 {
     MXOS_REGS r;

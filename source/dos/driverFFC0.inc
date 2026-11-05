@@ -12,8 +12,10 @@
 ; Специалиста-MX (FFC0h-FFDEh)
 ;
 ; вход:
-;  B=0 — обычный режим (без RAMD.COM — побайтовый), B=1 — сервисный.
-;  B=2, HL=адрес 32-байтного шаблона — регистрация обычного режима.
+;  B=RAMD_DRIVER_RESTORE — обычный режим (до RAMD.COM — блочный).
+;  B=RAMD_DRIVER_BYTE/BLOCK — временный выбор встроенного шаблона.
+;  B=RAMD_DRIVER_REGISTER, HL=шаблон — регистрация обычного режима.
+;  B=RAMD_DRIVER_USER — выбор зарегистрированного шаблона (как RESTORE).
 ;  Все регистры и флаги сохраняются; шаблон должен быть резидентным.
 ;
 ; 2022-02-02 SpaceEngineer
@@ -25,14 +27,16 @@ setRAMDDriver:
             push  bc
             push  af
             ld    a, b
-            cp    2
+            cp    RAMD_DRIVER_REGISTER
             jp z, setRAMDRegister
+            cp    RAMD_DRIVER_BLOCK
+            jp z, setRAMDBuiltin
             dec   b
             jp z, setRAMDDriver_1
 
-; Операнд хранит шаблон, зарегистрированный RAMD.COM. Без него — байтовый.
+; Операнд хранит шаблон RAMD.COM; до регистрации — встроенный блочный.
 setRAMDBlockTemplate:
-            ld    hl, driverByteStart
+            ld    hl, driverBlockStart
             jp    setRAMDTemplate
 setRAMDRegister:
             ld    (setRAMDBlockTemplate+1), hl
@@ -41,6 +45,9 @@ setRAMDRegister:
 setRAMDDriver_1:
             ; Адреса побайтового драйвера
             ld    hl, driverByteStart
+            jp    setRAMDTemplate
+setRAMDBuiltin:
+            ld    hl, driverBlockStart
 setRAMDTemplate:
             push  hl
             ld    de, 32
@@ -113,7 +120,37 @@ driverByteWrite: ; эта п/п копируется на FFD0h
 
 driverByteEnd:
 
-    INCLUDE "ramdByteSector.inc"
+; Встроенный блочный драйвер целиком помещается в общее окно.
+; FFC0h/FFD0h: C=страница, DE=сектор<<8 (E=0), HL=буфер основной RAM.
+; Передаёт ровно 256 байт. C сохраняется; AF/B/DE/HL разрушаются.
+; При выходе снова включена основная RAM; стек не переключается.
+driverBlockStart:
+            ld      a,c
+            ld      (IO_PAGE_RAMD),a
+            ld      a,(de)
+            ld      (IO_PAGE_RAM),a
+            ld      (hl),a
+            inc     hl
+            inc     e
+            jp nz,  bios_RAMDRead
+            ret
+            nop
+driverBlockWrite:
+            ld      b,(hl)
+            ld      a,c
+            ld      (IO_PAGE_RAMD),a
+            ld      a,b
+            ld      (de),a
+            ld      (IO_PAGE_RAM),a
+            inc     hl
+            inc     e
+            jp nz,  bios_RAMDWrite
+            ret
+driverBlockEnd:
+    ASSERT driverBlockWrite-driverBlockStart == bios_RAMDWrite-bios_RAMDRead
+    ASSERT driverBlockEnd-driverBlockStart == 32
+
+    INCLUDE "ramdBlockSector.inc"
 
 ; ---------------------------------------------------------------------------
 

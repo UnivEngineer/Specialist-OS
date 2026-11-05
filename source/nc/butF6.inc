@@ -1,38 +1,61 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; F6 - переименование файла на исходном диске.
-;----------------------------------------------------------------------------
-
+; F6 — перемещение: на одном томе меняются только записи каталога.
 but_F6:
-            call    drawWindowIfSel
+            ld a,(ncShiftState)
+            or a
+            jp z,ncRename
+            ld a,CLI_OP_MOVE
+            ld (copyFileOperation+1),a
+            call drawWindowIfSel
+            CENTER_LINE 7, 5Eh
+            ld hl,ncMoveText
+            call bios_printString
+            call inputForCopyMove
+            cp 01Bh
+            jp z,ncRefreshDirty
+            call copyFileInt
+            jp ncRefreshDirty
+ncMoveText: DB 'Move to',0
 
-            CENTER_LINE 12, 5Eh
-            ld      hl, aRenameOn
-            call    bios_printString
-            call    printSelDrive
+; Shift+F6 меняет только имя в текущем каталоге, без выбора второй панели.
+ncRename:
+            call drawWindowIfSel
+            CENTER_LINE 9, 5Eh
+            ld hl,ncRenameText
+            call bios_printString
+            call inputForRename
+            cp 01Bh
+            jp z,ncRefreshDirty
+            ld hl,state.panelA_drive
+            call readBytePanel
+            call bios_fileSelectDrive
+            jp c,copyFileError
+            call restorePanelDirectory
+            ld hl,vars.input
+ncRenameLeaf:
+            ld a,(hl)
+            or a
+            jp z,ncRenameLeafReady
+            cp ':'
+            jp z,ncRenameBadPath
+            cp '/'
+            jp z,ncRenameBadPath
+            cp 05Ch
+            jp z,ncRenameBadPath
+            inc hl
+            jp ncRenameLeaf
+ncRenameLeafReady:
+            ld hl,vars.input
+            ld de,vars.copyRequest.destination
+            call bios_fileNamePrepare
+            jp c,copyFileError
+            call getSelectedFile
+            ld de,vars.copyRequest.destination
+            ld a,CLI_OP_RENAME
+            call bios_cli
+            jp c,copyFileError
+            jp ncRefreshDirty
+ncRenameText: DB 'Rename to',0
 
-            call    inputForRename
-            cp      1Bh
-            jp z,   mainReload
-
-            ; Поле содержит только имя. Явно выбрать диск активной панели:
-            ; указать другой диск в строке переименования теперь невозможно.
-            ld      hl, state.panelA_drive
-            call    readBytePanel
-            ld      e, 1
-            call    bios_fileSelectDrive
-            jp c,   renameFileError
-
-            ld      hl, vars.input
-            ld      de, vars.tempFileDescr
-            call    bios_fileNamePrepare
-
-            call    getSelectedFile
-            ld      de, vars.tempFileDescr
-            call    bios_fileRenameOnDrive
-            jp c,   renameFileError
-            jp      mainReload
-
-renameFileError:
-            ld      hl, aCantRenameFile
-            jp      copyFileShowError
+ncRenameBadPath:
+            ld a,DOS_ERR_ARGUMENT
+            jp copyFileErrorCode

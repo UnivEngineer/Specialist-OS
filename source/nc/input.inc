@@ -1,92 +1,53 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Ввод строки
-;
-; 2013-12-18 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
-
-input:      ; Вывод строки
-            push    hl
-            ld      hl, vars.input
-            call    printStringInv
-            pop     hl
-
-            ; Включаем инверсию
-            ld      a, 1
-            ld      (bios_vars.inverse),a
-
-input_loop: ; Ввод символа
-            call  bios_getch
-
-            ; Enter или ESC
-            cp      0Dh
-            jp z,   input_exit
-            cp      1Bh
-            jp z,   input_exit
-
-            ; Если служебная клавиша или пробел, то пропускаем
-            cp      21h
-            jp c,   input_loop
-
-            ; Сохраняем для вывода
-            ld      c, a
-
-            ; Помещаем символ в буфер
-            ld      (de),a
-
-            ; Удаление
-            cp      7Fh
-            jp z,   input_bkspc
-
-            ; Если переполнение
-            ld      a, (vars.input + P_INPUT_WIDTH) & 0FFh  ; a = младший байт адреса пследнего байта буфера
-            cp      e
-            jp z,   input_loop
-
-            ; Вывод символа на экран            
-            call    bios_printChar
-
-            ; Увеличение длины строки
-            inc     de
-
-            jp      input_loop
-
-; ---------------------------------------------------------------------------
-
-input_bkspc:
-            ; Если это начало строки, выходим
-            ld      a, vars.input & 0FFh
-            cp      e
-            jp z,   input_loop
-
-            ; Уменьшаем длину строки
-            dec     de
-
-            ; Стираем символ с экрана
-            push    hl
-            ld      hl, asc_DC17
-            call    bios_printString
-            pop     hl
-
-            jp      input_loop
-
-; ---------------------------------------------------------------------------
-
-input_exit:
-            ; Сохраняем ESC или Enter для выхода 
-            ld      c, a
-
-            ; Записываем в конец строки 0Dh, 0
-            ex      de, hl
-            ld      (hl), 0Dh
-            inc     hl
-            xor     a
-            ld      (hl), a
-
-            ; Восстанавливаем инверсию
-            ld      (bios_vars.inverse),a
-
-            ; Выход           
-            ld      a, c
+; Диалог NC использует общий редактор с полем фиксированной ширины.
+; DE=конец начальной строки vars.input; A=Enter/Escape, строка ASCIIZ.
+input:
+            ld a,COLOR_DIALOG
+            call ncInputHookBegin
+            ld a,1
+            ld (bios_vars.inverse),a
+            ld hl,03D6Eh
+            ld (bios_vars.cursorY),hl
+            ld hl,vars.input
+            ld bc,(1 << 8) + P_INPUT_WIDTH
+            call lineEdit
+            call ncInputHookEnd
+            push af
+            ld hl,0
+            ld (bios_vars.inverse),hl
+            pop af
             ret
 
+; Пустая строка оставляет стрелки панели. Непустую редактирует Lineedit;
+; F-клавиши, Tab и CTRL возвращаются главному циклу NC с актуальной строкой.
+ncReadKey:
+            ld hl,(vars.cmdLineEnd)
+            ld de,vars.cmdLine
+            call bios_cmp_hl_de
+            jp z,ncGetch
+            ex de,hl
+            push de
+            ld hl,(vars.cmdTextPos)
+            ld (bios_vars.cursorY),hl
+            pop de
+            ld hl,vars.cmdLine
+            ld a,(vars.cmdCapacity)
+            ld c,a
+            ld b,7
+            ld a,COLOR_CMDLINE
+            call ncInputHookBegin
+            call lineEdit
+            call ncInputHookEnd
+            push af
+            ld a,(lineEditLength)
+            ld e,a
+            ld d,0
+            ld hl,vars.cmdLine
+            add hl,de
+            ld (vars.cmdLineEnd),hl
+            ld hl,(bios_vars.cursorY)
+            ld (vars.cmdLinePos),hl
+            ld a,(lineEditOffset)
+            ld (vars.cmdOffset),a
+            pop af
+            ret
+    INCLUDE "../include/lineedit.inc"

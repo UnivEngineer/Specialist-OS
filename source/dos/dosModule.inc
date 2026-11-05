@@ -26,6 +26,35 @@ fileCopy:
 fileHandle:
             push af
             ld a,18
+            jp dosModuleDispatch
+directoryGetCwd:
+            push af
+            ld a,21
+            jp dosModuleDispatch
+cliService:
+            push af
+            ld a,27
+            jp dosModuleDispatch
+cliResolveExternal:
+            push af
+            ld a,36
+            jp dosModuleDispatch
+directoryCreate:
+            push af
+            ld a,30
+            jp dosModuleDispatch
+directoryRemove:
+            push af
+            ld a,33
+            jp dosModuleDispatch
+directoryExtendGate:
+            push af
+            ld a,39
+            jp dosModuleDispatch
+
+directoryCommand:
+            push af
+            ld a,24
 dosModuleDispatch:
             push hl
             push de
@@ -53,6 +82,15 @@ dosModuleMissing:
 ; Повторная загрузка восстанавливает модуль после классической программы.
 ; Контейнер и сумма проверяются общим загрузчиком; активный диск сохранён.
 loadDosModule:
+            ; Обычные приложения соблюдают memtop. Повторно читать модуль
+            ; нужно только после явного releaseDosModule или холодного старта.
+            ld a,(v_dosModuleReady)
+            or a
+            jp z,dosModuleLoad
+            xor a
+            ld (v_dosError),a
+            ret
+dosModuleLoad:
             push bc
             push de
             push hl
@@ -62,24 +100,26 @@ loadDosModule:
             ld (v_dosModuleReady),a
             call fileChangeDrive
             jp c,dosModuleRestore
+            ld hl,0
+            ld (v_directory),hl
             ld hl,dosModuleName
             call imageOpen
             jp c,dosModuleRestore
             push hl
-            ld hl,DOS_MODULE_ADDR
+            ld hl,DOS_MODULE_LOAD_ADDR
             call cmp_hl_de
             pop hl
             jp nz,dosModuleBad
             push hl
             ld h,b
             ld l,c
-            ld de,DOS_MODULE_END-DOS_MODULE_ADDR
+            ld de,DOS_MODULE_END-DOS_MODULE_LOAD_ADDR
             call cmp_hl_de
             pop hl
             jp c,dosModuleLoadBody
             jp nz,dosModuleBad
 dosModuleLoadBody:
-            ld de,DOS_MODULE_ADDR
+            ld de,DOS_MODULE_LOAD_ADDR
             call imageLoad
             jp c,dosModuleRestore
             ld hl,(DOS_MODULE_ADDR+3)
@@ -87,7 +127,7 @@ dosModuleLoadBody:
             call cmp_hl_de
             jp nz,dosModuleBad
             ld a,(DOS_MODULE_ADDR+5)
-            dec a
+            cp DOS_MODULE_VERSION
             jp nz,dosModuleBad
             ; Сумма таблицы импортов проверяет соответствие модулю ядра.
             ld hl,moduleImports
@@ -153,4 +193,28 @@ dosModuleReleased:
             ret
 dosModuleName: DB "DOSMOD  COM"
             DS FILE_DESCR_SIZE-11,0
+; После fileLoadInfo imageOpen использует v_tmpFileDescr, а не хвост имени.
+; Поэтому 16-байтный заголовок контейнера не требует отдельного буфера.
+v_imageHeader = dosModuleName+FILE_DESCR_SIZE-16
+            ASSERT v_imageHeader >= dosModuleName+FILE_NAME_LENGTH+3
     INCLUDE "moduleImports.inc"
+
+; Выбранная оболочка переживает загрузку обычной программы.
+setShell:
+            cp 2
+            jp z,getShellDrive
+            jp nc,blockArgument
+            ld (v_shell),a
+            or a
+            ret z
+            ld a,(v_drive)
+            ld (v_shellDrive),a
+            xor a
+            ret
+getShellDrive:
+            ld a,(v_shellDrive)
+            or a
+            ret
+v_shell: DB 0
+v_shellDrive: DB 0
+pathCliCom: DB "A:",05Ch,"CLI.COM",0

@@ -70,10 +70,10 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
 
                 jp  uiDraw              ; C8A8: список графических объектов
                 jp  uiInverseRect       ; C8AB: инверсия прямоугольника
-                jp  uiToolbar           ; C8AE: строка F1-F8
+                jp  uiToolbar           ; C8AE: поля функционального тулбара
                 jp  uiCopyRect          ; C8B1: копирование битмапа
 
-                jp  fileAssociation     ; C8B4: поиск ассоциации в A:NC.EXT
+                jp  fileAssociation     ; C8B4: поиск ассоциации в A:CLI.EXT
 
                 jp  argNext             ; C8B7: следующее слово без изменения строки
 
@@ -91,4 +91,8 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp fileHandle           ; C8D5: открытый файл в памяти вызывающего
                 jp loadDosModule        ; C8D8: загрузить общие службы в верхнее ОЗУ
                 jp releaseDosModule     ; C8DB: отдать верхнее ОЗУ программе без расширенных служб
-                ASSERT $ == 0C8DEh
+                jp directoryService     ; C8DE: текущий каталог, пути и список с каталогами
+                jp cliService          ; C8E1: общий CLI
+                jp setShell            ; C8E4: выбор оболочки
+                jp setInputHook         ; C8E7: обработчик ожидания клавиатуры
+                ASSERT $ == 0C8EAh

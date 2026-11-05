@@ -6,11 +6,13 @@ param(
 
     [Parameter(Position = 1)]
     [ValidateSet(128, 256, 512)]
-    [int] $HardwareSizeKB = 128
+    [int] $HardwareSizeKB = 128,
+    [string] $ManifestFile
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
+if ($ManifestFile -and $Target -ne 'Games2M') { throw '-ManifestFile is currently supported only for Games2M.' }
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $assetDirectory = Join-Path $repositoryRoot "assets"
@@ -220,6 +222,7 @@ switch ($Target) {
     }
     "Games2M" {
         $manifestPath = Join-Path $PSScriptRoot "manifests\H-Games2M.txt"
+        if ($ManifestFile) { $manifestPath = (Resolve-Path -LiteralPath $ManifestFile).Path }
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
@@ -313,7 +316,7 @@ try {
         if ($baseName.Length -gt 8 -or $extension.Length -gt 3) {
             throw "Image name '$sourceName' does not fit FAT 8.3. Specify a separate short image name."
         }
-        $imageNameKey = "$baseName.$extension".ToUpperInvariant()
+        $imageNameKey = $sourceName.Replace('\', '/').ToUpperInvariant()
         if ($imageNames.ContainsKey($imageNameKey)) {
             throw "FAT 8.3 name conflict '$baseName.$extension': '$($imageNames[$imageNameKey])' and '$sourceName'."
         }
@@ -418,6 +421,17 @@ try {
 
     $start = Join-Bytes $boot $fat $directory.ToArray()
     $data = $fileData.ToArray()
+    $nestedPaths = @($manifest | ForEach-Object { $_.ImageName })
+    if (@($nestedPaths | Where-Object { $_ -match '[/\\]' }).Count -gt 0) {
+        $stagingPath = Join-Path $repositoryRoot "bin/nested-$Target.bin"
+        [IO.File]::WriteAllBytes($stagingPath, (Expand-Bytes (Join-Bytes $start $data) $volumeSize))
+        & python (Join-Path $PSScriptRoot 'nest-fat-image.py') $stagingPath @nestedPaths
+        if ($LASTEXITCODE -ne 0) { throw 'Nested FAT image generation failed.' }
+        $nestedImage = [IO.File]::ReadAllBytes($stagingPath)
+        [Array]::Copy($nestedImage, 0, $start, 0, $start.Length)
+        $data = New-Object byte[] ($nestedImage.Length - $start.Length)
+        [Array]::Copy($nestedImage, $start.Length, $data, 0, $data.Length)
+    }
 
     switch ($imageFormat) {
         "Mx2" {

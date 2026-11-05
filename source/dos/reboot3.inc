@@ -117,8 +117,13 @@ reboot3_fallback:
 
 reboot3_2:
             ; Запуск файла A:NC.COM
-            ld      hl, pathNcCom
-            call    fileExec
+            ld a,(v_shell)
+            or a
+            ld hl,pathNcCom
+            jp z,rebootShellReady
+            ld hl,pathCliCom
+rebootShellReady:
+            call fileExec
 
             ; Теплая перезагрузка
             jp      j_reboot3

@@ -29,7 +29,7 @@ def main():
             m[:]=data
         else:
             m[0xC000:0xC000+len(dos)] = dos
-        module=args.module.read_bytes();m[0x8000:0x8000+len(module)]=module
+        module=args.module.read_bytes();at=symbols['DOS_MODULE_LOAD_ADDR'];m[at:at+len(module)]=module
         m[symbols['v_dosModuleReady']]=1
         m[0x9000:0xC000] = screen
         return m

@@ -9,6 +9,9 @@ loadFiles:
             ld      c, a
             ld      e, 1
             call    bios_fileSelectDrive
+            push    bc
+            call    restorePanelDirectory
+            pop     bc
             ld      hl, vars.cacheValidA
             call    readBytePanel
             or      a
@@ -25,7 +28,28 @@ lf_ReadCatalog:
             call    fileCacheBase
             ld      bc, 0
             ld      de, FILE_CACHE_CAPACITY
-            call    bios_fileList
+            ld      a, DIR_OP_LIST
+            call    bios_directory
+            jp nc,  lf_ListReady
+            ld      de,0
+            ld      (hl),0FFh
+lf_ListReady:
+            ; Запись FAT "." становится явным пунктом корня только в кэше NC.
+            push hl
+            push de
+            call fileCacheBase
+            ld a,(hl)
+            cp '.'
+            jp nz,lf_RootReady
+            inc hl
+            ld a,(hl)
+            cp ' '
+            dec hl
+            jp nz,lf_RootReady
+            ld (hl),05Ch
+lf_RootReady:
+            pop de
+            pop hl
 
             ; Индексы NC пока байтовые. Больше 255 файлов не оборачиваем в 0.
             ld      a, d

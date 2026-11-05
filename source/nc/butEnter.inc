@@ -17,52 +17,30 @@ but_Enter:  ; Если ком строка не пустая
             inc     a
             jp z,   mainLoop ; Ничего не выбрано
 
-            ; hl = указатель на расширение файла
-            ld      de, FILE_DESCRIPTOR.ext
-            add     hl, de
-
-            ; Ассоциации — общий сервис DOS. Буфер временный, после кода NC.
             push    hl
-            call    getCopyBufferSize
-            ld      b,h
-            ld      c,l
+            ld      de, FILE_INFO.attrib
+            add     hl,de
+            ld      a,(hl)
+            and     010h
             pop     hl
-            jp c,   Enter_stdExec
-            ld      de, COPY_BUFFER
-            call    bios_fileAssociation
-            jp c,   Enter_stdExec
-            ex      de, hl
+            jp nz,  enterDirectory
+            jp Enter_stdExec
 
-Enter_5:
-            ; Оставляем место для пробела, полного пути 8.3 и терминатора.
-            ld      b, 45
-            ld      hl, vars.cmdLine
-Enter_4:
-            ld      a, (de)
-            ld      (hl), a
-            cp      0Dh
-            jp z,   Enter_3
-            inc     a
-            jp z,   Enter_3
-            dec     b
-            jp z,   Enter_stdExec
-            inc     hl
-            inc     de
-            jp      Enter_4
-
-; ---------------------------------------------------------------------------
-
-Enter_3:
-            ld      (hl), ' '
-            inc     hl
-            ld      (hl), 0
-            ld      (vars.cmdLineEnd), hl
-
-            ; Вывод командной строки на экран
-            COLOR   COLOR_CMDSCREEN
-            ld      hl, vars.cmdLine
-            call    bios_printString
-
+Enter_5:   ; F4 задаёт явную команду редактора, ассоциации остаются в CLI.
+            ld hl,vars.cmdLine
+EnterEditorCopy:
+            ld a,(de)
+            cp 0Dh
+            jp z,EnterEditorArgument
+            ld (hl),a
+            inc hl
+            inc de
+            jp EnterEditorCopy
+EnterEditorArgument:
+            ld (hl),' '
+            inc hl
+            ld (hl),0
+            ld (vars.cmdLineEnd),hl
 Enter_stdExec:
             ; Получить выбранный файл
             call     getSelectedFile
@@ -74,65 +52,69 @@ Enter_stdExec:
 
             ; ?
             call    selFileToCmdLine
+            jp c,   mainReload
 
 EnterCmdLine:
-            ; Команда X: без имени переключает активную панель на диск X.
-            ld      hl, (vars.cmdLineEnd)
-            ld      de, vars.cmdLine + 2
-            call    bios_cmp_hl_de
-            jp nz,  EnterExec
-
-            ld      a, (vars.cmdLine + 1)
-            cp      ':'
-            jp nz,  EnterExec
-
-            ld      a, (vars.cmdLine)
-            and     0DFh
-            sub     'A'
-            cp      8
-            jp nc,  EnterExec
-            ld      c, a
-
-            ; Не переключаться на букву без установленного драйвера.
-            push    bc
-            call    buildDriveList
-            pop     bc
-            call    findDrive
-            jp c,   EnterExec
-
-            ld      a, c
-            ld      hl, state.panelA_drive
-            call    writeBytePanel
-            xor     a
-            ld      hl, state.panelA_info
-            call    writeBytePanel
-            ld      hl, state.panelA_firstFile
-            call    writeBytePanel
-            ld      hl, state.panelA_curFile
-            call    writeBytePanel
-
-            call    clearCmdLine
-            call    saveState
-            jp      mainReload
-
+            ld hl,(vars.cmdLineEnd)
+            ld (hl),0
+            ld hl,state.panelA_drive
+            call readBytePanel
+            call bios_fileSelectDrive
+            call restorePanelDirectory
+            ld hl,vars.cmdLine
+            ld a,CLI_OP_QUERY
+            call bios_cli
+            jp c,ncCommandError
+            ld a,b
+            and 1
+            ld (ncCommandScreen),a
+            jp z,ncCommandRun
+            COLOR COLOR_CMDSCREEN
+            ld c,01Fh
+            call bios_printChar
+ncCommandRun:
+            ld hl,vars.cmdLine
+            ld de,ncOverwritePrompt
+            ld a,CLI_OP_COMMAND
+            call bios_cli
+            jp c,ncCommandError
+            cp 0FFh
+            jp z,EnterExec
+            ld a,b
+            and 4
+            ld (ncCommandContext),a
+            ld a,b
+            and 1
+            call nz,bios_getch
+            ld a,(ncCommandScreen)
+            xor 1
+            ld (ncKeepFrames),a
+            or a
+            call z,drawToolbar
+            ; Команды CD/диск меняют общий контекст и активную панель.
+            ld e,0
+            call bios_fileGetSetDrive
+            ld hl,state.panelA_drive
+            call writeBytePanel
+            call savePanelDirectory
+            ld a,(ncCommandContext)
+            or a
+            jp nz,directoryChanged
+            ld a,(ncCommandScreen)
+            or a
+            call nz,ncDamageBoth
+            call saveState
+            jp ncRefreshDirty
+ncCommandError:
+            call bios_getError
+            call dosErrorText
+            jp copyFileShowError
+ncCommandScreen: DB 0
+ncCommandContext: DB 0
+ncKeepFrames: DB 0
+ncCommandErrorText: DB 'Command error',0
 EnterExec:
-            ; Очистка экрана
-            COLOR   COLOR_CMDSCREEN
-            ld      c, 1Fh
-            call    bios_printChar
-
-            ; Помещаем в конец ком строки 0Dh
-            ld      hl, (vars.cmdLineEnd)
-            ld      (hl), 0Dh
-
-            ; Сохраняем состояние
-            call    saveState
-
-            ; Запускаем файл
-            ; Текущий том команды — активная панель, а не последний прочитанный каталог.
-            ld      hl, state.panelA_drive
-            call    readBytePanel
-            ld      e, 1
-            call    bios_fileSelectDrive
-            ld      hl, vars.cmdLine
-            jp      bios_fileExec
+            call ncStopObserver
+            call saveState
+            ld hl,vars.cmdLine
+            jp bios_fileExec

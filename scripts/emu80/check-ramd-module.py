@@ -82,12 +82,12 @@ def main():
     select(1)
     assert description()==[b'RAMD',b'R4 banked']
     report['checks'].append('stock AUTOEXEC installs R4 before NC')
-    # Для сравнения явно возвращаем встроенный Per-byte после обычной загрузки.
+    # Для сравнения явно возвращаем встроенный R3 после обычной загрузки.
     sub(0xC860,af=0x0100,hl=ds['diskDriver'])
-    sub(0xC86F,bc=0x0200,hl=ds['driverByteStart']);sub(0xC86F,bc=0)
-    assert description()==[b'RAMD',b'Per-byte']
+    sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)
+    assert description()==[b'RAMD',b'R3']
     assert int.from_bytes(m.read(ds['v_drives']+2,2),'little')==ds['diskDriver']
-    check_io('Per-byte')
+    check_io('R3')
     boot=m.sector(0)
     # Сохраняем boot/FAT/корень до установки. Секторные записи выше — только данные.
     root_start=int.from_bytes(boot[14:16],'little')+boot[16]*int.from_bytes(boot[22:24],'little')
@@ -183,11 +183,11 @@ def main():
 
     # Восстанавливаем встроенный драйвер и проверяем файл через байтовый путь.
     sub(0xC860,af=0x0100,hl=ds['diskDriver'])
-    sub(0xC86F,bc=0x0200,hl=ds['driverByteStart']);sub(0xC86F,bc=0)
-    assert description()==[b'RAMD',b'Per-byte']
+    sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)
+    assert description()==[b'RAMD',b'R3']
     m.write(0x7000,desc);m.write(0x4000,bytes(768))
     assert not sub(0xC848,hl=0x7000)['flags']['C'] and m.read(0x4000,768)==payload
-    report['checks'].append('same FAT file readable through restored built-in Per-byte')
+    report['checks'].append('same FAT file readable through restored built-in R3')
     # FORMAT только тестового B:, после проверки сохранённого файла.
     m.write(0,module);assert not sub(0)['flags']['C']
     m.write(0xF100,(ROOT/'bin/FORMAT.i80').read_bytes())
@@ -197,10 +197,10 @@ def main():
     report['checks'].append('FORMAT B: Y R preserves main and all 16 bank tails')
     # Оба ручных сценария DISKBEN: штатный ввод B + Enter, ноль записей.
     bs=symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
-    for label in ['Per-byte','R4 banked']:
-        if label=='Per-byte':
+    for label in ['R3','R4 banked']:
+        if label=='R3':
             sub(0xC860,af=0x0100,hl=ds['diskDriver'])
-            sub(0xC86F,bc=0x0200,hl=ds['driverByteStart']);sub(0xC86F,bc=0)
+            sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)
         else:
             m.write(0,module);assert not sub(0)['flags']['C']
         m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())

@@ -7,6 +7,8 @@
 
 execBat:
             pop     de
+            ld      hl,(v_directory)
+            ld      (v_batDirectory),hl
 
             ; Загружаем BAT во временный буфер без изменения записи каталога.
             ld      hl, BAT_BUFFER
@@ -33,6 +35,8 @@ v_batDrive:
             ; Выбрать диск содержащий BAT файл
             ld      a, 1 ; << сюда вместо 1 пишется диск, содержащий BAT файл
             call    fileSelectDrive
+            ld      hl,(v_batDirectory)
+            ld      (v_directory),hl
 
             ; Проверяем размер до загрузки, оставляя место для терминатора.
             ld      hl, v_batFileDescr

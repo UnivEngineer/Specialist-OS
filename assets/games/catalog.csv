@@ -2,8 +2,8 @@ File,LoadAddress,Status,OriginalName,Notes
 Almaz-2/Almaz2.cpu,0,reference,Almaz-2.exe,Сборка исходной чёрно-белой версии без оптимизаций
 Almaz-2/legacy/Almaz2-original.cpu,0,reference,Almaz-2.exe,Сохранённый оригинальный чёрно-белый бинарник
 Almaz-2/Almaz2-optimized.cpu,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; чёрно-белая версия для классического Специалиста со всеми программными оптимизациями
-Almaz-2/Almaz2-mx.cpu,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цветная версия для Специалиста-MX с программным звуком
-Almaz-2/Almaz2-mx-optimized.cpu,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цвет MXOS; эффекты ВИ53 2 МГц; музыка BIOS; TIME в секундах; квота анимации; в flash-манифесте имя Almaz2MX.exe
+Almaz-2/Almaz2-mx.cpu,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цветная версия для Специалиста-MX с программным звуком; освобождение DOSMOD перед использованием игровой памяти
+Almaz-2/Almaz2-mx-optimized.cpu,0,static-checked,Almaz-2.exe,Исходники source-apps/almaz2; цвет MXOS; эффекты ВИ53 2 МГц; музыка BIOS; TIME в секундах; квота анимации; в flash-манифесте имя Almaz2MX.exe; освобождение DOSMOD перед использованием игровой памяти
 Almaz-2/legacy/Almaz2-ramfos-original-broken.cpu,0,broken,Almaz-2.0.exe,Исторический цветной оригинал Ramfos с повреждёнными картами и надписями
 Almaz-2/legacy/Almaz2-ramfos-original-fixed.cpu,0,cpu-checked,Almaz-2.0.exe,Восстановленная цветная версия Ramfos; 29 байт исправлены; системные вызовы сохранены
 Almaz-2/Almaz2-ramfos.cpu,0,static-checked,Almaz-2.0.exe,Исходники source-apps/almaz2; цветная версия для Ramfos с программным звуком

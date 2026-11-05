@@ -4,5 +4,5 @@
             ld hl, 09000h
             ld de, 0BFF6h
             ld bc, 0900Ah
-            xor a
+            ld a, 246
             jp scrollCopyFill

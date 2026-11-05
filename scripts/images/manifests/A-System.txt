@@ -15,8 +15,8 @@
 #
 # Целевой формат задаёт расширение имени в первом столбце:
 #   COM/EXE: общий контейнер MXOS2 — заголовок 16 байт (загрузка, вход, размер, суммы) + нагрузка.
-#   COM исполняет DOS; EXE передаётся RUN через NC.EXT, без ключа RUN показывает меню среды.
-#   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через NC.EXT запускается RUN, по умолчанию -MON.
+#   COM исполняет DOS; EXE передаётся RUN через CLI.EXT, без ключа RUN показывает меню среды.
+#   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через CLI.EXT запускается RUN, по умолчанию -MON.
 #   При RKS -> COM/EXE заголовок и сумма RKS заменяются контейнером MXOS2; результат не является RAW.
 #   При преобразовании в RKS адрес входа должен совпадать с адресом загрузки.
 #   SYS/MON и остальные целевые расширения: побайтовая копия; SYS — DOS, MON — сырой образ сменного ядра.
@@ -46,8 +46,9 @@ RUN.COM          ../bin/RUN.cpu                                         0   RS
 RAMFOS.MON       ../bin/RAMFOS.mon                                      0xC000   RS
 MONITOR2.MON     ../bin/Monitor2.mon                                    0xC000   RS
 DEBUG.COM        ../bin/Debug.cpu                                       0   RS
+CLI.COM          ../bin/CLI.cpu                                         0   RS
 NC.COM           ../bin/NC.cpu                                          0   RS
-NC.EXT           system-rom/NC.EXT                                      0        RS
+CLI.EXT           system-rom/CLI.EXT                                      0        RS
 CHKDSK.COM       ../bin/CHKDSK.cpu                                      0
 DISKBEN.COM      ../bin/DISKBEN.cpu                                     0
 Test-MX.COM      programs/Test-MX.COM

@@ -3,5 +3,7 @@
 ; Расширения должны лежать подряд, без нулевых терминаторов.
 aBat:            DB "BAT"
 aCom:            DB "COM"
+aExe:            DB "EXE"
     ASSERT aCom == aBat+3
-pathRomCom:      DB "A:ROM.COM",0
+    ASSERT aExe == aCom+3
+pathRomCom:      DB "A:",05Ch,"ROM.COM",0
