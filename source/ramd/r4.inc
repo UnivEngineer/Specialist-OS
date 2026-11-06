@@ -1,5 +1,5 @@
 ; R4: прямой перенос четырёх байтов BC/DE через стек, без буфера данных.
-; Вход FFC0h/FFD0h: C=страница, DE=сектор<<8, HL=основная RAM.
+; Прямые входы regInitRead/regInitWrite: C=страница, DE=сектор<<8, HL=main.
 ; Выход: основная RAM и SP восстановлены; AF/BC/DE/HL/флаги разрушены.
 ; Нереентерабелен, прерывания запрещены контрактом MXOS.
 ; На сектор 128 смен банка и 256 чтений/записей полезных байтов.
@@ -99,14 +99,13 @@ regInitWrite:
             jp regWriteLoad
 
 driverBufferedStart:
-            jp regInitRead
+            DS 3,0
             ld sp,0
             ld a,0
             ld (IO_PAGE_RAMD),a
             jp regReadPop
                 DW 0
-            jp regInitWrite
-            BLOCK 13,0
+            BLOCK 16,0
 driverBufferedEnd:
             ASSERT driverBufferedEnd-driverBufferedStart == 32
 

@@ -203,6 +203,11 @@ handleRead:
 handleWrite:
             ld b,FILE_MODE_WRITE
 handleIO:
+    IFDEF BANKED_DOS_BUILD
+            ; Маршрутизатор отличает отказ до начала I/O от частичного обмена.
+            ld a,1
+            ld (kdIOStarted),a
+    ENDIF
             push bc
             ld a,FH_COUNT
             call handleLoadWord
@@ -271,18 +276,16 @@ handleIOLoop:
             ld a,h
             or l
             jp z,handleIOEnd
-            ; Чтение ограничено размером. Сначала вычисляем size-position.
+            ld a,(v_handleOp)
+            cp FILE_OP_WRITE
+            jp z,handleWritePosition
+            ; Только чтению нужна разность size-position перед обменом.
             ld a,FH_POSITION
             call handleField
             ex de,hl
             ld a,FILE_DESCRIPTOR.size
             call handleField
             call handleDifference
-            push af
-            ld a,(v_handleOp)
-            cp FILE_OP_WRITE
-            jp z,handleWritePop
-            pop af
             jp c,handleEOF
             ld hl,(v_handleDelta+2)
             ex de,hl
@@ -306,8 +309,6 @@ handleReadCountOk:
             call handleLocate
             jp c,handleExit
             jp handleTransfer
-handleWritePop:
-            pop af
 handleWritePosition:
             ; В C промежуток после seek за EOF имеет неопределённое содержимое.
             ; Кластеры промежутка выделяются здесь, до первой записи данных.
@@ -366,11 +367,7 @@ handleChunkReady:
             call sub_hl_de
             ld b,h
             ld c,l
-            push hl
-            ld h,b
-            ld l,c
             ld (v_handleDone),hl
-            pop hl
             ld a,b
             or c
             jp z,handleNoCommit
@@ -734,8 +731,14 @@ handleFlush:
             ld a,FH_DIR_OFFSET
             call handleLoadWord
             ld (v_cachedDescrOffset),hl
-            call markDirSectorAsModified
+            ld hl,(v_cachedSector)
+            ex de,hl
+            xor a
+            call getSectorAddressInCache
             ret c
+            ex de,hl
+            ld hl,(v_cachedDescrOffset)
+            add hl,de
             ; Остальные поля каталога не перезаписываем устаревшей копией.
             ld de,FILE_DESCRIPTOR.firstCluster
             add hl,de
@@ -745,13 +748,24 @@ handleFlush:
             ex de,hl
             pop hl
             ld b,6
+            ld c,0
 handleFlushCopy:
             ld a,(de)
+            cp (hl)
+            jp z,handleFlushUnchanged
+            inc c
             ld (hl),a
+handleFlushUnchanged:
             inc de
             inc hl
             dec b
             jp nz,handleFlushCopy
+            ; Кэш уже сброшен выше: неизменные метаданные не пачкаем.
+            ld a,c
+            or a
+            ret z
+            call markDirSectorAsModified
+            ret c
             call saveSectorCache
             ret c
             jp fatFinishWrite

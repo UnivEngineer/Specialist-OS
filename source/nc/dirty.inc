@@ -40,7 +40,8 @@ ncChangedRightMatch:
 ncStopObserver:
     ld hl,0
     ld a,CLI_OP_OBSERVER
-    jp bios_cli
+    MXCALL MX_DOS_CLI
+    ret
 ; После тихой команды: приглашение обновляется сразу, панели — по маске.
 ncRefreshDirty:
     call updateCommandPath

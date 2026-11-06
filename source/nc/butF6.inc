@@ -27,7 +27,7 @@ ncRename:
             jp z,ncRefreshDirty
             ld hl,state.panelA_drive
             call readBytePanel
-            call bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             jp c,copyFileError
             call restorePanelDirectory
             ld hl,vars.input
@@ -51,7 +51,7 @@ ncRenameLeafReady:
             call getSelectedFile
             ld de,vars.copyRequest.destination
             ld a,CLI_OP_RENAME
-            call bios_cli
+            MXCALL MX_DOS_CLI
             jp c,copyFileError
             jp ncRefreshDirty
 ncRenameText: DB 'Rename to',0

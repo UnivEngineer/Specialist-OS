@@ -121,7 +121,7 @@ class Matrix:
             raise RuntimeError(('NC boot timeout',state,self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
         self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
         self.ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
-        expected=(dos or ROOT/'bin/DOS.sys').read_bytes()
+        expected=(ROOT/'bin/BIOS.sys').read_bytes()
         # Холодный старт патчит ядро; сверяем таблицу ABI, а не все изменяемые байты.
         assert self.m.read(0xC800,3)==expected[0x800:0x803]
         conf=(RUNTIME/'specialist-os/specialist-mx2.conf').read_text(encoding='utf-8-sig')
@@ -211,7 +211,8 @@ class Matrix:
         self.check_integrity(before,after)
         total=current
         assert total[0][2]==(PASSES if info['caps']&8 else 0)
-        assert total[2][2]>=(PASSES if info['caps']&8 else 0)
+        # Физические flush внутри DOS не проходят через main C863h.
+        # Счётчик main-перехвата измеряет только Raw, не внутренний DOS flush.
         metrics=dict(zip(['rawWrite','rawRead','fileWrite','fileRead'],total))
         if drive==0:
             high=self.m.read(self.s['resultsHigh'],40)
@@ -221,7 +222,7 @@ class Matrix:
             metrics['fileReadHigh']=struct.unpack_from('<IIH',high,30)
         verification=[int.from_bytes(self.m.read(self.s[k],4),'little') for k in ['statRawVerify','statFileVerify']]
         mode_name={1:'write',5:'write+verify',6:'write+file-verify'}[mode]
-        self.report['rows'].append(dict(info,id=key,phase=self.phase,variant=variant,mode=mode_name,buffer='low',metrics=metrics,verifyTicks=verification,perPass=passes,integrity=True))
+        self.report['rows'].append(dict(info,id=key,phase=self.phase,variant=variant,mode=mode_name,buffer='low',metrics=metrics,fileFlushObservable=False,verifyTicks=verification,perPass=passes,integrity=True))
         self.save();print('DONE',key,flush=True)
     @staticmethod
     def check_integrity(before,after):

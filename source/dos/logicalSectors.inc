@@ -7,51 +7,42 @@ logicalSectorIO:
             dec a
             cp 2
             jp nc,blockArgument
+logicalSectorIOChecked:
+            ; Внутренние вызывающие задают только B=1/2.
             push hl
             ld hl,(v_logicalCapacity)
             call cmp_hl_de
             pop hl
             jp c,blockArgument
             jp z,blockArgument
-            ld a,(v_diskInfo.sectorShift)
-            push hl
-            ld hl,v_diskInfo.blockShift
-            sub (hl)
-            pop hl
-            jp c,blockArgument
-            jp z,j_diskDriver
+            ld a,(v_logicalShift)
+            or a
+            jp z,logicalPhysicalIO
             push hl
             push de
             push bc
             ld c,1
+            ex de,hl
 logicalScale:
+            ; DE<LBA capacity уже проверено: масштабирование не переполняется.
+            add hl,hl
             push af
-            ld a,d
-            add a,a
-            jp c,logicalOverflow
-            ld a,e
-            add a,a
-            ld e,a
-            ld a,d
-            rla
-            ld d,a
             ld a,c
             add a,a
             ld c,a
             pop af
             dec a
             jp nz,logicalScale
+            ex de,hl
 logicalBlocks:
-            call j_diskDriver
+            call logicalPhysicalIO
             jp c,logicalDone
             inc de
-            push bc
             push de
             ex de,hl
             ld hl,(v_diskInfo.blockSize)
             add hl,de
             pop de
-            pop bc
             dec c
             jp nz,logicalBlocks
             or a
@@ -60,10 +51,10 @@ logicalDone:
             pop de
             pop hl
             ret
-logicalOverflow:
-            pop af
-            call blockArgument
-            jp logicalDone
+
+logicalPhysicalIO:
+            ld a,(v_drive)
+            jp bios_blockIO
 
 ; A=log2 размера 7..9. HL=размер в байтах, BC/DE сохранены.
 sectorSizeFromShift:
@@ -90,7 +81,7 @@ v_cacheStride: DW 256
 v_cacheCount: DB FAT_CACHE_CAPACITY
 
 fatCachedWrite:
-            call logicalSectorIO
+            call logicalSectorIOChecked
             ret c
             ld a,(v_diskInfo.fatCount)
             cp 2
@@ -119,7 +110,7 @@ fatMirrorWrite:
             ex de,hl
             pop hl                ; исходный сектор
             ex (sp),hl            ; HL=буфер, исходный сектор сохранён
-            call logicalSectorIO
+            call logicalSectorIOChecked
             pop de
             ret
 fatMirrorDone:
@@ -128,21 +119,6 @@ fatMirrorDone:
             or a
             ret
 
-; A=диск 0..7, HL=драйвер, C=log2 блока. HL=DISK_INFO, CF=ошибка.
-; BC/DE сохранены; AF разрушается. Перед заменой драйвера нужен flush.
-installBlockDriver:
-            cp 8
-            jp nc,blockArgument
-            push af
-            ld a,c
-            cp 7
-            jp c,installBlockBad
-            cp 10
-            jp nc,installBlockBad
-            pop af
-            jp installDriverCommon
-installBlockBad:
-            pop af
 blockArgument:
             ld a,DOS_ERR_ARGUMENT
             jp dosSetError

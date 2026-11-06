@@ -56,6 +56,18 @@ nextArgument:
     cp '-'
     jp nz,argument
     inc hl
+    ld de,keyKOI7
+    ld c,4
+    call option
+    jp nz,runtimeOption
+    ld a,0FFh
+    ld (launchKoi),a
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+    jp endOption
+runtimeOption:
     ld de,keyMX
     ld c,2
     call option
@@ -462,6 +474,9 @@ install:
     ld a,(callerDrive)
     ld e,1
     call bios_fileGetSetDrive
+    ; Кодировка независима от MX/STD; сменные ядра задают её сами.
+    ld a,(launchKoi)
+    ld (bios_vars.koi7),a
     ; Переходник остаётся доступным после переключения в STD.
     ld hl,RAMFOS_BRIDGE
     ld de,RAMFOS_ARGS
@@ -562,7 +577,8 @@ copyBridge:
 rksRead:
     ld de,rksCursor
     ld a,2
-    jp bios_fileStream
+    MXCALL MX_DOS_FILESTREAM
+    ret
 ; BC=вычисленная сумма, HL=два байта суммы из RKS; CF=несовпадение.
 rksChecksum:
     ld e,(hl)
@@ -853,6 +869,7 @@ bridgeRelocations:
 bridgeRelocationsEnd:
 
 keyMX: DB "MX"
+keyKOI7: DB "KOI7"
 keyRF: DB "RF"
 keySTD: DB "STD"
 keyMON: DB "MON"
@@ -876,11 +893,12 @@ argAddress: DW 0
 staged: DB 0
 callerDrive: DB 0
 callerKoi: DB 0
+launchKoi: DB 0
 fileSize: DW 0
 monSP: DW 07FFFh
 monInit: DW 0C444h
 descriptor: BLOCK FILE_DESCR_SIZE,0
-txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]]",0
+txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
 txtNotFound: DB 0Ah,"File not found",0
 txtBad: DB 0Ah,"Bad image or address range",0
 upperEnd:

@@ -1,0 +1,233 @@
+; Холодная загрузка: BIOS в main, DOS в физическую страницу ДОЗУ 0.
+; Адреса файлов фиксированы сборщиком. FAT не нужен bootstrap.
+    INCLUDE "../../bin/bootstrap/config.inc"
+    ORG 02000h
+entry:
+    di
+    ld hl,stageImage
+    ld de,08000h
+    ld bc,stageEnd-stageImage
+relocate:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    dec bc
+    ld a,b
+    or c
+    jp nz,relocate
+    jp stage
+stageImage:
+    DISP 08000h
+stage:
+    ld sp,08FDFh
+    ld hl,03000h
+    ld de,03000h+DOS_BYTES
+    ld bc,0C000h
+    call moveCore
+biosLoaded:
+    ; Детектор работает до установки общего шлюза.
+    ld a,15
+    ld hl,0FFBEh
+    call BIOS_CHECK_RAMD
+    jp z,bootFailed
+    ; Адрес поля берётся из структуры BIOS, не из конца области.
+    ld a,(BIOS_PAGE_COUNT)
+    ld (pageCount),a
+    ld (dosContext+1),a
+    ld (BIOS_BOOT_PAGES),a
+    ld hl,byteWindow
+    ld de,byteWindowEnd
+    ld bc,0FFC0h
+    call moveCore
+    ; BIOS загружается всегда. DOS сохраняем только по её собственному
+    ; флагу готовности; это не проверка целостности исполняемого образа.
+    ld hl,DOS_READY
+    call 0FFC0h+byteRead-byteWindow
+    ld a,c
+    cp 1
+    jp nz,loadDos
+    ld (BIOS_BOOT_WARM),a
+    jp dosLoaded
+loadDos:
+    ; R4 ROM -> DOS: код хвоста одинаков в обеих страницах.
+    ld de,romTailImage
+    ld hl,0FF00h
+    ld bc,romTailEnd-romTailImage
+    xor a
+    call install
+    ld hl,romTailImage
+    ld de,romTailEnd
+    ld bc,0FF00h
+    call moveCore
+    ld hl,romWindow
+    ld de,romWindowEnd
+    ld bc,0FFC0h
+    call moveCore
+    ld hl,0
+    add hl,sp
+    dec hl
+    dec hl
+    ld (0FFD4h),hl
+    ld a,MODULE_SECTORS
+    ld (0FFD3h),a
+    ld hl,04004h
+    call 0FFC0h
+dosLoaded:
+    ; Данные страниц RAM-диска не трогаем, устанавливаем только FF00h.
+    ld hl,byteWindow
+    ld de,byteWindowEnd
+    ld bc,0FFC0h
+    call moveCore
+    ld a,(pageCount)
+installPages:
+    dec a
+    push af
+    ld de,transportImage+0300h
+    ld hl,0FF00h
+    ld bc,transportEnd-transportImage-0300h
+    call install
+    pop af
+    or a
+    jp nz,installPages
+    ld de,transportImage
+    ld hl,0FC00h
+    ld bc,transportEnd-transportImage
+    xor a
+    call install
+    ld de,clientImage
+    ld hl,0F800h
+    ld bc,clientEnd-clientImage
+    xor a
+    call install
+    ld de,dosContext
+    ld hl,BANK_PAGE
+    ld bc,dosContextEnd-dosContext
+    xor a
+    call install
+    ld hl,transportImage
+    ld de,transportEnd
+    ld bc,0FC00h
+    call moveCore
+    ld a,(pageCount)
+    ld (BANK_PAGE_COUNT),a
+    ld hl,0E800h
+    ld (BANK_SERVICE_SP),hl
+    ld hl,0E440h
+    ld (BANK_STACK_FLOOR),hl
+    ld hl,windowImage
+    ld de,windowEnd
+    ld bc,0FFC0h
+    call moveCore
+    ld a,1
+    ld (BIOS_BANKED),a
+    ld (BIOS_DOS_READY),a
+bootDone:
+    jp 0C000h
+bootFailed:
+    halt
+    jp bootFailed
+
+; A=физическая страница, DE=источник main, HL=назначение, BC=длина.
+; Общий байтовый установщик нужен только для хвостов до запуска транспорта.
+install:
+    ld (0FFC1h),a
+installLoop:
+    ld a,(de)
+    push bc
+    ld c,a
+    call 0FFC0h
+    pop bc
+    inc de
+    inc hl
+    dec bc
+    ld a,b
+    or c
+    jp nz,installLoop
+    ret
+byteWindow:
+    ld a,0
+    ld (0FFFDh),a
+    ld (hl),c
+    ld (0FFFCh),a
+    ret
+byteRead:
+    ; Второй вход читает байт из физической страницы 0 в C.
+    ld a,0
+    ld (0FFFDh),a
+    ld c,(hl)
+    ld (0FFFCh),a
+    ret
+byteWindowEnd:
+    ASSERT byteWindowEnd-byteWindow == 20
+romWindow:
+    ld sp,0
+    ld a,1
+    ld (0FFFEh),a
+    jp romRead4
+    xor a
+    ld (0FFFDh),a
+    jp ramWrite4
+romWindowEnd:
+    ASSERT romWindowEnd-romWindow == 18
+    INCLUDE "memcpy.inc"
+pageCount: DB 16
+dosContext:
+    DB 1
+    ; Число страниц после детектора копируется сюда перед установкой.
+    DB 16,0,0,0
+    DW 0F800h,0F440h
+dosContextEnd:
+transportImage:
+    INCBIN "../../bin/banked/TRANSPORT.bin"
+transportEnd:
+clientImage:
+    INCBIN "../../bin/banked/CLIENT.bin"
+clientEnd:
+windowImage:
+    INCBIN "../../bin/banked/WINDOW.bin"
+windowEnd:
+    ENT
+romTailStorage:
+    DISP 0FF00h
+romRead4:
+    pop bc
+    pop de
+    jp 0FFCBh
+ramWrite4:
+    ld sp,hl
+    push de
+    push bc
+    inc hl
+    inc hl
+    inc hl
+    inc hl
+    ld a,(0FFC1h)
+    add a,4
+    ld (0FFC1h),a
+    jp nz,0FFC0h
+    ld a,(0FFC2h)
+    inc a
+    cp 080h
+    jp nz,romSamePage
+    ld a,(0FFC4h)
+    inc a
+    ld (0FFC4h),a
+    xor a
+romSamePage:
+    ld (0FFC2h),a
+    ld a,(0FFD3h)
+    dec a
+    ld (0FFD3h),a
+    jp nz,0FFC0h
+    ld (0FFFCh),a
+    ld hl,(0FFD4h)
+    ld sp,hl
+    ret
+    ENT
+romTailStorageEnd:
+romTailImage = 08000h+romTailStorage-stageImage
+romTailEnd = romTailImage+romTailStorageEnd-romTailStorage
+stageEnd:
+    ASSERT stageEnd <= 03000h
+    ASSERT 08000h+stageEnd-stageImage < 08C00h

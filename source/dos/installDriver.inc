@@ -62,7 +62,17 @@ installDriverCommon:
             cp   (hl)
             pop  hl
             jp nz, installDriverInactive
-            ld   (j_diskDriver+1), hl
+    IFNDEF BANKED_DOS_BUILD
+            push af
+            ld a,(v_dosBanked)
+            or a
+            jp nz,installDriverBanked
+            ld (j_diskDriver+1),hl
+installDriverBanked:
+            pop af
+    ELSE
+            ld (j_diskDriver+1),hl
+    ENDIF
 installDriverInactive:
             pop af
 
@@ -75,3 +85,23 @@ installDriverInactive:
 
 
 v_blockShifts: DB 8,8,8,8,8,8,8,8
+
+; A=диск 0..7, HL=драйвер, C=log2 блока. HL=DISK_INFO, CF=ошибка.
+; BC/DE сохранены; AF разрушается. Перед заменой драйвера нужен flush.
+installBlockDriver:
+            cp 8
+            jp nc,installBlockError
+            push af
+            ld a,c
+            cp 7
+            jp c,installBlockBad
+            cp 10
+            jp nc,installBlockBad
+            pop af
+            jp installDriverCommon
+installBlockBad:
+            pop af
+installBlockError:
+            ld a,DOS_ERR_ARGUMENT
+            scf
+            ret

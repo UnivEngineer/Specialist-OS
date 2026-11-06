@@ -871,7 +871,7 @@ txtTitle:        DB "Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     ENDIF
 txtDrive:        DB 00Ah,"Drive A-H [A], Q=exit (Enter confirms): ",0
 txtFlashLife:    DB 00Ah,"FLASH: writes consume limited program life.",0
-txtVerify:       DB 00Ah,"Write [0]: 0=plain, 1=file verify, 2=sector verify: ",0
+txtVerify:       DB 00Ah,"Write [0]: 0=plain, 1=file verify, 2=raw sector verify: ",0
 txtWrites:       DB 00Ah,"Each pass uses and removes DISKBEN.TMP.",00Ah
                  DB "File WRITE includes metadata and flush.",00Ah
                  DB "Passes (0-9) [1], 0=skip: ",0
@@ -904,7 +904,7 @@ txtFloppy:       DB "Floppy",0
 txtHDD:          DB "HDD",0
 txtReadOnly:     DB "read only",0
 txtWrite:        DB "write",0
-txtWriteVerify:  DB "write + sector verify",0
+txtWriteVerify:  DB "verify: Raw sector / DOS file",0
 txtWriteFileVerify: DB "write + file verify",0
 txtUnknown:      DB "Unknown",0,0
 txtSkipped:      DB "skipped (read only / 0 passes)",00Ah,0
@@ -942,7 +942,7 @@ v_dataStart:     DW 0
 v_start:         DW 0
 v_fileKiB:       DB DEFAULT_FILE_KIB
 v_fileSectors:   DB DEFAULT_FILE_KIB*4
-v_bufferEndHi:   DB (02000h + DEFAULT_FILE_KIB*1024) / 256
+v_bufferEndHi:   DB (sectorBuffer + DEFAULT_FILE_KIB*1024) / 256
 v_operations:    DW 0
 v_left:          DW 0
 v_sector:        DW 0
@@ -968,6 +968,7 @@ highBuffer = 08200h
     IFNDEF HIGH_SECTORS
 HIGH_SECTORS = (LEGACY_APP_MEMORY_END-highBuffer)/256
     ENDIF
+    ASSERT HIGH_SECTORS > 0
     ASSERT fatBuffer+256 <= highBuffer || highBuffer+HIGH_SECTORS*256 <= fatBuffer
 program_end = highBuffer + HIGH_SECTORS*256
 ; EQU-псевдонимы сохраняют адреса в .sym даже при задании через -D.

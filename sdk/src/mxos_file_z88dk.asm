@@ -1,6 +1,7 @@
 ; Мост sccz80: единственный аргумент __z88dk_fastcall находится в HL.
 ; Возвращаем код DOS в HL, без зависимости от флагов в вызывающем C.
     SECTION code_clib
+    INCLUDE "mxos_syscall_ids.inc"
     PUBLIC _mxos_file_call
     PUBLIC _mxos_dos_init
     PUBLIC _mxos_current_drive
@@ -10,7 +11,8 @@ _mxos_file_call:
     add hl,de
     ld a,(hl)
     pop hl
-    call 0C8D5h
+    call 0F806h
+    defw MX_DOS_FILEHANDLE
     ld l,a
     ld h,0
     ret

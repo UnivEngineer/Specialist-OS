@@ -18,6 +18,7 @@
 fatFileLoad2:
             call fileFind
             ret c
+fatFileLoadFound:
             push hl
             push bc
             push de
@@ -30,6 +31,24 @@ fatFileLoad2:
             ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.size)
             ld b,h
             ld c,l
+    IFDEF BANKED_DOS_BUILD
+            ; Внешний диапазон уже проверен шлюзом в странице клиента.
+            ld a,(kdFarActive)
+            or a
+            jp nz,fileLoadRangeReady
+    ENDIF
+            ; Даже исторический load-at не должен затереть выполняемый DOS.
+            ld hl,(v_input_start)
+            ld de,DOS_MODULE_END
+            call cmp_hl_de
+            jp nc,fileLoadRangeReady
+            add hl,bc
+            jp c,fileLoadTooLarge
+            ld de,DOS_CODE_START
+            call cmp_hl_de
+            jp c,fileLoadRangeReady
+            jp nz,fileLoadTooLarge
+fileLoadRangeReady:
             ld hl,0
             ld (v_streamOffset),hl
             ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.firstCluster)

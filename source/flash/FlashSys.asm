@@ -49,7 +49,7 @@ FLASHSYS_READ_MODE = 1
 ;----------------------------------------------------------------------------
 
     ; F600h-F73Fh — FLASHSYS, F740h-F7FFh — RAMD.COM.
-    ; FlashSys, RAMD и внешний Flash в F800h-F9FFh работают одновременно.
+    ; FlashSys, RAMD и внешний Flash в E800h-E9FFh работают одновременно.
 RESIDENT_ADDRESS = SYSTEM_FLASH_ADDR
 SYSTEM_FLASH = 1
 

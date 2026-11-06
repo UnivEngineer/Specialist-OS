@@ -305,7 +305,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Rom",
           "cpu",
-          "DISK_DRIVER_ADDR"
+          "0"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -573,7 +573,7 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "SystemEmu"
+          "SystemEmuWritable"
         ],
         "dependsOn": "build: all",
         "dependsOrder": "sequence",
@@ -853,6 +853,23 @@
           "-File",
           "${workspaceFolder}\\scripts\\emu80\\run.ps1"
         ],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "image: CP/M",
+        "type": "process",
+        "command": "python",
+        "args": ["-X", "utf8", "${workspaceFolder}\\scripts\\images\\build-cpm.py"],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80 CP/M",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run-cpm.ps1"],
+        "dependsOn": ["image: CP/M"],
         "problemMatcher": [],
         "group": "build"
       },

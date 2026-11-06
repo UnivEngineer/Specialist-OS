@@ -1,4 +1,4 @@
-; Самостоятельная консоль MXOS. Общие команды выполняет DOSMOD.
+; Самостоятельная консоль MXOS. Общие команды выполняет DOS в своей странице.
     INCLUDE "../include/mxos.inc"
     ORG 0000h
 cliStart:
@@ -6,19 +6,19 @@ cliStart:
     jp c,cliModuleError
     ld hl,0
     ld a,CLI_OP_OBSERVER
-    call bios_cli
+    MXCALL MX_DOS_CLI
     xor a
     ld (bios_vars.koi7),a
     ld a,2
-    call bios_setShell
-    call bios_fileSelectDrive
+    MXCALL MX_DOS_SETSHELL
+    MXCALL MX_DOS_FILESELECTDRIVE
     call cliHistoryLoad
 cliPrompt:
     ld a,1
-    call bios_setShell
+    MXCALL MX_DOS_SETSHELL
     ld a,DIR_OP_GETCWD
     ld hl,cliPromptPath
-    call bios_directory
+    MXCALL MX_DOS_DIRECTORY
     jp c,cliError
     ld hl,cliPromptPath
     call bios_printString
@@ -31,7 +31,7 @@ cliPrompt:
     ld hl,CMD_LINE
     ld de,cliOverwritePrompt
     ld a,CLI_OP_COMMAND
-    call bios_cli
+    MXCALL MX_DOS_CLI
     jp c,cliError
     cp 0FFh
     jp z,cliExternal
@@ -43,14 +43,14 @@ cliExternal:
     call cliHistorySave
     ; Нижнее ОЗУ может быть затёрто программой; возврат через загрузку оболочки.
     ld a,1
-    call bios_setShell
+    MXCALL MX_DOS_SETSHELL
     ld hl,CMD_LINE
     jp bios_fileExec
 cliLeave:
     call cliHistorySave
     jp bios_reboot
 cliError:
-    call bios_getError
+    MXCALL MX_DOS_GETERROR
     call dosErrorText
     call bios_printString
     ld c,0Ah
@@ -61,7 +61,7 @@ cliModuleError:
     call bios_printString
     call bios_getch
     xor a
-    call bios_setShell
+    MXCALL MX_DOS_SETSHELL
     jp bios_reboot
 cliErrorText: DB 'Error ',0
 cliModuleErrorText: DB 'DOS module error',0

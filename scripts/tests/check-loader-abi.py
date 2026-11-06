@@ -18,7 +18,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--ticks', type=Path, default=Path(
         'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
-    p.add_argument('--image', type=Path, default=ROOT/'bin/DOS.sys')
+    p.add_argument('--image', type=Path, default=ROOT/'bin/BIOS.sys')
     p.add_argument('--report-directory', type=Path,
                    default=ROOT/'docs/compat/loader-abi-001/cpu')
     args = p.parse_args()

@@ -112,12 +112,7 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 # DOS требует предварительного измерения блоков и размещения между входами ABI.
 if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')) {
-    $packingArguments = @('--output', $outputPath, '--configuration', $configuration)
-    & python (Join-Path $PSScriptRoot 'pack-dos.py') @packingArguments
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    if ($OutputBase -eq 'DOS') {
-        & python (Join-Path $PSScriptRoot 'build-dos-module.py')
-    }
+    & python (Join-Path $PSScriptRoot 'build-bios-dos.py')
     exit $LASTEXITCODE
 }
 

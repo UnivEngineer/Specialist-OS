@@ -112,7 +112,31 @@ execBat_1:
             cp      0Ah
             jp z,   execBat_loop
 
+            ; @ подавляет только текущую строку; ECHO OFF — следующие.
+            cp      '@'
+            jp nz,  execBatEcho
+            inc     de
+            jp      execBatCommand
+execBatEcho:
+            ld      a,(v_batEcho)
+            or      a
+            jp z,   execBatCommand
+            push    de
+            ex      de,hl
+execBatEchoChar:
+            ld      a,(hl)
+            cp      020h
+            jp c,   execBatEchoEnd
+            ld      c,a
+            call    j_printChar
+            inc     hl
+            jp      execBatEchoChar
+execBatEchoEnd:
+            call    printCharA
+            pop     de
+
             ; Запустить файл
+execBatCommand:
             ex      de, hl             
             call    fileExec
             ret c                       ; ошибка прерывает пакетный файл

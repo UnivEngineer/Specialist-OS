@@ -166,7 +166,7 @@ moduleLoadError:
             call bios_printString
             call bios_getch
             jp bios_reboot
-moduleLoadErrorText: DB "DOSMOD.COM LOAD ERROR",0Dh,0
+moduleLoadErrorText: DB "DOS LOAD ERROR",0Dh,0
 
 ;---------------------------------------------------------------------------
 ; Константы и переменные
@@ -321,7 +321,7 @@ P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла �
 ;-----------------------------------------------------------------------
 
 ; Блок переменных состояния
-; Сохраняется в неиспользуемом секторе нулевой страницs RAM-диска
+; Сохраняется в B:\NCSTATE.TMP; не занимает состояние ядра DOS.
 
     STRUCT NC_STATE
 initState           DB    5Bh   ; признак, что NC.COM уже запускался

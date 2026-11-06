@@ -39,7 +39,7 @@ inputSwitchPanel:
             ld      (state.activePanel),a
             ld      hl,state.panelA_drive
             call    readBytePanel
-            call    bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             jp      restorePanelDirectory
 
 inputForFile:

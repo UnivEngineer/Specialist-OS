@@ -91,6 +91,11 @@ ParamsDone:
     jp      SearchExit
 
 SearchExit:
+    ; A: содержит BIOS, DOS и загрузчик; запрет действует и с ключом -Y.
+    ; Проверяем до подтверждения, выбора тома и обращения к драйверу.
+    ld      a, b
+    cp      'A'
+    jp z,   errSystemDrive
     ld      a, (v_FormatConfirmed)
     or      a
     jp nz,  Confirmed
@@ -343,11 +348,12 @@ FormatFatWrite:
 
     ; Форматирование меняет геометрию и уничтожает прежние каталоги.
     ; Сбрасываем старый кэш через mount и выбираем корень нового тома.
-    call bios_mountVolume
+    MXCALL MX_DOS_MOUNTVOLUME
     ret c
     ld de,0
     ld a,DIR_OP_SET
-    jp bios_directory
+    MXCALL MX_DOS_DIRECTORY
+    ret
 
 ;----------------------------------------------------------------------------
 ; Запись буфера на диск
@@ -414,6 +420,13 @@ errInvalidDrive:
     ld      hl, str_InvalidDrive
     jp      bios_printString
 
+errSystemDrive:
+    ld      hl, str_SystemDrive
+    call    bios_printString
+    ld      a, DOS_ERR_ACCESS
+    scf
+    ret
+
 ;----------------------------------------------------------------------------
 ; Вывод сообщения 'NO DRIVER'
 
@@ -444,7 +457,8 @@ errParams:
     scf
     ret
 
-str_Usage:          DB 0Ah,"FORMAT.COM [A:-H:] [-R] [-Y]",0
+str_Usage:          DB 0Ah,"FORMAT.COM [B:-H:] [-R] [-Y]",0
+str_SystemDrive:    DB "Cannot format system drive A:",0Ah,0
 str_Format:         DB 0Ah,"Format drive "
 str_A_Y_N:          DB "A: [Y/N]? ",0
 str_ChoseDrive:     DB 0Ah,"Choose drive: ",0

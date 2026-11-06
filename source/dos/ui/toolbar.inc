@@ -66,9 +66,7 @@ uiToolbarCharacter:
             jp z,uiToolbarCopy
             inc hl
             ld (toolbarText),hl
-    IF NEW_MEMORY_MAP
             sub 020h
-    ENDIF
             ld l,a
             ld h,0
             add hl,hl

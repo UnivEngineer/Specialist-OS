@@ -7,10 +7,10 @@ copyFileInt:
             ld      hl, state.panelA_drive
             call    readBytePanel
             ld      (vars.copyRequest.sourceDrive), a
-            call    bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             jp c,   copyFileError
             ld      a,DIR_OP_GET
-            call    bios_directory
+            MXCALL MX_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.sourceDirectory),hl
             call    getSelectedFile
@@ -29,7 +29,7 @@ copyFileNameLoop:
             ld      (state.activePanel),a
             ld      hl,state.panelA_drive
             call    readBytePanel
-            call    bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             call    restorePanelDirectory
             ld      a,(state.activePanel)
             xor     1
@@ -39,7 +39,7 @@ copyFileNameLoop:
             call    bios_fileNamePrepare
             jp c,   copyFileError
             ld      a,DIR_OP_RESOLVED
-            call    bios_directory
+            MXCALL MX_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.destinationDirectory),hl
             ld      e, 0
@@ -55,7 +55,7 @@ copyFileNameLoop:
             ld      hl, vars.copyRequest
 copyFileOperation:
             ld a,CLI_OP_COPY
-            call    bios_cli
+            MXCALL MX_DOS_CLI
             ret nc
             cp      FILE_OP_EXISTS
             jp z,   copyFileExists
@@ -82,13 +82,13 @@ getCopyLimitReady:
             ret
 
 copyFileError:
-            call bios_getError
+            MXCALL MX_DOS_GETERROR
 copyFileErrorCode:
             call dosErrorText
             jp      copyFileShowError
 
 copyFileExists:
-            call bios_getError
+            MXCALL MX_DOS_GETERROR
             call dosErrorText
 
 copyFileShowError:
@@ -119,7 +119,62 @@ showFileErrorWindow:
             pop     hl
             call    bios_printString
             COLOR   COLOR_DIALOG
-            ld      hl, 05090h
+            ld      hl, 03990h          ; x=114, нижняя линия знака y=144
             ld      (bios_vars.cursorY), hl
             ld      hl, vars.input
+            call    ncErrorCompact
             jp      printStringInv
+
+; Поле ошибки вмещает 26 знаков. Абсолютные пути сокращаются по компонентам,
+; для команды/относительного имени показываем многоточие и конец строки.
+; HL=строка (ASCIIZ или окончание CR), HL=vars.displayPath; AF/BC/DE разрушены.
+ncErrorCompact:
+            ld de,vars.displayPath
+            ld c,0
+ncErrorCopy:
+            ld a,(hl)
+            cp 020h
+            jp c,ncErrorCopied
+            ld (de),a
+            inc hl
+            inc de
+            inc c
+            ld a,c
+            cp MAX_PATH-1
+            jp c,ncErrorCopy
+ncErrorCopied:
+            xor a
+            ld (de),a
+            ld hl,vars.displayPath
+            ld a,c
+            cp 27
+            ret c
+            ; Сохраняем полный суффикс пути, когда это абсолютное имя.
+            ld a,(vars.input+1)
+            cp ':'
+            ld b,26
+            ld hl,vars.input
+            jp z,compactPath
+            ld hl,vars.displayPath
+            ld a,c
+            sub 23
+            ld e,a
+            ld d,0
+            add hl,de
+            ld de,vars.displayPath
+            ld a,'.'
+            ld (de),a
+            inc de
+            ld (de),a
+            inc de
+            ld (de),a
+            inc de
+ncErrorTail:
+            ld a,(hl)
+            ld (de),a
+            inc hl
+            inc de
+            or a
+            jp nz,ncErrorTail
+            ld hl,vars.displayPath
+            ret

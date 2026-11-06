@@ -6,6 +6,13 @@ typedef unsigned short mxos_u16;
 typedef unsigned long mxos_u32;
 typedef signed long mxos_i32;
 typedef struct { mxos_u8 bytes[64]; } MXOS_FILE;
+/* Целый файл по пути: 40 байт, рабочий дескриптор принадлежит вызывающему.
+ * count — вместимость загрузки / длина сохранения; actual — результат.
+ * path и buffer — NEAR-адреса; MX_DOS_FILELOADPATH/FILESAVEPATH через mxos_call. */
+typedef struct {
+    mxos_u16 path, buffer, count, actual;
+    mxos_u8 descriptor[32];
+} MXOS_PATH_IO;
 
 #define MXOS_SEEK_SET 0
 #define MXOS_SEEK_CUR 1

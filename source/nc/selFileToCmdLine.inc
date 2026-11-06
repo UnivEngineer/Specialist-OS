@@ -16,7 +16,7 @@ buildSelectedFilePath:
         push hl
         ld hl,vars.path
         ld a,DIR_OP_GETCWD
-        call bios_directory
+        MXCALL MX_DOS_DIRECTORY
         pop hl
         ret c
 buildCachedSelectedPath:

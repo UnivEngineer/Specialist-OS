@@ -8,10 +8,11 @@ restorePanelDirectory:
             call readBytePanel
             ld d,a
             ld a,DIR_OP_SET
-            jp bios_directory
+            MXCALL MX_DOS_DIRECTORY
+            ret
 savePanelDirectory:
             ld a,DIR_OP_GET
-            call bios_directory
+            MXCALL MX_DOS_DIRECTORY
             ret c
             ld a,e
             ld hl,state.panelA_dirLow
@@ -34,7 +35,7 @@ enterDirectory:
             ld (de),a
             ld hl,vars.pathArg
             ld a,CLI_OP_CHDIR
-            call bios_cli
+            MXCALL MX_DOS_CLI
             jp c,directoryFailure
             call savePanelDirectory
 directoryChanged:
@@ -65,7 +66,7 @@ directoryError: DB ' DIRECTORY ERROR',0
 updateCommandPath:
             ld hl,vars.path
             ld a,DIR_OP_GETCWD
-            call bios_directory
+            MXCALL MX_DOS_DIRECTORY
             ret nc
             ld hl,vars.path
             ld (hl),0
@@ -141,7 +142,7 @@ commandText:
 printPanelPath:
             ld hl,vars.path
             ld a,DIR_OP_GETCWD
-            call bios_directory
+            MXCALL MX_DOS_DIRECTORY
             ret c
             ld hl,vars.path
             ld b,29

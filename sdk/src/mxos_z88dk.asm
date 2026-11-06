@@ -2,6 +2,7 @@
 ; Мост нереентерабелен: меняется только операнд CALL, пакет хранит вызывающий.
     SECTION code_clib
     PUBLIC _mxos_bios_call
+    PUBLIC _mxos_call
     PUBLIC _mxos_memtop, _mxos_set_memtop, _mxos_release_module
     PUBLIC _mxos_getch, _mxos_getkey, _mxos_keyscan, _mxos_putch, _mxos_puts
     PUBLIC _mxos_cls, _mxos_cursor_get, _mxos_cursor_set, _mxos_upper
@@ -9,6 +10,16 @@
 
 ; Горячие вызовы без упаковки регистров: putch — 4 байта/15 тактов до BIOS,
 ; getch — 7 байт, 39 тактов обвязки помимо времени самой клавиатуры.
+_mxos_call:
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    inc hl
+    ex de,hl
+    call 0F800h
+    push af
+    pop hl
+    ret
 _mxos_putch:
     ld c,l
     jp 0C809h

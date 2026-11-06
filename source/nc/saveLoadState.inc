@@ -1,79 +1,73 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Cохранение состояния в ДОЗУ
-;
-; 2013-12-18 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
-
+; Состояние принадлежит NC. Пока оболочка работает в main, сохраняем его
+; в B:\NCSTATE.TMP. Ошибки и нехватка места отключают сохранение до нового NC.
+; Выбранный диск сохраняется, CWD не меняется файловым API.
 saveState:
-            ; Устанавливаем побайтовый драйвер
-            ld      b, 1
-            call    bios_setRAMDDriver
-
-            ld      de, state           ; откуда (в ОЗУ)
-            ld      hl, NC_STATE_ADDR          ; куда (в ДОЗУ)
-            ld      b,  stateEnd-state  ; сколько байт
-
-saveStateLoop:
-            ld      a, (de)
-            ld      c, a                ; записываемый байт в c
-            xor     a                   ; 0 страница ДОЗУ
-            call    bios_RAMDWrite
-            inc     hl
-            inc     de
-            dec     b
-            jp nz,  saveStateLoop
-
-            ; Восстанавливаем блочный драйвер
-            ; b уже 0 здесь
-            jp      bios_setRAMDDriver
-
-
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Загрузка состояния из ДОЗУ
-;
-; выход:
-;   флаг  z, если в ДОЗУ есть метка "запускалось"
-;   флаг nz, если в ДОЗУ нет  метки "запускалось"
-;   Дравер не восстанавливается!
-;
-; 2022-02-02 SpaceEngineer
-;----------------------------------------------------------------------------
-
+    ld a,(ncStateDisabled)
+    or a
+    ret nz
+    call ncStateBegin
+    ld hl,state
+    ld (ncStateIO+FILE_PATH_IO.buffer),hl
+    ld hl,ncStateIO
+    call bios_fileSavePath
+    jp c,ncStateDisable
+    ; Служебный файл не попадает в обычные списки NC/DIR.
+    ld hl,ncStateIO+FILE_PATH_IO.descriptor
+    ld bc,0201h
+    MXCALL MX_DOS_FILEGETSETATTR
+    jp c,ncStateDisable
+    jp ncStateFinish
 loadState:
-            ; Устанавливаем побайтовый драйвер
-            ld      b, 1
-            call    bios_setRAMDDriver
-
-            ; Если в рам-диске по адресу NC_STATE_ADDR (последний неполный сектор)
-            ; нет специальной метки, значит, не запускали форматирование.
-            ld      hl, NC_STATE_ADDR          ; адрес в странице
-            xor     a                   ; 0 страница ДОЗУ
-            call    bios_RAMDRead
-            ld      a, c                ; считанный байт в c
-            cp      5Bh
-            ret nz                      ; метки нет - выходим с флагом nz
-
-            ; Иначе загружаем состояние
-            ld      de, state           ; куда (в ОЗУ)
-            ld      hl, NC_STATE_ADDR          ; откуда (в ДОЗУ)
-            ld      b,  stateEnd-state  ; сколько байт байт
-
-loadStateLoop:
-            xor     a                   ; 0 страница ДОЗУ
-            call    bios_RAMDRead
-            ld      a, c                ; считанный байт в c
-            ld      (de), a
-            inc     hl
-            inc     de
-            dec     b
-            jp nz,  loadStateLoop
-
-            ; Восстанавливаем блочный драйвер
-            ; b уже 0 здесь
-            call    bios_setRAMDDriver
-
-            xor     a   ; для выхода с флагом z
-            ret
-
+    call ncStateBegin
+    ld hl,ncSavedState
+    ld (ncStateIO+FILE_PATH_IO.buffer),hl
+    ld hl,ncStateIO
+    call bios_fileLoadPath
+    jp nc,ncStateValidate
+    ; Отсутствующий файл при первом запуске не отключает сохранение.
+    MXCALL MX_DOS_GETERROR
+    cp DOS_ERR_NOT_FOUND
+    jp nz,ncStateDisable
+    jp ncStateInvalid
+ncStateValidate:
+    ld hl,(ncStateIO+FILE_PATH_IO.actual)
+    ld de,stateEnd-state
+    call bios_cmp_hl_de
+    jp nz,ncStateInvalid
+    ld a,(ncSavedState)
+    cp 05Bh
+    jp nz,ncStateInvalid
+    ld hl,ncSavedState
+    ld de,ncSavedState+stateEnd-state
+    ld bc,state
+    call bios_memcpy_bc_hl
+    xor a
+    jp ncStateFinish
+ncStateDisable:
+    ld a,1
+    ld (ncStateDisabled),a
+ncStateInvalid:
+    ld a,1
+    or a
+ncStateFinish:
+    push af
+    ld a,(ncStateDrive)
+    MXCALL MX_DOS_FILESELECTDRIVE
+    pop af
+    ret
+ncStateBegin:
+    ld e,0
+    call bios_fileGetSetDrive
+    ld (ncStateDrive),a
+    ld hl,stateEnd-state
+    ld (ncStateIO+FILE_PATH_IO.count),hl
+    ret
+ncStateDisabled: DB 0
+ncStateDrive: DB 0
+ncSavedState: DS stateEnd-state,0
+ncStateIO:
+    DW ncStatePath,ncSavedState,stateEnd-state,0
+    DS FILE_DESCRIPTOR,0
+ncStatePath:
+    DB 'B:',05Ch,'NCSTATE.TMP',0
+    DS MAX_PATH-($-ncStatePath),0

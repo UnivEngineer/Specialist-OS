@@ -213,7 +213,7 @@ initRightDrive:
 buildDriveList:
             ld      hl, vars.driveList
             ld      bc, 8
-            call    bios_fileGetDrives
+            MXCALL MX_DOS_FILEGETDRIVES
             ld      a, b
             ld      (vars.driveCount), a
             xor     a

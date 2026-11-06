@@ -1,4 +1,4 @@
-"""Встроенный блочный RAMD, сервисный байтовый ABI и пользовательский R4."""
+"""Встроенный блочный RAMD, сервисный байтовый ABI и устанавливаемые CP/M и R4."""
 from pathlib import Path
 import argparse,json,re,runpy
 
@@ -6,6 +6,7 @@ ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--runtime',type=Path,default=ROOT/'.local/monitor2-001')
 parser.add_argument('--report',type=Path,default=ROOT/'docs/drivers/ramd-modes-2026-11-05')
+parser.add_argument('--compare-r4',action='store_true')
 args=parser.parse_args();args.report.mkdir(parents=True,exist_ok=True)
 helpers=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
 globals_=helpers['Matrix'].__init__.__globals__
@@ -15,6 +16,7 @@ def symbols(name):
  return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/f'bin/{name}.sym').read_text(),re.M)}
 
 d,n,r=[symbols(name) for name in ['DOS','NC','RAMD']]
+driverLabel='CPM16' if r.get('RAMD_USE_CPM',0) else 'R4'
 Base=globals_['Bench'];stages=[];cold=True
 targets={d[name]:name for name in ['reboot3_1','fileExec','skipFormat','reboot3_2']}
 
@@ -84,10 +86,10 @@ try:
  m.func(d['bios_RAMDWrite'],af=0x0200,bc=saved,hl=0x1234)
  select(d['RAMD_DRIVER_BLOCK']);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_RESTORE']);window(user)
- report['checks'].append('byte access and explicit block selection preserve registered R4; all selector registers/flags preserved')
+ report['checks'].append('byte access and explicit block selection preserve registered user driver; all selector registers/flags preserved')
  # Для испытания встроенного физического пути заменяем только регистрацию B:.
  assert not m.func(d['bios_installDriver'],af=0x0100,hl=d['diskDriver'])['flags']['C']
- m.select(1);select(d['RAMD_DRIVER_BLOCK']);io('R3')
+ select(d['RAMD_DRIVER_BLOCK']);m.select(1);io('R3')
  # REGISTER не устанавливает окно, USER/RESTORE применяют новый шаблон.
  select(d['RAMD_DRIVER_REGISTER'],d['driverBlockStart']);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_BYTE']);window(d['driverByteStart'])
@@ -95,8 +97,13 @@ try:
  select(d['RAMD_DRIVER_REGISTER'],user);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_RESTORE']);window(user)
  assert not m.func(d['bios_installDriver'],af=0x0100,hl=r['Driver'])['flags']['C']
- m.select(1);io('R4')
- report['checks'].append('REGISTER leaves current window intact; USER applies new template; R4 registration restored')
+ m.select(1);io(driverLabel)
+ if args.compare_r4:
+  r4=symbols('RAMD-R4')
+  m.m.write(0,(ROOT/'bin/RAMD-R4.i80').read_bytes())
+  assert not m.func(r4['Install'])['flags']['C']
+  m.select(1);io('R4')
+ report['checks'].append('REGISTER leaves current window intact; USER applies new template; user registration restored')
  # Аппаратный сброс сохраняет RAM, но заново устанавливает начальный шаблон BIOS.
  sentinel=bytes(range(256));m.m.write(0x4001,sentinel)
  assert not m.func(d['bios_diskDriver'],bc=0x0100,de=0x100,hl=0x4001)['flags']['C']
@@ -109,7 +116,7 @@ try:
  m.m.write(0x4001,bytes(256))
  assert not m.func(d['bios_diskDriver'],bc=0x0200,de=0x100,hl=0x4001)['flags']['C']
  assert m.m.read(0x4001,256)==sentinel
- report['checks'].append('hardware reset restores BIOS default block template, skips format on existing RAM disk, AUTOEXEC reinstalls R4, data retained')
+ report['checks'].append('hardware reset restores BIOS default block template, skips format on existing RAM disk, AUTOEXEC reinstalls configured driver, data retained')
  (args.report/'result.json').write_text(json.dumps(report,indent=2)+'\n')
  print('RAMD MODES PASS',len(report['checks']),flush=True)
 finally:m.stop()

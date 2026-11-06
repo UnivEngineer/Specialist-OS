@@ -40,6 +40,13 @@ fileExecBuiltinDone:
             or a
             ret
 fileExecExternal:   ; Сюда будем записывать результат
+    IFDEF BANKED_DOS_BUILD
+            jp keExternal
+    ELSE
+            ; Поиск EXE/COM может выбрать другой том, но относительные
+            ; аргументы приложения относятся к диску вызывающей стороны.
+            ld a,(v_drive)
+            ld (v_execDrive),a
             ld      de, CMD_LINE
             
             ; Если первый символ меньше пробела, выходим c CF
@@ -103,7 +110,7 @@ fileExecPrepare:
             ld (v_curFileDescr + FILE_DESCRIPTOR.ext),hl
             ld a,'M'
             ld (v_curFileDescr + FILE_DESCRIPTOR.ext+2),a
-            ld a,(v_drive)
+            ld a,(v_execDrive)
             push af
             xor a
             call fileSelectDrive
@@ -124,7 +131,7 @@ execExplicitName:
             call cmpFileExt
             jp nz,execError
 execExeCom:
-            ld a,(v_drive)
+            ld a,(v_execDrive)
             push af
 execImageOpen:
             ld hl,v_curFileDescr
@@ -206,6 +213,7 @@ execImageError:
             call fileSelectDrive
             jp execError
 
+    ENDIF
 ; ---------------------------------------------------------------------------
 
 defAppReturn:

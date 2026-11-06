@@ -12,10 +12,11 @@ command=[str(args.z88dk/'bin/zcc.exe'),'+cpm',f'-DTEST_MEMTOP={top}','-clib=8080
 subprocess.run(command,cwd=ROOT,env=env,check=True)
 h=runpy.run_path(str(ROOT/'scripts/tests/check-file-handle.py'));memory=h['memory']
 s=h['S'];n=s['initVarsEnd']-s['initVars'];memory[s['bios_vars']:s['bios_vars']+n]=memory[s['initVars']:s['initVars']+n]
+memory[s['mx_call']:s['mx_call']+s['sysTailEnd']-s['sysTail']]=memory[s['sysTail']:s['sysTailEnd']]
 font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes();memory[s['FONT_ADDR']:s['FONT_ADDR']+len(font)]=font
 # Клавиатуру моделируем, а регистровый мост и прочие функции исполняются реально.
-memory[s['bios_getch']:s['bios_getch']+3]=b'\xC3\x00\x65';memory[0x6500:0x6504]=bytes.fromhex('3E 51 37 C9')
-memory[s['bios_keyScan']:s['bios_keyScan']+3]=b'\xC3\x10\x65';memory[0x6510:0x6514]=bytes.fromhex('3E FF B7 C9')
+memory[s['bios_getch']:s['bios_getch']+3]=b'\xC3\x00\xE6';memory[0xE600:0xE604]=bytes.fromhex('3E 51 37 C9')
+memory[s['bios_keyScan']:s['bios_keyScan']+3]=b'\xC3\x10\xE6';memory[0xE610:0xE614]=bytes.fromhex('3E FF B7 C9')
 data=(out/'stdio_code_crt_init.bin').read_bytes();assert 0x2000+len(data)<0x6000
 memory[0x2000:0x2000+len(data)]=data;(out/'input.bin').write_bytes(memory)
 subprocess.run([str(args.z88dk/'bin/z88dk-ticks.exe'),'-m8080','-pc','2000','-end','6100','-counter','50000000','-output',str(out/'output.bin'),str(out/'input.bin')],check=True,capture_output=True)

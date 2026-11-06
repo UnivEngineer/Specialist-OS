@@ -133,7 +133,7 @@ pip_printDiskInfo:
             ; Эта п/п может работать довольно долго,
             ; в зависимости от размера fat на диске
             ; Результат: de = количество свободных кластеров
-            call    bios_getDriveFreeSpace
+            MXCALL MX_DOS_GETDRIVEFREESPACE
 
             ; Считаем объем в килобайтах
             ; hl = hl * 256 / 1024 = hl / 4

@@ -26,7 +26,7 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
 loc_D595:   ; Удаляем текущий файл
             ld          hl, state.panelA_drive
             call        readBytePanel
-            call        bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             jp c,       deleteFileError
             call        getSelectedFile
             push hl
@@ -43,12 +43,12 @@ loc_D595:   ; Удаляем текущий файл
 ncDeleteRegular:
             ld a,CLI_OP_DELETE
 ncDeleteReady:
-            call bios_cli
+            MXCALL MX_DOS_CLI
             jp c,       deleteFileError
             ; Количество файлов и курсор обновляются по реальному каталогу.
             jp          ncRefreshDirty
 
 deleteFileError:
-            call bios_getError
+            MXCALL MX_DOS_GETERROR
             call dosErrorText
             jp copyFileShowError

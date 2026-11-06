@@ -88,6 +88,7 @@ fileOpError:
 for_Good:
             pop     de
             pop     hl
+    IFNDEF BANKED_DOS_BUILD
     IFDEF DOS_SPLIT_BUILD
             ; Временное размещение ядра в основной памяти: буфер и запрос
             ; не должны перекрывать его, даже находясь ниже bios_vars.
@@ -108,12 +109,17 @@ for_MainMemoryOk:
             pop de
             pop hl
     ENDIF
+    ENDIF
             or      a
             ret
 
 ; DE=исключительная граница программы, минимум memtop+1 и начала DOSMOD.
 ; AF/BC/HL и флаги сохранены. Системный стек проверяется отдельно.
 getAppMemoryEnd:
+    IFDEF BANKED_DOS_BUILD
+            ld de,DOS_BANK_STACK_BOTTOM
+            ret
+    ELSE
             push af
             push hl
             ld hl,(v_memTop)
@@ -132,3 +138,5 @@ getAppEndReady:
             pop hl
             pop af
             ret
+
+    ENDIF

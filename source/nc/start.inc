@@ -7,7 +7,7 @@
 
 Start:
             xor a
-            call bios_setShell
+            MXCALL MX_DOS_SETSHELL
             ; Модуль загружается до первого графического вызова.
             call    bios_loadDosModule
             jp c,   moduleLoadError
@@ -27,13 +27,9 @@ Start:
             ; Иначе сохраняем состояние.
             ld hl,ncDiskChanged
             ld a,CLI_OP_OBSERVER
-            call bios_cli
+            MXCALL MX_DOS_CLI
             call    loadState
             jp z,   formatCalled
-
-            ; loadState оставляет побайтовый драйвер ДОЗУ при первом запуске.
-            ld      b, 0
-            call    bios_setRAMDDriver
 
             ; H используется по умолчанию только при установленном драйвере.
             call    initRightDrive

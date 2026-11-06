@@ -125,10 +125,16 @@ imageLoad:
     push hl
     call imageSaveCursor
     pop hl
+    IFDEF BANKED_DOS_BUILD
+    ld a,(kdFarActive)
+    or a
+    jp nz,kiLoadSum
+    ENDIF
     dec hl
     ex de,hl
     ld hl,(v_input_end)
     call calcCS
+imageCheckSum:
     ld hl,(v_tmpFileDescr+12)
     ld d,b
     ld e,c

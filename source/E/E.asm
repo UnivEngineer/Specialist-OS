@@ -67,7 +67,7 @@ last    BLOCK  1,  0
 ;----------------------------------------------------------------------------
 
 ; Начало программы
-    IF NEW_MEMORY_MAP && !STANDARD_EDITOR
+    IF !STANDARD_EDITOR
         ORG 0
     ELSE
         ORG 0D000h

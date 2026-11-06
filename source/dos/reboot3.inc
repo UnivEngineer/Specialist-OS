@@ -6,7 +6,7 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-reboot3:    ; Инициализация стека
+dosBoot:    ; Инициализация стека; BIOS уже загрузил DOS
             ld      sp, STACK_ADDR
 
             ; Приложение могло изменить таймер и параметры BIOS-звука.
@@ -55,6 +55,10 @@ reboot3_1:
             call    setRAMDDriver
 
             ; Запуск файла "A:FORMAT.BAT"
+            ; До форматирования B: нельзя восстанавливать его контекст
+            ; после поиска ассоциаций. Сначала выбрать системный том.
+            xor a
+            call fileSelectDrive
             ld      hl, pathFormatBat
             call    fileExec
 
@@ -136,6 +140,7 @@ rebootShellReady:
 ; Режим 3 без загрузки счёта останавливает каждый канал ВИ53, OUT=1.
 ; BSR-команда 0Ah выключает программный звук PC5, не меняя режим ВВ55.
 ; Параметры берутся из общего шаблона, а не из состояния чужой программы.
+    IF BIOS_DOS_SPLIT == 0
 bios_reset_sound:
             ld      a, 0B6h
             ld      (IO_TIMER_MODE), a
@@ -150,3 +155,4 @@ bios_reset_sound:
             ret
 
             ASSERT bios_vars.beepDuration == bios_vars.beepFreq+1
+    ENDIF

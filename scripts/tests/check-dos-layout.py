@@ -21,6 +21,27 @@ def main():
     args.image = args.image.resolve()
     out = args.report_directory.resolve()
     out.mkdir(parents=True,exist_ok=True)
+    if args.image.name == 'DOS.sys' and (ROOT/'bin/System.layout.json').exists():
+        layout=json.loads((ROOT/'bin/System.layout.json').read_text('utf-8'))
+        spans=sorted((v['address'],v['address']+v['size']) for v in layout['windows']+layout['blocks'])
+        assert all(a[1]<=b[0] for a,b in zip(spans,spans[1:]))
+        ds=symbols(ROOT/'bin/BIOS.sym')
+        for name in ['BIOS','DOS']:
+            region=layout[name.lower()]
+            assert len((ROOT/f'bin/{name}.sys').read_bytes())==region['bytes']==region['end']-region['start']
+        assert layout['bios']['end']<=ds['DOS_END_MAX']<=ds['DISK_DRIVER_ADDR']
+        assert ds['DISK_DRIVER_ADDR']+512<=ds['FONT_ADDR']
+        assert ds['mx_call']==0xF800 and ds['RAMD_RESIDENT_ADDR']+192<=ds['mx_call']
+        ks=symbols(ROOT/'bin/banked/KERNEL.sym')
+        assert layout['dos']['page']==1
+        assert ks['dosCoreEnd']<=ks['DOS_BANK_COMPAT_ADDR']
+        assert layout['dos']['end']<=0xD800<=ks['DOS_BANK_STACK_BOTTOM']
+        assert ks['BANK_KERNEL_CACHE']==0xC000 and ks['bankKernelCommand']==0xC400
+        assert ds['APP_MEMORY_END']==0x8C00
+        assert ds['FONT_ADDR']+1280<=ds['STD_IO_ADDR']
+        runpy.run_path(str(ROOT/'scripts/tests/check-bios-dos-split.py'),run_name='__main__')
+        print('BIOS/DOS layout PASS: no overlaps; font below STD IO; DOS below cache')
+        return
     image = args.image.read_bytes()
     ds = symbols(args.image.with_suffix('.sym'))
     layout = json.loads(args.image.with_suffix('.layout.json').read_text('utf-8'))

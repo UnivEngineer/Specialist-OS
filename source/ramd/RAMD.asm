@@ -1,11 +1,16 @@
-; RAMD.COM — устанавливаемый блочный драйвер RAM-диска B:.
-; Загрузка/запуск с 0000h; резидент F740h–F7FFh, хвосты FF00h.
+; RAMD.COM — подготовка RAM-диска B: в банковой DOS.
+; Загрузка/запуск с 0000h; старый резидент F740h–F7FFh сохранён ниже.
 ; Вход установщика: стек вне нижних 32 КБ, прерывания запрещены MXOS.
-; Выход CF=0 — установлен, CF=1 — отказ flush или нет RAM-диска.
+; Выход CF=0 — том готов, CF=1 — отказ; для нового тома управление уходит FORMAT.
 ; AF/BC/DE/HL разрушаются. AUTOEXEC не изменяется.
     INCLUDE "../include/mxos.inc"
+; Переключатель исторической реализации: 1 — CP/M buf16, 0 — прежний R4.
+    IFNDEF RAMD_USE_CPM
+RAMD_USE_CPM = 1
+    ENDIF
+    ASSERT RAMD_USE_CPM == 0 || RAMD_USE_CPM == 1
     ORG 0
-    jp Install
+    jp BankInstall
 
 resident_file:
     DISP RAMD_RESIDENT_ADDR
@@ -31,13 +36,21 @@ Driver:
     ld c,d
     ld d,e
     ld e,0
-    call bios_RAMDRead
+    IF RAMD_USE_CPM
+    call cpmInitRead
+    ELSE
+    call regInitRead
+    ENDIF
     jp Done
 Write:
     ld c,d
     ld d,e
     ld e,0
-    call bios_RAMDWrite
+    IF RAMD_USE_CPM
+    call cpmInitWrite
+    ELSE
+    call regInitWrite
+    ENDIF
 Done:
     pop de
     pop bc
@@ -96,14 +109,25 @@ Info:
     ld hl,DriverInfo
     or a
     ret
+    IF RAMD_USE_CPM
+    INCLUDE "cpm-entry.inc"
+DriverInfo: DB "RAMD",0,"CP/M16",0
+    ELSE
 DriverInfo: DB "RAMD",0,"R4 banked",0
+    ENDIF
 resident_end:
     ASSERT resident_end <= RAMD_RESIDENT_ADDR + 0C0h
     ENT
 resident_file_end:
 
+    IF RAMD_USE_CPM
+    INCLUDE "cpm.inc"
+    ELSE
     INCLUDE "r4.inc"
+    ENDIF
 
+BankInstall:
+    INCLUDE "bank-install.inc"
 Install:
     ld a,(bios_vars.koi7)
     push af
@@ -117,7 +141,7 @@ Install:
     pop af
     ret
 InstallBody:
-    call bios_flushVolume
+    MXCALL MX_DOS_FLUSHVOLUME
     ret c
     ld a,(bios_vars.ramPageCount)
     or a
@@ -150,7 +174,7 @@ InstallByte:
     inc l
     ld c,a
     ld a,l
-    cp ramdBankTailEnd-regReadPop
+    cp ramdBankTailEnd-0FF00h
     ld a,c
     jp nz,InstallByte
     inc a

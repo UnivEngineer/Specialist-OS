@@ -38,16 +38,25 @@ def main():
         ('B: C: -Y', None, None, None, None),
         ('I: -Y', None, None, None, None),
         ('B: -Y UNKNOWN', None, None, None, None),
+        ('A:', None, None, None, None),
+        ('A: -Y', None, None, None, None),
+        ('a: -r -y', None, None, None, None),
+        ('-Y -R A:', None, None, None, None),
+        ('', None, None, None, None, 'A'),
+        ('-Y', None, None, None, None, 'A'),
     ]
     results = []
-    for number, (text, label, drive, ram, yes) in enumerate(cases):
+    for number, (text, label, drive, ram, yes, *keys) in enumerate(cases):
         m = bytearray(65536)
-        for base, file in ((0xC000, 'DOS'), (0, 'FORMAT')):
-            data = (ROOT / f'bin/{file}.{"sys" if file == "DOS" else "i80"}').read_bytes()
+        for base, file in ((0xC000, 'BIOS.sys'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
+            data = (ROOT / f'bin/{file}').read_bytes()
             m[base:base+len(data)] = data
         m[0xC818] = 0xC9            # печать не нужна для проверки парсера
-        m[0xC803:0xC806] = bytes.fromhex('3e 42 c9')  # интерактивный выбор B
-        m[0x8200:0x820C] = bytes.fromhex('31 df 8f 11 00 84 cd 00 00 c3 00 83')
+        m[0xC803:0xC806] = bytes([0x3e,ord(keys[0] if keys else 'B'),0xc9])
+        # Любой выбор тома/драйвера вместо отказа уводит исполнение в ловушку.
+        for entry in (0xC842,0xC863):m[entry:entry+3]=bytes.fromhex('c3 01 83')
+        wrapper=bytes.fromhex('31 df 8f 11 00 84 cd 00 00 22 02 85 f5 e1 22 00 85 c3 00 83')
+        m[0x8200:0x8200+len(wrapper)] = wrapper
         arg = text.encode('ascii') + b'\r\0'
         m[0x8400:0x8400+len(arg)] = arg
         source, target = out / f'{number:02}-input.bin', out / f'{number:02}-out.bin'
@@ -62,6 +71,9 @@ def main():
             assert b[65539] == ord(drive), text  # старший байт BC — буква диска
             assert bool(b[s['v_FormatRAMdisk']]) == ram, text
             assert bool(b[s['v_FormatConfirmed']]) == yes, text
+        if number>=14:
+            assert int.from_bytes(b[0x8502:0x8504],'little')==s['str_SystemDrive'],(text,'wrong error')
+            assert b[0x8500]&1 and b[0x8501]==6,(text,'expected CF and DOS_ERR_ACCESS')
         results.append({'arguments': text, 'result': label or 'rejected', 'disk_access': False})
     (out / 'checks.json').write_text(json.dumps(results, indent=2)+'\n', encoding='utf-8')
     print(f'OK: {len(results)} argument cases; no disk access')

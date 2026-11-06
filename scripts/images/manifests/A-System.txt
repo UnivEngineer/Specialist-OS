@@ -27,8 +27,8 @@
 # Порядок строк задаёт порядок файлов; в больших системных образах загрузочные записи идут первыми.
 
 # Имя на диске    Источник относительно assets/                          Адрес RAW Атрибуты
-DOS.SYS          ../bin/DOS.sys                                         0xC000   RS
-DOSMOD.COM       ../bin/DOSMOD.cpu                                      0x8000   RS
+BIOS.SYS         ../bin/BIOS.sys                                        0xC000   RS
+DOS.SYS          ../bin/DOS.sys                                         0x4000   RS
 AUTOEXEC.BAT     {AUTOEXEC}                                             0x8000   S
 README.TXT       system-rom/README.TXT
 E.COM            ../bin/E.cpu                                           0   RS
@@ -40,7 +40,6 @@ RAMD.COM         ../bin/RAMD.cpu                                        0       
 # TAPE.COM       ../bin/tape.cpu                                        0xEA00   RS
 FONT.FNT         system-rom/FONT.FNT                                    0        RS
 FONTKOI.FNT      system-rom/FONTKOI.FNT                                 0        RS
-FORMAT.BAT       system-rom/FORMAT.BAT                                  0x8000   RS
 FORMAT.COM       ../bin/FORMAT.cpu                                      0   RS
 RUN.COM          ../bin/RUN.cpu                                         0   RS
 RAMFOS.MON       ../bin/RAMFOS.mon                                      0xC000   RS
@@ -51,4 +50,5 @@ NC.COM           ../bin/NC.cpu                                          0   RS
 CLI.EXT           system-rom/CLI.EXT                                      0        RS
 CHKDSK.COM       ../bin/CHKDSK.cpu                                      0
 DISKBEN.COM      ../bin/DISKBEN.cpu                                     0
+COPYBEN.COM      ../bin/COPYBEN.cpu                                     0
 Test-MX.COM      programs/Test-MX.COM

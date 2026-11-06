@@ -35,7 +35,7 @@ file_write_high:
     ld a,1
     ld (v_fileOwned),a
     ld hl,tmpDescriptor
-    call bios_fileCreatePrepare
+    MXCALL MX_DOS_FILECREATEPREPARE
     call c,measure_end
     ret c
     xor a
@@ -47,8 +47,12 @@ file_write_high:
     call nc,maybe_verify_file
     jp measure_end
 
+; Физический драйвер DOS работает в другом банке: перехват C863h
+; видит только Raw. Для DOS оба режима проверки читают готовый файл целиком.
 maybe_verify_file:
     ld a,(v_writeMode)
+    cp 5
+    jp z,verify_file_data
     cp 6
     jp z,verify_file_data
     or a
@@ -152,7 +156,7 @@ stream_source_ready:
     ld b,a
     ld c,0
     ld a,(v_streamOp)
-    call bios_fileStream
+    MXCALL MX_DOS_FILESTREAM
     ret c
     jp stream_compare
 stream_raw:
@@ -214,7 +218,9 @@ stream_advance:
     jp nz,stream_success
     ld a,(v_streamKind)
     or a
-    jp z,bios_flushVolume
+    jp nz,$+9
+    MXCALL MX_DOS_FLUSHVOLUME
+    ret
     ld a,(v_caps)
     and DISK_CAP_FLUSH
     jp z,stream_success

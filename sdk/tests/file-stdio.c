@@ -3,7 +3,16 @@ static MXOS_PATH path;
 int main(void) {
  MXOS_FILE f; char b[8]; mxos_u16 directory, top=mxos_memtop();
  if (sizeof(f)!=64 || sizeof(mxos_u32)!=4 || sizeof(mxos_u16)!=2 || sizeof(void *)!=2) return 1;
- if (sizeof(MXOS_REGS)!=10) return 12;
+ if (sizeof(MXOS_REGS)!=10 || sizeof(MXOS_PATH_IO)!=40) return 12;
+ { MXOS_CALL request;
+   if (sizeof(request)!=10) return 31;
+   request.operation=MX_BIOS_UPPERCASE;
+   request.hl=0x1234; request.de=0x5678; request.bc=0x9ABC; request.af=0x6101;
+   mxos_call(&request);
+   if ((request.af>>8)!='A') return 32;
+   request.operation=0xFFFF;
+   if ((mxos_call(&request)&0xFF01)!=0x0A01) return 33;
+ }
  if (mxos_memcpy(b,"ABCD",5)!=b || b[3]!='D') return 13;
  mxos_memmove(b+1,b,4); if (b[1]!='A' || b[4]!='D') return 14;
  if (mxos_checksum("AB",2)!=0x4183) return 15;

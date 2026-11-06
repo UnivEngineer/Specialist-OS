@@ -39,7 +39,7 @@ mainPrepareReload:
             ld hl,state.panelA_drive
             call readBytePanel
             ld e,1
-            call bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             call restorePanelDirectory
             call updateCommandPath
             call redrawCommandLine
@@ -224,10 +224,10 @@ ncExitToCli:
             call saveState
             ld hl,state.panelA_drive
             call readBytePanel
-            call bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             call restorePanelDirectory
             ld a,1
-            call bios_setShell
+            MXCALL MX_DOS_SETSHELL
             COLOR COLOR_CMDSCREEN
             ld c,01Fh
             call bios_printChar

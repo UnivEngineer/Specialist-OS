@@ -38,7 +38,8 @@ Almaz-2/STD/Dash2.rks         games/DASH2.RKS
 Almaz-2/RAMFOS/Almaz2RF.exe   games/Almaz-2/Almaz2-ramfos-optimized.cpu
 Almaz-2/RAMFOS/Almaz2RF.bat   programs/Almaz2RF.bat
 ARCANOID.RKS     games/ARCANOID.RKS
-BALL.RKS         games/BALL.RKS
+Ball.exe         games/BALL.RKS
+Ball.bat         programs/Ball.bat
 BKT.RKS          games/BKT.RKS
 BUDI/BUDI-STD.EXE     games/BUDI/Budi-std.rks
 BUDI/BUDI-RF.EXE      games/BUDI/Budi-ramfos.cpu

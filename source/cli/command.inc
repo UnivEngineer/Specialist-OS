@@ -283,10 +283,33 @@ cliRmdir:
     ret c
     jp directoryRemove
 cliEcho:
+    ld hl,(cliArgs)
+    ld de,cliEchoOffText
+    ld c,4
+    call stricmp
+    jp z,cliEchoOff
+    ld hl,(cliArgs)
+    ld de,cliEchoOnText
+    ld c,3
+    call stricmp
+    jp z,cliEchoOn
     ld a,1
     ld (cliOutput),a
     ld hl,(cliArgs)
     call bios_printString
+    jp cliNewLine
+cliEchoOn:
+    ld a,1
+    jp cliEchoSet
+cliEchoOff:
+    xor a
+cliEchoSet:
+    ld (v_batEcho),a
+    xor a
+    ld (cliOutput),a
+    jp cliSuccess
+cliEchoOffText: DB 'OFF',0
+cliEchoOnText: DB 'ON',0
 cliNewLine:
     ld c,0Ah
     call bios_printChar
@@ -306,7 +329,11 @@ cliExit:
     ld (cliOutput),a
     ; EXIT возвращает из консоли в NC; BAT прекращает свой вызов EXIT.
     ld a,0
-    call bios_setShell
+    IFDEF BANKED_DOS_BUILD
+    call setShell
+    ELSE
+    MXCALL MX_DOS_SETSHELL
+    ENDIF
     jp cliSuccess
 ; Файловые команды не меняют выбранные пользователем диск и каталог.
 cliRemember:
@@ -509,8 +536,9 @@ cliDirLoop:
     call cliPrintNamePart
 cliDirNoExt:
     ; Колонка 15 (с нуля): 15 символов по 6 пикселей, X хранится в полупикселях.
-    ld a,45
-    ld (bios_vars.cursorX),a
+    MXCALL MX_BIOS_GETCURSORPOS
+    ld h,45
+    MXCALL MX_BIOS_SETCURSORPOS
     pop hl
     ld de,11
     add hl,de

@@ -2,6 +2,13 @@
 #ifndef MXOS_H
 #define MXOS_H
 #include "mxos_file.h"
+#include "mxos_syscall_ids.h"
+
+/* Родной диспетчер: operation=(группа<<8)|номер; порядок пакета HL/DE/BC/AF. */
+typedef struct {
+    mxos_u16 operation, hl, de, bc, af;
+} MXOS_CALL;
+mxos_u16 mxos_call(MXOS_CALL *request) MXOS_FASTCALL; /* AF результата, включая отказ диспетчера. */
 
 /* Соглашение C-порта: пять плотно расположенных 16-битных слов, sizeof=10. */
 typedef struct {

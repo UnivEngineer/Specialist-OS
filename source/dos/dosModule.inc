@@ -1,7 +1,7 @@
 ; Резидентные шлюзы модуля. Исходный AF передаётся реализации без изменений.
 uiDraw:
             push af
-            ld a,0
+            xor a
             jp dosModuleDispatch
 uiInverseRect:
             push af
@@ -58,12 +58,11 @@ directoryCommand:
 dosModuleDispatch:
             push hl
             push de
-            ld hl,v_dosModuleReady
-            inc (hl)
-            dec (hl)
+            ld e,a
+            ld a,(v_dosModuleReady)
+            or a
             jp z,dosModuleMissing
             ld hl,DOS_MODULE_JUMPS
-            ld e,a
             ld d,0
             add hl,de
             ld (dosModuleJump+1),hl
@@ -201,6 +200,8 @@ v_imageHeader = dosModuleName+FILE_DESCR_SIZE-16
 
 ; Выбранная оболочка переживает загрузку обычной программы.
 setShell:
+    cp 3
+    jp z,getShellMode
             cp 2
             jp z,getShellDrive
             jp nc,blockArgument
@@ -218,3 +219,8 @@ getShellDrive:
 v_shell: DB 0
 v_shellDrive: DB 0
 pathCliCom: DB "A:",05Ch,"CLI.COM",0
+
+getShellMode:
+    ld a,(v_shell)
+    or a
+    ret

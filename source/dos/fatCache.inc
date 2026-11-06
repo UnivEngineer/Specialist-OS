@@ -32,8 +32,8 @@ cacheData:      BLOCK   (FAT_CACHE_SIZE / 128) * FAT_CACHE_DATA, 0
 ;----------------------------------------------------------------------------
 
 resetSectorCache:
-        ; bc = системное время
-        call    getSystemTime
+        ; Все строки пусты: нейтральный возраст, без обращения к счётчику.
+        ld      bc,0
 
         ; В цикле записываем начальные значения во поля address
         ld      de, FAT_CACHE_ADDR      ; адрес буфера секторов
@@ -92,6 +92,12 @@ resetCacheLoop:
 ;
 ; 2022-02-08 Разработано SpaceEngineer
 ;----------------------------------------------------------------------------
+
+; HL=найденный слот, B=dirty. HL=буфер; BC/DE сохранены, AF разрушен.
+cacheTouchSlot:
+        push de
+        push bc
+        jp cff_SectorFound
 
 getSectorAddressInCache:
         push    bc
@@ -180,18 +186,8 @@ cacheSector:
 
         ; Просматриваем массив структур cacheData в поисках сектора с номером hl
         ex      hl, de                                      ; de = номер для поиска
-        ld      hl, cacheData + FAT_CACHE_DATA.number       ; hl = адрес поля number в первом элементе массива
-        ld      a,(v_cacheCount)
-        ld      c,a                      ; счетчик цикла
-cff_FindSector:
-        call    cmp_m_de            ; сравниваем [hl] и de
-        jp z,   cff_SectorFound     ; если равно, значит есть такой сектор в кэше
-        push    bc                  ; иначе переходим на следущий элемент массива
-        ld      bc, FAT_CACHE_DATA  ; bc = размер структуры FAT_CACHE_DATA
-        add     hl, bc
-        pop     bc
-        dec     c                   ; повтор цикла
-        jp      nz, cff_FindSector
+        call    streamCacheContains
+        jp nc,  cff_SectorFound
 
         ; Не не нашли сектор в массиве, загружаем его с накопителя на место наиболее давно использовавашегося
         push    de  ; de = номер сектора, который надо загрузить
@@ -264,7 +260,14 @@ cff_SectorFound:
         inc     hl      ; теперь hl = адрес поля accessTime
 
         ; Уcтанавливаем accessTime сектора
-        call    getSystemTime;  bc = системное время
+        ; Частый путь попадания: счётчик обновляется без CALL/RET.
+        push    hl
+        ld      hl,(v_fakeSystemTime)
+        inc     hl
+        ld      (v_fakeSystemTime),hl
+        ld      b,h
+        ld      c,l
+        pop     hl
 
         ld      (hl), c
         inc     hl
@@ -333,7 +336,7 @@ loadSectorToCache:
         pop     de      ; de = номер сектора
         ld      b, 2    ; режим - чтение
         or      a
-        call    logicalSectorIO
+        call    logicalSectorIOChecked
 
         ; Восстанавливаем регситры и выходим
         pop     hl
@@ -465,11 +468,17 @@ fatClusterToSector:
         dec     de
         dec     de          ; de -= 2 (нумерация кластеров начинается с 2)
 
-        ld      hl, (v_diskInfo.sectorsPerCluster)
-        ld a,l
+        ld a,(v_diskInfo.sectorsPerCluster)
         dec a
         jp z,fatClusterLinear
-        call    mul_hl_de   ; hl = de * BPB_SecPerClus
+        ; BPB проверен при монтировании: множитель — степень двойки.
+        ex      de, hl
+        inc a
+fatClusterShift:
+        rrca
+        add hl,hl
+        cp 1
+        jp nz,fatClusterShift
         ex      hl, de
 
 fatClusterLinear:
@@ -523,33 +532,6 @@ markDirSectorAsModified:
         add hl,de
         ld (v_cachedDescrPtr),hl
         pop de
-        ret
-
-;----------------------------------------------------------------------------
-; MXOS
-; Получение текущего системного времени
-;
-; В "Специалисте" нет часов реального времени (RTC), поэтому системное время
-; - это просто счетчик, увеличивающийся каждый раз при обращении. В будущем
-; можно будет сделать вермя через таймер ВИ53, или через драйвер RTC, при его
-; наличии в системе.
-;
-; выход:
-;   bc = системное время
-;
-; все остальные регистры сохраняеюся
-;
-; 2022-02-08 Разработано SpaceEngineer
-;----------------------------------------------------------------------------
-
-getSystemTime:
-        push    hl
-        ld      hl, (v_fakeSystemTime)
-        inc     hl
-        ld      (v_fakeSystemTime), hl
-        ld      b, h
-        ld      c, l
-        pop     hl
         ret
 
 ;----------------------------------------------------------------------------

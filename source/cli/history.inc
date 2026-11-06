@@ -115,11 +115,19 @@ cliHistoryRecallCopy:
 ; Внешняя COM может затереть весь CLI: сохраняем историю на RAM-диске B:.
 ; Обе процедуры сохраняют диск и CWD B:, ошибки истории не мешают командам.
 cliHistoryLoad:
+    ld a,(cliHistoryDisabled)
+    or a
+    ret nz
     call cliHistoryDiskBegin
-    jp c,cliHistoryDiskEnd
+    jp c,cliHistoryDisable
     ld hl,cliHistoryDescriptor
     call bios_fileLoadInfo
-    jp c,cliHistoryDiskEnd
+    jp nc,cliHistoryLoadSize
+    MXCALL MX_DOS_GETERROR
+    cp DOS_ERR_NOT_FOUND
+    jp z,cliHistoryDiskEnd
+    jp cliHistoryDisable
+cliHistoryLoadSize:
     ld hl,(cliHistoryDescriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
     or l
@@ -131,7 +139,7 @@ cliHistoryLoad:
     ld hl,cliHistoryDescriptor
     ld de,cliHistoryData
     call bios_fileLoad2
-    jp c,cliHistoryInvalid
+    jp c,cliHistoryLoadFailed
     ld hl,(cliHistoryData)
     ld de,0434Dh ; 'MC'
     call bios_cmp_hl_de
@@ -172,13 +180,21 @@ cliHistoryInvalid:
     ld (cliHistoryCount),a
     ld (cliHistoryNext),a
     jp cliHistoryDiskEnd
+cliHistoryLoadFailed:
+    xor a
+    ld (cliHistoryCount),a
+    ld (cliHistoryNext),a
+    jp cliHistoryDisable
 cliHistorySave:
+    ld a,(cliHistoryDisabled)
+    or a
+    ret nz
     ld hl,0434Dh
     ld (cliHistoryData),hl
     ld hl,03148h
     ld (cliHistoryData+2),hl
     call cliHistoryDiskBegin
-    jp c,cliHistoryDiskEnd
+    jp c,cliHistoryDisable
     ld hl,cliHistoryEnd-cliHistoryData
     ld (cliHistoryDescriptor+FILE_DESCRIPTOR.size),hl
     ld hl,0
@@ -188,6 +204,13 @@ cliHistorySave:
     ld hl,cliHistoryDescriptor
     ld de,cliHistoryData
     call bios_fileCreate
+    jp c,cliHistoryDisable
+    jp cliHistoryDiskEnd
+; Ошибки B:, включая полный том, отключают только дисковое сохранение.
+; Кольцо в памяти продолжает работать, ошибка не прерывает команду CLI.
+cliHistoryDisable:
+    ld a,1
+    ld (cliHistoryDisabled),a
     jp cliHistoryDiskEnd
 cliHistoryDiskBegin:
     ld e,0
@@ -196,10 +219,10 @@ cliHistoryDiskBegin:
     xor a
     ld (cliHistoryDiskReady),a
     ld a,1
-    call bios_fileSelectDrive
+    MXCALL MX_DOS_FILESELECTDRIVE
     ret c
     ld a,DIR_OP_GET
-    call bios_directory
+    MXCALL MX_DOS_DIRECTORY
     ret c
     ex de,hl
     ld (cliHistoryOldDirectory),hl
@@ -207,7 +230,8 @@ cliHistoryDiskBegin:
     ld (cliHistoryDiskReady),a
     ld de,0
     ld a,DIR_OP_SET
-    jp bios_directory
+    MXCALL MX_DOS_DIRECTORY
+    ret
 cliHistoryDiskEnd:
     ld a,(cliHistoryDiskReady)
     or a
@@ -215,11 +239,13 @@ cliHistoryDiskEnd:
     ld hl,(cliHistoryOldDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    call bios_directory
+    MXCALL MX_DOS_DIRECTORY
 cliHistoryRestoreDrive:
     ld a,(cliHistoryOldDrive)
-    jp bios_fileSelectDrive
+    MXCALL MX_DOS_FILESELECTDRIVE
+    ret
 cliHistoryOldDrive: DB 0
+cliHistoryDisabled: DB 0
 cliHistoryDiskReady: DB 0
 cliHistoryOldDirectory: DW 0
 cliHistoryDescriptor:

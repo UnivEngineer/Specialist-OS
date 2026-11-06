@@ -51,16 +51,9 @@ vars2       MON2_VARS_2     = APP_MEMORY_END - 0B0h
 v_fileDescr FILE_DESCRIPTOR = APP_MEMORY_END - 0100h
     ASSERT INPUT_BUF + MAX_PATH <= v_fileDescr
 
-; Буфер для листинга директории
-; В новой карте памяти можно расположить его
-; перед Монитором - там больше места
-    IF  NEW_MEMORY_MAP
+; Буфер списка каталога под верхними рабочими буферами DEBUG.
 v_fileInfo  FILE_INFO = APP_MEMORY_END - 01000h
 DIR_BUFFER_SIZE = (INPUT_BUF - v_fileInfo) / FILE_INFO_SIZE - 1
-    ELSE
-v_fileInfo  FILE_INFO = v_fileDescr + FILE_DESCRIPTOR_SIZE
-DIR_BUFFER_SIZE = (0FB00h - v_fileInfo) / FILE_INFO_SIZE - 1
-    ENDIF
 
 ;----------------------------------------------------------------------------
 ; Код

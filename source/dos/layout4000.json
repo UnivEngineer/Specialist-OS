@@ -49,6 +49,7 @@
     "diskWriteChecked",
     "installDriver",
     "checkRAMD",
-    "biosDriverNames"
+    "biosDriverNames",
+    "argNext"
   ]
 }

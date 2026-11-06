@@ -44,9 +44,14 @@ copyConfirmAsk:
     ld a,h
     or l
     jp z,copyConfirmDenied
+    IFNDEF BANKED_DOS_BUILD
     ld bc,1
     call fileOpRange
     ret c
+    ELSE
+    ; В DOS-банке адрес уже локальный: внешний callback проверяет шлюз,
+    ; внутренний обработчик вправе находиться в коде самого ядра.
+    ENDIF
     ex de,hl
     ld hl,(v_copyRequest)
     call copyConfirmJump

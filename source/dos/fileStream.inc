@@ -115,6 +115,14 @@ fileStreamArgument:
 ; Выход HL=конец буфера, DE=следующий кластер, v_streamOffset обновлён.
 ; BC/AF разрушены, CF=ошибка. Нереентерабельно, DI; буфер принадлежит программе.
 fatStream:
+    IFDEF BANKED_DOS_BUILD
+            push af
+            ld a,(kdFarActive)
+            or a
+            jp nz,kdFarStream
+            pop af
+fatStreamLocal:
+    ENDIF
             ld (v_streamMode),a
             ld (v_streamPtr),hl
             ex de,hl
@@ -139,26 +147,28 @@ streamLoop:
             ld hl,(v_streamOffset)
             ld a,(v_diskInfo.sectorShift)
             call splitSectorOffset
-            ld (v_streamSector),hl
+            push hl
             ex de,hl
             ld (v_streamWithin),hl
+            ld hl,(v_streamCluster)
+            ex de,hl
+            call fatClusterToSector
+            pop hl
+            add hl,de
+            ld (v_streamSector),hl
+streamSectorLoop:
+            ld hl,(v_streamWithin)
             ex de,hl
             ld hl,(v_diskInfo.sectorSize)
             call sub_hl_de
-            push hl
-            ld hl,(v_streamRemaining)
             ex de,hl
-            pop hl
+            ld hl,(v_streamRemaining)
             call cmp_hl_de
             jp c,streamChunkReady
             ex de,hl
 streamChunkReady:
             ld (v_streamChunk),hl
-            ld hl,(v_streamCluster)
-            ex de,hl
-            call fatClusterToSector
             ld hl,(v_streamSector)
-            add hl,de
             ex de,hl
             ld hl,(v_streamWithin)
             ld a,h
@@ -172,21 +182,21 @@ streamChunkReady:
             pop de
             jp nz,streamCached
             call streamCacheContains
-            jp nc,streamCached
+            jp nc,streamCachedHit
             ; Полный сектор без копии в кэше передаётся прямо из/в буфер.
             ld hl,(v_streamPtr)
             ld a,(v_streamMode)
             ld b,a
-            call logicalSectorIO
+            call logicalSectorIOChecked
             jp c,streamReturn
             jp streamCopyDone
 streamCached:
             ld a,(v_streamMode)
-            dec a
-            xor 1                 ; запись -> dirty=1, чтение -> 0
+            and 1                 ; запись -> dirty=1, чтение -> 0
 streamGetCache:
             call getSectorAddressInCache
             jp c,streamReturn
+streamCachedAddress:
             ex de,hl
             ld hl,(v_streamWithin)
             add hl,de
@@ -217,12 +227,22 @@ streamCopyDone:
             ld hl,(v_streamOffset)
             add hl,de
             ld (v_streamOffset),hl
-            push hl
+            ex de,hl
             ld hl,(v_diskInfo.clusterBytes)
             ex de,hl
-            pop hl
             call cmp_hl_de
-            jp c,streamLoop
+            jp nc,streamNextCluster
+            ld hl,(v_streamRemaining)
+            ld a,h
+            or l
+            jp z,streamReturn
+            ; Внутри кластера следующий фрагмент начинается с нового сектора.
+            ld hl,(v_streamSector)
+            inc hl
+            ld (v_streamSector),hl
+            ld hl,0
+            ld (v_streamWithin),hl
+            jp streamSectorLoop
 streamNextCluster:
             ld hl,(v_streamCluster)
             ex de,hl
@@ -310,33 +330,34 @@ v_streamPtr: DW 0
 v_streamCluster: DW 0
 v_streamMode: DB 0
 v_streamChunk: DW 0
-v_streamSector: DW 0
+v_streamSector: DW 0 ; абсолютный LBA текущего сектора
 v_streamWithin: DW 0
 
 ; DE=LBA. CF=0, если сектор присутствует в кэше, иначе CF=1.
-; BC/DE сохранены; HL/AF разрушены. Проверяем и грязные строки:
+; При попадании HL=слот кэша; DE сохранён, BC/AF разрушены. Проверяем грязные строки:
 ; прямое чтение не должно возвращать старую дисковую копию.
 streamCacheContains:
-            push bc
             ld hl,cacheData
             ld a,(v_cacheCount)
             ld c,a
 streamCacheProbe:
             call cmp_m_de
-            jp z,streamCacheHit
+            ret z
             push bc
             ld bc,FAT_CACHE_DATA
             add hl,bc
             pop bc
             dec c
             jp nz,streamCacheProbe
-            pop bc
             scf
             ret
-streamCacheHit:
-            pop bc
-            or a
-            ret
+; Слот уже найден: обновляем возраст/dirty без повторного поиска.
+streamCachedHit:
+            ld a,(v_streamMode)
+            and 1
+            ld b,a
+            call cacheTouchSlot
+            jp streamCachedAddress
 
 ; Конец полного файла после fatStream. DE=курсор кластера, смещение глобальное.
 ; HL/BC/DE сохранены, CF=ошибка. Нулевая цепочка допустима для пустого файла.

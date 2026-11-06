@@ -53,11 +53,18 @@ fileList_loop:
             call copyDescriptorCompact
             pop bc
             ex de,hl
+    IFDEF BANKED_DOS_BUILD
+            call kdListStep
+            jp c,fileList_end
+    ENDIF
             jp fileList_loop
 fileList_skip:
             pop hl
             jp fileList_loop
 fileList_end:
+    IFDEF BANKED_DOS_BUILD
+            call kdListEnd
+    ENDIF
             push af
             ld a,0FFh
             ld (de),a

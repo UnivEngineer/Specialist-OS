@@ -8,7 +8,7 @@
 loadFiles:
             ld      c, a
             ld      e, 1
-            call    bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             push    bc
             call    restorePanelDirectory
             pop     bc
@@ -29,7 +29,7 @@ lf_ReadCatalog:
             ld      bc, 0
             ld      de, FILE_CACHE_CAPACITY
             ld      a, DIR_OP_LIST
-            call    bios_directory
+            MXCALL MX_DOS_DIRECTORY
             jp nc,  lf_ListReady
             ld      de,0
             ld      (hl),0FFh

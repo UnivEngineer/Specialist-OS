@@ -30,24 +30,24 @@ j_printString:  jp  printString1        ; C818: Вывести строку на
                 jp  j_reboot3           ; C839: Запустить NC.COM
     ENDIF
                 jp  reboot3             ; C83C: Запустить NC.COM
-                jp  fileList            ; C83F: Получить список файлов
-                jp  fileGetSetDrive     ; C842: Получить/установить активное устройство
-                jp  fileCreate          ; C845: Создать файл
-                jp  fileLoad            ; C848: Читать подготовленное тело по DE, без промежуточного образа
-                jp  fileDelete          ; C84B: Удалить файл
-                jp  fileRename          ; C84E: Переименовать файл
-                jp  fileLoadInfo        ; C851: Загрузить информацию о файле
-                jp  imageOpen           ; C854: A=16/4, открыть COM или первый сектор RKS
-                jp  fileGetSetAttr      ; C857: Получить/установить атрибуты файла
-                jp  fileNamePrepare     ; C85A: Преобразовать имя файла во внутренний формат
-                jp  fileExec            ; C85D: Запустить файл
+                jp  sysLegacy_fileList            ; C83F: Получить список файлов
+                jp  sysLegacy_fileGetSetDrive     ; C842: Получить/установить активное устройство
+                jp  sysLegacy_fileCreate          ; C845: Создать файл
+                jp  sysLegacy_fileLoad            ; C848: Читать подготовленное тело по DE, без промежуточного образа
+                jp  sysLegacy_fileDelete          ; C84B: Удалить файл
+                jp  sysLegacy_fileRename          ; C84E: Переименовать файл
+                jp  sysLegacy_fileLoadInfo        ; C851: Загрузить информацию о файле
+                jp  sysLegacy_imageOpen           ; C854: открыть родной COM/EXE; HL=вход, DE=загрузка, BC=тело
+                jp  sysLegacy_fileGetSetAttr      ; C857: Получить/установить атрибуты файла
+                jp  sysLegacy_fileNamePrepare     ; C85A: Преобразовать имя файла во внутренний формат
+                jp  sysLegacy_fileExec            ; C85D: Запустить файл
                 jp  installDriver       ; C860: Установить драйвер накопителя
-j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранного диска
-                jp  fileLoad2           ; C866: Загрузить файл по адресу de
+j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранного диска
+                jp  sysLegacy_fileLoad2           ; C866: Загрузить файл по адресу de
                 jp  printChar_real      ; C869: [MXOS2] Вывод символа на экран (только реальные символы)
                 jp  printDecWord        ; C86C: [MXOS2] Вывод числа экран в десятичной форме
                 jp  setRAMDDriver       ; C86F: [MXOS2] Установить драйвер доступа к ДОЗУ
-                jp  getDriveFreeSpace   ; C872: [MXOS2] Получить оставшийся свободный объем диска
+                jp  sysLegacy_getDriveFreeSpace   ; C872: [MXOS2] Получить оставшийся свободный объем диска
                 jp  upperCase           ; C875: [MXOS2] Перевод кода символа КОИ-8 в верхний регистр
                 jp  strcmp              ; C878: [MXOS2] Сравнение строк, чувствительное к регистру
                 jp  stricmp             ; C87B: [MXOS2] Сравнение строк, нечувствительное к регистру
@@ -55,12 +55,12 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  div_hl_2            ; C881: [MXOS2] Деление hl на 2: hl = hl / 2
                 jp  mul_hl_de           ; C884: [MXOS2] Умножение hl на de: hl = hl * de
                 jp  div_hl_de           ; C887: [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
-                jp  fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
-                jp  dosUnsupported      ; C88D: резерв после удаления кластерного переноса
-                jp  installVolume       ; C890: зарегистрировать драйвер тома
-                jp  getVolume           ; C893: таблица и контекст драйвера тома
-                jp  mountVolume         ; C896: повторное монтирование тома
-                jp  flushVolume         ; C899: сохранить изменения тома
+                jp  sysLegacy_fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
+                jp  sysLegacy_dosUnsupported      ; C88D: резерв после удаления кластерного переноса
+                jp  sysLegacy_installVolume       ; C890: зарегистрировать драйвер тома
+                jp  sysLegacy_getVolume           ; C893: таблица и контекст драйвера тома
+                jp  sysLegacy_mountVolume         ; C896: повторное монтирование тома
+                jp  sysLegacy_flushVolume         ; C899: сохранить изменения тома
                 jp  beepTimer           ; C89C: звук ВИ53 с ABI RAMFOS beep
 
                 jp  diskWriteChecked    ; C89F: запись сектора с чтением и сравнением
@@ -73,26 +73,28 @@ j_diskDriver:   jp  diskDriver          ; C863: Драйвер выбранно�
                 jp  uiToolbar           ; C8AE: поля функционального тулбара
                 jp  uiCopyRect          ; C8B1: копирование битмапа
 
-                jp  fileAssociation     ; C8B4: поиск ассоциации в A:CLI.EXT
+                jp  sysLegacy_fileAssociation     ; C8B4: поиск ассоциации в A:CLI.EXT
 
                 jp  argNext             ; C8B7: следующее слово без изменения строки
 
-                jp  fileChangeDrive     ; C8BA: выбрать диск
-                jp  fileRename          ; C8BD: переименование на выбранном диске
-                jp  fileDelete          ; C8C0: удаление на выбранном диске
-                jp  fileCopy            ; C8C3: копирование с явным буфером
-                jp  fileGetDrives       ; C8C6: список доступных дисков
+                jp  sysLegacy_fileChangeDrive     ; C8BA: выбрать диск
+                jp  sysLegacy_fileRename          ; C8BD: переименование на выбранном диске
+                jp  sysLegacy_fileDelete          ; C8C0: удаление на выбранном диске
+                jp  sysLegacy_fileCopy            ; C8C3: копирование с явным буфером
+                jp  sysLegacy_fileGetDrives       ; C8C6: список доступных дисков
 
-                jp  dosGetError         ; C8C9: последняя причина ошибки DOS
+                jp  sysLegacy_dosGetError         ; C8C9: последняя причина ошибки DOS
 
                 jp installBlockDriver   ; C8CC: физический блок 128/256/512
-                jp logicalSectorIO      ; C8CF: логический сектор активного тома
-                jp fileStream           ; C8D2: поток с курсором вызывающей программы
-                jp fileHandle           ; C8D5: открытый файл в памяти вызывающего
+                jp sysLegacy_logicalSectorIO      ; C8CF: логический сектор активного тома
+                jp sysLegacy_fileStream           ; C8D2: поток с курсором вызывающей программы
+                jp sysLegacy_fileHandle           ; C8D5: открытый файл в памяти вызывающего
                 jp loadDosModule        ; C8D8: загрузить общие службы в верхнее ОЗУ
                 jp releaseDosModule     ; C8DB: отдать верхнее ОЗУ программе без расширенных служб
-                jp directoryService     ; C8DE: текущий каталог, пути и список с каталогами
-                jp cliService          ; C8E1: общий CLI
-                jp setShell            ; C8E4: выбор оболочки
+                jp sysLegacy_directoryService     ; C8DE: текущий каталог, пути и список с каталогами
+                jp sysLegacy_cliService          ; C8E1: общий CLI
+                jp sysLegacy_setShell            ; C8E4: выбор оболочки
                 jp setInputHook         ; C8E7: обработчик ожидания клавиатуры
                 ASSERT $ == 0C8EAh
+                jp blockIO             ; C8EA: физический запрос DOS -> BIOS
+                ASSERT $ == 0C8EDh

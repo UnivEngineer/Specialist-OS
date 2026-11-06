@@ -116,6 +116,7 @@ frbs_SectorReady:
             ld hl,v_diskInfo.blockShift
             sub (hl)
             jp c,frbs_Bad
+            ld (v_logicalShift),a
             ld b,a
             or a
             jp z,frbs_StepReady
@@ -141,7 +142,7 @@ frbs_CapacityReady:
             ld hl,FAT_CACHE_ADDR
             ld de,0
             ld b,2
-            call logicalSectorIO
+            call logicalSectorIOChecked
             jp c,frbs_Io
             ; 128/256 — явно обозначенные расширения. 512 — стандарт FAT16.
             ld a,(v_diskInfo.sectorShift)
@@ -313,7 +314,7 @@ frbs_TypeReady:
             ex de,hl
             ld hl,FAT_CACHE_ADDR
             ld b,2
-            call logicalSectorIO
+            call logicalSectorIOChecked
             jp c,frbs_Io
             ld a,(hl)
             cp c
@@ -356,3 +357,4 @@ frbs_Exit:
 aMxos256: DB "MXOS256 "
 aMxos128: DB "MXOS128 "
 v_logicalCapacity: DW 0
+v_logicalShift: DB 0 ; Проверенный log2 числа физических блоков на сектор

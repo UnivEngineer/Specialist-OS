@@ -59,11 +59,11 @@ EnterCmdLine:
             ld (hl),0
             ld hl,state.panelA_drive
             call readBytePanel
-            call bios_fileSelectDrive
+            MXCALL MX_DOS_FILESELECTDRIVE
             call restorePanelDirectory
             ld hl,vars.cmdLine
             ld a,CLI_OP_QUERY
-            call bios_cli
+            MXCALL MX_DOS_CLI
             jp c,ncCommandError
             ld a,b
             and 1
@@ -76,7 +76,7 @@ ncCommandRun:
             ld hl,vars.cmdLine
             ld de,ncOverwritePrompt
             ld a,CLI_OP_COMMAND
-            call bios_cli
+            MXCALL MX_DOS_CLI
             jp c,ncCommandError
             cp 0FFh
             jp z,EnterExec
@@ -90,7 +90,7 @@ ncCommandRun:
             xor 1
             ld (ncKeepFrames),a
             or a
-            call z,drawToolbar
+            call z,ncCommandRestoreScreen
             ; Команды CD/диск меняют общий контекст и активную панель.
             ld e,0
             call bios_fileGetSetDrive
@@ -105,9 +105,28 @@ ncCommandRun:
             call nz,ncDamageBoth
             call saveState
             jp ncRefreshDirty
+; Консольный вывод затрагивает и промежутки вне панелей/строки ввода.
+; Полная очистка нужна только при возврате с консольного экрана.
+ncCommandRestoreScreen:
+            COLOR COLOR_HELP_F
+            ld c,01Fh
+            call bios_printChar
+            jp drawToolbar
 ncCommandError:
-            call bios_getError
+            MXCALL MX_DOS_GETERROR
             call dosErrorText
+            push hl
+            ; В командном режиме поле диалога содержит ошибочную команду.
+            ld hl,vars.cmdLine
+            ld de,vars.input
+ncCommandErrorCopy:
+            ld a,(hl)
+            ld (de),a
+            inc hl
+            inc de
+            or a
+            jp nz,ncCommandErrorCopy
+            pop hl
             jp copyFileShowError
 ncCommandScreen: DB 0
 ncCommandContext: DB 0
