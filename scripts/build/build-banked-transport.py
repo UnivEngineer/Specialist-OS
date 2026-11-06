@@ -22,6 +22,12 @@ def main():
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'--lst={OUT/name}.lst', f'--sym={OUT/name}.sym',
                         f'--raw={OUT/name}.bin', str(ROOT/f'source/banked/{name}.asm')], check=True)
+    for kind in range(3):
+        name = f'LOCALDRV{kind}'
+        subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
+                        f'-DLOCAL_KIND={kind}', f'--lst={OUT/name}.lst',
+                        f'--sym={OUT/name}.sym', f'--raw={OUT/name}.bin',
+                        str(ROOT/'source/banked/LOCALDRV.asm')], check=True)
 
 if __name__ == '__main__':
     main()

@@ -14,12 +14,21 @@ def main():
     fs = h['symbols'](out/'FLASHDRV.sym')
     (out/'flash-imports.inc').write_text(''.join(
         f'{name} = 0{fs[name]:04X}h\n' for name in ('Driver','flashDosInit','FuncSize')), encoding='utf-8')
+    with (out/'flash-imports.inc').open('a',encoding='utf-8') as stream:
+        for kind,stem in [(1,'FLASHDRV'),(2,'FASTDRV')]:
+            ss=h['symbols'](out/f'{stem}.sym')
+            ls=h['symbols'](out/f'LOCALDRV{kind}.sym')
+            for key in ('SectorLimit','v_chipMap'):
+                stream.write(f'local{kind}{key} = {ls[key]-0xE800}\n')
+                stream.write(f'source{kind}{key} = 0{ss[key]:04X}h\n')
+        cs=h['symbols'](out/'CLIENT.sym')
+        stream.write(f'LOCAL_DRIVER_KIND = 0{cs["localDriverKind"]:04X}h\n')
     rs = h['symbols'](out/'ROMDRV.sym')
     with (out/'flash-imports.inc').open('a',encoding='utf-8') as stream:
         stream.write(f'romDriver = 0{rs["Driver"]:04X}h\nromDiskInfoPointer = 0{rs["v_diskInfo"]:04X}h\n')
     fs = h['symbols'](out/'FASTDRV.sym')
     with (out/'flash-imports.inc').open('a',encoding='utf-8') as stream:
-        for alias,key in [('fastDriver','Driver'),('fastDosInit','flashDosInit'),('fastFuncSize','FuncSize'),('fastChipStates','v_chipStates')]:
+        for alias,key in [('fastDriverNative','Driver'),('fastDosInit','flashDosInit'),('fastFuncSize','FuncSize'),('fastChipStates','v_chipStates')]:
             stream.write(f'{alias} = 0{fs[key]:04X}h\n')
     lines = []
     for unit in groups['dos']:

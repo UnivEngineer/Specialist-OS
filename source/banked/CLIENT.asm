@@ -137,5 +137,6 @@ bankSavePath:
     MXCALL MX_DOS_FILESAVEPATH
     ret
 bankClientEnd:
+    INCLUDE "local-block.inc"
     ASSERT $ <= CMD_LINE
     END

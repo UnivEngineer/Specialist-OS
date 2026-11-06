@@ -36,6 +36,13 @@ dosCoreEnd:
     ORG_PAD 0C500h
     INCLUDE "kernel-exec.inc"
     INCLUDE "kernel-system.inc"
+    INCLUDE "kernel-localio.inc"
+localImage0: INCBIN "../../bin/banked/LOCALDRV0.bin"
+localImage0End:
+localImage1: INCBIN "../../bin/banked/LOCALDRV1.bin"
+localImage1End:
+localImage2: INCBIN "../../bin/banked/LOCALDRV2.bin"
+localImage2End:
 kernelEnd:
     ASSERT $ <= 0D800h
     ASSERT FAT_CACHE_ADDR+FAT_CACHE_SIZE <= CMD_LINE

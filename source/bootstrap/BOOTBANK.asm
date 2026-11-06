@@ -115,6 +115,11 @@ installPages:
     ld (BANK_SERVICE_SP),hl
     ld hl,0E440h
     ld (BANK_STACK_FLOOR),hl
+    ; В main публичные F800h ставит BIOS, локальный физический вход — bootstrap.
+    ld hl,clientImage+0100h
+    ld de,clientEnd
+    ld bc,0F900h
+    call moveCore
     ld hl,windowImage
     ld de,windowEnd
     ld bc,0FFC0h

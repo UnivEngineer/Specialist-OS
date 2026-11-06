@@ -22,6 +22,17 @@ krRawBuffer:
     call krBlockSize
     call kdRange
     jp c,kdBad
+    call klEligible
+    jp nz,krBuffered
+    ld a,(krOperation)
+    cp 5
+    jp z,krBuffered
+    ld hl,klBlock
+    ld (kdEntry),hl
+    call kdInvoke
+    call kdCapture
+    jp kdFinish
+krBuffered:
     ld a,(kdRegs+5)
     cp 2
     jp z,krRead

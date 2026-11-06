@@ -187,7 +187,11 @@ streamChunkReady:
             ld hl,(v_streamPtr)
             ld a,(v_streamMode)
             ld b,a
+    IFDEF BANKED_DOS_BUILD
+            call ksSector
+    ELSE
             call logicalSectorIOChecked
+    ENDIF
             jp c,streamReturn
             jp streamCopyDone
 streamCached:
@@ -214,7 +218,11 @@ streamCopy:
             ld b,h
             ld c,l
             pop hl
+    IFDEF BANKED_DOS_BUILD
+            call ksCacheCopy
+    ELSE
             call moveBytesForward
+    ENDIF
 streamCopyDone:
             ld hl,(v_streamChunk)
             ex de,hl

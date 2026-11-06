@@ -317,13 +317,10 @@ kdHaveChunk:
     ld (KD_OBJECT+FH_COUNT),hl
     ld b,h
     ld c,l
-    ld a,(kdOperation)
-    cp FILE_OP_WRITE
-    jp nz,kdHandleCall
     ld hl,(kdBuffer)
-    ld de,KD_DATA
-    call kdFetch
-    jp c,kdBad
+    ld (kdFarCurrent),hl
+    ld a,1
+    ld (kdFarActive),a
 kdHandleCall:
     ld hl,KD_DATA
     ld (KD_OBJECT+FH_BUFFER),hl
@@ -332,6 +329,10 @@ kdHandleCall:
     ld a,(kdOperation)
     ld hl,KD_OBJECT
     call fileHandle
+    push af
+    xor a
+    ld (kdFarActive),a
+    pop af
     push af
     pop hl
     ld (kdResult),hl
@@ -344,14 +345,6 @@ kdHandleCount:
     ld (kdActual),hl
     ld b,h
     ld c,l
-    ld a,(kdOperation)
-    cp FILE_OP_READ
-    jp nz,kdHandleAdvance
-    ld hl,(kdBuffer)
-    ex de,hl
-    ld hl,KD_DATA
-    call kdStore
-    jp c,kdBad
 kdHandleAdvance:
     ld hl,(kdActual)
     ex de,hl

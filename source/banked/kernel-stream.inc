@@ -4,6 +4,26 @@
 ; проверенного внешнего запроса. Цепочку, кэш и ошибки обслуживает общий код.
 kdFarStream:
     pop af
+    push af
+    call klEligible
+    jp nz,ksBuffered
+    pop af
+    push af
+    ld a,1
+    ld (ksDirect),a
+    ld hl,(kdFarCurrent)
+    ld (ksDirectStart),hl
+    pop af
+    call fatStreamLocal
+    ld (kdFarCurrent),hl
+    call nc,ksDirectSum
+    push af
+    xor a
+    ld (ksDirect),a
+    pop af
+    ret
+ksBuffered:
+    pop af
     ld (ksMode),a
     ex de,hl
     ld (v_streamCluster),hl
@@ -94,3 +114,81 @@ ksLeft: DW 0
 ksChunk: DW 0
 ksActual: DW 0
 ksResult: DW 0
+ksDirect: DB 0
+ksDirectStart: DW 0
+
+; Загруженный образ суммируется в странице назначения: назад данные не идут.
+; AF=статус, остальные регистры сохранены. BIOS использует прежнюю сумму.
+ksDirectSum:
+    ld a,(kiSumActive)
+    or a
+    ret z
+    push bc
+    push de
+    push hl
+    dec hl
+    ld (klRegs+2),hl
+    ld hl,(ksDirectStart)
+    ld (klRegs),hl
+    xor a
+    ld bc,bios_calcCS
+    ld hl,bankCallback
+    ld de,klRegs
+    call bankCallPacket
+    ld h,b
+    ld l,c
+    ld (kiSum),hl
+    ld a,(BANK_FRAME_STATUS)
+    or a
+    jp z,ksSumResult
+    ld a,DOS_ERR_IO
+    scf
+ksSumResult:
+    pop hl
+    pop de
+    pop bc
+    ret
+
+; Полный сектор идёт непосредственно в клиент. Неполный фрагмент остаётся
+; в кэше DOS: копируем только запрошенные байты и сохраняем остальной сектор.
+ksSector:
+    ld a,(ksDirect)
+    or a
+    jp z,logicalSectorIOChecked
+    ; Логический сектор может состоять из нескольких 256-байтных блоков.
+    push bc
+    push de
+    push hl
+    ld a,(v_logicalShift)
+    ld c,1
+    or a
+    jp z,ksBlocks
+    push hl
+    ex de,hl
+ksScale:
+    add hl,hl
+    inc c
+    dec a
+    jp nz,ksScale
+    ex de,hl
+    pop hl
+ksBlocks:
+    call klBlock
+    jp c,ksBlocksDone
+    inc h
+    inc de
+    dec c
+    jp nz,ksBlocks
+ksBlocksDone:
+    pop hl
+    pop de
+    pop bc
+    ret
+ksCacheCopy:
+    ld a,(ksDirect)
+    or a
+    jp z,moveBytesForward
+    ld a,(v_streamMode)
+    dec a
+    jp z,kdFetch
+    jp kdStore

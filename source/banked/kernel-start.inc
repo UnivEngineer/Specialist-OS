@@ -46,10 +46,14 @@ kernelVersion: DB "DOS 2.0",0Dh,0Ah,0
 
 ; Тёплый вход после отбрасывания стеков программ. Образ/тома не перезагружаем.
 kernelWarm:
+    ld a,0FFh
+    ld (klInstalled),a
     xor a
     ld (v_bootAutoexec),a
     ld (kdBusy),a
     ld (kdFarActive),a
+    ld (ksDirect),a
+    ld (klFastOwner),a
     ld (kiReady),a
     ld hl,0
     call cliSetObserver
