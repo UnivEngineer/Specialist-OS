@@ -14,6 +14,21 @@ $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
 if ($LASTEXITCODE -ne 0) { throw 'Compact font generation failed.' }
 & python (Join-Path $repositoryRoot 'source-apps/copybench/build.py')
 if ($LASTEXITCODE -ne 0) { throw 'Copy benchmark generation failed.' }
+& python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py')
+if ($LASTEXITCODE -ne 0) { throw 'Font benchmark generation failed.' }
+Push-Location (Join-Path $repositoryRoot 'source-apps/fontbench')
+try {
+    & (Join-Path $repositoryRoot 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow -DMODE=1 -DBATCH=0 -DSHIFT_ORIGIN=0x2000 --raw=../../bin/FONTBEN.renderer.bin SHIFT.asm
+    if ($LASTEXITCODE -ne 0) { throw 'Font benchmark renderer assembly failed.' }
+} finally { Pop-Location }
+Push-Location (Join-Path $repositoryRoot 'source-apps/textbench')
+try {
+    foreach ($kind in @('TEXTBEN','FONTBEN')) {
+        $fontTest = if ($kind -eq 'FONTBEN') { 1 } else { 0 }
+        & (Join-Path $repositoryRoot 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow "-DFONT_TEST=$fontTest" "--raw=../../bin/$kind.bank.bin" bank-loop.asm
+        if ($LASTEXITCODE -ne 0) { throw "$kind bank loop assembly failed." }
+    }
+} finally { Pop-Location }
 $components = @(
     @{ Directory = "source-apps\copybench"; Source = "COPYBEN"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source-apps\\chkdsk"; Source = "CHKDSK"; Extension = "cpu"; Address = "0" },
@@ -49,6 +64,10 @@ if ($Target -eq "All") {
     }
 }
 
+$components += @(
+    @{ Directory = 'source-apps/textbench'; Source = 'STANDALONE'; Output = 'TEXTCOM'; Extension = 'cpu'; Address = '0' },
+    @{ Directory = 'source-apps/fontbench'; Source = 'STANDALONE'; Output = 'FONTCOM'; Extension = 'cpu'; Address = '0' }
+)
 foreach ($component in $components) {
     Push-Location (Join-Path $repositoryRoot $component.Directory)
     try {

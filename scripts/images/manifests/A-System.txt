@@ -51,4 +51,6 @@ CLI.EXT           system-rom/CLI.EXT                                      0     
 CHKDSK.COM       ../bin/CHKDSK.cpu                                      0
 DISKBEN.COM      ../bin/DISKBEN.cpu                                     0
 COPYBEN.COM      ../bin/COPYBEN.cpu                                     0
+FONTBEN.COM      ../bin/FONTCOM.cpu                                     0
+TEXTBEN.COM      ../bin/TEXTCOM.cpu                                     0
 Test-MX.COM      programs/Test-MX.COM

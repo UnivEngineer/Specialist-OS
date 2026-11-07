@@ -4,7 +4,10 @@
 ; BATCH: 0 — отдельный символ C, 1 — C печатных байт общего буфера.
 ; Оба входа предназначены для выбранного варианта сборки. AF/BC/DE/HL
 ; сохраняются. Позиция задаётся общей переменной BIOS, строки меняет стенд.
-            org 0EB00h
+            IFNDEF SHIFT_ORIGIN
+SHIFT_ORIGIN = 0EB00h
+            ENDIF
+            org SHIFT_ORIGIN
 scalarEntry:
             IF (MODE == 0 || MODE == 3) && BATCH == 0
             jp bios_printChar
