@@ -177,21 +177,6 @@ sysRegsError:
     pop af
     ret
 
-; Установка публичных входов. Хвост отделён от физического драйвера H:.
-; Вызывается при холодном старте и тёплом восстановлении MXOS.
-sysInstall:
-    ld hl,sysTail
-    ld de,sysTailEnd
-    ld bc,mx_call
-    jp memcpy_bc_hl
-sysTail:
-    jp sysCall
-    jp sysCpmEntry
-    jp sysCallRegs
-    jp sysLoadPath
-    jp sysSavePath
-sysTailEnd:
-    ASSERT sysTailEnd-sysTail == 15
 sysCpmEntry:
     ld b,0
     jp sysCall

@@ -83,4 +83,6 @@ sysDOSTable:
     DW filePathSave
     DW dosRawIO
     DW dosDriverSelect
+    DW dosDriverInstall
+    DW dosDriverRefresh
 sysDOSCount = ($-sysDOSTable)/2

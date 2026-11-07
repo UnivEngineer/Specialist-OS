@@ -56,7 +56,6 @@ def main():
             if page: m.write(0xF800, (base/'CLIENT.bin').read_bytes())
         select(1)
         m.write(0x4000, (base/'KERNEL.bin').read_bytes())
-        m.write(0x9000, (base/'FLASHDRV.bin').read_bytes())
         select(0)
         io_symbols=symbols(base/'MAINIO.sym')
         io_code=io_symbols['mainIoRequest']-ks['BIOS_BANK_IO_START']
@@ -66,7 +65,8 @@ def main():
         def invoke(page, entry, packet=None, operation=0, inline=False, legacy=None):
             select(page)
             call = ts['bankCallPacket'] if packet is not None else ts['bankCall']
-            if packet is not None: m.write(0x3000, packet)
+            packet_address = 0x3800 if page == 1 else 0x3000
+            if packet is not None: m.write(packet_address, packet)
             if legacy is not None:
                 code = b'\xcd'+word(legacy)
             elif inline:
@@ -79,7 +79,7 @@ def main():
             stack = 0x3F00
             m.write(0x2800, code+b'\xc3'+word(stop))
             m.stop_at(stop)
-            args = dict(bc=operation, de=0x3000)
+            args = dict(bc=operation, de=packet_address)
             if inline or legacy is not None:
                 args = {key:int.from_bytes(packet[i:i+2], 'little')
                         for key,i in (('hl',0),('de',2),('bc',4),('af',6))}
@@ -94,7 +94,7 @@ def main():
                               inline=inline, legacy=legacy, ticks=state['cpu_ticks']-ticks, error=result >> 8, carry=bool(result & 1)))
             if packet is not None and not inline and legacy is None and m.read(0xFFDB, 1) == b'\0':
                 returned = b''.join(word(state['registers'][key]['dec']) for key in ('hl','de','bc','af'))
-                assert m.read(0x3000, 8) == returned, 'MX_REGS результата'
+                assert m.read(packet_address, 8) == returned, 'MX_REGS результата'
             for p in (0, 1, 3):
                 select(p)
                 assert m.read(ts['bankDepth'], 1) == b'\0'
@@ -115,6 +115,9 @@ def main():
         print('BANK DOS BOOT PASS', flush=True)
         m.screenshot(out/'bank-dos-boot.png')
         select(0); m.write(bios['v_dosBanked'], b'\1')
+        m.write(0x3200, b'A:\\FLASH.COM\0')
+        request(0, ks['MX_DOS_FILEEXEC'], regs(hl=0x3200))
+        rows.append(dict(case='load-driver-COM-in-DOS-page'))
         image_checks = runpy.run_path(str(ROOT/'scripts/emu80/banked-image-cases.py'))['check_images']
         def check_images():
             image_checks(m, ks, bios, select, invoke, request, regs, rows)
@@ -162,8 +165,8 @@ def main():
         assert m.read(0x3300, 11) == b'H:\\BNKTEST\0'
         rows.append(dict(case='mkdir-chdir-caller-path'))
         select(1); m.write(ks['KD_PATH'], bytes([0xCC])*128)
-        request(1, ks['MX_DOS_DIRECTORY'], regs(hl=0x3500, a=4))
-        assert m.read(0x3500, 11) == b'H:\\BNKTEST\0'
+        request(1, ks['MX_DOS_DIRECTORY'], regs(hl=0x3700, a=4))
+        assert m.read(0x3700, 11) == b'H:\\BNKTEST\0'
         assert m.read(ks['KD_PATH'], 128) == bytes([0xCC])*128
         rows.append(dict(case='same-page-direct-NEAR-no-staging'))
         select(3)
@@ -382,7 +385,7 @@ def main():
             reference = m.read(0x1000, 2049)
             end = next(i for i in range(0, 2049, 16) if reference[i] == 255)+1
             reference = reference[:end]
-            total = m.read(0x3002, 2)
+            total = m.read(0x3802, 2)
             for page in (0, 3):
                 select(page); m.write(0x4000 if page else 0x3400, bytes([0xA5])*2049)
                 buffer = 0x4000 if page else 0x3400

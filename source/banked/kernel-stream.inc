@@ -154,7 +154,7 @@ ksSumResult:
 ksSector:
     ld a,(ksDirect)
     or a
-    jp z,logicalSectorIOChecked
+    jp z,logicalSectorPrepared
     ; Логический сектор может состоять из нескольких 256-байтных блоков.
     push bc
     push de

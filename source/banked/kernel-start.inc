@@ -10,22 +10,8 @@ kernelCold:
     call resetSectorCache
     ld a,1
     ld (v_bootAutoexec),a
-    call flashDosInit
-    jp c,kernelRomDriver
-    ld hl,Driver
-    ld (v_drives+14),hl
-    ld hl,v_diskInfo
-    ld (FuncSize+4),hl
-    ld a,1
-    ld (kernelHDriverKind),a
-    jp kernelNoFlash
-kernelRomDriver:
-    ld hl,romDriver
-    ld (v_drives+14),hl
-    ld hl,v_diskInfo
-    ld (romDiskInfoPointer),hl
-    xor a
-    ld (kernelHDriverKind),a
+    call registryBoot
+    ret c
 kernelNoFlash:
     ld hl,kernelVersion
     call bankDosPrintString
@@ -55,6 +41,7 @@ kernelWarm:
     ld (ksDirect),a
     ld (klFastOwner),a
     ld (kiReady),a
+    ld (diActive),a
     ld hl,0
     call cliSetObserver
     jp flushVolume

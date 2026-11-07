@@ -1,6 +1,7 @@
 ; Исполняемая копия H: для слота клиента. Установка и выбор остаются в DOS.
     INCLUDE "../include/mxos.inc"
-FLASH_BANKED_DRIVER = 1
+    DEFINE FLASH_BANKED_DRIVER 1
+    DEFINE DRIVER_IO_ONLY 1
 LATCH_0 = 00Ah
 LATCH_1 = 00Bh
 WRITE_0 = 00Ch
@@ -20,7 +21,6 @@ DISK_SECTORS = 256
             INCLUDE "../flash/flash-driver.inc"
         ELSE
             INCLUDE "../flash/flash-fast-driver.inc"
-            INCLUDE "../dos/diskWriteChecked.inc"
         ENDIF
     ENDIF
 localDriverEnd:

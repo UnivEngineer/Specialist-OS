@@ -20,7 +20,7 @@ imageOpen:
     call moveBytesForward
     ld hl,v_tmpFileDescr
     ld de,imageMagic
-    ld b,6
+    ld b,5
 imageMagicLoop:
     ld a,(de)
     cp (hl)
@@ -29,6 +29,9 @@ imageMagicLoop:
     inc de
     dec b
     jp nz,imageMagicLoop
+    ld a,(hl)
+    and 0FEh
+    jp nz,imageError
     ld hl,v_tmpFileDescr
     ld de,v_tmpFileDescr+13
     call calcCS

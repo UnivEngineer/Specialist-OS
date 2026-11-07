@@ -6,7 +6,7 @@
 PIT_HZ = 2000000
     ENDIF
     ASSERT PIT_HZ == 2000000 || PIT_HZ == 2500000
-RATE_FACTOR = PIT_HZ / 1000
+RATE_FACTOR = PIT_HZ / 1024
 TEST_SECTORS = 32
 DEFAULT_FILE_KIB = 8
     IFNDEF MAX_FILE_KIB
@@ -32,6 +32,7 @@ LAYOUT_MECHANICAL = 2
     ORG 0
 entry:
     di
+    STORE_DE v_arguments
     ld hl,0
     add hl,sp
     ld (callerSP),hl
@@ -52,6 +53,15 @@ benchMemoryReady:
     ENDIF
     ld hl,txtTitle
     call puts
+    ld hl,(v_arguments)
+    call parse_arguments
+    jp c,argument_error
+    ld a,(argHelp)
+    or a
+    jp nz,argument_help
+    ld a,(argDrive)
+    cp 0FFh
+    jp nz,drive_selected
 menu_drive:
     ld hl,txtDrive
     call puts
@@ -68,6 +78,7 @@ drive_value:
     sub 'A'
     cp 8
     jp nc,menu_drive
+drive_selected:
     ld (v_drive),a
     ld e,1
     call bios_fileGetSetDrive
@@ -94,40 +105,41 @@ drive_value:
     ld a,(v_caps)
     and DISK_CAP_WRITE
     jp z,prepare
+    ld a,(argWrites)
+    or a
+    jp z,prepare              ; -W=0: размер файла и проверка не нужны.
     ld a,(v_technology)
     cp 'F'
     jp nz,choose_verify
     ld hl,txtFlashLife
     call puts
 choose_verify:
+    ld a,(argCheck)
+    cp 0FFh
+    jp z,menu_verify
+    call select_check
+    jp c,argument_error
+    jp write_budget
 menu_verify:
     ld hl,txtVerify
     call puts
     call read_choice
     jp c,menu_verify
     or a
-    jp z,write_budget
-    cp '0'
-    jp z,write_budget
-    cp '1'
-    jp z,verify_whole_file
-    cp '2'
-    jp nz,menu_verify
-    ld a,(v_caps)
-    and DISK_CAP_VERIFY
-    jp z,menu_verify
-    ld a,5                    ; Посекторная проверка B=5.
-    jp verify_mode_ready
-verify_whole_file:
-    ld a,6                    ; B=1 всего файла, затем чтение и сравнение.
-verify_mode_ready:
-    ld (v_writeMode),a
-    jp write_budget
+    jp z,verify_choice
+    sub '0'
+verify_choice:
+    call select_check
+    jp c,menu_verify
 write_budget:
+    ld a,(argWrites)
+    cp 0FFh
+    jp nz,budget_value
+menu_writes:
     ld hl,txtWrites
     call puts
     call read_choice
-    jp c,write_budget
+    jp c,menu_writes
     or a
     jp nz,budget_digit
     ld a,1
@@ -135,17 +147,22 @@ write_budget:
 budget_digit:
     sub '0'
     cp 10
-    jp nc,write_budget
+    jp nc,menu_writes
 budget_value:
     ld (v_budget),a
     or a
     jp z,prepare
 file_size_menu:
+    ld a,(argSize)
+    or a
+    jp nz,file_size_value
+menu_size:
     ld hl,txtFileSizePrompt
     call puts
     call read_line
     call parse_file_kib
-    jp c,file_size_menu
+    jp c,menu_size
+file_size_value:
     ld (v_fileKiB),a
     ; Текущий кластер = сектор = 256 байт: КиБ * 4 кластеров.
     add a,a
@@ -275,6 +292,9 @@ case_pattern_ready:
     ld (io_call+1),hl
     xor a
     ld (v_index),a
+    LOAD_DE v_start
+    call raw_warmup
+    jp c,error
     call reset_timing
 operation_loop:
     ld a,(v_layout)
@@ -364,6 +384,7 @@ txtNoMemory: DB "NOT ENOUGH MEMORY",0
 puts:
     jp bios_printString
 
+    INCLUDE "args.inc"
     INCLUDE "fileTest.inc"
 
 ; Выбор строк теста по технологии. Механика пока только зарезервирована
@@ -689,7 +710,7 @@ region_bounds:
     or a
     ret
 
-; Вывод сырого U32 числа тиков и целых КиБ/с, без скрытого вычитания расходов.
+; Вывод миллисекунд и КиБ/с с двумя знаками, без вычитания расходов.
 ; RATE_FACTOR округлён вниз, погрешность <0,017% для поддержанных CLK1.
 print_case_name:
     ld a,(v_layout)
@@ -717,7 +738,7 @@ print_result_value:
     call print_time_ms
     ld hl,txtRate
     call puts
-    ; dividend = operations * (sectorSize/256) * floor(CLK1/1000).
+    ; dividend = operations * (sectorSize/256) * floor(CLK1/1024).
     xor a
     ld hl,v_dividend
     ld b,4
@@ -752,7 +773,7 @@ rate_multiply:
     ld hl,txtUnits
     jp puts
 
-; Скорость в kB/s, два знака после точки. Исходный числитель в v_dividend,
+; Скорость в KiB/s, два знака после точки. Исходный числитель в v_dividend,
 ; делитель — U32 тики v_elapsed. Сначала целая часть, затем два десятичных
 ; деления остатка: это не раздувает цикл вычитания в 100 раз.
 ; Все регистры разрушены, печать целиком вне измеряемого интервала.
@@ -871,7 +892,7 @@ txtTitle:        DB "Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     ENDIF
 txtDrive:        DB 00Ah,"Drive A-H [A], Q=exit (Enter confirms): ",0
 txtFlashLife:    DB 00Ah,"FLASH: writes consume limited program life.",0
-txtVerify:       DB 00Ah,"Write [0]: 0=plain, 1=file verify, 2=raw sector verify: ",0
+txtVerify:       DB 00Ah,"Check [0]: 0=plain, 1=file verify, 2=raw sector verify: ",0
 txtWrites:       DB 00Ah,"Each pass uses and removes DISKBEN.TMP.",00Ah
                  DB "File WRITE includes metadata and flush.",00Ah
                  DB "Passes (0-9) [1], 0=skip: ",0
@@ -884,7 +905,7 @@ txtError:        DB 00Ah,"I/O / format / free space error",0
 txtTimerError:   DB 00Ah,"PIT clock stopped / invalid",0
 txtDone:         DB 00Ah,"Press any key to exit",0
 txtRate:         DB " ms",009h,0
-txtUnits:        DB " kB/s",00Ah,0
+txtUnits:        DB " KiB/s",00Ah,0
 txtSummaryDrive: DB 00Ah,"Drive:  ",009h,009h,009h,009h,0
 txtLabel:        DB 00Ah,"Label:  ",009h,009h,009h,009h,0
 txtCapacity:    DB 00Ah,"Size (KiB): ",009h,009h,009h,0

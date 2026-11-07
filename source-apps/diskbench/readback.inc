@@ -8,6 +8,10 @@ read_high:
     ld (v_streamKind),a
     xor a
     ld (v_streamVerify),a
+    ld a,b
+    or a
+    call nz,raw_warmup_file
+    ret c
     call measure_begin
     call stream_read
     jp measure_end
@@ -20,6 +24,8 @@ write_high:
     ld (v_streamOp),a
     xor a
     ld (v_streamVerify),a
+    call raw_warmup_file
+    ret c
     call measure_begin
     call stream_read
     call nc,maybe_verify_raw
@@ -76,6 +82,16 @@ verify_stream:
     ld a,2
     ld (v_streamOp),a
     call timer_sample
+    ld a,(v_streamKind)
+    or a
+    jp z,verify_warm_ready
+    ; Flush мог передать устройство обратно DOS. Подготовка повторного
+    ; RAW-чтения не является проверкой данных и в VERIFY не входит.
+    call raw_warmup_file
+    ret c
+    call timer_read
+    ld (v_last),hl
+verify_warm_ready:
     ld hl,v_elapsed
     ld de,v_verifyStart
     ld b,4

@@ -91,6 +91,11 @@ probeNext:
     ld hl,Driver
     call bios_installDriver
     ld (FuncSize+4),hl
+    IF SYSTEM_FLASH
+    xor a
+    MXCALL MX_DOS_DRIVERREFRESH
+    ret c
+    ENDIF
     xor a
     ret
     IF !SYSTEM_FLASH

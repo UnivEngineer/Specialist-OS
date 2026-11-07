@@ -27,61 +27,76 @@ bankCopyFar:
     ld hl,(bankCopyRequest+4)
     call bankCopyRange
     jp c,bankCopyError
+bankCopyPrepared:
     ; Сохраняем стандартное окно на время атомарного переноса.
     ld hl,BANK_WINDOW
     ld de,bankCopySavedWindow
     ld b,32
     call bankCopyBytes
-    ld hl,bankCopyWindow
-    ld de,BANK_WINDOW
-    ld b,19
-    call bankCopyBytes
     ld hl,(bankCopyRequest+1)
     ld (BANK_COPY_SOURCE),hl
+    ld hl,(bankCopyRequest+4)
+    ld (BANK_COPY_DEST),hl
     ld hl,0
     add hl,sp
     ld (BANK_COPY_SP),hl
     ld a,(bankPage)
-    call bankCopySelector
-    ld (BANK_COPY_RETURN_PORT),a
-    ld a,c
-    ld (BANK_COPY_CALLER),a
-    ld a,0C3h
-    ld (BANK_COPY_CHECK),a
-    ld hl,bankCopyNoCarryCheck
-    ld a,(bankCopyRequest+1)
-    or a
-    jp nz,bankCopyCheckReady
-    ld hl,bankCopyFastCheck
-bankCopyCheckReady:
-    ld (BANK_COPY_CHECK+1),hl
+    call bankCopyPair
+    ld (BANK_COPY_RETURN),hl
     ld a,(bankCopyRequest)
-    call bankCopySelector
-    ld (BANK_WINDOW+6),a
-    ld a,c
-    ld (BANK_WINDOW+4),a
+    call bankCopyPair
+    ld (BANK_COPY_SRC_SELECT),hl
     ld a,(bankCopyRequest+3)
-    call bankCopySelector
-    ld (BANK_WINDOW+14),a
-    ld a,c
-    ld (BANK_WINDOW+12),a
+    call bankCopyPair
+    ld (BANK_COPY_DST_SELECT),hl
     ld hl,(bankCopyRequest+6)
-    ld a,h
-    ld (BANK_COPY_BLOCKS),a
     ld a,l
-    and 3
+    and 15
     ld (BANK_COPY_REST),a
+    ld a,h
+    dec a
+    or l
+    ld bc,16
+    jp z,bankCopyStart
+    ld b,4
+bankCopyDivide16:
+    or a
+    ld a,h
+    rra
+    ld h,a
     ld a,l
-    rrca
-    rrca
-    and 03Fh
-    ld (BANK_COPY_QUADS),a
-    ld hl,(bankCopyRequest+4)
-    inc hl
-    inc hl
-    inc hl
-    inc hl
-    jp bankCopyBlock
+    rra
+    ld l,a
+    dec b
+    jp nz,bankCopyDivide16
+    ld b,h
+    ld c,l
+bankCopyStart:
+    ld de,16
+    ld a,b
+    or c
+    jp nz,bankCopyTail
+    jp bankCopyRemainder
+
+; Секторный внутренний вход: тот же пакет, ровно 256 байт.
+; Драйвер уже проверил страницы/буфер. Сохраняет регистры, SP и окно,
+; поэтому пригоден и для вложенных вызовов из DOS, и из main.
+bankCopySector:
+    push bc
+    push de
+    push hl
+    ld de,bankCopyRequest
+    ld b,8
+    call bankCopyBytes
+    jp bankCopyPrepared
+
+; HL = пара: L — младший байт регистра маппера, H — физическая страница.
+; AF/BC/HL разрушены. Селектор не требует кода в общем окне.
+bankCopyPair:
+    call bankCopySelector
+    ld l,a
+    ld h,c
+    ret
 
 bankCopyReturn:
     ; Окно пока содержит указатель стека инициатора. Восстанавливаем SP
@@ -141,13 +156,5 @@ bankCopyValidRange:
     or a
     ret
 
-bankCopyWindow:
-    ld sp,0
-    ld a,0
-    ld (BANK_IO_RAM),a
-    jp bankCopyRead4
-    ld a,0
-    ld (BANK_IO_RAM),a
-    jp bankCopyWrite4
 bankCopyRequest: DS 8,0
 bankCopySavedWindow: DS 32,0

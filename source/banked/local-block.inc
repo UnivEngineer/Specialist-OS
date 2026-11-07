@@ -37,7 +37,7 @@ localRamWrite:
     ld (localRamCopy),a
 localRamRun:
     ld hl,localRamCopy
-    call bankCopyFar
+    call bankCopySector
     pop hl
     pop de
     pop bc

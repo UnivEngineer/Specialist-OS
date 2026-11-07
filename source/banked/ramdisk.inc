@@ -3,6 +3,15 @@
 ; B=1/2, DE=логический блок, HL=буфер DOS, CF/A=ошибка. BC/DE/HL разрушены.
 ; Страница DOS логически равна 1; данные RAM-диска начинаются с FAR=2.
 dosRamDriver:
+    ; Последний допустимый 256-байтный буфер начинается с FE00h.
+    ld a,h
+    cp 0FEh
+    jp c,dosRamBufferOK
+    jp nz,dosRamBad
+    ld a,l
+    or a
+    jp nz,dosRamBad
+dosRamBufferOK:
     ld a,e
     cp 0FFh
     jp z,dosRamBad
@@ -37,7 +46,7 @@ dosRamWrite:
     ld (dosRamCopy),a
 dosRamRun:
     ld hl,dosRamCopy
-    call bankCopyFar
+    call bankCopySector
     ret nc
 dosRamBad:
     ld a,DOS_ERR_ARGUMENT

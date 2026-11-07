@@ -27,7 +27,8 @@ def main():
         'bin/BIOS.sys', 'bin/DOS.sys', 'bin/DISKBEN.i80', 'images/SystemRom_emu80_writable.bin')}
     try:
         matrix.start('local-drivers')
-        for drive, name, mode in ((1, 'Bank-R4', 1), (1, 'Bank-R4', 6),
+        matrix.console()
+        for drive, name, mode in ((1, 'Bank-CPM16', 1), (1, 'Bank-CPM16', 6),
                                   (0, 'FlashSys', 1), (7, 'Flash', 1)):
             matrix.writable(drive, name, mode)
         matrix.install('FlashFst')

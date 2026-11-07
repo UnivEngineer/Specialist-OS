@@ -149,7 +149,7 @@ recursive:
                 assert m.read(sy['bankServiceSP'],2)==bytes.fromhex('00fc')
                 assert m.read(0xF7F0,15)==b'GUARD'*3
             rows.append({'target':target,'error':error})
-        for caller,source,dest,size,src,dst,error in [
+        copies = [
                 (0,1,2,8192,0x2001,0x5003,0),
                 (1,2,0,259,0x3003,0x4001,0),
                 (2,0,16,256,0x3001,0x5001,0),
@@ -164,7 +164,11 @@ recursive:
                 (0,17,17,0,0,0,0)] + [
                 (0,1,2,n,0x3000+offset,0x5003,0)
                 for n in (4,252,255,256,257,258,259,511,512,513,8192)
-                for offset in (0,1,253)]:
+                for offset in (0,1,253)]
+        entries = [('bankCopyFar', case) for case in copies]
+        entries += [('bankCopySector', (caller,source,dest,256,0x3001,0x5003,0))
+                    for caller,source,dest in ((0,0,2),(0,2,0),(1,1,2),(1,2,1),(2,0,1),(0,1,1))]
+        for entry,(caller,source,dest,size,src,dst,error) in entries:
             reset()
             data=bytes((i*17+31)&255 for i in range(size))
             if not error and size:
@@ -173,7 +177,7 @@ recursive:
             select(caller)
             packet=bytes([source])+src.to_bytes(2,'little')+bytes([dest])+dst.to_bytes(2,'little')+size.to_bytes(2,'little')
             m.write(0x1000,packet)
-            m.write(0x2000,bytes([0xCD])+sy['bankCopyFar'].to_bytes(2,'little')+bytes.fromhex('c30070'))
+            m.write(0x2000,bytes([0xCD])+sy[entry].to_bytes(2,'little')+bytes.fromhex('c30070'))
             before=m.read(0xFFC0,32)
             state=run(0x2000,hl=0x1000,bc=0x1234,de=0x5678)
             assert state['registers']['af']['dec']>>8==error,(caller,source,dest,size,state)
@@ -185,7 +189,7 @@ recursive:
             if not error and size:
                 select(dest);assert m.read(dst,size)==data,(caller,source,dest,size)
                 assert m.read(dst-1,1)==b'\xa5' and m.read(dst+size,1)==b'\x5a'
-            rows.append({'copy':[caller,source,dest,size],'error':error,
+            rows.append({'entry':entry,'copy':[caller,source,dest,size],'error':error,
                          'ticks':state['elapsedTicks'],'ms':state['elapsedTicks']/2000})
         (out/'result.json').write_text(json.dumps({'runtimeBytes':len(runtime),'windowBytes':len(window),'cases':rows},indent=2)+'\n')
         print(json.dumps(rows))

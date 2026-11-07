@@ -42,6 +42,18 @@ def host_checks():
         cpu.write_text('1000\n1010\n', encoding='ascii')
         cpu.with_suffix('.i80').write_bytes(bytes(17))
         assert convert(cpu, 'exe')[1] == Image(bytes(17), 0x1000, 0x1010)
+        driver = Image(b'\xc9', 0x9000, 0x9000, 1)
+        assert decode(encode(driver, 'com'), 'com') == driver
+        cpu.write_text('9000\n9000\n01\n', encoding='ascii')
+        cpu.with_suffix('.i80').write_bytes(driver.data)
+        assert convert(cpu, 'com')[1] == driver
+        for flags in (2, 0x80, 0xff):
+            try:
+                encode(Image(b'\xc9', 0x9000, 0x9000, flags), 'com')
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(('Unknown flags accepted', flags))
         bad = Path(tmp) / 'bad.exe'
         packed = bytearray(encode(Image(b'\xc9'), 'exe'))
         packed[4] = 2

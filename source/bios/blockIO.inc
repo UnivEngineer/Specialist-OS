@@ -23,6 +23,23 @@ blockIO:
     cp 2
     jp nc,blockIOModeError
 blockIOModeReady:
+    IFNDEF BANKED_DOS_BUILD
+    ld a,(v_dosBanked)
+    or a
+    jp z,blockIONative
+    ; В банковой системе BIOS обслуживает только A: (проверено выше).
+    ; Если локальный контекст уже A:, не выбираем и не восстанавливаем
+    ; тот же диск повторно. Прямой RET сохраняет все параметры драйвера.
+    ld a,(v_drive)
+    or a
+    jp nz,blockIONative
+    pop af
+    push hl
+    ld hl,(v_drives)
+    ex (sp),hl
+    ret
+blockIONative:
+    ENDIF
     pop af
     push hl
     ld hl,v_drive

@@ -19,24 +19,27 @@ class Image:
     data: bytes
     load: int = 0
     entry: int = 0
+    flags: int = 0
 
     def validate(self):
         if not self.data or not 0 <= self.load < 65536 or self.load + len(self.data) > 65536:
             raise ValueError('Invalid image address or size')
         if not self.load <= self.entry < self.load + len(self.data):
             raise ValueError('Entry is outside the image')
+        if self.flags & ~1:
+            raise ValueError("Unknown COM/EXE flags")
         return self
 
 
 def decode(data, kind, load=None, entry=None, path=None):
     kind = kind.lower().lstrip('.')
     if kind in ('com', 'exe'):
-        if len(data) < HEADER_SIZE or data[:6] != MAGIC:
+        if len(data) < HEADER_SIZE or data[:5] != MAGIC[:5]:
             raise ValueError('Expected MXOS2 COM/EXE header')
         start, run, size, cs, hs = struct.unpack_from('<5H', data, 6)
         if len(data) != HEADER_SIZE + size or checksum(data[:14]) != hs or checksum(data[16:]) != cs:
             raise ValueError('Invalid COM/EXE size or checksum')
-        return Image(data[16:], start, run).validate()
+        return Image(data[16:], start, run, data[5]).validate()
     if kind == 'rks':
         if len(data) < 6:
             raise ValueError('Short RKS')
@@ -46,9 +49,9 @@ def decode(data, kind, load=None, entry=None, path=None):
         return Image(data[4:-2], start, start if entry is None else entry).validate()
     if kind == 'cpu' and path is not None and Path(path).with_suffix('.i80').exists():
         fields = data.decode('ascii').split()
-        if len(fields) != 2:
+        if len(fields) not in (2, 3):
             raise ValueError('CPU requires load and entry addresses')
-        return Image(Path(path).with_suffix('.i80').read_bytes(), int(fields[0], 16), int(fields[1], 16)).validate()
+        return Image(Path(path).with_suffix('.i80').read_bytes(), int(fields[0], 16), int(fields[1], 16), int(fields[2], 16) if len(fields) == 3 else 0).validate()
     if kind == 'cpu':
         return Image(data, 0, 0).validate()
     # Старый EXE/BIN принимается только как явно заданный RAW-вход сборщика.
@@ -62,9 +65,11 @@ def encode(image, kind):
     if kind in ('com', 'exe'):
         if len(image.data) > 65535:
             raise ValueError('COM payload exceeds 65535 bytes')
-        header = MAGIC + struct.pack('<4H', image.load, image.entry, len(image.data), checksum(image.data))
+        header = MAGIC[:5] + bytes([image.flags]) + struct.pack('<4H', image.load, image.entry, len(image.data), checksum(image.data))
         return header + struct.pack('<H', checksum(header)) + image.data
     if kind == 'rks':
+        if image.flags:
+            raise ValueError('RKS cannot represent executable flags')
         if image.entry != image.load:
             raise ValueError('RKS cannot represent a separate entry address')
         return struct.pack('<HH', image.load, image.load + len(image.data) - 1) + image.data + struct.pack('<H', checksum(image.data))

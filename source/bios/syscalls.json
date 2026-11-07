@@ -492,6 +492,16 @@
         "id": 35,
         "name": "DRIVERSELECT",
         "target": "dosDriverSelect"
+      },
+      {
+        "id": 36,
+        "name": "DRIVERINSTALL",
+        "target": "dosDriverInstall"
+      },
+      {
+        "id": 37,
+        "name": "DRIVERREFRESH",
+        "target": "dosDriverRefresh"
       }
     ]
   }

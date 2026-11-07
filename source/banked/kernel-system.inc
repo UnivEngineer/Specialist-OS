@@ -20,7 +20,7 @@ krRawBuffer:
     ld hl,(kdRegs)
     ld (kdClientObject),hl
     call krBlockSize
-    call kdRange
+    call kiRange
     jp c,kdBad
     call klEligible
     jp nz,krBuffered
@@ -31,6 +31,7 @@ krRawBuffer:
     ld (kdEntry),hl
     call kdInvoke
     call kdCapture
+    call klGrant
     jp kdFinish
 krBuffered:
     ld a,(kdRegs+5)
@@ -118,7 +119,7 @@ krSize:
     call kdCapture
     ld hl,v_diskInfo
     ld bc,DISK_INFO
-    ld de,0FB80h
+    ld de,MAIN_DISK_INFO
     jp krStoreInfo
 krInfo:
     ld b,0FFh
@@ -126,7 +127,7 @@ krInfo:
     call kdCapture
     ld hl,(kdRegs)
     ld bc,64
-    ld de,0FBC0h
+    ld de,MAIN_DRIVER_INFO
 krStoreInfo:
     ; Стабильная копия до следующего RAWIO; окно ROM-моста её не затирает.
     push de
@@ -157,7 +158,7 @@ ktConfirm:
     ld (KD_PATH+FILE_COPY_REQUEST.onExists),hl
     ld hl,KD_PATH
     ld (kdCopy+1),hl
-    ld hl,0FB00h
+    ld hl,CLIENT_COPY_SNAPSHOT
     ld (kdCopy+4),hl
     ld a,DOS_IO_PAGE
     ld (kdCopy),a
@@ -166,7 +167,7 @@ ktConfirm:
     ld bc,FILE_COPY_REQUEST
     call kdCopyCount
     ret c
-    ld hl,0FB00h
+    ld hl,CLIENT_COPY_SNAPSHOT
     ld (ktRegs),hl
     ld hl,(ktHook)
     ld b,h
@@ -250,68 +251,7 @@ krSectorRead:
     jp kdRestorePointer
 krSectorSize: DW 0
 
-; A=7 (H:), C=0 ROM / 1 FLASH / 2 FLASHFST. Установленные копии находятся
-; в слотах DOS, COM не передаёт указатель на свой код. CF/A=ошибка DOS;
-; AF/BC/DE/HL разрушены. Диск и каталоги вызывающей стороны сохраняются.
+ ; Старый выбор встроенных шаблонов больше не используется: запускается COM.
 dosDriverSelect:
-    cp 7
-    jp nz,blockArgument
-    ld a,c
-    cp 3
-    jp nc,blockArgument
-    ld hl,kernelHDriverKind
-    cp (hl)
-    jp z,dosClearError
-    push bc
-    call flushVolume
-    pop bc
-    ret c
-    ld a,(kernelHDriverKind)
-    cp 2
-    jp nz,krDriverReady
-    push bc
-    ld b,4
-    call fastDriver
-    pop bc
-    ret c
-krDriverReady:
-    ld a,c
-    ld (krDriverChoice),a
-    ld hl,v_diskInfo
-    ld (romDiskInfoPointer),hl
-    or a
-    ld hl,romDriver
-    jp z,krDriverInstall
-    dec a
-    jp nz,krDriverFast
-    call flashDosInit
-    ret c
-    ld hl,v_diskInfo
-    ld (FuncSize+4),hl
-    ld hl,Driver
-    jp krDriverInstall
-krDriverFast:
-    call fastDosInit
-    ret c
-    ld hl,v_diskInfo
-    ld (fastFuncSize+4),hl
-    xor a
-    ld hl,fastChipStates
-    ld b,16
-krDriverReset:
-    ld (hl),a
-    inc hl
-    dec b
-    jp nz,krDriverReset
-    ld hl,fastDriver
-krDriverInstall:
-    ld (v_drives+14),hl
-    ld a,(krDriverChoice)
-    ld (kernelHDriverKind),a
-    ld a,(v_drive)
-    cp 7
-    jp nz,dosClearError
-    ld (j_diskDriver+1),hl
-    jp mountVolume
-kernelHDriverKind: DB 1
-krDriverChoice: DB 0
+    jp dosUnsupported
+kernelHDriverKind: DB 0

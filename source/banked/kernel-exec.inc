@@ -25,6 +25,9 @@ keCommandReady:
     jp kdFinish
 
 keExternal:
+    ld a,(diActive)
+    or a
+    jp nz,blockArgument
     ld a,(v_drive)
     push af
     ld de,CMD_LINE
@@ -55,11 +58,11 @@ keCommandCopied:
     ; Аргументы переводятся в системную строку main до загрузки тела.
     ld de,CMD_LINE
     call sub_hl_de
-    ld de,0FA00h
+    ld de,MAIN_COMMAND_ADDR
     add hl,de
     push hl
     ld hl,CMD_LINE
-    ld de,0FA00h
+    ld de,MAIN_COMMAND_ADDR
     ld bc,MAX_PATH+2
     xor a
     ld (kdPage),a
@@ -68,6 +71,9 @@ keCommandCopied:
     ld hl,v_curFileDescr
     call imageOpen
     jp c,keLoadError
+    ld a,(v_tmpFileDescr+5)
+    and IMAGE_FLAG_DRIVER
+    jp nz,keDriver
     ; Основная память до переходника RUN; верхние драйверы — явные области.
     push hl
     push de
@@ -123,6 +129,53 @@ keRangeOk:
     call bankCallPacket
     xor a
     ret
+keDriver:
+    ; Стек: адрес аргументов main, прежний диск. Код не затрагивает main.
+    ld a,d
+    cp DOS_BANK_DRIVER_ADDR/256
+    jp nz,keDriverBad
+    ld a,e
+    or a
+    jp nz,keDriverBad
+    ld h,b
+    ld l,c
+    add hl,de
+    jp c,keDriverBad
+    ld (diEnd),hl
+    ld de,DOS_BANK_DRIVER_END
+    call cmp_hl_de
+    jp c,keDriverRangeOk
+    jp nz,keDriverBad
+keDriverRangeOk:
+    ld de,DOS_BANK_DRIVER_ADDR
+    call imageLoad
+    jp c,keLoadError
+    push hl
+    call registryFlushH
+    pop hl
+    jp c,keLoadError
+    pop de
+    push hl
+    ; Аргументы сохраняют тот же NEAR-контракт, но теперь в странице DOS.
+    ld hl,CMD_LINE-MAIN_COMMAND_ADDR
+    add hl,de
+    ex de,hl
+    xor a
+    ld (kdBusy),a
+    inc a
+    ld (diActive),a
+    ld hl,keDriverReturn
+    ex (sp),hl
+    jp (hl)
+keDriverReturn:
+    push af
+    xor a
+    ld (diActive),a
+    pop af
+    jp keDone
+keDriverBad:
+    call blockArgument
+    jp keLoadError
 keRangeError:
     pop de
     pop hl

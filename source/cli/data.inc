@@ -76,6 +76,7 @@ cliQuery: DB 0
 cliAttribSet: DB 0
 cliAttribClear: DB 0
 cliOldDrive: DB 0
+cliOldValid: DB 0
 cliOldDirectory: DW 0
 cliArgs: DW 0
 cliTail: DW 0

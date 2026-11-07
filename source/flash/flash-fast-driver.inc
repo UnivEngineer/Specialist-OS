@@ -1,12 +1,15 @@
 ; Банковая копия физического FlashFst; синхронная проверка локальна.
 Driver:
     ld      a, b
+    IFNDEF DRIVER_IO_ONLY
     cp      0FFh
     jp z,   FuncInfo
     cp      5
     jp z,   FuncWriteChecked
     cp      3
     jp z,   FuncSize
+
+    ENDIF
 
     push    hl
     push    de
@@ -44,12 +47,15 @@ Exit:
 ;   de = число секторов;
 ;   hl = адрес DISK_INFO.
 
+    IFNDEF DRIVER_IO_ONLY
 FuncSize:
     ld      de, 0                 ; физическая ёмкость, патчит установщик
     ld      hl, 0                 ; DISK_INFO, патчит установщик
     ld      bc, 0800h
     or      a
     ret
+
+    ENDIF
 
 ;----------------------------------------------------------------------------
 ; Функция 2 - чтение сектора из флеш-памяти
@@ -391,6 +397,7 @@ WriteByteToChip:
 
     INCLUDE "flash-map.inc"
 
+    IFNDEF DRIVER_IO_ONLY
 ; B=0FFh: HL=две строки, B=технология, C=возможности (DISK_CAP_*).
 FuncInfo:
     ld      bc, DISK_TECH_FLASH * 256 + DISK_CAP_READ + DISK_CAP_WRITE + DISK_CAP_VERIFY + DISK_CAP_FLUSH
@@ -403,11 +410,20 @@ DriverDescription: DB "0x512K pipeline",0
 ; B=5: общий синхронный цикл B=1, B=2 и сравнения в DOS.
 ; BC/DE/HL сохраняются; CF=1 и diskWriteErr=1 при отказе.
 FuncWriteChecked:
+    IFDEF FLASH_BANKED_DRIVER
+    ; Общая проверка записи выполняется DOS, которая владеет буфером чтения.
+    ld      a,DOS_ERR_UNSUPPORTED
+    scf
+    ret
+    ELSE
     push    bc
     ld      bc, Driver
     call    diskWriteChecked
     pop     bc
     ret
+    ENDIF
+
+    ENDIF
 
 v_statePtr:     DW 0
 v_pageSelect:   DB 0

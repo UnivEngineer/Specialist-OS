@@ -29,6 +29,8 @@ pathCliCom: DB "A:",05Ch,"CLI.COM",0
 dosRawIO:
     jp j_diskDriver
 dosDriverSelect:
+dosDriverInstall:
+dosDriverRefresh:
     jp dosUnsupported
     ENDIF
 

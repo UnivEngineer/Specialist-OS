@@ -345,6 +345,8 @@ cliRemember:
     call cliCopyBytes
     ld a,(v_drive)
     ld (cliOldDrive),a
+    ld a,(v_diskInfo.isValid)
+    ld (cliOldValid),a
     ld hl,(v_directory)
     ld (cliOldDirectory),hl
     pop hl
@@ -369,6 +371,15 @@ cliFileStatus:
     jp nc,cliRestoreStatus
     ld a,b
     or a
+    jp nz,cliRestoreStatus
+    ; Ранее нераспознанный том не должен запрещать команду на другом диске.
+    ; Ошибка flush до фактического выбора прежнего диска остаётся ошибкой.
+    ld a,(cliOldDrive)
+    ld hl,v_drive
+    cp (hl)
+    jp nz,dosIoError
+    ld a,(cliOldValid)
+    cp DISK_VALID
     jp nz,cliRestoreStatus
     jp dosIoError
 cliRestoreStatus:

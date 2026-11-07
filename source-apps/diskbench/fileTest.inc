@@ -447,6 +447,8 @@ raw_buffer_ready:
     ld (v_rawPtr),hl
     ld a,(v_fileSectors)
     ld (v_rawLeft),a
+    call raw_warmup_file
+    ret c
     call measure_begin
 raw_io:
     ld hl,(v_rawPtr)
@@ -485,6 +487,25 @@ raw_success_check:
     jp nz,measure_end
     call maybe_verify_raw
     jp measure_end
+
+; Подготовка локальной серии RAW исключена из замера. Читаем первый
+; сектор в отдельный scratch: исходный файл/poison-буфер не затрагиваем.
+; DE=сектор; BC/DE/HL сохранены, AF/CF=статус драйвера.
+raw_warmup:
+    push bc
+    push hl
+    ld b,2
+    ld hl,fatBuffer
+    call bios_diskDriver
+    pop hl
+    pop bc
+    ret
+raw_warmup_file:
+    push de
+    LOAD_DE rawSectors
+    call raw_warmup
+    pop de
+    ret
 
 ; Обёртка замеров и посекторного B=5. Верхние чтения идут напрямую
 ; в 8200h через stream_read, без обратного копирования в нижнюю память.

@@ -190,7 +190,7 @@ streamChunkReady:
     IFDEF BANKED_DOS_BUILD
             call ksSector
     ELSE
-            call logicalSectorIOChecked
+            call logicalSectorPrepared
     ENDIF
             jp c,streamReturn
             jp streamCopyDone

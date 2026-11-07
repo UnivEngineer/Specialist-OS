@@ -138,5 +138,5 @@ bankSavePath:
     ret
 bankClientEnd:
     INCLUDE "local-block.inc"
-    ASSERT $ <= CMD_LINE
+    ASSERT $ <= LOCAL_DRIVER_ADDR
     END

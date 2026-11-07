@@ -116,6 +116,12 @@ if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 's
     exit $LASTEXITCODE
 }
 
+# Одноразовый установщик включает переносимую службу и её адреса патчей.
+if ($SourceBase -in @('Flash', 'FlashFst', 'Rom') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')) {
+    & python (Join-Path $PSScriptRoot 'build-banked-transport.py')
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+
 $dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)
 $buildInputs = @($dependencies + $assemblerPath + $PSCommandPath)
 $newestInput = $buildInputs |
@@ -174,6 +180,11 @@ if ($Extension -eq 'cpu') {
         [Convert]::ToInt32($symbolMatch.Groups[1].Value, 16)
     }
     $cpuText = ("{0:X4}`r`n{0:X4}`r`n" -f $numericAddress)
+    $symbolText = [IO.File]::ReadAllText($symbolPath)
+    $flagsMatch = [regex]::Match($symbolText, '(?m)^IMAGE_FLAGS: EQU 0x([0-9A-Fa-f]+)')
+    if ($flagsMatch.Success) {
+        $cpuText += ("{0:X2}`r`n" -f [Convert]::ToInt32($flagsMatch.Groups[1].Value, 16))
+    }
     [IO.File]::WriteAllText($outputPath, $cpuText, [Text.Encoding]::ASCII)
 }
 

@@ -35,6 +35,8 @@ sysBankCall:
     or a
     jp nz,sysBadPacket
 sysBankPacketReady:
+    jp sysRawRoute
+sysBankDoCall:
     push de
     ld a,1
     ld hl,BANK_DOS_GATE

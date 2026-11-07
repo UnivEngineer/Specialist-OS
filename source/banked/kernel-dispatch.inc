@@ -493,6 +493,8 @@ kdCopyCount:
     jp bankCopyFar
 
 kdScalars:
+    DB MX_DOS_DRIVERREFRESH & 0FFh
+    DW dosDriverRefresh
     DB MX_DOS_DRIVERSELECT & 0FFh
     DW dosDriverSelect
     DB MX_DOS_GETDRIVEFREESPACE & 0FFh

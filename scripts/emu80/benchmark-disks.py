@@ -65,7 +65,7 @@ class Matrix:
         self.m=Bench('http://127.0.0.1:19781/mcp');self.pid=None
         self.appBinary=ROOT/'bin/DISKBEN.i80'
         self.s=app_symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
-        self.report={'startedUtc':datetime.now(timezone.utc).isoformat(),'cpuHz':2000000,'pitHz':2000000,'fileBytes':SIZE,'passes':PASSES,'units':'decimal kB/s; ms','rows':[],'inventory':{},'phases':{}}
+        self.report={'startedUtc':datetime.now(timezone.utc).isoformat(),'cpuHz':2000000,'pitHz':2000000,'fileBytes':SIZE,'passes':PASSES,'units':'KiB/s (1024 bytes); ms','rows':[],'inventory':{},'phases':{}}
     def save(self):
         (OUT/'raw.json').write_text(json.dumps(self.report,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
     def stop(self):
@@ -129,6 +129,17 @@ class Matrix:
         self.phase=phase
         self.report['phases'][phase]={'pid':self.pid,'dosSha256':sha(dos or ROOT/'bin/DOS.sys'),'launchConf':(RUNTIME/'specialist-os/launch.conf').read_text(),'ramPages':self.m.read(0x8FF8,1)[0]}
         self.save();print('PHASE',phase,flush=True)
+    def console(self):
+        """Выход из NC и CLS настоящими клавишами до прямых замеров ABI."""
+        cli=symbols(ROOT/'bin/CLI.sym')
+        self.m.stop_at(cli['cliPrompt']);self.m.tap('f10');self.m.until(cli['cliPrompt'],120)
+        self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
+        for key in ('esc','c','l','s'):self.m.tap(key)
+        assert self.m.read(cli['CMD_LINE'],3).upper()==b'CLS'
+        self.m.stop_at(cli['cliPrompt']);self.m.tap('enter');self.m.until(cli['cliPrompt'],120)
+        self.m.call('bp_clear')
+        self.m.screenshot(OUT/'console-before-benchmark.png')
+
     def func(self,address,**regs):
         self.m.stop_at(0x8E10);self.m.write(0x8E00,bytes((0xCD,address&255,address>>8,0xC3,0x10,0x8E)))
         self.m.call('regs_set',pc=0x8E00,sp=0x8FDF,**regs)
@@ -137,9 +148,13 @@ class Matrix:
         assert not self.func(0xC842,af=drive<<8,de=1)['flags']['C']
         assert not self.func(0xC896)['flags']['C']
     def install(self,name):
-        address=0 if name in ['Flash','FlashFst','FlashSys','RAMD'] else SYSTEM['DISK_DRIVER_ADDR']
-        self.m.write(address,(ROOT/f'bin/{name}.i80').read_bytes());self.func(address)
-        # Смена буквы обновляет рабочий JP после установки драйвера.
+        if name in ('Flash','FlashFst','Rom'):
+            # Инициализатор COM исполняется загрузчиком в странице DOS.
+            self.m.write(0x7E00,('A:\\'+name+'.COM\0').encode('ascii'))
+            installed = self.func(0xC85D,hl=0x7E00)
+            assert not installed['flags']['C'], (name, installed)
+        else:
+            self.m.write(0,(ROOT/f'bin/{name}.i80').read_bytes());self.func(0)
         self.func(0xC842,af=0x0100,de=1)
     def format_ram(self):
         self.m.write(0,(ROOT/'bin/FORMAT.i80').read_bytes());self.m.write(0x7E00,b'B: -R -Y\r\0')

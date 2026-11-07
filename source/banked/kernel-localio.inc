@@ -61,6 +61,14 @@ klEligible:
     or a
     ret z
     cp 7
+    ret nz
+    ld a,(DOS_DRIVER_REGISTRY+7*DRIVER_RECORD_SIZE+1)
+    or a
+    jp nz,klEligibleH
+    inc a
+    ret
+klEligibleH:
+    xor a
     ret
 
 klInstall:
@@ -72,7 +80,7 @@ klInstall:
     or a
     jp nz,klReady
     ld b,4
-    call fastDriverNative
+    call LOCAL_DRIVER_ADDR
     ret c
     ld a,1
     ld (klFastOwner),a
@@ -81,30 +89,10 @@ klReady:
     ld hl,klInstalled
     cp (hl)
     ret z
-    or a
-    ld hl,localImage0
-    ld bc,localImage0End-localImage0
-    jp z,klCopyImage
-    dec a
-    jp nz,klFastImage
-    ld a,(source1SectorLimit+1)
-    ld (localImage1+local1SectorLimit+1),a
-    ld hl,source1v_chipMap
-    ld de,localImage1+local1v_chipMap
-    ld bc,4
-    call moveBytesForward
-    ld hl,localImage1
-    ld bc,localImage1End-localImage1
-    jp klCopyImage
-klFastImage:
-    ld a,(source2SectorLimit+1)
-    ld (localImage2+local2SectorLimit+1),a
-    ld hl,source2v_chipMap
-    ld de,localImage2+local2v_chipMap
-    ld bc,4
-    call moveBytesForward
-    ld hl,localImage2
-    ld bc,localImage2End-localImage2
+    ld hl,(registryImageSize)
+    ld b,h
+    ld c,l
+    ld hl,DOS_DRIVER_IMAGE
 klCopyImage:
     ld de,LOCAL_DRIVER_ADDR
     call kdStore
@@ -123,11 +111,14 @@ klRegs: DS MX_REGS,0
 
 ; Копии FLASHFST владеют конвейером по очереди. Ожидание — только при
 ; реальном переходе аппаратного обмена между DOS и main, не между блоками.
-; Контракт совпадает с физическим драйвером, включая B=3/FFh.
+; Здесь только секторный обмен/flush; B=3/FFh обслуживает реестр DOS.
 fastDriver:
+    ld a,(kernelHDriverKind)
+    cp 2
+    jp nz,LOCAL_DRIVER_ADDR
     ld a,(klFastOwner)
     or a
-    jp z,fastDriverNative
+    jp z,LOCAL_DRIVER_ADDR
     push bc
     push de
     push hl
@@ -142,6 +133,29 @@ fastDriver:
     ret c
     xor a
     ld (klFastOwner),a
-    jp fastDriverNative
+    jp LOCAL_DRIVER_ADDR
 klFastOwner: DB 0
 klFlushRegs: DW 0,0,0407h,0
+
+; Прямая серия RAW не требует перехода main -> DOS на каждом блоке.
+; Пакет результата уже сохранён в kdRegs; AF/BC/DE/HL разрушены.
+klGrant:
+    ld a,(kdRegs+6)
+    and 1
+    ret nz
+    ld a,(v_drive)
+    push af
+    call registryRecord
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
+    ld (klLease+1),hl
+    pop af
+    inc a
+    ld (klLease),a
+    ld hl,klLease
+    ld de,MAIN_RAW_LEASE
+    ld bc,3
+    jp kdStore
+klLease: DS 3,0

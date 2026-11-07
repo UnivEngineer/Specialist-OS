@@ -94,6 +94,18 @@ sysDiskDriver:
     ld a,(v_dosBanked)
     or a
     jp z,sysDiskNative
+    ; После подготовки серии регистры уже имеют контракт драйвера.
+    ; Не упаковываем их в MX_REGS ради вызова в этой же странице.
+    ld a,(MAIN_RAW_LEASE)
+    or a
+    jp z,sysDiskRequest
+    ld a,b
+    dec a
+    cp 2
+    jp nc,sysDiskRequest
+    pop af
+    jp sysRawBlock
+sysDiskRequest:
     pop af
     MXCALL MX_DOS_RAWIO
     ret

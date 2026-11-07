@@ -32,6 +32,7 @@ function Convert-ExecutableFile {
         $kind = [IO.Path]::GetExtension($Path).ToLowerInvariant()
         $load = $LoadAddress
         $entry = $load
+        $flags = 0
         $offset = 0
         $size = $data.Length
         $expectedChecksum = $null
@@ -40,9 +41,11 @@ function Convert-ExecutableFile {
         if ($kind -in @('.com', '.exe') -and $data.Length -ge 4 -and
             $data[2] -eq 0x4D -and $data[3] -eq 0x58) {
             if ($data.Length -lt 16) { throw 'Short COM/EXE header' }
-            for ($i = 0; $i -lt $magic.Length; $i++) {
+            for ($i = 0; $i -lt 5; $i++) {
                 if ($data[$i] -ne $magic[$i]) { throw 'Expected MXOS2 COM/EXE header' }
             }
+            $flags = $data[5]
+            if ($flags -band 0xFE) { throw 'Unknown COM/EXE flags' }
             $load = [BitConverter]::ToUInt16($data, 6)
             $entry = [BitConverter]::ToUInt16($data, 8)
             $size = [BitConverter]::ToUInt16($data, 10)
@@ -68,7 +71,9 @@ function Convert-ExecutableFile {
                     if ($value -gt 127) { throw 'CPU addresses must be ASCII' }
                 }
                 $fields = [Text.Encoding]::ASCII.GetString($data).Trim() -split '\s+'
-                if ($fields.Count -ne 2) { throw 'CPU requires load and entry addresses' }
+                if ($fields.Count -notin @(2, 3)) { throw 'CPU requires load, entry and optional flags' }
+                if ($fields.Count -eq 3) { $flags = [Convert]::ToInt32($fields[2], 16) }
+                if ($flags -notin @(0, 1)) { throw 'Unknown CPU flags' }
                 $load = [Convert]::ToInt32($fields[0], 16)
                 $entry = [Convert]::ToInt32($fields[1], 16)
                 $data = [IO.File]::ReadAllBytes($i80)
@@ -100,6 +105,7 @@ function Convert-ExecutableFile {
         }
 
         if ($Format -eq 'rks') {
+            if ($flags) { throw 'RKS cannot represent executable flags' }
             if ($entry -ne $load) { throw 'RKS cannot represent a separate entry address' }
             $result = New-Object byte[] ($size + 6)
             Set-Word $result 0 $load
@@ -110,6 +116,7 @@ function Convert-ExecutableFile {
             if ($size -gt 65535) { throw 'COM payload exceeds 65535 bytes' }
             $result = New-Object byte[] ($size + 16)
             [Array]::Copy($magic, $result, $magic.Length)
+            $result[5] = $flags
             Set-Word $result 6 $load
             Set-Word $result 8 $entry
             Set-Word $result 10 $size

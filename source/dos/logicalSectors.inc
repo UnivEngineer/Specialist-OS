@@ -15,6 +15,9 @@ logicalSectorIOChecked:
             pop hl
             jp c,blockArgument
             jp z,blockArgument
+logicalSectorPrepared:
+            ; Внутренний поток уже проверил кластер и весь буфер.
+            ; BPB гарантирует, что его сектора лежат внутри тома.
             ld a,(v_logicalShift)
             or a
             jp z,logicalPhysicalIO
@@ -53,8 +56,14 @@ logicalDone:
             ret
 
 logicalPhysicalIO:
+    IFDEF BANKED_DOS_BUILD
+            ; Диск выбран до начала операции, B=1/2 задан вызывающим.
+            ; Не повторяем выбор устройства и разбор номера функции.
+            jp j_diskDriver
+    ELSE
             ld a,(v_drive)
             jp bios_blockIO
+    ENDIF
 
 ; A=log2 размера 7..9. HL=размер в байтах, BC/DE сохранены.
 sectorSizeFromShift:

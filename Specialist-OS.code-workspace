@@ -224,7 +224,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Flash",
           "cpu",
-          "0"
+          "DOS_BANK_DRIVER_ADDR"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -251,7 +251,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "FlashFst",
           "cpu",
-          "0"
+          "DOS_BANK_DRIVER_ADDR"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"
@@ -305,7 +305,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "Rom",
           "cpu",
-          "0"
+          "DOS_BANK_DRIVER_ADDR"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\flash"

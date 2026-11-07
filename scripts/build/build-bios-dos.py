@@ -53,7 +53,7 @@ def main():
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
     lines += [inc(source/f) for f in ('getch.inc','printString1.inc','cmp_hl_de_2.inc')]
-    lines += [inc(ROOT/'source/bios/legacy-files.inc'), inc(ROOT/'source/bios/banked-start.inc')]
+    lines += [inc(ROOT/'source/bios/legacy-files.inc'), inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/raw-local.inc')]
     probe=out/'System.measure.asm'
     probe.write_text('\n'.join(lines+['    END','']),encoding='utf-8')
     h['assemble'](probe,out/'System.measure.bin',[])
@@ -70,6 +70,7 @@ def main():
               '    INCBIN "'+(out/'banked/MAINBIOS.bin').as_posix()+'"',
               'bankBiosImageEnd:',
               inc(ROOT/'source/bios/banked-start.inc'),
+              inc(ROOT/'source/bios/raw-local.inc'),
               '    ASSERT $ <= BIOS_BANK_GATE_END',
               '    ASSERT BIOS_BANK_GATE_END <= BIOS_BANK_IO_ADDR',
               '    ORG_PAD BIOS_BANK_IO_ADDR',
@@ -112,12 +113,7 @@ def main():
     report['nativeDosReference'] = report['dos']
     runpy.run_path(str(ROOT/'scripts/build/build-banked-dos.py'))['main']()
     bank=bytearray((out/'banked/KERNEL.bin').read_bytes())
-    driver=(out/'banked/FLASHDRV.bin').read_bytes()
-    bank[0x5000:0x5000+len(driver)]=driver
-    rom_driver=(out/'banked/ROMDRV.bin').read_bytes()
-    bank[0x5400:0x5400+len(rom_driver)]=rom_driver
-    fast_driver=(out/'banked/FASTDRV.bin').read_bytes()
-    bank[0x5600:0x5600+len(fast_driver)]=fast_driver
+    # Активный слот заполняется при инициализации DOS из общего шаблона.
     (out/'DOS.sys').write_bytes(bank)
     bank_layout=json.loads((out/'banked/KERNEL.layout.json').read_text(encoding='utf-8'))
     report['dos']=dict(start=0x4000,end=bank_layout['kernelEnd'],bytes=len(bank),page=1,

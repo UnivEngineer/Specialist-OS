@@ -3,8 +3,10 @@ Driver:
     ; B=1/2 сохраняют BC/DE/HL, AF и флаги разрушаются.
     ; Для B=3 и B=0FFh регистровый контракт приведён у обработчиков.
     ld      a, b
+    IFNDEF DRIVER_IO_ONLY
     cp      0FFh
     jp z,   FuncInfo
+    ENDIF
     cp      1
     jp nz,  DriverNotWrite
     ld      (bios_vars.diskWriteErr), a
@@ -13,8 +15,10 @@ Driver:
 DriverNotWrite:
     cp      2
     jp z,   FuncRead    ; чтение
+    IFNDEF DRIVER_IO_ONLY
     cp      3
     jp z,   FuncSize    ; размер
+    ENDIF
     scf                 ; неизвестная функция, включая запись B=5
     ret                 ; иначе выход
 
@@ -26,6 +30,7 @@ DriverNotWrite:
 ;   hl = адрес DISK_INFO;
 ;   bc = 0, подсказка линейного выделения; CF=0.
 ; Размер устройства не зависит от BPB текущего/ещё не смонтированного тома.
+    IFNDEF DRIVER_IO_ONLY
 FuncSize:
     ld      de, DISK_SECTORS
     ld      bc, 0
@@ -33,6 +38,7 @@ FuncSize:
     or      a
     ret
 
+    ENDIF
 ;----------------------------------------------------------------------------
 ; Функция 2 - чтение сектора из внешнего ROM.
 ;
@@ -50,6 +56,13 @@ FuncSize:
 ;   af и флаги, кроме CF (сохраняется из диспетчера).
 
 FuncRead:
+    ld a,d
+    or a
+    jp z,FuncReadReady
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
+FuncReadReady:
     ; Сохранение регистров
     push    hl
     push    de
@@ -122,6 +135,7 @@ ReadByteFromChip:
 ;
 ; Разрушает:
 ;   af и флаги.
+    IFNDEF DRIVER_IO_ONLY
 FuncInfo:
     ld      bc, DISK_TECH_ROM * 256 + DISK_CAP_READ
     ld      hl, DriverInfo
@@ -136,3 +150,4 @@ v_diskInfo:     DW 0
 
 ;----------------------------------------------------------------------------
 
+    ENDIF

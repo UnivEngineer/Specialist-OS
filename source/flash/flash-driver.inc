@@ -1,12 +1,15 @@
 ; Общее тело внешнего драйвера ВВ55: main-резидент и банковая DOS.
 Driver:
     ld      a, b
+    IFNDEF DRIVER_IO_ONLY
     cp      0FFh
     jp z,   FuncInfo
     cp      5
     jp z,   FuncWriteChecked
     cp      3
     jp z,   FuncSize
+
+    ENDIF
 
     push    hl
     push    de
@@ -37,12 +40,15 @@ Exit:
 
 ;----------------------------------------------------------------------------
 
+    IFNDEF DRIVER_IO_ONLY
 FuncSize:
     ld      de, 0                 ; физическая ёмкость, патчит установщик
     ld      hl, 0                 ; DISK_INFO, патчит установщик
     ld      bc, 0
     or      a
     ret
+
+    ENDIF
 
 ;----------------------------------------------------------------------------
 ; Чтение сектора.
@@ -204,6 +210,7 @@ WriteByteToChip:
 
     INCLUDE "flash-map.inc"
 
+    IFNDEF DRIVER_IO_ONLY
 ; B=0FFh: HL=две строки, B=технология, C=возможности (DISK_CAP_*).
 FuncInfo:
     ld      bc, DISK_TECH_FLASH * 256 + DISK_CAP_READ + DISK_CAP_WRITE + DISK_CAP_VERIFY
@@ -227,6 +234,8 @@ FuncWriteChecked:
     call    bios_diskWriteChecked
     pop     bc
     ret
+    ENDIF
+
     ENDIF
 
 v_pageSelect:   DB 0

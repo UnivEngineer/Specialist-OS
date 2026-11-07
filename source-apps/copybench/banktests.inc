@@ -1,5 +1,5 @@
-    INCLUDE "../../source/banked/abi.inc"
-    INCLUDE "../../source/banked/copy.inc"
+    INCLUDE "r4-abi.inc"
+    INCLUDE "r4-far.inc"
 ; Копирование маленького служебного блока, HL -> DE, B=1..255.
 ; Разрушает AF/B/DE/HL, сохраняет C.
 bankCopyBytes:
@@ -21,7 +21,7 @@ destinationPhysical: DB 0
 otherTail: DS 192,0
 farTailImage:
     DISP 0FF00h
-    INCLUDE "../../source/banked/copytail.inc"
+    INCLUDE "r4-tail.inc"
     ENT
 farTailEnd:
     ASSERT farTailEnd-farTailImage <= 192

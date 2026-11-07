@@ -31,6 +31,10 @@ fgd_SizeReady:
             ld      bc, 8
             call    fileOpRange
             ret c
+    IFDEF BANKED_DOS_BUILD
+            ; Готовая геометрия в реестре: опрос списка не монтирует тома.
+            jp registryDrives
+    ELSE
             call    flushVolume
             ret c
             ld      a, (v_drive)
@@ -63,6 +67,8 @@ fgd_Next:
     ELSE
             xor     a
             ret
+    ENDIF
+
     ENDIF
 
 ; HL=начало, BC=число байтов; только обычное ОЗУ, без оборота адреса.

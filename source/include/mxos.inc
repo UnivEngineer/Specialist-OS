@@ -16,20 +16,20 @@
 ;   E000-E1FF - Мост диска A: и адаптеры исторических файловых JMP
 ;   E200-E3FF - [ 512 B] Буфер этого моста, принадлежит BIOS
 ;   E400-E7FF - Служебный стек BIOS после включения банкового транспорта
-;   E800-EAFF - [ 768 B] Лениво устанавливаемая локальная копия драйвера H:
+;   E800-E881 - [ 130 B] Командная строка DOS/NC в main
+;   E900-E97F - Геометрия RAWIO и описание драйвера для клиента main
+;   E980-E985 - Разрешение прямой серии RAW и код её последней ошибки
+;   E986-EAFF - Резерв основной памяти
 ;   EB00-EFFF - [1280 B] Компактный шрифт FONTKOI.FNT
 ;   F000-F5FF - [1536 B] Загружаемый верхний этап RUN
 ;   F600-F73F - [ 320 B] FLASHSYS.COM
 ;   F740-F7FF - [ 192 B] Резерв MX; драйвер B: находится в DOS
 ;   F800-F80E - [  15 B] Общий вход, CP/M, адаптер, загрузка/сохранение по пути
-;   F80F-F8FF - Резерв системного хвоста
-;   F900-F9FF - Внутренний вход физического обмена в буфер main
-;   FA00-FA81 - [ 130 B] Общая командная строка DOS/NC
-;   FA82-FAFF - [ 126 B] Резерв MX
-;   FB00-FB55 - Снимок COPY для callback командной строки
-;   FB56-FB7F - Резерв MX
-;   FB80-FBBF - Геометрия физического диска для RAWIO
-;   FBC0-FBFF - Имя/описание драйвера для RAWIO
+;   F80F-F8BF - Код адаптера в банковых клиентах; резерв в main
+;   F8C0-F93F - Внутренний вход физического обмена и резерв
+;   F940-FB7F - [ 576 B] Один слот ROM/FLASH/FLASHFST, тот же адрес в DOS
+;   FB80-FBD5 - Снимок COPY для callback командной строки
+;   FBD6-FBFF - Резерв хвоста
 ;   FC00-FEFF - Банковый транспорт и контексты после его установки
 ;   FF00-FFBF - Защищённый хвост копировщика и резерв
 ;   FFC0-FFDF - [  32 B] Общее аппаратное окно команд/переноса данных
@@ -46,7 +46,9 @@
 ;     2100-217F - [ 128 B] Путь клиента или снимок запроса для callback
 ;   4000-8FDE - Бюджет кода и постоянных данных DOS (KERNEL.sym: dosCoreEnd)
 ;   8FDF-8FFF - Локальный резерв совместимых переменных; diskWriteErr=8FF9h
-;   9000-BFFF - Арена физических драйверов; FLASHDRV с 9000h, ROMDRV с 9400h, FASTDRV с 9600h
+;     3000-327F - [ 640 B] Реестр физических драйверов, 8 записей
+;     3400-363F - [ 576 B] Подготовленный образ активной службы H:
+;   9000-BFFF - Временная область инициализатора COM с IMAGE_FLAG_DRIVER
 ;   C000-C3FF - [1024 B] Дисковый кэш DOS
 ;   C400-C481 - [ 130 B] Локальная командная строка DOS
 ;   C482-C4FF - Резерв командной строки
@@ -54,8 +56,10 @@
 ;   D800-EFFF - [6144 B] Буфер BAT, сохраняется при запуске программ main
 ;   F000-F3FF - Резерв DOS
 ;   F400-F7FF - [1024 B] Служебный стек DOS; начальный SP=F800h
-;   F800-F9FF - Публичные входы CLIENT и резерв
-;   FA00-FBFF - Резерв контекста банкового клиента
+;   F800-F8BF - Публичные входы и код CLIENT
+;   F8C0-F93F - Внутренний вход физического обмена и резерв
+;   F940-FB7F - Один активный слот физических служб H:, как в main
+;   FB80-FBD5 - Снимок COPY; FBD6-FBFF — резерв
 ;   FC00-FEFF - Транспорт, контексты вложенных вызовов, общий копировщик
 ;   FF00-FFBF - Копия хвоста копировщика и резерв
 ;   FFC0-FFDF - То же физическое 32-байтное окно, что в основной памяти
@@ -375,6 +379,8 @@ RAMD_DRIVER_USER       = 4
 ; Номер функции передаётся в регистре b:
 ;   B = 1    - записать  сектор (256 байт). DE = номер сектора, HL = буфер.
 ;   B = 2    - прочитать сектор (256 байт). DE = номер сектора, HL = буфер.
+; В банковой DOS функции 3/FFh обслуживает реестр. DISK_INFO содержит
+; смонтированную BPB, ёмкость/возможности/строки принадлежат физическому диску.
 ;   B = 3    - информация о диске. DE = размер диска, HL = DISK_INFO,
 ;              BC = шаг выделения по чипам (0: линейно). Ненулевой шаг
 ;              также объявляет поддержку B=4: дождаться отложенных записей.
@@ -396,6 +402,25 @@ DISK_CAP_READ          = 01h
 DISK_CAP_WRITE         = 02h
 DISK_CAP_VERIFY        = 04h    ; B=5: синхронная запись с чтением и сравнением
 DISK_CAP_FLUSH         = 08h    ; B=4: завершение отложенной записи
+
+; Установка переносимой службы из инициализатора COM в странице DOS.
+; Версия 1 обслуживает слот H:. Все указатели относятся к загруженному
+; инициализатору 9000h–BFFFh; DOS копирует код и строки до его освобождения.
+DRIVER_INSTALL_VERSION = 1
+DRIVER_RECORD_SIZE = 80
+    STRUCT DRIVER_INSTALL
+version             DB 1
+drive               DB 7
+kind                DB 0       ; 0 ROM, 1 FLASH, 2 FLASHFST
+blockShift          DB 8
+blocks              DW 0
+allocationStep      DW 0
+capabilities        DB 0
+technology          DB 0
+image               DW 0       ; код собран для LOCAL_DRIVER_ADDR
+imageSize           DW 0
+text                DW 0       ; две ASCIIZ-строки, вместе не более 64 байт
+    ENDS
 
 ; ABI 1 драйвера тома. Аппаратный ABI bios_diskDriver остаётся отдельным.
 ; Таблица начинается с DB "FS",1,15; далее 15 адресов DW в этом порядке.
@@ -426,6 +451,7 @@ VOL_FLUSH             = 28
 
 ; Структура каталога
 IMAGE_HEADER_SIZE  = 16
+IMAGE_FLAG_DRIVER = 01h ; байт 5 COM/EXE: инициализатор в странице DOS
 FILE_DESCR_SIZE    = 32     ; размер дескриптора файла в каталоге (байт)
 FILE_NAME_LENGTH   = 8      ; длина имени файла  (байт)
 MAX_PATH           = 128    ; Путь в байтах, включая завершающий 0.
@@ -721,11 +747,18 @@ DOS_BANK_OBJECT_ADDR = 02000h
 DOS_BANK_PATH_ADDR = 02100h
 DOS_BANK_CODE_ADDR = 04000h
 DOS_BANK_COMPAT_ADDR = 08FDFh
+DOS_DRIVER_REGISTRY = 03000h ; 8 записей по DRIVER_RECORD_SIZE
+DOS_DRIVER_IMAGE = 03400h    ; сохранённая служба H:, без инициализатора
 DOS_BANK_DRIVER_ADDR = 09000h
 ; Зарезервированный слот физического драйвера в основной памяти.
-LOCAL_DRIVER_ADDR = 0E800h
-LOCAL_DRIVER_END = 0EB00h
-LOCAL_BLOCK_ENTRY = 0F900h
+LOCAL_DRIVER_ADDR = 0F940h
+LOCAL_DRIVER_END = 0FB80h
+LOCAL_BLOCK_ENTRY = 0F8C0h
+MAIN_COMMAND_ADDR = 0E800h
+MAIN_DISK_INFO = 0E900h
+MAIN_DRIVER_INFO = 0E940h
+MAIN_RAW_LEASE = 0E980h      ; диск+1, ёмкость word, последнее A/CF, признак результата
+CLIENT_COPY_SNAPSHOT = 0FB80h
 DOS_BANK_DRIVER_END = 0C000h
 DOS_BANK_CACHE_ADDR = 0C000h
 DOS_BANK_CMD_ADDR = 0C400h
@@ -792,7 +825,7 @@ DOS_CODE_END_MAX = DOS_END_MAX
     ENDIF
 
 ; Стек доступен в STD, командная строка нужна только в MX.
-CMD_LINE   = 0FA00h ; FA00h-FA81h, только MX
+CMD_LINE   = MAIN_COMMAND_ADDR ; только основная память, MX
 CMD_LINE_SIZE = 130
 DOS_MODULE_ADDR = 04000h ; Совместимое имя адреса нового файлового ядра
 DOS_MODULE_END = 08C00h  ; Далее переходники запуска и системный стек
@@ -818,12 +851,14 @@ NC_STATE_ADDR = 0FFB0h ; 12 байт; FFBEh — детектор, FFBFh — ме
     ASSERT DOS_BANK_STACK_TOP == mx_call
     ASSERT DOS_END_MAX <= FONT_ADDR
     ASSERT SYSTEM_PROGRAM_END <= SYSTEM_FLASH_ADDR
-    ASSERT CMD_LINE >= DISK_DRIVER_ADDR + 0200h
-    ASSERT CMD_LINE + CMD_LINE_SIZE <= 0FB00h
+    ASSERT CMD_LINE + CMD_LINE_SIZE <= MAIN_DISK_INFO
     ASSERT SYSTEM_FLASH_ADDR + 0140h <= RAMD_RESIDENT_ADDR
     ASSERT RAMD_RESIDENT_ADDR + 00C0h <= mx_call
     ASSERT DISK_DRIVER_ADDR + 0200h <= FONT_ADDR
-    ASSERT DISK_DRIVER_ADDR + 0200h <= CMD_LINE
+    ASSERT MAIN_DRIVER_INFO + 64 <= MAIN_RAW_LEASE
+    ASSERT MAIN_RAW_LEASE + 6 <= FONT_ADDR
+    ASSERT DOS_DRIVER_REGISTRY + 8*DRIVER_RECORD_SIZE <= DOS_DRIVER_IMAGE
+    ASSERT DOS_DRIVER_IMAGE + LOCAL_DRIVER_END-LOCAL_DRIVER_ADDR <= DOS_BANK_CODE_ADDR
     ASSERT FAT_CACHE_ADDR + FAT_CACHE_SIZE <= 0FF00h
     ASSERT CMD_LINE_SIZE == 130
     ASSERT STACK_BOTTOM < STACK_ADDR && STACK_ADDR <= STD_IO_ADDR

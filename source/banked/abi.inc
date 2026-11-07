@@ -33,15 +33,13 @@ BANK_IO_MAIN      = 0FFFCh
 BANK_IO_RAM       = 0FFFDh
 BANK_ERROR_RANGE  = 0E2h
 
-; Профиль memcpy_far: 19 байт переключателей, состояние и JMP проверки цикла.
-; SP/страница возврата принадлежат инициатору, а не странице источника.
-BANK_COPY_SOURCE      = BANK_WINDOW+1
-BANK_COPY_DST_GATE    = BANK_WINDOW+11
-BANK_COPY_SP          = BANK_WINDOW+19
-BANK_COPY_CALLER      = BANK_WINDOW+21
-BANK_COPY_BLOCKS      = BANK_WINDOW+22
-BANK_COPY_QUADS       = BANK_WINDOW+23
-BANK_COPY_REST        = BANK_WINDOW+24
-BANK_COPY_GROUPS      = BANK_WINDOW+25
-BANK_COPY_CHECK       = BANK_WINDOW+26
-BANK_COPY_RETURN_PORT = BANK_WINDOW+29
+; Профиль CPM16: первые 16 байт — данные, затем параметры переноса.
+; Пары селекторов: младший байт — FCh/FDh, старший — физическая страница.
+; SP и селектор возврата принадлежат инициатору, а не источнику.
+BANK_COPY_SOURCE     = BANK_WINDOW+16
+BANK_COPY_DEST       = BANK_WINDOW+18
+BANK_COPY_SP         = BANK_WINDOW+20
+BANK_COPY_SRC_SELECT = BANK_WINDOW+22
+BANK_COPY_DST_SELECT = BANK_WINDOW+24
+BANK_COPY_RETURN     = BANK_WINDOW+26
+BANK_COPY_REST       = BANK_WINDOW+28

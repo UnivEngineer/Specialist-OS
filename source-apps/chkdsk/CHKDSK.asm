@@ -827,7 +827,7 @@ headerRead:
     jp nz,headerRead
     ld hl,header
     ld de,mxMagic
-    ld b,6
+    ld b,5
 magicLoop:
     ld a,(de)
     cp (hl)
@@ -836,6 +836,9 @@ magicLoop:
     inc de
     dec b
     jp nz,magicLoop
+    ld a,(hl)
+    and 0FEh
+    jp nz,sumBad
     ld hl,(header+10)
     ld a,h
     or l
