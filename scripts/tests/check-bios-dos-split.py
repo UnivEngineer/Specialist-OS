@@ -7,10 +7,11 @@ OUT=ROOT/'docs/bios-dos-split-2026-11-06/cpu';OUT.mkdir(parents=True,exist_ok=Tr
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 W=lambda n:n.to_bytes(2,'little')
 base=bytearray(65536)
-for name,start in [('BIOS',0xC000),('DOS.native',0x4000)]:
+for name,start in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
  data=(ROOT/f'bin/{name}.sys').read_bytes();base[start:start+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-base[S['FONT_ADDR']:S['FONT_ADDR']+1280]=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
 base[S['v_dosModuleReady']]=1
 for line in (ROOT/'source/dos/entries.inc').read_text().splitlines():
  if line.strip().startswith('jp '):

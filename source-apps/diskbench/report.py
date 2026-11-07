@@ -47,8 +47,8 @@ def main():
         path=ROOT/f'images/SystemRom_ramd-{name}.bin'
         hashes.append(f"- Финальный SystemRom_ramd-{name}.bin: `{hashlib.sha256(path.read_bytes()).hexdigest()}`.")
     filelist=['source/include/mxos.inc','source/dos/DOS.asm','source/dos/DOSChecked.asm',
-        'source/dos/driverFFC0.inc','source/dos/driverBuffered.inc','source/dos/driverChecked.inc',
-        'source/dos/reboot2.inc','source/dos/reboot3.inc','source/nc/saveLoadState.inc',
+        'source/bios/driverFFC0.inc','source/dos/driverBuffered.inc','source/dos/driverChecked.inc',
+        'source/bios/reboot2.inc','source/dos/reboot3.inc','source/nc/saveLoadState.inc',
         'scripts/build/build-if-needed.ps1','scripts/build/build-project.ps1','scripts/emu80/check-boot.py',
         'scripts/images/manifests/A-System.txt','source-apps/diskbench/','source-apps/README.md',
         'Specialist-OS.code-workspace','README.md','docs/MXOS-banked-kernel.md']

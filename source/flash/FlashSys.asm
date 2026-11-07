@@ -26,7 +26,7 @@
 ; AT29C020 и AT29C040A (256/512 КБ, страница записи 256 байт).
 ; Ёмкость и физическая страница определяются по software ID, независимо от BPB.
 ; COM загружается с 0000h; ID выполняется временным кодом в 8C00h–8CFFh,
-; после успешного ID резидент копируется в F600h–F73Fh.
+; после успешного ID резидент копируется в F8C0h–F9FFh.
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
@@ -48,7 +48,7 @@ FLASHSYS_READ_MODE = 1
 
 ;----------------------------------------------------------------------------
 
-    ; F600h-F73Fh — FLASHSYS, F740h-F7FFh — RAMD.COM.
+    ; F8C0h-F9FFh — отдельный слот FLASHSYS в основной памяти.
     ; FlashSys, RAMD и внешний Flash в E800h-E9FFh работают одновременно.
 RESIDENT_ADDRESS = SYSTEM_FLASH_ADDR
 SYSTEM_FLASH = 1
@@ -357,7 +357,7 @@ v_halfPage:     DB 0
 ;----------------------------------------------------------------------------
 
 resident_end:
-    ASSERT_DONT_FIT RAMD_RESIDENT_ADDR
+    ASSERT_DONT_FIT SYSTEM_FLASH_END
     ENT
 resident_file_end:
     INCLUDE "flash-install.inc"

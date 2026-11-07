@@ -41,7 +41,7 @@ def main():
         matrix.writable(1,'RAMD',1,'R3')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
         matrix.report['binaries']={f:hashlib.sha256((ROOT/'bin'/f).read_bytes()).hexdigest()
-                                  for f in ['DOS.sys','DISKBEN.com','RAMD.com']}
+                                  for f in ['DOS.sys','DISKBEN.com','RAMDISK.com']}
         matrix.save()
         tick_ms=256000/matrix.report['pitHz']
         volume=matrix.report['fileBytes']*matrix.report['passes']

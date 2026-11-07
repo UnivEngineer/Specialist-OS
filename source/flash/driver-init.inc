@@ -69,7 +69,7 @@ MASK_STANDBY = 0C0h
 MASK_READ = 040h
 PPI_MODE_WRITE = 080h
 PPI_MODE_READ = 090h
-    INCLUDE "../banked/flash-init.inc"
+    INCLUDE "../bootstrap/tests/flash-init.inc"
     ENDMODULE
     ENDIF
     ASSERT $ <= DOS_BANK_DRIVER_END

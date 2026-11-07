@@ -178,7 +178,7 @@ request:
                 save_row('FAR',caller,srcPage,src,dstPage,dst,size,code)
         report=dict(cpuHz=2000000,repeats=3,units='decimal kB/s; emulated CPU milliseconds',rows=rows,
                     binaries={name:hashlib.sha256((ROOT/path).read_bytes()).hexdigest() for name,path in
-                              [('transport','bin/banked/TRANSPORT.bin'),('RAMD','bin/RAMD.i80'),('DOS','bin/DOS.sys')] + [(n,'bin/copybench/'+n+'.bin') for n in ('stack','loop','unrolled','direct','regs2','regs4','regs6','builtin_byte','builtin_block','CPMCOPY')]})
+                              [('transport','bin/banked/TRANSPORT.bin'),('RAMD','bin/RAMDISK.i80'),('DOS','bin/DOS.sys')] + [(n,'bin/copybench/'+n+'.bin') for n in ('stack','loop','unrolled','direct','regs2','regs4','regs6','builtin_byte','builtin_block','CPMCOPY')]})
         (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
         subprocess.run(['python',str(ROOT/'source-apps/copybench/report.py'),str(out)],check=True)
     finally:matrix.stop()

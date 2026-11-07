@@ -21,7 +21,7 @@ def main():
         m.install('RAMD');m.select(1)
         for mode in (1,6):m.writable(1,'RAMD',mode,'R4')
         m.report['binaries']={n:hashlib.sha256((ROOT/'bin'/n).read_bytes()).hexdigest()
-                              for n in ['DOS.sys','DOSMOD.i80','DISKBEN.i80','RAMD.i80','Flash.i80','FlashSys.i80']}
+                              for n in ['DOS.sys','DOSMOD.i80','DISKBEN.i80','RAMDISK.i80','Flash.i80','FlashSys.i80']}
         m.report['scope']='Current main-memory DOS; not a measurement of banked filesystem integration'
         m.save()
     finally:m.stop()

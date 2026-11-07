@@ -40,10 +40,10 @@ TypeCharCtimesB:
         JP    NZ,TypeCharCtimesB
         RET
 
-; Вход: HL = текст. Выход: HL после 0Dh либо на 0FFh; A = этот разделитель.
+; Вход: HL = текст. Выход: HL после 0Dh либо на 00h; A = этот разделитель.
 ; Разрушает AF и флаги, остальные регистры сохраняет.
 nextLine:  LD    A,(HL)                ; [11]
-        CP    0FFH          ; 255
+        OR    A             ; Конец документа — 00h
         RET   Z
         CP    0DH           ; 13
         INC   HL
@@ -175,7 +175,7 @@ printEditMode: CALL  bios_printString
 nextCurrentLine:  LD    HL,(v_currentLine)   ; [5]
         CALL  nextLine
         LD    A,(HL)
-        INC   A
+        OR    A
         RET   Z
         LD    (v_currentLine),HL
         LD    HL,(v_lineNumber)

@@ -54,18 +54,19 @@ def main():
             m.write(ts['bankServiceSP'], word(top)); m.write(ts['bankStackFloor'], word(low+64))
             m.write(low-16, b'guard-DOS-stack!')
             if page: m.write(0xF800, (base/'CLIENT.bin').read_bytes())
+            m.write(ks['LOCAL_BLOCK_ENTRY'], (base/'LOCALBLOCK.bin').read_bytes())
         select(1)
-        m.write(0x4000, (base/'KERNEL.bin').read_bytes())
+        m.write(ks['DOS_BANK_CODE_ADDR'], (base/'KERNEL.bin').read_bytes())
         select(0)
         io_symbols=symbols(base/'MAINIO.sym')
-        io_code=io_symbols['mainIoRequest']-ks['BIOS_BANK_IO_START']
+        io_code=io_symbols['mainIoEnd']-ks['BIOS_BANK_IO_START']
         assert m.read(ks['BIOS_BANK_IO_START'], io_code) == (base/'MAINIO.bin').read_bytes()[:io_code]
         m.write(0xFFC0, (base/'WINDOW.bin').read_bytes())
 
         def invoke(page, entry, packet=None, operation=0, inline=False, legacy=None):
             select(page)
             call = ts['bankCallPacket'] if packet is not None else ts['bankCall']
-            packet_address = 0x3800 if page == 1 else 0x3000
+            packet_address = 0x7D00 if page == 1 else 0x3000
             if packet is not None: m.write(packet_address, packet)
             if legacy is not None:
                 code = b'\xcd'+word(legacy)
@@ -75,15 +76,18 @@ def main():
                 code = b'\xcd'+word(0xF800)
             else:
                 code = b'\x3e\x01\x21'+word(entry)+b'\xcd'+word(call)
-            stop = 0x3E00
-            stack = 0x3F00
-            m.write(0x2800, code+b'\xc3'+word(stop))
+            stub = 0x7E00 if page == 1 else 0x2800
+            # Breakpoint общий для банков: адрес возврата не должен попадать
+            # в перенесённый код DOS (теперь он занимает и прежние 3Exxh).
+            stop = 0x8D00
+            stack = 0x8F00 if page == 1 else 0x3F00
+            m.write(stub, code+b'\xc3'+word(stop))
             m.stop_at(stop)
             args = dict(bc=operation, de=packet_address)
             if inline or legacy is not None:
                 args = {key:int.from_bytes(packet[i:i+2], 'little')
                         for key,i in (('hl',0),('de',2),('bc',4),('af',6))}
-            m.call('regs_set', pc=0x2800, sp=stack, **args)
+            m.call('regs_set', pc=stub, sp=stack, **args)
             ticks = m.call('cpu_state')['cpu_ticks']
             state = m.until(stop, 30)
             assert state['registers']['sp']['dec'] == stack
@@ -165,8 +169,8 @@ def main():
         assert m.read(0x3300, 11) == b'H:\\BNKTEST\0'
         rows.append(dict(case='mkdir-chdir-caller-path'))
         select(1); m.write(ks['KD_PATH'], bytes([0xCC])*128)
-        request(1, ks['MX_DOS_DIRECTORY'], regs(hl=0x3700, a=4))
-        assert m.read(0x3700, 11) == b'H:\\BNKTEST\0'
+        request(1, ks['MX_DOS_DIRECTORY'], regs(hl=0x7D80, a=4))
+        assert m.read(0x7D80, 11) == b'H:\\BNKTEST\0'
         assert m.read(ks['KD_PATH'], 128) == bytes([0xCC])*128
         rows.append(dict(case='same-page-direct-NEAR-no-staging'))
         select(3)
@@ -381,11 +385,11 @@ def main():
         # Список из своей страницы задаёт эталон для внешнего контракта.
         request(3, ks['MX_DOS_FILESELECTDRIVE'], regs(a=0))
         for fn, sub in ((ks['MX_DOS_FILELIST'], 0), (ks['MX_DOS_DIRECTORY'], 3)):
-            request(1, fn, regs(hl=0x1000, de=128, bc=1, a=sub))
-            reference = m.read(0x1000, 2049)
+            request(1, fn, regs(hl=ks['DOS_BANK_DATA_ADDR'], de=128, bc=1, a=sub))
+            reference = m.read(ks['DOS_BANK_DATA_ADDR'], 2049)
             end = next(i for i in range(0, 2049, 16) if reference[i] == 255)+1
             reference = reference[:end]
-            total = m.read(0x3802, 2)
+            total = m.read(0x7D02, 2)
             for page in (0, 3):
                 select(page); m.write(0x4000 if page else 0x3400, bytes([0xA5])*2049)
                 buffer = 0x4000 if page else 0x3400
@@ -433,11 +437,10 @@ def main():
         m.write(0x3300,b'REM banked fileExec'+bytes(110))
         legacy('bios_fileExec', regs(hl=0x3300))
         rows.append(dict(case='legacy-C800-metadata-stream-no-main-DOS'))
-        # CP/M 14/25 тоже маршрутизируются в DOS, не читают старый v_drive.
-        legacy('mx_cpmCall', regs(bc=14, de=1))
+        # CP/M запускается сменным ядром; прежний частичный BDOS удалён.
         result = invoke(0, 0, regs(bc=25), legacy=bios['mx_cpmCall'])
-        assert result[0] == 1
-        rows.append(dict(case='main-BDOS-drive-after-main-DOS-erased'))
+        assert result == (bios['DOS_ERR_UNSUPPORTED'], True)
+        rows.append(dict(case='main-BDOS-reserved-unsupported'))
 
         # Обратный вызов в страницу владельца, включая чужого инициатора.
         # Обработчик проверяет запрет повторного DOS и вызывает BIOS вложенно.

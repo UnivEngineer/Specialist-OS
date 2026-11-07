@@ -59,14 +59,14 @@ def main():
         m.screenshot(out/(name+'-command.png'))
         m.stop_at(s['entry'])
         m.tap('enter')
-        m.until(s['entry'],120)
+        m.until(s['entry'],120,page=0)
         assert m.read(0,32) == binary[:32]
 
     def finish(name):
         m.stop_at(s['exit_wait'])
         for label in ('error', 'file_exists'):
             m.call('bp_set', addr=s[label], type='exec')
-        m.until(s['exit_wait'],120)
+        x.until(s['exit_wait'])
         if name not in ('readonly', 'bad-size'):
             # Полный READ/WRITE прошёл, собственный тестовый файл удалён.
             assert m.read(s['v_fileOwned'],1) == b'\0'
@@ -77,7 +77,7 @@ def main():
         m.call('emu_run_for',ms=500)
         m.tap('space')
         m.stop_at(nc['mainLoop'])
-        m.until(nc['mainLoop'],120)
+        m.until(nc['mainLoop'],120,page=0)
         assert m.read(0,32) == (ROOT/'bin/NC.i80').read_bytes()[:32]
 
     try:

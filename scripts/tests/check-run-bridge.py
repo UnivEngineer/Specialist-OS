@@ -3,11 +3,11 @@ from pathlib import Path
 import re,subprocess,json
 root=Path(__file__).resolve().parents[2];out=root/'docs/compat/sector-load-001/bridge-cpu';out.mkdir(exist_ok=True)
 def symbols(name):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(root/'bin'/name).with_suffix('.sym').read_text(),re.M)}
-ds=symbols('DOS');rs=symbols('RUN');results=[]
+ds=symbols('BIOS');rs=symbols('RUN');results=[]
 for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,False,False),(3,False,False),(3,True,False),(0,False,True),(0,True,True),(1,False,True)):
- m=bytearray(65536);d=(root/'bin/DOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;r=(root/'bin/RUN.i80').read_bytes();m[:len(r)]=r; m[rs['ready']:rs['upperEnd']]=r[rs['upperSource']:rs['upperSource']+rs['upperEnd']-rs['ready']]
+ m=bytearray(65536);d=(root/'bin/BIOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;io=(root/'bin/IO.sys').read_bytes();m[0xf000:0xf000+len(io)]=io;r=(root/'bin/RUN.i80').read_bytes();m[:len(r)]=r
  m[ds['bios_fileGetSetDrive']:ds['bios_fileGetSetDrive']+2]=bytes.fromhex('B7 C9')
- load=0xd300 if staged and mode==3 else 0xf100 if staged else 0x1000
+ load=0xd300 if staged and mode==3 else 0xe600 if staged else 0x1000
  size=513
  # Программа сразу возвращается для проверки native-return; ядра — до точки входа.
  payload=bytearray((i*19+7)&255 for i in range(size));payload[:3]=bytes.fromhex('C3 00 83')
@@ -19,7 +19,10 @@ for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,
  if mode>=2:
   kernel=(root/('bin/RAMFOS.mon' if mode==3 else 'bin/Monitor2.mon')).read_bytes();m[0x9000:0x9000+len(kernel)]=kernel
  inp=out/'input.bin';target=out/'output.bin';inp.write_bytes(m)
- p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{rs["install"]:x}','-end','8300','-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
+ p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{rs["install"]:x}','-end',f'{rs["runBodyReady"]:x}','-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
+ prepared=target.read_bytes();assert int.from_bytes(prepared[65542:65544],'little')==rs['runBodyReady']
+ base=int.from_bytes(prepared[rs['bridgeBase']:rs['bridgeBase']+2],'little');inp.write_bytes(prepared[:65536])
+ p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{base:x}','-end','8300','-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
  got=target.read_bytes();pc=int.from_bytes(got[65542:65544],'little');assert pc==0x8300,(mode,staged,hex(pc),p.stdout)
  assert got[load:load+size]==payload,(mode,staged,'payload')
  args=rs['RAMFOS_ARGS'];assert got[args:args+6]==b'HELLO\0',(mode,staged,got[args:args+6])

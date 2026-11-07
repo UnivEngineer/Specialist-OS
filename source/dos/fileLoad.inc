@@ -39,7 +39,11 @@ fatFileLoadFound:
     ENDIF
             ; Даже исторический load-at не должен затереть выполняемый DOS.
             ld hl,(v_input_start)
-            ld de,DOS_MODULE_END
+    IFDEF BANKED_DOS_BUILD
+            ld de,dosImageEnd
+    ELSE
+            ld de,APP_MEMORY_END ; Линковочная CPU-модель включает кэш main.
+    ENDIF
             call cmp_hl_de
             jp nc,fileLoadRangeReady
             add hl,bc

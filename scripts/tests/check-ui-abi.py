@@ -1,4 +1,4 @@
-"""Проверка графического ABI DOS на CPU 8080: окна, инверсия и memmove битмапа."""
+"""Проверка графического ABI BIOS на CPU 8080: окна, инверсия и memmove битмапа."""
 import argparse
 import json
 from pathlib import Path
@@ -11,9 +11,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--ticks', type=Path, default=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
-    p.add_argument('--image', type=Path, default=ROOT/'bin/DOS.sys')
+    p.add_argument('--image', type=Path, default=ROOT/'bin/BIOS.sys')
     p.add_argument('--memory-image',type=Path)
-    p.add_argument('--module',type=Path,default=ROOT/'bin/DOSMOD.i80')
     p.add_argument('--report-directory', type=Path, default=ROOT/'docs/nc/ui-002/cpu')
     args = p.parse_args()
     out = args.report_directory.resolve()
@@ -29,8 +28,6 @@ def main():
             m[:]=data
         else:
             m[0xC000:0xC000+len(dos)] = dos
-        module=args.module.read_bytes();at=symbols['DOS_MODULE_LOAD_ADDR'];m[at:at+len(module)]=module
-        m[symbols['v_dosModuleReady']]=1
         m[0x9000:0xC000] = screen
         return m
     def run(m, entry, hl=0, bc=0, de=0, a=0):

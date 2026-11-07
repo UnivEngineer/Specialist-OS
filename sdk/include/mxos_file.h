@@ -14,6 +14,16 @@ typedef struct {
     mxos_u8 descriptor[32];
 } MXOS_PATH_IO;
 
+/* MX_BIOS_FILEBODY: общий загрузчик main, без разбора контейнера.
+ * descriptor — готовая запись выбранного диска; header/tail — байты.
+ * trailer=0 пропускает хвост, иначе получает tail байт; actual — тело. */
+typedef struct {
+    mxos_u8 descriptor[32];
+    mxos_u16 buffer;
+    mxos_u8 header, tail;
+    mxos_u16 trailer, actual;
+} MXOS_BODY_IO;
+
 #define MXOS_SEEK_SET 0
 #define MXOS_SEEK_CUR 1
 #define MXOS_SEEK_END 2

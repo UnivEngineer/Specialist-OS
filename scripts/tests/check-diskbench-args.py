@@ -22,6 +22,7 @@ def main():
     base[:len(code)] = code
     bios = (ROOT/'bin/BIOS.sys').read_bytes()
     base[0xC000:0xC000+len(bios)] = bios
+    io = (ROOT/'bin/IO.sys').read_bytes();base[0xF000:0xF000+len(io)] = io
     word = lambda v: struct.pack('<H', v)
 
     def run(label, text='', mode=0, caps=0):

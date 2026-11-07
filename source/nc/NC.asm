@@ -208,7 +208,7 @@ aShiftToolbar:
         UI_TOOLBAR_FIELD 3,0,"F10"
         UI_TOOLBAR_FIELD 4,080h,"Exit"
         DB 0
-aCommanderVer:      DB "Commander version 2.0",0
+aCommanderVer:      DB "Commander version 3.0",0
 aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
 aFileProtected:     DB "System or read-only file",0
 aChooseDrive:       DB "Choose drive:",0
@@ -237,7 +237,7 @@ aKBytesFree:        DB 18h,"bytes Free",0
 aKBytesTotalOnDrv:  DB 18h,"KB total on drive ",0
 aKBytesFreeOnDrv:   DB 18h,"KB free  on drive ",0
 aFilesUse:          DB 18h,"files use ",0
-aKBytesIn:          DB 18h,"KB in ",0
+aKBytesIn:          DB 18h,"KB",0
 aVolumeLabel:       DB "Volume label: ",0
 aDiskDriver:        DB "Driver: ",0
 aDiskTechnology:    DB "Technology: ",0

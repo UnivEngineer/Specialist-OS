@@ -34,7 +34,7 @@ clearAndDrawPage:   CALL  clearTextViewport         ; [2]
 drawPage:   LD    BC,180CH    ; 6156; [2]
 drawPageLine:  CALL  bios_printChar
         CALL  drawTextLine
-        INC   A
+        OR    A
         JP    Z,finishPageAndHome
         DEC   B
         LD    C,0AH         ; 10
@@ -92,8 +92,9 @@ drawLineByte:  LD    A,(HL)
         CALL  Z,bios_printChar
 drawLineLoop:  LD    A,(HL)
         LD    C,A
-        INC   A
+        OR    A
         JP    Z,finishDrawLine
+        INC   A
         INC   HL
         CALL  bios_printChar
         CP    0EH           ; 14
@@ -201,7 +202,7 @@ clearLineBufferLoop:  LD    (HL),20H    ; 32 ' '
 copyLineToBufferLoop:  LD    A,(HL)
         CP    0DH           ; 13
         RET   Z
-        CP    0FFH          ; 255
+        OR    A             ; Конец документа — 00h
         RET   Z
         DEC   B
         RET   Z
@@ -302,7 +303,7 @@ commitLineEdit:  LD    A,(v_lineDirty)  ; читаем v_lineDirty
         ADD   HL,DE
         EX    DE,HL
         CALL  nextLine
-        INC   A
+        OR    A
         JP    Z,resizeEditedLine
         DEC   HL
 resizeEditedLine:  CALL  resizeTextRange

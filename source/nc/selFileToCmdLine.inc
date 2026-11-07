@@ -86,17 +86,18 @@ getPathCount:
         inc b
         jp getPathCount
 getPathCapacity:
-        ld a,e
-        add a,b
+        ld hl,0
+        ld l,b
+        add hl,de
         jp c,getPathReject
-        cp (vars.cmdLineCtrl+1) & 0FFh
-        jp nc,getPathReject
+        ld de,vars.cmdLineCtrl
+        call bios_cmp_hl_de
+        jp c,getPathFits
+        jp nz,getPathReject
+getPathFits:
         pop de
         ld hl,vars.pathArg
 getPathAppend:
-        ld a,e
-        cp vars.cmdLineCtrl & 0FFh
-        jp z,getPathAppendEnd
         ld a,(hl)
         or a
         jp z,getPathAppendEnd

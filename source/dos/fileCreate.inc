@@ -129,7 +129,7 @@ fileCreate_dirLoop:
 fileCreate_dirEnd:
             or a
             jp nz,stc_popDBH_ret
-            ; Корень остаётся доступным без DOSMOD и никогда не расширяется.
+            ; Корень FAT12/16 фиксирован и никогда не расширяется.
             ld hl,(v_directory)
             ld a,h
             or l

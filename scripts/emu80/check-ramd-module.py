@@ -1,4 +1,4 @@
-"""RAMD.COM и встроенный байтовый обмен; только изолированный Emu80-flash-test."""
+"""RAMDISK.COM и встроенный байтовый обмен; только изолированный Emu80-flash-test."""
 import argparse
 import hashlib
 import json
@@ -30,7 +30,7 @@ def main():
     listener=subprocess.run(['powershell.exe','-NoProfile','-Command',command],
         capture_output=True,text=True,check=True).stdout.strip()
     assert Path(listener).resolve()==(args.runtime/'Emu80qt-mcp.exe').resolve()
-    ds=symbols(ROOT/'bin/DOS.sym');rs=symbols(ROOT/'bin/RAMD.sym');ns=symbols(ROOT/'bin/NC.sym')
+    ds=symbols(ROOT/'bin/DOS.sym');rs=symbols(ROOT/'bin/RAMDISK.sym');ns=symbols(ROOT/'bin/NC.sym')
     m=Bench('http://127.0.0.1:19781/mcp')
     m.call('debug_break');m.write(0xC000,(ROOT/'bin/DOS.sys').read_bytes())
     m.stop_at(ns['mainLoop'])
@@ -96,7 +96,7 @@ def main():
 
     # Настоящий запуск COM с диска A: через NC и стек DC00h.
     m.stop_at(ns['mainLoop']);m.call('regs_set',pc=0xC800);m.until(ns['mainLoop'],60)
-    cmd=b'A:RAMD.COM'
+    cmd=b'A:RAMDISK.COM'
     m.write(ns['vars.cmdLine'],cmd+b'\0')
     m.write(ns['vars.cmdLineEnd'],(ns['vars.cmdLine']+len(cmd)).to_bytes(2,'little'))
     m.write(0xDBFE,(0xC800).to_bytes(2,'little'))
@@ -130,13 +130,13 @@ def main():
     report['checks'].append('service byte read/write, full register preservation, R4 restored')
 
     # Установка с B:, который уже активен. Проверяет немедленную регистрацию.
-    module=(ROOT/'bin/RAMD.i80').read_bytes()
-    desc=bytearray(32);desc[:11]=b'RAMD    COM'
+    module=(ROOT/'bin/RAMDISK.i80').read_bytes()
+    desc=bytearray(32);desc[:11]=b'RAMDISK COM'
     packed=encode(Image(module),'com')
     desc[28:32]=len(packed).to_bytes(4,'little')
     m.write(0,packed);m.write(0x7000,desc)
     assert not sub(0xC845,hl=0x7000,de=0)['flags']['C']
-    execute('B:RAMD.COM')
+    execute('B:RAMDISK.COM')
     assert int.from_bytes(m.read(0xC864,2),'little')==rs['Driver']
     assert description()==[b'RAMD',b'R4 banked']
     assert tails()==expected

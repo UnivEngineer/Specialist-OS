@@ -70,6 +70,8 @@ v_dosModuleReady: DB 0
 ; C000h: первый вход из bootstrap или программный перезапуск.
 reboot1:
     call biosCheckReentry
+    ld a,3
+    call glyphCacheService
     ld (IO_PAGE_RAM),a
     call bios_reset_sound
     ld hl,initVars
@@ -82,10 +84,7 @@ reboot1:
     ; Очистка не меняет координаты: первая строка начинается сверху.
     ld hl,8
     ld (bios_vars.cursorY),hl
-    ld hl,biosFont
-    ld de,biosFontEnd
-    ld bc,FONT_ADDR
-    call memcpy_bc_hl
+    ; Внешний шрифт уже загружен bootstrap до первого вывода.
     ld hl,biosVersion
     call printString
     ld a,(v_dosBanked)
@@ -124,7 +123,4 @@ biosLoadHalt:
 biosVersion: DB "BIOS ",'0'+BIOS_VERSION_MAJOR,'.','0'+BIOS_VERSION_MINOR,10,0
 biosDosVersion: DB "DOS ",'0'+DOS_VERSION_MAJOR,'.','0'+DOS_VERSION_MINOR,10,0
 biosLoadError: DB "DOS load error",10,0
-biosFont:
-    INCBIN "../../assets/system-rom/FONTKOI.FNT"
-biosFontEnd:
 

@@ -6,7 +6,7 @@ R=Path(__file__).resolve().parents[2]
 O=R/'docs/nc/toolbar-2026-11-05/cpu';O.mkdir(parents=True,exist_ok=True)
 def symbols(name):
     return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin'/name).read_text(),re.M)}
-s=symbols('DOS.sym');d=symbols('DOSMOD.sym');n=symbols('NC.sym');W=lambda x:struct.pack('<H',x)
+s=symbols('DOS.sym');d=symbols('BIOS.sym');n=symbols('NC.sym');W=lambda x:struct.pack('<H',x)
 # В тестовой памяти единственная экранная запись заменена на RST 5. Обвязка
 # выполняет её, записывает адрес/байт/цвет и сохраняет регистры и флаги.
 asm=O/'trace.asm';asm.write_text(''' ORG 05000h
@@ -37,11 +37,12 @@ asm=O/'trace.asm';asm.write_text(''' ORG 05000h
 ''',encoding='utf-8')
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'trace.bin'),str(asm)],check=True,capture_output=True)
 m=bytearray(65536)
-for path,at in [(R/'bin/NC.i80',0),(R/'bin/DOS.sys',0xC000),
-                (R/'bin/DOSMOD.i80',s['DOS_MODULE_LOAD_ADDR']),
+for path,at in [(R/'bin/NC.i80',0),(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.sys',0xF000),
+                (R/'bin/DOS.native.sys',s['DOS_CODE_START']),
                 (R/'assets/system-rom/FONTKOI.FNT',s['FONT_ADDR']),
                 (O/'trace.bin',0x5000)]:
-    b=path.read_bytes();m[at:at+len(b)]=b
+    b=path.read_bytes()
+    m[at:at+len(b)]=b
 m[s['v_dosModuleReady']]=1
 assert m[d['uiToolbarWrite']]==0x77
 m[d['uiToolbarWrite']]=0xEF;m[0x28:0x2B]=b'\xC3'+W(0x5000)

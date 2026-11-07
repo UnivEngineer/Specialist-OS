@@ -14,22 +14,22 @@ def main():
     lines = []
     for unit in groups['dos']:
         for filename in unit['files']:
-            if filename == 'reboot3.inc':
-                lines.append(h['include'](ROOT/'source/banked/kernel-start.inc'))
+            if unit['name'] == 'reboot3':
+                lines.append(h['include'](ROOT/'source/dos/kernel-start.inc'))
             else:
                 lines.append(h['include'](ROOT/'source/dos'/filename))
     for name in ('cmp_hl_de','math','strcmp','move8080','memcpy_bc_hl','memmove_bc_hl',
                  'memset_de_20_b','argNext','calcCS','biosState','installDriver'):
-        lines.append(h['include'](ROOT/f'source/dos/{name}.inc'))
+        lines.append(h['include'](ROOT/f'source/common/{name}.inc'))
     (out/'kernel-layout.inc').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     registry = json.loads((ROOT/'source/bios/syscalls.json').read_text(encoding='utf-8'))
     services = next(group['services'] for group in registry if group['group'] == 2)
     assert [service['id'] for service in services] == list(range(len(services)))
     (out/'kernel-services.inc').write_text(''.join(
         f'    DW {service["target"].removeprefix("dos_")}\n' for service in services), encoding='utf-8')
-    h['assemble'](ROOT/'source/banked/KERNEL.asm', out/'KERNEL.bin', [])
+    h['assemble'](ROOT/'source/dos/DOS.asm', out/'KERNEL.bin', [])
     sy = h['symbols'](out/'KERNEL.sym')
-    report = {key:sy[key] for key in ('dosCoreStart','dosCoreEnd','kernelEnd','BANK_KERNEL_CACHE',
+    report = {key:sy[key] for key in ('dosCoreStart','dosCoreEnd','kernelEnd','DOS_BANK_DATA_ADDR','BANK_KERNEL_CACHE',
                                      'bankKernelCommand','kernelDispatch','v_drives','v_diskInfo')}
     report['bytes'] = (out/'KERNEL.bin').stat().st_size
     (out/'KERNEL.layout.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

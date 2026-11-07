@@ -38,7 +38,7 @@ def generate(check=False):
     outputs = {
         ROOT/'source/include/syscall-ids.inc':asm,
         ROOT/'source/bios/syscall-tables.inc':tables,
-        ROOT/'source/bios/legacy-files.inc':legacy,
+        ROOT/'source/io/legacy-files.inc':legacy,
         ROOT/'sdk/include/mxos_syscall_ids.h':c,
         ROOT/'sdk/src/mxos_syscall_ids.inc':z80,
     }

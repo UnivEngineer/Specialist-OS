@@ -22,11 +22,16 @@ def symbols(path):
 
 
 class Bench(Machine):
-    def until(self, pc, seconds=60):
+    def until(self, pc, seconds=60, page=None):
+        page_address=symbols(ROOT/'bin/banked/TRANSPORT.sym')['bankPage'] if page is not None else None
         for _ in range(seconds):
             state = self.call('cpu_state')
             if state['registers']['pc']['dec'] == pc:
-                return state
+                if page is None or self.read(page_address,1)==bytes([page]):
+                    return state
+                # Адрес breakpoint общий для банков, код по нему различается.
+                self.call('debug_step',mode='into')
+                continue
             self.call('emu_run_for', ms=1000)
         raise RuntimeError(self.call('cpu_state'))
 
@@ -91,7 +96,7 @@ def main():
     m.stop_at(0x8100)
     if args.variant == 'Buffered':
         # Штатный DOS загружается с байтовым RAMD; R4 устанавливается отдельно.
-        m.write(0x7000,b'A:RAMD.COM\0')
+        m.write(0x7000,b'A:RAMDISK.COM\0')
         assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
     m.subroutine(0xC842, af=0x0100, de=1)
     m.subroutine(0xC86F, bc=0)
@@ -121,7 +126,7 @@ def main():
     if args.variant == 'Buffered':
         for addr in [0xFE01, 0xFF00]:
             assert m.subroutine(0xC863, bc=0x100, de=0x100, hl=addr)['flags']['C']
-        rs = symbols(ROOT/'bin/RAMD.sym')
+        rs = symbols(ROOT/'bin/RAMDISK.sym')
         tail_length = rs['ramdBankTailEnd']-0xFF00
         tail = m.read(0xFF00, tail_length)
         for page in range(count):

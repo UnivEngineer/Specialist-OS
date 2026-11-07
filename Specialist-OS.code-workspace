@@ -39,7 +39,10 @@
       "**/.vs/**": true,
       "**/*.lst": true,
       "**/*.fix.lst": true
-    }
+    },
+    "cSpell.words": [
+      "MXOS"
+    ]
   },
   "tasks": {
     "version": "2.0.0",
@@ -142,7 +145,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "DOS",
           "sys",
-          "0xC000",
+          "0x0100",
           "DOS"
         ],
         "options": {
@@ -185,7 +188,7 @@
         }
       },
       {
-        "label": "build: ramd",
+        "label": "build: ramdisk",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -195,12 +198,12 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "RAMD",
+          "RAMDISK",
           "cpu",
           "0"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\source\\ramd"
+          "cwd": "${workspaceFolder}\\source\\ramdisk"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",

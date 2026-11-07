@@ -87,10 +87,10 @@ getCRC: ; Поиск конца буфера и подсчет контроль�
         ADD   A,(HL)
         LD    B,A
     ENDIF
-        INC   DE
         LD    A,(HL)
-        INC   A
+        OR    A
         JP    Z,buildSaveDescriptor
+        INC   DE
         INC   HL
         JP    getCRC
 
@@ -167,7 +167,7 @@ fileErrorBeepLoop: CALL  bios_beep_Old
         JP    finishFilePrompt
 ;----------------------------------------------------------------------
 
-; Вход: inputBuf. Выход: файл добавлен поверх старого 0FFh либо сигнал ошибки.
+; Вход: inputBuf. Выход: файл добавлен поверх старого 00h либо сигнал ошибки.
 ; Разрушает AF, BC, DE, HL, флаги.
 ; ОШИБКА: после PUSH HL ветви нехватки места не снимают сохранённый указатель.
 ; Проверка также не учитывает полносекторную запись fileLoad2.
@@ -186,9 +186,9 @@ insertFile:
         PUSH  DE
         LD    HL,(v_textBeginLo)    ; hl = адрес буфера
 
-        ; Сканируем буфер, пока не найдем конец текста (0FFh)
+        ; Сканируем буфер, пока не найдем конец текста (00h)
 findAppendPosition: LD    A,(HL)
-        INC   A
+        OR    A
         JP    Z,checkAppendCapacity
         INC   HL
         JP    findAppendPosition
@@ -223,7 +223,7 @@ loadTextFile:
         RET   C
         LD    HL,(fileDescSize)
         ADD   HL,DE
-        LD    (HL),0FFh
+        LD    (HL),00h
         OR    A
         RET
 

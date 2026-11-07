@@ -10,7 +10,7 @@ biosBankCold:
     ld hl,08BFFh
     call setMemTop
     ld a,1
-    ld hl,04063h
+    ld hl,BANK_DOS_GATE+6
     call bankCall
     jp c,biosLoadHalt
     ld hl,biosFlashSysPath
@@ -18,7 +18,7 @@ biosBankCold:
     ld hl,biosAutoexecPath
     call biosBootExec
     ld a,1
-    ld hl,04066h
+    ld hl,BANK_DOS_GATE+9
     call bankCall
     jp biosBankShell
 ; Имя загрузочного сценария выводится до запуска. Ошибка не скрывается,
@@ -50,7 +50,7 @@ biosBankWarm:
     ld (v_drive),a
     call sysInstall
     ld a,1
-    ld hl,04066h
+    ld hl,BANK_DOS_GATE+9
     call bankCall
     ld hl,08BFFh
     call setMemTop
@@ -66,6 +66,11 @@ biosBankShell:
     jp z,biosBankLaunchShell
     ld hl,biosCliPath
 biosBankLaunchShell:
+    push hl
+    call bios_printString
+    ld c,0Ah
+    call bios_printChar
+    pop hl
     call bios_fileExec
     jp biosBankShell
 biosAutoexecPath: DB "A:",05Ch,"AUTOEXEC.BAT",0
@@ -130,18 +135,29 @@ biosBankReturn:
     ld (IO_PAGE_RAM-0800h),a
     ld (IO_PAGE_RAM),a
     ld sp,STACK_ADDR
+    call biosRecoverCopyTail
+    push af
+    call sysInstall
+    ld a,2
+    call glyphCacheService
     xor a
     ld (bankDepth),a
+    ld (bankPage),a
+    ld hl,BIOS_BANK_STACK_BOTTOM+64
+    ld (bankStackFloor),hl
     ld hl,0
     ld (bankOwner),hl
-    ld hl,0E800h
+    ld hl,BIOS_BANK_STACK_TOP
     ld (bankServiceSP),hl
+    pop af
+    or a
+    call nz,biosMemWarning
     ld hl,biosResetDosContext
     call bankCopyFar
     jp c,biosLoadHalt
     call bios_reset_sound
     ld a,1
-    ld hl,04066h
+    ld hl,BANK_DOS_GATE+9
     call bankCall
     ld hl,08BFFh
     call setMemTop
@@ -154,7 +170,7 @@ biosResetDosContext:
     DW 5
 biosEmptyDosContext:
     DB 0,0,0
-    DW 0F800h
+    DW DOS_BANK_STACK_TOP
     ASSERT bankHome == bankOwner+1
     ASSERT bankDepth == bankOwner+2
     ASSERT bankServiceSP == bankOwner+3

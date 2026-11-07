@@ -45,6 +45,8 @@ sysBIOSTable:
     DW setInputHook
     DW blockIO
     DW memcpy_bc_hl
+    DW fileBodyLoad
+    DW glyphCacheService
 sysBIOSCount = ($-sysBIOSTable)/2
 sysDOSTable:
     DW dos_fileList

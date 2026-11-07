@@ -28,7 +28,8 @@
 
 # Имя на диске    Источник относительно assets/                          Адрес RAW Атрибуты
 BIOS.SYS         ../bin/BIOS.sys                                        0xC000   RS
-DOS.SYS          ../bin/DOS.sys                                         0x4000   RS
+IO.SYS           ../bin/IO.sys                                          0xF000   RS
+DOS.SYS          ../bin/DOS.sys                                         0x0100   RS
 AUTOEXEC.BAT     {AUTOEXEC}                                             0x8000   S
 README.TXT       system-rom/README.TXT
 E.COM            ../bin/E.cpu                                           0   RS
@@ -36,7 +37,7 @@ ROM.COM          ../bin/Rom.cpu                                         0xF800  
 FLASH.COM        ../bin/Flash.cpu                                       0        RS
 FLASHFST.COM     ../bin/FlashFst.cpu                                    0        RS
 FLASHSYS.COM     ../bin/FlashSys.cpu                                    0        RS
-RAMD.COM         ../bin/RAMD.cpu                                        0        RS
+RAMDISK.COM      ../bin/RAMDISK.cpu                                     0        RS
 # TAPE.COM       ../bin/tape.cpu                                        0xEA00   RS
 FONT.FNT         system-rom/FONT.FNT                                    0        RS
 FONTKOI.FNT      system-rom/FONTKOI.FNT                                 0        RS

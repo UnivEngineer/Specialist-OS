@@ -75,7 +75,7 @@ pageDownLineLoop:  LD    E,L
         LD    D,H
         CALL  nextLine
         LD    A,(HL)
-        INC   A
+        OR    A
         JP    NZ,pageDownAdvance
         LD    L,E
         LD    H,D

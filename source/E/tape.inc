@@ -91,18 +91,27 @@ readOrVerifyTape:  LD    A,B           ; [2]
         JP    NZ,synchronizeTopAndRedraw
         CALL  readTapeHeader
         PUSH  HL
-readTapeTextLoop:  CALL  readTapeByte
+        LD    A,B
+        OR    C
+        JP    Z,readTapeTextDone
+readTapeTextLoop:  PUSH  BC
+        CALL  readTapeByte
         LD    B,A
         LD    A,(v_tapeMode)
         INC   A
         JP    NZ,storeTapeTextByte
         LD    A,B
         CP    (HL)
-        JP    NZ,tapeReadMismatch
+        JP    NZ,tapeByteMismatch
 storeTapeTextByte:  LD    (HL),B
         INC   HL
-        INC   B
+        POP   BC
+        DEC   BC
+        LD    A,B
+        OR    C
         JP    NZ,readTapeTextLoop
+readTapeTextDone:
+        LD    (HL),00h
         LD    A,08H
         CALL  readTapeWord
         POP   HL
@@ -117,13 +126,15 @@ storeTapeTextByte:  LD    (HL),B
         LD    (v_textEnd),HL
         JP    keyHandler_Esc_Home
 
+tapeByteMismatch:
+        POP   BC
 tapeReadMismatch:  POP   HL
         LD    HL,txtTapeError
         CALL  bios_printString
         CALL  Beep4
         CALL  bios_getch
         LD    HL,(v_textEnd)
-        LD    (HL),0FFH
+        LD    (HL),00h
         JP    keyHandler_Esc_Home
 
 ; САМОМОДИФИКАЦИЯ: имя с ленты пишется поверх операнда и стартового кода.
@@ -217,7 +228,7 @@ keyHandler_Esc_G:
 
 sumTextUntilEnd:  LD    BC,0000H    ; [2]
 sumTextByte:  LD    A,(HL)
-        CP    0FFH          ; 255
+        OR    A             ; Конец документа — 00h
         RET   Z
         ADD   A,C
         LD    C,A

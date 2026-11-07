@@ -25,6 +25,17 @@ stage:
     ld bc,0C000h
     call moveCore
 biosLoaded:
+    ld hl,BOOT_IO_ROM
+    ld de,BOOT_IO_ROM+BOOT_IO_BYTES
+    ld bc,BOOT_IO_RAM
+    call moveCore
+ioLoaded:
+    ; Внешний файл шрифта лежит в первой ROM-странице отдельно от BIOS.
+    ld hl,BOOT_FONT_ROM
+    ld de,BOOT_FONT_ROM+BOOT_FONT_BYTES
+    ld bc,BOOT_FONT_RAM
+    call moveCore
+fontLoaded:
     ; Обе части системы готовятся до холодного входа C000h.
     ; Код чтения уже находится в BIOS, нижний DOS можно писать по месту.
     call BIOS_BOOT_LOAD_DOS

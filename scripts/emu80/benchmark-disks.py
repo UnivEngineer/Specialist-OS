@@ -42,7 +42,7 @@ def prepare_fixtures():
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
     base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
-    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.FNT','FONTKOI.FNT','RAMD.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
+    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.FNT','FONTKOI.FNT','RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
@@ -65,6 +65,7 @@ class Matrix:
         self.m=Bench('http://127.0.0.1:19781/mcp');self.pid=None
         self.appBinary=ROOT/'bin/DISKBEN.i80'
         self.s=app_symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
+        self.pageAddress=symbols(ROOT/'bin/banked/TRANSPORT.sym')['bankPage']
         self.report={'startedUtc':datetime.now(timezone.utc).isoformat(),'cpuHz':2000000,'pitHz':2000000,'fileBytes':SIZE,'passes':PASSES,'units':'KiB/s (1024 bytes); ms','rows':[],'inventory':{},'phases':{}}
     def save(self):
         (OUT/'raw.json').write_text(json.dumps(self.report,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
@@ -109,6 +110,10 @@ class Matrix:
                 a=diagnostic['moduleImports'];n=diagnostic['moduleImportsEnd']-a
                 raise RuntimeError(('module header/import mismatch',state,self.m.read(a,n).hex()))
             if state['registers']['pc']['dec']==nc.get('moduleLoadError'):
+                if self.m.read(0,32)!=(ROOT/'bin/NC.i80').read_bytes()[:32]:
+                    # До NC тот же адрес может исполнять FORMAT/RAMD.
+                    self.m.stop_at(nc['mainLoop'])
+                    continue
                 ds=symbols(ROOT/'bin/DOS.sym')
                 self.m.screenshot(OUT/'module-error.png')
                 raise RuntimeError(('DOS module load failed',self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
@@ -179,6 +184,9 @@ class Matrix:
     def until(self,target):
         for _ in range(180):
             state=self.m.call('cpu_state');pc=state['registers']['pc']['dec']
+            if pc in (target,self.s['error'],self.s['file_exists']) and self.m.read(self.pageAddress,1)!=b'\0':
+                self.m.call('debug_step',mode='into')
+                continue
             if pc==target:return state
             if pc in [self.s['error'],self.s['file_exists']]:
                 self.m.screenshot(OUT/'failure.png');raise RuntimeError(('DISKBEN error',state))
@@ -322,7 +330,7 @@ def main():
         matrix.start('rom64',flash=False,system=OUT/'rom64/SystemRom_emulator.bin',disk=OUT/'external-rom64/FlashDisk_emulator.bin')
         matrix.install('Rom');matrix.readonly(7,'H-ROM-64K',RUNTIME/'specialist-os/rom-disk.bin')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
-        matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','DISKBEN.i80','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMD.i80']}
+        matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','DISKBEN.i80','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMDISK.i80']}
         matrix.save()
     finally:matrix.stop()
 

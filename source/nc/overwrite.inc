@@ -28,7 +28,7 @@ ncOverwriteTrimEnd:
     ld hl,ncOverwriteWindow
     call draw
     ; Y текстового BIOS задаёт нижнюю линию восьмипиксельного знака.
-    ld hl,04A67h
+    ld hl,04A6Dh
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteTitle
     call bios_printString
@@ -43,23 +43,23 @@ ncOverwriteTrimEnd:
     ld a,96
     sub b
     ld h,a
-    ld l,127
+    ld l,130
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteName
     call bios_printString
-    ld hl,01D95h
+    ld hl,02C95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteYes
     call bios_printString
-    ld hl,03695h
+    ld hl,03F95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteYesAll
     call bios_printString
-    ld hl,06A95h
+    ld hl,06B95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteNo
     call bios_printString
-    ld hl,08395h
+    ld hl,07B95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteNoAll
     call bios_printString
@@ -67,7 +67,7 @@ ncOverwriteTrimEnd:
     ld (ncOverwriteChoice),a
     call ncOverwriteInvert
 ncOverwriteKey:
-    call bios_getch
+    call ncModalGetch
     cp 01Bh
     jp z,ncOverwriteNoKey
     cp 0Dh
@@ -147,19 +147,19 @@ ncOverwriteInvert:
     ex de,hl
     jp inverseRect
 ncOverwriteRects:
-    DW 0968Ch,(6<<8)+12
-    DW 09D8Ch,(10<<8)+12
-    DW 0A98Ch,(6<<8)+12
-    DW 0B08Ch,(10<<8)+12
+    DW 09A8Ch,(4<<8)+12
+    DW 09F8Ch,(9<<8)+12
+    DW 0AA8Ch,(3<<8)+12
+    DW 0AE8Ch,(8<<8)+12
 ncOverwriteAnswers: DB 1,2,0,3
 ncOverwriteWindow:
-    G_WINDOW 80h,32,88,320,72
-    G_LINE 80h,36,110,312
+    G_WINDOW 80h,64,96,256,64
+    G_LINE 80h,68,116,248
     DB 0
 ncOverwriteTitle: DB 'Overwrite file?',0
-ncOverwriteYes: DB '<Yes>',0
-ncOverwriteYesAll: DB '<Yes to all>',0
-ncOverwriteNo: DB '<No>',0
-ncOverwriteNoAll: DB '<No to all>',0
+ncOverwriteYes: DB 'Yes',0
+ncOverwriteYesAll: DB 'Yes to all',0
+ncOverwriteNo: DB 'No',0
+ncOverwriteNoAll: DB 'No to all',0
 ncOverwriteChoice: DB 2
 ncOverwriteName: DS 16,0

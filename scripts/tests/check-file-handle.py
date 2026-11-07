@@ -47,10 +47,10 @@ copy:
 ''',encoding='utf-8')
 subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(OUT/'driver.bin'),str(mock)],check=True,capture_output=True)
 memory=bytearray(65536)
-kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel
-module=(ROOT/'bin/DOS.native.sys').read_bytes();memory[S['DOS_MODULE_LOAD_ADDR']:S['DOS_MODULE_LOAD_ADDR']+len(module)]=module
+kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel;io_image=(ROOT/'bin/IO.sys').read_bytes();memory[0xF000:0xF000+len(io_image)]=io_image
+module=(ROOT/'bin/DOS.native.sys').read_bytes();memory[S['DOS_CODE_START']:S['DOS_CODE_START']+len(module)]=module
 memory[S['v_dosModuleReady']]=1
-memory[S['mx_call']:S['mx_call']+S['sysTailEnd']-S['sysTail']]=memory[S['sysTail']:S['sysTailEnd']]
+__import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](memory, S)
 memory[:8192]=bytes(8192);memory[0x100:0x104]=bytes.fromhex('f8 ff ff ff')
 memory[0xA000:0xA000+(OUT/'driver.bin').stat().st_size]=(OUT/'driver.bin').read_bytes()
 memory[S['v_drives']+2:S['v_drives']+4]=W(0xA000);memory[S['j_diskDriver']:S['j_diskDriver']+3]=b'\xC3'+W(0xA000)
@@ -160,9 +160,9 @@ for sector_size,cluster_sectors in [(128,1),(256,4),(512,2)]:
   text=text.replace('    ld b,e\n    ld c,0','    ld b,e\n    ld c,0\n    push af\n    ld a,b\n    or a\n    rra\n    ld b,a\n    ld a,c\n    rra\n    ld c,a\n    pop af')
  (OUT/'geometry.asm').write_text(text,encoding='utf-8')
  subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(OUT/'geometry.bin'),str(OUT/'geometry.asm')],check=True,capture_output=True)
- memory=bytearray(65536);kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel
- memory[S['DOS_MODULE_LOAD_ADDR']:S['DOS_MODULE_LOAD_ADDR']+len(module)]=module;memory[S['v_dosModuleReady']]=1
- memory[S['mx_call']:S['mx_call']+S['sysTailEnd']-S['sysTail']]=memory[S['sysTail']:S['sysTailEnd']]
+ memory=bytearray(65536);kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel;io_image=(ROOT/'bin/IO.sys').read_bytes();memory[0xF000:0xF000+len(io_image)]=io_image
+ memory[S['DOS_CODE_START']:S['DOS_CODE_START']+len(module)]=module;memory[S['v_dosModuleReady']]=1
+ __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](memory, S)
  driver=(OUT/'geometry.bin').read_bytes();memory[0xA000:0xA000+len(driver)]=driver
  memory[S['v_drives']+2:S['v_drives']+4]=W(0xA000);memory[S['j_diskDriver']:S['j_diskDriver']+3]=b'\xC3'+W(0xA000);memory[S['v_drive']]=1
  for name,value in dict(sectorSize=sector_size,sectorsPerCluster=cluster_sectors,resSectors=1,fatSectors=1,dirSectors=1,totalSectors=32,rootDirMaxFiles=sector_size//32,descrPerSector=sector_size//32,fatNumCells=sector_size//2,dirStartSector=2,dataStartSector=3,allocationStep=0,dataClusters=29//cluster_sectors,blockSize=block_size,clusterBytes=sector_size*cluster_sectors,physicalBlocks=32*sector_size//block_size).items():struct.pack_into('<H',memory,S['v_diskInfo.'+name],value)

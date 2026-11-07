@@ -172,19 +172,10 @@ pip_filesPresent:
             call    bios_sub_hl_de
             ex      hl, de
 
-            ; Печать "XXXX BYTES IN"
+            ; Печать занятого объёма без переноса суффикса диска.
             ld      b, 0    ; не дополнять пробелами
             ld      hl, aKBytesIn
-            call    pip_printNumberText
-
-            ; Положение курсора
-            ld      hl, 2C80h
-            call    setCursorPosPanel
-
-            ; Печать "A:"
-            ; Здесь будет печататься путь к текущей папке...
-            COLOR   COLOR_INFONUMBER
-            jp      printCurDrive
+            jp      pip_printNumberText
 
             ; ^^^ выход
 
@@ -224,7 +215,7 @@ pip_printNumberText:
 ; B=0FFh: HL=две строки, B=технология. AF/BC/DE/HL разрушаются.
 ; Строки ограничены контрактом ABI (22/30 символов).
 pip_printDriver:
-            ld      hl, 05B0h
+            ld      hl, 0BB0h
             call    setCursorPosPanel
             COLOR   COLOR_INFOTEXT
             ld      hl, aDiskDriver
@@ -244,14 +235,14 @@ pip_driverName:
             call    bios_printString
             inc     hl
             push    hl
-            ld      hl, 05BCh
+            ld      hl, 0BBCh
             call    setCursorPosPanel
             COLOR   COLOR_INFOTEXT
             pop     hl
             call    bios_printString
 
             ; BIOS печати сохраняет BC: тип из того же запроса B=FFh ещё в B.
-            ld      hl, 05C8h
+            ld      hl, 0BC8h
             call    setCursorPosPanel
             ld      hl, aDiskTechnology
             call    bios_printString

@@ -1,5 +1,5 @@
 ; Универсальный вход main: B=группа, C=функция, DE=параметр.
-; BDOS использует исторические DE/E. Родные группы BIOS/DOS получают
+; Группа BDOS пока не поддерживается. Родные группы BIOS/DOS получают
 ; DE -> MX_REGS (HL, DE, BC, AF), все слова little-endian, пакет изменяемый.
 ; Результаты исполнителя записываются в пакет и возвращаются в регистрах.
 ; На неверной группе/номере: CF=1, A=DOS_ERR_UNSUPPORTED, пакет не трогаем.
@@ -8,7 +8,7 @@
 sysCall:
     ld a,b
     or a
-    jp z,sysBdos
+    jp z,sysUnsupported
     ; Восемь байт пакета не могут пересекать общее окно/регистры.
     ld a,d
     cp 0FFh
@@ -114,78 +114,4 @@ sysBadPacket:
     scf
     ret
 
-; Именованный регистровый вызов: CALL mx_callRegs / DW группа*256+номер.
-; Сохраняет входные регистры/флаги в локальном пакете; возвращает результаты
-; исполнителя. Код после DW исполняется обычным RET, не как инструкция.
-sysCallRegs:
-    push af
-    push bc
-    push de
-    push hl
-    ld hl,8
-    add hl,sp
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ex de,hl
-    ld c,(hl)
-    inc hl
-    ld b,(hl)
-    inc hl
-    ex de,hl
-    ld (hl),d
-    dec hl
-    ld (hl),e
-    ld hl,0
-    add hl,sp
-    ex de,hl
-    call sysBankSelected
-    jp z,sysRegsNative
-    call sysBankCall
-    jp sysRegsReturned
-sysRegsNative:
-    call sysFindTarget
-    jp c,sysRegsError
-    ld bc,sysRegsReturned
-    push bc
-    push hl
-    jp sysLoadRegs
-sysRegsReturned:
-    ; Результат уже в регистрах. Локальный пакет больше не нужен:
-    ; восемь INC SP не меняют ни один регистр и ни один флаг.
-    inc sp
-    inc sp
-    inc sp
-    inc sp
-    inc sp
-    inc sp
-    inc sp
-    inc sp
-    ret
-sysRegsError:
-    ; Ошибка диспетчеризации не меняет пакет: переносим её AF отдельно.
-    push af
-    pop de
-    ld hl,6
-    add hl,sp
-    ld (hl),e
-    inc hl
-    ld (hl),d
-    pop hl
-    pop de
-    pop bc
-    pop af
-    ret
-
-sysCpmEntry:
-    ld b,0
-    jp sysCall
-sysLoadPath:
-    MXCALL MX_DOS_FILELOADPATH
-    ret
-sysSavePath:
-    MXCALL MX_DOS_FILESAVEPATH
-    ret
-
-    INCLUDE "syscall-tables.inc"
     INCLUDE "syscall-banked.inc"

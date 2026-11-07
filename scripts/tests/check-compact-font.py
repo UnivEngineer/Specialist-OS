@@ -2,16 +2,17 @@
 from pathlib import Path
 import re, subprocess
 ROOT=Path(__file__).resolve().parents[2]
-sy={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/DOS.sym').read_text(),re.M)}
+sy={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 out=ROOT/'docs/memory-map-004/font';out.mkdir(parents=True,exist_ok=True)
 font=(ROOT/'assets/system-rom/FONT.FNT').read_bytes()
 compact=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
-assert compact==font[256:1024]+font[1536:2048]
-dos=(ROOT/'bin/DOS.sys').read_bytes()
+assert compact[:4]==b'MXFN'
+assert compact[32:]==font[256:1024]+font[1536:2048]+font[0xa3*8:0xa4*8]+font[0xb3*8:0xb4*8]
+dos=(ROOT/'bin/BIOS.sys').read_bytes()
 ticks=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe')
 def run(c,phase,koi,inverse,linear):
  m=bytearray(65536);m[0xc000:0xc000+len(dos)]=dos
- m[sy['FONT_ADDR']:sy['FONT_ADDR']+1280]=compact;m[0x6000:0x6800]=font
+ m[sy['FONT_ADDR']:sy['FONT_ADDR']+len(compact)]=compact;m[0x6000:0x6800]=font
  m[0x9000:0xc000]=bytes((i*37)&255 for i in range(12288))
  m[sy['bios_vars.charGen']:sy['bios_vars.charGen']+2]=(0x6000//8 if linear else sy['FONT_ADDR_DIV_8']).to_bytes(2,'little')
  m[sy['bios_vars.koi7']]=koi;m[sy['bios_vars.escMode']]=255

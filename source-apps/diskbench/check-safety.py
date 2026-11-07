@@ -24,12 +24,12 @@ def main():
     m=helpers['Bench']('http://127.0.0.1:19781/mcp')
     s=helpers['symbols'](HERE/'build/DISKBEN.sym')
     ds=helpers['symbols'](ROOT/'bin/DOS.sym')
-    rs=helpers['symbols'](ROOT/'bin/RAMD.sym')
+    rs=helpers['symbols'](ROOT/'bin/RAMDISK.sym')
     m.call('debug_break');m.stop_at(SYSTEM['NC_LOAD_ADDR'])
     if m.read(SYSTEM['NC_LOAD_ADDR'],32)!=(ROOT/'bin/NC.i80').read_bytes()[:32]:
         m.until(SYSTEM['NC_LOAD_ADDR'],30)
     m.stop_at(0x8100)
-    m.write(0x7000,b'A:RAMD.COM\0')
+    m.write(0x7000,b'A:RAMDISK.COM\0')
     assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
     m.write(0,(HERE/'build/DISKBEN.com').read_bytes())
     m.subroutine(0xC842,af=0x100,de=1)

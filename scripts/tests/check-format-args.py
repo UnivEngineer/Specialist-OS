@@ -45,14 +45,32 @@ def main():
         ('', None, None, None, None, 'A'),
         ('-Y', None, None, None, None, 'A'),
     ]
+    cases += [
+        ('h', None, None, None, None),
+        ('', 'ConfirmRequest', 'H', False, False, 'h:'),
+        ('', None, None, None, None, 'AB'),
+        ('', None, None, None, None, 'B: C:'),
+        ('', None, None, None, None, ''),
+        ('', None, None, None, None, 'Z'),
+        ('B:', 'Format', 'B', False, False, 'Y'),
+        ('B:', 'Format', 'B', False, False, 'y'),
+        ('B:', None, None, None, None, 'N'),
+    ]
     results = []
     for number, (text, label, drive, ram, yes, *keys) in enumerate(cases):
         m = bytearray(65536)
-        for base, file in ((0xC000, 'BIOS.sys'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
+        for base, file in ((0xC000, 'BIOS.sys'), (0xF000, 'IO.sys'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
             data = (ROOT / f'bin/{file}').read_bytes()
             m[base:base+len(data)] = data
         m[0xC818] = 0xC9            # печать не нужна для проверки парсера
-        m[0xC803:0xC806] = bytes([0x3e,ord(keys[0] if keys else 'B'),0xc9])
+        # Редактор проверяется настоящей клавиатурой отдельно; здесь его ответ
+        # задан строкой, завершённой Enter, а не одиночным нажатием.
+        answer = (keys[0] if keys else 'B').encode('ascii') + b'\0'
+        stub = bytearray([0x21, s['v_Answer'] & 255, s['v_Answer'] >> 8])
+        for ch in answer: stub.extend([0x36, ch, 0x23])
+        stub.extend([0x3e, 13, 0xc9])
+        m[0x8600:0x8600+len(stub)] = stub
+        at = s['lineEdit']; m[at:at+3] = bytes.fromhex('c3 00 86')
         # Любой выбор тома/драйвера вместо отказа уводит исполнение в ловушку.
         for entry in (0xC842,0xC863):m[entry:entry+3]=bytes.fromhex('c3 01 83')
         wrapper=bytes.fromhex('31 df 8f 11 00 84 cd 00 00 22 02 85 f5 e1 22 00 85 c3 00 83')
@@ -71,9 +89,12 @@ def main():
             assert b[65539] == ord(drive), text  # старший байт BC — буква диска
             assert bool(b[s['v_FormatRAMdisk']]) == ram, text
             assert bool(b[s['v_FormatConfirmed']]) == yes, text
-        if number>=14:
+        if 14<=number<20:
             assert int.from_bytes(b[0x8502:0x8504],'little')==s['str_SystemDrive'],(text,'wrong error')
             assert b[0x8500]&1 and b[0x8501]==6,(text,'expected CF and DOS_ERR_ACCESS')
+        if number==20:
+            assert int.from_bytes(b[0x8502:0x8504], 'little')==s['str_Usage']
+            assert b'Invalid arguments' in b[s['str_Usage']:s['str_SystemDrive']]
         results.append({'arguments': text, 'result': label or 'rejected', 'disk_access': False})
     (out / 'checks.json').write_text(json.dumps(results, indent=2)+'\n', encoding='utf-8')
     print(f'OK: {len(results)} argument cases; no disk access')

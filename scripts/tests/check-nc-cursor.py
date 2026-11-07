@@ -15,8 +15,8 @@ def main():
     p.add_argument('--variant',default='NC')
     args=p.parse_args();out=args.report_directory.resolve();out.mkdir(parents=True,exist_ok=True)
     def syms(name):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin'/name).read_text(),re.M)}
-    ms=syms('DOSMOD.sym')
-    ns,ds=syms(args.variant+'.sym'),syms('DOS.sym');dos=(ROOT/'bin/DOS.sys').read_bytes();nc=(ROOT/'bin'/(args.variant+'.i80')).read_bytes()
+    ms=syms('BIOS.sym')
+    ns,ds=syms(args.variant+'.sym'),syms('DOS.sym');dos=(ROOT/'bin/BIOS.sys').read_bytes();nc=(ROOT/'bin'/(args.variant+'.i80')).read_bytes()
     count=ns['FILE_LIST_SIZE'];height=count//2*10;top=ns['P_FILE_LIST_Y']-8;inversions=0 if 'scrollBitmapPanel' in ns else 2
     def run(m,entry,bc=0,event=False):
         code=bytes.fromhex('31 00 8F 01')+bc.to_bytes(2,'little')+b'\xCD'+entry.to_bytes(2,'little')+bytes.fromhex('C3 00 63');m[0x6200:0x6200+len(code)]=code
@@ -25,9 +25,10 @@ def main():
         b=(out/'out.bin').read_bytes();assert int.from_bytes(b[65542:65544],'little')==0x6300,r.stdout
         return bytearray(b[:65536])
     def memory(panel=0,first=0,selected=35):
-        m=bytearray(65536);m[0xC000:0xC000+len(dos)]=dos;m[:len(nc)]=nc
-        module=(ROOT/'bin/DOSMOD.i80').read_bytes();m[ds['DOS_MODULE_LOAD_ADDR']:ds['DOS_MODULE_LOAD_ADDR']+len(module)]=module;m[ds['v_dosModuleReady']]=1
-        m[ns['FONT_ADDR']:ns['FONT_ADDR']+1280]=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes();m[0x8FE7:0x8FE9]=(ns['FONT_ADDR']//8).to_bytes(2,'little')
+        m=bytearray(65536);m[0xC000:0xC000+len(dos)]=dos;io=(ROOT/'bin/IO.sys').read_bytes();m[0xF000:0xF000+len(io)]=io;m[:len(nc)]=nc
+        module=(ROOT/'bin/DOS.native.sys').read_bytes();m[ds['DOS_CODE_START']:ds['DOS_CODE_START']+len(module)]=module;m[ds['v_dosModuleReady']]=1
+        __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](m, ds)
+        font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes();m[ns['FONT_ADDR']:ns['FONT_ADDR']+len(font)]=font;m[0x8FE7:0x8FE9]=(ns['FONT_ADDR']//8).to_bytes(2,'little')
         m[ns['state']+1]=panel;m[ns['state.panelA_filesCnt']+panel]=140;m[ns['state']+8+panel]=first;m[ns['state']+10+panel]=selected
         m[ns['vars.cacheValidA']+panel]=1;m[ns['vars.cacheDriveA']+panel]=m[ns['state']+4+panel]
         base=ns['FILE_CACHE_B'] if panel else ns['FILE_CACHE_A']
@@ -36,6 +37,10 @@ def main():
         m[ds['bios_fileGetSetDrive']]=0xC9
         # Кэш изолирован от диска; контекст каталога уже задан фикстурой.
         for entry in ['bios_fileSelectDrive', 'bios_directory']:
+            m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')
+        # MXCALL обходит исторические JMP; изолируем тот же файловый слой
+        # в его локальных целях диспетчера, не подменяя графику BIOS.
+        for entry in ['fileSelectDrive','directoryService','fileGetSetDrive']:
             m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')
         # Считаем вызовы инверсии отдельно от окончательного вида пикселей.
         trace=bytes.fromhex('3A 10 65 3C 32 10 65 C3')+ms['uiInverseRect'].to_bytes(2,'little');m[0x6600:0x6600+len(trace)]=trace;m[ds['bios_uiInverseRect']:ds['bios_uiInverseRect']+3]=bytes.fromhex('C3 00 66')

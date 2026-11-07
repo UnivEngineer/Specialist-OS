@@ -15,7 +15,7 @@ globals_['OUT']=args.report;globals_['RUNTIME']=args.runtime
 def symbols(name):
  return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/f'bin/{name}.sym').read_text(),re.M)}
 
-d,n,r=[symbols(name) for name in ['DOS','NC','RAMD']]
+d,n,r=[symbols(name) for name in ['DOS','NC','RAMDISK']]
 driverLabel='CPM16' if r.get('RAMD_USE_CPM',0) else 'R4'
 Base=globals_['Bench'];stages=[];cold=True
 targets={d[name]:name for name in ['reboot3_1','fileExec','skipFormat','reboot3_2']}
@@ -99,8 +99,8 @@ try:
  assert not m.func(d['bios_installDriver'],af=0x0100,hl=r['Driver'])['flags']['C']
  m.select(1);io(driverLabel)
  if args.compare_r4:
-  r4=symbols('RAMD-R4')
-  m.m.write(0,(ROOT/'bin/RAMD-R4.i80').read_bytes())
+  r4=symbols('RAMDISK-R4')
+  m.m.write(0,(ROOT/'bin/RAMDISK-R4.i80').read_bytes())
   assert not m.func(r4['Install'])['flags']['C']
   m.select(1);io('R4')
  report['checks'].append('REGISTER leaves current window intact; USER applies new template; user registration restored')

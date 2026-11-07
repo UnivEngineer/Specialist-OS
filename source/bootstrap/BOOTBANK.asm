@@ -26,6 +26,17 @@ stage:
     ld bc,0C000h
     call moveCore
 biosLoaded:
+    ld hl,BOOT_IO_ROM
+    ld de,BOOT_IO_ROM+BOOT_IO_BYTES
+    ld bc,BOOT_IO_RAM
+    call moveCore
+ioLoaded:
+    ; Внешний файл шрифта лежит в первой ROM-странице отдельно от BIOS.
+    ld hl,BOOT_FONT_ROM
+    ld de,BOOT_FONT_ROM+BOOT_FONT_BYTES
+    ld bc,BOOT_FONT_RAM
+    call moveCore
+fontLoaded:
     ; Детектор работает до установки общего шлюза.
     ld a,15
     ld hl,0FFBEh
@@ -71,7 +82,7 @@ loadDos:
     ld (0FFD4h),hl
     ld a,MODULE_SECTORS
     ld (0FFD3h),a
-    ld hl,04004h
+    ld hl,MODULE_LOAD+4
     call 0FFC0h
 dosLoaded:
     ; Данные страниц RAM-диска не трогаем, устанавливаем только FF00h.
@@ -83,9 +94,9 @@ dosLoaded:
 installPages:
     dec a
     push af
-    ld de,transportImage+0300h
+    ld de,memImage+MEM_DATA_OFFSET
     ld hl,0FF00h
-    ld bc,transportEnd-transportImage-0300h
+    ld bc,MEM_DATA_SIZE
     call install
     pop af
     or a
@@ -100,6 +111,21 @@ installPages:
     ld bc,clientEnd-clientImage
     xor a
     call install
+    ld de,localBlockImage
+    ld hl,BOOT_LOCAL_BLOCK
+    ld bc,localBlockEnd-localBlockImage
+    xor a
+    call install
+    ld de,dosKind
+    ld hl,BOOT_MEM_KIND
+    ld bc,1
+    xor a
+    call install
+    ld de,dosLocalA
+    ld hl,BOOT_MEM_LOCAL_A
+    ld bc,2
+    xor a
+    call install
     ld de,dosContext
     ld hl,BANK_PAGE
     ld bc,dosContextEnd-dosContext
@@ -111,14 +137,18 @@ installPages:
     call moveCore
     ld a,(pageCount)
     ld (BANK_PAGE_COUNT),a
-    ld hl,0E800h
+    ld hl,BOOT_BIOS_STACK_TOP
     ld (BANK_SERVICE_SP),hl
-    ld hl,0E440h
+    ld hl,BOOT_BIOS_STACK_FLOOR
     ld (BANK_STACK_FLOOR),hl
-    ; В main публичные F800h ставит BIOS, локальный физический вход — bootstrap.
-    ld hl,clientImage+00C0h
+    ; Полный MEM-клиент одинаков в main и DOS; BIOS задаст локальный вход.
+    ld hl,localBlockImage
+    ld de,localBlockEnd
+    ld bc,BOOT_LOCAL_BLOCK
+    call moveCore
+    ld hl,clientImage
     ld de,clientEnd
-    ld bc,0F8C0h
+    ld bc,0F800h
     call moveCore
     ld hl,windowImage
     ld de,windowEnd
@@ -177,21 +207,24 @@ romWindowEnd:
     ASSERT romWindowEnd-romWindow == 18
     INCLUDE "memcpy.inc"
 pageCount: DB 16
+dosKind: DB 2
+dosLocalA: DW BOOT_DOS_LOCAL_A
 dosContext:
     DB 1
     ; Число страниц после детектора копируется сюда перед установкой.
     DB 16,0,0,0
-    DW 0F800h,0F440h
+    DW BOOT_DOS_STACK_TOP,BOOT_DOS_STACK_BOTTOM+64
 dosContextEnd:
-transportImage:
-    INCBIN "../../bin/banked/TRANSPORT.bin"
-transportEnd:
-clientImage:
-    INCBIN "../../bin/banked/CLIENT.bin"
-clientEnd:
-windowImage:
-    INCBIN "../../bin/banked/WINDOW.bin"
-windowEnd:
+memImage:
+    INCBIN "../../bin/MEM.sys"
+transportImage = memImage+MEM_TRANSPORT_OFFSET
+transportEnd = transportImage+MEM_TRANSPORT_SIZE
+clientImage = memImage+MEM_CLIENT_OFFSET
+clientEnd = clientImage+MEM_CLIENT_SIZE
+localBlockImage = memImage+MEM_LOCAL_OFFSET
+localBlockEnd = localBlockImage+MEM_LOCAL_SIZE
+windowImage = memImage+MEM_WINDOW_OFFSET
+windowEnd = windowImage+MEM_WINDOW_SIZE
     ENT
 romTailStorage:
     DISP 0FF00h

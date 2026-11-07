@@ -32,17 +32,37 @@ formatMain:
     ld      c, 0
     jp      ReadParams
 
-    ; Запрос буквы диска для форматирования
+    ; Интерактивный выбор принимает букву или B:, затем Enter.
 chooseDrive:
     ld      hl, str_ChoseDrive
-    call    bios_printString; вывод сообщения 'CHOOSE DRIVE: '
-    call    bios_getch      ; ожидание нажатия клавиши
+    call    bios_printString
+    call    readAnswer
+    cp      01Bh
+    jp z,   errAbort
+    ld      hl, v_Answer
+    call    bios_argNext
+    jp c,   errAbort
+    ld      a, b
+    cp      1
+    jp z,   chooseLetter
+    cp      2
+    jp nz,  errParams
+    inc     de
+    ld      a, (de)
+    dec     de
+    cp      ':'
+    jp nz,  errParams
+chooseLetter:
+    ld      a, (de)
+    call    bios_upperCase
+    cp      'A'
+    jp c,   errInvalidDrive
+    cp      'I'
+    jp nc,  errInvalidDrive
     ld      c, a
-    call    bios_printChar
-    cp      21h             ; сравнение c пробелом
-    jp c,   errAbort        ; выход в ОС, если меньше или равно
-    call    bios_upperCase  ; превод буквы в верхний регистр
-    ld      b, a            ; запомнить букву диска в b
+    call    bios_argNext
+    jp nc,  errParams
+    ld      b, c
     jp      SearchExit
 
 ReadParams:
@@ -106,14 +126,37 @@ ConfirmRequest:
     ld      (str_A_Y_N), a  ; заменить 'A' в строке сообщения на введённую букву
     ld      hl, str_Format
     call    bios_printString; вывод сообщения 'FORMAT <буква>: [Y/N]?'
-    call    bios_getch      ; ожидание нажатия клавиши
-    call    bios_upperCase  ; превод буквы в верхний регистр
-    ld      c, a
+    push    bc
+    call    readAnswer
+    pop     bc
+    cp      01Bh
+    jp z,   errAbort
+    ld      hl, v_Answer
+    ld      a, (hl)
+    call    bios_upperCase
+    cp      'Y'
+    jp nz,  errAbort
+    inc     hl
+    ld      a, (hl)
+    or      a
+    jp nz,  errAbort
+    jp      Confirmed
+
+; Общий редактор строки, как в CLI и диалогах NC; Escape отменяет ввод.
+; Выход A=Enter/Escape, строка ASCIIZ; AF/BC/DE/HL разрушены.
+readAnswer:
+    ld      hl, v_Answer
+    ld      de, v_Answer
+    ld      bc, 0100h
+    call    lineEdit
+    push    af
+    ld      c, 0Ah
     call    bios_printChar
-    cp      'Y'             ; если найден параметр 'Y', переход к форматированию
-    jp z,   Confirmed
-    jp      errAbort        ; выход в ОС, если не 'Y/y'
-    
+    pop     af
+    ret
+
+    INCLUDE "../include/lineedit.inc"
+
 Confirmed:
     ld      a, b            ; восстановить букву диска в a
 
@@ -457,7 +500,7 @@ errParams:
     scf
     ret
 
-str_Usage:          DB 0Ah,"FORMAT.COM [B:-H:] [-R] [-Y]",0
+str_Usage:          DB 0Ah,"Invalid arguments",0Ah,"FORMAT.COM [B:-H:] [-R] [-Y]",0Ah,0
 str_SystemDrive:    DB "Cannot format system drive A:",0Ah,0
 str_Format:         DB 0Ah,"Format drive "
 str_A_Y_N:          DB "A: [Y/N]? ",0
@@ -468,6 +511,7 @@ str_NoDriver:       DB 0Ah,"No driver",0
 str_Aborting:       DB 0Ah,"Aborting",0
 str_RAM_DISK:       DB "RAM DISK   "
 
+v_Answer:           DS MAX_PATH,0
 v_FormatConfirmed:  DB 0
 v_FormatRAMdisk:    DB 0
 v_FatIndex:         DW 0

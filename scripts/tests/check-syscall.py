@@ -9,12 +9,13 @@ OUT=ROOT/'docs/banked/syscall-main-001';OUT.mkdir(parents=True,exist_ok=True)
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 W=lambda n:n.to_bytes(2,'little')
 base=bytearray(65536)
-for name,addr in [('BIOS',0xC000),('DOS.native',0x4000)]:
+for name,addr in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
     data=(ROOT/f'bin/{name}.sys').read_bytes();base[addr:addr+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-base[S['FONT_ADDR']:S['FONT_ADDR']+1280]=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
 base[S['v_dosModuleReady']]=1
-base[0xF800:0xF800+S['sysTailEnd']-S['sysTail']]=base[S['sysTail']:S['sysTailEnd']]
+__import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](base, S)
 rows=[]
 
 def run(body,memory=None):
@@ -71,7 +72,7 @@ for group in json.loads((ROOT/'source/bios/syscalls.json').read_text()):
 # Реализацию подменяем RET: проверяем именно маршрутизатор/адаптер.
 dos_group=next(g for g in json.loads((ROOT/'source/bios/syscalls.json').read_text()) if g['name']=='DOS')
 for target,address in re.findall(r'jp\s+sysLegacy_(\w+)\s*;\s*(C[0-9A-F]{3}):',
-                               (ROOT/'source/dos/jmps_c800.inc').read_text(encoding='utf-8')):
+                               (ROOT/'source/bios/jmps_c800.inc').read_text(encoding='utf-8')):
     svc=next(s for s in dos_group['services'] if s['target']=='dos_'+target)
     m=bytearray(base);at=S['sysDOSTable']+svc['id']*2
     m[at:at+2]=W(0x3100);m[0x3100]=0xC9
@@ -115,22 +116,9 @@ r,_=run(' ld bc,MX_BIOS_UPPERCASE\n ld de,0FFB9h\n call mx_call')
 assert r[0x3B07]==S['DOS_ERR_ARGUMENT'] and r[0x3B06]&1
 assert r[0xFFB9:]==base[0xFFB9:]
 
-# Произвольный B не меняет выбор группы через вход совместимости.
-r,_=run(' ld bc,0A50Ch\n call mx_cpmCall')
-assert r[0x3B00:0x3B02]==W(0x22) and r[0x3B07]==0x22 and r[0x3B05]==0
-r,_=run(' ld bc,0FFh\n call mx_call')
-assert r[0x3B00:0x3B02]==W(0) and r[0x3B07]==0
-r,_=run(' ld bc,01Ah\n ld de,03210h\n call mx_call')
-assert r[S['sysDma']:S['sysDma']+2]==W(0x3210)
-
-# Печать BDOS 2 и 9 совпадает с выводом BIOS; '$' не выводится.
-prefix=' call bios_clearScreenOld\n ld hl,8\n call bios_setCursorPos\n'
-a,_=run(prefix+" ld c,'A'\n call bios_printChar")
-b,_=run(prefix+" ld bc,2\n ld e,'A'\n call mx_call")
-assert a[0x9000:0xC000]==b[0x9000:0xC000]
-m=bytearray(base);m[0x3000:0x3004]=b'A$Z$'
-c,_=run(prefix+' ld bc,9\n ld de,03000h\n call mx_call',m)
-assert a[0x9000:0xC000]==c[0x9000:0xC000]
-
-(OUT/'result.json').write_text(json.dumps(dict(registerCases=rows,nested=True,bdosConsole=True),indent=2)+'\n')
-print(f'System dispatcher PASS: {len(rows)} register cases, nested call, unavailable DOS, BDOS console/DMA/version')
+# Преждевременный адаптер CP/M удалён: вход и группа зарезервированы.
+for call in (' ld bc,0A50Ch\n call mx_cpmCall', ' ld bc,0Ch\n call mx_call'):
+ r,_=run(call)
+ assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
+(OUT/'result.json').write_text(json.dumps(dict(registerCases=rows,nested=True,bdosUnsupported=True),indent=2)+'\n')
+print(f'System dispatcher PASS: {len(rows)} register cases, nested call, unavailable DOS, BDOS rejected')

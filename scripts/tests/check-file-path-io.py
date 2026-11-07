@@ -8,7 +8,7 @@ h=runpy.run_path(str(ROOT/'scripts/tests/check-file-handle.py'))
 run=h['run'];g=run.__globals__;S=h['S'];W=h['W']
 # Используем тот же блочный драйвер и геометрию, но чистый том.
 m=bytearray(h['default_memory']);m[:8192]=bytes(8192);m[0x100:0x104]=bytes.fromhex('f8 ff ff ff')
-m[0xF800:0xF800+S['sysTailEnd']-S['sysTail']]=m[S['sysTail']:S['sysTailEnd']]
+__import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](m, S)
 m[S['v_directory']:S['v_directory']+2]=W(0)
 m[S['v_directories']:S['v_directories']+16]=bytes(16)
 m[S['v_memTop']:S['v_memTop']+2]=W(S['DOS_CODE_START']-1)

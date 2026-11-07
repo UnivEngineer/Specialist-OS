@@ -1,4 +1,4 @@
-; Зафиксированная копия source/dos/driverFFC0.inc от 06.11.2026.
+; Зафиксированная копия source/bios/driverFFC0.inc от 06.11.2026.
 ; Аппаратные адреса и алгоритм независимы от будущей реализации BIOS.
 builtinBlockImage:
             ld      a,c

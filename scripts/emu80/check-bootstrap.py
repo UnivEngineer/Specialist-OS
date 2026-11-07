@@ -26,22 +26,38 @@ try:
    if label=='dosLoaded':
     page(1)
     if mode=='cold':
-     image=(ROOT/'bin/DOS.sys').read_bytes();assert m.read(0x4000,len(image))==image
+     image=(ROOT/'bin/DOS.sys').read_bytes();assert m.read(k['DOS_BANK_CODE_ADDR'],len(image))==image
     else:
      assert m.read(0xA800,17)==b'DOS survives warm'
      page(2);assert m.read(0xE000,17)==b'RAM disk survives'
     page(0)
+  font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+  assert m.read(b['FONT_ADDR'],len(font))==font
   state=nc();ticks['nc']=state['cpu_ticks'];assert m.read(b['v_memTop'],2)==bytes.fromhex('ff8b')
+  # Общий код MEM и разные данные установки main/DOS; минимальный профиль данных.
+  client=(ROOT/'bin/banked/CLIENT.bin').read_bytes()
+  local=(ROOT/'bin/banked/LOCALBLOCK.bin').read_bytes()
+  transport=(ROOT/'bin/banked/TRANSPORT.bin').read_bytes()
+  for bank,kind in ((0,1),(1,2)):
+   page(bank)
+   assert m.read(b['mx_call'],len(client))==client
+   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[:b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY']]
+   assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
+  page(2);assert m.read(0xFF00,len(transport)-0x300)==transport[0x300:]
+  page(0)
+
   page(1);assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')
   page(2)
   if mode!='cold':assert m.read(0xE000,17)==b'RAM disk survives'
   m.write(0xE000,b'RAM disk survives');page(0)
+  # Следующий Reset обязан восстановить обе части внешнего шрифта.
+  m.write(b['FONT_ADDR'],b'\xA5');m.write(b['FONT_ADDR']+len(font)-1,b'\x5A')
   row=dict(mode=mode,ticks=ticks,biosMs=(ticks['biosLoaded']-ticks['stage'])/2000,dosAndProbeMs=(ticks['dosLoaded']-ticks['biosLoaded'])/2000,bootMs=(ticks['nc']-ticks['stage'])/2000,dosReloaded=mode=='cold');rows.append(row);print(row,flush=True);m.screenshot(a.report/(mode+'.png'))
  # Программные входы сохраняют BIOS; выбор оболочки принадлежит DOS.
  cli=h['symbols'](ROOT/'bin/CLI.sym')
  t=h['symbols'](ROOT/'bin/banked/TRANSPORT.sym')
  marker=b['biosVersion']+5;original=m.read(marker,1);m.write(marker,b'9')
- driver=m.read(0xF600,16)
+ driver=m.read(b['SYSTEM_FLASH_ADDR'],16)
  for shell in ('NC','CLI'):
   if shell=='CLI':
    m.call('bp_clear');m.call('emu_run_for',ms=500)
@@ -55,18 +71,20 @@ try:
    m.call('regs_set',pc=entry,sp=0x8FDF);state=m.until(target,120)
    assert m.read(0,32)==binary
    assert m.read(marker,1)==b'9','Software restart reloaded BIOS'
-   assert m.read(0xF600,16)==driver
+   assert m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
    page(1);assert m.read(k['v_shell'],1)==bytes([shell=='CLI'])
    assert m.read(0xA800,17)==b'DOS survives warm'
    assert m.read(t['bankDepth'],1)==b'\1'
+   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[:b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY']]
+   assert int.from_bytes(m.read(t['bankServiceSP'],2),'little') <= b['DOS_BANK_STACK_TOP']
    page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
    row=dict(mode=f'{entry:04X}',std=std,shell=shell,biosReloaded=False,dosReloaded=False,returnMs=(state['cpu_ticks']-start)/2000)
    rows.append(row);print(row,flush=True)
   m.screenshot(a.report/('software-'+shell+'.png'))
  # Reset обязан восстановить даже повреждённый драйвер main, сохранив CLI.
- m.write(0xF600,b'\x76');m.stop_at(cli['cliPrompt']);m.call('emu_reset');m.until(cli['cliPrompt'],120)
+ m.write(b['SYSTEM_FLASH_ADDR'],b'\x76');m.stop_at(cli['cliPrompt']);m.call('emu_reset');m.until(cli['cliPrompt'],120)
  assert m.read(0,32)==(ROOT/'bin/CLI.i80').read_bytes()[:32]
- assert m.read(marker,1)==original and m.read(0xF600,16)==driver
+ assert m.read(marker,1)==original and m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
  page(1);assert m.read(k['v_shell'],1)==b'\1';assert m.read(0xA800,17)==b'DOS survives warm'
  page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
  rows.append(dict(mode='reset-corrupt-main',shell='CLI',biosRestored=True,driverRestored=True,dosReloaded=False))

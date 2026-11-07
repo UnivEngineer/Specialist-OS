@@ -1,333 +1,15 @@
 {
-  "fixed": [
-    {
-      "address": 49152,
-      "size": 15,
-      "files": [
-        "jmps_c000.inc"
-      ]
-    },
-    {
-      "address": 49168,
-      "size": 3,
-      "target": "clearScreen",
-      "abi": "bios_clearScreenOld"
-    },
-    {
-      "address": 49207,
-      "size": 3,
-      "target": "printChar",
-      "abi": "bios_printCharOld"
-    },
-    {
-      "address": 49520,
-      "size": 3,
-      "target": "beep",
-      "abi": "bios_beep_Old"
-    },
-    {
-      "address": 49551,
-      "size": 6,
-      "files": [
-        "delay_l.inc"
-      ]
-    },
-    {
-      "address": 49748,
-      "size": 12,
-      "files": [
-        "keybModes.inc"
-      ],
-      "abi": "bios_setKeybMode82"
-    },
-    {
-      "address": 49975,
-      "size": 3,
-      "target": "getch",
-      "abi": "bios_getchOld"
-    },
-    {
-      "address": 50039,
-      "size": 18,
-      "files": [
-        "tape.inc"
-      ],
-      "abi": "bios_tapeReadOld"
-    },
-    {
-      "address": 50128,
-      "size": 3,
-      "target": "t_tapeWrite",
-      "abi": "bios_tapeWriteOld"
-    },
-    {
-      "address": 50215,
-      "size": 3,
-      "target": "cmp_hl_de",
-      "abi": "bios_cmp_hl_de"
-    },
-    {
-      "address": 50221,
-      "size": 3,
-      "target": "memcpy_bc_hl",
-      "abi": "bios_memcpy_bc_hl"
-    },
-    {
-      "address": 50232,
-      "size": 3,
-      "target": "printString",
-      "abi": "bios_printStringOld"
-    },
-    {
-      "address": 50296,
-      "size": 3,
-      "target": "t_tapeReadError"
-    },
-    {
-      "address": 50336,
-      "size": 96,
-      "files": [
-        "keyTable.inc"
-      ],
-      "abi": "bios_keybTable"
-    },
-    {
-      "address": 51200,
-      "size": 234,
-      "files": [
-        "jmps_c800.inc"
-      ],
-      "abi": "bios_reboot"
-    }
-  ],
   "units": [
     {
-      "name": "clearScreen",
+      "name": "entries",
       "files": [
-        "clearScreen.inc"
-      ]
-    },
-    {
-      "name": "printChar",
-      "files": [
-        "printChar.inc"
-      ]
-    },
-    {
-      "name": "glyph",
-      "files": [
-        "printChar5.inc",
-        "drawChar.inc"
-      ],
-      "chain": true
-    },
-    {
-      "name": "printChar3",
-      "files": [
-        "printChar3.inc"
-      ]
-    },
-    {
-      "name": "beep",
-      "files": [
-        "beep.inc"
-      ]
-    },
-    {
-      "name": "scroll",
-      "files": [
-        "printChar4.inc",
-        "scrollUp.inc"
-      ],
-      "chain": true
-    },
-    {
-      "name": "keyScan",
-      "files": [
-        "keyScan.inc"
-      ]
-    },
-    {
-      "name": "getch2",
-      "files": [
-        "getch2.inc"
-      ]
-    },
-    {
-      "name": "calcCursorAddr",
-      "files": [
-        "calcCursorAddr.inc"
-      ]
-    },
-    {
-      "name": "calcCursorAddr2",
-      "files": [
-        "calcCursorAddr2.inc"
-      ]
-    },
-    {
-      "name": "drawCursor",
-      "files": [
-        "drawCursor.inc"
-      ]
-    },
-    {
-      "name": "drawCursor2",
-      "files": [
-        "drawCursor2.inc"
-      ]
-    },
-    {
-      "name": "sbb_de_hl_to_hl",
-      "files": [
-        "sbb_de_hl_to_hl.inc"
-      ]
-    },
-    {
-      "name": "memmove_bc_hl",
-      "files": [
-        "memmove_bc_hl.inc"
-      ]
-    },
-    {
-      "name": "memset_de_20_b",
-      "files": [
-        "memset_de_20_b.inc"
-      ]
-    },
-    {
-      "name": "romMappedRead",
-      "files": [
-        "romMappedRead.inc"
-      ]
-    },
-    {
-      "name": "strToHex",
-      "files": [
-        "strToHex.inc"
-      ],
-      "condition": "RAMFOS_COMPATIBILITY"
-    },
-    {
-      "name": "cmp_hl_de",
-      "files": [
-        "cmp_hl_de.inc"
-      ]
-    },
-    {
-      "name": "memcpy_bc_hl",
-      "files": [
-        "memcpy_bc_hl.inc"
-      ]
-    },
-    {
-      "name": "printChar6",
-      "files": [
-        "printChar6.inc"
-      ]
-    },
-    {
-      "name": "driverInfo",
-      "files": [
-        "driverInfo.inc"
-      ]
-    },
-    {
-      "name": "initVars",
-      "files": [
-        "initVars.inc"
-      ]
-    },
-    {
-      "name": "printer",
-      "files": [
-        "printer.inc"
-      ]
-    },
-    {
-      "name": "printString",
-      "files": [
-        "printString.inc"
-      ]
-    },
-    {
-      "name": "reboot1",
-      "files": [
-        "reboot1.inc"
-      ]
-    },
-    {
-      "name": "reboot2",
-      "files": [
-        "reboot2.inc"
-      ]
-    },
-    {
-      "name": "getch3",
-      "files": [
-        "getch3.inc"
-      ]
-    },
-    {
-      "name": "scrollDown",
-      "files": [
-        "printChar2.inc",
-        "scrollDown.inc"
-      ],
-      "chain": true
-    },
-    {
-      "name": "scrollUp2",
-      "files": [
-        "scrollUp2.inc"
-      ]
-    },
-    {
-      "name": "checkRAMD",
-      "files": [
-        "checkRAMD.inc"
-      ]
-    },
-    {
-      "name": "setGetCursorPos",
-      "files": [
-        "setGetCursorPos.inc"
-      ]
-    },
-    {
-      "name": "setGetMemTop",
-      "files": [
-        "setGetMemTop.inc"
-      ]
-    },
-    {
-      "name": "printHex",
-      "files": [
-        "printHex.inc"
-      ]
-    },
-    {
-      "name": "input",
-      "files": [
-        "input.inc"
-      ]
-    },
-    {
-      "name": "calcCS",
-      "files": [
-        "calcCS.inc"
+        "entries.inc"
       ]
     },
     {
       "name": "reboot3",
       "files": [
         "reboot3.inc"
-      ]
-    },
-    {
-      "name": "beepTimer",
-      "files": [
-        "beepTimer.inc"
       ]
     },
     {
@@ -343,30 +25,6 @@
       ]
     },
     {
-      "name": "driverFFC0",
-      "files": [
-        "driverFFC0.inc"
-      ]
-    },
-    {
-      "name": "driverSelect",
-      "files": [
-        "driverSelect.inc"
-      ]
-    },
-    {
-      "name": "diskWriteChecked",
-      "files": [
-        "diskWriteChecked.inc"
-      ]
-    },
-    {
-      "name": "installDriver",
-      "files": [
-        "installDriver.inc"
-      ]
-    },
-    {
       "name": "fileGetSetDrive",
       "files": [
         "fileGetSetDrive.inc"
@@ -376,12 +34,6 @@
       "name": "volume",
       "files": [
         "volume.inc"
-      ]
-    },
-    {
-      "name": "strcmp",
-      "files": [
-        "strcmp.inc"
       ]
     },
     {
@@ -481,24 +133,6 @@
       ]
     },
     {
-      "name": "printDecWord",
-      "files": [
-        "printDecWord.inc"
-      ]
-    },
-    {
-      "name": "math",
-      "files": [
-        "math.inc"
-      ]
-    },
-    {
-      "name": "move8080",
-      "files": [
-        "move8080.inc"
-      ]
-    },
-    {
       "name": "driverNames",
       "files": [
         "driverNames.inc"
@@ -511,28 +145,9 @@
       ]
     },
     {
-      "name": "initFont",
-      "files": [
-        "initFont.inc"
-      ],
-      "condition": "LOAD_FONT"
-    },
-    {
-      "name": "pitTimer",
-      "files": [
-        "pitTimer.inc"
-      ]
-    },
-    {
       "name": "imageLoader",
       "files": [
         "imageLoader.inc"
-      ]
-    },
-    {
-      "name": "argNext",
-      "files": [
-        "argNext.inc"
       ]
     },
     {
@@ -555,21 +170,9 @@
       ]
     },
     {
-      "name": "biosState",
-      "files": [
-        "biosState.inc"
-      ]
-    },
-    {
       "name": "cmpFileExt",
       "files": [
         "cmpFileExt.inc"
-      ]
-    },
-    {
-      "name": "biosDriverNames",
-      "files": [
-        "biosDriverNames.inc"
       ]
     },
     {
@@ -585,9 +188,39 @@
       ]
     },
     {
-      "name": "dosModule",
+      "name": "services",
       "files": [
-        "dosModule.inc"
+        "services.inc"
+      ]
+    },
+    {
+      "name": "pathIO",
+      "files": [
+        "filePathIO.inc"
+      ]
+    },
+    {
+      "name": "cli",
+      "files": [
+        "../cli/command.inc",
+        "../cli/directories.inc",
+        "../cli/attrib.inc",
+        "../cli/move.inc",
+        "../cli/tree.inc",
+        "../cli/data.inc",
+        "../cli/moveDirectories.inc",
+        "../cli/copyConfirm.inc",
+        "../cli/changes.inc"
+      ]
+    },
+    {
+      "name": "advanced",
+      "files": [
+        "fileAssociation.inc",
+        "fileCopy.inc",
+        "fileHandle.inc",
+        "directoryCwd.inc",
+        "../cli/directoryExtend.inc"
       ]
     }
   ]

@@ -67,7 +67,7 @@ def main():
         m.subroutine(0xC86F,bc=0)
         info('RAMD')
         assert 'RAMD/R3' in report['descriptors']
-        m.write(0x7000,b'A:RAMD.COM\0')
+        m.write(0x7000,b'A:RAMDISK.COM\0')
         assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
         select(1)
         info('RAMD')

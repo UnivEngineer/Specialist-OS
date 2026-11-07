@@ -272,6 +272,16 @@
         "name": "MEMCPY",
         "target": "memcpy_bc_hl",
         "legacy": "bios_memcpy_bc_hl"
+      },
+      {
+        "id": 45,
+        "name": "FILEBODY",
+        "target": "fileBodyLoad"
+      },
+      {
+        "id": 46,
+        "name": "GLYPHCACHE",
+        "target": "glyphCacheService"
       }
     ]
   },

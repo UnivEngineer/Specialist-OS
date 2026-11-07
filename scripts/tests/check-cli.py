@@ -52,7 +52,7 @@ if physical==128:text=text.replace('ld b,e\n ld c,0','ld b,e\n ld c,0\n push af\
 asm.write_text(text,encoding='utf-8')
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'driver.bin'),str(asm)],check=True,capture_output=True)
 m=bytearray(65536)
-for p,at in [(R/'bin/DOS.sys',0xC000),(R/'bin/DOSMOD.i80',S['DOS_MODULE_LOAD_ADDR']),(O/'driver.bin',0xA000)]:
+for p,at in [(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.sys',0xF000),(R/'bin/DOS.native.sys',S['DOS_CODE_START']),(O/'driver.bin',0xA000)]:
  b=p.read_bytes();m[at:at+len(b)]=b
 m[S['v_dosModuleReady']]=1;m[S['v_drive']]=0
 m[S['j_diskDriver']:S['j_diskDriver']+3]=b'\xC3'+W(0xA000)
@@ -186,7 +186,7 @@ command('PATH ;')
 data=b'GAME\0';m[0x5000:0x5000+len(data)]=data
 assert run(M['cliResolveExternal'],hl=0x5000)==(2,True)
 command('PATH A:/BIN')
-module=(R/'bin/DOSMOD.i80').read_bytes();start=S['DOS_MODULE_LOAD_ADDR'];m[start:start+len(module)]=module
+module=(R/'bin/DOS.native.sys').read_bytes();start=S['DOS_CODE_START'];m[start:start+len(module)]=module
 assert m[S['v_cliPath']:S['v_cliPath']+6]==b'A:/BIN'
 data=b'GAME.EXE ARG\0';m[0x5000:0x5000+len(data)]=data
 assert run(M['cliResolveExternal'],hl=0x5000)==(0,False)

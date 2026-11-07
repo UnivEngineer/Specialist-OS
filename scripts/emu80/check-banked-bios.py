@@ -25,9 +25,9 @@ def main():
     ts = symbols(base/'TRANSPORT.sym'); bs = symbols(base/'MAINBIOS.sym')
     cs = symbols(base/'CLIENT.sym')
     live = symbols(ROOT/'bin/BIOS.sym')
-    bios = (ROOT/'bin/BIOS.sys').read_bytes()
+    bios = (ROOT/'bin/IO.sys').read_bytes()
     bridge = (base/'MAINBIOS.bin').read_bytes()
-    assert bios[bs['BANK_BIOS_GATE']-0xC000:][:len(bridge)] == bridge, 'Rebuild BIOS and system image first'
+    assert bios[bs['BANK_BIOS_GATE']-live['BIOS_IO_ADDR']:][:len(bridge)] == bridge, 'Rebuild BIOS and system image first'
     h = runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
     g = h['Matrix'].__init__.__globals__; g['OUT'] = out; g['RUNTIME'] = args.runtime.resolve()
     matrix = h['Matrix'](); rows = []
@@ -44,10 +44,14 @@ def main():
         for page in (0, 1, 3):
             select(page); m.write(ts['BANK_LANDING'], runtime)
             m.write(ts['bankPage'], bytes([page])); m.write(ts['bankOwner'], bytes([7+page, page]))
-            top, low = (bs['BANK_BIOS_STACK_TOP'], bs['BANK_BIOS_STACK_LOW']) if page == 0 else (0xF800, 0xF400)
+            top, low = (bs['BANK_BIOS_STACK_TOP'], bs['BANK_BIOS_STACK_LOW']) if page == 0 else (cs['DOS_BANK_STACK_TOP'], cs['DOS_BANK_STACK_BOTTOM'])
             m.write(ts['bankServiceSP'], word(top)); m.write(ts['bankStackFloor'], word(low+64))
             m.write(low-16, b'guard-bios-stack')
-            if page: m.write(cs['mx_call'], (base/'CLIENT.bin').read_bytes())
+            m.write(cs['mx_call'], (base/'CLIENT.bin').read_bytes())
+            m.write(cs['LOCAL_BLOCK_ENTRY'], (base/'LOCALBLOCK.bin').read_bytes())
+            if page == 0:
+                m.write(live['MEM_NATIVE_CALL'], word(live['sysCall']))
+                m.write(live['MEM_LOCAL_A'], word(live['bios_blockIO']))
         select(0)
         assert m.read(bs['BANK_BIOS_GATE'], len(bridge)) == bridge, 'Gateway must be loaded by bootstrap'
         m.write(0xFFC0, window)
@@ -93,7 +97,7 @@ def main():
             assert m.read(bs['bbBusy'], 1) == bytes([busy])
             for p in (0, 1, 3):
                 select(p)
-                low = bs['BANK_BIOS_STACK_LOW'] if p == 0 else 0xF400
+                low = bs['BANK_BIOS_STACK_LOW'] if p == 0 else cs['DOS_BANK_STACK_BOTTOM']
                 assert m.read(low-16, 16) == b'guard-bios-stack'
                 assert m.read(ts['bankDepth'], 1) == b'\0'
             select(page)

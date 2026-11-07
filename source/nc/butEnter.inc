@@ -72,6 +72,12 @@ EnterCmdLine:
             COLOR COLOR_CMDSCREEN
             ld c,01Fh
             call bios_printChar
+            ld hl,8
+            call bios_setCursorPos
+            ld hl,vars.cmdLine
+            call bios_printString
+            ld c,0Ah
+            call bios_printChar
 ncCommandRun:
             ld hl,vars.cmdLine
             ld de,ncOverwritePrompt

@@ -40,7 +40,8 @@ compareSearchByte:  LD    B,(HL)
         INC   HL
         INC   DE
         JP    Z,compareSearchByte
-        INC   B
+        LD    A,B
+        OR    A
         JP    NZ,searchCandidate
         CALL  Beep4
         JP    keyHandler_Esc_Home
@@ -56,7 +57,7 @@ keyHandler_Esc_J:
         LD    HL,(v_currentLine)
         CALL  nextLine
         LD    A,(HL)
-        INC   A
+        OR    A
         RET   Z
         DEC   HL
         LD    (HL),20H    ; 32 ' '
@@ -69,7 +70,7 @@ joinLineByte:  CALL  compareHLDE
         LD    A,(BC)
         CP    0DH           ; 13
         JP    Z,commitAndRedraw
-        CP    0FFH          ; 255
+        OR    A             ; Конец документа — 00h
         JP    Z,commitAndRedraw
         LD    (DE),A
         INC   DE
@@ -186,7 +187,7 @@ keyHandler_Esc_N:
         LD    HL,(v_textBeginLo)
         LD    (HL),0DH    ; 13
         INC   HL
-        LD    (HL),0FFH   ; 255
+        LD    (HL),00h    ; Конец документа
         LD    (v_textEnd),HL
         JP    keyHandler_Esc_Home
 

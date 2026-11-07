@@ -12,7 +12,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--ticks', type=Path, default=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
     p.add_argument('--baseline', type=Path, default=ROOT/'docs/bench/memcpy-002/before/DOS.sys')
-    p.add_argument('--image', type=Path, default=ROOT/'bin/DOS.sys')
+    p.add_argument('--image', type=Path, default=ROOT/'bin/BIOS.sys')
     p.add_argument('--out', type=Path, default=ROOT/'docs/bench/memcpy-002/cpu')
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)

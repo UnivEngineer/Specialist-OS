@@ -35,7 +35,7 @@ lineWordRightLimit:   DB    "K"
 lineBufferLast:   DB    " "
 lineBufferEnd:   DB    "KSOFT ",27H,"92",2EH,00H
 v_topLine:   DW    0000H ; первая строка видимой страницы
-v_textEnd:   DW    0000H ; адрес маркера 0FFh
+v_textEnd:   DW    0000H ; адрес маркера 00h
 v_currentLine:   DW    0000H ; начало строки курсора в документе
 v_lineDirty:   DB    00H ; строка изменяется в буфере кода заставки
 v_insertMode:   DB    00H ; 0 = замена, 0FFh = вставка
@@ -68,7 +68,7 @@ beginSession:   ; Читаем указатель стека в hl
 
 ; Вход: границы текста в v_textBeginLo/v_textLimitLo. Выход: цикл редактора.
 ; Разрушает AF, BC, DE, HL, флаги; последний доступный байт резервируется под конец.
-; Нулевой байт превращается в маркер 0FFh, остальные данные сохраняются.
+; Нулевой байт завершает документ, остальные данные сохраняются.
 scanDocument:   LD    A,10H         ; 16
         LD    (editor_vars.last),A
         XOR   A
@@ -94,22 +94,18 @@ scanDocumentByte:
         POP   DE
         JP    Z,scanDocumentLimit
         LD    A,(HL)
-        OR    A
-        JP    NZ,testDocumentEnd
-        DEC   A
-        LD    (HL),A
-testDocumentEnd:   INC   A
+testDocumentEnd:   OR    A
         JP    Z,ensureNonemptyDocument
         INC   HL
         JP    scanDocumentByte
 scanDocumentLimit:
-        LD    (HL),0FFh
+        LD    (HL),00h
         JP    ensureNonemptyDocument
 ensureNonemptyDocument:   CALL  compareHLDE
         JP    NZ,rememberDocumentEnd
         LD    (HL),0DH    ; 13
         INC   HL
-        LD    (HL),0FFH   ; 255
+        LD    (HL),00h    ; Конец документа
 rememberDocumentEnd:   LD    (v_textEnd),HL
 clearAndRedrawDocument:  LD    C,1FH         ; 31
         CALL  bios_printChar

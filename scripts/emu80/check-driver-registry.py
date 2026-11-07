@@ -76,7 +76,7 @@ def main():
             m.write(0x8E00,b'\xcd\x63\xc8\xc3\x10\x8e')
             m.stop_at(0x8E10)
             m.call('bp_set',addr=ks['kernelDispatch'],type='exec')
-            m.call('bp_set',addr=bios['sysCallRegs'],type='exec')
+            m.call('bp_set',addr=h['symbols'](ROOT/'bin/banked/CLIENT.sym')['bankMxCallRegs'],type='exec')
             m.call('regs_set',pc=0x8E00,sp=0x8FDF,bc=0x0200,de=1,hl=0x2200)
             state = m.until(0x8E10,30)
             assert not state['flags']['C']
@@ -117,11 +117,12 @@ def main():
             rows.append(dict(case='initializer-reusable-arena-owned-metadata',driver=name))
 
         # Маркер страницы исполнения и передаваемого DE с аргументами.
-        body = b'\x3a'+word(ts['bankPage'])+b'\x32\x00\x37\xeb\x22\x01\x37\xaf\xc9'
+        marker=ks['DOS_BANK_CMD_ADDR']+256
+        body = b'\x3a'+word(ts['bankPage'])+b'\x32'+word(marker)+b'\xeb\x22'+word(marker+1)+b'\xaf\xc9'
         save('INIT.COM',exe['encode'](exe['Image'](body,0x9000,0x9000,1),'com'))
         m.write(0x3700,b'main marker')
         exec_file('B:\\INIT.COM hello')
-        result = dos_read(0x3700,3)
+        result = dos_read(marker,3)
         assert result[0] == 1 and ks['DOS_BANK_CMD_ADDR'] <= int.from_bytes(result[1:],'little') < ks['DOS_BANK_CMD_ADDR']+128
         assert m.read(0x3700,11) == b'main marker'
         rows.append(dict(case='driver-exec-page-and-local-arguments'))

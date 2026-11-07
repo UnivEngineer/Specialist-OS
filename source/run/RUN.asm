@@ -1,9 +1,21 @@
 ; RUN.COM v2: общий запуск COM/EXE/RKS в MX/STD/MON/RAMFOS.
 ; DE=аргументы, CF=ошибка до передачи. Регистры/флаги разрушаются.
-; Нижнее тело читается по месту; верхнее временно с 0000h.
-; Вход 0000h копирует верхний этап в F000h; MX/STD: 8C00h, MON/RF: AB00h.
+; Тело читается прямо по месту; подготовка и меню не остаются резидентными.
+; Разбор/меню в main; финальный загрузчик 8DB0h, переходник 8C00h или FONT_ADDR.
+; Защищённая область RUN в main: 8C00h–8DFFh, доступна и в STD.
+; Она переживает загрузку приложения с 0000h и не входит в его memtop.
+;   8C00–8CFF: переходник MX/STD (226 байт) либо продолжение Monitor-2.
+;   8D00–8D7F: аргументы приложения, 128 байт.
+;   8D80–8DAA: запрос загрузки тела, ожидаемая сумма и исходный диск, 43 байта.
+;   8DAB–8DAF: резерв параметров, 5 байт.
+;   8DB0–8DEB: финальное чтение/проверка тела, 60 байт.
+;   8DEC–8DFF: резерв продолжения, 20 байт.
+; Подмена MON/RF использует FONT_ADDR; верхняя программа RF — экран AB00h.
+; До запуска приложения 8C00h также служит временным ID-кодом FLASHSYS.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/ramfos.inc"
+RUN_BODY_REQUEST = RAMFOS_CONTEXT
+RUN_LOAD_STAGE = RAMFOS_CONTEXT+48
     MACRO GET_DE address
         push hl
         ld hl,(address)
@@ -16,16 +28,9 @@
         ex de,hl
     ENDM
     ORG 0000h
-    ; Загружаемая программа: верхний этап устанавливается до разбора команды.
-    ; DE с аргументами сохраняется; нижнее тело позднее можно перезаписать.
-    push de
-    ld hl,upperSource
-    ld de,upperSource + upperEnd - ready
-    ld bc,SYSTEM_PROGRAM_ADDR
-    call bios_memcpy_bc_hl
-    pop de
 start:
     ld hl,0
+    ld (cacheToken),hl
     add hl,sp
     ld (callerSP),hl
     ld a,(bios_vars.koi7)
@@ -206,6 +211,17 @@ nativeOpen:
     ld h,b
     ld l,c
     ld (appSize),hl
+    ; Заголовок контейнера принадлежит RUN; общая загрузка тела его не разбирает.
+    ld hl,(descriptor+FILE_DESCRIPTOR.firstCluster)
+    ld (rksCursor),hl
+    ld hl,0
+    ld (rksCursor+2),hl
+    ld hl,rksHeader
+    ld bc,16
+    call rksRead
+    jp c,badImage
+    ld hl,(rksHeader+12)
+    ld (expectedChecksum),hl
     ld a,(mode)
     inc a
     jp nz,ready
@@ -303,9 +319,8 @@ customMode:
     ld a,2
     jp setDefault
     jp ready
-upperSource:
-    DISP SYSTEM_PROGRAM_ADDR
 ready:
+upperSource = ready ; Метка прежнего CPU-стенда; верхнего размещения больше нет.
     ld a,(mode)
     or a
     call nz,bios_releaseDosModule
@@ -357,49 +372,58 @@ rangeEnd:
     jp c,rangeOK
     jp nz,badImage
 rangeOK:
-    ; Нижняя программа читается сразу по месту. Верхняя может затереть
-    ; RUN или DOS, поэтому только её тело временно занимает нижнее ОЗУ.
-    GET_DE appLoad
+    ld a,(mode)
+    or a
+    jp nz,cacheRangeReady
+    ld hl,(appLoad)
+    ld a,h
+    cp SYSTEM_PROGRAM_ADDR/256
+    jp c,cacheRangeReady
+    ld a,1
+    MXCALL MX_BIOS_GLYPHCACHE
+    jp c,badImage
+    ex de,hl
+    ld (cacheToken),hl
+cacheRangeReady:
+    ; Сохранить описание приложения до поиска сменного ядра.
+    ld e,2
+    call bios_fileGetSetDrive
+    ld (appDrive),a
+    ld hl,descriptor
+    ld de,bodyRequest
+    ld bc,FILE_DESCR_SIZE
+    call copyBytes
+    ld hl,(appLoad)
+    ld (bodyRequest+FILE_BODY_IO.buffer),hl
+    ld a,16
+    ld (bodyRequest+FILE_BODY_IO.header),a
     xor a
+    ld (bodyRequest+FILE_BODY_IO.tail),a
     ld (staged),a
-    ld a,d
-    cp 0C0h
-    jp c,loadBody
+    ; Верхняя программа RF может затереть ещё выполняемый BIOS.
+    ; Проверенное тело сначала читается в 0000h, затем переносится без BIOS.
+    ld a,(mode)
+    cp 3
+    jp nz,bodyDestinationReady
+    ld a,(appLoad+1)
+    cp 0D3h
+    jp c,bodyDestinationReady
     ld a,1
     ld (staged),a
-    ld de,0
-loadBody:
+    ld hl,0
+    ld (bodyRequest+FILE_BODY_IO.buffer),hl
+bodyDestinationReady:
     ld a,(descriptor+FILE_DESCRIPTOR.ext)
     and 0DFh
     cp 'R'
-    jp z,loadRksBody
-    call bios_fileLoad
-    jp c,badImage
-    jp bodyVerified
-loadRksBody:
-    ex de,hl
-    ld (rksDestination),hl
-    push hl
-    ld hl,(appSize)
-    ld b,h
-    ld c,l
-    pop hl
-    call rksRead
-    jp c,badImage
-    dec hl
-    ex de,hl
-    ld hl,(rksDestination)
-    call bios_calcCS
-    push bc
-    ld hl,rksHeader
-    ld bc,2
-    call rksRead
-    pop bc
-    jp c,badImage
-    ld hl,rksHeader
-    call rksChecksum
-    jp c,badImage
-bodyVerified:
+    jp nz,bodyPrepared
+    ld a,4
+    ld (bodyRequest+FILE_BODY_IO.header),a
+    ld a,2
+    ld (bodyRequest+FILE_BODY_IO.tail),a
+    ld hl,RUN_BODY_REQUEST+FILE_BODY_IO
+    ld (bodyRequest+FILE_BODY_IO.trailer),hl
+bodyPrepared:
     ld a,(mode)
     cp 2
     jp c,install
@@ -471,9 +495,11 @@ monitorOld:
     PUT_DE monInit
 install:
     ; Исходный том восстанавливается до последнего копирования тела/ядра.
-    ld a,(callerDrive)
+    ld a,(appDrive)
     ld e,1
     call bios_fileGetSetDrive
+    ld a,(callerDrive)
+    ld (bodyCallerDrive),a
     ; Кодировка независима от MX/STD; сменные ядра задают её сами.
     ld a,(launchKoi)
     ld (bios_vars.koi7),a
@@ -490,7 +516,13 @@ bridgeLowImage:
     ld a,(mode)
     cp 2
     jp c,prepareBridge
+    ld hl,FONT_ADDR
+    ld a,(staged)
+    or a
+    jp z,coreBridgeReady
+    ; Верхнее тело RF может перекрывать и сам шрифт: нужен экранный мост.
     ld hl,RAMFOS_VIDEO_BRIDGE
+coreBridgeReady:
     ld (bridgeBase),hl
     ld hl,RAMFOS_VIDEO_SP
     ld (bridgeTemporarySP+1-bridge+bridgeImage),hl
@@ -510,6 +542,9 @@ bridgeNoBodyCopy:
     ld (monAfterInitEntry+1),hl
     ld hl,(callerSP)
     ld (bridgeCallerSP+1-bridge+bridgeImage),hl
+    ld hl,(cacheToken)
+    ld (bridgeCacheLimit+1-bridge+bridgeImage),hl
+    ld hl,(callerSP)
     ld (bridgeGameSP+1-bridge+bridgeImage),hl
     ld hl,(monSP)
     ld (monAfterInitSP+1),hl
@@ -569,11 +604,22 @@ copyBridge:
     GET_DE bridgeBase
     ld bc,bridgeEnd-bridge
     call copyBytes
+    ; Параметры и короткое продолжение переживают загрузку тела с 0000h.
+    ld hl,bodyRequest
+    ld de,RUN_BODY_REQUEST
+    ld bc,bodyRequestEnd-bodyRequest
+    call copyBytes
     ld hl,(bridgeBase)
-    jp (hl)
+    ld (loadStageBridge+1),hl
+    ld hl,loadStage
+    ld de,RUN_LOAD_STAGE
+    ld bc,loadStageEnd-loadStage
+    call copyBytes
+runBodyReady:
+    jp RUN_LOAD_STAGE
 
 ; Формат RKS целиком принадлежит RUN. HL=буфер, BC=точная длина.
-; Курсор находится в собственной резидентной части RUN.
+; Курсор используется в нижнем RUN только до окончательной загрузки тела.
 rksRead:
     ld de,rksCursor
     ld a,2
@@ -690,6 +736,15 @@ notFound:
 badImage:
     ld hl,txtBad
 error:
+    push hl
+    ld hl,(cacheToken)
+    ld a,h
+    or l
+    jp z,errorCacheReady
+    ld a,1
+    MXCALL MX_BIOS_GLYPHCACHE
+errorCacheReady:
+    pop hl
     ld a,COLOR_BIOS
     ld (IO_COLOR),a
     call bios_printString
@@ -797,6 +852,15 @@ bridgeReloc15:
 bridgeReturnedMX:
 bridgeCallerSP:
     ld sp,0
+bridgeCacheLimit:
+    ld hl,0
+    ld a,h
+    or l
+bridgeReloc19:
+    jp z,bridgeCacheDone
+    ld a,1
+    MXCALL MX_BIOS_GLYPHCACHE
+bridgeCacheDone:
 bridgeRestoreKoi:
     ld a,0
     ld (bios_vars.koi7),a
@@ -866,6 +930,7 @@ bridgeRelocations:
     DB bridgeReloc16+1-bridge
     DB bridgeReloc17+1-bridge
     DB bridgeReloc18+1-bridge
+    DB bridgeReloc19+1-bridge
 bridgeRelocationsEnd:
 
 keyMX: DB "MX"
@@ -885,8 +950,7 @@ appLoad: DW 0
 appEntry: DW 0
 appSize: DW 0
 rksCursor: FILE_STREAM_CURSOR
-rksHeader: BLOCK 4,0
-rksDestination: DW 0
+rksHeader: BLOCK 16,0
 bridgeBase: DW 0
 bridgeDelta: DW 0
 argAddress: DW 0
@@ -895,16 +959,54 @@ callerDrive: DB 0
 callerKoi: DB 0
 launchKoi: DB 0
 fileSize: DW 0
+appDrive: DB 0
 monSP: DW 07FFFh
 monInit: DW 0C444h
 descriptor: BLOCK FILE_DESCR_SIZE,0
 txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
 txtNotFound: DB 0Ah,"File not found",0
 txtBad: DB 0Ah,"Bad image or address range",0
-upperEnd:
-    ASSERT_DONT_FIT SYSTEM_FLASH_ADDR
-    ASSERT $ <= SYSTEM_PROGRAM_END
-    ENT
+upperEnd: ; Граница прежнего CPU-стенда, все эти байты теперь в нижнем RUN.
+bodyRequest: FILE_BODY_IO
+expectedChecksum: DW 0
+bodyCallerDrive: DB 0
+bodyRequestEnd:
+    ASSERT bodyRequestEnd-bodyRequest <= RUN_LOAD_STAGE-RUN_BODY_REQUEST
+
+; Последний этап только читает тело, проверяет сумму и входит в переходник.
+; Ошибка после затирания RUN требует bootstrap: он восстановит BIOS/шрифт.
+; Адреса внутри блока отсутствуют, кроме патча последнего JP.
+loadStage:
+    ld hl,RUN_BODY_REQUEST
+    MXCALL MX_BIOS_FILEBODY
+    jp c,RUN_LOAD_STAGE+loadStageError-loadStage
+    ld a,(RUN_BODY_REQUEST+FILE_BODY_IO+2)
+    ld e,1
+    call bios_fileGetSetDrive
+    jp c,RUN_LOAD_STAGE+loadStageError-loadStage
+    ld hl,(RUN_BODY_REQUEST+FILE_BODY_IO.buffer)
+    push hl
+    GET_DE RUN_BODY_REQUEST+FILE_BODY_IO.actual
+    add hl,de
+    dec hl
+    ex de,hl
+    pop hl
+    call bios_calcCS
+    ld hl,(RUN_BODY_REQUEST+FILE_BODY_IO)
+    ld d,b
+    ld e,c
+    call bios_cmp_hl_de
+    jp nz,RUN_LOAD_STAGE+loadStageError-loadStage
+loadStageBridge:
+    jp 0
+loadStageError:
+    xor a
+    ld (IO_PAGE_ROM),a
+    jp 0
+loadStageEnd:
+    ASSERT RUN_LOAD_STAGE+loadStageEnd-loadStage <= RAMFOS_CONTEXT+128
+    ASSERT $ < RAMFOS_BRIDGE
+
 txtTitle: DB 0Ah,"MXOS2 executable launcher v2.0",0Ah,0
 txtLoad: DB ": Load address ",0
 txtEntry: DB ", Run address ",0
@@ -917,4 +1019,5 @@ txtModes: DB 0Ah,"Choose the runtime mode:",0Ah
 coreInput: BLOCK MAX_PATH,0
 appName: BLOCK MAX_PATH,0
 txtCustom: DB 0Ah,"Monitor file: ",0
+cacheToken: DW 0
     END

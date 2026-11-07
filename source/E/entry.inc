@@ -21,7 +21,7 @@ keyInput:
 keyHandler_F4:
         CALL  inputFileName
         CALL  openFile
-        JP    restartAfterLoad ; ОШИБКА: адрес лежит в перезаписываемом буфере строки
+        JP    scanDocument ; Стартовый код уже может быть буфером редактируемой строки.
 
 keyHandler_F5:
         CALL  inputFileName
@@ -31,7 +31,7 @@ keyHandler_F5:
 keyHandler_F6:
         CALL  inputFileName
         CALL  insertFile
-        JP    restartAfterLoad ; ОШИБКА: адрес лежит в перезаписываемом буфере строки
+        JP    scanDocument ; Повторный вход не исполняет перезаписанный стартовый код.
 
 ;----------------------------------------------------------------------
 
@@ -87,6 +87,9 @@ editorLimitReady:
         CALL  bios_cmp_hl_de
         POP   DE
         JP    C,commandLineFileTooLarge
+        ; Новый документ начинается пустым, даже если в памяти осталась NC.
+        LD    HL,(v_textBeginLo)
+        LD    (HL),00h
         XOR   A
         LD    (bios_vars.koi7),A      ; Файлы MXOS хранятся в KOI-8.
         EX    DE,HL

@@ -72,8 +72,8 @@ def main():
     report['move_cases']=len(cases)+2
     print('memmove:',report['move_cases'],'cases OK',flush=True)
     tmp=ROOT/'.codex-tmp/chkdsk';tmp.mkdir(parents=True,exist_ok=True)
-    old=subprocess.run(['git','show','5e83e32:source/dos/memcpy_bc_hl.inc'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
-    cmp=subprocess.run(['git','show','5e83e32:source/dos/cmp_hl_de.inc'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
+    old=subprocess.run(['git','show','5e83e32:source/common/memcpy_bc_hl.inc'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
+    cmp=subprocess.run(['git','show','5e83e32:source/common/cmp_hl_de.inc'],cwd=ROOT,capture_output=True,text=True,check=True).stdout
     (tmp/'old.asm').write_text('    ORG 07000h\n'+old+cmp)
     subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(tmp/'old.bin'),str(tmp/'old.asm')],check=True,capture_output=True)
     m.write(0x7000,(tmp/'old.bin').read_bytes())

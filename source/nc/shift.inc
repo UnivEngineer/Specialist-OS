@@ -61,8 +61,25 @@ ncTapeStub:
     CENTER_LINE 20, 5Eh
     ld hl,ncTapeStubText
     call bios_printString
-    call ncGetch
+    call ncModalGetch
     jp mainReload
+; Модальное окно без поля ввода: нулевая высота отключает и начальную
+; отрисовку курсора в getch2. Возвращает AF клавиши, сохраняет BC и cursorCfg.
+ncModalGetch:
+    push bc
+    ld a,(bios_vars.cursorCfg)
+    push af
+    xor a
+    ld (bios_vars.cursorCfg),a
+    call bios_getch
+    push af
+    pop bc
+    pop af
+    ld (bios_vars.cursorCfg),a
+    push bc
+    pop af
+    pop bc
+    ret
 ncTapeStubText: DB 'Tape not implemented',0
 ncShiftState: DB 2
 ncInputColor: DB COLOR_CMDLINE
