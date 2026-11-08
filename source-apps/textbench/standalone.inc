@@ -39,6 +39,8 @@ bench_finish:
     call puts
 waitKey:
     call bios_getch
+    cp 13
+    jp nz,waitKey
     ld a,(savedKoi)
     ld (bios_vars.koi7),a
     ld a,(savedInverse)
@@ -49,11 +51,31 @@ waitKey:
     ld (bios_vars.charGen),hl
     ret
 puts:
+    IFDEF FONT_CORPUS_TEST
+    push af
+    ld a,(reportMode)
+    or a
+    jp z,reportPutsScreen
+    pop af
+    jp reportPuts
+reportPutsScreen:
+    pop af
+    ENDIF
     jp bios_printString
 bench_clear:
     ld c,01Fh
     jp bios_printChar
 timing_printChar:
+    IFDEF FONT_CORPUS_TEST
+    push af
+    ld a,(reportMode)
+    or a
+    jp z,reportCharScreen
+    pop af
+    jp reportPutChar
+reportCharScreen:
+    pop af
+    ENDIF
     ld c,a
     jp bios_printChar
 timer_read = bios_timerRead
@@ -80,4 +102,4 @@ v_setup: DD 0
 v_last: DW 0
 noTimer: DB 'PIT timer unavailable',13,10,0
 noMemory: DB 'Need main RAM through 84FFh',13,10,0
-keyText: DB 13,10,'Press any key to return',0
+keyText: DB 13,10,'Press Enter to return',0

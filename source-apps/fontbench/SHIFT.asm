@@ -112,7 +112,11 @@ phase4:     ld a, h
             ld bc, 0F03Fh
             jp twoBytes
 phase2:     ld a, h
+            IFDEF STANDALONE_SERIAL
+            add a, 28h
+            ELSE
             add a, 38h
+            ENDIF
             ld h, a
             ld c, 0C0h
             jp oneByte
@@ -163,6 +167,9 @@ twoBytes:
             ENDIF
             ENDIF
 glyphDone:
+            IFDEF STANDALONE_SERIAL
+rendererReturn:
+            ENDIF
             IF BATCH
 ; На символ нет CALL рендера и сохранения общего набора регистров.
 ; Указатель лежит в операнде LDA; буфер целиком внутри страницы FFxxh.

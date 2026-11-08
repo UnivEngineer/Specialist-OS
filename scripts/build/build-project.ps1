@@ -18,8 +18,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Copy benchmark generation failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Font benchmark generation failed.' }
 Push-Location (Join-Path $repositoryRoot 'source-apps/fontbench')
 try {
-    & (Join-Path $repositoryRoot 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow -DMODE=1 -DBATCH=0 -DSHIFT_ORIGIN=0x2000 --raw=../../bin/FONTBEN.renderer.bin SHIFT.asm
+    & (Join-Path $repositoryRoot 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow -DMODE=1 -DBATCH=0 -DSTANDALONE_SERIAL=1 -DSHIFT_ORIGIN=0x2000 --raw=../../bin/FONTBEN.renderer.bin --sym=../../bin/FONTBEN.renderer.sym SHIFT.asm
     if ($LASTEXITCODE -ne 0) { throw 'Font benchmark renderer assembly failed.' }
+    & python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py') --entries
+    if ($LASTEXITCODE -ne 0) { throw 'Font benchmark renderer entries failed.' }
 } finally { Pop-Location }
 Push-Location (Join-Path $repositoryRoot 'source-apps/textbench')
 try {
@@ -72,6 +74,10 @@ foreach ($component in $components) {
     Push-Location (Join-Path $repositoryRoot $component.Directory)
     try {
         if ($component.ContainsKey("Output")) {
+            if ($component.Output -eq 'FONTCOM') {
+                & python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py') --entries
+                if ($LASTEXITCODE -ne 0) { throw 'Font benchmark ABI entries failed.' }
+            }
             & $buildScript $component.Source $component.Extension $component.Address $component.Output
         }
         else {

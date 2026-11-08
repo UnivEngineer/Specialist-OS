@@ -1,7 +1,13 @@
 ; Испытательный обход: прямой аппаратный переход, без нового ABI ОС.
-; Сохраняется весь используемый резерв C000h-C1FFh DOS, включая локальный стек.
-; IRQ, файловые вызовы и вложенный банковый транспорт запрещены до возврата.
+; Сохраняется весь используемый резерв DOS, включая локальный стек и текст.
+; IRQ и файловые вызовы запрещены до возврата. Атомарный memcpy_far в main
+; допустим: он сохраняет и восстанавливает все 32 байта тестового окна.
     INCLUDE "../../bin/banked/transport-imports.inc"
+    IFDEF FONT_CORPUS_TEST
+BANK_TEST_BYTES = 00800h
+    ELSE
+BANK_TEST_BYTES = 00200h
+    ENDIF
 ; Входа нет; AF/BC/DE/HL разрушены. Окно/резерв DOS восстановлены до RET.
 bank_run:
     ld hl,backupRequest
@@ -10,18 +16,67 @@ bank_run:
     ld hl,installRequest
     call bankCopyFar
     ret c
+    IFDEF FONT_CORPUS_TEST
+    ld a,(matrixFlags)
+    and 32
+    jp z,bankBulkReady
+    ; Проверка переноса не должна проходить за счёт уже совпадающего буфера.
+    ld hl,bankSerialBulk
+    ld bc,FONT_CORPUS_SIZE
+bankBulkPoison:
+    ld (hl),0
+    inc hl
+    dec bc
+    ld a,b
+    or c
+    jp nz,bankBulkPoison
+    call reset_timing
+    ld hl,bankSerialRequest
+    call bankCopyFar
+    ret c
+    call timer_sample
+bankBulkReady:
+    ENDIF
     ld hl,0FFC0h
     ld de,savedWindow
     ld bc,32
     call bench_copy
     ld hl,windowImage
+    IFDEF FONT_CORPUS_TEST
+    ld a,(matrixFlags)
+    and 80
+    jp z,bankWindowChosen
+    ld hl,window20Image
+bankWindowChosen:
+    ENDIF
     ld de,0FFC0h
     ld bc,32
     call bench_copy
     ld hl,0
     add hl,sp
     ld (mainSP),hl
+    IFDEF FONT_CORPUS_TEST
+    ld a,(matrixFlags)
+    and 32
+    jp z,bankResetTiming
+    ; Копирование уже учтено. Установка тестового окна вне всех замеров.
+    call timer_read
+    ld (v_last),hl
+    jp bankTimingReady
+bankResetTiming:
+    ENDIF
     call reset_timing
+    IFDEF FONT_CORPUS_TEST
+bankTimingReady:
+    ld a,(matrixFlags)
+    and 80
+    jp z,bankEnterNormal
+    ; В банковом образе по C7FEh лежит адрес начального входа C000h.
+    ld sp,0C7FEh
+    xor a
+    jp 0FFC6h
+bankEnterNormal:
+    ENDIF
     xor a
     jp 0FFC0h
 bankReturned:
@@ -76,6 +131,12 @@ bankService:
     jp z,bankCharacter
     dec a
     jp z,bankCursor
+    IFDEF FONT_CORPUS_TEST
+    cp 2
+    jp z,bankQuad
+    cp 3
+    jp z,bankSerial
+    ENDIF
     call timer_sample
     jp bankServiceDone
 bankCursor:
@@ -84,6 +145,60 @@ bankCursor:
 bankCharacter:
 bankOutput:
     call bios_printChar
+    IFDEF FONT_CORPUS_TEST
+    jp bankServiceDone
+; Четыре кода передаются регистрами: источник остается в странице DOS.
+bankQuad:
+    ld a,b
+    ld (bankQuadChars),a
+    ld a,c
+    ld (bankQuadChars+1),a
+    ld a,d
+    ld (bankQuadChars+2),a
+    ld a,e
+    ld (bankQuadChars+3),a
+    ld hl,bankQuadChars
+    ld c,4
+bankQuadOutput:
+    call quadRender
+    jp nc,bankServiceDone
+    ld hl,failText
+    ld (bitmapResult),hl
+    jp bankServiceDone
+; Чтение 48 байт через восьмибайтный переходник в общем окне.
+; Стековые обращения выполняются только после восстановления main.
+bankSerial:
+    ld a,(matrixFlags)
+    and 32
+    jp z,bankSerialBytes
+    ld de,-0C200h
+    add hl,de
+    ld de,bankSerialBulk
+    add hl,de
+    jp bankSerialBufferReady
+bankSerialBytes:
+    ex de,hl
+    ld hl,bankSerialChars
+    ld b,48
+bankSerialCopy:
+    ; Значение записываемого байта выбирает банк: всегда страница DOS 0.
+    xor a
+    call 0FFD8h
+    ld (hl),a
+    inc de
+    inc hl
+    dec b
+    jp nz,bankSerialCopy
+    ld hl,bankSerialChars
+bankSerialBufferReady:
+    ld c,48
+bankSerialOutput:
+    call serialBIOS
+    jp nc,bankServiceDone
+    ld hl,failText
+    ld (bitmapResult),hl
+    jp bankServiceDone
+    ENDIF
 bankServiceDone:
     pop hl
     pop de
@@ -106,20 +221,32 @@ windowImage:
     ld (IO_PAGE_RAMD),a
     pop af
     ret
+    IFDEF FONT_CORPUS_TEST
+    ld (IO_PAGE_RAMD),a
+    ld a,(de)
+    ld (IO_PAGE_RAM),a
+    ret
+    ENDIF
     DS 32-($-windowImage),0
 ; memcpy_far: FAR-код 0=main, 1=страница DOS.
 backupRequest: DB 1
     DW 0C000h
     DB 0
-    DW savedDos,512
+    DW savedDos,BANK_TEST_BYTES
 installRequest: DB 0
     DW bankImage
     DB 1
-    DW 0C000h,512
+    DW 0C000h,BANK_TEST_BYTES
 restoreRequest: DB 0
     DW savedDos
     DB 1
-    DW 0C000h,512
+    DW 0C000h,BANK_TEST_BYTES
+    IFDEF FONT_CORPUS_TEST
+bankSerialRequest: DB 1
+    DW 0C200h
+    DB 0
+    DW bankSerialBulk,FONT_CORPUS_SIZE
+    ENDIF
 bench_copy:
     ld a,(hl)
     ld (de),a
@@ -136,4 +263,10 @@ bankHL: DW 0
 bankTextMode: DB 0
 bankPortions: DB 0
 savedWindow: DS 32,0
-savedDos: DS 512,0
+    IFNDEF FONT_CORPUS_TEST
+savedDos: DS BANK_TEST_BYTES,0
+    ENDIF
+    IFDEF FONT_CORPUS_TEST
+bankQuadChars: DS 4,0
+bankSerialChars: DS 48,0
+    ENDIF

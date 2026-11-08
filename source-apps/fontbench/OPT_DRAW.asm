@@ -1,10 +1,15 @@
+            IFNDEF FONTBEN_EMBED_OPT
             include "../../source/include/mxos.inc"
+            ENDIF
 ; Замена только пиксельной части штатного printChar в тестовой машине.
 ; Вход как у drawChar: BC = экран, DE = глиф, H = следующий cursorX/2.
 ; Выход: регистры разрушены; их сохраняет внешний штатный printChar.
 ; Font/KOI/управляющие коды/курсор/принтер остаются в штатном коде.
 ; Таблицы сдвигов не используются. Учитывается bios_vars.inverse.
-            org 0ED00h
+            IFNDEF OPT_DRAW_ORIGIN
+OPT_DRAW_ORIGIN = 0ED00h
+            ENDIF
+            org OPT_DRAW_ORIGIN
 optimizedDraw:
             ld a, h
             and 3
@@ -31,7 +36,7 @@ optimizedDraw:
             xor d
             IF shifts
             DUP shifts
-            rlca
+            add a,a
             EDUP
             ENDIF
             xor e
