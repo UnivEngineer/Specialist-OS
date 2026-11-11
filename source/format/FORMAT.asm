@@ -10,20 +10,21 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 SECTOR_SIZE = 256           ; размер сектора в байтах
 
     ORG 0000h
 
-    ld a,(bios_vars.koi7)
+    ld a,(bios_upper.koi7)
     push af
     xor a
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     call formatMain
     pop bc
     push af
     ld a,b
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     pop af
     ret
 formatMain:
@@ -155,6 +156,13 @@ readAnswer:
     pop     af
     ret
 
+
+    MODULE formatMath
+    DEFINE MATH_MUL
+    DEFINE MATH_DIV
+    INCLUDE "../include/math.inc"
+    ENDMODULE
+
     INCLUDE "../include/lineedit.inc"
 
 Confirmed:
@@ -212,7 +220,7 @@ CalcParams:
     ld      de,SECTOR_SIZE-1
     add     hl,de
     ld      de,SECTOR_SIZE
-    call    bios_div_hl_de
+    call    formatMath.div_hl_de
     ld      (v_FatSectors),hl
     push    hl
     ld      h,l
@@ -227,10 +235,10 @@ CalcParams:
     ; Расчитываем размер каталога
     ld      hl,(v_DirFiles)     ; количество дескрипторов в корневом каталоге
     ld      de, FILE_DESCR_SIZE ; размер дескриптора в байтах
-    call    bios_mul_hl_de      ; размер каталога в байтах
+    call    formatMath.mul_hl_de      ; размер каталога в байтах
     ld      (v_DirBytes), hl
     ld      de, SECTOR_SIZE
-    call    bios_div_hl_de      ; hl = количество секторов каталога
+    call    formatMath.div_hl_de      ; hl = количество секторов каталога
     ld      (v_DirSectors), hl
 
     ; Расчитываем номер первого сектора области данных
@@ -391,11 +399,11 @@ FormatFatWrite:
 
     ; Форматирование меняет геометрию и уничтожает прежние каталоги.
     ; Сбрасываем старый кэш через mount и выбираем корень нового тома.
-    MXCALL MX_DOS_MOUNTVOLUME
+    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
     ret c
     ld de,0
     ld a,DIR_OP_SET
-    MXCALL MX_DOS_DIRECTORY
+    MXOS_CALL MXOS_DOS_DIRECTORY
     ret
 
 ;----------------------------------------------------------------------------
@@ -456,8 +464,8 @@ errSize:
     call bios_printString
     scf
     ret
-str_IO: DB 0Ah,"I/O error",0
-str_Size: DB 0Ah,"Too large",0
+str_IO: DB 0Ah,"I/O ERROR",0
+str_Size: DB 0Ah,"TOO LARGE",0
 
 errInvalidDrive:
     ld      hl, str_InvalidDrive
@@ -500,15 +508,15 @@ errParams:
     scf
     ret
 
-str_Usage:          DB 0Ah,"Invalid arguments",0Ah,"FORMAT.COM [B:-H:] [-R] [-Y]",0Ah,0
-str_SystemDrive:    DB "Cannot format system drive A:",0Ah,0
-str_Format:         DB 0Ah,"Format drive "
+str_Usage:          DB 0Ah,"INVALID ARGUMENTS",0Ah,"FORMAT.COM [B:-H:] [-R] [-Y]",0Ah,0
+str_SystemDrive:    DB "CANNOT FORMAT SYSTEM DRIVE A:",0Ah,0
+str_Format:         DB 0Ah,"FORMAT DRIVE "
 str_A_Y_N:          DB "A: [Y/N]? ",0
-str_ChoseDrive:     DB 0Ah,"Choose drive: ",0
-str_InvalidDrive:   DB 0Ah,"Invalid drive letter",0
-str_NoDriver:       DB 0Ah,"No driver",0
+str_ChoseDrive:     DB 0Ah,"CHOOSE DRIVE: ",0
+str_InvalidDrive:   DB 0Ah,"INVALID DRIVE LETTER",0
+str_NoDriver:       DB 0Ah,"NO DRIVER",0
 ;str_SizeUnknown:    DB 0Ah,"Drive size is unkown",0
-str_Aborting:       DB 0Ah,"Aborting",0
+str_Aborting:       DB 0Ah,"ABORTING",0
 str_RAM_DISK:       DB "RAM DISK   "
 
 v_Answer:           DS MAX_PATH,0

@@ -44,7 +44,7 @@
 ; Используемые переменные DOS.SYS:
 ; bios_vars.tapeError  = 8FE1h
 ; bios_vars.tapeAddr   = 8FE3h
-; bios_vars.cursorCfg  = 8FE9h
+; bios_upper.cursorCfg  = 8FE9h
 ; bios_vars.koi8         = 8FEAh
 ; bios_vars.cursorX    = 8FFCh
 
@@ -362,7 +362,7 @@ printChecksumMismatch:  CALL  printSpace
         CALL  bios_printChar
         RET
 drawSearchMarker: PUSH  AF
-        LD    A,(bios_vars.cursorCfg)
+        LD    A,(bios_upper.cursorCfg)
         PUSH  AF
         LD    A,11H         ; 17
         JP    drawSearchMarkerBody
@@ -911,10 +911,10 @@ legacyOutputStringReturn:  POP   HL
         CALL  legacyOutputByte
         POP   AF
         RET
-drawSearchMarkerBody:  LD    (bios_vars.cursorCfg),A
+drawSearchMarkerBody:  LD    (bios_upper.cursorCfg),A
         CALL  bios_drawCursorOld
         POP   AF
-        LD    (bios_vars.cursorCfg),A
+        LD    (bios_upper.cursorCfg),A
         LD    C,18H         ; 24
         POP   AF
         JP    mon2_printChar

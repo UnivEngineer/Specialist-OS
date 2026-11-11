@@ -6,6 +6,5 @@
     INCLUDE "../../bin/banked/transport-imports.inc"
     INCLUDE "../../bin/System.layout.inc"
     INCLUDE "getch.inc"
-    INCLUDE "printString1.inc"
     INCLUDE "cmp_hl_de_2.inc"
     END

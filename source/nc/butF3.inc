@@ -26,10 +26,10 @@ but_F3:     ; Временный выбор противоположной па�
             ; Перерисовываем панель
             call  loadAndPrintA
 
-            jp    saveStateAndReload
+            jp    panelStateChanged
 
 ; ---------------------------------------------------------------------------
 
 loc_D701:   call  loadAndPrintB
-            jp    saveStateAndReload
+            jp    panelStateChanged
 

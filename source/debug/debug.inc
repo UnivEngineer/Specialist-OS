@@ -43,7 +43,7 @@ printChecksumMismatch:  ; печать знака вопроса и выход
 ;----------------------------------------------------------------------------
 
 drawSearchMarker:   PUSH  AF
-        LD    A,(bios_vars.cursorCfg)
+        LD    A,(bios_upper.cursorCfg)
         PUSH  AF
         LD    A,11H
         JP    drawSearchMarkerBody

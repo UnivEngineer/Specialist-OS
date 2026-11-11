@@ -2,6 +2,7 @@
 ; Последние обнаруженные страницы временно используются с полным сохранением
 ; изменяемых данных, хвоста и общего окна. Файловые вызовы внутри теста запрещены.
     INCLUDE "../../source/include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
 PIT_HZ = 2000000
 BACKUP = 03000h
 EXPECTED = 05000h
@@ -19,17 +20,16 @@ entry:
     ld hl,0
     add hl,sp
     ld (callerSP),hl
-    call bios_releaseDosModule
     call bios_getMemTop
     ld de,088FFh
     call bios_cmp_hl_de
     jp c,noMemory
     ld sp,08000h
-    ld a,(bios_vars.koi7)
+    ld a,(bios_upper.koi7)
     ld (callerKoi),a
     xor a
-    ld (bios_vars.koi7),a
-    ld a,(bios_vars.ramPageCount)
+    call bios_setFontEncoding
+    ld a,(bios_upper.ramPageCount)
     or a
     jp z,noRAM
     dec a
@@ -71,7 +71,7 @@ entry:
     ld de,0FF00h
     ld bc,romTailImageEnd-romTailImage
     call localCopy
-    call bios_timerInit
+    call pitTimerInit
     call timer_probe
     jp z,timerFailed
     call reset_timing
@@ -189,7 +189,7 @@ waitKey:
     call puts
 exit:
     ld a,(callerKoi)
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     ld hl,(callerSP)
     ld sp,hl
     ret
@@ -286,9 +286,15 @@ verifyBad:
     INCLUDE "enginetests.inc"
 inputBuffer: DS 11,0
 ; Локальные настройки общей измерительной библиотеки приложений.
-timer_read = bios_timerRead
+    INCLUDE "../../source/include/timing-pit.inc"
+timer_read = pitTimerRead
 timing_print = puts
-timing_div_hl_de = bios_div_hl_de
+
+    MODULE copyMath
+    DEFINE MATH_DIV
+    INCLUDE "../../source/include/math.inc"
+    ENDMODULE
+timing_div_hl_de = copyMath.div_hl_de
 TIMING_NUMBER_WIDTH = 8
 DECIMAL = inputBuffer
 timing_printChar:

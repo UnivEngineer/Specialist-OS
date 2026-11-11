@@ -8,11 +8,11 @@ restorePanelDirectory:
             call readBytePanel
             ld d,a
             ld a,DIR_OP_SET
-            MXCALL MX_DOS_DIRECTORY
+            MXOS_CALL MXOS_DOS_DIRECTORY
             ret
 savePanelDirectory:
             ld a,DIR_OP_GET
-            MXCALL MX_DOS_DIRECTORY
+            MXOS_CALL MXOS_DOS_DIRECTORY
             ret c
             ld a,e
             ld hl,state.panelA_dirLow
@@ -35,10 +35,12 @@ enterDirectory:
             ld (de),a
             ld hl,vars.pathArg
             ld a,CLI_OP_CHDIR
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             jp c,directoryFailure
             call savePanelDirectory
 directoryChanged:
+            ld a,1
+            ld (ncKeepFrames),a
             call directoryResetSelection
             jp mainReloadActive
 directoryChangedAll:
@@ -53,7 +55,7 @@ directoryResetSelection:
             ld hl,vars.cmdLine
             ld (hl),0
             ld (vars.cmdLineEnd),hl
-            call saveState
+
             ret
 directoryFailure:
             ld hl,directoryError
@@ -64,13 +66,88 @@ directoryError: DB ' DIRECTORY ERROR',0
 ; Полное приглашение хранится в path; экран показывает хвост длинного пути.
 ; При длинной команде строка прокручивается, исходные байты не обрезаются.
 updateCommandPath:
-            ld hl,vars.path
-            ld a,DIR_OP_GETCWD
-            MXCALL MX_DOS_DIRECTORY
-            ret nc
-            ld hl,vars.path
-            ld (hl),0
+            call getPanelPath
+            ld de,vars.path
+            jp nc,copyPanelPath
+            push af
+            xor a
+            ld (de),a
+            pop af
             ret
+copyPanelPath:
+            ld a,(hl)
+            ld (de),a
+            inc hl
+            inc de
+            or a
+            jp nz,copyPanelPath
+            ret
+
+; Полный путь принадлежит панели; ключ — диск и кластер каталога.
+; HL=ASCIIZ, CF/A=ошибка DOS. Остальные регистры разрушены.
+getPanelPath:
+            ld hl,vars.pathValidA
+            call readBytePanel
+            or a
+            jp z,panelPathMiss
+            ld hl,state.panelA_drive
+            call readBytePanel
+            ld b,a
+            ld hl,vars.pathDriveA
+            call readBytePanel
+            cp b
+            jp nz,panelPathMiss
+            ld hl,state.panelA_dirLow
+            call readBytePanel
+            ld b,a
+            ld hl,vars.pathLowA
+            call readBytePanel
+            cp b
+            jp nz,panelPathMiss
+            ld hl,state.panelA_dirHigh
+            call readBytePanel
+            ld b,a
+            ld hl,vars.pathHighA
+            call readBytePanel
+            cp b
+            jp nz,panelPathMiss
+            call panelPathBase
+            or a
+            ret
+panelPathMiss:
+            call panelPathBase
+            push hl
+            ld a,DIR_OP_GETCWD
+            MXOS_CALL MXOS_DOS_DIRECTORY
+            pop hl
+            ret c
+            push hl
+            ld hl,state.panelA_drive
+            call readBytePanel
+            ld hl,vars.pathDriveA
+            call writeBytePanel
+            ld hl,state.panelA_dirLow
+            call readBytePanel
+            ld hl,vars.pathLowA
+            call writeBytePanel
+            ld hl,state.panelA_dirHigh
+            call readBytePanel
+            ld hl,vars.pathHighA
+            call writeBytePanel
+            ld a,1
+            ld hl,vars.pathValidA
+            call writeBytePanel
+            pop hl
+            or a
+            ret
+panelPathBase:
+            ld hl,vars.pathA
+            ld a,(state.activePanel)
+            or a
+            ret z
+            ld hl,vars.pathB
+            ret
+
 redrawCommandLine:
             ld hl,(vars.cmdLineEnd)
             ld (hl),0
@@ -103,9 +180,9 @@ commandPathTail:
             ld b,24
 commandPathPrint:
             push bc
-            call bios_printString
+            call bios_printStringReal
             ld c,'>'
-            call bios_printChar
+            call ncPrintChar
             pop bc
             ld hl,(bios_vars.cursorY)
             ld (vars.cmdTextPos),hl
@@ -133,26 +210,23 @@ commandOffsetReady:
             ld d,0
             add hl,de
 commandText:
-            call bios_printString
+            call bios_printStringReal
             ld hl,(bios_vars.cursorY)
             ld (vars.cmdLinePos),hl
             ret
 
  ; Заголовок панели: полный путь либо сокращение по границам компонентов.
 printPanelPath:
-            ld hl,vars.path
-            ld a,DIR_OP_GETCWD
-            MXCALL MX_DOS_DIRECTORY
+            call getPanelPath
             ret c
-            ld hl,vars.path
-            ld b,29
+            ld b,28
             call compactPath
             push hl
             COLOR 0F1h
-            ld hl,00308h
+            ld hl,00408h
             call setCursorPosPanel
             pop hl
-            jp bios_printString
+            jp bios_printStringReal
 
 ; HL — абсолютный путь, B — ширина поля (не менее PATH_RESERVED_LENGTH+12 для FAT 8.3).
 ; Выход: HL — vars.displayPath, исходная строка не изменена.

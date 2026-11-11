@@ -31,10 +31,15 @@ kfStream:
     call kdOverlap
     jp c,kfBad
     ld hl,(kfCursor)
-    ld de,KD_OBJECT
-    ld bc,FILE_STREAM_CURSOR
-    call kdFetch
+    ld a,(kdPage)
+    call mx_get32
     jp c,kfBad
+    ld h,d
+    ld l,e
+    ld (KD_OBJECT),hl
+    ld h,b
+    ld l,c
+    ld (KD_OBJECT+2),hl
     call fatCheckMounted
     jp c,kfError
     ld hl,(KD_OBJECT+2)
@@ -71,10 +76,14 @@ kfStream:
     ld (KD_OBJECT+2),hl
     ld hl,(kfCursor)
     ld (kdRegs+2),hl
+    ld hl,(KD_OBJECT)
     ex de,hl
-    ld hl,KD_OBJECT
-    ld bc,FILE_STREAM_CURSOR
-    call kdStore
+    ld hl,(KD_OBJECT+2)
+    ld b,h
+    ld c,l
+    ld hl,(kfCursor)
+    ld a,(kdPage)
+    call mx_put32
     jp c,kfBad
     jp kdFinish
 kfBad:

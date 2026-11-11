@@ -13,7 +13,7 @@ j_tapeWrite:    jp  t_tapeWrite         ; C80C: Запись байта на м�
                 jp  input               ; C80F: Ввод строки с клавиатуры
                 jp  j_keyScan           ; C812: Получить код нажатой клавиши
                 jp  printHexByte        ; C815: Вывести 16-ричное число (байт)
-j_printString:  jp  printString1        ; C818: Вывести строку на экран
+j_printString:  jp  printString        ; C818: Вывести строку на экран
                 jp  j_keyScan           ; C81B: Получить код нажатой клавиши
                 jp  getCursorPos        ; C81E: Получить координаты курсора в hl (координаты в пикселях)
                 jp  setCursorPos        ; C821: Установить координаты курсора из hl (координаты в пикселях)
@@ -44,7 +44,7 @@ j_printString:  jp  printString1        ; C818: Вывести строку на
                 jp  installDriver       ; C860: Установить драйвер накопителя
 j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранного диска
                 jp  sysLegacy_fileLoad2           ; C866: Загрузить файл по адресу de
-                jp  printChar_real      ; C869: [MXOS2] Вывод символа на экран (только реальные символы)
+                jp  printCharReal       ; C869: [MXOS2] Вывод символа на экран (только реальные символы)
                 jp  printDecWord        ; C86C: [MXOS2] Вывод числа экран в десятичной форме
                 jp  setRAMDDriver       ; C86F: [MXOS2] Установить драйвер доступа к ДОЗУ
                 jp  sysLegacy_getDriveFreeSpace   ; C872: [MXOS2] Получить оставшийся свободный объем диска
@@ -52,11 +52,9 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
                 jp  strcmp              ; C878: [MXOS2] Сравнение строк, чувствительное к регистру
                 jp  stricmp             ; C87B: [MXOS2] Сравнение строк, нечувствительное к регистру
                 jp  sub_hl_de           ; C87E: [MXOS2] Вычитание hl и de: hl = hl - de
-                jp  div_hl_2            ; C881: [MXOS2] Деление hl на 2: hl = hl / 2
-                jp  mul_hl_de           ; C884: [MXOS2] Умножение hl на de: hl = hl * de
-                jp  div_hl_de           ; C887: [MXOS2] Деление hl на de: hl = hl / de, de = hl % de
+                DS 9,0 ; C881..C889: арифметика перенесена в include/math.inc
                 jp  sysLegacy_fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
-                jp  sysLegacy_dosUnsupported      ; C88D: резерв после удаления кластерного переноса
+                DS 3,0 ; C88D..C88F: удалённый вход кластерного переноса
                 jp  sysLegacy_installVolume       ; C890: зарегистрировать драйвер тома
                 jp  sysLegacy_getVolume           ; C893: таблица и контекст драйвера тома
                 jp  sysLegacy_mountVolume         ; C896: повторное монтирование тома
@@ -65,13 +63,10 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
 
                 jp  diskWriteChecked    ; C89F: запись сектора с чтением и сравнением
 
-                jp  pitTimerInit        ; C8A2: настроить измерительный каскад ВИ53
-                jp  pitTimerRead        ; C8A5: защёлкнуть и прочитать счётчик
+                jp fast6.setEncoding ; C8A2: явный выбор KOI7/KOI8
+                DS 3,0 ; C8A5..C8A7 свободны
 
-                jp  uiDraw              ; C8A8: список графических объектов
-                jp  uiInverseRect       ; C8AB: инверсия прямоугольника
-                jp  uiToolbar           ; C8AE: поля функционального тулбара
-                jp  uiCopyRect          ; C8B1: копирование битмапа
+                DS 12,0 ; C8A8..C8B3 свободны после переноса UI в программу
 
                 jp  sysLegacy_fileAssociation     ; C8B4: поиск ассоциации в A:CLI.EXT
 
@@ -89,8 +84,7 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
                 jp sysLegacy_logicalSectorIO      ; C8CF: логический сектор активного тома
                 jp sysLegacy_fileStream           ; C8D2: поток с курсором вызывающей программы
                 jp sysLegacy_fileHandle           ; C8D5: открытый файл в памяти вызывающего
-                jp loadDosModule        ; C8D8: загрузить общие службы в верхнее ОЗУ
-                jp releaseDosModule     ; C8DB: отдать верхнее ОЗУ программе без расширенных служб
+                DS 6,0 ; C8D8..C8DD: DOS резидентна в своём банке
                 jp sysLegacy_directoryService     ; C8DE: текущий каталог, пути и список с каталогами
                 jp sysLegacy_cliService          ; C8E1: общий CLI
                 jp sysLegacy_setShell            ; C8E4: выбор оболочки
@@ -98,3 +92,8 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
                 ASSERT $ == 0C8EAh
                 jp blockIO             ; C8EA: физический запрос DOS -> BIOS
                 ASSERT $ == 0C8EDh
+                jp printStringRawZ     ; C8ED: ASCIIZ без управляющих кодов
+                ASSERT $ == 0C8F0h
+                jp printStringRawLim  ; C8F0: HL=буфер, BC=байты
+                jp bankText.dispatch    ; C8F3: внутренний MEM TEXT
+                ASSERT $ == 0C8F6h

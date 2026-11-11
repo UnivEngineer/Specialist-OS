@@ -20,7 +20,7 @@ def main():
     base[:len(program)] = program
     font = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
     word = lambda x: x.to_bytes(2, 'little')
-    base[s['bios_vars.charGen']:s['bios_vars.charGen'] + 2] = word(0x2800 // 8)
+    base[s['renderFont8']:s['renderFont8'] + 2] = word(0x2800 // 8)
     # Ядро полностью развёрнуто: восемь чтений шрифта и восемь записей экрана.
     kernel = base[s['aligned8Pixels']:s['aligned8Continue']]
     assert kernel == bytes.fromhex('1A 77 1C 2C') * 7 + bytes.fromhex('1A 77')

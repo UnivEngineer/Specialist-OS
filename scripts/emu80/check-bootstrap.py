@@ -31,7 +31,8 @@ try:
      assert m.read(0xA800,17)==b'DOS survives warm'
      page(2);assert m.read(0xE000,17)==b'RAM disk survives'
     page(0)
-  font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+  linear=(ROOT/'assets/system-rom/FONT.FNT').read_bytes()
+  font=bytes(linear[c*8+y] for y in range(8) for c in range(256))
   assert m.read(b['FONT_ADDR'],len(font))==font
   state=nc();ticks['nc']=state['cpu_ticks'];assert m.read(b['v_memTop'],2)==bytes.fromhex('ff8b')
   # Общий код MEM и разные данные установки main/DOS; минимальный профиль данных.
@@ -41,12 +42,13 @@ try:
   for bank,kind in ((0,1),(1,2)):
    page(bank)
    assert m.read(b['mx_call'],len(client))==client
-   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[:b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY']]
+   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:b['MEM_NATIVE_CALL']-b['MEM_IMAGE_LOCAL_START']]
    assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
-  page(2);assert m.read(0xFF00,len(transport)-0x300)==transport[0x300:]
+  data_size=h['symbols'](ROOT/'bin/MEM.sym')['MEM_DATA_SIZE']
+  page(2);assert m.read(0xFF00,data_size)==transport[0x300:0x300+data_size]
   page(0)
 
-  page(1);assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')
+  page(1);assert m.read(k['memoryRamPages'],1)==b'\x04';assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')
   page(2)
   if mode!='cold':assert m.read(0xE000,17)==b'RAM disk survives'
   m.write(0xE000,b'RAM disk survives');page(0)
@@ -75,7 +77,7 @@ try:
    page(1);assert m.read(k['v_shell'],1)==bytes([shell=='CLI'])
    assert m.read(0xA800,17)==b'DOS survives warm'
    assert m.read(t['bankDepth'],1)==b'\1'
-   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[:b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY']]
+   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:b['MEM_NATIVE_CALL']-b['MEM_IMAGE_LOCAL_START']]
    assert int.from_bytes(m.read(t['bankServiceSP'],2),'little') <= b['DOS_BANK_STACK_TOP']
    page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
    row=dict(mode=f'{entry:04X}',std=std,shell=shell,biosReloaded=False,dosReloaded=False,returnMs=(state['cpu_ticks']-start)/2000)
@@ -89,5 +91,16 @@ try:
  page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
  rows.append(dict(mode='reset-corrupt-main',shell='CLI',biosRestored=True,driverRestored=True,dosReloaded=False))
  print('RESET RESTORED BIOS/DRIVER; CLI/DOS/B: PRESERVED',flush=True)
+ # Старое ядро нельзя сохранять при несовместимой версии транспорта.
+ page(1);m.write(b['MEM_RUNTIME_REVISION_ADDR'],b'\0\0')
+ m.write(k['kernelVersion'],b'\0');page(0)
+ m.stop_at(s['dosLoaded']);m.call('emu_reset');m.until(s['dosLoaded'],120)
+ page(1);image=(ROOT/'bin/DOS.sys').read_bytes()
+ assert m.read(k['DOS_BANK_CODE_ADDR'],len(image))==image
+ page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
+ nc();page(1)
+ assert int.from_bytes(m.read(b['MEM_RUNTIME_REVISION_ADDR'],2),'little')==b['MEM_RUNTIME_REVISION']
+ page(0);rows.append(dict(mode='reset-incompatible-MEM',dosReloaded=True,ramDataPreserved=True))
+ print('INCOMPATIBLE MEM RELOADS DOS; RAM DATA PRESERVED',flush=True)
  (a.report/'result.json').write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
 finally:x.stop()

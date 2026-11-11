@@ -47,22 +47,28 @@ def main():
             top, low = (bs['BANK_BIOS_STACK_TOP'], bs['BANK_BIOS_STACK_LOW']) if page == 0 else (cs['DOS_BANK_STACK_TOP'], cs['DOS_BANK_STACK_BOTTOM'])
             m.write(ts['bankServiceSP'], word(top)); m.write(ts['bankStackFloor'], word(low+64))
             m.write(low-16, b'guard-bios-stack')
-            m.write(cs['mx_call'], (base/'CLIENT.bin').read_bytes())
-            m.write(cs['LOCAL_BLOCK_ENTRY'], (base/'LOCALBLOCK.bin').read_bytes())
+            client = (base/'CLIENT.bin').read_bytes()
+            if page == 0:
+                client = client[:cs['bankClientEnd']-cs['mx_call']]
+            m.write(cs['mx_call'], client)
+            m.write(cs['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
             if page == 0:
                 m.write(live['MEM_NATIVE_CALL'], word(live['sysCall']))
                 m.write(live['MEM_LOCAL_A'], word(live['bios_blockIO']))
+                m.write(live['MEM_LOCAL_CHECKED'], word(live['localBlockChecked']))
+                m.write(live['MEM_NEAR_COPY'], word(live['bios_memcpy_bc_hl']))
         select(0)
         assert m.read(bs['BANK_BIOS_GATE'], len(bridge)) == bridge, 'Gateway must be loaded by bootstrap'
         m.write(0xFFC0, window)
         bios_state = m.read(live['bios_vars'], 33)
+        font_state = m.read(live['FONT_ADDR'], live['FONT_BYTES'])
 
         def reset_screen():
             select(0); m.write(0x9000, bytes(0x3000)); m.write(live['bios_vars'], bios_state)
             m.write(live['bios_vars.cursorY'], b'\0\0')
-            m.write(live['bios_vars.escMode'], b'\0')
+            m.write(live['bios_upper.escMode'], b'\0')
             m.write(live['bios_vars.inverse'], b'\0\0')
-            m.write(live['bios_vars.koi7'], b'\0')
+            m.write(live['bios_upper.koi7'], b'\0')
 
         def run(page, operation, packet, data=b'', address=0x3200, inline=False, packet_at=0x3000, key=None, busy=0):
             select(page)
@@ -89,9 +95,10 @@ def main():
             assert m.read(ts['bankPage'], 1) == bytes([page])
             assert m.read(ts['bankOwner'], 2) == bytes([7+page, page])
             assert m.read(ts['bankDepth'], 1) == b'\0'
-            if page: assert m.read(0xFFC0, 12) == window[:12]
+            if page: assert m.read(0xFFC0, 8) == window[:8]
             saved = m.read(packet_at, 8)
             select(0)
+            assert m.read(live['FONT_ADDR'], live['FONT_BYTES']) == font_state, 'BIOS call damaged font'
             screen = m.read(0x9000, 0x3000)
             cursor = m.read(live['bios_vars.cursorY'], 2)
             assert m.read(bs['bbBusy'], 1) == bytes([busy])
@@ -126,9 +133,20 @@ def main():
             reset_screen(); direct, screen = run(0, 0x107, packet, text)
             # Основная память намеренно содержит другую строку по тому же адресу.
             select(0); m.write(0x3200, b'WRONG MAIN POINTER\0')
-            reset_screen(); banked, actual = run(1, 0x107, packet, text, inline=True)
-            assert actual == screen and banked['registers'] == direct['registers'], (len(text), direct, banked)
-            rows.append(dict(case='string', bytes=len(text)-1, directTicks=direct['ticks'], bankTicks=banked['ticks']))
+            for inline in (False, True):
+                reset_screen(); banked, actual = run(1, 0x107, packet, text, inline=inline)
+                assert actual == screen and banked['registers'] == direct['registers'], (len(text), direct, banked)
+                if not inline: assert banked['saved'] == banked['registers'], 'String MX_REGS result'
+                rows.append(dict(case='string', inline=inline, bytes=len(text)-1, directTicks=direct['ticks'], bankTicks=banked['ticks']))
+        # Явный main-указатель: одинаковый адрес в банке содержит другой текст.
+        packet = regs(0x3200, 0x4567, 0x89AB, 0x5503)
+        reset_screen(); direct, screen = run(0, 0x107, packet, b'MAIN buffer string\0')
+        for page in (1, 3):
+            for inline in (False, True):
+                reset_screen(); select(0); m.write(0x3200, b'MAIN buffer string\0')
+                banked, actual = run(page, 0x12F, packet, b'WRONG BANK POINTER\0', inline=inline)
+                assert actual == screen and banked['registers'] == direct['registers'], (page, inline, banked, direct)
+                rows.append(dict(case='string-main', page=page, inline=inline))
         # Конец буфера прямо перед хвостом. Никаких чтений через F800h.
         reset_screen(); result, screen = run(3, 0x107, regs(0xF7FC), b'end\0', 0xF7FC)
         assert bytes.fromhex(result['registers'])[:2] == word(0xF7FF)

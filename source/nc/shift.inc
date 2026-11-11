@@ -60,22 +60,22 @@ ncTapeStub:
     call drawWindow1
     CENTER_LINE 20, 5Eh
     ld hl,ncTapeStubText
-    call bios_printString
+    call bios_printStringReal
     call ncModalGetch
     jp mainReload
 ; Модальное окно без поля ввода: нулевая высота отключает и начальную
 ; отрисовку курсора в getch2. Возвращает AF клавиши, сохраняет BC и cursorCfg.
 ncModalGetch:
     push bc
-    ld a,(bios_vars.cursorCfg)
+    ld a,(bios_upper.cursorCfg)
     push af
     xor a
-    ld (bios_vars.cursorCfg),a
+    ld (bios_upper.cursorCfg),a
     call bios_getch
     push af
     pop bc
     pop af
-    ld (bios_vars.cursorCfg),a
+    ld (bios_upper.cursorCfg),a
     push bc
     pop af
     pop bc

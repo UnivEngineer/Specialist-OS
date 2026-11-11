@@ -5,15 +5,12 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-mainReload: ; Сначала обновляем приглашение активной панели.
+mainReload:
             call mainPrepareReload
-            ; Затем перерисовываем обе панели.
-            ld      a, (state.activePanel)
-            and     a
-            jp      nz, mainReload_0
-            call    loadAndPrintA
-            call    loadAndPrintB
-            jp      mainPanelsReady
+            call fullRedraw
+            call mainResetReload
+            call updateCommandPath
+            jp mainLoop
 
 ; Смена контекста не затрагивает другую файловую панель.
 mainReloadActive:
@@ -39,25 +36,23 @@ mainPrepareReload:
             ld hl,state.panelA_drive
             call readBytePanel
             ld e,1
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             call restorePanelDirectory
             call updateCommandPath
             call redrawCommandLine
             ret
 
-mainReload_0:
-            call    loadAndPrintB
-            call    loadAndPrintA
-            
 mainPanelsReady:
+            call mainResetReload
+            call updateCommandPath
+            jp mainSelectionChanged
+mainResetReload:
             xor a
             ld (ncDirtyMask),a
             ld (ncDamageMask),a
             ld (ncSelectiveRefresh),a
             ld (ncKeepFrames),a
-            ; Заголовки использовали path как временный буфер.
-            call updateCommandPath
-            jp mainSelectionChanged
+            ret
 mainDriveChanged:
             call    updateCommandPath
             call    redrawCommandLine
@@ -162,7 +157,7 @@ mainLoop_e: cp      20h   ; Пробел (20h)
             call    redrawCommandText
             jp      mainLoop_editDone
 mainLoop_appendChar:
-            call    bios_printChar
+            call    ncPrintChar
             jp      mainLoop_savePos
 
 mainLoop_savePos: ; ?
@@ -222,12 +217,13 @@ mainLoop_editDone EQU mainLoop_cursorReady
 ncExitToCli:
             call ncStopObserver
             call saveState
+            call ncFontRenderEnd
             ld hl,state.panelA_drive
             call readBytePanel
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             call restorePanelDirectory
             ld a,1
-            MXCALL MX_DOS_SETSHELL
+            MXOS_CALL MXOS_DOS_SET_SHELL
             COLOR COLOR_CMDSCREEN
             ld c,01Fh
             call bios_printChar

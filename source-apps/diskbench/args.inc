@@ -1,4 +1,4 @@
-; Аргументы DE при входе COM: [A:..H:] [-C=0..2] [-W=0..9] [-S=1..24] [-?].
+; Аргументы: [A:..H:] [-C:MAIN|DOS|BANK|ALL] [-M:RAW|FILE|ALL] [-V=0..2] [-W=0..9] [-S=1..24].
 ; Слова выделяет штатный bios_argNext; исходная строка не изменяется.
 ; parse_arguments: HL=строка, CF=ошибка, AF/BC/DE/HL разрушены.
 ; FFh отмечает отсутствующий диск/режим/проходы, ноль — отсутствующий размер.
@@ -6,12 +6,15 @@ parse_arguments:
     ld a,0FFh
     ld (argDrive),a
     ld (argCheck),a
+    ld (argFrag),a
     ld (argWrites),a
     xor a
     ld (argSize),a
     ld (argHelp),a
+    ld (argBank),a
+    ld (argMode),a
 argument_next:
-    call bios_argNext
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
     jp c,arguments_done
     push hl
     ex de,hl
@@ -30,7 +33,7 @@ argument_word:
     cp 2
     jp nz,argument_bad
     ld a,(hl)
-    call bios_upperCase
+    call bench_upperCase
     sub 'A'
     cp 8
     jp nc,argument_bad
@@ -52,20 +55,121 @@ argument_switch:
     cp 2
     jp nz,argument_value
     ld a,(hl)
+    call bench_upperCase
+    ld c,1
+    cp 'B'
+    jp z,argument_bank
+    inc c
+    cp 'D'
+    jp z,argument_bank
+    inc c
+    cp 'M'
+    jp z,argument_bank
+    inc c
+    cp 'A'
+    jp z,argument_bank
     cp '?'
     jp nz,argument_bad
     ld a,1
     ld (argHelp),a
     or a
     ret
+argument_bank:
+    ld a,(argBank)
+    or a
+    jp nz,argument_bad
+    ld a,c
+    ld (argBank),a
+    or a
+    ret
+; HL=слово, B=точная длина. Имена чувствительны только к ASCII-буквам.
+argument_mode:
+    ld de,modeNames
+    ld a,4
+    ld (context_limit+1),a
+    ld a,1
+    ld (namedMode),a
+    jp named_start
+argument_context:
+    ld de,contextNames
+    ld a,5
+    ld (context_limit+1),a
+    xor a
+    ld (namedMode),a
+named_start:
+    ld c,1
+context_next:
+    push hl
+    push bc
+context_match:
+    ld a,(de)
+    or a
+    jp z,context_end
+    ld c,a
+    ld a,b
+    or a
+    jp z,context_skip
+    ld a,(hl)
+    and 0DFh
+    cp c
+    jp nz,context_skip
+    inc hl
+    inc de
+    dec b
+    jp context_match
+context_end:
+    ld a,b
+    or a
+    jp nz,context_skip
+    pop bc
+    pop hl
+    ld a,(namedMode)
+    or a
+    jp z,argument_bank
+    ld a,(argMode)
+    or a
+    jp nz,argument_bad
+    ld a,c
+    ld (argMode),a
+    or a
+    ret
+context_skip:
+    ld a,(de)
+    inc de
+    or a
+    jp nz,context_skip
+    pop bc
+    pop hl
+    inc c
+    ld a,c
+context_limit:
+    cp 5
+    jp nz,context_next
+    jp argument_bad
+namedMode: DB 0
+modeNames: DB "RAW",0,"FILE",0,"ALL",0
+contextNames: DB "BANK",0,"DOS",0,"MAIN",0,"ALL",0
 argument_value:
     cp 4
     jp c,argument_bad
     ld a,(hl)
-    call bios_upperCase
+    call bench_upperCase
     ld c,a
     inc hl
     ld a,(hl)
+    cp ':'
+    jp nz,argument_equals
+    inc hl
+    dec b
+    dec b
+    dec b
+    ld a,c
+    cp 'C'
+    jp z,argument_context
+    cp 'M'
+    jp z,argument_mode
+    jp argument_bad
+argument_equals:
     cp '='
     jp nz,argument_bad
     inc hl
@@ -80,8 +184,12 @@ argument_value:
     ld a,c
     cp 'C'
     jp z,argument_check
+    cp 'V'
+    jp z,argument_check
     cp 'W'
     jp z,argument_writes
+    cp 'F'
+    jp z,argument_fragment
     cp 'S'
     jp nz,argument_bad
     ld a,(argSize)
@@ -95,6 +203,12 @@ argument_value:
     ld (argSize),a
     or a
     ret
+argument_fragment:
+    ld a,e
+    cp 2
+    jp nc,argument_bad
+    ld hl,argFrag
+    jp argument_store
 argument_check:
     ld a,e
     cp 3
@@ -175,16 +289,22 @@ argument_error:
 argument_help:
     ld hl,txtArgumentsHelp
     jp show_error
-txtArgumentsError: DB "Invalid arguments",00Ah,0
+txtArgumentsError: DB "Bad arguments",00Ah,0
 txtArgumentsHelp:
-    DB "DISKBEN [A:..H:] [-C=0..2] [-W=0..9] [-S=KiB]",00Ah
-    DB "-C: 0=plain, 1=file verify, 2=raw sector verify",00Ah
-    DB "-W: write/read passes; 0=raw read only",00Ah
-    DB "-S: file size in KiB (1-24); -?: help",00Ah
-    DB "Missing values are requested interactively.",00Ah,0
+    DB "DISKBEN [A:..H:] [-C:MAIN|DOS|BANK|ALL]",10
+    DB "-M:RAW|FILE|ALL [ALL]",10
+    DB "-V=0/1/2: none/file/sector",10
+    DB "-W=0..9 passes [1], 0=read",10
+    DB "-S=1..24 KiB [8], DOS/ALL <=8",10
+    DB "-F=0/1 seq/rnd; -? help",10
+    DB "Missing?",10,0
 v_arguments: DW 0
 argDrive: DB 0FFh
 argCheck: DB 0FFh
 argWrites: DB 0FFh
 argSize: DB 0
 argHelp: DB 0
+argBank: DB 0
+
+argFrag: DB 0FFh
+argMode: DB 0

@@ -17,8 +17,14 @@ sysCall:
     cp 0B9h
     jp nc,sysBadPacket
 sysPacketReady:
-    call sysBankSelected
+    ; Для BIOS банкового маршрута нет; не вызываем отдельную проверку.
+    ld a,b
+    cp MXOS_GROUP_DOS
+    jp nz,sysLocalCall
+    ld a,(v_dosBanked)
+    or a
     jp nz,sysBankCall
+sysLocalCall:
     call sysFindTarget
     ret c
     push de
@@ -28,9 +34,9 @@ sysPacketReady:
     jp sysLoadRegs
 sysFindTarget:
     ld a,b
-    cp MX_GROUP_BIOS
+    cp MXOS_GROUP_BIOS
     jp z,sysBios
-    cp MX_GROUP_DOS
+    cp MXOS_GROUP_DOS
     jp nz,sysUnsupported
     ld a,(v_dosModuleReady)
     or a
@@ -90,14 +96,15 @@ sysReturned:
     ld d,(hl)
     ld hl,0
     add hl,sp
-    ld b,8
-sysSaveResult:
+    ; Фиксированные восемь байт: нет счётчика и перехода на каждый байт.
+    REPT 7
     ld a,(hl)
     ld (de),a
     inc hl
     inc de
-    dec b
-    jp nz,sysSaveResult
+    ENDR
+    ld a,(hl)
+    ld (de),a
     pop hl
     pop de
     pop bc

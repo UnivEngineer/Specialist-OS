@@ -33,7 +33,7 @@ for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,
   assert got[0xab00:0xab20]==bytes(32)
  if mode==3:
   assert got[0xf800:0xf803]==kernel[0x1300:0x1303]
- if returning:assert got[ds['bios_vars.koi7']]==255,'caller KOI restored'
+ if returning:assert got[ds['bios_upper.koi7']]==255,'caller KOI restored'
  if mode<2:
   assert got[0x9000:0xc000]==m[0x9000:0xc000], 'native screen modified'
  results.append(dict(mode=mode,staged=staged,returning=returning,entryReached=True,args=args,screenUnchanged=mode<2))

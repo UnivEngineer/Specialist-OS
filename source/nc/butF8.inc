@@ -11,7 +11,7 @@ but_F8:     ; Рисуем окно
             ; Выводим "DELETE FROM A:"
             CENTER_LINE 14, 5Eh
             ld          hl, aDeleteFrom
-            call        bios_printString
+            call        bios_printStringReal
             call        printSelDrive
 
             call        printInvSelFile
@@ -26,7 +26,7 @@ loc_D54C:   ; Ждем нажатия Enter или ESC
 loc_D595:   ; Удаляем текущий файл
             ld          hl, state.panelA_drive
             call        readBytePanel
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             jp c,       deleteFileError
             call        getSelectedFile
             push hl
@@ -43,12 +43,12 @@ loc_D595:   ; Удаляем текущий файл
 ncDeleteRegular:
             ld a,CLI_OP_DELETE
 ncDeleteReady:
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             jp c,       deleteFileError
             ; Количество файлов и курсор обновляются по реальному каталогу.
             jp          ncRefreshDirty
 
 deleteFileError:
-            MXCALL MX_DOS_GETERROR
+            MXOS_CALL MXOS_DOS_GET_ERROR
             call dosErrorText
             jp copyFileShowError

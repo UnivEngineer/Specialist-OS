@@ -8,8 +8,8 @@
 but_F2:
             ld a,(ncShiftState)
             or a
-            jp z,ncTapeStub
             ld      c, 1
+            jp z,ncPanelSort
             call    choosePanelDrive
 
             ; Перезагружаем и перерисовываем вторую панель
@@ -18,19 +18,19 @@ but_F2:
             ; Перезагружаем и перерисовываем первую панель, только если она в режиме информации
             ld    a, (state.panelA_info)
             and   a
-            jp z, saveStateAndReload
+            jp z, panelStateChanged
             call  loadAndPrintA
 
-            ; Сохраняем состояние и выходим
-            jp    saveStateAndReload
+            ; Продолжаем работу с состоянием в памяти NC
+            jp    panelStateChanged
 
 ; ---------------------------------------------------------------------------
 
 but_F1:
             ld a,(ncShiftState)
             or a
-            jp z,ncTapeStub
             ld      c, 0
+            jp z,ncPanelSort
             call    choosePanelDrive
 
             ; Перезагружаем и перерисовываем первую панель
@@ -39,12 +39,12 @@ but_F1:
             ; Перезагружаем и перерисовываем вторую панель, только если она в режиме информации
             ld    a, (state.panelB_info)
             and   a
-            jp z, saveStateAndReload
+            jp z, panelStateChanged
             call  loadAndPrintB
             
-saveStateAndReload:
-            ; Сохраняем состояние и выходим
-            call  saveState
+panelStateChanged:
+            ; Продолжаем работу с состоянием в памяти NC
+
             jp    mainDriveChanged
 
 ; ---------------------------------------------------------------------------
@@ -83,17 +83,17 @@ chooseDrive:
             call  draw
 
             ; Вывести заголовок и компактный список установленных драйверов.
-            ld    hl, 1E63h
+            ld    hl, 1863h
             call  setCursorPosPanel
             ld    hl, aChooseDrive
-            call  bios_printString
+            call  bios_printStringReal
             call  printDriveList
 
             ; Отключить курсор BIOS на время выбора.
-            ld    a, (bios_vars.cursorCfg)
+            ld    a, (bios_upper.cursorCfg)
             push  af
             xor   a
-            ld    (bios_vars.cursorCfg), a
+            ld    (bios_upper.cursorCfg), a
 
             ; Найти текущий диск панели в компактном списке.
             ld    hl, state.panelA_drive
@@ -135,7 +135,8 @@ cd_Loop:
             cp    1Bh
             jp z, cd_Esc
 
-            ; Прямой выбор A-H разрешён только для найденного драйвера.
+            ; Прямой выбор A-H/a-h разрешён только для найденного драйвера.
+            and   0DFh              ; ASCII: привести букву к верхнему регистру.
             sub   'A'
             cp    8
             jp nc, cd_Loop
@@ -146,7 +147,7 @@ cd_Loop:
 
 cd_Esc:
             pop   af
-            ld    (bios_vars.cursorCfg), a
+            ld    (bios_upper.cursorCfg), a
             ld    a, 0FFh
             ret
 
@@ -163,7 +164,7 @@ cd_Enter:
 
 cd_ReturnDrive:
             pop   af
-            ld    (bios_vars.cursorCfg), a
+            ld    (bios_upper.cursorCfg), a
             ld    a, c
             ret
 
@@ -213,7 +214,7 @@ initRightDrive:
 buildDriveList:
             ld      hl, vars.driveList
             ld      bc, 8
-            MXCALL MX_DOS_FILEGETDRIVES
+            MXOS_CALL MXOS_DOS_FILE_GET_DRIVES
             ld      a, b
             ld      (vars.driveCount), a
             xor     a
@@ -260,61 +261,107 @@ fd_NotFound:
 ; Разрушает: AF, BC, DE, HL.
 
 printDriveList:
-            ld    hl, 1C74h
-            call  setCursorPosPanel
-            ld    hl, vars.driveList
-            ld    a, (vars.driveCount)
-            or    a
+            ld hl,vars.driveList
+            ld a,(vars.driveCount)
+            or a
             ret z
-            ld    b, a
-            ld    d, 4
-
-pdl_Loop:
-            ld    a, (hl)
-            inc   hl
-            add   a, 'A'
-            ld    c, a
-            call  bios_printChar
-
-            dec   b
+            ld b,a
+pdl_Row:
+            push hl
+            ld a,(vars.driveCount)
+            sub b
+            call driveCellPosition
+            call setCursorPosPanel
+            pop hl
+            ld de,ncTextBuffer
+            ld c,4
+pdl_Cell:
+            ld a,(hl)
+            inc hl
+            add a,'A'
+            ld (de),a
+            inc de
+            dec b
+            jp z,pdl_Print
+            dec c
+            jp z,pdl_Print
+            ld a,' '
+            ld (de),a
+            inc de
+            ld (de),a
+            inc de
+            ld (de),a
+            inc de
+            jp pdl_Cell
+pdl_Print:
+            xor a
+            ld (de),a
+            push hl
+            ld hl,ncTextBuffer
+            call bios_printStringReal
+            pop hl
+            ld a,b
+            or a
             ret z
-            dec   d
-            jp z, pdl_NewRow
+            jp pdl_Row
 
-            ld    c, ' '
-            call  bios_printChar
-            call  bios_printChar
-            call  bios_printChar
-            jp    pdl_Loop
-
-pdl_NewRow:
-            ld    d, 4
-            push  hl
-            ld    hl, 1C7Fh
-            call  setCursorPosPanel
-            pop   hl
-            jp    pdl_Loop
-
-;----------------------------------------------------------------------------
+; A=позиция в списке 0..7; HL=координаты буквы, BC/DE сохранены.
+; Каждая строка центрируется по реальному числу букв, без хвоста пробелов.
+; X округляется до экранного байта; шаг 24 пикселя сохраняется.
+; Центр области под разделителем — Y=119; курсор занимает Y-8..Y.
+driveCellPosition:
+            push bc
+            push de
+            ld c,a
+            ld a,(vars.driveCount)
+            ld b,a
+            ld l,123
+            cp 5
+            jp c,dcp_Center
+            ld b,4
+            ld l,117
+            ld a,c
+            cp 4
+            jp c,dcp_Center
+            sub 4
+            ld c,a
+            ld a,(vars.driveCount)
+            sub 4
+            ld b,a
+            ld l,129
+dcp_Center:
+            ld a,b
+            add a,a
+            ld d,a
+            add a,a
+            add a,d
+            ld d,a
+            ld a,54
+            sub d
+            and 0FCh
+            ld h,a
+            ld a,c
+            add a,a
+            add a,c
+            add a,a
+            add a,a
+            add a,h
+            ld h,a
+            pop de
+            pop bc
+            ret
 
 chooseDrive_draw:
-            ld    a, (vars.chooseDrive)
-            ld    hl, 976Ch
-
-            cp    4
-            jp c, chooseDrive_draw2
-            sub   4
-            ld    c, a
-            ld    a, l
-            add   a, 0Bh
-            ld    l, a
-            ld    a, c
-chooseDrive_draw2:
-            ld    c, a
-            add   a, a
-            add   a, c
-            add   a, h
-            ld    h, a
-            call  activePanelPos
-            ld    bc, (1 << 8) + 9
-            jp    inverseRect
+            ld a,(vars.chooseDrive)
+            call driveCellPosition
+            ld a,h
+            rrca
+            rrca
+            add a,90h
+            ld h,a
+            ld a,l
+            sub 8
+            ld l,a
+            call activePanelPos
+            ld bc,(1<<8)+9
+            jp inverseRect

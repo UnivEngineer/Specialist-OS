@@ -12,7 +12,7 @@ _mxos_file_call:
     ld a,(hl)
     pop hl
     call 0F806h
-    defw MX_DOS_FILEHANDLE
+    defw MXOS_DOS_FILEHANDLE
     ld l,a
     ld h,0
     ret

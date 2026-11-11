@@ -332,7 +332,7 @@ cliExit:
     IFDEF BANKED_DOS_BUILD
     call setShell
     ELSE
-    MXCALL MX_DOS_SETSHELL
+    MXOS_CALL MXOS_DOS_SET_SHELL
     ENDIF
     jp cliSuccess
 ; Файловые команды не меняют выбранные пользователем диск и каталог.
@@ -547,9 +547,9 @@ cliDirLoop:
     call cliPrintNamePart
 cliDirNoExt:
     ; Колонка 15 (с нуля): 15 символов по 6 пикселей, X хранится в полупикселях.
-    MXCALL MX_BIOS_GETCURSORPOS
+    MXOS_CALL MXOS_BIOS_GET_CURSOR_POS
     ld h,45
-    MXCALL MX_BIOS_SETCURSORPOS
+    MXOS_CALL MXOS_BIOS_SET_CURSOR_POS
     pop hl
     ld de,11
     add hl,de
@@ -821,6 +821,25 @@ cliFoundReady:
     ld bc,MAX_PATH
     call cliCopyBytes
 cliResolveAssociation:
+    ; Подтверждённый COM/EXE обрабатывается ядром до ассоциаций.
+    ld hl,cliRequest.source+8
+    ld de,aCom
+    ld c,3
+    call stricmp
+    jp z,cliCheckNativeImage
+    ld hl,cliRequest.source+8
+    ld de,aExe
+    ld c,3
+    call stricmp
+    jp nz,cliFindAssociation
+cliCheckNativeImage:
+    ld hl,cliRequest.source
+    call imageOpen
+    jp c,cliResolveFail
+    ld a,(v_tmpFileDescr+5)
+    or a
+    jp nz,cliAssociationAbsent
+cliFindAssociation:
     ld hl,cliRequest.source+8
     ld de,cliAssociationBuffer
     ld bc,512

@@ -1,24 +1,23 @@
 ; Самостоятельная консоль MXOS. Общие команды выполняет DOS в своей странице.
     INCLUDE "../include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0000h
 cliStart:
-    call bios_loadDosModule
-    jp c,cliModuleError
     ld hl,0
     ld a,CLI_OP_OBSERVER
-    MXCALL MX_DOS_CLI
+    MXOS_CALL MXOS_DOS_CLI
     xor a
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     ld a,2
-    MXCALL MX_DOS_SETSHELL
-    MXCALL MX_DOS_FILESELECTDRIVE
+    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     call cliHistoryLoad
 cliPrompt:
     ld a,1
-    MXCALL MX_DOS_SETSHELL
+    MXOS_CALL MXOS_DOS_SET_SHELL
     ld a,DIR_OP_GETCWD
     ld hl,cliPromptPath
-    MXCALL MX_DOS_DIRECTORY
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp c,cliError
     ld hl,cliPromptPath
     call bios_printString
@@ -31,7 +30,7 @@ cliPrompt:
     ld hl,CMD_LINE
     ld de,cliOverwritePrompt
     ld a,CLI_OP_COMMAND
-    MXCALL MX_DOS_CLI
+    MXOS_CALL MXOS_DOS_CLI
     jp c,cliError
     cp 0FFh
     jp z,cliExternal
@@ -43,28 +42,23 @@ cliExternal:
     call cliHistorySave
     ; Нижнее ОЗУ может быть затёрто программой; возврат через загрузку оболочки.
     ld a,1
-    MXCALL MX_DOS_SETSHELL
+    MXOS_CALL MXOS_DOS_SET_SHELL
     ld hl,CMD_LINE
+    ; После RET приложения код CLI в main уже может быть затёрт.
+    ld de,bios_reboot
+    push de
     jp bios_fileExec
 cliLeave:
     call cliHistorySave
     jp bios_reboot
 cliError:
-    MXCALL MX_DOS_GETERROR
+    MXOS_CALL MXOS_DOS_GET_ERROR
     call dosErrorText
     call bios_printString
     ld c,0Ah
     call bios_printChar
     jp cliPrompt
-cliModuleError:
-    ld hl,cliModuleErrorText
-    call bios_printString
-    call bios_getch
-    xor a
-    MXCALL MX_DOS_SETSHELL
-    jp bios_reboot
-cliErrorText: DB 'Error ',0
-cliModuleErrorText: DB 'DOS module error',0
+cliErrorText: DB 'ERROR ',0
 cliPromptPath: DS MAX_PATH,0
     INCLUDE "overwrite.inc"
     INCLUDE "../include/errors.inc"

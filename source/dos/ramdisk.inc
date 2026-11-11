@@ -15,10 +15,12 @@ dosRamBufferOK:
     ld a,e
     cp 0FFh
     jp z,dosRamBad
+    IFDEF BANKED_DOS_BUILD
+    ld a,(memoryRamPages)
+    ELSE
     ld a,(bankPageCount)
-    cp 2
-    jp c,dosRamBad
     dec a
+    ENDIF
     cp d
     jp c,dosRamBad
     jp z,dosRamBad

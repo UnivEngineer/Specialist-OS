@@ -1,10 +1,28 @@
-; Физический обмен выбранного диска. Только данные и описания пересекают
-; банк; адрес аппаратного обработчика никогда не выдаётся клиенту.
+; Физический обмен выбранного диска. Обычный запрос переносит параметры;
+; B=RAW_OP_PREPARE выдаёт точки в странице клиента для прямой серии.
 dosRawIO:
-    jp j_diskDriver
+    ld a,b
+    cp RAW_OP_PREPARE
+    jp z,dosRawPrepare
+    cp 5
+    jp nz,j_diskDriver
+    push bc
+    ld bc,j_diskDriver
+    call dosVerify.diskWriteChecked
+    pop bc
+    ret
+    MODULE dosVerify
+    DEFINE DWC_NO_ERROR_FLAG
+    DEFINE DWC_READ_BUFFER DOS_VERIFY_BUFFER
+    INCLUDE "../common/diskWriteChecked.inc"
+    UNDEFINE DWC_READ_BUFFER
+    UNDEFINE DWC_NO_ERROR_FLAG
+    ENDMODULE
 krRaw:
     ld a,(kdRegs+5)
     ld (krOperation),a
+    cp RAW_OP_PREPARE
+    jp z,krPrepareLocal
     cp 3
     jp z,krSize
     cp 0FFh
@@ -24,14 +42,18 @@ krRawBuffer:
     jp c,kdBad
     call klEligible
     jp nz,krBuffered
-    ld a,(krOperation)
-    cp 5
-    jp z,krBuffered
     ld hl,klBlock
     ld (kdEntry),hl
     call kdInvoke
     call kdCapture
     call klGrant
+    jp kdFinish
+; Подготовить маршрут один раз, до запуска секторного цикла клиента.
+krPrepareLocal:
+    ld hl,dosRawPrepare
+    ld (kdEntry),hl
+    call kdInvoke
+    call kdCapture
     jp kdFinish
 krBuffered:
     ld a,(kdRegs+5)
@@ -129,7 +151,7 @@ krInfo:
     ld bc,64
     ld de,MAIN_DRIVER_INFO
 krStoreInfo:
-    ; Стабильная копия до следующего RAWIO; окно ROM-моста её не затирает.
+    ; Стабильная копия до следующего RAW_IO; окно ROM-моста её не затирает.
     push de
     call kdStore
     pop hl
@@ -179,7 +201,7 @@ ktConfirm:
 ktHook: DW 0
 ktRegs: DS MX_REGS,0
 
-; Исторические FILECREATE/PREPARE используют тот же поток, что FileHandle.
+; Исторические FILE_CREATE/PREPARE используют тот же поток, что FileHandle.
 krPrepare:
     call kiFetchDescriptor
     jp c,kdBad
@@ -221,6 +243,14 @@ krSector:
     ld (kdClientObject),hl
     call kdRange
     jp c,kdBad
+    call klEligible
+    jp nz,krSectorBuffered
+    ld hl,krSectorDirect
+    ld (kdEntry),hl
+    call kdInvoke
+    call kdCapture
+    jp kdFinish
+krSectorBuffered:
     ld a,(kdRegs+5)
     cp 1
     jp nz,krSectorRead
@@ -249,6 +279,26 @@ krSectorRead:
     call kdStore
     jp c,kdBad
     jp kdRestorePointer
+; Полный логический сектор может состоять из нескольких физических блоков.
+krSectorDirect:
+    ld a,b
+    dec a
+    cp 2
+    jp nc,blockArgument
+    push hl
+    ld hl,(v_logicalCapacity)
+    call cmp_hl_de
+    pop hl
+    jp c,blockArgument
+    jp z,blockArgument
+    ld a,1
+    ld (ksDirect),a
+    call ksSector
+    push af
+    xor a
+    ld (ksDirect),a
+    pop af
+    ret
 krSectorSize: DW 0
 
  ; Старый выбор встроенных шаблонов больше не используется: запускается COM.

@@ -67,5 +67,5 @@ cliOverwritePartNext:
     dec b
     jp nz,cliOverwritePart
     ret
-cliOverwriteText: DB 'Overwrite ',0
-cliOverwriteKeys: DB '? Yes/No/All/Skip all [N] ',0
+cliOverwriteText: DB 'OVERWRITE ',0
+cliOverwriteKeys: DB '? YES/NO/ALL/SKIP ALL [N] ',0

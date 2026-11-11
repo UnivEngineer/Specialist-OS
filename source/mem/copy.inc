@@ -1,10 +1,13 @@
-; Привилегированный транспорт загрузчика/драйвера, не публичный malloc API.
+; Публичное FAR-копирование адресов; не malloc и не проверка владельца.
 ; HL -> {srcPage,srcOffset:word,dstPage,dstOffset:word,count:word}.
 ; Пакет находится в текущей странице. Диапазоны заканчиваются до FF00h;
 ; пересечение диапазонов одной страницы запрещено контрактом memcpy.
-; AF=статус, CF=ошибка; BC/DE/HL, страница, SP и все 32 байта окна сохранены.
+; AF=статус, CF=ошибка; BC/DE/HL, банк и SP сохранены; профиль окна остаётся COPY.
 ; Нереентерабельная атомарная петля: без callback и с запрещёнными IRQ.
 bankCopyFar:
+    xor a
+    ld (bankCopyMove),a
+bankCopyEnter:
     push bc
     push de
     push hl
@@ -27,12 +30,25 @@ bankCopyFar:
     ld hl,(bankCopyRequest+4)
     call bankCopyRange
     jp c,bankCopyError
+    ld a,(bankCopyMove)
+    or a
+    jp nz,MEM_MOVE_SELECT_ADDR
+    jp MEM_COPY_SELECT_ADDR
 bankCopyPrepared:
-    ; Сохраняем стандартное окно на время атомарного переноса.
+    ; Окно заменяется лениво. Последовательные копии не сохраняют его снова.
+    ld a,(BANK_PROFILE)
+    or a
+    jp z,bankCopySaveWindow
+    cp BANK_PROFILE_COUNT
+    jp c,bankCopyWindowReady
+bankCopySaveWindow:
     ld hl,BANK_WINDOW
     ld de,bankCopySavedWindow
     ld b,32
     call bankCopyBytes
+bankCopyWindowReady:
+    ld a,BANK_PROFILE_COPY
+    ld (BANK_PROFILE),a
     ld hl,(bankCopyRequest+1)
     ld (BANK_COPY_SOURCE),hl
     ld hl,(bankCopyRequest+4)
@@ -101,13 +117,9 @@ bankCopyPair:
 
 bankCopyReturn:
     ; Окно пока содержит указатель стека инициатора. Восстанавливаем SP
-    ; до первого CALL; перенос шаблона происходит вне самого окна.
+    ; до первой стековой команды. Профиль COPY остаётся установленным.
     ld hl,(BANK_COPY_SP)
     ld sp,hl
-    ld hl,bankCopySavedWindow
-    ld de,BANK_WINDOW
-    ld b,32
-    call bankCopyBytes
 bankCopyOK:
     xor a
 bankCopyError:
@@ -167,5 +179,45 @@ bankCopyValidRange:
     or a
     ret
 
+; Следующая команда или возврат из обработчика восстанавливает его окно.
+; AF/BC/DE/HL сохранены; стек уже должен принадлежать текущему банку.
+bankCommandWindow:
+    push af
+    ld a,(BANK_PROFILE)
+    or a
+    jp z,bankWindowReady
+    push bc
+    push de
+    push hl
+    ld hl,bankCopySavedWindow
+    ld de,BANK_WINDOW
+    ld b,32
+    call bankCopyBytes
+    pop hl
+    pop de
+    pop bc
+bankWindowReady:
+    pop af
+    ret
+
 bankCopyRequest: DS 8,0
-bankCopySavedWindow: DS 32,0
+bankCopySavedWindow = MEM_COMMAND_SHADOW
+
+; Ошибка строки: стек содержит сохранённые DE/BC/AF, затем возврат.
+bankTextRangeError:
+    pop de
+    pop bc
+    pop af
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
+; Ошибка стандартного PRINT_STRING: пакет не меняем, возвращаем код отказа.
+bankBiosStringError:
+    call bankCommandWindow
+    pop bc
+    ld a,DOS_ERR_ARGUMENT
+    ld (BANK_FRAME_STATUS),a
+    scf
+    jp MEM_BIOS_RESULT
+
+bankCopyMove: DB 0

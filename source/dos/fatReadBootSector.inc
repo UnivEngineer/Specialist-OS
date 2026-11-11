@@ -64,7 +64,7 @@ fatReadBootSector:
             call sectorSizeFromShift
             ld (v_diskInfo.blockSize),hl
             ld b,2
-            ld hl,FAT_CACHE_ADDR
+            ld hl,DOS_CACHE_BOOT_ADDR
             ld de,0
             call j_diskDriver
             jp c,frbs_Io
@@ -77,7 +77,7 @@ fatReadBootSector:
             ld de,diskDriver
             call cmp_hl_de
             jp nz,frbs_DriverInfo
-            ld hl,(FAT_CACHE_ADDR+19)
+            ld hl,(DOS_CACHE_BOOT_ADDR+19)
             ld (v_diskInfo.totalSectors),hl
 frbs_DriverInfo:
             ld b,3
@@ -88,7 +88,7 @@ frbs_DriverInfo:
             ld h,b
             ld l,c
             ld (v_diskInfo.allocationStep),hl
-            ld hl,(FAT_CACHE_ADDR+11)
+            ld hl,(DOS_CACHE_BOOT_ADDR+11)
             ld a,h
             or a
             jp nz,frbs_LargeSector
@@ -139,7 +139,7 @@ frbs_Capacity:
 frbs_CapacityReady:
             ld (v_logicalCapacity),hl
             call configureSectorCache
-            ld hl,FAT_CACHE_ADDR
+            ld hl,DOS_CACHE_BOOT_ADDR
             ld de,0
             ld b,2
             call logicalSectorIOChecked
@@ -153,25 +153,25 @@ frbs_CapacityReady:
             jp z,frbs_Oem
             ld de,aMxos128
 frbs_Oem:
-            ld hl,FAT_CACHE_ADDR+3
+            ld hl,DOS_CACHE_BOOT_ADDR+3
             ld c,8
             call strcmp
             jp nz,frbs_Bad
             jp frbs_Geometry
 frbs_Standard:
-            ld hl,(FAT_CACHE_ADDR+510)
+            ld hl,(DOS_CACHE_BOOT_ADDR+510)
             ld de,0AA55h
             call cmp_hl_de
             jp nz,frbs_Bad
 frbs_Geometry:
             ; Media допускает F0h и F8h..FFh, остальные значения не FAT.
-            ld a,(FAT_CACHE_ADDR+21)
+            ld a,(DOS_CACHE_BOOT_ADDR+21)
             cp 0F0h
             jp z,frbs_MediaReady
             cp 0F8h
             jp c,frbs_Bad
 frbs_MediaReady:
-            ld a,(FAT_CACHE_ADDR+13)
+            ld a,(DOS_CACHE_BOOT_ADDR+13)
             or a
             jp z,frbs_Bad
             ld b,a
@@ -193,33 +193,33 @@ frbs_MediaReady:
             jp nz,frbs_Bad
 frbs_ClusterReady:
             ld (v_diskInfo.clusterBytes),hl
-            ld a,(FAT_CACHE_ADDR+16)
+            ld a,(DOS_CACHE_BOOT_ADDR+16)
             dec a
             cp 2
             jp nc,frbs_Bad
             inc a
             ld (v_diskInfo.fatCount),a
-            ld hl,(FAT_CACHE_ADDR+19)
+            ld hl,(DOS_CACHE_BOOT_ADDR+19)
             ld a,h
             or l
             jp nz,frbs_TotalReady
-            ld hl,(FAT_CACHE_ADDR+34)
+            ld hl,(DOS_CACHE_BOOT_ADDR+34)
             ld a,h
             or l
             jp nz,frbs_Bad
-            ld hl,(FAT_CACHE_ADDR+32)
+            ld hl,(DOS_CACHE_BOOT_ADDR+32)
 frbs_TotalReady:
             ld (v_diskInfo.totalSectors),hl
             ex de,hl
             ld hl,(v_logicalCapacity)
             call cmp_hl_de
             jp c,frbs_Bad
-            ld hl,(FAT_CACHE_ADDR+14)
+            ld hl,(DOS_CACHE_BOOT_ADDR+14)
             ld (v_diskInfo.resSectors),hl
             ld a,h
             or l
             jp z,frbs_Bad
-            ld hl,(FAT_CACHE_ADDR+22)
+            ld hl,(DOS_CACHE_BOOT_ADDR+22)
             ld (v_diskInfo.fatSectors),hl
             ld a,h
             or l
@@ -256,7 +256,7 @@ frbs_FatAreaReady:
             call div_hl_2
             ld (v_diskInfo.descrPerSector),hl
             ex de,hl
-            ld hl,(FAT_CACHE_ADDR+17)
+            ld hl,(DOS_CACHE_BOOT_ADDR+17)
             ld (v_diskInfo.rootDirMaxFiles),hl
             ld a,h
             or l
@@ -299,8 +299,8 @@ frbs_TypeReady:
             ld hl,(v_diskInfo.fatNumCells)
             call cmp_hl_de
             jp c,frbs_Bad
-            ld hl,FAT_CACHE_ADDR+43
-            ld de,FAT_CACHE_ADDR+54
+            ld hl,DOS_CACHE_BOOT_ADDR+43
+            ld de,DOS_CACHE_BOOT_ADDR+54
             ld bc,v_diskInfo.volumeLabel
             call memcpy_bc_hl
             xor a
@@ -308,11 +308,11 @@ frbs_TypeReady:
             ; FAT[0] повторяет BPB_Media, FAT[1] резервирует нижние 14 бит.
             ; Старшие два бита FAT[1] — clean/error flags, допустимы оба
             ; состояния. Проверяем только заголовок, без обхода всего тома.
-            ld a,(FAT_CACHE_ADDR+21)
+            ld a,(DOS_CACHE_BOOT_ADDR+21)
             ld c,a
             ld hl,(v_diskInfo.resSectors)
             ex de,hl
-            ld hl,FAT_CACHE_ADDR
+            ld hl,DOS_CACHE_BOOT_ADDR
             ld b,2
             call logicalSectorIOChecked
             jp c,frbs_Io

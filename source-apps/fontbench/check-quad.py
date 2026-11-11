@@ -21,20 +21,22 @@ def main():
     packed = (ROOT / 'bin/FONTKOI.packed.bin').read_bytes()
     packed = bytearray(packed)
     for c in range(256):
-        struct.pack_into('<H', packed, 32 + c * 2, struct.unpack_from('<H', packed, 32 + c * 2)[0] + 0xdb90)
+        struct.pack_into('<H', packed, 32 + c * 2, struct.unpack_from('<H', packed, 32 + c * 2)[0] + 0x4b90)
     base = bytearray((i * 37 + (i >> 8) * 13) & 255 for i in range(65536))
     for name, address in [('FONTCOM.i80', 0), ('BIOS.sys', 0xc000), ('IO.sys', 0xf000)]:
         data = (ROOT / 'bin' / name).read_bytes()
         base[address:address + len(data)] = data
+    # В COM фаза 4 на старте занята парсером; entry восстанавливает её до тестов.
+    base[0x4000:0x5000] = (ROOT / 'bin/FONTBEN.shifts.bin').read_bytes()[0x1000:0x2000]
     word = lambda value: value.to_bytes(2, 'little')
     def put(m, name, value):
         m[s[name]:s[name] + 2] = word(value)
     base[0xf806:0xf80d] = b'\xe1\x23\x23\xe5\xc3' + word(io['glyphCacheService'])
-    put(base, 'GLYPH_CACHE_START', 0xdb90)
+    put(base, 'GLYPH_CACHE_START', 0x4b90)
     put(base, 'GLYPH_CACHE_ENTRIES', 0)
-    put(base, 'bios_vars.charGen', 0x2800 // 8)
-    base[s['bios_vars.escMode']] = 255
-    base[s['bios_vars.koi7']] = 0
+    put(base, 'renderFont8', 0x2800 // 8)
+    base[s['bios_upper.escMode']] = 255
+    base[s['bios_upper.koi7']] = 0
     base[s['bios_vars.inverse']] = 0
     base[s['GLYPH_CACHE_INVALID']] = 1
     # Развёрнутое ядро: источники через DE/HL, экран только STAX B.
@@ -64,16 +66,16 @@ def main():
     def run(events, slots=168, full=False, direct=None, prepare=False, half_missing=False, serial=None, optimized=False, inverse=False):
         nonlocal checks
         m = bytearray(base)
-        limit = 0xe110 + slots * 16 if slots else 0xdb90
+        limit = 0x5110 + slots * 16 if slots else 0x4b90
         put(m, 'GLYPH_CACHE_LIMIT', limit)
         if direct == 'half' and not prepare and not half_missing:
-            put(m, 'quadHalfFont', 0xdb90 // 8)
-            m[0xdb90:0xe390] = bytes((v >> 4) | ((v << 4) & 255) for v in font)
+            put(m, 'quadHalfFont', 0x4b90 // 8)
+            m[0x4b90:0x5390] = bytes((v >> 4) | ((v << 4) & 255) for v in font)
         if direct == 'packed':
-            put(m, 'packedBase', 0 if half_missing else 0xdb90)
-            m[s['packedLookupBase'] + 1:s['packedLookupBase'] + 3] = word(0xdb90 + 32)
+            put(m, 'packedBase', 0 if half_missing else 0x4b90)
+            m[s['packedLookupBase'] + 1:s['packedLookupBase'] + 3] = word(0x4b90 + 32)
             if not prepare:
-                m[0xdb90:0xdb90 + len(packed)] = packed
+                m[0x4b90:0x4b90 + len(packed)] = packed
         expected = bytearray(m[0x9000:0xc000])
         code = bytearray(b'\x31\x00\x8b')
         if optimized:
@@ -86,8 +88,9 @@ def main():
         for glyphs, x, baseline in events:
             count = len(glyphs)
             m[source:source + count] = bytes(glyphs)
-            half_ready = not half_missing and (not prepare or limit - 0xdb90 >= 2048)
-            packed_ready = not half_missing and (not prepare or limit - 0xdb90 >= 4072)
+            half_ready = not half_missing and (not prepare or limit - 0x4b90 >= 2048)
+            packed_ready = not half_missing
+            packed_overlay = prepare and direct == 'packed' and limit - 0x4b90 < 4072
             valid = count == 0 or (count <= 48 and (serial or count % 4 == 0 and x % 8 == 0) and baseline >= 7 and x + count * 6 <= 384 and (serial or full or direct or slots >= 3) and (direct != 'half' or half_ready) and (direct != 'packed' or packed_ready))
             code += b'\x21' + bytes((baseline, x // 2)) + b'\x22' + word(s['bios_vars.cursorY'])
             code += bytes.fromhex('21 97 A5 E5 F1')
@@ -107,7 +110,7 @@ def main():
                 for col, point in enumerate(glyphs):
                     bitmap = font[point * 8:point * 8 + 8]
                     if direct == 'packed':
-                        address = struct.unpack_from('<H', packed, 32 + point * 2)[0] - 0xdb90
+                        address = struct.unpack_from('<H', packed, 32 + point * 2)[0] - 0x4b90
                         bitmap = bytes(v >> 2 for v in packed[address:address + 8])
                     for row, value in enumerate(bitmap):
                         if inverse:
@@ -132,24 +135,37 @@ def main():
             assert bool(data[record + 6] & 1) == (not valid), ('carry', events, slots)
         _, _, count, valid, x, y = records[-1]
         assert data[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] == bytes((y, x // 2 + (count * 3 if valid else 0)))
-        assert data[0xdb80:0xdb90] == before[0xdb80:0xdb90]
-        assert data[limit:0xeba0] == before[limit:0xeba0]
+        if not packed_overlay:
+            assert data[0x4b80:0x4b90] == before[0x4b80:0x4b90]
+        if not packed_overlay:
+            assert data[limit:0x5ba0] == before[limit:0x5ba0]
         assert data[0x2800:0x3800] == before[0x2800:0x3800]
-        assert data[0x4000:0x6000] == before[0x4000:0x6000]
+        if direct == 'packed' and prepare and packed_overlay:
+            relocated = bytearray(packed)
+            for c in range(256):
+                struct.pack_into('<H', relocated, 32 + c * 2, struct.unpack_from('<H', packed, 32 + c * 2)[0] - 0x4b90 + 0x4000)
+            assert data[0x4000:0x4000 + len(relocated)] == relocated
+            assert data[0x4000 + len(relocated):0x6000] == before[0x4000 + len(relocated):0x6000]
+            assert data[s['packedBase']:s['packedBase'] + 2] == word(0x4000)
+            assert data[s['packedOverlay']] == 1
+        else:
+            assert data[0x4000:0x4b80] == before[0x4000:0x4b80]
+            assert data[0x5ba0:0x6000] == before[0x5ba0:0x6000]
         assert data[s['cacheVictimGuard'] + 1:s['cacheVictimGuard'] + 3] == word(s['cacheVictimReady'])
         if serial:
             assert data[s['CACHE_RENDERERRETURN']:s['CACHE_RENDERERRETURN'] + 3] == bytes.fromhex('E1 D1 C1')
             assert data[s['cacheFallbackExit'] + 1:s['cacheFallbackExit'] + 3] == word(s['cacheFallbackScalar'])
         if direct:
-            expected_arena = bytearray(before[0xdb90:0xeb90])
-            if prepare and direct == 'packed' and packed_ready:
+            expected_arena = bytearray(before[0x4b90:0x5b90])
+            if prepare and direct == 'packed' and packed_ready and not packed_overlay:
                 expected_arena[:len(packed)] = packed
             elif prepare and direct == 'half' and half_ready:
                 expected_arena[:2048] = bytes((v >> 4) | ((v << 4) & 255) for v in font)
-                assert data[s['quadHalfFont']:s['quadHalfFont'] + 2] == word(0xdb90 // 8)
+                assert data[s['quadHalfFont']:s['quadHalfFont'] + 2] == word(0x4b90 // 8)
             if direct == 'half' and not half_ready:
                 assert data[s['quadHalfFont']:s['quadHalfFont'] + 2] == word(0)
-            assert data[0xdb90:0xeb90] == expected_arena, 'immutable arena'
+            if not packed_overlay:
+                assert data[0x4b90:0x5b90] == expected_arena, 'immutable arena'
             assert data[s['cacheMisses']:s['cacheMisses'] + 2] == before[s['cacheMisses']:s['cacheMisses'] + 2]
             assert data[s['GLYPH_CACHE_INVALID']] == before[s['GLYPH_CACHE_INVALID']]
         checks += 1

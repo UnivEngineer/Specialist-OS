@@ -43,9 +43,11 @@ for path,at in [(R/'bin/NC.i80',0),(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.sys',0xF
                 (O/'trace.bin',0x5000)]:
     b=path.read_bytes()
     m[at:at+len(b)]=b
+fullfont=(R/'assets/system-rom/FONT.FNT').read_bytes()
+m[s['FONT_ADDR']:s['FONT_ADDR']+2048]=bytes(fullfont[c*8+y] for y in range(8) for c in range(256))
 m[s['v_dosModuleReady']]=1
-assert m[d['uiToolbarWrite']]==0x77
-m[d['uiToolbarWrite']]=0xEF;m[0x28:0x2B]=b'\xC3'+W(0x5000)
+assert m[n['uiToolbarWrite']]==0x77
+m[n['uiToolbarWrite']]=0xEF;m[0x28:0x2B]=b'\xC3'+W(0x5000)
 m[0x9000:0xC000]=bytes((i*37+(i>>8)*13)&255 for i in range(0x3000))
 m[s['bios_vars.cursorY']:s['bios_vars.cursorY']+2]=W(0x3543)
 m[s['bios_vars.inverse']]=0xA5
@@ -73,14 +75,14 @@ def expected(at):
 
 results=[]
 for name in ['aF1LeftF2RighF3','aShiftToolbar','aF1LeftF2RighF3']:
-    before=bytes(m);want=expected(n[name]);m[0x5100:0x5102]=W(0x2000)
+    before=bytes(m);want=expected(n[name]);m[0x5100:0x5102]=W(0x7000)
     code=b'\x31\x00\x8F\x21'+W(n[name])+b'\x01'+W((n['COLOR_HELP_F']<<8)|n['COLOR_HELP_TEXT'])
-    code+=b'\xCD'+W(s['bios_uiToolbar'])+b'\xC3'+W(0x6100)
+    code+=b'\xCD'+W(n['uiToolbar'])+b'\xC3'+W(0x6100)
     m[0x6000:0x6000+len(code)]=code;(O/'in.bin').write_bytes(m)
     run=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','6000','-end','6100','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True,text=True)
     out=(O/'out.bin').read_bytes();assert int.from_bytes(out[65542:65544],'little')==0x6100
     m=bytearray(out[:65536]);end=int.from_bytes(m[0x5100:0x5102],'little')
-    records=list(struct.iter_unpack('<HBB',m[0x2000:end]))
+    records=list(struct.iter_unpack('<HBB',m[0x7000:end]))
     assert len(records)==432 and len({r[0] for r in records})==432
     for addr,value,color in records:assert want[addr]==(value,color),(name,hex(addr),want[addr],(value,color))
     for addr in range(0x9000,0xC000):

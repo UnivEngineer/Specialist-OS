@@ -27,7 +27,10 @@ def main():
     assert bios['biosLowEnd']<=bios['FONT_ADDR']
     assert bios['io_vars']+bios['IO_VARIABLES']<=bios['STD_IO_ADDR']
     assert bios['FONT_ADDR']+len((ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes())<bios['FONT_ARENA_END']
-    assert bios['BIOS_UPPER_VARIABLES']<=256
+    assert bios['bios_upper']+bios['BIOS_UPPER_VARIABLES'] <= bios['io_vars']
+    assert bios['BIOS_VARIABLES'] == 33
+    for field,address in [('keyboardHook',0x8FDF),('tapeError',0x8FE1),('monitorFont',0x8FE7),('currentChar',0x8FE9),('cursorVisible',0x8FEA),('inputBusy',0x8FEB),('keyLocks',0x8FEC),('oldSP',0x8FF6),('inverse',0x8FFA),('cursorY',0x8FFC),('readDelay',0x8FFF)]:
+        assert bios['bios_vars.'+field] == address,field
     intervals=sorted((v['address'],v['address']+v['size']) for v in layout['blocks']+layout['windows'] if v['size'])
     assert all(a[1]<=b[0] for a,b in zip(intervals,intervals[1:]))
     for item in layout['windows']:
@@ -37,9 +40,12 @@ def main():
     spans=[(0,0x100,'vectors'),(dos['dosCoreStart'],dos['kernelEnd'],'image'),(dos['LOCAL_BLOCK_ENTRY'],dos['mx_call'],'local-block')]
     for address,size,name in [('DOS_BANK_DATA_ADDR',4096,'exchange'),('DOS_BANK_OBJECT_ADDR',86,'object'),
                               ('DOS_BANK_PATH_ADDR',128,'path'),('DOS_DRIVER_REGISTRY',640,'registry'),
-                              ('DOS_DRIVER_IMAGE',576,'driver-image'),('DOS_BANK_CACHE_ADDR',1024,'cache'),
+                              ('DOS_DRIVER_IMAGE',576,'driver-image'),('DOS_BANK_CACHE_ADDR',8192,'cache'),
+                              ('DOS_BANK_CACHE_TABLE',520,'cache-table'),
+                              ('DOS_BANK_PARTIAL_ADDR',512,'partial'),
+                              ('DOS_CACHE_BOOT_ADDR',512,'BPB'),
                               ('DOS_BANK_CMD_ADDR',130,'command'),('DOS_BANK_COMPAT_ADDR',33,'variables'),
-                              ('DOS_BANK_DRIVER_ADDR',0x3000,'initializer'),('BAT_BUFFER',0x1800,'BAT'),
+                              ('DOS_BANK_DRIVER_ADDR',dos['DOS_BANK_DRIVER_END']-dos['DOS_BANK_DRIVER_ADDR'],'initializer'),('BAT_BUFFER',dos['BAT_BUFFER_SIZE'],'BAT'),
                               ('DOS_BANK_STACK_BOTTOM',1024,'stack'),('mx_call',0x800,'tail')]:
         spans.append((dos[address],dos[address]+size,name))
     spans.sort();assert all(a[1]<=b[0] for a,b in zip(spans,spans[1:])),spans
@@ -48,7 +54,7 @@ def main():
         for unit in units:
             for filename in unit['files']:
                 path=Path(filename).resolve();assert path.is_file(),path
-                assert path.is_relative_to(ROOT/f'source/{region}') or path.is_relative_to(ROOT/'source/common') or (region=='dos' and path.is_relative_to(ROOT/'source/cli')),path
+                assert path.is_relative_to(ROOT/f'source/{region}') or path.is_relative_to(ROOT/'source/common') or (region=='dos' and path.is_relative_to(ROOT/'source/cli')) or (region=='bios' and path.is_relative_to(ROOT/'source/io')),path
     result=dict(biosBytes=len(binary),dosBytes=len(image),dosStart=dos['dosCoreStart'],dosEnd=dos['kernelEnd'],
                 freeBeforeBuffers=dos['DOS_BANK_DATA_ADDR']-dos['kernelEnd'],regions=spans,fixedSlots=len(layout['windows']))
     (out/'result.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')

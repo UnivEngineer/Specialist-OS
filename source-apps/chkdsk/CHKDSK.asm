@@ -1,6 +1,7 @@
 ; CHKDSK: диагностика текущего тома MXOS, без операций записи.
 ; Физический ABI C863h, сектор/кластер 256 байт, одна FAT16-подобная таблица.
     INCLUDE "../../source/include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
     MACRO LOAD_DE address
     push hl
     ld hl,(address)
@@ -22,11 +23,10 @@ entry:
     add hl,sp
     ld (callerSP),hl
     ; Карта кластеров и секторные буферы требуют верхнего прикладного ОЗУ.
-    call bios_releaseDosModule
-    ld a,(bios_vars.koi7)
+    ld a,(bios_upper.koi7)
     ld (callerKoi),a
     xor a
-    ld (bios_vars.koi7),a       ; Имена файлов на диске хранятся в KOI-8.
+    call bios_setFontEncoding       ; Имена файлов на диске хранятся в KOI-8.
     call bios_getMemTop
     ld de,header+256-1
     call bios_cmp_hl_de
@@ -152,7 +152,7 @@ waitKey:
     ld c,0Ah
     call bios_printChar
     ld a,(callerKoi)
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     ld hl,(callerSP)
     ld sp,hl
     or a
@@ -290,7 +290,7 @@ rootDivide:
     ld d,a
     ld e,0
     ex de,hl
-    call bios_div_hl_2
+    call checkMath.div_hl_2
     ex de,hl
     ld hl,(lastCluster)
     call compare
@@ -1023,25 +1023,25 @@ streamWord:
 mxMagic:        DB 0CDh,020h,"MX",1,0
 rksExt:         DB "RKS"
 txtFat:         DB "MXOS256 "
-txtTitle:       DB "CHKDSK - read only",0
-txtDone:        DB 10,"Press any key to exit",0
-txtDrive:       DB 10,"CHKDSK drive [A-H], Enter: ",0
-txtStructure:   DB 10,"Structure...",0
-txtReserved:    DB 10,"Invalid reserved FAT cell",0
-txtEntry:       DB 10,"Invalid directory entry: ",0
-txtSkipCS:      DB 10,"Structure errors: checksums skipped",0
-txtChecksums:   DB 10,"File checksums...",0
-txtErrors:      DB 10,"Errors: ",0
+txtTitle:       DB "CHKDSK - READ ONLY",0
+txtDone:        DB 10,"PRESS ANY KEY TO EXIT",0
+txtDrive:       DB 10,"CHKDSK DRIVE [A-H], ENTER: ",0
+txtStructure:   DB 10,"STRUCTURE...",0
+txtReserved:    DB 10,"INVALID RESERVED FAT CELL",0
+txtEntry:       DB 10,"INVALID DIRECTORY ENTRY: ",0
+txtSkipCS:      DB 10,"STRUCTURE ERRORS: CHECKSUMS SKIPPED",0
+txtChecksums:   DB 10,"FILE CHECKSUMS...",0
+txtErrors:      DB 10,"ERRORS: ",0
 txtChecked:     DB "  CS OK: ",0
 txtSkipped:     DB "  NO CS: ",0
-txtChain:       DB 10,"Chain/size/cycle/cross-link: ",0
-txtDuplicate:   DB 10,"Duplicate name: ",0
-txtLost:        DB 10,"Lost cluster: ",0
+txtChain:       DB 10,"CHAIN/SIZE/CYCLE/CROSS-LINK: ",0
+txtDuplicate:   DB 10,"DUPLICATE NAME: ",0
+txtLost:        DB 10,"LOST CLUSTER: ",0
 txtOK:          DB 10,"CS OK: ",0
-txtNoSum:       DB 10,"No stored checksum: ",0
-txtBadSum:      DB 10,"Bad checksum/header: ",0
-txtFormat:      DB 10,"Unsupported/invalid MXOS BPB",0
-txtIO:          DB 10,"Disk read error",0
+txtNoSum:       DB 10,"NO STORED CHECKSUM: ",0
+txtBadSum:      DB 10,"BAD CHECKSUM/HEADER: ",0
+txtFormat:      DB 10,"UNSUPPORTED/INVALID MXOS BPB",0
+txtIO:          DB 10,"DISK READ ERROR",0
 counts:
 errors:         DW 0
 checked:        DW 0
@@ -1075,17 +1075,23 @@ rksMode:        DB 0
 sumLastByte:    DB 0
 driveInput:     DB 0,0
 directoryDotMask: DB 0
-txtDirectoryDots: DB 10,"Missing . or .. directory entry",0
+txtDirectoryDots: DB 10,"MISSING . OR .. DIRECTORY ENTRY",0
 currentDirectory: DW 0
 currentParent: DW 0
 scanCluster: DW 0
 queueRead: DW 0
 queueWrite: DW 0
-txtDirectoryLimit: DB 10,"Directory scan limit",0
+txtDirectoryLimit: DB 10,"DIRECTORY SCAN LIMIT",0
 argumentPtr:     DW 0
 callerSP:       DW 0
 callerKoi:      DB 0
-txtNoMemory: DB "Not enough memory",0
+txtNoMemory: DB "NOT ENOUGH MEMORY",0
+
+    MODULE checkMath
+    DEFINE MATH_DIV2
+    INCLUDE "../../source/include/math.inc"
+    ENDMODULE
+
 codeEnd:
     ASSERT codeEnd < 02000h
 directoryQueue = 03000h

@@ -1,16 +1,12 @@
-; Копирование выполняет DOS. NC задаёт имена, диски и собственный буфер.
-COPY_BUFFER_END     EQU APP_MEMORY_END
-COPY_BUFFER         EQU (NC_END + 255) & 0FF00h
-COPY_BUFFER_SECTORS EQU (COPY_BUFFER_END - COPY_BUFFER) / 256
-
+; Копирование выполняет DOS через собственную пачку в банке DOS.
 copyFileInt:
             ld      hl, state.panelA_drive
             call    readBytePanel
             ld      (vars.copyRequest.sourceDrive), a
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             jp c,   copyFileError
             ld      a,DIR_OP_GET
-            MXCALL MX_DOS_DIRECTORY
+            MXOS_CALL MXOS_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.sourceDirectory),hl
             call    getSelectedFile
@@ -29,7 +25,7 @@ copyFileNameLoop:
             ld      (state.activePanel),a
             ld      hl,state.panelA_drive
             call    readBytePanel
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             call    restorePanelDirectory
             ld      a,(state.activePanel)
             xor     1
@@ -39,60 +35,38 @@ copyFileNameLoop:
             call    bios_fileNamePrepare
             jp c,   copyFileError
             ld      a,DIR_OP_RESOLVED
-            MXCALL MX_DOS_DIRECTORY
+            MXOS_CALL MXOS_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.destinationDirectory),hl
             ld      e, 0
             call    bios_fileGetSetDrive
             ld      (vars.copyRequest.destinationDrive), a
-            ld      hl, COPY_BUFFER
+            ld      hl, 0
             ld      (vars.copyRequest.buffer), hl
-            call    getCopyBufferSize
-            jp c,   copyFileError
             ld      (vars.copyRequest.bufferSize), hl
             ld      hl,ncOverwritePrompt
             ld      (vars.copyRequest.onExists),hl
             ld      hl, vars.copyRequest
 copyFileOperation:
             ld a,CLI_OP_COPY
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             ret nc
             cp      FILE_OP_EXISTS
             jp z,   copyFileExists
             jp      copyFileError
 
-; HL=доступные целые секторы буфера; учитывает текущий системный memtop.
-; AF/DE/HL разрушены, BC сохранён; CF=нет хотя бы одного сектора.
-getCopyBufferSize:
-            call bios_getMemTop
-            ld de,COPY_BUFFER_END-1
-            call bios_cmp_hl_de
-            jp c,getCopyLimitReady
-            ex de,hl
-getCopyLimitReady:
-            inc hl
-            ld de,COPY_BUFFER
-            call bios_sub_hl_de
-            ret c
-            ld l,0
-            ld a,h
-            or a
-            ret nz
-            scf
-            ret
-
 copyFileError:
-            MXCALL MX_DOS_GETERROR
+            MXOS_CALL MXOS_DOS_GET_ERROR
 copyFileErrorCode:
             call dosErrorText
             jp      copyFileShowError
 
 copyFileExists:
-            MXCALL MX_DOS_GETERROR
+            MXOS_CALL MXOS_DOS_GET_ERROR
             call dosErrorText
 
 copyFileShowError:
-            ld      de, 04280h          ; CENTER_LINE 20,80h
+            ld      de, 04480h          ; CENTER_LINE 20,80h
             call    showFileErrorWindow
 
 copyFileWaitRelease:
@@ -119,7 +93,7 @@ showFileErrorWindow:
             pop     hl
             call    bios_printString
             COLOR   COLOR_DIALOG
-            ld      hl, 03990h          ; x=114, нижняя линия знака y=144
+            ld      hl, 03890h          ; x=114, нижняя линия знака y=144
             ld      (bios_vars.cursorY), hl
             ld      hl, vars.input
             call    ncErrorCompact

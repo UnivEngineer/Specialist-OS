@@ -39,11 +39,11 @@ inputSwitchPanel:
             ld      (state.activePanel),a
             ld      hl,state.panelA_drive
             call    readBytePanel
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             jp      restorePanelDirectory
 
 inputForFile:
-            ld      hl, 3D6Eh
+            ld      hl, 3C6Eh
             ld      (bios_vars.cursorY), hl
             ld      de, vars.input
             ; Записать выбранный файл

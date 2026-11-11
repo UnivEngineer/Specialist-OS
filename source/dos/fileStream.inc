@@ -182,11 +182,21 @@ streamChunkReady:
             pop de
             jp nz,streamCached
             call streamCacheContains
-            jp nc,streamCachedHit
+            jp c,streamDirectIO
+            call streamDirectCached
+            jp c,streamReturn
+streamDirectIO:
             ; Полный сектор без копии в кэше передаётся прямо из/в буфер.
             ld hl,(v_streamPtr)
             ld a,(v_streamMode)
             ld b,a
+            dec a
+            jp nz,streamDirectReady
+            ld a,(v_streamChecked)
+            or a
+            jp z,streamDirectReady
+            ld b,5
+streamDirectReady:
     IFDEF BANKED_DOS_BUILD
             call ksSector
     ELSE
@@ -198,7 +208,7 @@ streamCached:
             ld a,(v_streamMode)
             and 1                 ; запись -> dirty=1, чтение -> 0
 streamGetCache:
-            call getSectorAddressInCache
+            call cachePartialSector
             jp c,streamReturn
 streamCachedAddress:
             ex de,hl
@@ -220,9 +230,12 @@ streamCopy:
             pop hl
     IFDEF BANKED_DOS_BUILD
             call ksCacheCopy
+            jp c,streamReturn
     ELSE
             call moveBytesForward
     ENDIF
+            call streamPartialVerify
+            jp c,streamReturn
 streamCopyDone:
             ld hl,(v_streamChunk)
             ex de,hl
@@ -345,27 +358,85 @@ v_streamWithin: DW 0
 ; При попадании HL=слот кэша; DE сохранён, BC/AF разрушены. Проверяем грязные строки:
 ; прямое чтение не должно возвращать старую дисковую копию.
 streamCacheContains:
-            ld hl,cacheData
-            ld a,(v_cacheCount)
-            ld c,a
-streamCacheProbe:
+            ld a,(v_cacheTag)
+            ld hl,v_cacheLastTag
+            cp (hl)
+            jp nz,streamCachePartialProbe
+            ld hl,(v_cacheLastSlot)
             call cmp_m_de
             ret z
+streamCachePartialProbe:
+            ld hl,partialCacheData
+            call cacheSlotMatches
+            ret z
+            ld hl,(v_cacheMaxSector)
+            call cmp_hl_de
+            ret c
+            ld a,(v_cacheProbeCount)
+            or a
+            jp z,streamCacheAbsent
+            ld c,a
+            ld hl,cacheData
+streamCacheProbe:
+            call cacheSlotMatches
+            ret z
             push bc
+streamCacheProbeStep:
             ld bc,FAT_CACHE_DATA
             add hl,bc
             pop bc
             dec c
             jp nz,streamCacheProbe
+streamCacheAbsent:
             scf
             ret
-; Слот уже найден: обновляем возраст/dirty без повторного поиска.
-streamCachedHit:
-            ld a,(v_streamMode)
-            and 1
-            ld b,a
-            call cacheTouchSlot
-            jp streamCachedAddress
+
+; Номер сектора совпал — проверить также диск и размер логического сектора.
+; Сравнение tag не разрушает курсор HL и счётчик поиска BC.
+cacheSlotMatches:
+            call cmp_m_de
+            ret nz
+            push hl
+            push bc
+            ld bc,7
+            add hl,bc
+            ld a,(v_cacheTag)
+            cp (hl)
+            pop bc
+            pop hl
+            ret
+; Полное чтение должно видеть незавершённую частичную запись. Сначала
+; сохраняем её, затем удаляем копию: сам полный сектор идёт прямо в клиент.
+; HL=слот, DE=LBA. BC/DE сохранены; CF=ошибка сохранения.
+streamDirectCached:
+            push bc
+            push de
+            push hl
+            call saveSectorFromCache
+            pop hl
+            jp c,streamDirectCachedDone
+            push hl
+            ld de,partialCacheData
+            call cmp_hl_de
+            pop hl
+            jp nz,streamDirectInvalidate
+            ld (hl),0FFh
+            inc hl
+            ld (hl),0FFh
+            ld de,5
+            add hl,de
+            ld (hl),0
+            inc hl
+            ld (hl),0FFh
+            jp streamDirectClean
+streamDirectInvalidate:
+            call cacheInvalidateHead
+streamDirectClean:
+            or a
+streamDirectCachedDone:
+            pop de
+            pop bc
+            ret
 
 ; Конец полного файла после fatStream. DE=курсор кластера, смещение глобальное.
 ; HL/BC/DE сохранены, CF=ошибка. Нулевая цепочка допустима для пустого файла.
@@ -441,3 +512,34 @@ streamRangeGood:
             pop hl
             or a
             ret
+
+; Неполный сектор уже собран в кэше: B=5 сохраняет и проверяет весь блок.
+; Успешная запись очищает dirty только этой строки; ошибка оставляет его.
+streamPartialVerify:
+            ld a,(v_streamMode)
+            cp 1
+            ret nz
+            ld a,(v_streamChecked)
+            or a
+            ret z
+            ld hl,(v_cacheLastSlot)
+            inc hl
+            inc hl
+            ld e,(hl)
+            inc hl
+            ld d,(hl)
+            ex de,hl
+            push hl
+            ld hl,(v_streamSector)
+            ex de,hl
+            pop hl
+            ld b,5
+            call logicalSectorPrepared
+            ret c
+            ld hl,(v_cacheLastSlot)
+            ld de,6
+            add hl,de
+            ld (hl),0
+            or a
+            ret
+v_streamChecked: DB 0

@@ -54,7 +54,18 @@ def main():
             m.write(ts['bankServiceSP'], word(top)); m.write(ts['bankStackFloor'], word(low+64))
             m.write(low-16, b'guard-DOS-stack!')
             if page: m.write(0xF800, (base/'CLIENT.bin').read_bytes())
-            m.write(ks['LOCAL_BLOCK_ENTRY'], (base/'LOCALBLOCK.bin').read_bytes())
+            m.write(ks['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
+            # Установочный образ не содержит адресов локальных обработчиков.
+            # После его замены восстанавливаем параметры, как bootstrap.
+            if page == 0:
+                m.write(ks['MEM_NATIVE_CALL'], word(bios['sysCall']))
+                m.write(ks['MEM_LOCAL_A'], word(bios['bios_blockIO']))
+                m.write(ks['MEM_LOCAL_CHECKED'], word(bios['localBlockChecked']))
+                m.write(ks['MEM_NEAR_COPY'], word(bios['bios_memcpy_bc_hl']))
+            elif page == 1:
+                m.write(ks['MEM_LOCAL_A'], word(ks['dosSystemDriver']))
+                m.write(ks['MEM_NEAR_COPY'], word(ks['memcpy_bc_hl']))
+            m.write(ks['MEM_BANK_KIND'], bytes([2 if page == 1 else 1]))
         select(1)
         m.write(ks['DOS_BANK_CODE_ADDR'], (base/'KERNEL.bin').read_bytes())
         select(0)
@@ -96,7 +107,9 @@ def main():
             calls.append(dict(caller=page, operation=operation if packet is not None else 'boot',
                               suboperation=packet[7] if packet is not None else 0,
                               inline=inline, legacy=legacy, ticks=state['cpu_ticks']-ticks, error=result >> 8, carry=bool(result & 1)))
-            if packet is not None and not inline and legacy is None and m.read(0xFFDB, 1) == b'\0':
+            if packet is not None and not inline and legacy is None and not state['flags']['C']:
+                assert m.read(0xFFD7, 1)==b'\0', 'Successful dispatch status lost after FAR copy'
+            if packet is not None and not inline and legacy is None and m.read(0xFFD7, 1) == b'\0':
                 returned = b''.join(word(state['registers'][key]['dec']) for key in ('hl','de','bc','af'))
                 assert m.read(packet_address, 8) == returned, 'MX_REGS результата'
             for p in (0, 1, 3):
@@ -119,8 +132,8 @@ def main():
         print('BANK DOS BOOT PASS', flush=True)
         m.screenshot(out/'bank-dos-boot.png')
         select(0); m.write(bios['v_dosBanked'], b'\1')
-        m.write(0x3200, b'A:\\FLASH.COM\0')
-        request(0, ks['MX_DOS_FILEEXEC'], regs(hl=0x3200))
+        m.write(0x3200, b'A:\\DRIVERS\\AT2MX.COM\0')
+        request(0, ks['MXOS_DOS_FILE_EXEC'], regs(hl=0x3200))
         rows.append(dict(case='load-driver-COM-in-DOS-page'))
         image_checks = runpy.run_path(str(ROOT/'scripts/emu80/banked-image-cases.py'))['check_images']
         def check_images():
@@ -138,8 +151,8 @@ def main():
             return
         # Публичные номера неизменны: только маршрут уходит в другой банк.
         for page in (0, 3):
-            request(page, ks['MX_DOS_FILESELECTDRIVE'], regs(a=7))
-            request(page, ks['MX_DOS_DIRECTORY'], regs(hl=0x3200, a=4))
+            request(page, ks['MXOS_DOS_FILE_SELECT_DRIVE'], regs(a=7))
+            request(page, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3200, a=4))
             assert m.read(0x3200, 4) == b'H:\\\0'
             rows.append(dict(case='select-H-getcwd', caller=page))
         # A: обслуживается основным BIOS; H: — драйвером в DOS-странице.
@@ -148,28 +161,28 @@ def main():
             handle = bytearray(64); handle[:11] = b'AUTOEXECBAT'
             handle[ks['FH_DRIVE']] = 0; handle[ks['FH_MODE']] = 1
             m.write(0x3100, handle)
-            request(page, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100))
+            request(page, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100))
             handle = bytearray(m.read(0x3100, 64))
             size = int.from_bytes(handle[28:32], 'little')
             handle[49:53] = word(0x3400)+word(2048)
             m.write(0x3100, handle)
-            request(page, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
+            request(page, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
             actual = m.read(0x3100, 64)
             assert int.from_bytes(actual[51:53], 'little') == size
             assert actual[49:51] == word(0x3400)
             assert m.read(0x3400, size) == (ROOT/'assets/system-rom/autoexec.emu-writable.bat').read_bytes()
-            request(page, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
+            request(page, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
             rows.append(dict(case='read-system-file-through-BIOS', caller=page, bytes=size))
         # Путь и данные в main специально отличаются от данных клиента банка 3.
         select(0); m.write(0x3200, b'H:\\WRONG\0'+bytes(119))
         select(3); m.write(0x3200, b'H:\\BNKTEST\0'+bytes(117))
-        request(3, ks['MX_DOS_DIRECTORY'], regs(hl=0x3200, a=7))
-        request(3, ks['MX_DOS_DIRECTORY'], regs(hl=0x3200, a=2))
-        request(3, ks['MX_DOS_DIRECTORY'], regs(hl=0x3300, a=4))
+        request(3, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3200, a=7))
+        request(3, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3200, a=2))
+        request(3, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3300, a=4))
         assert m.read(0x3300, 11) == b'H:\\BNKTEST\0'
         rows.append(dict(case='mkdir-chdir-caller-path'))
         select(1); m.write(ks['KD_PATH'], bytes([0xCC])*128)
-        request(1, ks['MX_DOS_DIRECTORY'], regs(hl=0x7D80, a=4))
+        request(1, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x7D80, a=4))
         assert m.read(0x7D80, 11) == b'H:\\BNKTEST\0'
         assert m.read(ks['KD_PATH'], 128) == bytes([0xCC])*128
         rows.append(dict(case='same-page-direct-NEAR-no-staging'))
@@ -177,75 +190,75 @@ def main():
         handle = bytearray(64); handle[:11] = b'BANKTESTBIN'
         handle[40] = 7; handle[41] = 1|2|4|8
         m.write(0x3100, handle)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100))
         payload = bytes((i*37+i//256)&255 for i in range(8193))
         m.write(0x4000, payload)
         handle = bytearray(m.read(0x3100, 64)); handle[49:53] = word(0x4000)+word(len(payload))
         m.write(0x3100, handle)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=2))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=2))
         handle = bytearray(m.read(0x3100, 64))
         assert int.from_bytes(handle[51:53], 'little') == len(payload)
         assert handle[49:51] == word(0x4000)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=4))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=4))
         handle[53:58] = bytes(5); m.write(0x3100, handle)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=3))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=3))
         handle = bytearray(m.read(0x3100, 64)); handle[49:53] = word(0x4000)+word(9000)
         m.write(0x3100, handle); m.write(0x4000, bytes([0xA5])*9000)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
         actual = m.read(0x3100, 64)
         assert int.from_bytes(actual[51:53], 'little') == len(payload)
         assert m.read(0x4000, len(payload)) == payload
         assert m.read(0x4000+len(payload), 9000-len(payload)) == bytes([0xA5])*(9000-len(payload))
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
         rows.append(dict(case='create-write-flush-seek-read-close', bytes=len(payload)))
         print('BANK DOS FILE IO PASS', flush=True)
         for pointer in (0xF7C1, 0xFFF0):
-            request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=pointer), expected=7)
+            request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=pointer), expected=7)
             rows.append(dict(case='reject-handle-boundary', address=pointer))
-        request(3, ks['MX_DOS_DIRECTORY'], regs(hl=0xF781, a=4), expected=7)
+        request(3, ks['MXOS_DOS_DIRECTORY'], regs(hl=0xF781, a=4), expected=7)
         select(3); m.write(0x3200, b'X'*128)
-        request(3, ks['MX_DOS_DIRECTORY'], regs(hl=0x3200, a=2), expected=7)
+        request(3, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3200, a=2), expected=7)
         rows.append(dict(case='reject-path-boundary-and-missing-terminator'))
         # Закрытый дескриптор: ноль переданных байт, буфер не меняется.
         handle = bytearray(m.read(0x3100, 64)); handle[49:53] = word(0x3400)+word(128)
         m.write(0x3100, handle); m.write(0x3400, bytes([0xCC])*128)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=1), expected=7)
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=1), expected=7)
         assert m.read(0x3100+51, 2) == b'\0\0'
         assert m.read(0x3400, 128) == bytes([0xCC])*128
         rows.append(dict(case='early-handle-error-zero-count'))
         # CLI и отрисовка DIR тоже исполняются в DOS с вложенными BIOS-вызовами.
         select(3); m.write(0x3200, b'dir\0'+bytes(124))
-        request(3, ks['MX_DOS_CLI'], regs(hl=0x3200, a=8))
-        request(3, ks['MX_DOS_CLI'], regs(hl=0x3200))
+        request(3, ks['MXOS_DOS_CLI'], regs(hl=0x3200, a=8))
+        request(3, ks['MXOS_DOS_CLI'], regs(hl=0x3200))
         select(0); m.screenshot(out/'bank-cli-dir.png')
         rows.append(dict(case='CLI-DIR-from-bank-nested-BIOS'))
         select(3); m.write(0x3200, b'cd /\0'+bytes(123))
-        request(3, ks['MX_DOS_CLI'], regs(hl=0x3200))
-        request(3, ks['MX_DOS_DIRECTORY'], regs(hl=0x3300, a=4))
+        request(3, ks['MXOS_DOS_CLI'], regs(hl=0x3200))
+        request(3, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3300, a=4))
         assert m.read(0x3300, 4) == b'H:\\\0'
         rows.append(dict(case='CLI-CD-from-bank'))
         # Полный файловый путь B: использует физическую страницу 1, не DOS 0.
-        request(0, ks['MX_DOS_FILESELECTDRIVE'], regs(a=1))
+        request(0, ks['MXOS_DOS_FILE_SELECT_DRIVE'], regs(a=1))
         handle = bytearray(64); handle[:11] = b'BANKRAM BIN'; handle[40] = 1; handle[41] = 15
         select(0); m.write(0x3100, handle)
-        request(0, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100))
+        request(0, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100))
         ram_payload = bytes((i*11+3)&255 for i in range(517))
         handle = bytearray(m.read(0x3100, 64)); handle[49:53] = word(0x3400)+word(517)
         m.write(0x3100, handle); m.write(0x3400, ram_payload)
-        request(0, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=2))
+        request(0, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=2))
         handle = bytearray(m.read(0x3100, 64)); handle[53:58] = bytes(5)
         m.write(0x3100, handle)
-        request(0, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=3))
+        request(0, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=3))
         handle = bytearray(m.read(0x3100, 64)); handle[51:53] = word(517)
         m.write(0x3100, handle); m.write(0x3400, bytes(517))
-        request(0, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
+        request(0, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
         assert m.read(0x3400, 517) == ram_payload
-        request(0, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
+        request(0, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
         rows.append(dict(case='RAMD-file-roundtrip-reserves-DOS-bank', bytes=517))
         def cli(command):
             data = command.encode('ascii')
             select(3); m.write(0x3200, data+bytes(128-len(data)))
-            request(3, ks['MX_DOS_CLI'], regs(hl=0x3200))
+            request(3, ks['MXOS_DOS_CLI'], regs(hl=0x3200))
 
         cli('copy H:/BNKTEST/BANKTEST.BIN B:/COPY.BIN')
         cli('ren B:/COPY.BIN B:/REN.BIN')
@@ -253,12 +266,12 @@ def main():
         select(3)
         handle = bytearray(64); handle[:11] = b'FINAL   BIN'; handle[40] = 1; handle[41] = 1
         m.write(0x3100, handle)
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100))
         handle = bytearray(m.read(0x3100, 64)); handle[49:53] = word(0x4000)+word(len(payload))
         m.write(0x3100, handle); m.write(0x4000, bytes(len(payload)))
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=1))
         assert m.read(0x4000, len(payload)) == payload
-        request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
+        request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=5))
         cli('del B:/FINAL.BIN')
         cli('mkdir B:/EMPTY')
         cli('rmdir B:/EMPTY')
@@ -269,7 +282,7 @@ def main():
             bad = bytearray(64); bad[:11] = b'BANKRAM BIN'; bad[40:43] = bytes([1, 1, 0x46])
             bad[49:53] = word(address)+word(count)
             m.write(0x3100, bad)
-            request(3, ks['MX_DOS_FILEHANDLE'], regs(hl=0x3100, a=1), expected=7)
+            request(3, ks['MXOS_DOS_FILEHANDLE'], regs(hl=0x3100, a=1), expected=7)
             assert m.read(0x3100, 64) == bad
             rows.append(dict(case='reject-client-buffer', address=address, count=count))
         packet = regs(hl=0x3200)
@@ -277,7 +290,7 @@ def main():
         assert m.read(0x3000, 8) == packet
         rows.append(dict(case='unsupported-preserves-packet'))
         select(1); m.write(ks['kdBusy'], b'\1')
-        request(3, ks['MX_DOS_GETERROR'], packet, expected=6)
+        request(3, ks['MXOS_DOS_GET_ERROR'], packet, expected=6)
         assert m.read(0x3000, 8) == packet
         select(1); assert m.read(ks['kdBusy'], 1) == b'\1'
         m.write(ks['kdBusy'], b'\0')
@@ -292,32 +305,32 @@ def main():
             m.write(0x3200, path+bytes(128-len(path)))
             obj = word(0x3200)+word(buffer)+word(length)+bytes(34)
             m.write(0x3100, obj); m.write(buffer, data+b'guard')
-            request(page, ks['MX_DOS_FILESAVEPATH'], regs(hl=0x3100))
+            request(page, ks['MXOS_DOS_FILE_SAVE_PATH'], regs(hl=0x3100))
             assert m.read(0x3100, 6) == obj[:6]
             assert m.read(0x3106, 2) == word(length)
             m.write(buffer, bytes([0xA5])*(length+5))
             obj = word(0x3200)+word(buffer)+word(length+5)+bytes(34)
             m.write(0x3100, obj)
-            request(page, ks['MX_DOS_FILELOADPATH'], regs(hl=0x3100))
+            request(page, ks['MXOS_DOS_FILE_LOAD_PATH'], regs(hl=0x3100))
             assert m.read(buffer, length) == data
             assert m.read(buffer+length, 5) == bytes([0xA5])*5
             assert m.read(0x3100, 6) == obj[:6]
             assert m.read(0x3106, 2) == word(length)
             if length:
                 m.write(0x3104, word(length-1))
-                request(page, ks['MX_DOS_FILELOADPATH'], regs(hl=0x3100), expected=7)
+                request(page, ks['MXOS_DOS_FILE_LOAD_PATH'], regs(hl=0x3100), expected=7)
                 assert m.read(0x3106, 2) == bytes(2)
             rows.append(dict(case='whole-file-path-roundtrip', caller=page, bytes=length))
         for buffer, length in ((0xF7FF, 2), (0xFFFF, 2), (0x3101, 40), (0x3201, 40)):
             select(3)
             m.write(0x3100, word(0x3200)+word(buffer)+word(length)+bytes(34))
-            request(3, ks['MX_DOS_FILELOADPATH'], regs(hl=0x3100), expected=7)
+            request(3, ks['MXOS_DOS_FILE_LOAD_PATH'], regs(hl=0x3100), expected=7)
             assert m.read(0x3106, 2) == bytes(2)
             rows.append(dict(case='reject-whole-file-buffer', address=buffer, count=length))
         print('BANK DOS WHOLE FILE IO PASS', flush=True)
         for page in (0, 3):
             select(page); m.write(0x3300, bytes([0xA5])*16)
-            request(page, ks['MX_DOS_FILEGETDRIVES'], regs(hl=0x3300, bc=8))
+            request(page, ks['MXOS_DOS_FILE_GET_DRIVES'], regs(hl=0x3300, bc=8))
             count = m.read(0x3005, 1)[0]
             assert m.read(0x3300, count) == bytes([0,1,7])
             assert m.read(0x3300+count, 16-count) == bytes([0xA5])*(16-count)
@@ -325,11 +338,11 @@ def main():
         select(3)
         path = b'B:/PATH20003.BIN'
         m.write(0x3200, path+bytes(128-len(path))); m.write(0x3300, bytes([0xA5])*32)
-        result = invoke(3, ks['BANK_DOS_GATE'], regs(hl=0x3200,de=0x3300), ks['MX_DOS_FILENAMEPREPARE'])
+        result = invoke(3, ks['BANK_DOS_GATE'], regs(hl=0x3200,de=0x3300), ks['MXOS_DOS_FILE_NAME_PREPARE'])
         assert not result[1], result
         assert m.read(0x3300, 32) == b'PATH2000BIN'+bytes([0xA5])*21
         assert m.read(0x3000, 4) == word(0x3200+len(path))+word(0x3300)
-        result = invoke(3, ks['BANK_DOS_GATE'], regs(hl=0x3300), ks['MX_DOS_FILELOADINFO'])
+        result = invoke(3, ks['BANK_DOS_GATE'], regs(hl=0x3300), ks['MXOS_DOS_FILE_LOAD_INFO'])
         assert not result[1], result
         descriptor = m.read(0x3300,32)
         assert int.from_bytes(descriptor[28:32],'little') == 20003
@@ -338,7 +351,7 @@ def main():
         offset = 0
         for length in (1,4096,73,20003-4170):
             m.write(0x4000,bytes([0xA5])*(length+3))
-            request(3, ks['MX_DOS_FILESTREAM'], regs(hl=0x4000,de=0x3100,bc=length,a=2))
+            request(3, ks['MXOS_DOS_FILESTREAM'], regs(hl=0x4000,de=0x3100,bc=length,a=2))
             expected = bytes((i*29+i//257+20003)&255 for i in range(offset,offset+length))
             assert m.read(0x4000,length) == expected
             assert m.read(0x4000+length,3) == bytes([0xA5])*3
@@ -347,44 +360,44 @@ def main():
         rows.append(dict(case='name-stat-stream-incremental-read', bytes=offset))
         for buffer,count,cur in ((0xF7FF,2,0x3100),(0x4000,5,0xF7FD),(0x3101,5,0x3100)):
             before = m.read(0x3100,4)
-            request(3,ks['MX_DOS_FILESTREAM'],regs(hl=buffer,de=cur,bc=count,a=2),expected=7)
+            request(3,ks['MXOS_DOS_FILESTREAM'],regs(hl=buffer,de=cur,bc=count,a=2),expected=7)
             assert m.read(0x3100,4) == before
             assert m.read(0x3004,2) == bytes(2)
-        request(3,ks['MX_DOS_FILESTREAM'],regs(hl=0xFFFF,de=0xFFFF,bc=0,a=2))
+        request(3,ks['MXOS_DOS_FILESTREAM'],regs(hl=0xFFFF,de=0xFFFF,bc=0,a=2))
         rows.append(dict(case='stream-boundaries-overlap-and-empty'))
         # Перезапись уже выделенной цепочки, затем чтение полным файловым ABI.
         m.write(0x3300,b'PATH4097BIN'+bytes(21))
-        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3300),ks['MX_DOS_FILELOADINFO'])
+        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3300),ks['MXOS_DOS_FILE_LOAD_INFO'])
         assert not result[1], result
         m.write(0x3100,m.read(0x331A,2)+bytes(2))
         stream_data = bytes((i*13+7)&255 for i in range(4097))
         m.write(0x4000,stream_data)
-        request(3,ks['MX_DOS_FILESTREAM'],regs(hl=0x4000,de=0x3100,bc=4097,a=1))
-        request(3,ks['MX_DOS_FLUSHVOLUME'],regs())
+        request(3,ks['MXOS_DOS_FILESTREAM'],regs(hl=0x4000,de=0x3100,bc=4097,a=1))
+        request(3,ks['MXOS_DOS_FLUSH_VOLUME'],regs())
         m.write(0x3100,word(0x3200)+word(0x4000)+word(4097)+bytes(34))
         m.write(0x3200,b'B:/PATH4097.BIN'+bytes(114)); m.write(0x4000,bytes(4097))
-        request(3,ks['MX_DOS_FILELOADPATH'],regs(hl=0x3100))
+        request(3,ks['MXOS_DOS_FILE_LOAD_PATH'],regs(hl=0x3100))
         assert m.read(0x4000,4097) == stream_data
         # Вернуть исходные байты для последующих проверок загрузки в main.
         original = bytes((i*29+i//257+4097)&255 for i in range(4097))
         m.write(0x4000,original)
-        request(3,ks['MX_DOS_FILESAVEPATH'],regs(hl=0x3100))
+        request(3,ks['MXOS_DOS_FILE_SAVE_PATH'],regs(hl=0x3100))
         rows.append(dict(case='stream-write-flush-read-by-path',bytes=4097))
         m.write(0x3300,b'PATH257 BIN'); m.write(0x3400,b'RENAMED BIN')
-        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3300,de=0x3400),ks['MX_DOS_FILERENAME'])
+        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3300,de=0x3400),ks['MXOS_DOS_FILE_RENAME'])
         assert not result[1],result
-        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3400,bc=0x2101),ks['MX_DOS_FILEGETSETATTR'])
+        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3400,bc=0x2101),ks['MXOS_DOS_FILE_GET_SET_ATTR'])
         assert result == (0x21,False),result
-        request(3,ks['MX_DOS_FILEDELETE'],regs(hl=0x3400),expected=6)
-        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3400,bc=0x2001),ks['MX_DOS_FILEGETSETATTR'])
+        request(3,ks['MXOS_DOS_FILE_DELETE'],regs(hl=0x3400),expected=6)
+        result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3400,bc=0x2001),ks['MXOS_DOS_FILE_GET_SET_ATTR'])
         assert result == (0x20,False),result
-        request(3,ks['MX_DOS_FILEDELETEONDRIVE'],regs(hl=0x3400))
-        request(3,ks['MX_DOS_FILELOADINFO'],regs(hl=0x3400),expected=2)
+        request(3,ks['MXOS_DOS_FILE_DELETE_ON_DRIVE'],regs(hl=0x3400))
+        request(3,ks['MXOS_DOS_FILE_LOAD_INFO'],regs(hl=0x3400),expected=2)
         rows.append(dict(case='rename-attributes-protect-delete'))
         print('BANK DOS METADATA AND STREAM PASS', flush=True)
         # Список из своей страницы задаёт эталон для внешнего контракта.
-        request(3, ks['MX_DOS_FILESELECTDRIVE'], regs(a=0))
-        for fn, sub in ((ks['MX_DOS_FILELIST'], 0), (ks['MX_DOS_DIRECTORY'], 3)):
+        request(3, ks['MXOS_DOS_FILE_SELECT_DRIVE'], regs(a=0))
+        for fn, sub in ((ks['MXOS_DOS_FILE_LIST'], 0), (ks['MXOS_DOS_DIRECTORY'], 3)):
             request(1, fn, regs(hl=ks['DOS_BANK_DATA_ADDR'], de=128, bc=1, a=sub))
             reference = m.read(ks['DOS_BANK_DATA_ADDR'], 2049)
             end = next(i for i in range(0, 2049, 16) if reference[i] == 255)+1
@@ -400,9 +413,9 @@ def main():
                 assert m.read(0x3000, 2) == word(buffer)
                 assert m.read(0x3004, 2) == word(1)
                 rows.append(dict(case='directory-list-preserves-count-skip-tail', caller=page, function=fn))
-        request(0, ks['MX_DOS_DIRECTORY'], regs(hl=0x3200, a=4), inline=True)
+        request(0, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x3200, a=4), inline=True)
         assert m.read(0x3200, 4) == b'A:\\\0'
-        rows.append(dict(case='main-inline-MXCALL-routes-to-bank'))
+        rows.append(dict(case='main-inline-MXOS_CALL-routes-to-bank'))
         # На этом этапе больше не используем старую DOS в main. Её код/кэш
         # намеренно портятся; BIOS и новая DOS должны продолжить работу.
         select(0); m.write(0x4000, bytes([0xCC])*0x4C00)
@@ -410,15 +423,15 @@ def main():
         m.write(0x3200, path+bytes(128-len(path)))
         # Малый буфер даёт штатную ошибку, не переход в затёртый код main.
         m.write(0x3100, word(0x3200)+word(0x4000)+word(8193)+bytes(34))
-        request(0, ks['MX_DOS_FILELOADPATH'], regs(hl=0x3100), expected=7, inline=True)
+        request(0, ks['MXOS_DOS_FILE_LOAD_PATH'], regs(hl=0x3100), expected=7, inline=True)
         path = b'B:/PATH4097.BIN'
         m.write(0x3200, path+bytes(128-len(path)))
-        request(0, ks['MX_DOS_FILELOADPATH'], regs(hl=0x3100), inline=True)
+        request(0, ks['MXOS_DOS_FILE_LOAD_PATH'], regs(hl=0x3100), inline=True)
         assert m.read(0x4000, 4097) == bytes((i*29+i//257+4097)&255 for i in range(4097))
         rows.append(dict(case='main-DOS-code-erased-load-above-4000', bytes=4097))
         path = b'A:/AUTOEXEC.BAT'
         m.write(0x3200, path+bytes(128-len(path)))
-        request(0, ks['MX_DOS_FILELOADPATH'], regs(hl=0x3100), inline=True)
+        request(0, ks['MXOS_DOS_FILE_LOAD_PATH'], regs(hl=0x3100), inline=True)
         system_data = (ROOT/'assets/system-rom/autoexec.emu-writable.bat').read_bytes()
         assert m.read(0x4000, len(system_data)) == system_data
         rows.append(dict(case='ROM-bridge-in-BIOS-after-main-DOS-erased', bytes=len(system_data)))
@@ -458,10 +471,10 @@ def main():
  ld (03605h),hl
  ld hl,03607h
  inc (hl)
- MXCALL MX_DOS_GETERROR
+ MXOS_CALL MXOS_DOS_GET_ERROR
  ld (03608h),a
  ld c,'.'
- MXCALL MX_BIOS_PRINTCHAR
+ MXOS_CALL MXOS_BIOS_PRINT_CHAR
  ret
 ''', encoding='utf-8')
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080',
@@ -469,28 +482,28 @@ def main():
         for owner, caller in ((0,0), (3,3), (3,0)):
             select(owner); m.write(0x3800, (out/'observer.bin').read_bytes())
             m.write(0x3600, bytes(16))
-            request(owner, ks['MX_DOS_CLI'], regs(hl=0x3800, bc=0x1234, de=0x5678, a=ks['CLI_OP_OBSERVER']))
+            request(owner, ks['MXOS_DOS_CLI'], regs(hl=0x3800, bc=0x1234, de=0x5678, a=ks['CLI_OP_OBSERVER']))
             assert m.read(0x3000, 6) == regs(hl=0x3800, bc=0x1234, de=0x5678)[:6]
             select(caller)
             path = f'B:/OBS{owner}{caller}'.encode('ascii')
             m.write(0x3200, path+bytes(128-len(path)))
-            request(caller, ks['MX_DOS_CLI'], regs(hl=0x3200, a=ks['CLI_OP_MKDIR']))
+            request(caller, ks['MXOS_DOS_CLI'], regs(hl=0x3200, a=ks['CLI_OP_MKDIR']))
             select(owner); event = m.read(0x3600, 9)
             assert event == bytes([1,0,0,0,owner,7+caller,caller,1,6]), event.hex()
-            request(owner, ks['MX_DOS_CLI'], regs(a=ks['CLI_OP_OBSERVER']))
+            request(owner, ks['MXOS_DOS_CLI'], regs(a=ks['CLI_OP_OBSERVER']))
             select(caller)
-            request(caller, ks['MX_DOS_CLI'], regs(hl=0x3200, a=ks['CLI_OP_RMDIR']))
+            request(caller, ks['MXOS_DOS_CLI'], regs(hl=0x3200, a=ks['CLI_OP_RMDIR']))
             select(owner); assert m.read(0x3607, 1) == b'\1'
             rows.append(dict(case='CLI-observer-callback-nested-BIOS-reject-DOS', owner=owner, caller=caller))
-        request(3, ks['MX_DOS_CLI'], regs(hl=0xF800, a=ks['CLI_OP_OBSERVER']), expected=7)
+        request(3, ks['MXOS_DOS_CLI'], regs(hl=0xF800, a=ks['CLI_OP_OBSERVER']), expected=7)
         print('BANK DOS CALLBACK AND LEGACY PASS', flush=True)
         check_images()
         check_copies()
         # Отдельная пустая тестовая B: с 300 нулевыми файлами. Заполняем
         # метаданные стенда напрямую, чтобы проверить границу пачки списка
         # независимо от сотен одинаковых вызовов создания файла.
-        request(0, ks['MX_DOS_FILESELECTDRIVE'], regs(a=1))
-        request(0, ks['MX_DOS_FLUSHVOLUME'], regs())
+        request(0, ks['MXOS_DOS_FILE_SELECT_DRIVE'], regs(a=1))
+        request(0, ks['MXOS_DOS_FLUSH_VOLUME'], regs())
         fixture = bytearray(ram_seed)
         fixture[17:19] = word(384)
         root = (int.from_bytes(fixture[14:16], 'little') +
@@ -502,11 +515,11 @@ def main():
             fixture[root+i*32:root+(i+1)*32] = name+b'\x20'+bytes(20)
             entries.append(name+b'\x20'+bytes(4))
         select(2); m.write(0, fixture)
-        request(0, ks['MX_DOS_MOUNTVOLUME'], regs())
+        request(0, ks['MXOS_DOS_MOUNT_VOLUME'], regs())
         for page, skip, capacity in ((0,0,300), (3,0,300), (3,0,256),
                                      (3,1,299), (3,255,45), (3,300,1), (3,0,0)):
             select(page); m.write(0x4000, bytes([0xA5])*(capacity*16+17))
-            request(page, ks['MX_DOS_DIRECTORY'], regs(hl=0x4000, de=capacity, bc=skip, a=3))
+            request(page, ks['MXOS_DOS_DIRECTORY'], regs(hl=0x4000, de=capacity, bc=skip, a=3))
             expected = b''.join(entries[skip:skip+capacity])+b'\xff'
             assert m.read(0x4000, len(expected)) == expected
             assert m.read(0x4000+len(expected), 16) == bytes([0xA5])*16
@@ -514,7 +527,7 @@ def main():
             assert m.read(0x3004, 2) == word(skip)
             rows.append(dict(case='directory-list-crosses-4KB-batch', caller=page, skip=skip, capacity=capacity))
         for buffer, capacity in ((0xF7FF,1), (0x4000,4096), (0xFFFF,0)):
-            request(3, ks['MX_DOS_FILELIST'], regs(hl=buffer, de=capacity), expected=7)
+            request(3, ks['MXOS_DOS_FILE_LIST'], regs(hl=buffer, de=capacity), expected=7)
             rows.append(dict(case='reject-directory-list-range', address=buffer, capacity=capacity))
         print('BANK DOS MAIN PUBLIC ABI PASS', flush=True)
         finish_report()

@@ -46,11 +46,11 @@ def main():
         m.write(S['STACK_BOTTOM'],bytes([0xA5])*(S['STACK_ADDR']-S['STACK_BOTTOM']))
         m.write(0x8500,source)
         m.write(0x8600,bytes(80))
-        m.write(0x8400,b'STD ABI: PRINTCHAR / MEMCPY\0')
+        m.write(0x8400,b'STD ABI: PRINT_CHAR / MEMCPY\0')
         m.write(0x8800,bytes.fromhex('05 C4 00 88 C9'))  # 64 вложенных CALL/RET.
         m.write(S['bios_vars.cursorY'],bytes((40,4)))
         m.write(S['bios_vars.inverse'],bytes(2))
-        m.write(S['bios_vars.escMode'],bytes([255]))
+        m.write(S['bios_upper.escMode'],bytes([255]))
         code = b''
         if std_mode is not None:
             code += bytes((0x3E,std_mode,0x32))+word(S['IO_COLOR'])+b'\x32'+word(S['IO_PAGE_STD'])
@@ -59,8 +59,6 @@ def main():
         code += b'\x0E!'+call('bios_printChar')
         for start,end,dest in [(0x8500,0x8541,0x8600),(0x8600,0x8641,0x8601),(0x8601,0x8642,0x8600)]:
             code += b'\x21'+word(start)+b'\x11'+word(end)+b'\x01'+word(dest)+call('bios_memcpy_bc_hl')
-        code += b'\x21\x28\x91\x01\x0A\x0A'+call('bios_uiInverseRect')
-        code += b'\x21\x28\x91\x01\x0A\x0A'+call('bios_uiInverseRect')
         code += bytes.fromhex('C3 00 83')
         assert len(code)<256
         m.write(0x8200,code)

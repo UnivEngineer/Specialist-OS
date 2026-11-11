@@ -21,12 +21,7 @@ fileExecKeepShellDrive:
             ; Встроенные команды доступны и вызывающему CLI/BAT через DOS.
             ld a,(v_dosModuleReady)
             or a
-            jp nz,fileExecModuleReady
-            push hl
-            call loadDosModule
-            pop hl
-            jp c,fileExecExternal
-fileExecModuleReady:
+            jp z,fileExecExternal
             push hl
             call directoryCommand
             pop hl
@@ -34,8 +29,11 @@ fileExecModuleReady:
             cp 0FFh
             jp nz,fileExecBuiltinDone
             call cliResolveExternal
-            jp c,badCommand
-            jp fileExecExternal
+            jp nc,fileExecExternal
+            ; Ошибка контейнера — статус загрузчика, без BAD COMMAND/ожидания.
+            cp DOS_ERR_BAD_IMAGE
+            jp z,dosSetError
+            jp badCommand
 fileExecBuiltinDone:
             or a
             ret
@@ -225,6 +223,9 @@ defAppReturn:
 execError:
             pop     de
 badCommand:
+            ld a,(v_batDepth)
+            or a
+            jp nz,batUnknownCommand
             ld      hl, txtBadCommand
             call    j_printString
             ld a,(v_shell)
@@ -238,6 +239,9 @@ execCommandErrorDone:
 stc_ret:
             scf
             ret
+batUnknownCommand:
+            ld a,DOS_ERR_NOT_FOUND
+            jp dosSetError
 
 ; ---------------------------------------------------------------------------
 

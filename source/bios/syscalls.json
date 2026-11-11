@@ -11,19 +11,19 @@
       },
       {
         "id": 1,
-        "name": "TAPEREAD",
+        "name": "TAPE_READ",
         "target": "t_tapeRead",
         "legacy": "bios_tapeRead"
       },
       {
         "id": 2,
-        "name": "PRINTCHAR",
+        "name": "PRINT_CHAR",
         "target": "printChar",
         "legacy": "bios_printChar"
       },
       {
         "id": 3,
-        "name": "TAPEWRITE",
+        "name": "TAPE_WRITE",
         "target": "t_tapeWrite",
         "legacy": "bios_tapeWrite"
       },
@@ -35,73 +35,78 @@
       },
       {
         "id": 5,
-        "name": "KEYCHECK",
+        "name": "KEY_CHECK",
         "target": "j_keyScan",
         "legacy": "bios_keyCheck"
       },
       {
         "id": 6,
-        "name": "PRINTHEXBYTE",
+        "name": "PRINT_HEX_BYTE",
         "target": "printHexByte",
         "legacy": "bios_printHexByte"
       },
       {
         "id": 7,
-        "name": "PRINTSTRING",
-        "target": "printString1",
-        "legacy": "bios_printString"
+        "name": "PRINT_STRING_Z",
+        "target": "printStringZ",
+        "legacy": "bios_printString",
+        "aliases": [
+          "PRINT_STRING",
+          "PRINT_STRING_BANK",
+          "PRINT_STRING_Z_BANK"
+        ]
       },
       {
         "id": 8,
-        "name": "KEYSCAN",
+        "name": "KEY_SCAN",
         "target": "j_keyScan",
         "legacy": "bios_keyScan"
       },
       {
         "id": 9,
-        "name": "GETCURSORPOS",
+        "name": "GET_CURSOR_POS",
         "target": "getCursorPos",
         "legacy": "bios_getCursorPos"
       },
       {
         "id": 10,
-        "name": "SETCURSORPOS",
+        "name": "SET_CURSOR_POS",
         "target": "setCursorPos",
         "legacy": "bios_setCursorPos"
       },
       {
         "id": 11,
-        "name": "TAPELOAD",
+        "name": "TAPE_LOAD",
         "target": "t_tapeLoad",
         "legacy": "bios_tapeLoad"
       },
       {
         "id": 12,
-        "name": "TAPESAVE",
+        "name": "TAPE_SAVE",
         "target": "t_tapeSave",
         "legacy": "bios_tapeSave"
       },
       {
         "id": 13,
-        "name": "CALCCS",
+        "name": "CALC_CS",
         "target": "calcCS",
         "legacy": "bios_calcCS"
       },
       {
         "id": 14,
-        "name": "PRINTHEXWORD",
+        "name": "PRINT_HEX_WORD",
         "target": "printHexWord",
         "legacy": "bios_printHexWord"
       },
       {
         "id": 15,
-        "name": "SETMEMTOP",
+        "name": "SET_MEM_TOP",
         "target": "setMemTop",
         "legacy": "bios_setMemTop"
       },
       {
         "id": 16,
-        "name": "GETMEMTOP",
+        "name": "GET_MEM_TOP",
         "target": "getMemTop",
         "legacy": "bios_getMemTop"
       },
@@ -113,31 +118,34 @@
       },
       {
         "id": 18,
-        "name": "INSTALLDRIVER",
+        "name": "INSTALL_DRIVER",
         "target": "installDriver",
         "legacy": "bios_installDriver"
       },
       {
         "id": 19,
-        "name": "DISKDRIVER",
+        "name": "DISK_DRIVER",
         "target": "sysDiskDriver",
         "legacy": "bios_diskDriver"
       },
       {
         "id": 20,
-        "name": "PRINTCHARREAL",
-        "target": "printChar_real",
-        "legacy": "bios_printCharReal"
+        "name": "PRINT_CHAR_RAW",
+        "target": "printCharRaw",
+        "legacy": "bios_printCharReal",
+        "aliases": [
+          "PRINT_CHAR_REAL"
+        ]
       },
       {
         "id": 21,
-        "name": "PRINTDECWORD",
+        "name": "PRINT_DEC_WORD",
         "target": "printDecWord",
         "legacy": "bios_printDecWord"
       },
       {
         "id": 22,
-        "name": "SETRAMDDRIVER",
+        "name": "SET_RAMD_DRIVER",
         "target": "setRAMDDriver",
         "legacy": "bios_setRAMDDriver"
       },
@@ -167,121 +175,111 @@
       },
       {
         "id": 27,
-        "name": "DIV_HL_2",
-        "target": "div_hl_2",
-        "legacy": "bios_div_hl_2"
-      },
-      {
-        "id": 28,
-        "name": "MUL_HL_DE",
-        "target": "mul_hl_de",
-        "legacy": "bios_mul_hl_de"
-      },
-      {
-        "id": 29,
-        "name": "DIV_HL_DE",
-        "target": "div_hl_de",
-        "legacy": "bios_div_hl_de"
-      },
-      {
-        "id": 30,
-        "name": "BEEPTIMER",
+        "name": "BEEP_TIMER",
         "target": "beepTimer",
         "legacy": "bios_beepTimer"
       },
       {
-        "id": 31,
-        "name": "DISKWRITECHECKED",
+        "id": 28,
+        "name": "DISK_WRITE_CHECKED",
         "target": "diskWriteChecked",
         "legacy": "bios_diskWriteChecked"
       },
       {
-        "id": 32,
-        "name": "TIMERINIT",
-        "target": "pitTimerInit",
-        "legacy": "bios_timerInit"
-      },
-      {
-        "id": 33,
-        "name": "TIMERREAD",
-        "target": "pitTimerRead",
-        "legacy": "bios_timerRead"
-      },
-      {
-        "id": 34,
-        "name": "UIDRAW",
-        "target": "uiDraw",
-        "legacy": "bios_uiDraw"
-      },
-      {
-        "id": 35,
-        "name": "UIINVERSERECT",
-        "target": "uiInverseRect",
-        "legacy": "bios_uiInverseRect"
-      },
-      {
-        "id": 36,
-        "name": "UITOOLBAR",
-        "target": "uiToolbar",
-        "legacy": "bios_uiToolbar"
-      },
-      {
-        "id": 37,
-        "name": "UICOPYRECT",
-        "target": "uiCopyRect",
-        "legacy": "bios_uiCopyRect"
-      },
-      {
-        "id": 38,
-        "name": "ARGNEXT",
+        "id": 29,
+        "name": "ARG_NEXT",
         "target": "argNext",
         "legacy": "bios_argNext"
       },
       {
-        "id": 39,
-        "name": "INSTALLBLOCKDRIVER",
+        "id": 30,
+        "name": "INSTALL_BLOCK_DRIVER",
         "target": "installBlockDriver",
         "legacy": "bios_installBlockDriver"
       },
       {
-        "id": 40,
-        "name": "LOADDOSMODULE",
-        "target": "loadDosModule",
-        "legacy": "bios_loadDosModule"
-      },
-      {
-        "id": 41,
-        "name": "RELEASEDOSMODULE",
-        "target": "releaseDosModule",
-        "legacy": "bios_releaseDosModule"
-      },
-      {
-        "id": 42,
-        "name": "SETINPUTHOOK",
+        "id": 31,
+        "name": "SET_INPUT_HOOK",
         "target": "setInputHook",
         "legacy": "bios_setInputHook"
       },
       {
-        "id": 43,
-        "name": "BLOCKIO",
+        "id": 32,
+        "name": "BLOCK_IO",
         "target": "blockIO",
         "legacy": "bios_blockIO"
       },
       {
-        "id": 44,
+        "id": 33,
         "name": "MEMCPY",
         "target": "memcpy_bc_hl",
         "legacy": "bios_memcpy_bc_hl"
       },
       {
-        "id": 45,
-        "name": "FILEBODY",
+        "id": 34,
+        "name": "FILE_BODY",
         "target": "fileBodyLoad"
       },
       {
-        "id": 46,
-        "name": "GLYPHCACHE",
+        "id": 35,
+        "name": "GLYPH_CACHE",
         "target": "glyphCacheService"
+      },
+      {
+        "id": 36,
+        "name": "PRINT_STRING_Z_MAIN",
+        "target": "printStringZ",
+        "aliases": [
+          "PRINT_STRING_MAIN"
+        ]
+      },
+      {
+        "id": 37,
+        "name": "FONT_RENDER",
+        "target": "fast6.service"
+      },
+      {
+        "id": 38,
+        "name": "PRINT_STRING_RAW_Z",
+        "target": "printStringRawZ",
+        "legacy": "bios_printStringReal",
+        "aliases": [
+          "PRINT_STRING_REAL",
+          "PRINT_STRING_RAW_Z_BANK"
+        ]
+      },
+      {
+        "id": 39,
+        "name": "PRINT_STRING_RAW_Z_MAIN",
+        "target": "printStringRawZ",
+        "aliases": [
+          "PRINT_STRING_REAL_MAIN"
+        ]
+      },
+      {
+        "id": 40,
+        "name": "PRINT_STRING_RAW_LIM",
+        "target": "printStringRawLim",
+        "aliases": [
+          "PRINT_STRING_RAW_LIM_BANK"
+        ],
+        "legacy": "bios_printStringRawLim"
+      },
+      {
+        "id": 41,
+        "name": "PRINT_STRING_RAW_LIM_MAIN",
+        "target": "printStringRawLim"
+      },
+      {
+        "id": 42,
+        "name": "TEXT_PRINT",
+        "target": "bankText.request"
+      },
+      {
+        "id": 43,
+        "name": "SET_FONT_ENCODING",
+        "target": "fast6.setEncoding",
+        "legacy": "bios_setFontEncoding"
       }
     ]
   },
@@ -291,227 +289,251 @@
     "services": [
       {
         "id": 0,
-        "name": "FILELIST",
+        "name": "FILE_LIST",
         "target": "dos_fileList",
         "legacy": "bios_fileList"
       },
       {
         "id": 1,
-        "name": "FILEGETSETDRIVE",
+        "name": "FILE_GET_SET_DRIVE",
         "target": "dos_fileGetSetDrive",
         "legacy": "bios_fileGetSetDrive"
       },
       {
         "id": 2,
-        "name": "FILECREATE",
+        "name": "FILE_CREATE",
         "target": "dos_fileCreate",
         "legacy": "bios_fileCreate"
       },
       {
         "id": 3,
-        "name": "FILELOAD",
+        "name": "FILE_LOAD",
         "target": "dos_fileLoad",
         "legacy": "bios_fileLoad"
       },
       {
         "id": 4,
-        "name": "FILEDELETE",
+        "name": "FILE_DELETE",
         "target": "dos_fileDelete",
         "legacy": "bios_fileDelete"
       },
       {
         "id": 5,
-        "name": "FILERENAME",
+        "name": "FILE_RENAME",
         "target": "dos_fileRename",
         "legacy": "bios_fileRename"
       },
       {
         "id": 6,
-        "name": "FILELOADINFO",
+        "name": "FILE_LOAD_INFO",
         "target": "dos_fileLoadInfo",
         "legacy": "bios_fileLoadInfo"
       },
       {
         "id": 7,
-        "name": "IMAGEOPEN",
+        "name": "IMAGE_OPEN",
         "target": "dos_imageOpen",
         "legacy": "bios_imageOpen"
       },
       {
         "id": 8,
-        "name": "FILEGETSETATTR",
+        "name": "FILE_GET_SET_ATTR",
         "target": "dos_fileGetSetAttr",
         "legacy": "bios_fileGetSetAttr"
       },
       {
         "id": 9,
-        "name": "FILENAMEPREPARE",
+        "name": "FILE_NAME_PREPARE",
         "target": "dos_fileNamePrepare",
         "legacy": "bios_fileNamePrepare"
       },
       {
         "id": 10,
-        "name": "FILEEXEC",
+        "name": "FILE_EXEC",
         "target": "dos_fileExec",
         "legacy": "bios_fileExec"
       },
       {
         "id": 11,
-        "name": "FILELOAD2",
+        "name": "FILE_LOAD2",
         "target": "dos_fileLoad2",
         "legacy": "bios_fileLoad2"
       },
       {
         "id": 12,
-        "name": "GETDRIVEFREESPACE",
+        "name": "GET_DRIVE_FREE_SPACE",
         "target": "dos_getDriveFreeSpace",
         "legacy": "bios_getDriveFreeSpace"
       },
       {
         "id": 13,
-        "name": "FILECREATEPREPARE",
+        "name": "FILE_CREATE_PREPARE",
         "target": "dos_fileCreatePrepare",
         "legacy": "bios_fileCreatePrepare"
       },
       {
         "id": 14,
-        "name": "RESERVEDC88D",
-        "target": "dos_dosUnsupported",
-        "legacy": "bios_reservedC88D"
-      },
-      {
-        "id": 15,
-        "name": "INSTALLVOLUME",
+        "name": "INSTALL_VOLUME",
         "target": "dos_installVolume",
         "legacy": "bios_installVolume"
       },
       {
-        "id": 16,
-        "name": "GETVOLUME",
+        "id": 15,
+        "name": "GET_VOLUME",
         "target": "dos_getVolume",
         "legacy": "bios_getVolume"
       },
       {
-        "id": 17,
-        "name": "MOUNTVOLUME",
+        "id": 16,
+        "name": "MOUNT_VOLUME",
         "target": "dos_mountVolume",
         "legacy": "bios_mountVolume"
       },
       {
-        "id": 18,
-        "name": "FLUSHVOLUME",
+        "id": 17,
+        "name": "FLUSH_VOLUME",
         "target": "dos_flushVolume",
         "legacy": "bios_flushVolume"
       },
       {
-        "id": 19,
-        "name": "FILEASSOCIATION",
+        "id": 18,
+        "name": "FILE_ASSOCIATION",
         "target": "dos_fileAssociation",
         "legacy": "bios_fileAssociation"
       },
       {
-        "id": 20,
-        "name": "FILESELECTDRIVE",
+        "id": 19,
+        "name": "FILE_SELECT_DRIVE",
         "target": "dos_fileChangeDrive",
         "legacy": "bios_fileSelectDrive"
       },
       {
-        "id": 21,
-        "name": "FILERENAMEONDRIVE",
+        "id": 20,
+        "name": "FILE_RENAME_ON_DRIVE",
         "target": "dos_fileRename",
         "legacy": "bios_fileRenameOnDrive"
       },
       {
-        "id": 22,
-        "name": "FILEDELETEONDRIVE",
+        "id": 21,
+        "name": "FILE_DELETE_ON_DRIVE",
         "target": "dos_fileDelete",
         "legacy": "bios_fileDeleteOnDrive"
       },
       {
-        "id": 23,
-        "name": "FILECOPY",
+        "id": 22,
+        "name": "FILE_COPY",
         "target": "dos_fileCopy",
         "legacy": "bios_fileCopy"
       },
       {
-        "id": 24,
-        "name": "FILEGETDRIVES",
+        "id": 23,
+        "name": "FILE_GET_DRIVES",
         "target": "dos_fileGetDrives",
         "legacy": "bios_fileGetDrives"
       },
       {
-        "id": 25,
-        "name": "GETERROR",
+        "id": 24,
+        "name": "GET_ERROR",
         "target": "dos_dosGetError",
         "legacy": "bios_getError"
       },
       {
-        "id": 26,
-        "name": "SECTORIO",
+        "id": 25,
+        "name": "SECTOR_IO",
         "target": "dos_logicalSectorIO",
         "legacy": "bios_sectorIO"
       },
       {
-        "id": 27,
+        "id": 26,
         "name": "FILESTREAM",
         "target": "dos_fileStream",
         "legacy": "bios_fileStream"
       },
       {
-        "id": 28,
+        "id": 27,
         "name": "FILEHANDLE",
         "target": "dos_fileHandle",
         "legacy": "bios_fileHandle"
       },
       {
-        "id": 29,
+        "id": 28,
         "name": "DIRECTORY",
         "target": "dos_directoryService",
         "legacy": "bios_directory"
       },
       {
-        "id": 30,
+        "id": 29,
         "name": "CLI",
         "target": "dos_cliService",
         "legacy": "bios_cli"
       },
       {
-        "id": 31,
-        "name": "SETSHELL",
+        "id": 30,
+        "name": "SET_SHELL",
         "target": "dos_setShell",
         "legacy": "bios_setShell"
       },
       {
-        "id": 32,
-        "name": "FILELOADPATH",
+        "id": 31,
+        "name": "FILE_LOAD_PATH",
         "target": "filePathLoad",
         "legacy": "bios_fileLoadPath"
       },
       {
-        "id": 33,
-        "name": "FILESAVEPATH",
+        "id": 32,
+        "name": "FILE_SAVE_PATH",
         "target": "filePathSave",
         "legacy": "bios_fileSavePath"
       },
       {
-        "id": 34,
-        "name": "RAWIO",
+        "id": 33,
+        "name": "RAW_IO",
         "target": "dosRawIO"
       },
       {
-        "id": 35,
-        "name": "DRIVERSELECT",
+        "id": 34,
+        "name": "DRIVER_SELECT",
         "target": "dosDriverSelect"
       },
       {
-        "id": 36,
-        "name": "DRIVERINSTALL",
+        "id": 35,
+        "name": "DRIVER_INSTALL",
         "target": "dosDriverInstall"
       },
       {
-        "id": 37,
-        "name": "DRIVERREFRESH",
+        "id": 36,
+        "name": "DRIVER_REFRESH",
         "target": "dosDriverRefresh"
+      },
+      {
+        "id": 37,
+        "name": "MEMORY",
+        "target": "dosMemoryService"
+      },
+      {
+        "id": 38,
+        "name": "MODULE_LOAD",
+        "target": "moduleLoad"
+      },
+      {
+        "id": 39,
+        "name": "MODULE_CALL",
+        "target": "moduleCall"
+      },
+      {
+        "id": 40,
+        "name": "MODULE_UNLOAD",
+        "target": "moduleUnload"
+      },
+      {
+        "id": 41,
+        "name": "FILE_EXEC_NATIVE",
+        "target": "fileExecNative"
+      },
+      {
+        "id": 42,
+        "name": "RESIDENT",
+        "target": "residentService"
       }
     ]
   }

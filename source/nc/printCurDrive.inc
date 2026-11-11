@@ -1,20 +1,10 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Вывод текущего накопителя
-;
-; 2013-12-18 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
-
-printCurDrive:    ; Узнаем активное устройство
-            ld    e, 2
-            call  bios_fileGetSetDrive
-
-printDrive: ; Выводим его букву на экран
-            add   a, 'A'
-            ld    c, a
-            call  bios_printChar
-
-            ; Выводим ':'
-            ld    c, ':'
-            jp    bios_printChar
-
+; Буква и двоеточие передаются BIOS одной строкой.
+printCurDrive:
+            ld e,2
+            call bios_fileGetSetDrive
+printDrive:
+            add a,'A'
+            ld (ncDriveText),a
+            ld hl,ncDriveText
+            jp bios_printStringReal
+ncDriveText: DB 'A',':',0

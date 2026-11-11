@@ -1,4 +1,4 @@
-"""Проверка графического ABI BIOS на CPU 8080: окна, инверсия и memmove битмапа."""
+"""Проверка локальной UI-библиотеки на CPU 8080: окна, инверсия и memmove битмапа."""
 import argparse
 import json
 from pathlib import Path
@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--ticks', type=Path, default=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
-    p.add_argument('--image', type=Path, default=ROOT/'bin/BIOS.sys')
+    p.add_argument('--image', type=Path, default=ROOT/'bin/NC.i80')
     p.add_argument('--memory-image',type=Path)
     p.add_argument('--report-directory', type=Path, default=ROOT/'docs/nc/ui-002/cpu')
     args = p.parse_args()
@@ -27,7 +27,9 @@ def main():
             assert len(data)==65536
             m[:]=data
         else:
-            m[0xC000:0xC000+len(dos)] = dos
+            m[:len(dos)] = dos
+            bios=(ROOT/'bin/BIOS.sys').read_bytes()
+            m[0xC000:0xC000+len(bios)]=bios
         m[0x9000:0xC000] = screen
         return m
     def run(m, entry, hl=0, bc=0, de=0, a=0):
@@ -48,18 +50,23 @@ def main():
         m=memory();expected=bytearray(m)
         for x in range(width):
             expected[dst+x*256:dst+x*256+height] = m[src+x*256:src+x*256+height]
-        b,log=run(m,symbols['bios_uiCopyRect'],src,dst,width*256+height)
+        b,log=run(m,symbols['uiCopyRect'],src,dst,width*256+height)
         assert b[0x9000:0xC000] == expected[0x9000:0xC000], (hex(src),hex(dst),width,height)
         assert b[0x7E00:0x7E06] == (src+width*256).to_bytes(2,'little')+(dst+width*256).to_bytes(2,'little')+height.to_bytes(2,'little')
         copies.append(dict(source=src,destination=dst,width=width,height=height,model_log=log.strip()))
     inversions=0
-    for addr,width,height in [(0x9118,10,10),(0xAB18,1,180),(0x9000,48,255)]:
+    # Побайтовая ширина, включая всю ширину экрана и нижнюю границу.
+    cases=[(0x9000,w,1+w%31) for w in range(1,49)]
+    cases += [(0x9118,11,232),(0x9D18,10,232),(0xBF00,1,255),(0x9000,48,255)]
+    for addr,width,height in cases:
         m=memory();expected=bytearray(m)
         for x in range(width):
-            for y in range(height):expected[addr+x*256+y]^=255
-        b,_=run(m,symbols['bios_uiInverseRect'],addr,width*256+height,0x5678)
-        assert b[0x9000:0xC000] == expected[0x9000:0xC000]
+            for y in range(height):
+                expected[addr+x*256+y]^=255
+        b,_=run(m,symbols['uiInverseRect'],addr,width*256+height,0x5678)
+        assert b[0x9000:0xC000] == expected[0x9000:0xC000], (hex(addr),width,height)
         assert b[0x7E04:0x7E06] == b'\x78\x56'
+        assert int.from_bytes(b[0x7E00:0x7E02],'little') == addr+width*256
         inversions+=1
     windows=0
     # Окно 40x20 пикселей, линия с масками и вертикальное заполнение.
@@ -80,7 +87,7 @@ def main():
             for x in range(0x93,0x96):expected[(x+shift)*256+60]=255
             expected[(0x96+shift)*256+60]|=0xF0
             at=(0x94+shift)*256+70;expected[at:at+5]=b'\x5A'*5
-            b,_=run(m,symbols['bios_uiDraw'],hl=0x7400,a=offset)
+            b,_=run(m,symbols['uiDraw'],hl=0x7400,a=offset)
             assert b[0x9000:0xC000] == expected[0x9000:0xC000], (offset,absolute)
             windows+=1
     report=dict(cpu='8080 model; no color hardware',copyRect=copies,inverseRectCases=inversions,windowCases=windows)

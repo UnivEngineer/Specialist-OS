@@ -51,7 +51,7 @@ try:
   command('H:/Ball.bat' if mode=='MX' else 'RUN -'+mode+' H:/Ball.exe',r['ready'])
   m.stop_at(0);m.until(0,40)
   assert m.read(0,32)==(ROOT/'assets/games/BALL.RKS').read_bytes()[4:36]
-  if mode in ['MX','STD']:assert m.read(d['bios_vars.koi7'],1)==b'\xff'
+  if mode in ['MX','STD']:assert m.read(d['bios_upper.koi7'],1)==b'\xff'
   m.call('bp_clear');m.call('emu_run_for',ms=2000);m.screenshot(OUT/('ball-'+mode.lower()+'.png'))
   m.tap('enter');m.call('emu_run_for',ms=1000);m.screenshot(OUT/('ball-menu-'+mode.lower()+'.png'))
   m.stop_at(n['mainLoop']);m.call('emu_reset');m.until(n['mainLoop'],40)

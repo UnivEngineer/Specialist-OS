@@ -1,4 +1,4 @@
-"""Стоимость DOSMOD, разрешения команды и FORMAT в собственном Emu80 (2 МГц)."""
+"""Стоимость разрешения команды и FORMAT в собственном Emu80 (2 МГц)."""
 from pathlib import Path
 import runpy,json
 R=Path(__file__).resolve().parents[2]
@@ -19,8 +19,6 @@ try:
     m.m.call('debug_break');m.m.call('bp_clear')
     # Проверка ABI, не проверка пользовательского ввода: PC/SP задаёт обвязка.
     m.select(0)
-    timed('module-already-loaded',s['bios_loadDosModule'])
-    timed('module-forced-reload',s['dosModuleLoad'])
     m.m.write(s['v_shell'],b'\x01')
     m.select(1)
     cmd=b'A:\\FORMAT.COM B: -R -Y\0'
@@ -38,7 +36,6 @@ try:
     m.select(1);m.m.write(0x5000,b'B: -R -Y\r\0')
     timed('format-body-with-old-return',0,de=0x5000)
     m.m.write(at,b'\xCD')
-    timed('module-already-loaded-after-format',s['bios_loadDosModule'])
     (O/'result.json').write_text(json.dumps(rows,indent=2)+'\n')
 finally:
     m.stop()

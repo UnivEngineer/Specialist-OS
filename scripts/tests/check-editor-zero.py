@@ -6,8 +6,8 @@ s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/
 W=lambda n:n.to_bytes(2,'little');base=bytearray(65536)
 for name,addr in [('E.i80',0),('BIOS.sys',0xc000),('IO.sys',0xf000)]:
  data=(R/'bin'/name).read_bytes();base[addr:addr+len(data)]=data
-font=(R/'assets/system-rom/FONTKOI.FNT').read_bytes();base[s['FONT_ADDR']:s['FONT_ADDR']+len(font)]=font
-base[s['bios_vars.charGen']:s['bios_vars.charGen']+2]=W(s['FONT_ADDR']//8)
+rawfont=(R/'assets/system-rom/FONT.FNT').read_bytes();font=bytes(rawfont[c*8+y] for y in range(8) for c in range(256));base[s['FONT_ADDR']:s['FONT_ADDR']+len(font)]=font
+base[s['bios_upper.charGen']:s['bios_upper.charGen']+2]=W(s['FONT_ADDR'])
 rows=0
 def run(memory,entry,hl=0,de=0,bc=0,end=0x8c20+25):
  global rows

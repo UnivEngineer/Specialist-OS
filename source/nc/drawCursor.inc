@@ -27,7 +27,7 @@ drawCursor: ; Цвет устаналвиается перед выводом
             sub   c
 
             ; Рассчиытваем координату X (точнее, адрес)
-            ld    h, 90h + (P_FILE_LIST_X1 * 2 / 8)
+            ld    h, 90h + 1
             cp    FILE_LIST_SIZE/2
             jp c, drawCursor_1
             sub   FILE_LIST_SIZE/2
@@ -44,21 +44,21 @@ drawCursor_1:
             add   P_FILE_LIST_Y - 8
             ld    l, a
 
-            ; Ширина курсора в байтах, высота в пикселях
-            ld    bc, (10 << 8) + 10
+            ; Одинаковая ширина выделения в обоих столбцах: 80 пикселей.
+            ld    bc,(10 << 8) + 10
 
             ; Если правая панель, сдвигаем курсор на пол экрана
 drawCursor_2:
             call  activePanelPos
 
-            ; Рисуем курсор (hl = адрес, b = ширина, c = высота)
-            jp      inverseRect
+            jp    inverseRect
 ; ---------------------------------------------------------------------------
 
     IF ENABLE_COLOR==0
 drawCursor_0:
             ld    hl, 92D6h
             ld    b, 2
-            jp    drawCursor_2
+            call  activePanelPos
+            jp    inverseRect
     ENDIF
 

@@ -5,7 +5,7 @@
 debugMemoryReady:
         ; Начинаем с очистки экрана
         XOR   A
-        LD    (bios_vars.koi7),A      ; Имена и текстовые дампы — KOI-8.
+        call bios_setFontEncoding      ; Имена и текстовые дампы — KOI-8.
         LD    C,1FH ; код символа очистки экрана
         CALL  bios_printChar
 

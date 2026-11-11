@@ -81,20 +81,21 @@ FuncRead:
     or      MASK_READ
     ld      (IO_PROG_C), a
 
-    ; E задаёт A15:A8, счётчик E - A7:A0.
+    ; E задаёт A15:A8; младшие адреса затем перебирает C.
     ld      d, e
-    ld      e, 0
     call    LatchHiAddr
+    ex      de, hl              ; DE=назначение, HL больше не адрес буфера
+    ld      hl, IO_PROG_A
+    ld      c, 0
 
-; Горячий цикл: 13 байт, 58 тактов/байт, 7424 мкс на сектор при 2 МГц.
-; На байт: 1 запись и 1 чтение КР580ВВ55, 1 запись в ОЗУ.
+; 11 байт, 52 такта/байт: HL=порт данных, DE=буфер, C=младший адрес.
 ReadLoop:
-    ld      a, e
+    ld      a, c
     ld      (IO_PROG_B), a
-    ld      a, (IO_PROG_A)
-    ld      (hl), a
-    inc     hl
-    inc     e
+    ld      a, (hl)
+    ld      (de), a
+    inc     de
+    inc     c
     jp nz,  ReadLoop
 
     or      a
@@ -131,44 +132,44 @@ FuncWrite:
     ld      (IO_PROG_MODE), a
 
     ; C4:C3 выбирают одну из четырёх микросхем.
-    ld      c, WRITE_1
     ld      a, d
     and     018h
     ld      b, a
     call    DisableWriteProtection
 
     ; После последнего байта команды SDP нельзя превышать tBLC = 150 мкс.
-    ; До первого импульса данных: 223 такта = 111,5 мкс при 2 МГц.
+    ; Настройка порта и регистров до первого байта укладывается в tBLC.
     ld      a, (v_pageSelect)
     or      MASK_STANDBY
     ld      (IO_PROG_C), a
-
-    ; B и C содержат быстрые команды импульса /WE для цикла загрузки.
-    ld      b, WRITE_0
 
     ld      d, e
     ld      e, 0
     call    LatchHiAddr
 
-; Горячий цикл: 21 байт, 94 такта/байт, 12032 мкс на сектор при 2 МГц.
-; Обычный и худший путь совпадают. На байт: 4 записи КР580ВВ55 и 1 чтение ОЗУ.
+    ld      c, d                ; старший адрес для DATA polling
+    ex      de, hl              ; DE=источник
+    ld      hl, IO_PROG_MODE
+    ld      b, 0
+
+; 17 байт, 78 тактов/байт = 39 мкс при 2 МГц, меньше tBLC=150 мкс.
+; HL=управление ВВ55, DE=источник, B=младший адрес, C=старший адрес.
 WriteLoop:
-    ld      a, e
-    ld      (IO_PROG_B), a
-    ld      a, (hl)
-    ld      (IO_PROG_A), a
     ld      a, b
-    ld      (IO_PROG_MODE), a
-    ld      a, c
-    ld      (IO_PROG_MODE), a
-    inc     hl
-    inc     e
+    ld      (IO_PROG_B), a
+    ld      a, (de)
+    ld      (IO_PROG_A), a
+    ld      (hl), WRITE_0
+    ld      (hl), WRITE_1
+    inc     de
+    inc     b
     jp nz,  WriteLoop
 
-    ; Сохраняем адрес последнего байта и ожидаемое значение DQ7.
+    ex      de, hl              ; HL=конец источника
+    ld      d, c
+    ld      e, 0FFh             ; последний адрес выбранной страницы
     dec     hl
-    ld      c, (hl)
-    dec     e                       ; E = 0FFh
+    ld      c, (hl)              ; ожидаемый DQ7
 
     ld      hl, (v_statePtr)
     inc     hl
@@ -281,7 +282,9 @@ wcPoll:
     xor     a
     ld      (hl), a
     inc     a
-    ld      (bios_vars.diskWriteErr), a
+    IFNDEF DRIVER_IO_ONLY
+    ld      (bios_upper.diskWriteErr), a
+    ENDIF
     scf
     ret
 
@@ -404,8 +407,8 @@ FuncInfo:
     ld      hl, DriverInfo
     or      a
     ret
-DriverInfo:        DB "FLASHFST",0
-DriverDescription: DB "0x512K pipeline",0
+DriverInfo:        DB "AT2MXF",0
+DriverDescription: DB "0X512K PIPELINE",0
 
 ; B=5: общий синхронный цикл B=1, B=2 и сравнения в DOS.
 ; BC/DE/HL сохраняются; CF=1 и diskWriteErr=1 при отказе.

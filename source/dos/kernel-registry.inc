@@ -18,6 +18,8 @@ registryClear:
 registryDefaults:
     ld hl,diskDriverDummy
     ld (v_drives+14),hl
+    ld a,7
+    call invalidateDriveCache
     ld a,(bankPageCount)
     dec a
     ld (DOS_DRIVER_REGISTRY+DRIVER_RECORD_SIZE+1),a
@@ -29,9 +31,10 @@ registryDefaults:
     ld de,DOS_DRIVER_REGISTRY+DRIVER_RECORD_SIZE+8
     ld bc,registryRamNameEnd-registryRamName
     call moveBytesForward
+    ld hl,0
     xor a
     jp dosDriverRefresh
-registryRamName: DB "Bank RAM",0,"CPM16; DOS reserved",0
+registryRamName: DB "BANK RAM",0,"CPM16; DOS RESERVED",0
 registryRamNameEnd:
 
 ; A=диск -> HL=запись; AF/DE разрушены. BC сохранён.
@@ -77,11 +80,39 @@ registryInfo:
     or a
     ret
 
-; A=0: обновить реестр системного носителя после установки BIOS-драйвера.
+; A=0: обновить реестр A:. HL=две ASCIIZ клиента, всего <=64 байт;
+; HL=0 выбирает встроенное описание ROM-SYS из DOS. BIOS возвращает только BC.
 ; CF/A=ошибка, остальные регистры разрушены. Геометрия FAT не меняется.
 dosDriverRefresh:
     or a
     jp nz,blockArgument
+    ld a,h
+    or l
+    jp z,registryUseBuiltin
+    ld de,KD_PATH
+    ld bc,64
+    call kdFetch
+    ret c
+    ld hl,KD_PATH
+    jp registryValidateText
+registryUseBuiltin:
+    ld hl,registryRomName
+registryValidateText:
+    ld (registrySystemText),hl
+    ld b,64
+    ld c,2
+registryValidateByte:
+    ld a,(hl)
+    inc hl
+    or a
+    jp nz,registryValidateNext
+    dec c
+    jp z,registryValidateReady
+registryValidateNext:
+    dec b
+    jp nz,registryValidateByte
+    jp blockArgument
+registryValidateReady:
     ld b,3
     ld hl,kernelSystemInfo
     call dosSystemDriver
@@ -100,11 +131,41 @@ dosDriverRefresh:
     ld (DOS_DRIVER_REGISTRY+4),hl
     ld a,8
     ld (DOS_DRIVER_REGISTRY+6),a
-    ld hl,kernelSystemInfo
+    ld hl,(registrySystemText)
+registrySystemCopy:
+    ; Две строки ограничены полем реестра. Остаток не содержит кода установщика.
     ld de,DOS_DRIVER_REGISTRY+8
-    ld bc,64
-    call moveBytesForward
+    ld b,64
+    ld c,2
+registrySystemCopyByte:
+    ld a,(hl)
+    inc hl
+    ld (de),a
+    inc de
+    or a
+    jp nz,registrySystemCopyNext
+    dec c
+    jp z,registrySystemClear
+registrySystemCopyNext:
+    dec b
+    jp nz,registrySystemCopyByte
+    jp blockArgument
+registrySystemClear:
+    dec b
+    jp z,registrySystemTextReady
+    xor a
+registrySystemClearByte:
+    ld (de),a
+    inc de
+    dec b
+    jp nz,registrySystemClearByte
+registrySystemTextReady:
+    xor a
+    call invalidateDriveCache
     jp dosClearError
+
+registrySystemText: DW 0
+registryRomName: DB "ROM-SYS",0,"BUILT-IN, READ ONLY",0
 
 ; HL=DRIVER_INSTALL в загруженном инициализаторе. Сначала проверяем все
 ; указатели/размеры и завершаем запись, затем заменяем запись и код.
@@ -251,12 +312,13 @@ diCopyCode:
     ld hl,DOS_DRIVER_IMAGE
     ld de,LOCAL_DRIVER_ADDR
     call moveBytesForward
-    ld a,0FFh
-    ld (klInstalled),a
-    xor a
+    call klInvalidate
+    ld a,DOS_IO_PAGE
     ld (klFastOwner),a
     ld hl,diskDriver
     ld (v_drives+14),hl
+    ld a,7
+    call invalidateDriveCache
     ld a,(v_drive)
     cp 7
     jp nz,dosClearError

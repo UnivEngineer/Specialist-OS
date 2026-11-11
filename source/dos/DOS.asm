@@ -1,6 +1,7 @@
 ; Файловое ядро и CLI в физической странице ДОЗУ 0.
 ; 0000h–00FFh оставлены под будущие векторы; образ содержит только код/данные.
     DEFINE FAT_CACHE_ADDR DOS_BANK_CACHE_ADDR
+    DEFINE FAT_CACHE_TABLE_ADDR DOS_BANK_CACHE_TABLE
     DEFINE BANKED_DOS_BUILD 1
     INCLUDE "../include/mxos.inc"
     INCLUDE "../mem/diskabi.inc"
@@ -37,9 +38,11 @@ dosExtensionStart:
     INCLUDE "kernel-system.inc"
     INCLUDE "kernel-localio.inc"
     INCLUDE "kernel-registry.inc"
+    INCLUDE "memory.inc"
+    INCLUDE "modules.inc"
 kernelEnd:
 dosImageEnd = kernelEnd
     ASSERT $ <= DOS_CODE_END_MAX
-    ASSERT $ <= DOS_BANK_DATA_ADDR
-    ASSERT FAT_CACHE_ADDR+FAT_CACHE_SIZE <= CMD_LINE
+    ASSERT $ <= DOS_BANK_OBJECT_ADDR
+    ASSERT FAT_CACHE_ADDR+FAT_CACHE_SIZE <= DOS_BANK_PARTIAL_ADDR
     END

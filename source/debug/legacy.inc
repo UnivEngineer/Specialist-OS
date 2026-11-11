@@ -39,10 +39,10 @@ legacyOutputStringReturn:  POP   HL
         CALL  legacyOutputByte
         POP   AF
         RET
-drawSearchMarkerBody:  LD    (bios_vars.cursorCfg),A
+drawSearchMarkerBody:  LD    (bios_upper.cursorCfg),A
         CALL  bios_drawCursorOld
         POP   AF
-        LD    (bios_vars.cursorCfg),A
+        LD    (bios_upper.cursorCfg),A
         LD    C,18H         ; 24
         POP   AF
         JP    mon2_printChar

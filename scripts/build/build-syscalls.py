@@ -18,20 +18,25 @@ def generate(check=False):
     legacy_targets = set()
     for group in registry:
         group_id = group['group']
-        asm.append(f"MX_GROUP_{group['name']} = {group_id}")
-        c.append(f"#define MX_GROUP_{group['name']} {group_id}")
+        asm.append(f"MXOS_GROUP_{group['name']} = {group_id}")
+        c.append(f"#define MXOS_GROUP_{group['name']} {group_id}")
         assert [s['id'] for s in group['services']] == list(range(len(group['services'])))
         tables.append(f"sys{group['name']}Table:")
         for service in group['services']:
             value = group_id*256+service['id']
-            name = 'MX_'+group['name']+'_'+service['name']
+            name = 'MXOS_'+group['name']+'_'+service['name']
             asm.append(f'{name} = 0{value:04X}h')
             c.append(f'#define {name} 0x{value:04X}')
             z80.append(f'defc {name} = 0{value:04X}h')
+            for alias in service.get('aliases', []):
+                alias_name = 'MXOS_'+group['name']+'_'+alias
+                asm.append(f'{alias_name} = {name}')
+                c.append(f'#define {alias_name} {name}')
+                z80.append(f'defc {alias_name} = {name}')
             tables.append('    DW '+service['target'])
             if group_id == 2 and service['target'].startswith('dos_') and service['target'] not in legacy_targets:
                 legacy_targets.add(service['target'])
-                legacy += ['sysLegacy_'+service['target'][4:]+':', f'    MXCALL {name}', '    ret']
+                legacy += ['sysLegacy_'+service['target'][4:]+':', f'    MXOS_CALL {name}', '    ret']
         tables.append(f"sys{group['name']}Count = ($-sys{group['name']}Table)/2")
     c.append('#endif')
     legacy.append('sysLegacyEnd:')

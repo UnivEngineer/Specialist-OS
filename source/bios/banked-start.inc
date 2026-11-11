@@ -1,7 +1,8 @@
 ; Bootstrap уже установил транспорт и образ DOS; повторного чтения DOS нет.
 biosBankCold:
     ld a,(biosBootPages)
-    ld (bios_vars.ramPageCount),a
+    ld (bios_upper.ramPageCount),a
+    call biosPrintPhysicalRam
     ld hl,2048
     ld (v_diskInfo.totalSectors),hl
     xor a
@@ -13,10 +14,9 @@ biosBankCold:
     ld hl,BANK_DOS_GATE+6
     call bankCall
     jp c,biosLoadHalt
-    ld hl,biosFlashSysPath
-    call biosBootExec
     ld hl,biosAutoexecPath
     call biosBootExec
+    ld c,0
     ld a,1
     ld hl,BANK_DOS_GATE+9
     call bankCall
@@ -31,36 +31,72 @@ biosBootExec:
     pop hl
     call bios_fileExec
     ret nc
+biosBootCommandFailed:
     ld hl,biosBootError
     call bios_printString
-    MXCALL MX_DOS_GETERROR
+    MXOS_CALL MXOS_DOS_GET_ERROR
     ld c,a
     call bios_printHexByte
     ld c,0Ah
     jp bios_printChar
-biosBootError: DB 'Boot command error ',0
-biosBankWarm:
-    ; Bootstrap уже восстановил транспорт и стеки. Геометрия BIOS нужна
-    ; ROM-мосту до повторной установки записывающего драйвера A:.
+ ; Только холодный старт: физический объём, включая зарезервированный банк DOS.
+; Геометрия и свободный объём B: определяются отдельно драйвером и MEM.
+biosPrintPhysicalRam:
+    ld hl,biosRamText
+    call printString
     ld a,(biosBootPages)
-    ld (bios_vars.ramPageCount),a
+    ld l,a
+    ld h,0
+    DUP 6
+        add hl,hl
+    EDUP
+    ex de,hl
+    ld b,0
+    call printDecWord
+    ld hl,biosRamBanksText
+    call printString
+    ld a,(biosBootPages)
+    ld e,a
+    ld d,0
+    ld b,0
+    call printDecWord
+    ld hl,biosRamEndText
+    jp printString
+biosRamText: DB 'RAM: ',0
+biosRamBanksText: DB ' KiB, ',0
+biosRamEndText: DB ' banks',10,0
+
+biosBootError: DB 'BOOT COMMAND ERROR ',0
+biosBankWarm:
+    ; Bootstrap уже восстановил транспорт и стеки. До AUTOEXEC доступен
+    ; встроенный ROM-драйвер A:, без знания файлов внешних драйверов.
+    ld a,(biosBootPages)
+    ld (bios_upper.ramPageCount),a
     ld hl,2048
     ld (v_diskInfo.totalSectors),hl
     xor a
     ld (v_drive),a
     call sysInstall
+    ld c,1
     ld a,1
     ld hl,BANK_DOS_GATE+9
     call bankCall
     ld hl,08BFFh
     call setMemTop
-    ; BIOS восстановлен, поэтому его резидентный драйвер A: устанавливается
-    ; заново. AUTOEXEC и FORMAT при тёплом входе не повторяются.
-    ld hl,biosFlashSysPath
-    call bios_fileExec
+    ; Согласовать реестр DOS со встроенным ROM после восстановления BIOS.
+    ; Драйверы повторно устанавливает только явный сценарий пользователя.
+    ld hl,0                     ; ROM-SYS: описание по умолчанию из DOS
+    xor a
+    MXOS_CALL MXOS_DOS_DRIVER_REFRESH
+    ld hl,biosAutoexecPath
+    call biosBootExec
+    ld c,0
+    ld a,1
+    ld hl,BANK_DOS_GATE+9
+    call bankCall
 biosBankShell:
     ld a,3
-    MXCALL MX_DOS_SETSHELL
+    MXOS_CALL MXOS_DOS_SET_SHELL
     or a
     ld hl,biosNcPath
     jp z,biosBankLaunchShell
@@ -112,15 +148,13 @@ sysDiskDriver:
     jp sysRawBlock
 sysDiskRequest:
     pop af
-    MXCALL MX_DOS_RAWIO
+    MXOS_CALL MXOS_DOS_RAW_IO
     ret
 sysDiskNative:
     pop af
     jp diskDriver
 
 biosCliPath: DB "A:",05Ch,"CLI.COM",0
-
-biosFlashSysPath: DB "A:",05Ch,"FLASHSYS.COM",0
 
 ; Программный возврат без перезагрузки BIOS/DOS и переустановки драйверов.
 ; Старые кадры вызовов main -> DOS -> приложение больше не будут возвращены.
@@ -135,6 +169,8 @@ biosBankReturn:
     ld (IO_PAGE_RAM-0800h),a
     ld (IO_PAGE_RAM),a
     ld sp,STACK_ADDR
+    ld hl,0
+    ld (fast6.preBase),hl ; Буфер приложения больше не принадлежит BIOS.
     call biosRecoverCopyTail
     push af
     call sysInstall
@@ -156,6 +192,7 @@ biosBankReturn:
     call bankCopyFar
     jp c,biosLoadHalt
     call bios_reset_sound
+    ld c,0
     ld a,1
     ld hl,BANK_DOS_GATE+9
     call bankCall

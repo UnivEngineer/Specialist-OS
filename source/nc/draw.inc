@@ -6,7 +6,7 @@ draw:
             jp z,   drawPanelOffset
             ld      a, 24
 drawPanelOffset:
-            jp      bios_uiDraw
+            jp      uiDraw
 
 ; HL = экранный адрес, сместить на активную панель; AF сохраняется.
 activePanelPos:
@@ -52,6 +52,19 @@ drawPanelHeaderRow:
             inc h
             dec b
             jp nz,drawPanelHeaderColumn
+            ; Верх разделителя колонок входит в очищенную полосу заголовка.
+            ld hl,state.panelA_info
+            call readBytePanel
+            ld b,0
+            or a
+            jp nz,drawHeaderDividerReady
+            ld b,080h
+drawHeaderDividerReady:
+            ld hl,09C07h
+            call activePanelPos
+            ld (hl),b
+            inc l
+            ld (hl),b
             ret
 panelHeaderLeft:   DB 0,0,0,0,07Fh,040h,05Fh,050h,050h
 panelHeaderMiddle: DB 0,0,0,0,0FFh,0,0FFh,0,0

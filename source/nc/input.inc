@@ -5,7 +5,7 @@ input:
             call ncInputHookBegin
             ld a,1
             ld (bios_vars.inverse),a
-            ld hl,03D6Eh
+            ld hl,03C6Eh
             ld (bios_vars.cursorY),hl
             ld hl,vars.input
             ld bc,(1 << 8) + P_INPUT_WIDTH
@@ -50,4 +50,7 @@ ncReadKey:
             ld (vars.cmdOffset),a
             pop af
             ret
+    DEFINE LINEEDIT_BATCH 1
+LINEEDIT_PRINT_CHAR EQU ncPrintChar
+LINEEDIT_PAINT EQU ncPrintField
     INCLUDE "../include/lineedit.inc"

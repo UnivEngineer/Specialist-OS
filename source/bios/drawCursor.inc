@@ -8,8 +8,8 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-drawCursor: ; Если установлен 7-ой бит bios_vars.cursorCfg & 0x80, выходим
-            ld    a, (bios_vars.cursorCfg)
+drawCursor: ; Если установлен 7-ой бит bios_upper.cursorCfg & 0x80, выходим
+            ld    a, (bios_upper.cursorCfg)
             and   a
             ret m 
 
@@ -26,9 +26,9 @@ drawCursor3:      ; Сохраняем регистры
             ld    d, a
 
             ; Положение курсора от +2 до -5 (при битах 654 от 0 до 7)
-            ; b = bios_vars.cursorCfg
-            ; e = ~((bios_vars.cursorCfg / 16) % 8 - 3) + l
-            ld    a, (bios_vars.cursorCfg)
+            ; b = bios_upper.cursorCfg
+            ; e = ~((bios_upper.cursorCfg / 16) % 8 - 3) + l
+            ld    a, (bios_upper.cursorCfg)
             ld    b, a
             rrca
             rrca

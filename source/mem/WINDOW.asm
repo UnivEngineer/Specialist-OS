@@ -1,13 +1,13 @@
+    INCLUDE "../include/mxos.inc"
     INCLUDE "abi.inc"
     ORG BANK_WINDOW
-; A=физическая страница для RAM, для main значение несущественно.
-; Между переключением и landing нет стековых команд.
-windowMain:
-    ld (BANK_IO_MAIN),a
+; HL=порт маппера, A=физический банк. Ни одной стековой команды.
+; Один переключатель вместо двух оставляет байт идентификатора профиля.
+windowSelect:
+    ld (hl),a
     jp BANK_LANDING
-windowRam:
-    ld (BANK_IO_RAM),a
-    jp BANK_LANDING
-    ASSERT $ == BANK_PACKET
+    DS BANK_PACKET-$,0
     DS BANK_PACKET_SIZE,0
+    DS BANK_PROFILE-$,0
+    DB BANK_PROFILE_COMMAND
     ASSERT $ == 0FFE0h

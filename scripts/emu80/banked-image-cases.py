@@ -19,20 +19,20 @@ def check_images(m, ks, bios, select, invoke, request, regs, rows):
         m.write(0x3200, path+bytes(128-len(path)))
         m.write(0x3100, word(0x3200)+word(0x5000)+word(len(data))+bytes(34))
         m.write(0x5000, data)
-        request(page, ks['MX_DOS_FILESAVEPATH'], regs(hl=0x3100))
+        request(page, ks['MXOS_DOS_FILE_SAVE_PATH'], regs(hl=0x3100))
 
     def open_image(page, name, error=0, legacy=False):
         select(page)
         base, ext = name.split('.')
         m.write(0x3300, base.encode().ljust(8)+ext.encode().ljust(3)+bytes(21))
         result = invoke(page, ks['BANK_DOS_GATE'], regs(hl=0x3300, a=16),
-                        ks['MX_DOS_IMAGEOPEN'], legacy=bios['bios_imageOpen'] if legacy else None)
+                        ks['MXOS_DOS_IMAGE_OPEN'], legacy=bios['bios_imageOpen'] if legacy else None)
         assert result[1] == bool(error), ('image-open', page, name, result)
         if error: assert result[0] == error, (name, result, error)
         return m.call('cpu_state')['registers']
 
     def load_image(page, target=0x5000, error=0, legacy=False):
-        result = invoke(page, ks['BANK_DOS_GATE'], regs(de=target), ks['MX_DOS_FILELOAD'],
+        result = invoke(page, ks['BANK_DOS_GATE'], regs(de=target), ks['MXOS_DOS_FILE_LOAD'],
                         legacy=bios['bios_fileLoad'] if legacy else None)
         assert result[1] == bool(error), ('image-load', page, result)
         if error: assert result[0] == error, (result, error)
@@ -66,7 +66,7 @@ def check_images(m, ks, bios, select, invoke, request, regs, rows):
         packet = regs(hl=0x3300,de=0x6000,bc=0x7788)
         # imageOpen сохраняет исходное имя в дескрипторе клиента.
         m.write(0x6000,bytes([0xA5])*(len(data)+16))
-        request(page,ks['MX_DOS_FILELOAD2'],packet)
+        request(page,ks['MXOS_DOS_FILE_LOAD2'],packet)
         assert m.read(0x3000,6) == packet[:6]
         assert m.read(0x6000,len(data)) == data
         assert m.read(0x6000+len(data),16) == bytes([0xA5])*16
@@ -88,9 +88,9 @@ def check_images(m, ks, bios, select, invoke, request, regs, rows):
     load_image(0,target=0xF7FF,error=7)
     load_image(0)  # Ошибка диапазона не расходует подготовленный образ.
     open_image(0,'IMAGE.COM')
-    assert invoke(0,ks['BANK_DOS_GATE'],regs(),ks['MX_DOS_FILEGETSETDRIVE']) == (1,False)
+    assert invoke(0,ks['BANK_DOS_GATE'],regs(),ks['MXOS_DOS_FILE_GET_SET_DRIVE']) == (1,False)
     load_image(0,error=7)
-    request(0,ks['MX_DOS_FILELOAD2'],regs(hl=0x3300,de=0xF7FF),expected=7)
-    request(0,ks['MX_DOS_FILELOAD2'],regs(hl=0x3300,de=0x3301),expected=7)
+    request(0,ks['MXOS_DOS_FILE_LOAD2'],regs(hl=0x3300,de=0xF7FF),expected=7)
+    request(0,ks['MXOS_DOS_FILE_LOAD2'],regs(hl=0x3300,de=0x3301),expected=7)
     rows.append(dict(case='image-range-context-invalidation-raw-overlap'))
     print('BANK DOS IMAGE LOAD PASS',flush=True)

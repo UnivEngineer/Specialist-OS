@@ -14,8 +14,8 @@
 #   BIN/I80/старый сырой COM/EXE: код без заголовка; адрес загрузки и входа задаёт адрес_RAW (0 по умолчанию).
 #
 # Целевой формат задаёт расширение имени в первом столбце:
-#   COM/EXE: общий контейнер MXOS2 — заголовок 16 байт (загрузка, вход, размер, суммы) + нагрузка.
-#   COM исполняет DOS; EXE передаётся RUN через CLI.EXT, без ключа RUN показывает меню среды.
+#   COM/EXE/DLL: общий контейнер MXOS2 — заголовок 16 байт (загрузка, вход, размер, суммы) + нагрузка.
+#   COM/EXE с MAIN/DOS/BANK исполняет DOS; без флага среду выбирает RUN через CLI.EXT.
 #   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через CLI.EXT запускается RUN, по умолчанию -MON.
 #   При RKS -> COM/EXE заголовок и сумма RKS заменяются контейнером MXOS2; результат не является RAW.
 #   При преобразовании в RKS адрес входа должен совпадать с адресом загрузки.
@@ -26,32 +26,61 @@
 # Атрибуты: R — read-only, S — системный, RS — оба; без атрибутов — 0. Для пропуска адреса перед ними пишется 0.
 # Порядок строк задаёт порядок файлов; в больших системных образах загрузочные записи идут первыми.
 
-# Имя на диске    Источник относительно assets/                          Адрес RAW Атрибуты
-BIOS.SYS         ../bin/BIOS.sys                                        0xC000   RS
-IO.SYS           ../bin/IO.sys                                          0xF000   RS
-DOS.SYS          ../bin/DOS.sys                                         0x0100   RS
-AUTOEXEC.BAT     {AUTOEXEC}                                             0x8000   S
-README.TXT       system-rom/README.TXT
-E.COM            ../bin/E.cpu                                           0   RS
-ROM.COM          ../bin/Rom.cpu                                         0xF800   RS
-FLASH.COM        ../bin/Flash.cpu                                       0        RS
-FLASHFST.COM     ../bin/FlashFst.cpu                                    0        RS
-FLASHSYS.COM     ../bin/FlashSys.cpu                                    0        RS
-RAMDISK.COM      ../bin/RAMDISK.cpu                                     0        RS
-# TAPE.COM       ../bin/tape.cpu                                        0xEA00   RS
-FONT.FNT         system-rom/FONT.FNT                                    0        RS
-FONTKOI.FNT      system-rom/FONTKOI.FNT                                 0        RS
-FORMAT.COM       ../bin/FORMAT.cpu                                      0   RS
-RUN.COM          ../bin/RUN.cpu                                         0   RS
-RAMFOS.MON       ../bin/RAMFOS.mon                                      0xC000   RS
-MONITOR2.MON     ../bin/Monitor2.mon                                    0xC000   RS
-DEBUG.COM        ../bin/Debug.cpu                                       0   RS
-CLI.COM          ../bin/CLI.cpu                                         0   RS
-NC.COM           ../bin/NC.cpu                                          0   RS
-CLI.EXT           system-rom/CLI.EXT                                      0        RS
-CHKDSK.COM       ../bin/CHKDSK.cpu                                      0
-DISKBEN.COM      ../bin/DISKBEN.cpu                                     0
-COPYBEN.COM      ../bin/COPYBEN.cpu                                     0
-FONTBEN.COM      ../bin/FONTCOM.cpu                                     0
-TEXTBEN.COM      ../bin/TEXTCOM.cpu                                     0
-Test-MX.COM      programs/Test-MX.COM
+# Имя на диске                  Источник относительно assets/        Адрес RAW   Атрибуты
+BIOS.SYS                       ../bin/BIOS.sys                          0xC000   RS
+IO.SYS                         ../bin/IO.sys                            0xF000   RS
+DOS.SYS                        ../bin/DOS.sys                           0x0100   RS
+AUTOEXEC.BAT                   {AUTOEXEC}                               0x8000   S
+README.TXT                     system-rom/README.TXT
+E.COM                          ../bin/E.cpu                             0        RS
+DRIVERS/ROM2M.COM              ../bin/Rom.cpu                           0        RS
+DRIVERS/ROM64K.COM             ../bin/Rom64.cpu                         0        RS
+DRIVERS/AT2MX.COM              ../bin/Flash.cpu                         0        RS
+DRIVERS/AT2MXF.COM             ../bin/FlashFst.cpu                      0        RS
+DRIVERS/AT512KS.COM            ../bin/FlashSys.cpu                      0        RS
+DRIVERS/RAMDISK.COM            ../bin/RAMDISK.cpu                       0        RS
+DRIVERS/README.TXT             system-rom/drivers/README.TXT
+# TAPE.COM                       ../bin/tape.cpu                          0xEA00   RS
+# FONTKOI.FNT                    system-rom/FONTKOI.FNT                   0        RS
+FONT.FNT                       system-rom/FONT.FNT                      0        RS
+FORMAT.COM                     ../bin/FORMAT.cpu                        0        RS
+RUN.COM                        ../bin/RUN.cpu                           0        RS
+RAMFOS.MON                     ../bin/RAMFOS.mon                        0xC000   RS
+MONITOR2.MON                   ../bin/Monitor2.mon                      0xC000   RS
+DEBUG.COM                      ../bin/Debug.cpu                         0        RS
+CLI.COM                        ../bin/CLI.cpu                           0        RS
+NC.COM                         ../bin/NC.cpu                            0        RS
+CLI.EXT                         system-rom/CLI.EXT                      0        RS
+CHKDSK.COM                     ../bin/CHKDSK.cpu                        0
+Test-MX.COM                    ../bin/TESTMX.cpu
+
+# Бенчмарки
+
+BENCH/CopyBen/CopyBen.com      ../bin/COPYBEN.cpu                       0
+BENCH/SortBen/SortBen.com      ../bin/SORTBEN.cpu                       0
+
+BENCH/DiskBen/DiskBen.com      ../bin/DISKBEN.cpu                       0
+BENCH/DiskBen/DiskBank.dll     ../bin/DISKBANK.cpu                      0
+BENCH/DiskBen/DiskDos.dll      ../bin/DISKDOS.cpu                       0
+BENCH/DiskBen/DiskMain.dll     ../bin/DISKMAIN.cpu                      0
+
+BENCH/FontBen/FontBen.com      ../bin/FONTCOM.cpu                       0
+BENCH/FontBen/FontLab.com      ../bin/FONTLAB.cpu                       0
+BENCH/FontBen/FontMap.com      ../bin/FONTRMP.cpu                       0
+BENCH/FontBen/FontBlk.com      ../bin/FONTBLK.cpu                       0
+BENCH/FontBen/TextBen.com      ../bin/TEXTCOM.cpu                       0
+BENCH/FontBen/FontBank.com     ../bin/FONTBANK.cpu                      0x4000
+BENCH/FontBen/TextBank.com     ../bin/TEXTBANK.cpu                      0x4000
+BENCH/FontBen/Engine6.dll      ../bin/ENGINE6.cpu 0x2000
+BENCH/FontBen/EngineP.dll      ../bin/ENGINEP.cpu 0x2000
+BENCH/FontBen/Engine4.dll      ../bin/ENGINE4.cpu 0x2000
+BENCH/FontBen/EngineM.dll      ../bin/ENGINEM.cpu 0x2000
+BENCH/FontBen/EngineB.dll      ../bin/ENGINEB.cpu 0x2000
+BENCH/FontBen/EngineS.dll      ../bin/ENGINES.cpu 0x2000
+BENCH/FontBen/README.TXT       benchmarks/fontben/Readme.txt
+
+# LLM80 бенчмарк
+#BENCH/LLM80/LLM80.EXE          programs/llm80/LLM80.cpu
+#BENCH/LLM80/LLM3.EXE           programs/llm80/LLM3.cpu
+#BENCH/LLM80/LLM3W.DLL          programs/llm80/LLM3W.cpu
+#BENCH/LLM80/README.TXT         programs/llm80/README.TXT

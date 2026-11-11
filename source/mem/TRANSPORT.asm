@@ -1,3 +1,4 @@
+    INCLUDE "../include/mxos.inc"
     INCLUDE "abi.inc"
     ORG BANK_LANDING
 ; Тело копируется в каждый исполняемый банк и в основную память.
@@ -69,6 +70,7 @@ bankPacketEnter:
 ; Выход: AF/BC/DE/HL целевой процедуры; исходные SP/страница/контекст сохранены.
 ; Прерывания запрещены. Прямой вход в ядро старого DOS здесь не допускается.
 bankCall:
+    call bankCommandWindow
     ld (BANK_FRAME_TARGET),a
     push af
     ld a,(bankPageCount)
@@ -130,6 +132,12 @@ bankCallContext:
 ; STATUS=1 до вызова; обработчик ставит 0 после успешной диспетчеризации.
 ; Результаты возвращаются в CPU. Клиент сам сохраняет их в локальный пакет.
 bankCallPacket:
+    ; Горячий COMMAND не вызывает подпрограмму установки профиля.
+    push af
+    ld a,(BANK_PROFILE)
+    or a
+    call nz,bankCommandWindow
+    pop af
     ld (BANK_FRAME_TARGET),a
     push af
     ld a,1
@@ -182,19 +190,23 @@ bankCallback:
 
 ; Сохранение результатов до чтения/изменения служебного кадра.
 bankServiceReturn:
+    ; Горячий COMMAND не вызывает подпрограмму установки профиля.
     push af
-    push bc
-    push de
-    push hl
-    ld hl,0
-    add hl,sp
-    ld de,BANK_FRAME_REGS
-    ld b,8
-    call bankCopyBytes
-    pop hl
-    pop de
-    pop bc
+    ld a,(BANK_PROFILE)
+    or a
+    call nz,bankCommandWindow
     pop af
+    ; После сохранения результата CPU-регистры уже не нужны: пишем слова
+    ; прямо в окно, без восьмибайтной копии со стека и обратных POP.
+    ld (BANK_FRAME_REGS),hl
+    ex de,hl
+    ld (BANK_FRAME_REGS+2),hl
+    ld h,b
+    ld l,c
+    ld (BANK_FRAME_REGS+4),hl
+    push af
+    pop hl
+    ld (BANK_FRAME_REGS+6),hl
     pop hl
     ld (BANK_FRAME_SP),hl
     pop hl
@@ -240,8 +252,10 @@ bankRejectStack:
     ld a,(BANK_FRAME_PAGE)
 bankSwitch:
     or a
+    ld hl,BANK_IO_MAIN
     jp z,BANK_SELECT_MAIN
     dec a
+    inc hl
     jp BANK_SELECT_RAM
 
 ; HL=источник, DE=назначение, B=1..255. AF/B/DE/HL разрушены.
@@ -269,4 +283,27 @@ bankTransportEnd:
     ASSERT $ <= 0FF00h
     DS 0FF00h-$,0
     INCLUDE "copytail.inc"
+; Модуль вернулся обычным RET. Вложенный отказ BIOS/DOS не должен
+; оставлять статус диспетчеризации внешнего moduleCall незавершённым.
+bankModuleCallback:
+    call bankCallback
+bankModuleReturned:
+    push af
+    xor a
+    ld (BANK_FRAME_STATUS),a
+    pop af
+    ret
+; Локальная диспетчеризация B=5; не переключает страницу/профиль.
+bankLocalChecked:
+    ld a,(bankPage)
+    or a
+    jp nz,MEM_IO_CHECKED
+    push hl
+    ld hl,(MEM_LOCAL_CHECKED)
+    ex (sp),hl
+    ret
+bankLocalBlockBad:
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
     ASSERT $ <= BANK_WINDOW

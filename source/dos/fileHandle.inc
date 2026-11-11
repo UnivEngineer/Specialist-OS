@@ -14,9 +14,12 @@ fileHandle:
 handleRangeOk:
             xor a
             ld (v_dosError),a
-            ld (bios_vars.diskWriteErr),a
+            ld (bios_upper.diskWriteErr),a
             ld hl,0
             ld (v_handleNew),hl
+            ld a,(v_handleOp)
+            cp FILE_OP_OPTIONS
+            jp z,handleOptions
             ld a,FH_DRIVE
             call handleField
             ld a,(hl)
@@ -98,7 +101,7 @@ handleOpen:
             ld a,FH_MODE
             call handleField
             ld a,(hl)
-            and 0E0h
+            and 080h
             jp nz,handleArgument
             ld a,(hl)
             and 3
@@ -107,9 +110,16 @@ handleOpen:
             and FILE_MODE_WRITE
             jp nz,handleOpenModeOk
             ld a,(hl)
-            and 01Ch
+            and 07Ch
             jp nz,handleArgument
 handleOpenModeOk:
+            call handleCheckMode
+            jp c,handleExit
+            ld a,FH_ALLOC_SEED
+            call handleField
+            ld (hl),0E1h
+            inc hl
+            ld (hl),0ACh
             ld a,FH_STATE
             call handleField
             ld (hl),0
@@ -229,6 +239,13 @@ handleIO:
             ld a,FH_BUFFER
             call handleLoadWord
             ld (v_handleBuffer),hl
+    IFDEF BANKED_DOS_BUILD
+            ; NEAR клиента и пересечение с FILE_HANDLE проверены в kdHandleIO.
+            ; KD_DATA здесь лишь локальная заглушка, не буфер всего запроса.
+            ld a,(kdFarActive)
+            or a
+            jp nz,handleBufferOk
+    ENDIF
             call streamBufferRange
             jp c,handleExit
             ; Пересечение буфера с дескриптором запрещено.
@@ -247,6 +264,8 @@ handleIO:
             call cmp_hl_de
             jp c,handleArgument
 handleBufferOk:
+            call handleWritePolicy
+            jp c,handleExit
             ld hl,(v_handleLeft)
             ld a,h
             or l
@@ -255,12 +274,12 @@ handleBufferOk:
             ld (v_handleEOF),a
             ld a,(v_handleOp)
             cp FILE_OP_WRITE
-            jp nz,handleIOLoop
+            jp nz,handleReadLimit
             ld a,FH_MODE
             call handleField
             ld a,(hl)
             and FILE_MODE_APPEND
-            jp z,handleIOLoop
+            jp z,handleReadLimit
             ; Каждый append пишет в конец, независимо от предшествующего seek.
             ld a,FILE_DESCRIPTOR.size
             call handleField
@@ -271,14 +290,14 @@ handleBufferOk:
             ld a,FH_VALID
             call handleField
             ld (hl),0
-handleIOLoop:
+handleReadLimit:
             ld hl,(v_handleLeft)
             ld a,h
             or l
             jp z,handleIOEnd
             ld a,(v_handleOp)
             cp FILE_OP_WRITE
-            jp z,handleWritePosition
+            jp z,handleIOLoop
             ; Только чтению нужна разность size-position перед обменом.
             ld a,FH_POSITION
             call handleField
@@ -306,12 +325,13 @@ handleIOLoop:
             ex de,hl
             ld (v_handleLeft),hl
 handleReadCountOk:
-            call handleLocate
-            jp c,handleExit
-            jp handleTransfer
+; EOF ограничивает весь READ один раз; внутри запроса меняется только остаток.
+handleIOLoop:
+            ld hl,(v_handleLeft)
+            ld a,h
+            or l
+            jp z,handleIOEnd
 handleWritePosition:
-            ; В C промежуток после seek за EOF имеет неопределённое содержимое.
-            ; Кластеры промежутка выделяются здесь, до первой записи данных.
             call handleLocate
             jp c,handleExit
 handleTransfer:
@@ -352,8 +372,14 @@ handleChunkReady:
             xor 3                 ; FILE_OP_READ=1 -> 2, WRITE=2 -> 1.
             ; Буфер/объект проверены один раз на весь запрос: повторная
             ; проверка публичного FileStream для каждого кластера не нужна.
+            push af
+            ld a,(v_handleChecked)
+            ld (v_streamChecked),a
+            pop af
             call fatStream
             push af
+            xor a
+            ld (v_streamChecked),a
             ld (v_handleBuffer),hl
             ld a,FH_CURSOR
             call handleStoreWord
@@ -396,6 +422,15 @@ handleNoCommit:
             ld e,c
             call sub_hl_de
             ld (v_handleLeft),hl
+            ; Для READ size-position пересчитывается только в конце запроса.
+            ; EOF уже ограничил длину; промежуточный кластер её не меняет.
+            ld a,(v_handleOp)
+            cp FILE_OP_WRITE
+            jp z,handleUpdateSize
+            ld a,h
+            or l
+            jp nz,handleTransferResult
+handleUpdateSize:
             ld a,FH_POSITION
             call handleField
             ex de,hl
@@ -564,6 +599,11 @@ handleAllocate:
             ld a,(v_handleOp)
             cp FILE_OP_WRITE
             jp nz,dosCorrupt
+            ld a,FH_MODE
+            call handleField
+            ld a,(hl)
+            and FILE_MODE_SCATTER
+            jp nz,handleAllocateScatter
             ld hl,(v_handlePrevious)
             ld a,h
             or l
@@ -796,27 +836,35 @@ handleCopyLoop:
             ret
 ; HL-DE -> v_handleDelta (32 бита), CF=заём; указатели разрушены.
 handleDifference:
-            ld bc,v_handleDelta
             or a
-handleDifferenceLoop:
             ld a,(de)
-            push bc
             ld b,a
             ld a,(hl)
             sbc a,b
-            pop bc
-            ld (bc),a
+            ld (v_handleDelta+0),a
             inc hl
             inc de
-            inc bc
-            push af
-            ld a,c
-            cp (v_handleDelta+4)&0FFh
-            jp z,handleDifferenceDone
-            pop af
-            jp handleDifferenceLoop
-handleDifferenceDone:
-            pop af
+            ld a,(de)
+            ld b,a
+            ld a,(hl)
+            sbc a,b
+            ld (v_handleDelta+1),a
+            inc hl
+            inc de
+            ld a,(de)
+            ld b,a
+            ld a,(hl)
+            sbc a,b
+            ld (v_handleDelta+2),a
+            inc hl
+            inc de
+            ld a,(de)
+            ld b,a
+            ld a,(hl)
+            sbc a,b
+            ld (v_handleDelta+3),a
+            inc hl
+            inc de
             ret
 ; HL=32-битный счётчик, BC=прибавляемые байты; BC сохранён.
 handleAddCount:
@@ -827,19 +875,12 @@ handleAddCount:
             ld a,(hl)
             adc a,b
             ld (hl),a
-            ld b,2
-handleAddHigh:
+            ret nc
             inc hl
-            ld a,(hl)
-            adc a,0
-            ld (hl),a
-            dec b
-            jp nz,handleAddHigh
-            push hl
-            ld hl,(v_handleDone)
-            ld b,h
-            ld c,l
-            pop hl
+            inc (hl)
+            ret nz
+            inc hl
+            inc (hl)
             ret
 ; HL=число, DE=вычитаемое слово; AF/BC/DE/HL разрушены.
 handleSubtractWord:
@@ -873,3 +914,5 @@ v_handleEOF: DB 0
 v_handleNew: DW 0
 v_handleOldTail: DW 0
 v_handleWalk: DW 0
+
+    INCLUDE "handle-options.inc"

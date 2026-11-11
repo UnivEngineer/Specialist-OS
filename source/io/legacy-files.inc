@@ -2,93 +2,90 @@
 ; Регистры передаются через общий диспетчер, выбор main/банка един.
 sysLegacyStart:
 sysLegacy_fileList:
-    MXCALL MX_DOS_FILELIST
+    MXOS_CALL MXOS_DOS_FILE_LIST
     ret
 sysLegacy_fileGetSetDrive:
-    MXCALL MX_DOS_FILEGETSETDRIVE
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ret
 sysLegacy_fileCreate:
-    MXCALL MX_DOS_FILECREATE
+    MXOS_CALL MXOS_DOS_FILE_CREATE
     ret
 sysLegacy_fileLoad:
-    MXCALL MX_DOS_FILELOAD
+    MXOS_CALL MXOS_DOS_FILE_LOAD
     ret
 sysLegacy_fileDelete:
-    MXCALL MX_DOS_FILEDELETE
+    MXOS_CALL MXOS_DOS_FILE_DELETE
     ret
 sysLegacy_fileRename:
-    MXCALL MX_DOS_FILERENAME
+    MXOS_CALL MXOS_DOS_FILE_RENAME
     ret
 sysLegacy_fileLoadInfo:
-    MXCALL MX_DOS_FILELOADINFO
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     ret
 sysLegacy_imageOpen:
-    MXCALL MX_DOS_IMAGEOPEN
+    MXOS_CALL MXOS_DOS_IMAGE_OPEN
     ret
 sysLegacy_fileGetSetAttr:
-    MXCALL MX_DOS_FILEGETSETATTR
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR
     ret
 sysLegacy_fileNamePrepare:
-    MXCALL MX_DOS_FILENAMEPREPARE
+    MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
     ret
 sysLegacy_fileExec:
-    MXCALL MX_DOS_FILEEXEC
+    MXOS_CALL MXOS_DOS_FILE_EXEC
     ret
 sysLegacy_fileLoad2:
-    MXCALL MX_DOS_FILELOAD2
+    MXOS_CALL MXOS_DOS_FILE_LOAD2
     ret
 sysLegacy_getDriveFreeSpace:
-    MXCALL MX_DOS_GETDRIVEFREESPACE
+    MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
     ret
 sysLegacy_fileCreatePrepare:
-    MXCALL MX_DOS_FILECREATEPREPARE
-    ret
-sysLegacy_dosUnsupported:
-    MXCALL MX_DOS_RESERVEDC88D
+    MXOS_CALL MXOS_DOS_FILE_CREATE_PREPARE
     ret
 sysLegacy_installVolume:
-    MXCALL MX_DOS_INSTALLVOLUME
+    MXOS_CALL MXOS_DOS_INSTALL_VOLUME
     ret
 sysLegacy_getVolume:
-    MXCALL MX_DOS_GETVOLUME
+    MXOS_CALL MXOS_DOS_GET_VOLUME
     ret
 sysLegacy_mountVolume:
-    MXCALL MX_DOS_MOUNTVOLUME
+    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
     ret
 sysLegacy_flushVolume:
-    MXCALL MX_DOS_FLUSHVOLUME
+    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
     ret
 sysLegacy_fileAssociation:
-    MXCALL MX_DOS_FILEASSOCIATION
+    MXOS_CALL MXOS_DOS_FILE_ASSOCIATION
     ret
 sysLegacy_fileChangeDrive:
-    MXCALL MX_DOS_FILESELECTDRIVE
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret
 sysLegacy_fileCopy:
-    MXCALL MX_DOS_FILECOPY
+    MXOS_CALL MXOS_DOS_FILE_COPY
     ret
 sysLegacy_fileGetDrives:
-    MXCALL MX_DOS_FILEGETDRIVES
+    MXOS_CALL MXOS_DOS_FILE_GET_DRIVES
     ret
 sysLegacy_dosGetError:
-    MXCALL MX_DOS_GETERROR
+    MXOS_CALL MXOS_DOS_GET_ERROR
     ret
 sysLegacy_logicalSectorIO:
-    MXCALL MX_DOS_SECTORIO
+    MXOS_CALL MXOS_DOS_SECTOR_IO
     ret
 sysLegacy_fileStream:
-    MXCALL MX_DOS_FILESTREAM
+    MXOS_CALL MXOS_DOS_FILESTREAM
     ret
 sysLegacy_fileHandle:
-    MXCALL MX_DOS_FILEHANDLE
+    MXOS_CALL MXOS_DOS_FILEHANDLE
     ret
 sysLegacy_directoryService:
-    MXCALL MX_DOS_DIRECTORY
+    MXOS_CALL MXOS_DOS_DIRECTORY
     ret
 sysLegacy_cliService:
-    MXCALL MX_DOS_CLI
+    MXOS_CALL MXOS_DOS_CLI
     ret
 sysLegacy_setShell:
-    MXCALL MX_DOS_SETSHELL
+    MXOS_CALL MXOS_DOS_SET_SHELL
     ret
 sysLegacyEnd:

@@ -38,12 +38,13 @@ def main():
         # Кэш изолирован от диска; контекст каталога уже задан фикстурой.
         for entry in ['bios_fileSelectDrive', 'bios_directory']:
             m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')
-        # MXCALL обходит исторические JMP; изолируем тот же файловый слой
+        # MXOS_CALL обходит исторические JMP; изолируем тот же файловый слой
         # в его локальных целях диспетчера, не подменяя графику BIOS.
         for entry in ['fileSelectDrive','directoryService','fileGetSetDrive']:
             m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')
         # Считаем вызовы инверсии отдельно от окончательного вида пикселей.
-        trace=bytes.fromhex('3A 10 65 3C 32 10 65 C3')+ms['uiInverseRect'].to_bytes(2,'little');m[0x6600:0x6600+len(trace)]=trace;m[ds['bios_uiInverseRect']:ds['bios_uiInverseRect']+3]=bytes.fromhex('C3 00 66')
+        entry=ns['uiInverseRect']; original=bytes(m[entry:entry+3])
+        trace=bytes.fromhex('3A 10 65 3C 32 10 65')+original+b'\xC3'+(entry+3).to_bytes(2,'little');m[0x6600:0x6600+len(trace)]=trace;m[entry:entry+3]=bytes.fromhex('C3 00 66')
         m=run(m,ns['printFilesUpDown'],bc=ns['FILE_LIST_SIZE']<<8);m=run(m,ns['drawCursor']);m=run(m,ns['clearCmdLine']);m[0x6510]=0
         return m
     def key(m,code,ctrl=False):

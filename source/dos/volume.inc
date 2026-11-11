@@ -201,6 +201,8 @@ volumeValidateLoop:
             ld (hl), e
             inc hl
             ld (hl), d
+            ld a,c
+            call invalidateDriveCache
             ld a, (v_drive)
             cp c
             pop hl
@@ -253,13 +255,18 @@ getVolume:
             or a
             ret
 
-; Выбранный том: установить таблицу/контекст, сбросить старый кэш,
-; затем вызвать mount. BC/DE/HL сохраняются, AF = результат обработчика.
+; Явный mount инвалидирует строки выбранного диска после внешней записи.
+; Обычная смена тома выбирает сохранённый контекст без инвалидации.
+; BC/DE/HL сохраняются, AF = результат обработчика mount.
 ; После подмены ядра все модули/контексты регистрируются заново.
 mountVolume:
+            ld a,(v_drive)
+            call invalidateDriveCache
+selectVolume:
             push hl
             push de
             push bc
+            call selectCacheForDrive
             ld a, (v_drive)
             call getVolume
             ex de, hl
@@ -268,7 +275,6 @@ mountVolume:
             ld de, VOLUME_DRIVER_HEADER
             add hl, de
             ld (v_volumeTable), hl
-            call resetSectorCache
             call volumeMountDispatch
             pop bc
             pop de
@@ -285,7 +291,7 @@ fatVolumeMount:
             jp fatReadBootSector
 fatVolumeFlush:
             xor a
-            ld (bios_vars.diskWriteErr),a
+            ld (bios_upper.diskWriteErr),a
             call saveSectorCache
             jp fatFinishWrite
 

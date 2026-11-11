@@ -185,6 +185,11 @@ recursive:
             for reg,value in [('hl',0x1000),('bc',0x1234),('de',0x5678)]:
                 assert state['registers'][reg]['dec']==value
             assert m.read(sy['bankPage'],1)==bytes([caller])
+            if not error and size:
+                assert m.read(0xFFDF,1)==b'\x01', 'Copy profile must remain installed'
+                # Следующее переключение восстанавливает кадр только по запросу.
+                m.write(0x2000,bytes([0xCD])+sy['bankCommandWindow'].to_bytes(2,'little')+bytes.fromhex('c30070'))
+                run(0x2000)
             assert m.read(0xFFC0,32)==before
             if not error and size:
                 select(dest);assert m.read(dst,size)==data,(caller,source,dest,size)

@@ -31,12 +31,13 @@ done:
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(stub.with_suffix('.bin')),'--sym='+str(stub.with_suffix('.sym')),str(stub)],check=True,capture_output=True)
 st=symbols(stub.with_suffix('.sym'));count=0
 for hz in [2000000,2500000]:
- base=R/f'docs/timing/shared-001/DISKBEN-{hz}'
+ base=O/f'DISKBEN-{hz}'
+ subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',f'-DPIT_HZ={hz}',f'--raw={base}.bin',f'--sym={base}.sym','DISKBEN.asm'],cwd=R/'source-apps/diskbench',check=True,capture_output=True)
  s=symbols(base.with_suffix('.sym'));code=base.with_suffix('.bin').read_bytes()
  max_ticks=0xFFFFFFFF>>(4 if hz==2000000 else 6)
  rng=random.Random(hz)
  for ticks in [0,1,2,7,8,124,125,624,625,7812,7813,65535,65536,max_ticks]+[rng.randrange(max_ticks) for _ in range(12)]:
-  m=bytearray(65536);m[:len(code)]=code;dos=(R/'bin/DOS.sys').read_bytes();m[0xC000:0xC000+len(dos)]=dos
+  m=bytearray(65536);m[:len(code)]=code;bios=(R/'bin/BIOS.sys').read_bytes();m[0xC000:0xC000+len(bios)]=bios
   raw=stub.with_suffix('.bin').read_bytes();m[0x8800:0x8800+len(raw)]=raw
   for label,target in [('timing_print',st['string']),('timing_printChar',st['emit'])]:m[s[label]:s[label]+3]=b'\xC3'+struct.pack('<H',target)
   struct.pack_into('<H',m,0x8A00,0x9000);struct.pack_into('<I',m,0x8000,ticks)

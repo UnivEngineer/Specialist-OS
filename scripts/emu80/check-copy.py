@@ -24,24 +24,38 @@ class FileMachine(Machine):
 
 
 def get_file(image, name):
+    # Старый контракт — 11 байт FAT-имени; строковый путь допускает каталоги.
+    parts = name.replace('\\', '/').split('/') if isinstance(name, str) else [name]
     word = lambda pos: struct.unpack_from('<H', image, pos)[0]
     sector_size = word(11)
     fat_start = word(14)
     root_start = fat_start + image[16] * word(22)
     root_size = (word(17) * 32 + sector_size - 1) // sector_size
-    root = image[root_start * sector_size:(root_start + root_size) * sector_size]
-    entry = next(root[i:i + 32] for i in range(0, len(root), 32) if root[i:i + 11] == name)
-    cluster = struct.unpack_from('<H', entry, 26)[0]
-    length = struct.unpack_from('<I', entry, 28)[0]
-    data = bytearray()
-    visited = set()
-    while len(data) < length:
-        assert cluster not in visited and cluster >= 2, 'Повреждённая цепочка'
-        visited.add(cluster)
-        sector = root_start + root_size + (cluster - 2) * image[13]
-        data += image[sector * sector_size:(sector + image[13]) * sector_size]
-        cluster = word(fat_start * sector_size + cluster * 2)
-    return entry, bytes(data[:length])
+    directory = image[root_start * sector_size:(root_start + root_size) * sector_size]
+    for index, part in enumerate(parts):
+        if isinstance(part, str):
+            base, _, ext = part.partition('.')
+            part = (base.ljust(8) + ext.ljust(3)).encode('ascii')
+        entry = next(directory[i:i + 32] for i in range(0, len(directory), 32)
+                     if directory[i] not in (0, 0xE5) and directory[i:i + 11].upper() == part.upper())
+        cluster = struct.unpack_from('<H', entry, 26)[0]
+        length = struct.unpack_from('<I', entry, 28)[0]
+        child = index + 1 < len(parts)
+        if child:
+            assert entry[11] & 16, 'Компонент пути не каталог'
+        data = bytearray()
+        visited = set()
+        while cluster < 0xFFF8 and (child or len(data) < length):
+            assert cluster not in visited and cluster >= 2, 'Повреждённая цепочка'
+            visited.add(cluster)
+            sector = root_start + root_size + (cluster - 2) * image[13]
+            data += image[sector * sector_size:(sector + image[13]) * sector_size]
+            cluster = word(fat_start * sector_size + cluster * 2)
+        if not child:
+            assert len(data) >= length, 'Оборванная цепочка'
+            return entry, bytes(data[:length])
+        directory = data
+    raise ValueError('Пустой путь')
 
 
 def main():

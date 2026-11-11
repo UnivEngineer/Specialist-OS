@@ -12,13 +12,7 @@ glyphCacheService:
     jp z,glyphCacheFull
     dec a
     jp nz,glyphCacheBad
-    ld hl,(FONT_SIZE_FIELD)
-    ld de,FONT_ADDR
-    add hl,de
-    jp c,glyphCacheBad
-    ld de,GLYPH_CACHE_END
-    call bios_cmp_hl_de
-    jp nc,glyphCacheBad
+    ld hl,FONT_ADDR+FONT_BYTES
     ld (GLYPH_CACHE_START),hl
     ld hl,GLYPH_CACHE_END
     ld (GLYPH_CACHE_LIMIT),hl

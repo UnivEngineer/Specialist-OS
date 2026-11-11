@@ -63,17 +63,19 @@ FuncRead:
     ld      (IO_PROG_C), a
 
     ld      d, e
-    ld      e, 0
     call    LatchHiAddr
+    ex      de, hl              ; DE=назначение, HL больше не адрес буфера
+    ld      hl, IO_PROG_A
+    ld      c, 0
 
-; Цикл 13 байт, 58 тактов/байт; чтение ВВ55 и запись в ОЗУ.
+; 11 байт, 52 такта/байт: HL=порт данных, DE=буфер, C=младший адрес.
 ReadLoop:
-    ld      a, e
+    ld      a, c
     ld      (IO_PROG_B), a
-    ld      a, (IO_PROG_A)
-    ld      (hl), a
-    inc     hl
-    inc     e
+    ld      a, (hl)
+    ld      (de), a
+    inc     de
+    inc     c
     jp nz,  ReadLoop
 
     or      a
@@ -104,24 +106,29 @@ FuncWrite:
     ld      e, 0
     call    LatchHiAddr
 
-; Цикл 23 байта, 98 тактов/байт = 49 мкс при 2 МГц, меньше tBLC=150 мкс.
+    ld      c, d                ; старший адрес для DATA polling
+    ex      de, hl              ; DE=источник
+    ld      hl, IO_PROG_MODE
+    ld      b, 0
+
+; 17 байт, 78 тактов/байт = 39 мкс при 2 МГц, меньше tBLC=150 мкс.
+; HL=управление ВВ55, DE=источник, B=младший адрес, C=старший адрес.
 WriteLoop:
-    ld      a, e
+    ld      a, b
     ld      (IO_PROG_B), a
-    ld      a, (hl)
+    ld      a, (de)
     ld      (IO_PROG_A), a
-    ld      a, WRITE_0
-    ld      (IO_PROG_MODE), a
-    ld      a, WRITE_1
-    ld      (IO_PROG_MODE), a
-    inc     hl
-    inc     e
+    ld      (hl), WRITE_0
+    ld      (hl), WRITE_1
+    inc     de
+    inc     b
     jp nz,  WriteLoop
 
-    ; Ожидаем DQ7 последнего байта. 768 чтений дают запас свыше tWC=10 мс.
+    ex      de, hl              ; HL=конец источника
+    ld      d, c
+    ld      e, 0FFh             ; последний адрес выбранной страницы
     dec     hl
-    ld      c, (hl)
-    dec     e
+    ld      c, (hl)              ; ожидаемый DQ7
 
     ld      a, PPI_MODE_READ
     ld      (IO_PROG_MODE), a
@@ -151,7 +158,9 @@ PollDone:
 WriteFailed:
     ld      a, 1
     IFNDEF FLASH_BANKED_DRIVER
-    ld      (bios_vars.diskWriteErr), a
+    IFNDEF DRIVER_IO_ONLY
+    ld      (bios_upper.diskWriteErr), a
+    ENDIF
     ENDIF
     scf
     jp      Exit
@@ -217,8 +226,8 @@ FuncInfo:
     ld      hl, DriverInfo
     or      a
     ret
-DriverInfo:        DB "FLASH",0
-DriverDescription: DB "0x512K sequential",0
+DriverInfo:        DB "AT2MX",0
+DriverDescription: DB "0X512K SEQUENTIAL",0
 
 ; B=5: общий синхронный цикл B=1, B=2 и сравнения в DOS.
 ; BC/DE/HL сохраняются; CF=1 и diskWriteErr=1 при отказе.

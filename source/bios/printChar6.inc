@@ -9,6 +9,6 @@
 ; Обработка ESC+F
 
 printChar_eF:   ld    a, 80h
-                ld    (bios_vars.escMode), a
+                ld    (bios_upper.escMode), a
                 ret
 

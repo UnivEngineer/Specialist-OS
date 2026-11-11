@@ -1,7 +1,7 @@
 ; Прямой RAW основной памяти; разрешение выдаёт DOS на первую операцию.
 sysRawRoute:
     ld a,c
-    cp MX_DOS_GETERROR & 0FFh
+    cp MXOS_DOS_GET_ERROR & 0FFh
     jp nz,sysRawCheck
     ld a,(MAIN_RAW_LEASE+5)
     or a
@@ -9,7 +9,7 @@ sysRawRoute:
     ld hl,sysRawError
     jp sysRawDispatch
 sysRawCheck:
-    cp MX_DOS_RAWIO & 0FFh
+    cp MXOS_DOS_RAW_IO & 0FFh
     jp nz,sysRawInvalidate
     ld a,(MAIN_RAW_LEASE)
     or a
@@ -107,8 +107,12 @@ sysInstall:
     ld (MAIN_RAW_LEASE+5),a
     ld hl,sysCall
     ld (MEM_NATIVE_CALL),hl
+    ld hl,bios_memcpy_bc_hl
+    ld (MEM_NEAR_COPY),hl
     ld hl,bios_blockIO
     ld (MEM_LOCAL_A),hl
+    ld hl,localBlockChecked
+    ld (MEM_LOCAL_CHECKED),hl
     ld a,MEM_BANK_EXEC
     ld (MEM_BANK_KIND),a
     ret

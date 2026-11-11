@@ -28,6 +28,12 @@ pathCliCom: DB "A:",05Ch,"CLI.COM",0
 ; В переходной основной сборке служебные банковые операции недоступны.
 dosRawIO:
     jp j_diskDriver
+dosMemoryService:
+moduleLoad:
+moduleCall:
+moduleUnload:
+fileExecNative:
+residentService:
 dosDriverSelect:
 dosDriverInstall:
 dosDriverRefresh:

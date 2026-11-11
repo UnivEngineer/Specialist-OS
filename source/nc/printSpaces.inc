@@ -1,17 +1,12 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Вывод пробелов
-;
-; b - кол-во пробелов
-;
-; 2013-12-18 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
-
+; B пробелов (0..63) одним строковым вызовом; HL/DE сохранены.
 printSpaces:
-            ld    c, ' '
-printSpaces_1:
-            call  bios_printChar
-            dec   b
-            jp nz,  printSpaces_1
-            ret
-
+        ld a,b
+        or a
+        ret z
+        push hl
+        ld hl,ncEmptyText
+        call ncPrintField
+        pop hl
+        ld b,0
+        ret
+ncEmptyText: DB 0

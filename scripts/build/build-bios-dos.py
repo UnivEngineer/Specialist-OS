@@ -1,4 +1,4 @@
-"""Парная сборка BIOS C000h и плотной банковой DOS с 0100h."""
+"""РџР°СЂРЅР°СЏ СЃР±РѕСЂРєР° BIOS C000h Рё РїР»РѕС‚РЅРѕР№ Р±Р°РЅРєРѕРІРѕР№ DOS СЃ 0100h."""
 import json
 import runpy
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 def component_groups():
-    """Раздельные составы BIOS/DOS; общие примитивы находятся в common."""
+    """Р Р°Р·РґРµР»СЊРЅС‹Рµ СЃРѕСЃС‚Р°РІС‹ BIOS/DOS; РѕР±С‰РёРµ РїСЂРёРјРёС‚РёРІС‹ РЅР°С…РѕРґСЏС‚СЃСЏ РІ common."""
     manifests={region:json.loads((ROOT/f'source/{region}/layout.json').read_text('utf-8'))
                for region in ('bios','dos')}
     def resolve(unit,region):
@@ -39,8 +39,8 @@ def main():
         if u.get('same_page'): lines += ['    ALIGN 256,0FFh']
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
-    lines += [inc(ROOT/'source/bios'/f) for f in ('getch.inc','printString1.inc','cmp_hl_de_2.inc')]
-    lines += [inc(ROOT/'source/io/legacy-files.inc'), inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/io/raw-local.inc'), inc(ROOT/'source/io/fileBody.inc'), inc(ROOT/'source/bios/syscall-tables.inc'), inc(ROOT/'source/io/glyphCache.inc')]
+    lines += [inc(ROOT/'source/bios'/f) for f in ('getch.inc','cmp_hl_de_2.inc')]
+    lines += [inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/syscall-tables.inc')]
     probe=out/'System.measure.asm'
     probe.write_text('\n'.join(lines+['    END','']),encoding='utf-8')
     h['assemble'](probe,out/'System.measure.bin',[])
@@ -63,17 +63,14 @@ def main():
               'bankIoImageStart:',
               '    INCBIN "'+(out/'banked/MAINIO.bin').as_posix()+'"',
               'bankIoImageEnd:',
-              inc(ROOT/'source/io/legacy-files.inc'),
-              inc(ROOT/'source/io/fileBody.inc'),
-              inc(ROOT/'source/io/raw-local.inc'),
-              inc(ROOT/'source/io/glyphCache.inc'),
-              'ioImageEnd:', '    ASSERT $ <= LOCAL_BLOCK_ENTRY',
+              'ioImageEnd:', '    ASSERT $ <= MEM_IMAGE_LOCAL_START',
               '    ASSERT BIOS_BANK_IO_BUFFER+261 <= MAIN_COMMAND_ADDR',
               '    ASSERT BIOS_BANK_STACK_TOP <= BIOS_BANK_IO_BUFFER']
     layout='\n'.join(lines)+'\n'
     (out/'System.layout.inc').write_text('DOS_IMAGE_SUM = 0\n'+layout,encoding='utf-8')
     h['assemble'](ROOT/'source/bios/BIOS.asm',out/'System.linked.bin',[])
     sy=h['symbols'](out/'System.linked.sym')
+    assert sy['FONT_ADDR']+sy['FONT_BYTES'] <= sy['FONT_ARENA_END'], 'РЁСЂРёС„С‚ РїРµСЂРµСЃРµРєР°РµС‚ СЃРёСЃС‚РµРјРЅС‹Р№ СЃС‚РµРє'
     raw=(out/'System.linked.bin').read_bytes()
     dos_start=sy['DOS_CODE_START']
     dos=raw[:sy['dosCoreEnd']-dos_start]
@@ -82,7 +79,7 @@ def main():
     (out/'System.layout.inc').write_text(f'DOS_IMAGE_SUM = 0{checksum:04X}h\n'+layout,encoding='utf-8')
     h['assemble'](ROOT/'source/bios/BIOS.asm',out/'System.linked.bin',[])
     raw=(out/'System.linked.bin').read_bytes()
-    assert raw[:len(dos)]==dos, 'Контрольная сумма не должна менять DOS'
+    assert raw[:len(dos)]==dos, 'РљРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР° РЅРµ РґРѕР»Р¶РЅР° РјРµРЅСЏС‚СЊ DOS'
     bios=raw[0xC000-dos_start:sy['biosLowEnd']-dos_start]
     io=raw[sy['BIOS_IO_ADDR']-dos_start:sy['ioImageEnd']-dos_start]
     (out/'IO.sys').write_bytes(io)
@@ -93,11 +90,15 @@ def main():
         (out/f'{stem}.lst').write_bytes((out/'System.linked.lst').read_bytes())
     report=dict(bios=dict(start=0xC000,end=0xC000+len(bios),bytes=len(bios)),
                 io=dict(start=sy['BIOS_IO_ADDR'],end=sy['ioImageEnd'],bytes=len(io)),
-                glyphCache=dict(start=sy['FONT_ADDR']+(ROOT/'assets/system-rom/FONTKOI.FNT').stat().st_size,end=sy['GLYPH_CACHE_END']),
+                diskBuffer=dict(start=sy['BIOS_DISK_BUFFER'],end=sy['BIOS_DISK_BUFFER_END']),
+                temporaryBuffer=dict(start=sy['BIOS_TEMP_BUFFER'],end=sy['BIOS_TEMP_BUFFER_END']),
+                upperReserve=dict(start=sy['FONT_ADDR']+sy['FONT_BYTES'],end=sy['BIOS_BANK_STACK_BOTTOM']),
+                glyphCache=dict(start=sy['FONT_ADDR']+sy['FONT_BYTES'],end=sy['GLYPH_CACHE_END']),
                 dos=dict(start=dos_start,end=sy['dosCoreEnd'],bytes=len(dos)),
                 units={k:[u['name'] for u in v] for k,v in groups.items()},windows=manifest['fixed'],
                 blocks=[dict(name=b['block']['key'],address=b['address'],size=b['block']['size'])
-                        for b in sorted(bios_plan['placed'],key=lambda b:b['address'])]
+                        for b in sorted(bios_plan['placed'],key=lambda b:b['address'])
+                        if b['block']['key'] != 'mainAdapters']
                        + [dict(name='bankBiosGateway', address=sy['bankBiosImageStart'],
                                size=sy['bankBiosImageEnd']-sy['bankBiosImageStart']),
                           dict(name='bankDiskBridge', address=sy['bankIoImageStart'],
@@ -114,7 +115,7 @@ def main():
     report['nativeDosReference'] = report['dos']
     runpy.run_path(str(ROOT/'scripts/build/build-banked-dos.py'))['main']()
     bank=bytearray((out/'banked/KERNEL.bin').read_bytes())
-    # Активный слот заполняется при инициализации DOS из общего шаблона.
+    # РђРєС‚РёРІРЅС‹Р№ СЃР»РѕС‚ Р·Р°РїРѕР»РЅСЏРµС‚СЃСЏ РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё DOS РёР· РѕР±С‰РµРіРѕ С€Р°Р±Р»РѕРЅР°.
     (out/'DOS.sys').write_bytes(bank)
     bank_layout=json.loads((out/'banked/KERNEL.layout.json').read_text(encoding='utf-8'))
     report['dos']=dict(start=bank_layout['dosCoreStart'],end=bank_layout['kernelEnd'],bytes=len(bank),page=1,

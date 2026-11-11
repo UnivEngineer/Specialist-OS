@@ -2,17 +2,20 @@
 bankDosPrintChar:
 j_printChar:
 printChar:
-    MXCALL MX_BIOS_PRINTCHAR
+    MXOS_CALL MXOS_BIOS_PRINT_CHAR
     ret
 bankDosPrintString:
 j_printString:
 printString:
-    MXCALL MX_BIOS_PRINTSTRING
+    push af
+    ld a,MEM_OP_PRINT
+    call mx_memory
+    pop af
     ret
 bankDosPrintDecWord:
-    MXCALL MX_BIOS_PRINTDECWORD
+    MXOS_CALL MXOS_BIOS_PRINT_DEC_WORD
     ret
 bankDosGetch:
 j_getch:
-    MXCALL MX_BIOS_GETCH
+    MXOS_CALL MXOS_BIOS_GETCH
     ret

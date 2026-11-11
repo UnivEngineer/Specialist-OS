@@ -1,5 +1,6 @@
 ; Состояние принадлежит NC. Пока оболочка работает в main, сохраняем его
 ; в B:\NCSTATE.TMP. Ошибки и нехватка места отключают сохранение до нового NC.
+; Вызывается перед запуском внешней программы и выходом из NC.
 ; Выбранный диск сохраняется, CWD не меняется файловым API.
 saveState:
     ld a,(ncStateDisabled)
@@ -9,23 +10,26 @@ saveState:
     ld hl,state
     ld (ncStateIO+FILE_PATH_IO.buffer),hl
     ld hl,ncStateIO
-    call bios_fileSavePath
+    MXOS_CALL MXOS_DOS_FILE_SAVE_PATH
     jp c,ncStateDisable
     ; Служебный файл не попадает в обычные списки NC/DIR.
     ld hl,ncStateIO+FILE_PATH_IO.descriptor
     ld bc,0201h
-    MXCALL MX_DOS_FILEGETSETATTR
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR
     jp c,ncStateDisable
     jp ncStateFinish
 loadState:
+    ld a,2
+    ld (ncSavedState+state.panelA_sort-state),a
+    ld (ncSavedState+state.panelB_sort-state),a
     call ncStateBegin
     ld hl,ncSavedState
     ld (ncStateIO+FILE_PATH_IO.buffer),hl
     ld hl,ncStateIO
-    call bios_fileLoadPath
+    MXOS_CALL MXOS_DOS_FILE_LOAD_PATH
     jp nc,ncStateValidate
     ; Отсутствующий файл при первом запуске не отключает сохранение.
-    MXCALL MX_DOS_GETERROR
+    MXOS_CALL MXOS_DOS_GET_ERROR
     cp DOS_ERR_NOT_FOUND
     jp nz,ncStateDisable
     jp ncStateInvalid
@@ -33,7 +37,11 @@ ncStateValidate:
     ld hl,(ncStateIO+FILE_PATH_IO.actual)
     ld de,stateEnd-state
     call bios_cmp_hl_de
+    jp z,ncStateVersionReady
+    ld de,state.panelA_sort-state
+    call bios_cmp_hl_de
     jp nz,ncStateInvalid
+ncStateVersionReady:
     ld a,(ncSavedState)
     cp 05Bh
     jp nz,ncStateInvalid
@@ -41,8 +49,19 @@ ncStateValidate:
     ld de,ncSavedState+stateEnd-state
     ld bc,state
     call bios_memcpy_bc_hl
+    ld hl,state.panelA_sort
+    call ncStateSortMode
+    inc hl
+    call ncStateSortMode
     xor a
     jp ncStateFinish
+; Неизвестное значение режима не влияет на остальные сохранённые поля.
+ncStateSortMode:
+    ld a,(hl)
+    cp 3
+    ret c
+    ld (hl),2
+    ret
 ncStateDisable:
     ld a,1
     ld (ncStateDisabled),a
@@ -52,7 +71,7 @@ ncStateInvalid:
 ncStateFinish:
     push af
     ld a,(ncStateDrive)
-    MXCALL MX_DOS_FILESELECTDRIVE
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     ret
 ncStateBegin:

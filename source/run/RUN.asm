@@ -14,6 +14,7 @@
 ; До запуска приложения 8C00h также служит временным ID-кодом FLASHSYS.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/ramfos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
 RUN_BODY_REQUEST = RAMFOS_CONTEXT
 RUN_LOAD_STAGE = RAMFOS_CONTEXT+48
     MACRO GET_DE address
@@ -33,7 +34,7 @@ start:
     ld (cacheToken),hl
     add hl,sp
     ld (callerSP),hl
-    ld a,(bios_vars.koi7)
+    ld a,(bios_upper.koi7)
     ld (callerKoi),a
     push de
     ld e,2
@@ -41,7 +42,7 @@ start:
     ld (callerDrive),a
     pop de
     xor a
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     ex de,hl
     xor a
     ld (appName),a
@@ -220,20 +221,68 @@ nativeOpen:
     ld bc,16
     call rksRead
     jp c,badImage
+    ld a,(rksHeader+5)
+    or a
+    jp nz,nativeForward
     ld hl,(rksHeader+12)
     ld (expectedChecksum),hl
     ld a,(mode)
     inc a
     jp nz,ready
-    ld a,(descriptor+FILE_DESCRIPTOR.ext)
-    and 0DFh
-    cp 'C'
-    ld a,0
-    jp z,setDefault
     jp chooseMode
+; Подтверждённый MAIN/DRIVER/BANK исполняет DOS без CLI/PATH/ассоциаций.
+; main-приложение может затереть RUN: продолжение заранее переносится в 8C00h.
+nativeForward:
+    ld a,(launchKoi)
+    call bios_setFontEncoding
+    ld hl,appName
+    ld de,coreInput
+    ld b,MAX_PATH-1
+    call nativeCopyArgument
+    jp c,usage
+    ld a,' '
+    ld (de),a
+    inc de
+    dec b
+    jp z,usage
+    ld hl,appArgs
+    call nativeCopyArgument
+    jp c,usage
+    xor a
+    ld (de),a
+    ld hl,coreInput
+    ld de,RAMFOS_ARGS
+    ld bc,MAX_PATH
+    call copyBytes
+    ld hl,nativeBridge
+    ld de,RAMFOS_BRIDGE
+    ld bc,nativeBridgeEnd-nativeBridge
+    call copyBytes
+    jp RAMFOS_BRIDGE
+nativeCopyArgument:
+    ld a,(hl)
+    or a
+    ret z
+    ld (de),a
+    inc hl
+    inc de
+    dec b
+    jp nz,nativeCopyArgument
+    scf
+    ret
+nativeBridge:
+    ld hl,RAMFOS_ARGS
+    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    jp nc,0C000h
+    ld hl,RAMFOS_BRIDGE+nativeError-nativeBridge
+    call bios_printString
+    call bios_getch
+    jp 0C000h
+nativeError: DB 'NATIVE LOAD FAILED',13,10,0
+nativeBridgeEnd:
+    ASSERT nativeBridgeEnd-nativeBridge <= 256
+
 rksOpen:
-    ; Классический контейнер может использовать всё ОЗУ до переходников.
-    call bios_releaseDosModule
     ld hl,descriptor
     call bios_fileLoadInfo
     jp c,notFound
@@ -321,9 +370,6 @@ customMode:
     jp ready
 ready:
 upperSource = ready ; Метка прежнего CPU-стенда; верхнего размещения больше нет.
-    ld a,(mode)
-    or a
-    call nz,bios_releaseDosModule
     ld hl,(appLoad)
     GET_DE appSize
     add hl,de
@@ -380,7 +426,7 @@ rangeOK:
     cp SYSTEM_PROGRAM_ADDR/256
     jp c,cacheRangeReady
     ld a,1
-    MXCALL MX_BIOS_GLYPHCACHE
+    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
     jp c,badImage
     ex de,hl
     ld (cacheToken),hl
@@ -502,7 +548,7 @@ install:
     ld (bodyCallerDrive),a
     ; Кодировка независима от MX/STD; сменные ядра задают её сами.
     ld a,(launchKoi)
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     ; Переходник остаётся доступным после переключения в STD.
     ld hl,RAMFOS_BRIDGE
     ld de,RAMFOS_ARGS
@@ -623,7 +669,7 @@ runBodyReady:
 rksRead:
     ld de,rksCursor
     ld a,2
-    MXCALL MX_DOS_FILESTREAM
+    MXOS_CALL MXOS_DOS_FILESTREAM
     ret
 ; BC=вычисленная сумма, HL=два байта суммы из RKS; CF=несовпадение.
 rksChecksum:
@@ -742,14 +788,14 @@ error:
     or l
     jp z,errorCacheReady
     ld a,1
-    MXCALL MX_BIOS_GLYPHCACHE
+    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
 errorCacheReady:
     pop hl
     ld a,COLOR_BIOS
     ld (IO_COLOR),a
     call bios_printString
     ld a,(callerKoi)
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     scf
     ret
 
@@ -799,7 +845,7 @@ bridgeNative:
 bridgeReloc9:
     jp z,bridgeStart
     ld a,0FFh
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
 bridgeSTD:
     ld a,0B6h
     ld (IO_TIMER_MODE),a
@@ -852,6 +898,7 @@ bridgeReloc15:
 bridgeReturnedMX:
 bridgeCallerSP:
     ld sp,0
+    push af                 ; Режим нужен после восстановления кэша и KOI.
 bridgeCacheLimit:
     ld hl,0
     ld a,h
@@ -859,13 +906,16 @@ bridgeCacheLimit:
 bridgeReloc19:
     jp z,bridgeCacheDone
     ld a,1
-    MXCALL MX_BIOS_GLYPHCACHE
+    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
 bridgeCacheDone:
 bridgeRestoreKoi:
     ld a,0
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     ld a,COLOR_BIOS
     ld (IO_COLOR),a
+    pop af
+    cp 2
+    jp c,0C000h             ; MX/STD: нижний RUN и код оболочки могли быть затёрты.
     or a
     ret
 ; Неперекрывающиеся диапазоны: тело 0000h -> верхнее ОЗУ,
@@ -964,8 +1014,8 @@ monSP: DW 07FFFh
 monInit: DW 0C444h
 descriptor: BLOCK FILE_DESCR_SIZE,0
 txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
-txtNotFound: DB 0Ah,"File not found",0
-txtBad: DB 0Ah,"Bad image or address range",0
+txtNotFound: DB 0Ah,"FILE NOT FOUND",0
+txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
 upperEnd: ; Граница прежнего CPU-стенда, все эти байты теперь в нижнем RUN.
 bodyRequest: FILE_BODY_IO
 expectedChecksum: DW 0
@@ -978,7 +1028,7 @@ bodyRequestEnd:
 ; Адреса внутри блока отсутствуют, кроме патча последнего JP.
 loadStage:
     ld hl,RUN_BODY_REQUEST
-    MXCALL MX_BIOS_FILEBODY
+    MXOS_CALL MXOS_BIOS_FILE_BODY
     jp c,RUN_LOAD_STAGE+loadStageError-loadStage
     ld a,(RUN_BODY_REQUEST+FILE_BODY_IO+2)
     ld e,1
@@ -1007,17 +1057,17 @@ loadStageEnd:
     ASSERT RUN_LOAD_STAGE+loadStageEnd-loadStage <= RAMFOS_CONTEXT+128
     ASSERT $ < RAMFOS_BRIDGE
 
-txtTitle: DB 0Ah,"MXOS2 executable launcher v2.0",0Ah,0
-txtLoad: DB ": Load address ",0
-txtEntry: DB ", Run address ",0
-txtModes: DB 0Ah,"Choose the runtime mode:",0Ah
-    DB "1 - MX:  MX  hardware, MXOS2 core",0Ah
-    DB "2 - STD: STD hardware, MXOS2 core",0Ah
-    DB "3 - RF:  MX  hardware, RAMFOS core",0Ah
-    DB "4 - MON: STD hardware, Monitor-2 core",0Ah
-    DB "5 - MON:CUSTOM: STD hardware, custom core",0Ah,"> ",0
+txtTitle: DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
+txtLoad: DB ": LOAD ADDRESS ",0
+txtEntry: DB ", RUN ADDRESS ",0
+txtModes: DB 0Ah,"CHOOSE THE RUNTIME MODE:",0Ah
+    DB "1 - MX:  MX  HARDWARE, MXOS2 CORE",0Ah
+    DB "2 - STD: STD HARDWARE, MXOS2 CORE",0Ah
+    DB "3 - RF:  MX  HARDWARE, RAMFOS CORE",0Ah
+    DB "4 - MON: STD HARDWARE, MONITOR-2 CORE",0Ah
+    DB "5 - MON:CUSTOM: STD HARDWARE, CUSTOM CORE",0Ah,"> ",0
 coreInput: BLOCK MAX_PATH,0
 appName: BLOCK MAX_PATH,0
-txtCustom: DB 0Ah,"Monitor file: ",0
+txtCustom: DB 0Ah,"MONITOR FILE: ",0
 cacheToken: DW 0
     END

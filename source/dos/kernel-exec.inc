@@ -1,5 +1,5 @@
-; Загрузчик исполняет программу в main, сохраняя BAT и DOS в своём банке.
-; Внешний FILEEXEC получает строку клиента. Вызов приложения допускает
+; Загрузчик исполняет программу в main либо отдельном EXEC-банке.
+; Внешний FILE_EXEC получает строку клиента. Вызов приложения допускает
 ; новые запросы DOS; состояние внешнего диспетчера лежит на стеке DOS.
 keRequest:
     ld hl,(kdRegs)
@@ -18,16 +18,21 @@ keCheckCommand:
     jp nz,keCheckCommand
     jp kdBad
 keCommandReady:
+    ld a,(kdFunction)
+    cp MXOS_DOS_FILE_EXEC_NATIVE & 0FFh
     ld hl,KD_PATH
+    jp z,keNativeRequest
     call fileExec
-    ; Вложенные запросы уже завершились; результат FILEEXEC — только CF/A.
+    jp keRequestDone
+keNativeRequest:
+    call keExternal
+keRequestDone:
+    ; Вложенные запросы уже завершились; результат FILE_EXEC — только CF/A.
     call kdCapture
     jp kdFinish
 
+fileExecNative:
 keExternal:
-    ld a,(diActive)
-    or a
-    jp nz,blockArgument
     ld a,(v_drive)
     push af
     ld de,CMD_LINE
@@ -55,6 +60,16 @@ keCommandCopied:
     call cmpFileExt
     pop hl
     jp z,keBat
+    ; Явное расширение тоже проверяется: DLL и прочие файлы не приложения.
+    push hl
+    call cmpFileExt
+    pop hl
+    jp z,keNativeExtension
+    push hl
+    call cmpFileExt
+    pop hl
+    jp nz,keExtensionDenied
+keNativeExtension:
     ; Аргументы переводятся в системную строку main до загрузки тела.
     ld de,CMD_LINE
     call sub_hl_de
@@ -72,8 +87,10 @@ keCommandCopied:
     call imageOpen
     jp c,keLoadError
     ld a,(v_tmpFileDescr+5)
-    and IMAGE_FLAG_DRIVER
-    jp nz,keDriver
+    cp IMAGE_FLAG_BANK
+    jp z,keBank
+    cp IMAGE_FLAG_DRIVER
+    jp z,keDriver
     ; Основная память до переходника RUN; верхние драйверы — явные области.
     push hl
     push de
@@ -141,14 +158,114 @@ keImageReady:
     ld (kdBusy),a
     ld hl,(keCacheToken)
     push hl
+    call appEnter
+    jp c,keAppRejected
     ld hl,bankCallback
     ld de,keRegs
     call bankCallPacket
-    pop hl
-    call keCacheRelease
+    call appLeave
     xor a
+keAppRejected:
+    push af
+    pop bc
+    pop hl
+    push bc
+    call keCacheRelease
+    pop af
     ret
+; Банковое приложение использует тот же жизненный цикл, что DLL.
+; Стек: указатель аргументов main, прежний диск. Вызовы ниже локальны DOS.
+keBank:
+    pop hl
+    ld de,MAIN_COMMAND_ADDR
+    call sub_hl_de
+    ld de,DOS_BANK_STACK_BOTTOM
+    add hl,de
+    push hl
+    xor a
+    ld (kdBusy),a
+    ld hl,CMD_LINE
+    ld a,MODULE_TARGET_BANK
+    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    jp c,keLoadError
+    push hl                 ; handle переживает любые вложенные вызовы.
+    ld hl,(mdRecord)
+    ld de,3
+    add hl,de
+    ld a,(hl)
+    ld (mdBankId),a
+    ld hl,CMD_LINE
+    ld de,DOS_BANK_STACK_BOTTOM
+    ld bc,MAX_PATH+2
+    call mdInstallPart
+    jp c,keBankPrepareFailed
+    ; Строка лежит в нижней части стека, недоступной стековым кадрам.
+    ld hl,keBankFloor
+    ld de,bankStackFloor
+    ld bc,2
+    call mdInstallPart
+    jp c,keBankPrepareFailed
+    ld hl,5
+    add hl,sp
+    ld a,(hl)               ; Восстанавливаем диск до входа приложения.
+    call fileSelectDrive
+    ld hl,0
+    push hl                 ; AF
+    push hl                 ; BC
+    ld hl,6
+    add hl,sp
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    push de                 ; DE — локальная строка аргументов в EXEC-банке.
+    ld hl,0
+    push hl                 ; HL
+    add hl,sp
+    ex de,hl                ; DE — локальный MX_REGS в DOS.
+    ld hl,8
+    add hl,sp
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    ld h,b
+    ld l,c
+    MXOS_CALL MXOS_DOS_MODULE_CALL
+    push af
+    ld hl,10
+    add hl,sp
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
+    ld a,1
+    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    pop af
+    push af
+    pop bc
+    ld hl,10                ; Пакет и handle больше не нужны.
+    add hl,sp
+    ld sp,hl
+    push bc
+    pop af
+keBankDone:
+    jp keLoadError          ; Снять аргументы, вернуть исходный диск и статус.
+keBankPrepareFailed:
+    push af
+    pop bc
+    pop hl
+    push bc
+    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    pop af
+    jp keLoadError
+keBankFloor: DW DOS_BANK_STACK_BOTTOM+192
+
 keDriver:
+    ld a,(moduleDosOwner)
+    or a
+    jp nz,keDriverBusy
+    ld a,(diActive)
+    or a
+    jp nz,keDriverBad
     ; Стек: адрес аргументов main, прежний диск. Код не затрагивает main.
     ld a,d
     cp DOS_BANK_DRIVER_ADDR/256
@@ -195,10 +312,15 @@ keDriverReturn:
 keDriverBad:
     call blockArgument
     jp keLoadError
+keDriverBusy:
+    ld a,MEM_ERROR_ACTIVE
+    call dosSetError
+    jp keLoadError
 keRangeError:
     pop de
     pop hl
     call blockArgument
+    jp keLoadError
 keLoadError:
     pop hl
 keDone:
@@ -209,6 +331,11 @@ keDone:
     call fileSelectDrive
     pop af
     ret
+keExtensionDenied:
+    ld a,DOS_ERR_UNSUPPORTED
+    call dosSetError
+    scf
+    jp keDone
 keBat:
     ; execBat ожидает аргументы на вершине стека и возвращается сюда.
     ld de,keBatDone
@@ -230,7 +357,7 @@ keCacheClaim:
     cp SYSTEM_PROGRAM_ADDR/256
     jp c,keCacheNoClaim
     ld a,1
-    MXCALL MX_BIOS_GLYPHCACHE
+    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
     ret c
     ex de,hl
     ld (keCacheToken),hl
@@ -243,6 +370,6 @@ keCacheRelease:
     or l
     ret z
     ld a,1
-    MXCALL MX_BIOS_GLYPHCACHE
+    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
     ret
 keCacheToken: DW 0

@@ -2,6 +2,11 @@
 ; ВИ53: CLK1 / 256 -> CLK2, GATE1/2=1, без прерываний.
 ; Запись включает выделение кластеров, FAT, каталог и штатные барьеры DOS.
     INCLUDE "../../source/include/mxos.inc"
+    IFDEF DISKBEN_BANK
+IMAGE_FLAGS = IMAGE_FLAG_BANK
+    ELSE
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
+    ENDIF
     IFNDEF PIT_HZ
 PIT_HZ = 2000000
     ENDIF
@@ -32,33 +37,50 @@ LAYOUT_MECHANICAL = 2
     ORG 0
 entry:
     di
+    IFNDEF DISKBEN_BANK
     STORE_DE v_arguments
+    ENDIF
     ld hl,0
     add hl,sp
     ld (callerSP),hl
-    ; Бенчмарк использует только резидентный файловый API и занимает HIGH.
-    call bios_releaseDosModule
-    ld a,(bios_vars.koi7)
+    IFNDEF DISKBEN_BANK
+    ld a,(bios_upper.koi7)
     ld (callerKoi),a
     xor a
-    ld (bios_vars.koi7),a       ; Имена файлов — KOI-8.
+    call bios_setFontEncoding       ; Имена файлов — KOI-8.
+    ENDIF
     IF FAT_CACHE_ADDR == 0FB00h
-    call bios_getMemTop
+    call bench_getMemTop
     ld de,program_end-1
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     jp nc,benchMemoryReady
     ld hl,txtNoMemory
     jp show_error
 benchMemoryReady:
     ENDIF
-    ld hl,txtTitle
-    call puts
+    IFDEF DISKBEN_BANK
+    ; Один MODULE_CALL на полный прогон. Параметры переданы значениями.
+    ld a,b
+    ld (argDrive),a
+    ld a,c
+    ld (argCheck),a
+    ld a,d
+    ld (argWrites),a
+    ld a,e
+    ld (argSize),a
+    ELSE
     ld hl,(v_arguments)
     call parse_arguments
     jp c,argument_error
     ld a,(argHelp)
     or a
     jp nz,argument_help
+    ENDIF
+    ld hl,txtTitle
+    call puts
+    IFNDEF DISKBEN_BANK
+    call choose_executor
+    ENDIF
     ld a,(argDrive)
     cp 0FFh
     jp nz,drive_selected
@@ -81,10 +103,10 @@ drive_value:
 drive_selected:
     ld (v_drive),a
     ld e,1
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     jp c,error
     ld b,3
-    call bios_diskDriver
+    call raw_driver
     ld (v_info),hl
     ld a,d
     or e
@@ -94,10 +116,19 @@ drive_selected:
     ld de,0
     ld hl,sectorBuffer
     ld b,2
-    call bios_diskDriver
+    call raw_driver
     jp c,error
     call geometry
     jp c,error
+    IFDEF DISKBEN_BANK
+    ; MAIN уже прочитал и проверил интерактивные параметры.
+    ld a,(argCheck)
+    ld (v_writeMode),a
+    ld a,(argWrites)
+    ld (v_budget),a
+    ld a,(argSize)
+    jp file_size_value
+    ENDIF
     ld a,1
     ld (v_writeMode),a
     xor a
@@ -175,12 +206,27 @@ set_buffer_end:
     ld a,h
     add a,sectorBuffer / 256
     ld (v_bufferEndHi),a
+    ld a,(argFrag)
+    cp 0FFh
+    jp nz,fragment_selected
+menu_fragment:
+    ld hl,txtFragment
+    call puts
+    call read_choice
+    jp c,menu_fragment
+    or a
+    jp z,fragment_selected
+    sub '0'
+    cp 2
+    jp nc,menu_fragment
+fragment_selected:
+    ld (argFrag),a
     jp prepare
 
 ; HL=строка десятичного размера; пустая строка = 8 КиБ.
 ; Выход A=1..24, CF=ошибка; AF/BC/DE/HL разрушены. Нет усечения/переполнения.
 parse_file_kib:
-    call bios_argNext
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
     ld a,DEFAULT_FILE_KIB
     jp nc,parse_size_word
     or a
@@ -208,7 +254,7 @@ parse_size_digit:
     inc hl
     jp parse_size_digit
 parse_size_done:
-    call bios_argNext
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
     jp nc,bad_geometry        ; Второе слово не является частью размера.
     ld a,c
     or a
@@ -216,6 +262,11 @@ parse_size_done:
     scf
     ret
 prepare:
+    IFNDEF DISKBEN_BANK
+    ld a,(argBank)
+    or a
+    jp nz,run_bank_module
+    ENDIF
     call select_layout
     ; Для физического READ не требуется свободный непрерывный участок.
     ld a,(v_budget)
@@ -236,13 +287,13 @@ prepare:
     ld hl,txtRegion
     call puts
     ld hl,(v_start)
-    call bios_printHexWord
+    call bench_printHexWord
     ld hl,txtDash
     call puts
     ld hl,(v_start)
     ld de,TEST_SECTORS-1
     add hl,de
-    call bios_printHexWord
+    call bench_printHexWord
     ld hl,txtBlankLines
     call puts
 prepare_timer:
@@ -265,7 +316,7 @@ case_loop:
     jp nz,case_buffer_ready
     ld a,(v_case)
     and 1
-    jp z,case_buffer_ready
+    jp nz,case_buffer_ready
     ld hl,highBuffer
 case_buffer_ready:
     ld (io_buffer+1),hl
@@ -280,7 +331,7 @@ case_passes:
     ld l,a
     ld h,0
     ld de,TEST_SECTORS
-    call bios_mul_hl_de
+    call bench_mul_hl_de
     ld (v_operations),hl
     ld (v_left),hl
     ld a,(v_case)
@@ -288,7 +339,7 @@ case_passes:
     jp c,case_pattern_ready
     jp file_write_case
 case_pattern_ready:
-    ld hl,bios_diskDriver
+    ld hl,raw_local
     ld (io_call+1),hl
     xor a
     ld (v_index),a
@@ -332,7 +383,7 @@ operation_ready:
 io_buffer:
     ld hl,sectorBuffer
 io_call:
-    call bios_diskDriver
+    call raw_local
     push af
     call timer_sample
     pop af
@@ -363,10 +414,14 @@ done:
     ld hl,txtDone
     call puts
 exit_wait:
-    call bios_getch
+    call bench_getch
+    ld c,00Ah
+    call bench_printChar
 finished:
+    IFNDEF DISKBEN_BANK
     ld a,(callerKoi)
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
+    ENDIF
     ld hl,(callerSP)
     ld sp,hl
     or a
@@ -382,8 +437,12 @@ show_error:
     jp done
 txtNoMemory: DB "NOT ENOUGH MEMORY",0
 puts:
-    jp bios_printString
+    jp bench_printString
 
+    INCLUDE "api.inc"
+    IFNDEF DISKBEN_BANK
+    INCLUDE "module.inc"
+    ENDIF
     INCLUDE "args.inc"
     INCLUDE "fileTest.inc"
 
@@ -394,6 +453,9 @@ puts:
 select_layout:
     xor a
     ld (v_layout),a
+    IFDEF DISKBEN_BANK
+    ret
+    ENDIF
     ld a,(v_technology)
     cp DISK_TECH_FLOPPY
     jp z,layout_mechanical
@@ -422,14 +484,44 @@ layout_store:
 
 ; Строковый ввод BIOS с редактированием. Enter полностью потребляется здесь.
 ; Выход HL=буфер с нулём, остальные регистры и флаги разрушаются.
+; Выбор нужен только при отсутствии -C:... или совместимого старого ключа.
+choose_executor:
+    ld a,(argMode)
+    or a
+    jp nz,executorModeReady
+    ld a,3
+    ld (argMode),a
+executorModeReady:
+    ld a,(argBank)
+    or a
+    ret nz
+menu_executor:
+    ld hl,txtExecutor
+    call puts
+    call read_line
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    ld c,3                     ; Enter: MAIN DLL.
+    jp c,argument_bank
+    push hl
+    ex de,hl
+    call argument_context
+    pop hl
+    jp c,menu_executor
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    ret c
+    xor a
+    ld (argBank),a
+    jp menu_executor
+
+txtExecutor: DB 10,"Caller MAIN/DOS/BANK/ALL [MAIN]: ",0
 read_line:
     ld hl,inputBuffer
     ld de,inputBuffer+16
-    call bios_input
+    call bench_input
     xor a
     ld (de),a
     ld c,00Ah
-    call bios_printChar
+    call bench_printChar
     ld hl,inputBuffer
     ret
 
@@ -437,7 +529,7 @@ read_line:
 ; Выход A=символ/0, CF=1 при лишнем тексте; HL/BC/DE разрушаются.
 read_choice:
     call read_line
-    call bios_argNext
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
     jp nc,choice_word
     xor a
     ret
@@ -447,7 +539,7 @@ choice_word:
     jp nz,choice_bad
     ld a,(de)
     ld c,a
-    call bios_argNext
+    MXOS_CALL MXOS_BIOS_ARG_NEXT
     jp nc,choice_bad
     ld a,c
     or a
@@ -461,7 +553,7 @@ choice_bad:
 detect_driver:
     ld b,0FFh
     ld hl,0
-    call bios_diskDriver
+    call raw_driver
     jp c,detect_unknown
     ld a,h
     or l
@@ -484,12 +576,31 @@ detect_unknown:
 
 ; Сводка отделена пустыми строками; поиск участка и печать вне измерения.
 print_summary:
+    ld a,(argBank)
+    ld hl,txtCaller
+    cp 1
+    jp z,summaryBank
+    ld hl,txtCallerDos
+    cp 2
+    jp z,summaryCaller
+    ld hl,txtCallerMainDll
+    cp 3
+    jp z,summaryCaller
+    ld hl,txtCallerBatch
+    cp 4
+    jp z,summaryCaller
+    ld hl,txtCaller
+    jp summaryCaller
+summaryBank:
+    ld hl,txtCallerBank
+summaryCaller:
+    call puts
     ld hl,txtSummaryDrive
     call puts
     ld a,(v_drive)
     add a,'A'
     ld c,a
-    call bios_printChar
+    call bench_printChar
     ld hl,txtLabel
     call puts
     ld hl,(v_info)
@@ -523,26 +634,26 @@ summary_type:
     call puts
     inc hl
     ld c,' '
-    call bios_printChar
+    call bench_printChar
     call puts
     ld hl,txtCapacity
     call puts
     ld hl,(v_capacity)
-    call bios_div_hl_2
-    call bios_div_hl_2
+    call bench_div_hl_2
+    call bench_div_hl_2
     ex de,hl
     ld b,0
-    call bios_printDecWord
+    call bench_printDecWord
     ld hl,txtSectorSize
     call puts
     LOAD_DE v_sectorSize
-    call bios_printDecWord
+    call bench_printDecWord
     ld hl,txtSpc
     call puts
     ld a,(v_spc)
     ld e,a
     ld d,0
-    call bios_printDecWord
+    call bench_printDecWord
     ld hl,txtMode
     call puts
     ld a,(v_budget)
@@ -571,7 +682,7 @@ summary_passes:
     ld e,a
     ld d,0
     ld b,0
-    call bios_printDecWord
+    call bench_printDecWord
     ld a,(v_budget)
     or a
     jp z,summary_end
@@ -581,13 +692,13 @@ summary_passes:
     ld e,a
     ld d,0
     ld b,0
-    call bios_printDecWord
+    call bench_printDecWord
     ld hl,txtClusters
     call puts
     ld a,(v_fileSectors)
     ld e,a
     ld d,0
-    call bios_printDecWord
+    call bench_printDecWord
 summary_end:
     ld hl,txtLineBreak
     jp puts
@@ -649,7 +760,7 @@ geometry_signature:
     inc a
     ld e,a
     ld d,0
-    call bios_mul_hl_de
+    call bench_mul_hl_de
     LOAD_DE v_reserved
     add hl,de
     jp c,bad_geometry
@@ -659,11 +770,11 @@ geometry_signature:
     cp 4
     jp nc,bad_geometry
     ld de,32
-    call bios_mul_hl_de
+    call bench_mul_hl_de
     LOAD_DE v_sectorSize
     add hl,de
     dec hl
-    call bios_div_hl_de
+    call bench_div_hl_de
     LOAD_DE v_dataStart
     add hl,de
     jp c,bad_geometry
@@ -674,11 +785,11 @@ geometry_signature:
     jp z,bad_geometry
     ex de,hl
     ld hl,(v_capacity)
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     jp c,bad_geometry
     STORE_DE v_capacity
     ld hl,(v_dataStart)
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     jp nc,bad_geometry
     or a
     ret
@@ -705,7 +816,7 @@ region_bounds:
     add hl,de
     jp c,bad_geometry
     LOAD_DE v_capacity
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     jp nc,bad_geometry
     or a
     ret
@@ -738,6 +849,12 @@ print_result_value:
     call print_time_ms
     ld hl,txtRate
     call puts
+    call calculate_rate
+    call print_rate_value
+    ld hl,txtUnits
+    jp puts
+
+calculate_rate:
     ; dividend = operations * (sectorSize/256) * floor(CLK1/1024).
     xor a
     ld hl,v_dividend
@@ -751,7 +868,7 @@ clear_dividend:
     ld e,h
     ld d,0
     ld hl,(v_operations)
-    call bios_mul_hl_de
+    call bench_mul_hl_de
 rate_multiply:
     push hl
     ld hl,v_dividend
@@ -769,9 +886,7 @@ rate_multiply:
     or d
     or e
     jp z,timer_error
-    call print_rate_value
-    ld hl,txtUnits
-    jp puts
+    ret
 
 ; Скорость в KiB/s, два знака после точки. Исходный числитель в v_dividend,
 ; делитель — U32 тики v_elapsed. Сначала целая часть, затем два десятичных
@@ -890,12 +1005,14 @@ txtTitle:        DB "Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     ELSE
                  DB "2.5 MHz",00Ah,0
     ENDIF
-txtDrive:        DB 00Ah,"Drive A-H [A], Q=exit (Enter confirms): ",0
+txtDrive:        DB 00Ah,"Drive A-H [A], Q=exit: ",0
 txtFlashLife:    DB 00Ah,"FLASH: writes consume limited program life.",0
-txtVerify:       DB 00Ah,"Check [0]: 0=plain, 1=file verify, 2=raw sector verify: ",0
+txtVerify:       DB 00Ah,"Check [0]: 0=plain, 1=file, 2=sector verify: ",0
+txtFragment:     DB 10,"Allocation [0]: 0=sequential, 1=random: ",0
 txtWrites:       DB 00Ah,"Each pass uses and removes DISKBEN.TMP.",00Ah
-                 DB "File WRITE includes metadata and flush.",00Ah
+                 DB "Creation excluded; WRITE includes flush.",00Ah
                  DB "Passes (0-9) [1], 0=skip: ",0
+txtDosLimit: DB 10,"DOS buffer limit: 8 KiB",0
 txtFileSizePrompt: DB 00Ah,"File size in KiB (1-24) [8]: ",0
 txtFileSize:     DB 00Ah,"File size (KiB):",009h,009h,0
 txtClusters:     DB 00Ah,"Clusters:   ",009h,009h,009h,0
@@ -906,6 +1023,15 @@ txtTimerError:   DB 00Ah,"PIT clock stopped / invalid",0
 txtDone:         DB 00Ah,"Press any key to exit",0
 txtRate:         DB " ms",009h,0
 txtUnits:        DB " KiB/s",00Ah,0
+    IFDEF DISKBEN_BANK
+txtCaller:       DB 00Ah,"Caller: BANK",0
+    ELSE
+txtCaller:       DB 00Ah,"Caller: MAIN",0
+txtCallerBank:   DB 00Ah,"Caller: BANK",0
+txtCallerDos:    DB 00Ah,"Caller: DOS",0
+txtCallerMainDll = txtCaller
+txtCallerBatch:   DB 00Ah,"Caller: MAIN / DOS / BANK",0
+    ENDIF
 txtSummaryDrive: DB 00Ah,"Drive:  ",009h,009h,009h,009h,0
 txtLabel:        DB 00Ah,"Label:  ",009h,009h,009h,009h,0
 txtCapacity:    DB 00Ah,"Size (KiB): ",009h,009h,009h,0
@@ -925,7 +1051,7 @@ txtFloppy:       DB "Floppy",0
 txtHDD:          DB "HDD",0
 txtReadOnly:     DB "read only",0
 txtWrite:        DB "write",0
-txtWriteVerify:  DB "verify: Raw sector / DOS file",0
+txtWriteVerify:  DB "driver sector verify",0
 txtWriteFileVerify: DB "write + file verify",0
 txtUnknown:      DB "Unknown",0,0
 txtSkipped:      DB "skipped (read only / 0 passes)",00Ah,0
@@ -942,7 +1068,7 @@ txtReadRnd:      DB "Read rnd: ",0
 txtWriteSeq:     DB "Write seq: ",0
 txtWriteRnd:     DB "Write rnd: ",0
 case_names:      DW txtRead,txtRead,txtWriteRow,txtWriteRow
-                 DW txtReadLow,txtReadHigh,txtWriteLow,txtWriteHigh
+                 DW txtReadHigh,txtReadLow,txtWriteHigh,txtWriteLow
                  DW txtReadSeq,txtReadRnd,txtWriteSeq,txtWriteRnd
 v_layout:        DB LAYOUT_SIMPLE
 v_drive:         DB 0
@@ -977,10 +1103,14 @@ code_end:
 sectorBuffer = 02000h
     ENDIF
     ASSERT code_end <= sectorBuffer
+    ASSERT batchStats == sectorBuffer
 verifyBuffer = sectorBuffer
     IFNDEF fatBuffer
 fatBuffer = 08000h
     ENDIF
+rawSectors = fatBuffer+256
+    ASSERT MAX_FILE_SECTORS*2 <= 256
+    ASSERT rawSectors+MAX_FILE_SECTORS*2 <= highBuffer
 lower_buffers_end = sectorBuffer + MAX_FILE_KIB*1024
     ASSERT lower_buffers_end <= fatBuffer
     IFNDEF highBuffer

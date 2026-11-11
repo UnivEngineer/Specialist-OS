@@ -12,15 +12,17 @@
 ;----------------------------------------------------------------------------
 
 printChar2:
+
+printCharBody:
             ; Помещаем в hl координаты курсора
             ld  hl, (bios_vars.cursorY)
 
-            ; Продолжаем, если не включен режим обработки ESC последовательности (bios_vars.escMode==0FFh)
-            ld  a, (bios_vars.escMode)
+            ; Продолжаем, если не включен режим обработки ESC последовательности (bios_upper.escMode==0FFh)
+            ld  a, (bios_upper.escMode)
             inc a
             jp  nz,  printChar_esc
 
-            ; Тут bios_vars.escMode==0FFh
+            ; Тут bios_upper.escMode==0FFh
 
             ; Если это печатные символы (>=20h), переходим к печати
             ld  a, c
@@ -35,111 +37,29 @@ printChar2:
             cp  1Bh
             jp  nz, printChar3
 
-            ; Далее ESC. Включаем режим обработки ESC последовательности (bios_vars.escMode=0)
+            ; Далее ESC. Включаем режим обработки ESC последовательности (bios_upper.escMode=0)
             xor a
-            ld  (bios_vars.escMode),a
+            ld  (bios_upper.escMode), a
             ret
 
 ; ---------------------------------------------------------------------------
-; Преобразование символа из KOI-7 в KOI-8 и вывод на экран (служебные коды 
-; также будут выводится)
+; Вывод печатного кода в уже выбранной физической раскладке шрифта.
 
 printChar_real:
             ; Символ для печати
             ld  c, a
 
-            ; Переходим к печати, если включен режим KOI-8 (bios_vars.koi7 == 0)
-            ld  a, (bios_vars.koi7)
-            inc a
-            jp  nz, printChar_real2
-
-            ; Включен режим KOI-7 (bios_vars.koi7 == 0FFh), надо
-            ; перекодировать символы для знакогнератора.
-
-            ; Если символ больше или равен 0C0h просто выходим
-            ld  a, c
-            cp  0C0h
-            ret nc      
-
-            ; Если символ находится в пределах 60h ... 7Fh, увеличиваем его код на 80h
-            cp  60h
-            jp  c, printChar_real2
-            cp  80h
-            jp  nc,  printChar_real2
-            add a, 80h
-            ld  c, a
-
-; ---------------------------------------------------------------------------
-; Вывод символа на экран в KOI-8 (служебные коды так же будут выводится)
-
+; Шрифт уже находится в выбранной раскладке. На глиф нет проверки KOI.
+; RawHelper принимает C, все 256 кодов допустимы.
+printCharRawHelper:
 printChar_real2:  
-            ; Тут полиморфизм
-            ld    a, (bios_vars.inverse)
-            and   a
-
-printChar_poly:
-            call z, normalVideo
-
-            ; Если bios_vars.charGen не равен 0FFFFh, то используется знакогнератор по адресу bios_vars.charGen*8
-            ld    hl, (bios_vars.charGen)
-            ld    a, h
-            inc   a
-            jp nz,  printChar_alt
-            ld    a, l
-            inc   a
-            jp nz,  printChar_alt
-
-            ; Иначе используем символы из ПЗУ. 
-            ; Адрес символа в ПЗУ (de = 0x800 + c*8)
-            ld    hl, 100h          
-            ld    b,  0
-            add   hl, bc
-            add   hl, hl
-            add   hl, hl
-            add   hl, hl
-            ex    de, hl
-
-            ; Промежуточное место для символа
-            ld    hl, v_char
-            push  hl
-
-            ; Копируем 8 байт из ПЗУ
-            ld    (IO_PAGE_ROM),a
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            inc   hl
-            inc   de
-            ld    a, (de)
-            ld    (hl), a
-            ld    (IO_PAGE_RAM),a
-
-            ; Вывод символа
-            pop   de
-            jp    printChar_de
+            ld hl,(bios_upper.charGen)
+            call printChar_alt
+            ld hl,(bios_vars.cursorY)
+            ld a,h
+            cp 192
+            ret c
+            jp printChar_c0A
 
 ; ---------------------------------------------------------------------------
 ; Обработка режима ESC+F
@@ -178,36 +98,36 @@ printChar_esc80_2:
 
 printChar_esc80_exit:
             dec   a
-            ld    (bios_vars.escMode),a
+            ld    (bios_upper.escMode),a
             ret
 
 ; ---------------------------------------------------------------------------
 ; Печать символа в ESC-режиме
 
-printChar_esc:    ; Перейти если bios_vars.escMode=80h
-            ld    a, (bios_vars.escMode)
+printChar_esc:    ; Перейти если bios_upper.escMode=80h
+            ld    a, (bios_upper.escMode)
             cp    80h
             jp z, printChar_esc80
 
             ; Выключить режим обработки ESC последовательности
             push  af
             ld    a, 0FFh
-            ld    (bios_vars.escMode),a
+            ld    (bios_upper.escMode),a
             pop   af
 
-            ; Перейти если bios_vars.escMode==0
+            ; Перейти если bios_upper.escMode==0
             or    a
             jp z, printChar_esc0
 
-            ; Перейти если обработка ESC+Y (bios_vars.escMode==1)
+            ; Перейти если обработка ESC+Y (bios_upper.escMode==1)
             dec   a
             jp z, printChar_esc1
 
-            ; Перейти если bios_vars.escMode==2
+            ; Перейти если bios_upper.escMode==2
             dec   a
             jp z, printChar_esc2
 
-            ; Перейти если bios_vars.escMode==3
+            ; Перейти если bios_upper.escMode==3
             dec   a
             jp z, printChar_esc3
 
@@ -236,7 +156,7 @@ printChar_esc1:   ; Если код меньше 20h или больше 20h + 2
 
 loc_C693:   ; Следующий символ будет обработан в printChar_esc2
             ld    a, 2
-            ld    (bios_vars.escMode),a
+            ld    (bios_upper.escMode),a
             ret
 
 ; ---------------------------------------------------------------------------
@@ -261,10 +181,6 @@ printChar_esc2:   ; Если код меньше 20h или больше 20h + 6
 
 printChar_esc0:   ; Если код больше 20h
             ld    a, c
-            cp    '(' ; 28h
-            jp z, printChar_e28
-            cp    ')' ; 29h
-            jp z, printChar_e29
             cp    'P' ; 50h
             jp z, printChar_eP
             sub   'A' ; 41h
@@ -297,7 +213,7 @@ printChar_esc0:   ; Если код больше 20h
 
 setEscMode_eY:    ; Следующий символ будет обработан в printChar_esc1 
             ld    a, 1
-            ld    (bios_vars.escMode),a
+            ld    (bios_upper.escMode),a
             ret
 
 ; ---------------------------------------------------------------------------
@@ -328,7 +244,7 @@ printChar0C:
 
 printChar_eP:
             ld    a, 3
-            ld    (bios_vars.escMode),a
+            ld    (bios_upper.escMode),a
             ret
 
 ; ---------------------------------------------------------------------------
@@ -360,7 +276,7 @@ printChar_esc3:
 
             ; Находимся в этом режиме до кода 0 или ESC
             ld    a, 3
-            ld    (bios_vars.escMode),a
+            ld    (bios_upper.escMode),a
             ret
 
 ; ---------------------------------------------------------------------------

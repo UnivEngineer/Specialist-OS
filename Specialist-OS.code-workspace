@@ -41,6 +41,7 @@
       "**/*.fix.lst": true
     },
     "cSpell.words": [
+      "AUTOEXEC",
       "MXOS"
     ]
   },
@@ -200,7 +201,7 @@
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
           "RAMDISK",
           "cpu",
-          "0"
+          "DOS_BANK_DRIVER_ADDR"
         ],
         "options": {
           "cwd": "${workspaceFolder}\\source\\ramdisk"

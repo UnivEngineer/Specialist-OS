@@ -1,4 +1,5 @@
-; HL=FILE_COPY_REQUEST. Все рабочие поля — в памяти вызывающего.
+; Внутренний движок DOS: HL=локальный FILE_COPY_REQUEST.
+; Внешние вызовы проходят kernel-copy.inc и получают собственную пачку DOS.
 ; buffer/bufferSize явно задают область данных; используется целое число
 ; секторов по 256 байт. Минимум 256 байт, остаток ёмкости не используется.
 ; Запрос и буфер не пересекаются, оба расположены ниже bios_vars.
@@ -129,7 +130,7 @@ fc_OverwriteReady:
             ; Создание заменяет существующий файл только после разрешения.
 
             xor     a
-            ld      (bios_vars.diskWriteErr), a
+            ld      (bios_upper.diskWriteErr), a
             ld      e, FILE_COPY_REQUEST.destination + FILE_DESCRIPTOR.firstCluster
             call    fc_Address
             ld      (hl), a

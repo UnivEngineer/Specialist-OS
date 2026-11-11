@@ -67,11 +67,11 @@ def main():
         m.subroutine(0xC86F,bc=0)
         info('RAMD')
         assert 'RAMD/R3' in report['descriptors']
-        m.write(0x7000,b'A:RAMDISK.COM\0')
+        m.write(0x7000,b'A:DRIVERS/RAMDISK.COM\0')
         assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
         select(1)
         info('RAMD')
-        assert 'RAMD/R4 banked' in report['descriptors']
+        assert 'RAMD/R4 BANKED' in report['descriptors']
         (out/'ramd.json').write_text(json.dumps(report['descriptors'],indent=2)+'\n')
         print('RAMD R3/R4 B=FFh: name, description, technology R, capabilities 03h OK')
         return

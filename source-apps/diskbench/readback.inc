@@ -33,15 +33,14 @@ write_high:
 
 ; Полное создание файла через DOS с источником в верхнем окне.
 ; Удаление предыдущего тестового файла и подготовка порций исключены;
-; выделение FAT/каталога, FileStream и flush входят в WRITE HIGH.
+; выделение FAT/каталога, FILEHANDLE и flush входят в WRITE HIGH.
 file_write_high:
     call file_cleanup
     ret c
     call measure_begin
     ld a,1
     ld (v_fileOwned),a
-    ld hl,tmpDescriptor
-    MXCALL MX_DOS_FILECREATEPREPARE
+    call bhCreate
     call c,measure_end
     ret c
     xor a
@@ -53,8 +52,8 @@ file_write_high:
     call nc,maybe_verify_file
     jp measure_end
 
-; Физический драйвер DOS работает в другом банке: перехват C863h
-; видит только Raw. Для DOS оба режима проверки читают готовый файл целиком.
+; Для DOS оба режима проверки читают готовый файл целиком.
+; Посекторный B=5 выбирается только в публичных RAW-запросах.
 maybe_verify_file:
     ld a,(v_writeMode)
     cp 5
@@ -123,13 +122,10 @@ stream_read:
     ld a,(v_streamKind)
     or a
     jp nz,stream_next
-    ld hl,tmpDescriptor
-    call bios_fileLoadInfo
+    ld a,(v_streamOp)
+    dec a
+    call nz,bhReadOpen
     ret c
-    ld hl,(tmpDescriptor+FILE_DESCRIPTOR.firstCluster)
-    ld (v_streamCluster),hl
-    ld hl,0
-    ld (v_streamOffset),hl
 stream_next:
     ld a,(v_streamLeft)
     cp HIGH_SECTORS+1
@@ -166,13 +162,12 @@ stream_source_ready:
     ld a,(v_streamKind)
     or a
     jp nz,stream_raw
-    ld de,v_streamCluster
     ld hl,highBuffer
     ld a,(v_streamChunk)
     ld b,a
     ld c,0
     ld a,(v_streamOp)
-    MXCALL MX_DOS_FILESTREAM
+    call bhTransfer
     ret c
     jp stream_compare
 stream_raw:
@@ -190,7 +185,7 @@ stream_raw_sector:
     pop hl
     ld a,(v_streamOp)
     ld b,a
-    call bios_diskDriver
+    call raw_local
     ret c
     inc h
     ld a,(v_streamCounter)
@@ -231,17 +226,22 @@ stream_advance:
     jp nz,stream_next
     ld a,(v_streamOp)
     dec a
-    jp nz,stream_success
+    jp nz,stream_read_close
     ld a,(v_streamKind)
     or a
-    jp nz,$+9
-    MXCALL MX_DOS_FLUSHVOLUME
-    ret
+    jp nz,stream_raw_flush
+    xor a
+    jp bench_flush
+stream_raw_flush:
     ld a,(v_caps)
     and DISK_CAP_FLUSH
     jp z,stream_success
-    ld b,4
-    jp bios_diskDriver
+    ld a,1
+    jp bench_flush
+stream_read_close:
+    ld a,(v_streamKind)
+    or a
+    jp z,bhClose
 stream_success:
     or a
     ret
@@ -251,7 +251,7 @@ print_verify:
     call puts
     ld hl,(v_outputBase)
     ld de,resultsLow+20
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     ld hl,statRawVerify
     jp c,verify_print_value
     ld hl,statFileVerify
@@ -266,7 +266,7 @@ verify_print_value:
     call puts
     ld hl,(v_outputBase)
     ld de,resultsLow+20
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     ld hl,statRawVerifyHigh
     jp c,verify_print_high
     ld hl,statFileVerifyHigh
@@ -285,8 +285,6 @@ v_streamOp:        DB 2
 v_streamVerify:    DB 0
 v_streamOriginal:  DW 0
 v_streamList:      DW 0
-v_streamCluster:   DW 0
-v_streamOffset:    DW 0
 v_streamLeft:      DB 0
 v_streamChunk:     DB 0
 v_streamEndHi:     DB 0

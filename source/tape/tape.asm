@@ -5,6 +5,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
     ORG     SYSTEM_PROGRAM_ADDR
 

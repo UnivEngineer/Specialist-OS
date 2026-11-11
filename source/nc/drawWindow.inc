@@ -14,7 +14,7 @@ drawToolbar:
         ld hl,aShiftToolbar
 ncToolbarReady:
         ld bc,(COLOR_HELP_F << 8) + COLOR_HELP_TEXT
-        jp bios_uiToolbar
+        jp uiToolbar
 
 drawWindowIfSel:
         call ncRealSelection

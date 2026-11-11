@@ -13,23 +13,24 @@ printInfoPanel:
             ld      hl, g_infoPanel
             call    draw
 
+printInfoContents:
             COLOR   COLOR_INFOHEADER
 
             ; Печать "COMMANDER VERSION XXX"
-            ld      hl, 1110h
+            ld      hl, 1010h
             call    setCursorPosPanel
             ld      hl, aCommanderVer
             call    bios_printString
 
             ; Печать "(C) OMSK 1992"
             ;ld      hl, 1D1Ah
-            ld      hl, 0E1Ah
+            ld      hl, 101Ah
             call    setCursorPosPanel
             ld      hl, aCopyright    
             call    bios_printString
 
             ; Положение курсора
-            ld      hl, 0B30h
+            ld      hl, 0C30h
             call    setCursorPosPanel
 
             ; Общий объем ОЗУ
@@ -40,7 +41,7 @@ printInfoPanel:
             call    pip_printNumberSpace
 
             ; Положение курсора
-            ld      hl, 0B3Ch
+            ld      hl, 0C3Ch
             call    setCursorPosPanel
 
             ; Свободный объем ОЗУ
@@ -53,17 +54,17 @@ printInfoPanel:
             call    pip_printNumberSpace
 
             ; Положение курсора
-            ld      hl, 0548h
+            ld      hl, 0448h
             call    setCursorPosPanel
 
             ; Общий объем ДОЗУ в кб
-            ld      a, (bios_vars.ramPageCount)
+            ld      a, (bios_upper.ramPageCount)
             ; hl = a * 256
             ld      h, a
             ld      l, 0
             ; hl = hl / 4
-            call    bios_div_hl_2
-            call    bios_div_hl_2
+            call    ncMath.div_hl_2
+            call    ncMath.div_hl_2
             ex      hl, de
 
             ; Печать "XXXX KB EXTENDED MEMORY"
@@ -92,14 +93,14 @@ printInfoPanel:
 
 pip_printDiskInfo:
             ; Положение курсора
-            ld      hl, 055Ch
+            ld      hl, 045Ch
             call    setCursorPosPanel
 
             ; Считаем объем в килобайтах
             ; de = de * 256 / 1024 = hl / 4
             ex      hl, de
-            call    bios_div_hl_2
-            call    bios_div_hl_2
+            call    ncMath.div_hl_2
+            call    ncMath.div_hl_2
             ex      hl, de
             push    de  ; в стеке - объем диска в кб
 
@@ -111,7 +112,7 @@ pip_printDiskInfo:
             COLOR   COLOR_INFOTEXT
 
             ; Положение курсора
-            ld      hl, 0B98h
+            ld      hl, 0C98h
             call    setCursorPosPanel
 
             ; Печать "Volume label: XXXXXXXXXXX"
@@ -126,20 +127,20 @@ pip_printDiskInfo:
             call    bios_printString
 
             ; Положение курсора
-            ld      hl, 0568h
+            ld      hl, 0468h
             call    setCursorPosPanel
             
             ; Подсчет свободного места на диске.
             ; Эта п/п может работать довольно долго,
             ; в зависимости от размера fat на диске
             ; Результат: de = количество свободных кластеров
-            MXCALL MX_DOS_GETDRIVEFREESPACE
+            MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
 
             ; Считаем объем в килобайтах
             ; hl = hl * 256 / 1024 = hl / 4
             ex      hl, de
-            call    bios_div_hl_2
-            call    bios_div_hl_2
+            call    ncMath.div_hl_2
+            call    ncMath.div_hl_2
             ex      hl, de
             push    de  ; в стеке - объем свободного места в кб
 
@@ -150,7 +151,7 @@ pip_printDiskInfo:
             call    printCurDrive
 
             ; Положение курсора
-            ld      hl, 0574h
+            ld      hl, 0474h
             call    setCursorPosPanel
 
             ; de = кол-во файлов          
@@ -186,7 +187,7 @@ pip_printDiskError:
             ; начальная инициализация оставляют только установленные драйверы.
 
             ; Положение курсора
-            ld      hl, 0B5Ch
+            ld      hl, 0C5Ch
             call    setCursorPosPanel
 
             ; Печать "DRIVE A: IS NOT FORMATTED"
@@ -208,14 +209,14 @@ pip_printNumberSpace:
             ld      b, 20h
 pip_printNumberText:
             COLOR   COLOR_INFONUMBER
-            call    bios_printDecWord
+            call    ncPrintDecWord
             COLOR   COLOR_INFOTEXT
             jp      bios_printString
 
 ; B=0FFh: HL=две строки, B=технология. AF/BC/DE/HL разрушаются.
 ; Строки ограничены контрактом ABI (22/30 символов).
 pip_printDriver:
-            ld      hl, 0BB0h
+            ld      hl, 0CB0h
             call    setCursorPosPanel
             COLOR   COLOR_INFOTEXT
             ld      hl, aDiskDriver
@@ -235,14 +236,14 @@ pip_driverName:
             call    bios_printString
             inc     hl
             push    hl
-            ld      hl, 0BBCh
+            ld      hl, 0CBCh
             call    setCursorPosPanel
             COLOR   COLOR_INFOTEXT
             pop     hl
             call    bios_printString
 
             ; BIOS печати сохраняет BC: тип из того же запроса B=FFh ещё в B.
-            ld      hl, 0BC8h
+            ld      hl, 0CC8h
             call    setCursorPosPanel
             ld      hl, aDiskTechnology
             call    bios_printString

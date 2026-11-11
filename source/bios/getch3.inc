@@ -8,39 +8,8 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-getch3:     ; Если нажат лишь РУС/LAT - то обрабатываем его как CAPS LOCK,
-            ; если нажат Shit+РУС/LAT - то переключаем режим КОИ
-            call    setKeybMode91
-            ld      a, 0F8h
-            ld      (IO_KEYB_B), a
-            ld      a, (IO_KEYB_A)           
-            push    af
-            call    setKeybMode82
-            pop     af
-            and     8
-            jp nz,  getch_capsLock
-
-            ; Меняем KOI-7 / KOI-8
-            ld      a, (bios_vars.koi7)
-            cpl
-            ld      (bios_vars.koi7), a
-
-            ;ld      a, 3Ah  ; включаем прописные английские
-            ld      a, 0BAh  ; включаем строчные английские
-            ld      (bios_vars.keyLocks), a
-
-            ; Звуковой сигнал
-            call    beep
-
-            ; Меняем частоту
-            ld      a, 5Fh
-            ld      (bios_vars.beepFreq),a
-
-            jp      getch_retry
-
-; ---------------------------------------------------------------------------
-; CAPS LOCK для KOI-7
-
+getch3:     ; Shift+РУС/LAT меняет регистр, но не раскладку знакогенератора.
+            ; KOI выбирает RUN/программа явным bios_setFontEncoding.
 getch_capsLock:
             ; Переключаем capsLock
             ld      a, (bios_vars.keyLocks)
@@ -62,7 +31,7 @@ getch_capsLock:
 ; CAPS LOCK для KOI-7 или РУС/LAT для KOI-8
 
 getch_rc:   ; В режиме KOI-8 мы переключаем кодировку
-            ld    a, (bios_vars.koi7)
+            ld    a, (bios_upper.koi7)
             inc   a
 
             ld    a, (bios_vars.keyLocks) ; Требуется в getch_RusLat

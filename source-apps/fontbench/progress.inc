@@ -1,10 +1,10 @@
-; Очищаем верхние 192 строки, нижняя строка результата остаётся видимой.
+; Очищаем верхние 240 строки, нижняя строка результата остаётся видимой.
 ; Все операции здесь выполняются вне измеряемого интервала.
 matrixClearText:
     ld hl,09000h
     ld b,48
 matrixClearColumn:
-    ld c,FONT_ROWS*8
+    ld c,FONT_ROWS*10
 matrixClearByte:
     ld (hl),0
     inc l
@@ -17,15 +17,21 @@ matrixClearByte:
     ret
 
 matrixProgress:
-    ld hl,000CFh
-    call bios_setCursorPos
+    ; Без паузы и печати 48 пробелов: очищаем только строку 248..255.
+    ld hl,090F8h
     ld b,48
 matrixProgressClear:
-    ld c,' '
-    call bios_printChar
+    ld c,8
+matrixProgressClearRow:
+    ld (hl),0
+    inc l
+    dec c
+    jp nz,matrixProgressClearRow
+    ld l,0F8h
+    inc h
     dec b
     jp nz,matrixProgressClear
-    ld hl,000CFh
+    ld hl,000FFh
     call bios_setCursorPos
     ld hl,matrixStage
     inc (hl)
@@ -33,7 +39,7 @@ matrixProgressClear:
     call matrixProgressNumber
     ld c,'/'
     call bios_printChar
-    ld a,MATRIX_STAGE_COUNT
+    ld a,(benchStageTotal)
     call matrixProgressNumber
     ld c,' '
     call bios_printChar
@@ -44,6 +50,16 @@ matrixProgressClear:
     ld hl,matrixDosText
 matrixProgressBank:
     call puts
+    ld a,(matrixKind)
+    ld hl,matrixFont6Text
+    cp 3
+    jp c,matrixProgressFont
+    ld hl,matrixFont8Text
+    cp 5
+    jp c,matrixProgressFont
+    ld hl,matrixFont4Text
+matrixProgressFont:
+    call puts
     ld hl,(matrixCase)
     ld de,12
     add hl,de
@@ -52,6 +68,8 @@ matrixProgressBank:
     ld d,(hl)
     ex de,hl
     call puts
+    ld c,' '
+    call bios_printChar
     ld hl,v_elapsed
     call print_time_ms
     ld hl,matrixMsText
@@ -102,6 +120,9 @@ matrixProgressNoTens:
     jp bios_printChar
 
 matrixMainText: DB 'MAIN ',0
-matrixDosText: DB 'DOS  ',0
+matrixDosText: DB 'BANK ',0
+matrixFont6Text: DB '6x8 ',0
+matrixFont8Text: DB '8x8 ',0
+matrixFont4Text: DB '4x8 ',0
 matrixMsText: DB ' ms',0
 matrixStage: DB 0

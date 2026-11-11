@@ -8,7 +8,7 @@ but_F6:
             call drawWindowIfSel
             CENTER_LINE 7, 5Eh
             ld hl,ncMoveText
-            call bios_printString
+            call bios_printStringReal
             call inputForCopyMove
             cp 01Bh
             jp z,ncRefreshDirty
@@ -21,13 +21,13 @@ ncRename:
             call drawWindowIfSel
             CENTER_LINE 9, 5Eh
             ld hl,ncRenameText
-            call bios_printString
+            call bios_printStringReal
             call inputForRename
             cp 01Bh
             jp z,ncRefreshDirty
             ld hl,state.panelA_drive
             call readBytePanel
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             jp c,copyFileError
             call restorePanelDirectory
             ld hl,vars.input
@@ -51,7 +51,7 @@ ncRenameLeafReady:
             call getSelectedFile
             ld de,vars.copyRequest.destination
             ld a,CLI_OP_RENAME
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             jp c,copyFileError
             jp ncRefreshDirty
 ncRenameText: DB 'Rename to',0

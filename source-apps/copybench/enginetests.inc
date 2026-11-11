@@ -1,7 +1,7 @@
 ; Сопоставимая матрица: четыре реализации, main <-> RAMD и RAMD -> RAMD.
 ; Все переносы 8192 байта. Блочные входы вызываются 32 раза, универсальные — один.
 engineTests:
-    ld a,(bios_vars.ramPageCount)
+    ld a,(bios_upper.ramPageCount)
     ld (bankPageCount),a
     xor a
     ld (engineBank),a
@@ -54,7 +54,7 @@ enginePrintSlash:
     ret
 
 bankTests:
-    ld a,(bios_vars.ramPageCount)
+    ld a,(bios_upper.ramPageCount)
     cp 2
     jp c,engineSkipBank
     ld a,(targetPage)

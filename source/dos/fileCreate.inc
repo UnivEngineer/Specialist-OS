@@ -81,7 +81,7 @@ fatCreateBadMetadata:
             jp dosSetError
 fatCreateMetadataOk:
             xor     a
-            ld      (bios_vars.diskWriteErr), a
+            ld      (bios_upper.diskWriteErr), a
             push    hl  ; [1]
             push    bc  ; [2]
             push    de  ; [3]

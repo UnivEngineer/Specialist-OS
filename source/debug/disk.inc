@@ -33,12 +33,7 @@ DirDiskLoop:
         CALL  Z,bios_getch      ; если нажата СТР, ждем нажатия СТР еще раз
         CP    1FH               ; СТР
         RET   Z                 ; выход, если СТР нажата еще раз
-        LD    B,08H             ; печатаем 8 символов имени файла
-        CALL  printStringB
-        LD    C,2EH             ; печатаем точку
-        CALL  bios_printChar
-        LD    B,03H             ; печатаем 3 символа расширения файла
-        CALL  printStringB
+        CALL  printFileNameReal ; 8 символов имени, точка и 3 расширения одним пакетом
         CALL  printSpace
         INC   HL                ; переходим через байт атрибута файла
         LD    E,(HL)            ; DE = адрес загрузки файла
@@ -63,16 +58,6 @@ DirDiskLoop:
         JP    DirDiskLoop
 
 ;----------------------------------------------------------------------------
-; Печать строки по адресу HL длиной B
-
-printStringB:
-        LD    C,(HL)
-        CALL  bios_printChar
-        INC   HL
-        DEC   B
-        JP    NZ,printStringB
-        RET
-
 ;----------------------------------------------------------------------------
 ; Директива B - сохранение области памяити в файл
 

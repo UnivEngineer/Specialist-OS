@@ -11,6 +11,7 @@ kernelDispatch:
     ld de,BANK_FRAME_REGS
     jp kdEntryCommon
 kernelLocalDispatch:
+    call bankCommandWindow
     ; DE уже указывает на локальный MX_REGS: транспорт/копировщик не нужны.
     ld a,DOS_IO_PAGE
     ld (BANK_FRAME_STATUS),a
@@ -21,14 +22,18 @@ kdEntryCommon:
     jp nz,kdReentry
     pop af
     ld (kdPage),a
+    xor a
+    ld (klRequestReady),a
+    ld a,0FFh
+    ld (ksRouteDrive),a
     ld a,b
-    cp MX_GROUP_DOS
+    cp MXOS_GROUP_DOS
     jp nz,dosUnsupported
     ld a,c
     ld (kdFunction),a
     ; Подготовленный образ действителен до следующего запроса DOS.
-    ; Чужой FILELOAD не может использовать курсор владельца образа.
-    cp MX_DOS_FILELOAD & 0FFh
+    ; Чужой FILE_LOAD не может использовать курсор владельца образа.
+    cp MXOS_DOS_FILE_LOAD & 0FFh
     jp z,kdImageContextReady
     push af
     xor a
@@ -47,57 +52,70 @@ kdPacketLoop:
     jp nz,kdPacketLoop
     ld a,1
     ld (kdBusy),a
+    ld a,(kdFunction)
+    cp MXOS_DOS_RESIDENT & 0FFh
+    jp z,residentService
+    cp MXOS_DOS_MODULE_LOAD & 0FFh
+    jp z,moduleLoad
+    cp MXOS_DOS_MODULE_CALL & 0FFh
+    jp z,moduleCall
+    cp MXOS_DOS_MODULE_UNLOAD & 0FFh
+    jp z,moduleUnload
+    cp MXOS_DOS_FILE_EXEC_NATIVE & 0FFh
+    jp z,keRequest
+    cp MXOS_DOS_MEMORY & 0FFh
+    jp z,kdMemory
     ld a,(kdPage)
     cp DOS_IO_PAGE
     jp z,kdLocal
     ld a,(kdFunction)
-    cp MX_DOS_FILECREATE & 0FFh
+    cp MXOS_DOS_FILE_CREATE & 0FFh
     jp z,krCreate
-    cp MX_DOS_FILECREATEPREPARE & 0FFh
+    cp MXOS_DOS_FILE_CREATE_PREPARE & 0FFh
     jp z,krPrepare
-    cp MX_DOS_SECTORIO & 0FFh
+    cp MXOS_DOS_SECTOR_IO & 0FFh
     jp z,krSector
-    cp MX_DOS_RAWIO & 0FFh
+    cp MXOS_DOS_RAW_IO & 0FFh
     jp z,krRaw
-    cp MX_DOS_FILEEXEC & 0FFh
+    cp MXOS_DOS_FILE_EXEC & 0FFh
     jp z,keRequest
-    cp MX_DOS_FILECOPY & 0FFh
+    cp MXOS_DOS_FILE_COPY & 0FFh
     jp z,kcCopy
-    cp MX_DOS_IMAGEOPEN & 0FFh
+    cp MXOS_DOS_IMAGE_OPEN & 0FFh
     jp z,kiOpen
-    cp MX_DOS_FILELOAD & 0FFh
+    cp MXOS_DOS_FILE_LOAD & 0FFh
     jp z,kiLoad
-    cp MX_DOS_FILELOAD2 & 0FFh
+    cp MXOS_DOS_FILE_LOAD2 & 0FFh
     jp z,kiRaw
-    cp MX_DOS_FILEGETDRIVES & 0FFh
+    cp MXOS_DOS_FILE_GET_DRIVES & 0FFh
     jp z,kmDrives
-    cp MX_DOS_FILENAMEPREPARE & 0FFh
+    cp MXOS_DOS_FILE_NAME_PREPARE & 0FFh
     jp z,kmName
-    cp MX_DOS_FILELOADINFO & 0FFh
+    cp MXOS_DOS_FILE_LOAD_INFO & 0FFh
     jp z,kmInfo
-    cp MX_DOS_FILEGETSETATTR & 0FFh
+    cp MXOS_DOS_FILE_GET_SET_ATTR & 0FFh
     jp z,kmAttr
-    cp MX_DOS_FILEDELETE & 0FFh
+    cp MXOS_DOS_FILE_DELETE & 0FFh
     jp z,kmDelete
-    cp MX_DOS_FILEDELETEONDRIVE & 0FFh
+    cp MXOS_DOS_FILE_DELETE_ON_DRIVE & 0FFh
     jp z,kmDelete
-    cp MX_DOS_FILERENAME & 0FFh
+    cp MXOS_DOS_FILE_RENAME & 0FFh
     jp z,kmRename
-    cp MX_DOS_FILERENAMEONDRIVE & 0FFh
+    cp MXOS_DOS_FILE_RENAME_ON_DRIVE & 0FFh
     jp z,kmRename
-    cp MX_DOS_FILESTREAM & 0FFh
+    cp MXOS_DOS_FILESTREAM & 0FFh
     jp z,kfStream
-    cp MX_DOS_FILELIST & 0FFh
+    cp MXOS_DOS_FILE_LIST & 0FFh
     jp z,kdFileList
-    cp MX_DOS_FILEHANDLE & 0FFh
+    cp MXOS_DOS_FILEHANDLE & 0FFh
     jp z,kdHandle
-    cp MX_DOS_DIRECTORY & 0FFh
+    cp MXOS_DOS_DIRECTORY & 0FFh
     jp z,kdDirectory
-    cp MX_DOS_CLI & 0FFh
+    cp MXOS_DOS_CLI & 0FFh
     jp z,kdCli
-    cp MX_DOS_FILELOADPATH & 0FFh
+    cp MXOS_DOS_FILE_LOAD_PATH & 0FFh
     jp z,kdPathIO
-    cp MX_DOS_FILESAVEPATH & 0FFh
+    cp MXOS_DOS_FILE_SAVE_PATH & 0FFh
     jp z,kdPathIO
     ; Разрешены только функции, не возвращающие локальных указателей.
     ld de,kdScalars
@@ -257,7 +275,7 @@ kdCliPath:
 ; фактически переданный FH_COUNT, включая последнюю неполную пачку.
 kdHandle:
     ld a,(kdRegs+7)
-    cp FILE_OP_CLOSE+1
+    cp FILE_OP_OPTIONS+1
     jp nc,kdBad
     ld (kdOperation),a
     ld hl,(kdRegs)
@@ -307,11 +325,8 @@ kdNoOverlap:
     ld hl,0
     ld (kdTotal),hl
 kdHandleLoop:
+    ; Полный диапазон уже проверен. Buffered fallback дробит его в ksBuffered.
     ld hl,(kdLeft)
-    ld a,h
-    cp KD_CHUNK/256
-    jp c,kdHaveChunk
-    ld hl,KD_CHUNK
 kdHaveChunk:
     ld (kdChunk),hl
     ld (KD_OBJECT+FH_COUNT),hl
@@ -386,6 +401,7 @@ kdRestorePointer:
     ld hl,(kdClientObject)
     ld (kdRegs),hl
 kdFinish:
+    call bankCommandWindow
     xor a
     ld (kdBusy),a
     ld (BANK_FRAME_STATUS),a
@@ -493,23 +509,23 @@ kdCopyCount:
     jp bankCopyFar
 
 kdScalars:
-    DB MX_DOS_DRIVERREFRESH & 0FFh
+    DB MXOS_DOS_DRIVER_REFRESH & 0FFh
     DW dosDriverRefresh
-    DB MX_DOS_DRIVERSELECT & 0FFh
+    DB MXOS_DOS_DRIVER_SELECT & 0FFh
     DW dosDriverSelect
-    DB MX_DOS_GETDRIVEFREESPACE & 0FFh
+    DB MXOS_DOS_GET_DRIVE_FREE_SPACE & 0FFh
     DW getDriveFreeSpace
-    DB MX_DOS_MOUNTVOLUME & 0FFh
+    DB MXOS_DOS_MOUNT_VOLUME & 0FFh
     DW mountVolume
-    DB MX_DOS_FILEGETSETDRIVE & 0FFh
+    DB MXOS_DOS_FILE_GET_SET_DRIVE & 0FFh
     DW fileGetSetDrive
-    DB MX_DOS_FILESELECTDRIVE & 0FFh
+    DB MXOS_DOS_FILE_SELECT_DRIVE & 0FFh
     DW fileChangeDrive
-    DB MX_DOS_GETERROR & 0FFh
+    DB MXOS_DOS_GET_ERROR & 0FFh
     DW dosGetError
-    DB MX_DOS_FLUSHVOLUME & 0FFh
+    DB MXOS_DOS_FLUSH_VOLUME & 0FFh
     DW flushVolume
-    DB MX_DOS_SETSHELL & 0FFh
+    DB MXOS_DOS_SET_SHELL & 0FFh
     DW setShell
     DB 0FFh
 kdLocalTable:
@@ -531,3 +547,10 @@ kdActual: DW 0
 kdTotal: DW 0
 kdResult: DW 0
 kdCopy: DS 8,0
+
+kdMemory:
+    ld hl,dosMemoryService
+    ld (kdEntry),hl
+    call kdInvoke
+    call kdCapture
+    jp kdFinish

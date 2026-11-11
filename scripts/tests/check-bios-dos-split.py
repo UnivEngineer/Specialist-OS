@@ -10,7 +10,9 @@ base=bytearray(65536)
 for name,start in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
  data=(ROOT/f'bin/{name}.sys').read_bytes();base[start:start+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+rawfont=(ROOT/'assets/system-rom/FONT.FNT').read_bytes()
+font=bytes(rawfont[c*8+y] for y in range(8) for c in range(256))
+base[S['bios_upper.charGen']:S['bios_upper.charGen']+9]=base[S['initTextVars']:S['initTextVarsEnd']]
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
 base[S['v_dosModuleReady']]=1
 for line in (ROOT/'source/dos/entries.inc').read_text().splitlines():
@@ -36,13 +38,6 @@ render=''' call bios_clearScreenOld
  call bios_printChar
  ld c,'b'
  call bios_printChar
- ld hl,09020h
- ld bc,0208h
- call bios_uiInverseRect
- ld hl,09000h
- ld bc,09200h
- ld de,0108h
- call bios_uiCopyRect
 '''
 normal,t1=run(bytearray(base),render)
 without=bytearray(base);without[0x4000:0x8C00]=b'\x76'*0x4C00;without[S['v_dosModuleReady']]=0

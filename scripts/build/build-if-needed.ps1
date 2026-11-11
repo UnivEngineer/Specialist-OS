@@ -117,7 +117,7 @@ if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 's
 }
 
 # Одноразовый установщик включает переносимую службу и её адреса патчей.
-if ($SourceBase -in @('Flash', 'FlashFst', 'Rom') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')) {
+if ($SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')) {
     & python (Join-Path $PSScriptRoot 'build-banked-transport.py')
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

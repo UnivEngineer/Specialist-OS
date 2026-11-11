@@ -42,7 +42,7 @@ try:
     ok(s['bios_fileLoadInfo'],hl=0x7200)
     assert int.from_bytes(m.m.read(0x721C,4),'little')==len(files['Almaz/STD/Almaz2.rks'])
     assert current()==0
-    cd('/Almaz/MXOS');saved=current();m.select(0);ok(s['bios_loadDosModule']);m.select(7);assert current()==saved
+    cd('/Almaz/MXOS');saved=current();m.select(0);m.select(7);assert current()==saved
     m.m.write(0x7600,b'RKS')
     state=ok(s['bios_fileAssociation'],hl=0x7600,de=0x4000,bc=8192)
     assert m.m.read(state['registers']['hl']['dec'],11)==b'A:\\RUN.COM\r'

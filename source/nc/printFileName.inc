@@ -1,47 +1,14 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Вывод имени файла в обычном виде с точкой
-;
-; вход:
-;   hl - адрес дескриптора файла
-;
-; выход:
-;   hl - указывает на следующее за расширением поле в дескрипторе файла
-;
-; 2022-01-31 SpaceEngineer
-;----------------------------------------------------------------------------
-
-;printFileName:
-;        push  bc
-;        ld    c, ' '               ; прерываем печать имени по пробелу
-;        ld    b, FILE_NAME_LENGTH  ; длина имени
-;        call  printString2
-;        ld    c, '.'
-;        call  bios_printChar       ; печатаем точку
-;        ld    b, 3                 ; длина расширения
-;        call  printString2
-;        pop   bc
-;        ret
-;
-
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Вывод имени файла - 8 символов, путое место, 3 символа.
-; Короткие имена дополняются пробелами, чтобы стереть предыдущий текст.
-; Выводит только реальные символы, чтобы не портить экран при
-; неотформатированном или повреждённом диске.
-;
-; вход:
-;   hl - адрес дескриптора файла
-;
-; 2022-02-16 SpaceEngineer
-;----------------------------------------------------------------------------
-
+; Поле 8 + разделитель + 3: 12 знаков, три пакета 6x8.
+; HL=FILE_INFO; HL/BC/DE сохранены, AF разрушается.
 printFileNamOnPanel:
-        push    hl
-        push    bc
-        ld      bc, FILE_NAME_LENGTH << 8   ; b = длина имени, с = 0 (без терминатора)
-        call    printString2
+        push hl
+        push bc
+        push de
+        ld de,ncTextBuffer
+        ld b,8
+        call ncCopyNamePart
+        ld a,' '
+        ld (de),a
         push hl
         inc hl
         inc hl
@@ -49,21 +16,64 @@ printFileNamOnPanel:
         ld a,(hl)
         and 010h
         pop hl
-        ld c,18h
         jp z,printFileGap
+        ; Корневой псевдоэлемент уже содержит обратную косую черту.
         push hl
         ld bc,-8
         add hl,bc
         ld a,(hl)
         pop hl
-        ld c,18h
         cp 05Ch
         jp z,printFileGap
-        ld c,05Ch
+        ld a,05Ch
+        ld (ncTextBuffer+8),a
 printFileGap:
-        call    bios_printChar
-        ld      bc, 3 << 8                  ; b = длина расширения, с = 0 (без терминатора)
-        call    printString2
-        pop     bc
-        pop     hl
+        ld de,ncTextBuffer+9
+        ld b,3
+        call ncCopyNamePart
+        xor a
+        ld (de),a
+        ld hl,ncTextBuffer
+        call bios_printStringReal
+        call ncNamePadding
+        pop de
+        pop bc
+        pop hl
+        ret
+; Полные байты полей вне 12 знаков восстанавливаются вместе с именем.
+; Это сохраняет выделение и при выборочной перерисовке после прокрутки.
+ncNamePadding:
+        ld hl,(bios_vars.cursorY)
+        ld a,h
+        rrca
+        rrca
+        add a,090h
+        ld h,a
+        ld a,l
+        sub 8
+        ld l,a
+        ld a,(bios_vars.inverse)
+        ld c,a
+ncNamePaddingByte:
+        push hl
+        ld b,10
+ncNamePaddingRow:
+        ld (hl),c
+        inc l
+        dec b
+        jp nz,ncNamePaddingRow
+        pop hl
+        ret
+; Поля FAT не являются ASCIIZ; непечатный байт заменяется пробелом.
+ncCopyNamePart:
+        ld a,(hl)
+        cp 20h
+        jp nc,ncCopyNameByte
+        ld a,' '
+ncCopyNameByte:
+        ld (de),a
+        inc hl
+        inc de
+        dec b
+        jp nz,ncCopyNamePart
         ret

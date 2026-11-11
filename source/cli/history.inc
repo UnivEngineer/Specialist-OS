@@ -123,7 +123,7 @@ cliHistoryLoad:
     ld hl,cliHistoryDescriptor
     call bios_fileLoadInfo
     jp nc,cliHistoryLoadSize
-    MXCALL MX_DOS_GETERROR
+    MXOS_CALL MXOS_DOS_GET_ERROR
     cp DOS_ERR_NOT_FOUND
     jp z,cliHistoryDiskEnd
     jp cliHistoryDisable
@@ -219,10 +219,10 @@ cliHistoryDiskBegin:
     xor a
     ld (cliHistoryDiskReady),a
     ld a,1
-    MXCALL MX_DOS_FILESELECTDRIVE
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld a,DIR_OP_GET
-    MXCALL MX_DOS_DIRECTORY
+    MXOS_CALL MXOS_DOS_DIRECTORY
     ret c
     ex de,hl
     ld (cliHistoryOldDirectory),hl
@@ -230,7 +230,7 @@ cliHistoryDiskBegin:
     ld (cliHistoryDiskReady),a
     ld de,0
     ld a,DIR_OP_SET
-    MXCALL MX_DOS_DIRECTORY
+    MXOS_CALL MXOS_DOS_DIRECTORY
     ret
 cliHistoryDiskEnd:
     ld a,(cliHistoryDiskReady)
@@ -239,10 +239,10 @@ cliHistoryDiskEnd:
     ld hl,(cliHistoryOldDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    MXCALL MX_DOS_DIRECTORY
+    MXOS_CALL MXOS_DOS_DIRECTORY
 cliHistoryRestoreDrive:
     ld a,(cliHistoryOldDrive)
-    MXCALL MX_DOS_FILESELECTDRIVE
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret
 cliHistoryOldDrive: DB 0
 cliHistoryDisabled: DB 0

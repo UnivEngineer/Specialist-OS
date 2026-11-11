@@ -13,10 +13,10 @@ file_write_case:
     jp nz,error
     ld hl,(v_capacity)
     ld de,8193
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     jp nc,error
     ld hl,tmpDescriptor
-    call bios_fileLoadInfo
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp nc,file_exists
     ld a,(v_budget)
     ld l,a
@@ -24,7 +24,7 @@ file_write_case:
     ld a,(v_fileSectors)
     ld e,a
     ld d,0
-    call bios_mul_hl_de
+    call bench_mul_hl_de
     ld (v_operations),hl
     xor a
     ld (v_bufferMode),a
@@ -44,9 +44,8 @@ file_pass:
     ld a,1
     ld (v_fileOwned),a
     call measure_begin
-    ld hl,tmpDescriptor
-    ld de,sectorBuffer
-    call bios_fileCreate
+    call bhCreate
+    call nc,file_write_low
     call c,measure_end
     jp c,error
     call maybe_verify_file
@@ -63,9 +62,8 @@ file_pass:
     call fill_payload
     ; Тот же файл читается до удаления. Поиск имени и проход FAT входят.
     call measure_begin
-    ld hl,tmpDescriptor
-    ld de,verifyBuffer
-    call bios_fileLoad2
+    call bhReadOpen
+    call nc,file_read_low
     call measure_end
     jp c,error
     ld de,statFileRead
@@ -164,13 +162,13 @@ print_progress:
     ld a,(v_pass)
     add a,'0'
     ld c,a
-    call bios_printChar
+    call bench_printChar
     ld c,'/'
-    call bios_printChar
+    call bench_printChar
     ld a,(v_budget)
     add a,'0'
     ld c,a
-    call bios_printChar
+    call bench_printChar
     ret
 
 ; A=0 — шаблон записи, A=FFh — противоположные байты перед чтением.
@@ -222,10 +220,6 @@ measure_clear:
     inc hl
     dec b
     jp nz,measure_clear
-    ld hl,(bios_diskDriver+1)
-    ld (file_original+1),hl
-    ld hl,file_driver
-    ld (bios_diskDriver+1),hl
     jp reset_timing
 clear_bytes:
     ld (hl),a
@@ -237,11 +231,6 @@ clear_bytes:
 ; CF исходного вызова и BC/DE/HL сохраняются.
 measure_end:
     call timer_sample
-file_restore_driver:
-    push hl
-    ld hl,(file_original+1)
-    ld (bios_diskDriver+1),hl
-    pop hl
     ret
 
 ; DE=приёмник записи статистики (тики U32, flush U32, число flush U16).
@@ -266,7 +255,7 @@ add_bytes_loop:
     ret
 
 ; HL=начало статистики группы в resultsLow. Печать READ, WRITE, FLUSH.
-; Для A: сначала LOW/HIGH одной операции, затем следующая операция.
+; Для A: сначала HIGH/LOW одной операции, затем следующая операция.
 ; Вход: HL=resultsLow или resultsLow+20. Все регистры разрушены.
 print_group:
     ld (v_outputBase),hl
@@ -292,23 +281,17 @@ print_group_operation:
     ld de,10
     add hl,de
 group_low:
-    push hl
-    call print_single
-    pop hl
     ld a,(v_layout)
     cp LAYOUT_MAPPED
-    ret nz
+    jp nz,print_single
     ld a,(v_outputMode)
-    cp 1
-    jp z,group_high
-    or a
-    ret nz
-    jp group_high
-
-group_high:
+    cp 2                       ; FLUSH остаётся одной строкой.
+    jp z,print_single
+    push hl
     ld de,resultsHigh-resultsLow
     add hl,de
-    ; Продолжаем с той же операцией для верхнего буфера.
+    call print_single
+    pop hl
     jp print_single
 
 ; HL=одна запись статистики; подпись определяется операцией и буфером.
@@ -322,7 +305,7 @@ print_single:
     jp nz,print_stat
     push hl
     ld de,resultsHigh
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     pop hl
     ld de,txtWriteLow
     jp c,print_stat
@@ -335,7 +318,7 @@ single_read:
     jp nz,print_stat
     push hl
     ld de,resultsHigh
-    call bios_cmp_hl_de
+    call bench_cmp_hl_de
     pop hl
     ld de,txtReadLow
     jp c,print_stat
@@ -372,7 +355,7 @@ print_flush_label:
     ld hl,(v_flushCount)
     ex de,hl
     ld b,0
-    call bios_printDecWord
+    call bench_printDecWord
     ld hl,txtTimes
     jp puts
 copy_bytes:
@@ -399,7 +382,19 @@ raw_chain:
     dec hl
     LOAD_DE v_dataStart
     add hl,de
+    jp c,raw_chain_invalid
     ex de,hl
+    ld hl,(v_capacity)
+    call bench_cmp_hl_de
+    jp c,raw_chain_invalid
+    jp z,raw_chain_invalid
+    ld a,(v_drive)
+    cp 1
+    jp nz,raw_chain_valid
+    ld a,e
+    cp 0FFh
+    jp z,raw_chain_invalid
+raw_chain_valid:
     ld hl,(v_rawPtr)
     ld (hl),e
     inc hl
@@ -409,6 +404,7 @@ raw_chain:
     ld a,(v_rawLeft)
     dec a
     ld (v_rawLeft),a
+    or a
     ret z
     ld hl,(v_rawCluster)
     add hl,hl
@@ -421,7 +417,7 @@ raw_chain:
     ex de,hl
     ld hl,fatBuffer
     ld b,2
-    call bios_diskDriver
+    call raw_driver
     ret c
     ld a,(v_rawOffset)
     ld l,a
@@ -432,6 +428,11 @@ raw_chain:
     ex de,hl
     ld (v_rawCluster),hl
     jp raw_chain
+
+raw_chain_invalid:
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
 
 ; B=1 запись / B=2 чтение. Один общий цикл, один flush после пакета записи.
 raw_transfer:
@@ -460,7 +461,7 @@ raw_io:
     ld hl,(v_rawBuffer)
     ld a,(v_rawOp)
     ld b,a
-    call bios_diskDriver
+    call raw_local
     jp c,measure_end
     ld hl,(v_rawBuffer)
     inc h
@@ -474,8 +475,8 @@ raw_io:
     ld a,(v_caps)
     and DISK_CAP_FLUSH
     jp z,raw_success
-    ld b,4
-    call bios_diskDriver
+    ld a,1
+    call bench_flush
     jp raw_success_check
 raw_success:
     or a
@@ -488,18 +489,42 @@ raw_success_check:
     call maybe_verify_raw
     jp measure_end
 
-; Подготовка локальной серии RAW исключена из замера. Читаем первый
-; сектор в отдельный scratch: исходный файл/poison-буфер не затрагиваем.
-; DE=сектор; BC/DE/HL сохранены, AF/CF=статус драйвера.
+; PREPARE завершает предыдущую запись и возвращает локальные входы.
+; Внутри измеряемой серии обращений к DOS больше нет.
+; BC/DE/HL сохраняются; CF/A=статус подготовки.
 raw_warmup:
     push bc
+    push de
     push hl
-    ld b,2
-    ld hl,fatBuffer
-    call bios_diskDriver
+    ld b,RAW_OP_PREPARE
+    MXOS_CALL MXOS_DOS_RAW_IO
+    jp c,raw_prepare_done
+    ld (raw_local_call+1),hl
+raw_prepare_done:
     pop hl
+    pop de
     pop bc
     ret
+; B=1/2/4/5, DE=LBA, HL=локальный буфер. BC/DE/HL сохраняются.
+; Список LBA/буферы подготовлены до серии; права PREPARE действуют до DOS.
+raw_local:
+    push bc
+    ld a,b
+    cp 1
+    jp nz,raw_local_ready
+    ld a,(v_writeMode)
+    cp 5
+    jp nz,raw_local_ready
+    ld b,5
+raw_local_ready:
+    call raw_local_dispatch
+    pop bc
+    ret
+raw_local_dispatch:
+    ld a,(v_drive)
+    ld c,a
+raw_local_call:
+    jp 0
 raw_warmup_file:
     push de
     LOAD_DE rawSectors
@@ -507,36 +532,48 @@ raw_warmup_file:
     pop de
     ret
 
-; Обёртка замеров и посекторного B=5. Верхние чтения идут напрямую
-; в 8200h через stream_read, без обратного копирования в нижнюю память.
-file_driver:
-    call timer_sample
-    push af
+; Общий RAW ABI: нет перехвата или изменения таблиц BIOS/DOS.
+; Вход B=операция, DE=блок, HL=main-буфер. Для I/O BC/DE/HL сохранены;
+; B=3/FFh возвращают геометрию и метаданные в регистрах по общему ABI.
+; B=5 применяется только для RAW, файловая проверка выполняется целиком.
+raw_driver:
     ld a,b
-    ld (v_driverOp),a
     cp 1
-    jp nz,file_driver_ready
+    jp z,raw_write
+    MXOS_CALL MXOS_DOS_RAW_IO
+    ret
+raw_write:
+    push bc
     ld a,(v_writeMode)
     cp 5
-    jp nz,file_driver_ready
+    jp nz,raw_dispatch
     ld b,5
-file_driver_ready:
-    pop af
-    push af
+raw_dispatch:
+    MXOS_CALL MXOS_DOS_RAW_IO
+    pop bc
+    ret
+
+; Явный барьер отделён от передачи данных. CF/BC/DE/HL сохраняются.
+; Время входит в WRITE и отдельно показывается в FLUSH.
+; A=0 — DOS (включая кэш/FAT/каталог), A=1 — физический RAW.
+bench_flush:
+    push bc
+    push de
     push hl
+    push af
+    call timer_sample
     call timer_read
     ld (v_flushStart),hl
-    pop hl
     pop af
-file_original:
-    call 0
+    or a
+    jp nz,bench_flush_raw
+    call bhFlush
+    jp bench_flush_done
+bench_flush_raw:
+    ld b,4
+    call raw_local
+bench_flush_done:
     push af
-    push hl
-    push de
-    push bc
-    ld a,(v_driverOp)
-    cp 4
-    jp nz,driver_copy_back
     call timer_read
     ex de,hl
     ld hl,(v_flushStart)
@@ -551,31 +588,53 @@ file_original:
     ld hl,(v_flushCount)
     inc hl
     ld (v_flushCount),hl
-driver_copy_back:
-file_driver_done:
-    pop bc
-    pop de
-    pop hl
-driver_restore_mode:
-    ld a,(v_driverOp)
-    cp 1
-    jp nz,file_driver_return
-    ld b,1
-file_driver_return:
+    call timer_sample
     pop af
+    pop hl
+    pop de
+    pop bc
     ret
+
+; Запись LOW через открытый FILEHANDLE: цепочку расширяет сама DOS.
+; Затем явный файловый flush. CF=ошибка, все регистры разрушены.
+file_write_low:
+    ld hl,sectorBuffer
+    ld a,(v_fileSectors)
+    ld b,a
+    ld c,0
+    ld a,1
+    call bhTransfer
+    ret c
+    xor a
+    jp bench_flush
 
 ; Удаляем только собственный файл. CF=ошибка, AF/HL разрушены.
 file_cleanup:
+    call bhClose
+    ret c
     ld a,(v_fileOwned)
     or a
     ret z
     ld hl,tmpDescriptor
-    call bios_fileDelete
+    MXOS_CALL MXOS_DOS_FILE_DELETE
     ret c
     xor a
     ld (v_fileOwned),a
     ret
+
+file_read_low:
+    ld hl,verifyBuffer
+    ld a,(v_fileSectors)
+    ld b,a
+    ld c,0
+    ld a,2
+    call bhTransfer
+    ret c
+    jp bhClose
+
+    DEFINE BH_DESCRIPTOR tmpDescriptor
+    DEFINE BH_DRIVE v_drive
+    INCLUDE "file-handle.inc"
 
 txtFileExists:    DB 00Ah,"DISKBEN.TMP exists; rename/delete.",0
 txtFlush:         DB "FLUSH:  ",009h,009h,0
@@ -605,6 +664,7 @@ statRawVerify:   DD 0
 statFileVerify:  DD 0
 statRawVerifyHigh: DD 0
 statFileVerifyHigh: DD 0
+statRawHighPostVerify: DD 0
 tmpDescriptor:    DB "DISKBEN TMP",0
                   BLOCK 6,0
                   DW 0
@@ -617,6 +677,7 @@ v_rawPtr:         DW 0
 v_rawBuffer:      DW 0
 v_rawLeft:        DB 0
 v_rawOffset:      DB 0
-rawSectors:       BLOCK MAX_FILE_SECTORS*2,0
+; Временный список LBA помещается между FAT-буфером и верхним окном.
+
 
     INCLUDE "readback.inc"

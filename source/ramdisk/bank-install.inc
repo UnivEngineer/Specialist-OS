@@ -1,15 +1,18 @@
 ; Штатный B: уже обслуживается DOS. Проверяем том, а не заменяем транспорт.
 ; Выход: CF/A=ошибка, иначе RET; новый том создаёт FORMAT передачей управления.
 ; AF/BC/DE/HL разрушены. Исходная KOI восстанавливается перед RET/JMP.
-    ld a,(bios_vars.koi7)
+    ex de,hl
+    call BankArguments
+    ret c
+    ld a,(bios_upper.koi7)
     push af
     xor a
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     call BankPrepare
     pop bc
     push af
     ld a,b
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     pop af
     ret c
     or a
@@ -20,7 +23,7 @@
     jp bios_fileExec
 
 BankPrepare:
-    ld a,(bios_vars.ramPageCount)
+    ld a,(bios_upper.ramPageCount)
     cp 2
     jp c,InstallFailed
     ld e,0
@@ -46,7 +49,7 @@ BankCheckVolume:
     xor a
     ret
 BankMountError:
-    MXCALL MX_DOS_GETERROR
+    MXOS_CALL MXOS_DOS_GET_ERROR
     cp DOS_ERR_UNSUPPORTED
     jp nz,BankReportError
     ; Неизвестная разметка: читаем boot отдельно. Ошибка чтения не означает,
@@ -104,6 +107,72 @@ BankReportError:
 
 bankPreviousDrive: DB 0
 bankFormatCommand: DB 'A:',05Ch,'FORMAT.COM B: -R -Y',0
-bankFormatText: DB 'RAMDISK: preparing B:',0Ah,0
-bankErrorText: DB 'RAMDISK: B: unchanged, error ',0
+bankFormatText: DB 'RAMDISK: PREPARING B:',0Ah,0
+bankErrorText: DB 'RAMDISK: B: UNCHANGED, ERROR ',0
 bankBootSector: DS 256,0
+
+; RAMDISK -P n: ограничение B: перед его первоначальным форматированием.
+; Готовый том с иной геометрией и выделенные FAR-блоки не изменяются.
+BankArguments:
+    call bios_argNext
+    jp c,BankNoArguments
+    ld a,b
+    cp 2
+    jp nz,BankArgumentError
+    ld a,(de)
+    cp '-'
+    jp nz,BankArgumentError
+    inc de
+    ld a,(de)
+    call bios_upperCase
+    cp 'P'
+    jp nz,BankArgumentError
+    call bios_argNext
+    jp c,BankArgumentError
+    ld a,b
+    cp 3
+    jp nc,BankArgumentError
+    ld c,0
+BankPageDigits:
+    ld a,(de)
+    sub '0'
+    cp 10
+    jp nc,BankArgumentError
+    push af
+    ld a,c
+    add a,a
+    add a,a
+    add a,c
+    add a,a
+    ld c,a
+    pop af
+    add a,c
+    cp 16
+    jp nc,BankArgumentError
+    ld c,a
+    inc de
+    dec b
+    jp nz,BankPageDigits
+    push bc
+    call bios_argNext
+    pop bc
+    jp nc,BankArgumentError
+    ld a,(bios_upper.ramPageCount)
+    dec a
+    cp c
+    jp nc,BankPagesAvailable
+    ld c,a
+BankPagesAvailable:
+    ld b,c
+    ld a,MEM_OP_RAMLIMIT
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret nc
+BankArgumentError:
+    ld hl,bankArgumentText
+    call bios_printString
+    scf
+    ret
+BankNoArguments:
+    xor a
+    ret
+bankArgumentText: DB 'RAMDISK: INVALID -P OR RAM DISK IS IN USE',0Dh,0Ah,0

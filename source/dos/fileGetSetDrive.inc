@@ -66,7 +66,7 @@ fileSelectDrive:
             rrca
 
             ; Файловая система выбирается отдельно от физического драйвера.
-            call    mountVolume
+            call    selectVolume
 
             ; Восстанавливаем регистры и выходим
             pop     de

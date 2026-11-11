@@ -1,38 +1,33 @@
 ; Каталог панели кэшируется целиком до предела 8-разрядной навигации.
-; Вход A=диск, активная панель задаёт отдельный кэш. AF/BC/DE/HL разрушены.
-; На попадании кэша дисковый список не читается; выбирается окно указателем.
-; Горячий путь со штатным выбором уже активного диска: 867 тактов в CPU-тесте
-; 8080 (около 0,43 мс при 2 МГц), 0 обращений к носителю. Вместо него
-; перечитывание H: на 140 файлов занимало 491253 такта. Временного буфера
-; и копирования окна нет; чтение полного каталога выполняется только на miss.
+; Вход A=диск, активная панель выбирает слот общего кэша. AF/BC/DE/HL разрушены.
+; На попадании кэша дисковый список не читается; выбирается окно индексов.
+; Готовый индекс возвращается вместе с каталогом, сортировка — только при miss режима.
 loadFiles:
             ld      c, a
             ld      e, 1
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             push    bc
             call    restorePanelDirectory
             pop     bc
-            ld      hl, vars.cacheValidA
-            call    readBytePanel
-            or      a
-            jp z,   lf_ReadCatalog
-            ld      hl, vars.cacheDriveA
-            call    readBytePanel
-            cp      c
-            jp z,   lf_Cached
+            call    ncCatalogAcquire
+            jp c,   lf_ReadCatalog
+            call    ncCatalogUseIndex
+            jp      lf_Cached
 
 lf_ReadCatalog:
-            ld      a, c
-            ld      hl, vars.cacheDriveA
-            call    writeBytePanel
+            ld a,1
+            ld (ncCatalogReadOk),a
             call    fileCacheBase
             ld      bc, 0
             ld      de, FILE_CACHE_CAPACITY
             ld      a, DIR_OP_LIST
-            MXCALL MX_DOS_DIRECTORY
+            MXOS_CALL MXOS_DOS_DIRECTORY
             jp nc,  lf_ListReady
-            ld      de,0
-            ld      (hl),0FFh
+            xor a
+            ld (ncCatalogReadOk),a
+            ld de,0
+            call fileCacheBase
+            ld (hl),0FFh
 lf_ListReady:
             ; Запись FAT "." становится явным пунктом корня только в кэше NC.
             push hl
@@ -60,9 +55,8 @@ lf_RootReady:
 lf_StoreCount:
             ld      hl, state.panelA_filesCnt
             call    writeBytePanel
-            ld      a, 1
-            ld      hl, vars.cacheValidA
-            call    writeBytePanel
+            ld a,(ncCatalogReadOk)
+            call ncCatalogCommit
 
 lf_Cached:
             ; Удаление могло сократить каталог. Пустая панель имеет позиции 0.
@@ -92,31 +86,31 @@ lf_CursorReady:
             call    writeBytePanel
 
 lf_View:
-            ; HL = начало видимого окна, без копирования дескрипторов.
-            ld      l, a
-            ld      h, 0
-            add     hl, hl
-            add     hl, hl
-            add     hl, hl
-            add     hl, hl
-            ex      de, hl
-            call    fileCacheBase
-            add     hl, de
-            ld      (vars.fileListPtr), hl
+            ; Видимое окно состоит из байтовых индексов, без копирования записей.
+            ld e,a
+            ld d,0
+            call fileIndexBase
+            add hl,de
+            ld (vars.fileListPtr),hl
             ret
 
-; HL = база кэша активной панели; A/HL/флаги разрушены, BC/DE сохранены.
+; HL=общий каталог, назначенный активной панели; BC/DE сохранены.
 fileCacheBase:
-            ld      hl, FILE_CACHE_A
-            ld      a, (state.activePanel)
-            or      a
-            ret z
-            ld      hl, FILE_CACHE_B
-            ret
+            ld hl,vars.cacheSlotA
+            call readBytePanel
+            jp ncCatalogBase
 
-; Полная перерисовка вызывается после файловых операций и выбора диска.
-; Помечает только кэш активной панели; A/HL/флаги разрушены.
+; Явное обновление отменяет и общий каталог, и связанные панельные индексы.
 invalidateFileCache:
-            xor     a
-            ld      hl, vars.cacheValidA
-            jp      writeBytePanel
+            push bc
+            push de
+            ld hl,vars.cacheSlotA
+            call readBytePanel
+            cp 0FFh
+            jp z,lf_NoSlot
+            ld c,a
+            call ncCatalogDiscard
+lf_NoSlot:
+            pop de
+            pop bc
+            ret

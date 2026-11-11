@@ -28,5 +28,5 @@ loc_D6C7:   ld      c, a
             call    readBytePanel
             call    loadFiles   ; На входе нужен a=накопитель
 
-            jp      saveStateAndReload
+            jp      panelStateChanged
 

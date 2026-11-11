@@ -523,8 +523,6 @@ driverCopy:
         print('FileStream ABI: read, continuation, write/flush, partial error/retry, invalid arguments, zero length passed')
         return
     m=fresh()
-    r=run(m,'bios_reservedC88D',hl=0x6000,de=0x7000,bc=123)
-    assert r['carry'] and r['error']==sy['DOS_ERR_UNSUPPORTED'] and r['hl']==0x6000 and r['de']==0x7000 and r['bc']==123,r
     rows = []
     def record(name): rows.append(name)
     m = fresh()

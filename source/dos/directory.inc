@@ -5,8 +5,6 @@ fatDirStart:
             push hl
             push de
             xor a
-            ld (v_dirIndex),a
-            ld (v_dirIndex+1),a
             ld (v_dirRemaining),a
             ld hl,(v_directory)
             ld a,h
@@ -24,6 +22,8 @@ fatDirStart:
             call fatDirClusterStart
             jp fatDirStartReturn
 fatDirRootStart:
+            ld hl,(v_diskInfo.rootDirMaxFiles)
+            ld (v_dirRootRemaining),hl
             ld hl,(v_diskInfo.dirStartSector)
             dec hl
             ld (v_cachedSector),hl
@@ -47,17 +47,12 @@ fatDirNext:
             ld a,h
             or l
             jp nz,fatDirEntryReady
-            ld hl,(v_dirIndex)
-            push hl
-            ld hl,(v_diskInfo.rootDirMaxFiles)
-            ex de,hl
-            pop hl
-            call cmp_hl_de
-            jp nc,fatDirEnd
-            push hl
-            inc hl
-            ld (v_dirIndex),hl
-            pop hl
+            ld hl,(v_dirRootRemaining)
+            ld a,h
+            or l
+            jp z,fatDirEnd
+            dec hl
+            ld (v_dirRootRemaining),hl
 fatDirEntryReady:
             ; Во время прохода каталога кэш не используется другими циклами.
             ; Сектор получаем один раз, остальные записи идут по указателю.
@@ -220,7 +215,7 @@ fatDirRestoreEntry:
             jp markDirSectorAsModified
 
 v_dirRemaining: DB 0
-v_dirIndex: DW 0
+v_dirRootRemaining: DW 0
 v_cachedDescrOffset: DW 0
 v_dirCluster: DW 0
 v_dirSectorsLeft: DW 0

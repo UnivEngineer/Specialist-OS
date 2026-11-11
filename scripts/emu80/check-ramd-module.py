@@ -80,7 +80,7 @@ def main():
         print(label,'I/O OK',flush=True)
 
     select(1)
-    assert description()==[b'RAMD',b'R4 banked']
+    assert description()==[b'RAMD',b'R4 BANKED']
     report['checks'].append('stock AUTOEXEC installs R4 before NC')
     # Для сравнения явно возвращаем встроенный R3 после обычной загрузки.
     sub(0xC860,af=0x0100,hl=ds['diskDriver'])
@@ -96,14 +96,14 @@ def main():
 
     # Настоящий запуск COM с диска A: через NC и стек DC00h.
     m.stop_at(ns['mainLoop']);m.call('regs_set',pc=0xC800);m.until(ns['mainLoop'],60)
-    cmd=b'A:RAMDISK.COM'
+    cmd=b'A:DRIVERS/RAMDISK.COM'
     m.write(ns['vars.cmdLine'],cmd+b'\0')
     m.write(ns['vars.cmdLineEnd'],(ns['vars.cmdLine']+len(cmd)).to_bytes(2,'little'))
     m.write(0xDBFE,(0xC800).to_bytes(2,'little'))
     m.stop_at(ns['mainLoop']);m.call('regs_set',pc=ns['EnterExec'],sp=0xDBFE)
     m.until(ns['mainLoop'],60)
     select(1)
-    assert description()==[b'RAMD',b'R4 banked']
+    assert description()==[b'RAMD',b'R4 BANKED']
     check_io('R4')
     assert b''.join(m.sector(i) for i in range(meta_end))==metadata
     report['checks'].append('real NC install from A:, boot/FAT/root unchanged')
@@ -138,7 +138,7 @@ def main():
     assert not sub(0xC845,hl=0x7000,de=0)['flags']['C']
     execute('B:RAMDISK.COM')
     assert int.from_bytes(m.read(0xC864,2),'little')==rs['Driver']
-    assert description()==[b'RAMD',b'R4 banked']
+    assert description()==[b'RAMD',b'R4 BANKED']
     assert tails()==expected
     report['checks'].append('reinstall from active B: immediately updates C863h')
 
@@ -150,7 +150,7 @@ def main():
     assert not sub(0xC845,hl=0x7000,de=0x4000)['flags']['C']
     for addr in [0xC800,0xC000]:
         m.stop_at(ns['mainLoop']);m.call('regs_set',pc=addr);m.until(ns['mainLoop'],60)
-        select(1);assert description()==[b'RAMD',b'R4 banked']
+        select(1);assert description()==[b'RAMD',b'R4 BANKED']
         m.write(0x7000,desc);m.write(0x4000,bytes(768))
         assert not sub(0xC848,hl=0x7000)['flags']['C']
         assert m.read(0x4000,768)==payload and tails()==expected
@@ -161,7 +161,7 @@ def main():
     for name in ['FLASH','FLASHFST','ROM','FLASHSYS']:
         execute('A:'+name+'.COM')
         assert m.read(rs['Driver'],len(resident))==resident and tails()==expected
-        select(1);assert description()==[b'RAMD',b'R4 banked']
+        select(1);assert description()==[b'RAMD',b'R4 BANKED']
     report['checks'].append('FLASH/FLASHFST/ROM/FLASHSYS coexist with RAMD')
 
     # Отказ установки не должен менять уже работающий драйвер.
@@ -197,7 +197,7 @@ def main():
     report['checks'].append('FORMAT B: Y R preserves main and all 16 bank tails')
     # Оба ручных сценария DISKBEN: штатный ввод B + Enter, ноль записей.
     bs=symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
-    for label in ['R3','R4 banked']:
+    for label in ['R3','R4 BANKED']:
         if label=='R3':
             sub(0xC860,af=0x0100,hl=ds['diskDriver'])
             sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)

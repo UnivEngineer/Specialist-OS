@@ -4,7 +4,6 @@ v_memTop: DW DOS_CODE_START-1
     ELSE
 v_memTop: DW APP_MEMORY_END-1
     ENDIF
-v_char:   BLOCK 13,0FFh
 v_input_start: DW 0
 v_input_end:   DW 0
 

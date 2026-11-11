@@ -47,7 +47,15 @@ def host_checks():
         cpu.write_text('9000\n9000\n01\n', encoding='ascii')
         cpu.with_suffix('.i80').write_bytes(driver.data)
         assert convert(cpu, 'com')[1] == driver
-        for flags in (2, 0x80, 0xff):
+        bank = Image(b"\xc9", 0x100, 0x100, 2)
+        for kind in ("com", "exe", "dll"):
+            assert decode(encode(bank, kind), kind) == bank
+        cpu.write_text("0100\n0100\n02\n", encoding="ascii")
+        cpu.with_suffix(".i80").write_bytes(bank.data)
+        assert convert(cpu, "dll")[1] == bank
+        main = Image(b"\xc9", 0x100, 0x100, 4)
+        assert decode(encode(main, "exe"), "exe") == main
+        for flags in (3, 5, 6, 7, 8, 0x80, 0xff):
             try:
                 encode(Image(b'\xc9', 0x9000, 0x9000, flags), 'com')
             except ValueError:
@@ -135,8 +143,8 @@ def emulator_checks(runtime):
     m.write(0x7200, b'EMPTY   TXT'+bytes(21))
     assert not m.subroutine(0xC84B, hl=0x7200)['flags']['C']
     results = []
-    cases = [('B:PROBE.COM', None, 'MX'),
-             ('A:RUN.COM B:PROBE.COM /X', None, 'MX'),
+    cases = [('B:PROBE.COM', '1', 'MX'),
+             ('A:RUN.COM B:PROBE.COM /X', '1', 'MX'),
              ('A:RUN.COM -MX B:PROBE.EXE /X', None, 'MX'),
              ('A:RUN.COM -STD B:PROBE.EXE /X', None, 'STD'),
              ('A:RUN.COM -RF B:PROBE.EXE /X', None, 'RF'),

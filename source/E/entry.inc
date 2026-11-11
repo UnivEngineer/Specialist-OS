@@ -91,7 +91,7 @@ editorLimitReady:
         LD    HL,(v_textBeginLo)
         LD    (HL),00h
         XOR   A
-        LD    (bios_vars.koi7),A      ; Файлы MXOS хранятся в KOI-8.
+        call bios_setFontEncoding      ; Файлы MXOS хранятся в KOI-8.
         EX    DE,HL
         CALL  bios_argNext
         JP    C,startupBannerAndLineBuffer

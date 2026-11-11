@@ -14,9 +14,7 @@ getSelFilePath:
         jp appendPathToCommand
 buildSelectedFilePath:
         push hl
-        ld hl,vars.path
-        ld a,DIR_OP_GETCWD
-        MXCALL MX_DOS_DIRECTORY
+        call updateCommandPath
         pop hl
         ret c
 buildCachedSelectedPath:

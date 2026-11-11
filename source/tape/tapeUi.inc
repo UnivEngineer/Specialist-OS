@@ -11,7 +11,7 @@ TAPE_BUFFER_END = 08FFFh
 Start:
 tapeMenu:
             xor     a
-            ld      (bios_vars.koi7), a    ; Имена файлов — KOI-8.
+            call bios_setFontEncoding    ; Имена файлов — KOI-8.
             ; После магнитофонной операции экран и состояние курсора могут
             ; остаться произвольными. Меню всегда начинает с чистого экрана.
             ld      hl, 0
@@ -20,7 +20,7 @@ tapeMenu:
             ld      hl, 0008h
             ld      (bios_vars.cursorY), hl
             ld      a, 0FFh
-            ld      (bios_vars.escMode), a
+            ld      (bios_upper.escMode), a
 
             ; Этот стек восстанавливается при ошибке чтения или по Break.
             ld      hl, 0

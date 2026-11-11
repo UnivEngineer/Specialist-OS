@@ -15,7 +15,7 @@
 
 fatFileDelete: ; Найти файл с именем из hl
             xor     a
-            ld      (bios_vars.diskWriteErr), a
+            ld      (bios_upper.diskWriteErr), a
             call    fileFind
             ret     c 
 
@@ -90,7 +90,7 @@ fatFlushPhysical:
             pop     bc
             ret nc
             ld      a, 1
-            ld      (bios_vars.diskWriteErr), a
+            ld      (bios_upper.diskWriteErr), a
             ret
 
 ; Завершение изменения файла после записи кэша и физического барьера.
@@ -99,7 +99,7 @@ fatFlushPhysical:
 ; При отказе сбрасываем кэш. Уже записанные секторы это не откатывает.
 fatFinishWrite:
             call    fatFlushPhysical
-            ld      a, (bios_vars.diskWriteErr)
+            ld      a, (bios_upper.diskWriteErr)
             or      a
             ret z
             scf

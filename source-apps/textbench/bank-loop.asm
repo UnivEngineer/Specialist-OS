@@ -1,116 +1,115 @@
-; Временный цикл в резерве C000h страницы DOS.
+; Исполняемый модуль: профиль, стек и возврат устанавливает загрузчик DOS.
     INCLUDE "../../source/include/mxos.inc"
-    ORG 0C000h
+; Адрес не совпадает с управляющим циклом main, что упрощает отладку.
+    ORG 04000h
 entry:
+    jp nativeEntry
+moduleEntry:
     IF FONT_TEST
-    ld sp,0C800h
-    ld a,(quadMode)
+    cp 080h
+    jp nc,gridBank
+    ld (action),a
+    ld a,c
+    ld (kind),a
+    ld a,b
+    ld (flags),a
+    ld (bulkRequest+4),hl
+    ld (lineRequest+4),hl
+    call moduleTimerStart
+    ld a,(flags)
+    and 32
+    jp z,bankSelectCall
+    ld hl,bulkRequest
+    call mx_memcpyFar
+    ret c
+    ld hl,(bulkRequest+4)
+    MXOS_CALL MXOS_BIOS_PRINT_STRING_MAIN
+    jp bankFinish
+bankSelectCall:
+    ld a,(kind)
     or a
-    jp z,scalarStart
-    cp 2
-    jp z,serialStart
+    jp z,bankCharacters
     cp 3
-    jp nc,windowStart
-    jp quadStart
-scalarStart:
-    ld a,24
-    ld (rowsLeft),a
-    ld de,0C200h
-    ld hl,00007h
-row:
-    ld a,1
-    call 0FFCCh
-    push hl
-    ld b,48
-glyph:
-    ld a,(de)
-    ld c,a
-    xor a
-    call 0FFCCh
-    inc de
-    dec b
-    jp nz,glyph
-    ld a,2
-    call 0FFCCh
-    pop hl
-    ld a,l
-    add a,8
-    ld l,a
-    ld a,(rowsLeft)
-    dec a
-    ld (rowsLeft),a
-    jp nz,row
-    jp 0FFC6h
-quadStart:
-    ld a,24
-    ld (rowsLeft),a
-    ld hl,0C200h
-    ld (quadText),hl
-    ld hl,00007h
-quadRow:
-    ld a,1
-    call 0FFCCh
-    push hl
-    ld a,12
-    ld (groupsLeft),a
-quadGroup:
-    ld hl,(quadText)
-    ld b,(hl)
-    inc hl
+    jp z,bankCharacters
+    cp 5
+    jp c,bankString
+    and 1
+    jp nz,bankCharacters
+bankString:
+    ld a,(flags)
+    and 64
+    jp nz,bankLines
+    ; Один штатный вызов на весь поток, включая CRLF.
+    ld hl,02000h
+    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    jp bankFinish
+bankCharacters:
+    ld hl,02000h
+bankCharacter:
     ld c,(hl)
-    inc hl
-    ld d,(hl)
-    inc hl
-    ld e,(hl)
-    inc hl
-    ld (quadText),hl
-    ld a,3
-    call 0FFCCh
-    ld a,(groupsLeft)
-    dec a
-    ld (groupsLeft),a
-    jp nz,quadGroup
-    ld a,2
-    call 0FFCCh
+    ld a,c
+    or a
+    jp z,bankFinish
+    push hl
+    cp 020h
+    jp c,bankCharacterNormal
+    ld a,(action)
+    cp 4
+    jp nz,bankCharacterNormal
+    ld a,c
+    MXOS_CALL MXOS_BIOS_PRINT_CHAR_REAL
+    jp bankCharacterDone
+bankCharacterNormal:
+    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+bankCharacterDone:
     pop hl
-    ld a,l
-    add a,8
-    ld l,a
-    ld a,(rowsLeft)
-    dec a
-    ld (rowsLeft),a
-    jp nz,quadRow
-    jp 0FFC6h
-serialStart:
+    inc hl
+    jp bankCharacter
+bankLines:
+    ld hl,02000h
+    ld (lineRequest+1),hl
     ld a,24
     ld (rowsLeft),a
-    ld hl,0C200h
-    ld (quadText),hl
-    ld hl,00007h
-serialRow:
-    ld a,1
-    call 0FFCCh
-    push hl
-    ld hl,(quadText)
-    ld c,48
-    ld a,4
-    call 0FFCCh
-    ld de,48
+bankLine:
+    ld hl,lineRequest
+    call mx_memcpyFar
+    ret c
+    ; 48 печатных + CRLF, локальный нуль не входит в memcpy_far.
+    ld hl,(lineRequest+4)
+    ld de,50
     add hl,de
-    ld (quadText),hl
-    ld a,2
-    call 0FFCCh
-    pop hl
-    ld a,l
-    add a,8
-    ld l,a
-    ld a,(rowsLeft)
-    dec a
-    ld (rowsLeft),a
-    jp nz,serialRow
+    ld (hl),0
+    ld hl,(lineRequest+4)
+    MXOS_CALL MXOS_BIOS_PRINT_STRING_MAIN
+    ld hl,(lineRequest+1)
+    ld de,50
+    add hl,de
+    ld (lineRequest+1),hl
+    ld hl,rowsLeft
+    dec (hl)
+    jp nz,bankLine
+bankFinish:
+    call moduleTimerSample
+    jp moduleTimerResult
+kind: DB 0
+flags: DB 0
+action: DB 0
+rowsLeft: DB 0
+bulkRequest: DB 0
+    DW 02000h
+    DB 0
+    DW 0,1201
+lineRequest: DB 0
+    DW 02000h
+    DB 0
+    DW 0,50
     ELSE
     ld a,c
     ld (mode),a
+    ex de,hl
+    ld (rowsLeft),hl
+    call moduleTimerStart
+    ret c
 row:
     ld hl,text
     ld a,(mode)
@@ -121,95 +120,28 @@ glyph:
     or a
     jp z,endRow
     ld c,a
-    MXCALL MX_BIOS_PRINTCHAR
+    MXOS_CALL MXOS_BIOS_PRINT_CHAR
     inc hl
     jp glyph
-endRow:
-    dec de
-    ld a,d
-    or e
-    jp nz,row
-    ret
 string:
-    MXCALL MX_BIOS_PRINTSTRING
-    jp endRow
+    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+endRow:
+    call moduleTimerSample
+    ret c
+    ld hl,(rowsLeft)
+    dec hl
+    ld (rowsLeft),hl
+    ld a,h
+    or l
+    jp nz,row
+    jp moduleTimerResult
 mode: DB 0
-    ENDIF
-    IF FONT_TEST
-    jp 0FFC6h
-rowsLeft: DB 0
-groupsLeft: DB 0
-quadText: DW 0
-windowFarPacket:
-    ld a,1
-    call 0FFC0h
-    ld h,0
-    ld l,c
-    add hl,de
-    ex de,hl
-    ret
-; Far48 передаёт всю строку одним копированием; Win20 — порциями 20+20+8.
-windowTextRow:
-    ld a,(quadMode)
-    cp 4
-    ld c,48
-    jp z,windowFarPacket
-    ld b,2
-windowPacket20:
-    ld c,20
-    call windowPacket
-    dec b
-    jp nz,windowPacket20
-    ld c,8
-    jp windowPacket
-    ENDIF
-    IF !FONT_TEST
+rowsLeft: DW 0
 text: DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
     ENDIF
-    ASSERT $ <= 0C180h
     IF FONT_TEST
-    DS 0C180h-$,0
-quadMode: DB 0
-windowStart:
-    ld a,24
-    ld (rowsLeft),a
-    ld de,0C200h
-    ld hl,00007h
-windowRow:
-    ld a,2
-    call 0FFC0h
-    push hl
-    call windowTextRow
-    ld a,3
-    call 0FFC0h
-    pop hl
-    ld a,l
-    add a,8
-    ld l,a
-    ld a,(rowsLeft)
-    dec a
-    ld (rowsLeft),a
-    jp nz,windowRow
-    xor a
-    jp 0FFC0h
-windowPacket:
-    push bc
-    ld hl,0FFCCh
-windowCopy:
-    ld a,(de)
-    ld (hl),a
-    inc de
-    inc hl
-    dec c
-    jp nz,windowCopy
-    pop bc
-    ld a,1
-    jp 0FFC0h
-    DS 0C200h-$,0
-corpus: DS 48*24,0
-    ASSERT $ <= 0C700h
-    DS 0C7FEh-$,0
-    DW 0C000h
-    ELSE
-    DS 0C200h-$,0
+    INCLUDE "../fontbench/grid-bank.inc"
     ENDIF
+    INCLUDE "native-entry.inc"
+    INCLUDE "module-timing.inc"
+    ASSERT $ < 05000h

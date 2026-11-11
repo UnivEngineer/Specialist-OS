@@ -72,27 +72,9 @@ skipFormat:
             and     2
             jp z,   reboot3_2
 
-            ; Встроенный драйвер читает все MX-банки. FlashSys подключаем
-            ; до AUTOEXEC для разрешения записи на системный A:.
+            ; Драйверы выбираются только явными командами AUTOEXEC.
             xor     a
             call    fileSelectDrive
-            ld      a, (v_diskInfo.totalSectors + 1)
-            cp      2
-            jp c,   reboot3_autoexec
-            ld      a, 1
-            ld      (v_bootAutoexec), a
-            ld      hl, pathFlashSysCom
-            call    fileExec
-            ld      a, 0
-            ld      (v_bootAutoexec), a
-            jp c,   reboot3_fallback
-            ; Установленный драйвер должен стать активным и для текущего A:.
-            ld      hl, (v_drives)
-            ld      (j_diskDriver+1), hl
-            xor     a
-            ld      (v_drive), a
-            call    mountVolume
-            jp c,   reboot3_fallback
 
 reboot3_autoexec:
             ; Запуск файла A:AUTOEXEC.BAT
@@ -112,10 +94,6 @@ reboot3_fallback:
             xor     a
             ld      (v_drive), a
             call    mountVolume
-
-            ; Драйвер H: заменяется стандартным ROM.COM.
-            ld      hl, pathRomCom
-            call    fileExec
 
 ; -------------------------------------
 

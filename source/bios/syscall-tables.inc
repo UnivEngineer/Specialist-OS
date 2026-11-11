@@ -7,7 +7,7 @@ sysBIOSTable:
     DW input
     DW j_keyScan
     DW printHexByte
-    DW printString1
+    DW printStringZ
     DW j_keyScan
     DW getCursorPos
     DW setCursorPos
@@ -20,33 +20,30 @@ sysBIOSTable:
     DW printer
     DW installDriver
     DW sysDiskDriver
-    DW printChar_real
+    DW printCharRaw
     DW printDecWord
     DW setRAMDDriver
     DW upperCase
     DW strcmp
     DW stricmp
     DW sub_hl_de
-    DW div_hl_2
-    DW mul_hl_de
-    DW div_hl_de
     DW beepTimer
     DW diskWriteChecked
-    DW pitTimerInit
-    DW pitTimerRead
-    DW uiDraw
-    DW uiInverseRect
-    DW uiToolbar
-    DW uiCopyRect
     DW argNext
     DW installBlockDriver
-    DW loadDosModule
-    DW releaseDosModule
     DW setInputHook
     DW blockIO
     DW memcpy_bc_hl
     DW fileBodyLoad
     DW glyphCacheService
+    DW printStringZ
+    DW fast6.service
+    DW printStringRawZ
+    DW printStringRawZ
+    DW printStringRawLim
+    DW printStringRawLim
+    DW bankText.request
+    DW fast6.setEncoding
 sysBIOSCount = ($-sysBIOSTable)/2
 sysDOSTable:
     DW dos_fileList
@@ -63,7 +60,6 @@ sysDOSTable:
     DW dos_fileLoad2
     DW dos_getDriveFreeSpace
     DW dos_fileCreatePrepare
-    DW dos_dosUnsupported
     DW dos_installVolume
     DW dos_getVolume
     DW dos_mountVolume
@@ -87,4 +83,10 @@ sysDOSTable:
     DW dosDriverSelect
     DW dosDriverInstall
     DW dosDriverRefresh
+    DW dosMemoryService
+    DW moduleLoad
+    DW moduleCall
+    DW moduleUnload
+    DW fileExecNative
+    DW residentService
 sysDOSCount = ($-sysDOSTable)/2

@@ -9,7 +9,7 @@ Driver:
     ENDIF
     cp      1
     jp nz,  DriverNotWrite
-    ld      (bios_vars.diskWriteErr), a
+    ld      (bios_upper.diskWriteErr), a
     scf
     ret                 ; запись - не поддерживается
 DriverNotWrite:
@@ -26,10 +26,10 @@ DriverNotWrite:
 ; Функция 3 - определение объёма накопителя.
 ;
 ; Выход:
-;   de = физическая ёмкость, 256 блоков по 256 байт;
+;   de = ёмкость в 256-байтных блоках (при установке берётся из BPB);
 ;   hl = адрес DISK_INFO;
 ;   bc = 0, подсказка линейного выделения; CF=0.
-; Размер устройства не зависит от BPB текущего/ещё не смонтированного тома.
+; Геометрия выбранного тома не меняет уже установленную ёмкость.
     IFNDEF DRIVER_IO_ONLY
 FuncSize:
     ld      de, DISK_SECTORS
@@ -43,7 +43,7 @@ FuncSize:
 ; Функция 2 - чтение сектора из внешнего ROM.
 ;
 ; Вход:
-;   de = номер 256-байтного сектора, 0000h..00FFh;
+;   de = номер 256-байтного блока; границы тома проверяет физический шлюз DOS.
 ;   hl = адрес буфера в основном ОЗУ.
 ;
 ; Выход:
@@ -56,6 +56,9 @@ FuncSize:
 ;   af и флаги, кроме CF (сохраняется из диспетчера).
 
 FuncRead:
+RomReadSelect:
+    jp      FuncReadLegacy      ; установщик выбирает интерфейс по BPB
+FuncReadLegacy:
     ld a,d
     or a
     jp z,FuncReadReady
@@ -78,18 +81,22 @@ FuncReadReady:
     ld      d, e
     ld      e, 0
 
-; Горячий цикл: 14 байт, 66 тактов/байт, 8,448 мс на сектор при 2 МГц.
-; Обычный и худший путь совпадают. На байт: две записи адреса в ВВ55,
-; одно чтение данных ВВ55 и одна запись в ОЗУ.
+    ; Старший адрес неизменен в пределах 256-байтного сектора.
+    ld      a, d
+    ld      (IO_PROG_C), a
+    ex      de, hl
+    ld      hl, IO_PROG_A
+    ld      c, 0
+
+; 11 байт, 52 такта/байт; одна запись адреса, одно чтение ВВ55.
 ReadLoop:
-    ex      de, hl          ; hl = адрес в ПЗУ, de = адрес в памяти
-    ld      (IO_PROG_B), hl ; порт B = младший байт адреса, порт C = старший байт адреса
-    ld      a, (IO_PROG_A)  ; a = байт из ПЗУ
-    ex      de, hl          ; hl = адрес в памяти, de = адрес в ПЗУ
-    ld      (hl), a         ; сохраняем байт в память
-    inc     hl              ; следующий адрес в памяти
-    inc     e               ; следующий адрес в ПЗУ
-    jp nz,  ReadLoop        ; повтор цикла, пока адрес в ПЗУ не пересечет XX00h
+    ld      a, c
+    ld      (IO_PROG_B), a
+    ld      a, (hl)
+    ld      (de), a
+    inc     de
+    inc     c
+    jp nz,  ReadLoop
 
     ; Восстановление портов, регистров и выход
     push    af
@@ -101,6 +108,51 @@ ReadLoop:
     pop     bc
     pop     de
     pop     hl
+    ret
+
+; Нынешняя плата flash-диска: C4:C3=чип, C2:C0=A18:A16,
+; A15:A8 удерживаются внешней защёлкой. Команды flash не посылаются.
+; BC/DE/HL сохраняются; AF разрушены, CF=0 при успехе.
+; Цикл: 11 байт, 52 такта/байт, 256 чтений PPI и записей ОЗУ.
+FlashRead:
+    ld      a,d
+    cp      020h               ; четыре 512-КиБ гнезда, максимум 2 МиБ
+    jp nc,  RomReadBad
+    push    hl
+    push    de
+    push    bc
+    ld      a,090h
+    ld      (IO_PROG_MODE),a
+    ld      a,d
+    or      040h               ; /OE активен, /WE неактивен
+    ld      (IO_PROG_C),a
+    ld      a,00Bh             ; установить PC5 защёлки адреса
+    ld      (IO_PROG_MODE),a
+    ld      a,e
+    ld      (IO_PROG_B),a
+    ld      a,00Ah
+    ld      (IO_PROG_MODE),a
+    ex      de,hl
+    ld      hl,IO_PROG_A
+    ld      c,0
+FlashReadLoop:
+    ld      a,c
+    ld      (IO_PROG_B),a
+    ld      a,(hl)
+    ld      (de),a
+    inc     de
+    inc     c
+    jp nz,  FlashReadLoop
+    ld      a,0C0h             ; оба управляющих сигнала неактивны
+    ld      (IO_PROG_C),a
+    pop     bc
+    pop     de
+    pop     hl
+    or      a
+    ret
+RomReadBad:
+    ld      a,DOS_ERR_ARGUMENT
+    scf
     ret
 
 ;----------------------------------------------------------------------------
@@ -141,7 +193,7 @@ FuncInfo:
     ld      hl, DriverInfo
     or      a
     ret
-DriverInfo:     DB "ROM",0,"64K read only",0
+DriverInfo:     DB "ROM2M",0,"64K READ ONLY",0
 
 ;----------------------------------------------------------------------------
 ; Адрес DISK_INFO, полученный при регистрации драйвера.

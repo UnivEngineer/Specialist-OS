@@ -5,7 +5,7 @@
 kdFarStream:
     pop af
     push af
-    call klEligible
+    call ksSelectRoute
     jp nz,ksBuffered
     pop af
     push af
@@ -130,8 +130,12 @@ ksDirectSum:
     ld (klRegs+2),hl
     ld hl,(ksDirectStart)
     ld (klRegs),hl
-    xor a
+    ld a,(kdPage)
+    or a
     ld bc,bios_calcCS
+    jp z,ksSumInvoke
+    ld bc,MEM_IO_CHECKSUM
+ksSumInvoke:
     ld hl,bankCallback
     ld de,klRegs
     call bankCallPacket
@@ -192,3 +196,25 @@ ksCacheCopy:
     dec a
     jp z,kdFetch
     jp kdStore
+
+; Маршрут сохраняется на внешний запрос, отдельно для выбранного диска.
+ksSelectRoute:
+    push hl
+    ld a,(v_drive)
+    ld hl,ksRouteDrive
+    cp (hl)
+    jp z,ksRouteKnown
+    ld (hl),a
+    call klEligible
+    ld a,0
+    jp z,ksRouteSave
+    inc a
+ksRouteSave:
+    ld (ksRouteBuffered),a
+ksRouteKnown:
+    ld a,(ksRouteBuffered)
+    or a
+    pop hl
+    ret
+ksRouteDrive: DB 0FFh
+ksRouteBuffered: DB 1

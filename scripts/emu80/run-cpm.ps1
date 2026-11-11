@@ -43,6 +43,9 @@ $old = '  RkRomDisk romDisk = "specialist-cpm/rom-disk.bin"' + "`n" + '  ppi2.ci
 $normalized = $config.Replace("`r`n", "`n")
 if (-not $normalized.Contains($old)) { throw 'The base profile ROM disk block has changed.' }
 $config = $normalized.Replace($old, "  RkSdController sdCard = `"specialist-cpm/sdcard`"`n  sdCard.model = spec`n  connect sdCard.data -> ppi2.portC`n  connect ppi2.portC -> sdCard.data`n  connect ppi2.portB -> sdCard.cmd")
+# Таблица клавиш CP/M рассчитана на физическую ЙЦУКЕН Специалиста.
+# QWERTY Emu80 меняет расположение виртуальных клавиш и даёт asd -> fcl.
+$config += "`nkbdLayout.layout = jcuken`n"
 [IO.File]::WriteAllText((Join-Path $deployment 'specialist-mx2.conf'), $config, (New-Object Text.UTF8Encoding($false)))
 $defines = ''
 $marker = Join-Path $runtime 'specialist-build.json'

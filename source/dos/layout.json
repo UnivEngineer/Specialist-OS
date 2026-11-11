@@ -222,6 +222,12 @@
         "directoryCwd.inc",
         "../cli/directoryExtend.inc"
       ]
+    },
+    {
+      "name": "localMath",
+      "files": [
+        "math.inc"
+      ]
     }
   ]
 }

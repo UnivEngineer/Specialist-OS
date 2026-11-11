@@ -29,18 +29,18 @@ def main():
     def word(m, at, value):
         m[at:at + 2] = value.to_bytes(2, 'little')
 
-    # Только стенд MXCALL Query заменён переходником к реальной службе IO.
+    # Только стенд MXOS_CALL Query заменён переходником к реальной службе IO.
     # Пропускаются два байта номера операции после CALL; транспорта здесь нет.
     base[0xf806:0xf806 + 7] = b'\xe1\x23\x23\xe5\xc3' + io['glyphCacheService'].to_bytes(2, 'little')
-    arena_start, arena_end = 0xdb90, 0xeb90
+    arena_start, arena_end = 0x4b90, 0x5b90
     word(base, s['GLYPH_CACHE_START'], arena_start)
     word(base, s['GLYPH_CACHE_LIMIT'], arena_end)
     word(base, s['GLYPH_CACHE_ENTRIES'], 0)
     base[s['GLYPH_CACHE_INVALID']] = 1
-    word(base, s['bios_vars.charGen'], 0x2800 // 8)
-    base[s['bios_vars.koi7']] = 0
+    word(base, s['renderFont8'], 0x2800 // 8)
+    base[s['bios_upper.koi7']] = 0
     base[s['bios_vars.inverse']] = 0
-    base[s['bios_vars.escMode']] = 255
+    base[s['bios_upper.escMode']] = 255
     checks = 0
     samples = []
 
@@ -65,7 +65,7 @@ def main():
                 alternate = bytes(v ^ 0x3f for v in font)
                 active_font = alternate
                 m[0x4000:0x4800] = alternate
-                code += b'\x21\x00\x08\x22' + s['bios_vars.charGen'].to_bytes(2, 'little')
+                code += b'\x21\x00\x08\x22' + s['renderFont8'].to_bytes(2, 'little')
                 code += b'\x3e\x01\x32' + s['GLYPH_CACHE_INVALID'].to_bytes(2, 'little')
                 continue
             _, point, x, y = event
@@ -132,23 +132,23 @@ def main():
     data, _ = run([('glyph', 65, 0, 0), ('font',), ('glyph', 65, 0, 8)])
     assert int.from_bytes(data[s['cacheMisses']:s['cacheMisses'] + 2], 'little') == 2
     # Один слот, нулевая ёмкость, конец ровно/не ровно по границе слота.
-    for limit, slots in [(0xe120, 1), (0xe11f, 0), (0xe110, 0), (0xdb90, 0), (0xe181, 7)]:
+    for limit, slots in [(0x5120, 1), (0x511f, 0), (0x5110, 0), (0x4b90, 0), (0x5181, 7)]:
         data, _ = run([('glyph', 65, 0, 0), ('glyph', 66, 2, 8), ('glyph', 65, 4, 16)], limit=limit)
         assert data[s['cacheSlots']] == slots, (hex(limit), data[s['cacheSlots']])
-    data, _ = run([('glyph', 65, x, i * 8) for i, x in enumerate((0, 4, 6, 0, 4, 2))], limit=0xe120)
+    data, _ = run([('glyph', 65, x, i * 8) for i, x in enumerate((0, 4, 6, 0, 4, 2))], limit=0x5120)
     assert int.from_bytes(data[s['cacheMisses']:s['cacheMisses'] + 2], 'little') == 5
     # Исходная фаза не обращается к отсутствующему кешу даже для кодов управления.
     for point in (0, 7, 10, 13, 27, 255):
         data, _ = run([('glyph', point, 2, 0)], limit=arena_start)
         assert int.from_bytes(data[s['cacheMisses']:s['cacheMisses'] + 2], 'little') == 0
-    run([('glyph', 65, 0, 0), ('resize', 0xe120), ('glyph', 65, 2, 8), ('glyph', 66, 4, 16)])
+    run([('glyph', 65, 0, 0), ('resize', 0x5120), ('glyph', 65, 2, 8), ('glyph', 66, 4, 16)])
     populated, _ = run([('glyph', i, (i % 48) * 6, (i // 48) * 8) for i in range(64)])
     # После сужения хвост прежнего кеша становится чужим: даже очистка запрещена.
     populated = bytearray(populated[:65536])
     populated[s['GLYPH_CACHE_INVALID']] = 1
-    run([('glyph', i, (i % 48) * 6, 32) for i in range(32)], limit=0xe120, initial=populated)
+    run([('glyph', i, (i % 48) * 6, 32) for i in range(32)], limit=0x5120, initial=populated)
     # Изменяемое начало арены и все допустимые однобайтные номера слотов.
-    for begin, slots in [(0xdca1, 152), (0xd660, 248)]:
+    for begin, slots in [(0x4ca1, 152), (0x4660, 248)]:
         initial = bytearray(base)
         word(initial, s['GLYPH_CACHE_START'], begin)
         data, _ = run([('glyph', 65, 0, 0)], initial=initial)

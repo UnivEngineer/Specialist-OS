@@ -7,9 +7,11 @@ dosBoot:
     jp kernelCold
     jp kernelWarm
 kernelCold:
-    call resetSectorCache
+    call resetAllSectorCaches
     ld a,1
     ld (v_bootAutoexec),a
+    call memoryInit
+    call moduleInit
     call registryBoot
     ret c
 kernelNoFlash:
@@ -22,26 +24,30 @@ kernelNoFlash:
     ld (v_dosModuleReady),a
     xor a
     ret
-loadDosModule:
-    xor a
-    ret
 j_reboot3:
     jp dosBoot
 v_dosModuleReady: DB 0
 kernelVersion: DB "DOS 2.0",0Dh,0Ah,0
 
 ; Тёплый вход после отбрасывания стеков программ. Образ/тома не перезагружаем.
+; C=1 перед AUTOEXEC (ошибка без ожидания клавиши), C=0 при входе в оболочку.
 kernelWarm:
-    ld a,0FFh
-    ld (klInstalled),a
     xor a
+    ld (v_batDepth),a
+    ld hl,BAT_BUFFER-BAT_FRAME_SIZE
+    ld (v_batFrame),hl
+    ld a,c
     ld (v_bootAutoexec),a
+    call klReclaim
+    ret c
+    call klInvalidate
+    xor a
     ld (kdBusy),a
     ld (kdFarActive),a
     ld (ksDirect),a
-    ld (klFastOwner),a
     ld (kiReady),a
     ld (diActive),a
+    call moduleWarm
     ld hl,0
     call cliSetObserver
     jp flushVolume

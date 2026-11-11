@@ -1,13 +1,13 @@
 ;----------------------------------------------------------------------------
 ; MXOS
-; FLASHSYS.COM - драйвер системного flash-диска AT29C010A/C020/C040A
+; AT512KS.COM - драйвер системного flash-диска AT29C010A/C020/C040A
 ;
 ; Номер функции передаётся в регистре b:
 ;   b == 1 - записать сектор (256 байт, номер сектора в de, буфер в hl);
 ;   b == 2 - прочитать сектор (256 байт, номер сектора в de, буфер в hl);
 ;   b == 5 - записать сектор, затем прочитать и сравнить все 256 байт;
 ;   b == 3 - размер диска в de, DISK_INFO в hl, bc=0 (линейное выделение);
-;   b == 0FFh - адрес имени и описания в hl (две строки с нулём).
+;   b == 0FFh - технология/возможности в BC; HL=0, строки принадлежат DOS.
 ;
 ; Для чтения и записи CF=0 означает успех, CF=1 - ошибку. После загрузки
 ; страницы ожидается завершение по DATA polling. Полное сравнение выполняется
@@ -19,7 +19,7 @@
 ; Регистр FFF8h здесь не используется: его D0 выбирает ROM/RAM только в
 ; стандартном режиме "Специалиста", а D1 переключает 4/8 цветов.
 ; Чтение в 8000h и выше выполняется одним отображением ROM через memcpy DOS;
-; в нижнее ОЗУ — парами через BC. Стек и исполняемый код находятся выше 8000h.
+; в нижнее ОЗУ — через общий верхний буфер 256 байт. Стек и исполняемый код находятся выше 8000h.
 ; Для функций 1/2/5 BC, DE, HL сохраняются; AF и флаги разрушаются.
 ;
 ; Поддерживаются AT29C010A (128 КБ, физическая страница записи 128 байт),
@@ -30,20 +30,28 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 DRIVE             = 0       ; A:
 ROM_PAGE_MASK     = 00Fh
 ROM_ADDR_HI_MASK  = 07Fh
 
     ; Варианты нижнего чтения для воспроизводимого сравнения на стенде.
-    ; 0 — старый цикл; 1 — пара через BC (штатный); 2 — через верхний буфер.
+    ; 0 — старый цикл; 1 — пара через BC; 2 — общий верхний буфер (штатный);
+    ; 3 — стенд CPM16: привилегированный внутренний вход данной сборки MEM.
     IFNDEF FLASHSYS_READ_MODE
-FLASHSYS_READ_MODE = 1
+FLASHSYS_READ_MODE = 2
     ENDIF
-    ASSERT FLASHSYS_READ_MODE >= 0 && FLASHSYS_READ_MODE <= 2
+    ASSERT FLASHSYS_READ_MODE >= 0 && FLASHSYS_READ_MODE <= 3
+    IF FLASHSYS_READ_MODE == 3
+    INCLUDE "../../bin/banked/transport-imports.inc"
+    ENDIF
     IF FLASHSYS_READ_MODE == 2
-    ; Буфер принадлежит стенду/вызывающей системе, не общему драйверу.
-    ASSERT FLASHSYS_READ_BUFFER >= 08000h && FLASHSYS_READ_BUFFER <= 08E00h
+    IFNDEF FLASHSYS_READ_BUFFER
+FLASHSYS_READ_BUFFER = BIOS_DISK_BUFFER
+    ENDIF
+    ; Буфер принадлежит карте MAIN, не стеку вызывающей программы.
+    ASSERT FLASHSYS_READ_BUFFER >= 08000h && FLASHSYS_READ_BUFFER <= 0FE00h
     ENDIF
 
 ;----------------------------------------------------------------------------
@@ -151,6 +159,22 @@ FuncRead:
     or      a
     jp m,   ReadMapped
 
+    IF FLASHSYS_READ_MODE == 3
+    ld      (readCopy+4), hl
+    ex      de, hl
+    ld      (readCopy+1), hl
+    ld      a, (v_page)
+    or      080h
+    ld      (readCopy), a
+    ld      hl, readCopy
+    call    bankCopySector
+    jp      Exit
+readCopy: DB 080h
+    DW 0
+    DB 0
+    DW 0,256
+    ENDIF
+
     IF FLASHSYS_READ_MODE == 2
     push    hl                  ; назначение в нижней памяти
     ld      hl, FLASHSYS_READ_BUFFER
@@ -209,9 +233,9 @@ ReadMapped:
     jp      Exit
 
 ; DE=адрес ROM-сектора, HL=верхнее назначение. AF/BC/DE/HL разрушаются.
-; Копирует 256 байт новым движком DOS, оставляет ROM подключённым.
+; Копирует 256 байт штатным движком BIOS, оставляет ROM подключённым.
 ; На сектор 256 чтений/записей, одно подключение ROM; RAM вернёт вызывающий.
-; Пары движка: 64 такта/2 байта (назад), плюс постоянная настройка.
+; Копирование идёт без переключений маппера внутри блока.
 ReadMappedCopy:
     ld      b, h
     ld      c, l
@@ -231,6 +255,19 @@ ReadMappedCopy:
 ;   hl = адрес буфера.
 
 FuncWrite:
+    ; Нижний источник сохраняем до подключения ROM; верхний доступен напрямую.
+    ld      a, h
+    or      a
+    jp m,   WritePrepared
+    push    de
+    ld      d, h
+    ld      e, l
+    inc     d
+    ld      bc, BIOS_DISK_BUFFER
+    call    bios_memcpy_bc_hl
+    pop     de
+    ld      hl, BIOS_DISK_BUFFER
+WritePrepared:
     ; Размер страницы определяется ID физического чипа, а не размером тома.
     ld      a, (v_halfPage)
     ld      (v_chunkEnd), a
@@ -272,30 +309,29 @@ ProgramChunk:
     ld      (02AAAh), a
     ld      a, 0A0h
     ld      (05555h), a
-    ld      (IO_PAGE_RAM), a
-
-; Горячий цикл: 22 байта, 100 тактов/байт = 50 мкс при 2 МГц.
-; Это меньше максимального tBLC=150 мкс. На байт: одно чтение ОЗУ, одна
-; запись ПЗУ и два переключения маппера.
-ProgramLoop:
-    ld      a, (hl)
+    ; ROM и верхний буфер доступны одновременно. Страница 128/256 байт.
+    push    hl
+    ld      a, (v_halfPage)
     ld      c, a
-    ld      a, (v_page)
-    ld      (IO_PAGE_ROM), a
-    ld      a, c
-    ld      (de), a
-    ld      (IO_PAGE_RAM), a
+    ld      b, 0
+    or      a
+    jp nz,  ProgramLength
+    inc     b
+ProgramLength:
+    add     hl, bc
+    ex      de, hl              ; DE=конец источника, HL=адрес flash
+    ld      b, h
+    ld      c, l
+    pop     hl
+    call    bios_memcpy_bc_hl
+    ld      d, b
+    ld      e, c                ; memcpy: BC=конец flash, HL=конец источника
+ProgramEnd:
+    dec     de
+    dec     hl
+    ld      c, (hl)
     inc     hl
-    inc     e
-    ld      a, (v_chunkEnd)
-    cp      e
-    jp nz,  ProgramLoop
-
-    ; Ожидание окончания программирования по DQ7 последнего байта. Худший путь (768 проверок)
-    ; длится около 16,5 мс и превышает максимальное tWC=10 мс.
-    dec     e
-    ld      a, (v_page)
-    ld      (IO_PAGE_ROM), a
+    ; Назначение ниже источника: memcpy идёт вперёд, DE — последний байт.
     push    hl
     ld      b, 3
     ld      l, 0
@@ -312,34 +348,33 @@ PollLoop:
     ; Тайм-аут: это ожидаемый результат при аппаратной защите /WE или ПЗУ.
     ld      (IO_PAGE_RAM), a
     pop     hl
-    inc     e
+    inc     de
     jp      WriteFailed
 
 PollDone:
     ld      (IO_PAGE_RAM), a
     pop     hl
-    inc     e
+    inc     de
 
     or      a
     ret
 
 WriteFailed:
     ld      a, 1
-    ld      (bios_vars.diskWriteErr), a
+    ld      (bios_upper.diskWriteErr), a
     scf
     ret
 
 ;----------------------------------------------------------------------------
 
 
-; B=0FFh: HL=две строки, B=технология, C=возможности (DISK_CAP_*).
+; B=0FFh: HL=0, B=технология, C=возможности (DISK_CAP_*).
+; Имя/описание: MXOS_DOS_RAW_IO B=FFh, из реестра DOS.
 FuncInfo:
     ld      bc, DISK_TECH_FLASH * 256 + DISK_CAP_READ + DISK_CAP_WRITE + DISK_CAP_VERIFY
-    ld      hl, DriverInfo
+    ld      hl, 0
     or      a
     ret
-DriverInfo:        DB "FLASHSYS",0
-DriverDescription: DB "000K mapped",0
 
 ; B=5: общий синхронный цикл B=1, B=2 и сравнения в DOS.
 ; BC/DE/HL сохраняются; CF=1 и diskWriteErr=1 при отказе.
@@ -360,6 +395,10 @@ resident_end:
     ASSERT_DONT_FIT SYSTEM_FLASH_END
     ENT
 resident_file_end:
+; Одноразовое описание установщика; в MAIN-резидент не копируется.
+DriverInfo:        DB "AT512KS",0
+DriverDescription: DB "000K ONBOARD FLASH",0
+    DS 64-($-DriverInfo),0
     INCLUDE "flash-install.inc"
 
 

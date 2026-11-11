@@ -53,13 +53,12 @@ cfdc_first:
             ld      (hl),a
             inc     hl
             inc     de
-            ld      b, FILE_NAME_LENGTH + 3
-cfdc_loop:  ld      a, (de)
-            ld      (hl), a
+            DUP FILE_NAME_LENGTH + 3
+            ld      a,(de)
+            ld      (hl),a
             inc     hl
             inc     de
-            dec     b
-            jp nz,  cfdc_loop
+            EDUP
 
             ; В компактной записи адреса загрузки больше нет.
             xor a

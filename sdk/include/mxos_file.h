@@ -8,13 +8,13 @@ typedef signed long mxos_i32;
 typedef struct { mxos_u8 bytes[64]; } MXOS_FILE;
 /* Целый файл по пути: 40 байт, рабочий дескриптор принадлежит вызывающему.
  * count — вместимость загрузки / длина сохранения; actual — результат.
- * path и buffer — NEAR-адреса; MX_DOS_FILELOADPATH/FILESAVEPATH через mxos_call. */
+ * path и buffer — NEAR-адреса; MXOS_DOS_FILE_LOAD_PATH/FILE_SAVE_PATH через mxos_call. */
 typedef struct {
     mxos_u16 path, buffer, count, actual;
     mxos_u8 descriptor[32];
 } MXOS_PATH_IO;
 
-/* MX_BIOS_FILEBODY: общий загрузчик main, без разбора контейнера.
+/* MXOS_BIOS_FILE_BODY: общий загрузчик main, без разбора контейнера.
  * descriptor — готовая запись выбранного диска; header/tail — байты.
  * trailer=0 пропускает хвост, иначе получает tail байт; actual — тело. */
 typedef struct {
@@ -23,6 +23,14 @@ typedef struct {
     mxos_u8 header, tail;
     mxos_u16 trailer, actual;
 } MXOS_BODY_IO;
+
+/* Low-level mxos_file_call: bytes[63]=operation, bytes[41]=mode.
+ * OPTIONS: bytes[57]=0 query / 1 exchange; word at 51 is flags, returns old flags. */
+#define MXOS_FILE_OP_OPTIONS 6
+#define MXOS_DOS_IO_VERIFY_FILES 1
+#define MXOS_FILE_MODE_VERIFY 32
+#define MXOS_FILE_MODE_SCATTER 64
+#define MXOS_FH_ALLOC_SEED 60
 
 #define MXOS_SEEK_SET 0
 #define MXOS_SEEK_CUR 1

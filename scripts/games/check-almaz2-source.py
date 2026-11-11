@@ -778,8 +778,6 @@ def main():
     for stem in ("Almaz2-8color", "Almaz2-mx", "Almaz2-ramfos"):
         payload, _ = load(stem)
         allowed = color_hooks | (ramfos_hooks if stem == "Almaz2-ramfos" else set())
-        if stem == "Almaz2-mx":
-            allowed |= {1,2,4,5,7,8}  # Три JMP через освобождение DOSMOD.
         differences = {i for i in range(0x09D4) if payload[i] != reference[i]}
         require(differences <= allowed, f"{stem}: original logic differs at {sorted(differences-allowed)}")
     # Оптимизированные сборки очищают экран перед возвратом в свою оболочку.
@@ -797,13 +795,9 @@ def main():
         if not monitor and "ramfos" not in stem:
             targets = ("game_start", "audio_editor_new" if pit else "editor_create_map",
                        "audio_editor_existing" if pit else "editor_open")
-            for offset, hook, target in zip((0,3,6),
-                    ("mxos_game_entry","mxos_editor_new","mxos_editor_current"), targets):
-                address = symbols[hook]
-                require(payload[offset] == 0xC3 and word(payload,offset+1) == address,
-                        f"{stem}: MXOS entry must release DOSMOD")
-                require(payload[address:address+6] == bytes.fromhex("cd db c8 c3") +
-                        symbols[target].to_bytes(2,"little"), f"{stem}: DOSMOD release adapter")
+            for offset, target in zip((0,3,6), targets):
+                require(payload[offset] == 0xC3 and word(payload,offset+1) == symbols[target],
+                        f"{stem}: direct MXOS entry {target}")
         check_diamond_explosion(payload, symbols)
         require(bool(symbols["app_monitor_target"]) == monitor, f"{stem}: monitor target")
         if monitor and optimized:

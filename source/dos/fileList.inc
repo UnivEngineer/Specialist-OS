@@ -16,7 +16,6 @@ fatListStart:
             ld (v_dirMaxFiles),hl
             ld hl,0
             ld (v_dirTotalFiles),hl
-            ld (v_dirListedFiles),hl
             pop bc
             pop hl
             push hl
@@ -32,21 +31,22 @@ fileList_loop:
             ld hl,(v_dirTotalFiles)
             inc hl
             ld (v_dirTotalFiles),hl
-            push de
-            ex de,hl
+            ; Countdown skip/capacity instead of comparing two U16 pairs
+            ; for every record. Continue scanning after capacity for total count.
             ld hl,(v_dirFirstFile)
-            call cmp_hl_de
-            pop de
-            jp nc,fileList_skip
-            push de
+            ld a,h
+            or l
+            jp z,fileList_capacity
+            dec hl
+            ld (v_dirFirstFile),hl
+            jp fileList_skip
+fileList_capacity:
             ld hl,(v_dirMaxFiles)
-            ex de,hl
-            ld hl,(v_dirListedFiles)
-            call cmp_hl_de
-            pop de
-            jp nc,fileList_skip
-            inc hl
-            ld (v_dirListedFiles),hl
+            ld a,h
+            or l
+            jp z,fileList_skip
+            dec hl
+            ld (v_dirMaxFiles),hl
             pop hl
             ex de,hl
             push bc

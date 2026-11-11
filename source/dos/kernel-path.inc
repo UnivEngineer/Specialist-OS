@@ -65,7 +65,7 @@ kpValidate:
     ld hl,KD_OBJECT
     ld (pathIoRequest),hl
     ld a,(kdFunction)
-    sub MX_DOS_FILELOADPATH & 0FFh
+    sub MXOS_DOS_FILE_LOAD_PATH & 0FFh
     ld (pathIoWrite),a
     ld a,1
     ld (kdFarActive),a

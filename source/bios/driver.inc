@@ -167,23 +167,7 @@ romMXReadBuffer:
             ld      a, h
             or      a
             jp m,   romMappedRead
-; Нижнее назначение: C=банк, B/A=пара данных. 19 байт, 94 такта/пару.
-; На сектор 256 чтений/записей и 256 переключений маппера.
-romMXReadLoop:
-            ld      a, c
-            ld      (IO_PAGE_ROM), a
-            ld      a, (de)
-            ld      b, a
-            inc     e
-            ld      a, (de)
-            ld      (IO_PAGE_RAM), a
-            ld      (hl), b
-            inc     hl
-            ld      (hl), a
-            inc     hl
-            inc     e
-            jp nz,  romMXReadLoop
-            jp      popDBHA_ret
+            jp      romBufferedRead
 
 ramDRead:
             call    ramDReadSector
@@ -212,12 +196,11 @@ diskDriver_s:
             jp z,   diskDriver_s_rom    ; да, переходим
 
             ; Это RAM-диск. Рассчитываем размер, зная количество банок ДОЗУ
-            ld      a, (bios_vars.ramPageCount) ; a  = количество 64к банок ДОЗУ
-            ld      e, a
-            ld      d, 0                        ; de = количество 64к банок ДОЗУ
-            ld      hl, 65536 / SECTOR_SIZE     ; hl = количество секторов в одной 64к банке
-            call    mul_hl_de                   ; hl = количество секторов в ДОЗУ
-            jp      diskDriver_s_exit
+            ; Геометрию B: публикует реестр DOS/драйвер, не детектор банков BIOS.
+            ; До запуска DOS встроенный драйвер сообщает размер только ROM A:.
+            pop     af
+            scf
+            ret
 
 diskDriver_s_rom:
             ; У ROM-диска размер должен быть прошит в загрузочном секторе

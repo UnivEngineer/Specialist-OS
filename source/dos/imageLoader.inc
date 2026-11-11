@@ -30,8 +30,11 @@ imageMagicLoop:
     dec b
     jp nz,imageMagicLoop
     ld a,(hl)
-    and 0FEh
-    jp nz,imageError
+    cp IMAGE_FLAG_MAIN
+    jp z,imageFlagsReady
+    cp IMAGE_FLAG_BANK+1
+    jp nc,imageError
+imageFlagsReady:
     ld hl,v_tmpFileDescr
     ld de,v_tmpFileDescr+13
     call calcCS

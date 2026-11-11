@@ -3,7 +3,7 @@ from pathlib import Path
 import re,subprocess,json
 R=Path(__file__).resolve().parents[2];O=R/'docs/font-arena-044/cache';O.mkdir(parents=True,exist_ok=True)
 s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/BIOS.sym').read_text(),re.M)}
-font=(R/'assets/system-rom/FONTKOI.FNT').read_bytes();rows=[]
+font=(R/'assets/system-rom/FONT.FNT').read_bytes();rows=[]
 for old_limit,mode,limit,expected_invalid,expected_entries,expected_epoch,error in [(s['GLYPH_CACHE_END'],1,s['GLYPH_CACHE_END'],0,5,42,False),(0xe500,1,s['GLYPH_CACHE_END'],0,5,42,False),(s['GLYPH_CACHE_END'],1,s['GLYPH_CACHE_END']-1,1,0,43,False),(s['GLYPH_CACHE_END'],1,s['FONT_ADDR']+len(font)-1,0,5,42,True),(0xe500,2,0,0,5,42,False)]:
  m=bytearray(65536)
  for name,at in [('BIOS',0xc000),('IO',0xf000)]:

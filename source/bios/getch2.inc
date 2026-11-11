@@ -25,7 +25,7 @@ loc_C227:   ; Рисуем курсор
             call    drawCursor2
 
             ; Задержка
-            ld      a, (bios_vars.cursorDelay)
+            ld      a, (bios_upper.cursorDelay)
 loc_C22D:   ld      b, 40h
             call    delay_b
             dec     a
@@ -86,7 +86,7 @@ loc_C269:
             call    drawCursor
 
             ; Ждем, пока отпустят клавишу
-            ld      a, (bios_vars.antiBsDelay)
+            ld      a, (bios_upper.antiBsDelay)
             ld      d, a
 loc_C27C:   call    keyScan2
             cp      h

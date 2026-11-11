@@ -1,14 +1,14 @@
 ; B=0FFh. Снимает сохранённый AF встроенного драйвера.
-; Выход HL=имя,0,описание,0; B=технология, C=возможности; CF=0. AF разрушен.
+; Выход HL=0 (описания находятся в DOS); B=технология, C=возможности; CF=0. AF разрушен.
 diskDriverInfo:
             pop     af
             ld      a, (v_drive)
             or      a
             ld      bc, DISK_TECH_ROM * 256 + DISK_CAP_READ
-            ld      hl, t_romDriverInfo
+            ld      hl, 0
             ret z
             ld      bc, DISK_TECH_RAM * 256 + DISK_CAP_READ + DISK_CAP_WRITE
-            ld      hl, t_ramDriverInfo
+            ld      hl, 0
             or      a
             ret
 

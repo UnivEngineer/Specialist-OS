@@ -3,19 +3,19 @@
 ; Временный ID использует 8C00h–8CFFh, общий системный резерв переходников.
 ; Выход CF=0: установлен; CF=1: ошибка flush, нет ID или неподдерживаемый чип.
 Install:
-    ld a,(bios_vars.koi7)
+    ld a,(bios_upper.koi7)
     push af
     xor a
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     call InstallBody
     pop bc
     push af
     ld a,b
-    ld (bios_vars.koi7),a
+    call bios_setFontEncoding
     pop af
     ret
 InstallBody:
-    MXCALL MX_DOS_FLUSHVOLUME
+    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
     ret c
     call ProbeDelay                  ; завершить ранее запущенное программирование
     IF SYSTEM_FLASH
@@ -31,7 +31,7 @@ InstallBody:
     ld a,c
     ld (resident_file+v_halfPage-Driver),a
     ex de,hl
-    ld bc,resident_file+DriverDescription-Driver
+    ld bc,DriverDescription
     ld d,h
     ld e,l
     inc de
@@ -92,8 +92,9 @@ probeNext:
     call bios_installDriver
     ld (FuncSize+4),hl
     IF SYSTEM_FLASH
+    ld hl,DriverInfo
     xor a
-    MXCALL MX_DOS_DRIVERREFRESH
+    MXOS_CALL MXOS_DOS_DRIVER_REFRESH
     ret c
     ENDIF
     xor a
@@ -107,7 +108,7 @@ InstallFailed:
     call bios_printString
     scf
     ret
-txtIDError: DB "FLASH: unsupported / missing chip",00Ah,0
+txtIDError: DB "FLASH: UNSUPPORTED / MISSING CHIP",00Ah,0
 
 ; 30720 тактов цикла (15,36 мс при 2 МГц, 12,288 мс при 2,5 МГц).
 ; HL/AF разрушены; BC/DE сохраняются. Нужна пауза 10 мс входа/выхода ID.

@@ -3,16 +3,9 @@
     ORG 0
 
 game_entry:
-    IF !ALMAZ_RAMFOS && !ALMAZ_MONITOR_TARGET
-    jp      mxos_game_entry
-    ELSE
     jp      game_start ; 0000h
-    ENDIF
 
 game_new_editor_map:
-    IF !ALMAZ_RAMFOS && !ALMAZ_MONITOR_TARGET
-        JP mxos_editor_new
-    ELSE
     IF ALMAZ_PIT
         JP audio_editor_new
     ELSE
@@ -22,12 +15,8 @@ game_new_editor_map:
     jp      editor_create_map
     ENDIF
     ENDIF
-    ENDIF
 
 game_edit_current_map:
-    IF !ALMAZ_RAMFOS && !ALMAZ_MONITOR_TARGET
-        JP mxos_editor_current
-    ELSE
     IF ALMAZ_PIT
         JP audio_editor_existing
     ELSE
@@ -35,7 +24,6 @@ game_edit_current_map:
         JP input_editor_existing
     ELSE
     jp      editor_open
-    ENDIF
     ENDIF
     ENDIF
 

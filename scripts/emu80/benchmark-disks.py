@@ -42,7 +42,7 @@ def prepare_fixtures():
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
     base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
-    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.FNT','FONTKOI.FNT','RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','ROM.COM'}
+    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.FNT','FONTKOI.FNT','Drivers/RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','Drivers/ROM2M.COM','Drivers/ROM64K.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
@@ -73,7 +73,7 @@ class Matrix:
         if self.pid:
             shell('$p=Get-Process -Id '+str(self.pid)+' -ErrorAction SilentlyContinue; if ($p -and $p.Path -eq '+ps(RUNTIME/'Emu80qt-mcp.exe')+') { Stop-Process -Id $p.Id; $p.WaitForExit() }')
             self.pid=None
-    def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False):
+    def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False,nc_binary=None,nc_symbols=None):
         self.stop()
         # Порт MCP фиксирован upstream. Не подключаемся к чужому эмулятору.
         owner=mcp_owner()
@@ -99,7 +99,13 @@ class Matrix:
                 self.m.call('debug_break');break
             except Exception:time.sleep(.2)
         else:raise RuntimeError('Owned test emulator did not acquire MCP port 19781')
-        nc=symbols(ROOT/'bin/NC.sym');self.m.stop_at(nc['mainLoop'])
+        nc_binary=nc_binary or ROOT/'bin/NC.i80'
+        nc=symbols(nc_symbols or ROOT/'bin/NC.sym');self.m.stop_at(nc['mainLoop'])
+        # Быстрая загрузка может закончиться до подключения MCP: NC уже ждёт
+        # клавишу внутри getch и сам до mainLoop не дойдёт. Escape возвращает
+        # его в обычный цикл, сохраняя проверку кода и страницу breakpoint.
+        if self.m.read(0,32)==nc_binary.read_bytes()[:32]:
+            self.m.tap('esc')
         if 'moduleLoadError' in nc:self.m.call('bp_set',addr=nc['moduleLoadError'],type='exec')
         diagnostic=symbols(ROOT/'bin/DOS.sym')
         if 'dosModuleBad' in diagnostic:self.m.call('bp_set',addr=diagnostic['dosModuleBad'],type='exec')
@@ -110,7 +116,7 @@ class Matrix:
                 a=diagnostic['moduleImports'];n=diagnostic['moduleImportsEnd']-a
                 raise RuntimeError(('module header/import mismatch',state,self.m.read(a,n).hex()))
             if state['registers']['pc']['dec']==nc.get('moduleLoadError'):
-                if self.m.read(0,32)!=(ROOT/'bin/NC.i80').read_bytes()[:32]:
+                if self.m.read(0,32)!=nc_binary.read_bytes()[:32]:
                     # До NC тот же адрес может исполнять FORMAT/RAMD.
                     self.m.stop_at(nc['mainLoop'])
                     continue
@@ -118,7 +124,7 @@ class Matrix:
                 self.m.screenshot(OUT/'module-error.png')
                 raise RuntimeError(('DOS module load failed',self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
             if state['registers']['pc']['dec']==nc['mainLoop']:
-                if self.m.read(0,32)==(ROOT/'bin/NC.i80').read_bytes()[:32]:break
+                if self.m.read(0,32)==nc_binary.read_bytes()[:32]:break
                 self.m.call('bp_clear');self.m.call('emu_run_for',ms=50);self.m.stop_at(nc['mainLoop'])
         else:
             self.m.call('debug_break');state=self.m.call('cpu_state')
@@ -155,7 +161,8 @@ class Matrix:
     def install(self,name):
         if name in ('Flash','FlashFst','Rom'):
             # Инициализатор COM исполняется загрузчиком в странице DOS.
-            self.m.write(0x7E00,('A:\\'+name+'.COM\0').encode('ascii'))
+            filename={'Flash':'AT2MX','FlashFst':'AT2MXF','Rom':'ROM2M'}[name]
+            self.m.write(0x7E00,('A:\\DRIVERS\\'+filename+'.COM\0').encode('ascii'))
             installed = self.func(0xC85D,hl=0x7E00)
             assert not installed['flags']['C'], (name, installed)
         else:
@@ -166,7 +173,6 @@ class Matrix:
         assert not self.func(0,de=0x7E00)['flags']['C']
         self.select(1)
     def init_app(self,drive,mode=1):
-        self.func(0xC8DB) # Стенд HIGH явно освобождает загружаемые службы.
         self.m.write(0,self.appBinary.read_bytes());self.select(drive)
         info=self.func(0xC863,bc=0x0300);capacity=info['registers']['de']['dec'];pointer=info['registers']['hl']['dec']
         self.m.write(self.s['v_info'],pointer.to_bytes(2,'little'));self.m.write(self.s['v_capacity'],capacity.to_bytes(2,'little'))

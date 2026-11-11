@@ -17,9 +17,6 @@ printInfoLine:
         ld      hl, (P_FILE_NAME_X << 8) + P_FILE_NAME_Y
         call    setCursorPosPanel
 
-        ; ld      c, '\'
-        ; call    bios_printChar
-
         ; Устанавливаем hl на описатель файла
         call    getSelectedFile
         push    hl
@@ -29,14 +26,10 @@ printInfoLine:
         jp nc,  printInfoPathReady
         ld      hl, vars.tempFileDescr
 printInfoPathReady:
-        ld      b, 23
+        ld      b, 20
         call    compactPath
-        ld      b, 23
-        ld      c, 1
-        call    printString2
-        ld      a, b
-        or      a
-        call nz,printSpaces
+        ld      b,20
+        call    ncPrintField
 
         ; Смещаем курсор
         ld      hl, (P_FILE_DATA_X << 8) + P_FILE_DATA_Y
@@ -60,16 +53,16 @@ printInfoPathReady:
         inc     hl
         ld      d, (hl)
         ld      b, 20h
-        jp      bios_printDecWord
+        jp      ncPrintFileSize
 
 printInfoDirectory:
         ld hl,infoDirectoryText
-        jp bios_printString
-infoDirectoryText: DB "<DIR>",0
+        jp bios_printStringReal
+infoDirectoryText: DB "   <DIR>",0
 
 printInfoEmpty:
         COLOR 0F1h
         ld hl,(P_FILE_NAME_X << 8) + P_FILE_NAME_Y
         call setCursorPosPanel
-        ld b,29
+        ld b,30
         jp printSpaces

@@ -14,8 +14,8 @@ for name,addr in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
 font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
-base[S['v_dosModuleReady']]=1
 __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](base, S)
+base[S['v_dosModuleReady']]=1
 rows=[]
 
 def run(body,memory=None):
@@ -62,8 +62,8 @@ for group in json.loads((ROOT/'source/bios/syscalls.json').read_text()):
     for svc in group['services']:
         m=bytearray(base);at=S['sys'+group['name']+'Table']+svc['id']*2
         m[at:at+2]=W(0x3100);m[0x3100]=0xC9
-        op='MX_'+group['name']+'_'+svc['name']
-        result,cycles=run(registers+' MXCALL '+op,m)
+        op='MXOS_'+group['name']+'_'+svc['name']
+        result,cycles=run(registers+' MXOS_CALL '+op,m)
         assert result[0x3B00:0x3B06]==bytes.fromhex('34 12 78 56 BC 9A'),op
         assert result[0x3B07]==0xDE and result[0x3B06]&1,op
         rows.append(dict(case=op,cycles=cycles))
@@ -83,21 +83,20 @@ for target,address in re.findall(r'jp\s+sysLegacy_(\w+)\s*;\s*(C[0-9A-F]{3}):',
 
 # Реальные функции: прямой вход и новый адаптер имеют одинаковые результаты.
 for legacy,op,setup in [
-    ('bios_upperCase','MX_BIOS_UPPERCASE',' ld a,061h'),
-    ('bios_mul_hl_de','MX_BIOS_MUL_HL_DE',' ld hl,123\n ld de,17'),
-    ('bios_getMemTop','MX_BIOS_GETMEMTOP',registers),
-    ('bios_getError','MX_DOS_GETERROR',registers),
+    ('bios_upperCase','MXOS_BIOS_UPPERCASE',' ld a,061h'),
+    ('bios_getMemTop','MXOS_BIOS_GET_MEM_TOP',registers),
+    ('bios_getError','MXOS_DOS_GET_ERROR',registers),
 ]:
     direct,dc=run(setup+'\n call '+legacy)
-    native,nc=run(setup+'\n MXCALL '+op)
+    native,nc=run(setup+'\n MXOS_CALL '+op)
     assert direct[0x3B00:0x3B08]==native[0x3B00:0x3B08],legacy
     rows.append(dict(case=legacy,directCycles=dc,nativeCycles=nc,overhead=nc-dc))
 
 # Вложенность: исполнитель вызывает другую службу через тот же вход.
 m=bytearray(base);at=S['sysBIOSTable'];m[at:at+2]=W(0x3100)
 # Служба 0: MVI A,'a' / CALL mx_callRegs / DW uppercase / RET.
-m[0x3100:0x3109]=bytes([0x3E,0x61,0xCD])+W(S['mx_callRegs'])+W(S['MX_BIOS_UPPERCASE'])+b'\xC9\0'
-r,_=run(registers+' MXCALL 0100h',m)
+m[0x3100:0x3109]=bytes([0x3E,0x61,0xCD])+W(S['mx_callRegs'])+W(S['MXOS_BIOS_UPPERCASE'])+b'\xC9\0'
+r,_=run(registers+' MXOS_CALL 0100h',m)
 assert r[0x3B07]==0x41
 
 for group,op in [(1,255),(2,255),(3,0),(255,0)]:
@@ -106,13 +105,13 @@ for group,op in [(1,255),(2,255),(3,0),(255,0)]:
     assert r[0x3000:0x3008]==base[0x3000:0x3008]
 
 m=bytearray(base);m[S['v_dosModuleReady']]=0
-r,_=run(registers+' MXCALL MX_DOS_GETERROR',m)
+r,_=run(registers+' MXOS_CALL MXOS_DOS_GET_ERROR',m)
 assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
-r,_=run(' ld a,061h\n MXCALL MX_BIOS_UPPERCASE',m)
+r,_=run(' ld a,061h\n MXOS_CALL MXOS_BIOS_UPPERCASE',m)
 assert r[0x3B07]==0x41,'BIOS не должен требовать DOS'
 
 # Пакет не может захватывать общее окно или аппаратные регистры.
-r,_=run(' ld bc,MX_BIOS_UPPERCASE\n ld de,0FFB9h\n call mx_call')
+r,_=run(' ld bc,MXOS_BIOS_UPPERCASE\n ld de,0FFB9h\n call mx_call')
 assert r[0x3B07]==S['DOS_ERR_ARGUMENT'] and r[0x3B06]&1
 assert r[0xFFB9:]==base[0xFFB9:]
 

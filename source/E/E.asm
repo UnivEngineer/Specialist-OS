@@ -6,6 +6,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 ; Компиляция оригинального редаткора (если 1)
 STANDARD_EDITOR = 0
@@ -30,7 +31,7 @@ STANDARD_EDITOR = 0
 ; Используемые переменные DOS.SYS:
 ; bios_vars.lastKey     = 08FF0h
 ; bios_vars.tapeInverse = 08FF3h
-; bios_vars.cursorDelay = 08FF4h
+; bios_upper.cursorDelay = 08FF4h
 ; bios_vars.inverse     = 08FFAh
 ; bios_vars.cursorY     = 08FFCh
 

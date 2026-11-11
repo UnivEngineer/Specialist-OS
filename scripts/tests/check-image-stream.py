@@ -141,7 +141,7 @@ def run(size,load=0x1000,rks=False,fragmented=False,corrupt=False,error=-1,full_
    struct.pack_into('<HHHBB',m,sy['cacheData']+8,lba,sy['FAT_CACHE_ADDR']+256,100,int(dirty),0)
    m[sy['FAT_CACHE_ADDR']+256:sy['FAT_CACHE_ADDR']+512]=m[0x3000+lba*256:0x3100+lba*256]
    if dirty:m[0x3000+lba*256:0x3100+lba*256]=bytes([0xEE])*256
- m[sy['bios_vars.koi7']]=255 if return_run else 0
+ m[sy['bios_upper.koi7']]=255 if return_run else 0
  ctx=sy['v_tmpFileDescr'];m[ctx:ctx+32]=bytes(32);struct.pack_into('<H',m,ctx+26,chain[0]);struct.pack_into('<I',m,ctx+28,len(packed))
  struct.pack_into('<H',m,0x7202,0x7300);struct.pack_into('<H',m,0x7204,error&65535)
  m[load-1 if load else 0xFFFF]=0xA5;m[load+size]=0x5A
@@ -177,7 +177,7 @@ def run(size,load=0x1000,rks=False,fragmented=False,corrupt=False,error=-1,full_
  assert got[0x9000:0xc000]==m[0x9000:0xc000], 'screen modified'
  expected_tail = rcode[rs['upperSource']+load+size-rs['ready']] if full_run and rs['ready']<=load+size<rs['upperEnd'] else 0x5A
  assert got[load-1 if load else 0xFFFF]==0xA5 and got[load+size]==expected_tail,(size,load,'tail guard')
- if return_run:assert got[sy['bios_vars.koi7']]==255,'caller KOI preserved'
+ if return_run:assert got[sy['bios_upper.koi7']]==255,'caller KOI preserved'
  if not failed:
   if not rks and not (full_run or dos_exec):assert int.from_bytes(got[65540:65542],'little')==load,'entry address'
   if dos_exec:

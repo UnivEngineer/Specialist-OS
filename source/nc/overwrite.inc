@@ -28,10 +28,10 @@ ncOverwriteTrimEnd:
     ld hl,ncOverwriteWindow
     call draw
     ; Y текстового BIOS задаёт нижнюю линию восьмипиксельного знака.
-    ld hl,04A6Dh
+    ld hl,04C6Dh
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteTitle
-    call bios_printString
+    call bios_printStringReal
     pop bc
     ; Имя центрируется по фактической длине, без пробельного хвоста 8.3.
     ld a,b
@@ -42,27 +42,29 @@ ncOverwriteTrimEnd:
     ld b,a
     ld a,96
     sub b
+    add a,2
+    and 0FCh
     ld h,a
     ld l,130
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteName
-    call bios_printString
+    call bios_printStringReal
     ld hl,02C95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteYes
-    call bios_printString
-    ld hl,03F95h
+    call bios_printStringReal
+    ld hl,04095h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteYesAll
-    call bios_printString
-    ld hl,06B95h
+    call bios_printStringReal
+    ld hl,06C95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteNo
-    call bios_printString
-    ld hl,07B95h
+    call bios_printStringReal
+    ld hl,07C95h
     ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteNoAll
-    call bios_printString
+    call bios_printStringReal
     ld a,2
     ld (ncOverwriteChoice),a
     call ncOverwriteInvert

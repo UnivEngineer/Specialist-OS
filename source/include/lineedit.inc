@@ -131,7 +131,11 @@ lineEditInserted:
     jp c,lineEditRedraw
     jp z,lineEditRedraw
     ld c,(hl)
+    IFDEF LINEEDIT_BATCH
+    call LINEEDIT_PRINT_CHAR
+    ELSE
     call bios_printChar
+    ENDIF
     jp lineEditLoop
 lineEditUnhandled:
     push af
@@ -227,6 +231,9 @@ lineEditPaintOnly:
     add hl,de
     ld a,(lineEditWidth)
     ld b,a
+    IFDEF LINEEDIT_BATCH
+    call LINEEDIT_PAINT
+    ELSE
 lineEditPaintLoop:
     ld a,(hl)
     or a
@@ -238,6 +245,7 @@ lineEditPaintSpace:
     call bios_printChar
     dec b
     jp nz,lineEditPaintLoop
+    ENDIF
     call lineEditCursor
     ret
 ; ZF=окно не сдвинулось; AF/BC разрушены.

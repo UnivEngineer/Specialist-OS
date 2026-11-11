@@ -69,7 +69,7 @@ def main():
             assert state['registers']['sp']['dec'] == 0x7000
             assert m.read(ts['bankPage'], 1) == bytes([caller])
             # Пакет контекста меняется при вызове; код стандартного профиля сохраняется.
-            assert m.read(0xFFC0, 12) == window[:12], 'Не восстановлен общий протокол'
+            assert m.read(0xFFC0, 8) == window[:8], 'Не восстановлен общий протокол'
             return state['registers']['af']['dec'] >> 8, bool(state['flags']['C']), elapsed
 
         result = execute(0, 1, fs['flashDosInit'])

@@ -31,11 +31,19 @@ biosLoaded:
     ld bc,BOOT_IO_RAM
     call moveCore
 ioLoaded:
-    ; Внешний файл шрифта лежит в первой ROM-странице отдельно от BIOS.
+    ; FONT.FNT остаётся линейным на диске; RAM — восемь страниц строк.
     ld hl,BOOT_FONT_ROM
-    ld de,BOOT_FONT_ROM+BOOT_FONT_BYTES
-    ld bc,BOOT_FONT_RAM
-    call moveCore
+    ld e,0
+fontCode:
+    ld d,BOOT_FONT_RAM >> 8
+    DUP 8
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc d
+    EDUP
+    inc e
+    jp nz,fontCode
 fontLoaded:
     ; Детектор работает до установки общего шлюза.
     ld a,15
@@ -52,12 +60,25 @@ fontLoaded:
     ld bc,0FFC0h
     call moveCore
     ; BIOS загружается всегда. DOS сохраняем только по её собственному
-    ; флагу готовности; это не проверка целостности исполняемого образа.
+    ; флагу готовности и совместимой ревизии MEM; это не проверка целостности.
     ld hl,DOS_READY
     call 0FFC0h+byteRead-byteWindow
     ld a,c
     cp 1
     jp nz,loadDos
+    ; При смене внутреннего ABI старое ядро нельзя соединять с новым MEM.
+    ; Это проверка версии связки, не контроль целостности DOS.
+    ld hl,BOOT_MEM_REVISION_ADDR
+    call 0FFC0h+byteRead-byteWindow
+    ld a,c
+    cp BOOT_MEM_REVISION
+    jp nz,loadDos
+    inc hl
+    call 0FFC0h+byteRead-byteWindow
+    ld a,c
+    or a
+    jp nz,loadDos
+    ld a,1
     ld (BIOS_BOOT_WARM),a
     jp dosLoaded
 loadDos:
@@ -126,6 +147,11 @@ installPages:
     ld bc,2
     xor a
     call install
+    ld de,dosNearCopy
+    ld hl,BOOT_MEM_NEAR_COPY
+    ld bc,2
+    xor a
+    call install
     ld de,dosContext
     ld hl,BANK_PAGE
     ld bc,dosContextEnd-dosContext
@@ -147,7 +173,8 @@ installPages:
     ld bc,BOOT_LOCAL_BLOCK
     call moveCore
     ld hl,clientImage
-    ld de,clientEnd
+    ; MAIN не получает локальные службы EXEC/DOS в слоте FLASHSYS.
+    ld de,clientImage+BANK_MAIN_CLIENT_BYTES
     ld bc,0F800h
     call moveCore
     ld hl,windowImage
@@ -209,6 +236,7 @@ romWindowEnd:
 pageCount: DB 16
 dosKind: DB 2
 dosLocalA: DW BOOT_DOS_LOCAL_A
+dosNearCopy: DW BOOT_DOS_NEAR_COPY
 dosContext:
     DB 1
     ; Число страниц после детектора копируется сюда перед установкой.
@@ -268,4 +296,6 @@ romTailImage = 08000h+romTailStorage-stageImage
 romTailEnd = romTailImage+romTailStorageEnd-romTailStorage
 stageEnd:
     ASSERT stageEnd <= 03000h
-    ASSERT 08000h+stageEnd-stageImage < 08C00h
+    ; Холодный bootstrap временно занимает также свободную область RUN.
+    ; Стек и переменные BIOS остаются выше BOOT_STAGE_LIMIT.
+    ASSERT 08000h+stageEnd-stageImage <= BOOT_STAGE_LIMIT

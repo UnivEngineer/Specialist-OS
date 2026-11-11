@@ -1,15 +1,17 @@
 ; Пять 16-битных слов: entry, AF, BC, DE, HL; единственный аргумент в HL.
 ; Мост нереентерабелен: меняется только операнд CALL, пакет хранит вызывающий.
     SECTION code_clib
+    INCLUDE "mxos_syscall_ids.inc"
     PUBLIC _mxos_bios_call
     PUBLIC _mxos_call
-    PUBLIC _mxos_memtop, _mxos_set_memtop, _mxos_release_module
+    PUBLIC _mxos_memmove_far, _mxos_puts_local
+    PUBLIC _mxos_printString_bank, _mxos_printString_main
+    PUBLIC _mxos_memcpy_far
+    PUBLIC _mxos_memtop, _mxos_set_memtop
     PUBLIC _mxos_getch, _mxos_getkey, _mxos_keyscan, _mxos_putch, _mxos_puts
     PUBLIC _mxos_cls, _mxos_cursor_get, _mxos_cursor_set, _mxos_upper
-    PUBLIC _mxos_timer_init, _mxos_timer_read
 
-; Горячие вызовы без упаковки регистров: putch — 4 байта/15 тактов до BIOS,
-; getch — 7 байт, 39 тактов обвязки помимо времени самой клавиатуры.
+; Консоль/таймер используют общий ABI и одинаково работают в main и BANK.
 _mxos_call:
     ld c,(hl)
     inc hl
@@ -20,23 +22,50 @@ _mxos_call:
     push af
     pop hl
     ret
+_mxos_memmove_far:
+    xor a
+    call 0F815h
+    push af
+    pop hl
+    ret
+_mxos_printString_bank:
+_mxos_puts_local:
+    ld a,5
+    jp 0F815h
+; Явный адрес строки main; диспетчер не копирует текст из банка клиента.
+_mxos_printString_main:
+    call 0F806h
+    defw MXOS_BIOS_PRINT_STRING_MAIN
+    ret
+_mxos_memcpy_far:
+    call 0F80Fh
+    push af
+    pop hl
+    ret
 _mxos_putch:
     ld c,l
-    jp 0C809h
+    call 0F806h
+    defw MXOS_BIOS_PRINT_CHAR
+    ret
 _mxos_puts:
-    jp 0C818h
+    call 0F806h
+    defw MXOS_BIOS_PRINT_STRING_BANK
+    ret
 _mxos_getch:
-    call 0C803h
+    call 0F806h
+    defw MXOS_BIOS_GETCH
     ld l,a
     ld h,0
     ret
 _mxos_getkey:
-    call 0C803h
+    call 0F806h
+    defw MXOS_BIOS_GETCH
     push af
     pop hl
     ret
 _mxos_keyscan:
-    call 0C81Bh
+    call 0F806h
+    defw MXOS_BIOS_KEY_SCAN
     ld l,a
     ld h,0
     inc a
@@ -45,28 +74,28 @@ _mxos_keyscan:
     ret
 _mxos_cls:
     ld c,31
-    jp 0C809h
+    call 0F806h
+    defw MXOS_BIOS_PRINT_CHAR
+    ret
 _mxos_memtop:
     jp 0C833h
 _mxos_set_memtop:
     jp 0C830h
 _mxos_cursor_get:
-    jp 0C81Eh
+    call 0F806h
+    defw MXOS_BIOS_GET_CURSOR_POS
+    ret
 _mxos_cursor_set:
-    jp 0C821h
-_mxos_release_module:
-    jp 0C8DBh
+    call 0F806h
+    defw MXOS_BIOS_SET_CURSOR_POS
+    ret
 _mxos_upper:
     ld a,l
-    call 0C875h
+    call 0F806h
+    defw MXOS_BIOS_UPPERCASE
     ld l,a
     ld h,0
     ret
-_mxos_timer_init:
-    jp 0C8A2h
-_mxos_timer_read:
-    jp 0C8A5h
-
 _mxos_bios_call:
     push hl
     ld e,(hl)

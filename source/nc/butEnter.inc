@@ -59,11 +59,11 @@ EnterCmdLine:
             ld (hl),0
             ld hl,state.panelA_drive
             call readBytePanel
-            MXCALL MX_DOS_FILESELECTDRIVE
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             call restorePanelDirectory
             ld hl,vars.cmdLine
             ld a,CLI_OP_QUERY
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             jp c,ncCommandError
             ld a,b
             and 1
@@ -82,7 +82,7 @@ ncCommandRun:
             ld hl,vars.cmdLine
             ld de,ncOverwritePrompt
             ld a,CLI_OP_COMMAND
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             jp c,ncCommandError
             cp 0FFh
             jp z,EnterExec
@@ -109,7 +109,6 @@ ncCommandRun:
             ld a,(ncCommandScreen)
             or a
             call nz,ncDamageBoth
-            call saveState
             jp ncRefreshDirty
 ; Консольный вывод затрагивает и промежутки вне панелей/строки ввода.
 ; Полная очистка нужна только при возврате с консольного экрана.
@@ -119,7 +118,7 @@ ncCommandRestoreScreen:
             call bios_printChar
             jp drawToolbar
 ncCommandError:
-            MXCALL MX_DOS_GETERROR
+            MXOS_CALL MXOS_DOS_GET_ERROR
             call dosErrorText
             push hl
             ; В командном режиме поле диалога содержит ошибочную команду.
@@ -141,5 +140,10 @@ ncCommandErrorText: DB 'Command error',0
 EnterExec:
             call ncStopObserver
             call saveState
+            call ncFontRenderEnd
             ld hl,vars.cmdLine
+            ; COM внутри BAT может затереть NC и вернуться обычным RET.
+            ; Возвращаться следует в BIOS, который загрузит оболочку заново.
+            ld de,bios_reboot
+            push de
             jp bios_fileExec

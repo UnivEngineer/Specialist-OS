@@ -1,7 +1,7 @@
-; Текстовый отчёт строится после всех измерений на месте эталона экрана.
+; Текстовый отчёт строится в отдельном буфере после всех измерений.
 ; Открытие, запись и закрытие — штатные fopen/fwrite/fclose через FILE_HANDLE.
-REPORT_BUFFER = 06800h
-REPORT_LIMIT = 07800h
+REPORT_BUFFER = 07C00h
+REPORT_LIMIT = 08B00h
 matrixSaveReport:
     ld hl,reportFailedText
     ld (reportMessage),hl
@@ -23,7 +23,11 @@ reportBuildLine:
     inc hl
     or (hl)
     jp z,reportBuilt
+    dec hl
+    call benchCaseSelected
+    jp z,reportSkipLine
     call matrixPrintValues
+reportSkipLine:
     ld hl,(matrixCase)
     ld de,14
     add hl,de

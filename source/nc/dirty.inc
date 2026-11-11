@@ -2,10 +2,13 @@
 ; Изменения каталога требуют перечитать кэш; следы диалога — только рисовать.
 ; Наблюдатель DOS не вызывает BIOS: A=диск, DE=каталог, C=0/1 точный/весь диск.
 ncDiskChanged:
+    call ncCatalogChanged
     ld b,a
     ld a,(state.panelA_drive)
     cp b
     jp nz,ncChangedRight
+    xor a
+    ld (vars.pathValidA),a
     ld a,(vars.panelA_info)
     or c
     jp nz,ncChangedLeftMatch
@@ -23,6 +26,8 @@ ncChangedRight:
     ld a,(state.panelB_drive)
     cp b
     ret nz
+    xor a
+    ld (vars.pathValidB),a
     ld a,(vars.panelB_info)
     or c
     jp nz,ncChangedRightMatch
@@ -40,7 +45,7 @@ ncChangedRightMatch:
 ncStopObserver:
     ld hl,0
     ld a,CLI_OP_OBSERVER
-    MXCALL MX_DOS_CLI
+    MXOS_CALL MXOS_DOS_CLI
     ret
 ; После тихой команды: приглашение обновляется сразу, панели — по маске.
 ncRefreshDirty:
@@ -60,6 +65,9 @@ ncDirtyRightCache:
     xor a
     ld (vars.cacheValidB),a
 ncDirtyDraw:
+    ld a,(ncDamageMask)
+    cp 3
+    jp z,mainReload
     ld a,(ncDamageMask)
     or a
     ld a,0

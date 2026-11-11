@@ -170,7 +170,7 @@ switch ($Target) {
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок служб; RAMD при необходимости запускает FORMAT.
         # Физические позиции BOOT/BIOS/DOS задаются отдельными проверками ниже.
-        $early = @('BIOS.SYS','IO.SYS','DOS.SYS','FONTKOI.FNT','RAMDISK.COM','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
+        $early = @('BIOS.SYS','IO.SYS','DOS.SYS','FONT.FNT','FORMAT.COM','AUTOEXEC.BAT','NC.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -189,7 +189,7 @@ switch ($Target) {
         $manifestData = Get-Manifest $manifestPath "hardware"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
-        $early = @('BIOS.SYS','IO.SYS','DOS.SYS','FONTKOI.FNT','RAMDISK.COM','FORMAT.COM','AUTOEXEC.BAT','FLASHSYS.COM','FLASH.COM','NC.COM','ROM.COM')
+        $early = @('BIOS.SYS','IO.SYS','DOS.SYS','FONT.FNT','FORMAT.COM','AUTOEXEC.BAT','NC.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -242,7 +242,7 @@ $volumeLabel = $manifestData.VolumeLabel
 # Линейный bootstrap: фиксированные адреса не зависят от длины соседних файлов.
 $stagedBoot = $makeBootDisk -and $imageFormat -eq 'Raw'
 if ($makeBootDisk -and -not $stagedBoot) { throw 'Split BIOS/DOS requires a linear system image: use SystemEmuWritable or SystemHardware (128/256/512 KB).' }
-$fixedBootFiles = @{ 'BOOT.SYS' = 0x2000; 'BIOS.SYS' = 0x3000; 'FONTKOI.FNT' = 0x5800; 'IO.SYS' = 0x6000; 'MEM.SYS' = 0x7000; 'DOS.SYS' = 0x8000 }
+$fixedBootFiles = @{ 'BOOT.SYS' = 0x2000; 'BIOS.SYS' = 0x3000; 'FONT.FNT' = 0x5800; 'IO.SYS' = 0x6000; 'MEM.SYS' = 0x7000; 'DOS.SYS' = 0x8000 }
 if ($BootstrapProbe -and -not $stagedBoot) { throw '-BootstrapProbe requires a linear system image.' }
 if ($stagedBoot) {
     $bootstrapArgs = @()
@@ -250,7 +250,7 @@ if ($stagedBoot) {
     & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
     if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
     $bootPath = Join-Path $repositoryRoot 'bin/bootstrap/sector.bin'
-    foreach ($name in @('BIOS.SYS','IO.SYS','DOS.SYS','FONTKOI.FNT')) {
+    foreach ($name in @('BIOS.SYS','IO.SYS','DOS.SYS','FONT.FNT')) {
         if (@($manifest | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "Bootstrap requires exactly one $name" }
     }
     $bootEntry = [pscustomobject]@{ ImageName='BOOT.SYS'; Source='../bin/bootstrap/BOOT.bin'; LoadAddress='0x2000'; Attributes=0x05 }
@@ -327,7 +327,7 @@ try {
 
         $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
         $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
-        if ($extension.ToLowerInvariant() -in @('com', 'exe', 'rks')) {
+        if ($extension.ToLowerInvariant() -in @('com', 'exe', 'dll', 'rks')) {
             $storedBytes = Convert-ExecutableFile $sourcePath $extension $loadAddress
         } else {
             $storedBytes = [IO.File]::ReadAllBytes($sourcePath)
@@ -350,12 +350,12 @@ try {
 
         if ($stagedBoot -and $fixedBootFiles.ContainsKey($sourceName)) {
             $fixedAddress = $fixedBootFiles[$sourceName]
-            $limit = switch ($sourceName) { 'BOOT.SYS' { 0x3000 }; 'BIOS.SYS' { 0x5800 }; 'FONTKOI.FNT' { 0x6000 }; 'IO.SYS' { 0x7000 }; 'MEM.SYS' { 0x8000 }; 'DOS.SYS' { 0x18000 } }
+            $limit = switch ($sourceName) { 'BOOT.SYS' { 0x3000 }; 'BIOS.SYS' { 0x5800 }; 'FONT.FNT' { 0x6000 }; 'IO.SYS' { 0x7000 }; 'MEM.SYS' { 0x8000 }; 'DOS.SYS' { 0x18000 } }
             if ($fixedAddress -lt $dataStartSector * $sectorSize -or $fixedAddress + $originalSize -gt $limit) { throw "Fixed bootstrap slot overflow: $sourceName" }
-            if ($sourceName -eq 'FONTKOI.FNT' -and ($originalSize -lt 32 -or $originalSize -gt 2080)) { throw 'FONTKOI.FNT: invalid MXFN file size' }
+            if ($sourceName -eq 'FONT.FNT' -and ($originalSize -ne 2048)) { throw 'FONT.FNT: expected 2048 bytes' }
             if ($sourceName -eq 'IO.SYS' -and ($loadAddress -ne 0xF000 -or $loadAddress+$originalSize -gt 0xF740)) { throw 'Invalid IO load range' }
             if ($sourceName -eq 'BIOS.SYS' -and ($loadAddress -ne 0xC000 -or $loadAddress+$originalSize -gt 0xF000)) { throw 'Invalid BIOS load range' }
-            if ($sourceName -eq 'DOS.SYS' -and ($loadAddress -ne 0x0100 -or $loadAddress+$originalSize -gt 0x6000)) { throw 'Invalid DOS load range' }
+            if ($sourceName -eq 'DOS.SYS' -and ($loadAddress -ne 0x0100 -or $loadAddress+$originalSize -gt 0x7000)) { throw 'Invalid DOS load range' }
             $nextCluster = [int]($fixedAddress / $sectorSize) - $dataStartSector + 2
         }
 

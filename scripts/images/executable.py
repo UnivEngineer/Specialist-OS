@@ -1,4 +1,4 @@
-"""Независимый эталон COM/EXE/RKS для Python-проверок. Сборщик использует executable.ps1."""
+"""Независимый эталон COM/EXE/DLL/RKS для Python-проверок. Сборщик использует executable.ps1."""
 from dataclasses import dataclass
 from pathlib import Path
 import struct
@@ -26,14 +26,14 @@ class Image:
             raise ValueError('Invalid image address or size')
         if not self.load <= self.entry < self.load + len(self.data):
             raise ValueError('Entry is outside the image')
-        if self.flags & ~1:
+        if self.flags not in (0, 1, 2, 4):
             raise ValueError("Unknown COM/EXE flags")
         return self
 
 
 def decode(data, kind, load=None, entry=None, path=None):
     kind = kind.lower().lstrip('.')
-    if kind in ('com', 'exe'):
+    if kind in ('com', 'exe', 'dll'):
         if len(data) < HEADER_SIZE or data[:5] != MAGIC[:5]:
             raise ValueError('Expected MXOS2 COM/EXE header')
         start, run, size, cs, hs = struct.unpack_from('<5H', data, 6)
@@ -62,7 +62,7 @@ def decode(data, kind, load=None, entry=None, path=None):
 def encode(image, kind):
     image.validate()
     kind = kind.lower().lstrip('.')
-    if kind in ('com', 'exe'):
+    if kind in ('com', 'exe', 'dll'):
         if len(image.data) > 65535:
             raise ValueError('COM payload exceeds 65535 bytes')
         header = MAGIC[:5] + bytes([image.flags]) + struct.pack('<4H', image.load, image.entry, len(image.data), checksum(image.data))
@@ -81,7 +81,7 @@ def convert(path, target, load=None):
     kind = path.suffix.lower().lstrip('.')
     # До миграции старые EXE без сигнатуры — допустимый вход, но не выход.
     data = path.read_bytes()
-    if kind in ('exe', 'com') and data[2:4] != b'MX':
+    if kind in ('exe', 'com', 'dll') and data[2:4] != b'MX':
         kind = 'raw'
     image = decode(data, kind, load=load, path=path)
     return encode(image, target), image
@@ -95,7 +95,7 @@ def convert_batch(requests):
         source = request['source']
         try:
             target = request['format'].lower()
-            if target not in ('com', 'exe', 'rks'):
+            if target not in ('com', 'exe', 'dll', 'rks'):
                 raise ValueError('Expected COM, EXE or RKS target')
             packed, _ = convert(source, target, request.get('load'))
         except (OSError, ValueError) as error:

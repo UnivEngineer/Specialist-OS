@@ -64,7 +64,7 @@ for hz in [2000000,2500000]:
   numerator=operations*(sector//256)*(hz//1024)
   hundredths=numerator*100//ticks
   millis=ticks*256000000//hz
-  expected=f'{millis//1000}.{millis%1000:03d} ms\t{hundredths//100}.{hundredths%100:02d} KiB/s'
+  expected=f'{millis//1000}.{millis%1000:03d} ms\t{hundredths//100:8d}.{hundredths%100:02d} KiB/s'
   assert actual==expected,(hz,operations,sector,ticks,actual,expected)
   rates.append(dict(hz=hz,operations=operations,sector=sector,ticks=ticks,text=actual))
 (O/'result.json').write_text(json.dumps(dict(formatCases=count,rateCases=rates),indent=2)+'\n',encoding='utf-8')

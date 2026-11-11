@@ -6,7 +6,7 @@ int main(void) {
  if (sizeof(MXOS_REGS)!=10 || sizeof(MXOS_PATH_IO)!=40) return 12;
  { MXOS_CALL request;
    if (sizeof(request)!=10) return 31;
-   request.operation=MX_BIOS_UPPERCASE;
+   request.operation=MXOS_BIOS_UPPERCASE;
    request.hl=0x1234; request.de=0x5678; request.bc=0x9ABC; request.af=0x6101;
    mxos_call(&request);
    if ((request.af>>8)!='A') return 32;

@@ -8,7 +8,7 @@
 ;  hl = адрес в странице ДОЗУ для записи тестового байта
 ;
 ; На выходе
-;  bios_vars.ramPageCount = максимальный номер страницы
+;  bios_upper.ramPageCount = максимальный номер страницы
 ;  NZ - ДОЗУ найдено (наоборот относительно стандратной функции Ramfos)
 ;   Z - ДОЗУ не найдено
 ;
@@ -45,7 +45,7 @@ checkRAMD_1:
 
             ; Сохраняем номер последней страницы + 1
             inc     a
-            ld      (bios_vars.ramPageCount), a
+            ld      (bios_upper.ramPageCount), a
             dec     a
 
             ; Это максимум, выходим
@@ -58,6 +58,6 @@ checkRAMD_2:
             ret nz
 
             ; В случае ошибки заносим в ramPageCount ноль и выходим с флагом Z
-            ld      (bios_vars.ramPageCount), a
+            ld      (bios_upper.ramPageCount), a
             ret
 

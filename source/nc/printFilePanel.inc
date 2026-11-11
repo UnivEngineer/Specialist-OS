@@ -9,13 +9,16 @@
 ; Перерисовка всей панели
 
 redrawFilePanel:
-        ld a,(ncSelectiveRefresh)
-        or a
-        call z,invalidateFileCache
         COLOR   COLOR_BORDER
         ld a,(ncKeepFrames)
         or a
         jp nz,refreshFilePanel
+        ; Полная отрисовка уже очищает содержимое окна.
+        xor a
+        ld hl,vars.drawnLeftA
+        call writeBytePanel
+        ld hl,vars.drawnRightA
+        call writeBytePanel
         call    drawPanelTop
 
         ; Рисование панели
@@ -29,29 +32,8 @@ redrawFilePanel:
 ; После тихой команды обновляем только содержимое и заголовок панели.
 refreshFilePanel:
         call drawPanelHeader
-        ld hl,0910Ah
-        call activePanelPos
-        call clearFileColumn
-        ld hl,09D0Ah
-        call activePanelPos
-        call clearFileColumn
         ld b,0
         jp printFilePanel
-clearFileColumn:
-        ld b,10
-clearFileColumnByte:
-        ld l,10
-        ld c,198
-        xor a
-clearFileColumnRow:
-        ld (hl),a
-        inc l
-        dec c
-        jp nz,clearFileColumnRow
-        inc h
-        dec b
-        jp nz,clearFileColumnByte
-        ret
 
 ;----------------------------------------------------------------------------
 ; Перерисовка списка файлов
@@ -78,7 +60,7 @@ printFilePanel:
 
         ld      b, FILE_LIST_SIZE
         pop     af
-        jp z,   printFilesUpDown
+        jp z,   printWholeFileList
         dec     a
         jp z,   printFilesDownUp
 
@@ -91,6 +73,97 @@ printFilesUpDownScroll:
 
 ;----------------------------------------------------------------------------
 ; Цикл печати сверху вниз
+
+printWholeFileList:
+        ; Полная отрисовка вызывается и напрямую после стадий рамок/метаданных.
+        ; loadFiles разрушает B: число видимых строк задаём здесь, не у caller.
+        ld b,FILE_LIST_SIZE
+        call printFilesUpDown
+        jp clearPanelTail
+
+; Стираем только строки, оставшиеся после прежнего видимого списка.
+; По две высоты принадлежат каждой панели; рамки и соседняя панель сохранены.
+clearPanelTail:
+        ld hl,state.panelA_firstFile
+        call readBytePanel
+        ld c,a
+        ld hl,state.panelA_filesCnt
+        call readBytePanel
+        sub c
+        jp nc,panelRowsNonnegative
+        xor a
+panelRowsNonnegative:
+        cp FILE_LIST_SIZE
+        jp c,panelRowsReady
+        ld a,FILE_LIST_SIZE
+panelRowsReady:
+        ld (vars.newRows),a
+        cp P_FILE_LIST_H
+        jp c,panelLeftReady
+        ld a,P_FILE_LIST_H
+panelLeftReady:
+        ld b,a
+        ld hl,vars.drawnLeftA
+        call readBytePanel
+        ld c,a
+        ld a,b
+        call writeBytePanel
+        ld hl,(SCROLL_LEFT << 8)+SCROLL_TOP
+        call activePanelPos
+        call clearColumnTail
+        ld a,(vars.newRows)
+        sub P_FILE_LIST_H
+        jp nc,panelRightReady
+        xor a
+panelRightReady:
+        ld b,a
+        ld hl,vars.drawnRightA
+        call readBytePanel
+        ld c,a
+        ld a,b
+        call writeBytePanel
+        ld hl,(SCROLL_RIGHT << 8)+SCROLL_TOP
+        call activePanelPos
+        jp clearColumnTail
+
+; HL=верх колонки, B=новая высота, C=прежняя, в текстовых строках.
+; Удаляем полезную ширину колонки, включая поля выделения слева и справа.
+clearColumnTail:
+        ld a,c
+        sub b
+        ret c
+        ret z
+        ld e,a
+        ld a,b
+        call panelRowsToPixels
+        add a,l
+        ld l,a
+        ld a,e
+        call panelRowsToPixels
+        ld c,a
+        ld b,10
+clearTailByte:
+        push hl
+        push bc
+        xor a
+clearTailPixel:
+        ld (hl),a
+        inc l
+        dec c
+        jp nz,clearTailPixel
+        pop bc
+        pop hl
+        inc h
+        dec b
+        jp nz,clearTailByte
+        ret
+panelRowsToPixels:
+        add a,a
+        ld d,a
+        add a,a
+        add a,a
+        add a,d
+        ret
 
 printFilesUpDown:
         ; Указатель списка файлов - на нулевой файл
@@ -113,7 +186,7 @@ pfud_Next:
         ret z
         ; Следующий файл
         push    bc
-        ld      bc, FILE_INFO_SIZE
+        ld      bc, 1
         add     hl, bc
         pop     bc
 
@@ -134,7 +207,7 @@ pfud_Next:
 printFilesDownUp:
         ; Указатель списка файлов - на последний файл
         ld      hl, (vars.fileListPtr)
-        ld      de, (FILE_LIST_SIZE-1) * FILE_INFO_SIZE
+        ld      de, FILE_LIST_SIZE-1
         add     hl, de
 
         ; Положение курсора - на последний файл
@@ -152,7 +225,7 @@ pfdu_Next:
         ret z
         ; Предыдущий файл
         push    bc
-        ld      bc, -FILE_INFO_SIZE
+        ld      bc, -1
         add     hl, bc
         pop     bc
 
@@ -169,7 +242,7 @@ pfdu_Next:
 
 ;----------------------------------------------------------------------------
 ; Первая строка прокрутки: имя, затем курсор до остальных строк.
-; Вход: HL = файл, DE = координаты. Сохраняет HL/DE/BC, разрушает AF.
+; Вход: HL = ячейка индекса, DE = координаты. Сохраняет HL/DE/BC, разрушает AF.
 ; Курсор уже нарисован; вызывающий код пропускает его в mainLoop.
 
 printFirstScrollFile:
@@ -190,12 +263,16 @@ printFirstScrollFile:
         pop     hl
         ret
 
-; Вход: HL = файл, DE = координаты. Сохраняет HL/DE/BC, разрушает AF.
+; Вход: HL = ячейка индекса, DE = координаты. Сохраняет HL/DE/BC, разрушает AF.
 printPanelFile:
         ex      de, hl
         call    setCursorPosPanel
         ex      de, hl
-        jp      printFileNamOnPanel
+        push    hl
+        call    indexedFile
+        call    printFileNamOnPanel
+        pop     hl
+        ret
 
     IF NC_BITMAP_SCROLL
 ; Старая инверсия остаётся на краю окна до печати нового имени.
@@ -205,10 +282,10 @@ printKeptScrollFile:
         push    de
         push    bc
         ld      a, e
-        ld      bc, FILE_INFO_SIZE
+        ld      bc, 1
         cp      P_FILE_LIST_Y
         jp z,   pks_Below
-        ld      bc, -FILE_INFO_SIZE
+        ld      bc, -1
         sub     10
         jp      pks_Normal
 pks_Below:
@@ -221,11 +298,14 @@ pks_Normal:
         pop     de
         pop     hl
         COLOR   COLOR_CURSOR
-        ld      a, 1
+        ; По контракту BIOS инверсия — слово FFFFh, а не логический байт 1.
+        ld      a, 0FFh
         ld      (bios_vars.inverse), a
+        ld      (bios_vars.inverse+1), a
         call    printPanelFile
         xor     a
         ld      (bios_vars.inverse), a
+        ld      (bios_vars.inverse+1), a
         COLOR   COLOR_FILE
         ret
     ENDIF

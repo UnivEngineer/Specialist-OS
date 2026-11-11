@@ -7,7 +7,7 @@
 ; B=группа; Z=0 только для готового банкового маршрута DOS. AF разрушен.
 sysBankSelected:
     ld a,b
-    cp MX_GROUP_DOS
+    cp MXOS_GROUP_DOS
     jp z,sysBankCheck
     xor a
     ret

@@ -3,7 +3,7 @@ but_F7:
             call drawWindow1
             CENTER_LINE 14, 5Eh
             ld hl,ncMkdirText
-            call bios_printString
+            call bios_printStringReal
             xor a
             ld (vars.input),a
             ld de,vars.input
@@ -12,7 +12,7 @@ but_F7:
             jp z,ncRefreshDirty
             ld hl,vars.input
             ld a,CLI_OP_MKDIR
-            MXCALL MX_DOS_CLI
+            MXOS_CALL MXOS_DOS_CLI
             jp c,copyFileError
             jp ncRefreshDirty
 ncMkdirText: DB 'Make directory',0

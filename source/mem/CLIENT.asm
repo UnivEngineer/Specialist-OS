@@ -9,15 +9,18 @@
     jp bankMxCallRegs
     jp bankLoadPath
     jp bankSavePath
+    jp bankCopyFar
+    jp MEM_LOCAL_INFO_ADDR
+    jp MEM_EXTENSION_ENTRY
 
 ; B=группа, C=номер, DE=MX_REGS в исходной странице.
 ; AF/BC/DE/HL — результат исполнителя. SP и страница сохраняются.
 ; BIOS выполняется в main, файловые функции — в физическом банке ДОЗУ 0.
 bankMxCall:
     ld a,b
-    cp MX_GROUP_BIOS
+    cp MXOS_GROUP_BIOS
     jp z,bankMxCheckPacket
-    cp MX_GROUP_DOS
+    cp MXOS_GROUP_DOS
     jp nz,bankMxUnsupported
 bankMxCheckPacket:
     ; Пакет не должен пересекать начало системного хвоста.
@@ -38,11 +41,9 @@ bankMxCheckPacket:
 bankMxPacketReady:
     push de
     ld a,b
-    cp MX_GROUP_DOS
+    cp MXOS_GROUP_DOS
     jp z,bankMxDos
-    xor a
-    ld hl,BANK_BIOS_GATE+3
-    jp bankMxInvoke
+    jp MEM_BIOS_ROUTE
 bankMxDos:
     ld a,(bankPage)
     cp 1
@@ -90,7 +91,6 @@ bankMxBadPacket:
     scf
     ret
 bankCpmCall:
-    ld b,0
 bankMxUnsupported:
     ld a,DOS_ERR_UNSUPPORTED
     scf
@@ -131,11 +131,13 @@ bankMxCallRegs:
     inc sp
     ret
 bankLoadPath:
-    MXCALL MX_DOS_FILELOADPATH
+    MXOS_CALL MXOS_DOS_FILE_LOAD_PATH
     ret
 bankSavePath:
-    MXCALL MX_DOS_FILESAVEPATH
+    MXOS_CALL MXOS_DOS_FILE_SAVE_PATH
     ret
 bankClientEnd:
     ASSERT $ <= SYSTEM_FLASH_ADDR
+    INCLUDE "local-io.inc"
+    ASSERT $ <= LOCAL_DRIVER_ADDR
     END

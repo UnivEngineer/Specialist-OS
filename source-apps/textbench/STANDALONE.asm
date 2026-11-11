@@ -1,9 +1,12 @@
 ; Автономный тест полного текстового пути BIOS с прокруткой, Intel 8080.
     INCLUDE "../../source/include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 entry:
     call bench_init
     jp c,bench_finish
+    call bank_open
+    jp c,moduleFailed
     call bench_clear
     call reset_timing
     ld de,32
@@ -14,7 +17,7 @@ charLoop:
     or a
     jp z,charEnd
     ld c,a
-    MXCALL MX_BIOS_PRINTCHAR
+    MXOS_CALL MXOS_BIOS_PRINT_CHAR
     inc hl
     jp charLoop
 charEnd:
@@ -32,7 +35,7 @@ charEnd:
     ld de,32
 stringLine:
     ld hl,text
-    MXCALL MX_BIOS_PRINTSTRING
+    MXOS_CALL MXOS_BIOS_PRINT_STRING
     call timer_sample
     dec de
     ld a,d
@@ -46,6 +49,7 @@ stringLine:
     xor a
     ld (bankTextMode),a
     call bank_run_native
+    jp c,moduleFailed
     ld hl,(v_elapsed)
     ld (bankCharTicks),hl
     ld hl,(v_elapsed+2)
@@ -54,6 +58,7 @@ stringLine:
     ld a,1
     ld (bankTextMode),a
     call bank_run_native
+    jp c,moduleFailed
     ld hl,summary
     call puts
     ld hl,charTicks
@@ -72,19 +77,23 @@ stringLine:
     call print_time_ms
     ld hl,msText
     call puts
+    call bank_close
+    jp bench_finish
+moduleFailed:
+    call bank_close
+    ld hl,bankErrorText
+    call puts
     jp bench_finish
 text: DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
 summary: DB 13,10,'TEXTBEN: 32 x 48 chars + CR/LF, PIT 2 MHz',13,10,'Main char:   ',0
 stringText: DB ' ms',13,10,'Main string: ',0
-bankText: DB ' ms',13,10,'DOS char:    ',0
-bankStringText: DB ' ms',13,10,'DOS string:  ',0
+bankText: DB ' ms',13,10,'BANK char:   ',0
+bankStringText: DB ' ms',13,10,'BANK string: ',0
 msText: DB ' ms',13,10,'Includes wrapping and scrolling.',13,10,0
 charTicks: DD 0
 stringTicks: DD 0
 bankCharTicks: DD 0
     INCLUDE "bank-runtime.inc"
-bankImage:
-    INCBIN "../../bin/TEXTBEN.bank.bin"
     INCLUDE "standalone.inc"
 programEnd:
     ASSERT programEnd < 08000h

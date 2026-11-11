@@ -93,7 +93,7 @@
     },
     {
       "address": 51200,
-      "size": 237,
+      "size": 246,
       "files": [
         "jmps_c800.inc"
       ],
@@ -111,6 +111,12 @@
       "name": "printChar",
       "files": [
         "printChar.inc"
+      ]
+    },
+    {
+      "name": "fast6",
+      "files": [
+        "font6.inc"
       ]
     },
     {
@@ -247,7 +253,8 @@
     {
       "name": "printString",
       "files": [
-        "printString.inc"
+        "printString.inc",
+        "bankText.inc"
       ]
     },
     {
@@ -351,19 +358,13 @@
     {
       "name": "math",
       "files": [
-        "../common/math.inc"
+        "math.inc"
       ]
     },
     {
       "name": "move8080",
       "files": [
         "../common/move8080.inc"
-      ]
-    },
-    {
-      "name": "pitTimer",
-      "files": [
-        "pitTimer.inc"
       ]
     },
     {
@@ -409,12 +410,18 @@
       ]
     },
     {
-      "name": "ui",
+      "name": "mainAdapters",
       "files": [
-        "ui/draw.inc",
-        "ui/inverse.inc",
-        "ui/toolbar.inc",
-        "ui/copyRect.inc"
+        "../io/legacy-files.inc",
+        "../io/fileBody.inc",
+        "../io/raw-local.inc",
+        "../io/glyphCache.inc"
+      ]
+    },
+    {
+      "name": "scalarPre",
+      "files": [
+        "scalarPre.inc"
       ]
     }
   ]

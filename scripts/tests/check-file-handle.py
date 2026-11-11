@@ -147,7 +147,6 @@ assert reachable==used,(reachable,used)
 # Освобождение модуля не снимает дополнительное ограничение владельца памяти.
 for top,expected in [(0x2FFF,0x2FFF),(0x3FFF,0x3FFF)]:
  memory[S['v_memTop']:S['v_memTop']+2]=W(top);memory[S['v_dosModuleReady']]=1
- assert run(S['bios_releaseDosModule'])==(0,False)
  assert int.from_bytes(memory[S['v_memTop']:S['v_memTop']+2],'little')==expected
  assert memory[S['v_dosModuleReady']]==1
 memory[S['v_memTop']:S['v_memTop']+2]=W(S['APP_MEMORY_END']-1);memory[S['v_dosModuleReady']]=1

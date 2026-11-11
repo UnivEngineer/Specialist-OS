@@ -11,12 +11,6 @@
 ; 148–151 тыс. тактов на шаг 1 против 565 тыс.
 ; текстом; шаг 18 — 347–349 тыс. Большие шаги идут текстовым путём.
 
-SCROLL_TOP EQU P_FILE_LIST_Y - 8
-SCROLL_BOTTOM EQU P_FILE_LIST_Y_MAX - 8
-SCROLL_HEIGHT EQU P_FILE_LIST_H * 10
-SCROLL_LEFT EQU 90h + P_FILE_LIST_X1 * 2 / 8
-SCROLL_RIGHT EQU 90h + P_FILE_LIST_X2 * 2 / 8
-
 scrollBitmapPanel:
             ld      a, (vars.scrollRows)
             cp      P_FILE_LIST_H + 1
@@ -146,7 +140,7 @@ bitmapCopy:
             ld      b, h
             ld      c, l
             pop     hl
-            call    bios_uiCopyRect
+            call    uiCopyRect
             pop     de
             pop     bc
             pop     hl

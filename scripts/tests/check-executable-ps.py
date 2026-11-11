@@ -21,16 +21,16 @@ def main():
             data = bytes((i*71+19)&255 for i in range(size))
             raw = folder/f'raw-{size}.bin'
             raw.write_bytes(data)
-            for target in ('com','exe','rks'):
+            for target in ('com','exe','dll','rks'):
                 add(raw,target)
             image = Image(data)
-            for kind in ('rks','com','exe'):
+            for kind in ('rks','com','exe','dll'):
                 if size==65536 and kind!='rks':
                     continue
                 path=folder/f'image-{size}.{kind}'
                 packed=encode(image,kind)
                 path.write_bytes(packed)
-                for target in ('com','exe','rks'):
+                for target in ('com','exe','dll','rks'):
                     add(path,target)
                 if size in (1,257):
                     for offset in range(16 if kind!='rks' else 4):
@@ -44,6 +44,17 @@ def main():
                     damaged[-1]^=1
                     bad.write_bytes(damaged)
                     add(bad,'exe')
+        for flags in (1, 2, 3, 4, 5, 6, 7, 8):
+            cpu=folder/f'flags-{flags}.cpu'
+            cpu.write_text(f'0100\n0100\n{flags:02X}\n',encoding='ascii')
+            cpu.with_suffix('.i80').write_bytes(b'\xc9')
+            for target in ('com','exe','dll','rks'):
+                add(cpu,target)
+            if flags in (1,2,4):
+                packed=folder/f'flags-{flags}.dll'
+                packed.write_bytes(encode(Image(b'\xc9',0x100,0x100,flags),'dll'))
+                for target in ('com','exe','dll','rks'):
+                    add(packed,target)
         raw=folder/'проверка.cpu'
         raw.write_bytes(b'\xc9')
         for target in ('com','exe','rks'):

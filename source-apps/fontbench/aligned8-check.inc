@@ -13,7 +13,7 @@ checkAligned8Char:
     ex de,hl
     ld c,(hl)
     ld b,0
-    ld hl,(bios_vars.charGen)
+    ld hl,(renderFont8)
     add hl,bc
     add hl,hl
     add hl,hl
@@ -36,7 +36,7 @@ checkAligned8Byte:
     jp nz,checkAligned8Char
     ld h,090h
     ld a,l
-    add a,8
+    add a,10
     ld l,a
     ld a,(aligned8CheckRows)
     dec a

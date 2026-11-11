@@ -8,72 +8,344 @@
     STRUCT  FAT_CACHE_DATA          ; размер структуры 8 байт
 number:         DW  0FFFFh          ; номер сектора
 address:        DW  FAT_CACHE_ADDR  ; адрес закешированного сектора в ОЗУ
-accessTime:     DW  0               ; последнее время обращения к сектору
+reference:      DW  0               ; младший байт — второй шанс алгоритма CLOCK
 isModified:     DB  0               ; модифицирован ли сектор
-_align:         DB  0               ; для выравнивания
+tag:            DB  0FFh            ; диск/размер головы либо индекс продолжения
     ENDS
 
-; Массив из FAT_CACHE_CAPACITY структур длиной FAT_CACHE_DATA, инициализирован нулями
-    IFDEF FAT_CACHE_TABLE_ADDR
-; Экспериментальная таблица слотов вне резидентного кода DOS.
-cacheData = FAT_CACHE_TABLE_ADDR
-    ASSERT cacheData + (FAT_CACHE_SIZE / 128) * FAT_CACHE_DATA <= FAT_CACHE_ADDR
-    ELSE
-cacheData:      BLOCK   (FAT_CACHE_SIZE / 128) * FAT_CACHE_DATA, 0
-    ENDIF
+; Общий пул с гранулой 128 байт: сектор занимает 1, 2 или 4 гранулы.
+; tag головы = (sectorShift-7)*8 + диск; 80h..BFh — индекс головы
+; занятого продолжения; FFh — свободная гранула. Неактивные диски чистые:
+; fileSelectDrive выполняет flush до смены физического драйвера.
+cacheData = DOS_BANK_CACHE_TABLE
+partialCacheData = cacheData + CACHE_GRANULES * FAT_CACHE_DATA
+v_cacheTable: DW cacheData
+v_cachePartial: DW partialCacheData
+v_cacheBuffer: DW FAT_CACHE_ADDR
+v_cachePartialBuffer: DW DOS_BANK_PARTIAL_ADDR
+v_cacheLastSlot: DW cacheData
+v_cacheLastTag: DB 0FFh
+v_cacheProbeCount: DB 0
+v_cacheMaxSector: DW 0
+v_cacheStride: DW 128
+v_cacheCount: DB CACHE_GRANULES
+v_cacheUsed: DB 0
+v_cacheDirty: DB 0 ; 0=чисто, 1=одна строка, 2=несколько
+v_cacheDirtySlot: DW 0
+v_cacheDrive: DB 0FFh
+v_cacheShift: DB 0
+v_cacheTag: DB 0FFh
+v_cacheSpan: DB 1
+v_cacheMask: DB 0FFh
+v_cacheGeometries: BLOCK 8,0
+v_cacheMaxByDrive: BLOCK 16,0
+v_cacheClock: DB 0
+v_allocIndex: DB 0
+v_allocCursor: DB 0
+v_allocEnd: DB 0
+v_invalidateDrive: DB 0
 
-;----------------------------------------------------------------------------
-; MXOS
-; Инициализация кэша fat
-;
-; регисты НЕ сохраняются!
-;
-; 2022-02-08 Разработано SpaceEngineer
-;----------------------------------------------------------------------------
+resetAllSectorCaches:
+        ld hl,v_cacheGeometries
+        ld b,24
+        xor a
+cacheResetGeometry:
+        ld (hl),a
+        inc hl
+        dec b
+        jp nz,cacheResetGeometry
+        ld (v_cacheShift),a
+        dec a
+        ld (v_cacheDrive),a
+        ld (v_cacheTag),a
+        jp resetSectorCache
 
-resetSectorCache:
-        ; Все строки пусты: нейтральный возраст, без обращения к счётчику.
-        ld      bc,0
-
-        ; В цикле записываем начальные значения во поля address
-        ld      de, FAT_CACHE_ADDR      ; адрес буфера секторов
-        ld      hl, cacheData           ; адрес первого элемента в массиве
-        ld      a,  (v_cacheCount)  ; счетчик цикла
-
-resetCacheLoop:
-        ; Поле number = 0FFFFh
-        ld      (hl), 0FFh
-        inc     hl
-        ld      (hl), 0FFh
-        inc     hl
-        ; Поле address = de
-        ld      (hl), e
-        inc     hl
-        ld      (hl), d
-        inc     hl
-        ; Поле accessTime = bc
-        ld      (hl), c
-        inc     hl
-        ld      (hl), b
-        inc     hl
-        ; Поле isModified = 0
-        ld      (hl), 0
-        inc     hl
-        ; Поле isLoaded = 0
-        ld      (hl), 0
-        inc     hl
-
-        ; de += SECTOR_SIZE
+; Строки остаются в пуле. Верхняя оценка LBA хранится отдельно для каждого
+; диска: загруженный заголовок программы на A: не замедляет поток B:.
+selectCacheForDrive:
+        push af
+        push de
         push hl
-        ld hl,(v_cacheStride)
+        ld a,(v_cacheDrive)
+        cp 8
+        jp nc,cacheSelectBound
+        add a,a
+        ld e,a
+        ld d,0
+        ld hl,v_cacheMaxByDrive
+        add hl,de
+        ex de,hl
+        ld hl,(v_cacheMaxSector)
+        ex de,hl
+        ld (hl),e
+        inc hl
+        ld (hl),d
+cacheSelectBound:
+        ld a,(v_drive)
+        ld (v_cacheDrive),a
+        add a,a
+        ld e,a
+        ld d,0
+        ld hl,v_cacheMaxByDrive
+        add hl,de
+        ld e,(hl)
+        inc hl
+        ld d,(hl)
+        ex de,hl
+        ld (v_cacheMaxSector),hl
+        pop hl
+        pop de
+        pop af
+        ret
+
+; A=диск. Явный remount/смена драйвера инвалидируют только его строки.
+; Вызывающий код предварительно сохраняет dirty прежним драйвером.
+invalidateDriveCache:
+        push af
+        push bc
+        push de
+        push hl
+        ld (v_invalidateDrive),a
+        ld hl,cacheData+7
+        ld c,CACHE_GRANULES
+cacheInvalidateLoop:
+        ld a,(hl)
+        or a
+        jp m,cacheInvalidateNext
+        and 7
+        ld b,a
+        ld a,(v_invalidateDrive)
+        cp b
+        jp nz,cacheInvalidateNext
+        push hl
+        ld de,-7
+        add hl,de
+        call cacheInvalidateHead
+        pop hl
+cacheInvalidateNext:
+        ld de,FAT_CACHE_DATA
+        add hl,de
+        dec c
+        jp nz,cacheInvalidateLoop
+        ld hl,partialCacheData+7
+        ld a,(hl)
+        and 7
+        ld b,a
+        ld a,(v_invalidateDrive)
+        cp b
+        jp nz,cacheInvalidateDone
+        ld (hl),0FFh
+        dec hl
+        ld (hl),0
+        ld hl,0FFFFh
+        ld (partialCacheData),hl
+cacheInvalidateDone:
+        pop hl
+        pop de
+        pop bc
+        pop af
+        ret
+
+; Полный сброс нужен только при первичной установке DOS.
+resetSectorCache:
+        xor a
+        ld (v_cacheUsed),a
+        ld (v_cacheDirty),a
+        ld (v_cacheClock),a
+        ld (v_cacheProbeCount),a
+        ld hl,0
+        ld (v_cacheMaxSector),hl
+        ld hl,cacheData
+        ld (v_cacheLastSlot),hl
+        ld de,FAT_CACHE_ADDR
+        ld b,CACHE_GRANULES
+cacheResetSlot:
+        ld (hl),0FFh
+        inc hl
+        ld (hl),0FFh
+        inc hl
+        ld (hl),e
+        inc hl
+        ld (hl),d
+        inc hl
+        xor a
+        ld (hl),a
+        inc hl
+        ld (hl),a
+        inc hl
+        ld (hl),a
+        inc hl
+        ld (hl),0FFh
+        inc hl
+        push hl
+        ld hl,128
         add hl,de
         ex de,hl
         pop hl
+        dec b
+        jp nz,cacheResetSlot
+        ld hl,0FFFFh
+        ld (partialCacheData),hl
+        ld hl,DOS_BANK_PARTIAL_ADDR
+        ld (partialCacheData+2),hl
+        xor a
+        ld (partialCacheData+6),a
+        dec a
+        ld (partialCacheData+7),a
+        ret
 
-        ; Повтор чикла
-        dec     a
-        jp nz,  resetCacheLoop
+; HL=голова: инвалидировать её и продолжения. BC/DE сохраняются.
+cacheInvalidateHead:
+        push bc
+        push de
+        push hl
+        ld de,7
+        add hl,de
+        ld a,(hl)
+        rrca
+        rrca
+        rrca
+        and 3
+        ld b,1
+        or a
+        jp z,cacheInvalidateSpan
+        ld b,2
+        dec a
+        jp z,cacheInvalidateSpan
+        ld b,4
+cacheInvalidateSpan:
+        pop hl
+cacheInvalidateCell:
+        ld (hl),0FFh
+        inc hl
+        ld (hl),0FFh
+        ld de,5
+        add hl,de
+        ld (hl),0
+        inc hl
+        ld (hl),0FFh
+        inc hl
+        dec b
+        jp nz,cacheInvalidateCell
+        pop de
+        pop bc
+        ret
 
+; A=индекс гранулы -> HL=описатель; BC разрушается.
+cacheIndexToSlot:
+        ld l,a
+        ld h,0
+        add hl,hl
+        add hl,hl
+        add hl,hl
+        ld bc,cacheData
+        add hl,bc
+        ret
+
+; CLOCK: занятая голова получает второй шанс после попадания. В отличие
+; от поиска минимального возраста, вытеснение не сканирует весь пул каждый
+; раз. Продолжения пропускаются; освобождаются целые пересекающие головы.
+cacheAllocateSector:
+        push de
+cacheVictimLoop:
+        ld a,(v_cacheClock)
+        call cacheIndexToSlot
+        ld bc,7
+        add hl,bc
+        ld a,(hl)
+        cp 0FFh
+        jp z,cacheVictimFound
+        or a
+        jp m,cacheVictimNext
+        dec hl
+        dec hl
+        dec hl
+        ld a,(hl)
+        or a
+        jp z,cacheVictimFound
+        ld (hl),0
+cacheVictimNext:
+        ld a,(v_cacheClock)
+        inc a
+        and CACHE_GRANULES-1
+        ld (v_cacheClock),a
+        jp cacheVictimLoop
+cacheVictimFound:
+        ld a,(v_cacheClock)
+        ld hl,v_cacheMask
+        and (hl)
+        ld (v_allocIndex),a
+        ld (v_allocCursor),a
+        ld b,a
+        ld a,(v_cacheSpan)
+        add a,b
+        ld (v_allocEnd),a
+cacheAllocateLoop:
+        ld a,(v_allocCursor)
+        call cacheIndexToSlot
+        push hl
+        ld bc,7
+        add hl,bc
+        ld a,(hl)
+        cp 0FFh
+        pop hl
+        jp z,cacheAllocateNext
+        or a
+        jp p,cacheAllocateHead
+        and 03Fh
+        call cacheIndexToSlot
+cacheAllocateHead:
+        call saveSectorFromCache
+        jp c,cacheAllocateError
+        call cacheInvalidateHead
+cacheAllocateNext:
+        ld a,(v_allocCursor)
+        inc a
+        ld (v_allocCursor),a
+        ld hl,v_allocEnd
+        cp (hl)
+        jp nz,cacheAllocateLoop
+        ld a,(v_allocEnd)
+        and CACHE_GRANULES-1
+        ld (v_cacheClock),a
+        ld a,(v_allocEnd)
+        ld hl,v_cacheUsed
+        cp (hl)
+        jp c,cacheAllocated
+        ld (hl),a
+cacheAllocated:
+        call cacheUpdateProbeCount
+        ld a,(v_allocIndex)
+        call cacheIndexToSlot
+        pop de
+        or a
+        ret
+cacheAllocateError:
+        pop de
+        ret
+
+; HL=успешно загруженная голова: опубликовать tag и занять продолжения.
+cachePublishSlot:
+        push hl
+        ld bc,7
+        add hl,bc
+        ld a,(v_cacheTag)
+        ld (hl),a
+        ld a,(v_allocIndex)
+        or 080h
+        ld c,a
+        ld a,(v_cacheSpan)
+        dec a
+        jp z,cachePublishDone
+        ld b,a
+cachePublishNext:
+        ld de,FAT_CACHE_DATA
+        add hl,de
+        ld (hl),c
+        dec b
+        jp nz,cachePublishNext
+cachePublishDone:
+        pop hl
         ret
 
 ;----------------------------------------------------------------------------
@@ -189,66 +461,31 @@ cacheSector:
         call    streamCacheContains
         jp nc,  cff_SectorFound
 
-        ; Не не нашли сектор в массиве, загружаем его с накопителя на место наиболее давно использовавашегося
-        push    de  ; de = номер сектора, который надо загрузить
-
-        ; Ищем наиболее давно использовавашийся сектор (т.е. у которого самый маленький accessTime)
-        ld      de, 0FFFFh                                  ; de = максимальный найденый accessTime сектора
-        ld      hl, cacheData + FAT_CACHE_DATA.accessTime   ; hl = адрес поля accessTime в первом элементе массива
-        ld      a,(v_cacheCount)
-        ld      c,a
-        ld      b,0                      ; b  = 0, c = счетчик цикла
-cff_FindOldestSector:
-        call    cmp_m_de            ; сравниваем [hl] и de
-        jp nc,  cff_next            ; переход, если [hl] >= de
-        ld      e, (hl)             ; тут [hl] < de, запоминаем accessTime сектора в de
-        inc     hl
-        ld      d, (hl)
-        dec     hl
-        ld      b, c                ; запоминаем итерацию цикла сектора в b
-cff_next:
-        push    bc                  ; переходим на следущий элемент массива
-        ld      bc, FAT_CACHE_DATA  ; bc = размер структуры FAT_CACHE_DATA
-        add     hl, bc
-        pop     bc
-        dec     c                   ; повтор цикла
-        jp      nz, cff_FindOldestSector
-
-        ; Нашли наиболее давно использовавашийся сектор
-        ld      a, (v_cacheCount)
-        sub     b       ; a = индекс найденного сектора
-    IF FAT_CACHE_CAPACITY > 32
-        ; Смещение таблицы больше байта: HL = индекс * 8.
-        ld      l, a
-        ld      h, 0
-        add     hl, hl
-        add     hl, hl
-        add     hl, hl
-        ld      bc, cacheData
-        add     hl, bc
-    ELSE
-        rla
-        rla
-        rla             ; a = a * 8 (размер структуры FAT_CACHE_DATA)
-        ld      c, a
-        ld      b, 0    ; bc = смещение сектора в массиве cacheData
-        ld      hl, cacheData
-        add     hl, bc  ; hl = адрес элемента массива
-    ENDIF
-
-        ; Прежде чем загрузить новый сектор, старый надо сохранить, если его isModified не ноль
-        call    saveSectorFromCache    ; записываем сектор на накопитель
-
-        jp c,   cff_WriteError
-
-        ; Загружаем новый сектор на место старого
-        pop     de              ; de = номер сектора, который надо загрузить
-        call    loadSectorToCache    ; загружаем сектор с накопителя
-        jp c,   cff_ReadError
+        call cacheAllocateSector
+        jp c,cff_AllocateError
+        call loadSectorToCache
+        jp c,cff_ReadError
+        push de
+        call cachePublishSlot
+        pop de
+        ; Безопасная верхняя оценка LBA метаданных. После вытеснения её можно
+        ; оставить завышенной: это даст только лишний поиск, но не пропуск.
+        push hl
+        ld hl,(v_cacheMaxSector)
+        call cmp_hl_de
+        jp nc,cff_MaxReady
+        ex de,hl
+        ld (v_cacheMaxSector),hl
+        ex de,hl
+cff_MaxReady:
+        pop hl
 
         ; Сектор найден или загружен, возвращаем его адрес
         ; Здесь hl = адрес элемента массива cacheData этого сектора
 cff_SectorFound:
+        ld (v_cacheLastSlot),hl
+        ld a,(v_cacheTag)
+        ld (v_cacheLastTag),a
 
         inc     hl
         inc     hl      ; теперь hl = адрес поля address
@@ -259,26 +496,21 @@ cff_SectorFound:
         ld      d, (hl) ; de = адрес сектора
         inc     hl      ; теперь hl = адрес поля accessTime
 
-        ; Уcтанавливаем accessTime сектора
-        ; Частый путь попадания: счётчик обновляется без CALL/RET.
-        push    hl
-        ld      hl,(v_fakeSystemTime)
+        ; Попадание даёт второй шанс CLOCK без счётчика времени/переполнения.
+        ld      (hl),1
         inc     hl
-        ld      (v_fakeSystemTime),hl
-        ld      b,h
-        ld      c,l
-        pop     hl
-
-        ld      (hl), c
+        ld      (hl),0
         inc     hl
-        ld      (hl), b ; de = адрес сектора
-        inc     hl      ; теперь hl = адрес поля isModified
 
         ; Устанавливаем isModified, если в регистре b на входе в функцию был не ноль
         pop     bc      ; b = флаг модификации
         ld      a, (hl)
         or      b
         ld      (hl), a
+        or a
+        jp z,cff_Clean
+        call cacheMarkDirty
+cff_Clean:
 
         ; hl = адрес сектора
         ex      hl, de
@@ -287,8 +519,80 @@ cff_SectorFound:
         pop     de
         ret
 
-cff_WriteError:
+; При единственной dirty-строке flush не должен сканировать весь пул.
+; Кандидат может уже быть сохранён при вытеснении; тогда переиспользуем его.
+cacheMarkDirty:
+        push hl
+        push de
+        ld a,(v_cacheDirty)
+        cp 2
+        jp z,cacheDirtyReady
+        ld hl,(v_cacheLastSlot)
+        ex de,hl
+        or a
+        jp z,cacheDirtySingle
+        ld hl,(v_cacheDirtySlot)
+        call cmp_hl_de
+        jp z,cacheDirtyReady
+        push de
+        ld de,6
+        add hl,de
         pop de
+        ld a,(hl)
+        or a
+        jp z,cacheDirtySingle
+        ld a,2
+        ld (v_cacheDirty),a
+        jp cacheDirtyReady
+cacheDirtySingle:
+        ex de,hl
+        ld (v_cacheDirtySlot),hl
+        ld a,1
+        ld (v_cacheDirty),a
+cacheDirtyReady:
+        pop de
+        pop hl
+        or a
+        ret
+
+; DE=LBA, A=dirty. Только неполные файловые сектора; общий кэш проверяем
+; первым, чтобы не создать две расходящиеся копии одного сектора.
+; BC/DE сохраняются, HL=буфер, CF=ошибка.
+cachePartialSector:
+        push bc
+        push de
+        ld b,a
+        call cachePartialInner
+        pop de
+        pop bc
+        ret
+cachePartialInner:
+        push de
+        push bc
+        call streamCacheContains
+        jp nc,cff_SectorFound
+        ld hl,(v_cachePartial)
+        push bc
+        call saveSectorFromCache
+        pop bc
+        jp c,cachePartialWriteError
+        push bc
+        call loadSectorToCache
+        pop bc
+        jp c,cff_ReadError
+        push hl
+        ld bc,7
+        add hl,bc
+        ld a,(v_cacheTag)
+        ld (hl),a
+        pop hl
+        jp cff_SectorFound
+cachePartialWriteError:
+        pop bc
+        pop de
+        jp dosIoError
+
+cff_AllocateError:
         pop bc
         pop de
         jp dosIoError
@@ -401,7 +705,7 @@ ssfc_Failed:
         ; Не все внешние драйверы устанавливают общий признак ошибки.
         ; Сохраняем отказ независимо от результатов следующих записей.
         ld      a, 1
-        ld      (bios_vars.diskWriteErr), a
+        ld      (bios_upper.diskWriteErr), a
         call    dosIoError
 
 ssfc_Exit:
@@ -420,12 +724,26 @@ ssfc_Exit:
 ;----------------------------------------------------------------------------
 
 saveSectorCache:
+        ld a,(v_cacheDirty)
+        or a
+        ret z
+        cp 1
+        jp nz,saveSectorCacheMany
+        push hl
+        ld hl,(v_cacheDirtySlot)
+        call saveSectorFromCache
+        pop hl
+        ret c
+        xor a
+        ld (v_cacheDirty),a
+        ret
+saveSectorCacheMany:
         ; Сохраняем регситры
         push    hl
         push    de
         push    bc
 
-        ld      hl, cacheData           ; hl = первый элемент в массиве cacheData
+        ld      hl,(v_cacheTable)           ; hl = первый элемент в массиве cacheData
         ld      de, FAT_CACHE_DATA      ; de = размер элемента массива cacheData
         ld      a,(v_cacheCount)
         ld      c,a  ; счетчик цикла
@@ -435,7 +753,11 @@ saveSectorCacheLoop:
         add     hl, de
         dec     c
         jp nz,  saveSectorCacheLoop
-        or      a
+        ld hl,(v_cachePartial)
+        call saveSectorFromCache
+        jp c,saveSectorCacheExit
+        xor a
+        ld (v_cacheDirty),a
 saveSectorCacheExit:
 
         ; Восстанавливаем регситры и выходим

@@ -14,11 +14,11 @@ def check_copies(root, out, m, ks, bios, select, invoke, request, regs, rows):
         path(page,name,drive)
         m.write(0x3100,word(0x3200)+word(0x5000)+word(len(data))+bytes(34))
         m.write(0x5000,data)
-        request(page,ks['MX_DOS_FILESAVEPATH'],regs(hl=0x3100))
+        request(page,ks['MXOS_DOS_FILE_SAVE_PATH'],regs(hl=0x3100))
     def read(page, name, drive="B"):
         path(page,name,drive)
         m.write(0x3100,word(0x3200)+word(0x5000)+word(8192)+bytes(34))
-        request(page,ks['MX_DOS_FILELOADPATH'],regs(hl=0x3100))
+        request(page,ks['MXOS_DOS_FILE_LOAD_PATH'],regs(hl=0x3100))
         return m.read(0x5000,int.from_bytes(m.read(0x3106,2),'little'))
     def operation(page, src, dst, answer=1, hook=True, move=False, error=0, cancel=False, buffer=0x6000, destination=1):
         select(page)
@@ -36,7 +36,7 @@ def check_copies(root, out, m, ks, bios, select, invoke, request, regs, rows):
             result=invoke(page,ks['BANK_DOS_GATE'],regs(hl=0x3300),legacy=bios['bios_fileCopy'])
             assert result==(error,bool(error)),result
         else:
-            request(page,ks['MX_DOS_CLI'],regs(hl=0x3300,a=7 if move else 1),expected=error)
+            request(page,ks['MXOS_DOS_CLI'],regs(hl=0x3300,a=7 if move else 1),expected=error)
         result=m.read(0x3300,size)
         assert result[:6]==packet[:6]
         assert result[f('onExists'):f('onExists')+2]==packet[f('onExists'):f('onExists')+2]
@@ -64,7 +64,7 @@ loop:
  ld hl,036EFh
  inc (hl)
  ld c,'.'
- MXCALL MX_BIOS_PRINTCHAR
+ MXOS_CALL MXOS_BIOS_PRINT_CHAR
  ld a,(036F1h)
  or a
  jp z,answer
@@ -93,7 +93,7 @@ answer:
 
     # При слиянии дерева Yes/No to all применяется ко всем дочерним файлам.
     for name in ('SRC_TREE','DST_TREE'):
-        path(3,name);request(3,ks['MX_DOS_CLI'],regs(hl=0x3200,a=4))
+        path(3,name);request(3,ks['MXOS_DOS_CLI'],regs(hl=0x3200,a=4))
     for leaf in ('A.BIN','B.BIN'):
         save(3,'SRC_TREE/'+leaf,b'new-'+leaf.encode())
         save(3,'DST_TREE/'+leaf,b'old-'+leaf.encode())
@@ -111,14 +111,14 @@ answer:
     assert read(3,'BNKCOPY.BIN',drive='H')==b'new-across'
     path(3,'ACROSS.BIN')
     m.write(0x3100,word(0x3200)+word(0x5000)+word(8192)+bytes(34))
-    request(3,ks['MX_DOS_FILELOADPATH'],regs(hl=0x3100),expected=2)
+    request(3,ks['MXOS_DOS_FILE_LOAD_PATH'],regs(hl=0x3100),expected=2)
     rows.append(dict(case='cross-drive-MOVE-No-keeps-source-Yes-deletes'))
     for buffer, capacity, hook in ((0xF7FF,256,0), (0x3301,512,0), (0x6000,255,0), (0x6000,512,0xF800)):
         select(3);packet=bytearray(size)
         packet[:4]=word(buffer)+word(capacity)
         packet[f('onExists'):f('onExists')+2]=word(hook)
         m.write(0x3300,packet)
-        request(3,ks['MX_DOS_FILECOPY'],regs(hl=0x3300),expected=1)
+        request(3,ks['MXOS_DOS_FILE_COPY'],regs(hl=0x3300),expected=1)
         assert m.read(0x3300,size)==packet
     rows.append(dict(case='COPY-invalid-buffer-overlap-capacity-callback'))
     print('BANK DOS COPY CALLBACK PASS',flush=True)

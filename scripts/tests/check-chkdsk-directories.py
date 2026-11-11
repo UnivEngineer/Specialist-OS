@@ -91,12 +91,12 @@ for variant in ['valid','wrong-parent','cycle','duplicate','missing-dot']:
   raw=p.read_bytes();m[at:at+len(raw)]=raw
  m[0x9000:0xB000]=disk;m[s['bios_diskDriver']:s['bios_diskDriver']+3]=b'\xC3'+W(0xB000)
  m[s['printChar']]=0xC9;m[s['bios_printChar']]=0xC9;m[s['bios_getch']:s['bios_getch']+3]=bytes.fromhex('3E 0D C9')
- m[s['bios_vars.koi7']]=1;m[s['v_drive']]=1
+ m[s['bios_upper.koi7']]=1;m[s['v_drive']]=1
  m[0x5800:0x5806]=b' B:\r\0\0'
  stub=b'\x31'+W(s['STACK_ADDR'])+b'\x11'+W(0x5800)+bytes.fromhex('CD 00 00 C3 00 61');m[0x6000:0x6000+len(stub)]=stub
  (O/'in.bin').write_bytes(m)
  subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','6000','-end','6100','-counter','20000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,check=True)
  out=(O/'out.bin').read_bytes();assert int.from_bytes(out[65542:65544],'little')==0x6100,variant
  errors=int.from_bytes(out[c['errors']:c['errors']+2],'little');assert (errors==0)==(variant=='valid'),(variant,errors)
- assert out[s['bios_vars.koi7']]==1
+ assert out[s['bios_upper.koi7']]==1
  print('CHKDSK directories',variant,'errors',errors,'PASS')

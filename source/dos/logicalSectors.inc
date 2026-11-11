@@ -1,5 +1,6 @@
 ; Логический сектор состоит из одного или нескольких физических блоков.
 ; B=1 запись / 2 чтение, DE=LBA тома, HL=буфер полного сектора.
+; Внутренний logicalSectorPrepared также принимает B=5 (запись с проверкой).
 ; BC/DE/HL сохранены, AF разрушен, CF=ошибка. Нереентерабельно, DI.
 ; Секторы меньше блока драйвера отвергаются: скрытой RMW-записи нет.
 logicalSectorIO:
@@ -59,6 +60,9 @@ logicalPhysicalIO:
     IFDEF BANKED_DOS_BUILD
             ; Диск выбран до начала операции, B=1/2 задан вызывающим.
             ; Не повторяем выбор устройства и разбор номера функции.
+            ld a,b
+            cp 5
+            jp z,dosRawIO
             jp j_diskDriver
     ELSE
             ld a,(v_drive)
@@ -76,18 +80,78 @@ sectorSizeLoop:
             jp nz,sectorSizeLoop
             ret
 
-; Страйд кэша и число строк меняются вместе с томом: 8/4/2 строки.
+; Геометрия входит в tag строки; старые строки этого диска при её смене
+; удаляются. Общая таблица и данные других дисков остаются на месте.
 configureSectorCache:
-            ld hl,(v_diskInfo.sectorSize)
-            ld (v_cacheStride),hl
-            ex de,hl
-            ld hl,FAT_CACHE_SIZE
-            call div_hl_de
-            ld a,l
-            ld (v_cacheCount),a
-            jp resetSectorCache
-v_cacheStride: DW 256
-v_cacheCount: DB FAT_CACHE_CAPACITY
+            ld a,(v_drive)
+            ld (v_cacheDrive),a
+            ld e,a
+            ld d,0
+            ld hl,v_cacheGeometries
+            add hl,de
+            ld a,(v_diskInfo.sectorShift)
+            cp (hl)
+            jp z,cacheGeometryReady
+            ld (hl),a
+            ld a,e
+            call invalidateDriveCache
+cacheGeometryReady:
+            ld a,(v_diskInfo.sectorShift)
+            ld (v_cacheShift),a
+            sub 7
+            ld b,a
+            rlca
+            rlca
+            rlca
+            or e
+            ld (v_cacheTag),a
+            ld a,b
+            ld b,1
+            or a
+            jp z,cacheSpanReady
+            ld b,2
+            dec a
+            jp z,cacheSpanReady
+            ld b,4
+cacheSpanReady:
+            ld a,b
+            ld (v_cacheSpan),a
+            dec a
+            cpl
+            ld (v_cacheMask),a
+            ld l,b
+            ld h,0
+            add hl,hl
+            add hl,hl
+            add hl,hl
+            ld (streamCacheProbeStep+1),hl
+            jp cacheUpdateProbeCount
+
+; Достаточно проверять только индексы, выровненные по размеру искомого
+; сектора. Например, 512-байтная голова не бывает в грануле 1, 2 или 3.
+cacheUpdateProbeCount:
+            ld a,(v_cacheUsed)
+            ld hl,v_cacheSpan
+            add a,(hl)
+            dec a
+            ld b,a
+            ld a,(v_cacheShift)
+            sub 7
+cacheProbeDivide:
+            or a
+            jp z,cacheProbeCountReady
+            push af
+            ld a,b
+            or a
+            rra
+            ld b,a
+            pop af
+            dec a
+            jp cacheProbeDivide
+cacheProbeCountReady:
+            ld a,b
+            ld (v_cacheProbeCount),a
+            ret
 
 fatCachedWrite:
             call logicalSectorIOChecked

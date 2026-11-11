@@ -125,23 +125,7 @@ romMXReadBuffer:
             ld      a, h
             or      a
             jp m,   romMappedRead
-; Нижнее назначение: C=банк, B/A=пара данных. 19 байт, 94 такта/пару.
-; На сектор 256 чтений/записей и 256 переключений маппера.
-romMXReadLoop:
-            ld      a, c
-            ld      (IO_PAGE_ROM), a
-            ld      a, (de)
-            ld      b, a
-            inc     e
-            ld      a, (de)
-            ld      (IO_PAGE_RAM), a
-            ld      (hl), b
-            inc     hl
-            ld      (hl), a
-            inc     hl
-            inc     e
-            jp nz,  romMXReadLoop
-            jp      popDBHA_success
+            jp      romBufferedRead
 
 ramDRead:
             call    ramDValidate
@@ -172,14 +156,14 @@ popDBHA_success:
 
 diskWriteFailed:
             ld      a, 1
-            ld      (bios_vars.diskWriteErr), a
+            ld      (bios_upper.diskWriteErr), a
             jp      popDBHA_error
 
 ; Вход DE=сектор, HL=буфер. CF=1 — недопустимый диапазон.
 ; AF/флаги разрушаются, остальные регистры сохраняются.
 ; Хвост xxFFh содержит служебный код, общее окно и оборудование.
 ramDValidate:
-            ld      a, (bios_vars.ramPageCount)
+            ld      a, (bios_upper.ramPageCount)
             cp      d
             jp z,   ramDInvalid
             ret c
@@ -208,12 +192,11 @@ diskDriver_s:
             or      a
             jp z,   diskDriver_s_rom
 
-            ld      a, (bios_vars.ramPageCount)
-            ld      e, a
-            ld      d, 0
-            ld      hl, 65536 / SECTOR_SIZE
-            call    mul_hl_de
-            jp      diskDriver_s_exit
+            ; Геометрию B: публикует реестр DOS/драйвер, не детектор банков BIOS.
+            ; До запуска DOS встроенный драйвер сообщает размер только ROM A:.
+            pop     af
+            scf
+            ret
 
 diskDriver_s_rom:
             ld      hl, (v_diskInfo.totalSectors)

@@ -94,7 +94,7 @@ def main():
             assert b[0x8500]&1 and b[0x8501]==6,(text,'expected CF and DOS_ERR_ACCESS')
         if number==20:
             assert int.from_bytes(b[0x8502:0x8504], 'little')==s['str_Usage']
-            assert b'Invalid arguments' in b[s['str_Usage']:s['str_SystemDrive']]
+            assert b'INVALID ARGUMENTS' in b[s['str_Usage']:s['str_SystemDrive']]
         results.append({'arguments': text, 'result': label or 'rejected', 'disk_access': False})
     (out / 'checks.json').write_text(json.dumps(results, indent=2)+'\n', encoding='utf-8')
     print(f'OK: {len(results)} argument cases; no disk access')

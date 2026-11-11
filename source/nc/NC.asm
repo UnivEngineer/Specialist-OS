@@ -6,6 +6,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+IMAGE_FLAGS = IMAGE_FLAG_MAIN
     INCLUDE "../include/ui.inc"
 
     ORG NC_LOAD_ADDR
@@ -103,7 +104,7 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
 
 ; Макрос для нахождения координат строки длиной W, отцентрированной горизонтально
     MACRO CENTER_LINE w, y
-        ld  hl, ((60h - w * 3 / 2) << 8) + y
+        ld  hl, (((60h - w * 3 / 2 + 2) & 0FCh) << 8) + y
         ld  (bios_vars.cursorY), hl
     ENDM
 
@@ -140,10 +141,16 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
     INCLUDE "drawCursor.inc"
     INCLUDE "keepCursorForKey.inc"
     INCLUDE "printInfoLine.inc"
-inverseRect = bios_uiInverseRect
+    DEFINE UI_IMPLEMENTATION
+    INCLUDE "../include/ui.inc"
+inverseRect = uiInverseRect
     INCLUDE "getSelectedFile.inc"
     INCLUDE "loadAndPrint.inc"
+    INCLUDE "fullRedraw.inc"
     INCLUDE "loadFiles.inc"
+    INCLUDE "catalogCache.inc"
+    INCLUDE "sort.inc"
+    INCLUDE "sortDialog.inc"
     INCLUDE "printInfoPanel.inc"
     INCLUDE "printFilePanel.inc"
     IF NC_BITMAP_SCROLL
@@ -161,12 +168,12 @@ inverseRect = bios_uiInverseRect
     INCLUDE "shift.inc"
     INCLUDE "colors.inc"
 
-moduleLoadError:
-            ld hl,moduleLoadErrorText
-            call bios_printString
-            call bios_getch
-            jp bios_reboot
-moduleLoadErrorText: DB "DOS LOAD ERROR",0Dh,0
+    MODULE ncMath
+    DEFINE MATH_DIV2
+    INCLUDE "../include/math.inc"
+    ENDMODULE
+
+    INCLUDE "fontRender.inc"
 
 ;---------------------------------------------------------------------------
 ; Константы и переменные
@@ -192,9 +199,9 @@ aF1LeftF2RighF3:
         DB 0
 aShiftToolbar:
         UI_TOOLBAR_FIELD 2,0,"F1"
-        UI_TOOLBAR_FIELD 4,080h,"TpLd"
+        UI_TOOLBAR_FIELD 4,080h,"Sort"
         UI_TOOLBAR_FIELD 2,0,"F2"
-        UI_TOOLBAR_FIELD 4,080h,"TpSv"
+        UI_TOOLBAR_FIELD 4,080h,"Sort"
         UI_TOOLBAR_FIELD 2,0,"F3"
         UI_TOOLBAR_FIELD 4,080h,"Info"
         UI_TOOLBAR_FIELD 2,0,"F4"
@@ -211,7 +218,7 @@ aShiftToolbar:
 aCommanderVer:      DB "Commander version 3.0",0
 aCopyright:         DB "(C) Omsk 1992, SPb 2022",0
 aFileProtected:     DB "System or read-only file",0
-aChooseDrive:       DB "Choose drive:",0
+aChooseDrive:       DB "  Choose drive: ",0
 aDeleteFrom:        DB "Delete from ",0
 asc_DC17:           DB 8, ' ',8, 0
 
@@ -257,12 +264,14 @@ aEditor:            DB "A:",05Ch,"E.COM",0Dh      ; терминатором т�
 
 g_filePanel:
             G_WINDOW 0, 0, 4, 192, 226        ; 2, 0, 90h, 0E0h, 16h
+g_fileDividers:
             G_LINE   0, 4, 208, 184           ; 1, 0D0h, 90h, 16h, 0Fh, 0F0h
             G_VLINE  0, 96, 7, 201            ; 3, ?, 9Ch, 0CDh, 80h
             DB 0
 
 g_infoPanel:
             G_WINDOW 0, 0, 4, 192, 226        ; 2, 0, 90h, 0E0h, 16h
+g_infoDividers:
             G_LINE   0, 4, 31, 184            ; 1, 1Fh, 90h, 16h, 0Fh, 0F0h
             G_LINE   0, 4, 136, 184           ; 1, 70h, 90h, 16h, 0Fh, 0F0h
             DB 0
@@ -293,10 +302,13 @@ FILE_LIST_SIZE    = 38
 
 ;-----------------------------------------------------------------------
 ; Коодинаты элементов панелей от левого верхнего угла экрана
-; x - удвоенные пиксели, y - пиксели
+; x - пиксели / 2, y - пиксели; X кратен 4 для пакетной печати.
 
-P_FILE_LIST_X1    = 6   ; Файловая таблица (2 колонки)
-P_FILE_LIST_X2    = 54
+P_FILE_LIST_X1    = 4   ; Файловая таблица (2 колонки)
+P_FILE_LIST_X2    = 52
+    ASSERT (P_FILE_LIST_X1 & 3) == 0 && (P_FILE_LIST_X2 & 3) == 0
+    ASSERT P_FILE_LIST_X1 * 2 + 12 * 6 <= 88
+    ASSERT P_FILE_LIST_X2 * 2 + 12 * 6 <= 184
 
     IF FULL_PANELS
 P_FILE_LIST_Y     = 12
@@ -307,14 +319,21 @@ P_FILE_LIST_Y     = 22
 P_FILE_LIST_H     = FILE_LIST_SIZE / 2  ; Высота файловой таблицы в строках
 P_FILE_LIST_Y_MAX = P_FILE_LIST_H * 10 + P_FILE_LIST_Y
 
+; Геометрия общей очистки хвостов и необязательной битмап-прокрутки.
+SCROLL_TOP EQU P_FILE_LIST_Y - 8
+SCROLL_BOTTOM EQU P_FILE_LIST_Y_MAX - 8
+SCROLL_HEIGHT EQU P_FILE_LIST_H * 10
+SCROLL_LEFT EQU 90h + P_FILE_LIST_X1 * 2 / 8
+SCROLL_RIGHT EQU 90h + P_FILE_LIST_X2 * 2 / 8
+
 P_DRIVE_LETTER_X  = 9   ; Буква имени диска внизу панели
 P_DRIVE_LETTER_Y  = 222
-P_FILE_NAME_X     = 3  ; Имя файла внизу панели
+P_FILE_NAME_X     = 4  ; Имя файла внизу панели
 P_FILE_NAME_Y     = 222
-P_FILE_DATA_X     = 75  ; Данные о файле (адрес загрузки, размер)
+P_FILE_DATA_X     = 68  ; Данные о файле (адрес загрузки, размер)
 P_FILE_DATA_Y     = 222
 
-P_INPUT_WIDTH     = 23  ; Длина поля ввода имени файла в символах
+P_INPUT_WIDTH     = 24  ; Длина поля ввода имени файла в символах
 
 ;-----------------------------------------------------------------------
 ; Переменные
@@ -336,6 +355,8 @@ panelA_firstFile    DB    0     ; c какого файла начинается
 panelB_firstFile    DB    0     ; c какого файла начинается панель B
 panelA_curFile      DB    0     ; на каком файле курсор на панели A
 panelB_curFile      DB    0     ; на каком файле курсор на панели B
+panelA_sort         DB    2     ; 0=порядок диска, 1=имя/расширение, 2=расширение/имя
+panelB_sort         DB    2
     ENDS
 
 state   NC_STATE
@@ -350,13 +371,30 @@ panelB_info     DB    0
 panelA_filesCnt DB    0
 panelB_filesCnt DB    0
 path           BLOCK MAX_PATH,0
+pathA          BLOCK MAX_PATH,0 ; Полный путь левой панели.
+pathB          BLOCK MAX_PATH,0 ; Полный путь правой панели.
+pathValidA     DB 0
+pathValidB     DB 0
+pathDriveA     DB 0
+pathDriveB     DB 0
+pathLowA       DB 0
+pathLowB       DB 0
+pathHighA      DB 0
+pathHighB      DB 0
+drawnLeftA     DB 0             ; Занятые строки в первой колонке.
+drawnLeftB     DB 0
+drawnRightA    DB 0             ; Занятые строки во второй колонке.
+drawnRightB    DB 0
+newRows        DB 0             ; Временный размер видимого списка.
 pathArg        BLOCK MAX_PATH,0
 displayPath    BLOCK MAX_PATH,0
-fileListPtr     DW    0         ; Видимое окно внутри кэша активной панели.
+fileListPtr     DW    0         ; Видимое окно индексной таблицы активной панели.
 cacheValidA     DB    0
 cacheValidB     DB    0
-cacheDriveA     DB    0
-cacheDriveB     DB    0
+cacheSlotA      DB    0FFh     ; Номер общего каталога; FF — ещё не назначен.
+cacheSlotB      DB    0FFh
+cacheSortA      DB    0
+cacheSortB      DB    0
 cmdLinePos      DW    0
 cmdLineEnd      DW    0
 cmdTextPos      DW    0         ; Начало видимой части команды после приглашения.
@@ -388,28 +426,28 @@ FILE_CACHE_CAPACITY   = 255     ; Нынешние индексы NC — 8-ра�
 FILE_CACHE_BYTES      = FILE_CACHE_CAPACITY * FILE_INFO_SIZE + 1
 FILE_CACHE_A          = varsEnd
 FILE_CACHE_B          = FILE_CACHE_A + FILE_CACHE_BYTES
+FILE_CACHE_C          = FILE_CACHE_B + FILE_CACHE_BYTES
     ASSERT FILE_INFO_SIZE == 16
 
 ; Единая системная строка принадлежит DOS и не входит в область NC.
 vars.cmdLine = CMD_LINE
 vars.cmdLineCtrl = CMD_LINE + 127
-NC_END = FILE_CACHE_B + FILE_CACHE_BYTES
+FILE_INDEX_A = (FILE_CACHE_C + FILE_CACHE_BYTES + 255) & 0FF00h
+FILE_INDEX_B = FILE_INDEX_A + FILE_CACHE_CAPACITY + 1
+CATALOG_INDEX_A = FILE_INDEX_B + FILE_CACHE_CAPACITY + 1
+NC_SORT_KEYS = (CATALOG_INDEX_A + 3 * (FILE_CACHE_CAPACITY + 1) + 255) & 0FF00h
+NC_SORT_RANKS = NC_SORT_KEYS + 11 * 256
+NC_SORT_COUNTS = NC_SORT_KEYS + 12 * 256
+NC_SORT_SCRATCH = NC_SORT_COUNTS + 256
+NC_END = NC_SORT_SCRATCH + 256
+    ASSERT (FILE_INDEX_A & 0FFh) == 0 && (FILE_INDEX_B & 0FFh) == 0
 
 ;-----------------------------------------------------------------------
 ; Проверяем, что программа помещается в память вместе со своими буферами
 ;-----------------------------------------------------------------------
 
-; Код, переменные, список и строка должны поместиться перед буфером обмена.
-NC_END_MAX = COPY_BUFFER_END
-    ASSERT COPY_BUFFER >= NC_END
-    ASSERT COPY_BUFFER_SECTORS > 0 && COPY_BUFFER_SECTORS <= 255
-    ASSERT COPY_BUFFER + COPY_BUFFER_SECTORS * 256 == COPY_BUFFER_END
-    ASSERT COPY_BUFFER_END <= bios_vars
-
-; Проверка
-    IF NC_END >= NC_END_MAX
-        ASSERT 0
-        DISPLAY /l, "Error! NC.COM did not fit (", NC_END, " > ", NC_END_MAX, ")"
-    ENDIF
+NC_END_MAX = APP_MEMORY_END
+    ASSERT NC_END <= NC_END_MAX
+    ASSERT NC_END_MAX <= bios_vars
 
     END
