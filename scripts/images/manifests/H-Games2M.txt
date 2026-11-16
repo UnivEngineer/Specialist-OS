@@ -141,7 +141,7 @@ SPKING2.RKS      games/SPKING2.RKS
 SQUARE.RKS       games/SQUARE.RKS
 STAKAN.RKS       games/STAKAN.RKS
 STAKAN2.RKS      games/STAKAN2.RKS
-MXOS/StarTrek.exe         games/STARTREK.RKS
+MXOS/StarTrek.exe         games/StarTrek/StarTrek-mx.exe
 StarWars/StarWars.rks     games/StarWars/StarWars-std.rks
 StarWars/SW-C800.rks      games/StarWars/StarWars-std-C800.rks
 StarWars/StarWar2.rks     games/StarWars/StarWars2-std.rks

@@ -1,0 +1,2121 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Library Type="DipTrace-ComponentLibrary" Version="5.1.0.3" Units="mil">
+  <Library Type="DipTrace-PatternLibrary" Version="5.1.0.3" Units="mil">
+    <PadStyles>
+      <PadStyle Name="PadT8" Type="Through" HoleType="Round" Hole="39.3701" Side="Top">
+        <MainStack Shape="Obround" Width="78.7402" Height="78.7402" XOff="0" YOff="0" />
+      </PadStyle>
+      <PadStyle Name="PadT36" Type="Through" HoleType="Round" Hole="31.4961" Side="Top">
+        <MainStack Shape="Obround" Width="68.8976" Height="49.2126" XOff="0" YOff="0" />
+      </PadStyle>
+    </PadStyles>
+    <Categories>
+      <Category Number="0">
+        <Name>Capacitors</Name>
+        <Types>
+          <Type Number="0">
+            <Name>'Chip</Name>
+            <SubTypes />
+          </Type>
+          <Type Number="1">
+            <Name>'Radial (Electrolytic)</Name>
+            <SubTypes />
+          </Type>
+          <Type Number="2">
+            <Name>'''Single</Name>
+            <SubTypes />
+          </Type>
+          <Type Number="3">
+            <Name>'SMD (Electrolytic)</Name>
+            <SubTypes />
+          </Type>
+        </Types>
+      </Category>
+      <Category Number="1">
+        <Name>Con Rectangular</Name>
+        <Types>
+          <Type Number="0">
+            <Name>Headers</Name>
+            <SubTypes>
+              <SubType Number="0">
+                <Name>1 Row</Name>
+              </SubType>
+              <SubType Number="1">
+                <Name>Pitch 2.54mm</Name>
+              </SubType>
+              <SubType Number="2">
+                <Name>Vertical</Name>
+              </SubType>
+              <SubType Number="3">
+                <Name>2 Rows</Name>
+              </SubType>
+              <SubType Number="4">
+                <Name>Female</Name>
+              </SubType>
+              <SubType Number="5">
+                <Name>Row Spacing 2.54mm</Name>
+              </SubType>
+              <SubType Number="6">
+                <Name>Horizontal</Name>
+              </SubType>
+            </SubTypes>
+          </Type>
+        </Types>
+      </Category>
+      <Category Number="2">
+        <Name>TO</Name>
+        <Types>
+          <Type Number="0">
+            <Name>Plastic Case</Name>
+            <SubTypes />
+          </Type>
+        </Types>
+      </Category>
+      <Category Number="3">
+        <Name>Others</Name>
+        <Types />
+      </Category>
+      <Category Number="4">
+        <Name>Two-Terminals</Name>
+        <Types>
+          <Type Number="0">
+            <Name>Inductors</Name>
+            <SubTypes>
+              <SubType Number="0">
+                <Name>Axial</Name>
+              </SubType>
+            </SubTypes>
+          </Type>
+          <Type Number="1">
+            <Name>Resistors</Name>
+            <SubTypes>
+              <SubType Number="0">
+                <Name>Axial</Name>
+              </SubType>
+              <SubType Number="1">
+                <Name>Singles</Name>
+              </SubType>
+            </SubTypes>
+          </Type>
+        </Types>
+      </Category>
+      <Category Number="5">
+        <Name>Con Barrel</Name>
+        <Types>
+          <Type Number="0">
+            <Name>Audio (RCA Jacks)</Name>
+            <SubTypes />
+          </Type>
+        </Types>
+      </Category>
+      <Category Number="6">
+        <Name>DIP</Name>
+        <Types>
+          <Type Number="0">
+            <Name>Pitch 2.54mm</Name>
+            <SubTypes />
+          </Type>
+          <Type Number="1">
+            <Name>Row Spacing 300mil</Name>
+            <SubTypes />
+          </Type>
+          <Type Number="2">
+            <Name>Leads Output - Side</Name>
+            <SubTypes />
+          </Type>
+          <Type Number="3">
+            <Name>Row Spacing 600mil</Name>
+            <SubTypes />
+          </Type>
+        </Types>
+      </Category>
+      <Category Number="7">
+        <Name>Switches</Name>
+        <Types>
+          <Type Number="0">
+            <Name>Pushbutton</Name>
+            <SubTypes>
+              <SubType Number="0">
+                <Name>Standard</Name>
+              </SubType>
+            </SubTypes>
+          </Type>
+          <Type Number="1">
+            <Name>Toggle</Name>
+            <SubTypes />
+          </Type>
+        </Types>
+      </Category>
+    </Categories>
+    <Patterns>
+      <Pattern PatternStyle="PatType57" Mounting="-1" Width="2509.8425" Height="615.1575" Orientation="0" LockTypeChange="N" Type="Zig-Zag" Float1="147.6378" Float2="196.8504" Float3="0" Int1="21" Int2="0">
+        <Name>SCART-F</Name>
+        <Origin X="-24.6063" Y="-184.5472" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+        <DefPad Style="PadT36" />
+        <Pads>
+          <Pad Id="1" Style="PadT36" X="-762.7953" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>1</Number>
+          </Pad>
+          <Pad Id="2" Style="PadT36" X="-688.9764" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>2</Number>
+          </Pad>
+          <Pad Id="3" Style="PadT36" X="-615.1575" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>3</Number>
+          </Pad>
+          <Pad Id="4" Style="PadT36" X="-541.3386" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>4</Number>
+          </Pad>
+          <Pad Id="5" Style="PadT36" X="-467.5197" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>5</Number>
+          </Pad>
+          <Pad Id="6" Style="PadT36" X="-393.7008" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>6</Number>
+          </Pad>
+          <Pad Id="7" Style="PadT36" X="-319.8819" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>7</Number>
+          </Pad>
+          <Pad Id="8" Style="PadT36" X="-246.063" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>8</Number>
+          </Pad>
+          <Pad Id="9" Style="PadT36" X="-172.2441" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>9</Number>
+          </Pad>
+          <Pad Id="10" Style="PadT36" X="-98.4252" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>10</Number>
+          </Pad>
+          <Pad Id="11" Style="PadT36" X="-24.6063" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>11</Number>
+          </Pad>
+          <Pad Id="12" Style="PadT36" X="49.2126" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>12</Number>
+          </Pad>
+          <Pad Id="13" Style="PadT36" X="123.0315" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>13</Number>
+          </Pad>
+          <Pad Id="14" Style="PadT36" X="196.8504" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>14</Number>
+          </Pad>
+          <Pad Id="15" Style="PadT36" X="270.6693" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>15</Number>
+          </Pad>
+          <Pad Id="16" Style="PadT36" X="344.4882" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>16</Number>
+          </Pad>
+          <Pad Id="17" Style="PadT36" X="418.3071" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>17</Number>
+          </Pad>
+          <Pad Id="18" Style="PadT36" X="492.126" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>18</Number>
+          </Pad>
+          <Pad Id="19" Style="PadT36" X="565.9449" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>19</Number>
+          </Pad>
+          <Pad Id="20" Style="PadT36" X="639.7638" Y="-86.122" Angle="0" Locked="N" Side="Top">
+            <Number>20</Number>
+          </Pad>
+          <Pad Id="21" Style="PadT36" X="713.5827" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+            <Number>21</Number>
+          </Pad>
+        </Pads>
+        <Shapes>
+          <Shape Id="1" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="959.7638" Y="12.3031" />
+              <Point X="1008.9567" Y="-86.122" />
+            </Points>
+          </Shape>
+          <Shape Id="2" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-1058.1496" Y="12.3031" />
+              <Point X="-1008.9567" Y="-86.122" />
+            </Points>
+          </Shape>
+          <Shape Id="3" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-885.7231" Y="307.5787" />
+              <Point X="885.7231" Y="-86.122" />
+            </Points>
+          </Shape>
+          <Shape Id="4" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="885.7231" Y="12.3031" />
+              <Point X="1254.9213" Y="-86.122" />
+            </Points>
+          </Shape>
+          <Shape Id="5" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-1254.9213" Y="12.3031" />
+              <Point X="-885.7231" Y="-86.122" />
+            </Points>
+          </Shape>
+        </Shapes>
+        <Holes />
+        <Dimensions>
+          <Dimension Locked="N" Type="Horizontal" Connected1="Pad" Object1="0" SubObject1="20" Point1="0" Connected2="-1" Object2="0" SubObject2="0" Point2="0" Layer="Top Dimension" X1="639.7638" Y1="-86.122" X2="984.252" Y2="-86.122" XD="639.7638" YD="-184.5472" ArrowSize="26.2467" Units="Common" FontVector="Y" FontName="Arial" FontSize="2" FontWidth="-2" FontScale="1" ShowUnits="N" Angle="0" ExternalRadius="0" PointerMode="0" />
+          <Dimension Locked="N" Type="Horizontal" Connected1="Pad" Object1="0" SubObject1="2" Point1="0" Connected2="-1" Object2="0" SubObject2="0" Point2="0" Layer="Top Dimension" X1="-688.9764" Y1="-86.122" X2="-1033.4646" Y2="-86.122" XD="-688.9764" YD="-184.5472" ArrowSize="26.2467" Units="Common" FontVector="Y" FontName="Arial" FontSize="2" FontWidth="-2" FontScale="1" ShowUnits="N" Angle="0" ExternalRadius="0" PointerMode="0" />
+        </Dimensions>
+        <Model3D Mirror="N" NoSearch="N" Units="Wings" IPC_XOff="0" IPC_YOff="0" AutoHeight="0" AutoColor="4934475" Type="File" KeepPins="N">
+          <Rotate X="0" Y="0" Z="0" />
+          <Offset X="0" Y="0" Z="0" />
+          <Zoom X="1" Y="1" Z="1" />
+        </Model3D>
+      </Pattern>
+      <Pattern PatternStyle="PatType90" Mounting="-1" Width="800.0002" Height="354.3308" Orientation="0" LockTypeChange="N" Type="Free" Float1="0" Float2="0" Float3="0" Int1="0" Int2="0">
+        <Name>DS1013_10</Name>
+        <Origin X="-0.9606" Y="-2.6325" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+        <AddFields>
+          <AddField Type="Link">
+            <Name>LINK</Name>
+            <Text>http://vinratel.at.ua/</Text>
+          </AddField>
+          <AddField Type="Text">
+            <Name>author</Name>
+            <Text>Даньковский В.И.</Text>
+          </AddField>
+          <AddField Type="Text">
+            <Name>mail</Name>
+            <Text>dvi534538@mail/ru</Text>
+          </AddField>
+        </AddFields>
+        <DefPad Style="PadT8" />
+        <Pads>
+          <Pad Id="1" Style="PadT8" X="199.0394" Y="47.3675" Angle="0" Locked="N" Side="Top">
+            <Number>1</Number>
+          </Pad>
+          <Pad Id="2" Style="PadT8" X="199.0394" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+            <Number>2</Number>
+          </Pad>
+          <Pad Id="3" Style="PadT8" X="99.0394" Y="47.3675" Angle="0" Locked="N" Side="Top">
+            <Number>3</Number>
+          </Pad>
+          <Pad Id="4" Style="PadT8" X="99.0394" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+            <Number>4</Number>
+          </Pad>
+          <Pad Id="5" Style="PadT8" X="-0.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+            <Number>5</Number>
+          </Pad>
+          <Pad Id="6" Style="PadT8" X="-0.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+            <Number>6</Number>
+          </Pad>
+          <Pad Id="7" Style="PadT8" X="-100.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+            <Number>7</Number>
+          </Pad>
+          <Pad Id="8" Style="PadT8" X="-100.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+            <Number>8</Number>
+          </Pad>
+          <Pad Id="9" Style="PadT8" X="-200.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+            <Number>9</Number>
+          </Pad>
+          <Pad Id="10" Style="PadT8" X="-200.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+            <Number>10</Number>
+          </Pad>
+        </Pads>
+        <Shapes>
+          <Shape Id="1" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-354.7205" Y="62.4685" />
+              <Point X="-354.7205" Y="-55.6654" />
+            </Points>
+          </Shape>
+          <Shape Id="2" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="354.7205" Y="-55.1339" />
+              <Point X="354.7205" Y="63" />
+            </Points>
+          </Shape>
+          <Shape Id="3" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="98.4331" />
+              <Point X="100" Y="98.4331" />
+            </Points>
+          </Shape>
+          <Shape Id="4" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="354.7205" Y="-120.0827" />
+              <Point X="354.7205" Y="127.9488" />
+            </Points>
+          </Shape>
+          <Shape Id="5" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-350.8005" Y="-124.0157" />
+              <Point X="350.8005" Y="-124.0157" />
+            </Points>
+          </Shape>
+          <Shape Id="6" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="350.8005" Y="131.8819" />
+              <Point X="103.9199" Y="131.8819" />
+            </Points>
+          </Shape>
+          <Shape Id="7" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-354.7205" Y="127.9488" />
+              <Point X="-354.7205" Y="-120.0827" />
+            </Points>
+          </Shape>
+          <Shape Id="8" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-103.9199" Y="131.8819" />
+              <Point X="-350.8005" Y="131.8819" />
+            </Points>
+          </Shape>
+          <Shape Id="9" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="354.7205" Y="127.9488" />
+              <Point X="353.5997" Y="130.748" />
+              <Point X="350.8005" Y="131.8819" />
+            </Points>
+          </Shape>
+          <Shape Id="10" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-350.8005" Y="131.8819" />
+              <Point X="-353.5997" Y="130.748" />
+              <Point X="-354.7205" Y="127.9488" />
+            </Points>
+          </Shape>
+          <Shape Id="11" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="350.8005" Y="-124.0157" />
+              <Point X="353.5997" Y="-122.8465" />
+              <Point X="354.7205" Y="-120.0827" />
+            </Points>
+          </Shape>
+          <Shape Id="12" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-354.7205" Y="-120.0827" />
+              <Point X="-353.5997" Y="-122.8465" />
+              <Point X="-350.8005" Y="-124.0157" />
+            </Points>
+          </Shape>
+          <Shape Id="13" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-347.5197" Y="66.4016" />
+              <Point X="-348.0801" Y="66.4016" />
+            </Points>
+          </Shape>
+          <Shape Id="14" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="347.5197" Y="66.9331" />
+              <Point X="348.0801" Y="66.9331" />
+            </Points>
+          </Shape>
+          <Shape Id="15" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-354.7205" Y="-59.5984" />
+              <Point X="-348.0801" Y="-59.5984" />
+            </Points>
+          </Shape>
+          <Shape Id="16" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="354.7205" Y="-59.0669" />
+              <Point X="348.0801" Y="-59.0669" />
+            </Points>
+          </Shape>
+          <Shape Id="17" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-354.7205" Y="66.4016" />
+              <Point X="-348.0801" Y="66.4016" />
+            </Points>
+          </Shape>
+          <Shape Id="18" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="347.5197" Y="-59.0669" />
+              <Point X="348.0801" Y="-59.0669" />
+            </Points>
+          </Shape>
+          <Shape Id="19" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="354.7205" Y="66.9331" />
+              <Point X="348.0801" Y="66.9331" />
+            </Points>
+          </Shape>
+          <Shape Id="20" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-347.5197" Y="-59.5984" />
+              <Point X="-348.0801" Y="-59.5984" />
+            </Points>
+          </Shape>
+          <Shape Id="21" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-396.0801" Y="177.1654" />
+              <Point X="-398.8806" Y="175.9961" />
+              <Point X="-400" Y="173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="22" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="400" Y="173.2323" />
+              <Point X="398.8806" Y="175.9961" />
+              <Point X="396.0801" Y="177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="23" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="396.0801" Y="-169.2992" />
+              <Point X="398.8806" Y="-168.1299" />
+              <Point X="400" Y="-165.3661" />
+            </Points>
+          </Shape>
+          <Shape Id="24" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-103.9199" Y="177.1654" />
+              <Point X="-396.0801" Y="177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="25" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-400" Y="173.2323" />
+              <Point X="-400" Y="-165.3661" />
+            </Points>
+          </Shape>
+          <Shape Id="26" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="329.1194" Y="-169.2992" />
+              <Point X="396.0801" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="27" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="7.9199" Y="-169.2992" />
+              <Point X="313.3596" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="28" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-396.0801" Y="-169.2992" />
+              <Point X="-329.1194" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="29" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="396.0801" Y="177.1654" />
+              <Point X="103.9199" Y="177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="30" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-400" Y="-165.3661" />
+              <Point X="-398.8806" Y="-168.1299" />
+              <Point X="-396.0801" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="31" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-313.3596" Y="-169.2992" />
+              <Point X="-7.8399" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="32" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="400" Y="-165.3661" />
+              <Point X="400" Y="173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="33" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="103.9199" Y="177.1654" />
+              <Point X="-103.9199" Y="177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="34" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="313.3596" Y="-169.2992" />
+              <Point X="329.1194" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="35" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-7.8399" Y="-169.2992" />
+              <Point X="7.9199" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="36" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-329.1194" Y="-169.2992" />
+              <Point X="-313.3596" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="37" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="329.1194" Y="-169.2992" />
+              <Point X="326.3202" Y="-170.4331" />
+              <Point X="325.1995" Y="-173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="38" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="0" Y="-177.1654" />
+              <Point X="2.8005" Y="-175.9961" />
+              <Point X="3.9199" Y="-173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="39" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="317.3596" Y="-173.2323" />
+              <Point X="317.3596" Y="-177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="40" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-3.9199" Y="-173.2323" />
+              <Point X="-3.9199" Y="-177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="41" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="0" Y="-177.1654" />
+              <Point X="-3.9199" Y="-177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="42" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-325.1995" Y="-173.2323" />
+              <Point X="-325.1995" Y="-177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="43" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-321.2795" Y="-177.1654" />
+              <Point X="-325.1995" Y="-177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="44" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="7.9199" Y="-169.2992" />
+              <Point X="5.1194" Y="-170.4331" />
+              <Point X="3.9199" Y="-173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="45" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="321.2795" Y="-177.1654" />
+              <Point X="324.0801" Y="-175.9961" />
+              <Point X="325.1995" Y="-173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="46" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="321.2795" Y="-177.1654" />
+              <Point X="317.3596" Y="-177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="47" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-321.2795" Y="-177.1654" />
+              <Point X="-318.4803" Y="-175.9961" />
+              <Point X="-317.3596" Y="-173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="48" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-313.3596" Y="-169.2992" />
+              <Point X="-316.1601" Y="-170.4331" />
+              <Point X="-317.3596" Y="-173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="49" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-325.1995" Y="-173.2323" />
+              <Point X="-326.3202" Y="-170.4331" />
+              <Point X="-329.1194" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="50" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-3.9199" Y="-173.2323" />
+              <Point X="-5.0394" Y="-170.4331" />
+              <Point X="-7.8399" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="51" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="317.3596" Y="-173.2323" />
+              <Point X="316.1601" Y="-170.4331" />
+              <Point X="313.3596" Y="-169.2992" />
+            </Points>
+          </Shape>
+          <Shape Id="52" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="170.8937" />
+              <Point X="100" Y="170.8937" />
+            </Points>
+          </Shape>
+          <Shape Id="53" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="161.0787" />
+              <Point X="100" Y="173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="54" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-103.9199" Y="131.8819" />
+              <Point X="-101.1194" Y="133.0512" />
+              <Point X="-100" Y="135.815" />
+            </Points>
+          </Shape>
+          <Shape Id="55" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="170.8937" />
+              <Point X="-96.0801" Y="173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="56" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="124.2283" />
+              <Point X="-100" Y="135.815" />
+            </Points>
+          </Shape>
+          <Shape Id="57" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="103.9199" Y="177.1654" />
+              <Point X="101.1194" Y="175.9961" />
+              <Point X="100" Y="173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="58" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="173.2323" />
+              <Point X="-100" Y="161.0787" />
+            </Points>
+          </Shape>
+          <Shape Id="59" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="103.1995" Y="177.0945" />
+              <Point X="103.3596" Y="177.1299" />
+            </Points>
+          </Shape>
+          <Shape Id="60" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-103.6798" Y="177.1654" />
+              <Point X="-103.7598" Y="177.1654" />
+            </Points>
+          </Shape>
+          <Shape Id="61" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="112.2165" />
+              <Point X="-100" Y="124.2283" />
+            </Points>
+          </Shape>
+          <Shape Id="62" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="135.815" />
+              <Point X="-100" Y="161.0787" />
+            </Points>
+          </Shape>
+          <Shape Id="63" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="124.2283" />
+              <Point X="100" Y="112.2165" />
+            </Points>
+          </Shape>
+          <Shape Id="64" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="170.8937" />
+              <Point X="-100" Y="170.8937" />
+            </Points>
+          </Shape>
+          <Shape Id="65" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="170.8937" />
+              <Point X="96.0801" Y="173.2323" />
+            </Points>
+          </Shape>
+          <Shape Id="66" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="161.0787" />
+              <Point X="100" Y="135.815" />
+            </Points>
+          </Shape>
+          <Shape Id="67" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="98.4331" />
+              <Point X="-100" Y="112.2165" />
+            </Points>
+          </Shape>
+          <Shape Id="68" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="135.815" />
+              <Point X="100" Y="124.2283" />
+            </Points>
+          </Shape>
+          <Shape Id="69" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="135.815" />
+              <Point X="101.1194" Y="133.0512" />
+              <Point X="103.9199" Y="131.8819" />
+            </Points>
+          </Shape>
+          <Shape Id="70" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="100" Y="112.2165" />
+              <Point X="100" Y="98.4331" />
+            </Points>
+          </Shape>
+          <Shape Id="71" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+            <Points>
+              <Point X="-100" Y="173.2323" />
+              <Point X="-101.1194" Y="175.9961" />
+              <Point X="-103.9199" Y="177.1654" />
+            </Points>
+          </Shape>
+        </Shapes>
+        <Model3D Mirror="N" NoSearch="N" Units="Wings" IPC_XOff="0" IPC_YOff="0" AutoHeight="0" AutoColor="4934475" Type="File" KeepPins="N">
+          <Filename>
+            <Path>D:\Библиотека DipTriec\3dmodels\Audio connector\DS1013_10.wrl</Path>
+            <Var>D:\Библиотека DipTriec\3dmodels\Audio connector\DS1013_10.wrl</Var>
+          </Filename>
+          <Rotate X="0" Y="0" Z="-180" />
+          <Offset X="0" Y="0" Z="-7.874" />
+          <Zoom X="0.39" Y="0.39" Z="0.39" />
+        </Model3D>
+      </Pattern>
+    </Patterns>
+  </Library>
+  <Categories />
+  <Components>
+    <Component ComponentStyle="CompType70">
+      <Part RefDes="J" PartType="Normal" Type="Free" Int1="0" Int2="0" Width="175" Height="2100" LockTypeChange="N">
+        <Name>SCART-F</Name>
+        <PartName>Part 1</PartName>
+        <Origin X="237.5" Y="1000" />
+        <SpiceModel Type="SubCkt" />
+        <Pins>
+          <Pin X="87.5" Y="1000" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>1</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-900" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="20" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>20</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="900" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>2</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-800" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="19" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>19</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="800" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="3" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>3</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-700" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="18" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>18</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="700" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="4" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>4</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-600" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="17" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>17</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="600" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="5" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>5</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-500" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="16" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>16</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="500" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="6" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>6</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-400" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="15" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>15</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="400" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="7" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>7</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-300" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="14" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>14</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="300" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="8" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>8</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-200" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="13" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>13</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="200" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="9" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>9</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-100" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="12" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>12</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="100" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="10" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>A</Name>
+            <PadNumber>10</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="11" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>11</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="87.5" Y="-1000" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="21" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>K</Name>
+            <PadNumber>21</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+        </Pins>
+        <Shapes>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="1000" />
+              <Point X="-62.5" Y="1000" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="1000" />
+              <Point X="37.5" Y="1025" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="1000" />
+              <Point X="37.5" Y="975" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="200" />
+              <Point X="-62.5" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="200" />
+              <Point X="37.5" Y="225" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="200" />
+              <Point X="37.5" Y="175" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="900" />
+              <Point X="-62.5" Y="900" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="900" />
+              <Point X="37.5" Y="925" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="900" />
+              <Point X="37.5" Y="875" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="950" />
+              <Point X="-87.5" Y="950" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="950" />
+              <Point X="-87.5" Y="850" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="850" />
+              <Point X="87.5" Y="850" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="850" />
+              <Point X="87.5" Y="1050" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="1050" />
+              <Point X="-87.5" Y="1050" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="1050" />
+              <Point X="-87.5" Y="950" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="800" />
+              <Point X="-62.5" Y="800" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="800" />
+              <Point X="37.5" Y="825" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="800" />
+              <Point X="37.5" Y="775" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="700" />
+              <Point X="-62.5" Y="700" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="700" />
+              <Point X="37.5" Y="725" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="700" />
+              <Point X="37.5" Y="675" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="750" />
+              <Point X="-87.5" Y="750" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="750" />
+              <Point X="-87.5" Y="650" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="650" />
+              <Point X="87.5" Y="650" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="650" />
+              <Point X="87.5" Y="850" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-1000" />
+              <Point X="-62.5" Y="-1000" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="850" />
+              <Point X="-87.5" Y="750" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="600" />
+              <Point X="-62.5" Y="600" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="600" />
+              <Point X="37.5" Y="625" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="600" />
+              <Point X="37.5" Y="575" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="500" />
+              <Point X="-62.5" Y="500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="500" />
+              <Point X="37.5" Y="525" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="500" />
+              <Point X="37.5" Y="475" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="550" />
+              <Point X="-87.5" Y="550" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="550" />
+              <Point X="-87.5" Y="450" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="450" />
+              <Point X="87.5" Y="450" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="450" />
+              <Point X="87.5" Y="650" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-1000" />
+              <Point X="37.5" Y="-975" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="650" />
+              <Point X="-87.5" Y="550" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="400" />
+              <Point X="-62.5" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="400" />
+              <Point X="37.5" Y="425" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="400" />
+              <Point X="37.5" Y="375" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="300" />
+              <Point X="-62.5" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="300" />
+              <Point X="37.5" Y="325" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="300" />
+              <Point X="37.5" Y="275" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="350" />
+              <Point X="-87.5" Y="350" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="350" />
+              <Point X="-87.5" Y="250" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="250" />
+              <Point X="87.5" Y="250" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="250" />
+              <Point X="87.5" Y="450" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-1000" />
+              <Point X="37.5" Y="-1025" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="450" />
+              <Point X="-87.5" Y="350" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="100" />
+              <Point X="-62.5" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="100" />
+              <Point X="37.5" Y="125" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="100" />
+              <Point X="37.5" Y="75" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="150" />
+              <Point X="-87.5" Y="150" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="150" />
+              <Point X="-87.5" Y="50" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="50" />
+              <Point X="87.5" Y="50" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="50" />
+              <Point X="87.5" Y="250" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-1050" />
+              <Point X="87.5" Y="-1050" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="250" />
+              <Point X="-87.5" Y="150" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="0" />
+              <Point X="-62.5" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="0" />
+              <Point X="37.5" Y="25" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="0" />
+              <Point X="37.5" Y="-25" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-100" />
+              <Point X="-62.5" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-100" />
+              <Point X="37.5" Y="-75" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-100" />
+              <Point X="37.5" Y="-125" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-50" />
+              <Point X="-87.5" Y="-50" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-50" />
+              <Point X="-87.5" Y="-150" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-150" />
+              <Point X="87.5" Y="-150" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-150" />
+              <Point X="87.5" Y="50" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-1050" />
+              <Point X="-87.5" Y="-950" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="50" />
+              <Point X="-87.5" Y="-50" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-200" />
+              <Point X="-62.5" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-200" />
+              <Point X="37.5" Y="-175" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-200" />
+              <Point X="37.5" Y="-225" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-300" />
+              <Point X="-62.5" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-300" />
+              <Point X="37.5" Y="-275" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-300" />
+              <Point X="37.5" Y="-325" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-250" />
+              <Point X="-87.5" Y="-250" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-250" />
+              <Point X="-87.5" Y="-350" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-350" />
+              <Point X="87.5" Y="-350" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-350" />
+              <Point X="87.5" Y="-150" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-1050" />
+              <Point X="87.5" Y="-950" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-150" />
+              <Point X="-87.5" Y="-250" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-400" />
+              <Point X="-62.5" Y="-400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-400" />
+              <Point X="37.5" Y="-375" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-400" />
+              <Point X="37.5" Y="-425" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-500" />
+              <Point X="-62.5" Y="-500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-500" />
+              <Point X="37.5" Y="-475" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-500" />
+              <Point X="37.5" Y="-525" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-450" />
+              <Point X="-87.5" Y="-450" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-450" />
+              <Point X="-87.5" Y="-550" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-550" />
+              <Point X="87.5" Y="-550" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-550" />
+              <Point X="87.5" Y="-350" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-350" />
+              <Point X="-87.5" Y="-450" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-600" />
+              <Point X="-62.5" Y="-600" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-600" />
+              <Point X="37.5" Y="-575" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-600" />
+              <Point X="37.5" Y="-625" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-700" />
+              <Point X="-62.5" Y="-700" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-700" />
+              <Point X="37.5" Y="-675" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-700" />
+              <Point X="37.5" Y="-725" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-650" />
+              <Point X="-87.5" Y="-650" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-650" />
+              <Point X="-87.5" Y="-750" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-750" />
+              <Point X="87.5" Y="-750" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-750" />
+              <Point X="87.5" Y="-550" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-550" />
+              <Point X="-87.5" Y="-650" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-800" />
+              <Point X="-62.5" Y="-800" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-800" />
+              <Point X="37.5" Y="-775" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-800" />
+              <Point X="37.5" Y="-825" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-900" />
+              <Point X="-62.5" Y="-900" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-900" />
+              <Point X="37.5" Y="-875" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-62.5" Y="-900" />
+              <Point X="37.5" Y="-925" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-850" />
+              <Point X="-87.5" Y="-850" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-950" />
+              <Point X="-87.5" Y="-850" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-950" />
+              <Point X="87.5" Y="-950" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="87.5" Y="-950" />
+              <Point X="87.5" Y="-750" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-87.5" Y="-750" />
+              <Point X="-87.5" Y="-850" />
+            </Points>
+          </Shape>
+        </Shapes>
+        <Pattern Style="PatType57" />
+      </Part>
+    </Component>
+    <Component ComponentStyle="CompType115">
+      <Part RefDes="XP" PartType="Normal" Type="Free" Int1="0" Int2="0" Width="750" Height="1000" LockTypeChange="N">
+        <Name>DS1013_10</Name>
+        <PartName>Part 1</PartName>
+        <Value>http://vinratel.at.ua/</Value>
+        <Origin X="-375" Y="450" />
+        <SpiceModel Type="SubCkt" />
+        <Pins>
+          <Pin X="-375" Y="450" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="1" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>1</Name>
+            <PadNumber>1</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="350" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="2" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>2</Name>
+            <PadNumber>2</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="250" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="3" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>3</Name>
+            <PadNumber>3</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="150" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="4" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>4</Name>
+            <PadNumber>4</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="50" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="5" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>5</Name>
+            <PadNumber>5</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="-50" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="6" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>6</Name>
+            <PadNumber>6</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="-150" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="7" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>7</Name>
+            <PadNumber>7</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="-250" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="8" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>8</Name>
+            <PadNumber>8</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="-350" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="9" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>9</Name>
+            <PadNumber>9</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+          <Pin X="-375" Y="-450" Locked="N" Type="Default" ElectricType="Undefined" Orientation="0" PadId="10" Length="150" ShowName="N" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0" SignalDelay="0" NumOrientation="0" NameOrientation="0">
+            <Name>10</Name>
+            <PadNumber>10</PadNumber>
+            <NameFont Size="5" Width="-2" Scale="1" />
+          </Pin>
+        </Pins>
+        <Shapes>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="500" />
+              <Point X="-375" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="400" />
+              <Point X="375" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="500" />
+              <Point X="375" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="500" />
+              <Point X="375" Y="500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="500" />
+              <Point X="-225" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="400" />
+              <Point X="-375" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="300" />
+              <Point X="375" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="400" />
+              <Point X="375" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="400" />
+              <Point X="375" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="400" />
+              <Point X="-225" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="300" />
+              <Point X="-375" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="200" />
+              <Point X="375" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="300" />
+              <Point X="375" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="300" />
+              <Point X="375" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="300" />
+              <Point X="375" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>1</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="500" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>2</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="300" />
+              <Point X="-225" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="200" />
+              <Point X="-375" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="100" />
+              <Point X="375" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="200" />
+              <Point X="375" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="200" />
+              <Point X="375" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="200" />
+              <Point X="-225" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="100" />
+              <Point X="375" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>3</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="300" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>4</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="100" />
+              <Point X="-375" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="0" />
+              <Point X="375" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="100" />
+              <Point X="375" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="100" />
+              <Point X="375" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="100" />
+              <Point X="-225" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="0" />
+              <Point X="-375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-100" />
+              <Point X="375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="0" />
+              <Point X="375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="0" />
+              <Point X="375" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="0" />
+              <Point X="-225" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-100" />
+              <Point X="375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>5</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="100" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>6</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="0" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-100" />
+              <Point X="375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-100" />
+              <Point X="375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-100" />
+              <Point X="-375" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-200" />
+              <Point X="375" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="-100" />
+              <Point X="375" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-100" />
+              <Point X="375" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="-100" />
+              <Point X="-225" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-200" />
+              <Point X="-375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="-200" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-200" />
+              <Point X="375" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="-200" />
+              <Point X="-225" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>7</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="-100" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>8</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="-200" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="-375" Y="-400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-400" />
+              <Point X="375" Y="-400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="-300" />
+              <Point X="375" Y="-400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-300" />
+              <Point X="375" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="-300" />
+              <Point X="-225" Y="-400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-400" />
+              <Point X="-375" Y="-500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-500" />
+              <Point X="375" Y="-500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="375" Y="-400" />
+              <Point X="375" Y="-500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-400" />
+              <Point X="375" Y="-400" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-225" Y="-400" />
+              <Point X="-225" Y="-500" />
+            </Points>
+          </Shape>
+          <Shape Type="Line" LineWidth="9.8425" Locked="N">
+            <Points>
+              <Point X="-375" Y="-500" />
+              <Point X="375" Y="-500" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>9</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-300" Y="-300" />
+            </Points>
+          </Shape>
+          <Shape Type="Text" Locked="N" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="9830400" LineSpacing="1.2" TextShow="Any Text" FontName="Arial" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left">
+            <TextLines>
+              <TextLine>10</TextLine>
+            </TextLines>
+            <Points>
+              <Point X="-325" Y="-400" />
+            </Points>
+          </Shape>
+        </Shapes>
+        <AddFields>
+          <AddField Type="Link">
+            <Name>web</Name>
+            <Text>http://vinratel.at.ua/</Text>
+          </AddField>
+          <AddField Type="Text">
+            <Name>author</Name>
+            <Text>Даньковский В.И.</Text>
+          </AddField>
+          <AddField Type="Text">
+            <Name>mail</Name>
+            <Text>dvi534538@mail/ru</Text>
+          </AddField>
+        </AddFields>
+        <Pattern Style="PatType90" />
+      </Part>
+    </Component>
+  </Components>
+</Library>

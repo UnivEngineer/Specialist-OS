@@ -1,0 +1,2096 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Source Type="DipTrace-PCB" Version="5.1.0.3" Units="mil">
+  <Library Type="DipTrace-ComponentLibrary" Version="5.1.0.3" Units="mil">
+    <Library Type="DipTrace-PatternLibrary" Version="5.1.0.3" Units="mil">
+      <PadStyles>
+        <PadStyle Name="PadT36" Type="Through" HoleType="Round" Hole="31.4961" Side="Top">
+          <MainStack Shape="Obround" Width="68.8976" Height="49.2126" XOff="0" YOff="0" />
+        </PadStyle>
+        <PadStyle Name="PadT8" Type="Through" HoleType="Round" Hole="39.3701" Side="Top">
+          <MainStack Shape="Obround" Width="78.7402" Height="78.7402" XOff="0" YOff="0" />
+        </PadStyle>
+        <PadStyle Name="PadT9" Type="Through" HoleType="Round" Hole="27.5591" Side="Top">
+          <MainStack Shape="Obround" Width="78.7402" Height="39.3701" XOff="0" YOff="0" />
+        </PadStyle>
+        <PadStyle Name="PadT10" Type="Through" HoleType="Round" Hole="27.5591" Side="Top">
+          <MainStack Shape="Polygon" Width="78.7402" Height="39.3701" XOff="0" YOff="0">
+            <Points>
+              <Point X="-29.5276" Y="19.685" />
+              <Point X="-39.3701" Y="9.8425" />
+              <Point X="-39.3701" Y="-9.8425" />
+              <Point X="-29.5276" Y="-19.685" />
+              <Point X="29.5276" Y="-19.685" />
+              <Point X="39.3701" Y="-9.8425" />
+              <Point X="39.3701" Y="9.8425" />
+              <Point X="29.5276" Y="19.685" />
+            </Points>
+          </MainStack>
+        </PadStyle>
+        <PadStyle Name="SMD0805" Type="Surface" Side="Top">
+          <MainStack Shape="Rectangle" Width="47.244094" Height="55.11811" XOff="0" YOff="0" Corner="0" />
+        </PadStyle>
+        <PadStyle Name="DIODE_THT" Type="Through" Side="Top" HoleType="Round" Hole="31.496063">
+          <MainStack Shape="Obround" Width="62.992126" Height="62.992126" XOff="0" YOff="0" Corner="0" />
+        </PadStyle>
+      </PadStyles>
+      <Patterns>
+        <Pattern PatternStyle="PatType0" Mounting="-1" Width="800.0002" Height="354.3308" Orientation="0" LockTypeChange="N" Type="Free" Float1="0" Float2="0" Float3="0" Int1="0" Int2="0">
+          <Name>DS1013_10</Name>
+          <Origin X="-0.9606" Y="-2.6325" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+          <DefPad Style="PadT8" />
+          <Pads>
+            <Pad Id="1" Style="PadT8" X="199.0394" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="PadT8" X="199.0394" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>2</Number>
+            </Pad>
+            <Pad Id="3" Style="PadT8" X="99.0394" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>3</Number>
+            </Pad>
+            <Pad Id="4" Style="PadT8" X="99.0394" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>4</Number>
+            </Pad>
+            <Pad Id="5" Style="PadT8" X="-0.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>5</Number>
+            </Pad>
+            <Pad Id="6" Style="PadT8" X="-0.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>6</Number>
+            </Pad>
+            <Pad Id="7" Style="PadT8" X="-100.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>7</Number>
+            </Pad>
+            <Pad Id="8" Style="PadT8" X="-100.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>8</Number>
+            </Pad>
+            <Pad Id="9" Style="PadT8" X="-200.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>9</Number>
+            </Pad>
+            <Pad Id="10" Style="PadT8" X="-200.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>10</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Id="1" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="62.4685" />
+                <Point X="-354.7205" Y="-55.6654" />
+              </Points>
+            </Shape>
+            <Shape Id="2" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="-55.1339" />
+                <Point X="354.7205" Y="63" />
+              </Points>
+            </Shape>
+            <Shape Id="3" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="98.4331" />
+                <Point X="100" Y="98.4331" />
+              </Points>
+            </Shape>
+            <Shape Id="4" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="-120.0827" />
+                <Point X="354.7205" Y="127.9488" />
+              </Points>
+            </Shape>
+            <Shape Id="5" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-350.8005" Y="-124.0157" />
+                <Point X="350.8005" Y="-124.0157" />
+              </Points>
+            </Shape>
+            <Shape Id="6" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="350.8005" Y="131.8819" />
+                <Point X="103.9199" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="7" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="127.9488" />
+                <Point X="-354.7205" Y="-120.0827" />
+              </Points>
+            </Shape>
+            <Shape Id="8" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.9199" Y="131.8819" />
+                <Point X="-350.8005" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="9" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="127.9488" />
+                <Point X="353.5997" Y="130.748" />
+                <Point X="350.8005" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="10" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-350.8005" Y="131.8819" />
+                <Point X="-353.5997" Y="130.748" />
+                <Point X="-354.7205" Y="127.9488" />
+              </Points>
+            </Shape>
+            <Shape Id="11" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="350.8005" Y="-124.0157" />
+                <Point X="353.5997" Y="-122.8465" />
+                <Point X="354.7205" Y="-120.0827" />
+              </Points>
+            </Shape>
+            <Shape Id="12" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="-120.0827" />
+                <Point X="-353.5997" Y="-122.8465" />
+                <Point X="-350.8005" Y="-124.0157" />
+              </Points>
+            </Shape>
+            <Shape Id="13" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-347.5197" Y="66.4016" />
+                <Point X="-348.0801" Y="66.4016" />
+              </Points>
+            </Shape>
+            <Shape Id="14" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="347.5197" Y="66.9331" />
+                <Point X="348.0801" Y="66.9331" />
+              </Points>
+            </Shape>
+            <Shape Id="15" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="-59.5984" />
+                <Point X="-348.0801" Y="-59.5984" />
+              </Points>
+            </Shape>
+            <Shape Id="16" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="-59.0669" />
+                <Point X="348.0801" Y="-59.0669" />
+              </Points>
+            </Shape>
+            <Shape Id="17" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="66.4016" />
+                <Point X="-348.0801" Y="66.4016" />
+              </Points>
+            </Shape>
+            <Shape Id="18" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="347.5197" Y="-59.0669" />
+                <Point X="348.0801" Y="-59.0669" />
+              </Points>
+            </Shape>
+            <Shape Id="19" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="66.9331" />
+                <Point X="348.0801" Y="66.9331" />
+              </Points>
+            </Shape>
+            <Shape Id="20" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-347.5197" Y="-59.5984" />
+                <Point X="-348.0801" Y="-59.5984" />
+              </Points>
+            </Shape>
+            <Shape Id="21" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-396.0801" Y="177.1654" />
+                <Point X="-398.8806" Y="175.9961" />
+                <Point X="-400" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="22" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="400" Y="173.2323" />
+                <Point X="398.8806" Y="175.9961" />
+                <Point X="396.0801" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="23" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="396.0801" Y="-169.2992" />
+                <Point X="398.8806" Y="-168.1299" />
+                <Point X="400" Y="-165.3661" />
+              </Points>
+            </Shape>
+            <Shape Id="24" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.9199" Y="177.1654" />
+                <Point X="-396.0801" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="25" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-400" Y="173.2323" />
+                <Point X="-400" Y="-165.3661" />
+              </Points>
+            </Shape>
+            <Shape Id="26" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="329.1194" Y="-169.2992" />
+                <Point X="396.0801" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="27" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="7.9199" Y="-169.2992" />
+                <Point X="313.3596" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="28" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-396.0801" Y="-169.2992" />
+                <Point X="-329.1194" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="29" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="396.0801" Y="177.1654" />
+                <Point X="103.9199" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="30" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-400" Y="-165.3661" />
+                <Point X="-398.8806" Y="-168.1299" />
+                <Point X="-396.0801" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="31" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-313.3596" Y="-169.2992" />
+                <Point X="-7.8399" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="32" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="400" Y="-165.3661" />
+                <Point X="400" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="33" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="103.9199" Y="177.1654" />
+                <Point X="-103.9199" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="34" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="313.3596" Y="-169.2992" />
+                <Point X="329.1194" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="35" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-7.8399" Y="-169.2992" />
+                <Point X="7.9199" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="36" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-329.1194" Y="-169.2992" />
+                <Point X="-313.3596" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="37" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="329.1194" Y="-169.2992" />
+                <Point X="326.3202" Y="-170.4331" />
+                <Point X="325.1995" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="38" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="0" Y="-177.1654" />
+                <Point X="2.8005" Y="-175.9961" />
+                <Point X="3.9199" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="39" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="317.3596" Y="-173.2323" />
+                <Point X="317.3596" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="40" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-3.9199" Y="-173.2323" />
+                <Point X="-3.9199" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="41" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="0" Y="-177.1654" />
+                <Point X="-3.9199" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="42" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-325.1995" Y="-173.2323" />
+                <Point X="-325.1995" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="43" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-321.2795" Y="-177.1654" />
+                <Point X="-325.1995" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="44" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="7.9199" Y="-169.2992" />
+                <Point X="5.1194" Y="-170.4331" />
+                <Point X="3.9199" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="45" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="321.2795" Y="-177.1654" />
+                <Point X="324.0801" Y="-175.9961" />
+                <Point X="325.1995" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="46" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="321.2795" Y="-177.1654" />
+                <Point X="317.3596" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="47" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-321.2795" Y="-177.1654" />
+                <Point X="-318.4803" Y="-175.9961" />
+                <Point X="-317.3596" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="48" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-313.3596" Y="-169.2992" />
+                <Point X="-316.1601" Y="-170.4331" />
+                <Point X="-317.3596" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="49" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-325.1995" Y="-173.2323" />
+                <Point X="-326.3202" Y="-170.4331" />
+                <Point X="-329.1194" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="50" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-3.9199" Y="-173.2323" />
+                <Point X="-5.0394" Y="-170.4331" />
+                <Point X="-7.8399" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="51" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="317.3596" Y="-173.2323" />
+                <Point X="316.1601" Y="-170.4331" />
+                <Point X="313.3596" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="52" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="170.8937" />
+                <Point X="100" Y="170.8937" />
+              </Points>
+            </Shape>
+            <Shape Id="53" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="161.0787" />
+                <Point X="100" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="54" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.9199" Y="131.8819" />
+                <Point X="-101.1194" Y="133.0512" />
+                <Point X="-100" Y="135.815" />
+              </Points>
+            </Shape>
+            <Shape Id="55" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="170.8937" />
+                <Point X="-96.0801" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="56" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="124.2283" />
+                <Point X="-100" Y="135.815" />
+              </Points>
+            </Shape>
+            <Shape Id="57" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="103.9199" Y="177.1654" />
+                <Point X="101.1194" Y="175.9961" />
+                <Point X="100" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="58" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="173.2323" />
+                <Point X="-100" Y="161.0787" />
+              </Points>
+            </Shape>
+            <Shape Id="59" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="103.1995" Y="177.0945" />
+                <Point X="103.3596" Y="177.1299" />
+              </Points>
+            </Shape>
+            <Shape Id="60" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.6798" Y="177.1654" />
+                <Point X="-103.7598" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="61" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="112.2165" />
+                <Point X="-100" Y="124.2283" />
+              </Points>
+            </Shape>
+            <Shape Id="62" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="135.815" />
+                <Point X="-100" Y="161.0787" />
+              </Points>
+            </Shape>
+            <Shape Id="63" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="124.2283" />
+                <Point X="100" Y="112.2165" />
+              </Points>
+            </Shape>
+            <Shape Id="64" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="170.8937" />
+                <Point X="-100" Y="170.8937" />
+              </Points>
+            </Shape>
+            <Shape Id="65" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="170.8937" />
+                <Point X="96.0801" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="66" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="161.0787" />
+                <Point X="100" Y="135.815" />
+              </Points>
+            </Shape>
+            <Shape Id="67" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="98.4331" />
+                <Point X="-100" Y="112.2165" />
+              </Points>
+            </Shape>
+            <Shape Id="68" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="135.815" />
+                <Point X="100" Y="124.2283" />
+              </Points>
+            </Shape>
+            <Shape Id="69" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="135.815" />
+                <Point X="101.1194" Y="133.0512" />
+                <Point X="103.9199" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="70" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="112.2165" />
+                <Point X="100" Y="98.4331" />
+              </Points>
+            </Shape>
+            <Shape Id="71" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="173.2323" />
+                <Point X="-101.1194" Y="175.9961" />
+                <Point X="-103.9199" Y="177.1654" />
+              </Points>
+            </Shape>
+          </Shapes>
+        </Pattern>
+        <Pattern PatternStyle="PatType1" Mounting="-1" Width="2509.8425" Height="615.1575" Orientation="0" LockTypeChange="N" Type="Zig-Zag" Float1="147.6378" Float2="196.8504" Float3="0" Int1="21" Int2="0">
+          <Name>SCART-F</Name>
+          <Origin X="-24.6063" Y="-184.5472" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+          <DefPad Style="PadT36" />
+          <Pads>
+            <Pad Id="1" Style="PadT36" X="-762.7953" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="PadT36" X="-688.9764" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>2</Number>
+            </Pad>
+            <Pad Id="3" Style="PadT36" X="-615.1575" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>3</Number>
+            </Pad>
+            <Pad Id="4" Style="PadT36" X="-541.3386" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>4</Number>
+            </Pad>
+            <Pad Id="5" Style="PadT36" X="-467.5197" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>5</Number>
+            </Pad>
+            <Pad Id="6" Style="PadT36" X="-393.7008" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>6</Number>
+            </Pad>
+            <Pad Id="7" Style="PadT36" X="-319.8819" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>7</Number>
+            </Pad>
+            <Pad Id="8" Style="PadT36" X="-246.063" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>8</Number>
+            </Pad>
+            <Pad Id="9" Style="PadT36" X="-172.2441" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>9</Number>
+            </Pad>
+            <Pad Id="10" Style="PadT36" X="-98.4252" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>10</Number>
+            </Pad>
+            <Pad Id="11" Style="PadT36" X="-24.6063" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>11</Number>
+            </Pad>
+            <Pad Id="12" Style="PadT36" X="49.2126" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>12</Number>
+            </Pad>
+            <Pad Id="13" Style="PadT36" X="123.0315" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>13</Number>
+            </Pad>
+            <Pad Id="14" Style="PadT36" X="196.8504" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>14</Number>
+            </Pad>
+            <Pad Id="15" Style="PadT36" X="270.6693" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>15</Number>
+            </Pad>
+            <Pad Id="16" Style="PadT36" X="344.4882" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>16</Number>
+            </Pad>
+            <Pad Id="17" Style="PadT36" X="418.3071" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>17</Number>
+            </Pad>
+            <Pad Id="18" Style="PadT36" X="492.126" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>18</Number>
+            </Pad>
+            <Pad Id="19" Style="PadT36" X="565.9449" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>19</Number>
+            </Pad>
+            <Pad Id="20" Style="PadT36" X="639.7638" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>20</Number>
+            </Pad>
+            <Pad Id="21" Style="PadT36" X="713.5827" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>21</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Id="1" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="959.7638" Y="12.3031" />
+                <Point X="1008.9567" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="2" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-1058.1496" Y="12.3031" />
+                <Point X="-1008.9567" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="3" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-885.7231" Y="307.5787" />
+                <Point X="885.7231" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="4" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="885.7231" Y="12.3031" />
+                <Point X="1254.9213" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="5" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-1254.9213" Y="12.3031" />
+                <Point X="-885.7231" Y="-86.122" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Holes />
+        </Pattern>
+        <Pattern PatternStyle="PatType2" Type="Free" Width="125.984252" Height="55.11811" Mounting="-1" Orientation="0" LockTypeChange="N">
+          <Name>0805</Name>
+          <Origin X="0" Y="0" Cross="Y" Circle="N" Common="Hide" />
+          <DefPad Style="SMD0805" />
+          <Pads>
+            <Pad Id="1" Style="SMD0805" X="-39.370079" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="SMD0805" X="39.370079" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>2</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Type="Line" Layer="Top Silk" LineWidth="4.724409">
+              <Points>
+                <Point X="-21.653543" Y="-33.464567" />
+                <Point X="21.653543" Y="-33.464567" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" Layer="Top Silk" LineWidth="4.724409">
+              <Points>
+                <Point X="-21.653543" Y="33.464567" />
+                <Point X="21.653543" Y="33.464567" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Holes />
+        </Pattern>
+        <Pattern PatternStyle="PatType3" Mounting="Through" Width="201.4951" Height="167.3176" Orientation="90" LockTypeChange="Y" Type="Free" Float1="0" Float2="0" Float3="0" Int1="0" Int2="0">
+          <Name>TO-92</Name>
+          <Origin X="0" Y="-30.5157" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+          <DefPad Style="PadT9" />
+          <Pads>
+            <Pad Id="1" Style="PadT10" X="-50" Y="-30.5157" Angle="1.5708" Locked="N" Side="Top">
+              <Number>1</Number>
+              <Note>1</Note>
+            </Pad>
+            <Pad Id="2" Style="PadT9" X="0" Y="-30.5157" Angle="1.5708" Locked="N" Side="Top">
+              <Number>2</Number>
+              <Note>2</Note>
+            </Pad>
+            <Pad Id="3" Style="PadT9" X="50" Y="-30.5157" Angle="1.5708" Locked="N" Side="Top">
+              <Number>3</Number>
+              <Note>3</Note>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Id="1" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-75.6207" Y="-83.6588" />
+                <Point X="0" Y="83.6588" />
+                <Point X="75.6207" Y="-83.6588" />
+              </Points>
+            </Shape>
+            <Shape Id="2" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="75.6207" Y="-83.6588" />
+                <Point X="-75.6207" Y="-83.6588" />
+              </Points>
+            </Shape>
+          </Shapes>
+        </Pattern>
+        <Pattern PatternStyle="PatType4" Type="Free" Width="362.992126" Height="62.992126" Mounting="-1" Orientation="0" LockTypeChange="N">
+          <Name>BAT85_DO34_P7.62</Name>
+          <Origin X="0" Y="0" Cross="Y" Circle="N" Common="Hide" />
+          <DefPad Style="DIODE_THT" />
+          <Pads>
+            <Pad Id="1" Style="DIODE_THT" X="150" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="DIODE_THT" X="-150" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>2</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Type="Rectangle" Layer="Top Silk" LineWidth="4.724409">
+              <Points>
+                <Point X="-59.84252" Y="-31.496063" />
+                <Point X="59.84252" Y="31.496063" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" Layer="Top Silk" LineWidth="7.874016">
+              <Points>
+                <Point X="43.307087" Y="-31.496063" />
+                <Point X="43.307087" Y="31.496063" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Holes />
+        </Pattern>
+      </Patterns>
+      <Categories />
+    </Library>
+    <Categories />
+    <Components>
+      <Component ComponentStyle="CompType0">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="700" Height="1550" LockTypeChange="N">
+          <Name>BH-10 / DS1013_10</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="350" Y="675" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GND</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="525" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GND</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="375" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="3" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>R</Name>
+              <PadNumber>3</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="225" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="4" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>G</Name>
+              <PadNumber>4</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="75" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="5" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>B</Name>
+              <PadNumber>5</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-75" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="6" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>NC</Name>
+              <PadNumber>6</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-225" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="7" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>+5V</Name>
+              <PadNumber>7</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-375" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="8" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>HSYNC_N</Name>
+              <PadNumber>8</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-525" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="9" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>VSYNC_N</Name>
+              <PadNumber>9</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-675" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="10" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>NC</Name>
+              <PadNumber>10</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Rectangle" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-350" Y="-775" />
+                <Point X="350" Y="775" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType0" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType1">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="900" Height="3200" LockTypeChange="N">
+          <Name>SCART-F</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="-450" Y="1500" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO R OUT</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="1350" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO R IN</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="1200" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="3" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO L OUT</Name>
+              <PadNumber>3</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="1050" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="4" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO GND</Name>
+              <PadNumber>4</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="900" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="5" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>BLUE GND</Name>
+              <PadNumber>5</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="750" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="6" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO L IN</Name>
+              <PadNumber>6</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="600" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="7" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>BLUE</Name>
+              <PadNumber>7</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="450" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="8" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AV SWITCH / NC</Name>
+              <PadNumber>8</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="300" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="9" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GREEN GND</Name>
+              <PadNumber>9</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="150" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="10" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>DATA / NC</Name>
+              <PadNumber>10</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="11" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GREEN</Name>
+              <PadNumber>11</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-150" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="12" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>DATA / NC</Name>
+              <PadNumber>12</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-300" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="13" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RED GND</Name>
+              <PadNumber>13</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-450" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="14" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>DATA GND</Name>
+              <PadNumber>14</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-600" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="15" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RED</Name>
+              <PadNumber>15</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-750" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="16" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RGB SELECT</Name>
+              <PadNumber>16</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-900" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="17" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>VIDEO GND</Name>
+              <PadNumber>17</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1050" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="18" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RGB GND</Name>
+              <PadNumber>18</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1200" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="19" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>SYNC OUT</Name>
+              <PadNumber>19</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1350" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="20" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>VIDEO IN / NC</Name>
+              <PadNumber>20</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1500" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="21" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>SHIELD</Name>
+              <PadNumber>21</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Rectangle" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-450" Y="-1600" />
+                <Point X="450" Y="1600" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType1" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType2">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="700" Height="900" LockTypeChange="N">
+          <Name>2N3904</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="350" Y="-200" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>E</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-350" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>B</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="200" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="3" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>C</Name>
+              <PadNumber>3</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-350" Y="0" />
+                <Point X="-100" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-100" Y="-160" />
+                <Point X="-100" Y="160" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-100" Y="80" />
+                <Point X="100" Y="200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="200" />
+                <Point X="350" Y="200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-100" Y="-80" />
+                <Point X="100" Y="-200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="-200" />
+                <Point X="350" Y="-200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="-200" />
+                <Point X="25" Y="-181" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="-200" />
+                <Point X="52" Y="-139" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType3" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType3">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="200" Height="90" LockTypeChange="N">
+          <Name>RES_0805</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="-100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Rectangle" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-100" Y="-45" />
+                <Point X="100" Y="45" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType2" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType4">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="200" Height="130" LockTypeChange="N">
+          <Name>CAP_0805</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="-100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-20" Y="-65" />
+                <Point X="-20" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="20" Y="-65" />
+                <Point X="20" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-100" Y="0" />
+                <Point X="-20" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="20" Y="0" />
+                <Point X="100" Y="0" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType2" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType5">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="300" Height="130" LockTypeChange="N">
+          <Name>BAT85</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="150" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>K</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-150" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>A</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-150" Y="0" />
+                <Point X="-65" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-65" Y="-65" />
+                <Point X="-65" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-65" Y="65" />
+                <Point X="65" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="0" />
+                <Point X="-65" Y="-65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="-65" />
+                <Point X="65" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="0" />
+                <Point X="150" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="65" />
+                <Point X="90" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="90" Y="65" />
+                <Point X="90" Y="45" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="-65" />
+                <Point X="40" Y="-65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="40" Y="-65" />
+                <Point X="40" Y="-45" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType4" />
+        </Part>
+      </Component>
+    </Components>
+  </Library>
+  <Board>
+    <BoardOutline>
+      <Points>
+        <Point X="0" Y="0" Arc="N" />
+        <Point X="2755.905512" Y="0" Arc="N" />
+        <Point X="2755.905512" Y="1259.84252" Arc="N" />
+        <Point X="0" Y="1259.84252" Arc="N" />
+      </Points>
+    </BoardOutline>
+    <Settings>
+      <Units>mm</Units>
+    </Settings>
+    <CopperLayers>
+      <Lay Id="0" Type="Signal" PlanePad="By Pads" NetId="-1" PlaneRing="7.874016" Color="255" Locked="N">
+        <Name>Top</Name>
+      </Lay>
+      <Lay Id="1" Type="Signal" PlanePad="By Pads" NetId="-1" PlaneRing="7.874016" Color="16711680" Locked="N">
+        <Name>Bottom</Name>
+      </Lay>
+    </CopperLayers>
+    <ViaStyles>
+      <ViaStyle Id="0" Size="27.559055" HoleSize="13.779528" Lay1="0" Lay2="1">
+        <Name>0.70 / 0.35 mm</Name>
+      </ViaStyle>
+    </ViaStyles>
+    <NetClasses>
+      <NetClass Id="0" UpdateId="0" Type="Normal" AllLayers="Y" AllVias="Y" PerformDRC="Y">
+        <Name>Default</Name>
+        <LayProperties>
+          <LayProperty Width="13.779528" MinWidth="11.811024" MaxWidth="118.110236" Clearance="7.874016" Neck_Width="11.811024" Neck_MaxLength="0">
+            <LayerName>Top</LayerName>
+          </LayProperty>
+        </LayProperties>
+      </NetClass>
+    </NetClasses>
+    <DRC AllLayers="Y" CheckClearance="Y" CheckSize="Y" CheckSameComponentPads="Y" CheckSilk="Y" SilkClearance="5.905512">
+      <LaySizes>
+        <LaySize Lay="0" MinTrace="11.811024" MinDrill="11.811024" MinRing="5.905512" MaxRing="196.850394" MaxPlatedHole="196.850394" MaxNonPlatedHole="196.850394" />
+      </LaySizes>
+    </DRC>
+    <ConnectivityCheck Traces="Y" Shapes="Y" CopperPours="Y" />
+    <Components>
+      <Component Id="0" UpdateId="100" PatternStyle="PatType0" X="1377.952756" Y="236.220472" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>XP1</RefDes>
+        <Name>BH-10 / DS1013_10</Name>
+        <Value>IDC-10 male</Value>
+        <RefDesMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="0" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="0" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="0" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="0" InternalConnection="-1" />
+          <Pad Id="2" NetId="0" InternalConnection="-1" />
+          <Pad Id="3" NetId="1" InternalConnection="-1" />
+          <Pad Id="4" NetId="2" InternalConnection="-1" />
+          <Pad Id="5" NetId="3" InternalConnection="-1" />
+          <Pad Id="6" NetId="-1" InternalConnection="-1" />
+          <Pad Id="7" NetId="4" InternalConnection="-1" />
+          <Pad Id="8" NetId="5" InternalConnection="-1" />
+          <Pad Id="9" NetId="6" InternalConnection="-1" />
+          <Pad Id="10" NetId="-1" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="1" UpdateId="101" PatternStyle="PatType1" X="1377.952756" Y="984.251969" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>XS1</RefDes>
+        <Name>SCART-F</Name>
+        <Value>RGB OUT</Value>
+        <RefDesMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="0" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="0" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="0" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="-1" InternalConnection="-1" />
+          <Pad Id="2" NetId="-1" InternalConnection="-1" />
+          <Pad Id="3" NetId="-1" InternalConnection="-1" />
+          <Pad Id="4" NetId="0" InternalConnection="-1" />
+          <Pad Id="5" NetId="0" InternalConnection="-1" />
+          <Pad Id="6" NetId="-1" InternalConnection="-1" />
+          <Pad Id="7" NetId="3" InternalConnection="-1" />
+          <Pad Id="8" NetId="-1" InternalConnection="-1" />
+          <Pad Id="9" NetId="0" InternalConnection="-1" />
+          <Pad Id="10" NetId="-1" InternalConnection="-1" />
+          <Pad Id="11" NetId="2" InternalConnection="-1" />
+          <Pad Id="12" NetId="-1" InternalConnection="-1" />
+          <Pad Id="13" NetId="0" InternalConnection="-1" />
+          <Pad Id="14" NetId="0" InternalConnection="-1" />
+          <Pad Id="15" NetId="1" InternalConnection="-1" />
+          <Pad Id="16" NetId="7" InternalConnection="-1" />
+          <Pad Id="17" NetId="0" InternalConnection="-1" />
+          <Pad Id="18" NetId="0" InternalConnection="-1" />
+          <Pad Id="19" NetId="8" InternalConnection="-1" />
+          <Pad Id="20" NetId="-1" InternalConnection="-1" />
+          <Pad Id="21" NetId="0" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="2" UpdateId="102" PatternStyle="PatType3" X="1929.133858" Y="452.755906" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>Q1</RefDes>
+        <Name>2N3904</Name>
+        <Value>NPN emitter follower</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="-114.173228" Y="51.181102" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="-114.173228" Y="51.181102" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="-114.173228" Y="51.181102" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="9" InternalConnection="-1" />
+          <Pad Id="2" NetId="10" InternalConnection="-1" />
+          <Pad Id="3" NetId="4" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="3" UpdateId="103" PatternStyle="PatType2" X="1929.133858" Y="610.23622" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>R1</RefDes>
+        <Name>RES_0805</Name>
+        <Value>200</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="9" InternalConnection="-1" />
+          <Pad Id="2" NetId="8" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="4" UpdateId="104" PatternStyle="PatType2" X="2086.614173" Y="610.23622" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>R2</RefDes>
+        <Name>RES_0805</Name>
+        <Value>120</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="8" InternalConnection="-1" />
+          <Pad Id="2" NetId="0" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="5" UpdateId="105" PatternStyle="PatType2" X="1496.062992" Y="511.811024" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>R3</RefDes>
+        <Name>RES_0805</Name>
+        <Value>180</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="55.11811" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="55.11811" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="55.11811" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="4" InternalConnection="-1" />
+          <Pad Id="2" NetId="7" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="6" UpdateId="106" PatternStyle="PatType2" X="2125.984252" Y="452.755906" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>C1</RefDes>
+        <Name>CAP_0805</Name>
+        <Value>100nF</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="39.370079" Y="-106.299213" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="39.370079" Y="-106.299213" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="39.370079" Y="-106.299213" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="4" InternalConnection="-1" />
+          <Pad Id="2" NetId="0" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="7" UpdateId="107" PatternStyle="PatType2" X="1259.84252" Y="433.070866" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>C2</RefDes>
+        <Name>CAP_0805</Name>
+        <Value>1uF / 16V</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="-39.370079" Y="55.11811" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="-39.370079" Y="55.11811" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="-39.370079" Y="55.11811" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="4" InternalConnection="-1" />
+          <Pad Id="2" NetId="0" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="8" UpdateId="108" PatternStyle="PatType4" X="629.92126" Y="433.070866" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>D1</RefDes>
+        <Name>BAT85</Name>
+        <Value>Schottky DO-34</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-70.866142" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-70.866142" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-70.866142" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="5" InternalConnection="-1" />
+          <Pad Id="2" NetId="10" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="9" UpdateId="109" PatternStyle="PatType4" X="629.92126" Y="236.220472" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>D2</RefDes>
+        <Name>BAT85</Name>
+        <Value>Schottky DO-34</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-70.866142" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-70.866142" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-70.866142" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="6" InternalConnection="-1" />
+          <Pad Id="2" NetId="10" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="10" UpdateId="110" PatternStyle="PatType2" X="590.551181" Y="610.23622" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>R4</RefDes>
+        <Name>RES_0805</Name>
+        <Value>4.7k</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="4" InternalConnection="-1" />
+          <Pad Id="2" NetId="10" InternalConnection="-1" />
+        </Pads>
+      </Component>
+      <Component Id="11" UpdateId="111" PatternStyle="PatType2" X="826.771654" Y="610.23622" Side="Top" Angle="0" MarkingFontSize="3.5" GridAlign="Origin" Locked="N">
+        <RefDes>R5</RefDes>
+        <Name>RES_0805</Name>
+        <Value>4.7k</Value>
+        <RefDesMarking>
+          <Silk Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </RefDesMarking>
+        <NameMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </NameMarking>
+        <ValueMarking>
+          <Silk Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-78.740157" Angle="0" />
+          <Assy Show="Common" Align="Common" />
+        </ValueMarking>
+        <Pads>
+          <Pad Id="1" NetId="10" InternalConnection="-1" />
+          <Pad Id="2" NetId="0" InternalConnection="-1" />
+        </Pads>
+      </Component>
+    </Components>
+    <Nets>
+      <Net Id="0" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>GND</Name>
+        <Pads>
+          <Item Comp="0" Pad="1" />
+          <Item Comp="0" Pad="2" />
+          <Item Comp="1" Pad="4" />
+          <Item Comp="1" Pad="5" />
+          <Item Comp="1" Pad="9" />
+          <Item Comp="1" Pad="13" />
+          <Item Comp="1" Pad="14" />
+          <Item Comp="1" Pad="17" />
+          <Item Comp="1" Pad="18" />
+          <Item Comp="1" Pad="21" />
+          <Item Comp="4" Pad="2" />
+          <Item Comp="6" Pad="2" />
+          <Item Comp="7" Pad="2" />
+          <Item Comp="11" Pad="2" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="1" Point1="-1" Connected2="Pad" Object2="0" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1576.992156" Y="283.587972" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1578.740157" Y="283.464567" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1578.740157" Y="185.03937" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1576.992156" Y="183.587972" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="1" Connected1="Pad" Object1="0" SubObject1="1" Point1="-1" Connected2="Pad" Object2="7" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1576.992156" Y="283.587972" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1578.740157" Y="283.464567" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1527.559055" Y="334.645669" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1515.748031" Y="334.645669" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1507.874016" Y="342.519685" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1354.330709" Y="342.519685" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1342.519685" Y="354.330709" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1338.582677" Y="354.330709" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="8" X="1299.212598" Y="393.700787" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1299.212598" Y="417.322835" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="10" X="1299.212599" Y="433.070866" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="2" Connected1="Pad" Object1="7" SubObject1="2" Point1="-1" Connected2="Pad" Object2="1" SubObject2="9" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1299.212599" Y="433.070866" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1287.401575" Y="444.88189" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1275.590551" Y="444.88189" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1271.653543" Y="448.818898" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1267.716535" Y="448.818898" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="5" X="1192.913386" Y="523.622047" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="6" X="1204.724409" Y="535.433071" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1204.724409" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1205.708656" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="3" Connected1="Pad" Object1="1" SubObject1="9" Point1="-1" Connected2="Pad" Object2="1" SubObject2="5" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1205.708656" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1204.724409" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1196.850394" Y="692.913386" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1192.913386" Y="692.913386" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1188.976378" Y="688.976378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1181.102362" Y="688.976378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1177.165354" Y="685.03937" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1149.606299" Y="685.03937" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1145.669291" Y="681.102362" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1114.173228" Y="681.102362" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1098.425197" Y="665.354331" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1094.488189" Y="665.354331" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1090.551181" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1086.614173" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1082.677165" Y="657.480315" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1031.496063" Y="657.480315" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="1027.559055" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="1023.622047" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="984.251969" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="19" X="909.448819" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="20" X="910.433056" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="4" Connected1="Pad" Object1="1" SubObject1="5" Point1="-1" Connected2="Pad" Object2="11" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="910.433056" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="909.448819" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="897.637795" Y="688.976378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="897.637795" Y="677.165354" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="893.700787" Y="673.228346" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="893.700787" Y="665.354331" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="866.141732" Y="637.795276" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="866.141733" Y="610.23622" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="5" Connected1="Pad" Object1="1" SubObject1="5" Point1="-1" Connected2="Pad" Object2="1" SubObject2="4" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="910.433056" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="909.448819" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="885.826772" Y="724.409449" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="885.826772" Y="751.968504" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="834.645669" Y="803.149606" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="834.645669" Y="897.637795" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="836.614156" Y="898.129969" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="6" Connected1="Pad" Object1="1" SubObject1="9" Point1="-1" Connected2="Pad" Object2="1" SubObject2="13" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1205.708656" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1204.724409" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1212.598425" Y="692.913386" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1216.535433" Y="692.913386" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1220.472441" Y="688.976378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1228.346457" Y="688.976378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1232.283465" Y="685.03937" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1259.84252" Y="685.03937" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1263.779528" Y="681.102362" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1299.212598" Y="681.102362" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1318.897638" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1322.834646" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1326.771654" Y="657.480315" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1377.952756" Y="657.480315" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1381.889764" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1385.826772" Y="661.417323" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="1389.76378" Y="665.354331" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="1393.700787" Y="665.354331" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="1429.133858" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="19" X="1500" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="20" X="1500.984256" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="7" Connected1="Pad" Object1="1" SubObject1="13" Point1="-1" Connected2="Pad" Object2="1" SubObject2="14" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1500.984256" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1500" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1523.622047" Y="724.409449" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1523.622047" Y="751.968504" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1574.80315" Y="803.149606" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1574.80315" Y="897.637795" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1574.803156" Y="898.129969" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="8" Connected1="Pad" Object1="1" SubObject1="13" Point1="-1" Connected2="Pad" Object2="1" SubObject2="17" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1500.984256" Y="701.279569" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1500" Y="700.787402" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1507.874016" Y="708.661417" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1511.811024" Y="708.661417" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1515.748031" Y="712.598425" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1523.622047" Y="712.598425" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1527.559055" Y="716.535433" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1547.244094" Y="716.535433" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1594.488189" Y="763.779528" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1598.425197" Y="763.779528" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1602.362205" Y="767.716535" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1606.299213" Y="767.716535" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1610.23622" Y="771.653543" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1688.976378" Y="771.653543" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1692.913386" Y="767.716535" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1696.850394" Y="767.716535" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="1700.787402" Y="763.779528" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="1704.724409" Y="763.779528" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="1767.716535" Y="700.787402" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="19" X="1795.275591" Y="700.787402" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="20" X="1796.259856" Y="701.279569" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="9" Connected1="Pad" Object1="1" SubObject1="17" Point1="-1" Connected2="Pad" Object2="1" SubObject2="18" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1796.259856" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1795.275591" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1818.897638" Y="724.409449" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1818.897638" Y="751.968504" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1870.07874" Y="803.149606" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1870.07874" Y="897.637795" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1870.078756" Y="898.129969" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="10" Connected1="Pad" Object1="1" SubObject1="17" Point1="-1" Connected2="Pad" Object2="1" SubObject2="21" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1796.259856" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1795.275591" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1803.149606" Y="708.661417" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1807.086614" Y="708.661417" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1811.023622" Y="712.598425" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1818.897638" Y="712.598425" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1822.834646" Y="716.535433" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1850.393701" Y="716.535433" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1854.330709" Y="720.472441" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1889.76378" Y="720.472441" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1909.448819" Y="740.15748" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1913.385827" Y="740.15748" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1917.322835" Y="744.094488" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1972.440945" Y="744.094488" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1976.377953" Y="740.15748" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1980.314961" Y="740.15748" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="2019.685039" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="2090.551181" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="2091.535456" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="11" Connected1="Pad" Object1="1" SubObject1="21" Point1="-1" Connected2="Pad" Object2="4" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="2091.535456" Y="701.279569" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="2090.551181" Y="700.787402" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="2094.488189" Y="696.850394" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="2094.488189" Y="641.732283" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="2125.984252" Y="610.23622" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="12" Connected1="Pad" Object1="4" SubObject1="2" Point1="-1" Connected2="Pad" Object2="6" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="2125.984252" Y="610.23622" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="2165.354331" Y="570.866142" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="2165.354331" Y="452.755906" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="2165.354331" Y="452.755906" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="1" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>RED</Name>
+        <Pads>
+          <Item Comp="0" Pad="3" />
+          <Item Comp="1" Pad="15" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="3" Point1="-1" Connected2="Pad" Object2="1" SubObject2="15" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1476.992156" Y="283.587972" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1476.377953" Y="283.464567" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1488.188976" Y="295.275591" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1488.188976" Y="511.811024" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1649.606299" Y="673.228346" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1649.606299" Y="700.787402" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1648.622056" Y="701.279569" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="2" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>GREEN</Name>
+        <Pads>
+          <Item Comp="0" Pad="4" />
+          <Item Comp="1" Pad="11" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="4" Point1="-1" Connected2="Pad" Object2="1" SubObject2="11" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1476.992156" Y="183.587972" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1476.377953" Y="185.03937" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1484.251969" Y="177.165354" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1488.188976" Y="177.165354" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1492.125984" Y="173.228346" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1500" Y="173.228346" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1503.937008" Y="169.291339" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1507.874016" Y="169.291339" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1543.307087" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1547.244094" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1551.181102" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1559.055118" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1562.992126" Y="125.984252" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1590.551181" Y="125.984252" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1594.488189" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1602.362205" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="1606.299213" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="1610.23622" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="1625.984252" Y="149.606299" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="19" X="1625.984252" Y="153.543307" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="20" X="1629.92126" Y="157.480315" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="21" X="1629.92126" Y="161.417323" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="22" X="1633.858268" Y="165.354331" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="23" X="1633.858268" Y="307.086614" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="24" X="1625.984252" Y="314.96063" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="25" X="1625.984252" Y="318.897638" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="26" X="1551.181102" Y="393.700787" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="27" X="1543.307087" Y="393.700787" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="28" X="1539.370079" Y="397.637795" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="29" X="1535.433071" Y="397.637795" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="30" X="1496.062992" Y="437.007874" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="31" X="1456.692913" Y="437.007874" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="32" X="1452.755906" Y="440.944882" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="33" X="1452.755906" Y="484.251969" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="34" X="1448.818898" Y="488.188976" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="35" X="1448.818898" Y="606.299213" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="36" X="1354.330709" Y="700.787402" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="37" X="1353.346456" Y="701.279569" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="3" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>BLUE</Name>
+        <Pads>
+          <Item Comp="0" Pad="5" />
+          <Item Comp="1" Pad="7" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="5" Point1="-1" Connected2="Pad" Object2="1" SubObject2="7" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1376.992156" Y="283.587972" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1377.952756" Y="283.464567" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1370.07874" Y="291.338583" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1370.07874" Y="389.76378" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1059.055118" Y="700.787402" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1058.070856" Y="701.279569" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="4" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>+5V</Name>
+        <Pads>
+          <Item Comp="0" Pad="7" />
+          <Item Comp="2" Pad="3" />
+          <Item Comp="5" Pad="1" />
+          <Item Comp="6" Pad="1" />
+          <Item Comp="7" Pad="1" />
+          <Item Comp="10" Pad="1" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="7" Point1="-1" Connected2="Pad" Object2="7" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1276.992156" Y="283.587972" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1275.590551" Y="283.464567" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1271.653543" Y="287.401575" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1271.653543" Y="326.771654" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1220.472441" Y="377.952756" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1220.472441" Y="433.070866" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="1" Connected1="Pad" Object1="7" SubObject1="1" Point1="-1" Connected2="Pad" Object2="5" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1220.472441" Y="433.070866" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1259.84252" Y="393.700787" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1259.84252" Y="389.76378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1263.779528" Y="385.826772" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1330.708661" Y="385.826772" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1334.645669" Y="389.76378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1338.582677" Y="389.76378" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1362.204724" Y="413.385827" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1362.204724" Y="440.944882" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="9" X="1417.322835" Y="496.062992" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1417.322835" Y="515.748031" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="11" X="1421.259843" Y="511.811024" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1456.692913" Y="511.811024" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="2" Connected1="Pad" Object1="5" SubObject1="1" Point1="-1" Connected2="Pad" Object2="2" SubObject2="3" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1456.692913" Y="511.811024" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1480.314961" Y="535.433071" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1480.314961" Y="562.992126" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1484.251969" Y="566.929134" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1484.251969" Y="590.551181" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="5" X="1594.488189" Y="700.787402" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1594.488189" Y="716.535433" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1598.425197" Y="720.472441" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1598.425197" Y="724.409449" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1614.173228" Y="740.15748" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1618.110236" Y="740.15748" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1622.047244" Y="744.094488" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1677.165354" Y="744.094488" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1681.102362" Y="740.15748" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1685.03937" Y="740.15748" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1704.724409" Y="720.472441" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="1704.724409" Y="716.535433" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="1940.944882" Y="480.314961" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="1944.88189" Y="480.314961" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="19" X="1948.818898" Y="476.377953" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="20" X="1952.755906" Y="476.377953" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="21" X="1972.440945" Y="456.692913" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="22" X="1972.440945" Y="429.133858" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="23" X="1980.314961" Y="421.259843" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="24" X="1979.133858" Y="422.240206" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="3" Connected1="Pad" Object1="2" SubObject1="3" Point1="-1" Connected2="Pad" Object2="6" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1979.133858" Y="422.240206" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1980.314961" Y="421.259843" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="2055.11811" Y="421.259843" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="2086.614173" Y="452.755906" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="4" Connected1="Pad" Object1="7" SubObject1="1" Point1="-1" Connected2="Pad" Object2="10" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1220.472441" Y="433.070866" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1125.984252" Y="433.070866" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="2" X="948.818898" Y="610.23622" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="551.181102" Y="610.23622" Lay="1" Width="17.716535" Jumper="0" Arc="N" ViaStyle="0" PairPoint="-1" />
+              <Point Id="4" X="551.181102" Y="610.23622" Lay="0" Width="17.716535" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="5" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>HSYNC_N</Name>
+        <Pads>
+          <Item Comp="0" Pad="8" />
+          <Item Comp="8" Pad="1" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="8" Point1="-1" Connected2="Pad" Object2="8" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1276.992156" Y="183.587972" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1275.590551" Y="185.03937" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1267.716535" Y="177.165354" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1263.779528" Y="177.165354" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1259.84252" Y="173.228346" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1251.968504" Y="173.228346" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1220.472441" Y="141.732283" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1216.535433" Y="141.732283" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1208.661417" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1204.724409" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1200.787402" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1192.913386" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1188.976378" Y="125.984252" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1165.354331" Y="125.984252" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1161.417323" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="1153.543307" Y="129.92126" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="1149.606299" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="1145.669291" Y="133.858268" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="18" X="1141.732283" Y="137.795276" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="19" X="1137.795276" Y="137.795276" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="20" X="897.637795" Y="377.952756" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="21" X="834.645669" Y="377.952756" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="22" X="779.527559" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="23" X="779.92126" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="6" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>VSYNC_N</Name>
+        <Pads>
+          <Item Comp="0" Pad="9" />
+          <Item Comp="9" Pad="1" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="0" SubObject1="9" Point1="-1" Connected2="Pad" Object2="9" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1176.992156" Y="283.587972" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1177.165354" Y="283.464567" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1165.354331" Y="271.653543" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1153.543307" Y="271.653543" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1145.669291" Y="263.779528" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1125.984252" Y="263.779528" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1118.110236" Y="255.905512" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1023.622047" Y="255.905512" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1003.937008" Y="236.220472" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="779.92126" Y="236.220472" Lay="1" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="7" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>RGB_SELECT</Name>
+        <Pads>
+          <Item Comp="1" Pad="16" />
+          <Item Comp="5" Pad="2" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="1" SubObject1="16" Point1="-1" Connected2="Pad" Object2="5" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1722.440956" Y="898.129969" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1724.409449" Y="897.637795" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1712.598425" Y="885.826772" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1712.598425" Y="692.913386" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1535.433071" Y="515.748031" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1535.433071" Y="511.811024" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="8" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>CSYNC_75</Name>
+        <Pads>
+          <Item Comp="1" Pad="19" />
+          <Item Comp="3" Pad="2" />
+          <Item Comp="4" Pad="1" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="1" SubObject1="19" Point1="-1" Connected2="Pad" Object2="3" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1943.897656" Y="701.279569" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1944.88189" Y="700.787402" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1968.503937" Y="677.165354" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1968.503937" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1968.503937" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="1" Connected1="Pad" Object1="3" SubObject1="2" Point1="-1" Connected2="Pad" Object2="4" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1968.503937" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="2047.244094" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="9" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>CSYNC_BUF</Name>
+        <Pads>
+          <Item Comp="2" Pad="1" />
+          <Item Comp="3" Pad="1" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="2" SubObject1="1" Point1="-1" Connected2="Pad" Object2="3" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1879.133858" Y="422.240206" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1877.952756" Y="421.259843" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1889.76378" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1889.76378" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1889.763779" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+      <Net Id="10" NetClass="0" RouteMode="Ratlines" HideRatlines="N" Locked="N">
+        <Name>CSYNC_RAW</Name>
+        <Pads>
+          <Item Comp="2" Pad="2" />
+          <Item Comp="8" Pad="2" />
+          <Item Comp="9" Pad="2" />
+          <Item Comp="10" Pad="2" />
+          <Item Comp="11" Pad="1" />
+        </Pads>
+        <Traces>
+          <Trace Id="0" Connected1="Pad" Object1="2" SubObject1="2" Point1="-1" Connected2="Pad" Object2="11" SubObject2="1" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="1929.133858" Y="422.240206" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="1929.133858" Y="421.259843" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="1917.322835" Y="409.448819" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="1917.322835" Y="385.826772" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="1913.385827" Y="381.889764" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="1913.385827" Y="377.952756" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="1901.574803" Y="366.141732" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="7" X="1712.598425" Y="366.141732" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="8" X="1661.417323" Y="417.322835" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="9" X="1555.11811" Y="417.322835" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="10" X="1503.937008" Y="468.503937" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="11" X="1421.259843" Y="468.503937" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="12" X="1397.637795" Y="492.125984" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="13" X="1015.748031" Y="492.125984" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="14" X="1003.937008" Y="503.937008" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="15" X="893.700787" Y="503.937008" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="16" X="787.401575" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="17" X="787.401575" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="1" Connected1="Pad" Object1="11" SubObject1="1" Point1="-1" Connected2="Pad" Object2="10" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="787.401575" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="629.92126" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="2" Connected1="Pad" Object1="10" SubObject1="2" Point1="-1" Connected2="Pad" Object2="8" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="629.92126" Y="610.23622" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="618.110236" Y="598.425197" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="618.110236" Y="586.614173" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="614.173228" Y="582.677165" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="4" X="614.173228" Y="566.929134" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="5" X="480.314961" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="6" X="479.92126" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+          <Trace Id="3" Connected1="Pad" Object1="8" SubObject1="2" Point1="-1" Connected2="Pad" Object2="9" SubObject2="2" Point2="-1" Group="-1" PairSeparateTrace="-1">
+            <Points>
+              <Point Id="0" X="479.92126" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="1" X="480.314961" Y="433.070866" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="2" X="480.314961" Y="236.220472" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+              <Point Id="3" X="479.92126" Y="236.220472" Lay="0" Width="13.779528" Jumper="0" Arc="N" ViaStyle="-1" PairPoint="-1" />
+            </Points>
+          </Trace>
+        </Traces>
+      </Net>
+    </Nets>
+    <Ratlines />
+    <Shapes>
+      <Shape Type="Obround" Id="0" Layer="Board Cutout">
+        <Points>
+          <Point X="94.488189" Y="251.968504" />
+          <Point X="220.472441" Y="377.952756" />
+        </Points>
+      </Shape>
+      <Shape Type="Obround" Id="1" Layer="Board Cutout">
+        <Points>
+          <Point X="2535.433071" Y="251.968504" />
+          <Point X="2661.417323" Y="377.952756" />
+        </Points>
+      </Shape>
+      <Shape Type="Text" Id="2" Layer="Top Silk" FontVector="Y" FontSize="4" FontWidth="-2" FontScale="1" Angle="0" HorzAlign="Left" VertAlign="Bottom" TextAlign="Left">
+        <Points>
+          <Point X="905.511811" Y="78.740157" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>XP1  BH-10</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="3" Layer="Top Silk" FontVector="Y" FontSize="4" FontWidth="-2" FontScale="1" Angle="0" HorzAlign="Left" VertAlign="Bottom" TextAlign="Left">
+        <Points>
+          <Point X="1062.992126" Y="1181.102362" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>SCART RGB OUT</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="4" Layer="Top Silk" FontVector="Y" FontSize="4" FontWidth="-2" FontScale="1" Angle="0" HorzAlign="Left" VertAlign="Bottom" TextAlign="Left">
+        <Points>
+          <Point X="236.220472" Y="78.740157" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>SCART rev2</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="5" Layer="Top Silk" FontVector="Y" FontSize="4" FontWidth="-2" FontScale="1" Angle="0" HorzAlign="Left" VertAlign="Bottom" TextAlign="Left">
+        <Points>
+          <Point X="1692.913386" Y="236.220472" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>1</TextLine>
+        </TextLines>
+      </Shape>
+    </Shapes>
+  </Board>
+</Source>

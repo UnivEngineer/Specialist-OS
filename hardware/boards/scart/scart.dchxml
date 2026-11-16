@@ -1,0 +1,2250 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Source Type="DipTrace-Schematic" Version="5.1.0.3" Units="mil">
+  <Library Type="DipTrace-ComponentLibrary" Version="5.1.0.3" Units="mil">
+    <Library Type="DipTrace-PatternLibrary" Version="5.1.0.3" Units="mil">
+      <PadStyles>
+        <PadStyle Name="PadT36" Type="Through" HoleType="Round" Hole="31.4961" Side="Top">
+          <MainStack Shape="Obround" Width="68.8976" Height="49.2126" XOff="0" YOff="0" />
+        </PadStyle>
+        <PadStyle Name="PadT8" Type="Through" HoleType="Round" Hole="39.3701" Side="Top">
+          <MainStack Shape="Obround" Width="78.7402" Height="78.7402" XOff="0" YOff="0" />
+        </PadStyle>
+        <PadStyle Name="PadT9" Type="Through" HoleType="Round" Hole="27.5591" Side="Top">
+          <MainStack Shape="Obround" Width="78.7402" Height="39.3701" XOff="0" YOff="0" />
+        </PadStyle>
+        <PadStyle Name="PadT10" Type="Through" HoleType="Round" Hole="27.5591" Side="Top">
+          <MainStack Shape="Polygon" Width="78.7402" Height="39.3701" XOff="0" YOff="0">
+            <Points>
+              <Point X="-29.5276" Y="19.685" />
+              <Point X="-39.3701" Y="9.8425" />
+              <Point X="-39.3701" Y="-9.8425" />
+              <Point X="-29.5276" Y="-19.685" />
+              <Point X="29.5276" Y="-19.685" />
+              <Point X="39.3701" Y="-9.8425" />
+              <Point X="39.3701" Y="9.8425" />
+              <Point X="29.5276" Y="19.685" />
+            </Points>
+          </MainStack>
+        </PadStyle>
+        <PadStyle Name="SMD0805" Type="Surface" Side="Top">
+          <MainStack Shape="Rectangle" Width="47.244094" Height="55.11811" XOff="0" YOff="0" Corner="0" />
+        </PadStyle>
+        <PadStyle Name="DIODE_THT" Type="Through" Side="Top" HoleType="Round" Hole="31.496063">
+          <MainStack Shape="Obround" Width="62.992126" Height="62.992126" XOff="0" YOff="0" Corner="0" />
+        </PadStyle>
+      </PadStyles>
+      <Patterns>
+        <Pattern PatternStyle="PatType0" Mounting="-1" Width="800.0002" Height="354.3308" Orientation="0" LockTypeChange="N" Type="Free" Float1="0" Float2="0" Float3="0" Int1="0" Int2="0">
+          <Name>DS1013_10</Name>
+          <Origin X="-0.9606" Y="-2.6325" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+          <DefPad Style="PadT8" />
+          <Pads>
+            <Pad Id="1" Style="PadT8" X="199.0394" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="PadT8" X="199.0394" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>2</Number>
+            </Pad>
+            <Pad Id="3" Style="PadT8" X="99.0394" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>3</Number>
+            </Pad>
+            <Pad Id="4" Style="PadT8" X="99.0394" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>4</Number>
+            </Pad>
+            <Pad Id="5" Style="PadT8" X="-0.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>5</Number>
+            </Pad>
+            <Pad Id="6" Style="PadT8" X="-0.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>6</Number>
+            </Pad>
+            <Pad Id="7" Style="PadT8" X="-100.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>7</Number>
+            </Pad>
+            <Pad Id="8" Style="PadT8" X="-100.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>8</Number>
+            </Pad>
+            <Pad Id="9" Style="PadT8" X="-200.9606" Y="47.3675" Angle="0" Locked="N" Side="Top">
+              <Number>9</Number>
+            </Pad>
+            <Pad Id="10" Style="PadT8" X="-200.9606" Y="-52.6325" Angle="0" Locked="N" Side="Top">
+              <Number>10</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Id="1" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="62.4685" />
+                <Point X="-354.7205" Y="-55.6654" />
+              </Points>
+            </Shape>
+            <Shape Id="2" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="-55.1339" />
+                <Point X="354.7205" Y="63" />
+              </Points>
+            </Shape>
+            <Shape Id="3" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="98.4331" />
+                <Point X="100" Y="98.4331" />
+              </Points>
+            </Shape>
+            <Shape Id="4" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="-120.0827" />
+                <Point X="354.7205" Y="127.9488" />
+              </Points>
+            </Shape>
+            <Shape Id="5" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-350.8005" Y="-124.0157" />
+                <Point X="350.8005" Y="-124.0157" />
+              </Points>
+            </Shape>
+            <Shape Id="6" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="350.8005" Y="131.8819" />
+                <Point X="103.9199" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="7" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="127.9488" />
+                <Point X="-354.7205" Y="-120.0827" />
+              </Points>
+            </Shape>
+            <Shape Id="8" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.9199" Y="131.8819" />
+                <Point X="-350.8005" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="9" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="127.9488" />
+                <Point X="353.5997" Y="130.748" />
+                <Point X="350.8005" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="10" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-350.8005" Y="131.8819" />
+                <Point X="-353.5997" Y="130.748" />
+                <Point X="-354.7205" Y="127.9488" />
+              </Points>
+            </Shape>
+            <Shape Id="11" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="350.8005" Y="-124.0157" />
+                <Point X="353.5997" Y="-122.8465" />
+                <Point X="354.7205" Y="-120.0827" />
+              </Points>
+            </Shape>
+            <Shape Id="12" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="-120.0827" />
+                <Point X="-353.5997" Y="-122.8465" />
+                <Point X="-350.8005" Y="-124.0157" />
+              </Points>
+            </Shape>
+            <Shape Id="13" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-347.5197" Y="66.4016" />
+                <Point X="-348.0801" Y="66.4016" />
+              </Points>
+            </Shape>
+            <Shape Id="14" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="347.5197" Y="66.9331" />
+                <Point X="348.0801" Y="66.9331" />
+              </Points>
+            </Shape>
+            <Shape Id="15" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="-59.5984" />
+                <Point X="-348.0801" Y="-59.5984" />
+              </Points>
+            </Shape>
+            <Shape Id="16" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="-59.0669" />
+                <Point X="348.0801" Y="-59.0669" />
+              </Points>
+            </Shape>
+            <Shape Id="17" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-354.7205" Y="66.4016" />
+                <Point X="-348.0801" Y="66.4016" />
+              </Points>
+            </Shape>
+            <Shape Id="18" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="347.5197" Y="-59.0669" />
+                <Point X="348.0801" Y="-59.0669" />
+              </Points>
+            </Shape>
+            <Shape Id="19" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="354.7205" Y="66.9331" />
+                <Point X="348.0801" Y="66.9331" />
+              </Points>
+            </Shape>
+            <Shape Id="20" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-347.5197" Y="-59.5984" />
+                <Point X="-348.0801" Y="-59.5984" />
+              </Points>
+            </Shape>
+            <Shape Id="21" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-396.0801" Y="177.1654" />
+                <Point X="-398.8806" Y="175.9961" />
+                <Point X="-400" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="22" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="400" Y="173.2323" />
+                <Point X="398.8806" Y="175.9961" />
+                <Point X="396.0801" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="23" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="396.0801" Y="-169.2992" />
+                <Point X="398.8806" Y="-168.1299" />
+                <Point X="400" Y="-165.3661" />
+              </Points>
+            </Shape>
+            <Shape Id="24" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.9199" Y="177.1654" />
+                <Point X="-396.0801" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="25" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-400" Y="173.2323" />
+                <Point X="-400" Y="-165.3661" />
+              </Points>
+            </Shape>
+            <Shape Id="26" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="329.1194" Y="-169.2992" />
+                <Point X="396.0801" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="27" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="7.9199" Y="-169.2992" />
+                <Point X="313.3596" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="28" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-396.0801" Y="-169.2992" />
+                <Point X="-329.1194" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="29" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="396.0801" Y="177.1654" />
+                <Point X="103.9199" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="30" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-400" Y="-165.3661" />
+                <Point X="-398.8806" Y="-168.1299" />
+                <Point X="-396.0801" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="31" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-313.3596" Y="-169.2992" />
+                <Point X="-7.8399" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="32" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="400" Y="-165.3661" />
+                <Point X="400" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="33" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="103.9199" Y="177.1654" />
+                <Point X="-103.9199" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="34" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="313.3596" Y="-169.2992" />
+                <Point X="329.1194" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="35" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-7.8399" Y="-169.2992" />
+                <Point X="7.9199" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="36" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-329.1194" Y="-169.2992" />
+                <Point X="-313.3596" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="37" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="329.1194" Y="-169.2992" />
+                <Point X="326.3202" Y="-170.4331" />
+                <Point X="325.1995" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="38" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="0" Y="-177.1654" />
+                <Point X="2.8005" Y="-175.9961" />
+                <Point X="3.9199" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="39" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="317.3596" Y="-173.2323" />
+                <Point X="317.3596" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="40" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-3.9199" Y="-173.2323" />
+                <Point X="-3.9199" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="41" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="0" Y="-177.1654" />
+                <Point X="-3.9199" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="42" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-325.1995" Y="-173.2323" />
+                <Point X="-325.1995" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="43" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-321.2795" Y="-177.1654" />
+                <Point X="-325.1995" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="44" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="7.9199" Y="-169.2992" />
+                <Point X="5.1194" Y="-170.4331" />
+                <Point X="3.9199" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="45" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="321.2795" Y="-177.1654" />
+                <Point X="324.0801" Y="-175.9961" />
+                <Point X="325.1995" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="46" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="321.2795" Y="-177.1654" />
+                <Point X="317.3596" Y="-177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="47" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-321.2795" Y="-177.1654" />
+                <Point X="-318.4803" Y="-175.9961" />
+                <Point X="-317.3596" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="48" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-313.3596" Y="-169.2992" />
+                <Point X="-316.1601" Y="-170.4331" />
+                <Point X="-317.3596" Y="-173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="49" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-325.1995" Y="-173.2323" />
+                <Point X="-326.3202" Y="-170.4331" />
+                <Point X="-329.1194" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="50" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-3.9199" Y="-173.2323" />
+                <Point X="-5.0394" Y="-170.4331" />
+                <Point X="-7.8399" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="51" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="317.3596" Y="-173.2323" />
+                <Point X="316.1601" Y="-170.4331" />
+                <Point X="313.3596" Y="-169.2992" />
+              </Points>
+            </Shape>
+            <Shape Id="52" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="170.8937" />
+                <Point X="100" Y="170.8937" />
+              </Points>
+            </Shape>
+            <Shape Id="53" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="161.0787" />
+                <Point X="100" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="54" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.9199" Y="131.8819" />
+                <Point X="-101.1194" Y="133.0512" />
+                <Point X="-100" Y="135.815" />
+              </Points>
+            </Shape>
+            <Shape Id="55" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="170.8937" />
+                <Point X="-96.0801" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="56" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="124.2283" />
+                <Point X="-100" Y="135.815" />
+              </Points>
+            </Shape>
+            <Shape Id="57" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="103.9199" Y="177.1654" />
+                <Point X="101.1194" Y="175.9961" />
+                <Point X="100" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="58" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="173.2323" />
+                <Point X="-100" Y="161.0787" />
+              </Points>
+            </Shape>
+            <Shape Id="59" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="103.1995" Y="177.0945" />
+                <Point X="103.3596" Y="177.1299" />
+              </Points>
+            </Shape>
+            <Shape Id="60" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-103.6798" Y="177.1654" />
+                <Point X="-103.7598" Y="177.1654" />
+              </Points>
+            </Shape>
+            <Shape Id="61" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="112.2165" />
+                <Point X="-100" Y="124.2283" />
+              </Points>
+            </Shape>
+            <Shape Id="62" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="135.815" />
+                <Point X="-100" Y="161.0787" />
+              </Points>
+            </Shape>
+            <Shape Id="63" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="124.2283" />
+                <Point X="100" Y="112.2165" />
+              </Points>
+            </Shape>
+            <Shape Id="64" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="170.8937" />
+                <Point X="-100" Y="170.8937" />
+              </Points>
+            </Shape>
+            <Shape Id="65" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="170.8937" />
+                <Point X="96.0801" Y="173.2323" />
+              </Points>
+            </Shape>
+            <Shape Id="66" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="161.0787" />
+                <Point X="100" Y="135.815" />
+              </Points>
+            </Shape>
+            <Shape Id="67" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="98.4331" />
+                <Point X="-100" Y="112.2165" />
+              </Points>
+            </Shape>
+            <Shape Id="68" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="135.815" />
+                <Point X="100" Y="124.2283" />
+              </Points>
+            </Shape>
+            <Shape Id="69" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="135.815" />
+                <Point X="101.1194" Y="133.0512" />
+                <Point X="103.9199" Y="131.8819" />
+              </Points>
+            </Shape>
+            <Shape Id="70" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="100" Y="112.2165" />
+                <Point X="100" Y="98.4331" />
+              </Points>
+            </Shape>
+            <Shape Id="71" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-100" Y="173.2323" />
+                <Point X="-101.1194" Y="175.9961" />
+                <Point X="-103.9199" Y="177.1654" />
+              </Points>
+            </Shape>
+          </Shapes>
+        </Pattern>
+        <Pattern PatternStyle="PatType1" Mounting="-1" Width="2509.8425" Height="615.1575" Orientation="0" LockTypeChange="N" Type="Zig-Zag" Float1="147.6378" Float2="196.8504" Float3="0" Int1="21" Int2="0">
+          <Name>SCART-F</Name>
+          <Origin X="-24.6063" Y="-184.5472" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+          <DefPad Style="PadT36" />
+          <Pads>
+            <Pad Id="1" Style="PadT36" X="-762.7953" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="PadT36" X="-688.9764" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>2</Number>
+            </Pad>
+            <Pad Id="3" Style="PadT36" X="-615.1575" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>3</Number>
+            </Pad>
+            <Pad Id="4" Style="PadT36" X="-541.3386" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>4</Number>
+            </Pad>
+            <Pad Id="5" Style="PadT36" X="-467.5197" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>5</Number>
+            </Pad>
+            <Pad Id="6" Style="PadT36" X="-393.7008" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>6</Number>
+            </Pad>
+            <Pad Id="7" Style="PadT36" X="-319.8819" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>7</Number>
+            </Pad>
+            <Pad Id="8" Style="PadT36" X="-246.063" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>8</Number>
+            </Pad>
+            <Pad Id="9" Style="PadT36" X="-172.2441" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>9</Number>
+            </Pad>
+            <Pad Id="10" Style="PadT36" X="-98.4252" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>10</Number>
+            </Pad>
+            <Pad Id="11" Style="PadT36" X="-24.6063" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>11</Number>
+            </Pad>
+            <Pad Id="12" Style="PadT36" X="49.2126" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>12</Number>
+            </Pad>
+            <Pad Id="13" Style="PadT36" X="123.0315" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>13</Number>
+            </Pad>
+            <Pad Id="14" Style="PadT36" X="196.8504" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>14</Number>
+            </Pad>
+            <Pad Id="15" Style="PadT36" X="270.6693" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>15</Number>
+            </Pad>
+            <Pad Id="16" Style="PadT36" X="344.4882" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>16</Number>
+            </Pad>
+            <Pad Id="17" Style="PadT36" X="418.3071" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>17</Number>
+            </Pad>
+            <Pad Id="18" Style="PadT36" X="492.126" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>18</Number>
+            </Pad>
+            <Pad Id="19" Style="PadT36" X="565.9449" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>19</Number>
+            </Pad>
+            <Pad Id="20" Style="PadT36" X="639.7638" Y="-86.122" Angle="0" Locked="N" Side="Top">
+              <Number>20</Number>
+            </Pad>
+            <Pad Id="21" Style="PadT36" X="713.5827" Y="-282.9724" Angle="0" Locked="N" Side="Top">
+              <Number>21</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Id="1" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="959.7638" Y="12.3031" />
+                <Point X="1008.9567" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="2" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-1058.1496" Y="12.3031" />
+                <Point X="-1008.9567" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="3" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-885.7231" Y="307.5787" />
+                <Point X="885.7231" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="4" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="885.7231" Y="12.3031" />
+                <Point X="1254.9213" Y="-86.122" />
+              </Points>
+            </Shape>
+            <Shape Id="5" Type="Rectangle" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-1254.9213" Y="12.3031" />
+                <Point X="-885.7231" Y="-86.122" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Holes />
+        </Pattern>
+        <Pattern PatternStyle="PatType2" Type="Free" Width="125.984252" Height="55.11811" Mounting="-1" Orientation="0" LockTypeChange="N">
+          <Name>0805</Name>
+          <Origin X="0" Y="0" Cross="Y" Circle="N" Common="Hide" />
+          <DefPad Style="SMD0805" />
+          <Pads>
+            <Pad Id="1" Style="SMD0805" X="-39.370079" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="SMD0805" X="39.370079" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>2</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Type="Line" Layer="Top Silk" LineWidth="4.724409">
+              <Points>
+                <Point X="-21.653543" Y="-33.464567" />
+                <Point X="21.653543" Y="-33.464567" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" Layer="Top Silk" LineWidth="4.724409">
+              <Points>
+                <Point X="-21.653543" Y="33.464567" />
+                <Point X="21.653543" Y="33.464567" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Holes />
+        </Pattern>
+        <Pattern PatternStyle="PatType3" Mounting="Through" Width="201.4951" Height="167.3176" Orientation="90" LockTypeChange="Y" Type="Free" Float1="0" Float2="0" Float3="0" Int1="0" Int2="0">
+          <Name>TO-92</Name>
+          <Origin X="0" Y="-30.5157" Cross="Y" Circle="Y" Common="Hide" Courtyard="Show" />
+          <DefPad Style="PadT9" />
+          <Pads>
+            <Pad Id="1" Style="PadT10" X="-50" Y="-30.5157" Angle="1.5708" Locked="N" Side="Top">
+              <Number>1</Number>
+              <Note>1</Note>
+            </Pad>
+            <Pad Id="2" Style="PadT9" X="0" Y="-30.5157" Angle="1.5708" Locked="N" Side="Top">
+              <Number>2</Number>
+              <Note>2</Note>
+            </Pad>
+            <Pad Id="3" Style="PadT9" X="50" Y="-30.5157" Angle="1.5708" Locked="N" Side="Top">
+              <Number>3</Number>
+              <Note>3</Note>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Id="1" Type="Arc" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="-75.6207" Y="-83.6588" />
+                <Point X="0" Y="83.6588" />
+                <Point X="75.6207" Y="-83.6588" />
+              </Points>
+            </Shape>
+            <Shape Id="2" Type="Line" Locked="N" Layer="Top Silk" AllLayers="N">
+              <Points>
+                <Point X="75.6207" Y="-83.6588" />
+                <Point X="-75.6207" Y="-83.6588" />
+              </Points>
+            </Shape>
+          </Shapes>
+        </Pattern>
+        <Pattern PatternStyle="PatType4" Type="Free" Width="362.992126" Height="62.992126" Mounting="-1" Orientation="0" LockTypeChange="N">
+          <Name>BAT85_DO34_P7.62</Name>
+          <Origin X="0" Y="0" Cross="Y" Circle="N" Common="Hide" />
+          <DefPad Style="DIODE_THT" />
+          <Pads>
+            <Pad Id="1" Style="DIODE_THT" X="150" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>1</Number>
+            </Pad>
+            <Pad Id="2" Style="DIODE_THT" X="-150" Y="0" Angle="0" Side="Top" Locked="N">
+              <Number>2</Number>
+            </Pad>
+          </Pads>
+          <Shapes>
+            <Shape Type="Rectangle" Layer="Top Silk" LineWidth="4.724409">
+              <Points>
+                <Point X="-59.84252" Y="-31.496063" />
+                <Point X="59.84252" Y="31.496063" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" Layer="Top Silk" LineWidth="7.874016">
+              <Points>
+                <Point X="43.307087" Y="-31.496063" />
+                <Point X="43.307087" Y="31.496063" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Holes />
+        </Pattern>
+      </Patterns>
+      <Categories />
+    </Library>
+    <Categories />
+    <Components>
+      <Component ComponentStyle="CompType0">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="700" Height="1550" LockTypeChange="N">
+          <Name>BH-10 / DS1013_10</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="350" Y="675" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GND</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="525" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GND</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="375" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="3" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>R</Name>
+              <PadNumber>3</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="225" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="4" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>G</Name>
+              <PadNumber>4</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="75" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="5" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>B</Name>
+              <PadNumber>5</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-75" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="6" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>NC</Name>
+              <PadNumber>6</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-225" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="7" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>+5V</Name>
+              <PadNumber>7</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-375" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="8" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>HSYNC_N</Name>
+              <PadNumber>8</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-525" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="9" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>VSYNC_N</Name>
+              <PadNumber>9</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="-675" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="10" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>NC</Name>
+              <PadNumber>10</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Rectangle" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-350" Y="-775" />
+                <Point X="350" Y="775" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType0" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType1">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="900" Height="3200" LockTypeChange="N">
+          <Name>SCART-F</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="-450" Y="1500" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO R OUT</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="1350" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO R IN</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="1200" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="3" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO L OUT</Name>
+              <PadNumber>3</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="1050" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="4" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO GND</Name>
+              <PadNumber>4</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="900" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="5" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>BLUE GND</Name>
+              <PadNumber>5</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="750" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="6" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AUDIO L IN</Name>
+              <PadNumber>6</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="600" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="7" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>BLUE</Name>
+              <PadNumber>7</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="450" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="8" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>AV SWITCH / NC</Name>
+              <PadNumber>8</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="300" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="9" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GREEN GND</Name>
+              <PadNumber>9</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="150" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="10" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>DATA / NC</Name>
+              <PadNumber>10</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="11" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>GREEN</Name>
+              <PadNumber>11</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-150" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="12" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>DATA / NC</Name>
+              <PadNumber>12</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-300" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="13" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RED GND</Name>
+              <PadNumber>13</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-450" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="14" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>DATA GND</Name>
+              <PadNumber>14</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-600" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="15" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RED</Name>
+              <PadNumber>15</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-750" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="16" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RGB SELECT</Name>
+              <PadNumber>16</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-900" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="17" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>VIDEO GND</Name>
+              <PadNumber>17</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1050" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="18" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>RGB GND</Name>
+              <PadNumber>18</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1200" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="19" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>SYNC OUT</Name>
+              <PadNumber>19</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1350" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="20" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>VIDEO IN / NC</Name>
+              <PadNumber>20</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-450" Y="-1500" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="21" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>SHIELD</Name>
+              <PadNumber>21</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Rectangle" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-450" Y="-1600" />
+                <Point X="450" Y="1600" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType1" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType2">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="700" Height="900" LockTypeChange="N">
+          <Name>2N3904</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="350" Y="-200" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>E</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-350" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>B</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="350" Y="200" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="3" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>C</Name>
+              <PadNumber>3</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-350" Y="0" />
+                <Point X="-100" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-100" Y="-160" />
+                <Point X="-100" Y="160" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-100" Y="80" />
+                <Point X="100" Y="200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="200" />
+                <Point X="350" Y="200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-100" Y="-80" />
+                <Point X="100" Y="-200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="-200" />
+                <Point X="350" Y="-200" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="-200" />
+                <Point X="25" Y="-181" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="100" Y="-200" />
+                <Point X="52" Y="-139" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType3" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType3">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="200" Height="90" LockTypeChange="N">
+          <Name>RES_0805</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="-100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Rectangle" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-100" Y="-45" />
+                <Point X="100" Y="45" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType2" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType4">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="200" Height="130" LockTypeChange="N">
+          <Name>CAP_0805</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="-100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="100" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name />
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="-20" Y="-65" />
+                <Point X="-20" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="8" Locked="N">
+              <Points>
+                <Point X="20" Y="-65" />
+                <Point X="20" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-100" Y="0" />
+                <Point X="-20" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="20" Y="0" />
+                <Point X="100" Y="0" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType2" />
+        </Part>
+      </Component>
+      <Component ComponentStyle="CompType5">
+        <Part RefDes="U" PartType="Normal" Type="Free" Width="300" Height="130" LockTypeChange="N">
+          <Name>BAT85</Name>
+          <PartName>Part 1</PartName>
+          <Origin X="0" Y="0" />
+          <Pins>
+            <Pin X="150" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="180" PadId="1" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>K</Name>
+              <PadNumber>1</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+            <Pin X="-150" Y="0" Locked="N" Type="Default" ElectricType="Passive" Orientation="0" PadId="2" Length="100" ShowName="Y" NumXShift="0" NumYShift="0" NameXShift="0" NameYShift="0">
+              <Name>A</Name>
+              <PadNumber>2</PadNumber>
+              <NameFont Size="6" Width="-2" Scale="1" />
+            </Pin>
+          </Pins>
+          <Shapes>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-150" Y="0" />
+                <Point X="-65" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-65" Y="-65" />
+                <Point X="-65" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="-65" Y="65" />
+                <Point X="65" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="0" />
+                <Point X="-65" Y="-65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="-65" />
+                <Point X="65" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="0" />
+                <Point X="150" Y="0" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="65" />
+                <Point X="90" Y="65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="90" Y="65" />
+                <Point X="90" Y="45" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="65" Y="-65" />
+                <Point X="40" Y="-65" />
+              </Points>
+            </Shape>
+            <Shape Type="Line" LineWidth="6" Locked="N">
+              <Points>
+                <Point X="40" Y="-65" />
+                <Point X="40" Y="-45" />
+              </Points>
+            </Shape>
+          </Shapes>
+          <Pattern Style="PatType4" />
+        </Part>
+      </Component>
+    </Components>
+  </Library>
+  <Schematic>
+    <SheetSettings>
+      <DisplayTitles>N</DisplayTitles>
+      <DisplaySheet>N</DisplaySheet>
+      <ActiveSheet>0</ActiveSheet>
+      <Sheets>
+        <Sheet>
+          <Id>0</Id>
+          <Name>SCART RGB adapter</Name>
+          <Type>Normal</Type>
+          <XPos>4700</XPos>
+          <YPos>2900</YPos>
+          <Scale>1</Scale>
+          <SheetWidth>11692.9134</SheetWidth>
+          <SheetHeight>8267.7165</SheetHeight>
+          <LeftMargin>300</LeftMargin>
+          <RightMargin>300</RightMargin>
+          <TopMargin>300</TopMargin>
+          <BottomMargin>300</BottomMargin>
+        </Sheet>
+      </Sheets>
+    </SheetSettings>
+    <Settings />
+    <ProjectLibs />
+    <DesignCache Count="6" />
+    <NetClasses>
+      <NetClass Id="0" UpdateId="0" Type="Normal">
+        <Name>Default</Name>
+      </NetClass>
+    </NetClasses>
+    <ERC CheckPinType="Y" CheckNotConnected="N" CheckSinglePin="Y" CheckShort="Y" CheckPinSuperimpose="Y" />
+    <Components>
+      <Part Id="0" UpdateId="100" ComponentStyle="CompType0" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="1100" Y="3700" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>XP1</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>BH-10 / DS1013_10</Name>
+        <Value>IDC-10 male</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="800" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="0" />
+          <Pin NetId="0" />
+          <Pin NetId="1" />
+          <Pin NetId="2" />
+          <Pin NetId="3" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="4" />
+          <Pin NetId="5" />
+          <Pin NetId="6" />
+          <Pin NetId="-1" NotConnected="Y" />
+        </Pins>
+      </Part>
+      <Part Id="1" UpdateId="101" ComponentStyle="CompType1" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="9400" Y="3500" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>XS1</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>SCART-F</Name>
+        <Value>RGB OUT</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="1680" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="0" />
+          <Pin NetId="0" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="3" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="0" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="2" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="0" />
+          <Pin NetId="0" />
+          <Pin NetId="1" />
+          <Pin NetId="7" />
+          <Pin NetId="0" />
+          <Pin NetId="0" />
+          <Pin NetId="8" />
+          <Pin NetId="-1" NotConnected="Y" />
+          <Pin NetId="0" />
+        </Pins>
+      </Part>
+      <Part Id="2" UpdateId="102" ComponentStyle="CompType2" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="5700" Y="4800" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>Q1</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>2N3904</Name>
+        <Value>NPN emitter follower</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="650" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="9" />
+          <Pin NetId="10" />
+          <Pin NetId="4" />
+        </Pins>
+      </Part>
+      <Part Id="3" UpdateId="103" ComponentStyle="CompType3" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="7200" Y="5200" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>R1</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>RES_0805</Name>
+        <Value>200</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="9" />
+          <Pin NetId="8" />
+        </Pins>
+      </Part>
+      <Part Id="4" UpdateId="104" ComponentStyle="CompType3" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="7200" Y="3350" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>R2</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>RES_0805</Name>
+        <Value>120</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="8" />
+          <Pin NetId="0" />
+        </Pins>
+      </Part>
+      <Part Id="5" UpdateId="105" ComponentStyle="CompType3" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="7200" Y="2500" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>R3</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>RES_0805</Name>
+        <Value>180</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="4" />
+          <Pin NetId="7" />
+        </Pins>
+      </Part>
+      <Part Id="6" UpdateId="106" ComponentStyle="CompType4" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="5700" Y="2100" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>C1</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>CAP_0805</Name>
+        <Value>100nF</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="4" />
+          <Pin NetId="0" />
+        </Pins>
+      </Part>
+      <Part Id="7" UpdateId="107" ComponentStyle="CompType4" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="5700" Y="1400" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>C2</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>CAP_0805</Name>
+        <Value>1uF / 16V</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="4" />
+          <Pin NetId="0" />
+        </Pins>
+      </Part>
+      <Part Id="8" UpdateId="108" ComponentStyle="CompType5" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="3600" Y="4200" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>D1</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>BAT85</Name>
+        <Value>Schottky DO-34</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="5" />
+          <Pin NetId="10" />
+        </Pins>
+      </Part>
+      <Part Id="9" UpdateId="109" ComponentStyle="CompType5" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="3600" Y="3450" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>D2</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>BAT85</Name>
+        <Value>Schottky DO-34</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="6" />
+          <Pin NetId="10" />
+        </Pins>
+      </Part>
+      <Part Id="10" UpdateId="110" ComponentStyle="CompType3" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="3600" Y="2600" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>R4</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>RES_0805</Name>
+        <Value>4.7k</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="4" />
+          <Pin NetId="10" />
+        </Pins>
+      </Part>
+      <Part Id="11" UpdateId="111" ComponentStyle="CompType3" ComponentPart="0" AllowParts="N" PartNumber="0" Sheet="0" X="3600" Y="1800" ShowNumbers="Show" MarkingFontSize="8">
+        <RefDes>R5</RefDes>
+        <PartRefDes>1</PartRefDes>
+        <PartName>Part 1</PartName>
+        <Name>RES_0805</Name>
+        <Value>4.7k</Value>
+        <RefDesMarking Show="Show" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="200" Angle="0" />
+        <NameMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-900" Angle="0" />
+        <ValueMarking Show="Hide" Align="Position" Horz="Center" Vert="Bottom" X="0" Y="-250" Angle="0" />
+        <Pins>
+          <Pin NetId="10" />
+          <Pin NetId="0" />
+        </Pins>
+      </Part>
+    </Components>
+    <Nets>
+      <Net Id="0" NetClass="0" HiddenId="0" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>GND</Name>
+        <Pins>
+          <Item Part="0" Pin="0" />
+          <Item Part="0" Pin="1" />
+          <Item Part="1" Pin="3" />
+          <Item Part="1" Pin="4" />
+          <Item Part="1" Pin="8" />
+          <Item Part="1" Pin="12" />
+          <Item Part="1" Pin="13" />
+          <Item Part="1" Pin="16" />
+          <Item Part="1" Pin="17" />
+          <Item Part="1" Pin="20" />
+          <Item Part="4" Pin="1" />
+          <Item Part="6" Pin="1" />
+          <Item Part="7" Pin="1" />
+          <Item Part="11" Pin="1" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="4375" Dir="0" />
+              <Point X="1850" Y="4375" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="4225" Dir="0" />
+              <Point X="1850" Y="4225" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="2" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="3" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="4550" Dir="0" />
+              <Point X="8550" Y="4550" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="3" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="4" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="4400" Dir="0" />
+              <Point X="8550" Y="4400" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="4" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="8" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="3800" Dir="0" />
+              <Point X="8550" Y="3800" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="5" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="12" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="3200" Dir="0" />
+              <Point X="8550" Y="3200" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="6" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="13" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="3050" Dir="0" />
+              <Point X="8550" Y="3050" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="7" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="16" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="2600" Dir="0" />
+              <Point X="8550" Y="2600" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="8" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="17" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="2450" Dir="0" />
+              <Point X="8550" Y="2450" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="9" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="20" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="2000" Dir="0" />
+              <Point X="8550" Y="2000" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="10" Sheet="0" Connected1="Pin" Bus1="-1" Object1="4" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="7400" Y="3350" Dir="0" />
+              <Point X="7700" Y="3350" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="11" Sheet="0" Connected1="Pin" Bus1="-1" Object1="6" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="5900" Y="2100" Dir="0" />
+              <Point X="6200" Y="2100" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="12" Sheet="0" Connected1="Pin" Bus1="-1" Object1="7" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="5900" Y="1400" Dir="0" />
+              <Point X="6200" Y="1400" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="13" Sheet="0" Connected1="Pin" Bus1="-1" Object1="11" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3800" Y="1800" Dir="0" />
+              <Point X="4100" Y="1800" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="1" NetClass="0" HiddenId="1" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>RED</Name>
+        <Pins>
+          <Item Part="0" Pin="2" />
+          <Item Part="1" Pin="14" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="2" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="4075" Dir="0" />
+              <Point X="1850" Y="4075" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="14" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="2900" Dir="0" />
+              <Point X="8550" Y="2900" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="2" NetClass="0" HiddenId="2" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>GREEN</Name>
+        <Pins>
+          <Item Part="0" Pin="3" />
+          <Item Part="1" Pin="10" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="3" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="3925" Dir="0" />
+              <Point X="1850" Y="3925" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="10" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="3500" Dir="0" />
+              <Point X="8550" Y="3500" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="3" NetClass="0" HiddenId="3" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>BLUE</Name>
+        <Pins>
+          <Item Part="0" Pin="4" />
+          <Item Part="1" Pin="6" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="4" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="3775" Dir="0" />
+              <Point X="1850" Y="3775" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="6" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="4100" Dir="0" />
+              <Point X="8550" Y="4100" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="4" NetClass="0" HiddenId="4" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>+5V</Name>
+        <Pins>
+          <Item Part="0" Pin="6" />
+          <Item Part="2" Pin="2" />
+          <Item Part="5" Pin="0" />
+          <Item Part="6" Pin="0" />
+          <Item Part="7" Pin="0" />
+          <Item Part="10" Pin="0" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="6" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="3475" Dir="0" />
+              <Point X="1850" Y="3475" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="2" SubObject1="2" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="6150" Y="5000" Dir="0" />
+              <Point X="6450" Y="5000" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="2" Sheet="0" Connected1="Pin" Bus1="-1" Object1="5" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="7000" Y="2500" Dir="0" />
+              <Point X="6700" Y="2500" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="3" Sheet="0" Connected1="Pin" Bus1="-1" Object1="6" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="5500" Y="2100" Dir="0" />
+              <Point X="5200" Y="2100" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="4" Sheet="0" Connected1="Pin" Bus1="-1" Object1="7" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="5500" Y="1400" Dir="0" />
+              <Point X="5200" Y="1400" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="5" Sheet="0" Connected1="Pin" Bus1="-1" Object1="10" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3400" Y="2600" Dir="0" />
+              <Point X="3100" Y="2600" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="5" NetClass="0" HiddenId="5" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>HSYNC_N</Name>
+        <Pins>
+          <Item Part="0" Pin="7" />
+          <Item Part="8" Pin="0" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="7" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="3325" Dir="0" />
+              <Point X="1850" Y="3325" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="8" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3850" Y="4200" Dir="0" />
+              <Point X="4150" Y="4200" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="6" NetClass="0" HiddenId="6" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>VSYNC_N</Name>
+        <Pins>
+          <Item Part="0" Pin="8" />
+          <Item Part="9" Pin="0" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="0" SubObject1="8" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="1550" Y="3175" Dir="0" />
+              <Point X="1850" Y="3175" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="9" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3850" Y="3450" Dir="0" />
+              <Point X="4150" Y="3450" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="7" NetClass="0" HiddenId="7" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>RGB_SELECT</Name>
+        <Pins>
+          <Item Part="1" Pin="15" />
+          <Item Part="5" Pin="1" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="15" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="2750" Dir="0" />
+              <Point X="8550" Y="2750" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="5" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="7400" Y="2500" Dir="0" />
+              <Point X="7700" Y="2500" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="8" NetClass="0" HiddenId="8" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>CSYNC_75</Name>
+        <Pins>
+          <Item Part="1" Pin="18" />
+          <Item Part="3" Pin="1" />
+          <Item Part="4" Pin="0" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="1" SubObject1="18" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="8850" Y="2300" Dir="0" />
+              <Point X="8550" Y="2300" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="3" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="7400" Y="5200" Dir="0" />
+              <Point X="7700" Y="5200" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="2" Sheet="0" Connected1="Pin" Bus1="-1" Object1="4" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="7000" Y="3350" Dir="0" />
+              <Point X="6700" Y="3350" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="9" NetClass="0" HiddenId="9" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>CSYNC_BUF</Name>
+        <Pins>
+          <Item Part="2" Pin="0" />
+          <Item Part="3" Pin="0" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="2" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="6150" Y="4600" Dir="0" />
+              <Point X="6450" Y="4600" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="3" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="7000" Y="5200" Dir="0" />
+              <Point X="6700" Y="5200" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+      <Net Id="10" NetClass="0" HiddenId="10" UniteByName="Y" ConnectPinByName="N" Global="Y">
+        <Name>CSYNC_RAW</Name>
+        <Pins>
+          <Item Part="2" Pin="1" />
+          <Item Part="8" Pin="1" />
+          <Item Part="9" Pin="1" />
+          <Item Part="10" Pin="1" />
+          <Item Part="11" Pin="0" />
+        </Pins>
+        <Wires>
+          <Wire Id="0" Sheet="0" Connected1="Pin" Bus1="-1" Object1="2" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="5250" Y="4800" Dir="0" />
+              <Point X="4950" Y="4800" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="1" Sheet="0" Connected1="Pin" Bus1="-1" Object1="8" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3350" Y="4200" Dir="0" />
+              <Point X="3050" Y="4200" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="2" Sheet="0" Connected1="Pin" Bus1="-1" Object1="9" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3350" Y="3450" Dir="0" />
+              <Point X="3050" Y="3450" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="3" Sheet="0" Connected1="Pin" Bus1="-1" Object1="10" SubObject1="1" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3800" Y="2600" Dir="0" />
+              <Point X="4100" Y="2600" Dir="0" />
+            </Points>
+          </Wire>
+          <Wire Id="4" Sheet="0" Connected1="Pin" Bus1="-1" Object1="11" SubObject1="0" Connected2="Free" Bus2="-1" Object2="-1" SubObject2="-1" HiddenPower="N" CanUnhide="N">
+            <Points>
+              <Point X="3400" Y="1800" Dir="0" />
+              <Point X="3100" Y="1800" Dir="0" />
+            </Points>
+          </Wire>
+        </Wires>
+      </Net>
+    </Nets>
+    <DifferentialPairs />
+    <Buses />
+    <Shapes>
+      <Shape Type="Text" Id="0" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="4430" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="1" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="4280" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="2" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="4130" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>RED</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="3" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="3980" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GREEN</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="4" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="3830" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>BLUE</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="5" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="3530" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>+5V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="6" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="3380" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>HSYNC_N</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="7" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="1870" Y="3230" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>VSYNC_N</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="8" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="4605" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="9" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="4455" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="10" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8382" Y="4155" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>BLUE</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="11" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="3855" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="12" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8340" Y="3555" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GREEN</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="13" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="3255" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="14" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="3105" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="15" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="2955" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>RED</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="16" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8130" Y="2805" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>RGB_SELECT</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="17" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="2655" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="18" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="2505" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="19" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8214" Y="2355" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_75</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="20" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="8424" Y="2055" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="21" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6470" Y="4655" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_BUF</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="22" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="4572" Y="4855" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_RAW</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="23" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6470" Y="5055" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>+5V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="24" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="5350" Y="4100" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>2N3904</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="25" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6322" Y="5255" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_BUF</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="26" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="7720" Y="5255" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_75</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="27" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6850" Y="5070" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>200</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="28" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6364" Y="3405" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_75</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="29" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="7720" Y="3405" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="30" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6850" Y="3220" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>120</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="31" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6574" Y="2555" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>+5V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="32" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="7720" Y="2555" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>RGB_SELECT</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="33" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6850" Y="2370" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>180</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="34" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="5074" Y="2155" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>+5V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="35" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6220" Y="2155" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="36" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="5350" Y="1970" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>100nF</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="37" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="5074" Y="1455" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>+5V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="38" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="6220" Y="1455" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="39" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="5350" Y="1270" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>1uF / 16V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="40" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="4170" Y="4255" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>HSYNC_N</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="41" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="2672" Y="4255" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_RAW</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="42" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="3250" Y="4070" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>BAT85</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="43" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="4170" Y="3505" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>VSYNC_N</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="44" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="2672" Y="3505" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_RAW</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="45" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="3250" Y="3320" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>BAT85</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="46" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="2974" Y="2655" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>+5V</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="47" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="4120" Y="2655" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_RAW</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="48" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="3250" Y="2470" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>4.7k</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="49" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="2722" Y="1855" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>CSYNC_RAW</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="50" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="4120" Y="1855" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>GND</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="51" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="7" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="3250" Y="1670" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>4.7k</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="52" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="16" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="600" Y="5900" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>Specialist-MX2 / SCART RGB adapter</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="53" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="8" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="600" Y="5550" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>XP1: IDC-10 to ram-slots XP19 (1:1); H/V on pins 8/9 through existing 470 ohm. SCART cable to TV.</TextLine>
+        </TextLines>
+      </Shape>
+      <Shape Type="Text" Id="54" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="8" FontWidth="-2" FontScale="1" FontColor="0" LineSpacing="1.2">
+        <Points>
+          <Point X="600" Y="800" />
+        </Points>
+        <FontName>Arial</FontName>
+        <TextLines>
+          <TextLine>D1/D2: cathodes to H/V, anodes joined at CSYNC_RAW. R4/R5 form a 4.7k + 4.7k bias divider.</TextLine>
+          <TextLine>Keep ram-slots 470 ohm resistors and specialist-m R9. No added wire to IDC pin 6.</TextLine>
+          <TextLine>Q1 buffers the sum; R1/R2 attenuation = 0.1875 into 75 ohm. SCART 19 -&gt; cable -&gt; TV 20.</TextLine>
+          <TextLine>REV2 REVIEW DRAFT: native DipTrace ERC/DRC and hardware levels not yet verified.</TextLine>
+        </TextLines>
+      </Shape>
+    </Shapes>
+  </Schematic>
+</Source>

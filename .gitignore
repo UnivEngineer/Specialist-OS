@@ -3,6 +3,7 @@
 images/*.bin
 bin/
 docs/
+tmp/
 .tmp_pdf
 .codex-tmp
 # Необязательные локальные установки/checkout эмуляторов.
