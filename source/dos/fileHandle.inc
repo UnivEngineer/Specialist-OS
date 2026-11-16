@@ -344,19 +344,10 @@ handleTransfer:
             ld (hl),e
             inc hl
             ld (hl),d
-            ; Курсор сохраняется между вызовами; переход FAT — один на кластер.
-            ld a,FH_CURSOR+2
-            call handleLoadWord
             ex de,hl
-            ld hl,(v_diskInfo.clusterBytes)
-            call sub_hl_de
-            push hl
+            ld (v_streamPrevious),hl
+            ; Поток сам готовит/выделяет цепочку пачками до физического обмена.
             ld hl,(v_handleLeft)
-            ex de,hl
-            pop hl
-            call cmp_hl_de
-            jp c,handleChunkReady
-            ex de,hl
 handleChunkReady:
             ld (v_handleChunk),hl
             ld b,h
@@ -373,6 +364,9 @@ handleChunkReady:
             ; Буфер/объект проверены один раз на весь запрос: повторная
             ; проверка публичного FileStream для каждого кластера не нужна.
             push af
+            ld a,(v_handleOp)
+            dec a
+            ld (v_streamFileWrite),a
             ld a,(v_handleChecked)
             ld (v_streamChecked),a
             pop af
@@ -380,8 +374,13 @@ handleChunkReady:
             push af
             xor a
             ld (v_streamChecked),a
+            ld (v_streamFileWrite),a
             ld (v_handleBuffer),hl
             ld a,FH_CURSOR
+            call handleStoreWord
+            ld hl,(v_streamPrevious)
+            ex de,hl
+            ld a,FH_PREVIOUS
             call handleStoreWord
             ld hl,(v_streamOffset)
             ex de,hl
@@ -397,6 +396,9 @@ handleChunkReady:
             ld a,b
             or c
             jp z,handleNoCommit
+            pop af
+            push af
+            call c,handleTrimPending
             push hl
             ld hl,0
             ld (v_handleNew),hl
@@ -649,6 +651,47 @@ handleAllocateFirst:
 handleAllocateLinked:
             pop hl
             ld (v_handleCluster),hl
+            ret
+
+; После частичного I/O-отказа сохраняем записанный префикс, освобождаем
+; только ещё не записанное продолжение новой цепочки. Регистры сохранены.
+handleTrimPending:
+            push bc
+            push de
+            push hl
+            ld hl,(v_handleNew)
+            ld a,h
+            or l
+            jp z,handleTrimDone
+            ld hl,(v_streamCluster)
+            ex de,hl
+            ld hl,(v_streamOffset)
+            ld a,h
+            or l
+            ld hl,(v_streamPrevious)
+            jp z,handleTrimTail
+            ld h,d
+            ld l,e
+            push hl
+            call fatReadCluster
+            pop hl
+            jp c,handleTrimDone
+handleTrimTail:
+            ld (v_handleOldTail),hl
+            ex de,hl
+            ld a,h
+            cp 0FFh
+            jp nz,handleTrimChain
+            ld a,l
+            cp 0F8h
+            jp nc,handleTrimDone
+handleTrimChain:
+            ld (v_handleNew),hl
+            call handleRollback
+handleTrimDone:
+            pop hl
+            pop de
+            pop bc
             ret
 
 ; Не оставляем цепочку, выделенную для ещё не записанного промежутка/хвоста.

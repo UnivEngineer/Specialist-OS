@@ -1,9 +1,9 @@
 ; F7 — создать каталог через общий CLI, путь ограничен MAX_PATH.
 but_F7:
             call drawWindow1
-            CENTER_LINE 14, 5Eh
             ld hl,ncMkdirText
-            call bios_printStringReal
+            ld e,94
+            call ncPrintCentered
             xor a
             ld (vars.input),a
             ld de,vars.input

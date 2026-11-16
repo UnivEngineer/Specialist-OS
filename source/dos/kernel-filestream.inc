@@ -30,15 +30,23 @@ kfStream:
     ld a,FILE_STREAM_CURSOR
     call kdOverlap
     jp c,kfBad
+    ; На входе активен COMMAND: два слова без установки COPY.
     ld hl,(kfCursor)
     ld a,(kdPage)
-    call mx_get32
+    ld b,a
+    ld a,MEM_OP_GET16
+    call mx_memory
     jp c,kfBad
-    ld h,d
-    ld l,e
+    push hl
+    ex de,hl
     ld (KD_OBJECT),hl
-    ld h,b
-    ld l,c
+    pop hl
+    inc hl
+    inc hl
+    ld a,MEM_OP_GET16
+    call mx_memory
+    jp c,kfBad
+    ex de,hl
     ld (KD_OBJECT+2),hl
     call fatCheckMounted
     jp c,kfError
@@ -70,20 +78,30 @@ kfStream:
     ld hl,(kfCount)
     call sub_hl_de
     ld (kdRegs+4),hl
-    ld hl,(v_streamCluster)
-    ld (KD_OBJECT),hl
-    ld hl,(v_streamOffset)
-    ld (KD_OBJECT+2),hl
     ld hl,(kfCursor)
     ld (kdRegs+2),hl
-    ld hl,(KD_OBJECT)
-    ex de,hl
-    ld hl,(KD_OBJECT+2)
-    ld b,h
-    ld c,l
-    ld hl,(kfCursor)
+    ; Поток оставляет COPY; вернуть COMMAND один раз до первого PUT.
+    ; Статус потока уже сохранён kdCapture в kdRegs+6.
+    call bankCommandWindow
     ld a,(kdPage)
-    call mx_put32
+    ld b,a
+    push hl
+    ld hl,(v_streamCluster)
+    ex de,hl
+    pop hl
+kfCursorPutFirst:
+    ld a,MEM_OP_PUT16
+    call mx_memory
+    jp c,kfBad
+    inc hl
+    inc hl
+    push hl
+    ld hl,(v_streamOffset)
+    ex de,hl
+    pop hl
+kfCursorPutSecond:
+    ld a,MEM_OP_PUT16
+    call mx_memory
     jp c,kfBad
     jp kdFinish
 kfBad:

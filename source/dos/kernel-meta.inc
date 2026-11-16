@@ -44,6 +44,11 @@ kmDescriptor:
     jp kdRestorePointer
 
 kmRename:
+    ld hl,fileRename
+    ld (kdEntry),hl
+; CLI_OP_RENAME uses the same two fixed 8.3 names, but invokes cliService
+; to retain its directory/file change notification (including case-only edits).
+kmRenameArgs:
     ld hl,(kdRegs)
     ld (kdClientObject),hl
     ld de,KD_OBJECT
@@ -55,8 +60,6 @@ kmRename:
     ld de,KD_PATH
     call kdFetch
     jp c,kdBad
-    ld hl,fileRename
-    ld (kdEntry),hl
     ld hl,KD_OBJECT
     ld (kdRegs),hl
     ld hl,KD_PATH

@@ -45,7 +45,25 @@ drawCursor3:      ; Сохраняем регистры
             ld    a, h
             cpl
             and   3
-            ld    hl, 011111100b ; FCh
+            ; Match the installed engine, including its aligned 4/8px cells.
+            ; The mask is shifted into the screen byte pair below as before.
+            ld    c,a
+            ld    a,(FONT_ENGINE_HEADER+5)
+            ld    hl,0FCh
+            cp    6
+            jp z,drawCursor_maskReady
+            ld    hl,0F0h
+            cp    4
+            jp z,drawCursor_mask4
+            ld    hl,0FFh
+            ld    c,3             ; 8px snaps to the start of a screen byte.
+            jp drawCursor_maskReady
+drawCursor_mask4:
+            ld    a,c
+            or    1               ; same rounding as the 4px glyph engine.
+            ld    c,a
+drawCursor_maskReady:
+            ld    a,c
             inc   a
 drawCursor_0:     add   hl, hl
             add   hl, hl

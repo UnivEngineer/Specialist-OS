@@ -29,7 +29,7 @@ blockPreparePointers:
     BLOCK_POINTER 3
     ret
 blockBuildFont:
-    ; Линейный FONT.FNT в стенде: пять исходных страниц по 32 глифа.
+    ; Линейный FONT.PF в стенде: пять исходных страниц по 32 глифа.
     ld hl,02900h
     ld de,PAGED_FONT_BASE
     ld bc,0300h

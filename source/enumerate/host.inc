@@ -1,0 +1,23 @@
+; Private matched-build imports.
+    DB "ENU1"
+    DW MEM_RUNTIME_REVISION
+    DW blockArgument
+    DW dosSetError
+    DW fileChangeDrive
+    DW directoryPathUnchecked
+    DW directoryCwdUnchecked
+    DW fatDirStart
+    DW fatDirItem
+    DW getSectorAddressInCache
+    DW cliCheckCancel
+    DW moveBytesForward
+    DW upperCase
+    DW v_drive
+    DW v_directory
+    DW v_dirRemaining
+    DW v_cachedSector
+    DW v_cachedDescrPtr
+    DW v_cachedDescrOffset
+    DW v_directories
+    DW dosCorrupt
+    DW fatCheckCluster

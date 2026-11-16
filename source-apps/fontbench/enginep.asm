@@ -12,6 +12,13 @@ initialize:
     ld (variant),a
     ld a,b
     ld (preEnabled),a
+    IFDEF FONT_TRIPLE_PACK
+    or a
+    jp z,copyFont
+    call triple.build
+    jp ready
+copyFont:
+    ENDIF
     IFDEF FONT_BLOCK32
     call blockBuild
     ELSE
@@ -114,6 +121,16 @@ ready:
     ld hl,batch8
     jp readyBatch
 readySix:
+    IFDEF FONT_TRIPLE_PACK
+    ld a,(preEnabled)
+    or a
+    jp z,readySixRaw
+    ld hl,triple.scalar
+    ld (descriptor+2),hl
+    ld hl,batchTriple
+    jp readyBatch
+readySixRaw:
+    ENDIF
     ld hl,batch6Raw
     ld a,(preEnabled)
     or a
@@ -166,6 +183,9 @@ name:
     ENDM
     CURSOR_BATCH batch6Raw,3,paged.raw6Helper
     CURSOR_BATCH batch6Pre,3,paged.pre6Helper
+    IFDEF FONT_TRIPLE_PACK
+    CURSOR_BATCH batchTriple,3,triple.batch
+    ENDIF
     IFNDEF FONT_BLOCK32
     CURSOR_BATCH batch8,4,paged.raw8Helper
     ELSE
@@ -245,5 +265,8 @@ preEnabled: DB 0
     ENDIF
     DEFINE SCALAR6_PAGED
     INCLUDE "engines/paged-scalar.inc"
+    IFDEF FONT_TRIPLE_PACK
+    INCLUDE "engines/triple-packed.inc"
+    ENDIF
     ASSERT $ <= 07C00h
 end:

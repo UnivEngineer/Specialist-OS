@@ -32,7 +32,7 @@ def main():
             m.screenshot(OUT/f'{source}-command.png')
             m.stop_at(0)
             m.tap('enter')
-            m.until(0,120)
+            m.until(0,120,page=0)
             assert m.read(0,64)==(ROOT/'bin/SORTBEN.i80').read_bytes()[:64]
             m.call('bp_clear')
             m.call('emu_run_for',ms=500)
@@ -44,13 +44,13 @@ def main():
             m.call('emu_run_for',ms=250)
             m.stop_at(sb['waitBetweenTables'])
             m.tap('1')
-            m.until(sb['waitBetweenTables'],120)
+            m.until(sb['waitBetweenTables'],120,page=0)
             m.screenshot(OUT/f'{source}-first-table.png')
             m.call('bp_clear')
             m.call('emu_run_for',ms=500)
             m.stop_at(sb['waitForExit'])
             m.tap('enter')
-            m.until(sb['waitForExit'],120)
+            m.until(sb['waitForExit'],120,page=0)
             m.screenshot(OUT/f'{source}-stopped.png')
             (OUT/f'{source}-state.json').write_text(json.dumps(m.call('cpu_state'),indent=2))
             # The kernel patches its CALL operands within the first 64 bytes.
@@ -69,7 +69,7 @@ def main():
             m.call('emu_run_for',ms=500)
             m.stop_at(nc['mainLoop'])
             m.tap('space')
-            m.until(nc['mainLoop'],120)
+            m.until(nc['mainLoop'],120,page=0)
             assert m.read(0,64)==(ROOT/'bin/NC.i80').read_bytes()[:64]
             print('SORTBEN UI PASS:',source,'32 records, 18 checked sorts, report saved, returned to NC',flush=True)
         # Separate ABI check after all keyboard scenarios: read back the actual

@@ -18,8 +18,8 @@ def main():
     names = ('memoryInit', 'moduleInit', 'moduleWarm', 'dosMemoryService', 'kdPage',
              'appEnter', 'appLeave', 'appOwner', 'memoryMainStart',
              'moduleActor', 'residentKeys', 'residentActorCheck',
-             'moduleDosOwner', 'moduleDosServiceOwner', 'memoryRamOwner',
-             'memoryRamPages', 'diActive')
+             'memoryRamOwner',
+             'memoryRamPages', 'memoryRamFresh', 'diActive')
     imports = '\n'.join(f'{n} = 0{kernel[n]:04X}h' for n in names)
     body = '''
     call memoryInit
@@ -27,7 +27,8 @@ def main():
     xor a
     ld (kdPage),a
     call appEnter
-    ld hl,07000h
+    ; Flat CPU model: MAIN arena must not overwrite the banked DOS image.
+    ld hl,08400h
     ld de,00800h
     ld b,0
     ld a,MEM_OP_ARENA
@@ -40,7 +41,7 @@ def main():
     jp c,fail
     ld (08510h),hl
     call appEnter
-    ld hl,07000h
+    ld hl,08400h
     ld b,0
     ld a,MEM_OP_FREE
     call dosMemoryService
@@ -50,7 +51,7 @@ def main():
     call appLeave
     ld hl,(memoryMainStart)
     ld (08512h),hl
-    ld hl,07000h
+    ld hl,08400h
     ld de,32
     ld bc,000A5h
     ld a,MEM_OP_FILL
@@ -76,7 +77,7 @@ def main():
     jp nz,fail
     call appLeave
     call appEnter
-    ld hl,07000h
+    ld hl,08400h
     ld de,00800h
     ld b,0
     ld a,MEM_OP_ARENA
@@ -88,7 +89,7 @@ def main():
     call dosMemoryService
     jp c,fail
     call moduleWarm
-    ld hl,07000h
+    ld hl,08400h
     ld de,00800h
     ld b,0
     ld a,MEM_OP_ARENA
@@ -103,7 +104,7 @@ def main():
     ld (moduleActor),a
     call residentActorCheck
     jp z,fail
-    ld hl,07000h
+    ld hl,08400h
     ld de,00800h
     ld b,0
     ld a,MEM_OP_ARENA
@@ -116,6 +117,8 @@ def main():
     ld (memoryRamPages),a
     ld a,DOS_BANK_PAGE
     ld (memoryRamOwner),a
+    ld a,1
+    ld (memoryRamFresh),a
     xor a
     ld (diActive),a
     ld c,MEM_RAMDISK_STATUS
@@ -128,6 +131,10 @@ def main():
     ld a,c
     cp 1
     jp nz,fail
+    ld a,d
+    dec a
+    or e
+    jp nz,fail
     ld c,MEM_RAMDISK_COMMIT
     ld a,MEM_OP_RAMDISK
     call dosMemoryService
@@ -138,11 +145,14 @@ def main():
     ld a,(memoryRamOwner)
     cp DOS_BANK_PAGE
     jp nz,fail
+    ld a,(memoryRamFresh)
+    dec a
+    jp nz,fail
     ; Reset сохраняет резидентный DOS-слот и освобождает временную арену.
     call moduleInit
     ld hl,dosRecords
     ld de,MODULE_TABLE
-    ld b,20
+    ld b,2*MODULE_RECORD_SIZE
 copyDosRecords:
     ld a,(hl)
     ld (de),a
@@ -150,19 +160,13 @@ copyDosRecords:
     inc de
     dec b
     jp nz,copyDosRecords
-    ld a,MODULE_OWNER_BASE
-    ld (moduleDosServiceOwner),a
-    inc a
-    ld (moduleDosOwner),a
     ld hl,04452h
     ld (residentKeys),hl
     call moduleWarm
-    ld a,(moduleDosServiceOwner)
-    cp MODULE_OWNER_BASE
-    jp nz,fail
-    ld a,(moduleDosOwner)
-    or a
-    jp nz,fail
+    ld hl,(MODULE_TABLE)
+    ld a,h
+    or l
+    jp z,fail
     ld hl,(MODULE_TABLE+MODULE_RECORD_SIZE)
     ld a,h
     or l
@@ -170,8 +174,9 @@ copyDosRecords:
     ld hl,0
     ld (residentKeys),hl
     call moduleWarm
-    ld a,(moduleDosServiceOwner)
-    or a
+    ld hl,(MODULE_TABLE)
+    ld a,h
+    or l
     jp nz,fail
     ld hl,055AAh
     ld (08500h),hl
@@ -186,10 +191,12 @@ dosRecords:
     DB 0,DOS_BANK_PAGE
     DW DOS_SERVICE_ADDR,0
     DB 0,MODULE_OWNER_BASE
+    DW DOS_SERVICE_ADDR,DOS_SERVICE_ADDR+1
     DW 2
     DB 0,DOS_BANK_PAGE
     DW DOS_BANK_DRIVER_ADDR,0
     DB 0,MODULE_OWNER_BASE+1
+    DW DOS_BANK_DRIVER_ADDR,DOS_BANK_DRIVER_ADDR+1
 '''
     with tempfile.TemporaryDirectory(prefix='mxos-memory-') as folder:
         out = Path(folder)
@@ -203,10 +210,10 @@ dosRecords:
         code = (out / 'case.bin').read_bytes()
         memory[0x8000:0x8000 + len(code)] = code
         (out / 'in.bin').write_bytes(memory)
-        subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe', '-m8080', '-pc', '8000', '-end', '8400', '-counter', '10000000', '-output', str(out / 'out.bin'), str(out / 'in.bin')], check=True, capture_output=True)
+        subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe', '-m8080', '-pc', '8000', '-end', '8400', '-counter', '10000000', '-output', str(out / 'out.bin'), str(out / 'in.bin')], check=True, capture_output=True, timeout=20)
         result = (out / 'out.bin').read_bytes()
         assert result[0x8500:0x8502] == bytes.fromhex('aa55'), result[0x8500:0x8502].hex()
-        assert result[0x7000:0x7020] == bytes([0xA5]) * 32
+        assert result[0x8400:0x8420] == bytes([0xA5]) * 32
         assert int.from_bytes(result[0x8514:0x8516], 'little') == 2048 - 32
         assert result[0x8514:0x8516] == result[0x8516:0x8518]
         assert result[0x8518] == 31

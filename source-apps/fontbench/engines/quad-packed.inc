@@ -89,11 +89,7 @@ packedCodeRead:
     ld b,0
     inc hl
     ld (packedCodeRead+1),hl
-    ld hl,02800h/8
-    add hl,bc
-    add hl,hl
-    add hl,hl
-    add hl,hl
+    call packedGetGlyph
     ld (packedSource+1),hl
     ld b,0
 packedPhase:
@@ -251,3 +247,4 @@ packedCount: DB 0
 packedHeader: INCBIN "../../../bin/FONTKOI.packed.bin",0,32
 packedIndex: INCBIN "../../../bin/FONTKOI.packed.index.bin"
 packedCodes: INCBIN "../../../bin/FONTKOI.packed.codes.bin"
+    INCLUDE "../../../bin/FONTKOI.packed.overrides.inc"

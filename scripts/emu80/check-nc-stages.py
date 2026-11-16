@@ -18,7 +18,7 @@ def frame(info):
  return b''.join(data)
 def check(label):
  active=m.read(n['state.activePanel'],1)
- modes=[m.read(n['vars.panelA_info']+i,1)[0] for i in range(2)]
+ modes=[m.read(n['state.panelA_info']+i,1)[0] for i in range(2)]
  # Обычный диалог F7 и Escape должны войти в общий полный путь.
  ready();m.tap('f7');m.stop_at(n['fullClearPanels']);m.tap('esc');m.until(n['fullClearPanels'],40)
  m.stop_at(n['fullDrawFrames']);m.until(n['fullDrawFrames'],40)

@@ -12,9 +12,8 @@ def main():
     p.add_argument('--report',type=Path,default=ROOT/'docs/bench/copybench-001')
     a=p.parse_args();out=a.report.resolve();out.mkdir(parents=True,exist_ok=True)
     if (out/'result.json').exists():p.error('Choose a new report directory')
-    subprocess.run(['python',str(ROOT/'scripts/build/build-banked-transport.py')],check=True)
     subprocess.run(['python',str(ROOT/'source-apps/copybench/build.py')],check=True)
-    s=symbols(ROOT/'bin/banked/TRANSPORT.sym')
+    s=symbols(ROOT/'bin/copybench/r4-reference.sym')
     h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
     g=h['Matrix'].__init__.__globals__;g['OUT']=out;g['RUNTIME']=a.runtime.resolve()
     matrix=h['Matrix']();rows=[]
@@ -154,7 +153,7 @@ again:
 ''')
                 save_row('CPM16',caller,srcPage,src,dstPage,dst,size,code)
         # После замены хвостов штатный DOS больше не вызывается.
-        runtime=(ROOT/'bin/banked/TRANSPORT.bin').read_bytes()
+        runtime=(ROOT/'bin/copybench/r4-reference.bin').read_bytes()
         window=(ROOT/'bin/banked/WINDOW.bin').read_bytes()
         for page in (0,1,2,3):
             select(page);m.write(0xFC00,runtime);m.write(s['bankPage'],bytes([page]))
@@ -178,7 +177,7 @@ request:
                 save_row('FAR',caller,srcPage,src,dstPage,dst,size,code)
         report=dict(cpuHz=2000000,repeats=3,units='decimal kB/s; emulated CPU milliseconds',rows=rows,
                     binaries={name:hashlib.sha256((ROOT/path).read_bytes()).hexdigest() for name,path in
-                              [('transport','bin/banked/TRANSPORT.bin'),('RAMD','bin/RAMDISK.i80'),('DOS','bin/DOS.sys')] + [(n,'bin/copybench/'+n+'.bin') for n in ('stack','loop','unrolled','direct','regs2','regs4','regs6','builtin_byte','builtin_block','CPMCOPY')]})
+                              [('transport','bin/copybench/r4-reference.bin'),('RAMD','bin/RAMDISK.i80'),('DOS','bin/DOS.sys')] + [(n,'bin/copybench/'+n+'.bin') for n in ('stack','loop','unrolled','direct','regs2','regs4','regs6','builtin_byte','builtin_block','CPMCOPY')]})
         (out/'result.json').write_text(json.dumps(report,indent=2)+'\n')
         subprocess.run(['python',str(ROOT/'source-apps/copybench/report.py'),str(out)],check=True)
     finally:matrix.stop()

@@ -287,14 +287,16 @@ CalcParams:
     ld (v_FatEnd),hl
     ld a,(v_FatSectors)
     ld (v_FatRemaining),a
-    ; Первый BAD: cluster-2+dataStart имеет младший байт FFh.
+    ; Первый BAD: cluster-2+dataStart имеет младший байт FEh.
     ld a,(v_DataStartSector)
     ld b,a
-    ld a,1
+    ld a,RAMDISK_DATA_BLOCK_LIMIT+2-256
     sub b
     ld l,a
     ld h,0
     ld (v_NextBad),hl
+    xor a
+    ld (v_BadTailPhase),a
     ld de,1
 FormatFatSector:
     push de                  ; номер записываемого сектора
@@ -353,9 +355,19 @@ FormatFatBads:
     ld (hl),FAT16_BAD & 0FFh
     inc hl
     ld (hl),FAT16_BAD >> 8
+    ld a,(v_BadTailPhase)
+    xor 1
+    ld (v_BadTailPhase),a
     ld hl,(v_NextBad)
-    inc h                    ; следующая страница RAMD: ещё 256 кластеров
+    jp z,FormatFatNextTail
+    inc hl                   ; второй BAD того же хвоста.
+    jp FormatFatBadReady
+FormatFatNextTail:
+    inc h
+    dec hl                   ; следующая пара: +255 кластеров.
+FormatFatBadReady:
     ld (v_NextBad),hl
+    jp FormatFatBads          ; пара может пересекать границу сектора FAT.
 FormatFatWrite:
     pop de
     ld c,1
@@ -526,6 +538,7 @@ v_FatIndex:         DW 0
 v_FatEnd:           DW 0
 v_FatRemaining:     DB 0
 v_NextBad:          DW 0
+v_BadTailPhase:     DB 0
 v_FatBytes:         DW 0
 v_DirBytes:         DW 0
 v_DirSectors:       DW 0

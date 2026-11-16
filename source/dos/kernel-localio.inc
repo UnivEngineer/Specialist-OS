@@ -50,8 +50,8 @@ klRamBounds:
     cp 1
     jp nz,klNotRam
     ld a,(klRegs+2)
-    cp 0FFh
-    jp z,klBad
+    cp RAMDISK_DATA_BLOCK_LIMIT
+    jp nc,klBad
     ld a,(memoryRamPages)
     ld hl,klRegs+3
     cp (hl)
@@ -61,6 +61,39 @@ klRamBounds:
     cp 5
     jp nz,klRamDirect
 klNotRam:
+    ld a,c
+    or a
+    jp nz,klNotSystem
+    ld a,(klRegs+5)
+    cp 2
+    jp nz,klInvoke
+    ; ROM можно читать прямо в банк клиента из DOS, без COMMAND-callback.
+    ; Для верхней MAIN сохраняем её более быстрый отображённый memcpy.
+    ld a,(kdPage)
+    or a
+    jp nz,klSystemRead
+    ld a,(klRegs+1)
+    or a
+    jp m,klInvoke
+klSystemRead:
+    ld hl,(klRegs+2)
+    ld a,l
+    add a,a
+    ld a,h
+    rla
+    or 080h
+    ld (klRamCopy),a
+    ld a,l
+    and 07Fh
+    ld h,a
+    ld l,0
+    ld (klRamCopy+1),hl
+    ld a,(kdPage)
+    ld (klRamCopy+3),a
+    ld hl,(klRegs)
+    ld (klRamCopy+4),hl
+    jp klRamRead
+klNotSystem:
     ld a,c
     cp 7
     jp nz,klInvoke
@@ -110,7 +143,7 @@ klRamDirect:
     ld (klRamCopy+4),hl
 klRamRead:
     ld hl,klRamCopy
-    call bankCopySector
+    call bankCopyPhysical
     jp klDone
 klRamCopy: DB 0
     DW 0

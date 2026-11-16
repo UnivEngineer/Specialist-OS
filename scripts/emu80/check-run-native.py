@@ -60,7 +60,7 @@ def enter(command, menu=False):
     allocations=m.read(k['MEM_ALLOC_TABLE'], 32*6)
     modules=m.read(k['MODULE_TABLE'], k['MODULE_MAX']*k['MODULE_RECORD_SIZE'])
     assert all(allocations[i]==255 for i in range(0,len(allocations),6)), command
-    assert all(modules[i:i+2]==bytes(2) for i in range(0,len(modules),10)), command
+    assert all(modules[i:i+2]==bytes(2) for i in range(0,len(modules),k['MODULE_RECORD_SIZE'])), command
     page(0)
     m.stop_at(n['mainLoop'])
     m.until(n['mainLoop'], 120, page=0)

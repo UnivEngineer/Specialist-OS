@@ -65,14 +65,20 @@ saveVCursor:
 ; Обработка кода 8h. Влево
 
 printChar_c08:    ; cursorX -= 3
-            ld    a, h
-            sub   3
+            ; Width belongs to the module; only controls read it here.
+            ld    a,(FONT_ENGINE_HEADER+5)
+            rrca
+            ld    b,a
+            ld    a,h
+            sub   b
 
             ; Если нет переноса, сохранить положение курсора и выйти
             jp nc,  saveVCursorHA
 
             ; cursorX = 189
-            ld    h, 189
+            ld    a,192
+            sub   b
+            ld    h,a
             ld    (bios_vars.cursorY), hl
 
             ; Продолжение в printChar_c19
@@ -96,8 +102,9 @@ saveVCursorLA:    ; Сохранить положение курсора и вы
 
 printChar_c18:    ; Если cursorX+3 >= 192, то перейти на printChar_c0A
             ; Иначе cursorX += 3
-            ld    a, h
-            add   a,3
+            ld    a,(FONT_ENGINE_HEADER+5)
+            rrca
+            add   a,h
             cp    0C0h
             jp c, saveVCursorHA
             jp    printChar_c0A

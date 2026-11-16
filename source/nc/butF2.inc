@@ -11,6 +11,7 @@ but_F2:
             ld      c, 1
             jp z,ncPanelSort
             call    choosePanelDrive
+            jp c,ncDriveDialogCancelled
 
             ; Перезагружаем и перерисовываем вторую панель
             call  loadAndPrintB
@@ -32,6 +33,7 @@ but_F1:
             ld      c, 0
             jp z,ncPanelSort
             call    choosePanelDrive
+            jp c,ncDriveDialogCancelled
 
             ; Перезагружаем и перерисовываем первую панель
             call  loadAndPrintA
@@ -44,8 +46,15 @@ but_F1:
             
 panelStateChanged:
             ; Продолжаем работу с состоянием в памяти NC
-
+            ld a,(ncDamageMask)
+            or a
+            jp nz,ncRefreshDirty
             jp    mainDriveChanged
+ncDriveDialogCancelled:
+            ld a,(ncDamageMask)
+            or a
+            jp nz,ncRefreshDirty
+            jp mainLoop
 
 ; ---------------------------------------------------------------------------
 
@@ -58,7 +67,7 @@ choosePanelDrive:
             ld      (state.activePanel), a
             call    chooseDrive
             cp      0FFh
-            jp z,   cpd_Restore
+            jp z,   cpd_Cancel
             ld      hl, state.panelA_drive
             call    writeBytePanel
             call    resetPanelDirectory
@@ -72,10 +81,18 @@ choosePanelDrive:
 cpd_Restore:
             pop     af
             ld      (state.activePanel), a
+            or a
+            ret
+cpd_Cancel:
+            pop af
+            ld (state.activePanel),a
+            scf
             ret
 
 chooseDrive:
             call  buildDriveList
+            ld hl,g_chooseDrive
+            call ncDialogOpen
 
             COLOR   COLOR_DIALOG
 
@@ -83,8 +100,18 @@ chooseDrive:
             call  draw
 
             ; Вывести заголовок и компактный список установленных драйверов.
-            ld    hl, 1863h
-            call  setCursorPosPanel
+            ld a,5
+            call ncTextAdvance
+            or a
+            rra                   ; divide, do not rotate odd 6px text width
+            ld b,a
+            ld a,48
+            sub b
+            add a,2
+            and 0FCh
+            ld h,a
+            ld l,99
+            call setCursorPosPanel
             ld    hl, aChooseDrive
             call  bios_printStringReal
             call  printDriveList
@@ -149,7 +176,7 @@ cd_Esc:
             pop   af
             ld    (bios_upper.cursorCfg), a
             ld    a, 0FFh
-            ret
+            jp ncDialogClose
 
 cd_Enter:
             ld    a, (vars.driveCount)
@@ -166,7 +193,7 @@ cd_ReturnDrive:
             pop   af
             ld    (bios_upper.cursorCfg), a
             ld    a, c
-            ret
+            jp ncDialogClose
 
 cd_Arrows:
             ld    a, (vars.driveCount)
@@ -261,49 +288,28 @@ fd_NotFound:
 ; Разрушает: AF, BC, DE, HL.
 
 printDriveList:
-            ld hl,vars.driveList
             ld a,(vars.driveCount)
             or a
             ret z
             ld b,a
+            ld c,0
 pdl_Row:
-            push hl
-            ld a,(vars.driveCount)
-            sub b
+            ld a,c
             call driveCellPosition
             call setCursorPosPanel
-            pop hl
-            ld de,ncTextBuffer
-            ld c,4
-pdl_Cell:
+            ld e,c
+            ld d,0
+            ld hl,vars.driveList
+            add hl,de
             ld a,(hl)
-            inc hl
             add a,'A'
-            ld (de),a
-            inc de
-            dec b
-            jp z,pdl_Print
-            dec c
-            jp z,pdl_Print
-            ld a,' '
-            ld (de),a
-            inc de
-            ld (de),a
-            inc de
-            ld (de),a
-            inc de
-            jp pdl_Cell
-pdl_Print:
-            xor a
-            ld (de),a
-            push hl
-            ld hl,ncTextBuffer
+            ld (ncCharText),a
+            ld hl,ncCharText
             call bios_printStringReal
-            pop hl
-            ld a,b
-            or a
-            ret z
-            jp pdl_Row
+            inc c
+            dec b
+            jp nz,pdl_Row
+            ret
 
 ; A=позиция в списке 0..7; HL=координаты буквы, BC/DE сохранены.
 ; Каждая строка центрируется по реальному числу букв, без хвоста пробелов.
@@ -336,10 +342,23 @@ dcp_Center:
             add a,a
             add a,d
             ld d,a
-            ld a,54
+            ld a,53
             sub d
-            and 0FCh
             ld h,a
+            ld a,(ncFontWidth)
+            cp 6
+            jp z,dcp_Aligned
+            cp 4
+            ld a,h
+            jp nz,dcp_Wide
+            and 0FEh
+            jp dcp_SaveX
+dcp_Wide:
+            dec a
+            and 0FCh
+dcp_SaveX:
+            ld h,a
+dcp_Aligned:
             ld a,c
             add a,a
             add a,c
@@ -354,14 +373,45 @@ dcp_Center:
 chooseDrive_draw:
             ld a,(vars.chooseDrive)
             call driveCellPosition
-            ld a,h
-            rrca
-            rrca
-            add a,90h
-            ld h,a
             ld a,l
             sub 8
+            ld d,a ; One blank pixel above and below the eight glyph rows.
+            ld a,h
+            ld h,0
             ld l,a
-            call activePanelPos
-            ld bc,(1<<8)+9
-            jp inverseRect
+            ld a,(state.activePanel)
+            or a
+            jp z,dcp_PixelX
+            ld bc,96
+            add hl,bc
+dcp_PixelX:
+            add hl,hl ; BIOS half-pixels -> absolute pixel X.
+            ld a,(ncFontWidth)
+            ld c,a
+            ld b,0
+            ld a,l
+            sub c
+            ld l,a
+            ld a,h
+            sbc a,0
+            ld h,a
+            ld a,(ncDrivePadLeft)
+            ld e,a
+            ld a,l
+            add a,e
+            ld l,a
+            ld a,h
+            adc a,0
+            ld h,a
+            ld a,c
+            add a,a
+            add a,c
+            sub e
+            ld c,a
+            ld a,(ncDrivePadRight)
+            ld e,a
+            ld a,c
+            sub e
+            ld c,a ; Equal margins around visible ink, excluding blank columns.
+            ld e,10
+            jp uiInverseRectPixels

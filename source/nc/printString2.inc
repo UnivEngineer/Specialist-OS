@@ -1,5 +1,5 @@
 ; Печать поля ASCIIZ с пробельным заполнением одним вызовом BIOS.
-; HL=строка, B=ширина 1..63. AF/BC/DE/HL сохранены.
+; HL=строка, B=ширина 1..96. AF/BC/DE/HL сохранены.
 ncPrintField:
         push af
         push bc
@@ -50,7 +50,91 @@ ncPrintChar:
         pop af
         ret
 ncCharText: DB 0,0
-ncTextBuffer: BLOCK 64,0
+ncTextBuffer: BLOCK 97,0
+
+; HL=ASCIIZ, B=maximum characters (1..96). Never wraps or pads the field.
+; AF/BC/DE preserved; HL points after the printed prefix (NUL or truncation).
+ncPrintTextLim:
+        push af
+        push bc
+        push de
+        push hl
+        ld e,b
+        ld bc,0
+ncTextLimCount:
+        ld a,(hl)
+        or a
+        jp z,ncTextLimReady
+        inc hl
+        inc c
+        dec e
+        jp nz,ncTextLimCount
+ncTextLimReady:
+        pop hl
+        call bios_printStringRawLim
+        pop de
+        pop bc
+        pop af
+        ret
+
+; Bounded information-panel text. Like printString: HL ends on the ORIGINAL
+; terminator, BC/DE/AF preserved (the driver description follows that NUL).
+; Padding is deliberately omitted: adjacent values retain their own color.
+ncPrintPanelText:
+        push af
+        push bc
+        push de
+        push hl
+        ld a,(bios_vars.cursorX)
+        cp 96
+        jp c,ncPanelTextLeft
+        sub 96
+ncPanelTextLeft:
+        ld c,a
+        ld a,92
+        sub c
+        jp c,ncPanelTextZero
+        ld c,a
+        ld a,(ncFontWidth)
+        rrca
+        ld e,a
+        ld a,c
+        ld b,0
+ncPanelTextCount:
+        sub e
+        jp c,ncPanelTextCopyStart
+        inc b
+        jp ncPanelTextCount
+ncPanelTextZero:
+        ld b,0
+ncPanelTextCopyStart:
+        pop hl
+        ld de,ncTextBuffer
+ncPanelTextCopy:
+        ld a,(hl)
+        or a
+        jp z,ncPanelTextEnd
+        inc hl
+        ld c,a
+        ld a,b
+        or a
+        jp z,ncPanelTextCopy
+        ld a,c
+        ld (de),a
+        inc de
+        dec b
+        jp ncPanelTextCopy
+ncPanelTextEnd:
+        xor a
+        ld (de),a
+        push hl
+        ld hl,ncTextBuffer
+        call bios_printStringReal
+        pop hl
+        pop de
+        pop bc
+        pop af
+        ret
 
 ; DE=число, B=маска ведущих нулей, как у bios_printDecWord.
 ; Регистры BC/DE/HL сохранены. Разложение — штатный алгоритм BIOS,

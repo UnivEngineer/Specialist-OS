@@ -27,12 +27,20 @@ mainOtherPanelInfo:
             ld a,(hl)
             or a
             jp z,mainPanelsReady
+            ; Enter/CD on the same drive changes no information-panel data.
+            ld a,(ncInfoDrive)
+            ld b,a
+            ld hl,state.panelA_drive
+            call readBytePanel
+            cp b
+            jp z,mainPanelsReady
             ld a,(state.activePanel)
             xor 1
             ld c,a
             call loadAndPrintPanel
             jp mainPanelsReady
 mainPrepareReload:
+            call ncDialogClose
             ld hl,state.panelA_drive
             call readBytePanel
             ld e,1
@@ -48,8 +56,12 @@ mainPanelsReady:
             jp mainSelectionChanged
 mainResetReload:
             xor a
+            ld (ncStartupPrepared),a
+            ld (ncCommandScreen),a
+            ld (ncCommandCursorKept),a
             ld (ncDirtyMask),a
             ld (ncDamageMask),a
+            ld (ncListMask),a
             ld (ncSelectiveRefresh),a
             ld (ncKeepFrames),a
             ret
@@ -77,6 +89,10 @@ mainLoop_cursorReady:
             ; Ввод команды не затрагивает инверсное выделение.
             ; При шаге за край окна старый курсор также можно сохранить.
             push    af
+            call    ncNavigationBlocked
+            jp c,   mainLoop_ignoreNavigation
+            pop af
+            push af
             call    keepCursorForKey
             jp c,   mainLoop_keyKept
             COLOR   COLOR_FILE
@@ -213,11 +229,14 @@ ctrlEnter:  ; Если файл не выбран, выход
 
 mainLoop_editDone EQU mainLoop_cursorReady
 
+mainLoop_ignoreNavigation:
+            pop af
+            jp mainLoop_cursorReady
+
 ; F10 завершает панельную оболочку, сохраняя её контексты.
 ncExitToCli:
             call ncStopObserver
             call saveState
-            call ncFontRenderEnd
             ld hl,state.panelA_drive
             call readBytePanel
             MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE

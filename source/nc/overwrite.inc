@@ -1,70 +1,46 @@
-; Модальный выбор замены: HL=FILE_COPY_REQUEST, A=0/1/2/3, CF=0.
+; Модальный выбор замены: A=FAR-банк DOS, HL=FILE_DESCRIPTOR назначения, A=0/1/2/3, CF=0.
 ; 0=No, 1=Yes, 2=Yes to all, 3=No to all. Escape равен No.
 ; Стрелки/Tab меняют выбор; Y/N/A/S выбирают ответ напрямую.
 ; Все регистры разрушены. Дисковые службы из обработчика не вызываются.
 ncOverwritePrompt:
+    MODULE localConfirm
+    DEFINE COPY_CONFIRM_BODY ncOverwriteBody
+    INCLUDE "../common/copyConfirmLocal.inc"
+    UNDEFINE COPY_CONFIRM_BODY
+    ENDMODULE
+ncOverwriteBody:
     push hl
-    call ncDamageBoth
+    ld hl,ncOverwriteWindow
+    call ncDialogOpen
     pop hl
-    ld de,FILE_COPY_REQUEST.destination
-    add hl,de
     ld de,ncOverwriteName
     call compactName
-    ld hl,ncOverwriteName
-    ld b,0
-ncOverwriteTrim:
-    ld a,(hl)
-    cp 0Dh
-    jp z,ncOverwriteTrimEnd
-    inc b
-    inc hl
-    jp ncOverwriteTrim
-ncOverwriteTrimEnd:
-    dec hl
-    ld (hl),0
-    dec b
-    push bc
     COLOR COLOR_DIALOG
     ld hl,ncOverwriteWindow
     call draw
-    ; Y текстового BIOS задаёт нижнюю линию восьмипиксельного знака.
-    ld hl,04C6Dh
-    ld (bios_vars.cursorY),hl
     ld hl,ncOverwriteTitle
-    call bios_printStringReal
-    pop bc
-    ; Имя центрируется по фактической длине, без пробельного хвоста 8.3.
-    ld a,b
-    add a,a
-    add a,b
-    or a
-    rra
-    ld b,a
-    ld a,96
-    sub b
-    add a,2
-    and 0FCh
-    ld h,a
-    ld l,130
-    ld (bios_vars.cursorY),hl
+    ld e,103
+    call ncOverwriteCentered
     ld hl,ncOverwriteName
-    call bios_printStringReal
-    ld hl,02C95h
-    ld (bios_vars.cursorY),hl
-    ld hl,ncOverwriteYes
-    call bios_printStringReal
-    ld hl,04095h
-    ld (bios_vars.cursorY),hl
-    ld hl,ncOverwriteYesAll
-    call bios_printStringReal
-    ld hl,06C95h
-    ld (bios_vars.cursorY),hl
-    ld hl,ncOverwriteNo
-    call bios_printStringReal
-    ld hl,07C95h
-    ld (bios_vars.cursorY),hl
-    ld hl,ncOverwriteNoAll
-    call bios_printStringReal
+    ld e,120
+    call ncOverwriteCentered
+    ld hl,ncOverwriteButtons
+    ld b,4
+ncOverwriteDraw:
+    push bc
+    push hl
+    ld de,UI_BUTTON.selected
+    add hl,de
+    ld (hl),0
+    pop hl
+    push hl
+    call ncDrawButton
+    pop hl
+    ld de,UI_BUTTON
+    add hl,de
+    pop bc
+    dec b
+    jp nz,ncOverwriteDraw
     ld a,2
     ld (ncOverwriteChoice),a
     call ncOverwriteInvert
@@ -79,7 +55,11 @@ ncOverwriteKey:
     cp 018h
     jp z,ncOverwriteRight
     cp 9
-    jp z,ncOverwriteRight
+    jp z,ncOverwriteNext
+    cp 019h
+    jp z,ncOverwriteVertical
+    cp 01Ah
+    jp z,ncOverwriteVertical
     and 0DFh
     cp 'Y'
     jp z,ncOverwriteYesKey
@@ -91,35 +71,48 @@ ncOverwriteKey:
     jp z,ncOverwriteNoAllKey
     jp ncOverwriteKey
 ncOverwriteLeft:
-    ld b,0FFh
-    jp ncOverwriteChange
 ncOverwriteRight:
     ld b,1
+    jp ncOverwriteChange
+ncOverwriteVertical:
+    ld b,2
 ncOverwriteChange:
     push bc
     call ncOverwriteInvert
     pop bc
     ld a,(ncOverwriteChoice)
-    add a,b
+    xor b
+    ld (ncOverwriteChoice),a
+    call ncOverwriteInvert
+    jp ncOverwriteKey
+ncOverwriteNext:
+    call ncOverwriteInvert
+    ld a,(ncOverwriteChoice)
+    inc a
     and 3
     ld (ncOverwriteChoice),a
     call ncOverwriteInvert
     jp ncOverwriteKey
+ncOverwriteCentered:
+    ld b,32
+    ld c,124
+    ld a,UI_ALIGN_CENTER
+    jp ncPrintAligned
 ncOverwriteYesKey:
     ld a,1
     or a
-    ret
+    jp ncDialogClose
 ncOverwriteYesAllKey:
     ld a,2
     or a
-    ret
+    jp ncDialogClose
 ncOverwriteNoAllKey:
     ld a,3
     or a
-    ret
+    jp ncDialogClose
 ncOverwriteNoKey:
     xor a
-    ret
+    jp ncDialogClose
 ncOverwriteDone:
     ld a,(ncOverwriteChoice)
     ld e,a
@@ -128,40 +121,44 @@ ncOverwriteDone:
     add hl,de
     ld a,(hl)
     or a
-    ret
-; Все ячейки имеют одинаковую высоту и границы по экранным байтам.
-; При смене выбора инвертируются только прежняя и новая ячейки.
+    jp ncDialogClose
 ncOverwriteInvert:
     ld a,(ncOverwriteChoice)
-    add a,a
-    add a,a
-    ld e,a
-    ld d,0
-    ld hl,ncOverwriteRects
+    ld l,a
+    ld h,0
+    add hl,hl
+    ld d,h
+    ld e,l
+    add hl,hl
+    add hl,hl
     add hl,de
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    inc hl
-    ld c,(hl)
-    inc hl
-    ld b,(hl)
-    ex de,hl
-    jp inverseRect
-ncOverwriteRects:
-    DW 09A8Ch,(4<<8)+12
-    DW 09F8Ch,(9<<8)+12
-    DW 0AA8Ch,(3<<8)+12
-    DW 0AE8Ch,(8<<8)+12
+    ld de,ncOverwriteButtons
+    add hl,de
+    push hl
+    ld de,UI_BUTTON.selected
+    add hl,de
+    ld a,(hl)
+    xor 1
+    pop hl
+    jp uiSelectButton
+ncOverwriteButtons:
+    UI_BUTTON ncOverwriteYes,32,60,128,14,6,0
+    UI_BUTTON ncOverwriteYesAll,96,60,128,14,6,0
+    UI_BUTTON ncOverwriteNo,32,60,144,14,6,0
+    UI_BUTTON ncOverwriteNoAll,96,60,144,14,6,0
+ncOverwriteLabels:
+    DW ncOverwriteYes,ncOverwriteYesAll,ncOverwriteNo,ncOverwriteNoAll
 ncOverwriteAnswers: DB 1,2,0,3
 ncOverwriteWindow:
-    G_WINDOW 80h,64,96,256,64
-    G_LINE 80h,68,116,248
+    G_MODAL_WINDOW 80h,56,88,264,76
+    G_LINE 80h,60,108,256
+    G_LINE 80h,60,124,256
     DB 0
 ncOverwriteTitle: DB 'Overwrite file?',0
-ncOverwriteYes: DB 'Yes',0
-ncOverwriteYesAll: DB 'Yes to all',0
-ncOverwriteNo: DB 'No',0
-ncOverwriteNoAll: DB 'No to all',0
+ncOverwriteYes: DB 'Yes [Y]',0
+ncOverwriteYesAll: DB 'Yes to all [A]',0
+ncOverwriteNo: DB 'No [N]',0
+ncOverwriteNoAll: DB 'No to all [S]',0
 ncOverwriteChoice: DB 2
+ncOverwriteButtonIndex: DB 0
 ncOverwriteName: DS 16,0

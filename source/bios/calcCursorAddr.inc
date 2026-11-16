@@ -13,10 +13,17 @@
 calcCursorAddr:   ; В hl положение курсора
             ld    hl, (bios_vars.cursorY)
 
-            ; Если cursorX >= 190, то перевод строки (вывод кода 10)
+            ; An aligned 4px cell at X=380 is valid; only X>=384 wraps.
             ; Иначе рассчитываем адрес старшего байта a = cursorX / 4 + 90h
-            ld    a, h
+            ld    a,(FONT_ENGINE_HEADER+5)
+            cp    6
+            ld    a,h
+            jp z,calcCursorLegacyEdge
+            cp    192
+            jp calcCursorEdgeReady
+calcCursorLegacyEdge:
             cp    190
+calcCursorEdgeReady:
             jp c, calcCursorAd_1
             ld    c, 10
             jp    calcCursorAd_0

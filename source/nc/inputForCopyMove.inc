@@ -50,12 +50,6 @@ inputForFile:
             call    getSelectedFile
             call    compactName
 
-            ; Записать терминатор
-            dec     de  ; compactName добавляет в конец строки ' ', 0Dh
-            dec     de
-            xor     a
-            ld      (de),a
-
             ; Перейти к редакированию
             jp      input
 

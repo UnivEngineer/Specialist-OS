@@ -40,11 +40,9 @@ for name in ('MOVE','GET8','GET16','PUT8','PUT16','PRINT','ALLOC','FREE','REALLO
  assert cm['MXOS_MEM_OP_'+name]==s['MEM_OP_'+name],name
 for name in ('BANK','STACK','RANGE','NOMEM','OWNER','HANDLE','ACTIVE'):
  assert cm['MXOS_MEM_ERR_'+name]==s['MEM_ERROR_'+name],name
-for name in ('COPY','LAZY_WINDOW','MEMORY_OPS','MODULES','ALLOCATOR','DWORD'):
+for name in ('COPY','LAZY_WINDOW','MEMORY_OPS','MODULES','ALLOCATOR'):
  assert cm['MXOS_MEM_CAP_'+name]==s['MEM_CAP_'+name],name
 assert cm['MXOS_MEM_SERVICE']==s['mx_memory']==0xF815
-assert cm['MXOS_MEM_GET32']==s['mx_get32']==0xF7A8
-assert cm['MXOS_MEM_PUT32']==s['mx_put32']==0xF7AB
 assert s['MXOS_BIOS_PRINT_STRING_BANK']==s['MXOS_BIOS_PRINT_STRING']==0x107
 assert s['MXOS_BIOS_PRINT_STRING_MAIN']==0x124
 assert s['MXOS_BIOS_FONT_RENDER']==0x125
@@ -71,3 +69,18 @@ image=(R/'bin/BIOS.sys').read_bytes()
 assert image[0x88D:0x890]==bytes(3)
 assert image[0x8D8:0x8DE]==bytes(6)
 print('Removed BIOS development entries absent; fixed-address gaps preserved')
+
+assert s['FILEOPS_JOB']==110
+assert s['FILEOPS_JOB.request']==24 and s['FILEOPS_JOB.phase']==13
+assert s['FILEOPS_JOB.total']==16 and s['FILEOPS_JOB.path']==22
+for name,value in dict(BEGIN=0,STEP=1,ANSWER=2,CANCEL=3,CLOSE=4,SKIP_PREPARE=5,NO_PREPARE=1,PHASE_COPY=0,PHASE_PREPARE=1,PHASE_DELETE=2,DELETE=2,COPY=0,MOVE=1,RUNNING=0,CONFIRM=1,DONE=2,FAILED=3).items():
+ assert f'#define MXOS_FILEOPS_{name} {value}' in header
+ assert s['FILEOPS_'+name]==value
+print('FILEOPS ASM/C job layout and operations PASS')
+
+assert s['MXOS_DOS_ENUMERATE']==0x22c
+assert s['ENUM_REQUEST']==12 and s['ENUM_ENTRY']==160
+for name,value in dict(OPEN=0,NEXT=1,CLOSE=2,RECURSIVE=1,CHECK_CANCEL=2).items():
+ assert s['ENUM_'+name]==value
+ assert f'#define MXOS_ENUM_{name} {value}' in header
+print('ENUM ASM/C request, record layout and operations PASS')

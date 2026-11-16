@@ -1,7 +1,11 @@
-; HL=FILE_COPY_REQUEST; A=0/1/2/3 (No/Yes/Yes all/No all), CF=0, все регистры разрушены.
+; A=FAR-банк DOS, HL=FILE_DESCRIPTOR назначения; A=0/1/2/3 (No/Yes/Yes all/No all), CF=0, все регистры разрушены.
 cliOverwritePrompt:
-    ld de,FILE_COPY_REQUEST.destination
-    add hl,de
+    MODULE localConfirm
+    DEFINE COPY_CONFIRM_BODY cliOverwriteBody
+    INCLUDE "../common/copyConfirmLocal.inc"
+    UNDEFINE COPY_CONFIRM_BODY
+    ENDMODULE
+cliOverwriteBody:
     push hl
     ld hl,cliOverwriteText
     call bios_printString

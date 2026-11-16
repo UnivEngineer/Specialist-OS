@@ -69,9 +69,9 @@ editorCheckFileSizeError:
         RET
 
 editorShowFileTooLarge:
-        LD    HL,txtOutOfMemory
-        CALL  bios_printString
-        JP    bios_getch
+        LD    HL,editorFileTooLargeMessage
+        CALL  bios_printStringZ
+        JP    editorMemoryDetails
 
 openCommandLineFile:
         PUSH  DE
@@ -86,7 +86,7 @@ editorLimitReady:
         LD    DE,01802h
         CALL  bios_cmp_hl_de
         POP   DE
-        JP    C,commandLineFileTooLarge
+        JP    C,editorMemoryTooSmall
         ; Новый документ начинается пустым, даже если в памяти осталась NC.
         LD    HL,(v_textBeginLo)
         LD    (HL),00h
@@ -131,3 +131,24 @@ commandLineFileTooLarge:
         JP    bios_reboot
 
         DB    00H,00H
+
+; Reject before even writing the initial NUL when no text space remains.
+editorMemoryTooSmall:
+        LD    HL,editorMemoryMessage
+        CALL  bios_printStringZ
+        CALL  editorMemoryDetails
+        JP    bios_reboot
+editorMemoryDetails:
+        CALL  bios_getMemTop
+        CALL  bios_printHexWord
+        LD    HL,editorMemoryPrompt
+        CALL  bios_printStringZ
+editorMemoryWait:
+        CALL  bios_getch
+        CP    13
+        JP    NZ,editorMemoryWait
+        LD    C,10
+        JP    bios_printChar
+editorMemoryMessage: DB 13,10,'E: no text buffer; need MEMTOP >= 1801h, have ',0
+editorFileTooLargeMessage: DB 13,10,'E: file exceeds available text buffer. MEMTOP=',0
+editorMemoryPrompt: DB 13,10,'Press Enter to return.',13,10,0

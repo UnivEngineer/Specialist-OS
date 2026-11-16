@@ -1,20 +1,8 @@
 ; Инициализатор исполняется в DOS; B: использует общие службы MEM/CPM16.
 ; Пул банков и геометрию реестра назначает RAMLIMIT; том создаёт FORMAT.
-; AF/BC/DE/HL разрушены. Режим KOI и выбор диска восстанавливаются.
-    ld hl,bios_upper.koi7
-    ld b,0
-    ld a,MEM_OP_GET8
-    call mx_memory
-    ld a,e
-    push af
-    xor a
-    MXOS_CALL MXOS_BIOS_SET_FONT_ENCODING
+; AF/BC/DE/HL разрушены. Выбор диска восстанавливается.
+; Сообщения — UPPER ENGLISH; установка и раскладка шрифта не меняются.
     call BankPrepare
-    pop bc
-    push af
-    ld a,b
-    MXOS_CALL MXOS_BIOS_SET_FONT_ENCODING
-    pop af
     ret c
     or a
     ret z
@@ -51,7 +39,17 @@ BankCheckVolume:
     xor a
     ret
 BankMountError:
+    ; Сохраняем исходную ошибку: STATUS — отдельный запрос DOS.
     MXOS_CALL MXOS_DOS_GET_ERROR
+    push af
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL MXOS_DOS_MEMORY
+    ld a,d
+    or a
+    pop bc
+    jp nz,BankFormatFresh
+    ld a,b
     cp DOS_ERR_UNSUPPORTED
     jp nz,BankReportError
     ; Неизвестная разметка: читаем boot отдельно. Ошибка чтения не означает,
@@ -83,6 +81,7 @@ BankMountError:
     ld de,512
     call cmp_hl_de
     jp z,BankSuspectVolume
+BankFormatFresh:
     ld hl,bankFormatText
     MXOS_CALL MXOS_BIOS_PRINT_STRING
     ld a,1

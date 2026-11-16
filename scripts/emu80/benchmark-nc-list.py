@@ -22,6 +22,7 @@ def build(symbols):
 entry:
     ld sp,08B00h
     call pitTimerInit
+    jp c,finished
     call pitTimerRead
     ld (started),hl
     IF {context}

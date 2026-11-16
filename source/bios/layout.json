@@ -16,7 +16,7 @@
     {
       "address": 49207,
       "size": 3,
-      "target": "printChar",
+      "target": "FONT_ENGINE_CHAR",
       "abi": "bios_printCharOld"
     },
     {
@@ -75,7 +75,7 @@
     {
       "address": 50232,
       "size": 3,
-      "target": "printString",
+      "target": "FONT_ENGINE_Z",
       "abi": "bios_printStringOld"
     },
     {
@@ -106,26 +106,6 @@
       "files": [
         "clearScreen.inc"
       ]
-    },
-    {
-      "name": "printChar",
-      "files": [
-        "printChar.inc"
-      ]
-    },
-    {
-      "name": "fast6",
-      "files": [
-        "font6.inc"
-      ]
-    },
-    {
-      "name": "glyph",
-      "files": [
-        "printChar5.inc",
-        "drawChar.inc"
-      ],
-      "chain": true
     },
     {
       "name": "printChar3",
@@ -253,7 +233,7 @@
     {
       "name": "printString",
       "files": [
-        "printString.inc",
+        "font-module.inc",
         "bankText.inc"
       ]
     },
@@ -419,9 +399,27 @@
       ]
     },
     {
-      "name": "scalarPre",
+      "name": "mainBlockIO",
       "files": [
-        "scalarPre.inc"
+        "../io/main-block.inc"
+      ]
+    },
+    {
+      "name": "mainIoAddress",
+      "files": [
+        "../io/main-address.inc"
+      ]
+    },
+    {
+      "name": "mainIoQuery",
+      "files": [
+        "../io/main-query.inc"
+      ]
+    },
+    {
+      "name": "mainIoRead",
+      "files": [
+        "../io/main-read.inc"
       ]
     }
   ]

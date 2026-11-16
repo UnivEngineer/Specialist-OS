@@ -8,12 +8,12 @@
 j_reboot3:      jp  reboot3             ; C800: Восстановить звук и запустить NC.COM
 j_getch:        jp  getch               ; C803: Ожидание ввода с клавиатуры
 j_tapeRead:     jp  t_tapeRead          ; C806: Чтение байта с магнитофона
-j_printChar:    jp  printChar           ; C809: Вывод символа на экран
+j_printChar:    jp  FONT_ENGINE_CHAR           ; C809: Вывод символа на экран
 j_tapeWrite:    jp  t_tapeWrite         ; C80C: Запись байта на магнитофон
                 jp  input               ; C80F: Ввод строки с клавиатуры
                 jp  j_keyScan           ; C812: Получить код нажатой клавиши
                 jp  printHexByte        ; C815: Вывести 16-ричное число (байт)
-j_printString:  jp  printString        ; C818: Вывести строку на экран
+j_printString:  jp  FONT_ENGINE_Z        ; C818: Вывести строку на экран
                 jp  j_keyScan           ; C81B: Получить код нажатой клавиши
                 jp  getCursorPos        ; C81E: Получить координаты курсора в hl (координаты в пикселях)
                 jp  setCursorPos        ; C821: Установить координаты курсора из hl (координаты в пикселях)
@@ -44,7 +44,7 @@ j_printString:  jp  printString        ; C818: Вывести строку на 
                 jp  installDriver       ; C860: Установить драйвер накопителя
 j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранного диска
                 jp  sysLegacy_fileLoad2           ; C866: Загрузить файл по адресу de
-                jp  printCharReal       ; C869: [MXOS2] Вывод символа на экран (только реальные символы)
+                jp  FONT_ENGINE_RAW       ; C869: [MXOS2] Вывод символа на экран (только реальные символы)
                 jp  printDecWord        ; C86C: [MXOS2] Вывод числа экран в десятичной форме
                 jp  setRAMDDriver       ; C86F: [MXOS2] Установить драйвер доступа к ДОЗУ
                 jp  sysLegacy_getDriveFreeSpace   ; C872: [MXOS2] Получить оставшийся свободный объем диска
@@ -52,9 +52,11 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
                 jp  strcmp              ; C878: [MXOS2] Сравнение строк, чувствительное к регистру
                 jp  stricmp             ; C87B: [MXOS2] Сравнение строк, нечувствительное к регистру
                 jp  sub_hl_de           ; C87E: [MXOS2] Вычитание hl и de: hl = hl - de
-                DS 9,0 ; C881..C889: арифметика перенесена в include/math.inc
+                jp printCharBody
+                jp printChar_c0A
+                jp calcCursorAd_0
                 jp  sysLegacy_fileCreatePrepare   ; C88A: [MXOS2] подготовить файл
-                DS 3,0 ; C88D..C88F: удалённый вход кластерного переноса
+                DS 3,0 ; C88D is unused; module init is at D800h
                 jp  sysLegacy_installVolume       ; C890: зарегистрировать драйвер тома
                 jp  sysLegacy_getVolume           ; C893: таблица и контекст драйвера тома
                 jp  sysLegacy_mountVolume         ; C896: повторное монтирование тома
@@ -63,7 +65,7 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
 
                 jp  diskWriteChecked    ; C89F: запись сектора с чтением и сравнением
 
-                jp fast6.setEncoding ; C8A2: явный выбор KOI7/KOI8
+                jp FONT_ENGINE_ENCODING ; C8A2: явный выбор KOI7/KOI8
                 DS 3,0 ; C8A5..C8A7 свободны
 
                 DS 12,0 ; C8A8..C8B3 свободны после переноса UI в программу
@@ -92,8 +94,8 @@ j_diskDriver:   jp  sysDiskDriver          ; C863: Драйвер выбранн
                 ASSERT $ == 0C8EAh
                 jp blockIO             ; C8EA: физический запрос DOS -> BIOS
                 ASSERT $ == 0C8EDh
-                jp printStringRawZ     ; C8ED: ASCIIZ без управляющих кодов
+                jp FONT_ENGINE_RAWZ     ; C8ED: ASCIIZ без управляющих кодов
                 ASSERT $ == 0C8F0h
-                jp printStringRawLim  ; C8F0: HL=буфер, BC=байты
+                jp FONT_ENGINE_LIM  ; C8F0: HL=буфер, BC=байты
                 jp bankText.dispatch    ; C8F3: внутренний MEM TEXT
                 ASSERT $ == 0C8F6h

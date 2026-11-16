@@ -1,4 +1,4 @@
-# Контейнеры COM/EXE/DLL MXOS2, RKS и CPU/I80. Без внешних процессов.
+# Контейнеры COM/EXE/DLL/FNT MXOS2, RKS и CPU/I80. Без внешних процессов.
 
 function Set-Word {
     param([byte[]] $Data, [int] $Offset, [int] $Value)
@@ -24,7 +24,7 @@ function Get-ExecutableChecksum {
 function Convert-ExecutableFile {
     param(
         [string] $Path,
-        [ValidateSet('com', 'exe', 'dll', 'rks')][string] $Format,
+        [ValidateSet('com', 'exe', 'dll', 'fnt', 'rks')][string] $Format,
         [int] $LoadAddress = 0
     )
     try {
@@ -38,7 +38,7 @@ function Convert-ExecutableFile {
         $expectedChecksum = $null
         $magic = [byte[]](0xCD, 0x20, 0x4D, 0x58, 1, 0)
 
-        if ($kind -in @('.com', '.exe', '.dll') -and $data.Length -ge 4 -and
+        if ($kind -in @('.com', '.exe', '.dll', '.fnt') -and $data.Length -ge 4 -and
             $data[2] -eq 0x4D -and $data[3] -eq 0x58) {
             if ($data.Length -lt 16) { throw 'Short COM/EXE header' }
             for ($i = 0; $i -lt 5; $i++) {
@@ -98,7 +98,7 @@ function Convert-ExecutableFile {
             throw 'Invalid image checksum'
         }
         # Проверенный контейнер того же формата уже содержит нужные байты.
-        # COM, EXE и DLL различаются расширением, их заголовок одинаков.
+        # COM, EXE, DLL и шрифтовые FNT различаются расширением, их заголовок одинаков.
         if (($kind -eq '.rks' -and $Format -eq 'rks') -or
             ($offset -eq 16 -and $Format -ne 'rks')) {
             return ,$data

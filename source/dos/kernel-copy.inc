@@ -59,19 +59,12 @@ kcStoreRequest:
     ld bc,FILE_COPY_REQUEST
     jp kdStore
 
-; HL=локальный запрос; callback видит снимок по исходному адресу клиента.
-; Менять запрос в обработчике нельзя; ответ — только A и CF.
+; HL=локальный запрос; клиент получает FAR-дескриптор назначения.
 kcConfirm:
-    call kcStoreRequest
-    ret c
-    ld hl,(kdClientObject)
-    ld (kcRegs),hl
+    push hl
     ld hl,(kcHook)
     ld b,h
     ld c,l
-    ld a,(kdPage)
-    ld hl,bankCallback
-    ld de,kcRegs
-    jp bankCallPacket
+    pop hl
+    jp ktCallConfirm
 kcHook: DW 0
-kcRegs: DS MX_REGS,0

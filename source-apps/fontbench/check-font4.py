@@ -17,8 +17,8 @@ def main():
     program = (ROOT / 'bin/FONTCOM.i80').read_bytes()
     base = bytearray((i * 37 + (i >> 8) * 13) & 255 for i in range(65536))
     base[:len(program)] = program
-    font = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
-    font4 = (ROOT / 'assets/system-rom/FONT4CPM.bin').read_bytes()
+    font = (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
+    font4 = (ROOT / 'bin/fonts/cpm4-paged.bin').read_bytes()
     narrow = bytes(font4[y * 256 + c] & 15 for c in range(256) for y in range(8))
     word = lambda n: n.to_bytes(2, 'little')
     call = lambda n: b'\xcd' + word(s[n])

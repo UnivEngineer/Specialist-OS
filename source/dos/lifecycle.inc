@@ -103,6 +103,7 @@ appLeave:
 
 ; C=владелец. Освобождаем дочерние модули и обычные выделения.
 appReleaseOwner:
+    call fileopsReleaseOwner
     ld hl,MODULE_TABLE
     ld b,MODULE_MAX
 appReleaseModule:
@@ -345,12 +346,15 @@ residentRetainRecord:
     cp DOS_IO_PAGE
     jp nz,residentRetainAllowed
     push hl
-    ld de,5              ; Старший байт входа DOS-DLL.
+    ld de,12             ; Actual end, not the entry address.
     add hl,de
-    ld a,(hl)
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ld hl,DOS_BANK_DRIVER_END
+    call cmp_hl_de
     pop hl
-    cp DOS_SERVICE_END/256
-    jp nc,residentDenied ; Временная арена нужна установщикам после Reset.
+    jp c,residentDenied ; Borrowed BAT memory cannot survive Reset.
 residentRetainAllowed:
     call residentKey
     push hl

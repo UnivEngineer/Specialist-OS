@@ -6,6 +6,7 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 entry: jp initialize
 descriptor: DB 6,1
     DW historical.monitor2,batch,empty
+    DW historical.monitor2 ; optional unwrapped historical scalar
     DS 06000h-$,0
 initialize:
     ld (variant),a
@@ -40,6 +41,7 @@ columnInit:
     ld hl,columnPre.scalar
 selected:
     ld (descriptor+2),hl
+    ld (descriptor+8),hl
     ld (scalarCall+1),hl
     ld hl,descriptor
     xor a

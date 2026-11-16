@@ -5,11 +5,11 @@ static char dos_path[MXOS_MAX_PATH]="B:\\DOSMOD.DLL";
 int main(void)
 {
     mxos_u16 handle,old,af;
-    mxos_u8 pages,state;
+    mxos_u8 pages,state,fresh;
     MXOS_MODULE_REGS r;
     if (sizeof(r)!=8) return 1;
-    if (mxos_ramdisk_status(&pages,&state)&MXOS_CF) return 16;
-    if (pages!=4 || state!=1) return 17;
+    if (mxos_ramdisk_status(&pages,&state,&fresh)&MXOS_CF) return 16;
+    if (pages!=4 || state!=1 || fresh) return 17;
     af=mxos_ramdisk_commit();
     if (!(af&MXOS_CF) || (af>>8)!=MXOS_MEM_ERR_OWNER) return 18;
     if (mxos_main_arena((void *)0x6000,0x2000)&MXOS_CF) return 2;

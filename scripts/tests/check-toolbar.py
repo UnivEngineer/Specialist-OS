@@ -39,11 +39,11 @@ subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'trace.bin'
 m=bytearray(65536)
 for path,at in [(R/'bin/NC.i80',0),(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.sys',0xF000),
                 (R/'bin/DOS.native.sys',s['DOS_CODE_START']),
-                (R/'assets/system-rom/FONTKOI.FNT',s['FONT_ADDR']),
+                (R/'bin/fonts/Compact.pf',s['FONT_ADDR']),
                 (O/'trace.bin',0x5000)]:
     b=path.read_bytes()
     m[at:at+len(b)]=b
-fullfont=(R/'assets/system-rom/FONT.FNT').read_bytes()
+fullfont=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 m[s['FONT_ADDR']:s['FONT_ADDR']+2048]=bytes(fullfont[c*8+y] for y in range(8) for c in range(256))
 m[s['v_dosModuleReady']]=1
 assert m[n['uiToolbarWrite']]==0x77
@@ -51,7 +51,7 @@ m[n['uiToolbarWrite']]=0xEF;m[0x28:0x2B]=b'\xC3'+W(0x5000)
 m[0x9000:0xC000]=bytes((i*37+(i>>8)*13)&255 for i in range(0x3000))
 m[s['bios_vars.cursorY']:s['bios_vars.cursorY']+2]=W(0x3543)
 m[s['bios_vars.inverse']]=0xA5
-font=(R/'assets/system-rom/FONT.FNT').read_bytes()
+font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 
 def expected(at):
     result={};column=0

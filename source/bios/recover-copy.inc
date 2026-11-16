@@ -26,11 +26,11 @@ biosRecoveryFlag:
     push af
     ; Код один и тот же; пять полей контекста LOCALBLOCK задаёт sysInstall.
     ld hl,MEM_IMAGE_LOCAL_START
-    ld de,BANK_LOCAL_BYTES
+    ; MAIN: не затирать установленный AT512KS локальными службами DOS/EXEC.
+    ld de,BANK_MAIN_LOCAL_BYTES
     call biosRecoverRange
     ld hl,mx_call
-    ; Службы EXEC/DOS после bankClientEnd занимают в main слот FLASHSYS.
-    ; Восстанавливаем только общий клиент, сохраняя установленный драйвер A:.
+    ; Общий CLIENT включает таблицу вызовов и текстовый шлюз.
     ld de,BANK_MAIN_CLIENT_BYTES
     call biosRecoverRange
     ld hl,BANK_LANDING

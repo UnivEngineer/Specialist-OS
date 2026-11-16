@@ -30,6 +30,10 @@ engineArgNext:
     ld de,argStandalone
     call engineEqual
     jp z,engineArgStandalone
+    ld hl,argToken
+    ld de,argLegacy
+    call engineEqual
+    jp z,engineArgLegacy
     ld hl,engineRecords
     ld b,ENGINE_COUNT
 engineArgFind:
@@ -55,14 +59,22 @@ engineArgFound:
     ld (hl),1
     jp engineArgDone
 engineArgAll:
+    call engineSelectShared
     ld a,1
-    call engineSelectAll
+    ld (engineRecords+5),a
     jp engineArgDone
 engineArgStandalone:
-    ld a,1
-    call engineSelectAll
+    call engineSelectShared
+    jp engineArgDone
+engineArgLegacy:
     xor a
-    ld (engineRecords+5),a
+    call engineSelectAll
+    ld hl,engineRecords+8+5
+    ld b,23
+    ld a,1
+    call engineSelectLoop
+    ld a,1
+    ld (engineRecords+30*8+5),a ; historical window monitor, after shared modules
 engineArgDone:
     pop hl
     ld a,(hl)
@@ -157,3 +169,4 @@ argStandalone: DB 'STANDALONE',0
 argOff: DB 'OFF',0
 argOn: DB 'ON',0
 argBoth: DB 'BOTH',0
+argLegacy: DB 'LEGACY',0

@@ -12,7 +12,7 @@ m=context['m'];x=context['x'];s=context['s'];n=context['n'];until=context['until
 O=R/'docs/bench/engine-grid'/('error' if failure else 'selection');O.mkdir(parents=True,exist_ok=True)
 context['O']=O
 context['h']['Matrix'].__init__.__globals__['OUT']=O
-font=(R/'assets/system-rom/FONT.FNT').read_bytes()
+font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 f4=(R/'bin/FONTBEN.font4.bin').read_bytes()
 font4=bytes((f4[(c//2)*8+y]>>(0 if c&1 else 4))&15 for c in range(256) for y in range(8))
 baseline=(R/'bin/BIOS.sys').read_bytes()
@@ -32,7 +32,7 @@ rows=[]
 try:
     x.start('engine-selection',system=R/'images/SystemRom_emu80_writable.bin')
     m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
-    cmd='A:/Bench/FontBen/FontBen.com -E FULL -P ON -N -Q' if failure else 'A:/Bench/FontBen/FontBen.com -E FULL -E 4DUP -P ON -Q'
+    cmd='A:/Bench/FontBen/FontBen.com -E SCALAR12 -P ON -N -Q' if failure else 'A:/Bench/FontBen/FontBen.com -E SCALAR12 -E 4DUP -P ON -Q'
     keys={':':'colon','/':'slash','.':'period',' ':'space','-':'minus'}
     for c in cmd:m.tap(keys.get(c,c.lower()))
     assert m.read(n['vars.cmdLine'],len(cmd)).upper()==cmd.upper().encode()
@@ -63,7 +63,7 @@ try:
             if stage<35:
                 m.call('debug_step',mode='into');until(s['gridMeasured'])
         m.call('bp_clear');until(s['bench_restore'])
-        assert {r['engine'] for r in rows}=={'FULL','4DUP'}
+        assert {r['engine'] for r in rows}=={'SCALAR12','4DUP'}
     check_restored();check_memory()
     m.call('bp_clear');m.call('debug_step',mode='into');m.stop_at(n['mainLoop']);m.until(n['mainLoop'],120,page=0)
     m.screenshot(O/'returned.png')
@@ -81,7 +81,7 @@ try:
             report+=m.read(0x7A00,count)
             assert len(report)<4096
         api(0x500)
-        assert report.count(b'FULL\r\nFontBen')==1 and report.count(b'4DUP\r\nFontBen')==1,report
+        assert report.count(b'SCALAR12\r\nFontBen')==1 and report.count(b'4DUP\r\nFontBen')==1,report
         (O/'FONTBEN.TXT').write_bytes(report)
     (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',restore='PASS',memory='PASS',injectedFailure=failure,rows=rows),indent=2)+'\n')
     print('ERROR CLEANUP PASS' if failure else 'SELECTION/APPEND PASS',flush=True)

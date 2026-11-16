@@ -81,7 +81,7 @@ def main():
         m.subroutine(0xC860, af=0, hl=syms['diskDriver'])
         select(0)
     if args.phase == 'boot':
-        assert m.read(SYSTEM['FONT_ADDR'], 2048) == (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
+        assert m.read(SYSTEM['FONT_ADDR'], 2048) == (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
         assert m.read(SYSTEM['SYSTEM_FLASH_ADDR'],8)==m.resident_bytes('FlashSys')[:8]
         assert m.read(SYSTEM['DISK_DRIVER_ADDR'],8)==m.resident_bytes('Flash')[:8]
         # Запускаем высоко размещённый AUTOEXEC непосредственно встроенным драйвером.

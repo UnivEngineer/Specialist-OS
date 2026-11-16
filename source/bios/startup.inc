@@ -23,11 +23,13 @@ reboot1:
     call memcpy_bc_hl
     ld a,COLOR_BIOS
     ld (IO_COLOR),a
-    call clearScreen
-    ; Очистка не меняет координаты: первая строка начинается сверху.
+    ; The boot sector cleared the screen; keep the BOOT.SYS splash.
+    ; Diagnostics start at the top, above the logo.
     ld hl,8
     ld (bios_vars.cursorY),hl
-    ; Внешний шрифт уже загружен bootstrap до первого вывода.
+    ; Bootstrap installs the default self-contained module before first output.
+    ld de,0
+    call FONT_ENGINE_INIT
     ld hl,biosVersion
     call printString
     ld a,(v_dosBanked)

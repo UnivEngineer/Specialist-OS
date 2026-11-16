@@ -32,7 +32,7 @@ font4Source:
 matrixPageText: DB 'Press Enter for next page',13,10,0
     ASSERT $ <= 02800h
     DS 02800h-$,0
-    INCBIN "../../assets/system-rom/FONT.FNT"
+    INCBIN "../../assets/system-rom/fonts/6x8/KOI8.pf"
     ASSERT $ == 03000h
     INCBIN "../../bin/FONTBEN.shifts.bin",0,00800h
     INCLUDE "engines/legacy.inc"

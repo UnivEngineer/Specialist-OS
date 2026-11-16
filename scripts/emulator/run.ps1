@@ -22,7 +22,7 @@ if (-not (Test-Path -LiteralPath $emulatorPath -PathType Leaf)) {
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $systemRomSource = Join-Path (Join-Path $repositoryRoot "images") $SystemImage
-$flashRomSource = Join-Path $repositoryRoot "images\FlashDisk_emulator.bin"
+$flashRomSource = Join-Path $repositoryRoot "images\FlashDisk_64K.bin"
 $configSource = Join-Path $PSScriptRoot "SpecialistMX2_My_MXOS.cfg"
 
 foreach ($sourcePath in @($systemRomSource, $flashRomSource, $configSource)) {

@@ -46,4 +46,7 @@ j_pageWriteAny:	jp ramfosWriteAny
 ramfosStart:
     jp compatStart
     ASSERT ramfosStart == 0F85Ah
+ramfosMonitor:
+    jp monitorStart
+    ASSERT ramfosMonitor == 0F85Dh
     ENDIF

@@ -100,7 +100,10 @@ keNativeExtension:
     jp c,keRangeError
     ld a,d
     cp 08Ch
-    ld de,08C00h
+    push hl
+    ld hl,(memorySystemEnd)
+    ex de,hl
+    pop hl
     jp c,keCheckEnd
     cp SYSTEM_PROGRAM_ADDR/256
     jp c,keRangeError
@@ -260,19 +263,19 @@ keBankPrepareFailed:
 keBankFloor: DW DOS_BANK_STACK_BOTTOM+192
 
 keDriver:
-    ld a,(moduleDosOwner)
-    or a
-    jp nz,keDriverBusy
     ld a,(diActive)
     or a
+    jp nz,keDriverBusy
+    ld hl,DOS_BANK_DRIVER_ADDR
+    call cmp_hl_de
+    jp nc,keDriverLower
+    jp keDriverAddressReady
+keDriverLower:
     jp nz,keDriverBad
-    ; Стек: адрес аргументов main, прежний диск. Код не затрагивает main.
-    ld a,d
-    cp DOS_BANK_DRIVER_ADDR/256
-    jp nz,keDriverBad
-    ld a,e
-    or a
-    jp nz,keDriverBad
+keDriverAddressReady:
+    ex de,hl
+    ld (diStart),hl
+    ex de,hl
     ld h,b
     ld l,c
     add hl,de
@@ -283,7 +286,12 @@ keDriver:
     jp c,keDriverRangeOk
     jp nz,keDriverBad
 keDriverRangeOk:
-    ld de,DOS_BANK_DRIVER_ADDR
+    ex de,hl
+    ld hl,(diStart)
+    call dosArenaCheck
+    jp c,keDriverBusy
+    ld hl,(diStart)
+    ex de,hl
     call imageLoad
     jp c,keLoadError
     push hl

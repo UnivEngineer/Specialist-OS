@@ -18,3 +18,9 @@ __pycache__/
 /images/RAMFOS-games.ramdisk
 /images/RAMFOS-games.json
 /images/RAMFOS-games.md
+
+# Генерируемые CP/M-образы и описание их состава.
+/images/CPM-README.TXT
+/images/CPM-images.json
+/images/CPM-original.rks
+/images/CPM-seed.dsk

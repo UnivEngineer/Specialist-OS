@@ -6,10 +6,12 @@ def symbols(name):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x(
 ds=symbols('BIOS');rs=symbols('RUN');results=[]
 for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,False,False),(3,False,False),(3,True,False),(0,False,True),(0,True,True),(1,False,True)):
  m=bytearray(65536);d=(root/'bin/BIOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;io=(root/'bin/IO.sys').read_bytes();m[0xf000:0xf000+len(io)]=io;r=(root/'bin/RUN.i80').read_bytes();m[:len(r)]=r
+ # Text ABI belongs to the installed font DLL after its extraction from BIOS.
+ font=(root/'bin/fonts/Rotate.i80').read_bytes();m[0xd800:0xd800+len(font)]=font
  m[ds['bios_fileGetSetDrive']:ds['bios_fileGetSetDrive']+2]=bytes.fromhex('B7 C9')
  load=0xd300 if staged and mode==3 else 0xe600 if staged else 0x1000
  size=513
- # Программа сразу возвращается для проверки native-return; ядра — до точки входа.
+ # RET returns through C000h to reload the shell; nonreturning payload stops at 8300h.
  payload=bytearray((i*19+7)&255 for i in range(size));payload[:3]=bytes.fromhex('C3 00 83')
  if returning:payload[0]=0xC9
  m[0xe1f0:0xe1f2]=bytes.fromhex('00 83')
@@ -22,9 +24,11 @@ for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,
  p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{rs["install"]:x}','-end',f'{rs["runBodyReady"]:x}','-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
  prepared=target.read_bytes();assert int.from_bytes(prepared[65542:65544],'little')==rs['runBodyReady']
  base=int.from_bytes(prepared[rs['bridgeBase']:rs['bridgeBase']+2],'little');inp.write_bytes(prepared[:65536])
- p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{base:x}','-end','8300','-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
- got=target.read_bytes();pc=int.from_bytes(got[65542:65544],'little');assert pc==0x8300,(mode,staged,hex(pc),p.stdout)
- assert got[load:load+size]==payload,(mode,staged,'payload')
+ p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{base:x}','-end',('c000' if returning else '8300'),'-counter','10000000','-output',str(target),str(inp)],capture_output=True,text=True,check=True,timeout=15)
+ got=target.read_bytes();pc=int.from_bytes(got[65542:65544],'little');assert pc==(0xc000 if returning else 0x8300),(mode,staged,returning,hex(pc),p.stdout)
+ # Upper legacy payload can occupy glyph pages. KOI restoration after RET
+ # rearranges those pages; only an executing payload must remain byte-exact.
+ if not returning or load<0xd800:assert got[load:load+size]==payload,(mode,staged,'payload')
  args=rs['RAMFOS_ARGS'];assert got[args:args+6]==b'HELLO\0',(mode,staged,got[args:args+6])
  if not returning:assert int.from_bytes(got[65548:65550],'little')==args,(mode,staged,'DE arguments')
  if mode==2:

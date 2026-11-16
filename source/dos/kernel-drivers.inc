@@ -31,7 +31,6 @@ kernelDiskDone:
     pop de
     pop bc
     ret
-kernelSystemInfo: DS 64,0
 diskDriverDummy:
     ld de,0
     ld bc,0

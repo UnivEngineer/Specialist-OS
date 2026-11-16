@@ -78,9 +78,6 @@ benchMemoryReady:
     ENDIF
     ld hl,txtTitle
     call puts
-    IFNDEF DISKBEN_BANK
-    call choose_executor
-    ENDIF
     ld a,(argDrive)
     cp 0FFh
     jp nz,drive_selected
@@ -120,6 +117,10 @@ drive_selected:
     jp c,error
     call geometry
     jp c,error
+    IFNDEF DISKBEN_BANK
+    call choose_executor
+    call choose_alignment
+    ENDIF
     IFDEF DISKBEN_BANK
     ; MAIN уже прочитал и проверил интерактивные параметры.
     ld a,(argCheck)
@@ -262,154 +263,7 @@ parse_size_done:
     scf
     ret
 prepare:
-    IFNDEF DISKBEN_BANK
-    ld a,(argBank)
-    or a
-    jp nz,run_bank_module
-    ENDIF
-    call select_layout
-    ; Для физического READ не требуется свободный непрерывный участок.
-    ld a,(v_budget)
-    push af
-    xor a
-    ld (v_budget),a
-    call find_region
-    pop bc
-    ld a,b
-    ld (v_budget),a
-    jp c,error
-    call print_summary
-    ld a,(v_budget)
-    or a
-    jp nz,prepare_timer
-    ld hl,txtRawAccess
-    call puts
-    ld hl,txtRegion
-    call puts
-    ld hl,(v_start)
-    call bench_printHexWord
-    ld hl,txtDash
-    call puts
-    ld hl,(v_start)
-    ld de,TEST_SECTORS-1
-    add hl,de
-    call bench_printHexWord
-    ld hl,txtBlankLines
-    call puts
-prepare_timer:
-    call timer_init
-    call timer_probe
-    jp z,timer_error
-run_tests:
-    ld a,(v_budget)
-    or a
-    ld a,2
-    ld (v_case),a
-    jp nz,file_write_case
-    ; Интерфейс и поиск свободного места не входят в измерение.
-    xor a
-    ld (v_case),a
-case_loop:
-    ld hl,sectorBuffer
-    ld a,(v_layout)
-    cp LAYOUT_MAPPED
-    jp nz,case_buffer_ready
-    ld a,(v_case)
-    and 1
-    jp nz,case_buffer_ready
-    ld hl,highBuffer
-case_buffer_ready:
-    ld (io_buffer+1),hl
-    ld a,(v_case)
-    cp 2
-    ld a,32
-    jp c,case_passes
-    ld a,(v_budget)
-case_passes:
-    or a
-    jp z,case_skipped
-    ld l,a
-    ld h,0
-    ld de,TEST_SECTORS
-    call bench_mul_hl_de
-    ld (v_operations),hl
-    ld (v_left),hl
-    ld a,(v_case)
-    cp 2
-    jp c,case_pattern_ready
-    jp file_write_case
-case_pattern_ready:
-    ld hl,raw_local
-    ld (io_call+1),hl
-    xor a
-    ld (v_index),a
-    LOAD_DE v_start
-    call raw_warmup
-    jp c,error
-    call reset_timing
-operation_loop:
-    ld a,(v_layout)
-    cp LAYOUT_MECHANICAL
-    jp nz,sequential
-    ld a,(v_case)
-    and 1
-    ld a,(v_index)
-    jp z,sequential
-    ; LCG modulo 32, полный период: каждый сектор ровно один раз за проход.
-    ld b,a
-    add a,a
-    add a,b
-    add a,a
-    add a,a
-    add a,b
-    add a,7
-    jp index_ready
-sequential:
-    ld a,(v_index)
-    inc a
-index_ready:
-    and TEST_SECTORS-1
-    ld (v_index),a
-    ld e,a
-    ld d,0
-    ld hl,(v_start)
-    add hl,de
-    ex de,hl
-    STORE_DE v_sector
-    ld b,2
-operation_ready:
-    call timer_read
-    ld (v_last),hl
-io_buffer:
-    ld hl,sectorBuffer
-io_call:
-    call raw_local
-    push af
-    call timer_sample
-    pop af
-    jp c,error
-operation_done:
-    ld hl,(v_left)
-    dec hl
-    ld (v_left),hl
-    ld a,h
-    or l
-    jp nz,operation_loop
-    call print_result
-    jp next_case
-case_skipped:
-    call print_case_name
-    ld hl,txtSkipped
-    call puts
-next_case:
-    ; CF=1 для простого плана: переход 0->2->4 вместо 0->1->2->3->4.
-    ld a,(v_layout)
-    cp 1
-    ld a,(v_case)
-    adc a,1
-    ld (v_case),a
-    cp 4
-    jp nz,case_loop
+    jp run_bank_module
 done:
     ld hl,txtDone
     call puts
@@ -513,6 +367,29 @@ menu_executor:
     ld (argBank),a
     jp menu_executor
 
+choose_alignment:
+    ld a,(argAlign)
+    cp 0FFh
+    ret nz
+    ld a,(v_drive)
+    cp 7
+    ld a,0
+    jp nz,alignment_selected
+menu_alignment:
+    ld hl,txtAlignmentPrompt
+    call puts
+    call read_choice
+    jp c,menu_alignment
+    or a
+    jp z,alignment_selected
+    sub '0'
+    cp 2
+    jp nc,menu_alignment
+alignment_selected:
+    ld (argAlign),a
+    ret
+
+txtAlignmentPrompt: DB 10,"Buffer: 0=aligned, 1=unaligned [0]: ",0
 txtExecutor: DB 10,"Caller MAIN/DOS/BANK/ALL [MAIN]: ",0
 read_line:
     ld hl,inputBuffer
@@ -669,6 +546,13 @@ summary_type:
     jp z,summary_mode
     ld hl,txtWriteFileVerify
 summary_mode:
+    call puts
+    ld a,(argAlign)
+    or a
+    ld hl,txtAligned
+    jp z,summary_alignment
+    ld hl,txtUnaligned
+summary_alignment:
     call puts
     ld a,(v_layout)
     cp LAYOUT_MAPPED
@@ -1019,7 +903,7 @@ txtClusters:     DB 00Ah,"Clusters:   ",009h,009h,009h,0
 txtRegion:       DB 00Ah,"Sectors (hex): ",0
 txtDash:         DB "-",0
 txtError:        DB 00Ah,"I/O / format / free space error",0
-txtTimerError:   DB 00Ah,"PIT clock stopped / invalid",0
+txtTimerError:   DB 00Ah,"PIT clock stopped/invalid",0
 txtDone:         DB 00Ah,"Press any key to exit",0
 txtRate:         DB " ms",009h,0
 txtUnits:        DB " KiB/s",00Ah,0
@@ -1040,10 +924,12 @@ txtSpc:         DB 00Ah,"Sectors/cluster:",009h,009h,0
 txtType:         DB 00Ah,"Type:   ",009h,009h,009h,009h,0
 txtDriver:       DB 00Ah,"Driver: ",009h,009h,009h,009h,0
 txtMode:         DB 00Ah,"Test mode:  ",009h,009h,009h,0
+txtAligned:     DB 10,"Buffer:",9,9,9,9," aligned (256 bytes)",0
+txtUnaligned:   DB 10,"Buffer:",9,9,9,9," unaligned (+1 byte)",0
 txtBuffers:      DB 00Ah,"Buffers:",009h,009h,009h,009h,"Low / High direct",0
 txtPasses:       DB 00Ah,"Passes: ",009h,009h,009h,009h,0
-txtLineBreak:    DB 00Ah,0
 txtBlankLines:   DB 00Ah,00Ah,0
+txtLineBreak = txtBlankLines+1
 txtROM:          DB "ROM",0
 txtRAM:          DB "RAM",0
 txtFlash:        DB "Flash",0
@@ -1100,13 +986,13 @@ v_dividend:      DD 0
 v_subByte:       DB 0
 code_end:
     IFNDEF sectorBuffer
-sectorBuffer = 02000h
+sectorBuffer = 02100h
     ENDIF
     ASSERT code_end <= sectorBuffer
     ASSERT batchStats == sectorBuffer
 verifyBuffer = sectorBuffer
     IFNDEF fatBuffer
-fatBuffer = 08000h
+fatBuffer = 08100h
     ENDIF
 rawSectors = fatBuffer+256
     ASSERT MAX_FILE_SECTORS*2 <= 256
@@ -1114,7 +1000,7 @@ rawSectors = fatBuffer+256
 lower_buffers_end = sectorBuffer + MAX_FILE_KIB*1024
     ASSERT lower_buffers_end <= fatBuffer
     IFNDEF highBuffer
-highBuffer = 08200h
+highBuffer = 08300h
     ENDIF
     IFNDEF HIGH_SECTORS
 HIGH_SECTORS = (LEGACY_APP_MEMORY_END-highBuffer)/256

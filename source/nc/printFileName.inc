@@ -1,4 +1,4 @@
-; Поле 8 + разделитель + 3: 12 знаков, три пакета 6x8.
+; Поле 8 + разделитель + 3: 12 знаков, 6 байт в 4x8, 9 байт в 6x8.
 ; HL=FILE_INFO; HL/BC/DE сохранены, AF разрушается.
 printFileNamOnPanel:
         push hl
@@ -34,36 +34,88 @@ printFileGap:
         xor a
         ld (de),a
         ld hl,ncTextBuffer
+        ld a,(ncFontWidth)
+        cp 8
+        jp z,ncPrintDetailedFile
         call bios_printStringReal
-        call ncNamePadding
+        ld a,(ncFontWidth)
+        cp 6
+        call z,ncNamePadding
+ncPanelNameDone:
         pop de
         pop bc
         pop hl
         ret
-; Полные байты полей вне 12 знаков восстанавливаются вместе с именем.
-; Это сохраняет выделение и при выборочной перерисовке после прокрутки.
+ncPrintDetailedFile:
+        pop de
+        pop bc
+        pop hl
+        push hl
+        push bc
+        push de
+        push hl
+        ld de,FILE_INFO.attrib
+        add hl,de
+        ld a,(hl)
+        and 10h
+        pop hl
+        jp nz,ncDetailedDirectory
+        ld de,FILE_INFO.size
+        add hl,de
+        ld e,(hl)
+        inc hl
+        ld d,(hl)
+        ld b,20h
+        call ncFormatDecimal
+        jp ncDetailedSuffix
+ncDetailedDirectory:
+        ld hl,ncDirectory5
+ncDetailedSuffix:
+        ld de,ncTextBuffer+12
+        ld b,5
+        ld a,' '
+ncDetailedGap:
+        ld (de),a
+        inc de
+        dec b
+        jp nz,ncDetailedGap
+        ld b,5
+        call ncCopyNamePart
+        xor a
+        ld (de),a
+        ld hl,ncTextBuffer
+        call bios_printStringReal
+        jp ncPanelNameDone
+ncDirectory5: DB '<DIR>'
+; The 1px right border follows the normal/inverse name on retained scrolling.
+; Preserve the other seven bits with the normal panel background palette.
 ncNamePadding:
         ld hl,(bios_vars.cursorY)
         ld a,h
-        rrca
-        rrca
-        add a,090h
-        ld h,a
-        ld a,l
-        sub 8
+        ld h,0
+        ld d,l
         ld l,a
+        add hl,hl
+        ld a,d
+        sub 8
+        ld d,a
+        ld e,10
+        ld bc,1
+    IF ENABLE_COLOR
+        ld a,(ncCurrentColor)
+        push af
+        and 0F0h
+        or COLOR_FILE & 0Fh
+        call ncSetColor
+    ENDIF
         ld a,(bios_vars.inverse)
-        ld c,a
-ncNamePaddingByte:
-        push hl
-        ld b,10
-ncNamePaddingRow:
-        ld (hl),c
-        inc l
-        dec b
-        jp nz,ncNamePaddingRow
-        pop hl
+        call uiFillRectPixels
+    IF ENABLE_COLOR
+        pop af
+        jp ncSetColor
+    ELSE
         ret
+    ENDIF
 ; Поля FAT не являются ASCIIZ; непечатный байт заменяется пробелом.
 ncCopyNamePart:
         ld a,(hl)

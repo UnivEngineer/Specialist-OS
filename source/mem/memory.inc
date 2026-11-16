@@ -7,6 +7,39 @@
     jp memBiosRoute
     jp bankMxResult
     jp memMovePrepared
+    jp memCommandScalarReturn
+memProfile:
+    push af
+    push bc
+    push de
+    push hl
+    ld c,a
+    ld a,(BANK_PROFILE)
+    or a
+    jp nz,memProfileFromOther
+    ld a,c
+    or a
+    jp z,memProfileReady
+    ld hl,BANK_WINDOW
+    ld de,bankCopySavedWindow
+    jp memProfileCopy
+memProfileFromOther:
+    ld a,c
+    or a
+    jp nz,memProfileReady
+    ld hl,bankCopySavedWindow
+    ld de,BANK_WINDOW
+memProfileCopy:
+    ld b,8
+    call bankCopyQuads
+memProfileReady:
+    ld a,c
+    ld (BANK_PROFILE),a
+    pop hl
+    pop de
+    pop bc
+    pop af
+    ret
 memMemory:
     or a
     jp z,memMove
@@ -22,29 +55,6 @@ memBad:
 
 ; Сохраняется канонический COMMAND; COPY/TEXT/LOCAL разделяют снимок.
 ; A=новый профиль; BC/DE/HL сохранены, AF разрушены.
-memProfile:
-    push bc
-    push de
-    push hl
-    push af
-    ld a,(BANK_PROFILE)
-    or a
-    jp z,memProfileSave
-    cp BANK_PROFILE_COUNT
-    jp c,memProfileReady
-memProfileSave:
-    ld hl,BANK_WINDOW
-    ld de,bankCopySavedWindow
-    ld b,32
-    call bankCopyBytes
-memProfileReady:
-    pop af
-    ld (BANK_PROFILE),a
-    pop hl
-    pop de
-    pop bc
-    ret
-
 ; Вход после проверки пакета memcpy. Регистры уже сохранены bankCopyFar.
 memCopySelect:
     ld a,(bankCopyRequest)
@@ -192,52 +202,43 @@ memScalar:
     dec hl
     jp nc,memScalarRange
 memScalarValid:
-    ; GET/PUT8/16 разделяют COPY с GET/PUT32 и memcpy.
-    ld a,BANK_PROFILE_COPY
-    call memProfile
-    push de
-    ld hl,memScalarTemplate
-    ld de,BANK_WINDOW
-    ld b,memScalarTemplateEnd-memScalarTemplate
-    call bankCopyBytes
-    pop de
-memScalarInstalled:
-    pop hl
-    pop bc
-    push bc
-    push hl
-    ld (BANK_WINDOW+4),hl
+    ld (memScalarAddress),hl
     ld a,b
-    call bankCopyPair
-    ld a,l
-    ld (BANK_WINDOW+1),a
-    ld a,h
-    ld (memSelect),a
+    ld (memScalarBank),a
+    ex de,hl
+    ld (memScalarValue),hl
+    ex de,hl
+    ld a,(BANK_PROFILE)
+    or a
+    call nz,bankCommandWindow  ; COPY/TEXT/LOCAL: вернуть обычный COMMAND.
+    ld a,(BANK_SCALAR_KIND)
+    push af
     ld a,(bankPage)
     call bankCopyPair
-    ld a,l
-    ld (BANK_WINDOW+12),a
+    ld (BANK_SCALAR_RETURN_PAIR),hl
+    ld a,(memOperation)
+    dec a
+    ld e,a
+    ld d,0
+    ld hl,memScalarKinds
+    add hl,de
+    ld a,(hl)
+    ld (BANK_SCALAR_KIND),a
+    ld hl,(memScalarValue)
+    ld b,h
+    ld c,l
+    ld hl,(memScalarAddress)
+    ex de,hl
+    ld a,(memScalarBank)
+    call bankCopyPair
     ld a,h
-    ld (BANK_WINDOW+10),a
-    ld a,(memOperation)
-    cp MEM_OP_PUT8
-    ld a,05Eh ; LD E,(HL)
-    ld c,056h ; LD D,(HL)
-    jp c,memScalarRead
-    ld a,073h ; LD (HL),E
-    ld c,072h ; LD (HL),D
-memScalarRead:
-    ld (BANK_WINDOW+6),a
-    ld a,(memOperation)
-    and 1
-    jp z,memScalarWord
-    ld c,0 ; NOP: не обращаться ко второму байту
-memScalarWord:
-    ld a,c
-    ld (BANK_WINDOW+8),a
-    ld a,(memSelect)
+    ld h,0FFh
     jp BANK_WINDOW
-memScalarReturn:
+memCommandScalarReturn:
+    pop af
+    ld (BANK_SCALAR_KIND),a
+    ld d,b
+    ld e,c
     ld a,(memOperation)
     cp MEM_OP_GET8
     jp nz,memScalarDone
@@ -252,161 +253,9 @@ memScalarRange:
     pop hl
     pop bc
     jp memBad
-memScalarTemplate:
-    ld (0FFFDh),a
-    ld hl,0
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ld a,0
-    ld (0FFFCh),a
-    jp memScalarReturn
-memScalarTemplateEnd:
-    ASSERT memScalarTemplateEnd-memScalarTemplate <= 31
+memScalarKinds: DB 5,3,6,4
+memScalarAddress: DW 0
+memScalarValue: DW 0
+memScalarBank: DB 0
 
-; TEXT20: общий путь строк и скаляров при уже активном TEXT.
-memPrint:
-    xor a
-    ld (memOperation),a
-memPrintTyped:
-    push af
-    ld a,(bankPage)
-    or a
-    jp z,memPrintNative
-    push bc
-    push de
-    ld (memTextNext),hl
-    ld a,(memOperation)
-    cp 2
-    ld hl,0FFFFh
-    jp c,memPrintCount
-    ld h,b
-    ld l,c
-memPrintCount:
-    ld (memTextRemaining),hl
-memPrintLoop:
-    ld hl,(memTextRemaining)
-    ld a,h
-    or l
-    jp z,memPrintDone
-    ld b,20
-    ld a,h
-    or a
-    jp nz,memPrintSize
-    ld a,l
-    cp 20
-    jp nc,memPrintSize
-    ld b,l
-memPrintSize:
-    ld a,BANK_PROFILE_TEXT
-    call memProfile
-    ld a,077h
-    ld (BANK_WINDOW),a
-    ld a,0C3h
-    ld (BANK_WINDOW+1),a
-    ld hl,memPrintMain
-    ld (BANK_WINDOW+2),hl
-    ld hl,(memTextNext)
-    ld de,BANK_PACKET
-memPrintFill:
-    ld a,h
-    cp 0F8h
-    jp nc,memPrintFilled
-    ld a,(hl)
-memPrintStore:
-    ld (de),a
-    inc de
-    inc hl
-    dec b
-    jp nz,memPrintFill
-memPrintFilled:
-    ld (memTextNext),hl
-    xor a
-    ld (de),a
-    ld a,e
-    sub BANK_PACKET & 0FFh
-    or a
-    jp z,bankTextRangeError
-    ld c,a
-    ld (memBack),a
-    ld hl,0
-    add hl,sp
-    ld (memSavedSP),hl
-    ld a,(memOperation)
-    ld d,a
-    ld a,(bankPage)
-    ld b,a
-    xor a
-    ld hl,BANK_IO_MAIN
-    jp BANK_WINDOW
-memPrintMain:
-    ld hl,(bankServiceSP)
-    ld sp,hl
-    push bc
-    ld a,d
-    ld hl,BANK_PACKET
-    call bios_textDispatch
-    ld de,-BANK_PACKET
-    add hl,de
-    ld a,l
-    pop bc
-    ld c,a
-    ld hl,memPrintReturn
-    ld (BANK_WINDOW+2),hl
-    ld a,b
-    dec a
-    ld hl,BANK_IO_RAM
-    jp BANK_WINDOW
-memPrintReturn:
-    ld hl,(memSavedSP)
-    ld sp,hl
-    ld a,(memBack)
-    sub c
-    jp nz,memPrintPartial
-    ld a,(memOperation)
-    cp 2
-    jp c,memPrintLoop
-    ld hl,(memTextRemaining)
-    ld b,0
-    ld a,l
-    sub c
-    ld l,a
-    ld a,h
-    sbc a,b
-    ld h,a
-    ld (memTextRemaining),hl
-    jp memPrintLoop
-memPrintPartial:
-    ld hl,(memTextNext)
-memPrintBack:
-    dec hl
-    dec a
-    jp nz,memPrintBack
-    jp memPrintHaveHL
-memPrintDone:
-    ld hl,(memTextNext)
-memPrintHaveHL:
-    pop de
-    pop bc
-    pop af
-    or a
-    ret
-memPrintNative:
-    pop af
-    jp bios_printStringZ
-memTextRemaining = memScalarTemplate+4
-memSavedSP: DW 0
-memTextNext: DW 0
-memOperation: DB 0
-memSelect: DB 0
-memBack: DB 0
-memTextScalar:
-    push hl
-    push bc
-    ld hl,memSelect
-    ld bc,1
-    call memPrintTyped
-    pop bc
-    pop hl
-    ret
 memExtensionEnd:

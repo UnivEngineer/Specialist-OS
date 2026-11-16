@@ -19,20 +19,44 @@ printInfoLine:
 
         ; Устанавливаем hl на описатель файла
         call    getSelectedFile
-        push    hl
-
-        ; Путь выбранного файла: целые компоненты, с резервом под размер.
-        call    buildCachedSelectedPath
-        jp nc,  printInfoPathReady
-        ld      hl, vars.tempFileDescr
-printInfoPathReady:
-        ld      b, 20
-        call    compactPath
-        ld      b,20
+        push hl
+        ld de,FILE_INFO.attrib
+        add hl,de
+        ld a,(hl)
+        and 10h
+        pop hl
+        jp z,ncStatusName
+        ld a,(hl)
+        cp 05Ch
+        jp z,ncStatusRoot
+        cp '.'
+        jp nz,ncStatusName
+        inc hl
+        ld a,(hl)
+        dec hl
+        cp '.'
+        jp nz,ncStatusName
+        inc hl
+        inc hl
+        ld a,(hl)
+        dec hl
+        dec hl
+        cp ' '
+        jp z,ncStatusParent
+ncStatusName:
+        push hl
+        ld de,vars.pathArg
+        call compactName
+        ld hl,vars.pathArg
+ncStatusPrint:
+        ld a,(ncStatusChars)
+        ld b,a
         call    ncPrintField
 
         ; Смещаем курсор
-        ld      hl, (P_FILE_DATA_X << 8) + P_FILE_DATA_Y
+        ld a,(ncStatusSizeX)
+        ld h,a
+        ld l,P_FILE_DATA_Y
         call    setCursorPosPanel
 
         ; Адрес не является метаданными FAT. Печатать только точный размер.
@@ -60,9 +84,31 @@ printInfoDirectory:
         jp bios_printStringReal
 infoDirectoryText: DB "   <DIR>",0
 
+; Navigation entries describe the action; no size or <DIR> suffix.
+ncStatusRoot:
+        ld hl,infoRootText
+        jp ncStatusNavigation
+ncStatusParent:
+        ld hl,infoParentText
+ncStatusNavigation:
+        push hl
+        call printInfoEmpty
+        ld hl,(P_FILE_NAME_X << 8) + P_FILE_NAME_Y
+        call setCursorPosPanel
+        pop hl
+        jp bios_printStringReal
+infoRootText: DB 'Go to drive root',0
+infoParentText: DB 'Go to parent dir',0
+
 printInfoEmpty:
         COLOR 0F1h
         ld hl,(P_FILE_NAME_X << 8) + P_FILE_NAME_Y
         call setCursorPosPanel
+        ld a,(ncHeaderChars)
+        ld b,a
+        ld a,(ncFontWidth)
+        cp 6
+        jp nz,ncEmptyStatusWidth
         ld b,30
+ncEmptyStatusWidth:
         jp printSpaces

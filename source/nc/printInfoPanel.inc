@@ -1,263 +1,391 @@
-;----------------------------------------------------------------------------
-; MXOS NC.COM
-; Рисование информационной панели
-;
-; 2013-12-18 Дизассемблировано vinxru
-;----------------------------------------------------------------------------
-
+; F3: render all immediate information before the slow FAT free-space scan.
 printInfoPanel:
-            COLOR   COLOR_BORDER
-            call    drawPanelTop
-
-            ; Рисуем панель
-            ld      hl, g_infoPanel
-            call    draw
-
+            COLOR COLOR_BORDER
+            call drawPanelTop
+            ld hl,g_infoPanel
+            call draw
 printInfoContents:
-            COLOR   COLOR_INFOHEADER
-
-            ; Печать "COMMANDER VERSION XXX"
-            ld      hl, 1010h
-            call    setCursorPosPanel
-            ld      hl, aCommanderVer
-            call    bios_printString
-
-            ; Печать "(C) OMSK 1992"
-            ;ld      hl, 1D1Ah
-            ld      hl, 101Ah
-            call    setCursorPosPanel
-            ld      hl, aCopyright    
-            call    bios_printString
-
-            ; Положение курсора
-            ld      hl, 0C30h
-            call    setCursorPosPanel
-
-            ; Общий объем ОЗУ
-            ld      de, 65504   ; Специалист-MX/MX2
-
-            ; Печать "XXXX BYTES MEMORY"
-            ld      hl, aKBytesMemory
-            call    pip_printNumberSpace
-
-            ; Положение курсора
-            ld      hl, 0C3Ch
-            call    setCursorPosPanel
-
-            ; Свободный объем ОЗУ
-            call    bios_getMemTop
-            inc     hl  ; сободно на 1 байт больше, чем memTop
-            ex      hl, de
-
-            ; Печать "XXXX BYTES FREE"
-            ld      hl, aKBytesFree
-            call    pip_printNumberSpace
-
-            ; Положение курсора
-            ld      hl, 0448h
-            call    setCursorPosPanel
-
-            ; Общий объем ДОЗУ в кб
-            ld      a, (bios_upper.ramPageCount)
-            ; hl = a * 256
-            ld      h, a
-            ld      l, 0
-            ; hl = hl / 4
-            call    ncMath.div_hl_2
-            call    ncMath.div_hl_2
-            ex      hl, de
-
-            ; Печать "XXXX KB EXTENDED MEMORY"
-            ld      hl, aKBytesExtMemory
-            call    pip_printNumberSpace
-
-            ; Получить размер диска
-            ld      b, 3    ; режим
-            call    bios_diskDriver             ; de = количество кластеров на диске, hl = адрес DISK_INFO
-            ld      (vars.diskInfoPtr), hl   ; cохраним адрес структуры DISK_INFO
-
-            ; Печатаем фактический драйвер и для неформатированного диска.
-            push    de
-            call    pip_printDriver
-            pop     de
-            ld      hl, (vars.diskInfoPtr)
-
-            ; Проверяем, распознан ли диск
-            ld      bc, DISK_INFO.isValid
-            add     hl, bc                  ; hl = адрес поля isValid
-            ld      a, (hl)                 ; a = isValid
-            cp      DISK_VALID              ; если значение меньше, чем DISK_VALID (2)
-            jp c,   pip_printDiskError      ; то переходим сюда
-
-            ;---------------------------------------------------------
-
-pip_printDiskInfo:
-            ; Положение курсора
-            ld      hl, 045Ch
-            call    setCursorPosPanel
-
-            ; Считаем объем в килобайтах
-            ; de = de * 256 / 1024 = hl / 4
-            ex      hl, de
-            call    ncMath.div_hl_2
-            call    ncMath.div_hl_2
-            ex      hl, de
-            push    de  ; в стеке - объем диска в кб
-
-            ; Печать "XXXX KBYTES TOTAL ON DRIVE A:"
-            ld      hl, aKBytesTotalOnDrv
-            call    pip_printNumberSpace
-            COLOR   COLOR_INFONUMBER
-            call    printCurDrive
-            COLOR   COLOR_INFOTEXT
-
-            ; Положение курсора
-            ld      hl, 0C98h
-            call    setCursorPosPanel
-
-            ; Печать "Volume label: XXXXXXXXXXX"
-            COLOR   COLOR_INFOTEXT
-            ld      hl, aVolumeLabel
-            call    bios_printString
-            COLOR   COLOR_INFONUMBER
-            ; hl = адрес поля v_diskInfo.volumeLabel
-            ld      hl, (vars.diskInfoPtr)
-            ld      de, DISK_INFO.volumeLabel
-            add     hl, de
-            call    bios_printString
-
-            ; Положение курсора
-            ld      hl, 0468h
-            call    setCursorPosPanel
-            
-            ; Подсчет свободного места на диске.
-            ; Эта п/п может работать довольно долго,
-            ; в зависимости от размера fat на диске
-            ; Результат: de = количество свободных кластеров
-            MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
-
-            ; Считаем объем в килобайтах
-            ; hl = hl * 256 / 1024 = hl / 4
-            ex      hl, de
-            call    ncMath.div_hl_2
-            call    ncMath.div_hl_2
-            ex      hl, de
-            push    de  ; в стеке - объем свободного места в кб
-
-            ; Печать "XXXX KBYTES FREE ON DRIVE A:"
-            ld      hl, aKBytesFreeOnDrv
-            call    pip_printNumberSpace
-            COLOR   COLOR_INFONUMBER
-            call    printCurDrive
-
-            ; Положение курсора
-            ld      hl, 0474h
-            call    setCursorPosPanel
-
-            ; de = кол-во файлов          
-            ld      hl, state.panelA_filesCnt
-            ld      a, (state.activePanel)
-            and     a
-            jp nz,  pip_filesPresent
-            inc     hl
-pip_filesPresent:
-            ld      e, (hl)
-            ld      d, 0
-
-            ; Печать "XX FILES USE"
-            ld      hl, aFilesUse
-            call    pip_printNumberSpace
-
-            pop     de  ; из стека - объем свободного места в кб
-            pop     hl  ; из стека - объем диска в кб
-            call    bios_sub_hl_de
-            ex      hl, de
-
-            ; Печать занятого объёма без переноса суффикса диска.
-            ld      b, 0    ; не дополнять пробелами
-            ld      hl, aKBytesIn
-            jp      pip_printNumberText
-
-            ; ^^^ выход
-
-            ;---------------------------------------------------------
-
+            xor a
+            ld (pipHasVolume),a
+            ; The info panel follows the opposite (active file) panel's drive.
+            ld hl,state.panelB_drive
+            ld a,(state.activePanel)
+            or a
+            jp z,pip_infoDrive
+            dec hl
+pip_infoDrive:
+            ld a,(hl)
+            ld (ncInfoDrive),a
+            ; Longest label is "Driver ": one common, byte-aligned value X.
+            ld a,7
+            call ncTextAdvance
+            add a,7 ; Left inset 4 plus upward rounding to a screen byte.
+            and 0FCh
+            ld (pipDetailX),a
+            ; Fixed field limits for the 4/6/8px layouts; no value wrapping.
+            ld a,(ncFontWidth)
+            ld b,15
+            ld c,22
+            cp 8
+            jp z,pip_fieldLimits
+            ld b,21
+            ld c,29
+            cp 6
+            jp z,pip_fieldLimits
+            ld b,36
+            ld c,44
+pip_fieldLimits:
+            ld a,b
+            ld (pipDetailChars),a
+            ld a,c
+            ld (pipDescriptionChars),a
+            COLOR COLOR_INFOHEADER
+            ld hl,0411h
+            call setCursorPosPanel
+            ld hl,aCommanderVer
+            call ncPrintPanelText
+            ld hl,041Bh
+            call setCursorPosPanel
+            ld hl,aCopyright
+            call ncPrintPanelText
+            ld a,50
+            ld de,65504
+            ld hl,aMainRAM
+            call pip_printNumber
+            call bios_getMemTop
+            inc hl
+            ex de,hl
+            ld a,60
+            ld hl,aMainFree
+            call pip_printNumber
+            ld a,(bios_upper.ramPageCount)
+            ld h,a
+            ld l,0
+            call ncMath.div_hl_2
+            call ncMath.div_hl_2
+            ex de,hl
+            ld a,70
+            ld hl,aBankRAM
+            call pip_printNumber
+            ld a,(bios_upper.ramPageCount)
+            ld e,a
+            ld d,0
+            ld a,80
+            ld hl,aBankPages
+            call pip_printNumber
+            ld a,MEM_OP_RAMDISK
+            ld c,MEM_RAMDISK_STATUS
+            MXOS_CALL MXOS_DOS_MEMORY
+            ld a,b
+            inc a ; DOS page plus the RAMDISK pool.
+            ld e,a
+            ld d,0
+            push de
+            ld a,90
+            ld hl,aReservedPages
+            call pip_printNumber
+            pop de
+            ld a,(bios_upper.ramPageCount)
+            sub e
+            ld e,a
+            ld a,100
+            ld hl,aFreePages
+            call pip_printNumber
+            ld b,3
+            call bios_diskDriver
+            ld (vars.diskInfoPtr),hl
+            push hl
+            ld bc,DISK_INFO.isValid
+            add hl,bc
+            ld a,(hl)
+            pop hl
+            cp DISK_VALID
+            jp c,pip_printDiskError
+            ld a,1
+            ld (pipHasVolume),a
+            ld bc,DISK_INFO.blockSize
+            add hl,bc
+            ld c,(hl)
+            inc hl
+            ld b,(hl)
+            ld h,b
+            ld l,c
+            call pip_unitsKiB
+            ld a,134
+            ld hl,aDiskTotal
+            call pip_printDiskNumber
+            ; Publish the free-space label now; leave its numeric field blank.
+            ld a,144
+            ld hl,aDiskFree
+            call pip_printDiskLabel
+            jp pip_printDriver
 pip_printDiskError:
-            ; Панель без драйвера теперь недостижима: выбор дисков и
-            ; начальная инициализация оставляют только установленные драйверы.
-
-            ; Положение курсора
-            ld      hl, 0C5Ch
-            call    setCursorPosPanel
-
-            ; Печать "DRIVE A: IS NOT FORMATTED"
-            COLOR   COLOR_INFOTEXT
-            ld      hl, aDrive
-            call    bios_printString
-            COLOR   COLOR_INFONUMBER
-            call    printCurDrive
-            COLOR   COLOR_INFOTEXT
-            ld      hl, aNotFormatted
-            jp      bios_printString
-
-            ; ^^^ выход
-
-; Общий вывод числа и подписи вместо семи одинаковых последовательностей.
-; Вход DE=число, HL=подпись, B=дополнение; Space задаёт ведущие пробелы.
-; Выход HL=конец подписи, DE сохранён; AF/флаги и B разрушаются.
-pip_printNumberSpace:
-            ld      b, 20h
-pip_printNumberText:
-            COLOR   COLOR_INFONUMBER
-            call    ncPrintDecWord
-            COLOR   COLOR_INFOTEXT
-            jp      bios_printString
-
-; B=0FFh: HL=две строки, B=технология. AF/BC/DE/HL разрушаются.
-; Строки ограничены контрактом ABI (22/30 символов).
+            ld hl,048Bh ; One error row centered in the disk block.
+            call setCursorPosPanel
+            COLOR COLOR_INFOTEXT
+            ld hl,aDrive
+            call ncPrintPanelText
+            call printCurDrive
+            ld hl,aNotFormatted
+            call ncPrintPanelText
 pip_printDriver:
-            ld      hl, 0CB0h
-            call    setCursorPosPanel
-            COLOR   COLOR_INFOTEXT
-            ld      hl, aDiskDriver
-            call    bios_printString
-            ld      hl, 0
-            ld      b, 0FFh
-            call    bios_diskDriver
-            jp c,   pip_driverUnknown
-            ld      a, h
-            or      l
-            jp nz,  pip_driverName
+            ld hl,0
+            ld b,0FFh
+            call bios_diskDriver
+            jp c,pip_driverUnknown
+            ld a,h
+            or l
+            jp nz,pip_driverName
 pip_driverUnknown:
-            ld      b, 0
-            ld      hl, aDriverUnknown
+            ld b,0
+            ld hl,aDriverUnknown
 pip_driverName:
-            COLOR   COLOR_INFONUMBER
-            call    bios_printString
-            inc     hl
-            push    hl
-            ld      hl, 0CBCh
-            call    setCursorPosPanel
-            COLOR   COLOR_INFOTEXT
-            pop     hl
-            call    bios_printString
-
-            ; BIOS печати сохраняет BC: тип из того же запроса B=FFh ещё в B.
-            ld      hl, 0CC8h
-            call    setCursorPosPanel
-            ld      hl, aDiskTechnology
-            call    bios_printString
-            ld      a, b
-            ld      hl, aTypeROM
-            cp      DISK_TECH_ROM
-            jp z,   pip_driverType
-            ld      hl, aTypeRAM
-            cp      DISK_TECH_RAM
-            jp z,   pip_driverType
-            ld      hl, aTypeFlash
-            cp      DISK_TECH_FLASH
-            jp z,   pip_driverType
-            ld      hl, aDriverUnknown
+            ld (pipDriverName),hl
+            ld a,b
+            ld (pipDriverTech),a
+pip_findDescription:
+            ld a,(hl)
+            inc hl
+            or a
+            jp nz,pip_findDescription
+            ld (pipDriverDescription),hl
+            ld a,(pipHasVolume)
+            add a,2 ; Fixed rows: optional Label, Driver, Type.
+            ld c,a
+            ld d,0
+pip_descriptionCount:
+            ld a,(hl)
+            or a
+            jp z,pip_descriptionCounted
+            ld a,c
+            cp 6 ; At most six rows fit between the divider and lower border.
+            jp z,pip_descriptionCounted
+            inc c
+            inc d
+            ld a,(pipDescriptionChars)
+            ld b,a
+pip_descriptionCountLine:
+            ld a,(hl)
+            or a
+            jp z,pip_descriptionCounted
+            inc hl
+            dec b
+            jp nz,pip_descriptionCountLine
+            jp pip_descriptionCount
+pip_descriptionCounted:
+            ld a,c
+            ld (pipRows),a
+            ld a,d
+            ld (pipDescriptionRows),a
+pip_metadataCounted:
+            ; Region Y=161..226: center fixed fields and wrapped description.
+            ; First baseline = 202 - 5 * row count (glyphs occupy Y-7..Y).
+            ld a,(pipRows)
+            ld b,a
+            add a,a
+            add a,a
+            add a,b
+            ld b,a
+            ld a,202
+            sub b
+            ld l,a
+            ld h,4
+            call setCursorPosPanel
+            ld a,(pipHasVolume)
+            or a
+            jp z,pip_drawDriver
+            call pip_volumeLabel
+            ex de,hl
+            ld hl,aVolumeLabel
+            call pip_printDetail
+            call pip_nextInfoRow
+pip_drawDriver:
+            ld hl,(pipDriverName)
+            ex de,hl
+            ld hl,aDiskDriver
+            call pip_printDetail
+            call pip_nextInfoRow
+            ld a,(pipDriverTech)
+            ld de,aTypeROM
+            cp DISK_TECH_ROM
+            jp z,pip_driverType
+            ld de,aTypeRAM
+            cp DISK_TECH_RAM
+            jp z,pip_driverType
+            ld de,aTypeFlash
+            cp DISK_TECH_FLASH
+            jp z,pip_driverType
+            ld de,aDriverUnknown
 pip_driverType:
-            COLOR   COLOR_INFONUMBER
-            jp      bios_printString
+            ld hl,aDiskTechnology
+            call pip_printDetail
+            ld hl,(pipDriverDescription)
+            ld a,(pipDescriptionRows)
+            or a
+            jp z,pip_freeSpaceLast
+            ld d,a
+pip_descriptionPrint:
+            call pip_nextInfoRow
+            COLOR COLOR_INFONUMBER
+            ld a,(pipDescriptionChars)
+            ld b,a
+            call ncPrintTextLim
+            dec d
+            jp nz,pip_descriptionPrint
+pip_freeSpaceLast:
+            ; No other screen text is delayed by this potentially slow request.
+            ld a,(ncInfoFreeDeferred)
+            or a
+            ret nz
+            ld a,(pipHasVolume)
+            or a
+            ret z
+            MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
+            ret c
+            ld hl,(vars.diskInfoPtr)
+            ld bc,DISK_INFO.clusterBytes
+            add hl,bc
+            ld c,(hl)
+            inc hl
+            ld b,(hl)
+            ld h,b
+            ld l,c
+            call pip_unitsKiB
+            ld a,144
+            jp pip_printNumberOnly
+pip_volumeLabel:
+            ld hl,(vars.diskInfoPtr)
+            ld de,DISK_INFO.volumeLabel
+            add hl,de
+            ret
+; HL=label -> A=width in BIOS half-pixels; BC/HL destroyed.
+pip_labelWidth:
+            ld b,0
+pip_countLabel:
+            ld a,(hl)
+            inc hl
+            or a
+            jp z,pip_countLabelEnd
+            inc b
+            jp pip_countLabel
+pip_countLabelEnd:
+            ld a,b
+            jp ncTextAdvance
+pipHasVolume: DB 0
+pipRows: DB 0
+pipDetailX: DB 0
+pipDetailChars: DB 0
+pipDescriptionChars: DB 0
+pipDescriptionRows: DB 0
+ncInfoDrive: DB 0FFh
+pipDriverTech: DB 0
+pipDriverName: DW 0
+pipDriverDescription: DW 0
+ncInfoFreeDeferred: DB 0
+
+; Sequential metadata rows; only the description can occupy several rows.
+; Preserve the original string pointer in HL and the value pointer in DE.
+pip_nextInfoRow:
+            push hl
+            ld hl,(bios_vars.cursorY)
+            ld a,l
+            add a,10
+            ld l,a
+            ld h,4
+            call setCursorPosPanel
+            pop hl
+            ret
+
+; A=Y, DE=number, HL=label. Number X=8..55, label X=64, byte-aligned.
+; Field width 12/8/6 chars for 4/6/8px; leading spaces right-align digits.
+pip_printNumber:
+            push hl
+            push af
+            call pip_printNumberOnly
+            pop af
+            pop hl
+pip_printLabel:
+            push hl
+            ld l,a
+            ld h,32
+            call setCursorPosPanel
+            pop hl
+            COLOR COLOR_INFOTEXT
+            jp ncPrintPanelText
+pip_printDiskLabel:
+            call pip_printLabel
+            jp printCurDrive
+pip_printNumberOnly:
+            ld l,a
+            ld h,4
+            call setCursorPosPanel
+            ld b,' '
+            push de
+            call ncFormatDecimal
+            pop de
+            ld a,(ncFontWidth)
+            ld b,6
+            cp 8
+            jp z,pip_numberPadding
+            ld b,8
+            cp 6
+            jp z,pip_numberPadding
+            ld b,12
+pip_numberPadding:
+            ld a,b
+            sub 5
+            ld b,a
+            COLOR COLOR_INFONUMBER
+            call printSpaces
+            ld hl,ncDecimalText
+            jp bios_printStringReal
+pip_printDiskNumber:
+            call pip_printNumber
+            jp printCurDrive ; Same color as the label, no color seam.
+
+; DE=count, HL=power-of-two bytes/unit (256..32768) -> DE=KiB.
+; Never forms the intermediate byte total, which would overflow 16 bits.
+pip_unitsKiB:
+            ld a,h
+            cp 4
+            ret z
+            jp c,pip_unitsDivide
+            call ncMath.div_hl_2
+            ex de,hl
+            add hl,hl
+            ex de,hl
+            jp pip_unitsKiB
+pip_unitsDivide:
+            add hl,hl
+            ex de,hl
+            call ncMath.div_hl_2
+            ex de,hl
+            jp pip_unitsKiB
+
+; HL=label, DE=value. Right-align labels before the shared value column.
+; Values are truncated to the fixed field length for the current font.
+pip_printDetail:
+            push de
+            push hl
+            call pip_labelWidth
+            ld b,a
+            ld a,(pipDetailX)
+            sub b
+            ld hl,(bios_vars.cursorY)
+            ld h,a
+            call setCursorPosPanel
+            pop hl
+            pop de
+            COLOR COLOR_INFOTEXT
+            call ncPrintPanelText
+            ex de,hl
+            push hl
+            ld hl,(bios_vars.cursorY)
+            ld a,(pipDetailX)
+            ld h,a
+            call setCursorPosPanel
+            pop hl
+            COLOR COLOR_INFONUMBER
+            ld a,(pipDetailChars)
+            ld b,a
+            jp ncPrintTextLim

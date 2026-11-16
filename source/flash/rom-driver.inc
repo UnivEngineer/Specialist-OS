@@ -86,17 +86,11 @@ FuncReadReady:
     ld      (IO_PROG_C), a
     ex      de, hl
     ld      hl, IO_PROG_A
-    ld      c, 0
-
-; 11 байт, 52 такта/байт; одна запись адреса, одно чтение ВВ55.
-ReadLoop:
-    ld      a, c
-    ld      (IO_PROG_B), a
-    ld      a, (hl)
-    ld      (de), a
-    inc     de
-    inc     c
-    jp nz,  ReadLoop
+    MODULE legacyPioRead
+    INCLUDE "pio-read.inc"
+    ENDMODULE
+ReadLoop = legacyPioRead.ReadLoop
+ReadAlignedLoop = legacyPioRead.ReadAlignedLoop
 
     ; Восстановление портов, регистров и выход
     push    af
@@ -113,7 +107,7 @@ ReadLoop:
 ; Нынешняя плата flash-диска: C4:C3=чип, C2:C0=A18:A16,
 ; A15:A8 удерживаются внешней защёлкой. Команды flash не посылаются.
 ; BC/DE/HL сохраняются; AF разрушены, CF=0 при успехе.
-; Цикл: 11 байт, 52 такта/байт, 256 чтений PPI и записей ОЗУ.
+; Цикл: 32,25 такта/байт при выравнивании, иначе 52; 256 чтений ВВ55.
 FlashRead:
     ld      a,d
     cp      020h               ; четыре 512-КиБ гнезда, максимум 2 МиБ
@@ -134,15 +128,11 @@ FlashRead:
     ld      (IO_PROG_MODE),a
     ex      de,hl
     ld      hl,IO_PROG_A
-    ld      c,0
-FlashReadLoop:
-    ld      a,c
-    ld      (IO_PROG_B),a
-    ld      a,(hl)
-    ld      (de),a
-    inc     de
-    inc     c
-    jp nz,  FlashReadLoop
+    MODULE flashPioRead
+    INCLUDE "pio-read.inc"
+    ENDMODULE
+FlashReadLoop = flashPioRead.ReadLoop
+FlashReadAlignedLoop = flashPioRead.ReadAlignedLoop
     ld      a,0C0h             ; оба управляющих сигнала неактивны
     ld      (IO_PROG_C),a
     pop     bc

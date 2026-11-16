@@ -15,23 +15,33 @@ def main():
     sy = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
                                           (OUT/'TRANSPORT.sym').read_text(),re.M)}
     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
-        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankLocalChecked','bankLocalBlockBad','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopyMove','bankCopySector','bankCommandWindow','bankCopyBytes','bankCopySavedWindow','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankTextRangeError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
+        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankLocalChecked','bankLocalBlockBad','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopyMove','bankCopySector','bankCopyPhysical','bankCommandWindow','bankCopyBytes','bankCopyQuads','bankCopySavedWindow','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankTextRangeError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopySP','bankCopyPairs','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
-        stream.write(f'BANK_COPY_DATA_BYTES = {sy["bankCopyTailEnd"]-0xFF00}\n')
+        stream.write(f'BANK_COPY_DATA_BYTES = {sy["bankCopyTailEnd"]-sy["BANK_COMMAND_LANDING"]}\n')
         stream.write(f'BANK_TRANSPORT_BYTES = {(OUT/"TRANSPORT.bin").stat().st_size}\n')
         stream.write(f'BANK_COPY_GUARD_ADDR = 0{sy["bankKeyboardSignature"]:04X}h\n')
-    for name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV','MAINIO','MAINBIOS','CLIENT','LOCALBLOCK'):
+    target_file=ROOT/'bin/BIOS.sym'
+    previous=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',target_file.read_text(),re.M)) if target_file.exists() else {}
+    (OUT/'main-io-import.inc').write_text(f'MAIN_BLOCK_IO_TARGET = 0{int(previous.get("mainBlockIO","0"),16):04X}h\n')
+    for name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV','MAINBIOS','LOCALBLOCK'):
         folder='source/io' if name in ('MAINIO','MAINBIOS') else ('source/bootstrap/tests' if name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV') else 'source/mem')
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'--lst={OUT/name}.lst', f'--sym={OUT/name}.sym',
                         f'--raw={OUT/name}.bin', str(ROOT/f'{folder}/{name}.asm')], check=True)
-        if name == 'CLIENT':
-            cs = dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (OUT/'CLIENT.sym').read_text(), re.M))
-            (OUT/'client-imports.inc').write_text(''.join(f'{key} = 0{int(cs[key],16):04X}h\n' for key in ('bankMxResult','bankMxInvoke','memPutDwordTemplate','memPutDwordTemplateEnd')), encoding='utf-8')
+    # Одна сборка разрешает ссылки LOCAL <-> TEXT без фиксированных перемычек.
+    # Установочный формат по-прежнему содержит отдельные LOCAL и CLIENT.
+    cs = dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (OUT/'LOCALBLOCK.sym').read_text(), re.M))
+    core = (OUT/'LOCALBLOCK.bin').read_bytes()
+    split = int(cs['mx_call'],16)-int(cs['MEM_IMAGE_LOCAL_START'],16)
+    (OUT/'CLIENT.bin').write_bytes(core[split:])
+    (OUT/'LOCALBLOCK.bin').write_bytes(core[:split])
+    (OUT/'CLIENT.sym').write_text((OUT/'LOCALBLOCK.sym').read_text(),encoding='utf-8')
+    (OUT/'CLIENT.lst').write_bytes((OUT/'LOCALBLOCK.lst').read_bytes())
     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
         stream.write(f'BANK_CLIENT_BYTES = {(OUT/"CLIENT.bin").stat().st_size}\n')
         stream.write(f'BANK_MAIN_CLIENT_BYTES = {int(cs["bankClientEnd"],16)-int(cs["mx_call"],16)}\n')
         stream.write(f'BANK_LOCAL_BYTES = {(OUT/"LOCALBLOCK.bin").stat().st_size}\n')
+        stream.write(f'BANK_MAIN_LOCAL_BYTES = {int(cs["MEM_IO_SYSTEM"],16)-int(cs["MEM_IMAGE_LOCAL_START"],16)}\n')
     for kind in range(3):
         name = f'LOCALDRV{kind}'
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',

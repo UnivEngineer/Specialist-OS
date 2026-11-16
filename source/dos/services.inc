@@ -34,6 +34,8 @@ moduleCall:
 moduleUnload:
 fileExecNative:
 residentService:
+enumService:
+fileopsService:
 dosDriverSelect:
 dosDriverInstall:
 dosDriverRefresh:

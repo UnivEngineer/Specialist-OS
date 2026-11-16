@@ -20,5 +20,9 @@ MapSector:
     ld d,a
     pop hl
     ret
+    ; Младший адрес складывается без переноса в H; таблица не пересекает страницу.
+    IF ($ & 0FFh) > 0FCh
+    DS 0100h-($ & 0FFh),0
+    ENDIF
 v_chipMap: DB 0,0,0,0
     ASSERT v_chipMap / 256 == (v_chipMap+3) / 256

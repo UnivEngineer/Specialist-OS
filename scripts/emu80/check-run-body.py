@@ -74,7 +74,7 @@ try:
   if name=='UHIGH.EXE':
    assert int.from_bytes(m.read(s['GLYPH_CACHE_LIMIT'],2),'little')==load,'upper utility did not claim cache'
   if mode in ('MX','STD'):
-   font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes();assert m.read(s['FONT_ADDR'],len(font))==font
+   font=(ROOT/'bin/fonts/Compact.pf').read_bytes();assert m.read(s['FONT_ADDR'],len(font))==font
   if mode=='MON':assert m.read(0xc000,4096)==(ROOT/'bin/Monitor2.mon').read_bytes()
   m.screenshot(OUT/(name+'-'+mode+'.png'))
   returned()

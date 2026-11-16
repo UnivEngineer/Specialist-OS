@@ -1,73 +1,53 @@
-; Защита от STD-программ, запущенных в MX: FF00h–FF03h имитируют
-; чтение ВВ55 без клавиш при A/C=FFh и B на ввод (режим 82h).
-; FF03h — условное FFh открытой шины; чтение РУС аппаратно не определено.
+; CPM32: 32 байта данных, параметры в обоих хвостах; BC/DE — адреса.
 bankKeyboardSignature:
     DB 0FFh,0FFh,0FFh,0FFh
-; Одинаковый хвост во всех страницах: CPM16, развёрнутые POP/PUSH.
-; Вход BC=число полных порций, DE=16; параметры в общем окне.
-; Остаток 0..15 переносится побайтно без чтения за концом диапазона.
-; CALL/RET запрещены до возврата в страницу инициатора и восстановления SP.
 bankCopyTail:
-    ld hl,(BANK_COPY_SRC_SELECT)
+    ld hl,(bankCopySourcePair)
     ld a,h
     ld h,0FFh
     ld (hl),a
-    ld hl,(BANK_COPY_SOURCE)
+    ld h,b
+    ld l,c
     ld sp,hl
-    add hl,de
-    ld (BANK_COPY_SOURCE),hl
 index = 0
-    DUP 8
+    DUP 32/2
     pop hl
     ld (BANK_WINDOW+index*2),hl
 index = index+1
     EDUP
-    ld hl,(BANK_COPY_DST_SELECT)
+    ld hl,0
+    add hl,sp
+    ld b,h
+    ld c,l
+    ld hl,(bankCopyDestPair)
     ld a,h
     ld h,0FFh
     ld (hl),a
-    ld hl,(BANK_COPY_DEST)
+    ld hl,32
     add hl,de
-    ld (BANK_COPY_DEST),hl
     ld sp,hl
+    ex de,hl
 index = 0
-    DUP 8
-    ld hl,(BANK_WINDOW+14-index*2)
+    DUP 32/2
+    ld hl,(BANK_WINDOW+32-2-index*2)
     push hl
 index = index+1
     EDUP
-    dec bc
-    ld a,b
-    or c
+    ld hl,bankCopyCount
+    dec (hl)
     jp nz,bankCopyTail
-bankCopyRemainder:
-    ld a,(BANK_COPY_REST)
-    or a
-    jp z,bankCopyFinish
-    ld b,a
-bankCopyByte:
-    ld hl,(BANK_COPY_SRC_SELECT)
-    ld a,h
-    ld h,0FFh
-    ld (hl),a
-    ld hl,(BANK_COPY_SOURCE)
-    ld c,(hl)
     inc hl
-    ld (BANK_COPY_SOURCE),hl
-    ld hl,(BANK_COPY_DST_SELECT)
-    ld a,h
-    ld h,0FFh
-    ld (hl),a
-    ld hl,(BANK_COPY_DEST)
-    ld (hl),c
-    inc hl
-    ld (BANK_COPY_DEST),hl
-    dec b
-    jp nz,bankCopyByte
-bankCopyFinish:
-    ld hl,(BANK_COPY_RETURN)
+    dec (hl)
+    jp nz,bankCopyTail
+    ld hl,(bankCopyReturnPair)
     ld a,h
     ld h,0FFh
     ld (hl),a
     jp bankCopyReturn
+bankCopyLocalParams:
+bankCopySourcePair: DW 0
+bankCopyDestPair: DW 0
+bankCopyReturnPair: DW 0
+bankCopyCount: DW 0
 bankCopyTailEnd:
+    ASSERT $ <= BANK_WINDOW

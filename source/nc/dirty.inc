@@ -7,9 +7,7 @@ ncDiskChanged:
     ld a,(state.panelA_drive)
     cp b
     jp nz,ncChangedRight
-    xor a
-    ld (vars.pathValidA),a
-    ld a,(vars.panelA_info)
+    ld a,(state.panelA_info)
     or c
     jp nz,ncChangedLeftMatch
     ld a,(state.panelA_dirLow)
@@ -19,6 +17,8 @@ ncDiskChanged:
     cp d
     jp nz,ncChangedRight
 ncChangedLeftMatch:
+    xor a
+    ld (vars.pathValidA),a
     ld a,(ncDirtyMask)
     or 1
     ld (ncDirtyMask),a
@@ -26,9 +26,7 @@ ncChangedRight:
     ld a,(state.panelB_drive)
     cp b
     ret nz
-    xor a
-    ld (vars.pathValidB),a
-    ld a,(vars.panelB_info)
+    ld a,(state.panelB_info)
     or c
     jp nz,ncChangedRightMatch
     ld a,(state.panelB_dirLow)
@@ -38,6 +36,8 @@ ncChangedRight:
     cp d
     ret nz
 ncChangedRightMatch:
+    xor a
+    ld (vars.pathValidB),a
     ld a,(ncDirtyMask)
     or 2
     ld (ncDirtyMask),a
@@ -49,6 +49,25 @@ ncStopObserver:
     ret
 ; После тихой команды: приглашение обновляется сразу, панели — по маске.
 ncRefreshDirty:
+    call ncDialogClose
+    ; A quiet typed command keeps its selection unless this panel is dirty or
+    ; covered by a dialog. Unrelated nested changes never invert its cursor.
+    ld a,(ncDirtyMask)
+    ld b,a
+    ld a,(ncDamageMask)
+    or b
+    ld b,a
+    ld a,(ncListMask)
+    or b
+    ld b,a
+    ld a,(state.activePanel)
+    or a
+    ld a,b
+    jp z,ncRefreshCursorMask
+    rrca
+ncRefreshCursorMask:
+    and 1
+    call nz,ncCommandHideCursor
     call updateCommandPath
     call clearCmdLine
     ld a,1
@@ -79,6 +98,9 @@ ncDirtyFrames:
     ld b,a
     ld a,(ncDamageMask)
     or b
+    ld b,a
+    ld a,(ncListMask)
+    or b
     ld (ncRefreshMask),a
     and 1
     call nz,ncRefreshLeft
@@ -88,16 +110,23 @@ ncDirtyFrames:
     xor a
     ld (ncDirtyMask),a
     ld (ncDamageMask),a
+    ld (ncListMask),a
     ld (ncSelectiveRefresh),a
     ld (ncKeepFrames),a
     call updateCommandPath
-    jp mainLoop
+    ld a,(ncCommandCursorKept)
+    or a
+    jp z,mainLoop
+    xor a
+    ld (ncCommandCursorKept),a
+    jp mainLoop_cursorReady
 ncDamageBoth:
     ld a,3
     ld (ncDamageMask),a
     ret
 ncDirtyMask: DB 0
 ncDamageMask: DB 0
+ncListMask: DB 0 ; Repaint cached list without clearing its panel/frame.
 ncSelectiveRefresh: DB 0
 ncRefreshMask: DB 0
 

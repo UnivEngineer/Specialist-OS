@@ -1,7 +1,11 @@
 ; Инициализаторы используют одну посадочную область. После RET всё тело
 ; можно затереть: реестр DOS владеет строками и копией подготовленной службы.
     INCLUDE "../../bin/banked/flash-imports.inc"
-    ORG DOS_BANK_DRIVER_ADDR
+    IFNDEF DRIVER_ORIGIN
+DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
+    ENDIF
+DRIVER_LOAD_ADDR = DRIVER_ORIGIN
+    ORG DRIVER_LOAD_ADDR
     IFNDEF ROM_LEGACY
     DEFINE ROM_LEGACY 0
     ENDIF

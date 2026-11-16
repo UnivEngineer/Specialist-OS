@@ -1,4 +1,4 @@
-"""Patch FONT.FNT and FONT_IT.FNT: KOI8-R graphics and visible raw controls.
+"""Patch fonts/6x8/KOI8.pf and fonts/6x8/KOI8_IT.pf: KOI8-R graphics and visible raw controls.
 
 Rows run top to bottom. Bits 5..0 run left to right; bits 7..6 stay zero.
 Run with --write to apply, without arguments to check the binary asset.
@@ -120,7 +120,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write', action='store_true')
     args = parser.parse_args()
-    for name in ('FONT.FNT', 'FONT_IT.FNT'):
+    for name in ('fonts/6x8/KOI8.pf', 'fonts/6x8/KOI8_IT.pf'):
         path = ROOT / 'assets/system-rom' / name
         original = path.read_bytes()
         assert len(original) == 2048
@@ -133,11 +133,14 @@ def main():
                 assert values[0] == code and len(values) == 9
                 assert all(row < 64 for row in values[1:])
                 font[code*8:code*8+8] = values[1:]
-        if name == 'FONT_IT.FNT':
+        if name == 'fonts/6x8/KOI8_IT.pf':
             # Match this font's own lowercase e and uppercase E.
             font[0xa3*8:0xa4*8] = bytes.fromhex('0a 00 0e 11 1f 10 0e 00')
             font[0xb3*8:0xb4*8] = bytes.fromhex('0a 1f 10 1e 10 10 1f 00')
         assert font[0x20*8:0x80*8] == original[0x20*8:0x80*8]
+        # ASCII 7Ch is vertical bar, including the italic source; the old
+        # italic asset incorrectly used an empty box at this position.
+        font[0x7c*8:0x7d*8] = bytes.fromhex('04 04 04 04 04 04 04 00')
         assert font[0xc0*8:] == original[0xc0*8:]
         assert all(row < 64 for row in font)
         if args.write:

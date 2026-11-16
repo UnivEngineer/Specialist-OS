@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--build', action='store_true')
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    font = (ROOT / 'assets/system-rom/FONTKOI.FNT').read_bytes()
+    font = (ROOT / 'bin/fonts/Compact.pf').read_bytes()
     meta = runpy.run_path(str(ROOT / 'scripts/build/font-format.py'))['parse'](font)
     glyphs = {}
     for page, offset in enumerate(meta['ranges']):
@@ -35,21 +35,34 @@ def main():
         records += bytes(v << 2 for v in g)
         records += bytes((v >> 2) | ((v << 6) & 255) for v in g)
         records += bytes((v >> 4) | ((v << 4) & 255) for v in g)
-    pointers = b''.join(struct.pack('<H', 544 + unique.index(glyphs.get(c, glyphs[32])) * 24) for c in range(256))
+    pointers = b''.join(struct.pack('<H', 544 + unique.index(glyphs.get(c, glyphs[127])) * 24) for c in range(256))
     header = struct.pack('<4s6H16x', b'QFNT', 1, len(unique), len(glyphs), 32, 544, 544 + len(records))
     packed = header + pointers + records
     if args.build:
         assert len(unique) == 147 and len(packed) == 4072
-        raw = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
-        assert all(raw[c * 8:c * 8 + 8] == g for c, g in glyphs.items())
+        raw = (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
+        # Compact shares the full source, with a DEL placeholder override.
+        (ROOT / 'bin/FONTKOI.packed.glyphs.bin').write_bytes(b''.join(unique))
+        # Tiny legacy module shares the full-font storage. Embed only glyphs
+        # which differ (the DEL placeholder).
+        overrides=[]
+        for g in unique:
+            c=next(c for c,v in glyphs.items() if v==g)
+            if raw[c*8:c*8+8]!=g:overrides.append((c,g))
+        code=['packedGetGlyph:', '    ld a,c']
+        for c,g in overrides:
+            code += [f'    cp {c}', f'    ld hl,packedOverride{c}', '    ret z']
+        code += ['    ld hl,02800h/8','    add hl,bc', *(['    add hl,hl']*3),'    ret']
+        for c,g in overrides:code += [f'packedOverride{c}: DB '+','.join(str(b) for b in g)]
+        (ROOT / 'bin/FONTKOI.packed.overrides.inc').write_text('\n'.join(code)+'\n')
         (ROOT / 'bin/FONTKOI.packed.bin').write_bytes(packed)
-        (ROOT / 'bin/FONTKOI.packed.index.bin').write_bytes(bytes(unique.index(glyphs.get(c, glyphs[32])) for c in range(256)))
+        (ROOT / 'bin/FONTKOI.packed.index.bin').write_bytes(bytes(unique.index(glyphs.get(c, glyphs[127])) for c in range(256)))
         (ROOT / 'bin/FONTKOI.packed.codes.bin').write_bytes(bytes(next(c for c, v in glyphs.items() if v == g) for g in unique))
     assert len(header) == 32 and len(packed) <= 4096
     # Проверяется восстановление всех готовых экранных частей без вращений.
     for c in range(256):
         offset = struct.unpack_from('<H', packed, 32 + c * 2)[0]
-        for y, v in enumerate(glyphs.get(c, glyphs[32])):
+        for y, v in enumerate(glyphs.get(c, glyphs[127])):
             a, b, d = (packed[offset + phase * 8 + y] for phase in range(3))
             assert a == v << 2
             assert (b & 15, b & 192) == (v >> 2, (v << 6) & 255)

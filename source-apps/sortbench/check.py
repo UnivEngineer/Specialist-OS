@@ -38,6 +38,9 @@ def main():
                     memory = bytearray(65536)
                     memory[:len(image)] = image
                     memory[0xc000:0xc000+len(bios)] = bios
+                    # This CPU model has no PIT; timer readiness is tested
+                    # separately by check-timing.py with scripted reads.
+                    memory[symbols[f'{module}.benchTimerInit']:symbols[f'{module}.benchTimerInit']+2] = b'\xb7\xc9'
                     memory[0x4000:0x4000+len(raw)] = raw
                     for ns in ('raw','upper'):
                         memory[symbols[f'{ns}.state.panelA_filesCnt']] = len(rows)

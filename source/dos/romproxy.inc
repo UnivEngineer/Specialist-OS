@@ -1,4 +1,4 @@
-; Локальный A: в DOS: чтение CPM16 в своём банке, запись/опрос через BIOS.
+; Локальный A: в DOS: чтение CPM32 в своём банке, запись/опрос через BIOS.
 ; B=1/2, DE=блок 256 байт, HL=буфер DOS. AF/BC/DE/HL разрушены; CF/A=ошибка.
 dosSystemDriver:
     ld a,b
@@ -17,7 +17,7 @@ dosSystemDriver:
     ret
 dosSystemRequest: DS 5,0
     IFDEF BANKED_DOS_BUILD
-; Локальный DOS READ использует тот же CPM16, что EXEC-клиент.
+; Локальный DOS READ использует тот же CPM32, что EXEC-клиент.
 ; Метаданные и полные данные не проходят через MAIN.
 dosSystemRead:
     push hl

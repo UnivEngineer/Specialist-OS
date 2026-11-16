@@ -18,7 +18,7 @@
 ;   FFFEh - подключить страницу ROM/flash-диска, D0-D3 = номер страницы.
 ; Регистр FFF8h здесь не используется: его D0 выбирает ROM/RAM только в
 ; стандартном режиме "Специалиста", а D1 переключает 4/8 цветов.
-; Чтение в 8000h и выше выполняется одним отображением ROM через memcpy DOS;
+; Чтение в 8000h и выше выполняется одним отображением ROM через копировщик BIOS;
 ; в нижнее ОЗУ — через общий верхний буфер 256 байт. Стек и исполняемый код находятся выше 8000h.
 ; Для функций 1/2/5 BC, DE, HL сохраняются; AF и флаги разрушаются.
 ;
@@ -30,6 +30,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../../bin/bios-copy-imports.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 DRIVE             = 0       ; A:
@@ -180,10 +181,10 @@ readCopy: DB 080h
     ld      hl, FLASHSYS_READ_BUFFER
     call    ReadMappedCopy
     ld      (IO_PAGE_RAM), a
-    pop     bc
+    pop     de
     ld      hl, FLASHSYS_READ_BUFFER
-    ld      de, FLASHSYS_READ_BUFFER + 256
-    call    bios_memcpy_bc_hl
+    ld      bc, 256
+    call    bios_copyForward
     or      a
     jp      Exit
     ENDIF
@@ -233,19 +234,16 @@ ReadMapped:
     jp      Exit
 
 ; DE=адрес ROM-сектора, HL=верхнее назначение. AF/BC/DE/HL разрушаются.
-; Копирует 256 байт штатным движком BIOS, оставляет ROM подключённым.
+; Копирует 256 байт прямым входом BIOS без проверки перекрытия/направления.
+; ROM и верхнее назначение не пересекаются; оставляет ROM подключённым.
 ; На сектор 256 чтений/записей, одно подключение ROM; RAM вернёт вызывающий.
 ; Копирование идёт без переключений маппера внутри блока.
 ReadMappedCopy:
-    ld      b, h
-    ld      c, l
     ex      de, hl
-    ld      d, h
-    inc     d
-    ld      e, l
+    ld      bc, 256
     ld      a, (v_page)
     ld      (IO_PAGE_ROM), a
-    jp      bios_memcpy_bc_hl
+    jp      bios_copyForward
 
 ;----------------------------------------------------------------------------
 ; Функция 1 - запись сектора в системную flash-память.
@@ -260,11 +258,9 @@ FuncWrite:
     or      a
     jp m,   WritePrepared
     push    de
-    ld      d, h
-    ld      e, l
-    inc     d
-    ld      bc, BIOS_DISK_BUFFER
-    call    bios_memcpy_bc_hl
+    ld      de, BIOS_DISK_BUFFER
+    ld      bc, 256
+    call    bios_copyForward
     pop     de
     ld      hl, BIOS_DISK_BUFFER
 WritePrepared:
@@ -310,7 +306,6 @@ ProgramChunk:
     ld      a, 0A0h
     ld      (05555h), a
     ; ROM и верхний буфер доступны одновременно. Страница 128/256 байт.
-    push    hl
     ld      a, (v_halfPage)
     ld      c, a
     ld      b, 0
@@ -318,20 +313,16 @@ ProgramChunk:
     jp nz,  ProgramLength
     inc     b
 ProgramLength:
-    add     hl, bc
-    ex      de, hl              ; DE=конец источника, HL=адрес flash
-    ld      b, h
-    ld      c, l
-    pop     hl
-    call    bios_memcpy_bc_hl
+    ; HL=источник, DE=flash, BC=128/256; области не пересекаются.
+    call    bios_copyForward
     ld      d, b
-    ld      e, c                ; memcpy: BC=конец flash, HL=конец источника
+    ld      e, c                ; копировщик: BC=конец flash, HL=конец источника
 ProgramEnd:
     dec     de
     dec     hl
     ld      c, (hl)
     inc     hl
-    ; Назначение ниже источника: memcpy идёт вперёд, DE — последний байт.
+    ; Прямой копировщик идёт вперёд; DE — последний байт flash.
     push    hl
     ld      b, 3
     ld      l, 0

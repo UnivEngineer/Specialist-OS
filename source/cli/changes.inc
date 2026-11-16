@@ -41,6 +41,14 @@ cliNotifyDone:
 cliNotifyJump:
     jp (hl)
 cliDeletePrepared:
+    call fileFindAny
+    ret c
+    ld a,(v_tmpFileDescr+FILE_DESCRIPTOR.attrib)
+    and 10h
+    jp z,cliDeleteFile
+    ld a,DOS_ERR_ACCESS
+    jp dosSetError
+cliDeleteFile:
     call cliChanged
     jp fileDelete
 cliRenamePrepared:

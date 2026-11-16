@@ -29,6 +29,7 @@ def main():
         f'    DW {service["target"].removeprefix("dos_")}\n' for service in services), encoding='utf-8')
     h['assemble'](ROOT/'source/dos/DOS.asm', out/'KERNEL.bin', [])
     sy = h['symbols'](out/'KERNEL.sym')
+    runpy.run_path(str(ROOT/'scripts/build/build-overlays.py'))['build'](sy)
     report = {key:sy[key] for key in ('dosCoreStart','dosCoreEnd','kernelEnd','DOS_BANK_DATA_ADDR','BANK_KERNEL_CACHE',
                                      'bankKernelCommand','kernelDispatch','v_drives','v_diskInfo')}
     report['bytes'] = (out/'KERNEL.bin').stat().st_size

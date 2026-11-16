@@ -29,16 +29,13 @@ resetPanelDirectory:
 enterDirectory:
             ld de,vars.pathArg
             call compactName
-            dec de
-            dec de
-            xor a
-            ld (de),a
             ld hl,vars.pathArg
             ld a,CLI_OP_CHDIR
             MXOS_CALL MXOS_DOS_CLI
             jp c,directoryFailure
             call savePanelDirectory
 directoryChanged:
+            call ncParentPrepare
             ld a,1
             ld (ncKeepFrames),a
             call directoryResetSelection
@@ -58,11 +55,141 @@ directoryResetSelection:
 
             ret
 directoryFailure:
-            ld hl,directoryError
-            call bios_printString
-            call bios_getch
-            jp directoryChanged
-directoryError: DB ' DIRECTORY ERROR',0
+            push af
+            ld hl,vars.pathArg
+            ld de,vars.input
+directoryErrorPath:
+            ld a,(hl)
+            ld (de),a
+            inc hl
+            inc de
+            or a
+            jp nz,directoryErrorPath
+            pop af
+            jp copyFileErrorCode
+
+; The old prompt path still identifies the directory we just left. Only an
+; immediate parent transition selects its leaf; entering children / other drives
+; keeps the usual initial selection. No saved ordinal can survive re-sorting.
+ncParentPrepare:
+            xor a
+            ld (ncParentPending),a
+            call getPanelPath
+            ret c
+            ld de,vars.path
+ncParentPrefix:
+            ld a,(hl)
+            or a
+            jp z,ncParentPrefixEnd
+            call bios_upperCase
+            ld b,a
+            ld a,(de)
+            call bios_upperCase
+            cp b
+            ret nz
+            inc hl
+            inc de
+            jp ncParentPrefix
+ncParentPrefixEnd:
+            dec hl
+            ld a,(hl)
+            cp 05Ch ; Root already includes its separator.
+            jp z,ncParentLeaf
+            ld a,(de)
+            cp 05Ch
+            ret nz
+            inc de
+ncParentLeaf:
+            ld hl,ncParentName
+            ld b,13 ; Maximum 8.3 leaf plus NUL.
+ncParentCopy:
+            ld a,(de)
+            cp 05Ch ; CD ../.. is not an immediate parent transition.
+            ret z
+            call bios_upperCase
+            ld (hl),a
+            inc hl
+            inc de
+            or a
+            jp z,ncParentCopied
+            dec b
+            jp nz,ncParentCopy
+            ret
+ncParentCopied:
+            ld a,(ncParentName)
+            or a
+            ret z
+            ld a,1
+            ld (ncParentPending),a
+            ret
+
+; Called once after acquiring the parent's current index. Find the directory,
+; not a similarly named file, then let loadFiles clamp/adjust the visible window.
+ncParentSelect:
+            ld a,(ncParentPending)
+            or a
+            ret z
+            xor a
+            ld (ncParentPending),a
+            ld hl,ncParentName
+            ld a,10h
+; HL=uppercase leaf, A=required attributes (0 means any file/directory).
+ncSelectLeaf:
+            ld (ncSelectName),hl
+            ld (ncSelectAttrib),a
+            call fileIndexBase
+            ld c,0
+ncParentFind:
+            ld a,(hl)
+            cp 0FFh
+            ret z
+            push hl
+            call indexedFile
+            push hl
+            ld de,FILE_INFO.attrib
+            add hl,de
+            ld a,(ncSelectAttrib)
+            or a
+            jp z,ncSelectAny
+            and (hl)
+            pop hl
+            jp z,ncParentNext
+            jp ncSelectCompareName
+ncSelectAny:
+            pop hl
+ncSelectCompareName:
+            ld de,vars.pathArg
+            call compactName
+            ld hl,vars.pathArg
+            push hl
+            ld hl,(ncSelectName)
+            ex de,hl
+            pop hl
+ncParentCompare:
+            ld a,(hl)
+            call bios_upperCase
+            ld b,a
+            ld a,(de)
+            cp b
+            jp nz,ncParentNext
+            inc hl
+            inc de
+            or a
+            jp nz,ncParentCompare
+            pop hl
+            ld a,c
+            ld hl,state.panelA_curFile
+            jp writeBytePanel
+ncParentNext:
+            pop hl
+            inc hl
+            inc c
+            jp ncParentFind
+ncParentPending: DB 0
+ncParentName: BLOCK 13,0
+ncSelectName: DW 0
+ncSelectAttrib: DB 0
+
 ; Полное приглашение хранится в path; экран показывает хвост длинного пути.
 ; При длинной команде строка прокручивается, исходные байты не обрезаются.
 updateCommandPath:
@@ -153,13 +280,12 @@ redrawCommandLine:
             ld (hl),0
 commandPathReady:
             COLOR COLOR_CMDLINE
-            ld hl,001F3h
-            ld (bios_vars.cursorY),hl
-            ld b,63
-            call printSpaces
-            ld hl,001F3h
+            ld hl,000F3h
             ld (bios_vars.cursorY),hl
             ld hl,vars.path
+            ld b,24
+            call compactPath
+            push hl
             ld b,0
 commandPathLength:
             ld a,(hl)
@@ -169,24 +295,18 @@ commandPathLength:
             inc hl
             jp commandPathLength
 commandPathTail:
-            ld hl,vars.path
-            ld a,b
-            cp 24
-            jp c,commandPathPrint
-            sub 24
-            ld e,a
-            ld d,0
-            add hl,de
-            ld b,24
+            ld (hl),'>'
+            inc hl
+            ld (hl),0
+            pop hl
 commandPathPrint:
             push bc
             call bios_printStringReal
-            ld c,'>'
-            call ncPrintChar
             pop bc
             ld hl,(bios_vars.cursorY)
             ld (vars.cmdTextPos),hl
-            ld a,61
+            ld a,(ncCommandChars)
+            dec a
             sub b
             ld (vars.cmdCapacity),a
 ; Перерисовываем только текст при сдвиге окна, без предварительного стирания.
@@ -201,7 +321,10 @@ redrawCommandText:
             ld a,l
             sub vars.cmdLine & 0FFh
             sub c
-            jp nc,commandOffsetReady
+            jp c,commandOffsetZero
+            inc a ; Keep a cell for the editor cursor at the right edge.
+            jp commandOffsetReady
+commandOffsetZero:
             xor a
 commandOffsetReady:
             ld (vars.cmdOffset),a
@@ -210,8 +333,21 @@ commandOffsetReady:
             ld d,0
             add hl,de
 commandText:
-            call bios_printStringReal
-            ld hl,(bios_vars.cursorY)
+            ld a,(vars.cmdCapacity)
+            ld b,a
+            call ncPrintField ; Erase the old tail in the same pass as new text.
+            ld a,(vars.cmdLineEnd)
+            sub vars.cmdLine & 0FFh
+            ld b,a
+            ld a,(vars.cmdOffset)
+            ld c,a
+            ld a,b
+            sub c
+            call ncTextAdvance
+            ld hl,(vars.cmdTextPos)
+            add a,h
+            ld h,a
+            ld (bios_vars.cursorY),hl
             ld (vars.cmdLinePos),hl
             ret
 
@@ -219,7 +355,8 @@ commandText:
 printPanelPath:
             call getPanelPath
             ret c
-            ld b,28
+            ld a,(ncHeaderChars)
+            ld b,a
             call compactPath
             push hl
             COLOR 0F1h
@@ -228,62 +365,114 @@ printPanelPath:
             pop hl
             jp bios_printStringReal
 
-; HL — абсолютный путь, B — ширина поля (не менее PATH_RESERVED_LENGTH+12 для FAT 8.3).
-; Выход: HL — vars.displayPath, исходная строка не изменена.
-; AF/BC/DE разрушены. Сохраняем диск и максимально длинный полный суффикс.
+ ; HL=absolute ASCIIZ path, B=available characters (>=19 for full FAT 8.3).
+; Preserve complete components, a useful leading directory when it fits, and
+; the longest complete suffix. Only the display copy is shortened.
 compactPath:
-            push hl
+            ld (ncPathSource),hl
+            ld a,b
+            ld (ncPathWidth),a
             ld c,0
-compactPathLength:
+            ld b,0
+ncPathMeasure:
             ld a,(hl)
             or a
-            jp z,compactPathMeasured
+            jp z,ncPathMeasured
             inc hl
             inc c
-            jp compactPathLength
-compactPathMeasured:
-            pop hl
-            ld de,vars.displayPath
-            ld a,b
+            inc b
+            cp 05Ch
+            jp z,ncPathSeparator
+            cp '/'
+            jp nz,ncPathMeasure
+ncPathSeparator:
+            ld b,0             ; length of the final component
+            jp ncPathMeasure
+ncPathMeasured:
+            ld a,c
+            ld (ncPathLength),a
+            ld a,(ncPathWidth)
             cp c
+            ld hl,(ncPathSource)
+            ld de,vars.displayPath
             jp nc,compactPathCopy
-            sub PATH_RESERVED_LENGTH
-            ld b,a
-            ld a,(hl)
-            ld (de),a
-            inc de
-            inc hl
-            inc hl
-            inc hl
-            dec c
-            dec c
-            dec c
-            push hl
+            ; Default prefix is the drive and root separator.
+            ld a,3
+            ld (ncPathHead),a
             push bc
-            ld hl,compactPathPrefix
-            ld b,PATH_PREFIX_LENGTH
-compactPathPrefixCopy:
+            ld de,3
+            add hl,de
+            ld c,3
+ncPathFirstComponent:
+            ld a,(hl)
+            or a
+            jp z,ncPathPrefixDone
+            inc hl
+            inc c
+            cp 05Ch
+            jp z,ncPathTryPrefix
+            cp '/'
+            jp nz,ncPathFirstComponent
+ncPathTryPrefix:
+            ; Prefix + omission mark + final component must fit.
+            ld a,(ncPathWidth)
+            sub c
+            jp c,ncPathPrefixDone
+            sub PATH_OMISSION_LENGTH+1
+            jp c,ncPathPrefixDone
+            cp b
+            jp c,ncPathPrefixDone
+            ld a,c
+            ld (ncPathHead),a
+ncPathPrefixDone:
+            pop bc
+            ld a,(ncPathHead)
+            ld c,a
+            ld b,a
+            ld hl,(ncPathSource)
+            ld de,vars.displayPath
+ncPathCopyHead:
             ld a,(hl)
             ld (de),a
             inc hl
             inc de
             dec b
-            jp nz,compactPathPrefixCopy
+            jp nz,ncPathCopyHead
+            push hl
+            push bc
+            ld hl,pathOmissionMark
+            ld b,PATH_OMISSION_LENGTH+1
+ncPathCopyMark:
+            ld a,(hl)
+            ld (de),a
+            inc hl
+            inc de
+            dec b
+            jp nz,ncPathCopyMark
             pop bc
             pop hl
-compactPathBoundary:
+            ld a,(ncPathWidth)
+            sub c
+            sub PATH_OMISSION_LENGTH+1
+            ld b,a            ; suffix budget
+            ld a,(ncPathLength)
+            sub c
+            ld c,a            ; remaining input
+ncPathFindSuffix:
             ld a,b
             cp c
             jp nc,compactPathCopy
-compactPathSkip:
+ncPathSkipComponent:
             ld a,(hl)
+            or a
+            jp z,compactPathCopy ; malformed/overlong input cannot run past NUL
             inc hl
             dec c
             cp 05Ch
-            jp z,compactPathBoundary
+            jp z,ncPathFindSuffix
             cp '/'
-            jp z,compactPathBoundary
-            jp compactPathSkip
+            jp z,ncPathFindSuffix
+            jp ncPathSkipComponent
 compactPathCopy:
             ld a,(hl)
             ld (de),a
@@ -293,3 +482,7 @@ compactPathCopy:
             jp nz,compactPathCopy
             ld hl,vars.displayPath
             ret
+ncPathSource: DW 0
+ncPathWidth: DB 0
+ncPathLength: DB 0
+ncPathHead: DB 0

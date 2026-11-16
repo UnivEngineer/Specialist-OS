@@ -3,7 +3,7 @@ from pathlib import Path
 import json,re,subprocess
 R=Path(__file__).resolve().parents[2];O=R/'docs/bench/block32';O.mkdir(parents=True,exist_ok=True)
 W=lambda n:n.to_bytes(2,'little')
-font=(R/'assets/system-rom/FONT.FNT').read_bytes()
+font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 codes=list(range(32,128))+list(range(192,256))
 source=(R/'assets/system-rom/README.TXT').read_bytes().replace(b'\r\n',b' ').replace(b'\r',b' ').replace(b'\n',b' ')
 corpus=bytes(c if c>=32 else 32 for c in source)[:1152].ljust(1152,b' ')

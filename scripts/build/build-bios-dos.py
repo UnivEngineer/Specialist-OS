@@ -53,16 +53,14 @@ def main():
     lines += [h['emit_plan'](bios_plan,manifest['fixed']).replace('    ORG 0C000h','    ORG_PAD 0C000h',1),
               inc(ROOT/'source/bios/banked-start.inc'),
               'ioTablesStart:', inc(ROOT/'source/bios/syscall-tables.inc'), 'ioTablesEnd:',
-              'biosLowEnd:', '    ASSERT $ <= FONT_ADDR',
+              'biosLowEnd:', '    ASSERT $ <= FONT_ENGINE_BASE',
               '    ORG_PAD BIOS_IO_ADDR',
               'bankBiosImageStart:',
               '    INCBIN "'+(out/'banked/MAINBIOS.bin').as_posix()+'"',
               'bankBiosImageEnd:',
               '    ASSERT $ <= BIOS_BANK_GATE_END',
-              '    ORG_PAD BIOS_BANK_IO_ADDR',
-              'bankIoImageStart:',
-              '    INCBIN "'+(out/'banked/MAINIO.bin').as_posix()+'"',
-              'bankIoImageEnd:',
+              'bankIoImageStart = BIOS_BANK_IO_ADDR',
+              'bankIoImageEnd = BIOS_BANK_IO_ADDR+3',
               'ioImageEnd:', '    ASSERT $ <= MEM_IMAGE_LOCAL_START',
               '    ASSERT BIOS_BANK_IO_BUFFER+261 <= MAIN_COMMAND_ADDR',
               '    ASSERT BIOS_BANK_STACK_TOP <= BIOS_BANK_IO_BUFFER']
@@ -85,10 +83,17 @@ def main():
     (out/'IO.sys').write_bytes(io)
     (out/'DOS.native.sys').write_bytes(dos)
     (out/'BIOS.sys').write_bytes(bios)
+    (out/'banked/MAINIO.bin').write_bytes(bytes([0xC3,sy['mainBlockIO']&255,sy['mainBlockIO']>>8]))
+    (out/'banked/MAINIO.sym').write_bytes((out/'System.linked.sym').read_bytes())
+    # Internal linked entry: the flash installer is rebuilt with this BIOS.
+    (out/'bios-copy-imports.inc').write_text(
+        '; Generated internal BIOS copy entry; not a fixed public ABI.\n'
+        f'bios_copyForward = 0{sy["moveBytesForward"]:04X}h\n', encoding='utf-8')
     for stem in ('DOS','BIOS','IO'):
         (out/f'{stem}.sym').write_bytes((out/'System.linked.sym').read_bytes())
         (out/f'{stem}.lst').write_bytes((out/'System.linked.lst').read_bytes())
     report=dict(bios=dict(start=0xC000,end=0xC000+len(bios),bytes=len(bios)),
+                fontEngine=dict(start=sy['FONT_ENGINE_BASE'],end=sy['FONT_ENGINE_END']),
                 io=dict(start=sy['BIOS_IO_ADDR'],end=sy['ioImageEnd'],bytes=len(io)),
                 diskBuffer=dict(start=sy['BIOS_DISK_BUFFER'],end=sy['BIOS_DISK_BUFFER_END']),
                 temporaryBuffer=dict(start=sy['BIOS_TEMP_BUFFER'],end=sy['BIOS_TEMP_BUFFER_END']),

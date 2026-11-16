@@ -6,6 +6,7 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 entry: jp initialize
 descriptor: DB 6,4
     DW monitor.scalar,serialBIOS,stageReset
+    DW monitor.body ; historical printString uses the unwrapped pixel body
     DS 06000h-$,0
 initialize:
     ld (variant),a

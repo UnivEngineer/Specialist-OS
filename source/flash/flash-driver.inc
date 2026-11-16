@@ -66,17 +66,11 @@ FuncRead:
     call    LatchHiAddr
     ex      de, hl              ; DE=назначение, HL больше не адрес буфера
     ld      hl, IO_PROG_A
-    ld      c, 0
-
-; 11 байт, 52 такта/байт: HL=порт данных, DE=буфер, C=младший адрес.
-ReadLoop:
-    ld      a, c
-    ld      (IO_PROG_B), a
-    ld      a, (hl)
-    ld      (de), a
-    inc     de
-    inc     c
-    jp nz,  ReadLoop
+    MODULE pioRead
+    INCLUDE "pio-read.inc"
+    ENDMODULE
+ReadLoop = pioRead.ReadLoop
+ReadAlignedLoop = pioRead.ReadAlignedLoop
 
     or      a
     jp      Exit
@@ -85,6 +79,11 @@ ReadLoop:
 ; Запись сектора.
 
 FuncWrite:
+    IFDEF PIO_UNALIGNED_MODE
+    IF PIO_UNALIGNED_MODE == 2
+    call pioWrite.Prepare
+    ENDIF
+    ENDIF
     ld      a, PPI_MODE_WRITE
     ld      (IO_PROG_MODE), a
 
@@ -109,20 +108,12 @@ FuncWrite:
     ld      c, d                ; старший адрес для DATA polling
     ex      de, hl              ; DE=источник
     ld      hl, IO_PROG_MODE
-    ld      b, 0
 
-; 17 байт, 78 тактов/байт = 39 мкс при 2 МГц, меньше tBLC=150 мкс.
-; HL=управление ВВ55, DE=источник, B=младший адрес, C=старший адрес.
-WriteLoop:
-    ld      a, b
-    ld      (IO_PROG_B), a
-    ld      a, (de)
-    ld      (IO_PROG_A), a
-    ld      (hl), WRITE_0
-    ld      (hl), WRITE_1
-    inc     de
-    inc     b
-    jp nz,  WriteLoop
+    MODULE pioWrite
+    INCLUDE "pio-write.inc"
+    ENDMODULE
+WriteLoop = pioWrite.WriteLoop
+WriteAlignedLoop = pioWrite.WriteAlignedLoop
 
     ex      de, hl              ; HL=конец источника
     ld      d, c

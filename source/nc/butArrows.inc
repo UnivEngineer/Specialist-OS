@@ -62,10 +62,12 @@ but_Right:  ; c = количество файлов
 
             ; увеличиваем на FILE_LIST_SIZE/2 файлов, если не дошли до конца списка
             add     FILE_LIST_SIZE/2
+            jp c,but_RightLast
             cp      c
 
             ; иначе устанавливаем курсор на последний файл
             jp c,   scrollPanel
+but_RightLast:
             ld      a, c
             jp      scrollPanel
 
@@ -80,7 +82,7 @@ but_Left:   ; a = файл, на котором курсор
             sub     FILE_LIST_SIZE/2
 
             ; иначе устанавливаем курсор на нулевой файл
-            jp p,   scrollPanel
+            jp nc,  scrollPanel
             xor     a
             jp      scrollPanel
 
@@ -129,7 +131,7 @@ scrollPanel:
             jp c,   scrollDown
 
             ; если курсор ниже последнего файла панели, скроллим вверх
-            sub     FILE_LIST_SIZE
+            call    ncSubVisible
             jp nc,  scrollUp
 
             ; иначе выходим

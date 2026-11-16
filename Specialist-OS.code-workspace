@@ -420,6 +420,21 @@
         "options": {
           "cwd": "${workspaceFolder}\\source\\monitor2"
         },
+      {
+        "label": "build: monitor-win",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
+          "MONWIN",
+          "mon",
+          "0xC000"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\source\\monitor_win"
+        },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build"
       },
@@ -521,7 +536,7 @@
           "0"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\source\\test-scr"
+          "cwd": "${workspaceFolder}\\source-apps\\test-scr"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -840,7 +855,8 @@
           "-NoProfile",
           "-File",
           "${workspaceFolder}\\scripts\\emu80\\run.ps1",
-          "-Flash"
+          "-Flash",
+          "-UpdateSystemFlash"
         ],
         "problemMatcher": [],
         "group": "build"

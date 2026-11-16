@@ -1,15 +1,13 @@
-; Битмап-прокрутка двух колонок NC через штатный memcpy DOS.
+; Битмап-прокрутка 1/2/3 колонок NC через локальный стековый копировщик.
 ; Вход B=1 вперёд, B=2 назад; vars.scrollRows=модуль шага.
 ; Обычно старый курсор стёрт. При scrollCursorKept его строка не копируется.
-; Вне выделения атрибут всех строк одинаковый COLOR_FILE.
+; Атрибуты ячеек хранятся в vars.rowColors; соседние цвета объединяются.
 ; CF=1: список и новый курсор нарисованы; AF/BC/DE/HL разрушены.
 ; CF=0: шаг больше колонки, нужен текстовый путь; BC/DE/HL сохранены.
 ; Межколоночный перенос делается до изменения его источника.
-; При обычном шаге 1 копируется по 3500 байт чтения/записи экрана,
-; при сохранённом курсоре — по 3400 и печатаются 2 имени вместо 36.
-; Каталог берётся из кэша. Стенд 8080 без диска, обычный путь:
-; 148–151 тыс. тактов на шаг 1 против 565 тыс.
-; текстом; шаг 18 — 347–349 тыс. Большие шаги идут текстовым путём.
+; В каждой ячейке высотой 10 копируются только 8 строк глифа:
+; пустые строки 0 и 9 остаются на месте. Выделение снимается или исключается.
+; Каталог берётся из кэша. Большие шаги идут текстовым путём.
 
 scrollBitmapPanel:
             ld      a, (vars.scrollRows)
@@ -32,6 +30,9 @@ scrollBitmapPanel:
             sub     e
             ld      (vars.scrollRemain), a
             pop     bc
+            ld a,(ncFontWidth)
+            cp 6
+            jp nz,bitmapAdaptive
             dec     b
             jp nz,  bitmapBackward
 
@@ -123,7 +124,142 @@ bitmapLeftCopy:
             scf
             ret
 
-; Относительные HL/BC, D=ширина, E=высота. Нулевая высота — no-op.
+; Runtime geometry for 1 or 3 columns. The old selection is already erased;
+; move each column before consuming the boundary strip from its neighbour.
+; Forward visits columns left-to-right, backward right-to-left.
+bitmapAdaptive:
+            ld a,b
+            ld (bitmapDirection),a
+            ld a,(ncColumns)
+            ld (bitmapColumnsLeft),a
+            ld a,SCROLL_LEFT
+            ld (bitmapColumn),a
+            dec b
+            jp z,bitmapAdaptiveForward
+            ld a,(ncColumns)
+            dec a
+            jp z,bitmapAdaptiveBackward
+            ld b,a
+            ld a,(ncColumnStep)
+            rrca
+            rrca
+            ld c,a
+            ld a,SCROLL_LEFT
+bitmapLastColumn:
+            add a,c
+            dec b
+            jp nz,bitmapLastColumn
+            ld (bitmapColumn),a
+            jp bitmapAdaptiveBackward
+bitmapAdaptiveForward:
+            ld a,(bitmapColumn)
+            ld h,a
+            ld b,a
+            ld c,SCROLL_TOP
+            ld a,(vars.scrollPixels)
+            add a,SCROLL_TOP
+            ld l,a
+            ld a,(vars.scrollRemain)
+            ld e,a
+            ld a,(ncCellBytes)
+            ld d,a
+            call bitmapCopy
+            call bitmapColumnDone
+            jp z,bitmapAdaptivePrint
+            call bitmapNextColumn
+            ld a,(vars.scrollRemain)
+            add a,SCROLL_TOP
+            ld c,a
+            ld l,SCROLL_TOP
+            ld a,(vars.scrollPixels)
+            ld e,a
+            call bitmapCopy
+            ld a,h
+            ld (bitmapColumn),a
+            jp bitmapAdaptiveForward
+bitmapAdaptiveBackward:
+            ld a,(bitmapColumn)
+            ld h,a
+            ld b,a
+            ld l,SCROLL_TOP
+            ld a,(vars.scrollPixels)
+            add a,SCROLL_TOP
+            ld c,a
+            ld a,(vars.scrollRemain)
+            ld e,a
+            ld a,(ncCellBytes)
+            ld d,a
+            call bitmapCopy
+            call bitmapColumnDone
+            jp z,bitmapAdaptivePrint
+            ld a,(ncColumnStep)
+            rrca
+            rrca
+            ld c,a
+            ld a,h
+            sub c
+            ld h,a
+            ld a,(vars.scrollRemain)
+            add a,SCROLL_TOP
+            ld l,a
+            ld c,SCROLL_TOP
+            ld a,(vars.scrollPixels)
+            ld e,a
+            call bitmapCopy
+            ld a,h
+            ld (bitmapColumn),a
+            jp bitmapAdaptiveBackward
+bitmapColumnDone:
+            ld a,(bitmapColumnsLeft)
+            dec a
+            ld (bitmapColumnsLeft),a
+            ret
+bitmapNextColumn:
+            ld a,(ncColumnStep)
+            rrca
+            rrca
+            add a,h
+            ld h,a
+            ret
+bitmapAdaptivePrint:
+            ld a,(bitmapDirection)
+            dec a
+            ld a,0
+            jp nz,bitmapAdaptiveFirstSlot
+            ld a,(vars.scrollRows)
+            ld c,a
+            ld a,(ncVisibleCount)
+            sub c
+bitmapAdaptiveFirstSlot:
+            ld (bitmapSlot),a
+            ld a,(vars.scrollRows)
+            ld b,a
+bitmapAdaptiveNewRow:
+            push bc
+            ld a,(bitmapSlot)
+            call ncSlotPosition
+            ld a,(bitmapSlot)
+            ld c,a
+            ld b,0
+            ld hl,(vars.fileListPtr)
+            add hl,bc
+            call printPanelFile
+            ld hl,bitmapSlot
+            inc (hl)
+            pop bc
+            dec b
+            jp nz,bitmapAdaptiveNewRow
+            COLOR COLOR_CURSOR
+            call drawCursor
+            COLOR COLOR_FILE
+            scf
+            ret
+bitmapDirection: DB 0
+bitmapColumnsLeft: DB 0
+bitmapColumn: DB 0
+bitmapSlot: DB 0
+
+; Относительные HL/BC, D=ширина, E=высота, кратная 10. Ноль — no-op.
 ; Сохраняет BC/DE/HL; AF/флаги разрушены. Цвет уже выбран.
 bitmapCopy:
             ld      a, e
@@ -140,7 +276,11 @@ bitmapCopy:
             ld      b, h
             ld      c, l
             pop     hl
-            call    uiCopyRect
+    IF NC_FILE_COLORS
+            call    ncCopyColoredText
+    ELSE
+            call    uiCopyTextRect
+    ENDIF
             pop     de
             pop     bc
             pop     hl

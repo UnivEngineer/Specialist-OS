@@ -1,3 +1,8 @@
+    IFDEF FONT_NATIVE_GRID
+CORPUS_IO_BUFFER = 03500h
+    ELSE
+CORPUS_IO_BUFFER = 08420h
+    ENDIF
 ; Чтение реального A:\README.TXT вне измерения: CR/LF заменяются пробелом,
 ; пара CRLF даёт один пробел, в том числе на границе блоков чтения.
 ; прочие управляющие байты заменяются пробелом, KOI-8 сохраняется побайтно.
@@ -70,8 +75,8 @@ corpusPad:
     call bios_fileHandle
     ret c
 corpusChunk:
-    ; Временный блок выше эталона; стек услуг 8500h включится лишь после чтения.
-    ld hl,08420h
+    ; The caller selects scratch space below its current memTop.
+    ld hl,CORPUS_IO_BUFFER
     ld (corpusHandle+FH_BUFFER),hl
     ld hl,256
     ld (corpusHandle+FH_COUNT),hl
@@ -87,7 +92,7 @@ corpusChunk:
     jp z,corpusClose
     ld hl,(corpusWrite)
     ex de,hl
-    ld hl,08420h
+    ld hl,CORPUS_IO_BUFFER
 corpusByte:
     ld a,(hl)
     inc hl

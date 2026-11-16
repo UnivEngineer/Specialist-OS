@@ -4,7 +4,7 @@ from pathlib import Path
 import struct
 
 
-def nest(image, paths):
+def nest(image, paths, staging_entries=None):
     data=bytearray(image)
     u16=lambda offset:struct.unpack_from('<H',data,offset)[0]
     sector=u16(11);spc=data[13];reserved=u16(14);copies=data[16]
@@ -30,8 +30,13 @@ def nest(image, paths):
         struct.pack_into('<H',entry,26,cluster)
         return entry
     entries=[];labels=[]
-    for i in range(root_entries):
-        entry=bytearray(data[root+i*32:root+(i+1)*32])
+    # The host staging list is not a FAT root directory. Nested manifests
+    # may contain more files than the final root has slots, without changing
+    # BPB geometry or moving fixed Bootstrap images.
+    source = data[root:root+root_bytes] if staging_entries is None else staging_entries
+    if len(source)%32:raise ValueError('Invalid staging entry length')
+    for i in range(len(source)//32):
+        entry=bytearray(source[i*32:(i+1)*32])
         if not entry[0]:break
         if entry[0]==0xE5:continue
         if entry[11]&8:labels.append(entry)
@@ -89,7 +94,8 @@ def nest(image, paths):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('image',type=Path);parser.add_argument('paths',nargs='+')
+    parser.add_argument('--entries',type=Path)
     args=parser.parse_args()
-    data,count=nest(args.image.read_bytes(),args.paths)
+    data,count=nest(args.image.read_bytes(),args.paths,args.entries.read_bytes() if args.entries else None)
     args.image.write_bytes(data)
     print('Nested FAT image:',count,'directories,',len(args.paths),'files')

@@ -1,6 +1,8 @@
 ; Полное обновление обеих панелей: фон, рамки, метаданные, списки.
 ; Активная панель сохраняется; частичное обновление сюда не входит.
 fullRedraw:
+            ld a,1
+            ld (ncInfoFreeDeferred),a
             ld a,(state.activePanel)
             push af
             COLOR COLOR_BORDER
@@ -28,8 +30,7 @@ fullDrawFrames:
             ld a,1
             ld (state.activePanel),a
             call drawFullPanelFrame
-            ; Активная файловая панель готовится первой: информационная
-            ; панель использует её счётчик файлов.
+            ; Сначала готовим метаданные активной панели.
             pop af
             push af
             ld (state.activePanel),a
@@ -48,7 +49,21 @@ fullDrawFiles:
             call fullPanelFiles
             pop af
             ld (state.activePanel),a
-            jp fullPanelLoad
+            call fullPanelLoad
+            ; Finish the slow number only after both panels are visible.
+            xor a
+            ld (ncInfoFreeDeferred),a
+            ld a,(state.activePanel)
+            push af
+            xor 1
+            ld (state.activePanel),a
+            ld hl,state.panelA_info
+            call readBytePanel
+            or a
+            call nz,pip_freeSpaceLast
+            pop af
+            ld (state.activePanel),a
+            ret
 
 ; Рамка без заливки уже очищенной внутренней области.
 drawFullPanelFrame:
@@ -59,11 +74,14 @@ drawFullPanelFrame:
             ld hl,state.panelA_info
             call readBytePanel
             or a
-            ld hl,g_fileDividers
-            jp z,fullFrameDividers
+            jp nz,fullInfoDividers
+            call ncDrawFileDividers
+            jp fullFrameDone
+fullInfoDividers:
             ld hl,g_infoDividers
 fullFrameDividers:
             call draw
+fullFrameDone:
             xor a
             ld hl,vars.drawnLeftA
             call writeBytePanel
@@ -71,11 +89,11 @@ fullFrameDividers:
             jp writeBytePanel
 
 fullPanelMetadata:
-            call fullPanelLoad
             ld hl,state.panelA_info
             call readBytePanel
             or a
             jp nz,printInfoContents
+            call fullPanelLoad
             call updateCommandPath
             call printPanelPath
             jp printInfoLine
@@ -88,9 +106,41 @@ fullPanelFiles:
             COLOR COLOR_FILE
             jp printWholeFileList
 fullPanelLoad:
+            ld a,(ncStartupPrepared)
+            or a
+            jp nz,lf_Cached ; First paint only selects an already prepared view.
             ld hl,state.panelA_drive
             call readBytePanel
             jp loadFiles
+
+; Keep the console banner visible while both catalogs, indices, selections and
+; absolute paths are prepared. Also prepare the inactive F3 panel's file view.
+ncPreparePanels:
+            ld a,(state.activePanel)
+            push af
+            xor a
+            ld (state.activePanel),a
+            call fullPanelLoad
+            call getPanelPath
+            ld a,1
+            ld (state.activePanel),a
+            call fullPanelLoad
+            call getPanelPath
+            pop af
+            ld (state.activePanel),a
+            jp fullPanelLoad ; Restore the active directory and window pointer.
+
+ncStartupCopyright:
+            COLOR COLOR_CMDSCREEN
+            ld hl,aCommanderVer
+            call bios_printStringReal
+            ld c,' '
+            call bios_printChar
+            ld hl,aCopyright
+            call bios_printStringReal
+            ld c,10
+            jp bios_printChar
+ncStartupPrepared: DB 0
 
 ; Команды uiDraw: боковые штрихи и три строки нижней рамки.
 g_panelEdges:

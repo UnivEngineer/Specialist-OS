@@ -6,9 +6,9 @@ but_F6:
             ld a,CLI_OP_MOVE
             ld (copyFileOperation+1),a
             call drawWindowIfSel
-            CENTER_LINE 7, 5Eh
             ld hl,ncMoveText
-            call bios_printStringReal
+            ld e,94
+            call ncPrintCentered
             call inputForCopyMove
             cp 01Bh
             jp z,ncRefreshDirty
@@ -19,9 +19,9 @@ ncMoveText: DB 'Move to',0
 ; Shift+F6 меняет только имя в текущем каталоге, без выбора второй панели.
 ncRename:
             call drawWindowIfSel
-            CENTER_LINE 9, 5Eh
             ld hl,ncRenameText
-            call bios_printStringReal
+            ld e,94
+            call ncPrintCentered
             call inputForRename
             cp 01Bh
             jp z,ncRefreshDirty

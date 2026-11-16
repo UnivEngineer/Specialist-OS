@@ -1,4 +1,7 @@
 ; Заголовок MXOS-256/FAT16 занимает 3Eh байт. Исторический шаблон сохранён.
+    IFDEF STAGED_BOOT
+    INCLUDE "../../bin/bootstrap/sector-config.inc"
+    ENDIF
     ORG 0
     jp boot
     DB 053h,050h,045h,054h,053h,04Dh,058h,032h,000h,001h,001h,001h,000h,001h,000h,002h
@@ -7,7 +10,36 @@
     DB 04Fh,04Dh,020h,046h,041h,054h,031h,036h,020h,020h,020h
 boot:
     IFDEF STAGED_BOOT
-    jp 02000h
+    ; No calls or RAM variables before the screen has been cleared.
+    di
+    ld a,0F0h
+    ld (BOOT_COLOR_PORT),a
+    ld sp,0C000h
+    ld hl,0
+    ld bc,03000h/16
+clearScreen:
+    DUP 8
+        push hl
+    EDUP
+    dec bc
+    ld a,b
+    or c
+    jp nz,clearScreen
+screenCleared:
+    ; BOOT.SYS runs from RAM; the ROM slot remains available for its data.
+    ld hl,02000h
+    ld de,BOOT_STAGE_BASE
+    ld bc,BOOT_STAGE_BYTES
+copyBoot:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    dec bc
+    ld a,b
+    or c
+    jp nz,copyBoot
+    jp BOOT_STAGE_BASE
     ELSE
     ld hl,0
     ld de,0C000h

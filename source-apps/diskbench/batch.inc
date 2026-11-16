@@ -6,7 +6,7 @@ batchCollect:
     ld b,40
     call copy_bytes
     ld hl,statRawVerify
-    ld b,20
+    ld b,48
     call copy_bytes
     ex de,hl
     ld (batchNext),hl
@@ -109,12 +109,12 @@ batchWriteLabel:
     ld a,(v_drive)
     or a
     jp nz,batchVerifyLow
-    ld a,64
+    ld a,104
     ld (batchOffset),a
     ld hl,txtBatchRawHighVerify
     call batchRow
 batchVerifyLow:
-    ld a,60
+    ld a,100
     ld (batchOffset),a
     ld hl,txtBatchRawVerify
     ld a,(v_drive)
@@ -127,23 +127,53 @@ batchReadOnly:
     ld a,(argMode)
     and 2
     ret z
+    ld a,(v_drive)
+    or a
+    jp nz,batchFileReadLow
+    ld a,70
+    ld (batchOffset),a
+    ld hl,txtBatchFileReadHigh
+    call batchRow
+batchFileReadLow:
     ld a,30
     ld (batchOffset),a
     ld hl,txtBatchDosRead
+    ld de,txtBatchFileReadLow
+    call batchFileLowName
     call batchRow
     ld a,(v_budget)
     or a
     ret z
+    ld a,(v_drive)
+    or a
+    jp nz,batchFileWriteLow
+    ld a,60
+    ld (batchOffset),a
+    ld hl,txtBatchFileWriteHigh
+    call batchRow
+batchFileWriteLow:
     ld a,20
     ld (batchOffset),a
     ld hl,txtBatchDosWrite
+    ld de,txtBatchFileWriteLow
+    call batchFileLowName
     call batchRow
     ld a,(v_writeMode)
     cp 6
     ret nz
+    ld a,(v_drive)
+    or a
+    jp nz,batchFileVerifyLow
+    ld a,108
+    ld (batchOffset),a
+    ld hl,txtBatchFileVerifyHigh
+    call batchRow
+batchFileVerifyLow:
     ld a,40
     ld (batchOffset),a
     ld hl,txtBatchDosVerify
+    ld de,txtBatchFileVerifyLow
+    call batchFileLowName
 batchRow:
     call puts
     ld hl,batchStats
@@ -153,34 +183,33 @@ batchRow:
 batchColumn:
     ld hl,(batchCell)
     ld a,(batchOffset)
-    cp 64
-    jp nz,batchCheckLowSum
-    ld de,48
-    add hl,de
-    jp batchRawSum
-batchCheckLowSum:
-    cp 60
-    jp z,batchRawSum
+    ld de,0
+    ld c,40
+    cp 100
+    jp z,batchSum
+    ld e,48
+    ld c,56
+    cp 104
+    jp z,batchSum
+    ld e,20
+    ld c,44
     cp 40
+    jp z,batchSum
+    ld e,60
+    ld c,84
+    cp 108
     jp nz,batchPlain
-    ld de,20
+batchSum:
+    ld a,c
+    ld (batchVerifyOffset),a
     add hl,de
-batchRawSum:
     ld de,v_elapsed
     ld b,4
     call copy_bytes
     ld hl,(batchCell)
-    ld de,44
-    ld a,(batchOffset)
-    cp 64
-    jp nz,batchLowVerifyOffset
-    ld e,56
-    jp batchVerifyOffset
-batchLowVerifyOffset:
-    cp 60
-    jp nz,batchVerifyOffset
-    ld e,40
-batchVerifyOffset:
+    ld a,(batchVerifyOffset)
+    ld e,a
+    ld d,0
     add hl,de
     ld de,v_elapsed
     ld b,4
@@ -211,7 +240,7 @@ batchMissing:
     call puts
 batchAdvance:
     ld hl,(batchCell)
-    ld de,60
+    ld de,88
     add hl,de
     ld (batchCell),hl
     ld hl,batchColumns
@@ -225,11 +254,12 @@ batchNext: DW 0
 batchCell: DW 0
 batchColumns: DB 0
 batchOffset: DB 0
+batchVerifyOffset: DB 0
 verifiedStat: DS 10,0
-; MAIN выполняется первым. После MODULE_UNLOAD его арена 2000h свободна;
+; MAIN выполняется первым. После MODULE_UNLOAD его арена 2100h свободна;
 ; DOS/BANK не пишут в неё. До завершения MAIN пакетных результатов ещё нет.
-batchStats = 02000h
-    ASSERT batchStats+3*60 <= 02C00h
+batchStats = 02100h
+    ASSERT batchStats+3*88 <= 02C00h
 txtRawHighVerified: DB "WRITE HIGH + VERIFY:",9,0
 txtRawLowVerified: DB "WRITE LOW + VERIFY:",9,0
 txtWriteVerified: DB "WRITE + VERIFY:",9,0
@@ -247,3 +277,17 @@ txtBatchDosRead: DB "FILE READ   ",0
 txtBatchDosWrite: DB "FILE WRITE  ",0
 txtBatchDosVerify: DB "FILE W+VERIFY",0
 txtBatchMissing: DB "        -- ",0
+
+txtBatchFileReadHigh: DB "FILE READ HI",0
+txtBatchFileWriteHigh: DB "FILE WRITE H",0
+txtBatchFileVerifyHigh: DB "FILE HIGH+V ",0
+
+batchFileLowName:
+    ld a,(v_drive)
+    or a
+    ret nz
+    ex de,hl
+    ret
+txtBatchFileReadLow: DB "FILE READ LO",0
+txtBatchFileWriteLow: DB "FILE WRITE L",0
+txtBatchFileVerifyLow: DB "FILE LOW+V  ",0

@@ -62,7 +62,7 @@ def main():
         path=ROOT/'assets'/source
         ext=name.rsplit('.',1)[-1].lower()
         expected=(convert(path,ext,int(options[0],0) if options else 0)[0]
-                  if ext in ('com','exe','dll','rks') else path.read_bytes())
+                  if ext in ('com','exe','dll','fnt','rks') else path.read_bytes())
         entry,actual=lookup(name)
         assert entry[18:20]==bytes(2), name
         assert actual==expected,f'{name}: содержимое образа отличается от {path}'

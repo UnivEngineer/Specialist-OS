@@ -13,9 +13,10 @@ BAT_INPUT = 256
 execBat:
     pop de                  ; Аргументы, положенные загрузчиком.
     IFDEF BANKED_DOS_BUILD
-    ld a,(moduleDosBorrowed)
-    or a
-    jp z,batArenaFree
+    ld hl,BAT_BUFFER
+    ld de,BAT_BUFFER+BAT_BUFFER_SIZE
+    call dosArenaCheck
+    jp nc,batArenaFree
     ld a,DOS_ERR_ACCESS
     jp dosSetError
 batArenaFree:

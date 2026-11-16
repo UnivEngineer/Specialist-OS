@@ -71,10 +71,11 @@ moveEmpty:
             pop     hl
             ret
 
-; Хвост: 54 такта / 2 байта вперёд, 55 назад (8080).
+; Остаток до 16 байт: 54 такта / 2 байта вперёд, 55 назад (8080).
 ; Полный блок: 16 байт за 287 тактов вперёд, 295 назад;
 ; ещё 22 такта управления на каждые 256 байт. Настройка считается отдельно.
-; Модуль целиком 261 байт, без промежуточного буфера.
+; Хвост 16..254 байта использует тот же развёрнутый блок, без второго тела.
+; moveCore: 295 байт; +40 байт к прежнему циклу, по копии в BIOS и DOS.
 ; На каждый байт одно чтение и одна запись, без обращения к портам.
 ; Вход BC=чётное ненулевое число; вперёд HL=назначение, DE=источник,
 ; назад HL=конец источника, DE=конец назначения. Разрушает AF/BC/DE.
@@ -89,16 +90,31 @@ moveReadSP: ld      sp, 0
             ld      a, c
             or      a
             jp z,   moveForwardPageCheck
-; Сначала чётный хвост до 254 байт, затем полные блоки по 256.
+            and     0Fh
+            jp z,   moveForwardTailBlocks
+; Сначала остаток 2..14 байт; C сохраняет исходный хвост для деления на 16.
 movePairForwardLoop:
             pop     de
             ld      (hl), e
             inc     hl
             ld      (hl), d
             inc     hl
-            dec     c
-            dec     c
+            dec     a
+            dec     a
             jp nz,  movePairForwardLoop
+moveForwardTailBlocks:
+            ld      a, c
+            and     0F0h
+            jp z,   moveForwardPageCheck
+            rrca
+            rrca
+            rrca
+            rrca
+            ld      c, a
+            ; После хвоста DEC B вернёт исходное число полных страниц.
+            ; INC/DEC работают по модулю 256 и при исходном B=FFh.
+            inc     b
+            jp      moveForwardBlock
 moveForwardPageCheck:
             ld      a, b
             or      a
@@ -129,15 +145,28 @@ moveWriteSP: ld      sp, 0
             ld      a, c
             or      a
             jp z,   moveBackPageCheck
+            and     0Fh
+            jp z,   moveBackTailBlocks
 movePairBackLoop:
             dec     hl
             ld      d, (hl)
             dec     hl
             ld      e, (hl)
             push    de
-            dec     c
-            dec     c
+            dec     a
+            dec     a
             jp nz,  movePairBackLoop
+moveBackTailBlocks:
+            ld      a, c
+            and     0F0h
+            jp z,   moveBackPageCheck
+            rrca
+            rrca
+            rrca
+            rrca
+            ld      c, a
+            inc     b
+            jp      moveBackBlock
 moveBackPageCheck:
             ld      a, b
             or      a

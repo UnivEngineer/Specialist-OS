@@ -1,6 +1,6 @@
 ; Реестр физических устройств принадлежит DOS, а не сменным службам.
 ; Запись: blocks, step, capabilities/technology, shift, kind, text[64], reserve[8].
-; BIOS A: регистрируется после установки; B: использует общий CPM16.
+; BIOS A: регистрируется после установки; B: использует общий CPM32.
 ; H: поступает из одноразового инициализатора, единственная активная копия.
 registryBoot:
     ld hl,DOS_DRIVER_REGISTRY
@@ -34,7 +34,7 @@ registryDefaults:
     ld hl,0
     xor a
     jp dosDriverRefresh
-registryRamName: DB "BANK RAM",0,"CPM16; DOS RESERVED",0
+registryRamName: DB "BANK RAM",0,"CPM32; DOS RESERVED",0
 registryRamNameEnd:
 
 ; A=диск -> HL=запись; AF/DE разрушены. BC сохранён.
@@ -114,7 +114,7 @@ registryValidateNext:
     jp blockArgument
 registryValidateReady:
     ld b,3
-    ld hl,kernelSystemInfo
+    ld hl,0
     call dosSystemDriver
     ret c
     ex de,hl
@@ -123,7 +123,7 @@ registryValidateReady:
     ld l,c
     ld (DOS_DRIVER_REGISTRY+2),hl
     ld b,0FFh
-    ld hl,kernelSystemInfo
+    ld hl,0
     call dosSystemDriver
     ret c
     ld h,b
@@ -338,8 +338,11 @@ registryFlushH:
 ; Диапазон должен полностью принадлежать текущему инициализатору.
 ; HL/BC сохранены; AF/DE разрушены, CF/A=ошибка.
 diRange:
-    ld a,h
-    cp DOS_BANK_DRIVER_ADDR/256
+    push hl
+    ld hl,(diStart)
+    ex de,hl
+    pop hl
+    call cmp_hl_de
     jp c,blockArgument
     push hl
     add hl,bc
@@ -354,6 +357,7 @@ diRange:
 diRangeBad:
     pop hl
     jp blockArgument
+diStart: DW 0
 diActive: DB 0
 diEnd: DW 0
 diDescriptor: DW 0

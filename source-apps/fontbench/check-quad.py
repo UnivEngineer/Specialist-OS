@@ -17,7 +17,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     sym = lambda name: {k: int(v, 16) for k, v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (ROOT / 'bin' / f'{name}.sym').read_text(), re.M)}
     s, io = sym('FONTCOM'), sym('IO')
-    font = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
+    font = (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
     packed = (ROOT / 'bin/FONTKOI.packed.bin').read_bytes()
     packed = bytearray(packed)
     for c in range(256):

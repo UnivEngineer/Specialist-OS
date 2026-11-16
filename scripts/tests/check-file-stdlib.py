@@ -13,7 +13,7 @@ subprocess.run(command,cwd=ROOT,env=env,check=True)
 h=runpy.run_path(str(ROOT/'scripts/tests/check-file-handle.py'));memory=h['memory']
 s=h['S'];n=s['initVarsEnd']-s['initVars'];memory[s['bios_vars']:s['bios_vars']+n]=memory[s['initVars']:s['initVars']+n]
 __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](memory, s)
-font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes();memory[s['FONT_ADDR']:s['FONT_ADDR']+len(font)]=font
+font=(ROOT/'bin/fonts/Compact.pf').read_bytes();memory[s['FONT_ADDR']:s['FONT_ADDR']+len(font)]=font
 # Клавиатуру моделируем, а регистровый мост и прочие функции исполняются реально.
 memory[s['bios_getch']:s['bios_getch']+3]=b'\xC3\x80\xEA';memory[0xEA80:0xEA84]=bytes.fromhex('3E 51 37 C9')
 memory[s['bios_keyScan']:s['bios_keyScan']+3]=b'\xC3\x90\xEA';memory[0xEA90:0xEA94]=bytes.fromhex('3E FF B7 C9')

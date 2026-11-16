@@ -1,13 +1,14 @@
 """Размер DISKBEN: десятичный ввод и проверка первого/последнего байта файла."""
-import json,re,struct,subprocess
+import json,re,struct,subprocess,runpy
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 s={k:int(v,16) for k,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'source-apps/diskbench/build/DISKBEN.sym').read_text(),re.M)}
+bios_s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 out=ROOT/'docs/diskbench/file-003';out.mkdir(parents=True,exist_ok=True)
 code=(ROOT/'bin/DISKBEN.i80').read_bytes();cpu=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe')
 def run(label,setup):
     mem=bytearray(65536);mem[:len(code)]=code
-    dos=(ROOT/'bin/DOS.sys').read_bytes();mem[0xC000:0xC000+len(dos)]=dos
+    runpy.run_path(str(ROOT/'scripts/tests/mem-image.py'))['install'](mem,bios_s)
     setup(mem)
     addr=s[label]
     wrapper=b'\x31\xF0\xBF\x21\x00\x80\xCD'+struct.pack('<H',addr)+bytes.fromhex('F5E1220090C3F0B8')
@@ -26,9 +27,9 @@ for text in texts:
 for kib in [1,8,9,16,24]:
     for bad in [None,0,255,256,kib*1024-1]:
         def setup(mem):
-            mem[s['v_pass']]=3;mem[s['v_bufferEndHi']]=0x20+kib*4
-            mem[0x2000:0x2000+kib*1024]=bytes(3^(i>>8)^(i&255) for i in range(0x2000,0x2000+kib*1024))
-            if bad is not None:mem[0x2000+bad]^=1
+            mem[s['v_pass']]=3;mem[s['v_bufferEndHi']]=s['sectorBuffer']//256+kib*4
+            start=s['sectorBuffer'];mem[start:start+kib*1024]=bytes(3^(i>>8)^(i&255) for i in range(start,start+kib*1024))
+            if bad is not None:mem[s['sectorBuffer']+bad]^=1
         _,carry=run('file_compare',setup)
         assert carry==(bad is not None),(kib,bad)
 report={'inputCases':len(texts),'compareSizesKiB':[1,8,9,16,24],'compareCases':25}

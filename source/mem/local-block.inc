@@ -58,10 +58,6 @@ localRamCopy: DB 0
     DB 0
     DW 0,256
 localDriverKind: DB 0
-    ASSERT $ <= mx_get32
-    DS mx_get32-$,0
-    jp memGetDword
-    jp memPutDword
     ASSERT $ <= MEM_LOCAL_CHECKED
     DS MEM_LOCAL_CHECKED-$,0
 memLocalChecked: DW 0

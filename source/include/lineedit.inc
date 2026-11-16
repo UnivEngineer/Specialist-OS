@@ -1,8 +1,11 @@
 ; Общий однострочный редактор CLI и диалогов NC, исходник включается в программу.
 ; HL=буфер MAX_PATH, DE=конец начального текста; B: bit0=Escape завершает ввод,
 ; bit1=вернуть CTRL/служебную клавишу вызывающему, bit2=вернуться при пустой строке.
+; bit3=вернуть обычные Up/Down вызывающему (A=19h/1Ah, CF=0).
 ; C=ширина окна (0 — до правого края). Позиция начала берётся из BIOS.
-; Возврат A=Enter/Escape, буфер ASCIIZ. AF/BC/DE/HL разрушены.
+; Ширина символа 4/6/8 px берётся из FONT_ENGINE_HEADER+5; X BIOS в полупикселях.
+; Возврат A=Enter/Escape либо переданная клавиша; CF=1 для переданного CTRL.
+; Буфер ASCIIZ. AF/BC/DE/HL разрушены, кроме указанных результатов.
 ; Последний столбец экрана не используется, поэтому ввод не прокручивает экран.
 lineEdit:
     ld (lineEditBuffer),hl
@@ -16,23 +19,38 @@ lineEdit:
     ld a,l
     ld (lineEditLength),a
     ld (lineEditPosition),a
+    ld a,(FONT_ENGINE_HEADER+5)
+    or a
+    rra
+    ld d,a ; Шаг символа в единицах cursorX.
     ld hl,(bios_vars.cursorY)
     ld a,c
     or a
     jp nz,lineEditWidthReady
-    ld a,h
-    cp 168
-    jp c,lineEditOriginReady
+    ; Если после приглашения осталось не более 8 ячеек, начать новую строку.
+    ld a,d
+    add a,a
+    add a,a
+    add a,a
+    ld b,a
+    ld a,192
+    sub b
+    cp h
+    jp z,lineEditOriginNewline
+    jp nc,lineEditOriginReady
+lineEditOriginNewline:
     ld c,0Ah
     call bios_printChar
     ld hl,(bios_vars.cursorY)
 lineEditOriginReady:
-    ld a,189
+    ; Оставить последнюю ячейку пустой: печать не должна прокрутить экран.
+    ld a,192
+    sub d
     sub h
     ld b,0
 lineEditWidthLoop:
     inc b
-    sub 3
+    sub d
     jp nc,lineEditWidthLoop
     dec b
     ld a,b
@@ -54,6 +72,16 @@ lineEditControlIgnored:
 lineEditKey:
     cp 0Dh
     ret z
+    ld c,a
+    ld a,(lineEditFlags)
+    and 8
+    ld a,c
+    jp z,lineEditOrdinaryKey
+    cp 019h
+    ret z
+    cp 01Ah
+    ret z
+lineEditOrdinaryKey:
     cp 07Fh
     jp z,lineEditBackspace
     cp 8
@@ -281,8 +309,22 @@ lineEditCursor:
     ld a,(lineEditPosition)
     sub b
     ld b,a
+    ld a,(FONT_ENGINE_HEADER+5)
+    cp 6
+    ld a,b
+    jp z,lineEditCursor6
+    add a,a
+    ld b,a
+    ld a,(FONT_ENGINE_HEADER+5)
+    cp 4
+    ld a,b
+    jp z,lineEditCursorReady
+    add a,a ; 8 px = 4 единицы cursorX.
+    jp lineEditCursorReady
+lineEditCursor6:
     add a,a
     add a,b
+lineEditCursorReady:
     ld hl,(lineEditOrigin)
     add a,h
     ld h,a

@@ -57,3 +57,17 @@ mxos_u16 mxos_resident_close(mxos_u16 handle)
     return mxos_module_unload(handle);
 }
 mxos_u16 mxos_resident_kill(mxos_u16 handle) { return mxos_module_unload(handle); }
+
+mxos_u16 mxos_fileops(mxos_u8 operation,MXOS_FILEOPS_JOB *job)
+{
+    MXOS_CALL r; r.operation=MXOS_DOS_FILEOPS; r.hl=(mxos_u16)job;
+    r.de=r.bc=0; r.af=(mxos_u16)operation<<8;
+    return mxos_call(&r);
+}
+
+mxos_u16 mxos_enumerate(mxos_u8 operation,MXOS_ENUM_REQUEST *request)
+{
+    MXOS_CALL r; r.operation=MXOS_DOS_ENUMERATE; r.hl=(mxos_u16)request;
+    r.de=r.bc=0; r.af=(mxos_u16)operation<<8;
+    return mxos_call(&r);
+}

@@ -208,7 +208,7 @@ def main():
     dos = (ROOT / "bin/DOS.sys").read_bytes()
     for entry in (0xC809, 0xC818):
         data[entry:entry + 3] = dos[entry - 0xC000:entry - 0xC000 + 3]
-    font = (ROOT / "assets/system-rom/FONT.FNT").read_bytes()
+    font = (ROOT / "assets/system-rom/fonts/6x8/KOI8.pf").read_bytes()
     data[0xE000:0xE000 + len(font)] = font
     data[0x8FE7:0x8FE9] = word(0xE000 // 8)
     data[0x8FEA] = 0

@@ -37,13 +37,13 @@ sysBIOSTable:
     DW fileBodyLoad
     DW glyphCacheService
     DW printStringZ
-    DW fast6.service
+    DW FONT_ENGINE_SERVICE
     DW printStringRawZ
     DW printStringRawZ
     DW printStringRawLim
     DW printStringRawLim
     DW bankText.request
-    DW fast6.setEncoding
+    DW FONT_ENGINE_ENCODING
 sysBIOSCount = ($-sysBIOSTable)/2
 sysDOSTable:
     DW dos_fileList
@@ -89,4 +89,6 @@ sysDOSTable:
     DW moduleUnload
     DW fileExecNative
     DW residentService
+    DW fileopsService
+    DW enumService
 sysDOSCount = ($-sysDOSTable)/2

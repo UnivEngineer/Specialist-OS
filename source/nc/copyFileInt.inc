@@ -49,11 +49,11 @@ copyFileNameLoop:
             ld      hl, vars.copyRequest
 copyFileOperation:
             ld a,CLI_OP_COPY
-            MXOS_CALL MXOS_DOS_CLI
+            call ncFileops
             ret nc
             cp      FILE_OP_EXISTS
             jp z,   copyFileExists
-            jp      copyFileError
+            jp      copyFileErrorCode
 
 copyFileError:
             MXOS_CALL MXOS_DOS_GET_ERROR
@@ -66,7 +66,7 @@ copyFileExists:
             call dosErrorText
 
 copyFileShowError:
-            ld      de, 04480h          ; CENTER_LINE 20,80h
+            ld      de, 03880h          ; CENTER_LINE 20,80h
             call    showFileErrorWindow
 
 copyFileWaitRelease:
@@ -75,29 +75,45 @@ copyFileWaitRelease:
             jp nz,  copyFileWaitRelease
 
 copyFileAnyKey:
-            call    bios_keyScan
-            inc     a
-            jp z,   copyFileAnyKey
-            jp      ncRefreshDirty
+            call ncModalGetch
+            cp 13
+            jp z,ncRefreshDirty
+            cp 01Bh
+            jp z,ncRefreshDirty
+            jp copyFileAnyKey
 
 ; Общий баннер ошибок копирования/удаления и защиты файла.
 ; Вход HL=сообщение, DE=координаты заголовка BIOS; имя в vars.input.
 ; AF/BC/DE/HL и флаги разрушаются. Ожидание клавиши выполняет вызывающий код.
 showFileErrorWindow:
-            push    hl
-            push    de
-            call    drawWindow2
-            COLOR   COLOR_DIALOG_ERR
-            pop     hl
-            ld      (bios_vars.cursorY), hl
-            pop     hl
-            call    bios_printString
-            COLOR   COLOR_DIALOG
-            ld      hl, 03890h          ; x=114, нижняя линия знака y=144
-            ld      (bios_vars.cursorY), hl
-            ld      hl, vars.input
-            call    ncErrorCompact
-            jp      printStringInv
+            push hl
+            ld hl,ncErrorWindow
+            call ncDialogOpen
+            COLOR COLOR_DIALOG
+            ld hl,ncErrorWindow
+            call draw
+            pop hl
+            ld e,111
+            call ncPrintCentered
+            ld hl,240
+            call ncProgressFieldWidth
+            ld a,b
+            ld (ncErrorChars),a
+            ld hl,vars.input
+            call ncErrorCompact
+            ld e,133
+            call ncPrintCentered
+            jp ncDialogOkButton
+ncErrorWindow:
+            G_MODAL_WINDOW 80h,64,96,256,64
+            G_LINE 80h,68,117,248
+            G_LINE 80h,68,139,248
+            DB 0
+ncErrorHint: DB 'OK [Enter]',0
+ncDialogOkButton:
+            ld hl,ncOkButton
+            jp ncDrawButton
+ncOkButton: UI_BUTTON ncErrorHint,68,56,141,14,6,1
 
 ; Поле ошибки вмещает 26 знаков. Абсолютные пути сокращаются по компонентам,
 ; для команды/относительного имени показываем многоточие и конец строки.
@@ -121,17 +137,30 @@ ncErrorCopied:
             ld (de),a
             ld hl,vars.displayPath
             ld a,c
-            cp 27
-            ret c
+            ld b,a
+            ld a,(ncErrorChars)
+            cp b
+            ld a,b
+            ret nc
             ; Сохраняем полный суффикс пути, когда это абсолютное имя.
             ld a,(vars.input+1)
             cp ':'
-            ld b,26
+            push af
+            ld a,(ncErrorChars)
+            ld b,a
+            pop af
             ld hl,vars.input
             jp z,compactPath
             ld hl,vars.displayPath
             ld a,c
-            sub 23
+            push bc
+            ld b,a
+            ld a,(ncErrorChars)
+            sub 3
+            ld c,a
+            ld a,b
+            sub c
+            pop bc
             ld e,a
             ld d,0
             add hl,de

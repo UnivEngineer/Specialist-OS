@@ -38,6 +38,14 @@ biosBootCommandFailed:
     ld c,a
     call bios_printHexByte
     ld c,0Ah
+    call bios_printChar
+    ld hl,biosBootWaitText
+    call bios_printString
+biosBootWaitEnter:
+    call bios_getch
+    cp 0Dh
+    jp nz,biosBootWaitEnter
+    ld c,0Ah
     jp bios_printChar
  ; Только холодный старт: физический объём, включая зарезервированный банк DOS.
 ; Геометрия и свободный объём B: определяются отдельно драйвером и MEM.
@@ -67,6 +75,7 @@ biosRamBanksText: DB ' KiB, ',0
 biosRamEndText: DB ' banks',10,0
 
 biosBootError: DB 'BOOT COMMAND ERROR ',0
+biosBootWaitText: DB 'Press Enter to continue',0
 biosBankWarm:
     ; Bootstrap уже восстановил транспорт и стеки. До AUTOEXEC доступен
     ; встроенный ROM-драйвер A:, без знания файлов внешних драйверов.
@@ -169,8 +178,7 @@ biosBankReturn:
     ld (IO_PAGE_RAM-0800h),a
     ld (IO_PAGE_RAM),a
     ld sp,STACK_ADDR
-    ld hl,0
-    ld (fast6.preBase),hl ; Буфер приложения больше не принадлежит BIOS.
+    ; The installed renderer and system-owned font resources survive app exit.
     call biosRecoverCopyTail
     push af
     call sysInstall
@@ -196,8 +204,6 @@ biosBankReturn:
     ld a,1
     ld hl,BANK_DOS_GATE+9
     call bankCall
-    ld hl,08BFFh
-    call setMemTop
     jp biosBankShell
 biosResetDosContext:
     DB 0

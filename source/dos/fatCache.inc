@@ -27,6 +27,10 @@ v_cacheLastSlot: DW cacheData
 v_cacheLastTag: DB 0FFh
 v_cacheProbeCount: DB 0
 v_cacheMaxSector: DW 0
+; Четыре недавно найденные головы. Адреса проверяются по LBA/tag перед
+; каждым использованием: вытеснение и invalidation не оставляют ложных попаданий.
+v_cacheHotSlots: DW cacheData,cacheData,cacheData,cacheData
+v_cacheHotNext: DB 0
 v_cacheStride: DW 128
 v_cacheCount: DB CACHE_GRANULES
 v_cacheUsed: DB 0
@@ -468,6 +472,7 @@ cacheSector:
         push de
         call cachePublishSlot
         pop de
+        call cacheRememberHot
         ; Безопасная верхняя оценка LBA метаданных. После вытеснения её можно
         ; оставить завышенной: это даст только лишний поиск, но не пропуск.
         push hl
@@ -517,6 +522,57 @@ cff_Clean:
 
         ; Восстанавливаем регистры и выходим
         pop     de
+        ret
+
+; HL=найденная голова; BC/DE/HL сохранены, Z=1, CF=0.
+cacheRememberHot:
+        push de
+        push bc
+        push hl
+        ld a,(v_cacheHotNext)
+        ld e,a
+        ld d,0
+        ld hl,v_cacheHotSlots
+        add hl,de
+        pop de
+        ld (hl),e
+        inc hl
+        ld (hl),d
+        ld a,(v_cacheHotNext)
+        add a,2
+        and 6
+        ld (v_cacheHotNext),a
+        ex de,hl
+        pop bc
+        pop de
+        xor a
+        ret
+; DE=LBA. Проверить последние головы перед полным проходом таблицы.
+; CF=0: HL=голова; CF=1: нет попадания. DE сохранён, BC/AF разрушены.
+cacheProbeHot:
+        ld hl,v_cacheHotSlots
+        ld b,4
+cacheHotLoop:
+        push hl
+        ld a,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,a
+        call cacheSlotMatches
+        pop hl
+        jp z,cacheHotFound
+        inc hl
+        inc hl
+        dec b
+        jp nz,cacheHotLoop
+        scf
+        ret
+cacheHotFound:
+        ld a,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,a
+        or a
         ret
 
 ; При единственной dirty-строке flush не должен сканировать весь пул.

@@ -94,7 +94,7 @@ def main():
         assert not b[0x7DC0] & 1
         assert b[s['vars.cacheSlotA']] == 0 and b[s['state.panelA_filesCnt']] == 100
         assert b[s['FILE_INDEX_A']:s['FILE_INDEX_A']+256] == old[s['CATALOG_INDEX_A']:s['CATALOG_INDEX_A']+256]
-        assert b[s['FILE_CACHE_A']:s['FILE_INDEX_A']] == old[s['FILE_CACHE_A']:s['FILE_INDEX_A']]
+        assert b[s['FILE_CACHE_A']:s['NC_END']] == old[s['FILE_CACHE_A']:s['NC_END']]
         assert b[s['FILE_INDEX_B']:s['FILE_INDEX_B']+256] == old[s['FILE_INDEX_B']:s['FILE_INDEX_B']+256]
         assert b[0x7DF0] == 0
         assert [metadata(b, i)[6] for i in range(3)] == [0, 2, 1]

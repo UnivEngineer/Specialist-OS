@@ -53,6 +53,10 @@ kdPacketLoop:
     ld a,1
     ld (kdBusy),a
     ld a,(kdFunction)
+    cp MXOS_DOS_ENUMERATE & 0FFh
+    jp z,enumService
+    cp MXOS_DOS_FILEOPS & 0FFh
+    jp z,fileopsService
     cp MXOS_DOS_RESIDENT & 0FFh
     jp z,residentService
     cp MXOS_DOS_MODULE_LOAD & 0FFh
@@ -242,6 +246,8 @@ kdCli:
     ld hl,cliService
     ld (kdEntry),hl
     ld a,(kdRegs+7)
+    cp CLI_OP_RENAME
+    jp z,kmRenameArgs
     cp CLI_OP_COPY
     jp z,kcCopy
     cp CLI_OP_MOVE
@@ -249,6 +255,8 @@ kdCli:
     cp CLI_OP_OBSERVER
     jp z,koRegister
     cp CLI_OP_QUERY
+    jp z,kdPath
+    cp CLI_OP_ASSOCIATION
     jp z,kdPath
     cp CLI_OP_COMMAND
     jp nz,kdCliPath

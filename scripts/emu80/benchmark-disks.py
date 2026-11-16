@@ -42,7 +42,7 @@ def prepare_fixtures():
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
     base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
-    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.FNT','FONTKOI.FNT','Drivers/RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','Drivers/ROM2M.COM','Drivers/ROM64K.COM'}
+    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.PF','FONTKOI.PF','Drivers/RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','Drivers/ROM2M.COM','Drivers/ROM64K.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
@@ -73,7 +73,7 @@ class Matrix:
         if self.pid:
             shell('$p=Get-Process -Id '+str(self.pid)+' -ErrorAction SilentlyContinue; if ($p -and $p.Path -eq '+ps(RUNTIME/'Emu80qt-mcp.exe')+') { Stop-Process -Id $p.Id; $p.WaitForExit() }')
             self.pid=None
-    def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False,nc_binary=None,nc_symbols=None):
+    def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False,nc_binary=None,nc_symbols=None,bios=None):
         self.stop()
         # Порт MCP фиксирован upstream. Не подключаемся к чужому эмулятору.
         owner=mcp_owner()
@@ -107,9 +107,12 @@ class Matrix:
         if self.m.read(0,32)==nc_binary.read_bytes()[:32]:
             self.m.tap('esc')
         if 'moduleLoadError' in nc:self.m.call('bp_set',addr=nc['moduleLoadError'],type='exec')
-        diagnostic=symbols(ROOT/'bin/DOS.sym')
+        diagnostic=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
         if 'dosModuleBad' in diagnostic:self.m.call('bp_set',addr=diagnostic['dosModuleBad'],type='exec')
-        for _ in range(120):
+        for attempt in range(120):
+            # NC may already be waiting in getch while its initial bytes have
+            # changed at runtime. Give its normal loop one keyboard event.
+            if attempt == 60:self.m.tap('esc')
             self.m.call('emu_run_for',ms=500)
             state=self.m.call('cpu_state')
             if state['registers']['pc']['dec']==diagnostic.get('dosModuleBad'):
@@ -120,7 +123,7 @@ class Matrix:
                     # До NC тот же адрес может исполнять FORMAT/RAMD.
                     self.m.stop_at(nc['mainLoop'])
                     continue
-                ds=symbols(ROOT/'bin/DOS.sym')
+                ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
                 self.m.screenshot(OUT/'module-error.png')
                 raise RuntimeError(('DOS module load failed',self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
             if state['registers']['pc']['dec']==nc['mainLoop']:
@@ -128,11 +131,11 @@ class Matrix:
                 self.m.call('bp_clear');self.m.call('emu_run_for',ms=50);self.m.stop_at(nc['mainLoop'])
         else:
             self.m.call('debug_break');state=self.m.call('cpu_state')
-            ds=symbols(ROOT/'bin/DOS.sym');self.m.screenshot(OUT/'boot-timeout.png')
+            ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym');self.m.screenshot(OUT/'boot-timeout.png')
             raise RuntimeError(('NC boot timeout',state,self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
         self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
         self.ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
-        expected=(ROOT/'bin/BIOS.sys').read_bytes()
+        expected=(bios or ROOT/'bin/BIOS.sys').read_bytes()
         # Холодный старт патчит ядро; сверяем таблицу ABI, а не все изменяемые байты.
         assert self.m.read(0xC800,3)==expected[0x800:0x803]
         conf=(RUNTIME/'specialist-os/specialist-mx2.conf').read_text(encoding='utf-8-sig')
@@ -333,7 +336,7 @@ def main():
         matrix.start('rom512',system=OUT/'rom512/SystemRom_emu80_writable.bin',locked=True)
         matrix.func(0xC860,af=0,hl=matrix.ds['diskDriver']);matrix.func(0xC842,af=0x0100,de=1)
         matrix.readonly(0,'A-native-ROM-512K',RUNTIME/'specialist-os/system-flash.bin')
-        matrix.start('rom64',flash=False,system=OUT/'rom64/SystemRom_emulator.bin',disk=OUT/'external-rom64/FlashDisk_emulator.bin')
+        matrix.start('rom64',flash=False,system=OUT/'rom64/SystemRom_emulator.bin',disk=OUT/'external-rom64/FlashDisk_64K.bin')
         matrix.install('Rom');matrix.readonly(7,'H-ROM-64K',RUNTIME/'specialist-os/rom-disk.bin')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
         matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','DISKBEN.i80','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMDISK.i80']}

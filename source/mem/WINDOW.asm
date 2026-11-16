@@ -5,7 +5,9 @@
 ; Один переключатель вместо двух оставляет байт идентификатора профиля.
 windowSelect:
     ld (hl),a
-    jp BANK_LANDING
+    jp BANK_COMMAND_LANDING
+    ld (hl),a
+    jp MEM_SCALAR_RETURN_ENTRY
     DS BANK_PACKET-$,0
     DS BANK_PACKET_SIZE,0
     DS BANK_PROFILE-$,0

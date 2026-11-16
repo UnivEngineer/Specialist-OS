@@ -1,7 +1,8 @@
 ; Модули: фиксированный контейнер COM/EXE, записи принадлежат DOS.
 ; Публичный вызов через MXOS_CALL; все NEAR-параметры находятся у kdPage.
 ; Запись: handle:word, active:byte, bank:byte, entry:word,
-; allocation:word, owner:byte, allocationOwner:byte. ID не переиспользуются.
+; allocation:word, owner:byte, allocationOwner:byte, start:word, end:word.
+; Диапазоны полуоткрытые; ID не переиспользуются.
     MACRO MD_GET_DE address
     push hl
     ld hl,(address)
@@ -36,10 +37,12 @@ mdClear:
     inc hl
     dec b
     jp nz,mdClear
+    ld (fileopsReady),a
+    ld (enumReady),a
+    ld (fileopsActive),a
+    ld (enumActive),a
+    ld (fileopsPublic),a
     ld (moduleActor),a
-    ld (moduleDosOwner),a
-    ld (moduleDosBorrowed),a
-    ld (moduleDosServiceOwner),a
     ld (appOwner),a
     ld (appDepth),a
     ld hl,residentKeys
@@ -67,8 +70,12 @@ memoryOwnerCurrent:
 
 ; Reset отбрасывает стек вызывавшей программы: её модули больше не исполняемы.
 ; Освобождаем и активные записи, но не обнуляем счётчик поколений handle.
+; FILEOPS code stays cached; a lost caller cannot resume its old job/stack.
 moduleWarm:
     xor a
+    ld (fileopsActive),a
+    ld (enumActive),a
+    ld (fileopsPublic),a
     ld (moduleActor),a
     ld hl,MODULE_TABLE+2
     ld b,MODULE_MAX
@@ -134,7 +141,6 @@ mdWarmBlockNext:
 
 moduleLoad:
     xor a
-    ld (mdBorrowRequest),a
     call dosClearError
     ld a,(kdRegs+7)
     cp MODULE_TARGET_DOS+1
@@ -245,18 +251,18 @@ mdPlacementReady:
     jp nz,mdRange
 mdBank:
     ; Весь DATA-банк резервируется целиком: чужие блоки исключены.
-    ld hl,0FF00h
+    ld hl,MEM_DATA_LIMIT
     ld b,MEM_ALLOC_ANY
     call memoryAlloc
     jp c,mdError
     jp mdReserved
 mdDos:
-    ; Резидентный слот не пересекается с временными DRIVER-инициализаторами.
+    ; Нижняя арена отделена от верхней арены DRIVER/FILEOPS.
     ld de,DOS_SERVICE_END
     call cmp_hl_de
     jp c,mdDosService
     jp z,mdDosService
-    ; Весь слот закреплён за одним модулем, включая его статические буферы.
+    ; Регистрируется фактическое тело, включая статические буферы модуля.
     ; Стек остаётся служебным стеком DOS и в эту арену не входит.
     ld de,DOS_BANK_DRIVER_END
     call cmp_hl_de
@@ -271,40 +277,25 @@ mdDosBorrowBat:
     or a
     jp nz,mdArenaBusy
     ld a,1
-    ld (mdBorrowRequest),a
 mdDosEndReady:
     ld hl,(mdAddress)
     ld de,DOS_BANK_DRIVER_ADDR
     call cmp_hl_de
     jp c,mdRange
-    ld a,(diActive)
-    or a
-    jp nz,mdArenaBusy
-    ld a,(moduleDosOwner)
-    or a
-    jp nz,mdArenaBusy
-    ld hl,(mdRecord)
-    ld de,9
-    add hl,de
-    ld a,(hl)
-    ld (moduleDosOwner),a
-    ld a,(mdBorrowRequest)
-    ld (moduleDosBorrowed),a
-    jp mdDosReserved
+    jp mdDosRange
 mdDosService:
     ld hl,(mdAddress)
     ld de,DOS_SERVICE_ADDR
     call cmp_hl_de
     jp c,mdRange
-    ld a,(moduleDosServiceOwner)
-    or a
-    jp nz,mdArenaBusy
-    ld hl,(mdRecord)
-    ld de,9
+mdDosRange:
+    ld hl,(mdAddress)
+    MD_GET_DE mdBytes
     add hl,de
-    ld a,(hl)
-    ld (moduleDosServiceOwner),a
-mdDosReserved:
+    ex de,hl
+    ld hl,(mdAddress)
+    call dosArenaCheck
+    jp c,mdArenaBusy
     ld hl,0
     ld (memorySlotPtr),hl
     ld b,DOS_IO_PAGE
@@ -359,6 +350,22 @@ mdReservedRecord:
     ld (hl),d
     inc hl
     MD_GET_DE memorySlotPtr
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    inc hl
+    inc hl                  ; record+10, after the two owner bytes.
+    MD_GET_DE mdAddress
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    push hl
+    ld hl,(mdBytes)
+    add hl,de
+    ex de,hl
+    pop hl
     ld (hl),e
     inc hl
     ld (hl),d
@@ -575,6 +582,8 @@ mdRelease:
     ld de,9
     add hl,de
     ld c,(hl)
+    call fileopsReleaseOwner
+    call enumReleaseOwner
     ld hl,MODULE_TABLE
     ld b,MODULE_MAX
 mdChildren:
@@ -645,18 +654,6 @@ mdFreeRecord:
     jp z,mdFreeRecordMain
     cp DOS_IO_PAGE
     jp nz,mdFreeExec
-    inc hl
-    inc hl                 ; Старший байт входа различает два слота DOS.
-    ld a,(hl)
-    cp DOS_SERVICE_END/256
-    jp nc,mdFreeTransientDos
-    xor a
-    ld (moduleDosServiceOwner),a
-    jp mdFreeRecordMain
-mdFreeTransientDos:
-    xor a
-    ld (moduleDosOwner),a
-    ld (moduleDosBorrowed),a
     jp mdFreeRecordMain
 mdFreeExec:
     ld (mdBankId),a
@@ -790,10 +787,6 @@ mdCallDone:
     jp kdError
 
 moduleActor: DB 0
-moduleDosBorrowed: DB 0 ; DOS-DLL занимает неактивные кадры BAT.
-mdBorrowRequest: DB 0
-moduleDosOwner: DB 0 ; Временная арена DRIVER; не выделение FAR-кучи.
-moduleDosServiceOwner: DB 0 ; Отдельный резидентный слот DOS.
 mdNext: DW 1
 mdRecord: DW 0
 mdClientRegs: DW 0

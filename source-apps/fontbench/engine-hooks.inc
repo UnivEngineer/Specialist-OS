@@ -1,9 +1,16 @@
-; Frontends shared by every standalone backend. No hooks in the BIOS run.
+; Shared frontends, except historical StringZ for MXOS1/MON2/RAMFOS.
+; No hooks in the BIOS run.
 ; Public Char/Raw preserve all registers; strings preserve AF/BC/DE and return
 ; the first unread HL. Scalar backends may clobber registers; batch backends
 ; take HL/C=bounded run and preserve BC/DE/HL. No duplicate saves in helpers.
 ; Saving/restoring only public JMPs would miss COMMAND and *_MAIN MXOS_CALL slots.
 engineSave:
+    ld hl,(0D816h)
+    ld (savedModuleScalar),hl
+    ld hl,(bios_setFontEncoding+1)
+    ld (savedEncoding),hl
+    ld a,(0D825h)
+    ld (savedWidth),a
     ld hl,bios_printChar
     ld de,originalChar
     ld bc,3
@@ -34,11 +41,31 @@ saveSlot:
     jp nz,saveSlot
     ret
 engineInstall:
+    ld a,(engineHistoricalMode)
+    and 80h
+    jp z,engineInstallLegacy
+    ld a,(engineWidth)
+    ld (0D825h),a
+    ld hl,(directScalar)
+    ld (0D816h),hl
+    ld hl,(directEncoding)
+    ld (bios_setFontEncoding+1),hl
+    ld de,directTargets
+    ld hl,hookSlots
+    jp writeSlots
+engineInstallLegacy:
+    call historicalStringSelect
     ld hl,hookTargets
     ex de,hl
     ld hl,hookSlots
     jp writeSlots
 engineRestore:
+    ld a,(savedWidth)
+    ld (0D825h),a
+    ld hl,(savedModuleScalar)
+    ld (0D816h),hl
+    ld hl,(savedEncoding)
+    ld (bios_setFontEncoding+1),hl
     ld de,savedSlots
     ld hl,hookSlots
 writeSlots:
@@ -107,6 +134,8 @@ engineWrap:
     call originalChar
     pop bc
     ret
+    INCLUDE "historical-string.inc"
+
 hookZ:
     push af
     xor a
@@ -276,3 +305,58 @@ bounds4:
     DB 48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,48,46,44,42,40,38,36,34,32,30,28,26,24,22,20,18,16,14,12,10,8,6,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 bounds8:
     DB 48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+; Shared production modules supply full public frontends, not scalar/batch
+; callbacks. Bind the same entries to MAIN and all MXCALL aliases.
+directOpen:
+    ld a,(hl)
+    ld (engineWidth),a
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    ex de,hl
+    ld (directScalar),hl
+    ex de,hl
+    ld de,directTargets
+    ld c,2
+    call directEntry
+    ld c,2
+    call directEntry
+    ld c,3
+    call directEntry
+    ld c,3
+    call directEntry
+    ld c,3
+    call directEntry
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
+    ld (directEncoding),hl
+    xor a
+    ret
+directEntry:
+    ld a,(hl)
+    ld b,a
+    inc hl
+    ld a,(hl)
+    inc hl
+directEntryCopy:
+    push af
+    ld a,b
+    ld (de),a
+    inc de
+    pop af
+    ld (de),a
+    inc de
+    dec c
+    jp nz,directEntryCopy
+    ret
+directTargets: DS 26,0
+directScalar: DW 0
+directEncoding: DW 0
+savedModuleScalar: DW 0
+savedEncoding: DW 0
+savedWidth: DB 0

@@ -7,10 +7,12 @@ ncPanelSort:
     ld hl,state.panelA_drive
     call readBytePanel
     call loadFiles
+    ld hl,ncSortWindow
+    call ncDialogOpen
     COLOR COLOR_DIALOG
     ld hl,ncSortWindow
     call draw
-    ld hl,01860h
+    ld hl,01460h
     call setCursorPosPanel
     ld hl,ncSortTitle
     call bios_printStringReal
@@ -35,12 +37,15 @@ ncSortDrawOption:
     add a,a
     add a,116
     ld l,a
-    ld h,24
+    ld h,20
     call setCursorPosPanel
     pop hl
     call bios_printStringReal
-    inc hl
     inc b
+    ld a,b
+    push bc
+    call ncSortTextAddress
+    pop bc
     ld a,b
     cp 3
     jp c,ncSortDrawOption
@@ -89,6 +94,19 @@ ncSortAccept:
     ld a,(ncSortChoice)
     cp b
     jp z,ncSortClose
+    call ncDialogClose ; Radix is about to reuse the snapshot workspace.
+    push af
+    ld a,(state.activePanel)
+    or a
+    ld a,1
+    jp z,ncSortMarkList
+    ld a,2
+ncSortMarkList:
+    ld hl,ncListMask
+    or (hl)
+    ld (hl),a
+    pop af
+    ld hl,state.panelA_sort
     call writeBytePanel
     ; Сохранить выбранный исходный файл, а не его прежнюю позицию.
     ld hl,state.panelA_curFile
@@ -102,15 +120,7 @@ ncSortAccept:
     call ncCatalogUseIndex
     call ncSortRestoreSelection
 ncSortClose:
-    ld a,(state.activePanel)
-    or a
-    ld a,1
-    jp z,ncSortDamage
-    ld a,2
-ncSortDamage:
-    ld hl,ncDamageMask
-    or (hl)
-    ld (hl),a
+    call ncDialogClose
     pop af
     ld (state.activePanel),a
     ; Информационная панель рисует текущий том файловой панели.
@@ -143,7 +153,7 @@ ncSortSelectionFound:
 ncSortSelectionReady:
     ld hl,state.panelA_curFile
     call writeBytePanel
-    sub FILE_LIST_SIZE
+    call ncSubVisible
     jp nc,ncSortSelectionScroll
     ld a,0FFh
 ncSortSelectionScroll:
@@ -159,9 +169,9 @@ ncSortInvert:
     add a,a
     add a,108
     ld l,a
-    ld h,096h
+    ld h,095h
     call activePanelPos
-    ld bc,(12<<8)+11
+    ld bc,(14<<8)+11
     jp inverseRect
 ncSortTextAddress:
     ld e,a
@@ -177,14 +187,17 @@ ncSortTextAddress:
     add hl,de
     ret
 ncSortWindow:
-    G_WINDOW 0,32,80,128,78
+    G_MODAL_WINDOW 0,32,80,128,78
     G_LINE 0,40,102,112
     DB 0
-ncSortTitle: DB 'Sort panel      ',0
+ncSortTitle: DB 'Sort panel',0
 ncSortOptions:
-    DB '[ ] Unsorted    ',0
-    DB '[ ] Name        ',0
-    DB '[ ] Extension   ',0
+    DB '[ ] Unsorted',0
+    DS 4,0
+    DB '[ ] Name',0
+    DS 8,0
+    DB '[ ] Extension',0
+    DS 3,0
     ASSERT $-ncSortOptions == 3*17
 ncSortChoice: DB 0
 ncSortNext: DB 0

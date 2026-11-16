@@ -9,10 +9,13 @@ but_F8:     ; Рисуем окно
             call    drawWindowIfSel
 
             ; Выводим "DELETE FROM A:"
-            CENTER_LINE 14, 5Eh
-            ld          hl, aDeleteFrom
-            call        bios_printStringReal
-            call        printSelDrive
+            ld hl,state.panelA_drive
+            call readBytePanel
+            add a,'A'
+            ld (aDeleteFrom+12),a
+            ld hl,aDeleteFrom
+            ld e,94
+            call ncPrintCentered
 
             call        printInvSelFile
 
@@ -28,27 +31,33 @@ loc_D595:   ; Удаляем текущий файл
             call        readBytePanel
             MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             jp c,       deleteFileError
-            call        getSelectedFile
-            push hl
-            ld de,FILE_INFO.attrib
-            add hl,de
+            call restorePanelDirectory
+            ld a,(state.activePanel)
+            ld hl,state.panelA_drive
+            call readBytePanel
+            ld (vars.copyRequest.sourceDrive),a
+            ld a,DIR_OP_GET
+            MXOS_CALL MXOS_DOS_DIRECTORY
+            ex de,hl
+            ld (vars.copyRequest.sourceDirectory),hl
+            call getSelectedFile
+            ld de,vars.copyRequest.source
+            ld b,11
+ncDeleteName:
             ld a,(hl)
-            and 010h
-            pop hl
-            jp z,ncDeleteRegular
-            call buildSelectedFilePath
-            jp c,deleteFileError
-            ld a,CLI_OP_RMDIR
-            jp ncDeleteReady
-ncDeleteRegular:
+            ld (de),a
+            inc hl
+            inc de
+            dec b
+            jp nz,ncDeleteName
             ld a,CLI_OP_DELETE
-ncDeleteReady:
-            MXOS_CALL MXOS_DOS_CLI
-            jp c,       deleteFileError
+            call ncFileops
+            jp c,deleteFileJobError
             ; Количество файлов и курсор обновляются по реальному каталогу.
             jp          ncRefreshDirty
 
 deleteFileError:
             MXOS_CALL MXOS_DOS_GET_ERROR
+deleteFileJobError:
             call dosErrorText
             jp copyFileShowError

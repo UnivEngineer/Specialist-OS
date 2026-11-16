@@ -1,0 +1,1442 @@
+{
+  "cpuHz": 2000000,
+  "units": "ticks; KiB/s derived from ticks",
+  "emulatorOnly": true,
+  "legacyFar": {
+    "cpuHz": 2000000,
+    "repeats": 3,
+    "units": "decimal kB/s; emulated CPU milliseconds",
+    "rows": [
+      {
+        "name": "Builtin block-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          16799,
+          16799,
+          16799
+        ],
+        "ms": 8.3995,
+        "kB_s": 30.47800464313352,
+        "verified": true
+      },
+      {
+        "name": "Builtin block-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          18079,
+          18079,
+          18079
+        ],
+        "ms": 9.0395,
+        "kB_s": 28.320150450799268,
+        "verified": true
+      },
+      {
+        "name": "Builtin block-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          536421,
+          536421,
+          536421
+        ],
+        "ms": 268.2105,
+        "kB_s": 30.54317411137893,
+        "verified": true
+      },
+      {
+        "name": "Builtin block-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          577381,
+          577381,
+          577381
+        ],
+        "ms": 288.6905,
+        "kB_s": 28.376410030811545,
+        "verified": true
+      },
+      {
+        "name": "Builtin byte-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          34344,
+          34344,
+          34344
+        ],
+        "ms": 17.172,
+        "kB_s": 14.907989750757046,
+        "verified": true
+      },
+      {
+        "name": "Builtin byte-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          34344,
+          34344,
+          34344
+        ],
+        "ms": 17.172,
+        "kB_s": 14.907989750757046,
+        "verified": true
+      },
+      {
+        "name": "Builtin byte-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          1097768,
+          1097768,
+          1097768
+        ],
+        "ms": 548.884,
+        "kB_s": 14.924829289977481,
+        "verified": true
+      },
+      {
+        "name": "Builtin byte-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          1097768,
+          1097768,
+          1097768
+        ],
+        "ms": 548.884,
+        "kB_s": 14.924829289977481,
+        "verified": true
+      },
+      {
+        "name": "stack-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          20380,
+          20380,
+          20380
+        ],
+        "ms": 10.19,
+        "kB_s": 25.122669283611383,
+        "verified": true
+      },
+      {
+        "name": "stack-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          20369,
+          20369,
+          20369
+        ],
+        "ms": 10.1845,
+        "kB_s": 25.136236437723994,
+        "verified": true
+      },
+      {
+        "name": "stack-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          651013,
+          651013,
+          651013
+        ],
+        "ms": 325.5065,
+        "kB_s": 25.166932150356445,
+        "verified": true
+      },
+      {
+        "name": "stack-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          650661,
+          650661,
+          650661
+        ],
+        "ms": 325.3305,
+        "kB_s": 25.18054716665053,
+        "verified": true
+      },
+      {
+        "name": "loop-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          26656,
+          26656,
+          26656
+        ],
+        "ms": 13.328,
+        "kB_s": 19.207683073229294,
+        "verified": true
+      },
+      {
+        "name": "loop-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          26325,
+          26325,
+          26325
+        ],
+        "ms": 13.1625,
+        "kB_s": 19.449192782526115,
+        "verified": true
+      },
+      {
+        "name": "loop-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          851845,
+          851845,
+          851845
+        ],
+        "ms": 425.9225,
+        "kB_s": 19.233546008957028,
+        "verified": true
+      },
+      {
+        "name": "loop-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          841253,
+          841253,
+          841253
+        ],
+        "ms": 420.6265,
+        "kB_s": 19.475710636395945,
+        "verified": true
+      },
+      {
+        "name": "unrolled-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          16047,
+          16047,
+          16047
+        ],
+        "ms": 8.0235,
+        "kB_s": 31.90627531625849,
+        "verified": true
+      },
+      {
+        "name": "unrolled-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          15748,
+          15748,
+          15748
+        ],
+        "ms": 7.874,
+        "kB_s": 32.51206502413005,
+        "verified": true
+      },
+      {
+        "name": "unrolled-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          512357,
+          512357,
+          512357
+        ],
+        "ms": 256.1785,
+        "kB_s": 31.97770304689894,
+        "verified": true
+      },
+      {
+        "name": "unrolled-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          502789,
+          502789,
+          502789
+        ],
+        "ms": 251.3945,
+        "kB_s": 32.58623398682151,
+        "verified": true
+      },
+      {
+        "name": "direct-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          14619,
+          14619,
+          14619
+        ],
+        "ms": 7.3095,
+        "kB_s": 35.0229153840892,
+        "verified": true
+      },
+      {
+        "name": "direct-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          15899,
+          15899,
+          15899
+        ],
+        "ms": 7.9495,
+        "kB_s": 32.20328322536009,
+        "verified": true
+      },
+      {
+        "name": "direct-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          466661,
+          466661,
+          466661
+        ],
+        "ms": 233.3305,
+        "kB_s": 35.10899775211556,
+        "verified": true
+      },
+      {
+        "name": "direct-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          507621,
+          507621,
+          507621
+        ],
+        "ms": 253.8105,
+        "kB_s": 32.27604846923197,
+        "verified": true
+      },
+      {
+        "name": "regs2-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          12937,
+          12937,
+          12937
+        ],
+        "ms": 6.4685,
+        "kB_s": 39.576408750096626,
+        "verified": true
+      },
+      {
+        "name": "regs2-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          12933,
+          12933,
+          12933
+        ],
+        "ms": 6.4665,
+        "kB_s": 39.58864919198948,
+        "verified": true
+      },
+      {
+        "name": "regs2-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          412837,
+          412837,
+          412837
+        ],
+        "ms": 206.4185,
+        "kB_s": 39.6863653209378,
+        "verified": true
+      },
+      {
+        "name": "regs2-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          412709,
+          412709,
+          412709
+        ],
+        "ms": 206.3545,
+        "kB_s": 39.698673884019975,
+        "verified": true
+      },
+      {
+        "name": "RAMD R4-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          10778,
+          10778,
+          10778
+        ],
+        "ms": 5.389,
+        "kB_s": 47.50417517164594,
+        "verified": true
+      },
+      {
+        "name": "RAMD R4-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          11446,
+          11446,
+          11446
+        ],
+        "ms": 5.723,
+        "kB_s": 44.73178402935523,
+        "verified": true
+      },
+      {
+        "name": "RAMD R4-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          343749,
+          343749,
+          343749
+        ],
+        "ms": 171.8745,
+        "kB_s": 47.6626841096265,
+        "verified": true
+      },
+      {
+        "name": "RAMD R4-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          365125,
+          365125,
+          365125
+        ],
+        "ms": 182.5625,
+        "kB_s": 44.872304005477574,
+        "verified": true
+      },
+      {
+        "name": "regs6-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          13348,
+          13348,
+          13348
+        ],
+        "ms": 6.674,
+        "kB_s": 38.357806412945756,
+        "verified": true
+      },
+      {
+        "name": "regs6-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 256,
+        "ticks": [
+          13334,
+          13334,
+          13334
+        ],
+        "ms": 6.667,
+        "kB_s": 38.3980800959952,
+        "verified": true
+      },
+      {
+        "name": "regs6-read",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          425989,
+          425989,
+          425989
+        ],
+        "ms": 212.9945,
+        "kB_s": 38.46108702337384,
+        "verified": true
+      },
+      {
+        "name": "regs6-write",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          8192
+        ],
+        "size": 8192,
+        "ticks": [
+          425541,
+          425541,
+          425541
+        ],
+        "ms": 212.7705,
+        "kB_s": 38.50157799130989,
+        "verified": true
+      },
+      {
+        "name": "CPM16",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          11319,
+          11319,
+          11319
+        ],
+        "ms": 5.6595,
+        "kB_s": 45.23367788673911,
+        "verified": true
+      },
+      {
+        "name": "CPM16",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 256,
+        "ticks": [
+          11319,
+          11319,
+          11319
+        ],
+        "ms": 5.6595,
+        "kB_s": 45.23367788673911,
+        "verified": true
+      },
+      {
+        "name": "CPM16",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 256,
+        "ticks": [
+          11489,
+          11489,
+          11489
+        ],
+        "ms": 5.7445,
+        "kB_s": 44.564365915223256,
+        "verified": true
+      },
+      {
+        "name": "CPM16",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          353559,
+          353559,
+          353559
+        ],
+        "ms": 176.7795,
+        "kB_s": 46.340214787348074,
+        "verified": true
+      },
+      {
+        "name": "CPM16",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 8192,
+        "ticks": [
+          353559,
+          353559,
+          353559
+        ],
+        "ms": 176.7795,
+        "kB_s": 46.340214787348074,
+        "verified": true
+      },
+      {
+        "name": "CPM16",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 8192,
+        "ticks": [
+          358689,
+          358689,
+          358689
+        ],
+        "ms": 179.3445,
+        "kB_s": 45.67745316973757,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 1,
+        "ticks": [
+          5468,
+          5468,
+          5468
+        ],
+        "ms": 2.734,
+        "kB_s": 0.365764447695684,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 1,
+        "ticks": [
+          5468,
+          5468,
+          5468
+        ],
+        "ms": 2.734,
+        "kB_s": 0.365764447695684,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 1,
+        "ticks": [
+          5500,
+          5500,
+          5500
+        ],
+        "ms": 2.75,
+        "kB_s": 0.36363636363636365,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 4,
+        "ticks": [
+          5562,
+          5562,
+          5562
+        ],
+        "ms": 2.781,
+        "kB_s": 1.438331535418914,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 4,
+        "ticks": [
+          5562,
+          5562,
+          5562
+        ],
+        "ms": 2.781,
+        "kB_s": 1.438331535418914,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 4,
+        "ticks": [
+          5594,
+          5594,
+          5594
+        ],
+        "ms": 2.797,
+        "kB_s": 1.4301036825169824,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 20,
+        "ticks": [
+          6566,
+          6566,
+          6566
+        ],
+        "ms": 3.283,
+        "kB_s": 6.091989034419738,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 20,
+        "ticks": [
+          6566,
+          6566,
+          6566
+        ],
+        "ms": 3.283,
+        "kB_s": 6.091989034419738,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 20,
+        "ticks": [
+          6598,
+          6598,
+          6598
+        ],
+        "ms": 3.299,
+        "kB_s": 6.062443164595332,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 256,
+        "ticks": [
+          18739,
+          18739,
+          18739
+        ],
+        "ms": 9.3695,
+        "kB_s": 27.322695981642564,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 256,
+        "ticks": [
+          18739,
+          18739,
+          18739
+        ],
+        "ms": 9.3695,
+        "kB_s": 27.322695981642564,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 256,
+        "ticks": [
+          18771,
+          18771,
+          18771
+        ],
+        "ms": 9.3855,
+        "kB_s": 27.276117415161686,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 512,
+        "ticks": [
+          32305,
+          32305,
+          32305
+        ],
+        "ms": 16.1525,
+        "kB_s": 31.69787958520353,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 512,
+        "ticks": [
+          32305,
+          32305,
+          32305
+        ],
+        "ms": 16.1525,
+        "kB_s": 31.69787958520353,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 512,
+        "ticks": [
+          32337,
+          32337,
+          32337
+        ],
+        "ms": 16.1685,
+        "kB_s": 31.66651204502582,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          0,
+          16384
+        ],
+        "size": 8192,
+        "ticks": [
+          439285,
+          439285,
+          439285
+        ],
+        "ms": 219.6425,
+        "kB_s": 37.29697121458734,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 0,
+        "source": [
+          0,
+          16384
+        ],
+        "destination": [
+          3,
+          20480
+        ],
+        "size": 8192,
+        "ticks": [
+          439285,
+          439285,
+          439285
+        ],
+        "ms": 219.6425,
+        "kB_s": 37.29697121458734,
+        "verified": true
+      },
+      {
+        "name": "FAR",
+        "caller": 1,
+        "source": [
+          3,
+          8192
+        ],
+        "destination": [
+          2,
+          20480
+        ],
+        "size": 8192,
+        "ticks": [
+          439317,
+          439317,
+          439317
+        ],
+        "ms": 219.6585,
+        "kB_s": 37.294254490493195,
+        "verified": true
+      }
+    ],
+    "binaries": {
+      "transport": "c920cf5066ee1c09f1f2d1da8285bcbf87482a00b358fc0a29a19f32cc0f27b3",
+      "RAMD": "d0b2af642943c45cc68d5e7fe6574553557daa192340820f9c41d90aaa6bbc74",
+      "DOS": "e82556feb3af307d1220e0798f4ae1fba6321fc2af43f5905ab97d5fe2017e33",
+      "stack": "8d1ee5444eda1e7135c4ff1a27c22cb3596ca2168c61b97f84f87397963dad57",
+      "loop": "75ee2da96b9935b1d96eff8328a563c17c2591a6034c6ca6610a7edf2ca39217",
+      "unrolled": "8e1c5dcd5df058c184f92e95adae405ebb980c35e39870938b53357833818b6a",
+      "direct": "35ee2567c82b08052c81ec78a99b83aaa0a5e54a8ffdb11ec12a3bb0d95aa02d",
+      "regs2": "0b9e8887300862f1850c811a25f5df4f933f33c73ae826b0580f68aa918182a4",
+      "regs4": "4b5c6a32fafd09bafcee9554b886591f9639f4681be2c9dbc0e50ac2bf9cd56c",
+      "regs6": "d1bf3d1ab36c110cf3ff8c0a2177495d6c1d81b96b4b910b084cd48b10752568",
+      "builtin_byte": "de8fd36ec6a7758f98ce4b2eaec1c7c6cbec7b4d2045a236aeb5bda3aeda1506",
+      "builtin_block": "11778cd9b1a2094338ca32872dfa6f8e546c6b308384912d3399fdc0379dd6ce",
+      "CPMCOPY": "b377e3697ad15823909bca3fe06c5cfbf147d3b7c47710fcbf48bcecc4b0cf28"
+    }
+  },
+  "stockNear": {
+    "cpu": "8080 model, 2 MHz; no physical hardware",
+    "baselineCommit": "5e83e32",
+    "measurement": "callTicks includes CALL and RET; excludes register setup",
+    "copy": [
+      {
+        "bytes": 4096,
+        "source": 0,
+        "destination": 16384,
+        "stock": {
+          "measuredTicks": 290896,
+          "callTicks": 290856,
+          "bodyTicks": 290839
+        },
+        "current": {
+          "measuredTicks": 76370,
+          "callTicks": 76330,
+          "bodyTicks": 76313
+        },
+        "speedup": 3.810507009039696,
+        "timeReductionPercent": 73.75677311109277
+      },
+      {
+        "bytes": 4096,
+        "source": 16384,
+        "destination": 0,
+        "stock": {
+          "measuredTicks": 290896,
+          "callTicks": 290856,
+          "bodyTicks": 290839
+        },
+        "current": {
+          "measuredTicks": 74287,
+          "callTicks": 74247,
+          "bodyTicks": 74230
+        },
+        "speedup": 3.9174108044769484,
+        "timeReductionPercent": 74.47293506064855
+      },
+      {
+        "bytes": 16384,
+        "source": 0,
+        "destination": 16384,
+        "stock": {
+          "measuredTicks": 1163344,
+          "callTicks": 1163304,
+          "bodyTicks": 1163287
+        },
+        "current": {
+          "measuredTicks": 303986,
+          "callTicks": 303946,
+          "bodyTicks": 303929
+        },
+        "speedup": 3.827337750784679,
+        "timeReductionPercent": 73.87217786580291
+      },
+      {
+        "bytes": 16384,
+        "source": 16384,
+        "destination": 0,
+        "stock": {
+          "measuredTicks": 1163344,
+          "callTicks": 1163304,
+          "bodyTicks": 1163287
+        },
+        "current": {
+          "measuredTicks": 295759,
+          "callTicks": 295719,
+          "bodyTicks": 295702
+        },
+        "speedup": 3.9338155478680776,
+        "timeReductionPercent": 74.5793876751047
+      }
+    ],
+    "scroll": [
+      {
+        "entry": "benchScrollUp",
+        "inverse": 0,
+        "stock": {
+          "measuredTicks": 237176,
+          "callTicks": 237136,
+          "bodyTicks": 237119
+        },
+        "current": {
+          "measuredTicks": 231896,
+          "callTicks": 231856,
+          "bodyTicks": 231839
+        },
+        "speedup": 1.0227727555034158,
+        "timeReductionPercent": 2.226570406855133
+      },
+      {
+        "entry": "benchScrollUp",
+        "inverse": 65535,
+        "stock": {
+          "measuredTicks": 237176,
+          "callTicks": 237136,
+          "bodyTicks": 237119
+        },
+        "current": {
+          "measuredTicks": 231896,
+          "callTicks": 231856,
+          "bodyTicks": 231839
+        },
+        "speedup": 1.0227727555034158,
+        "timeReductionPercent": 2.226570406855133
+      },
+      {
+        "entry": "benchScrollDown",
+        "inverse": 0,
+        "stock": {
+          "measuredTicks": 241630,
+          "callTicks": 241590,
+          "bodyTicks": 241573
+        },
+        "current": {
+          "measuredTicks": 238057,
+          "callTicks": 238017,
+          "bodyTicks": 238000
+        },
+        "speedup": 1.0150115327896747,
+        "timeReductionPercent": 1.4789519433751397
+      },
+      {
+        "entry": "benchScrollDown",
+        "inverse": 65535,
+        "stock": {
+          "measuredTicks": 241630,
+          "callTicks": 241590,
+          "bodyTicks": 241573
+        },
+        "current": {
+          "measuredTicks": 238057,
+          "callTicks": 238017,
+          "bodyTicks": 238000
+        },
+        "speedup": 1.0150115327896747,
+        "timeReductionPercent": 1.4789519433751397
+      }
+    ],
+    "sourceHashes": {
+      "memcpy_bc_hl.inc": "9ef9e2db8792461aba818edadd5b8954f3ecea8827166c5c21a6bb9670d493ae",
+      "move8080.inc": "8e474985a85dcf810e1808e648c67dc28a1ea9db7fc8f8f6d814e4c4677aaf04",
+      "scrollUp.inc": "d0e581a74e16d96222bb91cd08b3fa016b98c9789551714601a62d707562f684",
+      "scrollUp2.inc": "d87cd7f541adebce3671fdcc3f8eb3b0e83c30c118ca0c057dd96608c61ac25b",
+      "scrollDown.inc": "6b0db24f6eda9c5a853c4a22094748aa0f1a08eefef1affa4950b431bfa3b960"
+    },
+    "stockMatches2022": {
+      "memcpy_bc_hl.inc": true,
+      "cmp_hl_de.inc": true,
+      "scrollUp.inc": true,
+      "scrollUp2.inc": true,
+      "scrollDown.inc": true
+    }
+  }
+}

@@ -167,33 +167,20 @@ krBlockSize:
     pop hl
     ret
 
-; Текстовый COPY/MOVE использует снимок запроса в зарезервированном хвосте
-; клиента. Обработчик читает его, но возвращает решение только в A/CF.
+; Подтверждение в странице приложения: только FAR-дескриптор назначения.
+; Переходник приложения копирует 32 байта на свой стек до вывода диалога.
 ktConfirm:
-    ld de,KD_PATH
-    ld bc,FILE_COPY_REQUEST
-    call moveBytesForward
-    ld hl,0
-    ld (KD_PATH+FILE_COPY_REQUEST.buffer),hl
-    ld (KD_PATH+FILE_COPY_REQUEST.bufferSize),hl
-    ld hl,(ktHook)
-    ld (KD_PATH+FILE_COPY_REQUEST.onExists),hl
-    ld hl,KD_PATH
-    ld (kdCopy+1),hl
-    ld hl,CLIENT_COPY_SNAPSHOT
-    ld (kdCopy+4),hl
-    ld a,DOS_IO_PAGE
-    ld (kdCopy),a
-    ld a,(kdPage)
-    ld (kdCopy+3),a
-    ld bc,FILE_COPY_REQUEST
-    call kdCopyCount
-    ret c
-    ld hl,CLIENT_COPY_SNAPSHOT
-    ld (ktRegs),hl
+    push hl
     ld hl,(ktHook)
     ld b,h
     ld c,l
+    pop hl
+ktCallConfirm:
+    ld de,FILE_COPY_REQUEST.destination
+    add hl,de
+    ld (ktRegs),hl
+    ld a,DOS_IO_PAGE
+    ld (ktRegs+7),a
     ld a,(kdPage)
     ld hl,bankCallback
     ld de,ktRegs

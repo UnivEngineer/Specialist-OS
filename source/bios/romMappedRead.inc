@@ -20,10 +20,10 @@ romBufferedRead:
             ld      (IO_PAGE_ROM), a
             call    romCopySector
             ld      (IO_PAGE_RAM), a
-            pop     bc
+            pop     de
             ld      hl, BIOS_DISK_BUFFER
-            ld      de, BIOS_DISK_BUFFER_END
-            call    bios_memcpy_bc_hl
+            ld      bc, 256
+            call    moveBytesForward
     IF DISK_DRIVER_CHECKED
             jp      popDBHA_success
     ELSE
@@ -41,11 +41,8 @@ romStdMappedRead:
 
 ; Вход HL=верхнее назначение, DE=источник; длина ровно 256 байт.
 ; AF/BC/DE/HL и флаги разрушены. Маппер восстанавливает вызывающий.
+; Области не пересекаются: используем прямой вход без выбора направления.
 romCopySector:
-            ld      b, h
-            ld      c, l
             ex      de, hl
-            ld      d, h
-            inc     d
-            ld      e, l
-            jp      bios_memcpy_bc_hl
+            ld      bc, 256
+            jp      moveBytesForward

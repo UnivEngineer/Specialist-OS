@@ -12,7 +12,7 @@ base=bytearray(65536)
 for name,addr in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
     data=(ROOT/f'bin/{name}.sys').read_bytes();base[addr:addr+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-font=(ROOT/'assets/system-rom/FONTKOI.FNT').read_bytes()
+font=(ROOT/'bin/fonts/Compact.pf').read_bytes()
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
 __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](base, S)
 base[S['v_dosModuleReady']]=1

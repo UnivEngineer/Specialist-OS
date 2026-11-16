@@ -11,31 +11,14 @@ fileFindStart:
             push hl
             push de
             push bc
-            call fatDirStart
-            jp c,fileFind_end
-fileFind_loop:
-            ld a,(v_findMask)
-            call fatDirFiltered
-            jp c,fileFind_end
-            ex de,hl
-            ld hl,(v_foundDescrPtr)
-            push hl
-            ld c,FILE_NAME_LENGTH+3
-            ld a,(de)
-            cp 5
-            jp nz,fileFind_compare
             ld a,(hl)
             call upperCase
-            cp 0E5h
-            jp nz,fileFind_notEqual
-            inc hl
-            inc de
-            dec c
-fileFind_compare:
-            call stricmp
-fileFind_notEqual:
-            pop hl
-            jp nz,fileFind_loop
+            ld (fatDirFindFirst+1),a
+            call fatDirStart
+            jp c,fileFind_end
+            ld a,(v_findMask)
+            call fatDirFind
+            jp c,fileFind_end
             ld hl,(v_cachedDescrPtr)
             ex de,hl
             ld hl,v_tmpFileDescr

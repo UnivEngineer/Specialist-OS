@@ -29,11 +29,6 @@ $deployment = Join-Path $runtime 'specialist-cpm'
 $sd = Join-Path $deployment 'sdcard/CPM'
 New-Item -ItemType Directory -Path $sd -Force | Out-Null
 $disk = Join-Path $sd 'CPM.DSK'
-if ($ResetDisk -and (Test-Path -LiteralPath $disk)) {
-    $backup = $disk + '.' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0,8) + '.bak'
-    Copy-Item -LiteralPath $disk -Destination $backup
-    Write-Host "Previous disk backed up: $backup"
-}
 if ($ResetDisk -or -not (Test-Path -LiteralPath $disk)) { Copy-Item -LiteralPath (Join-Path $root 'images/CPM-seed.dsk') -Destination $disk -Force }
 if ((Get-Item -LiteralPath $disk).Length -ne 8388608) { throw 'Working CPM.DSK must be 8 MiB.' }
 Copy-Item -LiteralPath (Join-Path $root 'images/CPM-system.bin') -Destination (Join-Path $deployment 'system.bin') -Force

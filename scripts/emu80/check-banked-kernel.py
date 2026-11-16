@@ -13,18 +13,53 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, default=ROOT/'.local/monitor2-001')
     parser.add_argument('--report', type=Path, default=ROOT/'docs/banked/kernel-001')
+    parser.add_argument('--bundle', type=Path, help='Frozen bin directory; skips rebuilding components')
+    parser.add_argument('--port', type=int, default=19781)
+    parser.add_argument('--inject-system', action='store_true', help='Install current components after an existing bootstrap; isolated ABI test only')
+    parser.add_argument('--format-ram', action='store_true', help='Format disposable B: with current FORMAT before file tests')
+    parser.add_argument('--failure-only', action='store_true')
+    parser.add_argument('--cursor-bench', action='store_true')
+    parser.add_argument('--stream-only', action='store_true')
+    parser.add_argument('--files-only', action='store_true')
     parser.add_argument('--images-only', action='store_true')
     parser.add_argument('--copies-only', action='store_true')
     args = parser.parse_args()
     out = args.report.resolve(); out.mkdir(parents=True, exist_ok=True)
-    subprocess.run(['python', str(ROOT/'scripts/build/build-banked-dos.py')], check=True)
+    if not args.bundle: subprocess.run(['python', str(ROOT/'scripts/build/build-banked-dos.py')], check=True)
+    binaries=(args.bundle or ROOT/'bin').resolve()
     symbols = runpy.run_path(str(ROOT/'scripts/emu80/check-banked-bios.py'))['symbols']
-    base = ROOT/'bin/banked'
+    base = binaries/'banked'
     ks = symbols(base/'KERNEL.sym'); ts = symbols(base/'TRANSPORT.sym')
-    bios = symbols(ROOT/'bin/BIOS.sym')
+    bios = symbols(binaries/'BIOS.sym')
     h = runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
     g = h['Matrix'].__init__.__globals__; g['OUT'] = out; g['RUNTIME'] = args.runtime.resolve()
-    matrix = h['Matrix'](); rows = []; calls = []
+    g['mcp_owner'] = lambda: h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {args.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
+    matrix = h['Matrix'](); matrix.m.url=f'http://127.0.0.1:{args.port}/mcp'; rows = []; calls = []
+    if args.inject_system:
+        def start_injected(phase):
+            import time, shutil
+            assert not g['mcp_owner'](), 'Port owned; no emulator started'
+            runtime=args.runtime.resolve()
+            shutil.copyfile(ROOT/'images/FlashDisk_emu80_seed.bin',runtime/'specialist-os/flash-disk.bin')
+            conf=(runtime/'specialist-os/launch.conf').read_text()
+            assert 'pitSoundSource.muted = yes' in conf and 'tapeMonitor.muted = yes' in conf
+            matrix.pid=int(h['shell']('$p=Start-Process -FilePath '+h['ps'](runtime/'Emu80qt-mcp.exe')+" -ArgumentList '--conf-file','specialist-os/launch.conf','--platform','specialist-os' -WorkingDirectory "+h['ps'](runtime)+" -WindowStyle Normal -PassThru; $p.Id"))
+            for _ in range(60):
+                try:
+                    assert g['mcp_owner']()==str(matrix.pid)
+                    matrix.m.call('debug_break'); break
+                except Exception: time.sleep(.2)
+            else: raise RuntimeError('Owned emulator not available')
+            matrix.m.call('bp_clear'); matrix.m.call('emu_run_for',ms=5000);matrix.m.call('debug_break')
+            matrix.m.write(0xfffc,b'\0')
+            matrix.m.write(0xc000,(binaries/'BIOS.sys').read_bytes())
+            matrix.m.write(bios['BIOS_IO_ADDR'],(binaries/'IO.sys').read_bytes())
+            matrix.m.write(bios['v_drive'],b'\0')
+            matrix.m.write(bios['v_dosBanked'],b'\1')
+            matrix.m.write(bios['v_diskInfo.totalSectors'],(2048).to_bytes(2,'little'))
+            matrix.m.write(bios['bios_upper.ramPageCount'],b'\x10')
+            matrix.m.write(bios['FONT_ADDR'],(ROOT/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes())
+        matrix.start=start_injected
     word = lambda n: n.to_bytes(2, 'little')
     regs = lambda hl=0, de=0, bc=0, a=0: word(hl)+word(de)+word(bc)+word((a << 8)|2)
     def finish_report():
@@ -45,6 +80,13 @@ def main():
         select(2)
         assert int.from_bytes(m.read(11, 2), 'little') == 256
         ram_seed = bytearray(m.read(0, 0xFF00))
+        # DATA также должны получить копировщик той же ревизии.
+        for page in range(2,17):
+            if page == 3: continue
+            select(page)
+            tail=(base/'TRANSPORT.bin').read_bytes()
+            begin=ts.get('MEM_DATA_START',0xFF00)
+            m.write(begin,tail[begin-0xFC00:])
         for page in (0, 1, 3):
             select(page); m.write(0xFC00, (base/'TRANSPORT.bin').read_bytes())
             m.write(ts['bankPage'], bytes([page]))
@@ -53,8 +95,11 @@ def main():
                         else (ks['DOS_BANK_STACK_TOP'], ks['DOS_BANK_STACK_BOTTOM']))
             m.write(ts['bankServiceSP'], word(top)); m.write(ts['bankStackFloor'], word(low+64))
             m.write(low-16, b'guard-DOS-stack!')
-            if page: m.write(0xF800, (base/'CLIENT.bin').read_bytes())
-            m.write(ks['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
+            m.write(0xF800, (base/'CLIENT.bin').read_bytes())
+            local=(base/'LOCALBLOCK.bin').read_bytes()
+            if page == 0:
+                local=local[:ks['SYSTEM_FLASH_ADDR']-ks['MEM_IMAGE_LOCAL_START']]
+            m.write(ks['MEM_IMAGE_LOCAL_START'], local)
             # Установочный образ не содержит адресов локальных обработчиков.
             # После его замены восстанавливаем параметры, как bootstrap.
             if page == 0:
@@ -70,8 +115,9 @@ def main():
         m.write(ks['DOS_BANK_CODE_ADDR'], (base/'KERNEL.bin').read_bytes())
         select(0)
         io_symbols=symbols(base/'MAINIO.sym')
-        io_code=io_symbols['mainIoEnd']-ks['BIOS_BANK_IO_START']
-        assert m.read(ks['BIOS_BANK_IO_START'], io_code) == (base/'MAINIO.bin').read_bytes()[:io_code]
+        io_code=(base/'MAINIO.bin').read_bytes()
+        m.write(ks['MEM_MAIN_IO_BRIDGE'],io_code)
+        assert m.read(ks['MEM_MAIN_IO_BRIDGE'],len(io_code))==io_code
         m.write(0xFFC0, (base/'WINDOW.bin').read_bytes())
 
         def invoke(page, entry, packet=None, operation=0, inline=False, legacy=None):
@@ -129,6 +175,20 @@ def main():
         result = invoke(0, ks['dosBoot'])
         assert result == (0, False), ('boot', result)
         rows.append(dict(case='boot-DOS-in-bank-with-nested-BIOS-ROM'))
+        if args.format_ram:
+            # One DATA bank for B:; BANK caller 3 is outside the media pool.
+            select(1);m.write(ks['memoryRamPages'],b'\1');m.write(ks['DOS_DRIVER_REGISTRY']+ks['DRIVER_RECORD_SIZE'],word(256))
+            select(0);m.write(0,(binaries/'FORMAT.i80').read_bytes());m.write(0x7c00,b'B: -R -Y\0')
+            result=invoke(0,0,regs(de=0x7c00),legacy=0)
+            assert result==(0,False),('FORMAT B:',result)
+            select(2);boot=m.read(0,64);fat_start=int.from_bytes(boot[14:16],'little')*256
+            fat_sectors=int.from_bytes(boot[22:24],'little');root_sectors=(int.from_bytes(boot[17:19],'little')*32+255)//256
+            data_start=1+fat_sectors+root_sectors
+            for lba in (254,255):
+                cluster=lba-data_start+2
+                assert m.read(fat_start+cluster*2,2)==word(0xfff7),(lba,'tail not BAD')
+            rows.append(dict(case='FORMAT-reserves-two-DATA-tail-sectors-per-bank'))
+
         print('BANK DOS BOOT PASS', flush=True)
         m.screenshot(out/'bank-dos-boot.png')
         select(0); m.write(bios['v_dosBanked'], b'\1')
@@ -383,6 +443,111 @@ def main():
         m.write(0x4000,original)
         request(3,ks['MXOS_DOS_FILE_SAVE_PATH'],regs(hl=0x3100))
         rows.append(dict(case='stream-write-flush-read-by-path',bytes=4097))
+        if args.cursor_bench:
+            cursor_checks=runpy.run_path(str(ROOT/'scripts/emu80/filestream-cursor-cases.py'))['check_cursor']
+            cursor_checks(ROOT,out,m,ks,ts,select,invoke,request,regs,rows,calls)
+        if args.stream_only:
+            finish_report();return
+        if args.files_only:
+            for page,scattered,checked in (() if args.failure_only else __import__('itertools').product((0,1,3),(False,True),(False,True))):
+                select(page)
+                handle_address=0xE100 if page==1 else 0x3100
+                buffer=0xC001 if page==1 else 0x4001
+                data=bytes((i*41+(i>>8)+page)&255 for i in range(8192))
+                handle=bytearray(64);handle[:11]=b'BATCH8K BIN'
+                handle[ks['FH_DRIVE']]=1
+                handle[ks['FH_MODE']]=15|(32 if checked else 0)|(64 if scattered else 0)
+                m.write(handle_address,handle)
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=handle_address))
+                def transfer(op):
+                    select(page)
+                    current=bytearray(m.read(handle_address,64))
+                    current[ks['FH_BUFFER']:ks['FH_BUFFER']+4]=word(buffer)+word(8192)
+                    m.write(handle_address,current)
+                    request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=handle_address,a=op))
+                    assert m.read(handle_address+ks['FH_COUNT'],2)==word(8192)
+                    return calls[-1]['ticks']
+                def rewind():
+                    select(page);current=bytearray(m.read(handle_address,64))
+                    current[53:58]=bytes(5);m.write(handle_address,current)
+                    request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=handle_address,a=3))
+                select(page);m.write(buffer,data)
+                allocation_ticks=transfer(2) # Первый WRITE измерен отдельно, с выделением цепочки.
+                rewind();write_ticks=transfer(2)
+                rewind();select(page);m.write(buffer,bytes(8192))
+                read_ticks=transfer(1)
+                assert m.read(buffer,8192)==data,(page,checked,'8KiB data')
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=handle_address,a=5))
+                rows.append(dict(case='batch-8KiB-FILEHANDLE-roundtrip',caller=page,checked=checked,scattered=scattered,allocationTicks=allocation_ticks,
+                                 writeTicks=write_ticks,readTicks=read_ticks,
+                                 writeKiB_s=8*2000000/write_ticks,readKiB_s=8*2000000/read_ticks))
+                print('8KiB B: FILEHANDLE',page,scattered,checked,round(8*2000000/read_ticks,2),round(8*2000000/write_ticks,2),flush=True)
+            # Ошибка внутри новой цепочки: сохранённый префикс, без утечки хвоста.
+            for fail_at in (1,5,32,40):
+                page=3; select(page)
+                handle=bytearray(64);handle[:11]=b'FAILTESTBIN';handle[40]=1;handle[41]=15|32
+                m.write(0x3100,handle)
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100))
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100,a=4))
+                select(2);bpb=m.read(0,64);fat_start=int.from_bytes(bpb[14:16],'little')*256
+                total=int.from_bytes(bpb[19:21],'little');fat_sectors=int.from_bytes(bpb[22:24],'little')
+                data_start=1+fat_sectors+(int.from_bytes(bpb[17:19],'little')*32+255)//256
+                cells=(total-data_start)//bpb[13]+2
+                fat_before=m.read(fat_start,cells*2)
+                used_before={i for i in range(2,cells) if int.from_bytes(fat_before[i*2:i*2+2],'little')}
+                select(page)
+                data=bytes((i*17+(i>>8))&255 for i in range(16384))
+                current=bytearray(m.read(0x3100,64));current[49:53]=word(0x4001)+word(len(data));m.write(0x3100,current);m.write(0x4001,data)
+                entry=ks['LOCAL_BLOCK_ENTRY'];saved=m.read(entry,3)
+                hook=out/'fail-sector.asm'
+                hook.write_text(f""" ORG 03600h
+ ld a,b
+ cp 1
+ jp nz,forward
+ push hl
+ ld hl,037F0h
+ inc (hl)
+ ld a,{fail_at}
+ cp (hl)
+ pop hl
+ jp nz,forward
+ ld a,1
+ scf
+ ret
+forward:
+ DB {','.join(str(x) for x in saved)}
+ jp {entry+3}
+ END
+""")
+                subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080',f'--raw={out/"fail-sector.bin"}',str(hook)],check=True,capture_output=True)
+                m.write(0x3600,(out/'fail-sector.bin').read_bytes());m.write(0x37f0,b'\0');m.write(entry,b'\xc3'+word(0x3600))
+                try:request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100,a=2),expected=ks['DOS_ERR_IO'])
+                finally:select(page);m.write(entry,saved)
+                actual=m.read(0x3100,64);count=int.from_bytes(actual[51:53],'little')
+                assert count==(fail_at-1)*256,(fail_at,count)
+                assert int.from_bytes(actual[28:32],'little')==count
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100,a=5))
+                # Считать сохранённый файл заново через новый handle.
+                select(page);handle=bytearray(64);handle[:11]=b'FAILTESTBIN';handle[40]=1;handle[41]=1;m.write(0x3100,handle)
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100))
+                actual=bytearray(m.read(0x3100,64));assert int.from_bytes(actual[28:32],'little')==count
+                actual[49:53]=word(0x4001)+word(count);m.write(0x3100,actual);m.write(0x4001,bytes(count))
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100,a=1));assert m.read(0x4001,count)==data[:count]
+                request(page,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x3100,a=5))
+                # Проверить окончание цепочки после записанного префикса.
+                first=int.from_bytes(actual[26:28],'little')
+                select(2);bpb=m.read(0,64);fat_start=int.from_bytes(bpb[14:16],'little')*256
+                cluster=first;chain=[]
+                while cluster>=2 and cluster<0xfff8:
+                    assert cluster not in chain;chain.append(cluster)
+                    cluster=int.from_bytes(m.read(fat_start+cluster*2,2),'little')
+                assert len(chain)==(count+255)//256,(fail_at,count,chain)
+                fat_after=m.read(fat_start,cells*2)
+                used_after={i for i in range(2,cells) if int.from_bytes(fat_after[i*2:i*2+2],'little')}
+                assert used_after==used_before|set(chain),(fail_at,'unreachable FAT allocation')
+                rows.append(dict(case='batch-new-file-error-trims-unwritten-tail',failedSector=fail_at,bytes=count,clusters=len(chain)))
+                print('FILEHANDLE PARTIAL ERROR PASS',fail_at,count,flush=True)
+            finish_report();return
         m.write(0x3300,b'PATH257 BIN'); m.write(0x3400,b'RENAMED BIN')
         result = invoke(3,ks['BANK_DOS_GATE'],regs(hl=0x3300,de=0x3400),ks['MXOS_DOS_FILE_RENAME'])
         assert not result[1],result
@@ -532,7 +697,7 @@ def main():
         print('BANK DOS MAIN PUBLIC ABI PASS', flush=True)
         finish_report()
     except Exception:
-        if matrix.pid and h['mcp_owner']() == str(matrix.pid):
+        if matrix.pid and g['mcp_owner']() == str(matrix.pid):
             state = matrix.m.call('cpu_state')
             state['transportPage'] = matrix.m.read(ts['bankPage'], 1).hex()
             state['stack'] = matrix.m.read(state['registers']['sp']['dec'], 48).hex()

@@ -1,5 +1,5 @@
 ; MAIN/EXEC/DOS используют один измеритель с полным локальным буфером файла.
-; Настройки копируются из main до замера; 60 байт результата — до unload.
+; Настройки копируются из main до замера; 88 байт результата — до unload.
 run_bank_module:
     ld a,(argBank)
     cp 2
@@ -40,6 +40,8 @@ moduleGeometryReady:
     ld a,3
     ld (argBank),a
 moduleNotBatch:
+    ld a,(argAlign)
+    ld (workerConfig+10),a
     ld a,(argMode)
     ld (workerConfig+8),a
     ld a,(argFrag)
@@ -82,8 +84,8 @@ moduleOperationsReady:
     jp nz,moduleSelect
     ld a,MEM_OP_ARENA
     ld b,0
-    ld hl,02000h
-    ld de,LEGACY_APP_MEMORY_END-02000h
+    ld hl,02100h
+    ld de,LEGACY_APP_MEMORY_END-02100h
     MXOS_CALL MXOS_DOS_MEMORY
     jp c,bank_module_error
 moduleSelect:
@@ -118,6 +120,7 @@ moduleLoad:
     jp c,moduleUnload
     ld a,(bankModuleRegs+6)
     rra
+    ld a,(bankModuleRegs+7) ; Код ошибки исполнителя; LD сохраняет CF.
     jp c,moduleUnload
     ld a,(bankModuleRegs+5)
     ld (workerResultCopy),a
@@ -133,7 +136,7 @@ moduleLoad:
     ld hl,statRawVerify
     ld (workerResultCopy+4),hl
     ; +48/+52 — RAW HIGH WRITE/READ; +56 — полная проверка HIGH.
-    ld hl,20
+    ld hl,48
     ld (workerResultCopy+6),hl
     ld hl,workerResultCopy
     call mx_memcpyFar
@@ -145,6 +148,7 @@ moduleUnload:
     jp c,bank_module_error
     ld a,c
     rra
+    ld a,b                ; Сохранённый A до MODULE_UNLOAD.
     jp c,bank_module_error
     ld a,(batchEnabled)
     or a
@@ -171,8 +175,7 @@ moduleFilePrint:
     ld a,(argMode)
     and 2
     jp z,modulePrintDone
-    xor a
-    ld (v_layout),a
+    call moduleFileLayout
     ld hl,txtFileAccess
     call puts
     ld hl,resultsLow+20
@@ -180,7 +183,7 @@ moduleFilePrint:
     ld a,(moduleCheckMode)
     ld (v_writeMode),a
     cp 6
-    call z,printWriteVerified
+    call z,printFileVerified
 modulePrintDone:
     ld a,(moduleCheckMode)
     ld (v_writeMode),a
@@ -217,12 +220,57 @@ moduleReadOnlyFile:
     ld a,(argMode)
     and 2
     jp z,done
+    call moduleFileLayout
     ld hl,txtFileAccess
     call puts
+    ld hl,resultsHigh+30
+    ld de,txtReadHigh
+    ld a,(v_layout)
+    or a
+    call nz,print_stat
     ld hl,resultsLow+30
     ld de,txtRead
+    ld a,(v_layout)
+    or a
+    jp z,moduleFileReadLabel
+    ld de,txtReadLow
+moduleFileReadLabel:
     call print_stat
     jp done
+moduleFileLayout:
+    xor a
+    ld (v_layout),a
+    ld hl,statFileHigh+10
+    ld a,(hl)
+    inc hl
+    or (hl)
+    inc hl
+    or (hl)
+    inc hl
+    or (hl)
+    ret z
+    ld a,LAYOUT_MAPPED
+    ld (v_layout),a
+    ld hl,statFileHigh
+    ld de,resultsHigh+20
+    ld b,20
+    jp copy_bytes
+printFileVerified:
+    ld a,(v_layout)
+    or a
+    jp z,printWriteVerified
+    ld hl,statFileHighVerify
+    ld (verifySource+1),hl
+    ld hl,statFileHigh
+    call makeVerified
+    ld de,txtRawHighVerified
+    call printVerifiedLabel
+    ld hl,statFileVerify
+    ld (verifySource+1),hl
+    ld hl,statFileWrite
+    call makeVerified
+    ld de,txtRawLowVerified
+    jp printVerifiedLabel
 ; Дополнительные U32 компактного измерителя не совпадают с форматом
 ; legacy resultsHigh. Собираем его только для прямого MAIN A:.
 moduleRawLayout:
@@ -247,20 +295,27 @@ moduleRawLayout:
     ld b,4
     jp copy_bytes
 bank_module_error:
+    push af
     ld hl,txtBankModuleError
-    jp show_error
+    call puts
+    pop af
+    ld e,a
+    ld d,0
+    ld b,0
+    call bench_printDecWord
+    jp done
 bankModuleHandle: DW 0
 bankModuleRegs: DW workerConfig,0,0,0
-workerConfig: DS 10,0
+workerConfig: DS 11,0
 workerResultCopy: DB 0
     DW 0
     DB 0
     DW resultsLow,40
-bankModulePath: DB 'A:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskBank.dll',0
-dosModulePath: DB 'A:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskDos.dll',0
-mainModulePath: DB 'A:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskMain.dll',0
+bankModulePath: DB 'H:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskBank.dll',0
+dosModulePath: DB 'H:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskDos.dll',0
+mainModulePath: DB 'H:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskMain.dll',0
 ; MODULE_LOAD только читает ASCIIZ; 128 доступных байт обеспечены последующим кодом.
     ASSERT mainModulePath+MAX_PATH <= sectorBuffer
-txtBankModuleError: DB 'Disk module or I/O failed',0
+txtBankModuleError: DB 10,'Disk module error ',0
 
     INCLUDE "batch.inc"

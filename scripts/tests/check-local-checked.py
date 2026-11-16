@@ -55,7 +55,8 @@ done:
 (O/'driver.asm').write_text(source)
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'driver.bin'),str(O/'driver.asm')],check=True,capture_output=True)
 base=bytearray(65536);code=(R/'bin/banked/CLIENT.bin').read_bytes();base[0xF800:0xF800+len(code)]=code
-base[0xF740:0xF743]=b'\xc3'+W(0x8000);driver=(O/'driver.bin').read_bytes();base[0x8000:0x8000+len(driver)]=driver
+code=(R/'bin/banked/LOCALBLOCK.bin').read_bytes();base[s['MEM_IMAGE_LOCAL_START']:s['MEM_IMAGE_LOCAL_START']+len(code)]=code
+base[s['LOCAL_BLOCK_ENTRY']:s['LOCAL_BLOCK_ENTRY']+3]=b'\xc3'+W(0x8000);driver=(O/'driver.bin').read_bytes();base[0x8000:0x8000+len(driver)]=driver
 payload=bytes((n*37+11)&255 for n in range(256));base[0x3fff:0x4101]=b'X'+payload+b'Y'
 # Искажение в storage после WRITE будет прочитано и обнаружено VERIFY.
 rows=[]

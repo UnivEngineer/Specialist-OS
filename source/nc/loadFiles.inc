@@ -18,40 +18,67 @@ lf_ReadCatalog:
             ld a,1
             ld (ncCatalogReadOk),a
             call    fileCacheBase
-            ld      bc, 0
-            ld      de, FILE_CACHE_CAPACITY
+            push hl
+            ld hl,state.panelA_dirLow
+            call readBytePanel
+            ld c,a
+            ld hl,state.panelA_dirHigh
+            call readBytePanel
+            or c
+            ld bc,0
+            jp z,lf_ListFirstReady
+            inc bc ; Skip FAT "." in subdirectories; keep "..".
+lf_ListFirstReady:
+            pop hl
+            ld a,(ncCatalogCapacity)
+            ld e,a
+            ld d,0
             ld      a, DIR_OP_LIST
             MXOS_CALL MXOS_DOS_DIRECTORY
-            jp nc,  lf_ListReady
+            jp c,lf_ListFailed
+            ld a,b
+            or c
+            jp z,lf_ListReady
+            dec de ; DOS total includes the skipped "." record.
+            jp lf_ListReady
+lf_ListFailed:
             xor a
             ld (ncCatalogReadOk),a
             ld de,0
             call fileCacheBase
             ld (hl),0FFh
 lf_ListReady:
-            ; Запись FAT "." становится явным пунктом корня только в кэше NC.
-            push hl
-            push de
-            call fileCacheBase
-            ld a,(hl)
-            cp '.'
-            jp nz,lf_RootReady
-            inc hl
-            ld a,(hl)
-            cp ' '
-            dec hl
-            jp nz,lf_RootReady
-            ld (hl),05Ch
-lf_RootReady:
-            pop de
-            pop hl
+            ; Future optional "Go to drive root" entry: request BC=0 above
+            ; and re-enable this conversion of FAT "." to the UI-only "\".
+            ; push hl
+            ; push de
+            ; call fileCacheBase
+            ; ld a,(hl)
+            ; cp '.'
+            ; jp nz,lf_RootReady
+            ; inc hl
+            ; ld a,(hl)
+            ; cp ' '
+            ; dec hl
+            ; jp nz,lf_RootReady
+            ; ld (hl),05Ch
+            ; lf_RootReady:
+            ; pop de
+            ; pop hl
 
-            ; Индексы NC пока байтовые. Больше 255 файлов не оборачиваем в 0.
-            ld      a, d
-            or      a
-            ld      a, e
-            jp z,   lf_StoreCount
-            ld      a, FILE_CACHE_CAPACITY
+lf_ClampCount:
+            ; DOS returns total count, even when only capacity records fit.
+            ; Clamp to the runtime capacity before building byte indices.
+            ld a,(ncCatalogCapacity)
+            ld c,a
+            ld a,d
+            or a
+            jp nz,lf_CapCount
+            ld a,e
+            cp c
+            jp c,lf_StoreCount
+lf_CapCount:
+            ld a,c
 lf_StoreCount:
             ld      hl, state.panelA_filesCnt
             call    writeBytePanel
@@ -59,6 +86,8 @@ lf_StoreCount:
             call ncCatalogCommit
 
 lf_Cached:
+            call ncStateSelect
+            call ncParentSelect
             ; Удаление могло сократить каталог. Пустая панель имеет позиции 0.
             ld      hl, state.panelA_filesCnt
             call    readBytePanel
@@ -86,6 +115,17 @@ lf_CursorReady:
             call    writeBytePanel
 
 lf_View:
+            ld b,a
+            ld a,c
+            sub b
+            call ncSubVisible
+            ld a,b
+            jp c,lf_ViewReady
+            ld a,c
+            call ncSubVisible
+            inc a
+            call writeBytePanel
+lf_ViewReady:
             ; Видимое окно состоит из байтовых индексов, без копирования записей.
             ld e,a
             ld d,0

@@ -5,17 +5,6 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-drawToolbar:
-        ld a,(IO_KEYB_B)
-        and 2
-        ld (ncShiftState),a
-        ld hl,aF1LeftF2RighF3
-        jp nz,ncToolbarReady
-        ld hl,aShiftToolbar
-ncToolbarReady:
-        ld bc,(COLOR_HELP_F << 8) + COLOR_HELP_TEXT
-        jp uiToolbar
-
 drawWindowIfSel:
         call ncRealSelection
         pop hl
@@ -35,7 +24,8 @@ drawWindowIfSel:
 ; ---------------------------------------------------------------------------
 
 drawWindow1:
-        call ncDamageBoth
+        ld hl,g_window1
+        call ncDialogOpen
         COLOR   COLOR_DIALOG
 
         ; Рисуем окно
@@ -45,12 +35,17 @@ drawWindow1:
         ; Рисуем прямоугольник
         ld      hl, 9F65h           ; x=120 y=101
         ld      bc, (18 << 8) + 11  ; w=144 h=11
-        jp      inverseRect
+        call    inverseRect
+        ld hl,ncInputOk
+        call ncDrawButton
+        ld hl,ncInputCancel
+        jp ncDrawButton
 
 ; ---------------------------------------------------------------------------
 
 drawWindow2:
-        call ncDamageBoth
+        ld hl,g_window2
+        call ncDialogOpen
         COLOR   COLOR_DIALOG
 
         ; Рисуем окно
@@ -78,3 +73,10 @@ ncRealSelection:
 ncNoSelection:
         scf
         ret
+
+ncInputHint: DB "OK [Enter]  Cancel [Esc]",0
+
+ncInputOkText: DB 'OK [Enter]',0
+ncInputCancelText: DB 'Cancel [Esc]',0
+ncInputOk: UI_BUTTON ncInputOkText,36,56,122,14,6,1
+ncInputCancel: UI_BUTTON ncInputCancelText,100,56,122,14,6,0

@@ -17,6 +17,7 @@ benchRun:
     ENDIF
     call benchFill
     call benchTimerInit
+    jp c,benchDone
     call pitTimerRead
     ld (benchStart),hl
 benchInvoke:
@@ -31,6 +32,7 @@ benchInvoke:
     sbc a,d
     ld h,a
     ld (benchElapsed),hl
+    or a
 benchDone:
     IFDEF SORTBEN_STANDALONE
     ret
@@ -43,6 +45,7 @@ benchPrepareRun:
     ld sp,08B00h
     ENDIF
     call benchTimerInit
+    jp c,benchDone
     call pitTimerRead
     ld (benchStart),hl
 benchPrepareInvoke:
@@ -57,6 +60,7 @@ benchPrepareInvoke:
     sbc a,d
     ld h,a
     ld (benchElapsed),hl
+    or a
     jp benchDone
 
 benchOptimizedPrepare:
@@ -172,7 +176,8 @@ benchTimerInit:
     xor a
     ld (hl),a
     ld (hl),a
-    ret
+    ; Shared readiness check; wait is outside the measured interval.
+    jp pitTimerWaitReady
 
 benchFill:
     ld hl,FILE_INDEX_A

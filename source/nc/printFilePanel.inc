@@ -24,6 +24,7 @@ redrawFilePanel:
         ; Рисование панели
         ld      hl, g_filePanel
         call    draw
+        call ncDrawFileDividers
 
         ; Выодим список файлов сверху вниз
         ld      b, 0
@@ -41,6 +42,23 @@ refreshFilePanel:
 ;   b - режим (0 - вся панель, 1 - прокрутка снизу вверх, 2 - сверху вниз)
 
 printFilePanel:
+        ld a,(ncFontWidth)
+        cp 6
+        jp z,ncLegacyPanel
+        push bc
+        ld hl,state.panelA_drive
+        call readBytePanel
+        call loadFiles
+        call printPanelPath
+        COLOR COLOR_FILE
+        call ncPrintAdaptiveList
+        pop bc
+        ld a,b
+        or a
+        ret z
+        COLOR COLOR_CURSOR
+        jp drawCursor
+ncLegacyPanel:
         ; Рисуем сверху вниз или снизу вверх?
         ld      a, b
         or      a
@@ -75,6 +93,9 @@ printFilesUpDownScroll:
 ; Цикл печати сверху вниз
 
 printWholeFileList:
+        ld a,(ncFontWidth)
+        cp 6
+        jp nz,ncPrintAdaptiveList
         ; Полная отрисовка вызывается и напрямую после стадий рамок/метаданных.
         ; loadFiles разрушает B: число видимых строк задаём здесь, не у caller.
         ld b,FILE_LIST_SIZE
@@ -270,6 +291,9 @@ printPanelFile:
         ex      de, hl
         push    hl
         call    indexedFile
+    IF NC_FILE_COLORS
+        call ncPaintFileColor
+    ENDIF
         call    printFileNamOnPanel
         pop     hl
         ret

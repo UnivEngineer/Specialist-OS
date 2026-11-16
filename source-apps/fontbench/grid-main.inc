@@ -2,7 +2,7 @@
     INCLUDE "../../bin/FONTBEN.bios.entries.inc"
     DEFINE FONT_NATIVE_GRID
 FONT_CORPUS_SIZE = 1152
-textCorpus = 08600h
+textCorpus = 03000h ; transient corpus, consumed before standalone DLL load
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 entry:
@@ -12,15 +12,15 @@ entry:
     ret c
     call gridArgs
     jp c,gridExit
+    ld hl,(enginePreFirst)
+    ld (gridRequestedPre),hl
     call bios_getMemTop
-    ld de,textCorpus+FONT_CORPUS_SIZE-1
+    ld de,CORPUS_IO_BUFFER+255
     call bios_cmp_hl_de
     jp c,gridError
     call engineSave
     call loadCorpus
     jp c,gridError
-    ld hl,FONT_ADDR
-    ld (bios_upper.charGen),hl
     ld hl,textCorpus
     ld de,gridText
     ld c,24
@@ -54,12 +54,51 @@ gridEngineNext:
     jp z,gridEngineAllowed
     ld a,(engineId)
     or a
-    jp nz,gridInverseError
+    jp z,gridEngineAllowed
+    call engineRecord
+    ld de,7
+    add hl,de
+    ld a,(hl)
+    and 80h
+    jp z,gridInverseError
 gridEngineAllowed:
+    ld hl,(gridRequestedPre)
+    ld (enginePreFirst),hl
+    ld a,(engineId)
+    or a
+    jp nz,gridSharedMode
+    ; BIOS means the installed module, not a mutable legacy render flag.
+    ld hl,(FONT_ENGINE_HEADER+12)
+    ld a,h
+    or l
+    ld a,0
+    jp z,gridNativeMode
+    inc a
+    jp gridNativeMode
+gridSharedMode:
+    call engineRecord
+    ld de,7
+    add hl,de
+    ld a,(hl)
+    and 80h
+    jp z,gridEngineModeReady
+    ld de,-5
+    add hl,de
+    ld a,(hl)
+gridNativeMode:
+    ld (enginePreFirst),a
+    inc a
+    ld (enginePreEnd),a
+gridEngineModeReady:
     call engineRecord
     ld de,6
     add hl,de
+    ld a,(engineId)
+    or a
     ld a,(hl)
+    jp nz,gridWidthReady
+    ld a,(FONT_ENGINE_HEADER+5)
+gridWidthReady:
     ld (engineWidth),a
     add a,'0'
     ld (gridTitleWidth),a
@@ -151,18 +190,20 @@ gridMeasured:
     ld hl,gridStage
     inc (hl)
     call gridClearInfo
-    ld hl,00F7h ; row 240: engine name, separate from the 64-char status
+    ld hl,00F7h ; row 240: engine + stage; both lines fit 48 cells at 8x8
     ld (bios_vars.cursorY),hl
     call engineName
     call puts
-    ld hl,00FFh ; row 248: phase/API/transport/time, never wraps
-    ld (bios_vars.cursorY),hl
     ld hl,gridProgress
     call puts
     ld a,(gridStage)
     call gridByteNumber
     ld hl,gridTotal
     call puts
+    ; Status is outside the timer. Do not wrap at the physical bottom:
+    ; wrapping would scroll the test image even though timing is finished.
+    ld hl,00FFh ; row 248: phase/API/transport/time
+    ld (bios_vars.cursorY),hl
     call gridPrintLabel
     call gridPrintRoute
     ld hl,v_elapsed
@@ -514,7 +555,7 @@ gridCharDone:
 gridSave:
     ld hl,gridFileFailed
     ld (gridFileResult),hl
-    ld hl,07C00h
+    ld hl,(gridControl+8)
     ld (gridWrite),hl
     ld a,1
     ld (gridCapture),a
@@ -538,11 +579,12 @@ gridFileMode:
     ld hl,gridHandle
     call bios_fileHandle
     jp c,gridRestoreDrive
+    ld hl,(gridControl+8)
+    ex de,hl
     ld hl,(gridWrite)
-    ld de,07C00h
     call bios_sub_hl_de
     ld (gridHandle+FH_COUNT),hl
-    ld hl,07C00h
+    ld hl,(gridControl+8)
     ld (gridHandle+FH_BUFFER),hl
     ld hl,gridHandle
     ld a,FILE_OP_WRITE
@@ -643,6 +685,7 @@ gridCopy:
     INCLUDE "engine-select.inc"
     INCLUDE "../textbench/standalone.inc"
     INCLUDE "corpus.inc"
+gridRequestedPre: DW 0
 gridPre: DB 0
 gridKind: DB 0
 gridRoute: DB 0
@@ -660,7 +703,7 @@ gridFileFailed: DB 'Cannot save B:\FONTBEN.TXT',13,10,0
 gridFileSaved: DB 'Saved B:\FONTBEN.TXT',13,10,0
 gridControl: DW 0,0,0,08000h,0,gridText
     DB 0,0
-gridBankPath: DB 'A:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
+gridBankPath: DB 'H:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
 gridArgument: DB '0000',0
     DS MAX_PATH-($-gridBankPath),0
 gridResults: DS 240,0FFh
@@ -668,11 +711,11 @@ gridTitle: DB 'FontBen: 1152 bytes, '
 gridTitleWidth: DB '6','x8, ms '
 gridInverseLabel: DB 'N',13,10
     DB 'P API              MAIN CMD  TEXT W20  F256 USER',13,10,0
-gridProgress: DB 'Stage ',0
+gridProgress: DB ' Stage ',0
 gridTotal: DB '/36 '
 gridTotalWidth: DB '6','x8 ',0
 gridNextText: DB 'Press Enter to continue',13,10,0
-gridMs: DB ' ms    ',0
+gridMs: DB ' ms',0
 gridCRLF: DB 13,10,0
 gridDash: DB '   -',0
 gridRouteNames: DW gridRoute0,gridRoute1,gridRoute2,gridRoute3,gridRoute4,gridRoute5
@@ -688,14 +731,15 @@ gridName1: DB 'CharRaw          ',0
 gridName2: DB 'StringZ          ',0
 gridName3: DB 'StringRawZ       ',0
 gridName4: DB 'StringRawLim     ',0
-gridErrorText: DB 13,10,'FontBen failed (file, bank or FONT_RENDER)',13,10,0
+gridErrorText: DB 13,10,'FontBen failed (file, bank or memory)',13,10,0
 gridInverseErrorText: DB 'Inverse mode requires -E=BIOS',13,10,0
 gridHelp: DB 'FontBen -E=BIOS|ALL|STANDALONE|name[,name]',13,10
-    DB '-S scalar only; -I inverse (BIOS only)',13,10
+    DB '-S scalar only; -I inverse (BIOS/STANDALONE)',13,10
     DB '-P=OFF|ON|BOTH  -N no file  -Q no table/Enter',13,10
-    DB 'MXOS1 OPT FULL CACHE QUAD COLD WARM ROTATE',13,10
-    DB 'MON2 RAMFOS ROTLINE FULLFAST COLPRE',13,10
-    DB 'HALF PACKED PAGED REMAP32 BLOCK32 8X8 4RAW 4PACK 4DUP',13,10,0
+    DB 'ROTATE6 PACK6K FAST12K COMPACT6 FAST8 CPM4',13,10
+    DB 'Legacy: MXOS1 OPT SCALAR12 CACHE QUAD COLD WARM ROTATE',13,10
+    DB 'MON2 RAMFOS WIN8 ROTLINE FULLFAST COL6PRE TRIPACK',13,10
+    DB 'HALF PACKED ROW6 REMAP32 BLOCK32 ROW8 4RAW 4PACK 4DUP',13,10,0
 gridHandle: DB 'FONTBEN TXT'
     DS FH_DRIVE-11,0
     DB 1

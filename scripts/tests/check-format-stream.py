@@ -52,12 +52,14 @@ loop:
   (out/'driver.asm').write_text(asm)
   subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080',f'--raw={out/"driver.bin"}',str(out/'driver.asm')],check=True,capture_output=True)
   m=bytearray(65536)
-  for at,p in [(0,config.binary_dir/'FORMAT.i80'),(0xc000,config.binary_dir/'DOS.sys'),(0x9000,out/'driver.bin')]:
+  for at,p in [(0,config.binary_dir/'FORMAT.i80'),(0xc000,config.binary_dir/'BIOS.sys'),(0x9000,out/'driver.bin')]:
    b=p.read_bytes();m[at:at+len(b)]=b
   m[d['bios_fileGetSetDrive']:d['bios_fileGetSetDrive']+2]=bytes.fromhex('AF C9')
   m[d['bios_diskDriver']:d['bios_diskDriver']+3]=bytes.fromhex('C3 00 90')
   m[d['j_diskDriver']+1:d['j_diskDriver']+3]=struct.pack('<H',0x9000)
   m[d['bios_printString']]=0xc9
+  # End-of-format mount/chdir are mocked; consume the inline operation word.
+  m[d['mx_callRegs']:d['mx_callRegs']+6]=bytes.fromhex('E1 23 23 E5 AF C9')
   args=b'B: -Y'+(b' -R' if ram else b'')+b'\0';m[0x7000:0x7000+len(args)]=args
   m[0x8000:0x800c]=bytes.fromhex('31 DF 8F 11 00 70 CD 00 00 C3 00 81')
   m[f['buffer']-1]=0xa5;m[f['buffer']+256]=0x5a
@@ -70,7 +72,7 @@ loop:
   fatsectors=word(22);rootsectors=(word(17)*32+255)//256;start=1+fatsectors+rootsectors
   assert word(256)==0xfff8 and word(258)==0xffff
   for i in range(2,fatsectors*128):
-   expected=0xffff if i>=sectors-start+2 else 0xfff7 if ram and (i-2+start)%256==255 else 0
+   expected=0xffff if i>=sectors-start+2 else 0xfff7 if ram and (i-2+start)%256>=f['RAMDISK_DATA_BLOCK_LIMIT'] else 0
    assert word(256+i*2)==expected,(sectors,ram,i,word(256+i*2),expected)
   root=disk[(1+fatsectors)*256:start*256]
   assert root[:11]==(b'RAM DISK   ' if ram else b'NO NAME    ') and root[11]==8 and root[12:]==bytes(len(root)-12)

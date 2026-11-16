@@ -54,7 +54,7 @@ printChar_real:
 printCharRawHelper:
 printChar_real2:  
             ld hl,(bios_upper.charGen)
-            call printChar_alt
+fontScalarCall: call FONT_ENGINE_SCALAR
             ld hl,(bios_vars.cursorY)
             ld a,h
             cp 192
@@ -162,18 +162,25 @@ loc_C693:   ; Следующий символ будет обработан в p
 ; ---------------------------------------------------------------------------
 ; Обработка ESC+Y
 
-printChar_esc2:   ; Если код меньше 20h или больше 20h + 63, то пропускаем установку X
-            ld    a, c
-            cp    60h
+printChar_esc2:
+            ld a,c
+            sub 20h
+            ret c
+            ld b,a
+            ld a,(FONT_ENGINE_HEADER+5)
+            rrca
+            ld c,a ; 2/3/4 half-pixels per cell, outside pixel loops.
+            xor a
+            inc b
+escColumnLoop:
+            dec b
+            jp z,escColumnReady
+            add a,c
+            cp 192
             ret nc
-            sub   20h
-            ret c 
-
-            ; cursorX = c*3;
-            ld    c, a
-            add   a, a
-            add   a, c
-            ld    (bios_vars.cursorX),a
+            jp escColumnLoop
+escColumnReady:
+            ld (bios_vars.cursorX),a
             ret
 
 ; ---------------------------------------------------------------------------

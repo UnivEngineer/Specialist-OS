@@ -176,7 +176,7 @@ quadPrepareHalf:
     ld a,b
     cp 8
     jp nc,quadHalfSpace
-    ; Полный FONT.FNT оставляет в верхней арене меньше 2 КБ.
+    ; Полный FONT.PF оставляет в верхней арене меньше 2 КБ.
     ; Half, как и кеш стенда, использует собственный main-резерв.
     IFDEF FONT_ENGINE_DLL
     ld hl,03000h

@@ -25,7 +25,7 @@ memSystemBlock:
     pop bc
     ret
 memSystemRequest: DS 5,0
-; ROM — физический источник CPM16, MAIN-обработчик для чтения не нужен.
+; ROM — физический источник CPM32, MAIN-обработчик для чтения не нужен.
 ; Внутренний вход: вызывающая DOS проверяет LBA и буфер, RAW PREPARE
 ; передаёт эту обязанность клиенту. BC/DE/HL сохраняются, CF/A=статус.
 memSystemRead:
@@ -63,5 +63,3 @@ memRomCopy: DB 080h
     UNDEFINE DWC_NO_ERROR_FLAG
     INCLUDE "../common/localBlockChecked.inc"
     INCLUDE "../common/calcCS.inc"
-
-    INCLUDE "put32-template.inc"

@@ -75,13 +75,13 @@ mxos_u16 mxos_memory_query(mxos_u8 bank,MXOS_MEMORY_INFO *out)
     if (!(af&MXOS_CF)) { out->free_bytes=r.hl; out->largest=r.de; out->free_records=r.bc; }
     return af;
 }
-mxos_u16 mxos_ramdisk_status(mxos_u8 *pages,mxos_u8 *state)
+mxos_u16 mxos_ramdisk_status(mxos_u8 *pages,mxos_u8 *state,mxos_u8 *fresh)
 {
     MXOS_CALL r; mxos_u16 af;
     r.operation=MXOS_DOS_MEMORY; r.af=MXOS_MEM_OP_RAMDISK<<8;
     r.bc=MXOS_RAMDISK_STATUS; r.hl=r.de=0;
     af=mxos_call(&r);
-    if (!(af&MXOS_CF)) { *pages=r.bc>>8; *state=r.bc; }
+    if (!(af&MXOS_CF)) { *pages=r.bc>>8; *state=r.bc; *fresh=r.de>>8; }
     return af;
 }
 mxos_u16 mxos_ramdisk_commit(void)
@@ -90,23 +90,4 @@ mxos_u16 mxos_ramdisk_commit(void)
     r.operation=MXOS_DOS_MEMORY; r.af=MXOS_MEM_OP_RAMDISK<<8;
     r.bc=MXOS_RAMDISK_COMMIT; r.hl=r.de=0;
     return mxos_call(&r);
-}
-
-/* DWORD проходит через регистры нового локального MEM ABI, без DOS. */
-mxos_u16 mxos_get32_far(MXOS_FAR_ADDRESS *p, mxos_u32 *out)
-{
-    MXOS_REGS r;
-    r.entry=MXOS_MEM_GET32; r.af=(mxos_u16)p->bank<<8;
-    r.hl=p->offset; r.bc=r.de=0;
-    mxos_bios_call(&r);
-    if (!(r.af & MXOS_CF)) *out=((mxos_u32)r.bc<<16)|r.de;
-    return r.af;
-}
-mxos_u16 mxos_put32_far(MXOS_FAR_ADDRESS *p, mxos_u32 value)
-{
-    MXOS_REGS r;
-    r.entry=MXOS_MEM_PUT32; r.af=(mxos_u16)p->bank<<8;
-    r.hl=p->offset; r.bc=(mxos_u16)(value>>16); r.de=(mxos_u16)value;
-    mxos_bios_call(&r);
-    return r.af;
 }

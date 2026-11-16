@@ -2,7 +2,7 @@
 
 ## Автономный TextBen.com
 
-`powershell.exe -NoProfile -File scripts/build/build-project.ps1 OS` собирает TextBen.com и его банковый TextBank.com; оба помещены в `A:\Bench\FontBen\`. Запуск из NC после перехода в этот каталог — `TextBen.com`, возврат — Enter.
+`powershell.exe -NoProfile -File scripts/build/build-project.ps1 OS` собирает TextBen.com и его банковый TextBank.com; оба помещены в `H:\Bench\FontBen\`. Запуск из NC после перехода в этот каталог — `TextBen.com`, возврат — Enter.
 
 Тест измеряет штатные MXOS_CALL PRINT_CHAR и PRINT_STRING_BANK из main и отдельного EXEC-банка. Выводятся 32 строки по 48 печатных символов с CR/LF, включая перенос и прокрутку. Банковый PRINT_STRING_BANK переносит порции до 256 байт в буфер BIOS в main; разбиение и межбанковые переходы выполняет штатный адаптер IO/MEM.
 

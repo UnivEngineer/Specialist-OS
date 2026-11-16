@@ -1,8 +1,4 @@
-; Единые публичные входы main и исполняемых банков; обработчики BIOS локальны main.
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "biosabi.inc"
-    INCLUDE "abi.inc"
-    INCLUDE "../../bin/banked/transport-imports.inc"
+; Публичные входы и TEXT; включается в единую сборку LOCALBLOCK.
     ORG mx_call
     jp MEM_CALL_ENTRY
     jp bankCpmCall
@@ -136,8 +132,8 @@ bankLoadPath:
 bankSavePath:
     MXOS_CALL MXOS_DOS_FILE_SAVE_PATH
     ret
+    ASSERT $ <= MEM_TEXT_ENTRY
+    DS MEM_TEXT_ENTRY-$,0
+    INCLUDE "text.inc"
 bankClientEnd:
-    ASSERT $ <= SYSTEM_FLASH_ADDR
-    INCLUDE "local-io.inc"
     ASSERT $ <= LOCAL_DRIVER_ADDR
-    END

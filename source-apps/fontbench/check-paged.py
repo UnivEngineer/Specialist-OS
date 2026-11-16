@@ -12,7 +12,7 @@ source.write_text('PAGED_FONT_BASE = 05000h\nPAGED_PRE_BASE = 05800h\n ORG 01000
 subprocess.run([str(R/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow', '--raw='+str(O/'fixture.bin'), '--sym='+str(O/'fixture.sym'), str(source)], check=True)
 s = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (O/'fixture.sym').read_text(), re.M)}
 old = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (R/'bin/FONTLAB.sym').read_text(), re.M)}
-font = (R/'assets/system-rom/FONT.FNT').read_bytes()
+font = (R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 corpus = (R/'assets/system-rom/README.TXT').read_bytes().replace(b'\r\n',b' ').replace(b'\r',b' ').replace(b'\n',b' ')
 corpus = bytes(c if c >= 32 else 32 for c in corpus)[:1152].ljust(1152,b' ')
 word = lambda n:n.to_bytes(2,'little')

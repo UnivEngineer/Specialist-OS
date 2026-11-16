@@ -41,7 +41,7 @@ loop:
  code=(O/'case.bin').read_bytes();m[0x8000:0x8000+len(code)]=code;(O/'input.bin').write_bytes(m)
  p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8000','-end','8100','-counter','10000000','-output',str(O/'out.bin'),str(O/'input.bin')],check=True,capture_output=True,text=True)
  b=(O/'out.bin').read_bytes();assert int.from_bytes(b[65542:65544],'little')==0x8100,label
- assert b[0x8500:0x8505]==bytes.fromhex('0001001001'),(label,b[0x8500:0x8505].hex())
+ assert b[0x8500:0x8505]==struct.pack('<HBBB',s['MEM_ABI_VERSION'],0,16,s['MEM_BANK_EXEC']),(label,b[0x8500:0x8505].hex())
  error=0xe0 if label=='bad-bank' else 0xe2 if label=='bad-range' else 0
  assert b[0x8507]==error and bool(b[0x8506]&1)==bool(error),label
  assert b[0x8508:0x850a]==bytes.fromhex('7856'),label

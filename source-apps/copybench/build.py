@@ -33,5 +33,19 @@ def main():
               'variantTable: DW '+','.join(n+'Desc' for n in VARIANTS)+',0']
     (OUT.parent/'COPYBEN.variants.inc').write_text('\n'.join(lines)+'\n',encoding='utf-8')
 
+    # Private comparison candidates; not added to COPYBEN.COM or system drivers.
+    for name, source, defines in [
+        ('r4-reference', 'r4-reference.asm', []),
+        ('near-engines', 'near-engines.asm', []),
+        ('cpm-local16', 'cpm-local.asm', ['CHUNK=16']),
+        ('cpm-local32', 'cpm-local.asm', ['CHUNK=32']),
+        ('cpm-local32-aligned256', 'cpm-local.asm', ['CHUNK=32', 'ALIGNED=1']),
+        ('cpm-local32-aligned-batch', 'cpm-local.asm', ['CHUNK=32', 'ALIGNED=2']),
+    ]:
+        subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
+                        *['-D'+value for value in defines], f'--raw={OUT/name}.bin',
+                        f'--sym={OUT/name}.sym', f'--lst={OUT/name}.lst',
+                        str(HERE/source)], check=True)
+
 if __name__ == '__main__':
     main()

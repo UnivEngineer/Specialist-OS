@@ -72,6 +72,7 @@ entry:
     ld bc,romTailImageEnd-romTailImage
     call localCopy
     call pitTimerInit
+    jp c,timerFailed
     call timer_probe
     jp z,timerFailed
     call reset_timing

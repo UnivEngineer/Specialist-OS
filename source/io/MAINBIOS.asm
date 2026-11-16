@@ -1,12 +1,14 @@
 ; Внутренняя карта IO.SYS основной памяти.
+; Каноническая карта и адресные константы IO/MEM — ../include/mxos.inc.
 ; Файл с F000h загружается непрерывно; точный конец — System.layout.json.
 ; Адреса/размеры текущей сборки уточняет bin/System.layout.json.
-;   F000-F23F - [576 B] MAINBIOS.asm: принимающий адаптер BIOS
-;   F240-...  - MAINIO.asm: физический мост A: <-> DOS
+;   F000-F15E - [351 B] MAINBIOS.asm: принимающий адаптер BIOS
+;   F15F-F1BF - [ 97 B] Свободно в MAIN до начала MEM (в DOS здесь стек)
+;   F240      - JMP из MEM в скомпонованный в BIOS физический мост A: <-> DOS
 ; Файловые переходники, загрузчик тела, RAW-маршрутизатор и границы кэша
 ; компонуются в BIOS.SYS ниже области шрифта, а не входят в IO.SYS.
 ; Общие публичные JMP устанавливаются bootstrap из MEM.SYS.
-; LOCALBLOCK (с F480h), FLASHSYS (F8C0h), H: (FA00h) не входят в IO.SYS.
+; LOCALBLOCK (с F1C0h), AT512KS (F6C0h), H: (F9C0h) не входят в IO.SYS.
 ; Рабочие переменные и буфер текста находятся отдельно от файла:
 ; IO_VARIABLES и BIOS_BANK_IO_BUFFER объявлены в mxos.inc.
 ;
@@ -211,8 +213,8 @@ bbModes:
     DB 0 ; TAPE_SAVE
     DB 0 ; CALC_CS
     DB 1 ; PRINT_HEX_WORD
-    DB 0 ; SET_MEM_TOP
-    DB 0 ; GET_MEM_TOP
+    DB 1 ; SET_MEM_TOP: scalar HL, used by persistent MEM reservations
+    DB 1 ; GET_MEM_TOP: scalar HL result
     DB 1 ; PRINTER
     DB 0 ; INSTALL_DRIVER
     DB 0 ; DISK_DRIVER
@@ -256,10 +258,6 @@ bbRegs = io_vars.bbRegs
 bbCopy = io_vars.bbCopy
 ; Общий временный буфер: UI и физический A: не вложены друг в друга.
 bbBuffer = BIOS_BANK_IO_BUFFER
-    ORG_PAD MEM_MAIN_PUT32_TEMPLATE
-    MODULE mainDword
-    INCLUDE "../mem/put32-template.inc"
-    ENDMODULE
 bankBiosEnd:
     ASSERT $ <= BANK_BIOS_END
     END

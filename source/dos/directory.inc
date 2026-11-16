@@ -43,17 +43,6 @@ fatCheckMounted:
 fatDirNext:
             push de
             push bc
-            ld hl,(v_directory)
-            ld a,h
-            or l
-            jp nz,fatDirEntryReady
-            ld hl,(v_dirRootRemaining)
-            ld a,h
-            or l
-            jp z,fatDirEnd
-            dec hl
-            ld (v_dirRootRemaining),hl
-fatDirEntryReady:
             ; Во время прохода каталога кэш не используется другими циклами.
             ; Сектор получаем один раз, остальные записи идут по указателю.
             ld a,(v_dirRemaining)
@@ -74,7 +63,7 @@ fatDirLoadSector:
             ld hl,(v_directory)
             ld a,h
             or l
-            jp z,fatDirLoadRoot
+            jp z,fatDirCheckRoot
             ld hl,(v_dirSectorsLeft)
             ld a,h
             or l
@@ -106,7 +95,13 @@ fatDirFollow:
 fatDirUseSector:
             dec hl
             ld (v_dirSectorsLeft),hl
-fatDirLoadRoot:
+            jp fatDirReadSector
+fatDirCheckRoot:
+            ld hl,(v_dirRootRemaining)
+            ld a,h
+            or l
+            jp z,fatDirEnd
+fatDirReadSector:
             ld hl,(v_cachedSector)
             inc hl
             ld (v_cachedSector),hl
@@ -117,7 +112,29 @@ fatDirLoadRoot:
             ld (v_cachedDescrPtr),hl
             ld hl,0
             ld (v_cachedDescrOffset),hl
+            ; Корневой лимит списывается пачкой при загрузке сектора.
+            ; Поэтому обычный шаг по записи не проверяет тип каталога.
             ld a,(v_diskInfo.descrPerSector)
+            ld b,a
+            ld hl,(v_directory)
+            ld a,h
+            or l
+            jp nz,fatDirCountReady
+            ld hl,(v_dirRootRemaining)
+            ld a,h
+            or a
+            jp nz,fatDirReserveRoot
+            ld a,l
+            cp b
+            jp nc,fatDirReserveRoot
+            ld b,a
+fatDirReserveRoot:
+            ld e,b
+            ld d,0
+            call sub_hl_de
+            ld (v_dirRootRemaining),hl
+fatDirCountReady:
+            ld a,b
             dec a
             ld (v_dirRemaining),a
             ld hl,(v_cachedDescrPtr)
@@ -153,29 +170,115 @@ fatDirFile:
 fatDirItem:
             ld a,008h
 fatDirFiltered:
-            ld (fatDirAttrMask+1),a
-fatDirFilteredLoop:
-            call fatDirNext
-            ret c
-            ld a,(hl)
-            or a
-            jp z,fatDirEndFile
-            cp 0E5h
-            jp z,fatDirFilteredLoop
-            push hl
+            push bc
             push de
-            ld de,FILE_DESCRIPTOR.attrib
-            add hl,de
+            ld c,a
+            xor a
+            jp fatDirScanStart
+; Тот же секторный обход, но выдаётся только совпавшее 8.3-имя.
+; v_foundDescrPtr и fatDirFindFirst заданы fileFind; BC/DE сохраняются.
+fatDirFind:
+            push bc
+            push de
+            ld c,a
+            ld a,1
+fatDirScanStart:
+            ld (fatDirScanMode+1),a
+fatDirScanSector:
+            call fatDirNext
+            jp c,fatDirScanReturn
+            ld a,(v_dirRemaining)
+            ld b,a
+fatDirScanRecord:
             ld a,(hl)
-fatDirAttrMask:
-            and 018h
-            pop de
-            pop hl
-            jp nz,fatDirFilteredLoop
             or a
+            jp z,fatDirScanEnd
+            cp 0E5h
+            jp z,fatDirScanAdvance
+            push hl
+            ld a,l
+            add a,FILE_DESCRIPTOR.attrib ; 32-байтная запись не пересекает страницу.
+            ld l,a
+            ld a,(hl)
+            and c
+            pop hl
+            jp nz,fatDirScanAdvance
+fatDirScanMode:
+            ld a,0
+            or a
+            jp z,fatDirScanFound
+            ld a,(hl)
+            cp 5
+            jp nz,fatDirScanFirst
+            ld a,0E5h
+fatDirScanFirst:
+            call upperCase
+fatDirFindFirst:
+            cp 0
+            jp nz,fatDirScanAdvance
+            push hl
+            push bc
+            ex de,hl
+            ld hl,(v_foundDescrPtr)
+            ld c,FILE_NAME_LENGTH+3
+            ld a,(de)
+            cp 5
+            jp nz,fatDirScanCompare
+            inc hl
+            inc de
+            dec c
+fatDirScanCompare:
+            call stricmp
+            pop bc
+            pop hl
+            jp nz,fatDirScanAdvance
+fatDirScanFound:
+            call fatDirScanCommit
+            or a
+fatDirScanReturn:
+            pop de
+            pop bc
             ret
-fatDirEndFile:
+fatDirScanEnd:
+            call fatDirScanCommit
+            xor a
             scf
+            jp fatDirScanReturn
+fatDirScanAdvance:
+            ld a,b
+            or a
+            jp z,fatDirScanReload
+            ld de,FILE_DESCR_SIZE
+            add hl,de
+            dec b
+            jp fatDirScanRecord
+fatDirScanReload:
+            call fatDirScanCommit
+            jp fatDirScanSector
+; Между выдачами запись и счётчик живут в регистрах. Фиксируем курсор
+; только при выдаче/смене сектора, чтобы поиск имени не сохранял его 128 раз.
+fatDirScanCommit:
+            ld a,(v_dirRemaining)
+            sub b
+            ret z
+            ld (v_cachedDescrPtr),hl
+            push hl
+            push bc
+            ld l,a
+            ld h,0
+            add hl,hl
+            add hl,hl
+            add hl,hl
+            add hl,hl
+            add hl,hl
+            ex de,hl
+            ld hl,(v_cachedDescrOffset)
+            add hl,de
+            ld (v_cachedDescrOffset),hl
+            ld a,b
+            ld (v_dirRemaining),a
+            pop bc
+            pop hl
             ret
 
 ; HL=свободная запись. При замене 00h переносим конец каталога вперёд:

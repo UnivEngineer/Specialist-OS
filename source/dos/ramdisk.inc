@@ -1,5 +1,5 @@
 ; Блочный драйвер B: в странице DOS. Первую физическую страницу занимает DOS.
-; Как прежде, каждый 256-й блок (хвост страницы) недоступен носителю.
+; Как прежде, два последних блока каждой страницы недоступны носителю.
 ; B=1/2, DE=логический блок, HL=буфер DOS, CF/A=ошибка. BC/DE/HL разрушены.
 ; Страница DOS логически равна 1; данные RAM-диска начинаются с FAR=2.
 dosRamDriver:
@@ -13,8 +13,8 @@ dosRamDriver:
     jp nz,dosRamBad
 dosRamBufferOK:
     ld a,e
-    cp 0FFh
-    jp z,dosRamBad
+    cp RAMDISK_DATA_BLOCK_LIMIT
+    jp nc,dosRamBad
     IFDEF BANKED_DOS_BUILD
     ld a,(memoryRamPages)
     ELSE

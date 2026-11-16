@@ -35,10 +35,10 @@ try:
  m.start('overwrite-all',disk=R/'bin/nested-Games2M.bin')
  command('MD B:/SRC');command('MD B:/DST')
  command('COPY A:/README.TXT B:/SRC/ONE')
- command('COPY A:/FONTKOI.FNT B:/SRC/TWO')
+ command('COPY A:/FONTKOI.PF B:/SRC/TWO')
  command('ATTRIB -RS B:/SRC/TWO')
  command('COPY B:/SRC B:/DST')
- command('COPY A:/FONTKOI.FNT B:/SRC/ONE',True);finish('y')
+ command('COPY A:/FONTKOI.PF B:/SRC/ONE',True);finish('y')
  command('COPY B:/SRC B:/DST',True)
  assert m.m.read(n['ncOverwriteChoice'],1)==b'\2'
  m.m.screenshot(O/'default-no.png')

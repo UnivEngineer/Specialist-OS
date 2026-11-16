@@ -11,11 +11,13 @@ but_F5: ; Рисуем окно
         call    drawWindowIfSel
 
         ; Выводм "COPYING FROM A: TO"
-        CENTER_LINE 15, 5Eh
-        ld      (bios_vars.cursorY), hl
-        ld      hl, aCopyFromTo 
-        call    bios_printString
-        call    printSelDrive
+        ld hl,state.panelA_drive
+        call readBytePanel
+        add a,'A'
+        ld (aCopyFromTo+10),a
+        ld hl,aCopyFromTo
+        ld e,94
+        call ncPrintCentered
 
         call    inputForCopyMove
         cp      1Bh

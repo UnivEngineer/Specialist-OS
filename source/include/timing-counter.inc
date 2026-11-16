@@ -65,6 +65,11 @@ add_u16:
     ret
 ; Проверка движения каскада за заведомо заметную паузу вне измерений.
 ; Выход ZF=1 при неизменном счёте; разрушает все регистры.
+; TIMING_PROBE_READY может задать совместимый общий проверяющий вход
+; (ZF=0 при движении), чтобы не дублировать ожидание/код в тесном образе.
+    IFDEF TIMING_PROBE_READY
+timer_probe = TIMING_PROBE_READY
+    ELSE
 timer_probe:
     call timer_read
     push hl
@@ -83,4 +88,5 @@ timer_probe_wait:
     sbc a,d
     or b
     ret
+    ENDIF
 

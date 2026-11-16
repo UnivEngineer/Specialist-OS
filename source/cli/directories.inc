@@ -1,7 +1,17 @@
-; MKDIR/RMDIR — файловые операции DOS, реализация в загружаемом модуле.
+; MKDIR использует FILEOPS; создание одного каталога и RMDIR резидентны.
 ; HL=путь MAX_PATH. CF/A=код DOS, исходный диск/CWD сохраняется.
 ; AF/BC/DE/HL разрушены. Только пустые каталоги, без рекурсивного удаления.
+; Public command facade; recursive policy belongs to the cached executor.
 directoryCreate:
+    call directoryValidateLeaf
+    ret c
+    ld a,10
+    call fileopsRun
+    ret nc
+    jp dosIoError
+
+; Primitive: create one directory whose parent already exists.
+directoryCreateSingle:
     call directoryValidateLeaf
     ret c
     push hl
@@ -114,6 +124,7 @@ directoryRemove:
     ld de,cliRequest.source
     call fileNamePrepare
     jp c,cliFileDone
+directoryRemovePrepared:
     ld hl,(v_directory)
     ld (cliParent),hl
     ld hl,cliRequest.source

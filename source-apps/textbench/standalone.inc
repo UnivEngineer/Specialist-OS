@@ -16,10 +16,15 @@ bench_init:
     dec a
     ld (bios_upper.escMode),a
     call bios_getMemTop
+    IFDEF FONT_NATIVE_GRID
+    ld de,035FFh ; controller + temporary corpus, below resident tables
+    ELSE
     ld de,084FFh
+    ENDIF
     call bios_cmp_hl_de
     jp c,bench_no_memory
     call pitTimerInit
+    jp c,bench_no_timer
     call timer_probe
     jp z,bench_no_timer
     or a

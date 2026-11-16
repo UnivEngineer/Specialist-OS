@@ -1,6 +1,15 @@
 ; Локальная UI-библиотека для программы MAIN или DLL MAIN.
 ; Сначала INCLUDE для макросов. В секции кода DEFINE UI_IMPLEMENTATION
 ; и повторный INCLUDE включают процедуры и рабочие данные ровно один раз.
+; DEFINE UI_PIXEL_RECT adds uiFillRectPixels/uiInverseRectPixels/uiFrameRectPixels; see
+; ui-pixel-rect.inc for pixel coordinates, masks and register contracts.
+; DEFINE UI_BYTE_RECT adds uiFillRectBytes/uiFrameRectBytes. Existing uiDraw,
+; uiInverseRect and uiCopyRect remain the fast byte-aligned window path.
+; DEFINE UI_TEXT_RECT adds uiCopyTextRect for 8-of-10 text-cell scrolling.
+; DEFINE UI_TEXT_RECT_COLORS additionally enables a per-row palette copy;
+; requires UI_TEXT_RECT. Descriptor and stack/overlap contracts: UI.md.
+; DEFINE UI_BITMAP adds raw and software-palette bitmap save/restore.
+; All public contracts and examples: UI.md. No application state is required.
     IFNDEF UI_DEFINITIONS
     DEFINE UI_DEFINITIONS
 ; Формат списков объектов uiDraw. Координаты в пикселях.
@@ -9,6 +18,20 @@
     MACRO G_WINDOW A,X,Y,W,H
         DB A|2, Y, 90h+(X>>3), H-6, (W>>3)-2
     ENDM
+    MACRO G_MODAL_WINDOW A,X,Y,W,H
+        DB A|12h, Y, 90h+(X>>3), H-6, (W>>3)-2
+    ENDM
+    STRUCT UI_BUTTON
+text DW 0
+left DB 0       ; X/2
+width DB 0      ; Width/2
+top DB 0
+height DB 14
+font DB 6
+selected DB 0
+normal DB 007h
+focused DB 003h
+    ENDS
     MACRO G_LINE A,X,Y,W
         DB A|1, Y, 90h+(X>>3), (((X&7)+W+7)>>3)-2, 0FFh>>(X&7), (0FF00h>>((W+X)&7)) & 0FFh
     ENDM
@@ -70,6 +93,9 @@ uiDrawOffset:
             ld    h, a
             pop   af
 uiDrawAbsolute:
+    IFDEF UI_MODAL_BORDER
+            ld (uiDrawKind),a
+    ENDIF
 
             ; Если a&0xF==3, то заполнить c байт памяти байтом b
             and   0Fh
@@ -82,6 +108,14 @@ uiDrawAbsolute:
             jp z, uiDrawLine
 
             ; Нарисовать окно
+    IFDEF UI_MODAL_BORDER
+            ld a,(uiDrawKind)
+            and 10h
+            jp z,uiDrawPlainWindow
+            call uiDrawModalWindow
+            jp uiDrawNext
+uiDrawPlainWindow:
+    ENDIF
             call  uiDrawWindow
 
 uiDrawNext:  ; hl=de и следующий цикл
@@ -121,7 +155,19 @@ uiDrawLineLoop:
 ; ---------------------------------------------------------------------------
 ; Рисуем окно (b=ширина-2, с=высота-6)
 
+    IFDEF UI_MODAL_BORDER
+uiDrawKind: DB 0
+uiWindowPadding: DB 0
+uiDrawModalWindow:
+            ld a,2
+            jp uiDrawWindowPadding
+    ENDIF
 uiDrawWindow:
+    IFDEF UI_MODAL_BORDER
+            xor a
+uiDrawWindowPadding:
+            ld (uiWindowPadding),a
+    ENDIF
             ; Если h - 90h + b >= 0x2F, то есть X + b + 2 > ширина экрана, то выйти
             ld    a, h
             sub   90h
@@ -133,6 +179,14 @@ uiDrawWindow:
             push  hl
             push  bc
             push  de
+    IFDEF UI_MODAL_BORDER
+            ld a,(uiWindowPadding)
+            add a,a
+            ld e,a
+            ld a,c
+            sub e
+            ld c,a
+    ENDIF
 
             ; Линия
             ld    de, uiWindowPattern
@@ -169,6 +223,9 @@ uiDrawColumn:    ; Сохраняем регистры
             push  hl
 
             ; Копируем 3 байта (сверху-вниз)
+    IFDEF UI_MODAL_BORDER
+            call uiWindowPad
+    ENDIF
             call  uiCopyThree
 
             ; 4 ый байт повторяем С-раз (сверху-вниз)
@@ -178,6 +235,9 @@ uiDrawColumn:    ; Сохраняем регистры
 
             ; Копируем 3 байта (сверху-вниз)
             call  uiCopyThree
+    IFDEF UI_MODAL_BORDER
+            call uiWindowPad
+    ENDIF
 
             ; Восстаналиваем регистры
             pop   hl
@@ -195,6 +255,17 @@ uiDrawColumn:    ; Сохраняем регистры
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
+    IFDEF UI_MODAL_BORDER
+uiWindowPad:
+        ld a,(uiWindowPadding)
+        or a
+        ret z
+        ld (hl),0
+        inc l
+        ld (hl),0
+        inc l
+        ret
+    ENDIF
 uiCopyThree:
         ld    a, (de)
         ld    (hl), a
@@ -282,6 +353,7 @@ uiInverseLoop_y:
 ; Высота 9, Y=247..255. Координаты и инверсия BIOS не меняются.
 ; AF/BC/DE/HL разрушены; нереентерабельно, как прочие графические службы.
 ; Каждый экранный байт сразу получает окончательные битмап и атрибут.
+    IFNDEF UI_NO_TOOLBAR
 uiToolbar:
             ld a,b
             ld (toolbarKeyColor),a
@@ -472,6 +544,8 @@ toolbarBitmap: DS 37,0
 ; D*E чтений и столько же записей экрана, без обращений к портам.
 ; Стенд 8080: 10x170 вверх ~51,8 тыс. тактов, вниз ~53,0 тыс.;
 ; максимальный проверенный 48x255 — ~366 тыс. тактов (с обвязкой стенда).
+    ENDIF ; UI_NO_TOOLBAR
+
 uiCopyRect:
             push    de
             push    bc
@@ -490,6 +564,22 @@ uiCopyRect:
             dec     d
             jp nz,  uiCopyRect
             ret
+
+    IFDEF UI_PIXEL_RECT
+        INCLUDE "ui-pixel-rect.inc"
+    ENDIF
+    IFDEF UI_BYTE_RECT
+        INCLUDE "ui-byte-rect.inc"
+    ENDIF
+    IFDEF UI_BITMAP
+        INCLUDE "ui-bitmap.inc"
+    ENDIF
+    IFDEF UI_TEXT_RECT
+        INCLUDE "ui-text-rect.inc"
+    ENDIF
+    IFDEF UI_TEXT_RECT_COLORS
+        INCLUDE "ui-text-colors.inc"
+    ENDIF
 
     ENDIF
     ENDIF

@@ -194,6 +194,11 @@ argumentsDone:
     ld a,(appName)
     or a
     jp z,usage
+    ld hl,descriptor+FILE_DESCRIPTOR.ext
+    ld de,monExtension
+    ld c,3
+    call option
+    jp z,monitorOpen
     ld a,(descriptor+FILE_DESCRIPTOR.ext)
     and 0DFh
     cp 'R'
@@ -202,6 +207,8 @@ argumentsDone:
     jp z,nativeOpen
     cp 'E'
     jp nz,badImage
+    jp nativeOpen
+    INCLUDE "monitor.inc"
 nativeOpen:
     ld hl,descriptor
     ld a,16
@@ -378,13 +385,9 @@ upperSource = ready ; Метка прежнего CPU-стенда; верхне
     cp 3
     jp z,rfRange
     ld de,LEGACY_APP_MEMORY_END
-    ld a,(descriptor+FILE_DESCRIPTOR.ext)
-    and 0DFh
-    cp 'R'
-    jp z,rangeLowReady
     ld a,(mode)
-    or a
-    jp nz,rangeLowReady
+    cp 2 ; MON replaces the kernel; MX and STD keep its resident resources.
+    jp z,rangeLowReady
     push hl
     call bios_getMemTop
     ld de,APP_MEMORY_END-1
@@ -990,6 +993,7 @@ keySTD: DB "STD"
 keyMON: DB "MON"
 modeMap: DB 0,1,3,2
 monSuffix: DB ".MON"
+monExtension: DB "MON"
 rfPath: DB "A:",05Ch,"RAMFOS.MON",0
 corePath: DB "A:",05Ch,"MONITOR2.MON",0
     BLOCK MAX_PATH-($-corePath),0

@@ -24,9 +24,11 @@ memoryInitLoop:
     ld hl,0
     ld (memoryMainStart),hl
     ld (memoryMainEnd),hl
-    ret
+    jp memoryResidentReset
 
 dosMemoryService:
+    cp MEM_OP_RESIDENT
+    jp z,memoryResident
     cp MEM_OP_RAMDISK
     jp z,memoryRamDisk
     cp MEM_OP_DISKCLAIM
@@ -79,12 +81,12 @@ memoryArena:
     push hl
     add hl,de
     jp c,memoryArenaBad
-    ld a,h
-    cp 08Ch
+    push hl
+    ld hl,(memorySystemEnd)
+    ex de,hl
+    pop hl
+    call cmp_hl_de
     jp c,memoryArenaRange
-    jp nz,memoryArenaBad
-    ld a,l
-    or a
     jp nz,memoryArenaBad
 memoryArenaRange:
     ld (memoryNewEnd),hl
@@ -163,7 +165,7 @@ memoryBankCheck:
     jp nc,memoryDenied
     ld hl,0
     ld (memoryCandidate),hl
-    ld hl,0FF00h
+    ld hl,MEM_DATA_LIMIT
     ld (memoryLimit),hl
     jp memoryTry
 memoryMain:
@@ -178,6 +180,7 @@ memoryMain:
     jp z,memoryNoMem
     ld (memoryCandidate),hl
     ld hl,(memoryMainEnd)
+    call memoryCapMain
     ld (memoryLimit),hl
 memoryTry:
     ; Выравнивание два байта, одинаковое для C/ASM.
@@ -452,6 +455,10 @@ memoryLimitScan:
     add hl,de
     dec c
     jp nz,memoryLimitScan
+    ; Bootstrap проверил хвост MEM до его восстановления: это новое ОЗУ.
+    ld a,(memoryRamFresh)
+    or a
+    jp nz,memoryApplyLimit
     ld hl,KD_DATA
     ld de,0
     ld b,2
@@ -505,6 +512,7 @@ memoryVolumeResult:
     jp c,memoryDenied
     jp memoryApplyLimit
 memoryRamOwner: DB 0
+memoryRamFresh: DB 0        ; Bootstrap: 1 — хвост первого банка B: утрачен.
 memoryRamPages: DB 0
 memoryRequestedPages: DW 0
 memoryMainOwner: DB 0
@@ -526,3 +534,4 @@ memoryResize: DW 0
 memoryCopy: DS 8,0
 
     INCLUDE "memory-extra.inc"
+    INCLUDE "memory-resident.inc"

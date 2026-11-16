@@ -122,6 +122,13 @@ if ($SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory 
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
+# Fixed-address installers are linked from their measured size, against arenaEnd.
+if (($SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')) -or
+    ($SourceBase -eq 'RAMDISK' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\ramdisk'))) {
+    & python (Join-Path $PSScriptRoot 'build-driver.py') $sourcePath
+    exit $LASTEXITCODE
+}
+
 $dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)
 $buildInputs = @($dependencies + $assemblerPath + $PSCommandPath)
 $newestInput = $buildInputs |
@@ -213,5 +220,9 @@ if ($SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRo
         }
     }
     Write-Host ("[verified] Monitor-2: {0} bytes identical to original" -f $compiledBytes.Length)
+}
+if ($SourceBase -eq 'MONWIN' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor_win')) {
+    & python (Join-Path $repositoryRoot 'scripts/tests/check-monitor-win-build.py')
+    if ($LASTEXITCODE -ne 0) { throw 'Window monitor differs from its historical reference.' }
 }
 exit 0

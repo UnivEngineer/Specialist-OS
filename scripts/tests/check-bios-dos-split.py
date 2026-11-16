@@ -10,7 +10,7 @@ base=bytearray(65536)
 for name,start in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
  data=(ROOT/f'bin/{name}.sys').read_bytes();base[start:start+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-rawfont=(ROOT/'assets/system-rom/FONT.FNT').read_bytes()
+rawfont=(ROOT/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 font=bytes(rawfont[c*8+y] for y in range(8) for c in range(256))
 base[S['bios_upper.charGen']:S['bios_upper.charGen']+9]=base[S['initTextVars']:S['initTextVarsEnd']]
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font

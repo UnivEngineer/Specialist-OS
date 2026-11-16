@@ -16,7 +16,7 @@ try {
     foreach ($worker in @(
         @{ Name='DISKBANK'; Define='-DWORKER_BANK=1'; Load='C000'; Flags='02' },
         @{ Name='DISKDOS'; Define='-DWORKER_DOS=1'; Load='C000'; Flags='01' },
-        @{ Name='DISKMAIN'; Define='-DWORKER_MAIN=1'; Load='2000'; Flags='04' }
+        @{ Name='DISKMAIN'; Define='-DWORKER_MAIN=1'; Load='2100'; Flags='04' }
     )) {
         $name = $worker.Name
         & (Join-Path $root 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow $worker.Define "--lst=build/$name.lst" "--sym=build/$name.sym" "--raw=build/$name.i80" worker.asm

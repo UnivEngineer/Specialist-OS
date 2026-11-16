@@ -12,8 +12,8 @@ bankCopyEnter:
     push de
     push hl
     ld de,bankCopyRequest
-    ld b,8
-    call bankCopyBytes
+    ld b,2
+    call bankCopyQuads
     ld hl,(bankCopyRequest+6)
     ld a,h
     or l
@@ -35,64 +35,7 @@ bankCopyEnter:
     jp nz,MEM_MOVE_SELECT_ADDR
     jp MEM_COPY_SELECT_ADDR
 bankCopyPrepared:
-    ; Окно заменяется лениво. Последовательные копии не сохраняют его снова.
-    ld a,(BANK_PROFILE)
-    or a
-    jp z,bankCopySaveWindow
-    cp BANK_PROFILE_COUNT
-    jp c,bankCopyWindowReady
-bankCopySaveWindow:
-    ld hl,BANK_WINDOW
-    ld de,bankCopySavedWindow
-    ld b,32
-    call bankCopyBytes
-bankCopyWindowReady:
-    ld a,BANK_PROFILE_COPY
-    ld (BANK_PROFILE),a
-    ld hl,(bankCopyRequest+1)
-    ld (BANK_COPY_SOURCE),hl
-    ld hl,(bankCopyRequest+4)
-    ld (BANK_COPY_DEST),hl
-    ld hl,0
-    add hl,sp
-    ld (BANK_COPY_SP),hl
-    ld a,(bankPage)
-    call bankCopyPair
-    ld (BANK_COPY_RETURN),hl
-    ld a,(bankCopyRequest)
-    call bankCopyPair
-    ld (BANK_COPY_SRC_SELECT),hl
-    ld a,(bankCopyRequest+3)
-    call bankCopyPair
-    ld (BANK_COPY_DST_SELECT),hl
-    ld hl,(bankCopyRequest+6)
-    ld a,l
-    and 15
-    ld (BANK_COPY_REST),a
-    ld a,h
-    dec a
-    or l
-    ld bc,16
-    jp z,bankCopyStart
-    ld b,4
-bankCopyDivide16:
-    or a
-    ld a,h
-    rra
-    ld h,a
-    ld a,l
-    rra
-    ld l,a
-    dec b
-    jp nz,bankCopyDivide16
-    ld b,h
-    ld c,l
-bankCopyStart:
-    ld de,16
-    ld a,b
-    or c
-    jp nz,bankCopyTail
-    jp bankCopyRemainder
+    jp MEM_COPY_PREPARE_ENTRY
 
 ; Секторный внутренний вход: тот же пакет, ровно 256 байт.
 ; Драйвер уже проверил страницы/буфер. Сохраняет регистры, SP и окно,
@@ -103,23 +46,69 @@ bankCopyPhysical:
     push de
     push hl
     ld de,bankCopyRequest
-    ld b,8
-    call bankCopyBytes
+    ld b,2
+    call bankCopyQuads
     jp bankCopyPrepared
 
-; HL = пара: L — младший байт регистра маппера, H — физическая страница.
-; AF/BC/HL разрушены. Селектор не требует кода в общем окне.
+; A=FAR-код -> HL: L — младший байт маппера, H — физическая страница.
+; 80h..8Fh — внутренний ROM-профиль, недоступный публичному memcpy_far.
+; AF/HL разрушены, BC/DE сохранены. Промежуточного селектора в A/C нет.
 bankCopyPair:
-    call bankCopySelector
-    ld l,a
-    ld h,c
+    or a
+    jp m,bankCopyRomPair
+    ld h,a
+    ld l,0FCh
+    ret z
+    dec h
+    inc l
+    ret
+bankCopyRomPair:
+    and 00Fh
+    ld h,a
+    ld l,0FEh
     ret
 
+ ; Параметры инициатора не находятся в аппаратном окне.
+bankCopySP = MEM_COPY_STATE
+bankCopyPairs = MEM_COPY_STATE+2
+bankCopyRest = MEM_COPY_STATE+8
+
+; Полные 32-байтные порции закончены. BC/DE — первые непереданные адреса.
 bankCopyReturn:
-    ; Окно пока содержит указатель стека инициатора. Восстанавливаем SP
-    ; до первой стековой команды. Профиль COPY остаётся установленным.
-    ld hl,(BANK_COPY_SP)
+    ld hl,(bankCopySP)
     ld sp,hl
+    ld a,(bankCopyRest)
+    or a
+    jp z,bankCopyBulkDone
+    push bc
+    push de
+    ld hl,bankCopyTinyTemplate
+    ld de,BANK_WINDOW
+    ld b,8
+    call bankCopyQuads
+    ld hl,(bankCopyPairs)
+    ld a,h
+    ld (BANK_WINDOW+4),a
+    ld h,0FFh
+    ld (BANK_WINDOW+1),hl
+    ld hl,(bankCopyPairs+2)
+    ld a,h
+    ld (BANK_WINDOW+11),a
+    ld h,0FFh
+    ld (BANK_WINDOW+8),hl
+    ld hl,(bankCopyPairs+4)
+    ld a,h
+    ld (BANK_WINDOW+25),a
+    ld h,0FFh
+    ld (BANK_WINDOW+22),hl
+    ld a,(bankCopyRest)
+    ld (BANK_WINDOW+29),a
+    pop de
+    pop bc
+    jp BANK_WINDOW
+bankCopyBulkDone:
+    ld a,BANK_PROFILE_COPY
+    ld (BANK_PROFILE),a
 bankCopyOK:
     xor a
 bankCopyError:
@@ -137,37 +126,14 @@ bankCopyPageCheck:
     scf
     ret
 
-; A=логический ID -> A=младший байт порта, C=значение записи.
-bankCopySelector:
-    or a
-    jp m,bankCopyRomSelector
-    ld c,a
-    or a
-    ld a,0FCh
-    ret z
-    dec c
-    ld a,0FDh
-    ret
-
-; Внутренний физический селектор 80h..8Fh — окно ROM/flash.
-; Публичный bankCopyFar отвергает такие FAR-коды проверкой банков.
-bankCopyRomSelector:
-    and 00Fh
-    ld c,a
-    ld a,0FEh
-    ret
-
 bankCopyRange:
-    push hl
-    ld hl,(bankCopyRequest+6)
     ex de,hl
-    pop hl
+    ld hl,(bankCopyRequest+6)
     add hl,de
     jp c,bankCopyBadRange
-    ld a,h
-    cp 0FFh
-    jp c,bankCopyValidRange
-    jp nz,bankCopyBadRange
+    ld a,0FFh
+    cp h
+    ret nz                     ; H<FFh, поэтому CF=0.
     ld a,l
     or a
     ret z
@@ -186,31 +152,16 @@ bankCommandWindow:
     ld a,(BANK_PROFILE)
     or a
     jp z,bankWindowReady
-    push bc
-    push de
-    push hl
-    ld hl,bankCopySavedWindow
-    ld de,BANK_WINDOW
-    ld b,32
-    call bankCopyBytes
-    pop hl
-    pop de
-    pop bc
+    xor a
+    call MEM_SET_PROFILE_ENTRY
 bankWindowReady:
     pop af
     ret
 
+bankCopyTinyTemplate = MEM_COPY_TINY_TEMPLATE
 bankCopyRequest: DS 8,0
 bankCopySavedWindow = MEM_COMMAND_SHADOW
 
-; Ошибка строки: стек содержит сохранённые DE/BC/AF, затем возврат.
-bankTextRangeError:
-    pop de
-    pop bc
-    pop af
-    ld a,DOS_ERR_ARGUMENT
-    scf
-    ret
 ; Ошибка стандартного PRINT_STRING: пакет не меняем, возвращаем код отказа.
 bankBiosStringError:
     call bankCommandWindow

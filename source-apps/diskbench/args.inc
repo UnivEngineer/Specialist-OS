@@ -1,4 +1,4 @@
-; Аргументы: [A:..H:] [-C:MAIN|DOS|BANK|ALL] [-M:RAW|FILE|ALL] [-V=0..2] [-W=0..9] [-S=1..24].
+; Аргументы: [A:..H:] [-C:MAIN|DOS|BANK|ALL] [-M:RAW|FILE|ALL] [-B:ALIGNED|UNALIGNED] [-V=0..2] [-W=0..9] [-S=1..24].
 ; Слова выделяет штатный bios_argNext; исходная строка не изменяется.
 ; parse_arguments: HL=строка, CF=ошибка, AF/BC/DE/HL разрушены.
 ; FFh отмечает отсутствующий диск/режим/проходы, ноль — отсутствующий размер.
@@ -7,6 +7,7 @@ parse_arguments:
     ld (argDrive),a
     ld (argCheck),a
     ld (argFrag),a
+    ld (argAlign),a
     ld (argWrites),a
     xor a
     ld (argSize),a
@@ -82,6 +83,13 @@ argument_bank:
     ld (argBank),a
     or a
     ret
+argument_alignment:
+    ld de,alignmentNames
+    ld a,3
+    ld (context_limit+1),a
+    ld a,2
+    ld (namedMode),a
+    jp named_start
 ; HL=слово, B=точная длина. Имена чувствительны только к ASCII-буквам.
 argument_mode:
     ld de,modeNames
@@ -126,6 +134,8 @@ context_end:
     ld a,(namedMode)
     or a
     jp z,argument_bank
+    cp 2
+    jp z,alignment_store
     ld a,(argMode)
     or a
     jp nz,argument_bad
@@ -133,6 +143,12 @@ context_end:
     ld (argMode),a
     or a
     ret
+alignment_store:
+    ld a,c
+    dec a
+    ld e,a
+    ld hl,argAlign
+    jp argument_store
 context_skip:
     ld a,(de)
     inc de
@@ -148,6 +164,7 @@ context_limit:
     jp argument_bad
 namedMode: DB 0
 modeNames: DB "RAW",0,"FILE",0,"ALL",0
+alignmentNames: DB "ALIGNED",0,"UNALIGNED",0
 contextNames: DB "BANK",0,"DOS",0,"MAIN",0,"ALL",0
 argument_value:
     cp 4
@@ -168,6 +185,8 @@ argument_value:
     jp z,argument_context
     cp 'M'
     jp z,argument_mode
+    cp 'B'
+    jp z,argument_alignment
     jp argument_bad
 argument_equals:
     cp '='
@@ -293,6 +312,7 @@ txtArgumentsError: DB "Bad arguments",00Ah,0
 txtArgumentsHelp:
     DB "DISKBEN [A:..H:] [-C:MAIN|DOS|BANK|ALL]",10
     DB "-M:RAW|FILE|ALL [ALL]",10
+    DB "-B:ALIGNED|UNALIGNED [ALIGNED]",10
     DB "-V=0/1/2: none/file/sector",10
     DB "-W=0..9 passes [1], 0=read",10
     DB "-S=1..24 KiB [8], DOS/ALL <=8",10
@@ -308,3 +328,5 @@ argBank: DB 0
 
 argFrag: DB 0FFh
 argMode: DB 0
+
+argAlign: DB 0FFh

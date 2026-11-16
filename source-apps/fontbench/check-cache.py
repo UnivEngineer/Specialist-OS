@@ -20,7 +20,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     s = symbols('FONTCOM')
     io = symbols('IO')
-    font = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
+    font = (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
     base = bytearray((i * 37 + (i >> 8) * 13) & 255 for i in range(65536))
     for name, address in [('FONTCOM.i80', 0), ('BIOS.sys', 0xc000), ('IO.sys', 0xf000)]:
         data = (ROOT / 'bin' / name).read_bytes()

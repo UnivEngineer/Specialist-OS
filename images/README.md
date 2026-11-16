@@ -8,6 +8,6 @@
 - `SystemRom_emulator.bin` — системное ПЗУ объёмом 64 КБ для эмулятора;
 - `SystemRom_128K.bin`, `SystemRom_256K.bin` и `SystemRom_512K.bin` — сырые
   образы перезаписываемого системного ПЗУ выбранного объёма;
-- `FlashDisk_emulator.bin` — flash-диск объёмом 64 КБ для эмулятора;
+- `FlashDisk_64K.bin` — образ внешнего ROM-диска объёмом 64 КБ для прошивки и эмулятора;
 - `FlashDisk_chip1_512K.bin` … `FlashDisk_chip4_512K.bin` — четыре микросхемы
   физического flash-диска общим объёмом 2 МБ.

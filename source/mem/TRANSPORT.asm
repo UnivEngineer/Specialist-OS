@@ -93,8 +93,8 @@ bankCallValid:
     add hl,sp
     ld (BANK_FRAME_SP),hl
     ld de,BANK_FRAME_REGS
-    ld b,8
-    call bankCopyBytes
+    ld b,2
+    call bankCopyQuads
     xor a
     ld (BANK_FRAME_KIND),a
 bankCallSaved:
@@ -163,8 +163,8 @@ bankPacketValid:
     ld (BANK_FRAME_OPERATION),hl
     ex de,hl
     ld de,BANK_FRAME_REGS
-    ld b,8
-    call bankCopyBytes
+    ld b,2
+    call bankCopyQuads
     ld a,2
     ld (BANK_FRAME_KIND),a
     jp bankCallSaved
@@ -233,8 +233,8 @@ bankResume:
     add hl,sp
     ex de,hl
     ld hl,BANK_FRAME_REGS
-    ld b,8
-    call bankCopyBytes
+    ld b,2
+    call bankCopyQuads
     pop hl
     pop de
     pop bc
@@ -259,15 +259,8 @@ bankSwitch:
     jp BANK_SELECT_RAM
 
 ; HL=источник, DE=назначение, B=1..255. AF/B/DE/HL разрушены.
-bankCopyBytes:
-    ld a,(hl)
-    ld (de),a
-    inc hl
-    inc de
-    dec b
-    jp nz,bankCopyBytes
-    ret
-
+bankCopyBytes = MEM_COPY_BYTES_ENTRY
+bankCopyQuads = MEM_COPY_QUADS_ENTRY
 bankPage:       DB 0
 bankPageCount:  DB 16
 bankOwner:      DB 0
@@ -279,10 +272,6 @@ bankServiceSP:  DW BANK_STACK_TOP
 bankStackFloor: DW BANK_STACK_LOW+64
 bankTransportEnd:
     ASSERT bankTransportEnd <= 0FF00h
-    INCLUDE "copy.inc"
-    ASSERT $ <= 0FF00h
-    DS 0FF00h-$,0
-    INCLUDE "copytail.inc"
 ; Модуль вернулся обычным RET. Вложенный отказ BIOS/DOS не должен
 ; оставлять статус диспетчеризации внешнего moduleCall незавершённым.
 bankModuleCallback:
@@ -306,4 +295,19 @@ bankLocalBlockBad:
     ld a,DOS_ERR_ARGUMENT
     scf
     ret
+; Ошибка строки: стек содержит сохранённые DE/BC/AF, затем возврат.
+bankTextRangeError:
+    pop de
+    pop bc
+    pop af
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
+    INCLUDE "copy.inc"
+    ASSERT $ <= BANK_COMMAND_LANDING
+    DS BANK_COMMAND_LANDING-$,0
+    INCLUDE "scalar-command.inc"
+    ASSERT $ <= 0FF00h
+    DS 0FF00h-$,0
+    INCLUDE "copytail.inc"
     ASSERT $ <= BANK_WINDOW

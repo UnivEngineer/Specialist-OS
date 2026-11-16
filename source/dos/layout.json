@@ -202,15 +202,14 @@
     {
       "name": "cli",
       "files": [
-        "../cli/command.inc",
+        "cli.inc",
         "../cli/directories.inc",
-        "../cli/attrib.inc",
         "../cli/move.inc",
-        "../cli/tree.inc",
-        "../cli/data.inc",
+        "cli-data.inc",
         "../cli/moveDirectories.inc",
-        "../cli/copyConfirm.inc",
-        "../cli/changes.inc"
+        "../cli/changes.inc",
+        "command-data.inc",
+        "enumerate.inc"
       ]
     },
     {

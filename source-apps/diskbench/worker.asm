@@ -1,11 +1,12 @@
 ; Общий измеритель MAIN/EXEC/DOS: один FILEHANDLE-запрос на весь локальный буфер.
-; Вход HL=main-адрес десяти байтов настроек: диск, проверка, проходы, секторы,
-; reserved:word, dataStart:word, RAW/FILE mask, scatter. Выход B=FAR-банк, HL=60 байт статистики.
+; Вход HL=main-адрес одиннадцати байтов настроек: диск, проверка, проходы, секторы,
+; reserved:word, dataStart:word, RAW/FILE mask, scatter, смещение буфера 0/1. Выход B=FAR-банк, HL=88 байт статистики.
 ; Первые 48 байт прежние; +48/+52 — RAW WRITE/READ HIGH, +56 — VERIFY HIGH U32.
+; +60/+70 — FILE HIGH WRITE/READ (по 10 байт), +84 — VERIFY HIGH U32.
 ; CF/A=ошибка DOS. Загрузка/пересылка результатов вне замеров.
     INCLUDE "../../source/include/mxos.inc"
     IFDEF WORKER_MAIN
-    ORG 02000h
+    ORG 02100h
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ELSE
     ORG DOS_BANK_DRIVER_ADDR
@@ -35,6 +36,13 @@ workerEntry:
     ld hl,copyRequest
     call mx_memcpyFar
     ret c
+    ld a,(config+10)
+    cp 2
+    jp nc,chainInvalid
+    ld hl,buffer
+    ld l,a
+    ld (dataBuffer),hl
+    ld (bufferAddress),hl
     ld a,(config)
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret c
@@ -49,7 +57,7 @@ workerEntry:
     ld a,c
     ld (caps),a
     ld hl,stats
-    ld b,60
+    ld b,88
     xor a
 clearStats:
     ld (hl),a
@@ -59,6 +67,8 @@ clearStats:
     call setOptions
     ret c
     call pitTimerInit
+    ld a,DOS_ERR_UNSUPPORTED
+    ret c
     call timerRange
     ld a,(config+3)
     cp BUFFER_SECTORS+1
@@ -105,40 +115,12 @@ passAllocationReady:
     ld a,(config+8)
     and 2
     jp z,rawFileReady
-    call begin
-    call bhWriteOpen
+    call filePass
     jp c,failed
-    call fileTransfer
+    IFDEF WORKER_MAIN
+    call fileHigh
     jp c,failed
-    xor a
-    call flush
-    jp c,failed
-    call bhClose
-    jp c,failed
-    call timer_sample
-    ld de,stats+20
-    call addStats
-    ld a,(config+1)
-    cp 6
-    jp nz,fileVerified
-    call verifyWrite
-    jp c,failed
-fileVerified:
-    ld a,2
-    ld (operation),a
-    call prepareFileBuffer
-    call begin
-    call bhReadOpen
-    jp c,failed
-    call fileTransfer
-    jp c,failed
-    call bhClose
-    jp c,failed
-    call timer_sample
-    ld de,stats+30
-    call addStats
-    call compareFileBuffer
-    jp c,failed
+    ENDIF
 rawFileReady:
     ld a,(config+8)
     and 1
@@ -226,6 +208,49 @@ cleanup:
     ld (owned),a
     ret
 
+filePass:
+    call begin
+    call bhWriteOpen
+    ret c
+    call fileTransfer
+    ret c
+    xor a
+    call flush
+    ret c
+    call bhClose
+    ret c
+    call timer_sample
+    ld de,0
+    call fileAddStats
+    ld a,(config+1)
+    cp 6
+    jp nz,fileVerified
+    call verifyWrite
+    ret c
+fileVerified:
+fileReadPass:
+    ld a,2
+    ld (operation),a
+    call prepareFileBuffer
+    call begin
+    call bhReadOpen
+    ret c
+    call fileTransfer
+    ret c
+    call bhClose
+    ret c
+    call timer_sample
+    ld de,10
+    call fileAddStats
+    call compareFileBuffer
+    ret c
+    ret
+fileAddStats:
+    ld hl,(fileStats)
+    add hl,de
+    ex de,hl
+    jp addStats
+
 ; Параметры/цепочка определены до начала обмена. CF=ошибка, регистры разрушены.
 begin:
     xor a
@@ -243,15 +268,21 @@ prepareRawBuffer:
     ld hl,(bufferAddress)
     ld a,(operation)
     cp 1
-    ld c,0
-    jp z,rawFill
-    dec c
-rawFill:
+    ld a,0
+    jp z,rawFillPattern
+    dec a
+rawFillPattern:
+    ld b,a
     ld a,(pass)
+    xor b
+    ld b,a
+    ld c,0
+rawFill:
+    ld a,b
     xor l
-    xor c
     ld (hl),a
-    inc l
+    inc hl
+    dec c
     jp nz,rawFill
     ret
 rawSeries:
@@ -318,13 +349,16 @@ validateRawNext:
     call rawCall
     ret c
     ld hl,(bufferAddress)
+    ld c,0
 validateRawByte:
     ld a,(pass)
     xor l
     cp (hl)
     jp nz,mismatch
-    inc l
+    inc hl
+    dec c
     jp nz,validateRawByte
+validateRawSectorDone:
     ld hl,index
     dec (hl)
     jp nz,validateRawNext
@@ -356,7 +390,7 @@ prepareFile:
     call bhCall
     ret c
     ld bc,1
-    ld hl,buffer
+    ld hl,(dataBuffer)
     ld a,1
     call bhTransfer
     ret c
@@ -367,30 +401,35 @@ fileTransfer:
     ld a,(config+3)
     ld b,a
     ld c,0
-    ld hl,buffer
+    ld hl,(dataBuffer)
     ld a,(operation)
     jp bhTransfer
 prepareFileBuffer:
-    ld hl,buffer
+    ld hl,(dataBuffer)
     xor a
     ld (index),a
 bulkFillPage:
     ld a,(operation)
     cp 1
-    ld c,0
-    jp z,bulkFill
-    dec c
-bulkFill:
+    ld a,0
+    jp z,bulkFillPattern
+    dec a
+bulkFillPattern:
+    ld b,a
     ld a,(pass)
+    xor b
     ld b,a
     ld a,(index)
     xor b
+    ld b,a
+    ld c,0
+bulkFill:
+    ld a,b
     xor l
-    xor c
     ld (hl),a
-    inc l
+    inc hl
+    dec c
     jp nz,bulkFill
-    inc h
     ld a,(index)
     inc a
     ld (index),a
@@ -403,27 +442,31 @@ compareFileBuffer:
     ld a,(readUnknown)
     or a
     ret nz
-    ld hl,buffer
+    ld hl,(dataBuffer)
     xor a
     ld (index),a
-bulkCompare:
+bulkComparePage:
     ld a,(pass)
     ld b,a
     ld a,(index)
     xor b
+    ld b,a
+    ld c,0
+bulkCompare:
+    ld a,b
     xor l
     cp (hl)
     jp nz,mismatch
-    inc l
+    inc hl
+    dec c
     jp nz,bulkCompare
-    inc h
     ld a,(index)
     inc a
     ld (index),a
     ld b,a
     ld a,(config+3)
     cp b
-    jp nz,bulkCompare
+    jp nz,bulkComparePage
     xor a
     ret
 
@@ -483,10 +526,75 @@ rawCall:
     jp 0
 
     IFDEF WORKER_MAIN
+; Полный FILE HIGH: экран сохраняется в уже отработавший LOW-буфер.
+; Вся подготовка/восстановление вне измерения; общий FILEHANDLE не меняется.
+fileHigh:
+    ld a,(config)
+    or a
+    ret nz
+    ld a,(config+3)
+    cp 33                       ; Целиком до 8 КиБ, без порционного FILE API.
+    ret nc
+    ld hl,txtScreenBuffer
+    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    ld hl,09000h
+    ld (copyRequest+1),hl
+    ld hl,buffer
+    ld (copyRequest+4),hl
+    ld a,(config+3)
+    ld h,a
+    ld a,(config+10)
+    ld l,a                      ; Включая дополнительный байт смещения.
+    ld (copyRequest+6),hl
+    ld hl,copyRequest
+    call mx_memcpyFar
+    ret c
+    xor a
+    ld (IO_COLOR),a              ; Экранный буфер остаётся чёрным во время теста.
+    ld hl,09000h
+    ld a,(config+10)
+    ld l,a
+    ld (dataBuffer),hl
+    ld hl,stats+60
+    ld (fileStats),hl
+    MXOS_CALL MXOS_DOS_GET_ERROR ; Восстановить COMMAND вне таймера.
+    ld a,(config+2)
+    or a
+    jp z,fileHighRead
+    ld a,1
+    ld (operation),a
+    call prepareFileBuffer
+    call filePass
+    jp fileHighReturn
+fileHighRead:
+    call fileReadPass
+fileHighReturn:
+    push af
+    ld a,COLOR_BIOS
+    ld (IO_COLOR),a              ; Цвет консоли до восстановления её байтов.
+    ld hl,buffer
+    ld (copyRequest+1),hl
+    ld hl,09000h
+    ld (copyRequest+4),hl
+    ld hl,copyRequest
+    call mx_memcpyFar
+    ld hl,(bufferAddress)        ; Постоянный LOW-адрес, уже учитывает +1.
+    ld (dataBuffer),hl
+    ld hl,stats+20
+    ld (fileStats),hl
+    ld hl,config
+    ld (copyRequest+4),hl
+    ld hl,11
+    ld (copyRequest+6),hl
+    pop af
+    ret
+
 ; A: верхний буфер одновременно виден с ROM. Подготовка/сравнение
 ; исключены так же, как для нижнего буфера; число секторов одинаковое.
 rawHigh:
     ld hl,08200h
+    ld a,(config+10)
+    ld l,a
     ld (bufferAddress),hl
     ld a,1
     ld (operation),a
@@ -514,6 +622,8 @@ rawHigh:
     jp readHigh
 readHigh:
     ld hl,08200h
+    ld a,(config+10)
+    ld l,a
     ld (bufferAddress),hl
     ld a,2
     ld (operation),a
@@ -526,7 +636,7 @@ readHigh:
     call addElapsed
     call validateRawData
     push af
-    ld hl,buffer
+    ld hl,(dataBuffer)
     ld (bufferAddress),hl
     pop af
     ret
@@ -547,7 +657,10 @@ verifyWrite:
     call compareFileBuffer
     ret c
     call timer_sample
-    ld de,stats+44
+    ld hl,(fileStats)
+    ld de,24
+    add hl,de
+    ex de,hl
     jp addElapsed
 
 ; DE=10 байт: elapsed U32, flush U32, flush count U16.
@@ -706,19 +819,12 @@ readOnlyFile:
     ld hl,descriptor
     MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp c,readOnlyDone
-    ld a,2
-    ld (operation),a
-    call prepareFileBuffer
-    call begin
-    call bhReadOpen
+    call fileReadPass
     ret c
-    call fileTransfer
+    IFDEF WORKER_MAIN
+    call fileHigh
     ret c
-    call bhClose
-    ret c
-    call timer_sample
-    ld de,stats+30
-    call addStats
+    ENDIF
 readOnlyDone:
     ld hl,readOnlyLeft
     dec (hl)
@@ -840,8 +946,8 @@ txtScattered: DB "  Allocation: random",0
 copyRequest: DB 0
     DW 0
     DB 0
-    DW config,10
-config: DS 10,0
+    DW config,11
+config: DS 11,0
 bankId: DB 0
 caps: DB 0
 capacity: DW 0
@@ -858,6 +964,7 @@ offset: DB 0
 cluster: DW 0
 chainFatSector: DW 0FFFFh
 list: DW 0
+dataBuffer: DW buffer
 bufferAddress: DW buffer
 writeStat: DW 0
 verifyStat: DW 0
@@ -867,13 +974,15 @@ flushCount: DW 0
 v_elapsed: DD 0
 v_setup: DD 0
 v_last: DW 0
-stats: DS 60,0
+fileStats: DW stats+20
+stats: DS 88,0
 descriptor: DB "DISKBEN TMP",0
     DS 20,0
     ASSERT $-descriptor == FILE_DESCRIPTOR
 sectors: DS 24*4*2,0
     IFDEF WORKER_MAIN
 txtPass: DB 10,"MAIN: Pass ",0
+txtScreenBuffer: DB 10,"SCREEN WILL BE USED AS A TEMPORARY BUFFER",10,0
     ELSE
     IFDEF WORKER_DOS
 txtPass: DB 10,"DOS:  Pass ",0
@@ -882,24 +991,26 @@ txtPass: DB 10,"BANK: Pass ",0
     ENDIF
     ENDIF
     ALIGN 256
-fatBuffer: DS 256,0
+; FAT нужен только после окончания FILE-чтения/сравнения, при подготовке RAW.
+; RAW использует первые 256 байт (+1 при смещении), FAT — отдельную страницу.
 workerCodeEnd:
     IFDEF WORKER_MAIN
 BUFFER_SECTORS = 24*4
-    ASSERT $ <= 02C00h
-    DS 02C00h-$,0
-buffer: DS BUFFER_SECTORS*256,0
+    ASSERT $ <= 02B00h
+    DS 02B00h-$,0
+buffer: DS BUFFER_SECTORS*256+1,0
     ELSE
     IFDEF WORKER_DOS
 BUFFER_SECTORS = BENCH_DOS_BUFFER_KIB*4
-buffer: DS BUFFER_SECTORS*256,0
+buffer: DS BUFFER_SECTORS*256+1,0
     ELSE
 BUFFER_SECTORS = 24*4
 ; EXEC-банк целиком принадлежит DLL; нижняя область свободна от её тела.
 buffer = 02000h
-    ASSERT buffer+BUFFER_SECTORS*256 <= DOS_BANK_DRIVER_ADDR
+    ASSERT buffer+BUFFER_SECTORS*256+1 <= DOS_BANK_DRIVER_ADDR
     ENDIF
     ENDIF
+fatBuffer = buffer+512
 workerEnd:
     IFDEF WORKER_MAIN
     ASSERT workerEnd <= LEGACY_APP_MEMORY_END

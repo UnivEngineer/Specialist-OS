@@ -8,11 +8,13 @@ param(
     [ValidateSet(128, 256, 512)]
     [int] $HardwareSizeKB = 128,
     [string] $ManifestFile,
+    [string] $BootFont,
     [switch] $BootstrapProbe
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
+if ($BootFont -and $Target -notin @('SystemEmuWritable','SystemHardware')) { throw '-BootFont requires SystemEmuWritable or SystemHardware.' }
 if ($ManifestFile -and $Target -ne 'Games2M') { throw '-ManifestFile is currently supported only for Games2M.' }
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -82,6 +84,7 @@ function Get-Manifest {
 
     $lineNumber = 0
     $volumeLabel = $null
+    $bootFontName = $null
     $entries = foreach ($line in [IO.File]::ReadAllLines($Path)) {
         $lineNumber++
         $entry = $line.Trim()
@@ -89,6 +92,11 @@ function Get-Manifest {
             continue
         }
         if ($entry.StartsWith("@")) {
+            if ($entry -match '^@bootfont\s+(\S+)$') {
+                if ($null -ne $bootFontName) { throw "Duplicate @bootfont at ${Path}:${lineNumber}" }
+                $bootFontName = $Matches[1].Replace('\', '/')
+                continue
+            }
             if ($entry -notmatch '^@label\s+(.+)$') {
                 throw "Invalid manifest directive at ${Path}:${lineNumber}: expected @label Volume label"
             }
@@ -131,7 +139,7 @@ function Get-Manifest {
     if ($null -eq $volumeLabel) {
         throw "Missing @label in manifest: $Path"
     }
-    return [pscustomobject]@{ Entries = @($entries); VolumeLabel = $volumeLabel }
+    return [pscustomobject]@{ Entries = @($entries); VolumeLabel = $volumeLabel; BootFont = $bootFontName }
 }
 
 switch ($Target) {
@@ -170,7 +178,9 @@ switch ($Target) {
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок служб; RAMD при необходимости запускает FORMAT.
         # Физические позиции BOOT/BIOS/DOS задаются отдельными проверками ниже.
-        $early = @('BIOS.SYS','IO.SYS','DOS.SYS','FONT.FNT','FORMAT.COM','AUTOEXEC.BAT','NC.COM')
+        if ($BootFont) { $manifestData.BootFont = $BootFont.Replace('\', '/') }
+        if (-not $manifestData.BootFont) { throw 'System manifest requires @bootfont path/to/engine.fnt' }
+        $early = @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$manifestData.BootFont,'FORMAT.COM','AUTOEXEC.BAT','NC.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -189,7 +199,9 @@ switch ($Target) {
         $manifestData = Get-Manifest $manifestPath "hardware"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
-        $early = @('BIOS.SYS','IO.SYS','DOS.SYS','FONT.FNT','FORMAT.COM','AUTOEXEC.BAT','NC.COM')
+        if ($BootFont) { $manifestData.BootFont = $BootFont.Replace('\', '/') }
+        if (-not $manifestData.BootFont) { throw 'System manifest requires @bootfont path/to/engine.fnt' }
+        $early = @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$manifestData.BootFont,'FORMAT.COM','AUTOEXEC.BAT','NC.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -217,8 +229,8 @@ switch ($Target) {
         $chipSize = 64KB
         $maxFiles = 64
         $imageFormat = "Split"
-        $outputPath = Join-Path $imageDirectory "FlashDisk_emulator.bin"
-        $partNamePattern = "FlashDisk_emulator.bin"
+        $outputPath = Join-Path $imageDirectory "FlashDisk_64K.bin"
+        $partNamePattern = "FlashDisk_64K.bin"
         $makeBootDisk = $false
     }
     "Games2M" {
@@ -242,20 +254,22 @@ $volumeLabel = $manifestData.VolumeLabel
 # Линейный bootstrap: фиксированные адреса не зависят от длины соседних файлов.
 $stagedBoot = $makeBootDisk -and $imageFormat -eq 'Raw'
 if ($makeBootDisk -and -not $stagedBoot) { throw 'Split BIOS/DOS requires a linear system image: use SystemEmuWritable or SystemHardware (128/256/512 KB).' }
-$fixedBootFiles = @{ 'BOOT.SYS' = 0x2000; 'BIOS.SYS' = 0x3000; 'FONT.FNT' = 0x5800; 'IO.SYS' = 0x6000; 'MEM.SYS' = 0x7000; 'DOS.SYS' = 0x8000 }
+$fixedBootFiles = @{ 'BOOT.SYS' = 0x2000; 'BIOS.SYS' = 0x3000; 'IO.SYS' = 0x6000; 'MEM.SYS' = 0x7000; 'DOS.SYS' = 0x8000 }
 if ($BootstrapProbe -and -not $stagedBoot) { throw '-BootstrapProbe requires a linear system image.' }
 if ($stagedBoot) {
-    $bootstrapArgs = @()
+    $bootFontName = $manifestData.BootFont
+    $fontEntries = @($manifest | Where-Object { $_.ImageName -eq $bootFontName })
+    if ($fontEntries.Count -ne 1) { throw "Bootstrap requires exactly one $bootFontName" }
+    $fontSource = Join-Path $assetDirectory $fontEntries[0].Source
+    $fixedBootFiles[$bootFontName] = 0x4800
+    $bootstrapArgs = @('--font-body', $fontSource)
     if ($BootstrapProbe) { $bootstrapArgs += '--probe' }
     & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
     if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
     $bootPath = Join-Path $repositoryRoot 'bin/bootstrap/sector.bin'
-    foreach ($name in @('BIOS.SYS','IO.SYS','DOS.SYS','FONT.FNT')) {
+    foreach ($name in @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$bootFontName)) {
         if (@($manifest | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "Bootstrap requires exactly one $name" }
     }
-    $bootEntry = [pscustomobject]@{ ImageName='BOOT.SYS'; Source='../bin/bootstrap/BOOT.bin'; LoadAddress='0x2000'; Attributes=0x05 }
-    $tailEntry = [pscustomobject]@{ ImageName='MEM.SYS'; Source='../bin/MEM.sys'; LoadAddress='0x0000'; Attributes=0x05 }
-    $manifest = @($bootEntry) + @($manifest | Where-Object { $_.ImageName -eq 'BIOS.SYS' }) + @($manifest | Where-Object { $_.ImageName -eq 'IO.SYS' }) + @($tailEntry) + @($manifest | Where-Object { $_.ImageName -eq 'DOS.SYS' }) + @($manifest | Where-Object { $_.ImageName -notin @('BIOS.SYS','IO.SYS','DOS.SYS') })
     if ($BootstrapProbe) { $outputPath = $outputPath -replace '\.bin$', '-bootprobe.bin' }
 }
 
@@ -304,6 +318,7 @@ if ($imageFormat -eq 'Mx2') {
     Set-Word $fat (($dataClusters + 2) * 2) 0xFFF7
 }
 $nextCluster = 2
+$hasNestedFiles = @($manifest | Where-Object { $_.ImageName -match '[/\\]' }).Count -gt 0
 $fileCount = 1
 # Метка в BPB совпадает с единственной меткой в корне.
 $labelEntry = New-Object byte[] 32
@@ -327,7 +342,7 @@ try {
 
         $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
         $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
-        if ($extension.ToLowerInvariant() -in @('com', 'exe', 'dll', 'rks')) {
+        if ($extension.ToLowerInvariant() -in @('com', 'exe', 'dll', 'fnt', 'rks')) {
             $storedBytes = Convert-ExecutableFile $sourcePath $extension $loadAddress
         } else {
             $storedBytes = [IO.File]::ReadAllBytes($sourcePath)
@@ -343,19 +358,26 @@ try {
         }
         $imageNames[$imageNameKey] = $sourceName
 
-        if ($fileCount -ge $maxFiles) {
+        if ($fileCount -ge $maxFiles -and -not $hasNestedFiles) {
             throw "Root directory is full while adding $sourceName ($fileCount of $maxFiles files)"
         }
         $fileCount++
 
         if ($stagedBoot -and $fixedBootFiles.ContainsKey($sourceName)) {
             $fixedAddress = $fixedBootFiles[$sourceName]
-            $limit = switch ($sourceName) { 'BOOT.SYS' { 0x3000 }; 'BIOS.SYS' { 0x5800 }; 'FONT.FNT' { 0x6000 }; 'IO.SYS' { 0x7000 }; 'MEM.SYS' { 0x8000 }; 'DOS.SYS' { 0x18000 } }
+            $limit = switch ($sourceName) { 'BOOT.SYS' { 0x3000 }; 'BIOS.SYS' { 0x4800 }; 'IO.SYS' { 0x7000 }; 'MEM.SYS' { 0x8000 }; 'DOS.SYS' { 0x18000 } }
+            if ($sourceName -eq $bootFontName) { $limit = 0x6000 }
             if ($fixedAddress -lt $dataStartSector * $sectorSize -or $fixedAddress + $originalSize -gt $limit) { throw "Fixed bootstrap slot overflow: $sourceName" }
-            if ($sourceName -eq 'FONT.FNT' -and ($originalSize -ne 2048)) { throw 'FONT.FNT: expected 2048 bytes' }
+            if ($sourceName -eq $bootFontName -and $loadAddress -ne 0xD800) { throw 'Boot font must load at D800h' }
             if ($sourceName -eq 'IO.SYS' -and ($loadAddress -ne 0xF000 -or $loadAddress+$originalSize -gt 0xF740)) { throw 'Invalid IO load range' }
             if ($sourceName -eq 'BIOS.SYS' -and ($loadAddress -ne 0xC000 -or $loadAddress+$originalSize -gt 0xF000)) { throw 'Invalid BIOS load range' }
-            if ($sourceName -eq 'DOS.SYS' -and ($loadAddress -ne 0x0100 -or $loadAddress+$originalSize -gt 0x7000)) { throw 'Invalid DOS load range' }
+            if ($sourceName -eq 'DOS.SYS') {
+                $kernelSymbols = [IO.File]::ReadAllText((Join-Path $repositoryRoot 'bin/banked/KERNEL.sym'))
+                $codeLimit = [regex]::Match($kernelSymbols, '(?m)^DOS_CODE_END_MAX: EQU 0x([0-9A-Fa-f]+)')
+                if (-not $codeLimit.Success) { throw 'Missing DOS_CODE_END_MAX in KERNEL.sym' }
+                $dosLimit = [Convert]::ToInt32($codeLimit.Groups[1].Value, 16)
+                if ($loadAddress -ne 0x0100 -or $loadAddress+$originalSize -gt $dosLimit) { throw 'Invalid DOS load range' }
+            }
             $nextCluster = [int]($fixedAddress / $sectorSize) - $dataStartSector + 2
         }
 
@@ -453,13 +475,21 @@ try {
         }
     }
 
-    $start = Join-Bytes $boot $fat $directory.ToArray()
+    # Keep the complete host entry list out of the fixed-size FAT root.
+    # nest-fat-image writes only top-level children into the real root.
+    $rootBytes = $directory.ToArray()
+    if ($hasNestedFiles) {
+        $entryListPath = Join-Path $repositoryRoot "bin/nested-$Target.entries"
+        [IO.File]::WriteAllBytes($entryListPath, $rootBytes)
+        $rootBytes = New-Object byte[] ($directorySectors * $sectorSize)
+    }
+    $start = Join-Bytes $boot $fat $rootBytes
     $data = $fileData.ToArray()
     $nestedPaths = @($manifest | ForEach-Object { $_.ImageName })
     if (@($nestedPaths | Where-Object { $_ -match '[/\\]' }).Count -gt 0) {
         $stagingPath = Join-Path $repositoryRoot "bin/nested-$Target.bin"
         [IO.File]::WriteAllBytes($stagingPath, (Expand-Bytes (Join-Bytes $start $data) $volumeSize))
-        & python (Join-Path $PSScriptRoot 'nest-fat-image.py') $stagingPath @nestedPaths
+        & python (Join-Path $PSScriptRoot 'nest-fat-image.py') $stagingPath @nestedPaths --entries $entryListPath
         if ($LASTEXITCODE -ne 0) { throw 'Nested FAT image generation failed.' }
         $nestedImage = [IO.File]::ReadAllBytes($stagingPath)
         [Array]::Copy($nestedImage, 0, $start, 0, $start.Length)

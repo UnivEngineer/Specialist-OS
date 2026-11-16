@@ -665,6 +665,8 @@ statFileVerify:  DD 0
 statRawVerifyHigh: DD 0
 statFileVerifyHigh: DD 0
 statRawHighPostVerify: DD 0
+statFileHigh: BLOCK 28,0
+statFileHighVerify = statFileHigh+24
 tmpDescriptor:    DB "DISKBEN TMP",0
                   BLOCK 6,0
                   DW 0

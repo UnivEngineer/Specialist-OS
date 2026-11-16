@@ -50,3 +50,29 @@ compatFailure:
 compatCancel:
     xor a
     ret
+
+; RUN *.MON: private panel I/O uses the private 256-byte MAIN buffer. Never
+; expose DOS/FAT banks to the legacy filesystem, including private calls.
+monitorStart:
+    di
+    ld sp,STACK_TOP
+    call j_biosInit
+    xor a
+    ld (v_aramMaxPage),a
+    ld (v_aramMaxPageI),a
+    ld (0000h),a
+    ld (0000h+1),a
+    ld (0000h+2),a
+    ld a,0FCh
+    ld (disableARAM1+1),a
+    ld (disableARAM2+1),a
+    ; v_aramPageStart is 0000h in the freshly loaded image.
+    ld hl,0100h
+    ld (v_aramPageEnd),hl
+    ld (v_aramPageEnd2),hl
+    ld hl,RAM_TOP
+    call j_setMemTop
+    ld hl,a_12spaces+9
+    call fileSetType
+    ld b,0
+    jp dlg_main

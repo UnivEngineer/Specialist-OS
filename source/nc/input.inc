@@ -8,7 +8,9 @@ input:
             ld hl,03C6Eh
             ld (bios_vars.cursorY),hl
             ld hl,vars.input
-            ld bc,(1 << 8) + P_INPUT_WIDTH
+            ld a,(ncInputChars)
+            ld c,a
+            ld b,1
             call lineEdit
             call ncInputHookEnd
             push af
@@ -17,7 +19,7 @@ input:
             pop af
             ret
 
-; Пустая строка оставляет стрелки панели. Непустую редактирует Lineedit;
+; Up/Down всегда оставляются панели. Непустую строку редактирует Lineedit;
 ; F-клавиши, Tab и CTRL возвращаются главному циклу NC с актуальной строкой.
 ncReadKey:
             ld hl,(vars.cmdLineEnd)
@@ -32,12 +34,31 @@ ncReadKey:
             ld hl,vars.cmdLine
             ld a,(vars.cmdCapacity)
             ld c,a
-            ld b,7
+            ld b,15
             ld a,COLOR_CMDLINE
             call ncInputHookBegin
+            ld a,(ncCommandEditResume)
+            or a
+            jp z,ncCommandEditBegin
+            xor a
+            ld (ncCommandEditResume),a
+            call lineEditRedraw
+            jp ncCommandEditDone
+ncCommandEditBegin:
             call lineEdit
+ncCommandEditDone:
             call ncInputHookEnd
             push af
+            ; Panel movement cannot enter another editor. Reuse the prompt's
+            ; position/offset on the next read instead of restarting at End.
+            cp 019h
+            jp z,ncCommandEditKeep
+            cp 01Ah
+            jp nz,ncCommandEditSaved
+ncCommandEditKeep:
+            ld a,1
+            ld (ncCommandEditResume),a
+ncCommandEditSaved:
             ld a,(lineEditLength)
             ld e,a
             ld d,0
@@ -50,6 +71,7 @@ ncReadKey:
             ld (vars.cmdOffset),a
             pop af
             ret
+ncCommandEditResume: DB 0
     DEFINE LINEEDIT_BATCH 1
 LINEEDIT_PRINT_CHAR EQU ncPrintChar
 LINEEDIT_PAINT EQU ncPrintField

@@ -142,6 +142,8 @@ streamLoop:
             jp z,streamReturn
             ld hl,(v_streamCluster)
             ex de,hl
+            call streamEnsureWritable
+            jp c,streamReturn
             call fatCheckCluster
             jp c,streamReturn
             ld hl,(v_streamOffset)
@@ -186,6 +188,14 @@ streamChunkReady:
             call streamDirectCached
             jp c,streamReturn
 streamDirectIO:
+    IFDEF BANKED_DOS_BUILD
+            ld a,(v_logicalShift)
+            or a
+            jp nz,streamDirectSingle
+            call klEligible
+            jp z,streamBatchStart
+streamDirectSingle:
+    ENDIF
             ; Полный сектор без копии в кэше передаётся прямо из/в буфер.
             ld hl,(v_streamPtr)
             ld a,(v_streamMode)
@@ -265,15 +275,23 @@ streamCopyDone:
             ld (v_streamWithin),hl
             jp streamSectorLoop
 streamNextCluster:
+            call streamAdvanceCluster
+            jp c,streamReturn
+            jp streamLoop
+; Общий переход цепочки для потока и планировщика; AF/DE/HL разрушены.
+streamAdvanceCluster:
             ld hl,(v_streamCluster)
+            ld (v_streamPrevious),hl
             ex de,hl
             call fatReadCluster
-            jp c,streamReturn
+            ret c
             ex de,hl
             ld (v_streamCluster),hl
             ld hl,0
             ld (v_streamOffset),hl
-            jp streamLoop
+            ret
+streamReturnClear:
+            or a
 streamReturn:
             push af
             ld hl,(v_streamCluster)
@@ -353,6 +371,7 @@ v_streamMode: DB 0
 v_streamChunk: DW 0
 v_streamSector: DW 0 ; абсолютный LBA текущего сектора
 v_streamWithin: DW 0
+v_streamPrevious: DW 0
 
 ; DE=LBA. CF=0, если сектор присутствует в кэше, иначе CF=1.
 ; При попадании HL=слот кэша; DE сохранён, BC/AF разрушены. Проверяем грязные строки:
@@ -375,11 +394,14 @@ streamCachePartialProbe:
             ld a,(v_cacheProbeCount)
             or a
             jp z,streamCacheAbsent
+            call cacheProbeHot
+            ret nc
+            ld a,(v_cacheProbeCount)
             ld c,a
             ld hl,cacheData
 streamCacheProbe:
             call cacheSlotMatches
-            ret z
+            jp z,cacheRememberHot
             push bc
 streamCacheProbeStep:
             ld bc,FAT_CACHE_DATA
@@ -543,3 +565,34 @@ streamPartialVerify:
             or a
             ret
 v_streamChecked: DB 0
+
+; FILEHANDLE WRITE может расширить цепочку при подготовке следующей пачки.
+; Политика выделения и учёт отката остаются в штатном обработчике HANDLE.
+streamEnsureWritable:
+            ld a,(v_streamFileWrite)
+            or a
+            ret z
+            ld a,d
+            or e
+            jp z,streamAllocateCluster
+            ld a,d
+            cp 0FFh
+            jp nz,streamWritableReady
+            ld a,e
+            cp 0F8h
+            jp c,streamWritableReady
+streamAllocateCluster:
+            ld hl,(v_streamPrevious)
+            ld (v_handlePrevious),hl
+            ld h,d
+            ld l,e
+            ld (v_handleCluster),hl
+            call handleEnsureCurrent
+            ret c
+            ld hl,(v_handleCluster)
+            ld (v_streamCluster),hl
+            ex de,hl
+streamWritableReady:
+            xor a
+            ret
+v_streamFileWrite: DB 0

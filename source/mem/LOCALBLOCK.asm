@@ -1,11 +1,12 @@
-; Локальный физический вход, отдельный фрагмент устанавливаемого хвоста.
-; Находится ниже публичных JMP; одинаковый адрес в main и банке DOS.
+; Общая сборка LOCAL/CLIENT/TEXT с взаимными ссылками.
+; Сборщик разделяет бинарник по mx_call на два установочных сегмента.
     INCLUDE "../include/mxos.inc"
+    INCLUDE "biosabi.inc"
     INCLUDE "abi.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
-    INCLUDE "../../bin/banked/client-imports.inc"
+    INCLUDE "../../bin/banked/main-io-import.inc"
     ORG MEM_IMAGE_LOCAL_START
-    INCLUDE "dword.inc"
+    INCLUDE "copy-prepare.inc"
     INCLUDE "text-route.inc"
     ASSERT $ <= MEM_EXTENSION_ENTRY
     DS MEM_EXTENSION_ENTRY-$,0
@@ -37,7 +38,7 @@ memInfo:
     ld a,(MEM_BANK_KIND)
     ld c,a
     ld hl,MEM_ABI_VERSION
-    ld de,MEM_CAP_COPY | MEM_CAP_LAZY_WINDOW | MEM_CAP_MEMORY_OPS | MEM_CAP_MODULES | MEM_CAP_ALLOCATOR | MEM_CAP_DWORD
+    ld de,MEM_CAP_COPY | MEM_CAP_LAZY_WINDOW | MEM_CAP_MEMORY_OPS | MEM_CAP_MODULES | MEM_CAP_ALLOCATOR
     ld a,(bankPage)
     or a
     ret
@@ -47,6 +48,11 @@ memRuntimeRevision: DW MEM_RUNTIME_REVISION
     DS 32,0
     ASSERT $ == MEM_NEAR_COPY
 memNearCopy: DW 0
+mainLocalEnd:
+    ASSERT $ <= MEM_IO_SYSTEM
+    INCLUDE "local-io.inc"
 localBlockEnd:
     ASSERT $ <= mx_call
+    DS mx_call-$,0
+    INCLUDE "CLIENT.asm"
     END

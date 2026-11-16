@@ -24,11 +24,15 @@ drawCursor_2:     ; Повторить код ниже b раз
             ld    a, (de)
             xor   h
             ld    (de),a
+            ld    a,l
+            or    a
+            jp z,drawCursor_nextRow ; last aligned column must not write C000h.
             inc   d
             ld    a, (de)
             xor   l
             ld    (de),a
             dec   d
+drawCursor_nextRow:
             dec   e
             jp    drawCursor_2
 

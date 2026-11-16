@@ -7,7 +7,7 @@ O=R/'docs/bench/engine-grid/cpu';O.mkdir(parents=True,exist_ok=True)
 symbols=lambda name:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/f'bin/{name}.sym').read_text(encoding='utf-8'),re.M)}
 s=symbols('FONTCOM');bs=symbols('BIOS')
 w=lambda n:(n&65535).to_bytes(2,'little')
-font=(R/'assets/system-rom/FONT.FNT').read_bytes()
+font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 f4=(R/'bin/FONTBEN.font4.bin').read_bytes()
 font4=bytes((f4[(c//2)*8+y]>>(0 if c&1 else 4))&15 for c in range(256) for y in range(8))
 base=bytearray(65536)
@@ -35,6 +35,16 @@ def init(module,variant,pre,width):
     mem=bytearray(base);data=(R/f'bin/{module}.i80').read_bytes();mem[0x2000:0x2000+len(data)]=data
     mem,regs,_=run(mem,0x2000,af=variant<<8,bc=pre<<8)
     assert not regs[0]&1,('init',module,variant,pre)
+    if module=='ENGINEQ' and pre:
+        rows=bytes(font[c*8+y]&63 for y in range(8) for c in range(256))
+        for plane,transform in enumerate((lambda b:((b<<2)|(b>>4))&255,
+                                           lambda b:((b<<4)|(b>>2))&255,
+                                           lambda b:((b<<6)|b)&255)):
+            start=0x3000+plane*2048
+            assert mem[start:start+2048]==bytes(map(transform,rows)),('packed plane',plane)
+        # The packed table includes phase zero. Poison the otherwise unused
+        # source-copy area to detect accidental fallbacks to another 2 KiB.
+        mem[0x2800:0x3000]=bytes([0xA5])*2048
     desc=int.from_bytes(regs[4:6],'little')
     assert mem[desc]==width,(module,variant,'width')
     mem,_,_=run(mem,s['engineSave'])
@@ -43,6 +53,9 @@ def init(module,variant,pre,width):
     mem[s['hookRoundMask']+1]=(-mem[desc+1])&255
     mem[s['hookBounds']+1:s['hookBounds']+3]=w(s[f'bounds{width}'])
     mem,_,_=run(mem,s['engineResetStage'])
+    mode=1 if module=='ENGINE6' and variant==0 else variant+2 if module=='ENGINES' and variant in (0,1) else 0
+    mem[s['engineHistoricalMode']]=mode
+    if mode:mem[s['historicalGlyph']+1:s['historicalGlyph']+3]=mem[desc+8:desc+10]
     mem,_,_=run(mem,s['engineInstall'])
     return mem
 def oracle(text,raw,width,x=0,background=0):
@@ -59,6 +72,7 @@ def oracle(text,raw,width,x=0,background=0):
     return out,bytes([y,xp//2])
 cases=[('ENGINE6',i,6) for i in range(10)]+[('ENGINEP',0,6),('ENGINEP',1,8),('ENGINEM',0,6),('ENGINEB',0,6)]+[('ENGINE4',i,4) for i in range(3)]
 cases += [('ENGINES',i,6) for i in range(5)]
+cases += [('ENGINEQ',0,6)]
 results=[];checks=0
 if len(sys.argv)>1: cases=[c for c in cases if c[0] in sys.argv[1:]]
 for module,variant,width in cases:

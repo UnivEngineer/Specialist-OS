@@ -125,6 +125,7 @@ modeTitle:
     ld hl,raw.benchPrepare
     ld (raw.benchPrepareInvoke+1),hl
     call raw.benchPrepareRun
+    jp c,timerFailed
     ld hl,upperPrepText
     call output
     ld hl,(raw.benchElapsed)
@@ -136,6 +137,7 @@ modeTitle:
     ld hl,raw.benchOptimizedPrepare
     ld (raw.benchPrepareInvoke+1),hl
     call raw.benchPrepareRun
+    jp c,timerFailed
     ld hl,radixPrepText
     call output
     ld hl,(raw.benchElapsed)
@@ -146,6 +148,7 @@ modeTitle:
     ld hl,raw.ncRadixSort
     ld (raw.benchInvoke+1),hl
     call raw.benchRun
+    jp c,timerFailed
     ld hl,(raw.benchElapsed)
     ld (radixTicks),hl
     ld hl,raw.FILE_INDEX_A
@@ -190,11 +193,13 @@ nextRow:
     jp nz,runUpper
     ld (raw.benchInvoke+1),hl
     call raw.benchRun
+    jp c,timerFailed
     ld hl,(raw.benchElapsed)
     jp rowFinished
 runUpper:
     ld (upper.benchInvoke+1),hl
     call upper.benchRun
+    jp c,timerFailed
     ld hl,(upper.benchElapsed)
 rowFinished:
     ld (rowTicks),hl
@@ -245,6 +250,12 @@ fail:
     ld a,1
     ld (failed),a
     ld hl,failText
+    call output
+    jp save
+timerFailed:
+    ld a,1
+    ld (failed),a
+    ld hl,timerErrorText
     call output
 save:
     ld hl,(reportEnd)
@@ -648,6 +659,7 @@ msText: DB ' ms',0
 okText: DB ' OK',13,10,0
 doneText: DB 13,10,'All indices match. Source checksum OK.',13,10,0
 failText: DB 13,10,'BENCHMARK FAILED',13,10,0
+timerErrorText: DB 13,10,'PIT clock stopped / invalid',13,10,0
 savedText: DB 'Saved B:\SORTBEN.TXT',13,10,0
 saveErrorText: DB 'Cannot save B:\SORTBEN.TXT',13,10,0
 waitText: DB 'Press any key to exit',13,10,0

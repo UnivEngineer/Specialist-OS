@@ -38,22 +38,26 @@ def check_copies(root, out, m, ks, bios, select, invoke, request, regs, rows):
         else:
             request(page,ks['MXOS_DOS_CLI'],regs(hl=0x3300,a=7 if move else 1),expected=error)
         result=m.read(0x3300,size)
-        assert result[:6]==packet[:6]
+        assert result[:4]==bytes(4)
+        assert result[4:6]==packet[4:6]
         assert result[f('onExists'):f('onExists')+2]==packet[f('onExists'):f('onExists')+2]
         assert m.read(0x3300+size,16)==bytes([0xA5])*16
         if buffer:assert m.read(buffer,5000)==bytes([0xA5])*5000
         count=m.read(0x36EF,1)[0]
         if count:
-            seen=m.read(0x3600,size)
-            assert seen[:6]==packet[:6]
-            assert seen[f('onExists'):f('onExists')+2]==word(0x3800)
+            seen=m.read(0x3600,ks['FILE_DESCRIPTOR'])
+            assert seen[:11] in ([short(dst)] if '.' in dst else [short('A.BIN'),short('B.BIN')]), seen[:11]
         return count
 
     source=out/'copy-callback.asm'
     source.write_text(f''' INCLUDE "{(root/'source/include/mxos.inc').as_posix()}"
  ORG 03800h
+ DEFINE COPY_CONFIRM_BODY callbackBody
+ INCLUDE "{(root/'source/common/copyConfirmLocal.inc').as_posix()}"
+ UNDEFINE COPY_CONFIRM_BODY
+callbackBody:
  ld de,03600h
- ld b,{size}
+ ld b,FILE_DESCRIPTOR
 loop:
  ld a,(hl)
  ld (de),a
@@ -113,12 +117,14 @@ answer:
     m.write(0x3100,word(0x3200)+word(0x5000)+word(8192)+bytes(34))
     request(3,ks['MXOS_DOS_FILE_LOAD_PATH'],regs(hl=0x3100),expected=2)
     rows.append(dict(case='cross-drive-MOVE-No-keeps-source-Yes-deletes'))
-    for buffer, capacity, hook in ((0xF7FF,256,0), (0x3301,512,0), (0x6000,255,0), (0x6000,512,0xF800)):
+    # buffer/bufferSize внешнего запроса игнорируются (проверено выше).
+    # Ошибочным параметром здесь остаётся адрес обработчика в хвосте.
+    for buffer, capacity, hook in ((0x6000,512,0xF800),):
         select(3);packet=bytearray(size)
         packet[:4]=word(buffer)+word(capacity)
         packet[f('onExists'):f('onExists')+2]=word(hook)
         m.write(0x3300,packet)
         request(3,ks['MXOS_DOS_FILE_COPY'],regs(hl=0x3300),expected=1)
         assert m.read(0x3300,size)==packet
-    rows.append(dict(case='COPY-invalid-buffer-overlap-capacity-callback'))
+    rows.append(dict(case='COPY-invalid-callback'))
     print('BANK DOS COPY CALLBACK PASS',flush=True)

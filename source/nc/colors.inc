@@ -1,6 +1,6 @@
 ; Частые цвета: экономия двух байтов на вызов COLOR.
 ; Изменяет только A, сохраняет остальные регистры и флаги, как MVI/STA.
-; Общий хвост уменьшает код пяти установщиков до 26 байт.
+; Software mirror avoids reading the write-only color register for masked UI.
     IF ENABLE_COLOR
 ncColorText:
             ld      a, COLOR_INFOTEXT
@@ -18,5 +18,7 @@ ncColorFile:
             ld      a, COLOR_FILE
 ncSetColor:
             ld      (IO_COLOR), a
+            ld      (ncCurrentColor), a
             ret
     ENDIF
+ncCurrentColor: DB COLOR_FILE

@@ -43,7 +43,7 @@ def until(pc):
 
 def oracle(text,raw):
     image=bytearray(12288);xp=0;y=7
-    width=4 if engine.startswith('4') else 8 if engine=='8X8' else 6
+    width=4 if engine.startswith('4') else 8 if engine in ('ROW8','WIN8') else 6
     for c in text:
         if not raw and c==13:xp=0;continue
         if not raw and c==10:y+=10;continue
@@ -57,7 +57,11 @@ def oracle(text,raw):
         xp+=width
         if xp>=384:xp=0;y+=10
     return image,bytes([y,xp//2])
-font=(R/'assets/system-rom/FONT.FNT').read_bytes()
+font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
+if engine=='WIN8':
+    font=(R/'source/monitor_win/originals/monitor_win.rom').read_bytes()[0x1800:0x2000]
+elif engine=='ROW8':
+    font=(R/'assets/system-rom/fonts/8x8/Win8.pf').read_bytes()
 assert len(font)==2048
 if engine.startswith('4'):
     source=(R/'bin/FONTBEN.font4.bin').read_bytes()
@@ -139,17 +143,6 @@ try:
         assert len(actual)<=len(report)
     api(0x500,0x8B20)
     assert actual==report,'RAM report readback'
-    # MAIN has a real disk driver in F8C0h-F9FFh, not the bank I/O template.
-    for operation in ('mx_put32','mx_get32'):
-        m.write(0x8C00,b'\xcd'+s[operation].to_bytes(2,'little')+b'\xc3\x06\x8c')
-        m.stop_at(0x8C06);m.call('regs_set',pc=0x8C00,sp=0x8E00,af=0,hl=0x7A01,bc=0xABCD,de=0xEF01)
-        state=m.until(0x8C06,120,page=0)
-        assert not state['flags']['C'],operation
-        assert m.read(0x7A01,4)==bytes.fromhex('01efcdab'),operation
-        if operation=='mx_get32':
-            assert state['registers']['bc']['dec']==0xABCD and state['registers']['de']['dec']==0xEF01
-
-
-    (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',stages=STAGES,results=results,reportBytes=size,fileReadback='PASS',allocations='no leaks',modules='unloaded',prerender='disabled',dwordMainDriver='PASS',returnedToNC=True,cpuHz=2000000,pitHz=2000000,binarySha256={f:hashlib.sha256((R/f).read_bytes()).hexdigest() for f in ('bin/BIOS.sys','bin/IO.sys','bin/MEM.sys','bin/FONTCOM.i80','bin/FONTBANK.i80','images/SystemRom_emu80_writable.bin')}),indent=2)+'\n')
+    (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',stages=STAGES,results=results,reportBytes=size,fileReadback='PASS',allocations='no leaks',modules='unloaded',prerender='disabled',returnedToNC=True,cpuHz=2000000,pitHz=2000000,binarySha256={f:hashlib.sha256((R/f).read_bytes()).hexdigest() for f in ('bin/BIOS.sys','bin/IO.sys','bin/MEM.sys','bin/FONTCOM.i80','bin/FONTBANK.i80','images/SystemRom_emu80_writable.bin')}),indent=2)+'\n')
     print(engine,'GRID PASS',flush=True)
 finally:x.stop()

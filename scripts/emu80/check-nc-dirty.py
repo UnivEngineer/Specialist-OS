@@ -61,7 +61,7 @@ try:
  text('B:/D1/FOUR.TXT')
  assert observe('enter')==([0,1],[]),'F5 must not reload unrelated directories'
  # При замене файла на обеих видимых панелях обновляются кэши и строки сведений.
- command('COPY A:/FONTKOI.FNT B:/OTHER/THREE.TXT',[],[],prompt=True)
+ command('COPY A:/FONTKOI.PF B:/OTHER/THREE.TXT',[],[],prompt=True)
  assert observe('y')==([0,1],[0,1])
  cached=m.m.read(n['FILE_CACHE_B'],n['FILE_CACHE_BYTES'])
  entry=next(cached[i:i+16] for i in range(0,255*16,16) if cached[i:i+11].upper()==b'THREE   TXT')

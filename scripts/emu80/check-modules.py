@@ -1,10 +1,18 @@
 """Публичный moduleLoad/Call/Unload: реальные файлы и банки, без ручного хвоста."""
 from pathlib import Path
-import runpy,re,struct,json,subprocess,os
+import argparse,runpy,re,struct,json,subprocess,os
 R=Path(__file__).resolve().parents[2];O=R/'.local/modules-dos';O.mkdir(parents=True,exist_ok=True)
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text('utf-8'),re.M)}
+subprocess.run(['python',str(R/'source-apps/moduletest/build.py')],check=True)
 k=sy(R/'bin/banked/KERNEL.sym');n=sy(R/'bin/NC.sym')
-h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=O,RUNTIME=R/'.local/monitor2-001');x=h['Matrix']();m=x.m;rows=[]
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782')
+p.add_argument('--port',type=int,choices=range(19781,19785),default=19782)
+args=p.parse_args()
+h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'))
+g=h['Matrix'].__init__.__globals__;g.update(OUT=O,RUNTIME=args.runtime.resolve())
+g['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {args.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
+x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{args.port}/mcp';rows=[]
 e=runpy.run_path(str(R/'scripts/images/executable.py'))
 # C-обёртки компилируются отдельно от ядра и исполняются тем же стендом.
 z=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk');env=os.environ.copy();env['ZCCCFG']=str(z/'lib/config');env['PATH']=str(z/'bin')+os.pathsep+env['PATH']
@@ -13,9 +21,9 @@ word=lambda v:struct.pack('<H',v)
 regs=lambda hl=0,de=0,bc=0,af=2:struct.pack('<4H',hl,de,bc,af)
 def page(v):m.write(0xfffd if v else 0xfffc,bytes([v-1 if v else 0]))
 def call(op,hl=0,de=0,bc=0,af=2,error=None):
- page(0);m.write(0x3000,regs(hl,de,bc,af));m.write(0x2000,b'\xcd\x00\xf8\xc3\x00\x70')
- m.stop_at(0x7000);m.call('regs_set',pc=0x2000,sp=0x8fdf,bc=op,de=0x3000)
- z=m.until(0x7000,40);r={key:v['dec'] for key,v in z['registers'].items()}
+ page(0);m.write(0x3000,regs(hl,de,bc,af));m.write(0x2000,b'\xcd\x00\xf8\xc3\x00\x8b')
+ m.stop_at(0x8b00);m.call('regs_set',pc=0x2000,sp=0x8fdf,bc=op,de=0x3000)
+ z=m.until(0x8b00,40);r={key:v['dec'] for key,v in z['registers'].items()}
  assert r['sp']==0x8fdf,r
  assert m.read(k['bankPage'],1)==b'\0'
  if error is None:assert not r['af']&1,(hex(op),r)
@@ -25,7 +33,11 @@ def call(op,hl=0,de=0,bc=0,af=2,error=None):
  return r
 def snapshot():
  page(1);data=m.read(k['MEM_ALLOC_TABLE'],32*6);table=m.read(k['MODULE_TABLE'],k['MODULE_MAX']*k['MODULE_RECORD_SIZE']);page(0)
- return sum(data[i]!=255 for i in range(0,len(data),6)),sum(any(table[i:i+2]) for i in range(0,len(table),10))
+ return sum(data[i]!=255 for i in range(0,len(data),6)),sum(any(table[i:i+2]) for i in range(0,len(table),k['MODULE_RECORD_SIZE']))
+def dos_ranges():
+ page(1);data=m.read(k['MODULE_TABLE'],k['MODULE_MAX']*k['MODULE_RECORD_SIZE']);page(0)
+ return [struct.unpack_from('<HH',data,i+10) for i in range(0,len(data),k['MODULE_RECORD_SIZE']) if any(data[i:i+2]) and data[i+3]==k['DOS_IO_PAGE']]
+
 def save(name,data):
  page(0);m.write(0x3400,('B:\\'+name).encode()+b'\0'+bytes(128-len(name)-4));m.write(0x4000,data)
  m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34))
@@ -41,6 +53,7 @@ def unload(handle,error=None):return call(k['MXOS_DOS_MODULE_UNLOAD'],hl=handle,
 def check(name):rows.append(dict(case=name,allocations=snapshot()));print('PASS',name,flush=True)
 try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
+ k=sy(R/'bin/banked/KERNEL.sym')
  n=sy(fixture['nc_symbols'])
  x.start('module API',**fixture);m.call('debug_break');m.call('bp_clear')
  font_symbols=sy(R/'bin/BIOS.sym')
@@ -63,7 +76,7 @@ try:
   raise AssertionError(baseline)
  page(1)
  assert m.read(k['memoryRamOwner'],1)==bytes((k['DOS_IO_PAGE'],))
- assert m.read(k['moduleDosServiceOwner'],1)==b'\0';page(0)
+ assert not dos_ranges();page(0)
  state=call(k['MXOS_DOS_MEMORY'],bc=0,af=k['MEM_OP_RAMDISK']*256+2)
  assert state['bc']==0x401,state
  call(k['MXOS_DOS_MEMORY'],bc=1,af=k['MEM_OP_RAMDISK']*256+2,error=k['MEM_ERROR_OWNER'])
@@ -95,9 +108,9 @@ try:
  # RAW B: не должен попадать в освобождённые банки даже первым запросом.
  call(k['MXOS_DOS_FILE_SELECT_DRIVE'],af=0x102)
  page(6);guard=m.read(0,256);page(0)
- for block,mode in ((1024,2),(1024,1),(1023,2)):
+ for block,mode in ((1024,2),(1024,1),(1023,2),(1022,2)):
   call(k['MXOS_DOS_RAW_IO'],hl=0x5200,de=block,bc=mode*256,error=k['DOS_ERR_ARGUMENT'])
- call(k['MXOS_DOS_RAW_IO'],hl=0x5200,de=1022,bc=0x200)
+ call(k['MXOS_DOS_RAW_IO'],hl=0x5200,de=3*256+(k['MEM_DATA_LIMIT']>>8)-1,bc=0x200)
  call(k['MXOS_DOS_RAW_IO'],hl=0x5200,de=1024,bc=0x100,error=k['DOS_ERR_ARGUMENT'])
  page(6);assert m.read(0,256)==guard;page(0);check('RAM-disk-RAW-boundary-protects-free-banks')
  call(k['MXOS_DOS_MEMORY'],hl=0x6000,de=0x2000,af=k['MEM_OP_ARENA']*256+2)
@@ -131,12 +144,12 @@ try:
  # DOS-DLL: арена общая с инициализаторами, но не с FAR-кучей/стеком.
  for target in (0,1):load('DOSMOD.DLL',target=target,error=k['DOS_ERR_BAD_IMAGE'])
  for name in ('BANKMOD.DLL','MAINMOD.DLL','MRET.DLL'):load(name,target=2,error=k['DOS_ERR_BAD_IMAGE'])
- for name,address,body in (('DOSLOW.DLL',k['DOS_BANK_DRIVER_ADDR']-1,b'\xC9'),('DOSEND.DLL',k['DOS_BANK_DRIVER_END']-1,b'\xC9\xC9')):
+ for name,address,body in (('DOSLOW.DLL',k['DOS_BANK_DRIVER_ADDR']-1,b'\xC9'),('DOSEND.DLL',k['DOS_BANK_MODULE_END']-1,b'\xC9\xC9')):
   save(name,e['encode'](e['Image'](body,address,address,1),'com'))
   load(name,target=2,error=k['MEM_ERROR_RANGE']);assert snapshot()==baseline
  dos=load('DOSMOD.DLL',target=2)
  assert snapshot()==(baseline[0],baseline[1]+1)
- page(1);assert m.read(k['moduleDosOwner'],1)!=b'\0';assert m.read(k['MEM_BANK_KIND'],1)==bytes((k['MEM_BANK_DOS'],));page(0)
+ page(1);assert dos_ranges();page(1);assert m.read(k['MEM_BANK_KIND'],1)==bytes((k['MEM_BANK_DOS'],));page(0)
  for _ in range(3):assert invoke(dos)[:3]==(0x1235,0x2346,0x3457)
  result=invoke(dos,regs(af=0x702));assert result[3]>>8==1 and result[2]&255==k['MEM_BANK_DOS'],result
  invoke(dos,regs(af=0x102))
@@ -148,13 +161,13 @@ try:
  load('DOSMOD.DLL',target=2,error=k['MEM_ERROR_ACTIVE'])
  page(1);assert m.read(k['DOS_BANK_DRIVER_ADDR'],len(guard))==guard;page(0)
  result=invoke(dos,regs(hl=dos,af=0x302));assert result[3]&1 and result[3]>>8==k['MEM_ERROR_ACTIVE'],result
- result=invoke(dos,regs(af=0x902));assert result[3]&1 and result[3]>>8==k['MEM_ERROR_OWNER'],result
+ result=invoke(dos,regs(af=0x902));assert not result[3]&1,result
  result=invoke(dos,regs(af=0xA02));assert result[3]&1 and result[3]>>8==k['MEM_ERROR_ACTIVE'],result
  invoke(dos,regs(af=0x202));invoke(dos,regs(af=0x802))
  assert snapshot()==(baseline[0]+2,baseline[1]+2),snapshot()
  unload(dos);assert snapshot()==baseline
  invoke(dos,error=k['MEM_ERROR_HANDLE'])
- page(1);assert m.read(k['moduleDosOwner'],1)==b'\0';assert m.read(k['MEM_BANK_KIND'],1)==bytes((k['MEM_BANK_DOS'],));page(0)
+ page(1);assert not dos_ranges();page(1);assert m.read(k['MEM_BANK_KIND'],1)==bytes((k['MEM_BANK_DOS'],));page(0)
  bad=bytearray((R/'bin/moduletest/DOSMOD.DLL').read_bytes());bad[-1]^=1;save('DOSBAD.DLL',bytes(bad))
  load('DOSBAD.DLL',target=2,error=k['DOS_ERR_BAD_IMAGE']);assert snapshot()==baseline
  dos=load('DOSMOD.DLL',target=2);unload(dos);assert snapshot()==baseline
@@ -226,7 +239,7 @@ try:
  # Даже при свободной таблице дескрипторов занятые DATA-банки не отбираются.
  blocks=[]
  for _ in range(11-baseline[0]):
-  r=call(k['MXOS_DOS_MEMORY'],hl=0xff00,bc=0xff00,af=k['MEM_OP_ALLOC']*256+2)
+  r=call(k['MXOS_DOS_MEMORY'],hl=k['MEM_DATA_LIMIT'],bc=0xff00,af=k['MEM_OP_ALLOC']*256+2)
   blocks.append((r['hl'],r['bc']))
  load('MRET.DLL',error=k['MEM_ERROR_NOMEM']);assert snapshot()==(11,baseline[1])
  for address,bank in blocks:call(k['MXOS_DOS_MEMORY'],hl=address,bc=bank,af=k['MEM_OP_FREE']*256+2)
@@ -239,9 +252,9 @@ try:
  # Штатный запуск main-контроллера через редактор NC, а не прямой FILE_EXEC.
  m.call('bp_clear');m.stop_at(n['mainLoop']);m.call('emu_reset');m.until(n['mainLoop'],120)
  assert snapshot()==baseline,snapshot()
- page(1);assert m.read(k['memoryRamOwner'],1)==bytes((k['DOS_IO_PAGE'],));assert m.read(k['moduleDosServiceOwner'],1)==b'\0';page(0)
+ page(1);assert m.read(k['memoryRamOwner'],1)==bytes((k['DOS_IO_PAGE'],));assert not dos_ranges();page(0)
  invoke(dos_abandoned,error=k['MEM_ERROR_HANDLE'])
- page(1);assert m.read(k['moduleDosOwner'],1)==b'\0';page(0)
+ page(1);assert not dos_ranges();page(0)
  invoke(abandoned,error=k['MEM_ERROR_HANDLE']);check('Reset-invalidates-modules-cleans-resources')
  page(1);m.write(k['v_dosModuleReady'],b'\0');page(0)
  m.stop_at(n['mainLoop']);m.call('emu_reset');m.until(n['mainLoop'],120)
@@ -288,14 +301,25 @@ try:
  assert snapshot()==baseline,snapshot()
  check('normal-NC-controller-launch-with-B-files-after-DOS-reload')
  # Существующая DLL с корректным контейнером не исполняется из редактора NC.
- for command in ('B:/BANKMOD.DLL','A:/BENCH/FONTBEN/FBMAIN.DLL'):
+ for command in ('B:/BANKMOD.DLL','A:/FILEOPS.DLL'):
   m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
   before=m.read(0,32)
   for c in command:m.tap({':':'colon','/':'slash','.':'period'}.get(c,c.lower()))
   assert m.read(n['vars.cmdLine'],len(command)).upper()==command.encode()
-  m.stop_at(k['keExtensionDenied']);m.tap('enter');m.until(k['keExtensionDenied'],120,page=1)
+  # CLI may reject a DLL before FILE_EXEC; both are valid rejection routes.
+  m.stop_at(k['keExtensionDenied']);m.call('bp_set',addr=n['ncCommandError'],type='exec');m.tap('enter')
+  for _ in range(30):
+   state=m.call('cpu_state');pc=state['registers']['pc']['dec'];bank=m.read(k['bankPage'],1)[0]
+   if (pc,bank) in ((k['keExtensionDenied'],1),(n['ncCommandError'],0)):break
+   if pc in (k['keExtensionDenied'],n['ncCommandError']):m.call('debug_step',mode='into')
+   else:m.call('emu_run_for',ms=1000)
+  else:raise AssertionError(('DLL did not reach an error handler',state))
   page(0);assert m.read(0,32)==before
-  page(1);m.stop_at(n['mainLoop']);m.until(n['mainLoop'],120,page=0)
+  if bank:
+   # EnterExec tail-calls FILE_EXEC and returns through the shell, reloading NC.
+   page(1);m.stop_at(n['mainLoop']);m.until(n['mainLoop'],60,page=0)
+  else:
+   m.stop_at(n['mainLoop_cursorReady']);m.call('emu_run_for',ms=250);m.tap('enter');m.until(n['mainLoop_cursorReady'],30,page=0)
   assert snapshot()==baseline
   m.screenshot(O/('dll-rejected-'+command[0]+'.png'))
  check('NC-rejects-DLL-before-loading-main')

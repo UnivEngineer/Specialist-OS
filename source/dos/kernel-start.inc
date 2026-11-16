@@ -48,6 +48,10 @@ kernelWarm:
     ld (kiReady),a
     ld (diActive),a
     call moduleWarm
+    ld a,(v_bootAutoexec)
+    or a
+    call nz,memoryResidentReset
+    call memoryPublishTop
     ld hl,0
     call cliSetObserver
     jp flushVolume

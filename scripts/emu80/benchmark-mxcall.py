@@ -18,9 +18,9 @@ def main():
   (out/a.label).mkdir(parents=True,exist_ok=True)
   fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,out/a.label)
   x.start('MXOS_CALL '+a.label,**fixture);m.call('debug_break');m.call('bp_clear')
-  font=(R/'assets/system-rom/FONT.FNT').read_bytes()
+  font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
   expected_font=bytes(font[char*8+row] for row in range(8) for char in range(256))
-  assert m.read(s['FONT_ADDR'],s['FONT_BYTES'])==expected_font,'Boot font differs from FONT.FNT'
+  assert m.read(s['FONT_ADDR'],s['FONT_BYTES'])==expected_font,'Boot font differs from FONT.PF'
   page(6)
   for address,name in ((cs['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(cs['mx_call'],'CLIENT'),(ts['BANK_LANDING'],'TRANSPORT')):m.write(address,(b/(name+'.bin')).read_bytes())
   m.write(cs['MEM_BANK_KIND'],bytes((cs['MEM_BANK_EXEC'],)))

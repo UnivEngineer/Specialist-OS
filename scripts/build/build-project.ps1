@@ -14,6 +14,8 @@ $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
 if ($LASTEXITCODE -ne 0) { throw 'System call registry generation failed.' }
 & python (Join-Path $PSScriptRoot 'build-compact-font.py')
 if ($LASTEXITCODE -ne 0) { throw 'Compact font generation failed.' }
+& python (Join-Path $PSScriptRoot 'build-font-engines.py')
+if ($LASTEXITCODE -ne 0) { throw 'Font engine build failed.' }
 & python (Join-Path $repositoryRoot 'source-apps/copybench/build.py')
 if ($LASTEXITCODE -ne 0) { throw 'Copy benchmark generation failed.' }
 & python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py')
@@ -36,6 +38,7 @@ try {
     }
 } finally { Pop-Location }
 $components = @(
+    @{ Directory = 'source/font'; Source = 'FONT'; Extension = 'cpu'; Address = '0' },
     @{ Directory = "source-apps/test-mx"; Source = "TESTMX"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source-apps\copybench"; Source = "COPYBEN"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source-apps\\chkdsk"; Source = "CHKDSK"; Extension = "cpu"; Address = "0" },
@@ -49,6 +52,7 @@ $components = @(
     @{ Directory = "source\\flash";  Source = "Rom64";   Extension = "cpu"; Address = "DOS_BANK_DRIVER_ADDR" },
     @{ Directory = "source\\debug";   Source = "Debug"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\monitor2"; Source = "Monitor2"; Extension = "mon"; Address = "0xC000" },
+    @{ Directory = "source\\monitor_win"; Source = "MONWIN"; Extension = "mon"; Address = "0xC000" },
     @{ Directory = "source\\run"; Source = "RUN";  Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "mon"; Address = "0xC000" },
     @{ Directory = "source\\format"; Source = "FORMAT";  Extension = "cpu"; Address = "0" },
@@ -59,7 +63,7 @@ $components = @(
 
 if ($Target -eq "All") {
     $components += @{
-        Directory = "source\\test-scr"
+        Directory = "source-apps\\test-scr"
         Source = "test-scr"
         Extension = "cpu"
         Address = "0"
@@ -78,6 +82,8 @@ $components += @(
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEB'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINE6'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEP'; Extension = 'cpu'; Address = '0x2000' },
+    @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEW'; Extension = 'cpu'; Address = '0x2000' },
+    @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEQ'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINES'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINE4'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'STANDALONE'; Output = 'FONTCOM'; Extension = 'cpu'; Address = '0' },

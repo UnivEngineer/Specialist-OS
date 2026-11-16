@@ -47,6 +47,7 @@ typedef struct {
 #define MXOS_ERR_NO_DRIVER 9
 #define MXOS_ERR_UNSUPPORTED 10
 #define MXOS_ERR_BAD_IMAGE 11
+#define MXOS_ERR_CANCELLED 12
 
 /* Переходники компилятора: один указатель на 64-байтный блок; код DOS=0 при успехе. */
 #ifdef __Z88DK

@@ -39,13 +39,13 @@ ncShiftPoll:
     push hl
     ld hl,(bios_vars.cursorY)
     push hl
-    ld a,(bios_vars.inverse)
-    push af
+    ld hl,(bios_vars.inverse)
+    push hl
     xor a
     ld (bios_vars.inverse),a
     call drawToolbar
-    pop af
-    ld (bios_vars.inverse),a
+    pop hl
+    ld (bios_vars.inverse),hl
     pop hl
     ld (bios_vars.cursorY),hl
     ld a,(ncInputColor)
@@ -57,12 +57,21 @@ ncShiftDone:
     pop af
     ret
 ncTapeStub:
-    call drawWindow1
-    CENTER_LINE 20, 5Eh
+    ld hl,ncNoticeWindow
+    call ncDialogOpen
+    COLOR COLOR_DIALOG
+    ld hl,ncNoticeWindow
+    call draw
     ld hl,ncTapeStubText
-    call bios_printStringReal
+    ld e,120
+    call ncPrintCentered
+    call ncDialogOkButton
     call ncModalGetch
-    jp mainReload
+    jp ncRefreshDirty
+ncNoticeWindow:
+    G_MODAL_WINDOW 80h,64,96,256,64
+    G_LINE 80h,68,136,248
+    DB 0
 ; Модальное окно без поля ввода: нулевая высота отключает и начальную
 ; отрисовку курсора в getch2. Возвращает AF клавиши, сохраняет BC и cursorCfg.
 ncModalGetch:
@@ -80,7 +89,7 @@ ncModalGetch:
     pop af
     pop bc
     ret
-ncTapeStubText: DB 'Tape not implemented',0
+ncTapeStubText: DB 'Tape is not implemented',0
 ncShiftState: DB 2
 ncInputColor: DB COLOR_CMDLINE
 ncPreviousHook: DW 0

@@ -236,7 +236,7 @@
       {
         "id": 37,
         "name": "FONT_RENDER",
-        "target": "fast6.service"
+        "target": "FONT_ENGINE_SERVICE"
       },
       {
         "id": 38,
@@ -278,7 +278,7 @@
       {
         "id": 43,
         "name": "SET_FONT_ENCODING",
-        "target": "fast6.setEncoding",
+        "target": "FONT_ENGINE_ENCODING",
         "legacy": "bios_setFontEncoding"
       }
     ]
@@ -534,6 +534,16 @@
         "id": 42,
         "name": "RESIDENT",
         "target": "residentService"
+      },
+      {
+        "id": 43,
+        "name": "FILEOPS",
+        "target": "fileopsService"
+      },
+      {
+        "id": 44,
+        "name": "ENUMERATE",
+        "target": "enumService"
       }
     ]
   }

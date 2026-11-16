@@ -33,6 +33,7 @@ forbidden:
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'stub.bin'),'--sym='+str(O/'stub.sym'),str(O/'stub.asm')],check=True,capture_output=True)
 st={k:int(v,16) for k,v in re.findall(r'^(\w+): EQU 0x([\da-fA-F]+)',(O/'stub.sym').read_text(),re.M)}
 base=bytearray(65536);code=(R/'bin/banked/CLIENT.bin').read_bytes();base[0xF800:0xF800+len(code)]=code
+code=(R/'bin/banked/LOCALBLOCK.bin').read_bytes();base[s['MEM_IMAGE_LOCAL_START']:s['MEM_IMAGE_LOCAL_START']+len(code)]=code
 raw=(O/'stub.bin').read_bytes();base[0x8000:0x8000+len(raw)]=raw
 base[t['bankCopySector']:t['bankCopySector']+3]=b'\xc3'+W(st['capture'])
 base[t['bankCall']:t['bankCall']+3]=b'\xc3'+W(st['forbidden'])
@@ -60,6 +61,7 @@ k=syms('KERNEL');base=bytearray(65536);code=(R/'bin/DOS.sys').read_bytes();base[
 hook=b'\x3e\x01\x32'+W(0x8321)+b'\xaf\xc9';base[0x8000:0x8000+len(hook)]=hook
 base[k['MEM_IO_SYSTEM']:k['MEM_IO_SYSTEM']+3]=b'\xc3'+W(0x8000)
 base[t['bankCallPacket']:t['bankCallPacket']+3]=b'\xc3'+W(0x8000)
+base[t['bankCopySector']:t['bankCopySector']+3]=b'\xc3'+W(0x8000)
 count=0
 for capacity in (512,1024,2048):
  for entry in ('dosSystemDriver','klBlock'):

@@ -2,18 +2,24 @@
 from pathlib import Path
 import runpy, json, argparse
 ROOT=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--normal',action='store_true',help='Сохранён для прежних команд; сборка всегда штатная');p.add_argument('--report',type=Path,default=ROOT/'docs/banked/bootstrap-current');a=p.parse_args();a.report.mkdir(parents=True,exist_ok=True)
-h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__;g['RUNTIME']=ROOT/'.local/monitor2-001';g['OUT']=a.report.resolve()
-x=h['Matrix']();m=x.m;s=h['symbols'](ROOT/'bin/bootstrap/BOOT.sym');b=h['symbols'](ROOT/'bin/BIOS.sym');k=h['symbols'](ROOT/'bin/banked/KERNEL.sym');n=h['symbols'](ROOT/'bin/NC.sym');rows=[]
+p=argparse.ArgumentParser();p.add_argument('--normal',action='store_true',help='Сохранён для прежних команд; сборка всегда штатная');p.add_argument('--report',type=Path,default=ROOT/'docs/banked/bootstrap-current')
+p.add_argument('--bundle',type=Path,help='Frozen directory with bin/, System.bin and FONT.PF')
+p.add_argument('--runtime',type=Path,default=ROOT/'.local/monitor2-001');p.add_argument('--port',type=int,default=19781)
+a=p.parse_args();a.report.mkdir(parents=True,exist_ok=True)
+BIN=(a.bundle/'bin') if a.bundle else ROOT/'bin'
+FONT=(a.bundle/'FONT.PF') if a.bundle else ROOT/'assets/system-rom/fonts/6x8/KOI8.pf'
+h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__;g['RUNTIME']=a.runtime.resolve();g['OUT']=a.report.resolve()
+g['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
+x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp';s=h['symbols'](BIN/'bootstrap/BOOT.sym');b=h['symbols'](BIN/'BIOS.sym');k=h['symbols'](BIN/'banked/KERNEL.sym');n=h['symbols'](BIN/'NC.sym');ls=h['symbols'](BIN/'banked/LOCALBLOCK.sym');rows=[]
 def page(value):m.write(0xFFFD if value else 0xFFFC,bytes([value-1 if value else 0]))
 def nc():
  for _ in range(20):
   m.stop_at(n['mainLoop']);state=m.until(n['mainLoop'],120)
-  if m.read(0,32)==(ROOT/'bin/NC.i80').read_bytes()[:32]:return state
+  if m.read(0,32)==(BIN/'NC.i80').read_bytes()[:32]:return state
   m.call('debug_step',mode='into')
  raise AssertionError('NC was not restored')
 try:
- x.start('bootstrap')
+ x.start('bootstrap',system=a.bundle/'System.bin' if a.bundle else None,nc_binary=BIN/'NC.i80',nc_symbols=BIN/'NC.sym',dos=BIN/'DOS.sys')
  m.call('debug_break');page(1);m.write(k['v_dosModuleReady'],b'\0');page(0)
  for mode in ('cold','warm'):
   m.stop_at(s['stage'])
@@ -22,30 +28,39 @@ try:
   for label in ('stage','biosLoaded','dosLoaded','bootDone'):
    m.stop_at(s[label]);state=m.until(s[label],40);ticks[label]=state['cpu_ticks']
    if label=='biosLoaded':
-    image=(ROOT/'bin/BIOS.sys').read_bytes();assert m.read(0xC000,len(image))==image
+    image=(BIN/'BIOS.sys').read_bytes();assert m.read(0xC000,len(image))==image
    if label=='dosLoaded':
     page(1)
     if mode=='cold':
-     image=(ROOT/'bin/DOS.sys').read_bytes();assert m.read(k['DOS_BANK_CODE_ADDR'],len(image))==image
+     image=(BIN/'DOS.sys').read_bytes();assert m.read(k['DOS_BANK_CODE_ADDR'],len(image))==image
     else:
      assert m.read(0xA800,17)==b'DOS survives warm'
      page(2);assert m.read(0xE000,17)==b'RAM disk survives'
     page(0)
-  linear=(ROOT/'assets/system-rom/FONT.FNT').read_bytes()
+  linear=(FONT).read_bytes()
   font=bytes(linear[c*8+y] for y in range(8) for c in range(256))
   assert m.read(b['FONT_ADDR'],len(font))==font
   state=nc();ticks['nc']=state['cpu_ticks'];assert m.read(b['v_memTop'],2)==bytes.fromhex('ff8b')
   # Общий код MEM и разные данные установки main/DOS; минимальный профиль данных.
-  client=(ROOT/'bin/banked/CLIENT.bin').read_bytes()
-  local=(ROOT/'bin/banked/LOCALBLOCK.bin').read_bytes()
-  transport=(ROOT/'bin/banked/TRANSPORT.bin').read_bytes()
+  client=(BIN/'banked/CLIENT.bin').read_bytes()
+  local=(BIN/'banked/LOCALBLOCK.bin').read_bytes()
+  transport=(BIN/'banked/TRANSPORT.bin').read_bytes()
   for bank,kind in ((0,1),(1,2)):
    page(bank)
-   assert m.read(b['mx_call'],len(client))==client
-   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:b['MEM_NATIVE_CALL']-b['MEM_IMAGE_LOCAL_START']]
+   client_size=b['BANK_MAIN_CLIENT_BYTES'] if bank==0 else len(client)
+   actual=bytearray(m.read(b['mx_call'],client_size))
+   # TEXT хранит здесь живые счётчики, адреса и состояние операции.
+   at=ls['memTextRemaining']-b['mx_call']
+   actual[at:at+9]=client[at:at+9]
+   assert actual==client[:client_size]
+   assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
    assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
-  data_size=h['symbols'](ROOT/'bin/MEM.sym')['MEM_DATA_SIZE']
-  page(2);assert m.read(0xFF00,data_size)==transport[0x300:0x300+data_size]
+  data_size=h['symbols'](BIN/'MEM.sym')['MEM_DATA_SIZE']
+  data_start=b['MEM_DATA_START']
+  # Конец CPM32 содержит восемь байт параметров последнего обмена.
+  code_size=ls['bankCopyLocalParams']-data_start
+  assert code_size+8==data_size
+  page(2);assert m.read(data_start,code_size)==transport[data_start-0xfc00:data_start-0xfc00+code_size]
   page(0)
 
   page(1);assert m.read(k['memoryRamPages'],1)==b'\x04';assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')
@@ -56,8 +71,8 @@ try:
   m.write(b['FONT_ADDR'],b'\xA5');m.write(b['FONT_ADDR']+len(font)-1,b'\x5A')
   row=dict(mode=mode,ticks=ticks,biosMs=(ticks['biosLoaded']-ticks['stage'])/2000,dosAndProbeMs=(ticks['dosLoaded']-ticks['biosLoaded'])/2000,bootMs=(ticks['nc']-ticks['stage'])/2000,dosReloaded=mode=='cold');rows.append(row);print(row,flush=True);m.screenshot(a.report/(mode+'.png'))
  # Программные входы сохраняют BIOS; выбор оболочки принадлежит DOS.
- cli=h['symbols'](ROOT/'bin/CLI.sym')
- t=h['symbols'](ROOT/'bin/banked/TRANSPORT.sym')
+ cli=h['symbols'](BIN/'CLI.sym')
+ t=h['symbols'](BIN/'banked/TRANSPORT.sym')
  marker=b['biosVersion']+5;original=m.read(marker,1);m.write(marker,b'9')
  driver=m.read(b['SYSTEM_FLASH_ADDR'],16)
  for shell in ('NC','CLI'):
@@ -65,7 +80,7 @@ try:
    m.call('bp_clear');m.call('emu_run_for',ms=500)
    m.stop_at(cli['cliPrompt']);m.tap('f10');m.until(cli['cliPrompt'],120)
   target=n['mainLoop'] if shell=='NC' else cli['cliPrompt']
-  binary=(ROOT/f'bin/{shell}.i80').read_bytes()[:32]
+  binary=(BIN/f'{shell}.i80').read_bytes()[:32]
   for entry,std in ((0xC000,False),(0xC800,False),(0xC800,True)):
    # Изолированная проверка ABI; возврат реального COM проверяет system-019.
    m.stop_at(target);start=m.call('cpu_state')['cpu_ticks']
@@ -77,7 +92,7 @@ try:
    page(1);assert m.read(k['v_shell'],1)==bytes([shell=='CLI'])
    assert m.read(0xA800,17)==b'DOS survives warm'
    assert m.read(t['bankDepth'],1)==b'\1'
-   assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:b['MEM_NATIVE_CALL']-b['MEM_IMAGE_LOCAL_START']]
+   assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
    assert int.from_bytes(m.read(t['bankServiceSP'],2),'little') <= b['DOS_BANK_STACK_TOP']
    page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
    row=dict(mode=f'{entry:04X}',std=std,shell=shell,biosReloaded=False,dosReloaded=False,returnMs=(state['cpu_ticks']-start)/2000)
@@ -85,7 +100,7 @@ try:
   m.screenshot(a.report/('software-'+shell+'.png'))
  # Reset обязан восстановить даже повреждённый драйвер main, сохранив CLI.
  m.write(b['SYSTEM_FLASH_ADDR'],b'\x76');m.stop_at(cli['cliPrompt']);m.call('emu_reset');m.until(cli['cliPrompt'],120)
- assert m.read(0,32)==(ROOT/'bin/CLI.i80').read_bytes()[:32]
+ assert m.read(0,32)==(BIN/'CLI.i80').read_bytes()[:32]
  assert m.read(marker,1)==original and m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
  page(1);assert m.read(k['v_shell'],1)==b'\1';assert m.read(0xA800,17)==b'DOS survives warm'
  page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
@@ -95,7 +110,7 @@ try:
  page(1);m.write(b['MEM_RUNTIME_REVISION_ADDR'],b'\0\0')
  m.write(k['kernelVersion'],b'\0');page(0)
  m.stop_at(s['dosLoaded']);m.call('emu_reset');m.until(s['dosLoaded'],120)
- page(1);image=(ROOT/'bin/DOS.sys').read_bytes()
+ page(1);image=(BIN/'DOS.sys').read_bytes()
  assert m.read(k['DOS_BANK_CODE_ADDR'],len(image))==image
  page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
  nc();page(1)

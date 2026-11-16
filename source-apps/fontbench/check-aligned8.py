@@ -18,7 +18,7 @@ def main():
     base = bytearray((i * 37 + (i >> 8) * 13) & 255 for i in range(65536))
     program = (ROOT / 'bin/FONTCOM.i80').read_bytes()
     base[:len(program)] = program
-    font = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
+    font = (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
     word = lambda x: x.to_bytes(2, 'little')
     base[s['renderFont8']:s['renderFont8'] + 2] = word(0x2800 // 8)
     # Ядро полностью развёрнуто: восемь чтений шрифта и восемь записей экрана.

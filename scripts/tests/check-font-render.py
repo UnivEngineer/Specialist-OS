@@ -14,7 +14,7 @@ O.mkdir(parents=True, exist_ok=True)
 S = {k: int(v, 16) for k, v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (R/'bin/BIOS.sym').read_text(), re.M)}
 W = lambda x: x.to_bytes(2, 'little')
 ticks = 'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'
-font = (R/'assets/system-rom/FONT.FNT').read_bytes()
+font = (R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 compact = bytes(font[c*8+y] for y in range(8) for c in range(256))
 base = bytearray(65536)
 for name, address in [('BIOS', 0xC000), ('IO', 0xF000)]:

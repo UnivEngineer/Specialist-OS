@@ -72,7 +72,7 @@ def main():
     m.call('bp_set', addr=0x8100, type='exec')
     image_path = args.runtime / 'specialist-os/flash-disk.bin'
     expected = bytes(range(256)) * 2
-    source = (ROOT / 'assets/system-rom/FONT.FNT').read_bytes()
+    source = (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
     names = [(b'COPYCHK TXT', expected), (b'NCCOPY  FNT', source)]
     if not args.verify_only:
         # Предыдущие секторные тесты могли оставить другой драйвер и активный H:.
@@ -93,7 +93,7 @@ def main():
         m.write(0x7000, names[1][0] + bytes(21))
         m.subroutine(0xC84B, hl=0x7000)
 
-        # Исполняем процедуру, которую вызывает F5 в NC, с подготовленным выбором FONT.FNT.
+        # Исполняем процедуру, которую вызывает F5 в NC, с подготовленным выбором FONT.PF.
         listing = (ROOT / 'bin/NC.lst').read_text(encoding='utf-8-sig')
         def label(name):
             return int(re.search(r'^\s*\d+\+?\s+([0-9A-F]{4})\s+(?:[0-9A-F]{2}\s+)*' + name + r'[: ]', listing, re.M)[1], 16)
@@ -119,9 +119,9 @@ def main():
         m.write(state_addr + 8, b'\0')
         m.write(state_addr + 10, b'\0')
         m.write(buffer_addr, entry[:12] + entry[18:20] + entry[28:30])
-        # Источник FONT.FNT отличается от COPYCHK.TXT по размеру и содержимому.
+        # Источник FONT.PF отличается от COPYCHK.TXT по размеру и содержимому.
         # Отказ должен происходить до любой записи, включая FAT и каталог.
-        for destination in [b'H:COPYCHK.TXT\0', b'H:copychk.txt\0', b'A:FONT.FNT\0']:
+        for destination in [b'H:COPYCHK.TXT\0', b'H:copychk.txt\0', b'A:FONT.PF\0']:
             before = image_path.read_bytes()
             system_path = args.runtime / 'specialist-os/system-flash.bin'
             if not system_path.exists():

@@ -1,4 +1,5 @@
 ; Раскладка 32-байтного аппаратного окна общей памяти FFC0h–FFDFh
+; Полная карта IO/MEM и её адресные константы — ../include/mxos.inc.
 ; для стандартного протокола команд. Внутренний ABI, пока не публичный.
 ; memcpy_far использует другой профиль ниже; пакетная печать может иметь
 ; собственный профиль. 20 байт стандартного пакета НЕ являются буфером строки.
@@ -23,6 +24,7 @@ BANK_FRAME_STATUS = BANK_PACKET+15
 BANK_FRAME_ENTRY = BANK_PACKET+16
 BANK_FRAME_OPERATION = BANK_PACKET+18
     ASSERT BANK_FRAME_OPERATION+2 == BANK_WINDOW+28
+
 ; Последний байт физически общий и не пересекается с командами/CPM16.
 BANK_PROFILE = BANK_WINDOW+31
 BANK_PROFILE_COMMAND = 0
@@ -31,6 +33,10 @@ BANK_PROFILE_TEXT = 2
 BANK_PROFILE_LOCAL = 3
 BANK_PROFILE_COUNT = 4
 BANK_LANDING      = 0FC00h
+BANK_COMMAND_LANDING = 0FED0h ; Постоянный короткий обработчик во всех банках
+BANK_SCALAR_KIND = BANK_FRAME_KIND
+BANK_SCALAR_RETURN_PAIR = BANK_WINDOW+28
+BANK_SCALAR_RETURN_GATE = BANK_WINDOW+4
 
 ; Временный вход полной банковой DOS после локальной таблицы JMP.
 BANK_DOS_GATE     = 0015Dh
@@ -43,16 +49,8 @@ BANK_IO_MAIN      = 0FFFCh
 BANK_IO_RAM       = 0FFFDh
 BANK_ERROR_RANGE  = MEM_ERROR_RANGE
 
-; Профиль копировщика CPM16: первые 16 байт — данные, затем параметры переноса.
-; Пары селекторов: младший байт — FCh/FDh, старший — физическая страница.
-; SP и селектор возврата принадлежат инициатору, а не источнику.
-BANK_COPY_SOURCE     = BANK_WINDOW+16
-BANK_COPY_DEST       = BANK_WINDOW+18
-BANK_COPY_SP         = BANK_WINDOW+20
-BANK_COPY_SRC_SELECT = BANK_WINDOW+22
-BANK_COPY_DST_SELECT = BANK_WINDOW+24
-BANK_COPY_RETURN     = BANK_WINDOW+26
-BANK_COPY_REST       = BANK_WINDOW+28
+; COPY/CPM32: окно целиком содержит данные. Селекторы и счётчик
+; продублированы в хвостах страниц; адреса экспортирует транспортная сборка.
 
 ; Локальные кадры стека, не поля общего аппаратного окна.
 ; Все слова little-endian. Смещения от SP сразу после создания кадра.

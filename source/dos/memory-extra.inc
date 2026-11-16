@@ -95,7 +95,7 @@ memoryQuery:
     inc a
     cp b
     jp nc,memoryQuerySlots
-    ld hl,0FF00h
+    ld hl,MEM_DATA_LIMIT
     ld (memoryQueryEnd),hl
     jp memoryQueryGap
 memoryQueryMain:
@@ -107,7 +107,14 @@ memoryQueryMain:
     ld hl,(memoryMainStart)
     ld (memoryQueryCursor),hl
     ld hl,(memoryMainEnd)
+    call memoryCapMain
     ld (memoryQueryEnd),hl
+    ex de,hl
+    ld hl,(memoryQueryCursor)
+    call cmp_hl_de
+    jp c,memoryQueryGap
+    ex de,hl
+    ld (memoryQueryCursor),hl
 memoryQueryGap:
     ld hl,(memoryQueryEnd)
     ld (memoryQueryNext),hl
@@ -226,7 +233,7 @@ memoryQueryBlockEnd: DW 0
 memoryQueryTotal: DW 0
 memoryQueryMax: DW 0
 
-; C=0: B=размер пула, C=0 свободен/1 DOS/2 старый резидент.
+; C=0: B=размер пула, C=0 свободен/1 DOS/2 старый резидент; D=новое ОЗУ, E=0.
 ; C=1: DRIVER-инициализатор передаёт подготовленный пул самой DOS.
 ; Никакой модульный handle и реестр FAR-блоков для этого не нужны.
 memoryRamDisk:
@@ -253,7 +260,12 @@ memoryRamDiskValidate:
     ret c
     ld a,DOS_IO_PAGE
     ld (memoryRamOwner),a
+    xor a
+    ld (memoryRamFresh),a
 memoryRamDiskStatus:
+    ld a,(memoryRamFresh)
+    ld d,a
+    ld e,0
     ld a,(memoryRamPages)
     ld b,a
     ld c,0

@@ -23,7 +23,7 @@ gridBankStringSetup:
     cp 2
     jp nz,gridBankStart
     ld b,0
-    ld hl,07C00h
+    ld hl,(nativeControl+8) ; caller selected scratch below resident memTop
     ld de,00900h
     ld a,MEM_OP_ARENA
     MXOS_CALL MXOS_DOS_MEMORY

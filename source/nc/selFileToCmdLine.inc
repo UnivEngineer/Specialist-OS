@@ -131,6 +131,6 @@ selFileToCmdLine:
         ret c
         ex de,hl
         ld (vars.cmdLineEnd),hl
-        call redrawCommandLine
+        call redrawCommandText
         or a
         ret

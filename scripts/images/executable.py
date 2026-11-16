@@ -1,4 +1,4 @@
-"""Независимый эталон COM/EXE/DLL/RKS для Python-проверок. Сборщик использует executable.ps1."""
+"""Независимый эталон COM/EXE/DLL/FNT/RKS для Python-проверок. Сборщик использует executable.ps1."""
 from dataclasses import dataclass
 from pathlib import Path
 import struct
@@ -33,7 +33,7 @@ class Image:
 
 def decode(data, kind, load=None, entry=None, path=None):
     kind = kind.lower().lstrip('.')
-    if kind in ('com', 'exe', 'dll'):
+    if kind in ('com', 'exe', 'dll', 'fnt'):
         if len(data) < HEADER_SIZE or data[:5] != MAGIC[:5]:
             raise ValueError('Expected MXOS2 COM/EXE header')
         start, run, size, cs, hs = struct.unpack_from('<5H', data, 6)
@@ -62,7 +62,7 @@ def decode(data, kind, load=None, entry=None, path=None):
 def encode(image, kind):
     image.validate()
     kind = kind.lower().lstrip('.')
-    if kind in ('com', 'exe', 'dll'):
+    if kind in ('com', 'exe', 'dll', 'fnt'):
         if len(image.data) > 65535:
             raise ValueError('COM payload exceeds 65535 bytes')
         header = MAGIC[:5] + bytes([image.flags]) + struct.pack('<4H', image.load, image.entry, len(image.data), checksum(image.data))
@@ -81,7 +81,7 @@ def convert(path, target, load=None):
     kind = path.suffix.lower().lstrip('.')
     # До миграции старые EXE без сигнатуры — допустимый вход, но не выход.
     data = path.read_bytes()
-    if kind in ('exe', 'com', 'dll') and data[2:4] != b'MX':
+    if kind in ('exe', 'com', 'dll', 'fnt') and data[2:4] != b'MX':
         kind = 'raw'
     image = decode(data, kind, load=load, path=path)
     return encode(image, target), image
@@ -95,8 +95,8 @@ def convert_batch(requests):
         source = request['source']
         try:
             target = request['format'].lower()
-            if target not in ('com', 'exe', 'dll', 'rks'):
-                raise ValueError('Expected COM, EXE or RKS target')
+            if target not in ('com', 'exe', 'dll', 'fnt', 'rks'):
+                raise ValueError('Expected COM, EXE, DLL, FNT or RKS target')
             packed, _ = convert(source, target, request.get('load'))
         except (OSError, ValueError) as error:
             raise ValueError(f'{source}: {error}') from error
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path, nargs='?')
     parser.add_argument('output', type=Path, nargs='?')
-    parser.add_argument('--format', type=str.lower, choices=('com','exe','rks'))
+    parser.add_argument('--format', type=str.lower, choices=('com','exe','dll','fnt','rks'))
     parser.add_argument('--batch', type=Path, help='UTF-8 JSON: список source/format/load')
     parser.add_argument('--load', type=lambda s: int(s, 0))
     parser.add_argument('--stdout', action='store_true')

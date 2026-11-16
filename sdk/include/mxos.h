@@ -18,6 +18,48 @@ typedef struct { mxos_u8 bytes[32]; } MXOS_DESCRIPTOR;
 typedef struct { mxos_u8 bytes[16]; } MXOS_FILE_INFO;
 typedef struct { mxos_u8 bytes[48]; } MXOS_DISK_INFO;
 typedef struct { mxos_u8 bytes[86]; } MXOS_COPY_REQUEST;
+typedef struct {
+    mxos_u16 handle;
+    mxos_u8 mode,state,answer,error;
+    mxos_u32 bytes;
+    mxos_u16 files;
+    mxos_u8 flags,phase,known,reserved;
+    mxos_u32 total;
+    mxos_u16 required,path;
+    MXOS_COPY_REQUEST request; /* BEGIN input; returned for CONFIRM only. */
+} MXOS_FILEOPS_JOB;
+#define MXOS_FILEOPS_BEGIN 0
+#define MXOS_FILEOPS_STEP 1
+#define MXOS_FILEOPS_ANSWER 2
+#define MXOS_FILEOPS_CANCEL 3
+#define MXOS_FILEOPS_CLOSE 4
+#define MXOS_FILEOPS_SKIP_PREPARE 5
+#define MXOS_FILEOPS_NO_PREPARE 1
+#define MXOS_FILEOPS_PHASE_COPY 0
+#define MXOS_FILEOPS_PHASE_PREPARE 1
+#define MXOS_FILEOPS_PHASE_DELETE 2
+#define MXOS_FILEOPS_COPY 0
+#define MXOS_FILEOPS_MOVE 1
+#define MXOS_FILEOPS_DELETE 2
+#define MXOS_FILEOPS_RUNNING 0
+#define MXOS_FILEOPS_CONFIRM 1
+#define MXOS_FILEOPS_DONE 2
+#define MXOS_FILEOPS_FAILED 3
+/* CF reports API failure; job.error reports an operation failure. Always CLOSE. */
+mxos_u16 mxos_fileops(mxos_u8 operation,MXOS_FILEOPS_JOB *job);
+/* Request and output buffers are NEAR pointers in the caller's bank.
+ * One cursor, owned by the caller; always CLOSE, even after END/error. */
+typedef struct {
+    mxos_u16 handle,path,buffer,capacity,count;
+    mxos_u8 flags,state;
+} MXOS_ENUM_REQUEST;
+typedef struct { MXOS_DESCRIPTOR descriptor; char path[128]; } MXOS_ENUM_ENTRY;
+#define MXOS_ENUM_OPEN 0
+#define MXOS_ENUM_NEXT 1
+#define MXOS_ENUM_CLOSE 2
+#define MXOS_ENUM_RECURSIVE 1
+#define MXOS_ENUM_CHECK_CANCEL 2
+mxos_u16 mxos_enumerate(mxos_u8 operation,MXOS_ENUM_REQUEST *request);
 #define MXOS_MAX_PATH 128
 #define MXOS_RAW_PREPARE 6 /* RAW_IO B=6: unified entry HL (B=1/2/4/5), DE=0, shift B, drive C. */
 
@@ -108,7 +150,6 @@ void mxos_bios_call(MXOS_REGS *regs) MXOS_FASTCALL;
 #define MXOS_MEM_CAP_MEMORY_OPS 4
 #define MXOS_MEM_CAP_MODULES 8
 #define MXOS_MEM_CAP_ALLOCATOR 16
-#define MXOS_MEM_CAP_DWORD 32
 /* FAR-код: 0=main, 1..16=банки ДОЗУ; packed для 8080, sizeof=8. */
 typedef struct {
     mxos_u8 source_bank;
@@ -121,8 +162,6 @@ typedef struct {
 mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 
 #define MXOS_MEM_SERVICE 0xF815
-#define MXOS_MEM_GET32 0xF7A8
-#define MXOS_MEM_PUT32 0xF7AB
 #define MXOS_ALLOC_MAIN 0
 #define MXOS_ALLOC_ANY_BANK 255
 /* Операции F815h: 0..5; MXOS_DOS_MEMORY: 1..4, 6..10. */
@@ -141,6 +180,9 @@ mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 #define MXOS_MEM_OP_QUERY 12
 #define MXOS_MEM_OP_DISKCLAIM 13
 #define MXOS_MEM_OP_RAMDISK 14
+#define MXOS_MEM_OP_RESIDENT 15
+#define MXOS_MEM_RESIDENT_FONT 0
+#define MXOS_MEM_RESIDENT_SLOTS 4
 #define MXOS_RAMDISK_STATUS 0
 #define MXOS_RAMDISK_COMMIT 1
 #define MXOS_MEM_ERR_BANK 0xE0
@@ -166,7 +208,7 @@ mxos_u16 mxos_fill_far(MXOS_FAR_ADDRESS *address, mxos_u8 value, mxos_u16 bytes)
 mxos_u16 mxos_calloc_far(mxos_u8 bank, mxos_u16 count, mxos_u16 size, MXOS_FAR_ADDRESS *out);
 mxos_u16 mxos_memory_query(mxos_u8 bank, MXOS_MEMORY_INFO *out);
 /* state: 0=не закреплён, 1=владелец DOS, 2=исторический модульный владелец. */
-mxos_u16 mxos_ramdisk_status(mxos_u8 *pages, mxos_u8 *state);
+mxos_u16 mxos_ramdisk_status(mxos_u8 *pages, mxos_u8 *state, mxos_u8 *fresh);
 mxos_u16 mxos_ramdisk_commit(void); /* Только из DRIVER-инициализатора. */
 mxos_u16 mxos_resident_retain(mxos_u16 key);
 /* Соглашение входа резидента: A=1 RESTORE, A=2 CLOSE; отказ CLOSE сохраняет модуль. */
@@ -179,8 +221,6 @@ mxos_u16 mxos_get8_far(MXOS_FAR_ADDRESS *address, mxos_u8 *out);
 mxos_u16 mxos_get16_far(MXOS_FAR_ADDRESS *address, mxos_u16 *out);
 mxos_u16 mxos_put8_far(MXOS_FAR_ADDRESS *address, mxos_u8 value);
 mxos_u16 mxos_put16_far(MXOS_FAR_ADDRESS *address, mxos_u16 value);
-mxos_u16 mxos_get32_far(MXOS_FAR_ADDRESS *address, mxos_u32 *out);
-mxos_u16 mxos_put32_far(MXOS_FAR_ADDRESS *address, mxos_u32 value);
 
 /* Непрозрачный handle; формат локального MX_REGS совпадает с ASM (8 байт). */
 #define MXOS_MODULE_MAIN 0

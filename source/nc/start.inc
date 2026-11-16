@@ -7,10 +7,19 @@
 
 Start:
             xor a
+            ld (ncDialogActive),a
+            ld (ncListMask),a
+            ld (ncStartupPrepared),a
+            call bios_setFontEncoding ; Always restore KOI-8 before any NC output.
+            ld hl,0
+            ld (bios_vars.inverse),hl
+            call ncStartupCopyright
+ncStartupBannerReady:
+            call ncLayoutInit
+            call ncMemoryInit
+            jp c,ncMemoryError
+            xor a
             MXOS_CALL MXOS_DOS_SET_SHELL
-            ; Отключаем инверсию
-            ld      hl, 0
-            ld      (bios_vars.inverse), hl
             xor     a
             ld      (vars.path), a
             ld      (vars.scrollCursorKept), a
@@ -22,22 +31,22 @@ Start:
             ld      (vars.drawnLeftB), a
             ld      (vars.drawnRightA), a
             ld      (vars.drawnRightB), a
-            ld      (vars.panelA_info), a
-            ld      (vars.panelB_info), a
-            call bios_setFontEncoding    ; Имена файлов и содержимое — KOI-8.
+            ld      (vars.restoreSelectedA), a
+            ld      (vars.restoreSelectedB), a
+            ld      (vars.savedSelectedA), a
+            ld      (vars.savedSelectedB), a
             call    ncCatalogInit
-            call    ncFontRenderEnd
+            call    initRightDrive
+            call    ncConfigLoad
 
-            ; Загружаем состояние. Если ZF, значит, уже запускали NC.COM.
-            ; Иначе используем начальное состояние в памяти.
+            ; Apply the state overlay before reading either panel's catalog.
             ld hl,ncDiskChanged
             ld a,CLI_OP_OBSERVER
             MXOS_CALL MXOS_DOS_CLI
             call    loadState
-            jp z,   formatCalled
-
-            ; H используется по умолчанию только при установленном драйвере.
-            call    initRightDrive
+            call ncPreparePanels
+            ld a,1
+            ld (ncStartupPrepared),a
 
             ; До запуска программы или выхода запись на B: не нужна.
 
