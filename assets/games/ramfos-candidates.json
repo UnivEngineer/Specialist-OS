@@ -2288,7 +2288,7 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Буран.i80"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.cpu",
       "source_verified_now": true,
       "id": "RF-040"
     },
@@ -2343,7 +2343,7 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Starwar.i80"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.cpu",
       "source_verified_now": true,
       "id": "RF-041"
     },
@@ -3008,7 +3008,7 @@
         "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.rks"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-optimized-20261102.cpu",
       "source_verified_now": true,
       "id": "RF-059"
     },
@@ -3058,7 +3058,7 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Emu80_4.rar :: Emu80_40250\\_stuff\\spmx\\cpu\\Almaz_2.i80"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.cpu",
       "source_verified_now": true,
       "id": "RF-060"
     },
@@ -3092,7 +3092,7 @@
         "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.rks"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.cpu",
       "source_verified_now": true,
       "id": "RF-061"
     },
@@ -3126,7 +3126,7 @@
         "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.rks"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-20261104.cpu",
       "source_verified_now": true,
       "id": "RF-062"
     }

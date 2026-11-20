@@ -4,7 +4,7 @@
 
 `MONWIN.asm` — сборочный исходник SjASMPlus `--i8080`, восстановленный из имеющегося дизассемблированного листинга. Он воспроизводит ROM побайтно; числовые адреса и неизвестные данные сохранены. `originals/monitor_win.asm` — исходный полученный листинг, а не авторский ассемблерный текст. `originals/monitor_win.rom` — неизменённый эталон. Оба перенесены из `D:/Projects/RetroPC/Specialist/MySoft/Monitor-windows/`. SHA-256 ROM: `841a6db4bc330aa43514bcba98c02afd92db13f98670b435788adb6135bd7bac`.
 
-Сборка входит в `build: OS`; отдельная задача — `build: monitor-win`. Из этой папки:
+Монитор входит в сборку системы. Для отдельной сборки выполните из этой папки:
 
 ```powershell
 powershell.exe -NoProfile -File ../../scripts/build/build-if-needed.ps1 MONWIN mon 0xC000

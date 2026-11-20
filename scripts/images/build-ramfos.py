@@ -4,12 +4,14 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import runpy
 import struct
 import subprocess
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
 START, END = 0x2000, 0xFFFC
+REGISTRY = ROOT / 'assets/games/ramfos-candidates.json'
 
 
 def checksum(data):
@@ -22,23 +24,27 @@ def checksum(data):
     return b * 256 + c
 
 
-def payload(entry, library):
-    source = Path(entry['verified_source'])
+def source_path(entry, library):
     # Пути реестра переносим относительно двух известных корней.
-    normalized = str(source).replace('\\', '/')
+    normalized = entry['verified_source'].replace('\\', '/')
     for prefix, base in [('D:/Projects/Specialist-OS/', ROOT),
                          ('D:/Projects/RetroPC/Specialist/', library)]:
         if normalized.lower().startswith(prefix.lower()):
-            source = base / normalized[len(prefix):]
-            break
+            return base / normalized[len(prefix):]
+    return Path(normalized)
+
+
+def payload(entry, library):
+    source = source_path(entry, library)
     raw = source.read_bytes()
     size = entry['payload_bytes']
-    matches = [raw[offset:offset + size] for offset in range(len(raw) - size + 1)
-               if len(raw) >= offset + size
-               and hashlib.sha256(raw[offset:offset + size]).hexdigest() == entry['payload_sha256']]
-    if not matches:
+    view = memoryview(raw)
+    expected = entry['payload_sha256']
+    match = next((offset for offset in range(len(raw) - size + 1)
+                  if hashlib.sha256(view[offset:offset + size]).hexdigest() == expected), None)
+    if match is None:
         raise ValueError(f"{entry['id']}: неизвестная нагрузка {source}")
-    data = matches[0]
+    data = raw[match:match + size]
     address = int(entry['load_address'], 16)
     if not data or address + len(data) > 0x9000:
         raise ValueError(f"{entry['id']}: нагрузка вне пользовательского ОЗУ")
@@ -71,7 +77,7 @@ def build(library):
     assert len(kernel) == 0x3FE0
     packed = kernel[:0x1300] + kernel[0x3800:]
     assert 0x100 + len(packed) <= START
-    entries = json.loads((ROOT / 'assets/games/ramfos-candidates.json').read_text(encoding='utf-8'))['entries']
+    entries = json.loads(REGISTRY.read_text(encoding='utf-8'))['entries']
     monitor = (library / 'OS/RAMFOS-master/RomDisk/Monitor2.49152.sys').read_bytes()
     # Системный монитор доступен в каждом томе для штатного RKS-загрузчика.
     if len(monitor) != 0x1000:
@@ -134,8 +140,27 @@ def build(library):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--library', type=Path, default=Path('D:/Projects/RetroPC/Specialist'))
+    parser.add_argument('--force', action='store_true')
+    parser.add_argument('--run-build', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
-        build(args.library)
+        if args.run_build:
+            build(args.library)
+        else:
+            entries = json.loads(REGISTRY.read_text(encoding='utf-8'))['entries']
+            monitor = args.library / 'OS/RAMFOS-master/RomDisk/Monitor2.49152.sys'
+            options = ['image: RAMFOS', '--input', str(REGISTRY), '--input', str(monitor), '--hash', str(monitor)]
+            for entry in entries:
+                options.extend(('--input', str(source_path(entry, args.library))))
+            for name in ('ramfos', 'romboot'):
+                options.extend(('--asm', str(ROOT / f'source/ramfos/{name}.asm')))
+                for extension in ('bin', 'lst'):
+                    options.extend(('--output', str(ROOT / f'bin/RAMFOS-ROM-{name}.{extension}')))
+            for name in ('RAMFOS-system.bin', 'RAMFOS-games.ramdisk', 'RAMFOS-games.json', 'RAMFOS-games.md'):
+                options.extend(('--output', str(ROOT / 'images' / name)))
+            if args.force:
+                options.append('--force')
+            cached_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['main']
+            sys.exit(cached_build([*options, '--', __file__, '--run-build', '--library', str(args.library)]))
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         sys.exit(str(error))

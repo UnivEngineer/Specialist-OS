@@ -16,7 +16,9 @@
 
 ## Сборка и запуск
 
-Ядро для MXOS собирается задачей `build: ramfos` в `bin/RAMFOS.mon` — сырой образ 6880 байт без контейнера COM/EXE. Расширение SYS зарезервировано за DOS. Сборка `build: OS` включает ядро и общий [RUN.COM](../run/README.md); они находятся в большом системном flash-образе A-System.txt.
+Ядро для MXOS собирается вместе с системой в `bin/RAMFOS.mon` — сырой образ 6880 байт без контейнера COM/EXE. Расширение SYS зарезервировано за DOS. Сборка `scripts/build/build-project.ps1 OS` включает ядро и общий [RUN.COM](../run/README.md); они находятся в большом системном flash-образе A-System.txt.
+
+Для самостоятельного образа Emu80 сборщик `scripts/images/build-ramfos.py` проверяет нагрузки по SHA-256 из `assets/games/ramfos-candidates.json`. Два варианта Almaz-2 из этого реестра закреплены в `assets/games/Almaz-2/legacy/` по историческим сборкам, чтобы пересборка текущей игры не меняла тестовый RAM-диск.
 
 ```text
 A:RUN.COM -RF H:GAME.RKS

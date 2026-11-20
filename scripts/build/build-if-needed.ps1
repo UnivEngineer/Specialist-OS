@@ -10,7 +10,11 @@ param(
     [string] $Address,
 
     [Parameter(Position = 3)]
-    [string] $OutputBase = $SourceBase
+    [string] $OutputBase = $SourceBase,
+
+    [switch] $Force,
+    [Parameter(DontShow)]
+    [switch] $RunBuild
 )
 
 $ErrorActionPreference = "Stop"
@@ -32,155 +36,103 @@ function Get-FullPath {
     return [System.IO.Path]::GetFullPath((Join-Path $BaseDirectory $Path))
 }
 
-function Get-SourceDependencies {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $SourcePath,
-
-        [Parameter(Mandatory = $true)]
-        [string] $BuildDirectory
-    )
-
-    $visited = @{}
-    $dependencies = New-Object System.Collections.Generic.List[string]
-    $directivePattern = '^\s*(?:include|incbin)\s+(?:"([^"]+)"|''([^'']+)''|([^\s;]+))'
-
-    function Visit-Source {
-        param([string] $Path)
-
-        $fullPath = [System.IO.Path]::GetFullPath($Path)
-        $key = $fullPath.ToUpperInvariant()
-        if ($visited.ContainsKey($key)) {
-            return
-        }
-
-        if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-            throw "Build dependency not found: $fullPath"
-        }
-
-        $visited[$key] = $true
-        $dependencies.Add($fullPath)
-
-        foreach ($line in [System.IO.File]::ReadLines($fullPath)) {
-            $match = [System.Text.RegularExpressions.Regex]::Match(
-                $line,
-                $directivePattern,
-                [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
-            )
-            if (-not $match.Success) {
-                continue
-            }
-
-            $includePath = $match.Groups[1].Value
-            if ([string]::IsNullOrEmpty($includePath)) {
-                $includePath = $match.Groups[2].Value
-            }
-            if ([string]::IsNullOrEmpty($includePath)) {
-                $includePath = $match.Groups[3].Value
-            }
-
-            $resolvedPath = Get-FullPath -Path $includePath -BaseDirectory (Split-Path -Parent $fullPath)
-            if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
-                $resolvedPath = Get-FullPath -Path $includePath -BaseDirectory $BuildDirectory
-            }
-
-            $dependencies.Add($resolvedPath)
-            if ($line -match '^\s*include\b') {
-                Visit-Source -Path $resolvedPath
-            }
-        }
-    }
-
-    Visit-Source -Path $SourcePath
-    return $dependencies | Sort-Object -Unique
-}
-
 $buildDirectory = (Get-Location).ProviderPath
 $sourcePath = Get-FullPath -Path ($SourceBase + ".asm") -BaseDirectory $buildDirectory
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-. (Join-Path $repositoryRoot "scripts/images/cpu.ps1")
 $outputDirectory = Join-Path $repositoryRoot "bin"
 $outputPath = Join-Path $outputDirectory ($OutputBase + "." + $Extension)
 $listingPath = Join-Path $outputDirectory ($OutputBase + ".lst")
 $symbolPath = Join-Path $outputDirectory ($OutputBase + '.sym')
-$configurationPath = $outputPath + '.build-config'
 $rawOutputPath = $outputPath
 if ($Extension -eq 'cpu') { $rawOutputPath = Join-Path $outputDirectory ($OutputBase + '.i80') }
-$configuration = 'Configured'
 $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 
+$editor = $SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\EDIT')
+$commander = $SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')
+$dos = $SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')
+$flashDriver = $SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')
+$ramDriver = $SourceBase -eq 'RAMDISK' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\ramdisk')
+$monitor2 = $SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor2')
+$monitorWin = $SourceBase -eq 'MONWIN' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor_win')
+
+if (-not $RunBuild) {
+    $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), $OutputBase)
+    $inputs = @()
+    $outputs = @()
+    if ($editor -or $commander -or $dos -or $flashDriver -or $ramDriver) {
+        $cacheArgs += @('--project-inputs', '--scan-output', $outputDirectory)
+        if ($dos) {
+            $outputs += @('bin/fonts/Compact.pf', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc',
+                'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
+        } else {
+            $inputs += 'bin/banked/KERNEL.sym'
+        }
+        if ($flashDriver) { $inputs += 'bin/BIOS.sym' }
+    } else {
+        $cacheArgs += @('--asm', $sourcePath, '--output', $listingPath, '--output', $symbolPath, '--output', $outputPath)
+        if ($Extension -eq 'cpu') {
+            $cacheArgs += @('--output', $rawOutputPath)
+            $inputs += 'scripts/images/cpu.ps1'
+        }
+        if ($SourceBase -eq 'UI_GFX') {
+            $inputs += @('scripts/images/executable.py', 'scripts/images/cpu.py')
+            $outputs += 'bin/UI_GFX.dll'
+        }
+        if ($monitor2) {
+            $inputs += 'source/monitor2/originals/Monitor2.mon'
+            $cacheArgs += @('--hash', (Join-Path $repositoryRoot 'source/monitor2/originals/Monitor2.mon'), '--hash', $outputPath)
+        }
+        if ($monitorWin) {
+            $inputs += @('source/monitor_win/originals/monitor_win.rom', 'scripts/tests/check-monitor-win-build.py')
+            $cacheArgs += @('--hash', (Join-Path $repositoryRoot 'source/monitor_win/originals/monitor_win.rom'), '--hash', $outputPath)
+        }
+    }
+    foreach ($path in $inputs) { $cacheArgs += @('--input', (Join-Path $repositoryRoot $path)) }
+    foreach ($path in $outputs) { $cacheArgs += @('--output', (Join-Path $repositoryRoot $path)) }
+    if ($Force) { $cacheArgs += '--force' }
+    $cacheArgs += @('--', $PSCommandPath, $SourceBase, $Extension, $Address, $OutputBase, '-RunBuild')
+    & python @cacheArgs
+    exit $LASTEXITCODE
+}
+
+. (Join-Path $repositoryRoot "scripts/images/cpu.ps1")
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 # DOS требует предварительного измерения блоков и размещения между входами ABI.
-if ($SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\EDIT')) {
+if ($editor) {
     & python (Join-Path $PSScriptRoot 'build-editor.py')
     exit $LASTEXITCODE
 }
-if ($SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')) {
+if ($commander) {
     & python (Join-Path $PSScriptRoot 'build-nc.py')
     exit $LASTEXITCODE
 }
-if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')) {
+if ($dos) {
     & python (Join-Path $PSScriptRoot 'build-bios-dos.py')
     exit $LASTEXITCODE
 }
 
 # Одноразовый установщик включает переносимую службу и её адреса патчей.
-if ($SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')) {
+if ($flashDriver) {
     & python (Join-Path $PSScriptRoot 'build-banked-transport.py')
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 # Fixed-address installers are linked from their measured size, against arenaEnd.
-if (($SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')) -or
-    ($SourceBase -eq 'RAMDISK' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\ramdisk'))) {
+if ($flashDriver -or $ramDriver) {
     & python (Join-Path $PSScriptRoot 'build-driver.py') $sourcePath
     exit $LASTEXITCODE
 }
 
-$dependencies = @(Get-SourceDependencies -SourcePath $sourcePath -BuildDirectory $buildDirectory)
-$buildInputs = @($dependencies + $assemblerPath + $PSCommandPath)
-$newestInput = $buildInputs |
-    Get-Item -ErrorAction Stop |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-$needsCompile = -not (Test-Path -LiteralPath $rawOutputPath -PathType Leaf) -or
-    -not (Test-Path -LiteralPath $outputPath -PathType Leaf) -or
-    -not (Test-Path -LiteralPath $listingPath -PathType Leaf) -or
-    -not (Test-Path -LiteralPath $symbolPath -PathType Leaf) -or
-    -not (Test-Path -LiteralPath $configurationPath -PathType Leaf)
-
-if (-not $needsCompile) {
-    $needsCompile = [IO.File]::ReadAllText($configurationPath) -ne $configuration
-}
-
-if (-not $needsCompile) {
-    $output = Get-Item -LiteralPath $outputPath
-    $listing = Get-Item -LiteralPath $listingPath
-    $needsCompile = $output.LastWriteTimeUtc -lt $newestInput.LastWriteTimeUtc -or
-        $listing.LastWriteTimeUtc -lt $newestInput.LastWriteTimeUtc
-}
-
-if ($needsCompile) {
-    if (Test-Path -LiteralPath $configurationPath) { Remove-Item -LiteralPath $configurationPath }
-    Write-Host ("[build] {0} (newest input: {1})" -f $sourcePath, $newestInput.FullName)
-    & $assemblerPath `
-        "--i8080" `
-        "-Wno-rdlow" `
-        ("--lst={0}" -f $listingPath) `
-        ("--sym={0}" -f $symbolPath) `
-        ("--raw={0}" -f $rawOutputPath) `
-        $sourcePath
-
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
-    }
-    [IO.File]::WriteAllText($configurationPath, $configuration)
-}
-else {
-    Write-Host ("[up-to-date] {0}" -f $outputPath)
-}
+Write-Host "[build] $sourcePath"
+& $assemblerPath `
+    "--i8080" `
+    "-Wno-rdlow" `
+    ("--lst={0}" -f $listingPath) `
+    ("--sym={0}" -f $symbolPath) `
+    ("--raw={0}" -f $rawOutputPath) `
+    $sourcePath
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # CPU — текстовые адреса, машинный образ находится в соседнем I80.
 if ($Extension -eq 'cpu') {
@@ -207,8 +159,7 @@ if ($Extension -eq 'cpu') {
 }
 
 # Monitor-2 должен точно воспроизводить сохранённое историческое ядро.
-# Проверяем и после пропуска компиляции: подменённый результат недопустим.
-if ($SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor2')) {
+if ($monitor2) {
     $referencePath = Join-Path $buildDirectory 'originals\Monitor2.mon'
     $referenceHash = 'E8EABDEE87CBBB679F0D6E7C30BCDB2E48A793FC0A7938D8D9411F8BCAA9555A'
     $referenceBytes = [IO.File]::ReadAllBytes($referencePath)
@@ -232,7 +183,7 @@ if ($SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRo
     }
     Write-Host ("[verified] Monitor-2: {0} bytes identical to original" -f $compiledBytes.Length)
 }
-if ($SourceBase -eq 'MONWIN' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor_win')) {
+if ($monitorWin) {
     & python (Join-Path $repositoryRoot 'scripts/tests/check-monitor-win-build.py')
     if ($LASTEXITCODE -ne 0) { throw 'Window monitor differs from its historical reference.' }
 }

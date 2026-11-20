@@ -18,13 +18,13 @@ SHA-256 эталона: `e8eabdee87cbbb679f0d6e7c30bcdb2e48a793fc0a7938d8d9411f8
 
 ## Сборка и проверка
 
-Задача VS Code: **build: monitor2**. Из `source/monitor2`:
+Для отдельной сборки выполните из `source/monitor2`:
 
 ```powershell
 powershell.exe -NoProfile -File ../../scripts/build/build-if-needed.ps1 Monitor2 mon 0xC000
 ```
 
-Результат: `bin/Monitor2.mon`, `bin/Monitor2.lst`, `bin/Monitor2.sym`. Компонент включён в `build: OS` и `build: all`; манифест системного ROM берёт `MONITOR2.MON` из `bin/Monitor2.mon`.
+Результат: `bin/Monitor2.mon`, `bin/Monitor2.lst`, `bin/Monitor2.sym`. Компонент включён в сборку системы и в `build: all`; манифест системного ROM берёт `MONITOR2.MON` из `bin/Monitor2.mon`.
 
 Сборочный скрипт проверяет SHA-256 сохранённого эталона, затем длину и каждый байт результата. Несовпадение даёт ошибку с ненулевым кодом завершения и адресом первого отличия. Проверка выполняется также для `up-to-date`. Для намеренного изменения Monitor-2 потребуется отдельно пересмотреть этот контракт; перезаписывать оригинал для прохождения проверки нельзя.
 

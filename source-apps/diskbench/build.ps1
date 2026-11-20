@@ -1,7 +1,24 @@
 ﻿[CmdletBinding()]
-param([ValidateSet(2000000,2500000)][int] $PitHz = 2000000)
+param(
+    [ValidateSet(2000000,2500000)][int] $PitHz = 2000000,
+    [switch] $Force,
+    [Parameter(DontShow)]
+    [switch] $RunBuild
+)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if (-not $RunBuild) {
+    $cacheArgs = @((Join-Path $root 'scripts/build/build_cache.py'), "DISKBEN ($PitHz Hz)",
+        '--asm', (Join-Path $PSScriptRoot 'DISKBEN.asm'), '--asm', (Join-Path $PSScriptRoot 'worker.asm'),
+        '--input', (Join-Path $root 'scripts/images/cpu.ps1'), '--scan-output', (Join-Path $PSScriptRoot 'build'))
+    foreach ($name in 'DISKBEN', 'DISKBANK', 'DISKDOS', 'DISKMAIN') {
+        foreach ($extension in 'i80', 'cpu') { $cacheArgs += @('--output', (Join-Path $root "bin/$name.$extension")) }
+    }
+    if ($Force) { $cacheArgs += '--force' }
+    $cacheArgs += @('--', $PSCommandPath, '-PitHz', $PitHz, '-RunBuild')
+    & python @cacheArgs
+    exit $LASTEXITCODE
+}
 . (Join-Path $root "scripts/images/cpu.ps1")
 New-Item -ItemType Directory -Force (Join-Path $PSScriptRoot 'build') | Out-Null
 Push-Location $PSScriptRoot

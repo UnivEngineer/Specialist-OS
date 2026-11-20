@@ -1,9 +1,11 @@
 """Автономная сборка исторических копировщиков, без пересборки DOS."""
 from pathlib import Path
+import runpy
 import subprocess
 import re
+import sys
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).absolute().parent
 ROOT = HERE.parents[1]
 OUT = ROOT / 'bin/copybench'
 VARIANTS = ('stack', 'loop', 'unrolled', 'direct', 'regs2', 'regs4', 'regs6')
@@ -48,4 +50,7 @@ def main():
                         str(HERE/source)], check=True)
 
 if __name__ == '__main__':
-    main()
+    python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']
+    sys.exit(python_build(__file__, 'COPYBEN variants', main,
+                          inputs=(HERE, 'source/include', 'source/common'),
+                          outputs=('bin/COPYBEN.variants.inc',), scan_outputs=(OUT,)))

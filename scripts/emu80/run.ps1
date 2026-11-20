@@ -10,7 +10,8 @@ param(
     [switch] $UpdateSystemFlash,
     [switch] $ProtectSystemFlash,
     [switch] $Mcp,
-    [switch] $Mute
+    [switch] $Mute,
+    [switch] $PassThru
 )
 
 $ErrorActionPreference = 'Stop'
@@ -120,5 +121,5 @@ if (-not $PrepareOnly) {
     # Эмулятор — интерактивное приложение; скрытый запуск нужен только для диагностики.
     $windowStyle = if ($Hidden) { 'Hidden' } else { 'Normal' }
     $configName = 'specialist-os/launch.conf'
-    Start-Process -FilePath $executable -ArgumentList '--conf-file', $configName, '--platform', 'specialist-os' -WorkingDirectory $runtime -WindowStyle $windowStyle
+    Start-Process -FilePath $executable -ArgumentList '--conf-file', $configName, '--platform', 'specialist-os' -WorkingDirectory $runtime -WindowStyle $windowStyle -PassThru:$PassThru
 }

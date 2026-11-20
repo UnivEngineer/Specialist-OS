@@ -1,13 +1,16 @@
 """Сборка локального bootstrap, без вызовов BIOS и зависимости от COPYBEN."""
 from pathlib import Path
-import argparse, subprocess, runpy, re, json
-ROOT=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--probe',action='store_true');p.add_argument('--font-body',type=Path);p.add_argument('--font-name');a=p.parse_args()
-out=ROOT/'bin/bootstrap';out.mkdir(parents=True,exist_ok=True)
-module=(ROOT/'bin/DOS.sys').read_bytes()
-io=json.loads((ROOT/'bin/System.layout.json').read_text('utf8'))['io']
-assert io['bytes']+io['bankBytes']==(ROOT/'bin/IO.sys').stat().st_size
-subprocess.run(['python', str(ROOT/'scripts/build/build-font-engines.py')], check=True)
+import argparse, subprocess, runpy, re, json, sys
+from build_cache import main as cached_build
+
+ROOT = Path(__file__).absolute().parents[2]
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--probe', action='store_true')
+p.add_argument('--font-body', type=Path)
+p.add_argument('--font-name')
+p.add_argument('--force', action='store_true')
+p.add_argument('--run-build', action='store_true', help=argparse.SUPPRESS)
+a = p.parse_args()
 if a.font_body is None:
  lines=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig').splitlines()
  names=[line.split()[1] for line in lines if line.strip().lower().startswith('@bootfont ')]
@@ -18,6 +21,29 @@ if a.font_body is None:
  a.font_body=ROOT/'assets'/sources[0]
  if a.font_name is None:a.font_name=Path(names[0]).stem
 font_path=a.font_body.with_suffix('.i80') if a.font_body.suffix.lower()=='.cpu' else a.font_body
+out = ROOT / 'bin/bootstrap'
+if not a.run_build:
+    subprocess.run([sys.executable, str(ROOT / 'scripts/build/build-font-engines.py')], check=True)
+    options = ['Bootstrap', '--scan-output', str(out), '--output', str(out / 'sector.bin')]
+    for name in ('source/bootstrap', 'source/include', 'tasm/sjasmplus.exe', 'scripts/build/build-boot-splash.py',
+                 'scripts/images/executable.py', 'scripts/images/cpu.py', 'scripts/images/manifests/A-System.txt',
+                 'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/DOS.sys',
+                 'bin/System.layout.json', 'bin/banked/TRANSPORT.sym', 'bin/banked/KERNEL.sym', 'bin/MEM.sym'):
+        options.extend(('--input', str(ROOT / name)))
+    options.extend(('--input', str(font_path.absolute())))
+    if a.force:
+        options.append('--force')
+    command = [__file__, '--run-build', '--font-body', str(a.font_body.absolute())]
+    if a.font_name is not None:
+        command.extend(('--font-name', a.font_name))
+    if a.probe:
+        command.append('--probe')
+    sys.exit(cached_build([*options, '--', *command]))
+
+out.mkdir(parents=True, exist_ok=True)
+module = (ROOT / 'bin/DOS.sys').read_bytes()
+io = json.loads((ROOT / 'bin/System.layout.json').read_text('utf8'))['io']
+assert io['bytes'] + io['bankBytes'] == (ROOT / 'bin/IO.sys').stat().st_size
 font=font_path.read_bytes()
 if font[:4]==b'\xcd MX':
  font=runpy.run_path(str(ROOT/'scripts/images/executable.py'))['decode'](font,'fnt').data

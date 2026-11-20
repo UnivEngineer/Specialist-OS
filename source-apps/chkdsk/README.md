@@ -31,7 +31,7 @@ SYS/MON и другие сырые форматы без встроенной с
 ../../scripts/build/build-if-needed.ps1 CHKDSK com 0
 ```
 
-Входит в `build: OS`, результат `bin/CHKDSK.cpu` / `bin/CHKDSK.i80`, в системный манифест добавлен `CHKDSK.COM`. Тест с записью только в RAM изолированного Emu80:
+Входит в `scripts/build/build-project.ps1 OS`, результат `bin/CHKDSK.cpu` / `bin/CHKDSK.i80`, в системный манифест добавлен `CHKDSK.COM`. Тест с записью только в RAM изолированного Emu80:
 
 ```powershell
 python source-apps/chkdsk/check-emulator.py --runtime D:/Projects/RetroPC/Specialist/Emulator/Emu80-flash-test

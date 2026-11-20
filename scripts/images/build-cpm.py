@@ -3,10 +3,13 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import runpy
 import subprocess
+import sys
 import zipfile
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
+ARCHIVE_RELATIVE_PATH = 'Projects/RetroPC/Specialist/OS/CP-M/syabr-cpm-0.1.zip'
 
 
 def checksum(data):
@@ -55,5 +58,21 @@ def build(archive):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--archive', type=Path, default=Path('D:/Projects/RetroPC/Specialist/OS/CP-M/syabr-cpm-0.1.zip'))
-    build(parser.parse_args().archive)
+    local_archive = Path('D:/') / ARCHIVE_RELATIVE_PATH
+    shared_archive = Path('G:/') / ARCHIVE_RELATIVE_PATH
+    default_archive = shared_archive if not local_archive.is_file() and shared_archive.is_file() else local_archive
+    parser.add_argument('--archive', type=Path, default=default_archive)
+    parser.add_argument('--force', action='store_true')
+    parser.add_argument('--run-build', action='store_true', help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    if args.run_build:
+        build(args.archive)
+    else:
+        options = ['image: CP/M', '--input', str(args.archive), '--asm', str(ROOT / 'source/cpm/romboot.asm')]
+        for name in ('images/CPM-system.bin', 'images/CPM-seed.dsk', 'images/CPM-original.rks',
+                     'images/CPM-README.TXT', 'images/CPM-images.json', 'bin/CPM-romboot.bin', 'bin/CPM-romboot.lst'):
+            options.extend(('--output', str(ROOT / name)))
+        if args.force:
+            options.append('--force')
+        cached_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['main']
+        sys.exit(cached_build([*options, '--', __file__, '--run-build', '--archive', str(args.archive)]))

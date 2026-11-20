@@ -11,8 +11,7 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
     INCLUDE "tapeUi.inc"
 
-    ; Фиксированная область низкоуровневых процедур нужна эмулятору:
-    ; адреса этих диапазонов заданы в SpecialistMX2_My_MXOS.cfg.
+    ; Сохранить фиксированное размещение низкоуровневых процедур.
     ORG_PAD SYSTEM_PROGRAM_ADDR + 0500h
 
     INCLUDE "tapeWriteDelay.inc"

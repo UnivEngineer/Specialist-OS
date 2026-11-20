@@ -35,4 +35,6 @@ def encode(messages):
 if __name__ == '__main__':
     out = Path(sys.argv[1])
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_bytes(encode(MESSAGES))
+    data = encode(MESSAGES)
+    if not out.exists() or out.read_bytes() != data:
+        out.write_bytes(data)

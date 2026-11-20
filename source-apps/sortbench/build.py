@@ -1,10 +1,12 @@
 """Build the independent MAIN SORTBEN.COM benchmark and its two kernel variants."""
 from pathlib import Path
+import runpy
 import subprocess
+import sys
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).absolute().parent
 ROOT = HERE.parents[1]
-cpu_helpers = __import__('runpy').run_path(str(ROOT/'scripts/images/cpu.py'))
+cpu_helpers = runpy.run_path(str(ROOT/'scripts/images/cpu.py'))
 cpu_format = cpu_helpers['format_cpu']
 
 
@@ -31,4 +33,8 @@ def main():
 
 
 if __name__=='__main__':
-    main()
+    python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']
+    sys.exit(python_build(__file__, 'SORTBEN', main,
+                          inputs=(HERE, 'source/include', 'scripts/images/cpu.py'), exclude=(HERE / 'build',),
+                          outputs=tuple(f'bin/SORTBEN.{ext}' for ext in ('cpu', 'i80', 'sym', 'lst')),
+                          scan_outputs=(HERE / 'build',)))

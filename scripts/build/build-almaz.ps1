@@ -1,5 +1,9 @@
 [CmdletBinding()]
-param()
+param(
+    [switch] $Force,
+    [Parameter(DontShow)]
+    [switch] $RunBuild
+)
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
@@ -7,8 +11,17 @@ $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $assembler = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 $sourcePath = Join-Path $repositoryRoot "source-apps\almaz\Almaz.asm"
 $outputDirectory = Join-Path $repositoryRoot "bin"
-New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 $prefix = Join-Path $outputDirectory "Almaz-original"
+if (-not $RunBuild) {
+    $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), 'Almaz', '--asm', $sourcePath)
+    foreach ($extension in 'bin', 'lst', 'sym', 'rks') { $cacheArgs += @('--output', "$prefix.$extension") }
+    if ($Force) { $cacheArgs += '--force' }
+    $cacheArgs += @('--', $PSCommandPath, '-RunBuild')
+    & python @cacheArgs
+    exit $LASTEXITCODE
+}
+
+New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 & $assembler "--i8080" "-Wno-rdlow" `
     ("--raw={0}.bin" -f $prefix) ("--lst={0}.lst" -f $prefix) `
     ("--sym={0}.sym" -f $prefix) $sourcePath

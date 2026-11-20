@@ -9,7 +9,10 @@ param(
     [int] $HardwareSizeKB = 128,
     [string] $ManifestFile,
     [string] $BootFont,
-    [switch] $BootstrapProbe
+    [switch] $BootstrapProbe,
+    [switch] $Force,
+    [Parameter(DontShow)]
+    [switch] $RunBuild
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,13 +23,8 @@ if ($ManifestFile -and $Target -ne 'Games2M') { throw '-ManifestFile is currentl
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $assetDirectory = Join-Path $repositoryRoot "assets"
 $imageDirectory = Join-Path $repositoryRoot "images"
-if ($Target -in @('SystemEmuWritable','SystemHardware','SystemEmu','SystemEmuFlash')) {
-    & python (Join-Path $repositoryRoot 'scripts/build/build-error-strings.py') (Join-Path $repositoryRoot 'bin/ERRORS.DAT')
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot build ERRORS.DAT' }
-}
 $sectorSize = 256
 $sectorsPerCluster = 1
-. (Join-Path $PSScriptRoot 'executable.ps1')
 
 function Join-Bytes {
     param([Parameter(ValueFromRemainingArguments = $true)][byte[][]] $Arrays)
@@ -268,8 +266,11 @@ if ($stagedBoot) {
     $fixedBootFiles[$bootFontName] = 0x4800
     $bootstrapArgs = @('--font-body', $fontSource, '--font-name', [IO.Path]::GetFileNameWithoutExtension($bootFontName))
     if ($BootstrapProbe) { $bootstrapArgs += '--probe' }
-    & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
-    if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
+    if (-not $RunBuild) {
+        if ($Force) { $bootstrapArgs += '--force' }
+        & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
+        if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
+    }
     $bootPath = Join-Path $repositoryRoot 'bin/bootstrap/sector.bin'
     foreach ($name in @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$bootFontName)) {
         if (@($manifest | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "Bootstrap requires exactly one $name" }
@@ -277,6 +278,46 @@ if ($stagedBoot) {
     if ($BootstrapProbe) { $outputPath = $outputPath -replace '\.bin$', '-bootprobe.bin' }
 }
 
+$hasNestedFiles = @($manifest | Where-Object { $_.ImageName -match '[/\\]' }).Count -gt 0
+$errorBuilder = Join-Path $repositoryRoot 'scripts/build/build-error-strings.py'
+$errorTable = Join-Path $repositoryRoot 'bin/ERRORS.DAT'
+if (-not $RunBuild) {
+    $inputs = @($manifestPath, $bootPath, (Join-Path $PSScriptRoot 'executable.ps1'), (Join-Path $PSScriptRoot 'cpu.ps1'))
+    if ($stagedBoot) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'bin/banked/KERNEL.sym')) }
+    if ($hasNestedFiles) { $inputs += (Join-Path $PSScriptRoot 'nest-fat-image.py') }
+    $inputs += @(foreach ($entry in $manifest) {
+        $path = [IO.Path]::GetFullPath([IO.Path]::Combine($assetDirectory, $entry.Source))
+        if (-not $stagedBoot -or $path -ne $errorTable) { $path }
+        if ([IO.Path]::GetExtension($path) -eq '.cpu' -and $entry.ImageName -match '\.(com|exe|dll|fnt|rks)$') {
+            [IO.Path]::ChangeExtension($path, '.i80')
+        }
+    })
+
+    $cacheArgs = @((Join-Path $repositoryRoot 'scripts/build/build_cache.py'), "image: $Target", '--inputs-from-stdin')
+    $outputs = switch ($Target) {
+        'Games2M' { 1..4 | ForEach-Object { Join-Path $imageDirectory ($partNamePattern -f $_) } }
+        default { $outputPath }
+    }
+    if ($stagedBoot) { $outputs = @($outputs) + $errorTable }
+    if ($hasNestedFiles) {
+        $outputs = @($outputs) + (Join-Path $repositoryRoot "bin/nested-$Target.entries") + (Join-Path $repositoryRoot "bin/nested-$Target.bin")
+    }
+    foreach ($path in $outputs) { $cacheArgs += @('--output', $path) }
+    if ($Force) { $cacheArgs += '--force' }
+    $cacheArgs += @('--', $PSCommandPath, $Target, '-HardwareSizeKB', $HardwareSizeKB, '-RunBuild')
+    if ($ManifestFile) { $cacheArgs += @('-ManifestFile', $manifestPath) }
+    if ($BootFont) { $cacheArgs += @('-BootFont', $BootFont) }
+    if ($BootstrapProbe) { $cacheArgs += '-BootstrapProbe' }
+    $OutputEncoding = [Text.UTF8Encoding]::new($false)
+    ConvertTo-Json -InputObject $inputs -Compress | & python -X utf8 @cacheArgs
+    exit $LASTEXITCODE
+}
+
+. (Join-Path $PSScriptRoot 'executable.ps1')
+if ($stagedBoot) {
+    & python $errorBuilder $errorTable
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot build ERRORS.DAT' }
+}
 New-Item -ItemType Directory -Path $imageDirectory -Force | Out-Null
 
 $volumeSectors = [int]($volumeSize / $sectorSize)
@@ -295,11 +336,9 @@ $boot = [IO.File]::ReadAllBytes($bootPath)
 if ($boot.Length -ne $sectorSize) {
     throw "boot.bin must be exactly $sectorSize bytes"
 }
-$fat = New-Object byte[] ($fatSectors * $sectorSize)
-for ($index = 0; $index -lt 4; $index++) {
-    $fat[$index] = 0xFF
-}
-Set-Word $fat 0 0xFFF8
+$fat = [uint16[]]::new($fatSectors * $sectorSize / 2)
+$fat[0] = 0xFFF8
+$fat[1] = 0xFFFF
 $directory = New-Object IO.MemoryStream
 $fileData = New-Object IO.MemoryStream
 
@@ -313,16 +352,15 @@ if ($interleaveFiles) {
     $fileData.Write($emptyData, 0, $emptyData.Length)
 }
 # Запас таблицы не относится к области данных и не должен считаться свободным.
-for ($index = $dataClusters + 2; $index -lt $fat.Length / 2; $index++) {
-    Set-Word $fat ($index * 2) 0xFFFF
+for ($index = $dataClusters + 2; $index -lt $fat.Length; $index++) {
+    $fat[$index] = 0xFFFF
 }
 if ($imageFormat -eq 'Mx2') {
     # Частично недоступный сектор внутри объявленного тома — bad cluster,
     # а не занятый кластер без владельца (его CHKDSK счёл бы потерянным).
-    Set-Word $fat (($dataClusters + 2) * 2) 0xFFF7
+    $fat[$dataClusters + 2] = 0xFFF7
 }
 $nextCluster = 2
-$hasNestedFiles = @($manifest | Where-Object { $_.ImageName -match '[/\\]' }).Count -gt 0
 $fileCount = 1
 # Метка в BPB совпадает с единственной меткой в корне.
 $labelEntry = New-Object byte[] 32
@@ -337,8 +375,8 @@ $sectorPadding = Expand-Bytes ([byte[]]@()) $sectorSize
 
 try {
     foreach ($manifestEntry in $manifest) {
-        $sourcePath = Join-Path $assetDirectory $manifestEntry.Source
-        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+        $sourcePath = [IO.Path]::Combine($assetDirectory, $manifestEntry.Source)
+        if (-not [IO.File]::Exists($sourcePath)) {
             throw "Manifest input not found: $($manifestEntry.Source)"
         }
         $sourceName = $manifestEntry.ImageName
@@ -411,9 +449,9 @@ try {
                 $firstCluster = $cluster
             }
             if ($previousCluster -ne 0) {
-                Set-Word $fat ($previousCluster * 2) $cluster
+                $fat[$previousCluster] = $cluster
             }
-            Set-Word $fat ($cluster * 2) 0xFFFF
+            $fat[$cluster] = 0xFFFF
             $previousCluster = $cluster
 
             $count = [Math]::Min($sectorSize, $storedBytes.Length - $offset)
@@ -487,10 +525,12 @@ try {
         [IO.File]::WriteAllBytes($entryListPath, $rootBytes)
         $rootBytes = New-Object byte[] ($directorySectors * $sectorSize)
     }
-    $start = Join-Bytes $boot $fat $rootBytes
+    $fatBytes = [byte[]]::new($fat.Length * 2)
+    [Buffer]::BlockCopy($fat, 0, $fatBytes, 0, $fatBytes.Length)
+    $start = Join-Bytes $boot $fatBytes $rootBytes
     $data = $fileData.ToArray()
     $nestedPaths = @($manifest | ForEach-Object { $_.ImageName })
-    if (@($nestedPaths | Where-Object { $_ -match '[/\\]' }).Count -gt 0) {
+    if ($hasNestedFiles) {
         $stagingPath = Join-Path $repositoryRoot "bin/nested-$Target.bin"
         [IO.File]::WriteAllBytes($stagingPath, (Expand-Bytes (Join-Bytes $start $data) $volumeSize))
         & python (Join-Path $PSScriptRoot 'nest-fat-image.py') $stagingPath @nestedPaths --entries $entryListPath

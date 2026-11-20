@@ -30,6 +30,19 @@
     "z80-macroasm.seekSymbolsThroughWorkspace": true,
     "z80-macroasm.suggestOnInstructions": true,
     "z80-macroasm.format.enabled": false,
+    "task.autoDetect": "off",
+    "python.analysis.exclude": [
+      ".codex-tmp",
+      ".local",
+      "assets",
+      "bin",
+      "datasheets",
+      "docs",
+      "hardware",
+      "images",
+      "tasm",
+      "tmp"
+    ],
     "search.exclude": {
       "**/.vs/**": true,
       "**/*.lst": true,
@@ -49,561 +62,7 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "build: diskbench",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\source-apps\\diskbench\\build.ps1"
-        ],
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "build: llm80",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\source-apps\\llm80\\build.ps1"
-        ],
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "run: LLM80 (test Emu80)",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\source-apps\\llm80\\run.ps1"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "build: almaz",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-almaz.ps1"
-        ],
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "build: almaz2",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-almaz2.ps1",
-          "All",
-          "-PublishMxTimer"
-        ],
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "build: apps",
-        "dependsOn": [
-          "build: almaz",
-          "build: almaz2"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "build: dos4000",
-        "type": "shell",
-        "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/build/build-dos4000.ps1"],
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "build: dos",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "DOS",
-          "sys",
-          "0x0100",
-          "DOS"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\dos"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: editor",
-        "dependsOn": "build: ui-gfx",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "EDIT",
-          "cpu",
-          "0"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\EDIT"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: ramdisk",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "RAMDISK",
-          "cpu",
-          "DOS_BANK_DRIVER_ADDR"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\ramdisk"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: flash",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "Flash",
-          "cpu",
-          "DOS_BANK_DRIVER_ADDR"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\flash"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: flash-fast",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "FlashFst",
-          "cpu",
-          "DOS_BANK_DRIVER_ADDR"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\flash"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: flash-sys",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "FlashSys",
-          "cpu",
-          "0"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\flash"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: flash-rom",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "Rom",
-          "cpu",
-          "DOS_BANK_DRIVER_ADDR"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\flash"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: format",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "FORMAT",
-          "cpu",
-          "0"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\format"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: exe",
-        "type": "process",
-        "command": "python",
-        "args": ["${workspaceFolder}/scripts/build/build-exe.py"],
-        "group": "build",
-        "problemMatcher": []
-      },
-      {
-        "label": "build: run",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "RUN",
-          "cpu",
-          "0"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\run"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: ramfos",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "ramfos",
-          "mon",
-          "0xC000",
-          "RAMFOS"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\ramfos"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: monitor2",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "Monitor2",
-          "mon",
-          "0xC000"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\monitor2"
-        },
-      {
-        "label": "build: monitor-win",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "MONWIN",
-          "mon",
-          "0xC000"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\monitor_win"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "build: debug",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "Debug",
-          "cpu",
-          "0",
-          "Debug"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\debug"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: ui-gfx",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "UI_GFX",
-          "cpu",
-          "GFX_BASE"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\ui-gfx"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: nc",
-        "dependsOn": "build: ui-gfx",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "NC",
-          "cpu",
-          "0"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\nc"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: tape",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "tape",
-          "cpu",
-          "SYSTEM_PROGRAM_ADDR"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source\\tape"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: test-scr",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "test-scr",
-          "cpu",
-          "0"
-        ],
-        "options": {
-          "cwd": "${workspaceFolder}\\source-apps\\test-scr"
-        },
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "build: OS",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\build\\build-project.ps1",
-          "OS"
-        ],
-        "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
         "label": "build: all",
-        "dependsOn": "build: apps",
-        "dependsOrder": "sequence",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -612,257 +71,9 @@
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\build\\build-project.ps1",
-          "All"
+          "${workspaceFolder}\\scripts\\build\\build-all.ps1"
         ],
         "problemMatcher": "$errmatcher-sjasmplus",
-        "group": "build"
-      },
-      {
-        "label": "image: system ROM",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "SystemEmuWritable"
-        ],
-        "dependsOn": "build: all",
-        "dependsOrder": "sequence",
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "image: ramfos ROM",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "SystemRamfos"
-        ],
-        "dependsOn": "build: all",
-        "dependsOrder": "sequence",
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "image: writable system ROM",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "SystemHardware",
-          "${input:systemRomSizeKB}"
-        ],
-        "dependsOn": "build: all",
-        "dependsOrder": "sequence",
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "image: flash",
-        "dependsOn": "build: almaz2",
-        "dependsOrder": "sequence",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "${input:flashImageSet}"
-        ],
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "image: flash 64k",
-        "dependsOn": "build: almaz2",
-        "dependsOrder": "sequence",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "Games64k"
-        ],
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "listings: emu",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\listings\\prepare-for-emulator.ps1"
-        ],
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "shared",
-          "clear": false
-        }
-      },
-      {
-        "label": "run: emu (no build)",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\emulator\\run.ps1"
-        ],
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "dedicated",
-          "clear": true
-        }
-      },
-      {
-        "label": "run: emu",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\emulator\\run.ps1"
-        ],
-        "dependsOrder": "sequence",
-        "dependsOn": [
-          "image: system ROM",
-          "image: flash 64k",
-          "listings: emu"
-        ],
-        "problemMatcher": [],
-        "group": "build",
-        "presentation": {
-          "reveal": "always",
-          "focus": false,
-          "panel": "dedicated",
-          "clear": true
-        }
-      },
-      {
-        "label": "build: Emu80 adapter",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\emu80\\build.ps1",
-          "-Deploy"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "image: Emu80 system flash",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "SystemEmuWritable"
-        ],
-        "dependsOn": [
-          "build: OS"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "image: flash 2M",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\images\\build-image.ps1",
-          "Games2M"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "image: Emu80 flash seed",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\emu80\\seed-flash.ps1"
-        ],
-        "dependsOn": [
-          "image: flash 2M"
-        ],
-        "problemMatcher": [],
         "group": "build"
       },
       {
@@ -870,18 +81,15 @@
         "type": "process",
         "command": "powershell.exe",
         "args": [
+          "-NoLogo",
           "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run.ps1",
-          "-Flash",
-          "-ResetFlash"
+          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
+          "Flash2M"
         ],
-        "dependsOrder": "sequence",
-        "dependsOn": [
-          "image: Emu80 system flash",
-          "image: Emu80 flash seed"
-        ],
-        "problemMatcher": [],
+        "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build"
       },
       {
@@ -894,6 +102,22 @@
           "${workspaceFolder}\\scripts\\emu80\\run.ps1",
           "-Flash",
           "-UpdateSystemFlash"
+        ],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "run: Emu80 H-Flash2M (MCP slot, no build)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run-mcp-slot.ps1",
+          "-Port",
+          "${input:emu80McpPort}"
         ],
         "problemMatcher": [],
         "group": "build"
@@ -914,30 +138,17 @@
         "group": "build"
       },
       {
-        "label": "image: CP/M",
-        "type": "process",
-        "command": "python",
-        "args": ["-X", "utf8", "${workspaceFolder}\\scripts\\images\\build-cpm.py"],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
         "label": "run: Emu80 CP/M",
         "type": "process",
         "command": "powershell.exe",
-        "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\emu80\\run-cpm.ps1"],
-        "dependsOn": ["image: CP/M"],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "image: RAMFOS games",
-        "type": "process",
-        "command": "python",
         "args": [
-          "-X",
-          "utf8",
-          "${workspaceFolder}\\scripts\\images\\build-ramfos.py"
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
+          "CPM"
         ],
         "problemMatcher": [],
         "group": "build"
@@ -947,32 +158,13 @@
         "type": "process",
         "command": "powershell.exe",
         "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run-ramfos.ps1"
-        ],
-        "dependsOn": [
-          "image: RAMFOS games"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "run: Emu80 H-ROM64k",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
           "-NoLogo",
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run.ps1"
-        ],
-        "dependsOrder": "sequence",
-        "dependsOn": [
-          "image: system ROM",
-          "image: flash 64k"
+          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
+          "RAMFOS"
         ],
         "problemMatcher": [],
         "group": "build"
@@ -980,25 +172,15 @@
     ],
     "inputs": [
       {
-        "id": "systemRomSizeKB",
+        "id": "emu80McpPort",
         "type": "pickString",
-        "description": "Размер перезаписываемой системной ПЗУ, КБ",
+        "description": "Свободный порт локального Emu80 MCP",
         "options": [
-          "128",
-          "256",
-          "512"
-        ],
-        "default": "512"
-      },
-      {
-        "id": "flashImageSet",
-        "type": "pickString",
-        "description": "Набор файлов для образа flash-диска",
-        "options": [
-          "Games64k",
-          "Games2M"
-        ],
-        "default": "Games2M"
+          "19781",
+          "19782",
+          "19783",
+          "19784"
+        ]
       }
     ]
   }

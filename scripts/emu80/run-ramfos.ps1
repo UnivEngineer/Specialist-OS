@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string] $EmulatorDirectory,
-    [switch] $PrepareOnly
+    [switch] $PrepareOnly,
+    [switch] $Mute
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2.0
@@ -45,7 +46,9 @@ if (Test-Path -LiteralPath $marker) {
     $info = Get-Content -LiteralPath $marker -Raw | ConvertFrom-Json
     if (@($info.sources | Where-Object { $_.path -eq 'SpecialistMx2VideoRam.cpp' }).Count) { $defines = "define MX2_MODELS`n" }
 }
-[IO.File]::WriteAllText((Join-Path $deployment 'launch.conf'), ($defines + "include specialist-ramfos/specialist-mx2.conf`n"), (New-Object Text.UTF8Encoding($false)))
+$launchConfig = $defines + "include specialist-ramfos/specialist-mx2.conf`n"
+if ($Mute) { $launchConfig += "pitSoundSource.muted = yes`ntapeMonitor.muted = yes`n" }
+[IO.File]::WriteAllText((Join-Path $deployment 'launch.conf'), $launchConfig, (New-Object Text.UTF8Encoding($false)))
 Write-Host "Prepared RAMFOS with preloaded games: $deployment"
 if (-not $PrepareOnly) {
     Start-Process -FilePath $executable -ArgumentList '--conf-file', 'specialist-ramfos/launch.conf', '--platform', 'specialist-ramfos' -WorkingDirectory $runtime -WindowStyle Normal

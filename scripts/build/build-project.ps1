@@ -2,22 +2,81 @@
 param(
     [Parameter(Position = 0)]
     [ValidateSet("OS", "All")]
-    [string] $Target = "OS"
+    [string] $Target = "OS",
+    [switch] $Force,
+    [Parameter(DontShow)]
+    [switch] $RunBuild
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
-
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
+$buildScript = Join-Path $PSScriptRoot 'build-if-needed.ps1'
+$allExtras = @(
+    @{ Directory = 'source-apps/test-scr'; Source = 'test-scr'; Output = 'test-scr'; Extension = 'cpu'; Address = '0' },
+    @{ Directory = 'source/ramfos'; Source = 'test-low'; Output = 'RFTEST'; Extension = 'cpu'; Address = '0' },
+    @{ Directory = 'source/ramfos'; Source = 'test-high'; Output = 'RFTESTHI'; Extension = 'cpu'; Address = '0xE800' }
+)
+
+if (-not $RunBuild) {
+    $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), "build: $Target")
+    if ($Target -eq 'All') {
+        & $PSCommandPath OS -Force:$Force
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        $cacheArgs += @('--input', $buildScript, '--input', (Join-Path $repositoryRoot 'scripts/images/cpu.ps1'))
+        foreach ($component in $allExtras) {
+            $source = "$($component.Directory)/$($component.Source).asm"
+            $cacheArgs += @('--asm', (Join-Path $repositoryRoot $source))
+            foreach ($extension in 'cpu', 'i80', 'lst', 'sym') {
+                $cacheArgs += @('--output', (Join-Path $repositoryRoot "bin/$($component.Output).$extension"))
+            }
+        }
+    } else {
+        & python (Join-Path $PSScriptRoot 'build-syscalls.py')
+        if ($LASTEXITCODE -ne 0) { throw 'System call registry generation failed.' }
+        $fontArgs = @((Join-Path $PSScriptRoot 'build-font-engines.py'))
+        if ($Force) { $fontArgs += '--force' }
+        & python @fontArgs
+        if ($LASTEXITCODE -ne 0) { throw 'Font engine build failed.' }
+        $cacheArgs += @('--project-inputs', '--z88dk', '--input', (Join-Path $repositoryRoot 'bin/fonts'))
+        foreach ($directory in 'bin', 'source-apps/diskbench/build', 'source-apps/sortbench/build') {
+            $cacheArgs += @('--scan-output', (Join-Path $repositoryRoot $directory))
+        }
+        foreach ($path in 'bin/fonts/Compact.pf', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc',
+                'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc') {
+            $cacheArgs += @('--output', (Join-Path $repositoryRoot $path))
+        }
+        foreach ($path in 'source/monitor2/originals/Monitor2.mon', 'bin/Monitor2.mon',
+                'source/monitor_win/originals/monitor_win.rom', 'bin/MONWIN.mon') {
+            $cacheArgs += @('--hash', (Join-Path $repositoryRoot $path))
+        }
+    }
+    if ($Force) { $cacheArgs += '--force' }
+    $cacheArgs += @('--', $PSCommandPath, $Target, '-RunBuild')
+    & python @cacheArgs
+    exit $LASTEXITCODE
+}
+
+function Build-Component($component) {
+    Push-Location (Join-Path $repositoryRoot $component.Directory)
+    try {
+        $output = if ($component.ContainsKey('Output')) { $component.Output } else { $component.Source }
+        if ($output -eq 'FONTCOM') {
+            & python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py') --entries
+            if ($LASTEXITCODE -ne 0) { throw 'Font benchmark ABI entries failed.' }
+        }
+        & $buildScript $component.Source $component.Extension $component.Address $output -RunBuild
+        if ($LASTEXITCODE -ne 0) { throw "Component assembly failed: $($component.Source)" }
+    } finally { Pop-Location }
+}
+
+if ($Target -eq 'All') {
+    foreach ($component in $allExtras) { Build-Component $component }
+    exit 0
+}
+
 . (Join-Path $repositoryRoot "scripts/images/cpu.ps1")
-& python (Join-Path $PSScriptRoot 'build-syscalls.py')
-if ($LASTEXITCODE -ne 0) { throw 'System call registry generation failed.' }
-& python (Join-Path $PSScriptRoot 'build-compact-font.py')
-if ($LASTEXITCODE -ne 0) { throw 'Compact font generation failed.' }
-& python (Join-Path $PSScriptRoot 'build-font-engines.py')
-if ($LASTEXITCODE -ne 0) { throw 'Font engine build failed.' }
-& python (Join-Path $repositoryRoot 'source-apps/copybench/build.py')
+& python (Join-Path $repositoryRoot 'source-apps/copybench/build.py') --run-build
 if ($LASTEXITCODE -ne 0) { throw 'Copy benchmark generation failed.' }
 & python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py')
 if ($LASTEXITCODE -ne 0) { throw 'Font benchmark generation failed.' }
@@ -40,6 +99,7 @@ try {
 } finally { Pop-Location }
 $components = @(
     @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = 'GFX_BASE' },
+    @{ Directory = 'source/exe'; Source = 'EXE'; Extension = 'cpu'; Address = 'EXE_LOAD_ADDR' },
     @{ Directory = 'source/font'; Source = 'FONT'; Extension = 'cpu'; Address = '0' },
     @{ Directory = "source-apps/test-mx"; Source = "TESTMX"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source-apps\copybench"; Source = "COPYBEN"; Extension = "cpu"; Address = "0" },
@@ -63,21 +123,6 @@ $components = @(
     @{ Directory = "source\\nc";     Source = "NC";      Extension = "cpu"; Address = "0" }
 )
 
-if ($Target -eq "All") {
-    $components += @{
-        Directory = "source-apps\\test-scr"
-        Source = "test-scr"
-        Extension = "cpu"
-        Address = "0"
-    }
-    $components += @{
-        Directory = "source\\ramfos"; Source = "test-low"; Output = "RFTEST"; Extension = "cpu"; Address = "0"
-    }
-    $components += @{
-        Directory = "source\\ramfos"; Source = "test-high"; Output = "RFTESTHI"; Extension = "cpu"; Address = "0xE800"
-    }
-}
-
 $components += @(
     @{ Directory = 'source-apps/textbench'; Source = 'STANDALONE'; Output = 'TEXTCOM'; Extension = 'cpu'; Address = '0' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEM'; Extension = 'cpu'; Address = '0x2000' },
@@ -94,28 +139,10 @@ $components += @(
     @{ Directory = 'source-apps/fontbench'; Source = 'REMAP32'; Output = 'FONTRMP'; Extension = 'cpu'; Address = '0' }
 )
 foreach ($component in $components) {
-    Push-Location (Join-Path $repositoryRoot $component.Directory)
-    try {
-        if ($component.ContainsKey("Output")) {
-            if ($component.Output -eq 'FONTCOM') {
-                & python (Join-Path $repositoryRoot 'source-apps/fontbench/build-standalone.py') --entries
-                if ($LASTEXITCODE -ne 0) { throw 'Font benchmark ABI entries failed.' }
-            }
-            & $buildScript $component.Source $component.Extension $component.Address $component.Output
-        }
-        else {
-            & $buildScript $component.Source $component.Extension $component.Address
-        }
-        if ($LASTEXITCODE -ne 0) { throw "Component assembly failed: $($component.Source)" }
-    }
-    finally {
-        Pop-Location
-    }
+    Build-Component $component
 }
 
-& python (Join-Path $repositoryRoot 'scripts/build/build-exe.py')
-if ($LASTEXITCODE -ne 0) { throw 'EXE conversion utility build failed.' }
-& (Join-Path $repositoryRoot 'source-apps/diskbench/build.ps1')
+& (Join-Path $repositoryRoot 'source-apps/diskbench/build.ps1') -RunBuild
 if ($LASTEXITCODE -ne 0) { throw 'DISKBEN assembly failed.' }
-& python (Join-Path $repositoryRoot 'source-apps/sortbench/build.py')
+& python (Join-Path $repositoryRoot 'source-apps/sortbench/build.py') --run-build
 if ($LASTEXITCODE -ne 0) { throw 'SORTBEN assembly failed.' }
