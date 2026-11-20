@@ -173,7 +173,7 @@ tapeReadData:
             ld (hl),'S'
             ld hl,v_fileDescr
             ld de,0
-            call bios_fileCreate
+            call fileWriteDescriptor
             jp c,tapeCreateError
 
             ld      hl, txtLoadComplete
@@ -193,10 +193,9 @@ tapeSaveFile:
 
             ld      hl, v_path
             ld      de, v_fileDescr
-            call    bios_fileNamePrepare
-
+            MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
             ld      hl, v_fileDescr
-            call    bios_fileLoadInfo
+            MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
             jp c,   tapeFileNotFound
 
             ; В каталоге хранится точная длина контейнера RKS.
@@ -221,7 +220,7 @@ tapeSaveFile:
             ; Загрузить файл в буфер 0000h.
             ld      hl, v_fileDescr
             ld      de, 0
-            call    bios_fileLoad2
+            call    fileReadDescriptor
             jp c,   tapeFileNotFound
 
             ld hl,(0)
@@ -330,8 +329,7 @@ chooseDriveAgain:
             pop     af
             sub     'A'
             ld      e, 1
-            call    bios_fileGetSetDrive
-
+            MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
             ld      b, 3
             call    bios_diskDriver
             ld      a, d

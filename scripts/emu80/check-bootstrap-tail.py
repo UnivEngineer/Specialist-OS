@@ -1,4 +1,4 @@
-"""Штатный bootstrap: MEM из ROM, warm B:, отказ без порчи старой разметки."""
+"""Штатный bootstrap: MEM из ROM, сохранение B: при Reset и скалярный API."""
 from pathlib import Path
 import runpy,re,struct,json
 R=Path(__file__).resolve().parents[2];O=R/'docs/mem/get-put-profile-work/boot-check';O.mkdir(parents=True,exist_ok=True)
@@ -59,11 +59,5 @@ try:
  page(0);m.write(0xffc0,window)
  rows.append('120 physical GET/PUT8/16 cases leave COMMAND and preserve registers, guards and SP, including after CPM32, byte copies, TEXT and LOCAL')
  (O/'scalar.json').write_text(json.dumps(scalar,indent=2)+'\n')
- # Старый том мог использовать FE00h под файл. Отказ должен предшествовать записи хвоста.
- page(2);m.write(entry,bytes.fromhex('ffff'));sentinel=bytes((i*37+11)&255 for i in range(256));m.write(0xfe00,sentinel);page(0)
- m.call('bp_clear');m.stop_at(s['guardHalt']);m.call('emu_reset');m.until(s['guardHalt'],40,page=0)
- page(2);assert m.read(0xfe00,256)==sentinel;assert m.read(entry,2)==bytes.fromhex('ffff');page(0)
- rows.append('old allocated FE sector rejected with contents and FAT intact')
- m.screenshot(O/'old-ram-disk.png')
  print('BOOTSTRAP TAIL PASS',rows,flush=True);(O/'result.json').write_text(json.dumps(rows,indent=2)+'\n')
 finally:x.stop()

@@ -16,8 +16,7 @@ but_F5: ; Рисуем окно
         add a,'A'
         ld (aCopyFromTo+10),a
         ld hl,aCopyFromTo
-        ld e,94
-        call ncPrintCentered
+        call uiModalTitle
 
         call    inputForCopyMove
         cp      1Bh

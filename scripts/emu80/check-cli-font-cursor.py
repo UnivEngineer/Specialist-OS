@@ -61,8 +61,8 @@ def main():
         m.stop_at(symbols['cliInput'])
         m.tap('f10')
         wait_cli()
-        for font, width in [('Cpm4', 4), ('Compact', 6), ('Fast8', 8)]:
-            command('A:/FONT.COM ' + font)
+        for font, width in [('Cpm4', 4), ('Rotate', 6), ('Fast8', 8)]:
+            command('A:/FONT.COM ' + {'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}[font])
             assert m.read(symbols['FONT_ENGINE_HEADER'] + 5, 1)[0] == width
             command('CD A:/FONTS/8X8')
             command('fast8')

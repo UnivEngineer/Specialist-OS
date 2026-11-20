@@ -17,9 +17,11 @@
     IFNDEF TIMING_PIT_READ_ONLY
 ; Общий каскад ВИ53: CLK1 / 256 -> OUT1/CLK2 / 65536.
 ; Требуются GATE1=GATE2=1 и аппаратное соединение OUT1 с CLK2.
-; Это счётчик интервалов, не системные часы; с генерацией звука несовместим.
+; Обычный измерительный профиль использует режим 2 и останавливает несущую.
+; TIMING_PIT_INPUT_CLOCK выбирает режим 0 канала 2 и включает несущую только
+; после готовности счётчика и закрытия огибающей. См. source/mem/api.md.
 
-; Входа нет. Настраивает каналы 1/2 и останавливает несущую канала 0.
+; Входа нет. Настраивает каналы 0/1/2 согласно выбранному профилю.
 ; После настройки ждёт готовности через pitTimerWaitReady.
 ; CF=0: счёт начался; CF=1: не дождались движения (CLK/GATE/делитель).
 ; AF, HL и флаги разрушены, BC/DE сохранены.
@@ -35,11 +37,18 @@ pitTimerInit:
             ld      (hl),a
             inc     hl
             inc     hl
+    IFDEF TIMING_PIT_INPUT_CLOCK
+            ld      (hl),0B0h
+            dec     hl
+            ld      (hl),1
+            ld      (hl),0
+    ELSE
             ld      (hl),0B4h
             dec     hl
             xor     a
             ld      (hl),a
             ld      (hl),a
+    ENDIF
 
 ; Для уже записанной настройки: дождаться двух изменений канала 2,
 ; отбросив переход от старого счёта при загрузке и следующий счётный фронт.
@@ -69,6 +78,11 @@ pitTimerWaitNext:
             scf
             jp      pitTimerWaitDone
 pitTimerReady:
+    IFDEF TIMING_PIT_INPUT_CLOCK
+            ld      hl,IO_TIMER_CH0
+            ld      (hl),low KEY_CLICK_DIVISOR
+            ld      (hl),high KEY_CLICK_DIVISOR
+    ENDIF
             or      a
 pitTimerWaitDone:
             pop     de

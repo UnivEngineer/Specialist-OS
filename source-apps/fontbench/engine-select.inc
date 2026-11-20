@@ -54,7 +54,15 @@ engineLoad:
     inc hl
     ld d,(hl)
     ex de,hl
-    xor a
+    ld de,engineBasename
+engineCopyBasename:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    or a
+    jp nz,engineCopyBasename
+    ld hl,enginePath
     MXOS_CALL MXOS_DOS_MODULE_LOAD
     ret c
     ld (engineHandle),hl
@@ -143,7 +151,7 @@ engineHook:
     ld hl,0007h
     ld (bios_vars.cursorY),hl
     ld hl,gridText
-    ld bc,1152
+    ld bc,GRID_TEXT_BYTES
     call hookLim
     jp gridClear
 engineUnhook:
@@ -202,9 +210,12 @@ engineSelected:
 engineSelectShared:
     xor a
     call engineSelectAll
-    ld hl,engineRecords+24*8+5
-    ld b,6
+    ld hl,sharedEngineRecords+5
+    ld b,(windowEngineRecord-sharedEngineRecords)/8
     ld a,1
+    call engineSelectLoop
+    ld hl,experimentalEngineRecords+5
+    ld b,(engineRecordsEnd-experimentalEngineRecords)/8
     jp engineSelectLoop
 engineSelectAll:
     ld hl,engineRecords+5
@@ -265,14 +276,18 @@ engineRecords:
     ENGINE nameFullFast,3,pathS,0,6
     ENGINE nameColPre,4,pathS,0,6
     ENGINE nameTriple,0,pathQ,0,6
+sharedEngineRecords:
+rotateQuadsRecord:
     DW nameFontRot
     DB 0
     DW pathFontRot
     DB 0,6,80h
+packedQuadsRecord:
     DW nameFontPack
     DB 1
     DW pathFontPack
     DB 0,6,80h
+fullQuadsRecord:
     DW nameFontFull
     DB 1
     DW pathFontFull
@@ -289,11 +304,26 @@ engineRecords:
     DB 0
     DW pathFont4
     DB 0,4,80h
+windowEngineRecord:
     DW nameWindow
     DB 0
     DW pathWindow
     DB 0,8,4
-ENGINE_COUNT = ($-engineRecords)/8
+experimentalEngineRecords:
+    DW nameRotRows
+    DB 0
+    DW pathRotRows
+    DB 0,6,80h
+    DW nameRot8Quad
+    DB 0
+    DW pathRot8Quad
+    DB 0,8,80h
+    DW nameRot8Stream
+    DB 0
+    DW pathRot8Stream
+    DB 0,8,80h
+engineRecordsEnd:
+ENGINE_COUNT = (engineRecordsEnd-engineRecords)/8
 nameBios: DB 'BIOS',0
 nameMonitor: DB 'MXOS1',0
 nameOpt: DB 'OPT',0
@@ -310,34 +340,43 @@ nameEight: DB 'ROW8',0
 nameFour: DB '4RAW',0
 nameFourPack: DB '4PACK',0
 nameFourDup: DB '4DUP',0
-path6: DB 'H:/Bench/FontBen/Engine6.dll',0
-pathP: DB 'H:/Bench/FontBen/EngineP.dll',0
-path4: DB 'H:/Bench/FontBen/Engine4.dll',0
+path6: DB 'Engine6.dll',0
+pathP: DB 'EngineP.dll',0
+path4: DB 'Engine4.dll',0
 nameRemap: DB 'REMAP32',0
 nameBlock: DB 'BLOCK32',0
-pathM: DB 'H:/Bench/FontBen/EngineM.dll',0
-pathB: DB 'H:/Bench/FontBen/EngineB.dll',0
+pathM: DB 'EngineM.dll',0
+pathB: DB 'EngineB.dll',0
 
 nameMon2: DB 'MON2',0
 nameRamfos: DB 'RAMFOS',0
 nameLinear: DB 'ROTLINE',0
 nameFullFast: DB 'FULLFAST',0
-pathS: DB 'H:/Bench/FontBen/EngineS.dll',0
+pathS: DB 'EngineS.dll',0
 
 nameColPre: DB 'COL6PRE',0
 nameTriple: DB 'TRIPACK',0
-pathQ: DB 'H:/Bench/FontBen/EngineQ.dll',0
-nameFontRot: DB 'ROTATE6',0
-pathFontRot: DB 'H:/Bench/FontBen/FontRot.dll',0
-nameFontPack: DB 'PACK6K',0
-pathFontPack: DB 'H:/Bench/FontBen/FontPack.dll',0
-nameFontFull: DB 'FAST12K',0
-pathFontFull: DB 'H:/Bench/FontBen/FontFull.dll',0
+pathQ: DB 'EngineQ.dll',0
+nameFontRot: DB '6ROTATEQUADS',0
+pathFontRot: DB 'FontRot.dll',0
+nameFontPack: DB '6PACKEDQUADS',0
+pathFontPack: DB 'FontPack.dll',0
+nameFontFull: DB '6FULLQUADS',0
+pathFontFull: DB 'FontFull.dll',0
 nameFontKoi: DB 'COMPACT6',0
-pathFontKoi: DB 'H:/Bench/FontBen/FontKoi.dll',0
+pathFontKoi: DB 'FontKoi.dll',0
 nameFont8: DB 'FAST8',0
-pathFont8: DB 'H:/Bench/FontBen/Font8.dll',0
+pathFont8: DB 'Font8.dll',0
 nameFont4: DB 'CPM4',0
-pathFont4: DB 'H:/Bench/FontBen/Font4.dll',0
+pathFont4: DB 'Font4.dll',0
 nameWindow: DB 'WIN8',0
-pathWindow: DB 'H:/Bench/FontBen/EngineW.dll',0
+pathWindow: DB 'EngineW.dll',0
+nameRotRows: DB '6ROTATEROWS',0
+pathRotRows: DB 'RotRows.dll',0
+nameRot8Quad: DB '8ROTATEQUADS',0
+pathRot8Quad: DB 'Rot8Quad.dll',0
+nameRot8Stream: DB '8ROTATESTREAM',0
+pathRot8Stream: DB 'Rot8Strm.dll',0
+enginePath: DB 'A:/Bench/FontBen/'
+engineBasename:
+    DS MAX_PATH-($-enginePath),0 ; DOS copies the full path buffer.

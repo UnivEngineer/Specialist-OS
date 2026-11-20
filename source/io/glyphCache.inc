@@ -12,7 +12,9 @@ glyphCacheService:
     jp z,glyphCacheFull
     dec a
     jp nz,glyphCacheBad
-    ld hl,FONT_ADDR+FONT_BYTES
+    ld hl,(FONT_ENGINE_HEADER+8)
+    ld de,FONT_ENGINE_BASE
+    add hl,de
     ld (GLYPH_CACHE_START),hl
     ld hl,GLYPH_CACHE_END
     ld (GLYPH_CACHE_LIMIT),hl
@@ -74,7 +76,7 @@ glyphCacheEnd:
 ; AF/B/HL разрушены; интерфейс внутренних служебных данных не публичный.
 ioInitialize:
     ld hl,io_vars
-    ld b,IO_VARIABLES
+    ld b,io_vars.fontName-io_vars ; The installed engine and its name survive this reset.
     xor a
 ioInitializeLoop:
     ld (hl),a

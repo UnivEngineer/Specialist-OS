@@ -11,7 +11,7 @@ sbDone = sbNext+2
 sbSpan = sbDone+1
 sbSector = sbSpan+1
 sbPrevious = sbSector+2
-    ASSERT sbPrevious+2 <= DOS_CACHE_BOOT_ADDR
+    ASSERT sbPrevious+2 <= DOS_APP_FRAMES
 
 streamBatchStart:
     ld hl,(v_streamPrevious)

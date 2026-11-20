@@ -46,6 +46,7 @@ foClear:
     ld (foPathText),a
     ld (foPathStamp),a
     ld hl,0
+    ld (foJob.totalFiles),hl
     ld (foJob.total),hl
     ld (foJob.total+2),hl
     ld (foJob.required),hl
@@ -261,6 +262,25 @@ foProgress:
     inc hl
     ld (foJob.bytes+2),hl
     ret
+; A skipped file completes its source payload without transferring bytes.
+foFileSkipped:
+    ld a,(foAsync)
+    or a
+    ret z
+    ld e,FILE_COPY_REQUEST.source+FILE_DESCRIPTOR.size
+    call fc_Address
+    ex de,hl
+    ld hl,foJob.bytes
+    ld b,4
+    or a
+foSkipBytes:
+    ld a,(de)
+    adc a,(hl)
+    ld (hl),a
+    inc de
+    inc hl
+    dec b
+    jp nz,foSkipBytes
 foFileDone:
     ld a,(foAsync)
     or a

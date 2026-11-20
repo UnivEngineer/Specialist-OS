@@ -36,7 +36,7 @@ fileopsRunReady:
     inc a
     ld (fileopsActive),a
     ld a,b
-    call DOS_BANK_DRIVER_ADDR
+    call DOS_FILEOPS_ADDR
     push af
     xor a
     ld (fileopsActive),a

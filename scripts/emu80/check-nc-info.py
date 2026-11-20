@@ -10,11 +10,13 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '.local/nc-info-ui'
 
 
+FONT_PATHS = {'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}
+
 def main():
     parser=argparse.ArgumentParser(add_help=False)
     parser.add_argument('--port',type=int,choices=range(19781,19785),default=19781)
     parser.add_argument('--runtime',type=Path,default=ROOT/'.local/nc-sort-benchmark-runtime')
-    parser.add_argument('--startup-font',choices=('Cpm4','Compact','Fast8'))
+    parser.add_argument('--startup-font',choices=('Cpm4','Rotate','Fast8'))
     args,_=parser.parse_known_args()
     runtime=args.runtime.resolve()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -111,10 +113,10 @@ def main():
 
         def type_char(char):
             keys = {' ': 'space', ':': 'colon', '/': 'slash', '.': 'period', '-': 'minus'}
-            if char == '\\':
+            if char in ('\\', '_'):
                 # Specialist's unshifted backslash key produces '|'.
                 m.call('kbd_send',keys=['shift'],action='press')
-                m.tap('backslash')
+                m.tap('backslash' if char == '\\' else '0')
                 m.call('kbd_send',keys=['shift'],action='release')
                 m.call('emu_run_for',ms=120)
             else:
@@ -141,6 +143,56 @@ def main():
             else:raise AssertionError(('NC command return timeout',value))
             m.call('bp_clear');m.call('emu_run_for',ms=500)
 
+        if '--input-fields' in sys.argv:
+            runpy.run_path(str(ROOT/'scripts/emu80/nc-recovery-scenarios.py'))['inputs'](
+                m,n,command,type_char,wait_nc,OUT)
+            return
+
+        if '--shell-fallback' in sys.argv or '--dir-empty' in sys.argv:
+            scenarios=runpy.run_path(str(ROOT/'scripts/emu80/nc-recovery-scenarios.py'))
+            scenarios['shell' if '--shell-fallback' in sys.argv else 'directory'](
+                m,n,command,type_char,wait_nc,OUT)
+            return
+
+        if '--attrib-errors' in sys.argv:
+            def toolbar_pixels():
+                return b''.join(m.read(0x9000+x*256+247,9) for x in range(48))
+
+            def attrib_error(value, console_expected):
+                m.tap('esc');m.call('emu_run_for',ms=250)
+                for char in value:type_char(char)
+                assert m.read(n['vars.cmdLine'],len(value)).upper()==value.upper().encode()
+                before=toolbar_pixels()
+                m.stop_at(n['copyFileAnyKey'])
+                m.call('bp_set',addr=n['ncCommandErrorRestore'],type='exec')
+                m.tap('enter')
+                restored=False
+                for _ in range(240):
+                    cpu=m.call('cpu_state');pc=cpu['registers']['pc']['dec']
+                    if m.read(machine.pageAddress,1)==b'\0':
+                        if pc==n['ncCommandErrorRestore']:
+                            assert console_expected,('quiet error cleared panels',value)
+                            restored=True
+                            m.call('debug_step',mode='into')
+                        elif pc==n['copyFileAnyKey']:break
+                    m.call('emu_run_for',ms=500)
+                else:raise AssertionError(('error dialog timeout',value))
+                assert restored==console_expected,(value,restored)
+                assert m.read(n['ncCommandScreen'],1)==b'\0'
+                assert toolbar_pixels()==before,('toolbar missing under dialog',value)
+                m.screenshot(OUT/('attrib-console-error.png' if restored else 'attrib-quiet-error.png'))
+                m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('enter');wait_nc()
+                assert toolbar_pixels()==before,('toolbar missing after Enter',value)
+                print('ATTRIB error/toolbar PASS',value,flush=True)
+
+            command('COPY A:/README.TXT B:/ATTR.TXT')
+            attrib_error('ATTRIB B:/ATTR.TXT -R-S',False)
+            attrib_error('ATTRIB -R-S B:/ATTR.TXT',False)
+            command('ATTRIB -RS B:/ATTR.TXT')
+            attrib_error('ATTRIB B:/MISSING.TXT',True)
+            print('ATTRIB validation, quiet mutation and console error recovery PASS',flush=True)
+            return
+
         if '--startup-prepared' in sys.argv:
             cli={key:int(value,16) for key,value in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',
                 (ROOT/'bin/CLI.sym').read_text('utf-8'),re.M)}
@@ -151,16 +203,16 @@ def main():
                     if cpu.get('breaked'):m.call('debug_step',mode='into')
                     m.call('emu_run_for',ms=500)
                 raise AssertionError(('startup timeout',label,m.call('cpu_state')))
-            for font,info in [('Cpm4',0),('Compact',1),('Fast8',0)]:
+            for font,info in [('Cpm4',0),('Rotate',1),('Fast8',0)]:
                 if args.startup_font and font!=args.startup_font:continue
-                command('FONT '+font)
+                command('FONT '+FONT_PATHS[font])
                 active=m.read(n['state.activePanel'],1)[0]
                 other=active^1
                 if m.read(n['state.panelA_info']+other,1)[0]!=info:m.tap('f3');wait()
                 m.stop_at(cli['cliPrompt']);m.tap('f10');m.until(cli['cliPrompt'],120,page=0)
                 m.call('bp_clear');m.call('emu_run_for',ms=500)
                 m.tap('esc')
-                value='A:/NC.COM'
+                value='A:/NC_MN.COM'
                 for char in value:type_char(char)
                 assert m.read(n['CMD_LINE'],len(value)).upper()==value.encode()
                 # Breakpoints are installed only after ordinary command editing.
@@ -238,7 +290,7 @@ def main():
                     first=m.read(n['state.panelA_firstFile']+panel,1)[0]
                     assert first<=cur<first+m.read(n['ncVisibleCount'],1)[0]
                     if infos[panel]:m.tap('f3');wait()
-            command('FONT Compact')
+            command('FONT 6x8/Rotate')
             if m.read(n['state.activePanel'],1)[0]:m.tap('tab');wait()
             if m.read(n['state.panelB_info'],1)[0]:m.tap('f3');wait()
             command('CD A:/FONTS/6x8');focus(b'ROTATE.FNT')
@@ -254,8 +306,8 @@ def main():
             assert m.read(n['state.panelB_firstFile'],1)[0]>0
             names=[selected(0),selected(1)]
             m.tap('f3');wait() # Left information, active right files.
-            for font in ('Cpm4','Fast8','Compact'):
-                command('FONT '+font)
+            for font in ('Cpm4','Fast8','Rotate'):
+                command('FONT '+FONT_PATHS[font])
                 assert_restore(1,b'\1\0',names)
                 print(font,'text state restores paths, independent sorts, names, visible scroll and left F3 PASS',flush=True)
             # Swap the active/info panels, preserving their selected file names.
@@ -286,7 +338,7 @@ def main():
             # Insert an earlier item while NC is absent: saved ordinals are stale.
             cli_command('COPY A:/README.TXT A:/FONTS/6x8/'+added_name)
             m.tap('esc')
-            for char in 'A:/NC.COM':type_char(char)
+            for char in 'A:/NC_MN.COM':type_char(char)
             m.tap('enter');wait_nc()
             assert_restore(0,b'\0\1',names)
             assert m.read(n['state.panelA_curFile'],1)[0]==old_cursor+1
@@ -328,8 +380,8 @@ def main():
                 for _ in range(target):m.tap('down')
                 wait();assert selected().upper()==name.upper()
 
-            for font in ('Cpm4','Compact','Fast8'):
-                command('FONT '+font)
+            for font in ('Cpm4','Rotate','Fast8'):
+                command('FONT '+FONT_PATHS[font])
                 for _ in range(2):
                     panel=m.read(n['state.activePanel'],1)[0]
                     if m.read(n['state.panelA_info']+(panel^1),1)[0]:m.tap('f3');wait()
@@ -343,7 +395,7 @@ def main():
                 m.screenshot(OUT/f'{font}-parent-selection.png')
                 print(font,'parent leaf selection through Enter and CD, both panels PASS',flush=True)
 
-            command('FONT Compact')
+            command('FONT 6x8/Rotate')
             for value in ('MD B:/PAR','MD B:/PAR/ZZZ.EXT','CD B:/PAR/ZZZ.EXT',
                           'MD B:/PAR/AAA','CD ..'):command(value)
             assert selected().upper()==b'ZZZ.EXT'
@@ -379,7 +431,7 @@ def main():
             return
 
         if '--bitmap-changes' in sys.argv:
-            command('FONT Compact');command('A:');command('CD /')
+            command('FONT 6x8/Rotate');command('A:');command('CD /')
             panel=m.read(n['state.activePanel'],1)[0];other=panel^1
             if m.read(n['state.panelA_info']+other,1)[0]:m.tap('f3');wait()
             def panel_bitmap(which):
@@ -469,8 +521,8 @@ def main():
                 assert m.read(n['ncDialogActive'],1)==b'\0'
                 assert panels()==before,(label,'panel pixels did not restore')
             command('COPY A:/README.TXT B:/NCLOOK.TXT')
-            for font in ('Cpm4','Compact','Fast8'):
-                command('FONT '+font);command('A:');command('CD /');m.tap('home');wait()
+            for font in ('Cpm4','Rotate','Fast8'):
+                command('FONT '+FONT_PATHS[font]);command('A:');command('CD /');m.tap('home');wait()
                 panel=m.read(n['state.activePanel'],1)[0]
                 other=panel^1
                 for info in (False,True):
@@ -501,7 +553,7 @@ def main():
             return
 
         if '--benchmark-color-scroll' in sys.argv:
-            command('FONT Rotate');command('H:');command('CD /')
+            command('FONT 6x8/Rotate');command('H:');command('CD /')
             runpy.run_path(str(ROOT/'scripts/emu80/benchmark-nc-color-scroll.py'))['run_pit'](m)
             return
 
@@ -529,8 +581,8 @@ def main():
             for i in range(0,128,4):
                 if not rules[i]:break
                 configured_colors.setdefault(rules[i:i+3].decode('koi8-r').strip(),rules[i+3])
-            for font in (('Compact',) if '--launch-colors' in sys.argv else ('Cpm4','Compact','Fast8')):
-                command('FONT '+font);command('A:');command('CD /')
+            for font in (('Rotate',) if '--launch-colors' in sys.argv else ('Cpm4','Rotate','Fast8')):
+                command('FONT '+FONT_PATHS[font]);command('A:');command('CD /')
                 check_colors();m.screenshot(OUT/f'{font}-file-colors.png')
                 command('H:');command('CD /');m.tap('home');wait();check_colors()
                 columns=m.read(n['ncColumns'],1)[0]
@@ -554,8 +606,8 @@ def main():
             return
 
         if '--delete-dialog' in sys.argv:
-            for font in ('Cpm4','Compact','Fast8'):
-                command('FONT '+font);command('A:');command('CD /')
+            for font in ('Cpm4','Rotate','Fast8'):
+                command('FONT '+FONT_PATHS[font]);command('A:');command('CD /')
                 m.tap('home');wait()
                 for want_directory in (True,False):
                     panel=m.read(n['state.activePanel'],1)[0]
@@ -569,7 +621,7 @@ def main():
                         m.tap('down')
                     else:raise AssertionError('No suitable delete-dialog fixture')
                     leaf=record[:8].rstrip()+((b'.'+record[8:11].rstrip()) if record[8:11].strip() else b'')
-                    m.stop_at(n['loc_D54C']);m.tap('f8');m.until(n['loc_D54C'],120,page=0)
+                    m.stop_at(n['ncDeleteKey']);m.tap('f8');m.until(n['ncDeleteKey'],120,page=0)
                     m.call('bp_clear');m.call('emu_run_for',ms=500)
                     actual=m.read(n['vars.input'],32).split(b'\0')[0]
                     assert actual==leaf and all(c>=32 for c in actual),(font,leaf,actual)
@@ -579,7 +631,7 @@ def main():
             return
 
         if '--same-context' in sys.argv:
-            command('FONT Compact')
+            command('FONT 6x8/Rotate')
             def quiet_context(value):
                 m.tap('esc');m.call('emu_run_for',ms=250)
                 for char in value:type_char(char)
@@ -629,13 +681,13 @@ def main():
                 print('Panel',panel,'same root/saved directory: no redraw, no list read, selection/scroll preserved; real transitions PASS',flush=True)
             return
 
-        fonts=('Cpm4','Compact','Fast8')
+        fonts=('Cpm4','Rotate','Fast8')
         if '--fonts' in sys.argv:
             fonts=tuple(sys.argv[sys.argv.index('--fonts')+1].split(','))
-            assert all(font in ('Cpm4','Compact','Fast8') for font in fonts)
+            assert all(font in ('Cpm4','Rotate','Fast8') for font in fonts)
         overwrite_fixture=False
         for font in (() if '--state-only' in sys.argv else fonts):
-            command('FONT ' + font)
+            command('FONT '+FONT_PATHS[font])
             if '--overwrite-ui' in sys.argv:
                 copy='COPY A:/README.TXT B:/NCLOOK.TXT'
                 if not overwrite_fixture:
@@ -649,7 +701,7 @@ def main():
                 m.until(n['ncOverwriteKey'],120,page=0)
                 m.call('bp_clear');m.call('emu_run_for',ms=500)
                 for choice in (2,3,0,1):
-                    assert m.read(n['ncOverwriteChoice'],1)==bytes([choice]),(font,'overwrite navigation')
+                    assert m.read(n['uiModalFocusIndex'],1)==bytes([choice]),(font,'overwrite navigation')
                     m.screenshot(OUT/(font+'-overwrite-'+str(choice)+'.png'))
                     if choice!=1:m.tap('right');wait()
                 m.tap('esc');wait()
@@ -743,7 +795,7 @@ def main():
             m.screenshot(OUT / (font + '-info-B.png'))
             m.tap('f3')
             wait()
-            if font != 'Compact' and '--info-only' not in sys.argv:
+            if font != 'Rotate' and '--info-only' not in sys.argv:
                 command('H:')
                 visible = m.read(n['ncVisibleCount'], 1)[0]
                 assert m.read(n['state.panelA_filesCnt'], 1)[0] > visible + 2
@@ -762,17 +814,17 @@ def main():
                 m.screenshot(OUT / (font + '-scroll-backward.png'))
             print(font, 'F1/F2 and F3 A:/B: keyboard scenarios PASS', flush=True)
         if '--text-benchmark' in sys.argv:
-            command('FONT Compact');command('H:');command('CD /')
+            command('FONT 6x8/Rotate');command('H:');command('CD /')
             bench=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-nc-text-alignment.py'))
             bench['run'](m,n,ROOT/'docs/nc/text-align-2026-11-15')
             print('H: aligned/centered text benchmark PASS',flush=True)
             return
         if '--state-status' in sys.argv or '--state-only' in sys.argv:
-            command('FONT Compact')
+            command('FONT 6x8/Rotate')
             command('A:')
             m.tap('f3');wait()
             assert m.read(n['state.panelB_info'],1)==b'\x01'
-            command('FONT Compact')
+            command('FONT 6x8/Rotate')
             assert m.read(n['state.activePanel'],1)==b'\x00'
             assert m.read(n['state.panelB_info'],1)==b'\x01','right F3 lost on external program return'
             m.screenshot(OUT/'right-F3-restored.png')
@@ -781,7 +833,7 @@ def main():
             assert m.read(n['state.panelB_info'],1)==b'\x01','right F3 lost on CLI return'
             m.tap('f3');wait();m.tap('tab');wait();m.tap('f3');wait()
             assert m.read(n['state.panelA_info'],1)==b'\x01'
-            command('FONT Compact')
+            command('FONT 6x8/Rotate')
             assert m.read(n['state.activePanel'],1)==b'\x01'
             assert m.read(n['state.panelA_info'],1)==b'\x01','left F3 lost on external program return'
             m.screenshot(OUT/'left-F3-restored.png')

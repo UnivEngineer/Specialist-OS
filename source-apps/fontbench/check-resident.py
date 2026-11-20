@@ -9,9 +9,9 @@ sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)
 s=sy(R/'bin/FONTCOM.sym');n=sy(R/'bin/NC.sym');f=sy(R/'bin/FONT.sym');t=sy(R/'bin/banked/TRANSPORT.sym')
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=O,RUNTIME=R/'.local/font-import-runtime')
 x=h['Matrix']();m=x.m
-cases=[('Rotate','6x8/Rotate','BIOS','OFF',6),('PagedOff','6x8/Rotate','ROW6','OFF',6),('Packed6K','6x8/Packed6K','BIOS','ON',6),('Tripack','6x8/Rotate','TRIPACK','ON',6),('Fast12K','6x8/Fast12K','BIOS','ON',6),('PagedOn','6x8/Rotate','ROW6','ON',6),('Compact','6x8/Compact','BIOS','OFF',6),('Fast8','8x8/Fast8','BIOS','OFF',8),('Standalone8','8x8/Fast8','ROW8','ON',8),('Cpm4','4x8/Cpm4','BIOS','OFF',4),('Dup4','4x8/Cpm4','4DUP','ON',4)]
-cases += [('SharedRotate','6x8/Rotate','ROTATE6','OFF',6),('SharedPacked','6x8/Rotate','PACK6K','ON',6),('SharedFull','6x8/Rotate','FAST12K','ON',6),('SharedCompact','6x8/Compact','COMPACT6','OFF',6),('Shared8','8x8/Fast8','FAST8','OFF',8),('Shared4','4x8/Cpm4','CPM4','OFF',4),('Colpre','6x8/Rotate','COL6PRE','ON',6)]
-cases += [('Window8','8x8/Fast8','WIN8','OFF',8)]
+cases=[('Rotate','6x8/Rotate','BIOS','OFF',6),('PagedOff','6x8/Rotate','ROW6','OFF',6),('Packed6K','6x8/Packed','BIOS','ON',6),('Tripack','6x8/Rotate','TRIPACK','ON',6),('Fast12K','6x8/Fast','BIOS','ON',6),('PagedOn','6x8/Rotate','ROW6','ON',6),('Fast8','8x8/Rotate','BIOS','OFF',8),('Standalone8','8x8/Rotate','ROW8','ON',8),('Cpm4','4x8/Fast','BIOS','OFF',4),('Dup4','4x8/Fast','4DUP','ON',4)]
+cases += [('SharedRotate','6x8/Rotate','6RotateRows','OFF',6),('SharedPacked','6x8/Rotate','PACK6K','ON',6),('SharedFull','6x8/Rotate','FAST12K','ON',6),('SharedCompact','6x8/Rotate','COMPACT6','OFF',6),('Shared8','8x8/Rotate','FAST8','OFF',8),('Shared4','4x8/Fast','CPM4','OFF',4),('Colpre','6x8/Rotate','COL6PRE','ON',6)]
+cases += [('Window8','8x8/Rotate','WIN8','OFF',8)]
 cases.sort(key=lambda c: {'Window8':-1,'Packed6K':0,'Fast12K':1}.get(c[0],2))
 inverse='--inverse' in sys.argv
 selected=[arg for arg in sys.argv[1:] if arg!='--inverse']
@@ -53,10 +53,12 @@ def oracle(corpus,font,width,raw):
  return out,bytes([y+7,xp//2])
 try:
  # Refuse a stale image after a failed build, before opening an emulator.
- tree=runpy.run_path(str(R/'scripts/tests/check-nested-image.py'))['read_tree']((R/'images/SystemRom_emu80_writable.bin').read_bytes())[0]
+ disk=O/'bench-h.bin'
+ disk.write_bytes(b''.join((R/f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1,5)))
+ tree=runpy.run_path(str(R/'scripts/tests/check-nested-image.py'))['read_tree'](disk.read_bytes())[0]
  assert s['CORPUS_IO_BUFFER']==0x3500,'corpus scratch overlaps resident table'
- assert tree['BENCH/FontBen/FontBen.com'][16:]==(R/'bin/FONTCOM.i80').read_bytes(),'stale FontBen image'
- x.start('paired-font-grid',system=R/'images/SystemRom_emu80_writable.bin')
+ assert tree['BENCH/FontBen/FontBen.com'][32:]==(R/'bin/FONTCOM.i80').read_bytes(),'stale FontBen image'
+ x.start('paired-font-grid',system=R/'images/SystemRom_emu80_writable.bin',disk=disk)
  for tag,module,engine,pre,width in cases:
   folder=O/(tag+('-inverse' if inverse else ''));folder.mkdir(exist_ok=True)
   (folder/'verified.json').unlink(missing_ok=True)
@@ -70,13 +72,13 @@ try:
   if engine=='WIN8':font=(R/'source/monitor_win/originals/monitor_win.rom').read_bytes()[0x1800:0x2000]
   elif width==8:font=(R/'assets/system-rom/fonts/8x8/Win8.pf').read_bytes()
   elif width==4:
-   font=(R/'assets/system-rom/fonts/4x8/Cpm4.pf').read_bytes()
+   font=(R/'assets/system-rom/fonts/4x8/Fast.pf').read_bytes()
   elif tag in ('Compact','SharedCompact'):
    src=(R/'bin/fonts/compact-font.bin').read_bytes();lookup=(R/'bin/fonts/compact-map.bin').read_bytes();font=bytes(src[lookup[c]*8+y] for c in range(256) for y in range(8))
   else:font=bytes(b&63 for b in (R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes())
-  command('A:/Bench/FontBen/FontBen.com -E '+engine+' -P '+pre+' -Q'+(' -I' if inverse else ''),s['gridMeasured'])
+  command('H:/Bench/FontBen/FontBen.com -E '+engine+' -P '+pre+' -Q'+(' -I' if inverse else ''),s['gridMeasured'])
   if lower:assert m.read(prebase,lower)==predata,(tag,'corpus preparation damaged resident table')
-  corpus=m.read(s['gridText'],1152);refs=[oracle(corpus,font,width,r) for r in (False,True)]
+  corpus=m.read(s['gridText'],s['GRID_TEXT_BYTES']);refs=[oracle(corpus,font,width,r) for r in (False,True)]
   (folder/'corpus.bin').write_bytes(corpus);results=[]
   for stage in range(18):
    kind=m.read(s['gridKind'],1)[0];route=m.read(s['gridRoute'],1)[0]

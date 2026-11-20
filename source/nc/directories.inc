@@ -1,5 +1,10 @@
 ; Контексты двух панелей: по два байта в прежнем 12-байтном NC_STATE.
 ; AF/BC/DE/HL разрушены, кроме явно сохранённых регистров.
+restoreActiveDirectory:
+            ld hl,state.panelA_drive
+            call readBytePanel
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            ret c
 restorePanelDirectory:
             ld hl,state.panelA_dirLow
             call readBytePanel
@@ -29,6 +34,8 @@ resetPanelDirectory:
 enterDirectory:
             ld de,vars.pathArg
             call compactName
+            call restoreActiveDirectory
+            jp c,directoryFailure
             ld hl,vars.pathArg
             ld a,CLI_OP_CHDIR
             MXOS_CALL MXOS_DOS_CLI
@@ -313,6 +320,7 @@ commandPathPrint:
 ; Вход: cmdLineEnd и завершающий ноль; выход: cmdLinePos, cmdOffset.
 ; Разрушает AF/BC/DE/HL и флаги.
 redrawCommandText:
+            COLOR COLOR_CMDLINE ; This entry also follows a colored file cursor.
             ld hl,(vars.cmdTextPos)
             ld (bios_vars.cursorY),hl
             ld a,(vars.cmdCapacity)
@@ -353,13 +361,14 @@ commandText:
 
  ; Заголовок панели: полный путь либо сокращение по границам компонентов.
 printPanelPath:
+            call ncUpdateCatalogFrame
             call getPanelPath
             ret c
             ld a,(ncHeaderChars)
             ld b,a
             call compactPath
             push hl
-            COLOR 0F1h
+            call ncSetPanelBorder
             ld hl,00408h
             call setCursorPosPanel
             pop hl

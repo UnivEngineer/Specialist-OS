@@ -98,6 +98,7 @@ function Get-SourceDependencies {
 $buildDirectory = (Get-Location).ProviderPath
 $sourcePath = Get-FullPath -Path ($SourceBase + ".asm") -BaseDirectory $buildDirectory
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path $repositoryRoot "scripts/images/cpu.ps1")
 $outputDirectory = Join-Path $repositoryRoot "bin"
 $outputPath = Join-Path $outputDirectory ($OutputBase + "." + $Extension)
 $listingPath = Join-Path $outputDirectory ($OutputBase + ".lst")
@@ -111,6 +112,14 @@ $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 # DOS требует предварительного измерения блоков и размещения между входами ABI.
+if ($SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\EDIT')) {
+    & python (Join-Path $PSScriptRoot 'build-editor.py')
+    exit $LASTEXITCODE
+}
+if ($SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')) {
+    & python (Join-Path $PSScriptRoot 'build-nc.py')
+    exit $LASTEXITCODE
+}
 if ($SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')) {
     & python (Join-Path $PSScriptRoot 'build-bios-dos.py')
     exit $LASTEXITCODE
@@ -186,13 +195,15 @@ if ($Extension -eq 'cpu') {
         if (-not $symbolMatch.Success) { throw "Unknown load-address symbol: $Address" }
         [Convert]::ToInt32($symbolMatch.Groups[1].Value, 16)
     }
-    $cpuText = ("{0:X4}`r`n{0:X4}`r`n" -f $numericAddress)
     $symbolText = [IO.File]::ReadAllText($symbolPath)
     $flagsMatch = [regex]::Match($symbolText, '(?m)^IMAGE_FLAGS: EQU 0x([0-9A-Fa-f]+)')
-    if ($flagsMatch.Success) {
-        $cpuText += ("{0:X2}`r`n" -f [Convert]::ToInt32($flagsMatch.Groups[1].Value, 16))
-    }
+    $imageFlags = if ($flagsMatch.Success) { [Convert]::ToInt32($flagsMatch.Groups[1].Value, 16) } else { 0 }
+    $cpuText = New-CpuDescriptor -Load $numericAddress -Flags $imageFlags -Fields (Get-CpuFieldsFromSymbols $symbolText)
     [IO.File]::WriteAllText($outputPath, $cpuText, [Text.Encoding]::ASCII)
+    if ($SourceBase -eq 'UI_GFX') {
+        & python (Join-Path $repositoryRoot 'scripts/images/executable.py') $outputPath (Join-Path $outputDirectory 'UI_GFX.dll') --format dll
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
 }
 
 # Monitor-2 должен точно воспроизводить сохранённое историческое ядро.

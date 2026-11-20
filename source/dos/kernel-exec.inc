@@ -91,17 +91,39 @@ keNativeExtension:
     jp z,keBank
     cp IMAGE_FLAG_DRIVER
     jp z,keDriver
+    push hl
+    push de
+    ld hl,(v_imageHeader+IMAGE_STACK)
+    ld de,BIOS_BANK_STACK_TOP-BIOS_BANK_STACK_BOTTOM-64
+    call cmp_hl_de
+    pop de
+    pop hl
+    jp c,keMainStackReady
+    jp nz,keStackBad
+keMainStackReady:
     ; Основная память до переходника RUN; верхние драйверы — явные области.
     push hl
     push de
-    ld h,b
-    ld l,c
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
+    push de
+    push hl
+    ld hl,(v_imageHeader+IMAGE_MIN_HEAP)
+    ex de,hl
+    pop hl
     add hl,de
+    pop de
     jp c,keRangeError
     ld a,d
     cp 08Ch
     push hl
     ld hl,(memorySystemEnd)
+    push af
+    ld a,(v_imageHeader+IMAGE_POLICY)
+    or a
+    jp nz,kePreserveFont
+    ld hl,APP_MEMORY_END
+kePreserveFont:
+    pop af
     ex de,hl
     pop hl
     jp c,keCheckEnd
@@ -111,11 +133,24 @@ keNativeExtension:
 keCheckEnd:
     call cmp_hl_de
     jp c,keRangeOk
-    jp nz,keRangeError
+    jp z,keRangeOk
+    ld a,d
+    cp SYSTEM_PROGRAM_END/256
+    jp z,keRangeError
+    pop de                  ; imageOpen entry and load address saved above
+    pop hl
+    ld hl,keMainShortText
+    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    ld a,MEM_ERROR_NOMEM
+    call dosSetError
+    jp keLoadError
+keMainShortText: DB 'Not enough RAM',10,0
 keRangeOk:
     pop hl
     push bc
     push hl
+    call moduleMainClaim
+    jp c,keMainClaimFailed
     call keCacheClaim
     pop hl
     pop bc
@@ -123,6 +158,12 @@ keRangeOk:
     pop bc
     jp keLoadError
 keCacheClaimed:
+    push hl
+    push bc
+    call keReserveImage
+    pop bc
+    pop hl
+    jp c,keReservationFailed
     ld (kdFarCurrent),hl
     ld hl,0
     ld (kiSum),hl
@@ -138,10 +179,20 @@ keCacheClaimed:
     pop af
     pop bc
     jp nc,keImageReady
+    jp keMainLoadFailed
+keReservationFailed:
+    pop bc
+keMainLoadFailed:
     push af
+    call keDropImage
     ld hl,(keCacheToken)
     call keCacheRelease
     pop af
+    jp keLoadError
+keMainClaimFailed:
+    pop hl
+    pop bc
+    pop bc
     jp keLoadError
 keImageReady:
     ; BC=вход в main, DE=аргументы; callback восстанавливает этот пакет.
@@ -163,6 +214,7 @@ keImageReady:
     push hl
     call appEnter
     jp c,keAppRejected
+    call keBindImage
     ld hl,bankCallback
     ld de,keRegs
     call bankCallPacket
@@ -170,6 +222,7 @@ keImageReady:
     xor a
 keAppRejected:
     push af
+    call keDropImage
     pop bc
     pop hl
     push bc
@@ -179,6 +232,12 @@ keAppRejected:
 ; Банковое приложение использует тот же жизненный цикл, что DLL.
 ; Стек: указатель аргументов main, прежний диск. Вызовы ниже локальны DOS.
 keBank:
+    ld hl,(v_imageHeader+IMAGE_STACK)
+    ld de,DOS_BANK_STACK_TOP-DOS_BANK_STACK_BOTTOM-192
+    call cmp_hl_de
+    jp c,keBankStackReady
+    jp nz,keStackBad
+keBankStackReady:
     pop hl
     ld de,MAIN_COMMAND_ADDR
     call sub_hl_de
@@ -263,23 +322,26 @@ keBankPrepareFailed:
 keBankFloor: DW DOS_BANK_STACK_BOTTOM+192
 
 keDriver:
+    ld hl,(v_imageHeader+IMAGE_BSS)
+    inc hl
+    ld a,h
+    or l
+    jp z,keDriverBad
+    ld hl,(v_imageHeader+IMAGE_STACK)
+    ld de,DOS_BANK_STACK_TOP-DOS_BANK_STACK_BOTTOM-64
+    call cmp_hl_de
+    jp c,keDriverStackReady
+    jp nz,keStackBad
+keDriverStackReady:
     ld a,(diActive)
     or a
     jp nz,keDriverBusy
-    ld hl,DOS_BANK_DRIVER_ADDR
-    call cmp_hl_de
-    jp nc,keDriverLower
-    jp keDriverAddressReady
-keDriverLower:
-    jp nz,keDriverBad
-keDriverAddressReady:
-    ex de,hl
+    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
     ld (diStart),hl
-    ex de,hl
-    ld h,b
-    ld l,c
-    add hl,de
+    ld de,DOS_BANK_DRIVER_ADDR
+    call cmp_hl_de
     jp c,keDriverBad
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
     ld (diEnd),hl
     ld de,DOS_BANK_DRIVER_END
     call cmp_hl_de
@@ -288,9 +350,9 @@ keDriverAddressReady:
 keDriverRangeOk:
     ex de,hl
     ld hl,(diStart)
-    call dosArenaCheck
+    call dosArenaImage
     jp c,keDriverBusy
-    ld hl,(diStart)
+    ld hl,(v_tmpFileDescr+6)
     ex de,hl
     call imageLoad
     jp c,keLoadError
@@ -317,6 +379,10 @@ keDriverReturn:
     ld (diActive),a
     pop af
     jp keDone
+keStackBad:
+    ld a,MEM_ERROR_STACK
+    call dosSetError
+    jp keLoadError
 keDriverBad:
     call blockArgument
     jp keLoadError
@@ -381,3 +447,131 @@ keCacheRelease:
     MXOS_CALL MXOS_BIOS_GLYPH_CACHE
     ret
 keCacheToken: DW 0
+
+; Static MAIN interval is tracked separately from the application's heap.
+keReserveImage:
+    ld hl,0
+    ld (keImageToken),hl
+    ld hl,(v_tmpFileDescr+6)
+    ld de,APP_MEMORY_END
+    call cmp_hl_de
+    ret nc                   ; explicit upper utility, cache token handles it
+    call keRetireMain
+    ld hl,(v_imageHeader+IMAGE_BSS)
+    inc hl
+    ld a,h
+    or l
+    jp nz,keReserveKnown
+    ld hl,0
+    ld de,APP_MEMORY_END
+    jp keReserveRange
+keReserveKnown:
+    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
+    push hl
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
+    ex de,hl
+    pop hl
+keReserveRange:
+    call memoryReserveMain
+    ret c
+    ld hl,(memorySlotPtr)
+    ld (keImageToken),hl
+    xor a
+    ret
+keDropImage:
+    push af
+    ld hl,(keImageToken)
+    ld a,h
+    or l
+    jp z,keDropDone
+    ld (hl),0FFh
+    ld hl,0
+    ld (keImageToken),hl
+keDropDone:
+    pop af
+    ret
+keBindImage:
+    push bc
+    push hl
+    ld hl,(keImageToken)
+    ld (appImage),hl
+    ld a,h
+    or l
+    jp z,keBindDone
+    ld de,5
+    add hl,de
+    ld a,(appOwner)
+    ld (hl),a
+    ld (memoryMainOwner),a
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
+    ld (memoryMainStart),hl
+    ld hl,(memorySystemEnd)
+    ld (memoryMainEnd),hl
+    ld hl,0
+    ld (keImageToken),hl
+    call memoryPublishTop
+keBindDone:
+    pop hl
+    pop bc
+    ret
+keImageToken: DW 0
+
+; Nonreturning MAIN clients can also hand off to a DOS launcher whose child
+; needs their MAIN intervals. The command and return stack remain accessible.
+memoryRetireMain:
+    ld a,(moduleActor)
+    or a
+    jp nz,memoryDenied
+    ld hl,(appImage)
+    ld a,h
+    or l
+    ret z
+    call keRetireAll
+    jp memoryPublishTop
+
+; FILE_EXEC is a destructive handoff when the caller's MAIN image is replaced.
+; Its old static/heap blocks must not constrain the new application's memTop.
+; MAIN modules use the strict claim instead and cannot overwrite a live parent.
+keRetireMain:
+    ld a,(moduleActor)
+    or a
+    ret nz
+    ld hl,(appImage)
+    ld a,h
+    or l
+    ret z
+    ld hl,MEM_ALLOC_TABLE
+    ld b,MEM_ALLOC_RECORDS
+keRetireFind:
+    ld a,(hl)
+    or a
+    jp nz,keRetireNext
+    push hl
+    push bc
+    call mmcReadBlock
+    ld a,(appOwner)
+    cp (hl)
+    jp nz,keRetireNotOwned
+    call mmcOverlapSize
+    pop bc
+    pop hl
+    jp c,keRetireAll
+    jp keRetireNext
+keRetireNotOwned:
+    pop bc
+    pop hl
+keRetireNext:
+    ld de,6
+    add hl,de
+    dec b
+    jp nz,keRetireFind
+    ret
+keRetireAll:
+    ld hl,MEM_ALLOC_TABLE
+    ld b,MEM_ALLOC_RECORDS
+    ld a,(appOwner)
+    ld c,a
+    call appReleaseBlock
+    ld hl,0
+    ld (appImage),hl
+    ret

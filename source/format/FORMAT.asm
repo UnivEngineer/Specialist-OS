@@ -177,9 +177,7 @@ Format:
 
     ; Установить выбранный диск текущим
     ld      e, 01h          ; Номер диска в a
-    call    bios_fileGetSetDrive
-
-    ; Выдать размер диска в de
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE ; Выдать размер диска в de
     ld      b, 3            ; режим 3 - получить размер
     call    bios_diskDriver ; de = размер в секторах
 

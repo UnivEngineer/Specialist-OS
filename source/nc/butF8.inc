@@ -5,8 +5,17 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-but_F8:     ; Рисуем окно
-            call    drawWindowIfSel
+but_F8:
+            call ncRealSelection
+            jp c,mainLoop
+            call buildSelectedFilePath
+            jp c,mainLoop
+            ld hl,ncDeleteModal
+            xor a
+            ld bc,UI_FOCUS_PAIR*256
+            call uiModalFocusInit
+            ld hl,ncDeleteModal
+            call ncModalOpen
 
             ; Выводим "DELETE FROM A:"
             ld hl,state.panelA_drive
@@ -14,25 +23,30 @@ but_F8:     ; Рисуем окно
             add a,'A'
             ld (aDeleteFrom+12),a
             ld hl,aDeleteFrom
-            ld e,94
-            call ncPrintCentered
+            call uiModalTitle
 
-            call        printInvSelFile
+            ld hl,vars.pathArg
+            ld de,vars.pathArg+MAX_PATH
+            ld bc,vars.input
+            call bios_memcpy_bc_hl
+            ld hl,240
+            call ncProgressFieldWidth
+            ld hl,vars.pathArg
+            call compactPath
+            call uiModalBodyText
 
-loc_D54C:   ; Ждем нажатия Enter или ESC
-            call        bios_keyScan
-            cp          1Bh
-            jp z,       ncRefreshDirty
-            cp          0Dh
-            jp nz,      loc_D54C
-
-loc_D595:   ; Удаляем текущий файл
+ncDeleteKey:
+            call uiModalChoose
+            jp c,ncRefreshDirty
+ncDeleteConfirm:
+            or a
+            jp nz,ncRefreshDirty
             ld          hl, state.panelA_drive
             call        readBytePanel
             MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             jp c,       deleteFileError
             call restorePanelDirectory
-            ld a,(state.activePanel)
+            jp c,       deleteFileError
             ld hl,state.panelA_drive
             call readBytePanel
             ld (vars.copyRequest.sourceDrive),a
@@ -61,3 +75,9 @@ deleteFileError:
 deleteFileJobError:
             call dosErrorText
             jp copyFileShowError
+
+ncDeleteModal:
+    UI_MODAL_BEGIN 12,1,2
+    UI_MODAL_BUTTON ncInputOkText,0,0,1
+    UI_MODAL_BUTTON ncInputCancelText,0,1,0
+    UI_MODAL_END

@@ -80,8 +80,12 @@ loc_C1F2:   rrca
 
 ;----------------------------------------------------------------------------
 
-keybScan3:  push    de
+keybScan3:  ; Remember the selected switch for the EXEC repeat fast path.
+            ld      (keyColumn),hl
+            push    de
             push    af
+            ld      a,c
+            ld      (keyRow),a
             ld      a, 6    ; e += (6 - c) * 16
             sub     c
             add     a, a

@@ -31,7 +31,7 @@ printCharBody:
 
             ; Это табуляция
             cp  9
-            jp  z, printChar_c9      ; там bios_vars.cursorX+=24 и ret
+            jp  z, printChar_c9
 
             ; Любой символ кроме ESC
             cp  1Bh

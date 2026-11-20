@@ -20,7 +20,11 @@ def main():
     assert image[:3]==b'\xC3'+dos['dosBoot'].to_bytes(2,'little')
     assert len(binary)==layout['bios']['bytes']
     io=(ROOT/'bin/IO.sys').read_bytes()
-    assert len(io)==layout['io']['bytes']
+    assert len(io)==layout['io']['bytes']+layout['io']['bankBytes']
+    assert io[layout['io']['bytes']:]==(ROOT/'bin/banked/KEYBANK.bin').read_bytes()
+    assert io[:layout['io']['bytes']]==(ROOT/'bin/IO.main.bin').read_bytes()
+    assert layout['io']['bankAddress']==dos['IO_BANK_KEYS']
+    assert layout['io']['bankAddress']+layout['io']['bankBytes']<=dos['MEM_IMAGE_LOCAL_START']
     assert layout['io']['end']<=bios['MEM_IMAGE_LOCAL_START']
     mem=(ROOT/'bin/MEM.sys').read_bytes()
     address,size,offset=struct.unpack_from('<HHH',mem,6)
@@ -42,16 +46,16 @@ def main():
             offset=item['address']-layout['bios']['start']
             assert binary[offset:offset+3]==b'\xC3'+bios[item['target']].to_bytes(2,'little')
     spans=[(0,0x100,'vectors'),(dos['dosCoreStart'],dos['kernelEnd'],'image'),(dos['MEM_IMAGE_LOCAL_START'],dos['mx_call'],'local-block')]
-    for address,size,name in [('DOS_BANK_DATA_ADDR',4096,'exchange'),('DOS_BANK_OBJECT_ADDR',86,'object'),
+    for address,size,name in [('DOS_BANK_DATA_ADDR',4096,'exchange'),('DOS_BANK_OBJECT_ADDR',128,'object'),('MEM_ALLOC_TABLE',192,'allocations'),('MODULE_TABLE',128,'modules'),('DOS_IMAGE_CONTEXT_ADDR',83,'image-context'),('DOS_IMAGE_HEADER_ADDR',32,'image-header'),('DOS_FONT_STATE_ADDR',169,'font-state'),('DOS_MODULE_GUARD_ADDR',9,'module-release-guard'),('DOS_PARTIAL_RECORD',64,'partial-record'),('DOS_CLI_PATH1',128,'path1'),('DOS_CLI_PATH2',128,'path2'),('DOS_REQUEST_SCRATCH',42,'request-scratch'),
                               ('DOS_BANK_PATH_ADDR',128,'path'),('DOS_DRIVER_REGISTRY',640,'registry'),
                               ('DOS_DRIVER_IMAGE',576,'driver-image'),('DOS_BANK_CACHE_ADDR',8192,'cache'),
-                              ('DOS_BANK_CACHE_TABLE',520,'cache-table'),
+                              ('DOS_BANK_CACHE_TABLE',512,'cache-table'),
                               ('DOS_BANK_PARTIAL_ADDR',512,'partial'),
                               ('DOS_VERIFY_BUFFER',256,'verify'),('DOS_IO_BATCH_ADDR',152,'LBA-batch'),
                               ('DOS_CACHE_BOOT_ADDR',512,'BPB'),
                               ('DOS_BANK_CMD_ADDR',130,'command'),('DOS_BANK_COMPAT_ADDR',33,'variables'),
                               ('DOS_BANK_DRIVER_ADDR',dos['DOS_BANK_DRIVER_END']-dos['DOS_BANK_DRIVER_ADDR'],'initializer'),('BAT_BUFFER',dos['BAT_BUFFER_SIZE'],'BAT'),
-                              ('DOS_BANK_STACK_BOTTOM',dos['DOS_BANK_STACK_TOP']-dos['DOS_BANK_STACK_BOTTOM'],'stack'),('mx_call',0x800,'tail')]:
+                              ('IO_BANK_KEYS',layout['io']['bankBytes'],'local keyboard'),('DOS_BANK_STACK_BOTTOM',dos['DOS_BANK_STACK_TOP']-dos['DOS_BANK_STACK_BOTTOM'],'stack'),('mx_call',0x800,'tail')]:
         spans.append((dos[address],dos[address]+size,name))
     spans.sort();assert all(a[1]<=b[0] for a,b in zip(spans,spans[1:])),spans
     _,groups=runpy.run_path(str(ROOT/'scripts/build/build-bios-dos.py'))['component_groups']()

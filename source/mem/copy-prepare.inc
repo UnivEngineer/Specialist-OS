@@ -50,6 +50,12 @@ memBatchIO:
     ld (memBatchRemaining+1),a
     ld (memBatchTotal+1),a
     jp memBatchNext
+memRouteCall:
+    call bankQueueBefore
+    ld a,h
+    or l
+    jp z,memRouteBad
+    jp memRouteChecked
     ASSERT $ <= MEM_MAIN_IO_BRIDGE
     DS MEM_MAIN_IO_BRIDGE-$,0
 memMainIoBridge:

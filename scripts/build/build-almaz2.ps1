@@ -135,15 +135,34 @@ foreach ($variant in $selected) {
 
 if ($PublishMxTimer) {
     $archive = Join-Path $repositoryRoot "assets\games\Almaz-2"
+    . (Join-Path $repositoryRoot "scripts\images\cpu.ps1")
     # Публикация всех выбранных вариантов в обоих форматах.
     foreach ($variant in $selected) {
-        $destinationDirectory = $archive
+        $stem = $variant.Output
+        $descriptor = switch ($variant.Name) {
+            "MXOptimized" {
+                # Игра использует собственный стек и рабочую карту до 81FFh.
+                New-CpuDescriptor -Load 0 -Flags 4 -Fields ([ordered]@{POLICY='EXCLUSIVE'; MEM_END='8200'})
+            }
+            "RamfosOptimized" {
+                New-CpuDescriptor -Load 0 -Monitor 'ramfos.mon' -Fields @{MODE='RF'}
+            }
+        }
         foreach ($extension in @("cpu", "rks")) {
-            $fileName = "$($variant.Output).$extension"
+            $fileName = "$stem.$extension"
             $source = Join-Path $outputDirectory $fileName
-            $destination = Join-Path $destinationDirectory $fileName
+            if ($extension -eq 'cpu' -and $descriptor) {
+                $fileName = "$stem.i80"
+            }
+            $destination = Join-Path $archive $fileName
             if ((Get-FileSignature $source) -ne (Get-FileSignature $destination)) {
                 Copy-Item -LiteralPath $source -Destination $destination -Force
+            }
+        }
+        if ($descriptor) {
+            $path = Join-Path $archive "$stem.cpu"
+            if (-not (Test-Path -LiteralPath $path) -or [IO.File]::ReadAllText($path) -cne $descriptor) {
+                [IO.File]::WriteAllText($path, $descriptor, [Text.Encoding]::ASCII)
             }
         }
     }

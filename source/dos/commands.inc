@@ -106,21 +106,19 @@ cliMatchEnd:
     ld h,a
     inc de
     ld a,(de)
+    cp 4
+    jp z,cliAttrib
     cp 3
     jp c,cliCommandFlagsReady
     push hl
     ld hl,(cliArgs)
     ld b,a
     ld a,(hl)
-    inc b
-    dec b
     ld c,a
     ld a,b
     cp 5
     jp z,cliCdFlags
-    cp 3
     ld a,c
-    jp nz,cliAttribFlags
     or a
     ld a,0
     jp nz,cliCommandFlagsPop
@@ -133,14 +131,6 @@ cliCdFlags:
     jp nz,cliCommandFlagsPop
     ld a,1
     jp cliCommandFlagsPop
-cliAttribFlags:
-    cp '+'
-    jp z,cliCommandNoOutput
-    cp '-'
-    ld a,1
-    jp nz,cliCommandFlagsPop
-cliCommandNoOutput:
-    xor a
 cliCommandFlagsPop:
     pop hl
 cliCommandFlagsReady:
@@ -552,6 +542,7 @@ cliDirOpen:
     ld (cliDirRecursive),a
     ld hl,cliPath1
     xor a
+    ld (cliDirHadItems+1),a
     call enumRun
     ret c
 cliDirLoop:
@@ -561,6 +552,7 @@ cliDirLoop:
     ld a,h
     or l
     jp z,cliDirLoop
+    ld (cliDirHadItems+1),a
     ld a,(cliDirRecursive)
     or a
     jp z,cliDirShort
@@ -616,7 +608,14 @@ cliDirEnd:
     pop af
     or a
     jp nz,dosSetError
-    jp cliSuccess
+cliDirHadItems:
+    ld a,0 ; Patched only for this DIR; yielding without a record is not a match.
+    or a
+    jp nz,cliSuccess
+    ld hl,cliDirNoMatches
+    call bios_printString
+    jp cliNewLine
+cliDirNoMatches: DB 'No matching files',0
 cliPrintNamePart:
     ld a,(hl)
     cp ' '

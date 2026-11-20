@@ -91,18 +91,27 @@ moduleOperationsReady:
 moduleSelect:
     ld a,(argBank)
     cp 2
-    ld hl,dosModulePath
+    ld de,dosModuleName
     ld a,MODULE_TARGET_DOS
     jp z,moduleLoad
     ld a,(argBank)
     cp 3
-    ld hl,mainModulePath
+    ld de,mainModuleName
     ld a,MODULE_TARGET_MAIN
     jp z,moduleLoad
-    ld hl,bankModulePath
+    ld de,bankModuleName
     ld a,MODULE_TARGET_BANK
 moduleLoad:
     push af
+    ld hl,moduleFileName
+moduleCopyName:
+    ld a,(de)
+    ld (hl),a
+    inc de
+    inc hl
+    or a
+    jp nz,moduleCopyName
+    ld hl,modulePath
     push hl
     ld hl,workerConfig
     ld (bankModuleRegs),hl
@@ -311,11 +320,15 @@ workerResultCopy: DB 0
     DW 0
     DB 0
     DW resultsLow,40
-bankModulePath: DB 'H:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskBank.dll',0
-dosModulePath: DB 'H:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskDos.dll',0
-mainModulePath: DB 'H:',05Ch,'BENCH',05Ch,'DiskBen',05Ch,'DiskMain.dll',0
+    INCLUDE "../../source/include/app-drive.inc"
+; Share one path between workers; capture its drive at controller entry.
+modulePath: DB 'A:',05Ch,'BENCH',05Ch,'DiskBen',05Ch
+moduleFileName: DS 13,0
+bankModuleName: DB 'DiskBank.dll',0
+dosModuleName: DB 'DiskDos.dll',0
+mainModuleName: DB 'DiskMain.dll',0
 ; MODULE_LOAD только читает ASCIIZ; 128 доступных байт обеспечены последующим кодом.
-    ASSERT mainModulePath+MAX_PATH <= sectorBuffer
+    ASSERT modulePath+MAX_PATH <= sectorBuffer
 txtBankModuleError: DB 10,'Disk module error ',0
 
     INCLUDE "batch.inc"

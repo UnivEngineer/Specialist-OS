@@ -13,7 +13,7 @@ def main():
     sy=lambda path:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',path.read_text('utf-8-sig'),re.M)}
     n=sy(ROOT/'bin/NC.sym')
     memory=bytearray(65536)
-    for address,file in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.sys')]:
+    for address,file in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin')]:
         data=(ROOT/'bin'/file).read_bytes();memory[address:address+len(data)]=data
 
     def call(base,entry,a=0,de=0,hl=0):
@@ -48,7 +48,6 @@ def main():
         # Filesystem writes are intercepted; the production serializer/capture,
         # packet setup, pointer restoration and decimal conversion run unchanged.
         patch(base,'mx_callRegs',b'\xe3\x23\x23\xe3\xaf\xc9')
-        patch(base,'bios_fileGetSetDrive',b'\x3e\x07\xb7\xc9')
         patch(base,'loadFiles',b'\xc9')
         patch(base,'getSelectedFile',choose(0x8000,0x8010))
         patch(base,'getPanelPath',choose(0x8400,0x8500))

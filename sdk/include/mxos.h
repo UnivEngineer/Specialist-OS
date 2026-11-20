@@ -4,6 +4,28 @@
 #include "mxos_file.h"
 #include "mxos_syscall_ids.h"
 
+/* Direct local keyboard in DOS/EXEC. Keep one initialized state per input stream. */
+typedef struct { mxos_u8 last_key, repeat_count, locks, koi7; mxos_u16 column; mxos_u8 row_mask, repeat_start, timed, soft_divider, soft_ticks; } MXOS_KEY_STATE;
+#define MXOS_TIMER_RAW 0
+#define MXOS_TIMER_CLOCK 1
+#define MXOS_TIMER_RELEASE 2
+#define MXOS_TIMER_QUERY 3
+#define MXOS_KEY_STATE_INIT {255,0,0,0,0,0,0,0,0,0}
+#define MXOS_KEY_EVENT 0x0100
+#define MXOS_KEY_CTRL  0x0200
+#define MXOS_KEY_MOD_SHIFT 1
+#define MXOS_KEY_MOD_CTRL  2
+/* Begin returns 1 with the interval clock, 0 with software timing. */
+mxos_u8 mxos_bank_key_begin(MXOS_KEY_STATE *state);
+void mxos_bank_key_end(MXOS_KEY_STATE *state);
+/* Instantaneous physical state in DOS/EXEC. Shift returns 0 or 1. */
+mxos_u8 mxos_bank_key_shift(void);
+mxos_u8 mxos_bank_key_modifiers(void);
+/* Result: event flags and character in the low byte, or 0 if idle. */
+mxos_u16 mxos_bank_key_poll(MXOS_KEY_STATE *state) MXOS_FASTCALL;
+mxos_u16 mxos_bank_getch_cursor(MXOS_KEY_STATE *state) MXOS_FASTCALL;
+mxos_u16 mxos_bank_getch(MXOS_KEY_STATE *state) MXOS_FASTCALL;
+
 /* Родной диспетчер: operation=(группа<<8)|номер; порядок пакета HL/DE/BC/AF. */
 typedef struct {
     mxos_u16 operation, hl, de, bc, af;
@@ -25,7 +47,7 @@ typedef struct {
     mxos_u16 files;
     mxos_u8 flags,phase,known,reserved;
     mxos_u32 total;
-    mxos_u16 required,path;
+    mxos_u16 required,path,totalFiles;
     MXOS_COPY_REQUEST request; /* BEGIN input; returned for CONFIRM only. */
 } MXOS_FILEOPS_JOB;
 #define MXOS_FILEOPS_BEGIN 0
@@ -82,6 +104,36 @@ typedef struct {
 #define MXOS_FONT_RENDER_QUERY 0
 #define MXOS_FONT_RENDER_BUILD 1
 #define MXOS_FONT_RENDER_DISABLE 2
+/* MXOS2 v2 on-disk container, shared by COM/EXE/DLL/FNT. Little-endian.
+ * BSS is reserved, not cleared by DOS. C startup initializes its own BSS.
+ * mem_begin/end describe one contiguous half-open interval; min_heap is
+ * required additional space, not an allocation. No relocation is performed. */
+typedef struct {
+    mxos_u8 signature[5],flags;
+    mxos_u16 load,entry,body_bytes,body_checksum,bss,mem_begin,mem_end,min_heap;
+    mxos_u8 policy,api;
+    mxos_u16 stack_bytes;
+    mxos_u8 mode,header_bytes,options,reserved;
+    mxos_u16 header_checksum;
+} MXOS_IMAGE_HEADER;
+#define MXOS_IMAGE_HEADER_SIZE 32
+#define MXOS_IMAGE_VERSION 2
+#define MXOS_IMAGE_BSS_UNKNOWN 0xffff
+#define MXOS_IMAGE_POLICY_EXCLUSIVE 0
+#define MXOS_IMAGE_POLICY_PRESERVE 1
+#define MXOS_IMAGE_POLICY_MANAGED 2
+#define MXOS_IMAGE_MODE_AUTO 0
+#define MXOS_IMAGE_MODE_MX 1
+#define MXOS_IMAGE_MODE_STD 2
+#define MXOS_IMAGE_MODE_MON 3
+#define MXOS_IMAGE_MODE_RF 4
+#define MXOS_IMAGE_OPTION_CACHEABLE 1
+#define MXOS_IMAGE_OPTION_REUSABLE 2
+#define MXOS_MODULE_ACTIVATE 0xF0
+/* Trusted FONT installer / BIOS restoration, NEAR 128-byte command buffer. */
+#define MXOS_FONT_CONFIG_REGISTER 0
+#define MXOS_FONT_CONFIG_PREPARE 1
+#define MXOS_FONT_CONFIG_FINISH 2
 #define MXOS_IMAGE_FLAG_DRIVER 0x01
 #define MXOS_IMAGE_FLAG_BANK 0x02
 #define MXOS_IMAGE_FLAG_MAIN 0x04
@@ -98,9 +150,6 @@ typedef struct {
 typedef struct { char bytes[MXOS_MAX_PATH]; } MXOS_PATH;
 
 #define MXOS_CF 0x0001
-#define MXOS_BIOS_ABI_DIRECTORY 0xC8DE
-#define MXOS_BIOS_ABI_CLI 0xC8E1
-#define MXOS_BIOS_ABI_SHELL 0xC8E4
 #define MXOS_BIOS_ABI_INPUT_HOOK 0xC8E7
 #define MXOS_ZF 0x0040
 #define MXOS_BIOS_ABI_MEMCPY 0xC42D
@@ -117,32 +166,18 @@ typedef struct { char bytes[MXOS_MAX_PATH]; } MXOS_PATH;
 #define MXOS_BIOS_ABI_CHECKSUM 0xC82A
 #define MXOS_BIOS_ABI_MEMTOP_SET 0xC830
 #define MXOS_BIOS_ABI_MEMTOP_GET 0xC833
-#define MXOS_BIOS_ABI_FILE_LIST 0xC83F
-#define MXOS_BIOS_ABI_DRIVE 0xC842
-#define MXOS_BIOS_ABI_FILE_CREATE 0xC845
-#define MXOS_BIOS_ABI_FILE_DELETE 0xC84B
-#define MXOS_BIOS_ABI_FILE_RENAME 0xC84E
-#define MXOS_BIOS_ABI_FILE_STAT 0xC851
-#define MXOS_BIOS_ABI_FILE_ATTR 0xC857
-#define MXOS_BIOS_ABI_FILE_NAME 0xC85A
-#define MXOS_BIOS_ABI_FILE_LOAD 0xC866
 #define MXOS_BIOS_ABI_DISK_DRIVER 0xC863
 #define MXOS_BIOS_ABI_RAMD_DRIVER 0xC86F
 #define MXOS_BIOS_ABI_PRINT_DEC 0xC86C
 #define MXOS_BIOS_ABI_UPPER 0xC875
 #define MXOS_BIOS_ABI_STRCMP 0xC878
 #define MXOS_BIOS_ABI_STRICMP 0xC87B
-#define MXOS_BIOS_ABI_FLUSH 0xC899
 #define MXOS_BIOS_ABI_ARG_NEXT 0xC8B7
-#define MXOS_BIOS_ABI_DRIVE_SELECT 0xC8BA
-#define MXOS_BIOS_ABI_FILE_COPY 0xC8C3
-#define MXOS_BIOS_ABI_ERROR 0xC8C9
-#define MXOS_BIOS_ABI_SECTOR 0xC8CF
 
 /* Один мост позволяет обращаться и к остальным уже объявленным ABI. */
 void mxos_bios_call(MXOS_REGS *regs) MXOS_FASTCALL;
 
-#define MXOS_MEM_ABI_VERSION 0x0101
+#define MXOS_MEM_ABI_VERSION 0x0103
 #define MXOS_MEM_COPY_FAR 0xF80F
 #define MXOS_MEM_INFO 0xF812
 #define MXOS_MEM_CAP_COPY 1
@@ -150,6 +185,7 @@ void mxos_bios_call(MXOS_REGS *regs) MXOS_FASTCALL;
 #define MXOS_MEM_CAP_MEMORY_OPS 4
 #define MXOS_MEM_CAP_MODULES 8
 #define MXOS_MEM_CAP_ALLOCATOR 16
+#define MXOS_MEM_CAP_COMMAND_QUEUE 32
 /* FAR-код: 0=main, 1..16=банки ДОЗУ; packed для 8080, sizeof=8. */
 typedef struct {
     mxos_u8 source_bank;
@@ -181,8 +217,20 @@ mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 #define MXOS_MEM_OP_DISKCLAIM 13
 #define MXOS_MEM_OP_RAMDISK 14
 #define MXOS_MEM_OP_RESIDENT 15
+/* HL=start, BC=bytes: evict inactive overlapping MAIN modules; no writes. */
+#define MXOS_MEM_OP_MAINCLAIM 16
+#define MXOS_MEM_OP_MAINREGISTER 17
+#define MXOS_MEM_OP_MAINRETIRE 18
 #define MXOS_MEM_RESIDENT_FONT 0
 #define MXOS_MEM_RESIDENT_SLOTS 4
+#define MXOS_RESIDENT_RETAIN 0
+#define MXOS_RESIDENT_FIND 1
+#define MXOS_RESIDENT_ENUM 2
+#define MXOS_RESIDENT_SHELL_SET 3
+#define MXOS_RESIDENT_SHELL_RESUME 4
+#define MXOS_RESIDENT_DIRECTORY_EPOCH 5
+#define MXOS_RESIDENT_EPOCH_ALL 0xFE
+#define MXOS_RESIDENT_RELEASE 6
 #define MXOS_RAMDISK_STATUS 0
 #define MXOS_RAMDISK_COMMIT 1
 #define MXOS_MEM_ERR_BANK 0xE0
@@ -203,6 +251,9 @@ mxos_u16 mxos_malloc_far(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out);
 mxos_u16 mxos_free_far(MXOS_FAR_ADDRESS *address);
 mxos_u16 mxos_realloc_far(MXOS_FAR_ADDRESS *address, mxos_u16 bytes);
 mxos_u16 mxos_main_arena(void *start, mxos_u16 bytes);
+/* Exact owned MAIN buffer; no arena change, allocation/clearing or eviction.
+ * Rejects zero base/size and every overlap; release via mxos_free_far. */
+mxos_u16 mxos_main_register(void *start, mxos_u16 bytes);
 typedef struct { mxos_u16 free_bytes, largest; mxos_u8 free_records; } MXOS_MEMORY_INFO;
 mxos_u16 mxos_fill_far(MXOS_FAR_ADDRESS *address, mxos_u8 value, mxos_u16 bytes);
 mxos_u16 mxos_calloc_far(mxos_u8 bank, mxos_u16 count, mxos_u16 size, MXOS_FAR_ADDRESS *out);
@@ -217,6 +268,11 @@ mxos_u16 mxos_resident_close(mxos_u16 handle);
 mxos_u16 mxos_resident_kill(mxos_u16 handle);
 mxos_u16 mxos_resident_find(mxos_u16 key, mxos_u16 *handle);
 mxos_u16 mxos_resident_next(mxos_u8 *index, mxos_u16 *handle, mxos_u16 *key, mxos_u8 *bank);
+mxos_u16 mxos_shell_resident(mxos_u16 key); /* 0 selects file-based shell loading. */
+mxos_u16 mxos_shell_resume(void); /* No saved PC/SP; invokes the resident entry. */
+mxos_u16 mxos_directory_epoch(mxos_u16 *low, mxos_u16 *high);
+mxos_u16 mxos_drive_epochs(mxos_u8 *epochs); /* 32 bytes: eight LE32 values. */
+mxos_u16 mxos_resident_release(void); /* Drop own key; return to OS for unload. */
 mxos_u16 mxos_get8_far(MXOS_FAR_ADDRESS *address, mxos_u8 *out);
 mxos_u16 mxos_get16_far(MXOS_FAR_ADDRESS *address, mxos_u16 *out);
 mxos_u16 mxos_put8_far(MXOS_FAR_ADDRESS *address, mxos_u8 value);
@@ -245,6 +301,22 @@ void mxos_putch(mxos_u8 ch) MXOS_FASTCALL;
 void mxos_puts(const char *text) MXOS_FASTCALL;
 mxos_u16 mxos_readline(char *buffer, mxos_u16 capacity);
 void mxos_cls(void);
+/* Local queue callback may clobber registers. Flush preserves them all.
+ * The application owns callback code and its command buffer. */
+void mxos_queue_bind(void (*flush)(void)) MXOS_FASTCALL;
+void mxos_queue_flush(void);
+#define MXOS_ROUTE_CALL_ADDR 0xF818
+#define MXOS_QUEUE_BIOS 0
+#define MXOS_QUEUE_DOS 1
+#define MXOS_QUEUE_DLL 2
+#define MXOS_QUEUE_BIND_ADDR 0xF809
+#define MXOS_QUEUE_FLUSH_ADDR 0xF80C
+#define MXOS_COMMAND_REG_HL 1
+#define MXOS_COMMAND_REG_DE 2
+#define MXOS_COMMAND_REG_BC 4
+#define MXOS_COMMAND_REG_AF 8
+#define MXOS_COMMAND_INLINE_HL 16
+#define MXOS_COMMAND_BATCH_MAX 256
 mxos_u16 mxos_cursor_get(void); /* X/2 в старшем байте, Y в младшем. */
 void mxos_cursor_set(mxos_u16 xy) MXOS_FASTCALL;
 void mxos_print_dec(mxos_u16 value, mxos_u8 padding);

@@ -6,6 +6,8 @@
 
     INCLUDE "../include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
+IMAGE_BSS_SIZE = IMAGE_BSS_UNKNOWN
 
     INCLUDE "state.inc" ; Рабочая память и размещение программы
     INCLUDE "command.inc" ; Приглашение, ввод и диспетчер директив
@@ -31,4 +33,6 @@ debugNoMemory: DB "NOT ENOUGH MEMORY",0
     INCLUDE "file-name.inc" ; Пакетная печать поля 8.3
 
     ASSERT $ <= APP_MEMORY_END
+    INCLUDE "../include/file-io.inc"
+    INCLUDE "../include/file-image.inc"
     END

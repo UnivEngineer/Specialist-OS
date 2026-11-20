@@ -14,29 +14,28 @@
 ;   8E00-8FDE - [  479 B] Системный стек, SP=8FDFh
 ;   8FDF-8FFF - [   33 B] Переменные BIOS
 ;   9000-BFFF - [12288 B] Экран; временный образ сменного ядра и переходник
-;   C000-D7CC - [ 6093 B] BIOS.SYS; точный конец — bin/System.layout.json
-;   D7CD-D7FF - [   51 B] Резерв между BIOS.SYS и шрифтовым движком
+;   C000-D7F2 - [ 6131 B] BIOS.SYS; точный конец — bin/System.layout.json
+;   D7F3-D7FF - [   13 B] Резерв между BIOS.SYS и шрифтовым движком
 ;   D800-E3FF - [ 3072 B] Сменный шрифтовый движок и его внутренний резерв
 ;   E400-EBFF - [ 2048 B] Полный FONT.PF по строкам глифов, без заголовка
 ;   EC00-EC7F - [  128 B] Непрерывный резерв верхней арены / кэш глифов
 ;   EC80-ED7F - [  256 B] Служебный стек BIOS; начальный SP=ED80h
 ;   ED80-EE8F - [  272 B] Общий временный буфер A: / текста и UI
 ;   EE90-EF9F - [  272 B] BIOS_UPPER_VARIABLES, включая состояние текста MXOS
-;   EFA0-EFDF - [   64 B] IO_VARIABLES — рабочие переменные IO.SYS
+;   EFA0-EFE7 - [   72 B] IO_VARIABLES — рабочие переменные IO.SYS и имя шрифта
 ;   EFE0-EFFF - [   32 B] Резерв после удаления старого снимка окна
-;   F000-F15E - [  351 B] IO.SYS (точный конец — bin/System.layout.json)
-;   F15F-F1BF - [   97 B] Свободно в MAIN после удаления COPY-ветви GET/PUT
+;   F000-F1BE - [  447 B] IO.SYS (точный конец — bin/System.layout.json)
+;   F1BF-F1BF - [    1 B] Свободно в MAIN перед MEM.SYS
 ;   F1C0-F33F - [  384 B] MEM.SYS: подготовка CPM32, серия I/O, мост A:, копировщик
 ;   F340-F376 - [   55 B] MEM.SYS: остаток CPM32, копировщик четвёрок и резерв
 ;   F377-F37F - [    9 B] Состояние CPM32
 ;   F380-F3F7 - [  120 B] MEM.SYS: маршрутизация текста и резерв
 ;   F3F8-F5BF - [  456 B] MEM.SYS: операции памяти и резерв
 ;   F5C0-F67B - [  188 B] MEM.SYS: локальные адаптеры, контекст и снимок COMMAND
-;   F67C-F6BF - [   68 B] Непрерывный резерв MEM
+;   F67C-F6BF - [   68 B] Быстрый регистровый вход MEM и резерв
 ;   F6C0-F7FF - [  320 B] MAIN: AT512KS; DOS/EXEC: службы A:, проверки и суммы
 ;   F800-F8BF - [  192 B] MEM.SYS: публичные входы CLIENT и резерв
-;   F8C0-F9BE - [  255 B] MEM.SYS: текстовый шлюз
-;   F9BF-F9BF - [    1 B] Резерв перед драйвером H:
+;   F8C0-F9BF - [  256 B] MEM.SYS: inline-данные COMMAND и контроллер вызова DLL
 ;   F9C0-FBFF - [  576 B] Один слот ROM2M/AT2MX/AT2MXF, одинаковый во всех EXEC
 ;   FC00-FEFF - [  768 B] MEM.SYS: транспорт и контексты
 ;   FF00-FFBF - [  192 B] Защищённый хвост копировщика и резерв
@@ -57,63 +56,65 @@
 ; Карта 2: физический банк ДОЗУ 0 / DOS, FAR-код 1.
 ; Bootstrap загружает DOS.SYS в этот банк до запуска BIOS.
 ;   0000-00FF - [  256 B] Резерв векторов/обработчиков, совместимый с моделью CP/M
-;   0100-712F - [28720 B] Плотный код и данные DOS; точный конец — kernelEnd
-;   7130-733F - [  528 B] Резерв роста DOS; сборка требует 512–1024 байта
-;   7340-7AEC - [ 1965 B] ENUM.DLL при загрузке в нижнюю арену DOS-DLL
-;   7AED-7BFF - [  275 B] Остаток нижней арены DOS-DLL
-;   7C00-7C81 - [  130 B] Локальная командная строка DOS
-;   7C82-7CFF - [  126 B] Резерв
-;   7D00-7DBF - [  192 B] Реестр выделенных FAR-блоков
-;   7DC0-7E2F - [  112 B] Восемь записей DLL: handle, контекст, [start,end)
-;   7E30-7EFF - [  208 B] Свободная рабочая область DOS
-;   7F00-8EFF - [ 4096 B] Пачка файлового обмена или списка каталога
-;   8F00-8FDE - [  223 B] Свободная рабочая область DOS
-;   8FDF-8FFF - [   33 B] Локальный резерв совместимых переменных; diskWriteErr=8FF9h
-;   9000-AFFF - [ 8192 B] Единый пул кэша FAT/каталогов всех дисков
-;   B000-B1FF - [  512 B] 64 описателя гранул кэша по 128 байт
-;   B200-B207 - [    8 B] Описание отдельного неполного файлового сектора
-;   B208-B3FF - [  504 B] Резерв
-;   B400-B5FF - [  512 B] Отдельный неполный файловый сектор, с меткой диска
-;   B600-B6FF - [  256 B] Буфер проверяющего чтения физического сектора
-;   B700-B797 - [  152 B] Пакет LBA и контрольный курсор потока
-;   B798-B7FF - [  104 B] Резерв буферов DOS
-;   B800-B9FF - [  512 B] Независимый буфер чтения BPB и заголовка FAT
-;   BA00-BA7F - [  128 B] Пакет файловой операции / FILEOPS_JOB (110 байт)
-;   BA80-BAFF - [  128 B] Путь клиента или снимок запроса callback
-;   BB00-BD7F - [  640 B] Реестр физических драйверов, 8 записей
-;   BD80-BFBF - [  576 B] Подготовленный образ службы H: без инициализатора
-;   BFC0-BFFF - [   64 B] Резерв буферов DOS
-;   C000-D4D1 - [ 5330 B] FILEOPS.DLL при загрузке в верхнюю арену DOS-DLL
-;   D4D2-D77F - [  686 B] Остаток верхней арены; установщики прижаты к D780h
-;   D780-EF7F - [ 6144 B] Восемь кадров BAT: контекст, строка, буфер чтения 512 Б
-;   EF80-F1BF - [  576 B] Служебный стек DOS; начальный SP=F1C0h
+;   0100-75FD - [29950 B] Плотный код и данные DOS; точный конец — kernelEnd
+;   75FE-77FF - [  514 B] Резерв роста DOS; сборка требует 512–1024 байта
+;   7800-87FF - [ 4096 B] Пачка файлового обмена или списка каталога
+;   8800-8881 - [  130 B] Локальная командная строка DOS
+;   8882-88D4 - [   83 B] Сохранённый контекст загрузчика образов
+;   88D5-88F4 - [   32 B] Заголовок загружаемого образа
+;   88F5-88FF - [   11 B] Резерв
+;   8900-89BF - [  192 B] Реестр выделенных FAR-блоков
+;   89C0-8A3F - [  128 B] Восемь записей DLL по 16 байт и их интервалы
+;   8A40-8AE8 - [  169 B] Выбранный профиль FONT и контекст восстановления
+;   8AE9-8AF1 - [    9 B] Проверка активных потомков перед выгрузкой DLL
+;   8AF2-8AFF - [   14 B] Резерв
+;   8B00-8B7F - [  128 B] Пакет файловой операции / FILEOPS_JOB
+;   8B80-8BFF - [  128 B] Путь клиента или снимок callback
+;   8C00-8E7F - [  640 B] Реестр физических драйверов
+;   8E80-90BF - [  576 B] Образ локальной службы H: без инициализатора
+;   90C0-90DE - [   31 B] Резерв
+;   90DF-90FF - [   33 B] Локальные переменные BIOS
+;   9100-92FF - [  512 B] Отдельный неполный файловый сектор
+;   9300-93FF - [  256 B] Буфер проверяющего чтения сектора
+;   9400-94AF - [  176 B] Пакет физических LBA и временный курсор
+;   94B0-94FF - [   80 B] Кадры MAIN-приложений (8 по 9 байт) и резерв
+;   9500-96FF - [  512 B] BPB / загрузочная гранула логического сектора
+;   9700-973F - [   64 B] Открытый неполный FILEHANDLE
+;   9740-97BF - [  128 B] Первый рабочий путь CLI
+;   97C0-97E9 - [   42 B] Контекст запроса DOS и регистры наблюдателя
+;   97EA-97FF - [   22 B] Резерв перед ареной
+;   9800-B4FF - [ 7424 B] Единая арена DLL и установщиков драйверов
+;   B500-CB7F - [ 5760 B] Восемь кадров BAT с буферами чтения по 512 байт; доступны DLL без активного BAT
+;   CB80-CBFF - [  128 B] Второй рабочий путь CLI
+;   CC00-CDFF - [  512 B] 64 описателя гранул общего кэша
+;   CE00-EDFF - [ 8192 B] Единый пул кэша FAT/каталогов всех дисков
+;   EE00-F03F - [  576 B] Служебный стек DOS; начальный SP=F040h
+;   F040-F1BF - [  384 B] Банковый сегмент IO.SYS: клавиатура MX и резерв
 ;   F1C0-F33F - [  384 B] MEM.SYS: подготовка CPM32, серия I/O, мост A:, копировщик
 ;   F340-F376 - [   55 B] MEM.SYS: остаток CPM32, копировщик четвёрок и резерв
 ;   F377-F37F - [    9 B] Состояние CPM32
 ;   F380-F3F7 - [  120 B] MEM.SYS: маршрутизация текста и резерв
 ;   F3F8-F5BF - [  456 B] MEM.SYS: операции памяти и резерв
 ;   F5C0-F67B - [  188 B] MEM.SYS: локальные адаптеры, контекст и снимок COMMAND
-;   F67C-F6BF - [   68 B] Непрерывный резерв MEM
+;   F67C-F6BF - [   68 B] Быстрый регистровый вход MEM и резерв
 ;   F6C0-F7FF - [  320 B] MAIN: AT512KS; DOS/EXEC: службы A:, проверки и суммы
 ;   F800-F8BF - [  192 B] MEM.SYS: публичные входы CLIENT и резерв
-;   F8C0-F9BE - [  255 B] MEM.SYS: текстовый шлюз
-;   F9BF-F9BF - [    1 B] Резерв перед драйвером H:
+;   F8C0-F9BF - [  256 B] MEM.SYS: inline-данные COMMAND и контроллер вызова DLL
 ;   F9C0-FBFF - [  576 B] Один слот ROM2M/AT2MX/AT2MXF, одинаковый во всех EXEC
 ;   FC00-FEFF - [  768 B] MEM.SYS: транспорт, контексты и общий копировщик
 ;   FF00-FFBF - [  192 B] Копия хвоста копировщика и резерв
 ;   FFC0-FFDF - [   32 B] То же физическое 32-байтное окно, что в основной памяти
 ;   FFE0-FFFF - [   32 B] Регистры оборудования, доступны из банка DOS
 ;
-; Арены DOS-DLL целиком: 7340-7BFF (2240 Б) и C000-D77F (6016 Б).
-; Выше показаны текущие размеры ENUM/FILEOPS из bin/ENUM.sym и bin/FILEOPS.sym,
-; а не постоянные резервации: модули загружаются лениво и могут вытесняться
-; при пересечении с другой DLL или установщиком; активный код закреплён.
-; DOS-DLL также может занять D780-EF7F, если кадры BAT не используются.
-; FILEOPS_JOB занимает 110 Б: заголовок состояния 24 Б и FILE_COPY_REQUEST 86 Б.
+; Единая арена DOS-DLL: 9800-B4FF (7424 Б), точные интервалы без слотов.
+; ENUM собран с 9800h, FILEOPS с A000h; установщики прижаты к B500h.
+; Неактивные модули можно вытеснять при пересечении, активные закреплены.
+; DOS-DLL может временно расшириться до CB80h, заимствуя неактивные кадры BAT.
+; FILEOPS_JOB занимает 112 Б: заголовок состояния 26 Б и FILE_COPY_REQUEST 86 Б.
 ; Буфер пути клиента (128 Б) находится отдельно, в памяти вызывающей программы.
 ;
-; Исполняемый банк приложения (EXEC) использует полный хвост F1C0-FFFF, как DOS.
-; Ниже F1C0 находятся его собственные код, данные, куча и стек, не области DOS
+; Исполняемый банк приложения (EXEC) получает локальную клавиатуру с F040h и полный хвост MEM с F1C0h.
+; Ниже EE00h находятся его собственные код, данные и куча; выше — служебный стек
 ; из карты 2; размещением и границами управляют загрузчик и менеджер памяти.
 ;
 ; Карта 3: банк DATA / RAM-диск, без полного исполняемого профиля MEM.
@@ -145,7 +146,7 @@
 BIOS_DOS_SPLIT       = 1       ; BIOS C000h в main, DOS 0100h в физической странице 0
 BIOS_VERSION_MAJOR  = 6
 BIOS_VERSION_MINOR  = 0
-DOS_VERSION_MAJOR   = 2
+DOS_VERSION_MAJOR   = 3
 DOS_VERSION_MINOR   = 0
 ; Назначение банка: DATA получает COMMAND/CPM32 с FED0h, DOS/EXEC — полный хвост.
 MEM_BANK_DATA = 0
@@ -158,8 +159,8 @@ MXOS_GROUP_MEMORY     = 3
 ; Публичный memcpy: банки 0=main, 1..16=ДОЗУ; слова little-endian.
 ; Нулевой размер — успех, предел диапазонов FF00h, перекрытие запрещено.
 ; Пакет, код и стек инициатора не должны попадать в область назначения.
-MEM_ABI_VERSION = 00101h       ; Публичный ABI MEM 1.1
-MEM_RUNTIME_REVISION = 41      ; Повысить при изменении транспорта или раскладки DOS
+MEM_ABI_VERSION = 00103h       ; Публичный ABI MEM 1.3
+MEM_RUNTIME_REVISION = 56      ; Повысить при изменении транспорта или раскладки DOS
 MEM_WINDOW_VERSION = 2         ; Внутренний протокол физического окна
     IFNDEF DOS_IO_BATCH_SECTORS
 DOS_IO_BATCH_SECTORS = 32       ; 16/32/64 полных физических секторов за серию
@@ -173,6 +174,9 @@ MEM_CAP_LAZY_WINDOW = 2
 MEM_CAP_MEMORY_OPS = 4
 MEM_CAP_MODULES = 8
 MEM_OP_MOVE = 0
+MX_QUEUE_BIOS = 0
+MX_QUEUE_DOS = 1
+MX_QUEUE_DLL = 2
 MEM_OP_GET8 = 1
 MEM_OP_GET16 = 2
 MEM_OP_PUT8 = 3
@@ -188,6 +192,15 @@ MEM_OP_QUERY = 12
 MEM_OP_DISKCLAIM = 13
 MEM_OP_RAMDISK = 14
 MEM_OP_RESIDENT = 15 ; B=0 query/1 replace, C=system slot, HL=bytes, DE=protected end
+; MAINCLAIM: HL=start, BC=bytes, evicts overlapping inactive MAIN DLLs (code+BSS).
+; No allocation/writes; active DLLs reject with ACTIVE, font/system slots survive.
+MEM_OP_MAINCLAIM = 16
+; MAINREGISTER: B=0, HL=nonzero MAIN base, DE=bytes. Exact owned range,
+; no writes/moves/eviction or arena change. Overlap=ACTIVE; release with FREE.
+; Tracked by normal image/module ownership and destructive FILE_EXEC handoff.
+; Success: B=0, HL=base, DE=bytes, A=0, CF=0; error leaves registry unchanged.
+MEM_OP_MAINREGISTER = 17
+MEM_OP_MAINRETIRE = 18 ; Release the current MAIN image and its allocations before an irreversible handoff.
 MEM_RESIDENT_SLOTS = 4
 MEM_RESIDENT_FONT = 0
 MEM_RAMDISK_STATUS = 0
@@ -195,9 +208,24 @@ MEM_RAMDISK_STATUS = 0
 MEM_RAMDISK_COMMIT = 1
 RAMDISK_SERVICE_KEY = 04452h ; Исторический ключ RAMDSVC; штатный B: принадлежит DOS.
 MEM_CAP_ALLOCATOR = 16
+MEM_CAP_COMMAND_QUEUE = 32
 RESIDENT_RETAIN = 0
 RESIDENT_FIND = 1
 RESIDENT_ENUM = 2
+RESIDENT_SHELL_SET = 3 ; DE=preferred resident key, or 0 for the MAIN shell.
+RESIDENT_SHELL_RESUME = 4 ; Resume configured resident; CF=1 if absent/failed
+NC_BANK_KEY = 0434Eh
+RESIDENT_DIRECTORY_EPOCH = 5 ; HL=low word, DE=high word of mutation generation
+RESIDENT_EPOCH_ALL = 0FEh ; B=FEh: copy eight 32-bit drive epochs to NEAR HL
+RESIDENT_RELEASE = 6 ; Current resident drops its key; DOS unloads after RET
+; SHELL_SET: DE=0 selects NC_MN, otherwise DE is the preferred resident key.
+; SHELL_RESUME: invoke RESTORE (A=1, other regs zero) on a fresh EXEC stack.
+; When absent, returns CF=1, A=0 and HL=preferred key. No PC/SP snapshot.
+; DIRECTORY_EPOCH: B=0 -> HL:DE low/high 32-bit global mutation generation;
+; B=RESIDENT_EPOCH_ALL, HL=32-byte NEAR output -> eight little-endian drive
+; generations A:..H:. Includes attempted writes, survives observer disconnect.
+; RELEASE is self-only: it drops the key, assigns the inactive module to DOS,
+; and leaves code alive until RET. The shell dispatcher then unloads it.
 APP_MAX_DEPTH = 8
 APP_OWNER_BASE = 020h
 MEM_ALLOC_ANY = 0FFh
@@ -213,9 +241,34 @@ MODULE_TARGET_MAIN = 0
 MODULE_TARGET_BANK = 1
 MODULE_TARGET_DOS = 2 ; DLL в одной из арен DOS; регистрируется точный диапазон
 MODULE_MAX = 8
-MODULE_RECORD_SIZE = 14
+MODULE_RECORD_SIZE = 16
 MODULE_STACK_SIZE = 1024
 MODULE_OWNER_BASE = 080h
+; MXOS_DOS_TIMER operations. RAW/CLOCK acquire exclusively; RELEASE is owner-only.
+TIMER_RAW = 0
+TIMER_CLOCK = 1
+TIMER_RELEASE = 2
+TIMER_QUERY = 3       ; A=0 free, 1 mine, 2 held by another owner
+KEY_REPEAT_FIRST = 12 ; clock units of 32.768 ms at 2 MHz
+KEY_REPEAT_NEXT = 2
+KEY_CURSOR_HALF = 15
+KEY_CLICK_TICKS = 64 ; 8.192 ms, CH1 divisor 256
+KEY_CLICK_DIVISOR = 1000 ; 2 kHz from CLK0
+IO_KEY_MOD_SHIFT = 1
+IO_KEY_MOD_CTRL  = 2
+; Private state of a keyboard consumer in DOS/EXEC. Instantiate once per input stream.
+    STRUCT IO_KEY_STATE
+lastKey DB 0FFh
+repeatCount DB 0
+locks DB 0        ; bit 7 Caps Lock, bit 0 Russian layout
+koi7 DB 0         ; 0 = KOI8, FFh = KOI7
+column DW 0       ; driven column of held switch
+rowMask DB 0
+repeatStart DB 0   ; timestamp of the last reported press/repeat
+timed DB 0         ; positive after TIMER_CLOCK succeeds
+softDivider DB 0   ; fallback only, when the clock is unavailable
+softTicks DB 0
+    ENDS
     STRUCT MEM_COPY_REQUEST
 sourceBank DB 0
 sourceOffset DW 0
@@ -250,6 +303,48 @@ af DW 0
         call mx_callRegs
         DW operation
     ENDM
+
+    MACRO MXOS_KEY_BEGIN state
+        ld a,(state+IO_KEY_STATE.timed)
+        or a
+        jp nz,.ready
+        ld a,TIMER_CLOCK
+        MXOS_CALL MXOS_DOS_TIMER
+        sbc a,a
+        inc a
+        ld (state+IO_KEY_STATE.timed),a
+        ld a,0FFh
+        ld (state+IO_KEY_STATE.lastKey),a
+.ready:
+    ENDM
+
+    MACRO MXOS_KEY_END state
+        ld a,(state+IO_KEY_STATE.timed)
+        or a
+        jp z,.done
+        xor a
+        ld (state+IO_KEY_STATE.timed),a
+        ld a,TIMER_RELEASE
+        MXOS_CALL MXOS_DOS_TIMER
+.done:
+    ENDM
+; Non-returning shell handoff. The explicit MX_REGS and return address live
+; on the system stack; mx_call never returns into MAIN code overwritten by
+; the loaded program. returnAddress must reset SP (BIOS reboot/EXEC shell).
+; Pass ordinary FILE_EXEC registers before this macro; no continuation follows.
+    MACRO MXOS_EXEC returnAddress
+        push af
+        push bc
+        push de
+        push hl
+        ld hl,0
+        add hl,sp
+        ex de,hl
+        ld hl,returnAddress
+        push hl
+        ld bc,MXOS_DOS_FILE_EXEC
+        jp mx_call
+    ENDM
     IFNDEF DISK_DRIVER_CHECKED
 DISK_DRIVER_CHECKED =  1       ; Встроенный ROM/RAM-драйвер: CF и проверка аргументов
     ENDIF
@@ -257,18 +352,20 @@ DISK_DRIVER_CHECKED =  1       ; Встроенный ROM/RAM-драйвер: CF
 RAMD_MAX_PAGE        =  16      ; Максимальное количество страниц RAM диска
 RAMD_PAGE_END        =  0FFBEh  ; Тестовый байт вне кода копировщика
 ROM_64K              =  1       ; Включить поддержку ПЗУ 64 Кб Специалиста МХ2
+    IFNDEF ENABLE_COLOR
 ENABLE_COLOR         =  1       ; Включить поддержку цвета
+    ENDIF
 COLOR_BIOS           =  0F0h    ; Цвет командной строки
 RAMFOS_COMPATIBILITY =  1       ; Совместимость с RAMFOS (WIP)
 
- ; Fixed resident slot, entirely visible in STD. Private module layout is free.
+; Fixed resident slot, entirely visible in STD. Private module layout is free.
     IFDEF FONT_BENCH_MAIN
 ; Compile the very same public engines into the FontBen MAIN DLL arena.
 FONT_ENGINE_BASE = 02000h
-FONT_ENGINE_END = 04800h
+FONT_ENGINE_END  = 04880h
     ELSE
 FONT_ENGINE_BASE = 0D800h
-FONT_ENGINE_END = 0EC80h
+FONT_ENGINE_END  = 0EC80h
     ENDIF
 FONT_ENGINE_INIT = FONT_ENGINE_BASE
 FONT_ENGINE_CHAR = FONT_ENGINE_BASE+3
@@ -279,8 +376,15 @@ FONT_ENGINE_LIM = FONT_ENGINE_BASE+15
 FONT_ENGINE_ENCODING = FONT_ENGINE_BASE+18 ; D812h: A=0 KOI8, A!=0 KOI7; AF/BC/DE/HL preserved; idempotent, physical bitmap/index swap
 FONT_ENGINE_SCALAR = FONT_ENGINE_BASE+21
 FONT_ENGINE_SERVICE = FONT_ENGINE_BASE+24
+FONT_ENGINE_PSEUDO = FONT_ENGINE_BASE+27
+; FNT1: +5 cell width, +6 height, +7 renderer kind:
+; 0 Rotate, 1 Packed6K, 2 Fast12K, 3 Compact, 4 Fast8, 5 Cpm4, 6 Graph8.
+; Kind identifies the engine, independently of imported glyphs/file names.
 FONT_ENGINE_HEADER = FONT_ENGINE_BASE+32
-FONT_ENGINE_VERSION = 1
+FONT_ENGINE_VERSION = 2
+FONT_FORMAT_GRAPH8 = 6 ; Fast8 variant with exact two-pixel cursor coordinates
+FONT_FORMAT_GRAPH8_PACKED = 7 ; three pagesets of rotated bytes
+FONT_FORMAT_GRAPH8_FULL = 8 ; six pagesets of separated bitmap parts
     IFDEF FONT_BENCH_MAIN
 FONT_ADDR = 04000h
     ELSE
@@ -306,7 +410,7 @@ monitorFont     DW      018A0h          ; 8FE7h — исторический а�
 currentChar     DB       0
 cursorVisible   DB       0
 inputBusy       DB       0
-keyLocks        DB      0BAh ; 3Ah      ; 8FECh - Caps Lock или Рус/Lat (3A - прописные анг, BA - строчные анг, BB - прописные рус, 3B - строчные рус)
+keyLocks        DB      0BAh ; 3Ah      ; 8FECh - KOI8: bit0=RUS, bit7=нижний регистр без Shift; остальные биты сохранены
 keyHandler      DW      -1              ; 8FEDh -
 lastLastKey     DB      -1              ; 8FEFh - Предпоследняя нажатая клавиша
 lastKey         DB      -1              ; 8FF0h - Последняя нажатая клавиша
@@ -378,6 +482,8 @@ romChunk        DW 0
 romCheck        DB 0
 romSavedSP      DW 0
 romLoops        DB 0
+fontName        BLOCK 8 ; MAIN, installed FNT basename padded with zero/space
+
     ENDS
 io_vars IO_VARIABLES = 0EFA0h
     ASSERT io_vars + IO_VARIABLES <= 0F000h
@@ -400,21 +506,14 @@ DOS_ENTRY_BASE = 00100h
 dos_dosBoot                = DOS_ENTRY_BASE+000h
 dos_fileList               = DOS_ENTRY_BASE+003h
 dos_fileGetSetDrive        = DOS_ENTRY_BASE+006h
-dos_fileCreate             = DOS_ENTRY_BASE+009h
-dos_fileLoad               = DOS_ENTRY_BASE+00Ch
 dos_fileDelete             = DOS_ENTRY_BASE+00Fh
 dos_fileRename             = DOS_ENTRY_BASE+012h
 dos_fileLoadInfo           = DOS_ENTRY_BASE+015h
-dos_imageOpen              = DOS_ENTRY_BASE+018h
 dos_fileGetSetAttr         = DOS_ENTRY_BASE+01Bh
 dos_fileNamePrepare        = DOS_ENTRY_BASE+01Eh
 dos_fileExec               = DOS_ENTRY_BASE+021h
-dos_fileLoad2              = DOS_ENTRY_BASE+024h
 dos_getDriveFreeSpace      = DOS_ENTRY_BASE+027h
-dos_fileCreatePrepare      = DOS_ENTRY_BASE+02Ah
 dos_dosUnsupported         = DOS_ENTRY_BASE+02Dh
-dos_installVolume          = DOS_ENTRY_BASE+030h
-dos_getVolume              = DOS_ENTRY_BASE+033h
 dos_mountVolume            = DOS_ENTRY_BASE+036h
 dos_flushVolume            = DOS_ENTRY_BASE+039h
 dos_fileAssociation        = DOS_ENTRY_BASE+03Ch
@@ -423,7 +522,6 @@ dos_fileCopy               = DOS_ENTRY_BASE+042h
 dos_fileGetDrives          = DOS_ENTRY_BASE+045h
 dos_dosGetError            = DOS_ENTRY_BASE+048h
 dos_logicalSectorIO        = DOS_ENTRY_BASE+04Bh
-dos_fileStream             = DOS_ENTRY_BASE+04Eh
 dos_fileHandle             = DOS_ENTRY_BASE+051h
 dos_directoryService       = DOS_ENTRY_BASE+054h
 dos_cliService             = DOS_ENTRY_BASE+057h
@@ -431,7 +529,7 @@ dos_setShell               = DOS_ENTRY_BASE+05Ah
 
 bios_init               = 0C000h ; Инициализация из bootstrap / программный возврат в DOS
 
-; Устаревшие точки, лечше не применять
+; Устаревшие точки, лучше не применять. Оставлены для совместимости.
 bios_keyScanOld         = 0C003h ; [OLD] Получить код нажатой клавиши, = bios_keyScan
 bios_drawCursorOld      = 0C006h ; [OLD] XOR курсор: ширина/выравнивание из FNT1, высота cursorCfg
 bios_restartOld         = 0C009h ; [OLD] Тёплая перезагрузка, устанавливает системный стек
@@ -478,28 +576,15 @@ bios_strToHex           = 0C839h ; [MXOS2] Преобразвоние строк
 bios_rebootAlt          = 0C839h ; Программный возврат в выбранную оболочку
     ENDIF
 bios_rebootAlt2         = 0C83Ch ; Программный возврат в выбранную оболочку
-bios_fileList           = 0C83Fh ; Получить список файлов
-bios_fileGetSetDrive    = 0C842h ; Получить/установить активное устройство
-bios_fileCreate         = 0C845h ; HL=дескриптор с точным N, DE=исходный буфер
-bios_fileLoad           = 0C848h ; DE=назначение; читать подготовленное тело по месту, CF=ошибка
-bios_fileDelete         = 0C84Bh ; Удалить файл
-bios_fileRename         = 0C84Eh ; Переименовать файл
-bios_fileLoadInfo       = 0C851h ; Загрузить информацию о файле
-bios_imageOpen          = 0C854h ; HL=дескриптор, открыть родной COM/EXE MXOS
-bios_fileGetSetAttr     = 0C857h ; HL=имя 8+3, C=0 чтение / 1 запись B (R/H/S/A), DIR сохраняется; A=атрибуты, CF=ошибка
-bios_fileNamePrepare    = 0C85Ah ; Преобразовать имя файла во внутренний формат
-bios_fileExec           = 0C85Dh ; Запустить файл; BAT затирает ОЗУ ниже 7000h
 bios_installDriver      = 0C860h ; Установить драйвер накопителя
 bios_diskDriver         = 0C863h ; Драйвер выбранного диска
 
-bios_fileLoad2          = 0C866h ; Загрузить файл по адресу de
 
 ; Новые точки C800h MXOS2
 bios_printCharRaw       = 0C869h ; [MXOS2] A=код 00h-FFh; AF/BC/DE/HL сохранены
 bios_printCharReal      = 0C869h ; [MXOS2] Вывод символа на экран (только реальные символы)
 bios_printDecWord       = 0C86Ch ; [MXOS2] Вывод числа экран в десятичной форме
 bios_setRAMDDriver      = 0C86Fh ; [MXOS2] B=RAMD_DRIVER_*, выбор 32-байтного окна FFC0h
-bios_getDriveFreeSpace  = 0C872h ; [MXOS2] Получить оставшийся свободный объем диска
 bios_upperCase          = 0C875h ; [MXOS2] Перевод кода символа КОИ-8 в верхний регистр
 bios_strcmp             = 0C878h ; [MXOS2] Сравнение строк, чувствительное к регистру
 bios_stricmp            = 0C87Bh ; [MXOS2] Сравнение строк, нечувствительное к регистру
@@ -507,35 +592,18 @@ bios_sub_hl_de          = 0C87Eh ; [MXOS2] Вычитание hl и de: hl = hl 
 bios_fontControl       = 0C881h ; C=character/control, private module callback, registers clobbered
 bios_fontNewLine       = 0C884h ; HL=cursor, private module newline callback
 bios_fontPosition      = 0C887h ; C=control, private historical cursor helper
-bios_fileCreatePrepare  = 0C88Ah ; [MXOS2] Создать файл и выделить цепочку FAT без записи данных
-bios_installVolume      = 0C890h ; [MXOS2] Зарегистрировать драйвер файловой системы тома
-bios_getVolume          = 0C893h ; [MXOS2] Получить таблицу и контекст драйвера тома
-bios_mountVolume        = 0C896h ; [MXOS2] Повторно смонтировать выбранный том
-bios_flushVolume        = 0C899h ; [MXOS2] Сохранить изменения выбранного тома
 bios_beepTimer          = 0C89Ch ; [MXOS2] Звуковой сигнал через ВИ53, ABI RAMFOS beep
 bios_diskWriteChecked   = 0C89Fh ; [MXOS2] Общий B=5: BC=адрес драйвера, DE=сектор, HL=данные
 bios_setFontEncoding    = 0C8A2h ; [MXOS2] A=0 KOI8, иначе KOI7; перестановка шрифта/пререндера, регистры сохранены
-bios_fileAssociation    = 0C8B4h ; [MXOS2] HL=расширение, DE/BC=буфер/ёмкость; CF=0 HL=команда, диск сохранён
 bios_argNext            = 0C8B7h ; [MXOS2] HL=курсор -> HL=разделитель, DE=слово, B=длина; CF=конец, C сохранён
-bios_fileSelectDrive    = 0C8BAh ; [MXOS2] A=диск 0..7; BC/DE/HL сохранены, CF=ошибка
-bios_fileRenameOnDrive  = 0C8BDh ; [MXOS2] HL/DE=старое/новое компактное имя на текущем диске
-bios_fileDeleteOnDrive  = 0C8C0h ; [MXOS2] HL=компактное имя на текущем диске, CF=ошибка
-bios_fileCopy           = 0C8C3h ; [MXOS2] HL=FILE_COPY_REQUEST, CF/A=результат; диск восстановлен
-bios_fileGetDrives      = 0C8C6h ; [MXOS2] HL/BC=буфер/ёмкость в байтах (>=8); B=количество
-bios_getError           = 0C8C9h ; [MXOS2] A=код DOS, CF=ошибка; BC/DE/HL сохранены
 bios_installBlockDriver = 0C8CCh ; [MXOS2] A=диск, HL=драйвер, C=log2 физического блока (7..9)
-bios_sectorIO           = 0C8CFh ; [MXOS2] B=1/2, DE=логический сектор, HL=буфер; BC/DE/HL сохранены
-bios_fileStream         = 0C8D2h ; [MXOS2] A=1/2, DE=FILE_STREAM_CURSOR, HL=буфер, BC=байты
-bios_fileHandle         = 0C8D5h ; [MXOS2] A=FILE_OP_*, HL=FILE_HANDLE; CF/A=код DOS
-bios_directory          = 0C8DEh ; [MXOS2] A=DIR_OP_*, пути и буферы принадлежат вызывающему
-bios_cli                = 0C8E1h ; [MXOS2] A=CLI_OP_*, общий обработчик CLI/NC/BAT
-bios_setShell           = 0C8E4h ; [MXOS2] A=0 NC, 1 CLI/сохранить диск, 2 получить диск CLI
 bios_setInputHook       = 0C8E7h ; [MXOS2] HL=callback/0, возврат HL=прежний; DE/AF разрушены
 bios_blockIO            = 0C8EAh ; [MXOS2] A=диск, B=1/2, DE=физический блок, HL=буфер; BC/DE/HL сохранены
 bios_printStringRawZ    = 0C8EDh ; [MXOS2] HL=ASCIIZ; 01h-FFh рисуются как глифы
 bios_printStringReal    = 0C8EDh ; [MXOS2] HL=ASCIIZ main; AF/BC/DE сохранены, HL=нуль; 01h–FFh — глифы
 bios_printStringRawLim  = 0C8F0h ; [MXOS2] HL=байты, BC=длина; AF/BC/DE сохранены, HL=конец
 bios_textDispatch       = 0C8F3h ; [MXOS2] Внутренний адаптер MEM TEXT
+bios_printStringRawPseudo = 0C8F6h ; [MXOS2] HL=байты, BC=длина; RawLim с дорисовкой рамок KOI8-R
 
 ;-----------------------------------------------------------------------
 ; Адрес таблицы переходов драйвера магнитофона
@@ -547,11 +615,13 @@ TAPE_DRIVER_JUMPS = bios_tapeReadOld    ; старая таблица перех
 mx_call           = 0F800h ; B=группа, C=номер, DE=параметр/пакет MX_REGS
 mx_cpmCall        = 0F803h ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
 mx_callRegs       = 0F806h ; CALL + DW операции; регистры как у исполнителя
-bios_fileLoadPath = 0F809h ; HL=FILE_PATH_IO, путь/буфер/вместимость заданы явно
-bios_fileSavePath = 0F80Ch ; HL=FILE_PATH_IO, путь/буфер/точная длина заданы явно
+mx_queueBind      = 0F809h ; HL=local flush callback, 0 disables; AF destroyed
+mx_queueFlush     = 0F80Ch ; explicit flush; all registers and flags preserved
 mx_memcpyFar      = 0F80Fh ; HL=MEM_COPY_REQUEST; CF/A=статус, BC/DE/HL сохранены
 mx_memInfo        = 0F812h ; HL=версия, DE=возможности, A=FAR-код, B=банки, C=тип; CF=0
 mx_memory         = 0F815h ; A=MEM_OP_*, регистры/ошибки: source/mem/api.md
+
+mx_routeCall      = 0F818h ; HL=bound DLL handle, DE=local MX_REGS, results in CPU
 
 ;-----------------------------------------------------------------------
 ; Непереключаемое ОЗУ ПК "Специалист-MX" (0FFC0h-0FFDF, 32 байта)
@@ -670,31 +740,42 @@ text                DW 0       ; две ASCIIZ-строки, вместе не �
 ; Таблица начинается с DB "FS",1,15; далее 15 адресов DW в этом порядке.
 ; Файловые операции пока сохраняют исторические контракты DOS (8.3, точный размер N).
 ; Это ещё не независимый байтовый поток и не готовый драйвер RAMFOS.
-VOLUME_DRIVER_VERSION = 1
-VOLUME_DRIVER_COUNT   = 15
-VOLUME_DRIVER_HEADER  = 4
-VOL_MOUNT             = 0
-VOL_LIST              = 2
-VOL_CREATE            = 4
-VOL_LOAD              = 6
-VOL_DELETE            = 8
-VOL_RENAME            = 10
-VOL_STAT              = 12
-VOL_LOAD_ADDRESS      = 14  ; Зарезервирован: адреса перенесены из FAT в контейнер
-VOL_ATTRIBUTES        = 16
-VOL_LOAD_AT           = 18
-VOL_FREE_SPACE        = 20
-VOL_PREPARE_NAME      = 22
-VOL_CREATE_PREPARE    = 24
-VOL_RESERVED_26       = 26
-VOL_FLUSH             = 28
 
 ;-----------------------------------------------------------------------
 ; Структура файловой системы
 ;-----------------------------------------------------------------------
 
 ; Структура каталога
-IMAGE_HEADER_SIZE  = 16
+; One signature for the kernel and local container readers.
+    MACRO MXOS_IMAGE_SIGNATURE
+        DB 0CDh,020h,"MX",2
+    ENDM
+IMAGE_HEADER_SIZE = 32
+FONT_IMAGE_HEADER_SIZE = IMAGE_HEADER_SIZE
+IMAGE_BSS = 14
+IMAGE_MEMORY_BEGIN = 16
+IMAGE_MEMORY_END = 18
+IMAGE_MIN_HEAP = 20
+IMAGE_POLICY = 22
+IMAGE_API_VERSION = 23
+IMAGE_STACK = 24
+IMAGE_MODE = 26
+IMAGE_MODE_AUTO = 0
+IMAGE_MODE_MX = 1
+IMAGE_MODE_STD = 2
+IMAGE_MODE_MON = 3
+IMAGE_MODE_RF = 4
+IMAGE_HEADER_BYTES = 27
+IMAGE_OPTIONS = 28
+IMAGE_HEADER_CHECKSUM = 30
+IMAGE_POLICY_EXCLUSIVE = 0
+IMAGE_POLICY_PRESERVE = 1
+IMAGE_POLICY_MANAGED = 2
+IMAGE_OPTION_CACHEABLE = 1
+IMAGE_OPTION_REUSABLE  = 2 ; opt-in MAIN DLL activation on cold load and reuse
+MODULE_ACTIVATE        = 0F0h ; A at entry; C=0 fresh / 1 reuse; CF=reject
+
+IMAGE_BSS_UNKNOWN = 0FFFFh
 IMAGE_FLAG_DRIVER = 01h ; байт 5 COM/EXE: инициализатор в странице DOS
 IMAGE_FLAG_BANK = 02h   ; требуется отдельный исполняемый банк
 IMAGE_FLAG_MAIN = 04h   ; явно подтверждена совместимость с main/MXOS BIOS
@@ -722,7 +803,7 @@ CLI_OP_RMDIR       = 6      ; HL=путь MAX_PATH.
 CLI_OP_MOVE        = 7      ; HL=FILE_COPY_REQUEST; на одном томе перенос записи без данных/FAT.
 CLI_OP_QUERY       = 8      ; HL=строка без исполнения; B как COMMAND, A=FFh внешняя команда.
 CLI_OP_OBSERVER    = 9      ; HL=наблюдатель изменений (0=отключить); A=диск, DE=каталог, C=масштаб.
-CLI_OP_ASSOCIATION = 10     ; HL=расширение ASCIIZ в буфере MAX_PATH; CF=0 есть ассоциация, CF=1 нет/ошибка. Команду не изменяет.
+CLI_OP_ASSOCIATION = 10     ; HL=расширение ASCIIZ в буфере MAX_PATH; CF=0 DE=команда в банке DOS до CR/FF, до следующего вызова CLI; CF=1 нет/ошибка.
 ; B после COMMAND/QUERY: bit0 — вывод, bit1 — EXIT, bit2 — CD/смена диска.
 
 FAT_ITEM_SIZE      = 2      ; размер записи в таблице FAT (байт)
@@ -741,7 +822,7 @@ FAT16_EOC_MIN      = 0FFF8h
 FAT16_RES          = 0FFF0h
 
 ;-----------------------------------------------------------------------
-; Общие коды ошибок DOS: результат A и bios_getError (C8C9h)
+; Общие коды ошибок DOS: результат A и MXOS_DOS_GET_ERROR
 ;-----------------------------------------------------------------------
 ; A=0, CF=0 — успех; ненулевой A, CF=1 — ошибка.
 ; Это коды служб DOS, не номера операций FILE_OP_* и не результат stdio EOF.
@@ -757,6 +838,7 @@ DOS_ERR_NO_DRIVER   = 9    ; Для накопителя не установле
 DOS_ERR_UNSUPPORTED = 10   ; Формат тома или операция не поддерживаются.
 DOS_ERR_CANCELLED   = 12   ; Cooperative cancellation at a safe boundary.
 DOS_ERR_BAD_IMAGE   = 11   ; Неверный заголовок или контрольная сумма программы.
+DOS_ERR_WRITE_PROTECTED = 13 ; Драйвер тома не поддерживает запись.
 
 ;-----------------------------------------------------------------------
 ; Дескриптор файла (одна запись в каталоге) FAT12/16/32
@@ -817,7 +899,7 @@ size            BLOCK   2                   ; смещение 0Eh, младши
     ENDS
 
 ;-----------------------------------------------------------------------
-; Операции над открытым файлом: bios_fileHandle (C8D5h), A=FILE_OP_*
+; Единый файловый API: MXOS_DOS_FILEHANDLE, A=FILE_OP_*
 ;-----------------------------------------------------------------------
 ; HL указывает на FILE_HANDLE в памяти вызывающей программы.
 ; Параметры и результаты находятся в объекте; A/CF возвращают код DOS.
@@ -829,6 +911,8 @@ FILE_OP_WRITE      = 2    ; Записать FH_COUNT байт из FH_BUFFER.
 FILE_OP_SEEK       = 3    ; Изменить позицию по FH_SEEK/FH_ORIGIN.
 FILE_OP_FLUSH      = 4    ; Сохранить размер, запись каталога и кэш.
 FILE_OP_CLOSE      = 5    ; Выполнить FLUSH и закрыть объект.
+FILE_OP_OPEN_AT    = 8    ; Имя 8.3 + FH_DRIVE; FH_SEEK.low=родительский каталог.
+FILE_OP_OPEN_PATH  = 7    ; FH_BUFFER=ASCIIZ-путь в памяти вызывающего.
 FILE_OP_OPTIONS    = 6    ; FH_ORIGIN=0 get / 1 exchange, FH_COUNT=флаги DOS.
 DOS_IO_VERIFY_FILES = 1   ; Проверять запись данных FILEHANDLE при DISK_CAP_VERIFY.
 
@@ -851,7 +935,8 @@ FILE_MODE_APPEND   = 16   ; Перед каждой записью перейт�
 ; Это не запись каталога и не числовой файловый номер: память выделяет
 ; вызывающая программа, скрытой таблицы открытых файлов DOS не создаёт.
 ; Перед OPEN объект обнуляют, задают имя 8.3 (11 байт с пробелами),
-; FH_DRIVE и FH_MODE. Первые 32 байта после OPEN — FILE_DESCRIPTOR.
+; FH_DRIVE и FH_MODE. OPEN_PATH вместо имени принимает ASCIIZ в FH_BUFFER;
+; путь и объект принадлежат памяти вызывающего. Первые 32 байта — FILE_DESCRIPTOR.
 ; READ/WRITE получают FH_BUFFER и FH_COUNT, SEEK — FH_SEEK/FH_ORIGIN.
 ; Рабочие поля позиции/курсора/каталога ведёт DOS; объект сохраняют
 ; между вызовами и не перекрывают буфером обмена. Слова little-endian.
@@ -875,7 +960,7 @@ FH_OPERATION       = 63   ; 1 байт: C-переходник передаёт 
 FILE_HANDLE        = 64   ; Полный размер объекта, включая запись каталога.
 
 ;-----------------------------------------------------------------------
-; Курсор байтового потока FILE_STREAM_CURSOR: bios_fileStream (C8D2h)
+; Внутренний курсор FAT для FILE_HANDLE; самостоятельного публичного вызова нет.
 ;-----------------------------------------------------------------------
 ; Четыре байта в памяти вызывающей программы: кластер и смещение внутри него.
 ; DE=адрес курсора, HL=буфер, BC=число байтов, A=1 запись / 2 чтение.
@@ -888,7 +973,7 @@ offset      DW 0               ; Смещение в кластере, не аб
     ENDS
 
 ;-----------------------------------------------------------------------
-; Запрос копирования FILE_COPY_REQUEST: bios_fileCopy (C8C3h), 86 байт
+; Запрос копирования FILE_COPY_REQUEST: MXOS_DOS_FILE_COPY, 86 байт
 ;-----------------------------------------------------------------------
 ; HL=запрос в памяти вызывающей программы; данные копируются в банке DOS.
 ; Реализация находится в DOS.SYS, исполняемой в собственной странице.
@@ -975,6 +1060,7 @@ reserved DB 0
 total DD 0                    ; Logical source bytes, accumulated during preparation.
 required DW 0                 ; Conservative additional destination clusters.
 path DW 0                     ; Optional MAX_PATH buffer in the caller's bank.
+totalFiles DW 0               ; Complete source file count when known=1.
 request FILE_COPY_REQUEST     ; BEGIN input; returned only for CONFIRM.
     ENDS
     ASSERT FILEOPS_JOB <= 128
@@ -992,6 +1078,7 @@ header     DB 0
 tail       DB 0
 trailer    DW 0
 actual     DW 0
+parent     DW 0                ; Явный кластер родителя, 0=корень.
     ENDS
 
     STRUCT FILE_PATH_IO
@@ -1005,30 +1092,30 @@ descriptor  FILE_DESCRIPTOR
 ;-----------------------------------------------------------------------
 ; Заголовок исполняемого файла EXE/COM (собственный формат MXOS2)
 ;-----------------------------------------------------------------------
-; COM и EXE имеют одинаковый контейнер: заголовок 16 байт, затем тело.
-; COM/EXE исполняет DOS; RUN выбирает среду совместимости классических программ.
-; Все 16-битные поля little-endian: сначала младший байт, затем старший.
-;
-; Смещение Размер  Содержимое
-;   00h      2     0CDh,020h: INT 20h при запуске как COM в MS DOS.
-;   02h      2     Сигнатура ASCII "MX" (04Dh,058h).
-;   04h      1     Версия контейнера: 01h.
-;   05h      1     00h: main/нейтральный DLL, 01h: DRIVER, 02h: BANK, 04h: MAIN; сочетания запрещены.
-;   06h      2     Абсолютный адрес загрузки тела.
-;   08h      2     Абсолютный адрес входа в программу.
-;   0Ah      2     Размер тела N в байтах, N > 0.
-;   0Ch      2     Контрольная сумма тела, штатная bios_calcCS (Monitor-2).
-;   0Eh      2     bios_calcCS байтов заголовка 00h..0Dh включительно.
-;   10h      N     Тело: машинный код 8080 и данные программы.
-;
-; Размер файла строго N+16. Вход находится внутри загруженного тела;
-; диапазон загрузки проверяется загрузчиком. Заголовок в тело не копируется.
-; Перемещения адресов и BSS в версии 1 не предусмотрены.
-; Обе суммы аддитивные, не полиномиальный CRC; результат BC записывается
-; как C,B. Сумма тела считается по N байтам, без заголовка; в конце файла
-; дополнительной суммы нет. Проверка выполняется при загрузке с накопителя.
-; Сигнатуры MZ/PE нет; байты тела предназначены для процессора 8080.
-; Первые два байта обеспечивают выход, если файл запущен как COM в MS DOS.
+; COM/EXE/DLL/FNT: общий контейнер v2, заголовок 32 байта, затем тело.
+; Все word little-endian. Заголовок не копируется в адрес загрузки.
+; 00h: CD 20 "MX" 02 (5 Б); 05h: FLAGS (0/DRIVER/BANK/MAIN).
+; 06h: load; 08h: entry; 0Ah: bodyBytes; 0Ch: bodyChecksum.
+; 0Eh: BSS bytes (FFFFh — неизвестный объём); 10h: memoryBegin;
+; 12h: memoryEnd исключительно; 14h: minHeap; 16h: policy;
+; 17h: API (0/2); 18h: stackBytes; 1Ah: MODE; 1Bh: headerBytes=32;
+; 1Ch: options (bit 0 CACHEABLE, bit 1 REUSABLE); 1Dh: reserved=0;
+; 1Eh: headerChecksum по байтам 00h..1Dh; 20h: начало тела.
+; bodyChecksum — штатная сумма Монитора-2 по телу, хвостовой суммы нет.
+; Размер файла строго bodyBytes+32, entry внутри тела. Релокации нет.
+; memoryBegin <= load; memoryEnd >= load+bodyBytes+BSS (если BSS известен).
+; BSS и прочая рабочая память резервируются, но не обнуляются загрузчиком.
+; Инициализацию выполняет программа; C CRT обнуляет собственный BSS.
+; EXCLUSIVE=0: освобождение прикладной MAIN; неизвестный BSS требует её.
+; PRESERVE=1: отказ при пересечении; MANAGED=2: можно вытеснять CACHEABLE.
+; Активный код не вытесняется. DOS-арена освобождает лишь явный кэш.
+; MODE=AUTO/MX/STD/MON/RF (0..4). FLAGS=0 передаёт выбор среды RUN;
+; MODE!=AUTO позволяет RUN выбрать известное стандартное ядро без BAT/меню.
+; Имя произвольного монитора и сценарии остаются в BAT с вызовом RUN.
+; CPU: load, entry, monitor; далее ID=VALUE. Символы ASM метаданных:
+; IMAGE_BSS_SIZE, IMAGE_MEM_BEGIN, IMAGE_MEM_END, IMAGE_MIN_HEAP_SIZE,
+; IMAGE_STACK_SIZE, IMAGE_MEMORY_POLICY, IMAGE_API, IMAGE_COMPAT_MODE,
+; IMAGE_CACHEABLE. Эти имена не совпадают с константами смещений полей.
 
 ;-----------------------------------------------------------------------
 ; Информация об активном накопителе (диске)
@@ -1070,71 +1157,101 @@ DISK_VALID     = 2
 ;-----------------------------------------------------------------------
 
 ; Страница ДОЗУ 0 / DOS
-DOS_BANK_PAGE         = 1               ; Логический FAR ID физической страницы 0
-DOS_BANK_DATA_ADDR    = 07F00h
+DOS_BANK_PAGE         = 1         ; Логический FAR ID физической страницы 0
+DOS_BANK_DATA_ADDR    = 07800h
 DOS_BANK_DATA_SIZE    = 01000h
-DOS_BANK_OBJECT_ADDR  = 0BA00h
-DOS_BANK_PATH_ADDR    = 0BA80h
+DOS_BANK_OBJECT_ADDR  = 08B00h
+DOS_BANK_PATH_ADDR    = 08B80h
 DOS_BANK_CODE_ADDR    = 00100h
-DOS_BANK_COMPAT_ADDR  = 08FDFh
-DOS_DRIVER_REGISTRY   = 0BB00h ; 8 записей по DRIVER_RECORD_SIZE
-DOS_DRIVER_IMAGE      = 0BD80h    ; сохранённая служба H:, без инициализатора
-DOS_SERVICE_ADDR      = 07340h    ; Нижняя арена DOS-DLL, диапазоны без округления
-DOS_SERVICE_END       = 07C00h    ; Исключающая верхняя граница
-DOS_BANK_DRIVER_ADDR  = 0C000h
+DOS_BANK_COMPAT_ADDR  = 090DFh
+DOS_DRIVER_REGISTRY   = 08C00h    ; 8 записей по DRIVER_RECORD_SIZE
+DOS_DRIVER_IMAGE      = 08E80h    ; сохранённая служба H:, без инициализатора
+DOS_SERVICE_ADDR      = 09800h    ; Начало единой арены; ENUM размещается первым
+DOS_SERVICE_END       = 0B500h    ; Исключающая верхняя граница
+DOS_BANK_DRIVER_ADDR  = 09800h
+DOS_FILEOPS_ADDR      = 0A000h    ; После ENUM, в той же непрерывной арене
+DOS_REQUEST_SCRATCH   = 097C0h
+DOS_CLI_PATH1         = 09740h
+DOS_CLI_PATH2         = 0CB80h
+DOS_PARTIAL_RECORD    = 09700h
 
 ; Зарезервированный слот физического драйвера в основной памяти
-MEM_IO_SYSTEM        = 0F6C0h ; EXEC/DOS: локальные службы A:, MAIN: AT512KS
-MEM_IO_CHECKED       = MEM_IO_SYSTEM+3
-MEM_IO_CHECKSUM      = MEM_IO_SYSTEM+6
-LOCAL_DRIVER_ADDR     = 0F9C0h
-LOCAL_DRIVER_END      = 0FC00h
-LOCAL_BLOCK_ENTRY     = 0F5C0h
-MEM_IMAGE_LOCAL_START = 0F1C0h ; Подготовка CPM32 и пакетного обмена
-MEM_COPY_PREPARE_ENTRY = 0F1C0h ; CPM32: подготовка общего окна и локальных параметров
-MEM_BATCH_ENTRY       = 0F1C3h ; Пакет физических секторов в странице клиента
-MEM_MAIN_IO_BRIDGE    = 0F240h ; JMP в аппаратную часть BIOS; цель задаёт сборщик
-MEM_COPY_BYTES_ENTRY  = 0F335h
-MEM_COPY_TINY_TEMPLATE = 0F340h ; Точный остаток 1..31 байт, исполняется в окне
-MEM_COPY_QUADS_ENTRY  = 0F360h
-MEM_COPY_STATE        = 0F377h ; SP, селекторы и остаток CPM32, 9 байт
-MEM_EXTENSION_ENTRY   = 0F3F8h
-MEM_COPY_SELECT_ADDR  = MEM_EXTENSION_ENTRY+3
-MEM_BIOS_ROUTE        = MEM_EXTENSION_ENTRY+6
-MEM_BIOS_RESULT       = MEM_EXTENSION_ENTRY+9
-MEM_MOVE_SELECT_ADDR  = MEM_EXTENSION_ENTRY+12
-MEM_SCALAR_RETURN_ENTRY = MEM_EXTENSION_ENTRY+15 ; Возврат COMMAND GET/PUT без чужого стека
-MEM_SET_PROFILE_ENTRY = MEM_EXTENSION_ENTRY+18
-MEM_LOCAL_CHECKED    = 0F62Eh ; MAIN: локальный проверяющий цикл BIOS
-MEM_CALL_ENTRY        = 0F630h
-MEM_NATIVE_CALL       = 0F640h
-MEM_BANK_KIND         = 0F642h
-MEM_LOCAL_A           = 0F643h
-MEM_LOCAL_INFO_ADDR   = 0F645h ; Внутренний обработчик общего образа MEM
+MEM_IO_SYSTEM             = 0F6C0h ; EXEC/DOS: локальные службы A:, MAIN: AT512KS
+MEM_IO_CHECKED            = MEM_IO_SYSTEM+3
+MEM_IO_CHECKSUM           = MEM_IO_SYSTEM+6
+LOCAL_DRIVER_ADDR         = 0F9C0h
+LOCAL_DRIVER_END          = 0FC00h
+LOCAL_BLOCK_ENTRY         = 0F5C0h
+; Direct DOS/EXEC calls. HL points to four bytes: last, repeat count, locks, KOI7.
+; Initialize FF,0,0,0 for KOI8 Latin. Poll: Z=idle, NZ=A, CF=Ctrl.
+IO_BANK_KEYS              = 0F040h
+io_bankGetCh              = IO_BANK_KEYS
+io_bankKeyPoll            = IO_BANK_KEYS+3
+io_bankKeyScan            = IO_BANK_KEYS+6
+io_bankGetChCursor        = IO_BANK_KEYS+9
+io_bankKeyModifiers       = IO_BANK_KEYS+12
+io_bankKeyShift           = IO_BANK_KEYS+15
+io_bankKeyTicks           = IO_BANK_KEYS+23 ; HL=IO_KEY_STATE -> A, preserves BC/DE/HL
+io_bankClockRead          = IO_BANK_KEYS+26 ; HL=compensated countdown, 128 us, BC/DE preserved
+MEM_IMAGE_LOCAL_START     = 0F1C0h ; Подготовка CPM32 и пакетного обмена
+MEM_COPY_PREPARE_ENTRY    = 0F1C0h ; CPM32: подготовка общего окна и локальных параметров
+MEM_BATCH_ENTRY           = 0F1C3h ; Пакет физических секторов в странице клиента
+MEM_MAIN_IO_BRIDGE        = 0F240h ; JMP в аппаратную часть BIOS; цель задаёт сборщик
+MEM_COPY_BYTES_ENTRY      = 0F335h
+MEM_COPY_TINY_TEMPLATE    = 0F340h ; Точный остаток 1..31 байт, исполняется в окне
+MEM_COPY_QUADS_ENTRY      = 0F360h
+MEM_COPY_STATE            = 0F377h ; SP, селекторы и остаток CPM32, 9 байт
+MEM_EXTENSION_ENTRY       = 0F3F8h
+MEM_COPY_SELECT_ADDR      = MEM_EXTENSION_ENTRY+3
+MEM_BIOS_ROUTE            = MEM_EXTENSION_ENTRY+6
+MEM_BIOS_RESULT           = MEM_EXTENSION_ENTRY+9
+MEM_MOVE_SELECT_ADDR      = MEM_EXTENSION_ENTRY+12
+MEM_SCALAR_RETURN_ENTRY   = MEM_EXTENSION_ENTRY+15 ; Возврат COMMAND GET/PUT без чужого стека
+MEM_SET_PROFILE_ENTRY     = MEM_EXTENSION_ENTRY+18
+MEM_BUFFER_MAIN_ENTRY     = MEM_EXTENSION_ENTRY+21
+MEM_BUFFER_RETURN_ENTRY   = MEM_EXTENSION_ENTRY+24
+MEM_LOCAL_CHECKED         = 0F62Eh ; MAIN: локальный проверяющий цикл BIOS
+MEM_CALL_ENTRY            = 0F630h
+MEM_NATIVE_CALL           = 0F640h
+MEM_BANK_KIND             = 0F642h
+MEM_LOCAL_A               = 0F643h
+MEM_LOCAL_INFO_ADDR       = 0F645h ; Внутренний обработчик общего образа MEM
 MEM_RUNTIME_REVISION_ADDR = 0F658h ; Word: версия установленного транспорта
-MEM_COMMAND_SHADOW    = 0F65Ah
-MEM_NEAR_COPY         = 0F67Ah ; Локальный стековый memcpy: HL=начало, DE=конец, BC=приёмник
-MAIN_COMMAND_ADDR     = bios_upper.commandLine
-MAIN_DISK_INFO        = bios_upper.diskInfo
-MAIN_DRIVER_INFO      = bios_upper.driverInfo
-MAIN_RAW_LEASE        = bios_upper.rawLease      ; диск+1, ёмкость word, последнее A/CF, признак результата
-MEM_TEXT_ENTRY       = 0F8C0h ; TEXT расположен после публичного клиента
-MEM_DATA_START = 0FED0h       ; DATA: постоянная команда и хвост CPM32
-MEM_DATA_LIMIT = MEM_DATA_START
-DOS_BANK_DRIVER_END   = 0D780h
-DOS_BANK_MODULE_END   = 0EF80h ; DOS-DLL может занять BAT только при v_batDepth=0
-DOS_BANK_CACHE_TABLE  = 0B000h
-DOS_BANK_CACHE_ADDR   = 09000h
-DOS_BANK_PARTIAL_ADDR = 0B400h
-DOS_VERIFY_BUFFER     = 0B600h ; Не пересекает исходный неполный сектор B400h–B5FFh
-DOS_IO_BATCH_ADDR     = 0B700h ; Пакет LBA и временный курсор потока, до 160 байт
-DOS_CACHE_BOOT_ADDR   = 0B800h
-DOS_PARTIAL_SIZE      = 512
-DOS_BANK_CMD_ADDR     = 07C00h
-MEM_ALLOC_TABLE       = 07D00h ; 32 записи по 6 байт, только банк DOS
-MODULE_TABLE          = 07DC0h ; MODULE_MAX записей по MODULE_RECORD_SIZE, только DOS
-DOS_BANK_STACK_BOTTOM = 0EF80h
-DOS_BANK_STACK_TOP    = MEM_IMAGE_LOCAL_START
+MEM_COMMAND_SHADOW        = 0F65Ah
+MEM_NEAR_COPY             = 0F67Ah ; Локальный стековый memcpy: HL=начало, DE=конец, BC=приёмник
+MAIN_COMMAND_ADDR         = bios_upper.commandLine
+MAIN_DISK_INFO            = bios_upper.diskInfo
+MAIN_DRIVER_INFO          = bios_upper.driverInfo
+MAIN_RAW_LEASE            = bios_upper.rawLease      ; диск+1, ёмкость word, последнее A/CF, признак результата
+MEM_TEXT_ENTRY            = 0F8C0h ; TEXT расположен после публичного клиента
+MEM_SCOPE_ENTRY           = 0F993h ; Internal DOS callback in the controller bank
+MEM_ROUTE_STATE           = 0FE98h ; scoped DLL handle, entry, bank and owner
+MEM_QUEUE_HOOK            = MEM_ROUTE_STATE+6 ; local callback, followed by its gate
+MEM_DATA_START            = 0FED0h       ; DATA: постоянная команда и хвост CPM32
+MEM_DATA_LIMIT            = MEM_DATA_START
+DOS_BANK_DRIVER_END       = 0B500h
+DOS_BANK_MODULE_END       = 0CB80h ; Исключает рабочий путь CLI и кэш; BAT можно занять только при v_batDepth=0
+    IFDEF DOS_REFERENCE_BUILD
+DOS_BANK_CACHE_TABLE      = 0B000h
+    ELSE
+DOS_BANK_CACHE_TABLE      = 0CC00h
+    ENDIF
+DOS_BANK_CACHE_ADDR       = 0CE00h
+DOS_BANK_PARTIAL_ADDR     = 09100h
+DOS_VERIFY_BUFFER         = 09300h ; Не пересекает исходный неполный сектор B400h–B5FFh
+DOS_IO_BATCH_ADDR         = 09400h ; Пакет LBA и временный курсор потока, до 160 байт
+DOS_APP_FRAMES            = 094B0h ; APP_MAX_DEPTH records of 9 bytes
+DOS_CACHE_BOOT_ADDR       = 09500h
+DOS_PARTIAL_SIZE          = 512
+DOS_IMAGE_CONTEXT_ADDR    = 08882h ; Saved descriptor/header/directory, 83 bytes
+DOS_IMAGE_HEADER_ADDR     = 088D5h ; Current 32-byte executable header
+DOS_FONT_STATE_ADDR       = 08A40h ; Saved FONT profile and restore context, 169 bytes
+DOS_MODULE_GUARD_ADDR     = 08AE9h ; Owner-subtree preflight set, 9 bytes
+DOS_BANK_CMD_ADDR         = 08800h
+MEM_ALLOC_TABLE           = 08900h ; 32 записи по 6 байт, только банк DOS
+MODULE_TABLE              = 089C0h ; MODULE_MAX записей по MODULE_RECORD_SIZE, только DOS
+DOS_BANK_STACK_BOTTOM     = 0EE00h
+DOS_BANK_STACK_TOP        = IO_BANK_KEYS
 
 ; Основная память / BIOS и временная основная сборка DOS.
 ; Границы STD по мапперу MMX: вся верхняя страница 4 КБ — устройства.
@@ -1157,11 +1274,11 @@ FAT_CACHE_CAPACITY = FAT_CACHE_SIZE / SECTOR_SIZE   ; сколько секто�
 
 ; Буфер BAT исключён из образа DOS; в штатной системе принадлежит её банку.
 BAT_READ_SIZE   = 512
-BAT_FRAME_SIZE  = 768
+BAT_FRAME_SIZE  = 720
 BAT_MAX_DEPTH   = 8
     IFDEF BANKED_DOS_BUILD
-BAT_BUFFER      = 0D780h
-BAT_BUFFER_SIZE = 01800h
+BAT_BUFFER      = 0B500h
+BAT_BUFFER_SIZE = BAT_FRAME_SIZE * BAT_MAX_DEPTH
     ELSE
 BAT_BUFFER      = 0000h
 BAT_BUFFER_SIZE = DOS_ENTRY_BASE ; Только линковочная основная сборка.
@@ -1203,7 +1320,8 @@ BIOS_BANK_STACK_TOP    = 0ED80h
 
     IFDEF BANKED_DOS_BUILD
 DOS_CODE_START         = DOS_BANK_CODE_ADDR
-DOS_CODE_END_MAX       = DOS_SERVICE_ADDR-512
+; Keep at least 512 bytes of growth reserve before the fixed DOS exchange buffer.
+DOS_CODE_END_MAX       = DOS_BANK_DATA_ADDR ; code may use the previous spare extension
     ELSE
     IFDEF DOS_SPLIT_BUILD
 DOS_CODE_START         = DOS_ENTRY_BASE ; Линковочный образ, не исполняется в main.
@@ -1227,29 +1345,37 @@ NC_STATE_ADDR          = 0FFB0h ; 12 байт; FFBEh — детектор, FFBFh
 ; Статические проверки
 ;-----------------------------------------------------------------------
 
-    ASSERT DOS_BANK_DATA_ADDR >= 07E10h
+    ASSERT DOS_BANK_DATA_ADDR >= DOS_CODE_START
     ASSERT DOS_BANK_DATA_ADDR+DOS_BANK_DATA_SIZE <= DOS_BANK_COMPAT_ADDR
     ASSERT BAT_FRAME_SIZE*BAT_MAX_DEPTH <= 01800h
     ASSERT DOS_BANK_OBJECT_ADDR+FILE_HANDLE <= DOS_BANK_PATH_ADDR
     ASSERT DOS_BANK_CODE_ADDR == 00100h
     ASSERT DOS_BANK_PATH_ADDR+MAX_PATH <= DOS_DRIVER_REGISTRY
     ASSERT MEM_ALLOC_TABLE+MEM_ALLOC_RECORDS*6 <= MODULE_TABLE
-    ASSERT MODULE_TABLE+MODULE_MAX*MODULE_RECORD_SIZE <= DOS_BANK_DATA_ADDR
+    ASSERT MODULE_TABLE+MODULE_MAX*MODULE_RECORD_SIZE <= DOS_BANK_OBJECT_ADDR
     ASSERT DOS_BANK_COMPAT_ADDR+BIOS_VARIABLES <= DOS_BANK_DRIVER_ADDR
     ASSERT DOS_BANK_CMD_ADDR+CMD_LINE_SIZE <= DOS_BANK_COMPAT_ADDR
     ASSERT CACHE_GRANULES <= 64
     ASSERT (CACHE_GRANULES & (CACHE_GRANULES-1)) == 0
-    ASSERT DOS_BANK_CACHE_ADDR+FAT_CACHE_SIZE <= DOS_BANK_CACHE_TABLE
-    ASSERT DOS_BANK_CACHE_TABLE+(CACHE_GRANULES+1)*8 <= DOS_BANK_PARTIAL_ADDR
+    IFNDEF DOS_REFERENCE_BUILD
+    ASSERT DOS_BANK_CACHE_TABLE+CACHE_GRANULES*8 <= DOS_BANK_CACHE_ADDR
+    ENDIF
+    IFDEF BANKED_DOS_BUILD
+    ASSERT BAT_BUFFER+BAT_BUFFER_SIZE == DOS_BANK_MODULE_END
+    ASSERT DOS_BANK_MODULE_END == DOS_CLI_PATH2
+    ASSERT DOS_CLI_PATH2+MAX_PATH <= DOS_BANK_CACHE_TABLE
+    ENDIF
+    ASSERT DOS_BANK_CACHE_ADDR+FAT_CACHE_SIZE <= DOS_BANK_STACK_BOTTOM
+    ASSERT DOS_PARTIAL_RECORD+8 <= DOS_SERVICE_ADDR
     ASSERT DOS_BANK_PARTIAL_ADDR+DOS_PARTIAL_SIZE <= DOS_VERIFY_BUFFER
     ASSERT DOS_VERIFY_BUFFER+256 <= DOS_CACHE_BOOT_ADDR
     ASSERT DOS_CACHE_BOOT_ADDR+512 <= DOS_BANK_DRIVER_ADDR
     ASSERT DOS_BANK_DRIVER_END <= 0D800h
     ASSERT DOS_DRIVER_REGISTRY+8*DRIVER_RECORD_SIZE <= DOS_DRIVER_IMAGE
-    ASSERT DOS_SERVICE_END <= DOS_BANK_CMD_ADDR
+    ASSERT DOS_BANK_CMD_ADDR+CMD_LINE_SIZE <= MEM_ALLOC_TABLE
     ASSERT DOS_BANK_CMD_ADDR+CMD_LINE_SIZE <= DOS_BANK_STACK_BOTTOM
     ASSERT DOS_BANK_STACK_BOTTOM < DOS_BANK_STACK_TOP
-    ASSERT DOS_BANK_STACK_TOP == MEM_IMAGE_LOCAL_START
+    ASSERT DOS_BANK_STACK_TOP == IO_BANK_KEYS
     ASSERT DOS_BANK_STACK_TOP-DOS_BANK_STACK_BOTTOM == 576
     ASSERT BIOS_DISK_BUFFER_END <= BIOS_TEMP_BUFFER_END
     ASSERT BIOS_TEMP_BUFFER_SIZE == 272
@@ -1265,7 +1391,7 @@ NC_STATE_ADDR          = 0FFB0h ; 12 байт; FFBEh — детектор, FFBFh
     ASSERT BIOS_BANK_IO_BUFFER+261 <= MAIN_COMMAND_ADDR
     ASSERT MAIN_DRIVER_INFO + 64 <= MAIN_RAW_LEASE
     ASSERT bios_upper + BIOS_UPPER_VARIABLES <= io_vars
-    ASSERT DOS_CACHE_BOOT_ADDR+512 <= DOS_BANK_OBJECT_ADDR
+    ASSERT DOS_CACHE_BOOT_ADDR+512 <= DOS_PARTIAL_RECORD
     ASSERT DOS_DRIVER_REGISTRY + 8*DRIVER_RECORD_SIZE <= DOS_BANK_DRIVER_ADDR
     ASSERT DOS_DRIVER_IMAGE + LOCAL_DRIVER_END-LOCAL_DRIVER_ADDR <= DOS_BANK_DRIVER_ADDR
     ASSERT FAT_CACHE_ADDR + FAT_CACHE_SIZE <= 0FF00h

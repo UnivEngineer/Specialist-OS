@@ -44,27 +44,9 @@ int mxos_fopen(MXOS_FILE *f, const char *path, const char *mode)
         else if (ch=='b') { if (field) return argument(f); field=1; }
         else return argument(f);
     }
-    if (path[0] && path[1]==':') {
-        ch=(mxos_u8)path[0];
-        if (ch>='a' && ch<='h') ch-=32;
-        if (ch<'A' || ch>'H') return argument(f);
-        f->bytes[40]=ch-'A'; path+=2;
-    }
-    n=0; field=0;
-    while (*path) {
-        ch=(mxos_u8)*path++;
-        if (ch=='.') {
-            if (!n || field) return argument(f);
-            field=1; n=0;
-        } else {
-            if (ch<33 || ch=='/' || ch=='\\' || ch==':' || ch=='*' || ch=='?' || ch=='"' || ch=='<' || ch=='>' || ch=='|') return argument(f);
-            if (n==(field ? 3 : 8)) return argument(f);
-            f->bytes[(field ? 8 : 0)+n++]=ch;
-        }
-    }
-    if (!n || f->bytes[0]==' ') return argument(f);
     f->bytes[41]=flags;
-    return invoke(f,0);
+    put16(f->bytes+49,(mxos_u16)path);
+    return invoke(f,7);
 }
 
 static mxos_u16 transfer(MXOS_FILE *f, void *buffer, mxos_u16 bytes, mxos_u8 op)
@@ -114,3 +96,30 @@ int mxos_fputc(int ch, MXOS_FILE *f)
 int mxos_feof(const MXOS_FILE *f) { return f->bytes[44]!=0; }
 int mxos_ferror(const MXOS_FILE *f) { return f->bytes[43]; }
 void mxos_clearerr(MXOS_FILE *f) { f->bytes[43]=0; f->bytes[44]=0; }
+
+/* Whole-file helpers share fopen/read/write/close; no additional kernel ABI. */
+static mxos_u8 whole_file(MXOS_PATH_IO *q,mxos_u8 writing)
+{
+    MXOS_FILE f; mxos_u8 i,error=0; mxos_u16 n;
+    q->actual=0;
+    if (q->count) {
+        mxos_u32 begin=q->buffer,end=begin+q->count,object=(mxos_u16)q;
+        if (end>65535UL || (begin<object+sizeof(*q) && object<end)) return MXOS_ERR_ARGUMENT;
+    }
+    if (mxos_fopen(&f,(const char *)q->path,writing?"wb":"rb")) return f.bytes[43];
+    n=q->count;
+    if (!writing) {
+        if (f.bytes[30] || f.bytes[31] || get16(f.bytes+28)>n) error=MXOS_ERR_ARGUMENT;
+        else n=get16(f.bytes+28);
+    }
+    if (!error) {
+        q->actual=writing?mxos_write(&f,(const void *)q->buffer,n):mxos_read(&f,(void *)q->buffer,n);
+        error=f.bytes[43];
+    }
+    if (mxos_fclose(&f) && !error) error=f.bytes[43];
+    for (i=0;i<32;++i) q->descriptor[i]=f.bytes[i];
+    if (error) q->actual=0;
+    return error;
+}
+mxos_u8 mxos_file_read_all(MXOS_PATH_IO *q) { return whole_file(q,0); }
+mxos_u8 mxos_file_write_all(MXOS_PATH_IO *q) { return whole_file(q,1); }

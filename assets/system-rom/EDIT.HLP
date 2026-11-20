@@ -1,0 +1,44 @@
+Arrows	Move cursor
+Home	Go to line start
+End	Go to line end
+Ctrl+Home	Go to document start
+Ctrl+End	Go to document end
+Ctrl+Up	Page up
+Ctrl+Down	Page down
+Ctrl+Left	Go to previous word
+Ctrl+Right	Go to next word
+Enter	Split line
+Backspace	Delete left
+Shift+BS	Delete right
+Tab	Insert tab
+Ctrl+Z	Undo line
+F1	Insert/replace
+F2	Open help
+F3	Find text
+F4	Mark selection
+F5	Copy selection
+F6	Move selection
+F7	Find next match
+F8	Delete selection
+Shift+F1	Tab width 2/4/6/8
+Shift+F2	Display KOI8-R / KOI7-R
+Shift+F3	New document
+Shift+F4	Load file
+Shift+F5	Save file
+Shift+F6	Append file
+Shift+F9	Text / HEX view
+F10 / STR	Exit editor
+HEX 0-9, A-F	Replace a nibble immediately
+HEX F5	Save file
+HEX F6	KOI7-R / KOI8-R / All (with 6x8 font also CS)
+HEX F7	Raw file / container header and body
+HEX F8	Recalculate and write container checksums
+HEX F9	Return to text
+HEX F4	Mark byte range
+HEX L/R	One nibble
+HEX Shift+F1	Copy (raw)
+HEX Shift+F2	Add zeros (raw)
+HEX Shift+F3	Fill hex word
+HEX Shift+F4	Overwrite block
+RUS/LAT	Switch language
+Shift+RUS	Caps Lock

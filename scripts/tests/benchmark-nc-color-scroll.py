@@ -793,7 +793,7 @@ def write_report(out, report):
 python scripts/tests/benchmark-nc-color-scroll.py
 ```
 
-Сначала должны существовать актуальные bin/NC.i80, BIOS.sys, IO.sys и шрифтовые движки с `.pre`. `--quick` запускает сокращённый набор, `--report-only` пересобирает только этот текст из results.json. Получение файлов, установка шрифта, подготовка таблиц и начальная печать не входят в счётчик. Проверяется пустая граница измерения RET + JP = 20 тактов, затем эти общие 20 тактов вычитаются.
+Сначала должны существовать актуальные bin/NC.i80, BIOS.sys, IO.main.bin и шрифтовые движки с `.pre`. `--quick` запускает сокращённый набор, `--report-only` пересобирает только этот текст из results.json. Получение файлов, установка шрифта, подготовка таблиц и начальная печать не входят в счётчик. Проверяется пустая граница измерения RET + JP = 20 тактов, затем эти общие 20 тактов вычитаются.
 
 Исходники эксперимента: [benchmark-nc-color-scroll.py](../../../scripts/tests/benchmark-nc-color-scroll.py), сгенерированные [bench.asm](bench.asm), [листинг](bench.lst), [точные результаты](results.json). Каталог inputs содержит неизменные снимки бинарников, символов и исходников; SHA-256 записаны в JSON. Полные многомегабайтные трассы разбираются в памяти и не сохраняются.
 
@@ -814,7 +814,7 @@ def main():
         return
     inputs = out/'inputs'; inputs.mkdir(exist_ok=True)
     input_paths = [ROOT/'bin/NC.i80', ROOT/'bin/NC.sym', ROOT/'bin/BIOS.sys',
-                   ROOT/'bin/BIOS.sym', ROOT/'bin/IO.sys', ROOT/'source/include/ui.inc',
+                   ROOT/'bin/BIOS.sym', ROOT/'bin/IO.main.bin', ROOT/'source/include/ui.inc',
                    ROOT/'source/common/move8080.inc', ROOT/'source/nc/scrollBitmap.inc']
     input_paths += [ROOT/f'bin/fonts/{font}.i80' for font in ('Cpm4','Compact','Rotate','Packed6K','Fast12K','Fast8')]
     input_paths += [ROOT/f'bin/fonts/{font}.pre' for font in ('Packed6K','Fast12K')]
@@ -847,7 +847,7 @@ def main():
             first, new_first = (delta, 0) if down else (0, delta)
             m = bytearray(65536)
             for addr, path in [(0, inputs/'bin/NC.i80'), (0xc000, inputs/'bin/BIOS.sys'),
-                               (0xd800, inputs/f'bin/fonts/{font}.i80'), (0xf000, inputs/'bin/IO.sys'),
+                               (0xd800, inputs/f'bin/fonts/{font}.i80'), (0xf000, inputs/'bin/IO.main.bin'),
                                (0x4000, out/'bench.bin')]:
                 data = path.read_bytes(); m[addr:addr+len(data)] = data
             m[bios['bios_vars']:bios['bios_vars']+bios['BIOS_VARIABLES']] = m[bios['initVars']:bios['initVarsEnd']]

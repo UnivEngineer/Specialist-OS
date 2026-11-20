@@ -3,6 +3,30 @@
 ; rectangles must fit VRAM without Y wrapping. AF/BC/DE/HL destroyed.
 ; Caller sets IO_COLOR. uiFrameRectBytes draws a 1px outline, interior intact.
 ; Unlike the pixel API, top/bottom rows and fills need no edge-mask setup.
+; Reapply the selected color by writing each byte back without changing bits.
+uiRecolorRectBytes:
+    ld a,b
+    or a
+    ret z
+    ld a,c
+    or a
+    ret z
+    ld e,c
+uiRecolorByteColumn:
+    push hl
+    ld c,e
+uiRecolorByteRow:
+    ld a,(hl)
+    ld (hl),a
+    inc l
+    dec c
+    jp nz,uiRecolorByteRow
+    pop hl
+    inc h
+    dec b
+    jp nz,uiRecolorByteColumn
+    ret
+
 uiFillRectBytes:
     ld d,a
     ld a,b

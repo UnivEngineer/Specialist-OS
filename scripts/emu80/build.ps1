@@ -47,6 +47,10 @@ $exeName = if ($Mcp) { 'Emu80qt-mcp.exe' } else { 'Emu80qt.exe' }
 $files = foreach ($name in @('At29Flash.cpp','At29Flash.h','SpecialistFlashDisk.cpp','SpecialistFlashDisk.h','SpecialistMx2VideoRam.cpp','SpecialistMx2VideoRam.h','SpecialistSystemFlash.cpp','SpecialistSystemFlash.h')) {
     [ordered]@{ path = $name; sha256 = (Get-FileHash -LiteralPath (Join-Path $source ('src/' + $name))).Hash.ToLowerInvariant() }
 }
+foreach ($name in @('mxos-end.patch', 'mxos-underscore.patch', 'mxos-cyrillic.patch', 'mxos-scancodes.patch')) {
+    $keyPatch = Join-Path $PSScriptRoot ('../../source-emulators/emu80/' + $name)
+    $files += [ordered]@{ path = $name; sha256 = (Get-FileHash -LiteralPath $keyPatch).Hash.ToLowerInvariant() }
+}
 $record = [ordered]@{ executableSha256 = (Get-FileHash -LiteralPath (Join-Path $build ('release/' + $exeName))).Hash.ToLowerInvariant(); sources = @($files) }
 [IO.File]::WriteAllText((Join-Path $build 'build-specialist.json'), ($record | ConvertTo-Json -Depth 5) + "`n", (New-Object Text.UTF8Encoding($false)))
 if ($Deploy) {

@@ -66,6 +66,9 @@ drawCursorColorReady:
             pop bc
             pop hl
     ENDIF
+    IF ENABLE_COLOR
+            jp uiRecolorRectBytes
+    ELSE
             call  inverseRect
             ; Only 6px has a spare byte with no frame pixels. Keep 4/8px
             ; selection byte-aligned rather than recoloring the panel frame.
@@ -90,22 +93,7 @@ drawCursorBorder:
             ld d,a
             ld e,10
             ld bc,1
-    IF ENABLE_COLOR
-            ld a,(ncCurrentColor)
-            push af
-            ; The 6px padding byte contains no frame pixels: keep the normal
-            ; blue background, and use the highlight foreground for its 1 bit.
-            ld a,(ncCurrentColor)
-            and 0F0h
-            or COLOR_FILE & 0Fh
-            call ncSetColor
-    ENDIF
-            call uiInverseRectPixels
-    IF ENABLE_COLOR
-            pop af
-            jp ncSetColor
-    ELSE
-            ret
+            jp uiInverseRectPixels
     ENDIF
 ; ---------------------------------------------------------------------------
 

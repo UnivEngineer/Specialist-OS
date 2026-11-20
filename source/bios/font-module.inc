@@ -7,13 +7,19 @@ printStringZ = FONT_ENGINE_Z
 printStringRawZ = FONT_ENGINE_RAWZ
 printStringReal = FONT_ENGINE_RAWZ
 printStringRawLim = FONT_ENGINE_LIM
+printStringRawPseudo = FONT_ENGINE_PSEUDO
 ; Tab remains a control operation in the BIOS interpreter.
 printChar_c9:
-    ; Four cells in half-pixel cursor units, for all module widths.
+    ; The next stop is a multiple of four cells, measured in 2px units.
     ld a,(FONT_ENGINE_HEADER+5)
     add a,a
     ld c,a
-    ld a,(bios_vars.cursorX)
+    xor a
+printCharTabNext:
     add a,c
-    ld (bios_vars.cursorX),a
-    ret
+    cp 192
+    jp nc,printChar_c0A
+    cp h
+    jp z,printCharTabNext
+    jp c,printCharTabNext
+    jp saveVCursorHA

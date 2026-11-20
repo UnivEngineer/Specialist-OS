@@ -5,10 +5,11 @@ R=Path(__file__).resolve().parents[2]
 def symbols(path):
  return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',path.read_text('utf-8'),re.M)}
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--label',required=True);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-09');a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--label',required=True);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17');p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19785),default=19782);p.add_argument('--profile',choices=('command','copy'),default='command');a=p.parse_args()
  out=a.out.resolve();out.mkdir(parents=True,exist_ok=True)
- h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=out,RUNTIME=R/'.local/monitor2-001')
- x=h['Matrix']();m=x.m;b=R/'bin/banked';cs=symbols(b/'CLIENT.sym');ts=symbols(b/'TRANSPORT.sym');bs=symbols(b/'MAINBIOS.sym');s=symbols(R/'bin/BIOS.sym')
+ h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=out,RUNTIME=a.runtime.resolve())
+ h['Matrix'].__init__.__globals__['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue;if($p){{$p[0].OwningProcess}};exit 0')
+ x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp';b=R/'bin/banked';cs=symbols(b/'CLIENT.sym');ts=symbols(b/'TRANSPORT.sym');bs=symbols(b/'MAINBIOS.sym');s=symbols(R/'bin/BIOS.sym')
  word=lambda n:struct.pack('<H',n)
  packet=struct.pack('<4H',0x1234,0x2345,0x3456,0x7103)
  def page(n):m.write(0xfffd if n else 0xfffc,bytes((n-1 if n else 0,)))
@@ -16,11 +17,9 @@ def main():
  rows=[]
  try:
   (out/a.label).mkdir(parents=True,exist_ok=True)
-  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,out/a.label)
+  fixture=dict(system=R/'images/SystemRom_emu80_writable.bin')
   x.start('MXOS_CALL '+a.label,**fixture);m.call('debug_break');m.call('bp_clear')
-  font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
-  expected_font=bytes(font[char*8+row] for row in range(8) for char in range(256))
-  assert m.read(s['FONT_ADDR'],s['FONT_BYTES'])==expected_font,'Boot font differs from FONT.PF'
+  expected_font=m.read(s['FONT_ADDR'],s['FONT_BYTES'])
   page(6)
   for address,name in ((cs['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(cs['mx_call'],'CLIENT'),(ts['BANK_LANDING'],'TRANSPORT')):m.write(address,(b/(name+'.bin')).read_bytes())
   m.write(cs['MEM_BANK_KIND'],bytes((cs['MEM_BANK_EXEC'],)))
@@ -34,7 +33,11 @@ def main():
   for n in (0,1,6):
    for inline in (False,True):
     for repeat in range(2):
-     page(n);m.write(0x3000,packet)
+     page(0);m.write(0xffc0,(b/'WINDOW.bin').read_bytes());page(n)
+     if a.profile=='copy':
+      m.write(0x3100,b'\x06'+word(0x4000)+b'\0'+word(0x5000)+word(32))
+      m.write(0x2000,b'\xcd'+word(cs['mx_memcpyFar'])+b'\xc3\x00\x70');m.stop_at(0x7000);m.call('regs_set',pc=0x2000,sp=0x7000,hl=0x3100);m.until(0x7000,10,page=n)
+     m.write(0x3000,packet)
      stub=b'\xcd'+word(cs['mx_callRegs'])+word(cs['MXOS_BIOS_UPPERCASE']) if inline else b'\xcd'+word(cs['mx_call'])
      m.write(0x2000,stub+b'\xc3\x00\x70');m.call('bp_clear')
      regs=dict(hl=0x1234,de=0x2345,bc=0x3456,af=0x7103) if inline else dict(de=0x3000,bc=cs['MXOS_BIOS_UPPERCASE'])
@@ -42,9 +45,10 @@ def main():
      checkpoints=[]
      if inline:checkpoints.append((n,cs['bankMxCallRegs'],'inline-entry'))
      if n:
-      checkpoints += [(n,cs['bankMxCall'],'client'),(n,ts['bankCallPacket'],'transport-call'),(0,ts['bankLanding'],'main-landing'),(0,bs['bankBiosPacketDispatch'],'bios-adapter'),(0,bs['bbInvoke'],'bios-invoke')]
-     checkpoints += [(0,s['sysCall'],'main-dispatch'),(0,s['sysReturned'],'main-result')]
-     if n:checkpoints += [(0,bs['bbFinish'],'bios-result'),(0,ts['bankServiceReturn'],'transport-result'),(n,ts['bankResume'],'caller-resume'),(n,cs['bankMxResult'],'client-result')]
+      checkpoints += [(n,cs['bankMxRegsRoute'] if inline else cs['bankMxCall'],'client'),(n,ts['bankCallPacket'],'transport-call'),(0,ts['bankLanding'],'main-landing'),(0,bs['bankBiosPacketDispatch'],'bios-adapter'),(0,bs['bbScalarFast'],'bios-invoke')]
+     checkpoints += [(0,s['sysBiosRegs'] if n or inline else s['sysCall'],'main-dispatch')]
+     if not n and not inline:checkpoints.append((0,s['sysReturned'],'main-result'))
+     if n:checkpoints += [(0,bs['bbScalarDone'],'bios-result'),(0,ts['bankServiceReturn'],'transport-result'),(n,ts['bankResume'],'caller-resume')]
      checkpoints.append((n,0x7000,'return'))
      start=last=state();previous='stub';stages=[]
      for target,address,name in checkpoints:
@@ -55,7 +59,8 @@ def main():
      assert m.read(ts['bankPage'],1)==bytes((n,)) and m.read(ts['bankDepth'],1)==b'\0'
      assert m.read(ts['bankOwner'],2)==bytes((7+n,n))
      if not inline:assert m.read(0x3000,8)==struct.pack('<4H',r['hl'],r['de'],r['bc'],r['af'])
-     row=dict(page=n,inline=inline,repeat=repeat,ticks=last-start,stages=stages);rows.append(row)
+     page(0);assert m.read(s['FONT_ADDR'],s['FONT_BYTES'])==expected_font;page(n)
+     row=dict(profile=a.profile,page=n,inline=inline,repeat=repeat,ticks=last-start,stages=stages);rows.append(row)
      print(a.label,n,'MXOS_CALL' if inline else 'MX_REGS',repeat,last-start,flush=True)
   (out/(a.label+'.json')).write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
  finally:x.stop()

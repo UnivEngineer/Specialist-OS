@@ -7,7 +7,7 @@ def call(m,entry,a=0,bc=0,hl=0,de=0):
  m=bytearray(m);code=b'\x31'+W(0x8fe0)+b'\x3e'+bytes([a])+b'\x01'+W(bc)+b'\x21'+W(hl)+b'\x11'+W(de)+b'\xcd'+W(entry)+b'\xc3'+W(0x2000);m[0x100:0x100+len(code)]=code
  (O/'in.bin').write_bytes(m)
  subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','100','-end','2000','-counter','30000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,check=True,timeout=20)
- b=(O/'out.bin').read_bytes();assert b[65542:65544]==W(0x2000);return bytearray(b[:65536])
+ b=(O/'out.bin').read_bytes();assert b[65542:65546]==W(0x2000)+W(0x8fe0);return bytearray(b[:65536])
 font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes();checks=0;reference={}
 for name in ('Rotate','Packed6K','Fast12K'):
  m=bytearray(65536);data=(R/'bin/BIOS.sys').read_bytes();m[0xc000:0xc000+len(data)]=data
@@ -47,5 +47,45 @@ for name in ('Rotate','Packed6K','Fast12K'):
     if name=='Rotate':reference[key]=got[0x9000:0xc000]
     else:assert got[0x9000:0xc000]==reference[key],(name,key,'rotate reference')
     checks+=1
+ # Stop before and after a successful quartet, at each possible slot.
+ for n in range(8):
+  for entry,char_entry,separator in [('bios_printStringZ','bios_printChar',b'\t'),
+                                     ('bios_printStringReal','bios_printCharRaw',b'\x01')]:
+   text=b'ABCDEFG'[:n]+separator+b'wxyz'
+   b=bytearray(m)
+   b[0x1000:0x1000+len(text)+1]=text+b'\0'
+   b[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2]=b'\x08\0'
+   actual=call(b,S[entry],hl=0x1000)
+   expected=b
+   for glyph in text:
+    expected=call(expected,S[char_entry],a=glyph,bc=glyph)
+   assert actual[0x9000:0xc000]==expected[0x9000:0xc000],(name,entry,n)
+   cursor=S['bios_vars.cursorY']
+   assert actual[cursor:cursor+2]==expected[cursor:cursor+2],(name,entry,n)
+   checks+=1
  print(name,'PASS',flush=True)
 print(checks,'checks')
+
+# Both public interpreted entries use the next four-cell stop, even from
+# an X position that falls between characters.
+for name,width in [('Cpm4',4),('Rotate',6),('Fast8',8)]:
+ m=bytearray(65536)
+ for binary,address in [(R/'bin/BIOS.sys',0xc000),(R/f'bin/fonts/{name}.i80',0xd800)]:
+  data=binary.read_bytes()
+  m[address:address+len(data)]=data
+ m[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=m[S['initVars']:S['initVarsEnd']]
+ m[S['bios_upper.escMode']]=255
+ m=call(m,S['FONT_ENGINE_INIT'])
+ m[0x1000:0x1002]=b'\t\0'
+ screen=bytes(m[0x9000:0xc000])
+ stop=2*width
+ for x in (0,1,width//2,stop-1,stop,stop+1,192-stop-1,192-stop,191,192,255):
+  at=S['bios_vars.cursorY']
+  m[at:at+2]=bytes([8,x])
+  target=(x//stop+1)*stop
+  expected=bytes([8,target]) if target<192 else b'\x12\0'
+  for entry in ('bios_printChar','bios_printStringZ'):
+   result=call(m,S[entry],bc=9,hl=0x1000)
+   assert result[at:at+2]==expected,(name,entry,x,result[at:at+2],expected)
+   assert result[0x9000:0xc000]==screen
+ print(name,'Tab stops and right-edge wrap PASS',flush=True)

@@ -9,6 +9,6 @@ for name,source,defines,origin in [('BANKMOD','MODULE',['-DMAIN_MODULE=0'],0x100
     symbols=(O/f'{name}.sym').read_text('utf-8')
     flags=re.search(r'^IMAGE_FLAGS: EQU 0x([0-9A-Fa-f]+)',symbols,re.M)
     if name in ('DOSAPP','DOSMOD','DRVPROBE'): origin=int(re.search(r'^DOS_BANK_DRIVER_ADDR: EQU 0x([0-9A-Fa-f]+)',symbols,re.M)[1],16)
-    data=e['encode'](e['Image']((O/f'{name}.bin').read_bytes(),origin,origin,int(flags[1],16) if flags else 0),'com')
     ext='COM' if name in ('MODTEST','BANKAPP','MAINAPP','DOSAPP','DRVPROBE') else 'DLL'
+    data=e['encode'](e['Image']((O/f'{name}.bin').read_bytes(),origin,origin,int(flags[1],16) if flags else 0),ext.lower())
     (O/f'{name}.{ext}').write_bytes(data)

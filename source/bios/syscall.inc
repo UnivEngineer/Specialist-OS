@@ -5,17 +5,28 @@
 ; На неверной группе/номере: CF=1, A=DOS_ERR_UNSUPPORTED, пакет не трогаем.
 ; Контекст вызова хранится на стеке; сам диспетчер допускает вложенность.
 ; Реентерабельность файловой системы этим не обеспечивается.
+; Internal three-JMP table: packet, register call, trusted BIOS scalar.
 sysCall:
+    jp sysPacketReady
+    jp sysRegsEntry
+    jp sysBiosRegs
+sysRegsEntry:
     ld a,b
-    or a
-    jp z,sysUnsupported
-    ; Восемь байт пакета не могут пересекать общее окно/регистры.
-    ld a,d
-    cp 0FFh
-    jp nz,sysPacketReady
-    ld a,e
-    cp 0B9h
-    jp nc,sysBadPacket
+    cp MXOS_GROUP_BIOS
+    jp z,sysBiosRegs
+    ; Keep the prepared local RAW route and DOS adapters.
+    jp sysPacketReady
+sysBiosRegs:
+    ld hl,sysBIOSTable
+    ld b,0
+    add hl,bc
+    add hl,bc
+    ld c,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,c
+    push hl
+    jp sysLoadRegs
 sysPacketReady:
     ; Для BIOS банкового маршрута нет; не вызываем отдельную проверку.
     ld a,b
@@ -48,9 +59,6 @@ sysBios:
     ld hl,sysBIOSTable
     ld a,sysBIOSCount
 sysSelect:
-    cp c
-    jp z,sysUnsupported
-    jp c,sysUnsupported
     ld b,0
     add hl,bc
     add hl,bc

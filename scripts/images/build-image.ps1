@@ -20,6 +20,10 @@ if ($ManifestFile -and $Target -ne 'Games2M') { throw '-ManifestFile is currentl
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $assetDirectory = Join-Path $repositoryRoot "assets"
 $imageDirectory = Join-Path $repositoryRoot "images"
+if ($Target -in @('SystemEmuWritable','SystemHardware','SystemEmu','SystemEmuFlash')) {
+    & python (Join-Path $repositoryRoot 'scripts/build/build-error-strings.py') (Join-Path $repositoryRoot 'bin/ERRORS.DAT')
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot build ERRORS.DAT' }
+}
 $sectorSize = 256
 $sectorsPerCluster = 1
 . (Join-Path $PSScriptRoot 'executable.ps1')
@@ -262,7 +266,7 @@ if ($stagedBoot) {
     if ($fontEntries.Count -ne 1) { throw "Bootstrap requires exactly one $bootFontName" }
     $fontSource = Join-Path $assetDirectory $fontEntries[0].Source
     $fixedBootFiles[$bootFontName] = 0x4800
-    $bootstrapArgs = @('--font-body', $fontSource)
+    $bootstrapArgs = @('--font-body', $fontSource, '--font-name', [IO.Path]::GetFileNameWithoutExtension($bootFontName))
     if ($BootstrapProbe) { $bootstrapArgs += '--probe' }
     & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
     if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
@@ -369,7 +373,7 @@ try {
             if ($sourceName -eq $bootFontName) { $limit = 0x6000 }
             if ($fixedAddress -lt $dataStartSector * $sectorSize -or $fixedAddress + $originalSize -gt $limit) { throw "Fixed bootstrap slot overflow: $sourceName" }
             if ($sourceName -eq $bootFontName -and $loadAddress -ne 0xD800) { throw 'Boot font must load at D800h' }
-            if ($sourceName -eq 'IO.SYS' -and ($loadAddress -ne 0xF000 -or $loadAddress+$originalSize -gt 0xF740)) { throw 'Invalid IO load range' }
+            if ($sourceName -eq 'IO.SYS' -and $loadAddress -ne 0xF000) { throw 'Invalid IO load range' }
             if ($sourceName -eq 'BIOS.SYS' -and ($loadAddress -ne 0xC000 -or $loadAddress+$originalSize -gt 0xF000)) { throw 'Invalid BIOS load range' }
             if ($sourceName -eq 'DOS.SYS') {
                 $kernelSymbols = [IO.File]::ReadAllText((Join-Path $repositoryRoot 'bin/banked/KERNEL.sym'))

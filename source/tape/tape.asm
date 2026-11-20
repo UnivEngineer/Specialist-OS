@@ -25,4 +25,5 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ; TAPE.COM не должен попасть в кэш FAT.
     ASSERT_DONT_FIT 0FB00h
 
+    INCLUDE "../include/file-io.inc"
     END

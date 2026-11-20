@@ -1,9 +1,10 @@
 ; Shared monochrome/one-color copy of 8 glyph rows in each 10px text cell.
 ; HL=источник, BC=назначение, D=ширина в байтах, E=высота в пикселях.
-; D>0; E=10..200, кратно 10; обе области внутри VRAM, без перехода Y через 256.
-; Столбцы слева направо: горизонтальное перекрытие допустимо только влево.
+; D>0; E=10..250, кратно 10; обе области внутри VRAM, без перехода Y через 256.
+; Горизонтальное перекрытие допустимо в обе стороны.
 ; Вертикальное перекрытие допустимо в обе стороны. Строки 0/9 каждой ячейки
-; должны уже иметь одинаковый пустой фон; инверсия снята/исключена вызывающим.
+; должны уже иметь одинаковый пустой фон. Инверсия только глифов допустима;
+; выделение, меняющее строки 0/9, снимает/исключает вызывающий.
 ; Цвет задаёт вызывающий. AF/BC/DE/HL разрушены; SP восстановлен.
 ; Нереентерабелен; IRQ запрещены контрактом MXOS. Пока SP указывает на VRAM,
 ; нет CALL/PUSH/POP кроме собственно переноса; код и рабочие данные вне VRAM.
@@ -30,14 +31,33 @@ countRows:
     ld hl,0
     add hl,sp
     ld (restoreSP+1),hl
+    ; Select the column order separately from the order of rows.
+    ld a,1
+    ld (columnStep),a
     ld hl,(source)
-    ld a,b
-    cp h
-    jp c,setForward
-    jp nz,setBackward
+    ld a,h
+    cp b
+    jp nc,columnsReady
+    ld a,255
+    ld (columnStep),a
+    ld a,(width)
+    dec a
+    add a,h
+    ld h,a
+    ld (source),hl
+    ld hl,(destination)
+    ld a,(width)
+    dec a
+    add a,h
+    ld h,a
+    ld (destination),hl
+columnsReady:
+    ld hl,(source)
+    ; Y alone determines the row order, independently of X.
     ld a,c
     cp l
     jp c,setForward
+    jp setBackward
 setBackward:
     ld a,1
     ld (direction),a
@@ -98,11 +118,15 @@ forwardRow:
     dec b
     jp nz,forwardRow
 nextColumn:
+    ld a,(columnStep)
     ld hl,(source)
-    inc h
+    add a,h
+    ld h,a
     ld (source),hl
+    ld a,(columnStep)
     ld hl,(destination)
-    inc h
+    add a,h
+    ld h,a
     ld (destination),hl
     ld a,(width)
     dec a
@@ -121,4 +145,5 @@ height: DB 0
 rows: DB 0
 width: DB 0
 direction: DB 0
+columnStep: DB 1
     ENDMODULE

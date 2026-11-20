@@ -29,9 +29,7 @@ MonitorMain:
 
         ; узнать текущий диск
         LD    E,02H
-        CALL  bios_fileGetSetDrive
-
-        ; печать промпта A:\>
+        MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE ; печать промпта A:\>
         ADD   A,'A'
         LD    C,A
         CALL  bios_printChar
@@ -54,18 +52,15 @@ MonitorMain:
 
         ; узнать текущий диск
         LD    E,02H
-        CALL  bios_fileGetSetDrive
+        MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
         PUSH  AF
 
         ; преобразовать имя файла в буфере
         LD    HL,INPUT_BUF
         LD    DE,v_fileInfo.name
-        CALL  bios_fileNamePrepare
-
-        ; узнать текущий диск
+        MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE ; узнать текущий диск
         LD    E,02H
-        CALL  bios_fileGetSetDrive
-
+        MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
         LD    E,A
         POP   AF
         CP    E

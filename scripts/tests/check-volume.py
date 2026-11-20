@@ -1,25 +1,26 @@
-"""Проверка машинного кода диспетчера томов без запуска ОС и эмулятора ПК.
+"""8080 metadata adapters: register/flag preservation, error normalization and mount.
 
-Из source/dos собрать DOS.asm с --sym=../../bin/DOS-volume.sym
-и --raw=../../bin/DOS-volume-test.sys, затем выполнить этот сценарий.
-Узкая модель команд 8080 исполняет диспетчер; файловые и аппаратные
-обработчики заменяются контролируемыми процедурами. Полную FAT она не проверяет.
+FAT handlers are replaced by controlled hooks. Real FAT I/O is covered by
+check-file-handle.py and the visible banked-DOS integration tests.
 """
 from pathlib import Path
 import re
 import struct
 
 ROOT = Path(__file__).resolve().parents[2]
-BINARY = (ROOT / 'bin/DOS-volume-test.sys').read_bytes()
+BINARY = (ROOT / 'bin/DOS.native.sys').read_bytes()
 SYMBOLS = dict((name, int(value, 16)) for name, value in re.findall(
     r'(?m)^(\w+): EQU 0x([0-9A-Fa-f]+)',
-    (ROOT / 'bin/DOS-volume.sym').read_text()))
+    (ROOT / 'bin/DOS.sym').read_text()))
 
 
 class CPU:
     def __init__(self):
         self.m = bytearray(65536)
-        self.m[0xc000:0xc000+len(BINARY)] = BINARY
+        bios=(ROOT/'bin/BIOS.sys').read_bytes()
+        self.m[0xc000:0xc000+len(bios)]=bios
+        base=SYMBOLS['DOS_CODE_START']
+        self.m[base:base+len(BINARY)]=BINARY
         self.r = [0x12, 0x34, 0x56, 0x78, 0x23, 0x45, 0, 0x67]
         self.f = 0xd7
         self.sp = 0x8f00
@@ -114,6 +115,9 @@ class CPU:
                 v = self.r[7]+self.value(op & 7)
                 self.flags(v, int(v > 255))
                 self.r[7] = v & 255
+            elif op == 0xaf:
+                self.r[7]=0
+                self.flags(0)
             elif 0xb0 <= op <= 0xb7:
                 self.r[7] |= self.value(op & 7)
                 self.flags(self.r[7])
@@ -131,6 +135,8 @@ class CPU:
                 a = self.r[7]
                 self.r[7] = a >> 1 | (a & 1) << 7
                 self.f = self.f & ~1 | (a & 1)
+            elif op in (0x02,0x12):
+                self.m[self.pair(op>>4)] = self.r[7]
             elif op == 0x3a:
                 self.r[7] = self.m[word()]
             elif op == 0x32:
@@ -158,6 +164,11 @@ class CPU:
                 v = word()
                 self.push(self.pc)
                 self.pc = v
+            elif op & 0xc7 == 0xc4:
+                v=word()
+                if self.condition(op >> 3 & 7):
+                    self.push(self.pc)
+                    self.pc=v
             elif op == 0xc3:
                 self.pc = word()
             elif op & 0xc7 == 0xc2:
@@ -176,112 +187,49 @@ class CPU:
         raise AssertionError('Превышен предел выполнения проверки')
 
 
-def register(c, drive=6, pointer=0x8000, context=0x8123):
-    c.m[pointer:pointer+4] = b'FS\x01\x0f'
-    for index in range(15):
-        c.setword(pointer+4+index*2, 0x9000+index*3)
-    c.r[7] = drive
-    c.setpair(2, pointer)
-    c.setpair(1, context)
-    before = c.r[:6]
-    c.run(0xc890)
-    assert c.r[:6] == before
-
-
 def main():
-    assert BINARY == (ROOT / 'bin/DOS.sys').read_bytes(), 'Проверяется другая сборка DOS'
-    operations = [(0xc83f, 'fatFileList'), (0xc845, 'fatFileCreate'),
-                  (0xc848, 'fatFileLoad'), (0xc84b, 'fatFileDelete'),
-                  (0xc84e, 'fatFileRename'), (0xc851, 'fatFileLoadInfo'),
-                  (0xc854, 'fatFileGetSetAddr'), (0xc857, 'fatFileGetSetAttr'),
-                  (0xc866, 'fatFileLoad2'), (0xc872, 'fatGetDriveFreeSpace'),
-                  (0xc88a, 'fatFileCreatePrepare')]
-    for entry, target in operations:
-        c = CPU()
-        before, flags = c.r[:], c.f
-        seen = []
-        def handler(cpu):
-            seen.append(1)
-            assert cpu.r == before and cpu.f == flags, target
-            cpu.r[7], cpu.f = 0x81, 3
-        c.hooks[SYMBOLS[target]] = handler
-        c.run(entry)
-        assert seen == [1] and (c.r[7], c.f) == (0x81, 3)
-    print('OK: все 12 прежних файловых входов передают регистры/флаги и результат FAT без изменений')
+    pairs=[('fileList','fatFileList'),('fileDelete','fatFileDelete'),
+           ('fileRename','fatFileRename'),('fileLoadInfo','fatFileLoadInfo'),
+           ('fileGetSetAttr','fatFileGetSetAttr'),('getDriveFreeSpace','fatGetDriveFreeSpace'),
+           ('fileCreatePrepare','fatFileCreatePrepare'),('flushVolume','fatVolumeFlush'),
+           ('volumePrepareName','fatFileNamePrepare'),('volumeMountDispatch','fatReadBootSector')]
+    cases=0
+    for entry,target in pairs:
+        for carry,error in [(False,0),(True,0),(True,6)]:
+            c=CPU();before=c.r[:];flags=c.f;seen=[]
+            c.m[SYMBOLS['v_dosError']]=8
+            def handler(cpu):
+                assert cpu.r==before and cpu.f==flags,(entry,cpu.r,before,cpu.f,flags)
+                assert cpu.m[SYMBOLS['v_dosError']]==0
+                seen.append(target)
+                cpu.m[SYMBOLS['v_dosError']]=error
+                cpu.r[7]=0x81;cpu.f=2|int(carry)
+            c.hooks[SYMBOLS[target]]=handler;c.run(SYMBOLS[entry])
+            assert seen==[target]
+            assert c.r[:6]==before[:6] and (c.r[7],c.f)==(0x81,2|int(carry))
+            assert c.m[SYMBOLS['v_dosError']]==((error or 1) if carry else 0)
+            cases+=1
+    for entry,invalidate in [('selectVolume',False),('mountVolume',True)]:
+        c=CPU();before=c.r[:6];seen=[]
+        c.hooks[SYMBOLS['invalidateDriveCache']]=lambda cpu:seen.append('invalidate')
+        c.hooks[SYMBOLS['selectCacheForDrive']]=lambda cpu:seen.append('cache')
+        def mounted(cpu):
+            seen.append('mount');cpu.r[:6]=[1,2,3,4,5,6];cpu.r[7]=0x82;cpu.f=3
+            cpu.m[SYMBOLS['v_dosError']]=6
+        c.hooks[SYMBOLS['fatReadBootSector']]=mounted;c.run(SYMBOLS[entry])
+        assert seen==(['invalidate'] if invalidate else [])+['cache','mount']
+        assert c.r[:6]==before and (c.r[7],c.f)==(0x82,3)
+    for name in ['fileCreate','fileLoad2','fatFileCreate','fatFileLoad2',
+                 'fatFileGetSetAddr','installVolume','getVolume','v_volumeTable','v_volumes']:
+        assert name not in SYMBOLS,name
+    c=CPU()
+    name='тест.жя'.encode('koi8-r')
+    c.m[0x8000:0x8000+len(name)+1]=name+b'\0'
+    c.setpair(2,0x8000)
+    c.setpair(1,0x8080)
+    c.run(SYMBOLS['volumePrepareName'])
+    assert not c.f&1
+    assert c.m[0x8080:0x808b]=='тест    жя '.encode('koi8-r')
+    print('FAT adapters PASS',cases,'register/status cases; select/mount; KOI8-R names; retired paths absent')
 
-    c = CPU()
-    register(c)
-    assert not c.f & 1
-    assert c.word(SYMBOLS['v_volumes']+12) == 0x8000
-    assert c.word(SYMBOLS['v_volumeContexts']+12) == 0x8123
-    assert c.word(SYMBOLS['v_volumes']+2) == SYMBOLS['fatVolumeDriver']
-    c.r[7] = 6
-    bc = c.pair(0)
-    c.run(0xc893)
-    assert (c.pair(2), c.pair(1), c.pair(0)) == (0x8000, 0x8123, bc)
-
-    mounted = []
-    def mounted_handler(cpu):
-        mounted.append(cpu.word(SYMBOLS['v_volumeContext']))
-        cpu.m[SYMBOLS['v_diskInfo']+34] = 2
-        cpu.f &= ~1
-    c.hooks[0x9000] = mounted_handler
-    c.hooks[SYMBOLS['resetSectorCache']] = lambda cpu: None
-    c.r[7] = 6
-    before = c.r[:6]
-    c.run(SYMBOLS['fileSelectDrive'])
-    assert mounted == [0x8123] and c.r[:6] == before
-    assert c.m[SYMBOLS['v_drive']] == 6
-    assert c.word(SYMBOLS['j_diskDriver']+1) == SYMBOLS['diskDriverDummy']
-    # Повторный mount и замена активного тома сохраняют регистры даже при
-    # разрушающем обработчике, возвращая его CF.
-    def clobber_mount(cpu):
-        cpu.r[:6] = [1, 2, 3, 4, 5, 6]
-        cpu.r[7], cpu.f = 0x82, 3
-    c.hooks[0x9000] = clobber_mount
-    before = c.r[:6]
-    c.run(0xc896)
-    assert c.r[:6] == before and (c.r[7], c.f) == (0x82, 3)
-    register(c)
-    assert c.r[:6] == before and (c.r[7], c.f) == (0x82, 3)
-    c.hooks[0x9000] = mounted_handler
-    c.hooks[0x9000+14*3] = lambda cpu: cpu.calls.append('flush')
-    c.run(0xc899)
-    assert c.calls == ['flush']
-    c.calls.clear()
-    c.hooks[0x9003] = lambda cpu: cpu.calls.append('list')
-    c.run(0xc83f)
-    assert c.calls == ['list']
-
-    c.setpair(2, 0x8200)
-    c.setpair(1, 0x8300)
-    c.m[0x8200:0x820b] = b'G:HELLO.TXT'
-    before_bc = c.pair(0)
-    def prepare(cpu):
-        assert (cpu.pair(2), cpu.pair(1), cpu.pair(0)) == (0x8202, 0x8300, before_bc)
-        cpu.calls.append('prepare')
-    c.hooks[0x9000+11*3] = prepare
-    c.run(0xc85a)
-    assert c.calls[-1] == 'prepare'
-    print('OK: регистрация G:, контекст, выбор носителя, mount, файловый вызов и отделение префикса диска')
-
-    for drive in (8, 255):
-        c = CPU()
-        old = bytes(c.m[SYMBOLS['v_volumes']:SYMBOLS['v_volumes']+32])
-        register(c, drive=drive)
-        assert c.f & 1 and bytes(c.m[SYMBOLS['v_volumes']:SYMBOLS['v_volumes']+32]) == old
-    for offset, value in ((0, 0), (1, 0), (2, 2), (3, 14), (4, 0)):
-        c = CPU()
-        register(c)
-        c.m[0x8000+offset] = value
-        if offset == 4:
-            c.m[0x8005] = 0
-        c.r[7] = 5
-        c.setpair(2, 0x8000)
-        c.run(0xc890)
-        assert c.f & 1 and c.word(SYMBOLS['v_volumes']+10) == SYMBOLS['fatVolumeDriver']
-    print('OK: отклонены неверный диск, magic, версия, число функций и нулевой обработчик')
-
-
-if __name__ == '__main__':
-    main()
+if __name__=='__main__':main()

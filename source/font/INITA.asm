@@ -53,6 +53,10 @@ initialize:
     or a
     jp z,importFlat
     ld a,(mode)
+    cp FONT_FORMAT_GRAPH8_PACKED
+    jp z,preparePacked8
+    cp FONT_FORMAT_GRAPH8_FULL
+    jp z,prepareFull8
     xor a
     ret
 importFlat:
@@ -94,6 +98,7 @@ importStore:
     jp nz,importRow
     xor a
     ret
+    INCLUDE "prepare-graph8.inc"
 source: DW 0
 flatSource: DW 0
 lowerBase: DW 0

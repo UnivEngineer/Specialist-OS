@@ -1,0 +1,31 @@
+; The EXEC profile has a local cursor mirror; MAIN remains the only renderer.
+    DEFINE bios_vars.cursorY ncBankCursor
+    DEFINE bios_vars.cursorX ncBankCursor+1
+    DEFINE bios_vars.inverse ncBankInverse
+    DEFINE bios_upper.cursorCfg ncBankCursorCfg
+    DEFINE bios_upper.ramPageCount ncBankRamPages
+    DEFINE FONT_ENGINE_HEADER ncBankFontHeader
+    DEFINE bios_printStringReal ncBankPrintRaw
+    DEFINE bios_printStringRawLim ncBankPrintLim
+    DEFINE bios_printStringZ ncBankPrintString
+    DEFINE bios_printString ncBankPrintString
+    DEFINE bios_printChar ncBankPrintChar
+    DEFINE bios_printHexWord ncBankPrintHexWord
+    DEFINE bios_setCursorPos ncBankSetCursor
+    DEFINE bios_getch ncBankGetch
+    DEFINE bios_getMemTop ncBankGetMemTop
+    DEFINE bios_cmp_hl_de ncBankCompare
+    DEFINE bios_sub_hl_de ncBankSubtract
+    DEFINE bios_upperCase ncBankStrings.upperCase
+    DEFINE bios_memcpy_bc_hl ncBankCopy.memcpy_bc_hl
+    DEFINE bios_setFontEncoding ncBankEncoding
+    DEFINE bios_keyScan io_bankKeyScan
+    DEFINE bios_diskDriver ncBankDiskInfo
+    DEFINE bios_reboot ncBankReturn
+ncBankQueue = 0D000h
+ncBankCursor = 0DF00h
+ncBankInverse = 0DF02h
+ncBankCursorCfg = 0DF04h
+ncBankRamPages = 0DF05h
+ncBankFontHeader = 0DF08h
+    DEFINE UI_BUTTON_RECOLOR ncBankRecolor

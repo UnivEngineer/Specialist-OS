@@ -7,8 +7,10 @@ tryGroup:
     ld a,(bios_vars.cursorX)
     cp 192
     jp nc,empty
+    IFNDEF FONT_GRAPHIC_X
     and 3
     jp nz,empty
+    ENDIF
     ld a,(realMode)
     or a
     jp nz,escReady
@@ -16,13 +18,21 @@ tryGroup:
     inc a
     jp nz,empty
 escReady:
+    IFDEF FONT_ALIGNED_ROWS
+    jp graphicAlignedPacket
+    ELSE
     ld a,(bios_vars.cursorX)
+    IFDEF FONT_GRAPHIC_X
+    and 3
+    jp nz,graphicPacket
+    ld a,(bios_vars.cursorX)
+    ENDIF
     rrca
     rrca
     ld d,a
     ld a,48
     sub d
-    ld e,a ; pairs remaining before the screen edge
+    ld e,a ; columns remaining before the screen edge
     ld a,(realMode)
     cp 2
     jp nz,quotaReady
@@ -37,11 +47,19 @@ quotaReady:
     ld a,e
     or a
     jp z,empty
-    ld (pairs),a
     ld a,d
     add a,90h
     ld d,a
     ld (startColumn+1),a
+    ; D advances once per full video byte. Only RawLim needs a column limit below C0h.
+    ld a,(realMode)
+    cp 2
+    jp nz,limitReady
+    ld a,d
+    add a,e
+    ld (normalLimit+1),a
+    ld (inverseLimit+1),a
+limitReady:
     ld a,(bios_vars.cursorY)
     sub 7
     ld e,a
@@ -66,7 +84,7 @@ routeReady:
     ld c,l
 route: jp normalLim
 
-    MACRO BYTE_LOOP label, kind, inverse
+    MACRO BYTE_LOOP label, kind, inverse, limit
 label:
     ld a,(bc)
     IF kind != 2
@@ -94,17 +112,21 @@ label:
     sub 7
     ld e,a
     inc d
-    ld hl,pairs
-    dec (hl)
+    ld a,d
+    IF kind == 2
+limit: cp 0
+    ELSE
+    cp 0C0h
+    ENDIF
     jp nz,label
     jp finish
     ENDM
-    BYTE_LOOP normalZ,32,0
-    BYTE_LOOP normalRawZ,1,0
-    BYTE_LOOP normalLim,2,0
-    BYTE_LOOP inverseZ,32,1
-    BYTE_LOOP inverseRawZ,1,1
-    BYTE_LOOP inverseLim,2,1
+    BYTE_LOOP normalZ,32,0,unused
+    BYTE_LOOP normalRawZ,1,0,unused
+    BYTE_LOOP normalLim,2,0,normalLimit
+    BYTE_LOOP inverseZ,32,1,unused
+    BYTE_LOOP inverseRawZ,1,1,unused
+    BYTE_LOOP inverseLim,2,1,inverseLimit
 finish:
     ld h,b
     ld l,c
@@ -119,18 +141,20 @@ startColumn: cp 0
     cp 192
     jp c,done
     ld hl,(bios_vars.cursorY)
-    call bios_fontNewLine
+    call fontLineEnd
 done:
     ld hl,(text)
     or a
     ret
+    ENDIF
 empty:
     ld hl,(text)
     scf
     ret
+    IFNDEF FONT_ALIGNED_ROWS
 normalRoutes: DW normalZ,normalRawZ,normalLim
 inverseRoutes: DW inverseZ,inverseRawZ,inverseLim
-pairs: DB 0
+    ENDIF
 text: DW 0
 realMode: DB 0
     ENDMODULE

@@ -1,0 +1,37 @@
+--- a/src/qt/qtMainWindow.cpp
++++ b/src/qt/qtMainWindow.cpp
+@@ -2215,6 +2215,34 @@
+ {
+     int key = evt->key();
+     bool keypad = evt->modifiers() & Qt::KeypadModifier;
++
++#ifdef Q_OS_WIN
++    if (m_windowType == EWT_EMULATION && m_platformGroupName == "specialist-os" &&
++        !m_smartAction->isChecked() && !keypad) {
++        // Win32 scan codes for the four alphanumeric rows of the PC keyboard.
++        static constexpr PalKeyCode numberRow[] = {
++            PK_1, PK_2, PK_3, PK_4, PK_5, PK_6, PK_7, PK_8, PK_9, PK_0, PK_MINUS, PK_EQU
++        };
++        static constexpr PalKeyCode upperRow[] = {
++            PK_Q, PK_W, PK_E, PK_R, PK_T, PK_Y, PK_U, PK_I, PK_O, PK_P, PK_LBRACKET, PK_RBRACKET
++        };
++        static constexpr PalKeyCode homeRow[] = {
++            PK_A, PK_S, PK_D, PK_F, PK_G, PK_H, PK_J, PK_K, PK_L, PK_SEMICOLON, PK_APOSTROPHE, PK_TILDE
++        };
++        static constexpr PalKeyCode lowerRow[] = {
++            PK_BSLASH, PK_Z, PK_X, PK_C, PK_V, PK_B, PK_N, PK_M, PK_COMMA, PK_PERIOD, PK_SLASH
++        };
++        const auto scan = evt->nativeScanCode();
++        if (scan >= 0x02 && scan <= 0x0D)
++            return numberRow[scan - 0x02];
++        if (scan >= 0x10 && scan <= 0x1B)
++            return upperRow[scan - 0x10];
++        if (scan >= 0x1E && scan <= 0x29)
++            return homeRow[scan - 0x1E];
++        if (scan >= 0x2B && scan <= 0x35)
++            return lowerRow[scan - 0x2B];
++    }
++#endif
+ 
+     switch (key) {
+     case Qt::Key_A:

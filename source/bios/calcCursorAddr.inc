@@ -17,14 +17,12 @@ calcCursorAddr:   ; В hl положение курсора
             ; Иначе рассчитываем адрес старшего байта a = cursorX / 4 + 90h
             ld    a,(FONT_ENGINE_HEADER+5)
             cp    6
-            ld    a,h
-            jp z,calcCursorLegacyEdge
-            cp    192
-            jp calcCursorEdgeReady
-calcCursorLegacyEdge:
-            cp    190
+            ld    a,191
+            jp nz,calcCursorEdgeReady
+            ld    a,189
 calcCursorEdgeReady:
-            jp c, calcCursorAd_1
+            cp    h
+            jp nc,calcCursorAd_1
             ld    c, 10
             jp    calcCursorAd_0
 

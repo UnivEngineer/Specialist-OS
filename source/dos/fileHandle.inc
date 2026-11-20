@@ -14,25 +14,67 @@ fileHandle:
 handleRangeOk:
             xor a
             ld (v_dosError),a
-            ld (bios_upper.diskWriteErr),a
+            ld (fatWriteError),a
             ld hl,0
             ld (v_handleNew),hl
             ld a,(v_handleOp)
             cp FILE_OP_OPTIONS
             jp z,handleOptions
+            ld a,(v_handleOp)
+            cp FILE_OP_OPEN_PATH
+            jp nz,handleShortName
+            ld a,FH_STATE
+            call handleField
+            ld a,(hl)
+            cp 046h
+            jp z,handleArgument
+            ; A path is parsed once, in DOS. Keep the resolved parent while
+            ; opening; the handle remembers the exact directory entry.
+            ld a,FH_BUFFER
+            call handleField
+            ld e,(hl)
+            inc hl
+            ld d,(hl)
+            ex de,hl
+            push hl
+            ld hl,(v_handle)
+            ex de,hl
+            pop hl
+            call fileNamePrepare
+            jp c,handleExit
+            ld a,(v_drive)
+            ld hl,(v_handle)
+            ld de,FH_DRIVE
+            add hl,de
+            ld (hl),a
+            xor a
+            ld (v_handleOp),a
+            jp handleVolumeReady
+handleShortName:
             ld a,FH_DRIVE
             call handleField
             ld a,(hl)
             call fileChangeDrive
             jp c,handleExit
-            ld hl,(v_volumeTable)
-            ld de,fatVolumeDriver+VOLUME_DRIVER_HEADER
-            call cmp_hl_de
-            jp z,handleVolumeReady
-            ld a,DOS_ERR_UNSUPPORTED
-            call dosSetError
-            jp handleExit
 handleVolumeReady:
+            ld a,(v_handleOp)
+            cp FILE_OP_OPEN_AT
+            jp nz,handleOpenContextReady
+            ld hl,(v_handle)
+            ld de,FH_SEEK
+            add hl,de
+            ld e,(hl)
+            inc hl
+            ld d,(hl)
+            ld a,d
+            or e
+            call nz,fatCheckCluster
+            jp c,handleExit
+            ex de,hl
+            ld (v_directory),hl
+            xor a
+            ld (v_handleOp),a
+handleOpenContextReady:
             ld a,(v_handleOp)
             or a
             jp z,handleOpen

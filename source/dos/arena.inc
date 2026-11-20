@@ -3,13 +3,23 @@
 ; cached FILEOPS/ENUM images are the extra intervals. Active code is pinned.
 ; HL=start, DE=end; BC/DE/HL preserved. CF/A=ACTIVE on an intersection.
 ; Cached, idle overlays may be discarded, but never a live DLL or installer.
+dosArenaImage:
+    ld a,(v_imageHeader+IMAGE_POLICY)
+    jp arenaEnter
 dosArenaCheck:
+    ld a,IMAGE_POLICY_MANAGED
+arenaEnter:
+    ld (arenaPolicy),a
     push bc
     push de
     push hl
     ld (arenaStart),hl
     ex de,hl
     ld (arenaEnd),hl
+    call imageSaveContext
+    xor a
+    ld (arenaPhase),a
+arenaRestart:
     ld a,(diActive)
     or a
     jp z,arenaModules
@@ -47,7 +57,33 @@ arenaNext:
     pop hl
     call arenaOverlap
     pop hl
-    jp nz,arenaConflict
+    jp z,arenaSkip
+    push bc
+    push hl
+    inc hl
+    inc hl
+    ld a,(hl)
+    or a
+    jp nz,arenaModulePinned
+    ld a,(arenaPolicy)
+    cp IMAGE_POLICY_PRESERVE
+    jp z,arenaModulePinned
+    ld de,12
+    add hl,de
+    ld a,(hl)
+    and IMAGE_OPTION_CACHEABLE
+    jp z,arenaModulePinned
+    pop hl
+    push hl
+    call mdCanRelease
+    jp c,arenaGuardFailed
+    ld a,(arenaPhase)
+    or a
+    call nz,mdReleaseChecked
+arenaGuardFailed:
+    pop hl
+    pop bc
+    jp c,arenaConflict
 arenaSkip:
     ld de,MODULE_RECORD_SIZE
     add hl,de
@@ -59,14 +95,25 @@ arenaSkip:
     ld hl,enumOverlay
     call arenaCached
     jp c,arenaConflict
-    jp arenaFree
+    ld a,(arenaPhase)
+    or a
+    jp nz,arenaFree
+    inc a
+    ld (arenaPhase),a
+    jp arenaRestart
+arenaModulePinned:
+    pop hl
+    pop bc
+    jp arenaConflict
 arenaFree:
+    call imageRestoreContext
     pop hl
     pop de
     pop bc
     xor a
     ret
 arenaConflict:
+    call imageRestoreContext
     pop hl
     pop de
     pop bc
@@ -100,6 +147,13 @@ arenaCached:
     or a
     scf
     ret nz
+    ld a,(arenaPolicy)
+    cp IMAGE_POLICY_PRESERVE
+    scf
+    ret z
+    ld a,(arenaPhase)
+    or a
+    ret z
     dec hl
     ld (hl),0
     or a
@@ -125,3 +179,6 @@ arenaApart:
     ret
 arenaStart: DW 0
 arenaEnd: DW 0
+
+arenaPhase: DB 0
+arenaPolicy: DB IMAGE_POLICY_MANAGED

@@ -21,19 +21,19 @@ def main():
             data = bytes((i*71+19)&255 for i in range(size))
             raw = folder/f'raw-{size}.bin'
             raw.write_bytes(data)
-            for target in ('com','exe','dll','rks'):
+            for target in ('com','exe','dll','fnt','rks'):
                 add(raw,target)
             image = Image(data)
-            for kind in ('rks','com','exe','dll'):
+            for kind in ('rks','com','exe','dll','fnt'):
                 if size==65536 and kind!='rks':
                     continue
                 path=folder/f'image-{size}.{kind}'
                 packed=encode(image,kind)
                 path.write_bytes(packed)
-                for target in ('com','exe','dll','rks'):
+                for target in ('com','exe','dll','fnt','rks'):
                     add(path,target)
                 if size in (1,257):
-                    for offset in range(16 if kind!='rks' else 4):
+                    for offset in range(32 if kind!='rks' else 4):
                         bad=folder/f'bad-{size}-{offset}.{kind}'
                         damaged=bytearray(packed)
                         damaged[offset]^=1
@@ -44,17 +44,36 @@ def main():
                     damaged[-1]^=1
                     bad.write_bytes(damaged)
                     add(bad,'exe')
+        for index,fields in enumerate([
+            'FLAGS=04\nBSS=20\nMEM_BEGIN=80\nMEM_END=200\nMIN_HEAP=100\nSTACK=80\nPOLICY=PRESERVE\nAPI=2\nMODE=MX\nCACHEABLE=1',
+            'FLAGS=04\nBSS=FFFF\nPOLICY=MANAGED',
+            'FLAGS=04\nMEM_END=100',
+            'FLAGS=04\nMEM_BEGIN=101',
+            'FLAGS=04\nMODE=5',
+            'FLAGS=00\nBSS=FFFF\nPOLICY=EXCLUSIVE\nMODE=STD',
+        ]):
+            cpu=folder/f'metadata-{index}.cpu';cpu.write_text('0100\n0100\nmxos2.mon\n'+fields+'\n',encoding='ascii');cpu.with_suffix('.i80').write_bytes(b'\xc9')
+            for target in ('com','exe','dll','fnt'):add(cpu,target)
         for flags in (1, 2, 3, 4, 5, 6, 7, 8):
             cpu=folder/f'flags-{flags}.cpu'
-            cpu.write_text(f'0100\n0100\n{flags:02X}\n',encoding='ascii')
+            cpu.write_text(f'0100\n0100\nmxos2.mon\nFLAGS={flags:02X}\n',encoding='ascii')
             cpu.with_suffix('.i80').write_bytes(b'\xc9')
-            for target in ('com','exe','dll','rks'):
+            for target in ('com','exe','dll','fnt','rks'):
                 add(cpu,target)
             if flags in (1,2,4):
                 packed=folder/f'flags-{flags}.dll'
                 packed.write_bytes(encode(Image(b'\xc9',0x100,0x100,flags),'dll'))
-                for target in ('com','exe','dll','rks'):
+                for target in ('com','exe','dll','fnt','rks'):
                     add(packed,target)
+        for text in ('0100\n0100\nmxos2.mon\n',
+                     '0100\n0100\nmon2.mon\nNOTE=external legacy monitor\n',
+                     '0100\n0100\nmonC000.rom\nFLAGS=00\nCUSTOM=value\n',
+                     '0100\n0100\nmxos2.mon\nFLAGS=04\nFLAGS=02\n',
+                     '0100\n0100\n\nFLAGS=04\n',
+                     '0100\n0100\n04\n',
+                     '0100\n0100\nmxos2.mon\nBROKEN\n'):
+            cpu=folder/f'descriptor-{len(cases)}.cpu';cpu.write_text(text,encoding='ascii')
+            cpu.with_suffix('.i80').write_bytes(b'\xc9');add(cpu,'com')
         raw=folder/'проверка.cpu'
         raw.write_bytes(b'\xc9')
         for target in ('com','exe','rks'):

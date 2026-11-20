@@ -1,58 +1,24 @@
-; Внутренняя карта IO.SYS основной памяти.
-; Каноническая карта и адресные константы IO/MEM — ../include/mxos.inc.
-; Файл с F000h загружается непрерывно; точный конец — System.layout.json.
-; Адреса/размеры текущей сборки уточняет bin/System.layout.json.
-;   F000-F15E - [351 B] MAINBIOS.asm: принимающий адаптер BIOS
-;   F15F-F1BF - [ 97 B] Свободно в MAIN до начала MEM (в DOS здесь стек)
-;   F240      - JMP из MEM в скомпонованный в BIOS физический мост A: <-> DOS
-; Файловые переходники, загрузчик тела, RAW-маршрутизатор и границы кэша
-; компонуются в BIOS.SYS ниже области шрифта, а не входят в IO.SYS.
-; Общие публичные JMP устанавливаются bootstrap из MEM.SYS.
-; LOCALBLOCK (с F1C0h), AT512KS (F6C0h), H: (F9C0h) не входят в IO.SYS.
-; Рабочие переменные и буфер текста находятся отдельно от файла:
-; IO_VARIABLES и BIOS_BANK_IO_BUFFER объявлены в mxos.inc.
-;
-; Адаптер банковых клиентов к BIOS основной памяти.
-; A=страница клиента, BC=номер группы/функции, DE=NEAR MX_REGS клиента.
-; Регистры результата возвращаются в CPU и в исходный пакет. SP/owner/home
-; восстанавливает транспорт. Код BIOS не видит указателей чужой страницы.
-; Один активный запрос: повторный вход возвращает ACCESS без порчи внешнего.
+; IO.SYS: receiving BIOS adapter and command batches at F000h.
+; +0: receive/copy batch, +3: register packet, +6: finish TEXT_PRINT,
+; +9: execute local inline command stream. All offsets are internal MEM ABI.
+; Live size/end: bin/System.layout.json; slot ends before MEM at F1C0h.
+; Packet addresses, operation IDs and stack limits are caller preconditions.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../mem/biosabi.inc"
     INCLUDE "../mem/abi.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
     ORG BANK_BIOS_GATE
 bankBiosDispatch:
-    jp bbSlowEntry
+    jp biosCommandBatch
 bankBiosPacketDispatch:
-    jp bbFastEntry
+    jp bbEntry
 bankBiosFinishDispatch:
     jp bbFinish
-bbSlowEntry:
-    push af
-    ld a,(bbBusy)
-    or a
-    jp nz,bbReentered
-    ; A уже равен нулю после проверки bbBusy.
-    ld (bbFast),a
-    pop af
-    jp bbEntry
-bbFastEntry:
-    push af
-    ld a,(bbBusy)
-    or a
-    jp nz,bbReentered
-    ld a,1
-    ld (bbFast),a
-    pop af
+bankBiosBatchLocal:
+    jp bbBatchLocal
 bbEntry:
     ld (bbPage),a
-    ld a,b
-    cp MXOS_GROUP_BIOS
-    jp nz,bbUnsupported
     ld a,c
-    cp bbModesEnd-bbModes
-    jp nc,bbUnsupported
     ld (bbFunction),a
     push de
     ld e,a
@@ -64,21 +30,9 @@ bbEntry:
     or a
     jp z,bbUnsupported
     ld (bbMode),a
-    ld a,(bbFast)
-    or a
-    jp nz,bbFastFetch
-    ex de,hl
-    ld (bbPacketAddress),hl
-    ld bc,MX_REGS
-    call bbCheckRange
-    jp c,bbBadArgument
-    ld a,1
-    ld (bbBusy),a
-    ld de,bbRegs
-    call bbFetch
-    jp c,bbCopyError
-    jp bbRegsReady
 bbFastFetch:
+    dec a
+    jp z,bbScalarFast
     ld hl,BANK_FRAME_REGS
     ld de,bbRegs
     ld b,MX_REGS
@@ -90,42 +44,31 @@ bbRegsReady:
     cp 5
     ld a,5
     jp z,bios_textDispatch
-    ld a,(bbMode)
-    dec a
-    jp z,bbInvoke
-    ld hl,(bbRegs)
-    ld (bbSource),hl
-    dec a ; После проверки скалярного пути A уже равно bbMode-1.
-    jp z,bbString
     jp bbUnsupported
 
-; Скалярные вызовы: адрес экрана и координаты — значения, не NEAR-буфер.
-bbInvoke:
+bbScalarFast:
+    ld de,BANK_FRAME_REGS
+    ld hl,bbScalarDone
+    push hl
+    ld hl,(MEM_NATIVE_CALL)
+    ld bc,6
+    add hl,bc
     ld a,(bbFunction)
     ld c,a
-    ld b,MXOS_GROUP_BIOS
-    ld de,bbRegs
-    call mx_call
-bbFinish:
-    ld a,(bbFast)
+    jp (hl)
+bbScalarDone:
+    push af
+    ld a,(BANK_PROFILE)
     or a
-    jp nz,bbReturnRegs
-    ; Возвращаем пакет до восстановления AF исполнителя.
-    ld hl,bbRegs
-    ld (bbCopy+1),hl
+    call nz,bankCommandWindow
     xor a
-    ld (bbCopy),a
-    ld a,(bbPage)
-    ld (bbCopy+3),a
-    ld hl,(bbPacketAddress)
-    ld (bbCopy+4),hl
-    ld hl,MX_REGS
-    ld (bbCopy+6),hl
-    ld hl,bbCopy
-    call bankCopyFar
-    call bankCommandWindow
-    jp c,bbCopyError
+    ld (BANK_FRAME_STATUS),a
+    pop af
+    ret
+
+bbFinish:
 bbReturnRegs:
+    call bankCommandWindow
     xor a
     ld (bbBusy),a
     ld (BANK_FRAME_STATUS),a
@@ -140,28 +83,6 @@ bbReturnRegs:
     pop af
     ret
 
-; Строки печатаются пачками до 256 байт. Нулевой байт не пересылается
-; отдельно, длинная строка не ограничена размером временного буфера.
-; HL результата остаётся указателем исходной страницы на завершающий нуль.
-bbString:
-    ld a,6
-    jp bios_textDispatch
-
-; HL=NEAR начала, BC=размер; CF=диапазон пересекает хвост/оборотов адреса.
-; HL/BC сохранены, AF/DE разрушены. Копирование никогда не читает за F800h.
-bbCheckRange:
-    push hl
-    add hl,bc
-    jp c,bbRangeDone
-    ld de,BANK_CLIENT_LIMIT
-    ld a,d
-    cp h
-    jp nz,bbRangeDone
-    ld a,e
-    cp l
-bbRangeDone:
-    pop hl
-    ret
 bbFetch:
     ld (bbCopy+1),hl
     ex de,hl
@@ -176,18 +97,6 @@ bbFetch:
     ld hl,bbCopy
     jp bankCopyFar
 
-bbReentered:
-    pop af
-    ld a,DOS_ERR_ACCESS
-    scf
-    ret
-bbCopyError:
-    xor a
-    ld (bbBusy),a
-bbBadArgument:
-    ld a,DOS_ERR_ARGUMENT
-    scf
-    ret
 bbUnsupported:
     ld a,DOS_ERR_UNSUPPORTED
     scf
@@ -197,6 +106,73 @@ bbUnsupported:
 ; 2 — ASCIIZ; 5 — запрос TEXT_PRINT.
 ; Дисковые функции, memcpy/strcmp, установка драйверов/хуков и memtop
 ; нельзя исполнять над NEAR-адресами клиента в контексте main.
+; A=source FAR bank, HL=source, BC=bytes (1..256). Trusted command stream.
+; Record: opcode, totalBytes, registerMask, packed words, inline data.
+; The sender owns record bounds, valid operation IDs and lifetimes.
+biosCommandBatch:
+    push af
+    dec bc
+    ld a,b
+    or a
+    inc bc
+    jp nz,bbBatchTooLarge
+    pop af
+    ld (bbPage),a
+    ld de,bbBuffer
+    push bc
+    call bbFetch
+    pop bc
+    ld hl,bbBuffer
+bbBatchLocal:
+    push hl
+    add hl,bc
+    ld (bbPacketAddress),hl
+    pop hl
+bbBatchRecord:
+    ld a,(hl)
+    or a
+    jp z,bbBatchDone
+    ld (bbFunction),a
+    inc hl
+    ld a,(hl)
+    inc hl
+    push hl
+    sub 2
+    ld e,a
+    ld d,0
+    add hl,de
+    ld (bbSource),hl
+    pop hl
+    DEFINE BATCH_REGS bbRegs
+    INCLUDE "../common/batch-args.inc"
+    UNDEFINE BATCH_REGS
+    ld a,(bbFunction)
+    ld c,a
+    ld de,bbRegs
+    ld hl,bbBatchNext
+    push hl
+    ld hl,(MEM_NATIVE_CALL)
+    DUP 6
+        inc hl
+    EDUP
+    jp (hl)
+bbBatchNext:
+    ld hl,(bbPacketAddress)
+    ex de,hl
+    ld hl,(bbSource)
+    call bios_cmp_hl_de
+    jp c,bbBatchRecord
+bbBatchDone:
+    call bankCommandWindow
+    xor a
+    ret
+
+bbBatchTooLarge:
+    pop af
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
+
 bbModes:
     DB 1 ; GETCH
     DB 0 ; TAPE_READ
@@ -242,8 +218,10 @@ bbModes:
     DB 1 ; PRINT_STRING_RAW_LIM_MAIN
     DB 5 ; TEXT_PRINT
     DB 1 ; SET_FONT_ENCODING
+    DB 1 ; COMMAND_BATCH
+    DB 0 ; PRINT_STRING_RAW_PSEUDO: intercepted by MEM
 bbModesEnd:
-    ASSERT bbModesEnd-bbModes == MXOS_BIOS_SET_FONT_ENCODING-0100h+1
+    ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-0100h+1
 bbBusy = io_vars.bbBusy
 bbFast = io_vars.bbFast
 bbPage = io_vars.bbPage

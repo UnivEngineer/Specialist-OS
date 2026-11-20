@@ -6,6 +6,7 @@
 IMAGE_FLAGS = IMAGE_FLAG_BANK
     ELSE
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
     ENDIF
     IFNDEF PIT_HZ
 PIT_HZ = 2000000
@@ -39,6 +40,8 @@ entry:
     di
     IFNDEF DISKBEN_BANK
     STORE_DE v_arguments
+    call appProgramDrive
+    ld (modulePath),a
     ENDIF
     ld hl,0
     add hl,sp
@@ -1008,6 +1011,9 @@ HIGH_SECTORS = (LEGACY_APP_MEMORY_END-highBuffer)/256
     ASSERT HIGH_SECTORS > 0
     ASSERT fatBuffer+256 <= highBuffer || highBuffer+HIGH_SECTORS*256 <= fatBuffer
 program_end = highBuffer + HIGH_SECTORS*256
+    IFNDEF DISKBEN_BANK
+IMAGE_MEM_END = program_end
+    ENDIF
 ; EQU-псевдонимы сохраняют адреса в .sym даже при задании через -D.
 diskbench_source = sectorBuffer
 diskbench_high = highBuffer

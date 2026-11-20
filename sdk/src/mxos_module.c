@@ -58,6 +58,40 @@ mxos_u16 mxos_resident_close(mxos_u16 handle)
 }
 mxos_u16 mxos_resident_kill(mxos_u16 handle) { return mxos_module_unload(handle); }
 
+mxos_u16 mxos_shell_resident(mxos_u16 key)
+{
+    MXOS_CALL r; r.operation=MXOS_DOS_RESIDENT;
+    r.af=MXOS_RESIDENT_SHELL_SET<<8; r.de=key; r.hl=r.bc=0;
+    return mxos_call(&r);
+}
+mxos_u16 mxos_shell_resume(void)
+{
+    MXOS_CALL r; r.operation=MXOS_DOS_RESIDENT;
+    r.af=MXOS_RESIDENT_SHELL_RESUME<<8; r.de=r.hl=r.bc=0;
+    return mxos_call(&r);
+}
+mxos_u16 mxos_directory_epoch(mxos_u16 *low,mxos_u16 *high)
+{
+    MXOS_CALL r; mxos_u16 af; r.operation=MXOS_DOS_RESIDENT;
+    r.af=MXOS_RESIDENT_DIRECTORY_EPOCH<<8; r.de=r.hl=r.bc=0;
+    af=mxos_call(&r);
+    if (!(af&MXOS_CF)) { *low=r.hl; *high=r.de; }
+    return af;
+}
+mxos_u16 mxos_drive_epochs(mxos_u8 *epochs)
+{
+    MXOS_CALL r; r.operation=MXOS_DOS_RESIDENT;
+    r.af=MXOS_RESIDENT_DIRECTORY_EPOCH<<8; r.hl=(mxos_u16)epochs;
+    r.bc=MXOS_RESIDENT_EPOCH_ALL<<8; r.de=0;
+    return mxos_call(&r);
+}
+mxos_u16 mxos_resident_release(void)
+{
+    MXOS_CALL r; r.operation=MXOS_DOS_RESIDENT;
+    r.af=MXOS_RESIDENT_RELEASE<<8; r.de=r.hl=r.bc=0;
+    return mxos_call(&r);
+}
+
 mxos_u16 mxos_fileops(mxos_u8 operation,MXOS_FILEOPS_JOB *job)
 {
     MXOS_CALL r; r.operation=MXOS_DOS_FILEOPS; r.hl=(mxos_u16)job;

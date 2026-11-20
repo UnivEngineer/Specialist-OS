@@ -14,13 +14,32 @@
 
     INCLUDE "../include/mxos.inc"
 
+    IFNDEF NC_BANKED
+NC_BANKED = 0
+    ENDIF
+    IFNDEF NC_STATUS_DEFER
+NC_STATUS_DEFER = 0
+    ENDIF
+    IF NC_BANKED
+NC_CATALOG_SLOTS = 4
+IMAGE_FLAGS = IMAGE_FLAG_BANK
+    INCLUDE "bank-api.inc"
+    INCLUDE "bank-bindings.inc"
+    ELSE
+NC_CATALOG_SLOTS = 2
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
+    ENDIF
 
     INCLUDE "../include/ui.inc"
 
 
 
+    IF NC_BANKED
+    ORG 00100h
+    jp ncBankEntry
+    ELSE
     ORG NC_LOAD_ADDR
+    ENDIF
 
 
 
@@ -56,189 +75,7 @@ NC_FILE_COLORS = ENABLE_COLOR
 
 
 
-; Предустановки цветов:
-
-; 0 = vinxru
-
-; 1 = новый
-
-; 2 = Norton Commander
-
-COLOR_PRESET = 1
-
-
-
-COLOR_CMDLINE    =  070h        ; Цвет командной строки
-
-COLOR_CMDSCREEN  =  COLOR_BIOS  ; Цвет командного экрана (когда панели спрятаны)
-
-
-
-    IF COLOR_PRESET == 0
-
-
-
-COLOR_BORDER     =  0F1h    ; Цвет рамки
-
-COLOR_PANELNAME  =  0A1h    ; Цвет заголовка панели (NAME)
-
-COLOR_FILE       =  0B1h    ; Цвет файлов
-
-COLOR_INFOLINE   =  0B1h    ; Цвет строки информации о текущем файле
-
-COLOR_CURSOR     =  0B0h    ; Цвет выделенного файла (инверсный)
-
-COLOR_DIALOG     =  007h    ; Цвет окон диалогов F1-F9
-
-COLOR_DIALOG_ERR =  047h    ; Цвет текста на окне с сообщением об ошибке
-
-COLOR_INFOHEADER =  0A1h    ; Заголовок информационной панели
-
-COLOR_INFONUMBER =  0E1h    ; Цифры на информационной панели
-
-COLOR_INFOTEXT   =  0F1h    ; Текст на информационной панели
-
-COLOR_HELP_F     =  040h    ; Цвет функциональных клавиш в строке подсказки
-
-COLOR_HELP_TEXT  =  071h    ; Цвет текста в строке подсказки
-
-
-
-    ELSEIF COLOR_PRESET == 1
-
-
-
-COLOR_BORDER     =  0F1h    ; Цвет рамки
-
-COLOR_PANELNAME  =  0E1h    ; Цвет заголовка панели (NAME)
-
-COLOR_FILE       =  0B1h    ; Цвет файлов
-
-COLOR_INFOLINE   =  0B1h    ; Цвет строки информации о текущем файле
-
-COLOR_CURSOR     =  030h    ; Цвет выделенного файла (инверсный)
-
-COLOR_DIALOG     =  007h    ; Цвет окон диалогов F1-F9
-
-COLOR_DIALOG_ERR =  047h    ; Цвет текста на окне с сообщением об ошибке
-
-COLOR_INFOHEADER =  0E1h    ; Заголовок информационной панели
-
-COLOR_INFONUMBER =  0E1h    ; Цифры на информационной панели
-
-COLOR_INFOTEXT   =  0F1h    ; Текст на информационной панели
-
-COLOR_HELP_F     =  060h    ; Цвет функциональных клавиш в строке подсказки
-
-COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подсказки
-
-
-
-    ELSE
-
-
-
-COLOR_BORDER     =  0B1h    ; Цвет рамки
-
-COLOR_PANELNAME  =  0E1h    ; Цвет заголовка панели (NAME)
-
-COLOR_FILE       =  0B1h    ; Цвет файлов
-
-COLOR_INFOLINE   =  0B1h    ; Цвет строки информации о текущем файле
-
-COLOR_CURSOR     =  030h    ; Цвет выделенного файла (инверсный)
-
-COLOR_DIALOG     =  007h    ; Цвет окон диалогов F1-F9
-
-COLOR_DIALOG_ERR =  047h    ; Цвет текста на окне с сообщением об ошибке
-
-COLOR_INFOHEADER =  0B1h    ; Заголовок информационной панели
-
-COLOR_INFONUMBER =  0E1h    ; Цифры на информационной панели
-
-COLOR_INFOTEXT   =  0B1h    ; Текст на информационной панели
-
-COLOR_HELP_F     =  070h    ; Цвет функциональных клавиш в строке подсказки
-
-COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подсказки
-
-
-
-    ENDIF
-
-
-
-;---------------------------------------------------------------------------
-
-; Макросы
-
-;---------------------------------------------------------------------------
-
-
-
-; Когда цвет включен, макрос вставляет такой код
-
-    MACRO COLOR x
-
-        IF ENABLE_COLOR
-
-            IF x == COLOR_INFOTEXT
-
-                call ncColorText
-
-            ELSEIF x == COLOR_INFONUMBER
-
-                call ncColorNumber
-
-            ELSEIF x == COLOR_CMDLINE
-
-                call ncColorCommand
-
-            ELSEIF x == COLOR_DIALOG
-
-                call ncColorDialog
-
-            ELSEIF x == COLOR_FILE
-
-                call ncColorFile
-
-            ELSE
-
-                ld a, x
-
-                ld (IO_COLOR), a
-
-                ld (ncCurrentColor), a
-
-            ENDIF
-
-        ENDIF
-
-    ENDM
-
-
-
-; Макрос для нахождения координат строки длиной W, отцентрированной горизонтально
-
-    MACRO CENTER_LINE w, y
-
-        ld a,w
-
-        ld l,y
-
-        call ncCenterLine
-
-    ENDM
-
-
-
-;---------------------------------------------------------------------------
-
-; Код
-
-;---------------------------------------------------------------------------
-
-
+    INCLUDE "style.inc"
 
     INCLUDE "start.inc"     ; Продолжается в main
 
@@ -280,13 +117,11 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
 
     INCLUDE "overwrite.inc"
 
-    DEFINE DOS_ERROR_UI
 
     INCLUDE "../include/errors.inc"
 
-    UNDEFINE DOS_ERROR_UI
 
-    INCLUDE "printInvSelFile.inc"
+
 
     INCLUDE "butF8.inc"
 
@@ -308,17 +143,20 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
 
     INCLUDE "printInfoLine.inc"
 
-    DEFINE UI_NO_TOOLBAR
 
+    IF NC_BANKED
+    INCLUDE "bank-graphics.inc"
+    ELSE
     DEFINE UI_PIXEL_RECT
 
     DEFINE UI_BYTE_RECT
 
     DEFINE UI_BITMAP
 
+    DEFINE UI_TEXT_RECT
     IF NC_BITMAP_SCROLL
 
-    DEFINE UI_TEXT_RECT
+
 
     IF NC_FILE_COLORS
 
@@ -334,7 +172,6 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
 
     INCLUDE "../include/ui.inc"
 
-    UNDEFINE UI_NO_TOOLBAR
 
     UNDEFINE UI_PIXEL_RECT
 
@@ -349,6 +186,8 @@ COLOR_HELP_TEXT  =  030h    ; Цвет текста в строке подска
     IF NC_FILE_COLORS
 
     UNDEFINE UI_TEXT_RECT_COLORS
+
+    ENDIF
 
     ENDIF
 
@@ -424,15 +263,52 @@ inverseRect = uiInverseRect
 
 
 
+    IF NC_BANKED
+    INCLUDE "bank-runtime.inc"
+    ELSE
     INCLUDE "memory.inc"
+    ENDIF
 
     INCLUDE "../include/ui-text-align.inc"
     INCLUDE "align.inc"
+    IF ENABLE_COLOR
     DEFINE UI_BUTTON_COLOR ncSetColor
+    ENDIF
     INCLUDE "../include/ui-button.inc"
+    DEFINE UI_MODAL_SNAPSHOT ncModalSnapshot
+    DEFINE UI_MODAL_BUTTON_DRAW ncDrawButton
+    DEFINE UI_MODAL_KEYS
+    INCLUDE "../include/ui-modal.inc"
+    INCLUDE "modal.inc"
+    INCLUDE "../include/file-io.inc"
+    IF !NC_BANKED
+    INCLUDE "../include/ui-scrollbar.inc"
+    ENDIF
+    IF NC_BANKED
+    DEFINE UI_HELP_HANDLE ncGfxHandle
+    DEFINE UI_HELP_REGS ncGfxRegisters
+    DEFINE UI_HELP_BANK ncBankNumber
+    DEFINE UI_HELP_PIXELS 0
+    DEFINE UI_HELP_KEY uiModalGetch
+    INCLUDE "../include/ui-bank-help.inc"
+    ELSE
+    DEFINE UI_HELP_OPEN ncModalOpen
+    DEFINE UI_HELP_KEY uiModalGetch
+    DEFINE UI_HELP_CLOSE ncDialogClose
+    DEFINE UI_HELP_COLOR ncHelpColor
+    DEFINE UI_HELP_BUFFER vars.pathArg
+    INCLUDE "../include/ui-help.inc"
+    ASSERT MAX_PATH >= UI_HELP_BLOCK
+    ENDIF
+    INCLUDE "help.inc"
     INCLUDE "layout.inc"
+    INCLUDE "toolbar-text.inc"
 
+    IF NC_BANKED
+    INCLUDE "bank-toolbar.inc"
+    ELSE
     INCLUDE "toolbar.inc"
+    ENDIF
 
 
 
@@ -444,13 +320,17 @@ inverseRect = uiInverseRect
 
 
 
+    IF NC_BANKED
+aCommanderVer:      DB "Commander 3.0 BANK",0
+    ELSE
 aCommanderVer:      DB "Commander 3.0",0
+    ENDIF
 
 aCopyright:         DB "(C) Omsk/SPb 1992-2026",0
 
 aFileProtected:     DB "System or read-only file",0
 
-aChooseDrive:       DB "Drive",0
+aChooseDrive:       DB "Choose drive",0
 
 aDeleteFrom:        DB "Delete from A:",0
 
@@ -492,7 +372,7 @@ aRenameOn:          DB "Rename on ",0
 
 aMainRAM:           DB "bytes MAIN RAM",0
 
-aMainFree:          DB "bytes MAIN free",0
+aMainFree:          DB "bytes MAIN max",0
 
 aBankRAM:           DB "KiB BANK RAM",0
 
@@ -506,11 +386,11 @@ aDiskTotal:         DB "KiB total on ",0
 
 aDiskFree:          DB "KiB free in ",0
 
-aVolumeLabel:       DB "Label ",0
+aVolumeLabel:       DB "Label",0
 
-aDiskDriver:        DB "Driver ",0
+aDiskDriver:        DB "Driver",0
 
-aDiskTechnology:    DB "Type ",0
+aDiskTechnology:    DB "Type",0
 
 aTypeROM:           DB "ROM",0
 
@@ -528,7 +408,7 @@ aNotFormatted:      DB " ","is not formatted",0
 
 
 
-aEditor:            DB "A:",05Ch,"E.COM",0Dh      ; терминатором тут должно быть 0Dh
+aEditor:            DB "A:",05Ch,"EDIT.COM -NC",0Dh      ; терминатором тут должно быть 0Dh
 
 
 
@@ -564,40 +444,11 @@ g_infoDividers:
 
             G_LINE   0, 4, 31, 184            ; 1, 1Fh, 90h, 16h, 0Fh, 0F0h
 
-            G_LINE   0, 4, 112, 184
+            G_LINE   0, 4, 104, 184
 
-            G_LINE   0, 4, 160, 184
+            G_LINE   0, 4, 140, 184
 
-            DB 0
-
-
-
-g_chooseDrive:
-
-            G_MODAL_WINDOW 0, 40, 85, 112, 50       ; 2, 55h, 95h, 02Ch, 0Ch
-
-            G_LINE   0, 44, 103, 104          ; 1, 67h, 95h, 0Ch, 0Fh, 0F0h
-
-            DB 0
-
-
-
-g_window1:
-
-            G_MODAL_WINDOW 80h, 64, 80, 256, 64    ; 82h, 50h, 9Eh, 1Fh, 12h
-
-            G_LINE   80h, 68, 98, 248
-            G_LINE   80h, 68, 116, 248        ; 81h, 62h, 9Eh, 12h, 0Fh, 0F0h
-
-            DB 0
-
-
-
-g_window2:
-
-            G_MODAL_WINDOW 80h, 104, 114, 176, 37   ; 82h, 72h, 9Dh, 1Fh, 14h
-
-            G_LINE   80h, 108, 132, 168       ; 81h, 84h, 9Dh, 14h, 0Fh, 0F0h
+            G_LINE   0, 4, 204, 184
 
             DB 0
 
@@ -809,6 +660,10 @@ cacheSlotA      DB    0FFh     ; Номер общего каталога; FF �
 
 cacheSlotB      DB    0FFh
 
+panelFrameA     DB    0         ; 1 while the painted file panel is truncated.
+
+panelFrameB     DB    0
+
 cacheSortA      DB    0
 
 cacheSortB      DB    0
@@ -891,13 +746,20 @@ NC_TOOLBAR_CACHE = varsEnd
 
 NC_TOOLBAR_CACHE_BYTES = 48*9
 
+    IF NC_BANKED
+FILE_INDEX_A = (varsEnd + 255) & 0FF00h ; Toolbar bitmaps use client-owned MAIN memory.
+    ELSE
 FILE_INDEX_A = (NC_TOOLBAR_CACHE + 2*NC_TOOLBAR_CACHE_BYTES + 255) & 0FF00h
+    ENDIF
 
 FILE_INDEX_B = FILE_INDEX_A + 256
 
 CATALOG_INDEX_A = FILE_INDEX_B + 256
 
-NC_SORT_KEYS = CATALOG_INDEX_A + 3 * 256
+NC_SORT_KEYS = CATALOG_INDEX_A + NC_CATALOG_SLOTS * 256
+    IF NC_BANKED
+ncQSnapshot = NC_SORT_KEYS ; Palette runs reuse idle radix scratch; no DLL BSS.
+    ENDIF
 
 NC_SORT_RANKS = NC_SORT_KEYS + 11 * 256
 
@@ -909,21 +771,28 @@ FILE_CACHE_A = NC_SORT_SCRATCH + 768
 
 NC_DIALOG_PIXELS = NC_SORT_KEYS
 
-NC_DIALOG_COLORS = NC_SORT_KEYS+2560
+NC_DIALOG_COLORS = NC_SORT_KEYS+3072
 
 NC_DIALOG_COLOR_BYTES = FILE_CACHE_A-NC_DIALOG_COLORS
 
-    ASSERT NC_DIALOG_COLOR_BYTES >= 1536
+    ASSERT NC_DIALOG_COLOR_BYTES >= 1024
 
 FILE_CACHE_B = FILE_CACHE_A + FILE_CACHE_BYTES
 
 FILE_CACHE_C = FILE_CACHE_B + FILE_CACHE_BYTES
 
-NC_END = FILE_CACHE_C + FILE_CACHE_BYTES
+NC_END = FILE_CACHE_A + NC_CATALOG_SLOTS * FILE_CACHE_BYTES
 
-NC_MIN_CATALOG_CAPACITY = 32 ; Keep NC usable with the 12 KiB font engine.
+NC_MIN_CATALOG_CAPACITY = P_FILE_LIST_H ; One full column per catalog at minimum.
 
-NC_MIN_END = FILE_CACHE_A + 3 * (NC_MIN_CATALOG_CAPACITY + 1) * FILE_INFO_SIZE
+NC_MIN_END = FILE_CACHE_A + NC_CATALOG_SLOTS * (NC_MIN_CATALOG_CAPACITY + 1) * FILE_INFO_SIZE
+
+    IF !NC_BANKED
+; Fixed state, toolbar, indices and shared sort/dialog scratch are ordinary
+; image BSS. Only the two variable-capacity catalogs use the MAIN heap.
+IMAGE_BSS_SIZE = FILE_CACHE_A-vars
+IMAGE_MIN_HEAP_SIZE = NC_MIN_END-FILE_CACHE_A
+    ENDIF
 
     ASSERT (FILE_INDEX_A & 0FFh) == 0 && (FILE_INDEX_B & 0FFh) == 0
 
@@ -937,13 +806,21 @@ NC_MIN_END = FILE_CACHE_A + 3 * (NC_MIN_CATALOG_CAPACITY + 1) * FILE_INFO_SIZE
 
 
 
+    IF NC_BANKED
+NC_END_MAX = 0D000h
+    ELSE
 NC_END_MAX = APP_MEMORY_END
+    ENDIF
 
     ; Catalog capacity is selected at startup for the actual memTop.
 
     ASSERT NC_MIN_END <= NC_END_MAX
 
+    IF NC_BANKED
+    ASSERT NC_END < ncBankQueue
+    ELSE
     ASSERT NC_END_MAX <= bios_vars
+    ENDIF
 
 
 

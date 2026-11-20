@@ -47,6 +47,13 @@ keepCursorForKey:
             ld      (vars.scrollCursorKept), a
             ret c
             ld      a, c
+            cp      2
+            jp nz,  kcf_CheckKey
+            ld      a,(ncShiftState)
+            or      a
+            jp nz,  kcf_Keep        ; Disk info changes only the opposite panel.
+            jp      kcf_Erase       ; Shift-F3 opens help over the file panels.
+kcf_CheckKey:
             cp      0Bh
             jp c,   kcf_Erase       ; F1-F8, LEFT, TAB, END
             jp z,   kcf_Keep        ; неиспользуемый код

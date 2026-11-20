@@ -47,7 +47,7 @@ ncStopObserver:
     ld a,CLI_OP_OBSERVER
     MXOS_CALL MXOS_DOS_CLI
     ret
-; После тихой команды: приглашение обновляется сразу, панели — по маске.
+; После тихой команды панели обновляются по маске.
 ncRefreshDirty:
     call ncDialogClose
     ; A quiet typed command keeps its selection unless this panel is dirty or
@@ -68,8 +68,7 @@ ncRefreshDirty:
 ncRefreshCursorMask:
     and 1
     call nz,ncCommandHideCursor
-    call updateCommandPath
-    call clearCmdLine
+    call resetCmdLine
     ld a,1
     ld (ncSelectiveRefresh),a
     ld a,(ncDirtyMask)
@@ -113,7 +112,11 @@ ncDirtyFrames:
     ld (ncListMask),a
     ld (ncSelectiveRefresh),a
     ld (ncKeepFrames),a
+    ; COPY/MOVE may have left DOS in the opposite panel's directory.
+    ; Cache the prompt only after restoring the active panel's context.
+    call restoreActiveDirectory
     call updateCommandPath
+    call redrawCommandLine
     ld a,(ncCommandCursorKept)
     or a
     jp z,mainLoop

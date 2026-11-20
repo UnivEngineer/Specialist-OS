@@ -45,7 +45,7 @@ fileopsControl:
     ld a,(fileopsOp)
     add a,4
 fileopsControlCall:
-    call DOS_BANK_DRIVER_ADDR
+    call DOS_FILEOPS_ADDR
     jp fileopsPublish
 fileopsBegin:
     ld a,0FFh
@@ -56,11 +56,17 @@ fileopsBegin:
     ld bc,MAX_PATH
     call nz,kdRange
     jp c,kdBad
+    ld a,(KD_OBJECT+FILEOPS_JOB.mode)
+    cp FILEOPS_DELETE
+    jp z,fileopsBeginValid
+    jp nc,kdBad
+    ; A packed transfer request must carry an actual destination leaf.
+    ld a,(KD_OBJECT+FILEOPS_JOB.request+FILE_COPY_REQUEST.destination)
+    cp ' '+1
+    jp c,kdBad
+fileopsBeginValid:
     call fileopsEnsure
     jp c,fileopsApiError
-    ld a,(KD_OBJECT+FILEOPS_JOB.mode)
-    cp FILEOPS_DELETE+1
-    jp nc,kdBad
     ld hl,(fileopsNext)
     ld a,h
     or l
@@ -82,11 +88,11 @@ fileopsBegin:
     ld (fileopsPublic),a
     ld hl,KD_OBJECT
     ld a,4
-    call DOS_BANK_DRIVER_ADDR
+    call DOS_FILEOPS_ADDR
 fileopsPublish:
     ld hl,KD_OBJECT
     ld a,9
-    call DOS_BANK_DRIVER_ADDR
+    call DOS_FILEOPS_ADDR
     ld a,(fileopsOp)
     cp FILEOPS_CLOSE
     jp nz,fileopsStore
@@ -102,7 +108,7 @@ fileopsStore:
     jp z,fileopsNoPath
     push hl
     ld a,12
-    call DOS_BANK_DRIVER_ADDR
+    call DOS_FILEOPS_ADDR
     push hl
     ld hl,fileopsPathStamp
     cp (hl)
@@ -120,7 +126,7 @@ fileopsNoPath:
     ld hl,(kdClientObject)
     ex de,hl
     ld hl,KD_OBJECT
-    ld bc,FILEOPS_JOB.request ; Common reply is the compact 24-byte header.
+    ld bc,FILEOPS_JOB.request ; Common reply is the compact 26-byte header.
     ld a,(KD_OBJECT+FILEOPS_JOB.state)
     cp FILEOPS_CONFIRM
     jp nz,fileopsReply
@@ -150,7 +156,7 @@ fileopsReleaseOwner:
     ret nz
     push bc
     ld a,8
-    call DOS_BANK_DRIVER_ADDR
+    call DOS_FILEOPS_ADDR
     xor a
     ld (fileopsPublic),a
     ld (fileopsActive),a

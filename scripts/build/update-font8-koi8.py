@@ -26,6 +26,7 @@ def build():
     # Text has one blank left column; graphics keep full-width joins.
     for code in list(range(0x80))+list(range(0xc0,0x100))+[0xa3,0xb3]:
         font[code*8:code*8+8]=bytes(b>>1 for b in font[code*8:code*8+8])
+    font[0x09*8:0x0a*8]=bytes.fromhex('00 11 09 7d 09 11 01 00')
     return bytes(font)
 
 if __name__=='__main__':

@@ -1,18 +1,22 @@
 ; Диалог NC использует общий редактор с полем фиксированной ширины.
 ; DE=конец начальной строки vars.input; A=Enter/Escape, строка ASCIIZ.
 input:
+    IF !NC_BANKED
             ld a,COLOR_DIALOG
             call ncInputHookBegin
+    ENDIF
             ld a,1
             ld (bios_vars.inverse),a
-            ld hl,03C6Eh
+            call ncModalInputCursor
             ld (bios_vars.cursorY),hl
             ld hl,vars.input
             ld a,(ncInputChars)
             ld c,a
             ld b,1
             call lineEdit
+    IF !NC_BANKED
             call ncInputHookEnd
+    ENDIF
             push af
             ld hl,0
             ld (bios_vars.inverse),hl
@@ -35,8 +39,10 @@ ncReadKey:
             ld a,(vars.cmdCapacity)
             ld c,a
             ld b,15
+    IF !NC_BANKED
             ld a,COLOR_CMDLINE
             call ncInputHookBegin
+    ENDIF
             ld a,(ncCommandEditResume)
             or a
             jp z,ncCommandEditBegin
@@ -47,7 +53,9 @@ ncReadKey:
 ncCommandEditBegin:
             call lineEdit
 ncCommandEditDone:
+    IF !NC_BANKED
             call ncInputHookEnd
+    ENDIF
             push af
             ; Panel movement cannot enter another editor. Reuse the prompt's
             ; position/offset on the next read instead of restarting at End.

@@ -108,6 +108,8 @@ fpSkipped:
     xor a
     ld (foJob.known),a
 fpReady:
+    ld hl,(foJob.files)
+    ld (foJob.totalFiles),hl
     xor a
     ld (foJob.phase),a
     ld hl,0
@@ -473,6 +475,8 @@ fpSkip: DB 0
 fpOpen: DB 0
 
 fpSingleFile:
+    ld hl,1
+    ld (foJob.totalFiles),hl
     ld hl,foJob.request.source+FILE_DESCRIPTOR.size
     ld de,foJob.total
     ld bc,4

@@ -105,7 +105,7 @@ ncStatePathValue:
     MXOS_CALL MXOS_DOS_CLI
     jp c,ncStatePathDone
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld hl,state.panelA_drive
     call writeBytePanel
     call savePanelDirectory
@@ -185,7 +185,7 @@ saveState:
     or a
     ret nz
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (ncStateDrive),a
     ld a,(state.activePanel)
     ld (ncStateActive),a
@@ -230,7 +230,7 @@ saveState:
     ld hl,NC_SORT_KEYS
     ld (ncStateIO+FILE_PATH_IO.buffer),hl
     ld hl,ncStateIO
-    MXOS_CALL MXOS_DOS_FILE_SAVE_PATH
+    call fileWriteAll
     jp c,ncStateDisable
     ld hl,ncStateIO+FILE_PATH_IO.descriptor
     ld bc,0201h ; Hide the generated state from ordinary directory listings.

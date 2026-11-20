@@ -22,6 +22,7 @@ FONT_LOWER_BYTES = FONT_MODE*4096
     jp setEncoding
     jp scalar
     jp service
+    jp fontPseudoDraw
     DS FONT_ENGINE_HEADER-$,0
     DB "FNT1",FONT_ENGINE_VERSION,6,8,FONT_MODE
     DW imageEnd-FONT_ENGINE_BASE,FONT_ADDR
@@ -30,7 +31,6 @@ FONT_LOWER_BYTES = FONT_MODE*4096
 initializerName: DB "Init6.dll",0
 printChar2 = bios_fontControl
 printCharBody = bios_fontControl
-printChar_c0A = bios_fontNewLine
 calcCursorAd_0 = bios_fontPosition
     INCLUDE "char.inc"
 printChar_real2:
@@ -41,7 +41,7 @@ printCharRawHelper:
     ld a,h
     cp 192
     ret c
-    jp bios_fontNewLine
+    jp fontLineEnd
     INCLUDE "string.inc"
     INCLUDE "packet6.inc"
     IF FONT_MODE == 2
@@ -57,6 +57,10 @@ scalar = scalarPre.draw
     ENDIF
     INCLUDE "install.inc"
     INCLUDE "bench.inc"
+PSEUDO_STEP = 3
+PSEUDO_WRAP = 190
+    INCLUDE "pseudo.inc"
+    FONT_PSEUDO_ENTRY
     ASSERT $ <= FONT_ADDR
     DS FONT_ADDR-$,0
 fontData:
@@ -65,6 +69,7 @@ fontData:
     ELSE
     INCBIN "../../bin/fonts/paged-font.bin"
     ENDIF
+    FONT_PSEUDO_TAIL
 imageEnd:
     ASSERT $ <= FONT_ENGINE_END
 

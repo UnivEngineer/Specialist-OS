@@ -1,5 +1,4 @@
 ; Резидентные данные и строки MXOS.
-    INCLUDE "volumeData.inc"
 
 v_findCluster:      DW 0  ; Используется в fileFindClusterFirst/fileFindClusterNext
 v_fileFirstCluster: DW 0  ; Первый кластер созданного файла
@@ -18,9 +17,11 @@ v_dirTotalFiles     DW 0  ; Используется в fileList
 ; В будущем может быть заменен на реальное время с RTC или таймера.
 v_fakeSystemTime:   DW 0
 
-pathNcCom:          DB "A:",05Ch,"NC.COM",0
+    IFNDEF BANKED_DOS_BUILD
+pathNcCom:          DB "A:",05Ch,"NC_MN.COM",0
 pathAutoexecBat:    DB "A:",05Ch,"AUTOEXEC.BAT",0
 pathFormatBat:      DB "A:",05Ch,"FORMAT.BAT",0
+    ENDIF
 
 
 

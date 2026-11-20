@@ -23,7 +23,7 @@ Dir_DirDisk:
         LD    BC, 0                 ; начинаем с 0 файла
         LD    HL, v_fileInfo.name   ; адрес буфера
         LD    DE, DIR_BUFFER_SIZE   ; размер буфера в штуках
-        CALL  bios_fileList
+        MXOS_CALL MXOS_DOS_FILE_LIST
 DirDiskLoop:
         LD    A,(HL)            ; первый символ имени файла
         INC   A
@@ -90,7 +90,7 @@ Dir_B:  ; адрес начала - в дескриптор
         LD HL,(v_dumpAddress)
         EX DE,HL
         POP HL
-        CALL  bios_fileCreate
+        CALL  fileWriteDescriptor
 
         ; в случае ошибки печатаем надпись "МАЛ ДИСК"
         LD    HL,txtSmallDisk
@@ -135,7 +135,7 @@ Dir_V:  ; запоминаем первый параметр директивы 
         PUSH  DE
 
         ; загружаем файл по адресу, указанному в директиве
-        CALL  bios_fileLoad2
+        CALL  fileReadDescriptor
 
         ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
         PUSH  AF
@@ -148,9 +148,7 @@ Dir_V:  ; запоминаем первый параметр директивы 
         ; получение информации о файле
         PUSH  DE
         LD    HL,v_fileDescr.name
-        CALL  bios_fileLoadInfo
-
-        ; размер файла
+        MXOS_CALL MXOS_DOS_FILE_LOAD_INFO ; размер файла
         LD    HL,(v_fileDescr.size)
         EX    DE,HL
 
@@ -169,14 +167,13 @@ Dir_V:  ; запоминаем первый параметр директивы 
 Dir_U:
         CALL EnterFileName
         RET   C
-        CALL bios_imageOpen
+        CALL fileReadImage
         RET C
-        PUSH DE
-        PUSH BC
-        CALL bios_fileLoad
+        LD H,B
+        LD L,C
+        PUSH HL
+        EX DE,HL
         POP DE
-        POP HL
-        RET C
         PUSH HL
         CALL printHexWordHL
         POP HL
@@ -194,7 +191,7 @@ Dir_Y:  PUSH  HL
         EX    (SP),HL
         LD    B,L
         POP   HL
-        CALL  bios_fileGetSetAttr   ; установка байта атрибутов файла
+        MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR ; установка байта атрибутов файла
         LD    HL,txtNoFile
         CALL  C,bios_printString    ; если файл не найден - вывести сообщение
         RET
@@ -206,7 +203,7 @@ Dir_Q:
         CALL  EnterFileName         ; ввод имени файла
         RET   C
         LD    C,02H                 ; режим для фаункции bios_fileGetSetAttr - чтение байта атрибутов файла
-        CALL  bios_fileGetSetAttr   ; чтение байта атрибутов файла
+        MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR ; чтение байта атрибутов файла
         PUSH  AF                    ; результат и флаг ошибки (cf) - в стек
         LD    HL,txtNoFile
         CALL  C,bios_printString    ; если файл не найден - вывести сообщение
@@ -227,7 +224,7 @@ EnterFileName:
         LD    DE,INPUT_BUF_END
         CALL  bios_input
         LD    DE,v_fileDescr.name   ; буфер для подготовленного имени файла
-        CALL  bios_fileNamePrepare  ; подготавливаем имя файла
+        MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE ; подготавливаем имя файла
         EX    DE,HL                 ; HL = подготовленное имя файла
         RET
 

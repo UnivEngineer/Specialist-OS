@@ -73,12 +73,30 @@ lf_ClampCount:
             ld c,a
             ld a,d
             or a
-            jp nz,lf_CapCount
+            jp nz,lf_TooLarge
             ld a,e
             cp c
-            jp c,lf_StoreCount
+            jp c,lf_Fits
+            jp z,lf_Fits
+lf_TooLarge:
+            call ncCatalogRememberTotal
+            call ncCatalogActiveOverflow
+            ld a,(hl)
+            or a
+            jp nz,lf_CapCount
+            ld (hl),1
 lf_CapCount:
             ld a,c
+            jp lf_StoreCount
+lf_Fits:
+            push af
+            call ncCatalogActiveOverflow
+            ld a,(ncCatalogReadOk)
+            or a
+            jp z,lf_FitCount ; Failed reads keep the warning history on retry.
+            ld (hl),0
+lf_FitCount:
+            pop af
 lf_StoreCount:
             ld      hl, state.panelA_filesCnt
             call    writeBytePanel
@@ -88,6 +106,9 @@ lf_StoreCount:
 lf_Cached:
             call ncStateSelect
             call ncParentSelect
+; Scroll uses the indices of the view already on screen. It changes only
+; the window into that view, so no drive or directory selection is needed.
+lf_UpdateViewport:
             ; Удаление могло сократить каталог. Пустая панель имеет позиции 0.
             ld      hl, state.panelA_filesCnt
             call    readBytePanel
@@ -126,6 +147,23 @@ lf_View:
             inc a
             call writeBytePanel
 lf_ViewReady:
+            ; A wider panel must not retain a short tail from the old layout.
+            ; Clamp to max(0, count-visible) after keeping the cursor in view;
+            ; moving the start backwards here cannot hide a valid cursor.
+            ld b,a
+            ld hl,state.panelA_filesCnt
+            call readBytePanel
+            call ncSubVisible
+            jp nc,lf_ViewLimit
+            xor a
+lf_ViewLimit:
+            cp b
+            jp nc,lf_ViewportReady
+            ld hl,state.panelA_firstFile
+            call writeBytePanel
+            ld b,a
+lf_ViewportReady:
+            ld a,b
             ; Видимое окно состоит из байтовых индексов, без копирования записей.
             ld e,a
             ld d,0

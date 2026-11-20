@@ -10,11 +10,11 @@
 #   CPU + соседний I80: CPU содержит адреса загрузки и входа (два hex-числа ASCII), I80 — код.
 #   CPU без I80: сырой код, загрузка и вход 0000h.
 #   RKS: адреса и нагрузка из стандартного контейнера; сумма проверяется.
-#   COM/EXE MXOS2: адреса и нагрузка из 16-байтного заголовка; суммы проверяются.
+#   COM/EXE MXOS2: адреса и нагрузка из 32-байтного заголовка v2; суммы проверяются.
 #   BIN/I80/старый сырой COM/EXE: код без заголовка; адрес загрузки и входа задаёт адрес_RAW (0 по умолчанию).
 #
 # Целевой формат задаёт расширение имени в первом столбце:
-#   COM/EXE: общий контейнер MXOS2 — заголовок 16 байт (загрузка, вход, размер, суммы) + нагрузка.
+#   COM/EXE: общий контейнер MXOS2 — заголовок 32 байта (загрузка, вход, размер, суммы) + нагрузка.
 #   COM исполняет DOS; EXE передаётся RUN через CLI.EXT, без ключа RUN показывает меню среды.
 #   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через CLI.EXT запускается RUN, по умолчанию -MON.
 #   При RKS -> COM/EXE заголовок и сумма RKS заменяются контейнером MXOS2; результат не является RAW.
@@ -36,7 +36,6 @@ Almaz-2/STD/Almaz2.rks        games/Almaz-2/Almaz2-optimized.rks
 Almaz-2/STD/Almaz2-8.rks      games/Almaz-2/Almaz2-8color.rks
 Almaz-2/STD/Dash2.rks         games/DASH2.RKS
 Almaz-2/RAMFOS/Almaz2RF.exe   games/Almaz-2/Almaz2-ramfos-optimized.cpu
-Almaz-2/RAMFOS/Almaz2RF.bat   games/Almaz-2/Almaz2-ramfos-optimized.bat
 ARCANOID.RKS     games/ARCANOID.RKS
 Ball.exe         games/BALL.RKS
 Ball.bat         programs/Ball.bat
@@ -69,7 +68,8 @@ DUNGEON2.RKS     games/DUNGEON2.RKS
 DUSHMAN.RKS      games/DUSHMAN.RKS
 DUSHMAN2.RKS     games/DUSHMAN2.RKS
 DwnEarth.rks     games/DwnEarth.rks
-Elite.txt        games/Elite.txt
+Elite/Elite.exe  games/Elite/Elite-jcuken.rks
+Elite/Elite.txt  games/Elite.txt
 EXOLON.RKS       games/EXOLON.RKS
 FOOTBALL.RKS     games/FOOTBALL.RKS
 GOLD.RKS         games/GOLD.RKS
@@ -196,6 +196,9 @@ BENCH/FontBen/EngineB.dll      ../bin/ENGINEB.cpu 0x2000
 BENCH/FontBen/EngineS.dll      ../bin/ENGINES.cpu 0x2000
 BENCH/FontBen/README.TXT       benchmarks/fontben/Readme.txt
 BENCH/FontBen/FontRot.dll    ../bin/fonts/FontRot.cpu    0x2000
+BENCH/FontBen/RotRows.dll    ../bin/fonts/RotRows.cpu    0x2000
+BENCH/FontBen/Rot8Quad.dll   ../bin/fonts/Rot8Quad.cpu   0x2000
+BENCH/FontBen/Rot8Strm.dll   ../bin/fonts/Rot8Strm.cpu   0x2000
 BENCH/FontBen/FontPack.dll    ../bin/fonts/FontPack.cpu    0x2000
 BENCH/FontBen/FontFull.dll    ../bin/fonts/FontFull.cpu    0x2000
 BENCH/FontBen/FontKoi.dll    ../bin/fonts/FontKoi.cpu    0x2000

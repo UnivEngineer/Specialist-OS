@@ -25,6 +25,23 @@ activePanelOffset:
 ; на Y=4 и Y=6; над ними нет вертикальных штрихов и остатков старого пути.
 drawPanelTop:
 drawPanelHeader:
+    IF NC_BANKED
+            ld hl,09000h
+            call activePanelPos
+            ld de,panelHeaderLeft
+            ld bc,0109h
+            call ncTileColumn
+            inc h
+            ld de,panelHeaderMiddle
+            ld b,22
+            call ncTileColumn
+            ld a,h
+            add a,22
+            ld h,a
+            ld de,panelHeaderRight
+            ld b,1
+            call ncTileColumn
+    ELSE
             ld hl,09000h
             call activePanelPos
             ld b,24
@@ -53,6 +70,7 @@ drawPanelHeaderRow:
             dec b
             jp nz,drawPanelHeaderColumn
             ; Верх разделителя колонок входит в очищенную полосу заголовка.
+    ENDIF
             ld hl,state.panelA_info
             call readBytePanel
             or a
@@ -61,3 +79,50 @@ drawPanelHeaderRow:
 panelHeaderLeft:   DB 0,0,0,0,07Fh,040h,05Fh,050h,050h
 panelHeaderMiddle: DB 0,0,0,0,0FFh,0,0FFh,0,0
 panelHeaderRight:  DB 0,0,0,0,0FEh,2,0FAh,00Ah,00Ah
+
+; Repaint the frame and dividers without clearing the file list.
+ncUpdateCatalogFrame:
+            ld a,(state.activePanel)
+            call ncCatalogPanelOverflow
+            or a
+            jp z,ncCatalogFrameReady
+            cp 1
+            ld a,1
+            jp nz,ncCatalogFrameReady
+            ld (ncCatalogWarnPending),a
+ncCatalogFrameReady:
+            ld b,a
+            ld hl,vars.panelFrameA
+            call readBytePanel
+            cp b
+            ret z
+            ld a,b
+            call writeBytePanel
+            call ncSetPanelBorder
+            ld hl,g_panelEdges
+            call draw
+            ; Side strokes replace whole bytes. Draw the divider ends after
+            ; them so the horizontal line can merge with the inner strokes.
+            jp drawPanelHeader
+
+ncResetPanelBorder:
+            xor a
+            ld hl,vars.panelFrameA
+            call writeBytePanel
+            COLOR COLOR_BORDER
+            ret
+ncSetPanelBorder:
+            ld hl,vars.panelFrameA
+            call readBytePanel
+            call ncBorderColor
+    IF ENABLE_COLOR
+            jp ncSetColor
+    ELSE
+            ret
+    ENDIF
+ncBorderColor:
+            or a
+            ld a,COLOR_BORDER
+            ret z
+            ld a,COLOR_TRUNCATED
+            ret

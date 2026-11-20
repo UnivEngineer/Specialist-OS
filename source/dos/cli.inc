@@ -29,7 +29,7 @@ cliAssociationQuery:
     ld de,cliAssociationBuffer
     ld bc,512
     call fileAssociation
-    ld hl,0
+    ex de,hl                ; borrowed command in the DOS bank, through CR/FF
     ret
 
     INCLUDE "commands.inc"

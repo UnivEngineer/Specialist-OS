@@ -109,9 +109,7 @@ def main():
     ld b,0
     ld a,MEM_OP_ARENA
     call dosMemoryService
-    jp nc,fail
-    cp MEM_ERROR_OWNER
-    jp nz,fail
+    jp c,fail
     ; Владение пулом DOS не требует модуля и сохраняется после очистки.
     ld a,4
     ld (memoryRamPages),a
@@ -192,15 +190,25 @@ dosRecords:
     DW DOS_SERVICE_ADDR,0
     DB 0,MODULE_OWNER_BASE
     DW DOS_SERVICE_ADDR,DOS_SERVICE_ADDR+1
+    DW 0
     DW 2
     DB 0,DOS_BANK_PAGE
     DW DOS_BANK_DRIVER_ADDR,0
     DB 0,MODULE_OWNER_BASE+1
     DW DOS_BANK_DRIVER_ADDR,DOS_BANK_DRIVER_ADDR+1
+    DW 0
 '''
+    branches = []
+    def mark(match):
+        branches.append(match.group(0))
+        return match.group(0).replace('fail', 'fail_' + str(len(branches)))
+    body = re.sub(r'jp (?:n?[zc]),fail', mark, body)
+    marks = ''.join(f'fail_{index}:\n ld hl,{index}\n ld (0851Ch),hl\n jp fail\n'
+                    for index in range(1, len(branches)+1))
+    body += marks
     with tempfile.TemporaryDirectory(prefix='mxos-memory-') as folder:
         out = Path(folder)
-        src = imports + f'\n INCLUDE "{(ROOT / "source/include/mxos.inc").as_posix()}"\n ORG 08000h\n ld sp,08FDFh\n' + body + '\n END\n'
+        src = imports + f'\n INCLUDE "{(ROOT / "source/include/mxos.inc").as_posix()}"\n ORG 0B800h\n ld sp,08FDFh\n' + body + '\n END\n'
         (out / 'case.asm').write_text(src, encoding='utf-8')
         subprocess.run([str(ROOT / 'tasm/sjasmplus.exe'), '--i8080', f'--raw={out / "case.bin"}', str(out / 'case.asm')], check=True, capture_output=True)
         memory = bytearray(65536)
@@ -208,11 +216,11 @@ dosRecords:
         data = (ROOT / 'bin/DOS.sys').read_bytes()
         memory[0x100:0x100 + len(data)] = data
         code = (out / 'case.bin').read_bytes()
-        memory[0x8000:0x8000 + len(code)] = code
+        memory[0xb800:0xb800 + len(code)] = code
         (out / 'in.bin').write_bytes(memory)
-        subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe', '-m8080', '-pc', '8000', '-end', '8400', '-counter', '10000000', '-output', str(out / 'out.bin'), str(out / 'in.bin')], check=True, capture_output=True, timeout=20)
+        subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe', '-m8080', '-pc', 'b800', '-end', '8400', '-counter', '10000000', '-output', str(out / 'out.bin'), str(out / 'in.bin')], check=True, capture_output=True, timeout=20)
         result = (out / 'out.bin').read_bytes()
-        assert result[0x8500:0x8502] == bytes.fromhex('aa55'), result[0x8500:0x8502].hex()
+        assert result[0x8500:0x8502] == bytes.fromhex('aa55'), (result[0x8500:0x8502].hex(), int.from_bytes(result[0x851c:0x851e], 'little'))
         assert result[0x8400:0x8420] == bytes([0xA5]) * 32
         assert int.from_bytes(result[0x8514:0x8516], 'little') == 2048 - 32
         assert result[0x8514:0x8516] == result[0x8516:0x8518]

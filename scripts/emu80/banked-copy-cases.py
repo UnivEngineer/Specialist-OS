@@ -10,15 +10,19 @@ def check_copies(root, out, m, ks, bios, select, invoke, request, regs, rows):
     def path(page, name, drive="B"):
         select(page);data = (drive+':/'+name).encode()
         m.write(0x3200,data+bytes(128-len(data)))
+    def file_io(page,address,writing=False):
+        import runpy
+        callback=lambda op,hl=0,a=0:request(page,op,regs(hl=hl,af=(a<<8)|2))
+        return runpy.run_path(str(root/'scripts/emu80/file-api.py'))['path_io'](m,callback,ks,address,writing,handle=0x2e00)
     def save(page, name, data, drive="B"):
         path(page,name,drive)
         m.write(0x3100,word(0x3200)+word(0x5000)+word(len(data))+bytes(34))
         m.write(0x5000,data)
-        request(page,ks['MXOS_DOS_FILE_SAVE_PATH'],regs(hl=0x3100))
+        file_io(page,0x3100,True)
     def read(page, name, drive="B"):
         path(page,name,drive)
         m.write(0x3100,word(0x3200)+word(0x5000)+word(8192)+bytes(34))
-        request(page,ks['MXOS_DOS_FILE_LOAD_PATH'],regs(hl=0x3100))
+        file_io(page,0x3100)
         return m.read(0x5000,int.from_bytes(m.read(0x3106,2),'little'))
     def operation(page, src, dst, answer=1, hook=True, move=False, error=0, cancel=False, buffer=0x6000, destination=1):
         select(page)
@@ -115,7 +119,7 @@ answer:
     assert read(3,'BNKCOPY.BIN',drive='H')==b'new-across'
     path(3,'ACROSS.BIN')
     m.write(0x3100,word(0x3200)+word(0x5000)+word(8192)+bytes(34))
-    request(3,ks['MXOS_DOS_FILE_LOAD_PATH'],regs(hl=0x3100),expected=2)
+    m.write(0x2e00,bytes(41)+b'\1'+bytes(7)+word(0x3200)+bytes(13));request(3,ks['MXOS_DOS_FILEHANDLE'],regs(hl=0x2e00,af=0x702),expected=2)
     rows.append(dict(case='cross-drive-MOVE-No-keeps-source-Yes-deletes'))
     # buffer/bufferSize внешнего запроса игнорируются (проверено выше).
     # Ошибочным параметром здесь остаётся адрес обработчика в хвосте.

@@ -7,7 +7,7 @@ monitorOpen:
     or a
     jp nz,argumentError
     ld hl,descriptor
-    call bios_fileLoadInfo
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
@@ -36,7 +36,7 @@ monitorProfile:
     call bios_clearScreenOld
     ld hl,descriptor
     ld de,RAMFOS_TEMP
-    call bios_fileLoad2
+    call fileReadDescriptor
     jp c,notFound
     ; Reject unrelated files of the same length before modifying the kernel.
     ld a,(RAMFOS_TEMP+0800h)
@@ -61,7 +61,7 @@ monitorCheckRF:
 monitorLoaded:
     ld a,(callerDrive)
     ld e,1
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld hl,monitorBootImage
     ld de,monitorBootImage+monitorBootEnd-monitorBoot
     ld bc,RAMFOS_BRIDGE

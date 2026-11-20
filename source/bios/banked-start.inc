@@ -3,11 +3,7 @@ biosBankCold:
     ld a,(biosBootPages)
     ld (bios_upper.ramPageCount),a
     call biosPrintPhysicalRam
-    ld hl,2048
-    ld (v_diskInfo.totalSectors),hl
-    xor a
-    ld (v_drive),a
-    call sysInstall
+    call biosInstallBootDrive
     ld hl,08BFFh
     call setMemTop
     ld a,1
@@ -29,13 +25,19 @@ biosBootExec:
     ld c,0Ah
     call bios_printChar
     pop hl
-    call bios_fileExec
+    MXOS_CALL MXOS_DOS_FILE_EXEC
     ret nc
 biosBootCommandFailed:
-    ld hl,biosBootError
-    call bios_printString
     MXOS_CALL MXOS_DOS_GET_ERROR
-    ld c,a
+    ld hl,biosBootError
+    jp biosReportBootError
+biosNcResumeFailed:
+    ld hl,biosNcResumeError
+; A=error, HL=prefix. Return CF set so the caller can enter recovery.
+biosReportBootError:
+    push af
+    call bios_printString
+    pop af
     call bios_printHexByte
     ld c,0Ah
     call bios_printChar
@@ -46,7 +48,13 @@ biosBootWaitEnter:
     cp 0Dh
     jp nz,biosBootWaitEnter
     ld c,0Ah
-    jp bios_printChar
+    call bios_printChar
+    scf
+    ret
+biosBootError: DB 'BOOT ERROR ',0
+biosNcResumeError: DB 'NC BANK ERROR ',0
+biosBootWaitText: DB 'Press Enter',0
+
  ; Только холодный старт: физический объём, включая зарезервированный банк DOS.
 ; Геометрия и свободный объём B: определяются отдельно драйвером и MEM.
 biosPrintPhysicalRam:
@@ -74,22 +82,27 @@ biosRamText: DB 'RAM: ',0
 biosRamBanksText: DB ' KiB, ',0
 biosRamEndText: DB ' banks',10,0
 
-biosBootError: DB 'BOOT COMMAND ERROR ',0
-biosBootWaitText: DB 'Press Enter to continue',0
+biosInstallBootDrive:
+    ld hl,2048
+    ld (v_diskInfo.totalSectors),hl
+    xor a
+    ld (v_drive),a
+    jp sysInstall
+
 biosBankWarm:
     ; Bootstrap уже восстановил транспорт и стеки. До AUTOEXEC доступен
     ; встроенный ROM-драйвер A:, без знания файлов внешних драйверов.
     ld a,(biosBootPages)
     ld (bios_upper.ramPageCount),a
-    ld hl,2048
-    ld (v_diskInfo.totalSectors),hl
-    xor a
-    ld (v_drive),a
-    call sysInstall
+    call biosInstallBootDrive
     ld c,1
     ld a,1
     ld hl,BANK_DOS_GATE+9
     call bankCall
+    ; Reset preserves DOS, so kernelCold does not print its version here.
+    ; Report the resident DOS once per bootstrap start, before AUTOEXEC.
+    ld hl,biosDosVersion
+    call printString
     ld hl,08BFFh
     call setMemTop
     ; Согласовать реестр DOS со встроенным ROM после восстановления BIOS.
@@ -104,22 +117,39 @@ biosBankWarm:
     ld hl,BANK_DOS_GATE+9
     call bankCall
 biosBankShell:
+    call biosRestoreFont
+    call biosRunShell
+    jp nc,biosBankShell
+    ; A failed preferred shell must never be retried without a prompt.
+    ld a,3
+    MXOS_CALL MXOS_DOS_SET_SHELL
+    xor 1
+    MXOS_CALL MXOS_DOS_SET_SHELL
+    call biosRunShell
+    jp nc,biosBankShell
+    jp biosRecoveryStart
+biosRunShell:
     ld a,3
     MXOS_CALL MXOS_DOS_SET_SHELL
     or a
-    ld hl,biosNcPath
-    jp z,biosBankLaunchShell
     ld hl,biosCliPath
-biosBankLaunchShell:
-    push hl
-    call bios_printString
-    ld c,0Ah
-    call bios_printChar
-    pop hl
-    call bios_fileExec
-    jp biosBankShell
+    jp nz,biosTryShell
+    ld a,RESIDENT_SHELL_RESUME
+    MXOS_CALL MXOS_DOS_RESIDENT
+    ret nc
+    or a
+    scf
+    jp nz,biosNcResumeFailed
+    ld a,h
+    or l
+    ld hl,biosNcPath
+    jp nz,biosTryShell
+    ld hl,biosNcMainPath
+    jp biosTryShell
 biosAutoexecPath: DB "A:",05Ch,"AUTOEXEC.BAT",0
 biosNcPath: DB "A:",05Ch,"NC.COM",0
+biosNcMainPath: DB "A:",05Ch,"NC_MN.COM",0
+biosCliPath: DB "A:",05Ch,"CLI.COM",0
 biosBootPages: DB 16
 biosBootWarm: DB 0
 biosBootEntered: DB 0
@@ -162,8 +192,6 @@ sysDiskRequest:
 sysDiskNative:
     pop af
     jp diskDriver
-
-biosCliPath: DB "A:",05Ch,"CLI.COM",0
 
 ; Программный возврат без перезагрузки BIOS/DOS и переустановки драйверов.
 ; Старые кадры вызовов main -> DOS -> приложение больше не будут возвращены.

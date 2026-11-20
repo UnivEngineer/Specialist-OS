@@ -37,7 +37,7 @@ asm=O/'trace.asm';asm.write_text(''' ORG 05000h
 ''',encoding='utf-8')
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'trace.bin'),str(asm)],check=True,capture_output=True)
 m=bytearray(65536)
-for path,at in [(R/'bin/NC.i80',0),(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.sys',0xF000),
+for path,at in [(R/'bin/NC.i80',0),(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.main.bin',0xF000),
                 (R/'bin/DOS.native.sys',s['DOS_CODE_START']),
                 (R/'bin/fonts/Compact.pf',s['FONT_ADDR']),
                 (O/'trace.bin',0x5000)]:

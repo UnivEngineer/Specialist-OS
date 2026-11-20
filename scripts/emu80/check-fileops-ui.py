@@ -22,9 +22,11 @@ def call(op,hl=0,de=0,bc=0,a=0,error=False):
  assert bool(r['af']&1)==error,(hex(op),r)
  assert m.read(b['FONT_ADDR'],b['FONT_BYTES'])==font,'font damaged'
  return r
+def file_io(address,writing=False):
+ return runpy.run_path(str(R/'scripts/emu80/file-api.py'))['path_io'](m,call,k,address,writing)
 def save(name,data,drive='B'):
  m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x4000,data)
- m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34));call(k['MXOS_DOS_FILE_SAVE_PATH'],hl=0x3200)
+ m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34));file_io(0x3200,True)
 def job(name='TARGET',drive=1,source=b'SOURCE  BIN',extension='BIN',mode=0):
  page(1);before=m.read(k['v_directories'],16)+m.read(k['v_directory'],2)+m.read(k['v_drive'],1);page(0)
  j=bytearray(k['FILEOPS_JOB']);j[2]=mode;q=k['FILEOPS_JOB.request'];j[q+4]=1;j[q+5]=drive
@@ -41,7 +43,7 @@ def step(op=1):
  assert after==context,('STEP changed cwd',op,context.hex(),after.hex())
  return result
 def read(name,length,drive='B'):
- m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x3200,word(0x3400)+word(0x4000)+word(length)+bytes(34));call(k['MXOS_DOS_FILE_LOAD_PATH'],hl=0x3200);return m.read(0x4000,length)
+ m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x3200,word(0x3400)+word(0x4000)+word(length)+bytes(34));file_io(0x3200);return m.read(0x4000,length)
 
 def cli(t,error=False):
  m.write(0x3400,t.encode()+b'\0'+bytes(127-len(t)));return call(k['MXOS_DOS_CLI'],hl=0x3400,error=error)
@@ -117,6 +119,7 @@ try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
  k=sy(R/'bin/banked/KERNEL.sym');b=sy(R/'bin/BIOS.sym');n=sy(fixture['nc_symbols'])
  x.start('NC-PREPARE',**fixture);m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
+ call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0)
  cli('MKDIR B:/TREE/SUB')
  for i in range(20):save('TREE/SUB/F'+str(i)+'.BIN',bytes([i])*1024)
@@ -137,23 +140,26 @@ try:
  assert m.read(n['vars.fileJob.known'],1)==b'\1'
  assert int.from_bytes(m.read(n['vars.fileJob.total'],4),'little')==20*1024
  m.screenshot(O/'copy-known.png')
- previous=bytes(24*9)
+ previous=bytes(25*9)
  for sample in range(3):
   # Stop only after a completed paint; bar pixels must never be erased.
   before=m.read(n['ncProgressPercent'],1)
   for _ in range(100):
    m.call('emu_run_for',ms=500);m.until(n['ncFileopsLoop'],90,page=0)
    if m.read(n['ncProgressPercent'],1)!=before:break
-  bar=b''.join(m.read(0x9000+(10+col)*256+124,9) for col in range(24))
+  modal=int.from_bytes(m.read(n['uiModalCurrent'],2),'little')
+  bar_y=m.read(modal+1,1)[0]+11
+  # The final columns contain the current modal's percentage field.
+  bar=b''.join(m.read(0x9000+(10+col)*256+bar_y,9) for col in range(25))
   width=m.read(n['ncProgressBarWidth'],1)[0]
-  assert width%8==0 and width<=192
-  assert bar==bytes([255])*(width//8*9)+bytes(24*9-width//8*9),(width,bar.hex())
+  assert width%8==0 and width<=224
+  assert bar==bytes([255])*(min(width,200)//8*9)+bytes(25*9-min(width,200)//8*9),(width,bar.hex())
   assert all((old&new)==old for old,new in zip(previous,bar)),'bar pixels were cleared'
   previous=bar
   m.screenshot(O/('copy-step-'+str(sample)+'.png'))
  returned()
  print('PASS known total and progress percentage',flush=True)
- select('SKIPNC');m.stop_at(n['loc_D54C']);tap('f8');m.until(n['loc_D54C'],90,page=0);ready();m.screenshot(O/'delete-confirm.png');m.stop_at(n['ncFileopsLoop']);tap('enter');m.until(n['ncFileopsLoop'],90,page=0)
+ select('SKIPNC');m.stop_at(n['ncDeleteKey']);tap('f8');m.until(n['ncDeleteKey'],90,page=0);ready();m.screenshot(O/'delete-confirm.png');m.stop_at(n['ncFileopsLoop']);tap('enter');m.until(n['ncFileopsLoop'],90,page=0)
  progress(2);m.screenshot(O/'delete-progress.png');returned()
  assert m.read(n['vars.fileJob.error'],1)==b'\0'
  print('PASS real NC F8 recursive directory deletion and bitmap restore',flush=True)

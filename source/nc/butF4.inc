@@ -19,13 +19,37 @@ but_F4:
 
         call ncRealSelection
         jp c,mainLoop
+        ld de,FILE_INFO.attrib
+        add hl,de
+        ld a,(hl)
+        and 10h
+        jp nz,mainLoop
+    IF NC_BANKED
+ncBankEditSelected:
+        call getSelectedFile
+        call buildSelectedFilePath
+        jp c,mainLoop
+        jp ncBankEditorReady
+    ELSE
         ; Запуск редактора
-        ld      de, aEditor   ; "A:E.COM\r"
+        ld      de,aEditor
         jp      Enter_5
+    ENDIF
 
 
-; E.COM без имени открывает новый пустой документ.
+; EDIT.COM без имени открывает новый пустой документ.
 ncNewFile:
+    IF NC_BANKED
+        xor a
+        ld (vars.pathArg),a
+ncBankEditorReady:
+        call ncEditorLoading
+        call ncBankFlush
+        call ncStopObserver
+        ld a,3
+        ld (ncBankExitAction),a
+        jp ncBankReturn
+    ELSE
         ld hl,aEditor
         ld de,vars.cmdLine
 ncNewFileCopy:
@@ -41,4 +65,5 @@ ncNewFileReady:
         ld (de),a
         ex de,hl
         ld (vars.cmdLineEnd),hl
-        jp EnterExec
+        jp ncLaunchEditor
+    ENDIF

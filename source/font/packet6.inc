@@ -10,10 +10,6 @@
 ; При раннем выходе внешний RawLim вычитает реальный сдвиг HL, не квоту.
 tryGroup:
     ld (text),hl
-    xor a
-    ld (produced),a
-    ld hl,nextGroup
-    ld (groupNext+1),hl
     ld hl,scan
     ld (scanRoute+1),hl
     ld a,20h
@@ -27,44 +23,32 @@ tryGroup:
     ld (scanLow+1),a
     jp stateReady
 limitedMode:
-    ; RawLim: BC — общий остаток байтов. Квота = min(BC / 4, 64).
-    ; >=256 байт дают 64 четверки, иначе два RRC и AND дают floor(C/4).
-    ; Считаем четверки, поэтому 256 байт не требуют условного «0 = 256».
-    ld hl,limitedNext
-    ld (groupNext+1),hl
     ld hl,scanRaw
     ld (scanRoute+1),hl
-    ld a,b
-    or a
-    ld a,64
-    jp nz,limitedQuota
-    ld a,c
-    rrca
-    rrca
-    and 63
-limitedQuota:
-    ; LD не меняет ZF: от OR B либо AND 63 здесь осталось «квота = 0».
-    ld (limitedNext+1),a
-    jp z,noGroup
     jp stateReady
 checkEsc:
     ld a,(bios_upper.escMode)
     inc a
-    jp nz,noGroup
+    jp nz,emptyGroup
 stateReady:
     ld hl,(bios_vars.cursorY)
     ld a,h
     and 3
-    jp nz,noGroup
+    jp nz,emptyGroup
     ld a,l
     cp 7
-    jp c,noGroup
+    jp c,emptyGroup
     IF FONT_MODE
     ld hl,columnsPackedNormal
     ld de,columnsPackedInverse
     ELSE
+    IFDEF FONT_ROTATE_ROWS
+    ld hl,rotateRowsNormal
+    ld de,rotateRowsInverse
+    ELSE
     ld hl,columnsRawNormal
     ld de,columnsRaw
+    ENDIF
     ENDIF
 selectInverse:
     ; Обычное ядро не содержит NOP. Инверсное содержит CPL после слияния.
@@ -78,12 +62,41 @@ routeReady:
     ld hl,(bios_vars.cursorY)
     ld a,h
     cp 181
-    jp nc,noGroup
+    jp nc,emptyGroup
     ld a,h
     rrca
     rrca
     add a,90h
     ld d,a
+    ld (startColumn+1),a
+    ; Cap the first disallowed starting column by the right edge. A
+    ; 6x8 quad uses three columns, so BEh is the first unusable start.
+    ld a,(realMode)
+    cp 2
+    ld a,0BEh
+    jp nz,endReady
+    ld a,b
+    or a
+    ld a,0BEh
+    jp nz,endReady
+    ld a,c
+    cp 64
+    ld a,0BEh
+    jp nc,endReady
+    ld a,c
+    rrca
+    rrca
+    and 15
+    jp z,emptyGroup
+    ld b,a
+    add a,a
+    add a,b
+    add a,d
+    cp 0BEh
+    jp c,endReady
+    ld a,0BEh
+endReady:
+    ld (endColumn+1),a
     ld a,l
     sub 7
     ld e,a
@@ -103,69 +116,36 @@ scanRaw:
     READ_CODE 2
     READ_CODE 3
     jp scanDone
-scanStop:
-    pop de
-    jp noGroup
 scan:
-    push de
-    ld de,codes
-    ld b,4
+    ; BC walks the four code bytes, leaving the VRAM pointer in DE.
+    ld bc,codes
 scanByte:
     ld a,(hl)
 scanLow:
     cp 20h
-    jp c,scanStop
-scanAccepted:
-    ld (de),a
-    inc de
+    jp c,noGroup
+    ld (bc),a
+    inc bc
     inc hl
-    dec b
+    ld a,c
+    cp (codes+4) & 0FFh
     jp nz,scanByte
-    pop de
 scanDone:
     ld (text),hl
 route:
     IF FONT_MODE
     jp columnsPackedNormal
     ELSE
+    IFDEF FONT_ROTATE_ROWS
+    jp rotateRowsNormal
+    ELSE
     jp columnsRawNormal
     ENDIF
-limitedNext:
-    ; 8-битная квота живёт в операнде LD A,n: регистры нужны пикселям.
-    ; Только после успешно нарисованной четверки уменьшаем её на один.
-    ; Здесь нет загрузки/записи 16-битного остатка и повторного hasFour.
-    ; Все ядра fast6 нерекурсивны, IRQ выключены, самомодификация допустима.
-    ld a,0
-    dec a
-    ld (limitedNext+1),a
-    jp nz,nextGroup
-noGroup:
-    ; Курсор фиксируется один раз по реально нарисованным четвёркам.
-    ; При остановке Z внутри четвёрки text всё ещё указывает на её начало.
-    ld a,(produced)
-    or a
-    jp z,emptyGroup
-    add a,a
-    add a,a
-    ld b,a
-    add a,a
-    add a,b
-    ld hl,bios_vars.cursorX
-    add a,(hl)
-    ld (hl),a
-    cp 192
-    jp c,groupReturn
-    ld hl,(bios_vars.cursorY)
-    call printChar_c0A
-groupReturn:
-    ld hl,(text)
-    or a ; CF=0, напечатана хотя бы одна четвёрка.
-    ret
-emptyGroup:
-    ld hl,(text)
-    scf
-    ret
+    ENDIF
     IF !FONT_MODE
+    IFDEF FONT_ROTATE_ROWS
+    INCLUDE "rotate-rows.inc"
+    ELSE
 columnsRawNormal:
     ld hl,(codes+0)
     ld c,h
@@ -888,25 +868,42 @@ merge2_7: or 0
 invRaw2_7: cpl
     ld (de),a
     jp done
+    ENDIF
     ELSE
     INCLUDE "packed-columns.inc"
     ENDIF
 done:
-    ; Продолжаем экранный указатель, как в PAGED. Последняя строка ядра
-    ; оставила E на +7; следующий полный столбец получается через INC D.
+    ; The pixel kernel leaves DE at the bottom of the third column.
     ld a,e
     sub 7
     ld e,a
     inc d
-    ld hl,produced
-    inc (hl)
     ld a,d
-    cp 0BEh ; Для следующей четвёрки нужны ещё три полных столбца.
-    jp nc,noGroup
-groupNext:
-    jp nextGroup
+endColumn: cp 0BEh
+    jp c,nextGroup
+noGroup:
+    ; A rejected control/NUL quad leaves D and the text pointer intact.
+    ; Recover both progress and cursor X from D; no separate quad count.
+    ld a,d
+startColumn: cp 0
+    jp z,emptyGroup
+    sub 90h
+    add a,a
+    add a,a
+    ld (bios_vars.cursorX),a
+    cp 192
+    jp c,groupReturn
+    ld hl,(bios_vars.cursorY)
+    call fontLineEnd
+groupReturn:
+    ld hl,(text)
+    or a ; CF=0, напечатана хотя бы одна четвёрка.
+    ret
+emptyGroup:
+    ld hl,(text)
+    scf
+    ret
 realMode: DB 0
-produced: DB 0
 text: DW 0
 codes: DS 4
     ENDMODULE

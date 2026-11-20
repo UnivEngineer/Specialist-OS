@@ -68,10 +68,12 @@ if engine.startswith('4'):
     font=bytes((source[(c//2)*8+y]>>(0 if c&1 else 4))&15 for c in range(256) for y in range(8))
 results=[]
 ui_only='--ui-only' in sys.argv
+disk=O/'bench-h.bin'
+disk.write_bytes(b''.join((R/f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1,5)))
 try:
-    x.start('native-grid',system=R/'images/SystemRom_emu80_writable.bin')
+    x.start('native-grid',system=R/'images/SystemRom_emu80_writable.bin',disk=disk)
     m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
-    cmd='A:/Bench/FontBen/FontBen.com'+(' -E '+engine if engine!='BIOS' else '')+(' -P '+preOnly if preOnly!='BOTH' else '')+(' -I' if inverse else '')+(' -S' if scalarOnly else '')
+    cmd='H:/Bench/FontBen/FontBen.com'+(' -E '+engine if engine!='BIOS' else '')+(' -P '+preOnly if preOnly!='BOTH' else '')+(' -I' if inverse else '')+(' -S' if scalarOnly else '')
     keys={':':'colon','/':'slash','.':'period',' ':'space','-':'minus','=':'equals'}
     for c in cmd:m.tap(keys.get(c,c.lower()))
     assert m.read(n['vars.cmdLine'],len(cmd)).upper()==cmd.upper().encode(),m.read(n['vars.cmdLine'],len(cmd))
@@ -80,8 +82,8 @@ try:
     abi_before=(R/'bin/BIOS.sys').read_bytes()[0x800:0x8F6]
     slotaddrs=[int.from_bytes(m.read(s['hookSlots']+i*2,2),'little') for i in range(13)]
     originalslots=[(R/'bin/BIOS.sys').read_bytes()[a-0xC000:a-0xC000+2] for a in slotaddrs]
-    corpus=m.read(s['gridText'],1153)
-    assert corpus[-1]==0 and all(corpus[i*48+46:i*48+48]==b'\r\n' for i in range(24))
+    corpus=m.read(s['gridText'],s['GRID_TEXT_BYTES']+1)
+    assert corpus[-1]==0 and all(corpus[i*s['GRID_STRIDE']+s['GRID_GLYPHS']:(i+1)*s['GRID_STRIDE']]==b'\r\n' for i in range(s['GRID_ROWS']))
     references=[oracle(corpus[:-1],raw) for raw in (False,True)]
     for stage in range(STAGES):
         pre,kind,route=(m.read(s[k],1)[0] for k in ('gridPre','gridKind','gridRoute'))

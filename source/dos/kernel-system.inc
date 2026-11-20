@@ -188,38 +188,6 @@ ktCallConfirm:
 ktHook: DW 0
 ktRegs: DS MX_REGS,0
 
-; Исторические FILE_CREATE/PREPARE используют тот же поток, что FileHandle.
-krPrepare:
-    call kiFetchDescriptor
-    jp c,kdBad
-    ld hl,KD_OBJECT
-    call fileCreatePrepare
-    call kdCapture
-    jp kiReturnDescriptor
-krCreate:
-    call kiFetchDescriptor
-    jp c,kdBad
-    ld hl,(KD_OBJECT+FILE_DESCRIPTOR.size+2)
-    ld a,h
-    or l
-    jp nz,kdBad
-    ld hl,(KD_OBJECT+FILE_DESCRIPTOR.size)
-    ld b,h
-    ld c,l
-    ld hl,(kdRegs+2)
-    call kdRange
-    jp c,kdBad
-    ld (kdFarCurrent),hl
-    ld a,1
-    ld (kdFarActive),a
-    ld hl,KD_OBJECT
-    ld de,KD_DATA
-    call fileCreate
-    call kdCapture
-    xor a
-    ld (kdFarActive),a
-    jp kiReturnDescriptor
-
 ; Логический сектор: размер берётся из BPB текущего тома.
 krSector:
     ld hl,(v_diskInfo.sectorSize)

@@ -263,7 +263,7 @@ save:
     call math.sub_hl_de
     ld (saveIO+FILE_PATH_IO.count),hl
     ld hl,saveIO
-    MXOS_CALL MXOS_DOS_FILE_SAVE_PATH
+    call fileWriteAll
     ld hl,savedText
     jp nc,saveMessage
     ld hl,saveErrorText
@@ -691,4 +691,5 @@ savePath: DB 'B:\SORTBEN.TXT',0
 REFERENCE = 07200h
 REPORT = 07300h
     ASSERT $ < raw.benchRaw
+    INCLUDE "../../source/include/file-io.inc"
     END

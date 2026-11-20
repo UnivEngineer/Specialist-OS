@@ -26,10 +26,9 @@ dosCoreStart:
     INCLUDE "kernel-dispatch.inc"
     INCLUDE "kernel-stream.inc"
     INCLUDE "kernel-batch.inc"
-    INCLUDE "kernel-path.inc"
+    INCLUDE "kernel-ranges.inc"
     INCLUDE "kernel-list.inc"
     INCLUDE "kernel-meta.inc"
-    INCLUDE "kernel-filestream.inc"
     INCLUDE "kernel-observer.inc"
     INCLUDE "kernel-image.inc"
     INCLUDE "kernel-copy.inc"
@@ -39,6 +38,7 @@ dosCoreEnd:
 dosExtensionStart:
     INCLUDE "kernel-exec.inc"
     INCLUDE "kernel-system.inc"
+    INCLUDE "font-state.inc"
     INCLUDE "kernel-localio.inc"
     INCLUDE "kernel-registry.inc"
     INCLUDE "memory.inc"
@@ -47,7 +47,7 @@ dosExtensionStart:
 kernelEnd:
 dosImageEnd = kernelEnd
     ASSERT $ <= DOS_CODE_END_MAX
-    ASSERT DOS_SERVICE_ADDR-kernelEnd <= 1024
+    ASSERT DOS_BANK_DATA_ADDR-kernelEnd <= 1024
     ASSERT $ <= DOS_BANK_OBJECT_ADDR
-    ASSERT FAT_CACHE_ADDR+FAT_CACHE_SIZE <= DOS_BANK_PARTIAL_ADDR
+    ASSERT FAT_CACHE_ADDR+FAT_CACHE_SIZE <= DOS_BANK_STACK_BOTTOM
     END

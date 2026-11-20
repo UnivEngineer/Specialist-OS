@@ -79,9 +79,9 @@
       ]
     },
     {
-      "name": "fileLoad",
+      "name": "fileStat",
       "files": [
-        "fileLoad.inc"
+        "fileStat.inc"
       ]
     },
     {
@@ -100,12 +100,6 @@
       "name": "fileGetSetAttr",
       "files": [
         "fileGetSetAttr.inc"
-      ]
-    },
-    {
-      "name": "fileGetSetAddr",
-      "files": [
-        "fileGetSetAddr.inc"
       ]
     },
     {
@@ -191,12 +185,6 @@
       "name": "services",
       "files": [
         "services.inc"
-      ]
-    },
-    {
-      "name": "pathIO",
-      "files": [
-        "filePathIO.inc"
       ]
     },
     {

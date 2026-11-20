@@ -10,6 +10,7 @@ Set-StrictMode -Version 2.0
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $buildScript = Join-Path $PSScriptRoot "build-if-needed.ps1"
+. (Join-Path $repositoryRoot "scripts/images/cpu.ps1")
 & python (Join-Path $PSScriptRoot 'build-syscalls.py')
 if ($LASTEXITCODE -ne 0) { throw 'System call registry generation failed.' }
 & python (Join-Path $PSScriptRoot 'build-compact-font.py')
@@ -34,10 +35,11 @@ try {
         $moduleName = if ($fontTest) { 'FONTBANK' } else { 'TEXTBANK' }
         & (Join-Path $repositoryRoot 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow "-DFONT_TEST=$fontTest" "--raw=../../bin/$moduleName.i80" "--sym=../../bin/$moduleName.sym" bank-loop.asm
         if ($LASTEXITCODE -ne 0) { throw "$kind bank loop assembly failed." }
-        Set-Content -LiteralPath (Join-Path $repositoryRoot "bin/$moduleName.cpu") -Value '4000 4000 02' -Encoding ASCII
+        Set-Content -LiteralPath (Join-Path $repositoryRoot "bin/$moduleName.cpu") -Value (New-CpuDescriptor -Load 0x4000 -Flags 2 -Fields (Get-CpuFieldsFromSymbols ([IO.File]::ReadAllText((Join-Path $repositoryRoot "bin/$moduleName.sym"))))) -Encoding ASCII
     }
 } finally { Pop-Location }
 $components = @(
+    @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = 'GFX_BASE' },
     @{ Directory = 'source/font'; Source = 'FONT'; Extension = 'cpu'; Address = '0' },
     @{ Directory = "source-apps/test-mx"; Source = "TESTMX"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source-apps\copybench"; Source = "COPYBEN"; Extension = "cpu"; Address = "0" },
@@ -56,7 +58,7 @@ $components = @(
     @{ Directory = "source\\run"; Source = "RUN";  Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\ramfos"; Source = "ramfos"; Output = "RAMFOS"; Extension = "mon"; Address = "0xC000" },
     @{ Directory = "source\\format"; Source = "FORMAT";  Extension = "cpu"; Address = "0" },
-    @{ Directory = "source\\E";      Source = "E";       Extension = "cpu"; Address = "0" },
+    @{ Directory = "source\\EDIT";      Source = "EDIT";       Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\cli";     Source = "CLI"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\nc";     Source = "NC";      Extension = "cpu"; Address = "0" }
 )
@@ -111,6 +113,8 @@ foreach ($component in $components) {
     }
 }
 
+& python (Join-Path $repositoryRoot 'scripts/build/build-exe.py')
+if ($LASTEXITCODE -ne 0) { throw 'EXE conversion utility build failed.' }
 & (Join-Path $repositoryRoot 'source-apps/diskbench/build.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'DISKBEN assembly failed.' }
 & python (Join-Path $repositoryRoot 'source-apps/sortbench/build.py')

@@ -13,7 +13,7 @@ O.mkdir(parents=True, exist_ok=True)
 s = {k: int(v, 16) for k, v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (R/'bin/FONTLAB.sym').read_text(), re.M)}
 word = lambda x: x.to_bytes(2, 'little')
 base = bytearray(65536)
-for file, address in [('FONTCOM.i80', 0), ('BIOS.sys', 0xC000), ('IO.sys', 0xF000)]:
+for file, address in [('FONTCOM.i80', 0), ('BIOS.sys', 0xC000), ('IO.main.bin', 0xF000)]:
     data = (R/'bin'/file).read_bytes()
     base[address:address+len(data)] = data
 base[0x9000:0xC000] = bytes((i*37+(i>>8)*13)&255 for i in range(0x3000))

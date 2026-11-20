@@ -43,7 +43,7 @@ inputSwitchPanel:
             jp      restorePanelDirectory
 
 inputForFile:
-            ld      hl, 3C6Eh
+            call ncModalInputCursor
             ld      (bios_vars.cursorY), hl
             ld      de, vars.input
             ; Записать выбранный файл

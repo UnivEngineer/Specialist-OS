@@ -1,5 +1,5 @@
 ; FONT owns files and memory; transient initializer owns font formats.
-; 4000h..47FFh flat input; 4FF0h header, 5000h..57FFh initializer.
+; 4000h..47FFh flat input; native header before 5000h..57FFh initializer.
 parseOption:
     ld hl,(argTail)
 nextOption:
@@ -112,11 +112,11 @@ findExtension:
     dec hl
     ret
 loadPath:
-    call bios_fileLoadPath
+    call fileReadAll
 restoreDrive:
     push af
     ld a,(oldDrive)
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     ret
 loadInitializer:
@@ -139,7 +139,7 @@ initDirectory:
     jp initDirectory
 initName:
     push de
-    ld hl,(staging+62)
+    ld hl,(staging+IMAGE_HEADER_SIZE+46)
     ld de,FONT_ENGINE_BASE
     call bios_cmp_hl_de
     jp c,initBad
@@ -152,7 +152,7 @@ initName:
     call bios_cmp_hl_de
     pop hl
     jp c,initBad
-    ld de,staging+16
+    ld de,staging+IMAGE_HEADER_SIZE
     add hl,de
     pop de
     ; At most 12 characters, no directory separators in the module name.
@@ -177,38 +177,38 @@ readInitializer:
     call loadPath
     ret c
     ld hl,(initializerIO+FILE_PATH_IO.actual)
-    ld de,24
+    ld de,IMAGE_HEADER_SIZE+8
     call bios_cmp_hl_de
     jp c,badImage
-    ld hl,(FONT_INIT_ADDR-10)
+    ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+6)
     ld de,FONT_INIT_ADDR
     call bios_cmp_hl_de
     jp nz,badImage
-    ld hl,(FONT_INIT_ADDR-8)
+    ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+8)
     call bios_cmp_hl_de
     jp nz,badImage
-    ld hl,(FONT_INIT_ADDR-6)
-    ld de,16
+    ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+10)
+    ld de,IMAGE_HEADER_SIZE
     add hl,de
     ex de,hl
     ld hl,(initializerIO+FILE_PATH_IO.actual)
     call bios_cmp_hl_de
     jp nz,badImage
-    ld hl,FONT_INIT_ADDR-16
-    ld de,FONT_INIT_ADDR-3
+    ld hl,FONT_INIT_ADDR-IMAGE_HEADER_SIZE
+    ld de,FONT_INIT_ADDR-IMAGE_HEADER_SIZE+IMAGE_HEADER_CHECKSUM-1
     call bios_calcCS
-    ld hl,(FONT_INIT_ADDR-2)
+    ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+IMAGE_HEADER_CHECKSUM)
     ld d,b
     ld e,c
     call bios_cmp_hl_de
     jp nz,badImage
     ld hl,(initializerIO+FILE_PATH_IO.actual)
-    ld de,FONT_INIT_ADDR-17
+    ld de,FONT_INIT_ADDR-IMAGE_HEADER_SIZE-1
     add hl,de
     ex de,hl
     ld hl,FONT_INIT_ADDR
     call bios_calcCS
-    ld hl,(FONT_INIT_ADDR-4)
+    ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+12)
     ld d,b
     ld e,c
     call bios_cmp_hl_de
@@ -258,8 +258,8 @@ optionName: DS 13,0
 importPath: DS MAX_PATH,0
 initializerPath: DS MAX_PATH+13,0
 initializerMagic: DB 'FIN1',1
-initContext: DW staging+16,FONT_IMPORT_ADDR,0
-initializerIO: DW initializerPath,FONT_INIT_ADDR-16,0810h,0
+initContext: DW staging+IMAGE_HEADER_SIZE,FONT_IMPORT_ADDR,0
+initializerIO: DW initializerPath,FONT_INIT_ADDR-IMAGE_HEADER_SIZE,FONT_INIT_END-FONT_INIT_ADDR+IMAGE_HEADER_SIZE,0
     DS FILE_DESCRIPTOR,0
 importIO: DW importPath,FONT_IMPORT_ADDR,2048,0
     DS FILE_DESCRIPTOR,0

@@ -52,7 +52,7 @@ if physical==128:text=text.replace('ld b,e\n ld c,0','ld b,e\n ld c,0\n push af\
 asm.write_text(text,encoding='utf-8')
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'driver.bin'),str(asm)],check=True,capture_output=True)
 m=bytearray(65536)
-for p,at in [(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.sys',0xF000),(R/'bin/DOS.native.sys',S['DOS_CODE_START']),(O/'driver.bin',0xA000)]:
+for p,at in [(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.main.bin',0xF000),(R/'bin/DOS.native.sys',S['DOS_CODE_START']),(O/'driver.bin',0xA000)]:
  b=p.read_bytes();m[at:at+len(b)]=b
 m[S['v_dosModuleReady']]=1;m[S['v_drive']]=0
 m[S['j_diskDriver']:S['j_diskDriver']+3]=b'\xC3'+W(0xA000)
@@ -90,7 +90,7 @@ command('RD ONE',S['DOS_ERR_ACCESS'])
 command('RD ONE/TWO');command('RD ONE')
 # Данные обычного файла для COPY/MOVE/REN/DEL и потокового TYPE.
 m[0x5400:0x5420]=word('FILE')+bytes(21);m[0x541C:0x5420]=struct.pack('<I',5);m[0x5700:0x5705]=b'HELLO'
-assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)==(0,False)
+assert run(S['fileCreate'],hl=0x5400,de=0x5700)==(0,False)
 command('REN FILE file');assert b'file       ' in m[root:root+sector]
 command('REN file FILE')
 command('MD DST');command('COPY FILE DST');assert cwd()==0
@@ -100,12 +100,12 @@ for text,output in [('CD DST',4),('A:',4),('MD NEW',0),('DIR',1),('CD',1),('PATH
  assert m[M['cliOutput']]==output and cwd()==0,(text,m[M['cliOutput']])
 command('ATTRIB +RH FILE');command('DEL FILE',S['DOS_ERR_ACCESS']);command('ATTRIB -RH +A FILE')
 m[0x5400:0x5420]=word('FILE')+bytes(21)
-assert run(S['bios_fileGetSetAttr'],hl=0x5400)==(0x20,False)
+assert run(S['fileGetSetAttr'],hl=0x5400)==(0x20,False)
 command('ATTRIB +H DST')
 m[0x5400:0x5420]=word('DST')+bytes(21)
-assert run(S['bios_fileGetSetAttr'],hl=0x5400)==(0x12,False)
-assert run(S['bios_fileGetSetAttr'],hl=0x5400,bc=1)==(0x10,False)
-assert run(S['bios_fileGetSetAttr'],hl=0x5400,bc=0x0801)==(S['DOS_ERR_ARGUMENT'],True)
+assert run(S['fileGetSetAttr'],hl=0x5400)==(0x12,False)
+assert run(S['fileGetSetAttr'],hl=0x5400,bc=1)==(0x10,False)
+assert run(S['fileGetSetAttr'],hl=0x5400,bc=0x0801)==(S['DOS_ERR_ARGUMENT'],True)
 fat_before=bytes(m[sector:2*sector])
 command('MOVE FILE DST/MOVED')
 assert bytes(m[sector:2*sector])==fat_before,'MOVE changed FAT'
@@ -121,7 +121,7 @@ command('MOVE VIAABI FILE')
 command('MOVE FILE DST/FILE',S['DOS_ERR_EXISTS'])
 command('ATTRIB +R -R FILE')
 m[0x5400:0x5420]=word('FILE')+bytes(21)
-assert run(S['bios_fileGetSetAttr'],hl=0x5400)==(0x20,False)
+assert run(S['fileGetSetAttr'],hl=0x5400)==(0x20,False)
 command('CD DST');saved_cwd=cwd()
 command('DIR A:');assert cwd()==saved_cwd
 command('CD A:');assert cwd()==saved_cwd
@@ -137,7 +137,7 @@ command('MD TREE');command('MD TREE/CHILD');command('MD DEST')
 command('CD TREE/CHILD');command('MD DEEP')
 for leaf in ['FIRST','SECOND']:
  m[0x5400:0x5420]=word(leaf)+bytes(21);m[0x541C:0x5420]=struct.pack('<I',5);m[0x5700:0x5705]=b'HELLO'
- assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)==(0,False)
+ assert run(S['fileCreate'],hl=0x5400,de=0x5700)==(0,False)
 command('CD /')
 command('REN TREE Tree');assert b'Tree       ' in m[root:root+sector]
 command('COPY Tree Tree/CHILD',S['DOS_ERR_ACCESS'])
@@ -166,7 +166,7 @@ command('CD /');command('RD DEST/Tree/CHILD');command('RD DEST/Tree');command('R
 # Общий поиск расширения и ассоциаций, без запуска чужой среды.
 def create(short,data):
  m[0x5400:0x5420]=short+bytes(21);m[0x541C:0x5420]=struct.pack('<I',len(data));m[0x5700:0x5700+len(data)]=data
- assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)==(0,False)
+ assert run(S['fileCreate'],hl=0x5400,de=0x5700)==(0,False)
 create(b'CLI     EXT',b'RKS A:\\RUN.COM\r\nEXE A:\\RUN.COM\r\n')
 create(b'GAME    EXE',b'X')
 create(b'GAME    RKS',b'X')

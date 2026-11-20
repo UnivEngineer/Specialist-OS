@@ -64,6 +64,17 @@ cliAttribPath:
     ld (cliArgs),hl
     call cliOnePath
     ret c
+    ; One parser for QUERY and execution. Only the read form needs a console.
+    ld a,(cliAttribSet)
+    ld b,a
+    ld a,(cliAttribClear)
+    or b
+    sub 1
+    sbc a,a
+    and 1
+    ld hl,cliAttribExecute
+    jp cliCommandFlagsReady
+cliAttribExecute:
     call cliRemember
     call cliPrepareSource
     jp c,cliFileDone

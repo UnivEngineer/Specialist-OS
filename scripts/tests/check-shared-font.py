@@ -5,7 +5,7 @@ base=Path(__file__).with_name('check-aligned-font.py').read_text().split('for na
 exec(base)
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',p.read_text(),re.M)}
 count=0
-for native,shared in [('Rotate','FontRot'),('Packed6K','FontPack'),('Fast12K','FontFull'),('Compact','FontKoi'),('Fast8','Font8'),('Cpm4','Font4')]:
+for native,shared in [('Rotate','RotRows'),('Packed6K','FontPack'),('Fast12K','FontFull'),('Compact','FontKoi'),('Fast8','Font8'),('Cpm4','Font4')]:
  m=seed(native);ss=sy(R/f'bin/fonts/{shared}.sym')
  other=bytearray(m);data=(R/f'bin/fonts/{shared}.i80').read_bytes();other[0x2000:0x2000+len(data)]=data
  other=call(other,ss['benchInitialize'])

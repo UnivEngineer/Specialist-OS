@@ -10,11 +10,9 @@ handleOptions:
             jp z,handleOptionsGet
             ld a,FH_COUNT
             call handleLoadWord
-            ld a,h
-            or a
-            jp nz,handleArgument
             ld a,l
             and 0FEh
+            or h
             jp nz,handleArgument
             ld a,(v_fileOptions)
             ld b,a
@@ -34,16 +32,23 @@ handleOptionsReturn:
             ld (hl),0
             jp handleSuccess
 
-; Явное VERIFY отвергается до CREATE/TRUNCATE, если драйвер не умеет B=5.
+; HL=FH_MODE. Проверяем возможности до CREATE/TRUNCATE.
 handleCheckMode:
-            ld a,FH_MODE
-            call handleField
             ld a,(hl)
-            and FILE_MODE_VERIFY
+            and FILE_MODE_WRITE|FILE_MODE_VERIFY
             ret z
+            push af
             ld b,0FFh
             call j_diskDriver
+            pop de
             ret c
+            ld a,c
+            and DISK_CAP_WRITE
+            ld a,DOS_ERR_WRITE_PROTECTED
+            jp z,dosSetError
+            ld a,d
+            and FILE_MODE_VERIFY
+            ret z
             ld a,c
             and DISK_CAP_VERIFY
             ret nz
@@ -55,11 +60,8 @@ handleWritePolicy:
             xor a
             ld (v_handleChecked),a
             ld a,(v_handleOp)
-            cp FILE_OP_WRITE
-            jp z,handleWritePolicyActive
-            or a
-            ret
-handleWritePolicyActive:
+            xor FILE_OP_WRITE
+            ret nz
             ld a,FH_MODE
             call handleField
             ld a,(hl)
@@ -75,7 +77,6 @@ handleWritePolicyActive:
             ld a,c
             and DISK_CAP_VERIFY
             ld (v_handleChecked),a
-            or a
             ret
 
 ; LFSR x^16+x^14+x^13+x^11+1. Остаток даёт позицию по всему тому;

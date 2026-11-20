@@ -45,19 +45,19 @@ reportBuilt:
     call bios_sub_hl_de
     ld (reportSize),hl
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (reportDrive),a
     ld a,1
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     jp c,reportRestoreDrive
     ld a,DIR_OP_GET
-    call bios_directory
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp c,reportRestoreDrive
     ex de,hl
     ld (reportDirectory),hl
     ld de,0
     ld a,DIR_OP_SET
-    call bios_directory
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp c,reportRestoreDirectory
     call reportFopen
     jp c,reportRestoreDirectory
@@ -87,13 +87,13 @@ reportRestoreDirectory:
     ld hl,(reportDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    call bios_directory
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp nc,reportRestoreDrive
     ld hl,reportFailedText
     ld (reportMessage),hl
 reportRestoreDrive:
     ld a,(reportDrive)
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret nc
     ld hl,reportFailedText
     ld (reportMessage),hl
@@ -125,9 +125,8 @@ reportFclose:
     ld a,FILE_OP_CLOSE
 reportFileCall:
     ld hl,reportHandle
-    jp bios_fileHandle
-
-; Эти обработчики сохраняют регистры так же, как экранные функции вывода.
+    MXOS_CALL MXOS_DOS_FILEHANDLE
+    ret ; Эти обработчики сохраняют регистры так же, как экранные функции вывода.
 reportPuts:
     push af
     push hl

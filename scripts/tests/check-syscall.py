@@ -68,26 +68,18 @@ for group in json.loads((ROOT/'source/bios/syscalls.json').read_text()):
         assert result[0x3B07]==0xDE and result[0x3B06]&1,op
         rows.append(dict(case=op,cycles=cycles))
 
-# Все исторические файловые JMP должны сохранять регистровый контракт.
-# Реализацию подменяем RET: проверяем именно маршрутизатор/адаптер.
-dos_group=next(g for g in json.loads((ROOT/'source/bios/syscalls.json').read_text()) if g['name']=='DOS')
-for target,address in re.findall(r'jp\s+sysLegacy_(\w+)\s*;\s*(C[0-9A-F]{3}):',
-                               (ROOT/'source/bios/jmps_c800.inc').read_text(encoding='utf-8')):
-    svc=next(s for s in dos_group['services'] if s['target']=='dos_'+target)
-    m=bytearray(base);at=S['sysDOSTable']+svc['id']*2
-    m[at:at+2]=W(0x3100);m[0x3100]=0xC9
-    result,cycles=run(registers+' call 0'+address+'h',m)
-    assert result[0x3B00:0x3B06]==bytes.fromhex('34 12 78 56 BC 9A'),target
-    assert result[0x3B07]==0xDE and result[0x3B06]&1,target
-    rows.append(dict(case='legacy-'+address,cycles=cycles))
+# Retired file-data operation IDs are holes, not compatibility aliases.
+for op in (0x202,0x203,0x207,0x20b,0x20d,0x20e,0x20f,0x21a,0x21f,0x220):
+    result,_=run(f' MXOS_CALL {op}')
+    assert result[0x3b07]==S['DOS_ERR_UNSUPPORTED'] and result[0x3b06]&1
 
 # Реальные функции: прямой вход и новый адаптер имеют одинаковые результаты.
 for legacy,op,setup in [
     ('bios_upperCase','MXOS_BIOS_UPPERCASE',' ld a,061h'),
     ('bios_getMemTop','MXOS_BIOS_GET_MEM_TOP',registers),
-    ('bios_getError','MXOS_DOS_GET_ERROR',registers),
+    ('dosGetError','MXOS_DOS_GET_ERROR',registers),
 ]:
-    direct,dc=run(setup+'\n call '+legacy)
+    direct,dc=run(setup+f'\n call 0{S[legacy]:04X}h')
     native,nc=run(setup+'\n MXOS_CALL '+op)
     assert direct[0x3B00:0x3B08]==native[0x3B00:0x3B08],legacy
     rows.append(dict(case=legacy,directCycles=dc,nativeCycles=nc,overhead=nc-dc))
@@ -99,7 +91,7 @@ m[0x3100:0x3109]=bytes([0x3E,0x61,0xCD])+W(S['mx_callRegs'])+W(S['MXOS_BIOS_UPPE
 r,_=run(registers+' MXOS_CALL 0100h',m)
 assert r[0x3B07]==0x41
 
-for group,op in [(1,255),(2,255),(3,0),(255,0)]:
+for group,op in [(3,0),(255,0)]:
     r,_=run(f' ld bc,{group*256+op}\n ld de,03000h\n call mx_call')
     assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
     assert r[0x3000:0x3008]==base[0x3000:0x3008]
@@ -110,10 +102,7 @@ assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
 r,_=run(' ld a,061h\n MXOS_CALL MXOS_BIOS_UPPERCASE',m)
 assert r[0x3B07]==0x41,'BIOS не должен требовать DOS'
 
-# Пакет не может захватывать общее окно или аппаратные регистры.
-r,_=run(' ld bc,MXOS_BIOS_UPPERCASE\n ld de,0FFB9h\n call mx_call')
-assert r[0x3B07]==S['DOS_ERR_ARGUMENT'] and r[0x3B06]&1
-assert r[0xFFB9:]==base[0xFFB9:]
+# Packet ranges and service IDs are now caller preconditions.
 
 # Преждевременный адаптер CP/M удалён: вход и группа зарезервированы.
 for call in (' ld bc,0A50Ch\n call mx_cpmCall', ' ld bc,0Ch\n call mx_call'):

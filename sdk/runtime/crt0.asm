@@ -31,13 +31,14 @@ crtCleared:
     call 0F812h
     ld (_mxos_home_page),a
     or a
-    ld hl,0F000h
+    ld hl,0EE00h
     jp nz,crtLimit
     call 0F806h
     defw MXOS_BIOS_GET_MEM_TOP
     inc hl
 crtLimit:
-    ld de,__BSS_END_tail
+    defc crt_heap_start = (__BSS_END_tail+1)&0FFFEh
+    ld de,crt_heap_start
     ld a,l
     sub e
     ld l,a
@@ -46,8 +47,27 @@ crtLimit:
     ld h,a
     jp c,crtNoHeap
     push hl
-    ld hl,_mxos_default_heap
+    ld a,(_mxos_home_page)
+    or a
+    jp nz,crtLocalHeap
+    ; Reserve one MAIN heap block; malloc/free stay entirely local thereafter.
+    ex de,hl
+    ld b,0
+    ld a,9                   ; MEM_OP_ARENA
+    call 0F806h
+    defw MXOS_DOS_MEMORY
+    jp c,crtHeapRefused
+    pop hl
+    push hl
+    ld b,0
+    ld a,6                   ; MEM_OP_ALLOC
+    call 0F806h
+    defw MXOS_DOS_MEMORY
+    jp c,crtHeapRefused
+    ex de,hl
+crtLocalHeap:
     pop bc
+    ld hl,_mxos_default_heap
     push hl
     push de
     push bc
@@ -60,6 +80,8 @@ crtLimit:
     jp z,crtNoHeap
     call _main
     ret
+crtHeapRefused:
+    pop hl
 crtNoHeap:
     ld hl,0FFFFh
     scf

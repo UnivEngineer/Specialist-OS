@@ -138,11 +138,10 @@ ncPaintFileColor:
     pop af
     ld (hl),a
     ld b,a
-    ld a,(bios_vars.inverse)
-    or a
-    ld a,b
+    ld a,(ncCurrentColor)
+    cp COLOR_CURSOR
     jp z,ncPaintColorReady
-    ld a,COLOR_CURSOR
+    ld a,b
 ncPaintColorReady:
     call ncSetColor
     pop bc

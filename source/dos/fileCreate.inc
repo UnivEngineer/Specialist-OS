@@ -1,57 +1,14 @@
-;----------------------------------------------------------------------------
-; MXOS
-; Создать файл
-;
-; На входе
-;  hl - адрес дескриптора файла в формате FAT (имя, фтрибуты, размер и т.д.)
-;  de - адрес исходного буфера; размер в дескрипторе равен N
-;
-; На выходе
-;  сf - ошибка
-;
-; При нехватке кластеров частичная запись и цепочка удаляются.
-; Аппаратный отказ записи не обеспечивает транзакционный откат.
-;
-; 2013-12-12 Дизассемблировано vinxru
-; 2022-02-11 Переработано SpaceEngineer
-;----------------------------------------------------------------------------
-
-; Внутренний вход для потокового копирования.
-; HL=FILE_DESCRIPTOR с точной 32-битной длиной. DE — рабочий регистр.
-; Создаёт запись каталога и FAT-цепочку, но не пишет данные.
+; Создание записи и предварительное выделение FAT-цепочки.
+; HL=FILE_DESCRIPTOR с точной 32-битной длиной; данные пишет FILEHANDLE/fatStream.
+; Общий примитив FILEHANDLE, FILEOPS и MKDIR. Не является whole-file writer.
 fatFileCreatePrepare:
             ; Длину цепочки определяет точный размер, а не размер сектора вызывающего.
             call fatSizeToClusters
             ret c
-            ld      a, 1
-            ld      (v_fileCreatePrepare), a
             ex      de, hl
             ld      (v_input_end), hl
             ex      de, hl
             jp      fileCreateEntry
-
-fatFileCreate: ; HL=дескриптор с точным размером, DE=буфер данных.
-            ex de,hl
-            ld (v_input_start),hl
-            ex de,hl
-            ; Сохраняем регистры
-            xor     a
-            ld      (v_fileCreatePrepare), a
-            ; Обычный create читает единый адресный буфер; старшее слово
-            ; длины разрешено только потоковому createPrepare.
-            push hl
-            push de
-            ld de,FILE_DESCRIPTOR.size+2
-            add hl,de
-            ld a,(hl)
-            inc hl
-            or (hl)
-            pop de
-            pop hl
-            jp z,fatCreateSmallSize
-            ld a,DOS_ERR_ARGUMENT
-            jp dosSetError
-fatCreateSmallSize:
 
 fileCreateEntry:
             push hl
@@ -81,7 +38,7 @@ fatCreateBadMetadata:
             jp dosSetError
 fatCreateMetadataOk:
             xor     a
-            ld      (bios_upper.diskWriteErr), a
+            ld      (fatWriteError), a
             push    hl  ; [1]
             push    bc  ; [2]
             push    de  ; [3]
@@ -224,18 +181,6 @@ fileCreate_firstReady:
             ld a,h
             or l
             jp z,fileCreate_prepareDone
-            ld      a, (v_fileCreatePrepare)
-            or      a
-            jp nz,  fileCreate_allocate
-
-            ;---------------------------------------------------------------------
-
-            ld hl,(v_newDescrPtr)
-            call fatSizeToClusters
-            jp c,popDBH_ret
-            ex de,hl
-            ld (v_input_end),hl
-
 fileCreate_allocate:
             ld      hl,(v_fileFirstCluster)
 writeFirstCluster:
@@ -270,71 +215,11 @@ fileCreate_allocFailed:
             call    dosSetError
             jp      popDBH_ret
 fileCreate_allocDone:
-            ld      a, (v_fileCreatePrepare)
-            or      a
-            jp nz,  fileCreate_prepareDone
-
-; ---------------------------------------------------------------------------
-; Сохраняем файл на диск
-
-            ; Номер первого кластера
-            ld      hl, (v_fileFirstCluster)
-            ex      hl, de
-
-            push de
-            ld hl,(v_newDescrPtr)
-            ld bc,FILE_DESCRIPTOR.size
-            add hl,bc
-            ld e,(hl)
-            inc hl
-            ld d,(hl)
-            ex de,hl
-            pop de
-            ld b,h
-            ld c,l
-            ld hl,0
-            ld (v_streamOffset),hl
-            ld hl,(v_input_start)
-            ld a,1
-            call fatStream
-            jp c,popDBH_ret
-
-; ---------------------------------------------------------------------------
-; Расчет однобайтовой контрольной суммы
-; Это нигде не используется даже в оригинальной ОС
-
-;            ld      hl, (v_input_end)   ; hl = размер файла - 1 из v_input_end
-;            inc     hl                  ; hl = размер файла
-;            ex      de, hl              ; de = размер файла
-;            ld      hl, (v_input_start) ; hl = адрес загрузки файла из v_input_start
-;            ld      b, 0                ; тут будет накапливаться сумма
-;fileCreateCRCLoop:
-;            ld      a, d
-;            or      e
-;            jp z,   fileCreateCRCDone   ; если счетчик досчитал до нуля, выходим
-;            ld  a,  (hl)                ; читаем байт файла
-;            add     a, b                ; накапливаем сумму
-;            ld      b, a
-;            inc     hl                  ; следующий байт
-;            dec     de                  ; уменьшаем счетчик
-;            jp      fileCreateCRCLoop
-;fileCreateCRCDone:
-;            ; Сохраняем контрольную сумму в дескриптор файла, в поле ntReserved
-;            ld      a, b                ; a = посчитанная контрольная сумма
-;            ld      hl, (v_newDescrPtr)
-;            ld      bc, FILE_DESCRIPTOR.ntReserved
-;            add     hl, bc              ; hl = адрес поля ntReserved в дескрипторе файла
-;            ld      (hl), a             ; сохраняем контрльную сумму
-
-; ------------------------------------------------------------------------------------------------------------------------
-; Сохраняем кэш и выходим
-
 fileCreate_prepareDone:
             call    saveSectorCache ; сохраняем изменения в кэше на диск
             call    fatFinishWrite
             jp      popDBH_ret
 
-v_fileCreatePrepare: DB 0
 
 
 fileCreate_accessDenied:

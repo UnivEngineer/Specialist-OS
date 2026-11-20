@@ -70,12 +70,17 @@ getPathLeafEnd:
         ld hl,vars.pathArg
         ret
 appendPathToCommand:
+        ld c,0
+        jp appendPathChecked
+appendPathWithSpace:
+        ld c,1
+appendPathChecked:
         ld hl,(vars.cmdLineEnd)
         ex de,hl
         ld hl,vars.pathArg
         ; Проверяем всю добавку до изменения общей строки.
         push de
-        ld b,0
+        ld b,c
 getPathCount:
         ld a,(hl)
         or a
@@ -104,6 +109,13 @@ getPathAppend:
         inc hl
         jp getPathAppend
 getPathAppendEnd:
+        ld a,c
+        or a
+        jp z,getPathTerminate
+        ld a,' '
+        ld (de),a
+        inc de
+getPathTerminate:
         xor a
         ld (de),a
         ret
@@ -127,7 +139,12 @@ getPathLeafOverflow:
 
 selFileToCmdLine:
         call    getSelFilePath
-
+        jp      selectedPathAppended
+selFileToCmdLineWithSpace:
+        call    buildSelectedFilePath
+        ret c
+        call    appendPathWithSpace
+selectedPathAppended:
         ret c
         ex de,hl
         ld (vars.cmdLineEnd),hl

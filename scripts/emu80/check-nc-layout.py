@@ -37,8 +37,8 @@ def main():
    m.tap('esc');m.call('emu_run_for',ms=1500)
   visual='--visual-only' in sys.argv
   focus='--focus' in sys.argv
-  for font,width in [('Rotate',6),('Cpm4',4),('Fast8',8),('Compact',6)]:
-   command('FONT '+font)
+  for font,width in [('Rotate',6),('Cpm4',4),('Fast8',8)]:
+   command('FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}[font])
    assert byte('ncFontWidth')==width,(font,byte('ncFontWidth'))
    shot(font+'-panels')
    if focus:
@@ -102,7 +102,7 @@ def main():
    command('MD '+p)
   command('CD B:/FOLDER1/FOLDER2/FOLDER3')
   for font,width in [('Cpm4',4),('Fast8',8),('Rotate',6)]:
-   command('FONT '+font);assert byte('ncFontWidth')==width
+   command('FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}[font]);assert byte('ncFontWidth')==width
    type_text('echo testing');shot(font+'-long-path');m.tap('esc')
   print('NC ADAPTIVE FONT UI PASS',flush=True)
  except Exception:

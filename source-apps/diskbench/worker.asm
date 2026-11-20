@@ -997,8 +997,10 @@ workerCodeEnd:
     IFDEF WORKER_MAIN
 BUFFER_SECTORS = 24*4
     ASSERT $ <= 02B00h
-    DS 02B00h-$,0
-buffer: DS BUFFER_SECTORS*256+1,0
+    ; Controller reserves 2100h..memTop before MODULE_LOAD. The scratch
+    ; buffer is filled before use; omit its 24 KiB from the disk image.
+    ; DOS keeps its buffer in the payload: its size reserves the DOS arena.
+buffer = 02B00h
     ELSE
     IFDEF WORKER_DOS
 BUFFER_SECTORS = BENCH_DOS_BUFFER_KIB*4
@@ -1011,7 +1013,11 @@ buffer = 02000h
     ENDIF
     ENDIF
 fatBuffer = buffer+512
-workerEnd:
+    IFDEF WORKER_MAIN
+workerEnd = buffer+BUFFER_SECTORS*256+1
+    ELSE
+workerEnd = $
+    ENDIF
     IFDEF WORKER_MAIN
     ASSERT workerEnd <= LEGACY_APP_MEMORY_END
     ELSE

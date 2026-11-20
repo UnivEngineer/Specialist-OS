@@ -24,9 +24,9 @@ def main():
     (out/'kernel-layout.inc').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     registry = json.loads((ROOT/'source/bios/syscalls.json').read_text(encoding='utf-8'))
     services = next(group['services'] for group in registry if group['group'] == 2)
-    assert [service['id'] for service in services] == list(range(len(services)))
+
     (out/'kernel-services.inc').write_text(''.join(
-        f'    DW {service["target"].removeprefix("dos_")}\n' for service in services), encoding='utf-8')
+        f'    DW {next((v["target"].removeprefix("dos_") for v in services if v["id"] == i), "dosUnsupported")}\n' for i in range(max(v['id'] for v in services)+1)), encoding='utf-8')
     h['assemble'](ROOT/'source/dos/DOS.asm', out/'KERNEL.bin', [])
     sy = h['symbols'](out/'KERNEL.sym')
     runpy.run_path(str(ROOT/'scripts/build/build-overlays.py'))['build'](sy)

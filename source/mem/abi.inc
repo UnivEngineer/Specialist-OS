@@ -1,8 +1,8 @@
 ; Раскладка 32-байтного аппаратного окна общей памяти FFC0h–FFDFh
 ; Полная карта IO/MEM и её адресные константы — ../include/mxos.inc.
-; для стандартного протокола команд. Внутренний ABI, пока не публичный.
-; memcpy_far использует другой профиль ниже; пакетная печать может иметь
-; собственный профиль. 20 байт стандартного пакета НЕ являются буфером строки.
+; для COMMAND: регистровый кадр либо inline-данные до 20 байт.
+; FFDEh выбирает форму текущего перехода. Внутренний, не публичный ABI.
+; memcpy_far временно использует всё окно как данные COPY.
 ; FAR: FAR-код, младший и старший байты смещения;
 ; номер банка: 0=main, 1..16=банки ДОЗУ.
 BANK_WINDOW       = 0FFC0h
@@ -29,9 +29,9 @@ BANK_FRAME_OPERATION = BANK_PACKET+18
 BANK_PROFILE = BANK_WINDOW+31
 BANK_PROFILE_COMMAND = 0
 BANK_PROFILE_COPY = 1
-BANK_PROFILE_TEXT = 2
-BANK_PROFILE_LOCAL = 3
-BANK_PROFILE_COUNT = 4
+BANK_PROFILE_LOCAL = 2
+BANK_PROFILE_COUNT = 3
+BANK_BUFFER_KIND = BANK_WINDOW+30 ; 0=register frame, 1=inline to MAIN, 2=return
 BANK_LANDING      = 0FC00h
 BANK_COMMAND_LANDING = 0FED0h ; Постоянный короткий обработчик во всех банках
 BANK_SCALAR_KIND = BANK_FRAME_KIND

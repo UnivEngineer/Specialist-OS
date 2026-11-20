@@ -19,7 +19,7 @@ TABLES = (
     ("t_sound_diamond_explosion", 0x0AFE, 3),
     ("t_music_intro", 0x0B13, 4), ("t_music_level", 0x0B51, 4),
 )
-PALETTE = bytes.fromhex("00 10 48 70 40 b0 e4 f0 50 a0 20 80 00 10 48 70")
+PALETTE = bytes.fromhex("00 10 47 70 40 b0 e4 f0 50 a0 20 70 00 10 47 70")
 
 
 def require(condition, message):

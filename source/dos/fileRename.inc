@@ -15,7 +15,7 @@
 
 fatFileRename:
             xor     a
-            ld      (bios_upper.diskWriteErr), a
+            ld      (fatWriteError), a
             ; Служебные записи . и .. не переименовываются.
             ld      a,(de)
             cp      02Eh

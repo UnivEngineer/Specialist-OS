@@ -81,8 +81,13 @@ cliSearchDrive: DB 0
 cliNeedExtension: DB 0
 cliPathCursor: DW 0
 cliLine: DS MAX_PATH,0
+    IFDEF BANKED_DOS_BUILD
+cliPath1 = DOS_CLI_PATH1
+cliPath2 = DOS_CLI_PATH2
+    ELSE
 cliPath1: DS MAX_PATH,0
 cliPath2: DS MAX_PATH,0
+    ENDIF
 cliSearchDirectory EQU cliPath2
 cliCopyHook: DW 0
 cliDirRecursive: DB 0

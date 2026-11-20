@@ -23,7 +23,7 @@ but_Down:   ; c = количество файлов
 
             ; если курсор на последнем файле + 1, выходим
             cp      c
-            jp z,   mainSelectionChanged
+            jp z,   ncArrowSelectionChanged
 
             ; иначе сохраняем новое положение курсора
             ; и скроллим панель, если надо
@@ -38,7 +38,7 @@ but_Up:     ; a = файл, на котором курсор
 
             ; если курсор на нулевом файле, выходим
             or      a
-            jp z,   mainSelectionChanged
+            jp z,   ncArrowSelectionChanged
 
             ; курсор на предыдущий файл
             dec     a
@@ -135,13 +135,13 @@ scrollPanel:
             jp nc,  scrollUp
 
             ; иначе выходим
-            jp      mainSelectionChanged
+            jp      ncArrowSelectionChanged
 
 scrollDown: ; скроллинг списка вниз
             add     a, b
 
             ; если скроллить некуда, выходим
-            jp nc,  mainSelectionChanged
+            jp nc,  ncArrowSelectionChanged
 
             ; направление перерисовки списока файлов - сверху вниз
             ld      b, 2
@@ -153,7 +153,7 @@ scrollUp:   ; скроллинг списка вверх
 
             ; если скроллить некуда, выходим
             cp      c       ; c = количество файлов
-            jp nc,  mainSelectionChanged
+            jp nc,  ncArrowSelectionChanged
 
             ; направление перерисовки списока файлов - снизу вверх
             ld      b, 1
@@ -185,9 +185,21 @@ scrollDeltaReady:
             ; b = направление
             call    printFilePanel
 
+ncArrowSelectionChanged:
+            call ncArrowStatus
+            jp mainLoop
+ncArrowStatus:
+    IF NC_STATUS_DEFER
+            ld a,1
+            ld (ncStatusPending),a
+            ret
+    ELSE
+            jp printInfoLine
+    ENDIF
+
 scrollFinished:
             ; Курсор уже нарисован после первой строки списка.
-            call    printInfoLine
+            call    ncArrowStatus
             jp      mainLoop_cursorReady
 
 ; ---------------------------------------------------------------------------

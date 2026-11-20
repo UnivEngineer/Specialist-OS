@@ -4,6 +4,7 @@ copyFileInt:
             call    readBytePanel
             ld      (vars.copyRequest.sourceDrive), a
             MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            call nc,restorePanelDirectory
             jp c,   copyFileError
             ld      a,DIR_OP_GET
             MXOS_CALL MXOS_DOS_DIRECTORY
@@ -11,14 +12,7 @@ copyFileInt:
             ld      (vars.copyRequest.sourceDirectory),hl
             call    getSelectedFile
             ld      de, vars.copyRequest.source
-            ld      c, FILE_NAME_LENGTH + 3
-copyFileNameLoop:
-            ld      a, (hl)
-            ld      (de), a
-            inc     hl
-            inc     de
-            dec     c
-            jp nz,  copyFileNameLoop
+            call    ncCopyShortName
             ; По умолчанию назначение — каталог противоположной панели.
             ld      a,(state.activePanel)
             xor     1
@@ -32,14 +26,38 @@ copyFileNameLoop:
             ld      (state.activePanel),a
             ld      hl, vars.input
             ld      de, vars.copyRequest.destination
-            call    bios_fileNamePrepare
+            MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
             jp c,   copyFileError
+            ld      a,(vars.copyRequest.destination)
+            cp      ' '
+            jp nz,  ncCopyDestinationReady
+            ; A drive or a path ending in a separator supplies the directory
+            ; only. DOS has already resolved it; keep the source leaf name.
+            ld      a,(vars.input)
+            or      a
+            jp z,   ncCopyBadDestination
+            ld      a,(hl)
+            or      a
+            jp nz,  ncCopyBadDestination
+            dec     hl
+            ld      a,(hl)
+            cp      ':'
+            jp z,   ncCopyUseSourceName
+            cp      '/'
+            jp z,   ncCopyUseSourceName
+            cp      05Ch
+            jp nz,  ncCopyBadDestination
+ncCopyUseSourceName:
+            ld      hl,vars.copyRequest.source
+            ld      de,vars.copyRequest.destination
+            call    ncCopyShortName
+ncCopyDestinationReady:
             ld      a,DIR_OP_RESOLVED
             MXOS_CALL MXOS_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.destinationDirectory),hl
             ld      e, 0
-            call    bios_fileGetSetDrive
+            MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
             ld      (vars.copyRequest.destinationDrive), a
             ld      hl, 0
             ld      (vars.copyRequest.buffer), hl
@@ -55,6 +73,21 @@ copyFileOperation:
             jp z,   copyFileExists
             jp      copyFileErrorCode
 
+ncCopyBadDestination:
+            ld      a,DOS_ERR_ARGUMENT
+            jp      copyFileErrorCode
+
+ncCopyShortName:
+            ld      c,FILE_NAME_LENGTH + 3
+ncCopyShortNameByte:
+            ld      a,(hl)
+            ld      (de),a
+            inc     hl
+            inc     de
+            dec     c
+            jp nz,  ncCopyShortNameByte
+            ret
+
 copyFileError:
             MXOS_CALL MXOS_DOS_GET_ERROR
 copyFileErrorCode:
@@ -66,16 +99,18 @@ copyFileExists:
             call dosErrorText
 
 copyFileShowError:
-            ld      de, 03880h          ; CENTER_LINE 20,80h
             call    showFileErrorWindow
 
+    IF NC_BANKED
+            call ncBankFlush
+    ENDIF
 copyFileWaitRelease:
             call    bios_keyScan
             inc     a
             jp nz,  copyFileWaitRelease
 
 copyFileAnyKey:
-            call ncModalGetch
+            call uiModalGetch
             cp 13
             jp z,ncRefreshDirty
             cp 01Bh
@@ -87,33 +122,23 @@ copyFileAnyKey:
 ; AF/BC/DE/HL и флаги разрушаются. Ожидание клавиши выполняет вызывающий код.
 showFileErrorWindow:
             push hl
-            ld hl,ncErrorWindow
-            call ncDialogOpen
-            COLOR COLOR_DIALOG
-            ld hl,ncErrorWindow
-            call draw
+            ld hl,ncErrorModal
+            call ncModalOpen
             pop hl
-            ld e,111
-            call ncPrintCentered
+            call uiModalTitle
             ld hl,240
             call ncProgressFieldWidth
             ld a,b
             ld (ncErrorChars),a
             ld hl,vars.input
             call ncErrorCompact
-            ld e,133
-            call ncPrintCentered
-            jp ncDialogOkButton
-ncErrorWindow:
-            G_MODAL_WINDOW 80h,64,96,256,64
-            G_LINE 80h,68,117,248
-            G_LINE 80h,68,139,248
-            DB 0
+            jp uiModalBodyText
 ncErrorHint: DB 'OK [Enter]',0
-ncDialogOkButton:
-            ld hl,ncOkButton
-            jp ncDrawButton
-ncOkButton: UI_BUTTON ncErrorHint,68,56,141,14,6,1
+ncErrorModal:
+    UI_MODAL_BEGIN 12,1,1
+ncOkButton:
+    UI_MODAL_BUTTON ncErrorHint,0,0,1
+    UI_MODAL_END
 
 ; Поле ошибки вмещает 26 знаков. Абсолютные пути сокращаются по компонентам,
 ; для команды/относительного имени показываем многоточие и конец строки.

@@ -1,9 +1,9 @@
 """Boundary tests: NC tail capacity and E refusing before initial text write."""
 from pathlib import Path
-import re,subprocess
+import re,subprocess,runpy
 R=Path(__file__).resolve().parents[2];O=R/'.local/app-memtop';O.mkdir(exist_ok=True)
 sy=lambda f:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',f.read_text(),re.M)}
-B=sy(R/'bin/BIOS.sym');N=sy(R/'bin/NC.sym');E=sy(R/'bin/E.sym');W=lambda n:n.to_bytes(2,'little')
+B=sy(R/'bin/BIOS.sym');N=sy(R/'bin/NC.sym');E=sy(R/'bin/EDIT.sym');W=lambda n:n.to_bytes(2,'little')
 def execute(m,entry,end=0xeff0):
  code=b'\x31'+W(0x8fe0)+b'\xcd'+W(entry)+b'\xc3'+W(end);m[0xee00:0xee00+len(code)]=code
  (O/'in.bin').write_bytes(m)
@@ -15,18 +15,11 @@ def seed(app,top):
   data=(R/'bin'/file).read_bytes();m[addr:addr+len(data)]=data
  m[B['v_memTop']:B['v_memTop']+2]=W(top)
  return m
-for top in [N['NC_MIN_END']-2,N['NC_MIN_END']-1,0x63ff,0x7bff,0x8bff]:
- m,cf=execute(seed('NC',top),N['ncMemoryInit'])
- assert cf==int(top<N['NC_MIN_END']-1)
- if cf:continue
- capacity=min(255,(top+1-N['FILE_CACHE_A'])//48-1)
- assert m[N['ncCatalogCapacity']]==capacity
- stride=(capacity+1)*16
- assert m[N['ncCatalogBases']:N['ncCatalogBases']+6]==b''.join(W(N['FILE_CACHE_A']+stride*i) for i in range(3))
- assert int.from_bytes(m[N['ncMemoryEnd']:N['ncMemoryEnd']+2],'little')<=top+1
- print(hex(top),'NC capacity',capacity)
+# NC now uses the real DOS allocator. Its boundary check must include the
+# loader's image/BSS reservation and ARENA/ALLOC rather than a bare BIOS image.
+runpy.run_path(str(R/'scripts/tests/check-nc-main-memory.py'))
 for top in [0x1800,0x1801,0x63ff,0x7bff,0x8bff]:
- m=seed('E',top)
+ m=seed('EDIT',top)
  # Stop before file argument parsing or before the explicit low-memory message.
  target=E['editorMemoryTooSmall'] if top<0x1801 else B['bios_argNext']
  if top>=0x1801:

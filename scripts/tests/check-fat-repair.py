@@ -22,6 +22,9 @@ def main():
     parser.add_argument('--timings', action='store_true')
     parser.add_argument('--binary-dir', type=Path, default=ROOT/'bin')
     args = parser.parse_args()
+    if args.stream_only:
+        subprocess.run([__import__('sys').executable,str(Path(__file__).with_name('check-file-handle.py'))],check=True)
+        return
     global OUT
     if args.variant != 'DOS': OUT = OUT.with_name('cpu-'+args.variant)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -117,6 +120,16 @@ driverCopy:
                    capture_output=True, check=True)
     driver = stub.with_suffix('.bin').read_bytes()
     def run(m, label, hl=0, de=0, bc=0, a=0):
+        if label == 'fatStreamCursor':
+            # Fixture-only cursor representation; no exported FILESTREAM ABI.
+            cursor=de
+            cluster,offset=struct.unpack_from('<HH',m,cursor)
+            struct.pack_into('<H',m,sy['v_streamOffset'],offset)
+            result=run(m,'fatStream',hl=hl,de=cluster,bc=bc,a=a)
+            remaining=int.from_bytes(m[sy['v_streamRemaining']:sy['v_streamRemaining']+2],'little')
+            struct.pack_into('<HH',m,cursor,result['de'],int.from_bytes(m[sy['v_streamOffset']:sy['v_streamOffset']+2],'little'))
+            result.update(bc=bc-remaining,de=cursor)
+            return result
         io_before=struct.unpack_from('<HH',m,0x8618)
         code = b'\x31'+word(sy['STACK_ADDR'])+b'\x21'+word(hl)+b'\x11'+word(de)
         code += b'\x01'+word(bc)+bytes((0x3E,a,0xCD))+word(sy[label])
@@ -189,7 +202,7 @@ driverCopy:
             return m
         m=fixture()
         def current():
-            result=run(m,'bios_directory',a=0)
+            result=run(m,'directoryService',a=0)
             assert not result['carry'],result
             return result['de']
         def cd(path,cluster=None,error=0):
@@ -198,7 +211,7 @@ driverCopy:
             m[0x6FFF]=0xA5;m[0x7080]=0x5A
             saved=bytes(m[0x6FFF:0x7081])
             before=current()
-            result=run(m,'bios_directory',a=2,hl=0x7000)
+            result=run(m,'directoryService',a=2,hl=0x7000)
             assert bytes(m[0x6FFF:0x7081])==saved,path
             assert result['carry']==bool(error),(path,result)
             if error:
@@ -208,12 +221,12 @@ driverCopy:
             results.append(dict(path=raw.decode('ascii'),cluster=cluster,error=error))
         cd('/ALMAZ/MXOS',3)
         m[0x7100:0x710B]=b'FILE    BIN'
-        result=run(m,'bios_fileLoad2',hl=0x7100,de=0x6000)
+        result=run(m,'fileLoad2',hl=0x7100,de=0x6000)
         assert not result['carry'] and m[0x6000:0x6005]==b'HELLO',result
         m[0x7100:0x7120]=entry(b'NEW     TXT',size=3);m[0x6000:0x6003]=b'NEW'
-        assert not run(m,'bios_fileCreate',hl=0x7100,de=0x6000)['carry']
+        assert not run(m,'fileCreate',hl=0x7100,de=0x6000)['carry']
         assert m[1280+96:1280+107]==b'NEW     TXT'
-        assert not run(m,'bios_fileDelete',hl=0x7100)['carry']
+        assert not run(m,'fileDelete',hl=0x7100)['carry']
         assert m[1280+96]==0xE5
         results.append(dict(fileReadCreateDelete=True))
         cd('../STD',4);cd('./../MXOS/',3);cd('\\ALMAZ\\STD',4)
@@ -224,9 +237,9 @@ driverCopy:
         cd('/ALMAZ/A.B.C',error=sy['DOS_ERR_ARGUMENT'])
         cd(bytes([65])*128,error=sy['DOS_ERR_ARGUMENT'])
         cd('/',0);cd('..',0);cd('/ALMAZ/MXOS',3)
-        result=run(m,'bios_directory',a=1,de=2)
+        result=run(m,'directoryService',a=1,de=2)
         assert not result['carry'] and current()==2,result
-        result=run(m,'bios_directory',a=3,hl=0x6000,de=20)
+        result=run(m,'directoryService',a=3,hl=0x6000,de=20)
         assert not result['carry'] and result['de']==4,result
         assert m[0x6000:0x600B]==b'.          ' and m[0x6020:0x602B]==b'MXOS       '
         results.append(dict(directoryListIncludesDotsAndFolders=True))
@@ -237,19 +250,19 @@ driverCopy:
         for sector,physical,spc in [(128,128,2),(256,256,4),(512,256,1)]:
             m=fixture(sector,physical,spc);cd('/ALMAZ/MXOS',3)
             m[0x7100:0x710B]=b'FILE    BIN'
-            result=run(m,'bios_fileLoad2',hl=0x7100,de=0x6000)
+            result=run(m,'fileLoad2',hl=0x7100,de=0x6000)
             assert not result['carry'] and m[0x6000:0x6005]==b'HELLO',(sector,spc,result)
             results.append(dict(sector=sector,physical=physical,clusterSectors=spc))
-        result=run(m,'bios_directory',a=2,hl=0xF000)
+        result=run(m,'directoryService',a=2,hl=0xF000)
         assert result['carry'] and result['error']==sy['DOS_ERR_ARGUMENT']
         results.append(dict(invalidPathBufferRejected=True))
         m=fixture();cd('/ALMAZ/MXOS',3)
         m[544:576]=entry(b'ROOT    TXT')
         m[0x7100:0x710C]=b'B:\\ROOT.TXT\0'
         run(m,'resetSectorCache')
-        run(m,'bios_fileNamePrepare',hl=0x7100,de=0x7200)
+        run(m,'fileNamePrepare',hl=0x7100,de=0x7200)
         assert m[0x7200:0x720B]==b'ROOT    TXT'
-        assert not run(m,'bios_fileLoadInfo',hl=0x7200)['carry']
+        assert not run(m,'fileLoadInfo',hl=0x7200)['carry']
         assert current()==3
         results.append(dict(explicitRootKeepsSavedCurrentDirectory=True))
         m=fixture()
@@ -258,9 +271,9 @@ driverCopy:
         cd('B:/ALMAZ/COLLECT1.MX2',3)
         cd('../COLLECTIONS',error=sy['DOS_ERR_ARGUMENT'])
         m[0x7100:0x7180]=b'B:/ALMAZ/COLLECT1.MX2/FILE.BIN /Q\0'.ljust(128,b'\0')
-        r=run(m,'bios_fileNamePrepare',hl=0x7100,de=0x7200)
+        r=run(m,'fileNamePrepare',hl=0x7100,de=0x7200)
         assert not r['carry'] and m[0x7200:0x720B]==b'FILE    BIN',r
-        assert not run(m,'bios_fileLoad2',hl=0x7200,de=0x6000)['carry']
+        assert not run(m,'fileLoad2',hl=0x7200,de=0x6000)['carry']
         assert m[0x6000:0x6005]==b'HELLO'
         results.append(dict(fullFilePathAnd83Directory=True))
         (OUT/'subdirectories.json').write_text(json.dumps(results,indent=2)+'\n',encoding='utf-8')
@@ -276,29 +289,29 @@ driverCopy:
             m[root+slot*32]=0
             after=bytes(m[root:end])
             m[0x7000:0x7020]=entry(b'NEW     TXT')
-            result=run(m,'bios_fileCreate',hl=0x7000,de=0x6000)
+            result=run(m,'fileCreate',hl=0x7000,de=0x6000)
             assert not result['carry'],(slot,result)
             assert m[root+slot*32:root+slot*32+11]==b'NEW     TXT'
             if slot<entries-1:assert m[root+(slot+1)*32]==0,slot
             else:assert m[root+entries*32:end]==after[entries*32:]
-            result=run(m,'bios_fileList',hl=0x6000,de=40)
+            result=run(m,'fileList',hl=0x6000,de=40)
             assert not result['carry'],result
             assert m[0x6000+(slot+1)*16]==0xFF,(slot,m[0x6000:0x6100].hex())
             results.append(f'sector {sector}: new end marker at slot {slot}, root entries {entries}')
         m=fresh();m[512:576]=entry(b'DELETED TXT')+entry(b'KEEP    TXT');m[512]=0xE5
         m[0x7000:0x7020]=entry(b'NEW     TXT')
-        assert not run(m,'bios_fileCreate',hl=0x7000,de=0x6000)['carry']
+        assert not run(m,'fileCreate',hl=0x7000,de=0x6000)['carry']
         assert m[544:555]==b'KEEP    TXT'
         results.append('reusing E5 preserves subsequent live entries')
         m=fresh()
         for i in range(7):m[512+i*32:544+i*32]=entry(f'F{i:07d}TXT'.encode())
         m[768:800]=entry(b'GARBAGE TXT');m[0x7000:0x7020]=entry(b'NEW     TXT')
         m[0x8600:0x8602]=bytes((2,3))
-        result=run(m,'bios_fileCreate',hl=0x7000,de=0x6000)
+        result=run(m,'fileCreate',hl=0x7000,de=0x6000)
         assert result['carry'] and result['error']==sy['DOS_ERR_IO'],result
         assert m[512+7*32]==0
         results.append('next-sector read failure does not publish a new entry')
-        for operation in ('bios_fileLoadInfo','bios_fileDelete','bios_fileCreate'):
+        for operation in ('fileLoadInfo','fileDelete','fileCreate'):
             m=fresh();m[512:544]=entry(b'INVALID TXT');m[532:534]=word(1)
             m[0x7000:0x7020]=entry(b'INVALID TXT')
             disk=bytes(m[:8192])
@@ -356,8 +369,8 @@ driverCopy:
         times={}
         m=fresh(entries=64)
         for i in range(64):m[512+i*32:544+i*32]=entry(f'F{i:07d}BIN'.encode())
-        times['directory_64']=run(m,'bios_fileList',hl=0x6000,de=64)['cycles']
-        times['directory_64_cached']=run(m,'bios_fileList',hl=0x6000,de=64)['cycles']
+        times['directory_64']=run(m,'fileList',hl=0x6000,de=64)['cycles']
+        times['directory_64_cached']=run(m,'fileList',hl=0x6000,de=64)['cycles']
         def source(length,index=0):
             m=fresh(entries=64)
             for i in range(index):m[512+i*32:544+i*32]=entry(f'F{i:07d}BIN'.encode())
@@ -366,34 +379,34 @@ driverCopy:
             m[2560:2560+length]=bytes((i*37+5)&255 for i in range(length))
             m[0x8100:0x810B]=b'SOURCE  BIN'
             return m
-        m=source(8192);r=run(m,'bios_fileLoad2',hl=0x8100,de=0x6000);assert not r['carry'];times['read_8192']=r['cycles']
+        m=source(8192);r=run(m,'fileLoad2',hl=0x8100,de=0x6000);assert not r['carry'];times['read_8192']=r['cycles']
         m=fresh(entries=64);m[0x8100:0x8120]=entry(b'NEW     BIN',size=8192)
-        r=run(m,'bios_fileCreate',hl=0x8100,de=0x6000);assert not r['carry'],r;times['create_8192']=r['cycles']
+        r=run(m,'fileCreate',hl=0x8100,de=0x6000);assert not r['carry'],r;times['create_8192']=r['cycles']
         phases={}
         def phase(name,m,label,**regs):
             r=run(m,label,**regs);assert not r['carry'],(name,r)
             phases[name]={k:r[k] for k in ['cycles','reads','writes']}
             return r
-        m=source(8192,40);phase('read_8192_at_40',m,'bios_fileLoad2',hl=0x8100,de=0x6000)
+        m=source(8192,40);phase('read_8192_at_40',m,'fileLoad2',hl=0x8100,de=0x6000)
         m=source(8192,40);phase('find_at_40',m,'fileFind',hl=0x8100)
         m=source(8192,40);m[512+40*32:544+40*32]=bytes([255] if 'v_blockShifts' not in sy else [0])*32
         m[260:324]=bytes(64)
         m[0x8100:0x8120]=entry(b'NEW     BIN',size=8192)
-        phase('create_8192_at_40',bytearray(m),'bios_fileCreate',hl=0x8100,de=0x6000)
-        phase('allocate_8192_at_40',m,'bios_fileCreatePrepare',hl=0x8100,de=32)
+        phase('create_8192_at_40',bytearray(m),'fileCreate',hl=0x8100,de=0x6000)
+        phase('allocate_8192_at_40',m,'fileCreatePrepare',hl=0x8100,de=32)
         cluster=int.from_bytes(m[0x811A:0x811C],'little')
         m[0x6000:0x8000]=bytes((i*13+7)&255 for i in range(8192))
         if 'fatStream' in sy:
             m[sy['v_streamOffset']:sy['v_streamOffset']+2]=word(0)
             phase('write_allocated_8192',m,'fatStream',hl=0x6000,de=cluster,bc=8192,a=1)
         else:phase('write_allocated_8192',m,'fatFileTransferClusters',hl=0x6000,de=cluster,bc=0x0120)
-        phase('final_flush',m,'bios_flushVolume')
+        phase('final_flush',m,'flushVolume')
         assert m[2560:10752]==m[0x6000:0x8000]
         times['phases']=phases
         if 'FILE_COPY_REQUEST' not in sy:
             print(json.dumps(times));return
         m=source(4096);req=bytearray(sy['FILE_COPY_REQUEST']);req[:4]=word(0x6001)+word(2065);req[4:6]=bytes((1,1));req[6:17]=b'SOURCE  BIN';req[38:49]=b'COPY    BIN';m[0x7600:0x7600+len(req)]=req
-        r=run(m,'bios_fileCopy',hl=0x7600);assert not r['carry'];times['copy_4096']=r['cycles']
+        r=run(m,'fileCopy',hl=0x7600);assert not r['carry'];times['copy_4096']=r['cycles']
         print(json.dumps(times));return
     if args.logical_only:
         cases=0
@@ -411,24 +424,24 @@ driverCopy:
                     offset=clusterbytes-7
                     m[0x7000:0x7004]=word(2)+word(offset)
                     m[0x6000:0x6014]=bytes([0xA5])*20
-                    r=run(m,'bios_fileStream',hl=0x6001,de=0x7000,bc=18,a=2)
+                    r=run(m,'fatStreamCursor',hl=0x6001,de=0x7000,bc=18,a=2)
                     assert not r['carry'] and r['bc']==18,(physical,sector,spc,fats,r)
                     assert m[0x6001:0x6013]==payload[offset:offset+18]
                     assert m[0x6000]==m[0x6013]==0xA5
                     m[0x7000:0x7004]=word(2)+word(offset)
                     m[0x6001:0x6013]=b'ABCDEFGHIJKLMNOPQR'
-                    assert not run(m,'bios_fileStream',hl=0x6001,de=0x7000,bc=18,a=1)['carry']
-                    assert not run(m,'bios_flushVolume')['carry']
+                    assert not run(m,'fatStreamCursor',hl=0x6001,de=0x7000,bc=18,a=1)['carry']
+                    assert not run(m,'flushVolume')['carry']
                     assert m[data*sector+offset:data*sector+offset+18]==b'ABCDEFGHIJKLMNOPQR'
                     assert not run(m,'fatWriteCluster',hl=4,de=0xFFF7)['carry']
-                    assert not run(m,'bios_flushVolume')['carry']
+                    assert not run(m,'flushVolume')['carry']
                     for copy in range(fats):assert m[(1+copy*fatsectors)*sector+8:(1+copy*fatsectors)*sector+10]==word(0xFFF7),(physical,sector,spc,fats,copy,m[(1+copy*fatsectors)*sector+8:(1+copy*fatsectors)*sector+10].hex())
                     run(m,'resetSectorCache')
                     for i in range(13):m[root*sector+i*32:root*sector+(i+1)*32]=entry(b'IGNORE  TXT',attr=8)
                     idx=12;m[root*sector+idx*32:root*sector+(idx+1)*32]=entry(b'LAST    TXT')
                     m[0x7000:0x700B]=b'LAST    TXT'
-                    assert not run(m,'bios_fileLoadInfo',hl=0x7000)['carry']
-                    assert run(m,'bios_fileGetSetAttr',hl=0x7000,bc=0x2001)['a']==0x20
+                    assert not run(m,'fileLoadInfo',hl=0x7000)['carry']
+                    assert run(m,'fileGetSetAttr',hl=0x7000,bc=0x2001)['a']==0x20
                     assert m[root*sector+idx*32+11]==0x20
                     run(m,'resetSectorCache')
                     length=clusterbytes+5
@@ -438,7 +451,7 @@ driverCopy:
                     request[:4]=word(0x6001)+word(513);request[4:6]=bytes((1,1))
                     request[6:17]=b'SOURCE  BIN';request[38:49]=b'TARGET  BIN'
                     m[0x7600:0x7600+len(request)]=request
-                    r=run(m,'bios_fileCopy',hl=0x7600)
+                    r=run(m,'fileCopy',hl=0x7600)
                     assert not r['carry'],(physical,sector,spc,fats,r)
                     current=int.from_bytes(m[root*sector+58:root*sector+60],'little');actual=bytearray()
                     for _ in range(10):
@@ -451,83 +464,23 @@ driverCopy:
         for physical,sector in [(128,256),(128,512),(256,512)]:
             m=fresh(sector=sector,physical=physical)
             m[0x8600:0x8602]=bytes((2,4*sector//physical+1))
-            assert run(m,'bios_sectorIO',hl=0x6000,de=4,bc=0x0200)['carry']
+            assert run(m,'sectorIO',hl=0x6000,de=4,bc=0x0200)['carry']
             m[0x8600]=0
-            assert not run(m,'bios_sectorIO',hl=0x6000,de=4,bc=0x0200)['carry']
-            assert run(m,'bios_sectorIO',hl=0x6000,de=5000 if sector==512 else 64,bc=0x0200)['carry']
+            assert not run(m,'sectorIO',hl=0x6000,de=4,bc=0x0200)['carry']
+            assert run(m,'sectorIO',hl=0x6000,de=5000 if sector==512 else 64,bc=0x0200)['carry']
         for marker in [0,1,*range(0xFFF0,0x10000)]:
             m=fresh();m[512:544]=entry(b'MARKER  BIN',2,1)
             m[260:262]=word(marker);m[0x7000:0x700B]=b'MARKER  BIN'
-            r=run(m,'bios_fileLoad2',hl=0x7000,de=0x6000)
+            r=run(m,'fileLoad2',hl=0x7000,de=0x6000)
             assert r['carry']==(marker<0xFFF8),(marker,r)
         print('LOGICAL SECTORS PASS' ,cases,'geometry combinations')
-        return
-    if args.stream_only:
-        def prepared(offset=250):
-            m = fresh()
-            m[260:264] = word(3)+word(0xFFFF)
-            m[1024:1536] = bytes(n & 255 for n in range(512))
-            m[0x7000:0x7004] = word(2)+word(offset)
-            return m
-        m = prepared()
-        r = run(m,'bios_fileStream',a=2,hl=0x6000,de=0x7000,bc=20)
-        assert not r['carry'] and r['bc']==20 and r['hl']==0x6014 and r['de']==0x7000, r
-        assert m[0x6000:0x6014] == bytes(range(250,256))+bytes(range(14))
-        assert m[0x7000:0x7004] == word(3)+word(14)
-        r = run(m,'bios_fileStream',a=2,hl=0x6014,de=0x7000,bc=4)
-        assert not r['carry'] and r['bc']==4 and m[0x6014:0x6018]==bytes(range(14,18)), r
-        m = prepared()
-        m[0x6000:0x6014] = b'ABCDEFGHIJKLMNOPQRST'
-        r = run(m,'bios_fileStream',a=1,hl=0x6000,de=0x7000,bc=20)
-        assert not r['carry'] and r['bc']==20, r
-        assert not run(m,'fatVolumeFlush')['carry']
-        assert m[1274:1294] == b'ABCDEFGHIJKLMNOPQRST'
-        m = prepared()
-        m[0x8600:0x8602] = bytes((2,5))
-        r = run(m,'bios_fileStream',a=2,hl=0x6000,de=0x7000,bc=20)
-        assert r['carry'] and r['bc']==6 and r['hl']==0x6006, r
-        assert m[0x7000:0x7004] == word(3)+word(0)
-        m[0x8600] = 0
-        r = run(m,'bios_fileStream',a=2,hl=0x6006,de=0x7000,bc=14)
-        assert not r['carry'] and r['bc']==14 and r['a']==0, r
-        m = prepared()
-        m[0x8600:0x8602] = bytes((2,1))
-        r = run(m,'bios_fileStream',a=2,hl=0x6000,de=0x7000,bc=20)
-        assert r['carry'] and r['bc']==6 and m[0x7000:0x7004]==word(2)+word(256), r
-        m[0x8600] = 0
-        r = run(m,'bios_fileStream',a=2,hl=0x6006,de=0x7000,bc=14)
-        assert not r['carry'] and r['bc']==14 and m[0x7000:0x7004]==word(3)+word(14), r
-        for mode, offset, count in [(0,0,1),(3,0,1),(2,257,1),(2,0,0)]:
-            m = prepared(offset)
-            before = bytes(m[0x7000:0x7004])
-            r = run(m,'bios_fileStream',a=mode,hl=0x6000,de=0x7000,bc=count)
-            assert r['carry'] == (count!=0) and r['bc']==0 and r['hl']==0x6000 and r['de']==0x7000, r
-            assert m[0x7000:0x7004] == before
-        # Полные секторы: отказ второй прямой записи и продолжение.
-        m=prepared(0);payload=bytes((i*17+3)&255 for i in range(512))
-        m[0x6000:0x6200]=payload;m[0x8600:0x8602]=bytes((1,5))
-        r=run(m,'bios_fileStream',a=1,hl=0x6000,de=0x7000,bc=512)
-        assert r['carry'] and r['bc']==256 and r['hl']==0x6100,r
-        assert m[0x7000:0x7004]==word(3)+word(0) and m[1024:1280]==payload[:256]
-        m[0x8600]=0
-        assert not run(m,'bios_fileStream',a=1,hl=0x6100,de=0x7000,bc=256)['carry']
-        assert m[1024:1536]==payload
-        # Полная запись при попадании в кэш: чтение должно видеть новые данные.
-        m=prepared(0);m[0x6000:0x6100]=bytes([0x5A])*256
-        assert not run(m,'getSectorAddressInCache',de=4,a=0)['carry']
-        assert not run(m,'bios_fileStream',a=1,hl=0x6000,de=0x7000,bc=256)['carry']
-        m[0x7000:0x7004]=word(2)+word(0)
-        assert not run(m,'bios_fileStream',a=2,hl=0x6100,de=0x7000,bc=256)['carry']
-        assert m[0x6100:0x6200]==bytes([0x5A])*256
-        assert not run(m,'bios_flushVolume')['carry'] and m[1024:1280]==bytes([0x5A])*256
-        print('FileStream ABI: read, continuation, write/flush, partial error/retry, invalid arguments, zero length passed')
         return
     m=fresh()
     rows = []
     def record(name): rows.append(name)
     m = fresh()
     assert int.from_bytes(m[sy['v_diskInfo.dirSectors']:sy['v_diskInfo.dirSectors']+2],'little') == 2
-    assert run(m,'bios_getDriveFreeSpace')['de'] == 60
+    assert run(m,'getDriveFreeSpace')['de'] == 60
     record('rounded root; free space excludes reserved entries and FAT padding')
     # Р’СЃРµ С‚СЂРё РІРёРґР° СЃР»СѓР¶РµР±РЅС‹С… Р·Р°РїРёСЃРµР№ Рё СѓРґР°Р»С‘РЅРЅР°СЏ Р·Р°РїРёСЃСЊ РїСЂРѕРїСѓСЃРєР°СЋС‚СЃСЏ.
     m[512:544] = entry(b'LABEL      ',attr=8)
@@ -536,44 +489,44 @@ driverCopy:
     m[608:640] = entry(b'\xE5ELETED TXT')
     m[640:672] = entry(b'VISIBLE TXT')
     m[704:736] = entry(b'AFTERENDTXT')
-    result = run(m,'bios_fileList',hl=0x6000,de=20)
+    result = run(m,'fileList',hl=0x6000,de=20)
     assert not result['carry'] and result['de'] == 1 and m[0x6000:0x600B] == b'VISIBLE TXT'
     assert m[0x6010] == 0xFF
     record('00 end, E5 deletion, LFN/label/directory filtering')
     m[0x7000:0x700B] = b'VISIBLE TXT'
-    assert not run(m,'bios_fileLoadInfo',hl=0x7000)['carry']
-    assert run(m,'bios_fileGetSetAttr',hl=0x7000,bc=0x2101)['a'] == 0x21
-    assert run(m,'bios_fileGetSetAttr',hl=0x7000)['a'] == 0x21
+    assert not run(m,'fileLoadInfo',hl=0x7000)['carry']
+    assert run(m,'fileGetSetAttr',hl=0x7000,bc=0x2101)['a'] == 0x21
+    assert run(m,'fileGetSetAttr',hl=0x7000)['a'] == 0x21
     record('attribute setter uses B and returns the committed attribute')
-    assert run(m,'bios_fileDelete',hl=0x7000)['carry']
-    assert run(m,'bios_getError')['a'] == sy['DOS_ERR_ACCESS']
+    assert run(m,'fileDelete',hl=0x7000)['carry']
+    assert run(m,'dosGetError')['a'] == sy['DOS_ERR_ACCESS']
     record('read-only deletion reports access denied')
     m = fresh(); m[512:544] = entry(b'\x05NAME   TXT')
     m[0x7000:0x700B] = b'\xE5NAME   TXT'
-    assert not run(m,'bios_fileLoadInfo',hl=0x7000)['carry']
+    assert not run(m,'fileLoadInfo',hl=0x7000)['carry']
     assert m[sy['v_tmpFileDescr']] == 0xE5
-    assert run(m,'bios_fileList',hl=0x6000,de=20)['de'] == 1 and m[0x6000] == 0xE5
+    assert run(m,'fileList',hl=0x6000,de=20)['de'] == 1 and m[0x6000] == 0xE5
     m = fresh(); m[0x7000:0x7020] = entry(b'\xE5NAME   TXT')
-    assert not run(m,'bios_fileCreate',hl=0x7000,de=0x7100)['carry']
+    assert not run(m,'fileCreate',hl=0x7000,de=0x7100)['carry']
     assert m[512] == 5
     record('05 escapes the first KOI-8 E5 byte on disk; stat/list restore the original byte')
     m = fresh(entries=13)
     for i in range(13): m[512+i*32:544+i*32] = entry(f'F{i:07}TXT'.encode())
     m[0x7000:0x7020] = entry(b'NEW     TXT')
-    result = run(m,'bios_fileCreate',hl=0x7000,de=0x7100)
+    result = run(m,'fileCreate',hl=0x7000,de=0x7100)
     assert result['carry'] and result['error'] == sy['DOS_ERR_DIR_FULL']
     assert m[512+13*32:544+13*32] == bytes(32)
     record('full non-sector-aligned root does not spill into its padding')
     m = fresh(); m[0x7000:0x7020] = entry(b'NEW     BIN',size=3*256)
     for c in range(4,62): m[256+c*2:258+c*2] = word(0xFFFF)
-    result = run(m,'bios_fileCreatePrepare',hl=0x7000,de=3)
+    result = run(m,'fileCreatePrepare',hl=0x7000,de=3)
     assert result['carry'] and result['error'] == sy['DOS_ERR_FULL'], result
     assert m[512] == 0xE5 and m[260:264] == bytes(4)
     record('out-of-space allocation removes the partial file and releases its chain')
     for last in [0xFFF8,0xFFFF]:
         m = fresh(); m[512:544] = entry(b'CHAIN   BIN',2,512)
         m[260:264] = word(3)+word(last); m[0x7000:0x700B] = b'CHAIN   BIN'
-        result=run(m,'bios_fileDelete',hl=0x7000)
+        result=run(m,'fileDelete',hl=0x7000)
         assert not result['carry'], (last,result,m[260:264].hex())
         assert m[512] == 0xE5 and m[260:264] == bytes(4)
     record('delete accepts complete FAT16 EOC range and writes E5')
@@ -581,30 +534,30 @@ driverCopy:
         m = fresh(); m[260:262] = word(bad)
         # EOC Р·Р°РєРѕРЅРµРЅ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµРіРѕ Р·Р°РїСЂРѕС€РµРЅРЅРѕРіРѕ Р±Р»РѕРєР°.
         m[0x7000:0x7004]=word(2)+word(0)
-        result = run(m,'bios_fileStream',hl=0x6000,de=0x7000,bc=512,a=2)
+        result = run(m,'fatStreamCursor',hl=0x6000,de=0x7000,bc=512,a=2)
         assert result['carry'] and result['error'] == sy['DOS_ERR_CORRUPT'], (bad,result)
     record('free, reserved, bad and premature EOC links fail before the next data access')
     m = fresh(); m[512:544] = entry(b'CYCLE   BIN',2,512)
     m[260:264] = word(3)+word(2); m[0x7000:0x700B] = b'CYCLE   BIN'
-    assert run(m,'bios_fileDelete',hl=0x7000)['carry']
+    assert run(m,'fileDelete',hl=0x7000)['carry']
     record('cyclic deletion terminates with corruption')
     m = fresh(); m[0x8600:0x8602] = bytes((2,2))
-    result = run(m,'bios_fileList',hl=0x6000,de=20)
+    result = run(m,'fileList',hl=0x6000,de=20)
     assert result['carry'] and result['error'] == sy['DOS_ERR_IO'] and m[0x6000] == 255
     record('directory read errors propagate with a terminated output')
     m = fresh(); run(m,'getSectorAddressInCache',de=2,a=1)
     m[0x8600:0x8602] = bytes((1,2))
-    result = run(m,'bios_flushVolume')
+    result = run(m,'flushVolume')
     assert result['carry'] and result['error'] == sy['DOS_ERR_IO']
     cache = sy['cacheData']
     assert any(m[cache+i*8+6] for i in range(sy['FAT_CACHE_CAPACITY']))
     m[0x8600] = 0
-    assert not run(m,'bios_flushVolume')['carry']
+    assert not run(m,'flushVolume')['carry']
     assert not any(m[cache+i*8+6] for i in range(sy['FAT_CACHE_CAPACITY']))
     record('failed write retains dirty cache; retry flush succeeds')
     m = fresh(); run(m,'getSectorAddressInCache',de=2,a=1)
     m[0x8600:0x8602] = bytes((1,2)); original = m[sy['v_drive']]
-    result = run(m,'bios_fileSelectDrive',a=7)
+    result = run(m,'fileChangeDrive',a=7)
     assert result['carry'] and m[sy['v_drive']] == original
     record('failed old-volume flush prevents drive switch and cache discard')
     for offset,value in [(12,0),(13,0),(13,3),(16,3),(22,0),(19,3)]:
@@ -615,17 +568,17 @@ driverCopy:
     if args.variant == 'DOS4000':
         for valid,error in [(0,sy['DOS_ERR_NO_DRIVER']),(1,sy['DOS_ERR_UNSUPPORTED'])]:
             m=fresh();m[sy['v_diskInfo.isValid']]=valid
-            result=run(m,'bios_getDriveFreeSpace')
+            result=run(m,'getDriveFreeSpace')
             assert result['carry'] and result['error']==error
         record('free-space query reports an unmounted volume instead of false success')
         m=fresh()
-        assert run(m,'bios_fileSelectDrive',a=8)['error']==sy['DOS_ERR_ARGUMENT']
-        assert not run(m,'bios_fileSelectDrive',a=1)['carry']
-        assert run(m,'bios_getError')['a']==0
+        assert run(m,'fileChangeDrive',a=8)['error']==sy['DOS_ERR_ARGUMENT']
+        assert not run(m,'fileChangeDrive',a=1)['carry']
+        assert run(m,'dosGetError')['a']==0
         record('successful selection of the same drive clears the previous error')
         m=fresh();m[512:544]=entry(b'BADIMG  EXE',2,17)
         m[260:262]=word(0xFFFF);m[0x7000:0x700B]=b'BADIMG  EXE'
-        result=run(m,'bios_imageOpen',hl=0x7000,a=16)
+        result=run(m,'imageOpen',hl=0x7000,a=16)
         assert result['carry'] and result['error']==sy['DOS_ERR_BAD_IMAGE'],result
         record('invalid executable image reports its own error code')
         for length in [0,1,255,256,257,513]:
@@ -639,7 +592,7 @@ driverCopy:
                 m[(4+i)*256:(5+i)*256]=chunk+bytes([0xCC])*(256-len(chunk))
             m[0x7000:0x700B]=b'EXACT   BIN'
             m[0x6000:0x6002+length]=bytes([0xA5])*(length+2)
-            result=run(m,'bios_fileLoad2',hl=0x7000,de=0x6001)
+            result=run(m,'fileLoad2',hl=0x7000,de=0x6001)
             assert not result['carry'], (length,result)
             assert m[0x6001:0x6001+length]==payload
             assert m[0x6000]==m[0x6001+length]==0xA5
@@ -647,22 +600,22 @@ driverCopy:
         for following in [0,0xFFF7,2,3]:
             m=fresh(); m[512:544]=entry(b'BADTAIL BIN',2,1)
             m[260:262]=word(following);m[0x7000:0x700B]=b'BADTAIL BIN'
-            result=run(m,'bios_fileLoad2',hl=0x7000,de=0x6001)
+            result=run(m,'fileLoad2',hl=0x7000,de=0x6001)
             assert result['carry'] and result['error']==sy['DOS_ERR_CORRUPT'], (following,result)
         record('whole-file load rejects free/bad/cyclic/overlong tails')
         m=fresh();m[512:544]=entry(b'BIG     BIN',2,65536)
         m[0x7000:0x700B]=b'BIG     BIN'
-        result=run(m,'bios_fileLoad2',hl=0x7000,de=0x6001)
+        result=run(m,'fileLoad2',hl=0x7000,de=0x6001)
         assert result['carry'] and result['error']==sy['DOS_ERR_ARGUMENT']
         record('load-at rejects a length above its address-space capacity')
         m=fresh();descriptor=entry(b'METADATATXT')
         descriptor[12]=255;descriptor[20:22]=word(0x1234)
         m[0x7000:0x7020]=descriptor
-        assert not run(m,'bios_fileCreatePrepare',hl=0x7000,de=0)['carry']
+        assert not run(m,'fileCreatePrepare',hl=0x7000,de=0)['carry']
         assert m[512+12]==0x18 and m[512+20:512+22]==bytes(2)
         record('create normalizes NT reserved bits and zeroes FstClusHI')
         m=fresh();m[0x7000:0x7020]=entry(b'WRONG   BIN',size=257)
-        result=run(m,'bios_fileCreatePrepare',hl=0x7000,de=1)
+        result=run(m,'fileCreatePrepare',hl=0x7000,de=1)
         assert not result['carry'] and m[512:523]==b'WRONG   BIN'
         record('stream allocation derives cluster count from the 32-bit file length')
         for start,size in [(0x4000,256),(0x3FFF,2),(sy['dosCoreEnd']-1,2)]:
@@ -683,7 +636,7 @@ driverCopy:
             m[0x7600:0x7600+len(req)]=req
             m[0x6000:0x6203]=bytes([0xA5])*515
             if fail:m[0x8600:0x8602]=bytes((2,4))
-            result=run(m,'bios_fileCopy',hl=0x7600)
+            result=run(m,'fileCopy',hl=0x7600)
             if fail:
                 assert result['carry'] and result['error']==sy['DOS_ERR_IO'],result
                 assert m[544]==0xE5 and m[266:272]==bytes(6)

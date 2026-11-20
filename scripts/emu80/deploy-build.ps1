@@ -25,7 +25,7 @@ if (-not (Test-Path -LiteralPath $builtExe)) { throw "Missing executable: $built
 $buildInfo = Get-Content -LiteralPath (Join-Path $BuildDirectory 'build-specialist.json') -Raw | ConvertFrom-Json
 if ((Get-FileHash -LiteralPath $builtExe).Hash.ToLowerInvariant() -ne $buildInfo.executableSha256) { throw 'Executable does not match the recorded build.' }
 $lock = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'upstream.json') -Raw | ConvertFrom-Json
-$sources = foreach ($name in @('At29Flash.cpp','At29Flash.h','SpecialistFlashDisk.cpp','SpecialistFlashDisk.h','SpecialistMx2VideoRam.cpp','SpecialistMx2VideoRam.h','SpecialistSystemFlash.cpp','SpecialistSystemFlash.h')) {
+$sources = foreach ($name in @('At29Flash.cpp','At29Flash.h','SpecialistFlashDisk.cpp','SpecialistFlashDisk.h','SpecialistMx2VideoRam.cpp','SpecialistMx2VideoRam.h','SpecialistSystemFlash.cpp','SpecialistSystemFlash.h','mxos-end.patch','mxos-underscore.patch','mxos-cyrillic.patch','mxos-scancodes.patch')) {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root ('source-emulators/emu80/' + $name))).Hash.ToLowerInvariant()
     $builtHash = @($buildInfo.sources | Where-Object { $_.path -eq $name })
     if ($builtHash.Count -ne 1 -or $builtHash[0].sha256 -ne $hash) { throw "Source changed since build: $name" }

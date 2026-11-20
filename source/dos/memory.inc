@@ -26,7 +26,69 @@ memoryInitLoop:
     ld (memoryMainEnd),hl
     jp memoryResidentReset
 
+; One machine-wide lease. Store owner+1 so the anonymous MAIN owner is valid.
+timerOwner: DB 0
+timerReleaseOwner:       ; C = allocation owner, preserved
+    ld a,(timerOwner)
+    dec a
+    cp c
+    ret nz
+    xor a
+    ld (timerOwner),a
+    ret
+timerService:
+    ld b,a
+    call memoryOwnerCurrent
+    inc a
+    ld c,a
+    ld hl,timerOwner
+    ld a,b
+    cp TIMER_QUERY
+    jp z,timerQuery
+    cp TIMER_RELEASE
+    jp z,timerRelease
+    jp nc,memoryBad
+    ld a,(hl)
+    or a
+    jp nz,memoryDenied
+    ld (hl),c
+    ld a,b
+    or a
+    ret z               ; exclusive raw access, no PIT writes
+    call pitTimerInit
+    ret nc
+    xor a
+    ld (timerOwner),a
+    jp memoryUnsupported
+timerRelease:
+    ld a,(hl)
+    cp c
+    jp nz,memoryDenied
+    xor a
+    ld (hl),a
+    ret
+timerQuery:
+    ld a,(hl)
+    or a
+    ret z
+    cp c
+    ld a,1
+    ret z
+    inc a
+    or a
+    ret
+
+    DEFINE TIMING_PIT_INPUT_CLOCK
+    INCLUDE "../include/timing-pit.inc"
+    UNDEFINE TIMING_PIT_INPUT_CLOCK
+
 dosMemoryService:
+    cp MEM_OP_MAINRETIRE
+    jp z,memoryRetireMain
+    cp MEM_OP_MAINREGISTER
+    jp z,memoryRegisterMain
+    cp MEM_OP_MAINCLAIM
+    jp z,memoryMainClaim
     cp MEM_OP_RESIDENT
     jp z,memoryResident
     cp MEM_OP_RAMDISK
@@ -70,8 +132,8 @@ memoryBad:
     ret
 
 memoryArena:
-    call residentActorCheck
-    jp nz,memoryDenied
+    ; MAIN allocations of a resident remain ordinary tracked resources. Only
+    ; system reservations (FONT) promise survival against MAIN replacement.
     ld a,b
     or a
     jp nz,memoryBad
@@ -94,6 +156,15 @@ memoryArenaRange:
     ld hl,MEM_ALLOC_TABLE
     ld c,MEM_ALLOC_RECORDS
 memoryArenaScan:
+    push hl
+    push de
+    ex de,hl
+    ld hl,(appImage)
+    call cmp_hl_de
+    ex de,hl
+    pop de
+    pop hl
+    jp z,memoryArenaScanNext
     ld a,(hl)
     or a
     jp nz,memoryArenaScanNext
@@ -124,6 +195,34 @@ memoryArenaBusy:
     pop hl
     jp memoryDenied
 
+; Register an existing static buffer through the normal allocation ledger.
+; Exact ranges may be odd-aligned. Never replace another allocation, even own.
+memoryRegisterMain:
+    ld a,b
+    or a
+    jp nz,memoryBad
+    ld a,h
+    or l
+    jp z,memoryBad
+    ld a,d
+    or e
+    jp z,memoryBad
+    ld (memoryCandidate),hl
+    ex de,hl
+    ld (memorySize),hl
+    ex de,hl
+    add hl,de
+    jp c,memoryBad
+    ld (memoryNewEnd),hl
+    ex de,hl
+    ld hl,(memorySystemEnd)
+    call cmp_hl_de
+    jp c,memoryBad
+    xor a
+    ld (memoryBank),a
+    ld a,0FEh
+    ld (memoryPlacement),a
+    jp memoryFindSlot
 memoryAlloc:
     ld (memorySize),hl
     ld a,h
@@ -132,13 +231,18 @@ memoryAlloc:
     ld a,b
     ld (memoryBank),a
     ld (memoryPlacement),a
+memoryFindSlot:
     ; Сначала резервируем запись; таблица не меняется до успешного поиска.
+    call memoryFindFreeSlot
+    ret c
+    jp memorySlotFound
+memoryFindFreeSlot:
     ld hl,MEM_ALLOC_TABLE
     ld c,MEM_ALLOC_RECORDS
 memorySlot:
     ld a,(hl)
-    inc a
-    jp z,memorySlotFound
+    cp 0FFh
+    ret z
     ld de,6
     add hl,de
     dec c
@@ -146,6 +250,9 @@ memorySlot:
     jp memoryNoMem
 memorySlotFound:
     ld (memorySlotPtr),hl
+    ld a,(memoryPlacement)
+    cp 0FEh ; Private exact-placement mode of MAINREGISTER, never a FAR bank.
+    jp z,memoryScanStart
     ld a,(memoryBank)
     or a
     jp z,memoryMain
@@ -238,6 +345,9 @@ memoryScan:
     jp c,memoryNoOverlap
     jp z,memoryNoOverlap
     pop hl
+    ld a,(memoryPlacement)
+    cp 0FEh
+    jp z,mdActive
     ld hl,(memoryBlockEnd)
     ld (memoryCandidate),hl
     jp memoryTry
@@ -248,6 +358,25 @@ memoryScanNext:
     add hl,de
     dec c
     jp nz,memoryScan
+    call memoryWriteRecord
+    call memoryOwnerCurrent
+    ld (hl),a
+    ld a,(memoryPlacement)
+    cp 0FEh
+    call z,memoryPublishTop
+    ld a,(memoryBank)
+    ld b,a
+    ld c,0
+    ld hl,(memorySize)
+    ex de,hl
+    ld hl,(memoryCandidate)
+    xor a
+    ret
+; Fill the bank, base and size. Return HL pointing to the owner byte.
+memoryWriteRecord:
+    ld a,(memoryBank)
+    or a
+    call z,mdReuseInvalidateAllocation
     ld hl,(memorySlotPtr)
     ld a,(memoryBank)
     ld (hl),a
@@ -268,13 +397,6 @@ memoryScanNext:
     inc hl
     ld (hl),d
     inc hl
-    call memoryOwnerCurrent
-    ld (hl),a
-    ld a,(memoryBank)
-    ld b,a
-    ld c,0
-    ld hl,(memoryCandidate)
-    xor a
     ret
 memoryNextBank:
     ld a,(memoryPlacement)
@@ -289,6 +411,27 @@ memoryNull:
     ld hl,0
     ld bc,0
     ld de,0
+    xor a
+    ret
+
+; Internal fixed reservation [HL,DE), already checked by the MAIN arena.
+; Unlike public ALLOC this permits address 0000h. Allocation record stays
+; private (owner FFh) until the loader attaches it to an application/module.
+; HL=base, B=0, memorySlotPtr=record; CF/A=failure, no partial publication.
+memoryReserveMain:
+    ld (memoryCandidate),hl
+    ex de,hl
+    call sub_hl_de
+    ld (memorySize),hl
+    call memoryFindFreeSlot
+    ret c
+    ld (memorySlotPtr),hl
+    xor a
+    ld (memoryBank),a
+    call memoryWriteRecord
+    ld (hl),0FFh
+    ld hl,(memoryCandidate)
+    ld b,0
     xor a
     ret
 
@@ -341,6 +484,7 @@ memoryFree:
     call memoryFind
     ret c
     ld (hl),0FFh
+    call memoryPublishTop
     xor a
     ret
 

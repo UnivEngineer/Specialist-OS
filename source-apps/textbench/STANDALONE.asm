@@ -3,6 +3,8 @@
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 entry:
+    call appProgramDrive
+    ld (bankPath),a
     call bench_init
     jp c,bench_finish
     call bank_open
@@ -93,6 +95,7 @@ msText: DB ' ms',13,10,'Includes wrapping and scrolling.',13,10,0
 charTicks: DD 0
 stringTicks: DD 0
 bankCharTicks: DD 0
+    INCLUDE "../../source/include/app-drive.inc"
     INCLUDE "bank-runtime.inc"
     INCLUDE "standalone.inc"
 programEnd:

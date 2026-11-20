@@ -22,6 +22,48 @@ cliChangedDisk:
     push hl
     ld c,1
 cliNotify:
+    ; Generation survives disconnecting the transient UI observer.
+    ld hl,cliChangeEpoch
+    call cliIncrementEpoch
+    ld a,(v_drive)
+    add a,a
+    add a,a
+    ld e,a
+    ld d,0
+    ld hl,cliDriveEpochs
+    add hl,de
+    call cliIncrementEpoch
+    jp cliEpochReady
+cliIncrementEpoch:
+    inc (hl)
+    ret nz
+    inc hl
+    inc (hl)
+    ret nz
+    inc hl
+    inc (hl)
+    ret nz
+    inc hl
+    inc (hl)
+    ret
+; Unknown MAIN/upper launchers may write disks outside DOS notifications.
+cliInvalidateEpochs:
+    push bc
+    ld hl,cliChangeEpoch
+    call cliIncrementEpoch
+    ld hl,cliDriveEpochs
+    ld b,8
+cliInvalidateDriveEpoch:
+    push hl
+    call cliIncrementEpoch
+    pop hl
+    ld de,4
+    add hl,de
+    dec b
+    jp nz,cliInvalidateDriveEpoch
+    pop bc
+    ret
+cliEpochReady:
     ld hl,(cliChangeHook)
     ld a,h
     or l
@@ -57,6 +99,8 @@ cliRenamePrepared:
     call cliChangedObject
     jp fileRename
 cliChangeHook: DW 0
+cliChangeEpoch: DS 4,0
+cliDriveEpochs: DS 8*4,0
 
 ; Имя каталога меняет пути потомков; для него инвалидируется весь том.
 ; Обычный файл затрагивает только запись текущего каталога.

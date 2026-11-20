@@ -6,7 +6,7 @@ R=Path(__file__).resolve().parents[2];O=R/'.local/ui-bitmap-cpu';O.mkdir(exist_o
 h=runpy.run_path(str(R/'scripts/tests/benchmark-nc-color-scroll.py'))
 n=h['symbols'](R/'bin/NC.sym');W=lambda x:int(x).to_bytes(2,'little')
 base=bytearray(65536)
-for at,name in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.sys')]:
+for at,name in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin')]:
     data=(R/'bin'/name).read_bytes();base[at:at+len(data)]=data
 
 

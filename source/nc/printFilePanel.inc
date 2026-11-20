@@ -9,10 +9,10 @@
 ; Перерисовка всей панели
 
 redrawFilePanel:
-        COLOR   COLOR_BORDER
         ld a,(ncKeepFrames)
         or a
         jp nz,refreshFilePanel
+        call ncResetPanelBorder
         ; Полная отрисовка уже очищает содержимое окна.
         xor a
         ld hl,vars.drawnLeftA
@@ -32,6 +32,7 @@ redrawFilePanel:
 
 ; После тихой команды обновляем только содержимое и заголовок панели.
 refreshFilePanel:
+        call ncSetPanelBorder
         call drawPanelHeader
         ld b,0
         jp printFilePanel
@@ -46,10 +47,7 @@ printFilePanel:
         cp 6
         jp z,ncLegacyPanel
         push bc
-        ld hl,state.panelA_drive
-        call readBytePanel
-        call loadFiles
-        call printPanelPath
+        call ncPreparePrintFilePanel
         COLOR COLOR_FILE
         call ncPrintAdaptiveList
         pop bc
@@ -60,25 +58,17 @@ printFilePanel:
         jp drawCursor
 ncLegacyPanel:
         ; Рисуем сверху вниз или снизу вверх?
-        ld      a, b
-        or      a
-        push    af
-
-        ; Загрузка списка файлов
-        ld      hl, state.panelA_drive
-        call    readBytePanel   ; a = номер накопителя
-        call    loadFiles
-
-        pop af
-        push af
-        call z,printPanelPath
+        push    bc
+        call    ncPreparePrintFilePanel
+        pop     bc
 
         ; Цвет для печати списка файлов
         COLOR   COLOR_FILE
 
-        ld      b, FILE_LIST_SIZE
-        pop     af
+        ld      a,b
+        or      a
         jp z,   printWholeFileList
+        ld      b, FILE_LIST_SIZE
         dec     a
         jp z,   printFilesDownUp
 
@@ -88,6 +78,15 @@ printFilesUpDownScroll:
         ld      de, (P_FILE_LIST_X1 << 8) + P_FILE_LIST_Y
         call    printFirstScrollFile
         jp      pfud_Next
+
+ncPreparePrintFilePanel:
+        ld a,b
+        or a
+        jp nz,lf_UpdateViewport
+        ld hl,state.panelA_drive
+        call readBytePanel
+        call loadFiles
+        jp printPanelPath
 
 ;----------------------------------------------------------------------------
 ; Цикл печати сверху вниз
@@ -163,6 +162,10 @@ clearColumnTail:
         call panelRowsToPixels
         ld c,a
         ld b,10
+    IF NC_BANKED
+        xor a
+        jp uiFillRectBytes
+    ELSE
 clearTailByte:
         push hl
         push bc
@@ -178,6 +181,7 @@ clearTailPixel:
         dec b
         jp nz,clearTailByte
         ret
+    ENDIF
 panelRowsToPixels:
         add a,a
         ld d,a
@@ -299,9 +303,16 @@ printPanelFile:
         ret
 
     IF NC_BITMAP_SCROLL
-; Старая инверсия остаётся на краю окна до печати нового имени.
-; Не скопированный соседний элемент восстанавливаем обычным текстом.
+; The selection stays at the same screen coordinates. A color scroll copied
+; the old bitmap using its normal palette, so only the new name is missing.
 printKeptScrollFile:
+    IF ENABLE_COLOR
+        COLOR   COLOR_CURSOR
+        call    printPanelFile
+        COLOR   COLOR_FILE
+        ret
+    ELSE
+        ; The excluded inverse cell requires restoring the adjacent name.
         push    hl
         push    de
         push    bc
@@ -332,4 +343,5 @@ pks_Normal:
         ld      (bios_vars.inverse+1), a
         COLOR   COLOR_FILE
         ret
+    ENDIF
     ENDIF

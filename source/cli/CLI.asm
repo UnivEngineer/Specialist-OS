@@ -45,24 +45,22 @@ cliExternal:
     MXOS_CALL MXOS_DOS_SET_SHELL
     ld hl,CMD_LINE
     ; После RET приложения код CLI в main уже может быть затёрт.
-    ld de,bios_reboot
-    push de
-    jp bios_fileExec
+    MXOS_EXEC bios_reboot
 cliLeave:
     call cliHistorySave
     jp bios_reboot
 cliError:
     MXOS_CALL MXOS_DOS_GET_ERROR
     call dosErrorText
-    call bios_printString
+    call bios_printStringReal
     ld c,0Ah
     call bios_printChar
     jp cliPrompt
-cliErrorText: DB 'ERROR ',0
 cliPromptPath: DS MAX_PATH,0
     INCLUDE "overwrite.inc"
     INCLUDE "../include/errors.inc"
     INCLUDE "input.inc"
     INCLUDE "history.inc"
+    INCLUDE "../include/file-io.inc"
     ASSERT $ < APP_MEMORY_END
     END

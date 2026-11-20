@@ -1,0 +1,17 @@
+--- a/src/Specialist.cpp
++++ b/src/Specialist.cpp
+@@ -987,6 +987,14 @@
+     EmuKey key = translateCommonUnicodeKeys(unicodeKey, shift, lang);
+ 
++    if (lang && m_platform->getBaseName() == "specialist-os") {
++        // In MXOS, RUS/LAT toggles a lock and cannot be held with a letter.
++        lang = false;
++        // The common layout maps Ъ to Backspace for Mikrosha only.
++        if (key == EK_BSP)
++            return EK_NONE;
++    }
++
+     SpecKeyboard* kbd = static_cast<SpecKeyboard*>(m_platform->getKeyboard());
+     if (kbd->getMatrixType() != SpecKeyboard::SKT_SP580)
+         return key;
+ 

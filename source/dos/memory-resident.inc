@@ -111,6 +111,8 @@ mrCheckNext:
     jp nz,mrCheckBlock
     ld hl,(mrBase)
     ld (mrCeiling),hl
+    ld de,APP_MEMORY_END
+    call mdReuseInvalidate
     jp mrCommit
 mrRelease:
     ld hl,0
@@ -144,6 +146,7 @@ mrResult:
     inc hl
     ld d,(hl)
     ld hl,(memorySystemEnd)
+    call memoryMainCeiling
     dec hl
     ld b,h
     ld c,l
@@ -161,9 +164,116 @@ memoryCapMain:
     ret
 memoryPublishTop:
     ld hl,(memorySystemEnd)
+    call memoryMainCeiling
     dec hl
+    xor a
     MXOS_CALL MXOS_BIOS_SET_MEM_TOP
     ret
+; HL=system ceiling -> conservative contiguous MAIN end below loaded DLLs.
+; Explicit FAR arenas can still use free gaps, checked against allocations.
+; BC/DE preserved. MAIN applications respecting memTop cannot hit DLL BSS.
+memoryMainCeiling:
+    push bc
+    push de
+    ld (memoryPublishedEnd),hl
+    ld hl,MODULE_TABLE
+    ld b,MODULE_MAX
+memoryCeilingModule:
+    ld a,(hl)
+    inc hl
+    or (hl)
+    dec hl
+    jp z,memoryCeilingNext
+    push hl
+    ld de,3
+    add hl,de
+    ld a,(hl)
+    or a
+    jp nz,memoryCeilingPop
+    ld de,7
+    add hl,de
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a
+    push de
+    push hl
+    ld hl,(memoryMainStart)
+    ex de,hl
+    pop hl
+    call cmp_hl_de
+    pop de
+    jp c,memoryCeilingPop
+    jp z,memoryCeilingPop
+    ld hl,(memoryPublishedEnd)
+    call cmp_hl_de
+    jp c,memoryCeilingPop
+    ex de,hl
+    ld (memoryPublishedEnd),hl
+memoryCeilingPop:
+    pop hl
+memoryCeilingNext:
+    ld de,MODULE_RECORD_SIZE
+    add hl,de
+    dec b
+    jp nz,memoryCeilingModule
+    ld hl,MEM_ALLOC_TABLE
+    ld b,MEM_ALLOC_RECORDS
+memoryCeilingBlock:
+    ld a,(hl)
+    or a
+    jp nz,memoryCeilingBlockNext
+    push hl
+    ld de,5
+    add hl,de
+    ld a,(appOwner)
+    or a
+    jp z,memoryCeilingBlockUse
+    cp (hl)
+    jp z,memoryCeilingBlockPop
+memoryCeilingBlockUse:
+    pop hl
+    push hl
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a
+    add hl,de
+    push de
+    push hl
+    ld hl,(memoryMainStart)
+    ex de,hl
+    pop hl
+    call cmp_hl_de
+    pop de
+    jp c,memoryCeilingBlockPop
+    jp z,memoryCeilingBlockPop
+    ld hl,(memoryPublishedEnd)
+    call cmp_hl_de
+    jp c,memoryCeilingBlockPop
+    ex de,hl
+    ld (memoryPublishedEnd),hl
+memoryCeilingBlockPop:
+    pop hl
+memoryCeilingBlockNext:
+    ld de,6
+    add hl,de
+    dec b
+    jp nz,memoryCeilingBlock
+    ld hl,(memoryPublishedEnd)
+    pop de
+    pop bc
+    ret
+memoryPublishedEnd: DW APP_MEMORY_END
 ; Cold DOS start or Bootstrap restoration of the default upper engine only.
 ; Ordinary shell/app returns must never call this reset.
 memoryResidentReset:

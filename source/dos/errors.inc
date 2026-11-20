@@ -23,6 +23,8 @@ dosCorrupt:
             ld a,DOS_ERR_CORRUPT
             jp dosSetError
 v_dosError: DB 0
+; Sticky FAT write status belongs to the DOS bank. EF98h is on its stack.
+fatWriteError: DB 0
 
     IFDEF DOS_SPLIT_BUILD
 ; Явное успешное завершение публичной операции вне диспетчера томов.

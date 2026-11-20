@@ -59,7 +59,7 @@ def main():
     results = []
     for number, (text, label, drive, ram, yes, *keys) in enumerate(cases):
         m = bytearray(65536)
-        for base, file in ((0xC000, 'BIOS.sys'), (0xF000, 'IO.sys'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
+        for base, file in ((0xC000, 'BIOS.sys'), (0xF000, 'IO.main.bin'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
             data = (ROOT / f'bin/{file}').read_bytes()
             m[base:base+len(data)] = data
         m[0xC818] = 0xC9            # печать не нужна для проверки парсера

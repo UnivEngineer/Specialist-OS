@@ -176,7 +176,13 @@ boot: DS 512,0
         ELSE
     DB "AT2MXF",0
         ENDIF
-chipDescription: DB "0X512K ",0
+; Число чипов подставляет software-ID probe; поддержан только AT29C040A.
+chipDescription: DB "0X512K "
+        IF LOCAL_KIND == 1
+    DB "SEQUENTIAL",0
+        ELSE
+    DB "PIPELINE",0
+        ENDIF
     MODULE initProbe
     IF LOCAL_KIND == 1
 SectorLimit = serviceImage+local1SectorLimit

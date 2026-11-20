@@ -20,20 +20,6 @@ sysBankCheck:
 ; Транспорт сохраняет SP/страницу/owner/home; неподдержанный запрос
 ; не изменяет пакет, как и основной диспетчер. AF/BC/DE/HL — результат.
 sysBankCall:
-    ld h,d
-    ld l,e
-    push bc
-    ld bc,MX_REGS
-    add hl,bc
-    pop bc
-    jp c,sysBadPacket
-    ld a,h
-    cp 0F8h
-    jp c,sysBankPacketReady
-    jp nz,sysBadPacket
-    ld a,l
-    or a
-    jp nz,sysBadPacket
 sysBankPacketReady:
     jp sysRawRoute
 sysBankDoCall:

@@ -121,7 +121,7 @@ cliHistoryLoad:
     call cliHistoryDiskBegin
     jp c,cliHistoryDisable
     ld hl,cliHistoryDescriptor
-    call bios_fileLoadInfo
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp nc,cliHistoryLoadSize
     MXOS_CALL MXOS_DOS_GET_ERROR
     cp DOS_ERR_NOT_FOUND
@@ -138,7 +138,7 @@ cliHistoryLoadSize:
     jp nz,cliHistoryDiskEnd
     ld hl,cliHistoryDescriptor
     ld de,cliHistoryData
-    call bios_fileLoad2
+    call fileReadDescriptor
     jp c,cliHistoryLoadFailed
     ld hl,(cliHistoryData)
     ld de,0434Dh ; 'MC'
@@ -203,7 +203,7 @@ cliHistorySave:
     ld (cliHistoryDescriptor+FILE_DESCRIPTOR.attrib),a
     ld hl,cliHistoryDescriptor
     ld de,cliHistoryData
-    call bios_fileCreate
+    call fileWriteDescriptor
     jp c,cliHistoryDisable
     jp cliHistoryDiskEnd
 ; Ошибки B:, включая полный том, отключают только дисковое сохранение.
@@ -214,7 +214,7 @@ cliHistoryDisable:
     jp cliHistoryDiskEnd
 cliHistoryDiskBegin:
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (cliHistoryOldDrive),a
     xor a
     ld (cliHistoryDiskReady),a

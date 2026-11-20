@@ -29,7 +29,7 @@ try:
  for ch in command:tap(keys.get(ch,ch.lower()))
  assert m.m.read(s['CMD_LINE'],len(command)).upper()==command.upper().encode()
  m.m.screenshot(O/'command.png');tap('enter');m.m.stop_at(game['game_frame'])
- prefix=(R/('assets/games/Almaz-2/Almaz2-mx-optimized.cpu' if not a.before else 'assets/games/originals/almaz2/Almaz2-mx-optimized-before-dosmod-2026-11-05.cpu.bin')).read_bytes()[:32]
+ prefix=(R/('assets/games/Almaz-2/Almaz2-mx-optimized.i80' if not a.before else 'assets/games/originals/almaz2/Almaz2-mx-optimized-before-dosmod-2026-11-05.cpu.bin')).read_bytes()[:32]
  loaded_loop(game['game_frame'],prefix)
  report['moduleReadyInGame']=m.m.read(s['v_dosModuleReady'],1)[0]
  report['moduleHeaderInGame']=m.m.read(0x8000,16).hex()

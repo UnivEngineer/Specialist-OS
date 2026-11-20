@@ -102,6 +102,7 @@ if ($Flash) {
 }
 Copy-Item -LiteralPath $configSource -Destination (Join-Path $deployment 'specialist-mx2.conf') -Force
 $launchConfig = $(if ($mx2Models) { "define MX2_MODELS`n" }) + $(if ($Flash) { "define FLASH_DISK`ndefine SYSTEM_FLASH`n" }) + $(if ($ProtectSystemFlash) { "define SYSTEM_FLASH_LOCKED`n" }) + "include specialist-os/specialist-mx2.conf`n"
+$launchConfig += "kbdLayout.layout = smart`n"
 if ($Mcp -or $Mute) {
     $launchConfig += "pitSoundSource.muted = yes`ntapeMonitor.muted = yes`n"
 }

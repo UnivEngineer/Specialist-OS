@@ -1,7 +1,8 @@
 ; Модули: фиксированный контейнер COM/EXE, записи принадлежат DOS.
 ; Публичный вызов через MXOS_CALL; все NEAR-параметры находятся у kdPage.
 ; Запись: handle:word, active:byte, bank:byte, entry:word,
-; allocation:word, owner:byte, allocationOwner:byte, start:word, end:word.
+; allocation:word, owner:byte, allocationOwner:byte, start:word, end:word,
+; options:byte, policy:byte. With handle=0, active=1 marks a vacant image.
 ; Диапазоны полуоткрытые; ID не переиспользуются.
     MACRO MD_GET_DE address
     push hl
@@ -45,6 +46,9 @@ mdClear:
     ld (moduleActor),a
     ld (appOwner),a
     ld (appDepth),a
+    ld hl,0
+    ld (appImage),hl
+    ld (keImageToken),hl
     ld hl,residentKeys
     ld b,MODULE_MAX*2
 mdClearResidents:
@@ -73,13 +77,34 @@ memoryOwnerCurrent:
 ; FILEOPS code stays cached; a lost caller cannot resume its old job/stack.
 moduleWarm:
     xor a
+    ld (timerOwner),a
     ld (fileopsActive),a
     ld (enumActive),a
     ld (fileopsPublic),a
     ld (moduleActor),a
+    call mdForgetRoute
+    ld a,DOS_BANK_PAGE
+    call mdForgetRoute
     ld hl,MODULE_TABLE+2
     ld b,MODULE_MAX
 mdResetActive:
+    push bc
+    push hl
+    dec hl
+    ld a,(hl)
+    dec hl
+    or (hl)
+    jp z,mdResetRouteDone
+    inc hl
+    inc hl
+    inc hl
+    ld a,(hl)
+    cp 2
+    call nc,mdForgetRoute
+mdResetRouteDone:
+    pop hl
+    pop bc
+    xor a
     ld (hl),a
     ld de,MODULE_RECORD_SIZE
     add hl,de
@@ -112,10 +137,14 @@ mdResetNext:
     add hl,de
     dec b
     jp nz,mdResetModule
-    ; Временные блоки main/обычных приложений не переживают потерю стека.
+    ; После потери стеков MAIN-буферы клиентов регистрируются заново.
+    ; Сохраняем системные блоки и диапазоны опубликованных образов DLL.
     ld hl,MEM_ALLOC_TABLE
     ld b,MEM_ALLOC_RECORDS
 mdWarmBlocks:
+    ld a,(hl)
+    inc a
+    jp z,mdWarmBlockNext
     push hl
     ld de,5
     add hl,de
@@ -123,8 +152,18 @@ mdWarmBlocks:
     pop hl
     cp DOS_IO_PAGE
     jp z,mdWarmBlockNext
+    cp 0FFh
+    jp nz,mdWarmOrdinary
+    call mdAllocationPublished
+    jp nz,mdWarmBlockNext
+    jp mdWarmFree
+mdWarmOrdinary:
     cp MODULE_OWNER_BASE
-    jp nc,mdWarmBlockNext
+    jp c,mdWarmFree
+    ld a,(hl)
+    or a
+    jp nz,mdWarmBlockNext
+mdWarmFree:
     ld (hl),0FFh
 mdWarmBlockNext:
     ld de,6
@@ -137,6 +176,54 @@ mdWarmBlockNext:
     ld hl,0
     ld (memoryMainStart),hl
     ld (memoryMainEnd),hl
+    ld (appImage),hl
+    ld (keImageToken),hl
+    ld de,APP_MEMORY_END
+    jp mdReuseInvalidate
+
+; NZ if a private image reservation belongs to a published module. A Reset
+; during preparation must release otherwise orphaned FF-owned allocations.
+; DE is scratch.
+mdAllocationPublished:
+    push bc
+    push hl
+    ex de,hl
+    ld hl,MODULE_TABLE
+    ld b,MODULE_MAX
+mdAllocationNext:
+    ld a,(hl)
+    inc hl
+    or (hl)
+    dec hl
+    jp z,mdAllocationSkip
+    push hl
+    push de
+    ld de,6
+    add hl,de
+    ld c,(hl)
+    inc hl
+    ld a,(hl)
+    ld h,a
+    ld l,c
+    pop de
+    call cmp_hl_de
+    pop hl
+    jp z,mdAllocationLive
+mdAllocationSkip:
+    push de
+    ld de,MODULE_RECORD_SIZE
+    add hl,de
+    pop de
+    dec b
+    jp nz,mdAllocationNext
+    xor a
+    jp mdAllocationDone
+mdAllocationLive:
+    ld a,1
+    or a
+mdAllocationDone:
+    pop hl
+    pop bc
     ret
 
 moduleLoad:
@@ -147,6 +234,10 @@ moduleLoad:
     jp nc,mdRange
     ld (mdPlacement),a
     cp MODULE_TARGET_BANK
+    jp z,mdResidentPlacementReady
+    ; A retained EXEC may use a tracked, disposable MAIN graphics module.
+    ; It remains a child; retaining a module initially still requires no MAIN.
+    or a
     jp z,mdResidentPlacementReady
     call residentActorCheck
     jp nz,residentDenied
@@ -159,36 +250,6 @@ mdResidentPlacementReady:
     ld a,h
     or l
     jp z,mdNoMemory
-    ld hl,MODULE_TABLE
-    ld b,MODULE_MAX
-    ld c,MODULE_OWNER_BASE
-mdSlot:
-    ld a,(hl)
-    inc hl
-    or (hl)
-    dec hl
-    jp z,mdSlotReady
-    ld de,MODULE_RECORD_SIZE
-    add hl,de
-    inc c
-    dec b
-    jp nz,mdSlot
-mdNoMemory:
-    ld a,MEM_ERROR_NOMEM
-    jp mdError
-mdSlotReady:
-    ld (mdRecord),hl
-    ld de,6
-    add hl,de
-    xor a
-    ld (hl),a
-    inc hl
-    ld (hl),a
-    inc hl
-    ld a,(mdOwner)
-    ld (hl),a
-    inc hl
-    ld (hl),c
     ld hl,(kdRegs)
     ld de,KD_PATH
     ld bc,MAX_PATH
@@ -216,6 +277,22 @@ mdOpen:
     ex de,hl
     ld (mdAddress),hl
     MD_PUT_BC mdBytes
+    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
+    ld (mdMemoryStart),hl
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
+    ld (mdMemoryEnd),hl
+    ld hl,(v_imageHeader+IMAGE_STACK)
+    ld de,DOS_BANK_STACK_TOP-DOS_BANK_STACK_BOTTOM-64
+    ld a,(mdPlacement)
+    or a
+    jp nz,mdStackLimit
+    ld de,BIOS_BANK_STACK_TOP-BIOS_BANK_STACK_BOTTOM-64
+mdStackLimit:
+    call cmp_hl_de
+    jp c,mdStackReady
+    jp nz,mdRange
+mdStackReady:
+    ld hl,(mdAddress)
     ld a,(mdPlacement)
     cp MODULE_TARGET_DOS
     jp z,mdDosImage
@@ -239,12 +316,38 @@ mdDosImage:
     cp IMAGE_FLAG_DRIVER
     jp nz,mdImage
 mdPlacementReady:
-    add hl,bc
+    ld a,(v_imageHeader+IMAGE_OPTIONS)
+    and IMAGE_OPTION_REUSABLE
+    jp z,mdPlacementDispatch
+    ld a,(mdPlacement)
+    or a
+    jp nz,mdImage
+mdPlacementDispatch:
+    call mdReuseSelect
+    jp c,mdNoMemory
+    ld (mdRecord),hl
+    ld de,6
+    add hl,de
+    xor a
+    ld (hl),a
+    inc hl
+    ld (hl),a
+    inc hl
+    ld a,(mdOwner)
+    ld (hl),a
+    inc hl
+    ld (hl),c
+    ld hl,(mdMemoryEnd)
     ld a,(mdPlacement)
     cp MODULE_TARGET_DOS
     jp z,mdDos
     or a
     jp z,mdMain
+    push hl
+    ld hl,(v_imageHeader+IMAGE_MIN_HEAP)
+    ex de,hl
+    pop hl
+    add hl,de
     ld de,DOS_BANK_STACK_BOTTOM
     call cmp_hl_de
     jp c,mdBank
@@ -257,13 +360,14 @@ mdBank:
     jp c,mdError
     jp mdReserved
 mdDos:
-    ; Нижняя арена отделена от верхней арены DRIVER/FILEOPS.
-    ld de,DOS_SERVICE_END
-    call cmp_hl_de
-    jp c,mdDosService
-    jp z,mdDosService
-    ; Регистрируется фактическое тело, включая статические буферы модуля.
-    ; Стек остаётся служебным стеком DOS и в эту арену не входит.
+    push hl
+    ld hl,(v_imageHeader+IMAGE_BSS)
+    inc hl
+    ld a,h
+    or l
+    pop hl
+    jp z,mdRange
+    ; One contiguous arena, shared by cached services and installers.
     ld de,DOS_BANK_DRIVER_END
     call cmp_hl_de
     jp c,mdDosEndReady
@@ -278,23 +382,15 @@ mdDosBorrowBat:
     jp nz,mdArenaBusy
     ld a,1
 mdDosEndReady:
-    ld hl,(mdAddress)
+    ld hl,(mdMemoryStart)
     ld de,DOS_BANK_DRIVER_ADDR
     call cmp_hl_de
     jp c,mdRange
     jp mdDosRange
-mdDosService:
-    ld hl,(mdAddress)
-    ld de,DOS_SERVICE_ADDR
-    call cmp_hl_de
-    jp c,mdRange
 mdDosRange:
-    ld hl,(mdAddress)
-    MD_GET_DE mdBytes
-    add hl,de
-    ex de,hl
-    ld hl,(mdAddress)
-    call dosArenaCheck
+    ld hl,(mdMemoryStart)
+    MD_GET_DE mdMemoryEnd
+    call dosArenaImage
     jp c,mdArenaBusy
     ld hl,0
     ld (memorySlotPtr),hl
@@ -304,28 +400,23 @@ mdArenaBusy:
     ld a,MEM_ERROR_ACTIVE
     jp mdError
 mdMain:
-    ; Сужаем начало доверенной арены только на время точного выделения.
-    ld hl,(memoryMainStart)
-    ex de,hl
-    ld hl,(mdAddress)
+    ld hl,(mdMemoryStart)
+    MD_GET_DE mdMemoryEnd
+    ld bc,APP_MEMORY_END
+    push hl
+    ld h,b
+    ld l,c
     call cmp_hl_de
+    pop hl
     jp c,mdRange
-    push de
-    ld (memoryMainStart),hl
-    ld hl,(mdBytes)
-    ld b,0
-    call memoryAlloc
-    pop de
-    ex de,hl
-    ld (memoryMainStart),hl
-    ex de,hl
+    MD_GET_BC mdMemoryEnd
+    call moduleMainClaimStrict
     jp c,mdError
-    MD_GET_DE mdAddress
-    call cmp_hl_de
-    jp z,mdReserved
-    ld hl,(memorySlotPtr)
-    ld (hl),0FFh
-    jp mdRange
+    ld hl,(mdMemoryStart)
+    MD_GET_DE mdMemoryEnd
+    call memoryReserveMain
+    jp c,mdError
+    ld b,0
 mdReserved:
     ld a,b
     ld (mdBankId),a
@@ -356,19 +447,21 @@ mdReservedRecord:
     inc hl
     inc hl
     inc hl                  ; record+10, after the two owner bytes.
-    MD_GET_DE mdAddress
+    MD_GET_DE mdMemoryStart
     ld (hl),e
     inc hl
     ld (hl),d
     inc hl
-    push hl
-    ld hl,(mdBytes)
-    add hl,de
-    ex de,hl
-    pop hl
+    MD_GET_DE mdMemoryEnd
     ld (hl),e
     inc hl
     ld (hl),d
+    inc hl
+    ld a,(v_imageHeader+IMAGE_OPTIONS)
+    ld (hl),a
+    inc hl
+    ld a,(v_imageHeader+IMAGE_POLICY)
+    ld (hl),a
     ld a,(mdBankId)
     ld (kdPage),a
     cp DOS_IO_PAGE
@@ -377,6 +470,13 @@ mdReservedRecord:
     call nz,mdInstall
     jp c,mdRollback
 mdContextReady:
+    ld a,(mdReuseHit)
+    or a
+    jp z,mdReadImage
+    ld c,1
+    call mdActivate
+    jp nc,mdLoadReady
+mdReadImage:
     ld hl,(mdAddress)
     ld (kdFarCurrent),hl
     ld hl,0
@@ -390,10 +490,17 @@ mdContextReady:
     xor a
     ld (kiSumActive),a
     ld (kdFarActive),a
-    ld a,(mdCaller)
-    ld (kdPage),a
     pop af
     jp c,mdRollback
+    ld a,(v_imageHeader+IMAGE_OPTIONS)
+    and IMAGE_OPTION_REUSABLE
+    jp z,mdLoadReady
+    ld c,0
+    call mdActivate
+    jp c,mdRollback
+mdLoadReady:
+    ld a,(mdCaller)
+    ld (kdPage),a
     ld hl,(mdRecord)
     MD_GET_DE mdNext
     ld (hl),e
@@ -403,6 +510,8 @@ mdContextReady:
     ld (kdRegs),hl
     inc hl
     ld (mdNext),hl
+    call mdReuseTrack
+    call memoryPublishTop
     xor a
     jp kdError
 mdRollback:
@@ -419,6 +528,9 @@ mdFileError:
 mdImage:
     ld a,DOS_ERR_BAD_IMAGE
     jp mdError
+mdNoMemory:
+    ld a,MEM_ERROR_NOMEM
+    jp mdError
 mdRange:
     ld a,MEM_ERROR_RANGE
 mdError:
@@ -427,10 +539,16 @@ mdError:
 
 ; Полный профиль берётся из DOS. Пакет физического копировщика внутренний:
 ; разрешены защищённые хвосты выше FF00h, недоступные публичному memcpy_far.
+mdForgetRoute:
+    ld (mdBankId),a
+    ld hl,bankQueueResetImage
+    ld de,MEM_ROUTE_STATE
+    ld bc,bankQueueBefore-MEM_ROUTE_STATE+1
+    jp mdInstallPart
 mdInstall:
-    ld hl,MEM_IMAGE_LOCAL_START
-    ld de,MEM_IMAGE_LOCAL_START
-    ld bc,BANK_LOCAL_BYTES
+    ld hl,IO_BANK_KEYS
+    ld de,IO_BANK_KEYS
+    ld bc,MEM_IMAGE_LOCAL_START-IO_BANK_KEYS+BANK_LOCAL_BYTES
     call mdInstallPart
     ret c
     ld hl,mx_call
@@ -447,6 +565,8 @@ mdInstall:
     ld (mdContext),a
     ld a,(bankPageCount)
     ld (mdContext+1),a
+    ld a,(mdBankId)
+    call mdForgetRoute
     ld hl,mdContext
     ld de,bankPage
     ld bc,9
@@ -567,8 +687,119 @@ mdUnloadPinned:
     ld a,MEM_ERROR_ACTIVE
     jp mdError
 
+; Preflight the whole ownership subtree. An inactive cached parent must not
+; evict an executing child. Iterate a bounded owner set, without recursive SP.
+mdCanRelease:
+    push bc
+    push de
+    push hl
+    push hl
+    inc hl
+    inc hl
+    ld a,(hl)
+    or a
+    jp nz,mdGuardRootActive
+    pop hl
+    ld de,9
+    add hl,de
+    ld a,(hl)
+    sub MODULE_OWNER_BASE
+    cp MODULE_MAX
+    jp nc,mdGuardInvalid
+    push af
+    ld hl,DOS_MODULE_GUARD_ADDR
+    ld b,MODULE_MAX
+    xor a
+mdGuardClear:
+    ld (hl),a
+    inc hl
+    dec b
+    jp nz,mdGuardClear
+    pop af
+    ld l,a
+    ld h,0
+    ld de,DOS_MODULE_GUARD_ADDR
+    add hl,de
+    ld (hl),1
+mdGuardPass:
+    xor a
+    ld (DOS_MODULE_GUARD_ADDR+MODULE_MAX),a
+    ld hl,MODULE_TABLE
+    ld b,MODULE_MAX
+mdGuardRow:
+    ld a,(hl)
+    inc hl
+    or (hl)
+    dec hl
+    jp z,mdGuardNext
+    push hl
+    ld de,8
+    add hl,de
+    ld a,(hl)
+    sub MODULE_OWNER_BASE
+    cp MODULE_MAX
+    jp nc,mdGuardPop
+    ld l,a
+    ld h,0
+    ld de,DOS_MODULE_GUARD_ADDR
+    add hl,de
+    ld a,(hl)
+    or a
+    jp z,mdGuardPop
+    pop hl
+    push hl
+    inc hl
+    inc hl
+    ld a,(hl)
+    or a
+    jp nz,mdGuardRootActive
+    ld de,7
+    add hl,de
+    ld a,(hl)
+    sub MODULE_OWNER_BASE
+    cp MODULE_MAX
+    jp nc,mdGuardPop
+    ld l,a
+    ld h,0
+    ld de,DOS_MODULE_GUARD_ADDR
+    add hl,de
+    ld a,(hl)
+    or a
+    jp nz,mdGuardPop
+    inc a
+    ld (hl),a
+    ld (DOS_MODULE_GUARD_ADDR+MODULE_MAX),a
+mdGuardPop:
+    pop hl
+mdGuardNext:
+    ld de,MODULE_RECORD_SIZE
+    add hl,de
+    dec b
+    jp nz,mdGuardRow
+    ld a,(DOS_MODULE_GUARD_ADDR+MODULE_MAX)
+    or a
+    jp nz,mdGuardPass
+    xor a
+mdGuardDone:
+    pop hl
+    pop de
+    pop bc
+    ret
+mdGuardRootActive:
+    pop hl
+    ld a,MEM_ERROR_ACTIVE
+    scf
+    jp mdGuardDone
+mdGuardInvalid:
+    ld a,MEM_ERROR_HANDLE
+    scf
+    jp mdGuardDone
+
 ; HL=запись. Потомки освобождаются до владельца, реестр конечен и ацикличен.
 mdRelease:
+    call mdCanRelease
+    ret c
+mdReleaseChecked:
     push hl
     call klReclaim
     pop hl
@@ -582,6 +813,7 @@ mdRelease:
     ld de,9
     add hl,de
     ld c,(hl)
+    call timerReleaseOwner
     call fileopsReleaseOwner
     call enumReleaseOwner
     ld hl,MODULE_TABLE
@@ -601,7 +833,7 @@ mdChildren:
     jp z,mdChildNext
     push bc
     push hl
-    call mdRelease
+    call mdReleaseChecked
     pop hl
     pop bc
 mdChildNext:
@@ -664,11 +896,65 @@ mdFreeExec:
 mdFreeRecordMain:
     pop hl
     xor a
+    ld c,a
+    or (hl)
+    inc hl
+    or (hl)
+    jp z,mdFreeRecordClear
+    push hl
+    ld de,13
+    add hl,de
+    ld a,(hl)
+    and IMAGE_OPTION_REUSABLE
+    rrca
+    ld c,a
+    pop hl
+mdFreeRecordClear:
+    xor a
+    ld (hl),a
+    dec hl
     ld (hl),a
     inc hl
-    ld (hl),a
+    inc hl
+    ld (hl),c
+    call memoryPublishTop
     ret
 
+; Resolve and pin once for the duration of the controller callback.
+moduleScope:
+    call mdResolve
+    jp c,mdError
+    push hl
+    inc hl
+    inc hl
+    inc (hl)
+    inc hl
+    ld a,(hl)
+    ld (kdRegs+4),a
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ld bc,4
+    add hl,bc
+    ld a,(hl)
+    ld (kdRegs+5),a
+    ld hl,(kdRegs+2)
+    ld b,h
+    ld c,l
+    MD_PUT_DE kdRegs+2
+    xor a
+    ld (kdBusy),a
+    ld a,(kdPage)
+    ld hl,MEM_SCOPE_ENTRY
+    ld de,kdRegs
+    call bankCallPacket
+    pop hl
+    inc hl
+    inc hl
+    dec (hl)
+    xor a
+    jp kdError
 ; HL=handle, DE=MX_REGS в банке инициатора. Модуль получает регистры,
 ; обычный RET возвращает их в пакет; AF самого API — статус диспетчеризации.
 moduleCall:
@@ -681,7 +967,7 @@ moduleCall:
     push hl
     ld bc,MX_REGS
     add hl,bc
-    ld de,MEM_IMAGE_LOCAL_START
+    ld de,IO_BANK_KEYS
     call cmp_hl_de
     pop hl
     jp c,mdRegsReady
@@ -786,6 +1072,8 @@ mdCallDone:
     xor a
     jp kdError
 
+    INCLUDE "module-main-claim.inc"
+    INCLUDE "module-reuse.inc"
 moduleActor: DB 0
 mdNext: DW 1
 mdRecord: DW 0
@@ -797,6 +1085,8 @@ mdBankId: DB 0
 mdAddress: DW 0
 mdEntry: DW 0
 mdBytes: DW 0
+mdMemoryStart: DW 0
+mdMemoryEnd: DW 0
 mdCallEntry: DW 0
 mdCopy: DB 1
     DW 0

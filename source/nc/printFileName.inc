@@ -38,9 +38,11 @@ printFileGap:
         cp 8
         jp z,ncPrintDetailedFile
         call bios_printStringReal
+    IF !ENABLE_COLOR
         ld a,(ncFontWidth)
         cp 6
         call z,ncNamePadding
+    ENDIF
 ncPanelNameDone:
         pop de
         pop bc
@@ -87,8 +89,8 @@ ncDetailedGap:
         call bios_printStringReal
         jp ncPanelNameDone
 ncDirectory5: DB '<DIR>'
-; The 1px right border follows the normal/inverse name on retained scrolling.
-; Preserve the other seven bits with the normal panel background palette.
+    IF !ENABLE_COLOR
+; The 1px right border follows the inverse cursor in monochrome.
 ncNamePadding:
         ld hl,(bios_vars.cursorY)
         ld a,h
@@ -101,20 +103,8 @@ ncNamePadding:
         ld d,a
         ld e,10
         ld bc,1
-    IF ENABLE_COLOR
-        ld a,(ncCurrentColor)
-        push af
-        and 0F0h
-        or COLOR_FILE & 0Fh
-        call ncSetColor
-    ENDIF
         ld a,(bios_vars.inverse)
-        call uiFillRectPixels
-    IF ENABLE_COLOR
-        pop af
-        jp ncSetColor
-    ELSE
-        ret
+        jp uiFillRectPixels
     ENDIF
 ; Поля FAT не являются ASCIIZ; непечатный байт заменяется пробелом.
 ncCopyNamePart:

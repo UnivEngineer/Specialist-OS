@@ -93,11 +93,46 @@
     },
     {
       "address": 51200,
-      "size": 246,
+      "size": 63,
       "files": [
         "jmps_c800.inc"
       ],
       "abi": "bios_reboot"
+    },
+    {
+      "address": 51296,
+      "size": 42,
+      "files": [
+        "jmps_c860.inc"
+      ]
+    },
+    {
+      "address": 51356,
+      "size": 9,
+      "files": [
+        "jmps_c89c.inc"
+      ]
+    },
+    {
+      "address": 51383,
+      "size": 3,
+      "files": [
+        "jmps_c8b7.inc"
+      ]
+    },
+    {
+      "address": 51404,
+      "size": 3,
+      "files": [
+        "jmps_c8cc.inc"
+      ]
+    },
+    {
+      "address": 51431,
+      "size": 18,
+      "files": [
+        "jmps_c8e7.inc"
+      ]
     }
   ],
   "units": [
@@ -231,9 +266,14 @@
       ]
     },
     {
+      "name": "fontControl",
+      "files": [
+        "font-module.inc"
+      ]
+    },
+    {
       "name": "printString",
       "files": [
-        "font-module.inc",
         "bankText.inc"
       ]
     },
@@ -390,11 +430,20 @@
       ]
     },
     {
-      "name": "mainAdapters",
+      "name": "fileBodyAdapter",
       "files": [
-        "../io/legacy-files.inc",
-        "../io/fileBody.inc",
-        "../io/raw-local.inc",
+        "../io/fileBody.inc"
+      ]
+    },
+    {
+      "name": "rawLocalAdapter",
+      "files": [
+        "../io/raw-local.inc"
+      ]
+    },
+    {
+      "name": "glyphCacheAdapter",
+      "files": [
         "../io/glyphCache.inc"
       ]
     },

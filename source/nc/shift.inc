@@ -1,5 +1,6 @@
 ; Обработчик ожидания живёт только внутри ввода NC: внешняя COM его не наследует.
 ; Сохраняет регистры, положение и инверсию ввода; цвет восстанавливается явно.
+    IF !NC_BANKED
 ncInputHookBegin:
     push hl
     push de
@@ -27,6 +28,9 @@ ncGetch:
     jp ncInputHookEnd
 ncShiftPoll:
     push af
+    IF NC_STATUS_DEFER
+    call ncStatusIdle
+    ENDIF
     ld a,(IO_KEYB_B)
     and 2
     push hl
@@ -56,40 +60,19 @@ ncShiftPoll:
 ncShiftDone:
     pop af
     ret
+    ELSE
+ncGetch EQU ncBankGetch
+    ENDIF
 ncTapeStub:
-    ld hl,ncNoticeWindow
-    call ncDialogOpen
-    COLOR COLOR_DIALOG
-    ld hl,ncNoticeWindow
-    call draw
+    ld hl,ncErrorModal
+    call ncModalOpen
     ld hl,ncTapeStubText
-    ld e,120
-    call ncPrintCentered
-    call ncDialogOkButton
-    call ncModalGetch
+    call uiModalBodyText
+    call uiModalGetch
     jp ncRefreshDirty
-ncNoticeWindow:
-    G_MODAL_WINDOW 80h,64,96,256,64
-    G_LINE 80h,68,136,248
-    DB 0
-; Модальное окно без поля ввода: нулевая высота отключает и начальную
-; отрисовку курсора в getch2. Возвращает AF клавиши, сохраняет BC и cursorCfg.
-ncModalGetch:
-    push bc
-    ld a,(bios_upper.cursorCfg)
-    push af
-    xor a
-    ld (bios_upper.cursorCfg),a
-    call bios_getch
-    push af
-    pop bc
-    pop af
-    ld (bios_upper.cursorCfg),a
-    push bc
-    pop af
-    pop bc
-    ret
 ncTapeStubText: DB 'Tape is not implemented',0
 ncShiftState: DB 2
+    IF !NC_BANKED
 ncInputColor: DB COLOR_CMDLINE
 ncPreviousHook: DW 0
+    ENDIF

@@ -19,11 +19,12 @@ finally:
     sys.argv = saved
 O = R/'docs/bench/triple-packed'
 O.mkdir(parents=True, exist_ok=True)
+g = q['s']; width = g['GRID_GLYPHS']; printable = width*g['GRID_ROWS']
 source = (R/'assets/system-rom/README.TXT').read_bytes()
 source = source.replace(b'\r\n', b' ').replace(b'\r', b' ').replace(b'\n', b' ')
-source = bytes(b if b >= 32 else 32 for b in source)[:1104].ljust(1104, b' ')
-text = b''.join(source[i:i+46]+b'\r\n' for i in range(0, 1104, 46))
-assert len(text) == 1152
+source = bytes(b if b >= 32 else 32 for b in source)[:printable].ljust(printable, b' ')
+text = b''.join(source[i:i+width]+b'\r\n' for i in range(0, printable, width))
+assert len(text) == g['GRID_TEXT_BYTES']
 (O/'corpus.bin').write_bytes(text)
 results = []
 mem = q['init']('ENGINEQ', 0, 1, 6)
@@ -51,7 +52,7 @@ for name, module, variant, pre in (('ROW6 OFF', 'ENGINEP', 0, 0),
     for kind, api in enumerate(apis):
         m = bytearray(mem)
         s, bs = q['s'], q['bs']
-        m[s['gridText']:s['gridText']+1153] = text+b'\0'
+        m[s['gridText']:s['gridText']+len(text)+1] = text+b'\0'
         m[s['gridKind']] = kind
         m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2] = bytes([7, 0])
         m[0x9000:0xC000] = bytes(12288)

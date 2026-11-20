@@ -59,14 +59,30 @@ for mode,checked,fail in [(1,0,False),(1,4,False),(2,4,False),(1,4,True)]:
 # Full-sector routing is local and switches only writes to checked entry.
 for mode,checked,want in [(1,0,1),(1,4,5),(2,4,2)]:
  m=mem();m[s['v_streamMode']]=mode;m[s['v_streamChecked']]=checked
+ m[s['v_logicalShift']]=1  # Force single-sector routing rather than the batch path.
  patch(m,'ksSector',bytes.fromhex('78 32 10 D9 B7 C9'));patch(m,'streamCopyDone',bytes.fromhex('C9'))
  b,cf,a=run(m,'streamDirectIO');assert cf==0 and b[0xD910]==want
  rows.append(['full',mode,checked,want])
-for caps in [0,4]:
- m=mem();m[0xD029]=34;patch(m,'j_diskDriver',bytes([0x0E,caps,0xB7,0xC9]))
- b,cf,a=run(m,'handleCheckMode');assert cf==int(caps==0)
- if not caps:assert b[s['v_dosError']]==10
- rows.append(['explicit-capability',caps,cf])
+for mode,caps,error in [(1,1,0),(2,1,13),(34,1,13),(2,3,0),(34,3,10),(34,7,0)]:
+ m=mem();m[0xD029]=mode;patch(m,'j_diskDriver',bytes([0x0E,caps,0xB7,0xC9]))
+ b,cf,a=run(m,'handleCheckMode',hl=0xD029)
+ assert cf==bool(error) and b[s['v_dosError']]==error
+ rows.append(['explicit-capability',mode,caps,cf])
+# DOS has a stack where MAIN keeps bios_upper.diskWriteErr. A driver can
+# legitimately overwrite that address while flushing. Its carry is authoritative.
+for fail in (False,True):
+ m=mem();m[s['v_cacheDirty']]=0
+ struct.pack_into('<H',m,s['v_diskInfo.allocationStep'],0x800)
+ m[s['fatWriteError']]=1
+ patch(m,'j_diskDriver',b'\x3e\x55\x32'+word(s['bios_upper.diskWriteErr'])+
+       (b'\x37\xc9' if fail else b'\xb7\xc9'))
+ b,cf,_=run(m,'flushVolume')
+ assert cf==fail and b[s['fatWriteError']]==fail and b[s['bios_upper.diskWriteErr']]==0x55
+ rows.append(['flush-driver-status',fail,cf])
+# A later successful barrier must preserve an earlier cache write error.
+m=mem();m[s['fatWriteError']]=1
+struct.pack_into('<H',m,s['v_diskInfo.allocationStep'],0)
+assert run(m,'fatFinishWrite')[1]==1
 # Even scattered allocation uses a bounded full-volume search.
 m=mem();struct.pack_into('<H',m,0xD03C,0xACE1);struct.pack_into('<H',m,s['v_diskInfo.dataClusters'],3)
 patch(m,'fatReadCluster',bytes.fromhex('11 FF FF B7 C9'));patch(m,'handleAllocateFound',bytes.fromhex('C9'))

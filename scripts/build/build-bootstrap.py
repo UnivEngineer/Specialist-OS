@@ -1,11 +1,12 @@
 """Сборка локального bootstrap, без вызовов BIOS и зависимости от COPYBEN."""
 from pathlib import Path
-import argparse, subprocess, runpy, re
+import argparse, subprocess, runpy, re, json
 ROOT=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--probe',action='store_true');p.add_argument('--font-body',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--probe',action='store_true');p.add_argument('--font-body',type=Path);p.add_argument('--font-name');a=p.parse_args()
 out=ROOT/'bin/bootstrap';out.mkdir(parents=True,exist_ok=True)
 module=(ROOT/'bin/DOS.sys').read_bytes()
-io=(ROOT/'bin/IO.sys').read_bytes()
+io=json.loads((ROOT/'bin/System.layout.json').read_text('utf8'))['io']
+assert io['bytes']+io['bankBytes']==(ROOT/'bin/IO.sys').stat().st_size
 subprocess.run(['python', str(ROOT/'scripts/build/build-font-engines.py')], check=True)
 if a.font_body is None:
  lines=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig').splitlines()
@@ -15,10 +16,14 @@ if a.font_body is None:
  sources=[fields[1] for fields in entries if fields[0].lower()==names[0].lower()]
  if len(sources)!=1:raise ValueError('Boot font must name exactly one manifest entry')
  a.font_body=ROOT/'assets'/sources[0]
+ if a.font_name is None:a.font_name=Path(names[0]).stem
 font_path=a.font_body.with_suffix('.i80') if a.font_body.suffix.lower()=='.cpu' else a.font_body
 font=font_path.read_bytes()
-if font[:4]==b'\xcd MX':font=font[16:]
-if len(font)<48 or font[32:36]!=b'FNT1' or int.from_bytes(font[40:42],'little')!=len(font):
+if font[:4]==b'\xcd MX':
+ font=runpy.run_path(str(ROOT/'scripts/images/executable.py'))['decode'](font,'fnt').data
+abi_source=(ROOT/'source/include/mxos.inc').read_text(encoding='utf-8')
+font_version=int(re.search(r'^FONT_ENGINE_VERSION\s*=\s*(\d+)',abi_source,re.M).group(1))
+if len(font)<48 or font[32:37]!=b'FNT1'+bytes([font_version]) or int.from_bytes(font[40:42],'little')!=len(font):
  raise ValueError('Invalid boot font module descriptor')
 if int.from_bytes(font[44:46],'little'):
  raise ValueError('Bootstrap font must be self-contained: MAIN prerender reservation is not supported; use Rotate/Compact and install another engine in AUTOEXEC')
@@ -31,13 +36,17 @@ with (out/'config.inc').open('a',encoding='utf-8') as f:
  f.write(f'BOOT_COLOR_PORT = 0{int(symbols["IO_COLOR"],16):04X}h\n')
  f.write(f'BANK_MAIN_CLIENT_BYTES = {int(symbols["BANK_MAIN_CLIENT_BYTES"],16)}\n')
  f.write(f'BANK_MAIN_LOCAL_BYTES = {int(symbols["BANK_MAIN_LOCAL_BYTES"],16)}\n')
- f.write(f'BOOT_IO_BYTES = {len(io)}\nBOOT_IO_ROM = 06000h\n')
+ f.write(f"BOOT_IO_BYTES = {io['bytes']}\nBOOT_IO_KEYS = {io['bankAddress']}\nBOOT_IO_KEY_BYTES = {io['bankBytes']}\nBOOT_IO_ROM = 06000h\n")
  for alias,key in [('BOOT_IO_RAM','BIOS_IO_ADDR'),('BOOT_LOCAL_BLOCK','MEM_IMAGE_LOCAL_START'),('BOOT_MEM_KIND','MEM_BANK_KIND'),('BOOT_DOS_STACK_TOP','DOS_BANK_STACK_TOP'),('BOOT_DOS_STACK_BOTTOM','DOS_BANK_STACK_BOTTOM'),('BOOT_BIOS_STACK_TOP','BIOS_BANK_STACK_TOP')]:
   f.write(f'{alias} = 0{int(symbols[key],16):04X}h\n')
  f.write(f'BOOT_BIOS_STACK_FLOOR = 0{int(symbols["BIOS_BANK_STACK_BOTTOM"],16)+64:04X}h\n')
- f.write(f'BOOT_FONT_ROM = 04810h\nBOOT_FONT_BYTES = {len(font)}\n')
+ f.write(f'BOOT_FONT_ROM = 04820h\nBOOT_FONT_BYTES = {len(font)}\n')
  for alias,key in [('BOOT_FONT_RAM','FONT_ENGINE_BASE')]:
   f.write(f'{alias} = 0{int(symbols[key],16):04X}h\n')
+ name=(a.font_name or font_path.stem).encode('ascii')
+ if not 1<=len(name)<=8:raise ValueError('Boot font basename must fit FAT 8.3')
+ f.write(f'BOOT_FONT_NAME_RAM = 0{int(symbols["io_vars.fontName"],16):04X}h\n')
+ f.write('    DEFINE BOOT_SELECTED_BASENAME '+','.join(str(n) for n in name.ljust(8,b' '))+'\n')
  f.write(f'BIOS_BOOT_LOAD_DOS = 0{int(symbols["biosLoadDosImage"],16):04X}h\n')
 ts=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/TRANSPORT.sym').read_text(),re.M))
 with (out/'config.inc').open('a',encoding='utf-8') as f:

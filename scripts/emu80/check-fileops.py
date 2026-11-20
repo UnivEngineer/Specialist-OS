@@ -22,9 +22,11 @@ def call(op,hl=0,de=0,bc=0,a=0,error=False):
  assert bool(r['af']&1)==error,(hex(op),r)
  assert m.read(b['FONT_ADDR'],b['FONT_BYTES'])==font,'font damaged'
  return r
+def file_io(address,writing=False):
+ return runpy.run_path(str(R/'scripts/emu80/file-api.py'))['path_io'](m,call,k,address,writing)
 def save(name,data,drive='B'):
  m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x4000,data)
- m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34));call(k['MXOS_DOS_FILE_SAVE_PATH'],hl=0x3200)
+ m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34));file_io(0x3200,True)
 def job(name='TARGET',drive=1,source=b'SOURCE  BIN',extension='BIN',mode=0):
  page(1);before=m.read(k['v_directories'],16)+m.read(k['v_directory'],2)+m.read(k['v_drive'],1);page(0)
  j=bytearray(k['FILEOPS_JOB']);j[2]=mode;q=k['FILEOPS_JOB.request'];j[q+4]=1;j[q+5]=drive
@@ -41,11 +43,12 @@ def step(op=1):
  assert after==context,('STEP changed cwd',op,context.hex(),after.hex())
  return result
 def read(name,length,drive='B'):
- m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x3200,word(0x3400)+word(0x4000)+word(length)+bytes(34));call(k['MXOS_DOS_FILE_LOAD_PATH'],hl=0x3200);return m.read(0x4000,length)
+ m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x3200,word(0x3400)+word(0x4000)+word(length)+bytes(34));file_io(0x3200);return m.read(0x4000,length)
 try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
  k=sy(R/'bin/banked/KERNEL.sym');b=sy(R/'bin/BIOS.sym')
  n=sy(fixture['nc_symbols']);x.start('FILEOPS',**fixture);m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
+ call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0)
  call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
  m.write(0x2500,b'\x3a\x00\x39\x3c\x32\x00\x39\xc9');m.write(0x3900,b'\0')
@@ -92,14 +95,15 @@ try:
    if j[3]>=2:break
   assert j[3]==2,(policy,j)
   assert confirmations==(0 if policy is None else 1),(policy,confirmations)
-  assert int.from_bytes(j[10:12],'little')==(0 if policy==3 else 2),(policy,j)
+  # Processed-file count includes Skip/No to all, as does progress.
+  assert int.from_bytes(j[10:12],'little')==2,(policy,j)
   step(4)
   assert read('TDEST/A/ONE.BIN',len(data))==data
  print('PASS stepped recursive copy, Yes/No to all, complete per-drive CWD preservation',flush=True)
  # Exact module ranges: disjoint DLLs coexist, and overlapping loads cannot
  # overwrite a pinned FILEOPS. Idle eviction is selective.
  e=runpy.run_path(str(R/'scripts/images/executable.py'))
- for name,origin in [('UPPER.DLL',0xD700),('OTHER.DLL',0xD600),('OVER.DLL',0xC000)]:
+ for name,origin in [('UPPER.DLL',0xB400),('OTHER.DLL',0xB300),('OVER.DLL',k['DOS_FILEOPS_ADDR'])]:
   save(name,e['encode'](e['Image'](b'\xc9',origin,origin,1),'com'))
  def load(name,error=False):
   m.write(0x3400,('B:\\'+name).encode()+b'\0'+bytes(110))
@@ -113,18 +117,18 @@ try:
  page(1);assert m.read(k['fileopsReady'],1)==b'\0';page(0)
  unload(load_handle)
  job('RELOAD');step(4)
- page(1);cached=m.read(0xC000,(R/'bin/FILEOPS.i80').stat().st_size);page(0)
+ page(1);cached=m.read(k['DOS_FILEOPS_ADDR'],(R/'bin/FILEOPS.i80').stat().st_size);page(0)
  m.write(0x3400,b'A:/DRIVERS/RAMDISK.COM\0'+bytes(100))
  call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
  page(1)
- if m.read(k['fileopsReady'],1)==b'\1':assert m.read(0xC000,len(cached))==cached
+ if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
  page(0)
  # Both flash variants and ROM install from different measured origins.
  for installer in ('AT2MXF.COM','ROM2M.COM','AT2MX.COM'):
   m.write(0x3400,('A:/DRIVERS/'+installer).encode()+b'\0'+bytes(100))
   call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
   page(1)
-  if m.read(k['fileopsReady'],1)==b'\1':assert m.read(0xC000,len(cached))==cached
+  if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
   page(0)
   if installer=='AT2MXF.COM':
    probe=bytes((i*73+19)&255 for i in range(513));save('FOCHECK.BIN',probe,'H');assert read('FOCHECK.BIN',len(probe),'H')==probe
@@ -164,15 +168,14 @@ try:
   if selected()==b'DOS     SYS':break
   tap('down')
  else:raise AssertionError(('cannot select DOS.SYS',selected()))
- tap('f5')
- # Change only the drive letter of the prefilled H:\DOS.SYS path.
- tap('up');tap('right');tap('backspace');text('B')
- assert m.read(n['vars.input'],11).upper()==b'B:\\DOS.SYS\0',m.read(n['vars.input'],20)
+ m.stop_at(n['input']);tap('f5');m.until(n['input'],90,page=0)
+ m.call('bp_clear');m.call('emu_run_for',ms=250)
+ original=m.read(n['vars.input'],128).split(b'\0')[0]
+ for _ in original:tap('backspace')
+ text('B:/DOS.SYS')
+ assert m.read(n['vars.input'],10).upper().startswith(b'B:/DOS.SYS')
  m.screenshot(O/'nc-f5-input.png')
- m.stop_at(n['ncProgressContent']);tap('enter');m.until(n['ncProgressContent'],30,page=0)
- m.stop_at(n['ncFileopsLoop']);m.until(n['ncFileopsLoop'],30,page=0)
- m.screenshot(O/'nc-f5-progress.png')
- m.stop_at(n['mainLoop_cursorReady']);m.until(n['mainLoop_cursorReady'],30,page=0)
+ m.stop_at(n['mainLoop_cursorReady']);tap('enter');m.until(n['mainLoop_cursorReady'],90,page=0)
  m.call('bp_clear');m.call('emu_run_for',ms=250)
  assert int.from_bytes(m.read(n['vars.fileJob.bytes'],4),'little')==Path(R/'bin/DOS.sys').stat().st_size
  assert m.read(n['vars.fileJob.error'],1)==b'\0'

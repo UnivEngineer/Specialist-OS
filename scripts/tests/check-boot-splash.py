@@ -50,7 +50,7 @@ shown, draw_ticks = run(relocated, boot['stage'], boot['logoShown'])
 expected = bytearray(0x3000)
 bitmap = (ROOT / 'source/bootstrap/splash.bin').read_bytes()
 for column in range(46):
-    offset = 0x100 + column * 256 + 108
+    offset = 0x100 + column * 256 + 112
     expected[offset:offset + 39] = bitmap[column * 39:(column + 1) * 39]
 assert shown[0x9000:0xC000] == expected
 assert shown[0xC000:0xFFF8] == memory[0xC000:0xFFF8], 'BIOS copied before logo'

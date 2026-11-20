@@ -8,6 +8,9 @@
     jp bankMxResult
     jp memMovePrepared
     jp memCommandScalarReturn
+    jp memProfile
+    jp memPrintMain
+    jp memPrintReturn
 memProfile:
     push af
     push bc
@@ -41,6 +44,7 @@ memProfileReady:
     pop af
     ret
 memMemory:
+    call bankQueueBefore
     or a
     jp z,memMove
     cp MEM_OP_PRINT
@@ -187,20 +191,6 @@ memScalar:
     push bc
     push hl
     ld (memOperation),a
-    ld a,b
-    call bankCopyPageCheck
-    jp c,memScalarError
-    ld a,h
-    cp 0FFh
-    jp nc,memScalarRange
-    ld a,(memOperation)
-    and 1
-    jp nz,memScalarValid
-    inc hl
-    ld a,h
-    cp 0FFh
-    dec hl
-    jp nc,memScalarRange
 memScalarValid:
     ld (memScalarAddress),hl
     ld a,b
@@ -211,6 +201,8 @@ memScalarValid:
     ld a,(BANK_PROFILE)
     or a
     call nz,bankCommandWindow  ; COPY/TEXT/LOCAL: вернуть обычный COMMAND.
+    xor a
+    ld (BANK_BUFFER_KIND),a
     ld a,(BANK_SCALAR_KIND)
     push af
     ld a,(bankPage)
@@ -258,4 +250,20 @@ memScalarAddress: DW 0
 memScalarValue: DW 0
 memScalarBank: DB 0
 
+memRouteInvoke:
+    call bankCallPacket
+    ex (sp),hl
+    push af
+    ld a,h
+    ld (bankHome),a
+    pop af
+    ex (sp),hl
+    inc sp
+    inc sp
+    ret
+memRouteBad:
+    ld a,MEM_ERROR_HANDLE
+    scf
+    ret
+memRoute = MEM_ROUTE_STATE
 memExtensionEnd:

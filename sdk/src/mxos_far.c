@@ -32,6 +32,10 @@ mxos_u16 mxos_main_arena(void *start, mxos_u16 bytes)
 {
     MXOS_CALL r; return memory_call(&r,MXOS_MEM_OP_ARENA,0,(mxos_u16)start,bytes);
 }
+mxos_u16 mxos_main_register(void *start, mxos_u16 bytes)
+{
+    MXOS_CALL r; return memory_call(&r,MXOS_MEM_OP_MAINREGISTER,0,(mxos_u16)start,bytes);
+}
 static mxos_u16 access(MXOS_FAR_ADDRESS *p, mxos_u8 op, mxos_u16 value, mxos_u16 *out)
 {
     MXOS_REGS r;

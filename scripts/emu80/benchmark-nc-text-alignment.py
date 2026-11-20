@@ -158,8 +158,10 @@ elapsed: DW 0
     # padding pixel; only the actual name text belongs to this comparison.
     at=patched.index(b'\xcd'+W(n['bios_printStringReal']),n['printFileNamOnPanel'],n['ncPrintDetailedFile'])
     patched[at+1:at+3]=W(s['text12'])
-    patched[n['ncNamePadding']]=0xc9
-    m.write(origin,code);m.write(at+1,W(s['text12']));m.write(n['ncNamePadding'],b'\xc9')
+    m.write(origin,code);m.write(at+1,W(s['text12']))
+    if 'ncNamePadding' in n:
+        patched[n['ncNamePadding']]=0xc9
+        m.write(n['ncNamePadding'],b'\xc9')
     starts=sorted(set((0,(count-visible)//2,count-visible)))
     report=dict(cpu_hz=2000000,pit_tick_ms=.128,repeats=5,drive='H:',panel=panel,
         root_records=count,source_cache_count=cache_count,visible_rows=visible,font=font,results=[],
@@ -230,7 +232,7 @@ elapsed: DW 0
 def main():
     import argparse
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--fonts',default='Rotate,Compact,Packed6K,Fast12K')
+    parser.add_argument('--fonts',default='Rotate,Packed6K,Fast12K')
     parser.add_argument('--out',type=Path,default=ROOT/'docs/nc/text-align-2026-11-15')
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=True)
     h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
@@ -238,7 +240,7 @@ def main():
     n=runpy.run_path(str(ROOT/'scripts/tests/benchmark-nc-color-scroll.py'))['symbols'](ROOT/'bin/NC.sym')
     reports=[];reference=None
     for font in args.fonts.split(','):
-        assert font in ('Rotate','Compact','Packed6K','Fast12K')
+        assert font in ('Rotate','Packed6K','Fast12K')
         machine=h['Matrix']()
         try:
             machine.start('text-alignment-'+font,disk=ROOT/'images/FlashDisk_emu80_seed.bin')
@@ -258,7 +260,7 @@ def main():
                     else:raise AssertionError('FONT return timeout')
                     m.call('bp_clear')
                 m.call('emu_run_for',ms=1500)
-            command('FONT '+font);command('H:');command('CD /')
+            command('FONT 6x8/'+{'Packed6K':'Packed','Fast12K':'Fast'}.get(font,font));command('H:');command('CD /')
             report=run(m,n,args.out/font,font,reference)
             reports.append(report)
             if reference is None:reference=args.out/font

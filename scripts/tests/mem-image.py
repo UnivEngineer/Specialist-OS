@@ -5,7 +5,7 @@ import struct
 def install(memory, symbols):
     bios=(Path(__file__).resolve().parents[2]/'bin/BIOS.sys').read_bytes()
     memory[0xC000:0xC000+len(bios)]=bios
-    io=(Path(__file__).resolve().parents[2]/'bin/IO.sys').read_bytes()
+    io=(Path(__file__).resolve().parents[2]/'bin/IO.main.bin').read_bytes()
     memory[0xF000:0xF000+len(io)]=io
     data=(Path(__file__).resolve().parents[2]/'bin/MEM.sys').read_bytes()
     assert data[:6]==b'MXMM\x01\x04'

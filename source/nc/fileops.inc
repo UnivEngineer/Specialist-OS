@@ -22,11 +22,25 @@ ncFileopsMode:
     ld (ncProgressChoice),a
     ld hl,ncProgressPath
     ld (vars.fileJob.path),hl
+    IF NC_BANKED
+    ld a,(ncInputState.timed)
+    or a
+    jp nz,ncFileopsClockReady
+    ELSE
     ld a,13
     ld (ncProgressKey),a
-    call ncProgressClock.pitTimerInit
+    ENDIF
+    ld a,TIMER_CLOCK
+    MXOS_CALL MXOS_DOS_TIMER
     jp c,ncFileopsBegin
-    call ncProgressClock.pitTimerRead
+    call ncFileopsClockReady
+    push af
+    ld a,TIMER_RELEASE
+    MXOS_CALL MXOS_DOS_TIMER
+    pop af
+    ret
+ncFileopsClockReady:
+    call ncProgressReadClock
     ld (ncProgressStart),hl
     ld a,1
     ld (ncProgressTimer),a
@@ -52,10 +66,14 @@ ncFileopsConfirm:
     ld (vars.fileJob.answer),a
     xor a
     ld (ncProgressVisible),a
+    call ncProgressPaint
     ld a,FILEOPS_ANSWER
     call ncFileopsCall
     jp c,ncFileopsAbort
-    call ncProgressClock.pitTimerRead
+    ld a,(ncProgressTimer)
+    or a
+    jp z,ncFileopsInspect
+    call ncProgressReadClock
     ld (ncProgressStart),hl
     jp ncFileopsInspect
 ncFileopsInspect:
@@ -88,11 +106,27 @@ ncFileopsAbort:
     scf
     ret
 ncFileopsCall:
+    IF NC_BANKED
+    call ncBankFlush
+    ENDIF
     ld hl,vars.fileJob
     MXOS_CALL MXOS_DOS_FILEOPS
     ret
 ; Only newly pressed keys activate buttons; held Enter from the input is ignored.
 ncProgressInput:
+    IF NC_BANKED
+    ld hl,ncInputState
+    ld a,(hl)
+    push af
+    call io_bankKeyPoll
+    pop bc                ; B = preceding raw key. POP BC preserves Z.
+    jp z,ncProgressStep
+    ld c,a
+    ld a,(hl)
+    cp b                  ; A repeat must not activate a button again.
+    jp z,ncProgressStep
+    ld a,c
+    ELSE
     call bios_keyScan
     ld b,a
     ld a,(ncProgressKey)
@@ -100,16 +134,27 @@ ncProgressInput:
     ld a,b
     ld (ncProgressKey),a
     jp z,ncProgressStep
+    ENDIF
     or a
     jp z,ncProgressStep
     cp 01Bh
     jp z,ncProgressCancelKey
-    cp 8
-    jp z,ncProgressChoose
-    cp 018h
-    jp z,ncProgressChoose
-    cp 9
-    jp z,ncProgressChoose
+    ld e,a
+    ld a,(ncProgressVisible)
+    or a
+    jp z,ncProgressNonFocus
+    ld a,(vars.fileJob.phase)
+    cp FILEOPS_PHASE_PREPARE
+    jp nz,ncProgressNonFocus
+    ld a,e
+    call uiModalFocusKey
+    jp nc,ncProgressAction
+    ld a,(uiModalFocusIndex)
+    ld (ncProgressChoice),a
+    jp ncProgressStep
+ncProgressNonFocus:
+    ld a,e
+ncProgressAction:
     cp 13
     jp z,ncProgressEnter
     and 0DFh
@@ -126,19 +171,6 @@ ncProgressCancelButton:
     jp nz,ncProgressStep
     ld a,FILEOPS_SKIP_PREPARE
     ret
-ncProgressChoose:
-    ld a,(vars.fileJob.phase)
-    cp FILEOPS_PHASE_PREPARE
-    jp nz,ncProgressStep
-    COLOR COLOR_DIALOG
-    xor a
-    call ncProgressSelectedFrame
-    ld a,(ncProgressChoice)
-    xor 1
-    ld (ncProgressChoice),a
-    ld a,0FFh
-    call ncProgressSelectedFrame
-    jp ncProgressStep
 ncProgressEnter:
     ld a,(ncProgressChoice)
     or a
@@ -164,7 +196,7 @@ ncProgressThrottle:
     ld a,(ncProgressTimer)
     or a
     jp z,ncProgressPaint
-    call ncProgressClock.pitTimerRead
+    call ncProgressReadClock
     ex de,hl
     ld hl,(ncProgressStart)
     call ncProgressSubtract
@@ -176,7 +208,7 @@ ncProgressPaint:
     ld a,(ncProgressTimer)
     or a
     ret z
-    call ncProgressClock.pitTimerRead
+    call ncProgressReadClock
     ld (ncProgressStart),hl
     ret
 ncProgressPaintBody:
@@ -189,43 +221,28 @@ ncProgressPaintBody:
     jp z,ncProgressValues
     jp ncProgressContent
 ncProgressOpen:
-    ld hl,ncProgressWindow
-    call ncDialogOpen
-    COLOR COLOR_DIALOG
-    ld hl,ncProgressWindow
-    call draw
+    call ncProgressInitFocus
+    call ncProgressModal
+    call ncModalOpen
     ld a,1
     ld (ncProgressVisible),a
+    jp ncProgressFocusDone
 ncProgressContent:
     COLOR COLOR_DIALOG
-    ld hl,68
-    ld bc,248
-    ld d,93
-    ld e,71
-    xor a
-    call uiFillRectPixels
-    ld hl,ncProgressDividers
-    call draw
+    call ncProgressInitFocus
+    call ncProgressModal
+    call uiModalClear
+ncProgressFocusDone:
     ld a,0FFh
     ld (ncProgressPercent),a
     ld (ncProgressLastPath),a
-    ld hl,ncProgressLastNumber
-    ld b,6
-ncProgressResetNumber:
-    ld (hl),a
-    inc hl
-    dec b
-    jp nz,ncProgressResetNumber
     xor a
     ld (ncProgressBarWidth),a
     ld a,(vars.fileJob.phase)
     ld (ncProgressPhase),a
-    call ncProgressButtons
     ld a,(vars.fileJob.phase)
     cp FILEOPS_PHASE_PREPARE
     jp z,ncProgressPreparing
-    ld hl,02467h                ; X=72 px
-    call bios_setCursorPos
     ld a,(vars.fileJob.phase)
     cp FILEOPS_PHASE_DELETE
     ld hl,ncProgressDeleteTitle
@@ -237,8 +254,7 @@ ncProgressTitleReady:
     jp nz,ncProgressTitleSelected
     ld hl,ncProgressMoveTitle
 ncProgressTitleSelected:
-    ld e,103
-    call ncPrintCentered
+    call uiModalTitle
     jp ncProgressValues
 ncProgressPreparing:
     ld a,(vars.fileJob.mode)
@@ -247,64 +263,105 @@ ncProgressPreparing:
     jp nz,ncProgressPrepareSelected
     ld hl,ncProgressPrepareMoveTitle
 ncProgressPrepareSelected:
-    ld e,103
-    call ncPrintCentered
+    call uiModalTitle
     jp ncProgressValues
  ; Static title/buttons survive heartbeats. Text is opaque and padded,
 ; only changed values are printed. The bar only grows, in 8-pixel pieces.
 ncProgressValues:
     COLOR COLOR_DIALOG
-    ld a,(vars.fileJob.phase)
-    cp FILEOPS_PHASE_PREPARE
-    jp z,ncProgressScanValues
-    ld c,0
-    ld hl,vars.fileJob.bytes
-    ld de,ncProgressLastNumber
-    ld b,4
-    call ncProgressCompare
-    ld a,c
-    or a
-    jp z,ncProgressValuesBar
     call ncProgressTextBegin
-    call ncProgressCounts
-    ld hl,02478h
-    call bios_setCursorPos
-    ld hl,240
-    call ncProgressFieldWidth
-    ld hl,ncProgressText
-    call ncPrintRightField
-ncProgressValuesBar:
-    ld a,(vars.fileJob.known)
-    or a
-    call nz,ncProgressBar
-    jp ncProgressPathLine
-ncProgressScanValues:
-    ld c,0
-    ld hl,vars.fileJob.total
-    ld de,ncProgressLastNumber
-    ld b,4
-    call ncProgressCompare
-    ld hl,vars.fileJob.files
-    ld de,ncProgressLastNumber+4
-    ld b,2
-    call ncProgressCompare
-    ld a,c
-    or a
-    jp z,ncProgressPathLine
-    call ncProgressTextBegin
+    ld hl,ncProgressFilesLabel
+    call ncProgressAppend
     ld hl,(vars.fileJob.files)
     ex de,hl
     call ncProgressAppendWord
-    ld hl,ncProgressFilesText
+    ld a,(vars.fileJob.phase)
+    cp FILEOPS_PHASE_PREPARE
+    jp z,ncProgressFilesReady
+    ld a,(vars.fileJob.known)
+    or a
+    jp z,ncProgressFilesReady
+    ld hl,ncProgressSlash
     call ncProgressAppend
-    ld hl,vars.fileJob.total
-    call ncProgressBytes
-    ld hl,02478h
+    ld hl,(vars.fileJob.totalFiles)
+    ex de,hl
+    call ncProgressAppendWord
+ncProgressFilesReady:
+    ld a,7
+    call uiModalBodyY
+    ld h,36
+    ld l,e
     call bios_setCursorPos
-    ld hl,240
+    ld hl,96
     call ncProgressFieldWidth
     ld hl,ncProgressText
     call ncPrintField
+    call ncProgressTextBegin
+    ld hl,ncProgressSizeLabel
+    call ncProgressAppend
+    ld a,(vars.fileJob.phase)
+    cp FILEOPS_PHASE_PREPARE
+    jp nz,ncProgressTransferSize
+    ld hl,vars.fileJob.total
+    call ncProgressBytes
+    jp ncProgressSizeReady
+ncProgressTransferSize:
+    call ncProgressCounts
+ncProgressSizeReady:
+    ld a,7
+    call uiModalBodyY
+    ld h,84
+    ld l,e
+    call bios_setCursorPos
+    ld hl,144
+    call ncProgressFieldWidth
+    ld hl,ncProgressText
+    call ncPrintRightField
+    ld a,(vars.fileJob.phase)
+    cp FILEOPS_PHASE_PREPARE
+    jp z,ncProgressPathLine
+    ld a,(vars.fileJob.known)
+    or a
+    jp z,ncProgressActivity
+    call ncProgressBar
+    jp ncProgressPathLine
+; Unknown totals (DELETE or skipped preparation): activity, without a fake %.
+ncProgressActivity:
+    ld hl,79
+    ld bc,226
+    ld a,10
+    call uiModalBodyY
+    ld d,e
+    ld e,11
+    ld a,0FFh
+    call uiFrameRectPixels
+    ld hl,80
+    ld bc,224
+    ld a,11
+    call uiModalBodyY
+    ld d,e
+    ld e,9
+    xor a
+    call uiFillRectPixels
+    ld a,(ncProgressActivityX)
+    add a,8
+    cp 192
+    jp c,ncProgressActivityReady
+    xor a
+ncProgressActivityReady:
+    ld (ncProgressActivityX),a
+    ld l,a
+    ld h,0
+    ld de,80
+    add hl,de
+    ld bc,24
+    ld a,11
+    call uiModalBodyY
+    ld d,e
+    ld e,9
+    ld a,0FFh
+    call uiFillRectPixels
+    jp ncProgressPathLine
 ncProgressPathLine:
     ld hl,240
     call ncProgressFieldWidth
@@ -329,7 +386,10 @@ ncProgressPathCompare:
     or a
     ret z
     push hl
-    ld hl,0248Fh
+    ld a,30
+    call uiModalBodyY
+    ld h,36
+    ld l,e
     call bios_setCursorPos
     ld hl,240
     call ncProgressFieldWidth
@@ -342,52 +402,30 @@ ncProgressFieldWidth:
     call ncMath.div_hl_de
     ld b,l
     ret
-; Compare and remember B bytes; C accumulates differences across fields.
-ncProgressCompare:
-    ld a,(de)
-    xor (hl)
-    or c
-    ld c,a
-    ld a,(hl)
-    ld (de),a
-    inc hl
-    inc de
-    dec b
-    jp nz,ncProgressCompare
-    ret
-ncProgressButtons:
-    ld a,(ncProgressVisible)
-    or a
-    ret z
+ncProgressModal:
     ld a,(vars.fileJob.phase)
     cp FILEOPS_PHASE_PREPARE
-    jp nz,ncProgressOneButton
-    xor a
-    ld (ncProgressCancelWidget.selected),a
-    ld (ncProgressAbortButton.selected),a
-    ld hl,ncProgressCancelWidget
-    call ncDrawButton
-    ld hl,ncProgressAbortButton
-    call ncDrawButton
-    ld a,1
-    jp ncProgressSelectedFrame
-ncProgressSelectedFrame:
-    and 1
-    push af
+    ld hl,ncProgressPrepareModal
+    ret z
+    ld hl,ncProgressRunModal
+    ret
+ncProgressInitFocus:
+    call ncProgressModal
+    ld a,0
+    jp nz,ncProgressFocusIndex
     ld a,(ncProgressChoice)
-    or a
-    ld hl,ncProgressCancelWidget
-    jp z,ncProgressFocusReady
-    ld hl,ncProgressAbortButton
-ncProgressFocusReady:
-    pop af
-    jp uiSelectButton
-ncProgressOneButton:
-    ld hl,ncProgressOnlyAbortButton
-    jp ncDrawButton
-ncProgressCancelWidget: UI_BUTTON ncProgressCancel,36,56,149,14,6,0
-ncProgressAbortButton: UI_BUTTON ncProgressAbort,100,56,149,14,6,0
-ncProgressOnlyAbortButton: UI_BUTTON ncProgressAbortEsc,68,56,149,14,6,1
+ncProgressFocusIndex:
+    ld bc,UI_FOCUS_GRID*256
+    jp uiModalFocusInit
+ncProgressPrepareModal:
+    UI_MODAL_BEGIN 36,1,2
+    UI_MODAL_BUTTON ncProgressCancel,0,0,1
+    UI_MODAL_BUTTON ncProgressAbort,0,1,0
+    UI_MODAL_END
+ncProgressRunModal:
+    UI_MODAL_BEGIN 36,1,1
+    UI_MODAL_BUTTON ncProgressAbortEsc,0,0,1
+    UI_MODAL_END
 ; Normalize to 16 bits <=655, preserving the ratio to about 0.2 percent.
 ncProgressBar:
     ld hl,vars.fileJob.total
@@ -442,8 +480,10 @@ ncProgressPercentReady:
     push bc
     jp nz,ncProgressBarFrameReady
     ld hl,79
-    ld bc,194
-    ld d,123
+    ld bc,226
+    ld a,10
+    call uiModalBodyY
+    ld d,e
     ld e,11
     ld a,0FFh
     call uiFrameRectPixels
@@ -458,7 +498,9 @@ ncProgressBarFrameReady:
     call ncProgressAppendWord
     ld a,'%'
     call ncProgressAppendChar
-    ld hl,08C83h                ; Right edge at X=312, baseline 131.
+    ld hl,(uiModalCurrent)
+    ld l,(hl)
+    ld h,140
     call bios_setCursorPos
     ld hl,ncProgressText
     ld b,4
@@ -466,7 +508,7 @@ ncProgressBarFrameReady:
     ld a,(ncProgressPercent)
     ld l,a
     ld h,0
-    ld de,24
+    ld de,28
     call ncMath.mul_hl_de
     ld de,100
     call ncMath.div_hl_de
@@ -486,7 +528,9 @@ ncProgressBarFrameReady:
     ld (ncProgressBarWidth),a
     ld hl,80
     add hl,de
-    ld d,124
+    ld a,11
+    call uiModalBodyY
+    ld d,e
     ld e,9
     ld a,0FFh
     jp uiFillRectPixels
@@ -591,8 +635,8 @@ ncProgressCountUnit:
     ld (ncProgressUnits),hl
     ld hl,vars.fileJob.bytes
     call ncProgressInteger
-    ld a,'/'
-    call ncProgressAppendChar
+    ld hl,ncProgressSlash
+    call ncProgressAppend
     ld hl,vars.fileJob.total
     call ncProgressInteger
     ld hl,(ncProgressUnits)
@@ -674,13 +718,6 @@ ncProgressSubtract:
     sbc a,d
     ld h,a
     ret
-ncProgressWindow:
-    G_MODAL_WINDOW 80h,64,88,256,80
-    DB 0
-ncProgressDividers:
-    G_LINE 80h,68,108,248
-    G_LINE 80h,68,147,248
-    DB 0
 ncProgressTitle: DB 'Copying files...',0
 ncProgressMoveTitle: DB 'Moving files...',0
 ncProgressPrepareTitle: DB 'Preparing to copy files...',0
@@ -689,7 +726,10 @@ ncProgressDeleteTitle: DB 'Deleting files...',0
 ncProgressCancel: DB 'Cancel [Esc]',0
 ncProgressAbort: DB 'Abort [A]',0
 ncProgressAbortEsc: DB 'Abort [Esc]',0
-ncProgressFilesText: DB ' files / ',0
+ncProgressFilesLabel: DB 'Files: ',0
+ncProgressSizeLabel: DB 'Size: ',0
+ncProgressSlash: DB '/',0
+ncProgressActivityX: DB 0
 ncProgressB: DB ' B',0
 ncProgressKiBText: DB ' KiB',0
 ncProgressMiB: DB ' MiB',0
@@ -697,12 +737,13 @@ ncProgressVisible: DB 0
 ncProgressTimer: DB 0
 ncProgressPhase: DB 0FFh
 ncProgressChoice: DB 0
+    IF !NC_BANKED
 ncProgressKey: DB 0
+    ENDIF
 ncProgressPercent: DB 0
 ncProgressStart: DW 0
 ncProgressOut: DW 0
 ncProgressBarWidth: DB 0
-ncProgressLastNumber: DS 6,0FFh
 ncProgressLastPath: DS 61,0FFh
 ncProgressUnits: DW 0
 ncProgressDenom: DS 4,0
@@ -711,7 +752,14 @@ ncProgressNumber: DS 4,0
 ncProgressRemainder: DS 4,0
 ncProgressText EQU vars.displayPath
 ncProgressPath EQU vars.pathArg ; Reuse the existing modal path buffer.
+    IF NC_BANKED
+ncProgressReadClock = io_bankClockRead
+    ELSE
+    DEFINE TIMING_PIT_READ_ONLY
     MODULE ncProgressClock
     INCLUDE "../include/timing-pit.inc"
     ENDMODULE
+    UNDEFINE TIMING_PIT_READ_ONLY
+ncProgressReadClock = ncProgressClock.pitTimerRead
+    ENDIF
 

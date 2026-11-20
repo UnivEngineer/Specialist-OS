@@ -5,7 +5,12 @@
 ; 2013-12-18 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-but_F3:     ; Временный выбор противоположной панели
+but_F3:
+            ld    a,(ncShiftState)
+            or    a
+            jp z, ncHelp
+
+            ; Временный выбор противоположной панели
             ld    a, (state.activePanel)
             push  af
             xor   1
@@ -20,16 +25,15 @@ but_F3:     ; Временный выбор противоположной па�
             ; Восстанавлаием активную панель
             pop   af
             ld    (state.activePanel),a
-            and   a
-            jp z, loc_D701
+            xor   1
+            ld    c,a
+            call  loadAndPrintPanel
 
-            ; Перерисовываем панель
-            call  loadAndPrintA
-
-            jp    panelStateChanged
-
-; ---------------------------------------------------------------------------
-
-loc_D701:   call  loadAndPrintB
-            jp    panelStateChanged
+            ; The active file selection and command prompt are already visible.
+            ld    a,(ncDamageMask)
+            or    a
+            jp z, mainLoop_cursorReady
+            ld    a,1
+            ld    (ncCommandCursorKept),a
+            jp    ncRefreshDirty
 

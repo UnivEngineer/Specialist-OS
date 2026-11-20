@@ -3,7 +3,7 @@ static MXOS_PATH path;
 int main(void) {
  MXOS_FILE f; char b[8]; mxos_u16 directory, top=mxos_memtop();
  if (sizeof(f)!=64 || sizeof(mxos_u32)!=4 || sizeof(mxos_u16)!=2 || sizeof(void *)!=2) return 1;
- if (sizeof(MXOS_REGS)!=10 || sizeof(MXOS_PATH_IO)!=40) return 12;
+ if (sizeof(MXOS_REGS)!=10 || sizeof(MXOS_PATH_IO)!=40 || sizeof(MXOS_BODY_IO)!=42) return 12;
  { MXOS_CALL request;
    if (sizeof(request)!=10) return 31;
    request.operation=MXOS_BIOS_UPPERCASE;
@@ -42,5 +42,14 @@ int main(void) {
  f.bytes[28]=3; if (mxos_file_save(f.bytes,"NEW")) return 25;
  if (mxos_file_load(f.bytes,b) || b[0]!='N' || b[2]!='W') return 26;
  if (mxos_file_rename(f.bytes,"RENSTDIOBIN") || mxos_file_delete("RENSTDIOBIN")) return 27;
+ { MXOS_PATH_IO q;
+   q.path=(mxos_u16)"B:/CWHOLE.BIN";q.buffer=(mxos_u16)"WHOLE";q.count=5;
+   if (mxos_file_write_all(&q) || q.actual!=5) return 35;
+   q.buffer=(mxos_u16)b;q.count=sizeof(b);
+   if (mxos_file_read_all(&q) || q.actual!=5 || b[0]!='W' || b[4]!='E') return 36;
+   q.count=1;
+   if (mxos_file_read_all(&q)!=MXOS_ERR_ARGUMENT || q.actual) return 37;
+   if (mxos_file_delete("CWHOLE  BIN")) return 38;
+ }
  return 0;
 }

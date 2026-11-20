@@ -23,7 +23,7 @@ def main():
     for c in range(256):
         struct.pack_into('<H', packed, 32 + c * 2, struct.unpack_from('<H', packed, 32 + c * 2)[0] + 0x4b90)
     base = bytearray((i * 37 + (i >> 8) * 13) & 255 for i in range(65536))
-    for name, address in [('FONTCOM.i80', 0), ('BIOS.sys', 0xc000), ('IO.sys', 0xf000)]:
+    for name, address in [('FONTCOM.i80', 0), ('BIOS.sys', 0xc000), ('IO.main.bin', 0xf000)]:
         data = (ROOT / 'bin' / name).read_bytes()
         base[address:address + len(data)] = data
     # В COM фаза 4 на старте занята парсером; entry восстанавливает её до тестов.

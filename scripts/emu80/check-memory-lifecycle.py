@@ -42,12 +42,14 @@ def snapshot():
     page(0)
     return [(data[i],int.from_bytes(data[i+1:i+3],'little'),int.from_bytes(data[i+3:i+5],'little'),data[i+5]) for i in range(0,len(data),6) if data[i]!=255]
 
+def file_io(address,writing=False):
+ return runpy.run_path(str(ROOT/'scripts/emu80/file-api.py'))['path_io'](m,lambda op,hl=0,a=0:call(op,hl=hl,af=(a<<8)|2),k,address,writing,handle=0x2e00)
 def save(name,data):
     page(0)
     m.write(0x3400,('B:\\'+name+'\0').encode()+bytes(100))
     m.write(0x4000,data)
     m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34))
-    call(k['MXOS_DOS_FILE_SAVE_PATH'],hl=0x3200)
+    file_io(0x3200,True)
 
 try:
     x.start('Memory lifecycle / DOS-owned RAM disk')

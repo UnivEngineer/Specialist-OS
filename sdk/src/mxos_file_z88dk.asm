@@ -3,7 +3,6 @@
     SECTION code_clib
     INCLUDE "mxos_syscall_ids.inc"
     PUBLIC _mxos_file_call
-    PUBLIC _mxos_dos_init
     PUBLIC _mxos_current_drive
 _mxos_file_call:
     push hl
@@ -16,14 +15,10 @@ _mxos_file_call:
     ld l,a
     ld h,0
     ret
-_mxos_dos_init:
-    call 0C8D8h
-    ld l,a
-    ld h,0
-    ret
 _mxos_current_drive:
     ld de,0
-    call 0C842h
+    call 0F806h
+    defw MXOS_DOS_FILE_GET_SET_DRIVE
     ld l,a
     ld h,0
     ret

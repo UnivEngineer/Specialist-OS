@@ -7,8 +7,7 @@ but_F6:
             ld (copyFileOperation+1),a
             call drawWindowIfSel
             ld hl,ncMoveText
-            ld e,94
-            call ncPrintCentered
+            call uiModalTitle
             call inputForCopyMove
             cp 01Bh
             jp z,ncRefreshDirty
@@ -20,8 +19,7 @@ ncMoveText: DB 'Move to',0
 ncRename:
             call drawWindowIfSel
             ld hl,ncRenameText
-            ld e,94
-            call ncPrintCentered
+            call uiModalTitle
             call inputForRename
             cp 01Bh
             jp z,ncRefreshDirty
@@ -46,7 +44,7 @@ ncRenameLeaf:
 ncRenameLeafReady:
             ld hl,vars.input
             ld de,vars.copyRequest.destination
-            call bios_fileNamePrepare
+            MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
             jp c,copyFileError
             call getSelectedFile
             ld de,vars.copyRequest.destination

@@ -8,6 +8,11 @@
 drawCursor_1:     ; Цикл
             dec   a
             jp nz,  drawCursor_0
+            ld    a,d
+            sub   0BFh
+            jp nz,drawCursor_inside
+            ld    l,a             ; Clip the second byte at the right edge.
+drawCursor_inside:
 
             ; b = vars.cursorCfg & 0xF
             ld    a, b

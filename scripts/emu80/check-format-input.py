@@ -17,10 +17,10 @@ def still(label):
 try:
  x.start('after')
  # Модальные окна вызываются обычными командами и Shift+F1.
- m.call('kbd_send',keys=['shift'],action='press');m.call('emu_run_for',ms=250);m.stop_at(n['ncModalGetch']);m.tap('f1');m.until(n['ncModalGetch'],120,page=0);m.call('kbd_send',keys=['shift'],action='release');still('tape-no-cursor');m.stop_at(n['mainLoop']);m.tap('enter');m.until(n['mainLoop'],120,page=0)
+ m.call('kbd_send',keys=['shift'],action='press');m.call('emu_run_for',ms=250);m.stop_at(n['uiModalGetch']);m.tap('f1');m.until(n['uiModalGetch'],120,page=0);m.call('kbd_send',keys=['shift'],action='release');still('tape-no-cursor');m.stop_at(n['mainLoop']);m.tap('enter');m.until(n['mainLoop'],120,page=0)
  cmd('copy A:/README.TXT B:/README.TXT',n['mainLoop'])
  cmd('copy A:/README.TXT B:/README.TXT',n['ncOverwriteKey']);still('overwrite-no-cursor')
- m.stop_at(n['ncOverwriteKey']);m.tap('right');m.until(n['ncOverwriteKey'],120,page=0);still('overwrite-no-to-all')
+ m.stop_at(n['uiModalReadChoice']);m.tap('right');m.until(n['uiModalReadChoice'],120,page=0);still('overwrite-no-to-all')
  m.stop_at(n['mainLoop']);m.tap('esc');m.until(n['mainLoop'],120,page=0)
  ready();x.console();cmd('format h',c['cliPrompt']);m.screenshot(O/'invalid-cli.png');rows.append(dict(case='invalid-cli',message='Invalid arguments'))
  cmd('format',f['lineEditLoop']);ready();m.tap('a');assert m.read(f['v_Answer'],2).lower()==b'a\0';m.screenshot(O/'drive-before-enter.png')

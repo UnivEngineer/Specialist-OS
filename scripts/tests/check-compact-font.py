@@ -52,5 +52,5 @@ raw=bytes((n*37+n//8)&255 for n in range(2048));m[0x4000:0x4800]=raw
 m[0x1100:0x1106]=W(0xd800)+W(0x4000)+W(0)
 m=call(m,0x5000,hl=0x1100)
 codes=(R/'bin/fonts/compact-codes.bin').read_bytes()
-assert m[C['fontData']:C['fontData']+1296]==bytes(raw[c*8+y]&63 for c in codes for y in range(8))
+assert m[C['fontData']:C['fontData']+len(codes)*8]==bytes(raw[c*8+y]&63 for c in codes for y in range(8))
 print('Compact flat import PASS')

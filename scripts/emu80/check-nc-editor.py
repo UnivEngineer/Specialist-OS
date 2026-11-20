@@ -1,10 +1,10 @@
-"""Клавиатура NC/CLI: вставка пути, запуск E, NUL-маркер и сохранение FFh."""
+"""Клавиатура NC/CLI: вставка пути, запуск EDIT, NUL-маркер и сохранение FFh."""
 from pathlib import Path
 import runpy,json,re
 R=Path(__file__).resolve().parents[2];O=R/'docs/nc-fixes-048';O.mkdir(parents=True,exist_ok=True)
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=O,RUNTIME=R/'.local/monitor2-001')
 def symbols(p):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text(),re.M)}
-x=h['Matrix']();m=x.m;n=symbols(R/'bin/NC.sym');e=symbols(R/'bin/E.sym');c=symbols(R/'bin/CLI.sym');rows=[]
+x=h['Matrix']();m=x.m;n=symbols(R/'bin/NC.sym');e=symbols(R/'bin/EDIT.sym');c=symbols(R/'bin/CLI.sym');rows=[]
 def ready():
  m.call('bp_clear');m.call('emu_run_for',ms=500)
 def reset():
@@ -13,6 +13,12 @@ def text(s):
  for ch in s:m.tap({' ':'space',':':'colon','.':'period','/':'slash'}.get(ch,ch.lower()))
 def cmd(s,target):
  ready();m.tap('esc');text(s);m.screenshot(O/'command.png');m.stop_at(target);m.tap('enter');m.until(target,120,page=0)
+def editor_name(value):
+ m.call('emu_run_for',ms=500)
+ m.tap('lf')
+ for _ in range(m.read(e['lineEditLength'],1)[0]):m.tap('backspace')
+ text(value)
+
 def choose(stem,ext):
  cache=m.read(n['FILE_CACHE_A'],n['FILE_CACHE_BYTES'])
  name=(stem.ljust(8)+ext.ljust(3)).encode();i=next(i for i in range(len(cache)//16) if cache[i*16:i*16+11].upper()==name)
@@ -21,8 +27,7 @@ def choose(stem,ext):
  print('SELECT',name,i,flush=True)
 def editor(label,empty):
  start=int.from_bytes(m.read(e['v_textBeginLo'],2),'little');end=int.from_bytes(m.read(e['v_textEnd'],2),'little')
- assert (end==start+1) if empty else end>start+1,(label,start,end,m.read(start,32))
- if empty:assert m.read(start,2)==b'\r\0'
+ assert (end==start) if empty else end>start+1,(label,start,end,m.read(start,32))
  m.screenshot(O/(label+'.png'));rows.append(dict(case=label,empty=empty,bytes=end-start));print(rows[-1],flush=True)
 # Собственный H: с текстом, содержащим FFh. Рабочие образы пользователя не меняются.
 import struct
@@ -39,16 +44,16 @@ try:
  line=m.read(n['vars.cmdLine'],128).split(b'\0')[0];assert line.upper()==b'A:'+bytes([92])+b'README.TXT',line
  rows.append(dict(case='ctrl-enter',line=line.decode()));m.screenshot(O/'ctrl-enter.png');m.tap('esc')
  m.stop_at(e['editorStatusLoop']);m.tap('f4');m.until(e['editorStatusLoop'],120,page=0);editor('f4-readme',False)
- reset();choose('E','COM');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0);editor('enter-e',True)
- reset();cmd('E.COM',e['editorStatusLoop']);editor('nc-empty',True)
- reset();m.stop_at(c['cliPrompt']);m.tap('f10');m.until(c['cliPrompt'],120,page=0);cmd('E.COM',e['editorStatusLoop']);editor('cli-empty',True)
- m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('E.COM A:/README.TXT',e['editorStatusLoop']);editor('cli-readme',False)
+ reset();choose('EDIT','COM');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0);editor('enter-edit',True)
+ reset();cmd('EDIT.COM',e['editorStatusLoop']);editor('nc-empty',True)
+ reset();m.stop_at(c['cliPrompt']);m.tap('f10');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM',e['editorStatusLoop']);editor('cli-empty',True)
+ m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM A:/README.TXT',e['editorStatusLoop']);editor('cli-readme',False)
  # Открытие FFh-текста, изменение строки, добавление файла и сохранение без NUL.
- m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('E.COM H:/MARKER.TXT',e['editorStatusLoop'])
- assert m.read(0x1800,9)==b'A\xffB\rC\xffD\r\0'
- ready();m.tap('z');m.tap('f6');text('H:/APPEND.TXT');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0)
- expected=b'z\xffB\rC\xffD\rX\xffY\r';assert m.read(0x1800,len(expected)+1)==expected+b'\0'
- ready();m.tap('f5');text('B:/MARKER.TXT');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0);m.screenshot(O/'marker-saved.png')
+ m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM H:/MARKER.TXT',e['editorStatusLoop'])
+ assert m.read(e['EDITOR_TEXT_BEGIN'],9)==b'A\xffB\rC\xffD\r\0'
+ ready();m.tap('z');m.tap('f6');editor_name('H:/APPEND.TXT');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0)
+ expected=b'z\xffB\rC\xffD\rX\xffY\r';assert m.read(e['EDITOR_TEXT_BEGIN'],len(expected)+1)==expected+b'\0'
+ ready();m.tap('f5');editor_name('B:/MARKER.TXT');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0);m.screenshot(O/'marker-saved.png')
  m.write(0x7600,b'B:/MARKER.TXT\0');assert not x.func(0xC85A,hl=0x7600,de=0x7800)['flags']['C']
  assert not x.func(0xC851,hl=0x7800)['flags']['C'];assert int.from_bytes(m.read(0x781c,4),'little')==len(expected)
  assert not x.func(0xC866,hl=0x7800,de=0x7000)['flags']['C'];assert m.read(0x7000,len(expected))==expected

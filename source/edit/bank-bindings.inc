@@ -1,0 +1,28 @@
+; Only software mirrors are visible in EXEC; MAIN owns BIOS and VRAM.
+    DEFINE bios_vars.cursorY ebCursor
+    DEFINE bios_vars.cursorX ebCursor+1
+    DEFINE bios_vars.inverse ebInverse
+    DEFINE bios_upper.cursorCfg ebCursorCfg
+    DEFINE bios_vars.keyLocks ebKeyLocks
+    DEFINE FONT_ENGINE_HEADER ebFont
+    DEFINE IO_COLOR ebColor
+    DEFINE bios_printStringReal ebPrintRaw
+    DEFINE bios_printStringRawLim ebPrintLim
+    DEFINE bios_printString ebPrintString
+    DEFINE bios_printChar ebPrintChar
+    DEFINE bios_setCursorPos ebSetCursor
+    DEFINE bios_getch ebGetch
+    DEFINE bios_getMemTop ebMemTop
+    DEFINE bios_sub_hl_de ebSubtract
+    DEFINE bios_cmp_hl_de compareHLDE
+    DEFINE bios_memcpy_bc_hl ebCopy.memcpy_bc_hl
+    DEFINE bios_argNext ebArgs.argNext
+    DEFINE bios_setFontEncoding ebEncoding
+    DEFINE bios_setInputHook ebSetHook
+    DEFINE bios_reboot ebReturn
+    DEFINE UI_BUTTON_RECOLOR ebRecolor
+ebCursor = EDIT_BANK_STATE
+ebInverse = EDIT_BANK_STATE+2
+ebCursorCfg = EDIT_BANK_STATE+4
+ebFont = EDIT_BANK_STATE+8
+ebColor = EDIT_BANK_STATE+16

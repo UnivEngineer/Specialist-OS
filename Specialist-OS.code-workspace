@@ -163,6 +163,7 @@
       },
       {
         "label": "build: editor",
+        "dependsOn": "build: ui-gfx",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -172,12 +173,12 @@
           "Bypass",
           "-File",
           "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
-          "E",
+          "EDIT",
           "cpu",
           "0"
         ],
         "options": {
-          "cwd": "${workspaceFolder}\\source\\E"
+          "cwd": "${workspaceFolder}\\source\\EDIT"
         },
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build",
@@ -351,6 +352,14 @@
         }
       },
       {
+        "label": "build: exe",
+        "type": "process",
+        "command": "python",
+        "args": ["${workspaceFolder}/scripts/build/build-exe.py"],
+        "group": "build",
+        "problemMatcher": []
+      },
+      {
         "label": "build: run",
         "type": "process",
         "command": "powershell.exe",
@@ -467,7 +476,35 @@
         }
       },
       {
+        "label": "build: ui-gfx",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoLogo",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\build\\build-if-needed.ps1",
+          "UI_GFX",
+          "cpu",
+          "GFX_BASE"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}\\source\\ui-gfx"
+        },
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "clear": false
+        }
+      },
+      {
         "label": "build: nc",
+        "dependsOn": "build: ui-gfx",
         "type": "process",
         "command": "powershell.exe",
         "args": [

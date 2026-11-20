@@ -12,20 +12,20 @@ ncPanelSort:
     COLOR COLOR_DIALOG
     ld hl,ncSortWindow
     call draw
-    ld hl,01460h
-    call setCursorPosPanel
+    ld a,(state.activePanel)
+    or a
+    ld b,20
+    jp z,ncSortTitlePosition
+    ld b,116
+ncSortTitlePosition:
+    ld c,56
+    ld e,96
     ld hl,ncSortTitle
-    call bios_printStringReal
-    ld a,' '
-    ld (ncSortOptions+1),a
-    ld (ncSortOptions+18),a
-    ld (ncSortOptions+35),a
+    ld a,UI_ALIGN_CENTER
+    call ncPrintAligned
     ld hl,state.panelA_sort
     call readBytePanel
     ld (ncSortChoice),a
-    call ncSortTextAddress
-    inc hl
-    ld (hl),'x'
     ld hl,ncSortOptions
     ld b,0
 ncSortDrawOption:
@@ -37,10 +37,14 @@ ncSortDrawOption:
     add a,a
     add a,116
     ld l,a
-    ld h,20
+    ld h,28
     call setCursorPosPanel
     pop hl
+    ld de,4
+    add hl,de
     call bios_printStringReal
+    ld a,b
+    call ncSortDrawCheck
     inc b
     ld a,b
     push bc
@@ -51,7 +55,7 @@ ncSortDrawOption:
     jp c,ncSortDrawOption
     call ncSortInvert
 ncSortKeyLoop:
-    call ncModalGetch
+    call uiModalGetch
     cp 01Bh
     jp z,ncSortClose
     cp 0Dh
@@ -173,6 +177,30 @@ ncSortInvert:
     call activePanelPos
     ld bc,(14<<8)+11
     jp inverseRect
+ncSortDrawCheck:
+    push bc
+    ld c,a
+    ld hl,state.panelA_sort
+    call readBytePanel
+    cp c
+    ld a,0
+    jp nz,ncSortCheckReady
+    inc a
+ncSortCheckReady:
+    push af
+    ld a,c
+    add a,a
+    add a,a
+    add a,a
+    add a,a
+    add a,109
+    ld l,a
+    ld h,095h
+    call activePanelPos
+    pop af
+    call uiDrawCheckbox
+    pop bc
+    ret
 ncSortTextAddress:
     ld e,a
     ld d,0

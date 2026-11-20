@@ -83,6 +83,9 @@ uiButtonPalette:
     ; attributes over the whole rectangle, without a flash or color reads.
     ld hl,(uiButtonObject)
     call uiButtonRect
+    IFDEF UI_BUTTON_RECOLOR
+    call UI_BUTTON_RECOLOR
+    ELSE
     ld a,l
     DUP 3
     rrca
@@ -123,6 +126,7 @@ uiButtonColorRow:
     inc h
     dec b
     jp nz,uiButtonColorColumn
+    ENDIF
     ld hl,(uiButtonObject)
     ld de,UI_BUTTON.normal
     add hl,de

@@ -18,7 +18,7 @@ tag:            DB  0FFh            ; диск/размер головы либ�
 ; занятого продолжения; FFh — свободная гранула. Неактивные диски чистые:
 ; fileSelectDrive выполняет flush до смены физического драйвера.
 cacheData = DOS_BANK_CACHE_TABLE
-partialCacheData = cacheData + CACHE_GRANULES * FAT_CACHE_DATA
+partialCacheData = DOS_PARTIAL_RECORD
 v_cacheTable: DW cacheData
 v_cachePartial: DW partialCacheData
 v_cacheBuffer: DW FAT_CACHE_ADDR
@@ -761,7 +761,7 @@ ssfc_Failed:
         ; Не все внешние драйверы устанавливают общий признак ошибки.
         ; Сохраняем отказ независимо от результатов следующих записей.
         ld      a, 1
-        ld      (bios_upper.diskWriteErr), a
+        ld      (fatWriteError), a
         call    dosIoError
 
 ssfc_Exit:

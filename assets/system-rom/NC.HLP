@@ -1,0 +1,26 @@
+Arrows	Move selection
+Tab	Switch panel
+Enter	Open or execute
+Home	First item
+End	Last item
+F1	Left drive
+F2	Right drive
+F3	Other panel info
+F4	Edit file in editor
+F5	Copy item to another panel
+F6	Move item to another panel
+F7	Make directory
+F8	Delete file or directory
+F9	Open help
+F10	Open console
+Shift+F1	Sort left panel
+Shift+F2	Sort right panel
+Shift+F3	Open help
+Shift+F4	New document in editor
+Shift+F5	Copy item to another panel
+Shift+F6	Rename item
+Shift+F7	Make directory
+Ctrl+Enter	Insert path to command line
+Ctrl+F10	Exit Commander
+Esc	Clear command
+Hold Shift	File toolbar

@@ -3,11 +3,12 @@
     jp MEM_CALL_ENTRY
     jp bankCpmCall
     jp bankMxCallRegs
-    jp bankLoadPath
-    jp bankSavePath
+    jp bankQueueBind
+    jp bankQueueBefore
     jp bankCopyFar
     jp MEM_LOCAL_INFO_ADDR
     jp MEM_EXTENSION_ENTRY
+    jp memRouteCall
 
 ; B=группа, C=номер, DE=MX_REGS в исходной странице.
 ; AF/BC/DE/HL — результат исполнителя. SP и страница сохраняются.
@@ -19,21 +20,6 @@ bankMxCall:
     cp MXOS_GROUP_DOS
     jp nz,bankMxUnsupported
 bankMxCheckPacket:
-    ; Пакет не должен пересекать начало системного хвоста.
-    ld h,d
-    ld l,e
-    push bc
-    ld bc,MX_REGS
-    add hl,bc
-    pop bc
-    jp c,bankMxBadPacket
-    ld a,h
-    cp BANK_CLIENT_LIMIT/256
-    jp c,bankMxPacketReady
-    jp nz,bankMxBadPacket
-    ld a,l
-    or a
-    jp nz,bankMxBadPacket
 bankMxPacketReady:
     push de
     ld a,b
@@ -82,10 +68,6 @@ bankMxReturned:
     inc sp
     inc sp
     ret
-bankMxBadPacket:
-    ld a,DOS_ERR_ARGUMENT
-    scf
-    ret
 bankCpmCall:
 bankMxUnsupported:
     ld a,DOS_ERR_UNSUPPORTED
@@ -116,7 +98,7 @@ bankMxCallRegs:
     ld hl,0
     add hl,sp
     ex de,hl
-    call mx_call
+    call bankMxRegsRoute
     inc sp
     inc sp
     inc sp
@@ -126,14 +108,58 @@ bankMxCallRegs:
     inc sp
     inc sp
     ret
-bankLoadPath:
-    MXOS_CALL MXOS_DOS_FILE_LOAD_PATH
+bankQueueBind:
+    ld (MEM_QUEUE_HOOK),hl
+    ld a,h
+    or l
+    ld a,0C9h
+    jp z,bankQueueBound
+    ld a,0C3h
+bankQueueBound:
+    ld (bankQueueBefore),a
     ret
-bankSavePath:
-    MXOS_CALL MXOS_DOS_FILE_SAVE_PATH
-    ret
+memBiosQueue:
+    ld hl,4
+    add hl,de
+    ld a,(hl)
+    dec a
+    cp 20
+    jp nc,memBiosGeneric
+    inc hl
+    ld a,(hl)
+    or a
+    jp nz,memBiosGeneric
+    ld a,7
+    jp memBiosText
     ASSERT $ <= MEM_TEXT_ENTRY
     DS MEM_TEXT_ENTRY-$,0
     INCLUDE "text.inc"
+    ASSERT $ <= MEM_SCOPE_ENTRY
+    DS MEM_SCOPE_ENTRY-$,0
+; BC=controller callback. Keep the enclosing route on this service stack.
+memScopeEnter:
+    ld hl,(memRoute)
+    push hl
+    ld hl,(memRoute+2)
+    push hl
+    ld hl,(memRoute+4)
+    push hl
+    push bc
+    ld hl,BANK_FRAME_REGS
+    ld de,memRoute
+    ld b,6
+    call bankCopyBytes
+    pop hl
+    call memScopeInvoke
+    call bankQueueBefore
+    pop hl
+    ld (memRoute+4),hl
+    pop hl
+    ld (memRoute+2),hl
+    pop hl
+    ld (memRoute),hl
+    ret
+memScopeInvoke:
+    jp (hl)
 bankClientEnd:
     ASSERT $ <= LOCAL_DRIVER_ADDR

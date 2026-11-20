@@ -26,12 +26,9 @@ def save(name, data):
     m.write(0x3400, ('B:\\'+name).encode()+bytes(128-len(name)-3))
     m.write(0x4000, data)
     m.write(0x3200, word(0x3400)+word(0x4000)+word(len(data))+bytes(34))
-    m.write(0x3000, struct.pack('<4H', 0x3200, 0, 0, 2))
-    m.write(0x2000, b'\xcd\x00\xf8\xc3\x00\x70')
-    m.stop_at(0x7000)
-    m.call('regs_set', pc=0x2000, sp=0x8fdf, bc=k['MXOS_DOS_FILE_SAVE_PATH'], de=0x3000)
-    result = m.until(0x7000, 40)
-    assert not result['registers']['af']['dec'] & 1, result
+    api=runpy.run_path(str(R/'scripts/emu80/file-api.py'))
+    callback=lambda op,hl=0,a=0:api['main_call'](m,k,op,hl,a)
+    api['path_io'](m,callback,k,0x3200,True)
 
 def enter(command, menu=False):
     page(0)

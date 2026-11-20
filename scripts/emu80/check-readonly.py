@@ -97,7 +97,7 @@ def main():
 
     select(0)
     selected(0, entry)
-    expect_nc_error(label('loc_D595'), b'Delete failed')
+    expect_nc_error(label('ncDeleteConfirm'), b'Delete failed')
     assert m.read(state + 6, 1) == b'\1'  # Отказ не уменьшает счётчик вручную.
     check_original()
 

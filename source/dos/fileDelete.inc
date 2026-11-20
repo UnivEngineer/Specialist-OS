@@ -14,8 +14,6 @@
 ;----------------------------------------------------------------------------
 
 fatFileDelete: ; Найти файл с именем из hl
-            xor     a
-            ld      (bios_upper.diskWriteErr), a
             call    fileFind
             ret     c 
 
@@ -45,6 +43,9 @@ fileCheckDeleteAllowed:
             jp dosSetError
 
 deleteFileInt:
+            ; RMDIR and the FILEOPS tree walker also enter here directly.
+            xor     a
+            ld      (fatWriteError),a
             ; Сохраняем регистры
             push    hl
             push    bc
@@ -90,16 +91,17 @@ fatFlushPhysical:
             pop     bc
             ret nc
             ld      a, 1
-            ld      (bios_upper.diskWriteErr), a
+            ld      (fatWriteError), a
             ret
 
-; Завершение изменения файла после записи кэша и физического барьера.
-; Вход: diskWriteErr от записей, в том числе при вытеснении.
-; Выход: CF=ошибка; AF разрушается, BC/DE/HL сохраняются.
-; При отказе сбрасываем кэш. Уже записанные секторы это не откатывает.
+fatVolumeFlush:
+    xor a
+    ld (fatWriteError),a
+    call saveSectorCache
+; После записи кэша физический барьер сохраняет все предыдущие ошибки.
 fatFinishWrite:
             call    fatFlushPhysical
-            ld      a, (bios_upper.diskWriteErr)
+            ld      a, (fatWriteError)
             or      a
             ret z
             scf

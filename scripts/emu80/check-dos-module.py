@@ -6,7 +6,7 @@ R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--runtime',type=Path,required=True);p.add_argument('--report-directory',type=Path,default=R/'docs/file-api-001/emulator');a=p.parse_args()
 o=a.report_directory.resolve();o.mkdir(parents=True,exist_ok=True)
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__;g['OUT']=o;g['RUNTIME']=a.runtime.resolve()
-m=h['Matrix']();s=h['symbols'](R/'bin/DOS.sym');e=h['symbols'](R/'bin/E.sym');report={}
+m=h['Matrix']();s=h['symbols'](R/'bin/DOS.sym');e=h['symbols'](R/'bin/EDIT.sym');report={}
 def tap(key):
  m.m.call('kbd_send',keys=[key],action='tap',duration_ms=100);m.m.call('emu_run_for',ms=120)
 def ok(address,**regs):
@@ -27,7 +27,7 @@ try:
  m.start('nc-editor-module')
  before=m.m.read(0x8000,0xC00)
  m.m.call('bp_clear');m.m.call('emu_run_for',ms=500);tap('esc');m.m.call('emu_run_for',ms=250)
- command='A:E.COM A:README.TXT';keys={' ':'space',':':'colon','.':'period'}
+ command='A:EDIT.COM A:README.TXT';keys={' ':'space',':':'colon','.':'period'}
  for ch in command:tap(keys.get(ch,ch.lower()))
  assert m.m.read(s['CMD_LINE'],len(command)).upper()==command.encode()
  m.m.screenshot(o/'nc-command.png');tap('enter');m.m.call('emu_run_for',ms=1500);m.m.call('debug_break')

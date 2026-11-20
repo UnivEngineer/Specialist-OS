@@ -109,140 +109,35 @@ loc_C290:   ld      l, h
             ld      h, b  ; код нажатой и предыдущей клавиши сохраняем в bios_vars.lastKey
             ld      (bios_vars.lastLastKey), hl
 
-loc_C295:   ; Не служебные клавиши CAPS LOCK, SHIFT и РУС/LAT не влияют
-            ld      a, b
-            cp      21h
-            jp c,   getch_noShift   
-            ; На клавиши c кодами 21h-3Fh влияет SHIFT
-            cp      40h
-            jp c,   getch_shift 
-            ; На символьные клавиши (40h-7Eh) влияют CAPS LOCK, SHIFT и РУС/LAT
-            cp      7Fh
-            jp c,   getch_chars
-            ; Не служебные клавиши (7Fh+) CAPS LOCK, SHIFT и РУС/LAT не влияют
-            jp z,   getch_noShift
-
-            ; ...
-            ;nop
-            ;nop
-
-            ; Переходим, если код клавиши не 81h
-            cp      81h
-            jp nz,  getch_noShift
-
-            ; Код клавиши 81h
-
-            ; Если шифт не нажат
-            ld      a, (IO_KEYB_B)
-            and     2
-            jp nz,  getch3
-
-            ; Код клавиши 81h с шифтом
-
-            ; Звуковой сигнал
-            call    beep
-
-            ; CAPS LOCK для KOI-7 или РУС/LAT для KOI-8
-            jp      getch_rc
-
-; ---------------------------------------------------------------------------
-; Нажата комбинация Shift + РУС/LAT
-
-getch_RusLat:
-            ; на входе a = bios_vars.keyLocks
-            xor     81h ; инверируем сарший и младший биты
-            ld      (bios_vars.keyLocks), a
-
-            ; Особый звуковой сигнал
-            ld      a, (bios_vars.beepFreq)
-            push    af
-            ld      a, 4Fh
-            ld      (bios_vars.beepFreq), a
-            call    beep
-            ld      a, 5Fh
-            ld      (bios_vars.beepFreq), a
-            call    beep
-            pop     af
-            ld      (bios_vars.beepFreq), a
-
-            ; ...
-            ;nop
-
-            jp      getch_retry
-
-; ---------------------------------------------------------------------------
-; Включаем кирилицу или строчные буквы
-
-getch_chars:
-            ; Если не нажат CAPS LOCK, пропускаем код ниже
-            ld      a, (bios_vars.keyLocks)
-            ld      c, a
-            and     a
-            jp M,   loc_C2EA    ; CAPS LOCK
-
-            ; Превращаем заглавные в строчные
-            ld      a, b
-            xor     20h
-            ld      b, a
-
-loc_C2EA:   ; Если зафиксирвоан ли РУС/ЛАТ, помещаем в c=1
-            ld      a, c
-            and     1
-            ld      c, a
-
-            ; Если шифт нажат, помещаем в a=0
-            ld      a, (IO_KEYB_B)
-            and     2
-            rrca    ; ! Как на счет флага c ?
-
-            ; Превращаем английские символы в русские если a^c==0
-            xor     c
-            ld      a, b
-            jp nz,  loc_C5A8
-            add     80h
-            jp      loc_C5A8
-
-; ---------------------------------------------------------------------------
-; Меняем цифры на символы
-
-getch_shift:
-            ; Если не нажат шифт, пропускаем код ниже
-            ld      a, (IO_KEYB_B)
-            and     2
-            ld      a, b
-            jp nz,  loc_C5A8
-
-            ; Меняем цифры на символы
-            xor     10h
-
-            ; Одно исключение 30h должен меняться на 5Fh
-            cp      20h
-            jp nz,  getch_noShift
-            ld      a, 5Fh
-
-            ; Прододжение getch_noShift
-
-; ---------------------------------------------------------------------------
-; Символы без изменений
-
-getch_noShift:
-            ; Сохраняем код нажатой клавиши в b     
-            ld      b, a
-
-loc_C311:   call    setKeybMode83
-            ld      a, 0F7h
-            ld      (IO_KEYB_A),a
-            ld      a, (IO_KEYB_B)
-            cpl
-            rrca
-            rrca
-            rrca
-            call    setKeybMode82
-
-            ;nop
-
-            ; Восстаналиваем код нажатой клавиши
-            ld      a, b
+loc_C295:
+            ld a,(bios_upper.koi7)
+            ld d,a
+            ld a,(bios_vars.keyLocks)
+            ld e,a
+            call keyDecode
+            jp nz,popa_ret_2
+            ld a,(bios_vars.keyLocks)
+            xor e
+            ld a,e
+            ld (bios_vars.keyLocks),a
+            jp m,getchCapsBeep
+            ld a,(bios_vars.beepFreq)
+            push af
+            ld a,04Fh
+            ld (bios_vars.beepFreq),a
+            call beep
+            ld a,05Fh
+            ld (bios_vars.beepFreq),a
+            call beep
+            pop af
+            ld (bios_vars.beepFreq),a
+            jp getch_retry
+getchCapsBeep:
+            ld a,(bios_vars.beepFreq)
+            xor 10h
+            ld (bios_vars.beepFreq),a
+            call beep
+            jp getch_retry
 
 popa_ret_2: ; Восстаналиваем регистры и выходим
             pop     de

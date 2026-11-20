@@ -1,4 +1,4 @@
-; TEXT20: общий путь строк и скаляров при уже активном TEXT.
+; Доставка строк и коротких пачек в форме inline профиля COMMAND.
 memPrint:
     xor a
     ld (memOperation),a
@@ -32,20 +32,12 @@ memPrintLoop:
     jp nc,memPrintSize
     ld b,l
 memPrintSize:
-    ld a,BANK_PROFILE_TEXT
-    call memProfile
-    ld a,077h
-    ld (BANK_WINDOW),a
-    ld a,0C3h
-    ld (BANK_WINDOW+1),a
-    ld hl,memPrintMain
-    ld (BANK_WINDOW+2),hl
+    call bankCommandWindow
+    ld a,1
+    ld (BANK_BUFFER_KIND),a
     ld hl,(memTextNext)
     ld de,BANK_PACKET
 memPrintFill:
-    ld a,h
-    cp 0F8h
-    jp nc,memPrintFilled
     ld a,(hl)
 memPrintStore:
     ld (de),a
@@ -59,8 +51,6 @@ memPrintFilled:
     ld (de),a
     ld a,e
     sub BANK_PACKET & 0FFh
-    or a
-    jp z,bankTextRangeError
     ld c,a
     ld (memBack),a
     ld hl,0
@@ -85,8 +75,8 @@ memPrintMain:
     ld a,l
     pop bc
     ld c,a
-    ld hl,memPrintReturn
-    ld (BANK_WINDOW+2),hl
+    ld a,2
+    ld (BANK_BUFFER_KIND),a
     ld a,b
     dec a
     ld hl,BANK_IO_RAM
@@ -134,19 +124,3 @@ memTextNext: DW 0
 memOperation: DB 0
 memSelect: DB 0
 memBack: DB 0
-memTextScalar:
-    push hl
-    push bc
-    ; memSelect находится в TEXT выше F800h; общий копировщик строки
-    ; принимает только обычную память клиента. Передаём байт через стек.
-    ld hl,(memSelect)
-    push hl
-    ld hl,0
-    add hl,sp
-    ld bc,1
-    call memPrintTyped
-    pop bc                    ; Временное слово с символом.
-    pop bc
-    pop hl
-    ret
-memTextEnd:

@@ -10,18 +10,6 @@ env=os.environ.copy();env['ZCCCFG']=str(args.z88dk/'lib/config');env['PATH']=str
 top=int(re.search(r'^APP_MEMORY_END: EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/DOS.sym').read_text(encoding='utf-8'),re.M).group(1),16)-1
 command=[str(args.z88dk/'bin/zcc.exe'),'+cpm',f'-DTEST_MEMTOP={top}','-clib=8080','-compiler=sccz80','-crt0='+str(ROOT/'sdk/tests/file-crt'),'-zorg=8192','-I'+str(ROOT/'sdk/include'),str(ROOT/'sdk/src/mxos_file.c'),str(ROOT/'sdk/src/mxos_file_z88dk.asm'),str(ROOT/'sdk/src/mxos.c'),str(ROOT/'sdk/src/mxos_z88dk.asm'),str(ROOT/'sdk/tests/file-stdio.c'),'-o',str(out/'stdio.bin'),'-m']
 subprocess.run(command,cwd=ROOT,env=env,check=True)
-h=runpy.run_path(str(ROOT/'scripts/tests/check-file-handle.py'));memory=h['memory']
-s=h['S'];n=s['initVarsEnd']-s['initVars'];memory[s['bios_vars']:s['bios_vars']+n]=memory[s['initVars']:s['initVars']+n]
-__import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](memory, s)
-font=(ROOT/'bin/fonts/Compact.pf').read_bytes();memory[s['FONT_ADDR']:s['FONT_ADDR']+len(font)]=font
-# Клавиатуру моделируем, а регистровый мост и прочие функции исполняются реально.
-memory[s['bios_getch']:s['bios_getch']+3]=b'\xC3\x80\xEA';memory[0xEA80:0xEA84]=bytes.fromhex('3E 51 37 C9')
-memory[s['bios_keyScan']:s['bios_keyScan']+3]=b'\xC3\x90\xEA';memory[0xEA90:0xEA94]=bytes.fromhex('3E FF B7 C9')
-data=(out/'stdio_code_crt_init.bin').read_bytes();assert 0x2000+len(data)<0x6000
-memory[0x2000:0x2000+len(data)]=data;(out/'input.bin').write_bytes(memory)
-subprocess.run([str(args.z88dk/'bin/z88dk-ticks.exe'),'-m8080','-pc','2000','-end','6100','-counter','50000000','-output',str(out/'output.bin'),str(out/'input.bin')],check=True,capture_output=True)
-got=(out/'output.bin').read_bytes();result=int.from_bytes(got[0x5E80:0x5E82],'little')
-assert int.from_bytes(got[65542:65544],'little')==0x6100
-assert result==0,result
-(out/'result.json').write_text(json.dumps(dict(cpu='8080',compiler='sccz80 -clib=8080',programBytes=len(data),exitCode=result)),encoding='utf-8')
-print('C STDIO PASS; compiled 8080 executable:',len(data),'bytes')
+# The banked kernel and its buffers cannot be overlaid on MAIN in this test.
+# Execute the compiled C consumer in its own visible, muted Emu80 instance.
+subprocess.run([__import__('sys').executable,str(ROOT/'scripts/emu80/check-unified-sdk.py')],check=True)

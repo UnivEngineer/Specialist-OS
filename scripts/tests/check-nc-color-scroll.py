@@ -8,7 +8,7 @@ h=runpy.run_path(str(ROOT/'scripts/tests/benchmark-nc-color-scroll.py'))
 n=h['symbols'](ROOT/'bin/NC.sym');b=h['symbols'](ROOT/'bin/BIOS.sym')
 W=lambda v:int(v).to_bytes(2,'little')
 base=bytearray(65536)
-for at,path in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.sys')]:
+for at,path in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin')]:
     data=(ROOT/'bin'/path).read_bytes();base[at:at+len(data)]=data
 for ext,attr,color in [('TXT',0,n['COLOR_FILE']),('com',0,n['COLOR_EXECUTABLE']),
                        ('EXE',0,n['COLOR_EXECUTABLE']),('Bat',0,n['COLOR_EXECUTABLE']),

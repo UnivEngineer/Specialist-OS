@@ -11,19 +11,19 @@ loadCorpus:
     xor a
     ld (corpusStatus),a
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (corpusDrive),a
     xor a
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     jp c,corpusDriveError
     ld a,DIR_OP_GET
-    call bios_directory
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp c,corpusDriveError
     ex de,hl
     ld (corpusDirectory),hl
     ld de,0
     ld a,DIR_OP_SET
-    call bios_directory
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp c,corpusDirectoryError
     call corpusRead
     jp nc,corpusRestoreDirectory
@@ -34,14 +34,14 @@ corpusRestoreDirectory:
     ld hl,(corpusDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    call bios_directory
+    MXOS_CALL MXOS_DOS_DIRECTORY
     jp nc,corpusRestoreDrive
 corpusDriveError:
     ld a,1
     ld (corpusStatus),a
 corpusRestoreDrive:
     ld a,(corpusDrive)
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     jp nc,corpusStatusReady
     ld a,1
     ld (corpusStatus),a
@@ -72,7 +72,7 @@ corpusPad:
     ld (corpusHandle+FH_MODE),a
     ld hl,corpusHandle
     ld a,FILE_OP_OPEN
-    call bios_fileHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
     ret c
 corpusChunk:
     ; The caller selects scratch space below its current memTop.
@@ -82,7 +82,7 @@ corpusChunk:
     ld (corpusHandle+FH_COUNT),hl
     ld hl,corpusHandle
     ld a,FILE_OP_READ
-    call bios_fileHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
     jp c,corpusCloseError
     ld hl,(corpusHandle+FH_COUNT)
     ld b,h
@@ -120,7 +120,8 @@ corpusSkip:
 corpusClose:
     ld hl,corpusHandle
     ld a,FILE_OP_CLOSE
-    jp bios_fileHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
+    ret
 corpusCloseError:
     call corpusClose
     scf

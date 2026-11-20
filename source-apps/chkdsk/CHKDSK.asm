@@ -28,7 +28,7 @@ entry:
     xor a
     call bios_setFontEncoding       ; Имена файлов на диске хранятся в KOI-8.
     call bios_getMemTop
-    ld de,header+256-1
+    ld de,IMAGE_MEM_END-1
     call bios_cmp_hl_de
     jp nc,checkMemoryReady
     ld hl,txtNoMemory
@@ -58,7 +58,7 @@ chooseDrive:
     cp 8
     jp nc,askDrive
     ld e,1
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
 scan:
     xor a
     ld (phase),a
@@ -78,25 +78,20 @@ clearCounts:
     call readSector
     call geometry
     jp c,badGeometry
-    ; FAT в пользовательской RAM: не используем изменяемый кэш DOS.
-    ld hl,(fatStart)
+    ; Собственный односекторный кэш FAT. FFh вне диапазона секторов FAT.
+    ld a,0FFh
+    ld (fatCachedSector),a
+    ld de,0
+    call fatNext
     ex de,hl
-    ld hl,fatBuffer
-    ld a,(fatSectors)
-    ld c,a
-loadFat:
-    call readSector
-    inc de
-    inc h
-    dec c
-    jp nz,loadFat
-    ld hl,(fatBuffer)
     ld de,0FFF8h
     call bios_sub_hl_de
     ld a,h
     or l
     call nz,reservedError
-    ld hl,(fatBuffer+2)
+    ld de,1
+    call fatNext
+    ex de,hl
     inc hl
     ld a,h
     or l
@@ -595,8 +590,22 @@ fatNext:
     ld h,d
     ld l,e
     add hl,hl
-    ld de,fatBuffer
+    ld a,(fatCachedSector)
+    cp h
+    jp z,fatNextCached
+    ld a,h
+    ld (fatCachedSector),a
+    push hl
+    ld e,h
+    ld d,0
+    ld hl,(fatStart)
     add hl,de
+    ex de,hl
+    ld hl,fatBuffer
+    call readSector
+    pop hl
+fatNextCached:
+    ld h,fatBuffer >> 8
     ld e,(hl)
     inc hl
     ld d,(hl)
@@ -812,7 +821,7 @@ checksumFile:
     STORE_DE streamCluster
     ld hl,fileBuffer+256
     ld (streamPtr),hl
-    ; Первые 64 байта читаем только если файл не короче этого заголовка.
+    ; Read the common 16-byte prefix, then the rest of a v2 header if present.
     ld hl,(entryCopy+28)
     ld de,16
     call compare
@@ -827,7 +836,7 @@ headerRead:
     jp nz,headerRead
     ld hl,header
     ld de,mxMagic
-    ld b,5
+    ld b,4
 magicLoop:
     ld a,(de)
     cp (hl)
@@ -837,25 +846,61 @@ magicLoop:
     dec b
     jp nz,magicLoop
     ld a,(hl)
+    cp 2
+    jp z,checksumMxV2
+    dec a
+    jp nz,resetRKS
+    inc hl
+    ld a,(hl)
     and 0FEh
     jp nz,sumBad
+    ld de,16
+    jp checksumMx
+checksumMxV2:
+    ld hl,(entryCopy+28)
+    ld de,IMAGE_HEADER_SIZE
+    call compare
+    jp c,sumBad
+    ld hl,header+16
+    ld b,IMAGE_HEADER_SIZE-16
+checksumMxReadTail:
+    call streamByte
+    ld (hl),a
+    inc hl
+    dec b
+    jp nz,checksumMxReadTail
+    ld a,(header+IMAGE_HEADER_BYTES)
+    cp IMAGE_HEADER_SIZE
+    jp nz,sumBad
+    ld de,IMAGE_HEADER_SIZE
+checksumMx:
     ld hl,(header+10)
     ld a,h
     or l
     jp z,sumBad
     ld (payloadLeft),hl
-    ld de,16
+    push de
     add hl,de
-    jp c,sumBad
+    jp nc,checksumMxLength
+    pop de
+    jp sumBad
+checksumMxLength:
     LOAD_DE entryCopy+28
     call compare
+    pop de
     jp nz,sumBad
-    ld hl,(header+14)
-    ld (expected),hl
+    ld hl,header-3
+    add hl,de
+    push hl
+    ex de,hl
     ld hl,header
-    ld de,header+13
     call bios_calcCS
-    ld hl,(expected)
+    pop hl
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
     ld d,b
     ld e,c
     call compare
@@ -1020,7 +1065,7 @@ streamWord:
     ld h,a
     ret
 
-mxMagic:        DB 0CDh,020h,"MX",1,0
+mxMagic:        DB 0CDh,020h,"MX"
 rksExt:         DB "RKS"
 txtFat:         DB "MXOS256 "
 txtTitle:       DB "CHKDSK - READ ONLY",0
@@ -1052,6 +1097,7 @@ capacity:       DW 0
 total:          DW 0
 fatStart:       DW 0
 fatSectors:     DB 0
+fatCachedSector: DB 0
 dirStart:       DW 0
 dirSectors:     DW 0
 rootEntries:    DW 0
@@ -1093,16 +1139,16 @@ txtNoMemory: DB "NOT ENOUGH MEMORY",0
     ENDMODULE
 
 codeEnd:
-    ASSERT codeEnd < 02000h
-directoryQueue = 03000h
-directoryQueueEnd = 04000h
-names = 02000h
-fatBuffer = 04000h
-usedMap = 08000h
-sectorBuffer = 08400h
-dirBuffer = 08500h
-entryCopy = 08600h
-fileBuffer = 08700h
-sumBuffer = 08800h
-header = 08A00h
+names = (codeEnd+255) & 0FF00h
+directoryQueue = names+1000h
+directoryQueueEnd = directoryQueue+1000h
+fatBuffer = directoryQueueEnd
+usedMap = fatBuffer+256
+sectorBuffer = usedMap+1024
+dirBuffer = sectorBuffer+256
+entryCopy = dirBuffer+256
+fileBuffer = entryCopy+256
+sumBuffer = fileBuffer+256
+header = sumBuffer+512
+IMAGE_MEM_END = header+256
     END

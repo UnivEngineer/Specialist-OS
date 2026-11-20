@@ -10,10 +10,9 @@ calcCursorAd_0:   ; Перевод строки (на входе c=10)
 
             ; Восстановление регистров после printChar (хотя он не портит регистры)
             ld    hl, (bios_vars.cursorY)
-            ld    a, h
-
 calcCursorAd_1:   ; Расчет старшего байта адреса
             ; a = cursorX / 4 + 90h       
+            ld    a, h
             rrca
             rrca
             and   3Fh

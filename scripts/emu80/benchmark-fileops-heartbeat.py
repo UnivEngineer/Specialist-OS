@@ -45,15 +45,20 @@ def run(version):
   return rr
  def command(t,keep=False):
   m.write(0x8c00,t.encode()+b'\0'+bytes(127-len(t)));return call(k['MXOS_DOS_CLI'],hl=0x8c00,keep=keep)
+ def file_io(address,writing=False):
+  if version=='old':
+   return call(k['MXOS_DOS_FILE_SAVE_PATH' if writing else 'MXOS_DOS_FILE_LOAD_PATH'],hl=address)
+  callback=lambda op,hl=0,a=0:call(op,hl=hl,aa=a)
+  return runpy.run_path(str(R/'scripts/emu80/file-api.py'))['path_io'](m,callback,k,address,writing)
  def save(t,data):
   m.write(0x8c00,('B:/'+t).encode()+b'\0'+bytes(120-len(t)));m.write(0x4000,data)
-  m.write(0x8c80,word(0x8c00)+word(0x4000)+word(len(data))+bytes(34));call(k['MXOS_DOS_FILE_SAVE_PATH'],hl=0x8c80)
+  m.write(0x8c80,word(0x8c00)+word(0x4000)+word(len(data))+bytes(34));file_io(0x8c80,True)
  def verifycopy(dst,tree):
   expected={dst+'/'+name:data for name,data in payloads.items()} if tree else {dst:filedata}
   for name,data in expected.items():
    m.write(0x8c00,('B:/'+name).encode()+b'\0'+bytes(120-len(name)))
    m.write(0x8c80,word(0x8c00)+word(0x4000)+word(len(data))+bytes(34))
-   call(k['MXOS_DOS_FILE_LOAD_PATH'],hl=0x8c80)
+   file_io(0x8c80)
    assert int.from_bytes(m.read(0x8c86,2),'little')==len(data),('length',version,name)
    assert m.read(0x4000,len(data))==data,('content',version,name)
   print('CONTENT PASS',version,dst,flush=True)

@@ -39,12 +39,12 @@ ncLayoutByte:
     jp nz,ncLayoutByte
     jp ncDriveGlyphPadding
 ; width, columns, X stride/2, cell bytes, visible rows, header/status chars,
-; status size X/2, prompt usable chars, input chars, error chars, divider list.
-ncLayout4: DB 4,3,32,6,P_FILE_LIST_H*3,44,36,76,94,36,40
+; prompt usable chars, input chars, error chars, divider list.
+ncLayout4: DB 4,3,32,6,P_FILE_LIST_H*3,44,43,94,36,40
     DW ncDividers4
-ncLayout8: DB 8,1,88,22,P_FILE_LIST_H,22,14,60,46,18,20
+ncLayout8: DB 8,1,88,22,P_FILE_LIST_H,22,21,46,18,20
     DW ncDividers8
-ncLayout6: DB 6,2,48,10,FILE_LIST_SIZE,28,20,68,62,24,26
+ncLayout6: DB 6,2,48,10,FILE_LIST_SIZE,28,29,62,24,26
     DW g_fileDividers
 ncFontWidth: DB 6
 ncColumns: DB 2
@@ -52,8 +52,7 @@ ncColumnStep: DB 48
 ncCellBytes: DB 10
 ncVisibleCount: DB FILE_LIST_SIZE
 ncHeaderChars: DB 28
-ncStatusChars: DB 20
-ncStatusSizeX: DB 68
+ncStatusChars: DB 29
 ncCommandChars: DB 62
 ncInputChars: DB 24
 ncErrorChars: DB 26
@@ -66,6 +65,13 @@ ncDrivePadRight: DB 0
 ; 4/6px glyphs have one empty left column. For RAW8 use the actual A..H
 ; glyphs, so shifting the 8px font's blank column needs no NC code change.
 ncDriveGlyphPadding:
+    IF NC_BANKED
+    ld a,(ncGfxResult+16)
+    ld (ncDrivePadLeft),a
+    ld a,(ncGfxResult+17)
+    ld (ncDrivePadRight),a
+    ret
+    ELSE
     ld a,1
     ld (ncDrivePadLeft),a
     xor a
@@ -107,6 +113,8 @@ ncDrivePaddingRight:
     ld a,1
     ld (ncDrivePadRight),a
     ret
+
+    ENDIF
 
 ; A=characters -> half-pixels, BC/DE/HL preserved.
 ncTextAdvance:
@@ -219,6 +227,11 @@ ncClearCell:
     ld l,a
     ld a,(ncCellBytes)
     ld b,a
+    IF NC_BANKED
+    ld c,10
+    xor a
+    jp uiFillRectBytes
+    ELSE
 ncClearCellColumn:
     push hl
     ld c,10
@@ -233,3 +246,4 @@ ncClearCellPixel:
     dec b
     jp nz,ncClearCellColumn
     ret
+    ENDIF

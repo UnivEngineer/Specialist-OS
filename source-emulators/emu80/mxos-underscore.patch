@@ -1,0 +1,13 @@
+--- a/src/Specialist.cpp
++++ b/src/Specialist.cpp
+@@ -978,3 +978,10 @@
+ EmuKey SpecKbdLayout::translateUnicodeKey(unsigned unicodeKey, PalKeyCode, bool& shift, bool& lang, bool& /*ctrl*/)
+ {
++    if (unicodeKey == L'_' && m_platform->getBaseName() == "specialist-os") {
++        // MXOS decodes Shift+0 as ASCII underscore.
++        shift = true;
++        lang = false;
++        return EK_0;
++    }
++
+     EmuKey key = translateCommonUnicodeKeys(unicodeKey, shift, lang);

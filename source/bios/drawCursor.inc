@@ -52,12 +52,14 @@ drawCursor3:      ; Сохраняем регистры
             ld    hl,0FCh
             cp    6
             jp z,drawCursor_maskReady
-            ld    hl,0F0h
+            ld    l,0F0h
             cp    4
             jp z,drawCursor_mask4
-            ld    hl,0FFh
+            ld    l,0FFh
+            ld    a,(FONT_ENGINE_HEADER+7)
+            cp    FONT_FORMAT_GRAPH8
+            jp z,drawCursor_maskReady
             ld    c,3             ; 8px snaps to the start of a screen byte.
-            jp drawCursor_maskReady
 drawCursor_mask4:
             ld    a,c
             or    1               ; same rounding as the 4px glyph engine.

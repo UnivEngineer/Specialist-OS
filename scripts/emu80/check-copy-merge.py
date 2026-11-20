@@ -26,9 +26,9 @@ try:
  m.start('copy-merge',disk=R/'bin/nested-Games2M.bin')
  command('COPY A:/README.TXT B:/ONE.TXT');assert error()==0,error()
  command('COPY A:/README.TXT B:/ONE.TXT',prompt=True)
- assert m.m.read(n['ncOverwriteChoice'],1)==b'\2'
+ assert m.m.read(n['uiModalFocusIndex'],1)==b'\2'
  m.m.screenshot(O/'overwrite-default-no.png')
- tap('left');tap('left');assert m.m.read(n['ncOverwriteChoice'],1)==b'\0'
+ tap('left');tap('left');assert m.m.read(n['uiModalFocusIndex'],1)==b'\0'
  m.m.screenshot(O/'overwrite-yes.png');finish('enter');assert error()==0,error()
  command('COPY A:/README.TXT B:/ONE.TXT',prompt=True);finish('esc');assert error()==0,error()
  command('B:');tap('tab');command('CD H:/')

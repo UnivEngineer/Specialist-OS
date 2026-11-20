@@ -78,6 +78,10 @@ mainLoop:   ; Рисуем курсор выбранного файла
             call    drawCursor
 
 mainLoop_cursorReady:
+            ld a,(ncCatalogWarnPending)
+            or a
+            call nz,ncCatalogShowWarnings
+            jp c,ncRefreshDirty
             ; Положение курсора в ком строке
             ld      hl, (vars.cmdLinePos)
             ld      (bios_vars.cursorY), hl
@@ -86,6 +90,7 @@ mainLoop_cursorReady:
             COLOR   COLOR_CMDLINE
             call    ncReadKey
 
+mainLoop_dispatchKey:
             ; Ввод команды не затрагивает инверсное выделение.
             ; При шаге за край окна старый курсор также можно сохранить.
             push    af
@@ -143,7 +148,7 @@ mainLoop_keyKept:
             cp      8Bh   ; F10 — самостоятельный CLI
             jp z,   ncExitToCli
             cp      8Ah   ; F9 (8Ah)
-            jp z,   mainLoop_editDone
+            jp z,   ncHelp
 mainLoop_e: cp      20h   ; Пробел (20h)
             jp c,   mainLoop_editDone
 
@@ -211,7 +216,12 @@ but_Esc:    call    clearCmdLine
 
 ; ---------------------------------------------------------------------------
 
-but_ctrl:   cp    0Dh
+but_ctrl:
+    IF NC_BANKED
+            cp 08Bh
+            jp z,ncBankFullExitToCli
+    ENDIF
+            cp    0Dh
             jp z, ctrlEnter
             jp    mainLoop_e
 
@@ -223,7 +233,7 @@ ctrlEnter:  ; Если файл не выбран, выход
             cp      0FFh
             jp z,   mainLoop_editDone
 
-            call    selFileToCmdLine
+            call    selFileToCmdLineWithSpace
             jp      mainLoop_editDone
 
 
@@ -247,3 +257,15 @@ ncExitToCli:
             ld c,01Fh
             call bios_printChar
             jp bios_reboot
+
+    IF NC_BANKED
+; Exit on the Shift toolbar remains resident. Ctrl-F10 explicitly unloads.
+ncBankFullExitToCli:
+            COLOR COLOR_CMDSCREEN
+            ld c,31
+            call bios_printChar
+            call ncBankFlush
+            ld a,2
+            ld (ncBankExitAction),a
+            jp ncBankReturn
+    ENDIF

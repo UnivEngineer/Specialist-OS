@@ -38,10 +38,12 @@ def dos_ranges():
  page(1);data=m.read(k['MODULE_TABLE'],k['MODULE_MAX']*k['MODULE_RECORD_SIZE']);page(0)
  return [struct.unpack_from('<HH',data,i+10) for i in range(0,len(data),k['MODULE_RECORD_SIZE']) if any(data[i:i+2]) and data[i+3]==k['DOS_IO_PAGE']]
 
+def file_io(address,writing=False):
+ return runpy.run_path(str(R/'scripts/emu80/file-api.py'))['path_io'](m,lambda op,hl=0,a=0:call(op,hl=hl,af=(a<<8)|2),k,address,writing,handle=0x2e00)
 def save(name,data):
  page(0);m.write(0x3400,('B:\\'+name).encode()+b'\0'+bytes(128-len(name)-4));m.write(0x4000,data)
  m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34))
- call(k['MXOS_DOS_FILE_SAVE_PATH'],hl=0x3200)
+ file_io(0x3200,True)
 def load(name,target=1,error=None):
  page(0);m.write(0x3400,('B:\\'+name).encode()+b'\0'+bytes(128-len(name)-4))
  r=call(k['MXOS_DOS_MODULE_LOAD'],hl=0x3400,af=target*256+2,error=error)
@@ -179,10 +181,10 @@ try:
  call(k['MXOS_DOS_FILE_EXEC'],hl=0x3400)
  probe=int.from_bytes(m.read(0x5202,2),'little');assert probe&1 and probe>>8==k['MEM_ERROR_ACTIVE'],hex(probe)
  assert snapshot()==baseline;check('DOS-DLL-refuses-to-overwrite-running-driver')
- for name,offset in [('BADFLAG.EXE',5),('BADHEAD.EXE',2),('BADCHECK.EXE',14),('BADBODY.EXE',-1),('BADFLAG.COM',5)]:
+ for name,offset in [('BADFLAG.EXE',5),('BADHEAD.EXE',2),('BADCHECK.EXE',30),('BADBODY.EXE',-1),('BADFLAG.COM',5)]:
   data=bytearray((R/'bin/moduletest/MAINAPP.COM').read_bytes())
   data[offset]=3 if offset==5 else data[offset]^1
-  if offset in (2,5):data[14:16]=word(e['checksum'](data[:14]))
+  if offset in (2,5):data[30:32]=word(e['checksum'](data[:30]))
   save(name,bytes(data));page(0);m.write(0x5200,word(0))
   m.write(0x3400,('B:\\'+name+'\0').encode()+bytes(100))
   call(k['MXOS_DOS_FILE_EXEC'],hl=0x3400,error=k['DOS_ERR_BAD_IMAGE'])
@@ -197,13 +199,7 @@ try:
   for _ in range(3):
    result=invoke(handle);assert result[:3]==(0x1235,0x2346,0x3457) and result[3]&1,result
   if target:
-   # Ошибка входа в банк не оставляет active или изменённый MX_REGS.
-   info=invoke(handle,regs(af=0x702));bank=info[3]>>8
-   page(bank);old_sp=m.read(k['bankServiceSP'],2);m.write(k['bankServiceSP'],word(k['DOS_BANK_STACK_BOTTOM']))
-   invoke(handle,error=k['MEM_ERROR_STACK'])
-   page(bank);m.write(k['bankServiceSP'],old_sp);old_depth=m.read(k['bankDepth'],1);m.write(k['bankDepth'],bytes([k['BANK_MAX_DEPTH']]))
-   invoke(handle,error=k['MEM_ERROR_STACK'])
-   page(bank);m.write(k['bankDepth'],old_depth);page(0)
+   # MEM 1.2 trusts the caller stack; do not inject invalid SP/depth.
    invoke(handle)
    call(k['MXOS_DOS_MODULE_CALL'],hl=handle,de=0xf7fd,error=k['DOS_ERR_ARGUMENT'])
    assert snapshot()==before

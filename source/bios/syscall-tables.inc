@@ -44,24 +44,26 @@ sysBIOSTable:
     DW printStringRawLim
     DW bankText.request
     DW FONT_ENGINE_ENCODING
+    DW BIOS_BANK_GATE_ADDR
+    DW printStringRawPseudo
 sysBIOSCount = ($-sysBIOSTable)/2
 sysDOSTable:
     DW dos_fileList
     DW dos_fileGetSetDrive
-    DW dos_fileCreate
-    DW dos_fileLoad
+    DW dos_dosUnsupported
+    DW dos_dosUnsupported
     DW dos_fileDelete
     DW dos_fileRename
     DW dos_fileLoadInfo
-    DW dos_imageOpen
+    DW dos_dosUnsupported
     DW dos_fileGetSetAttr
     DW dos_fileNamePrepare
     DW dos_fileExec
-    DW dos_fileLoad2
+    DW dos_dosUnsupported
     DW dos_getDriveFreeSpace
-    DW dos_fileCreatePrepare
-    DW dos_installVolume
-    DW dos_getVolume
+    DW dos_dosUnsupported
+    DW dos_dosUnsupported
+    DW dos_dosUnsupported
     DW dos_mountVolume
     DW dos_flushVolume
     DW dos_fileAssociation
@@ -72,13 +74,13 @@ sysDOSTable:
     DW dos_fileGetDrives
     DW dos_dosGetError
     DW dos_logicalSectorIO
-    DW dos_fileStream
+    DW timerService
     DW dos_fileHandle
     DW dos_directoryService
     DW dos_cliService
     DW dos_setShell
-    DW filePathLoad
-    DW filePathSave
+    DW dos_dosUnsupported
+    DW dos_dosUnsupported
     DW dosRawIO
     DW dosDriverSelect
     DW dosDriverInstall
@@ -91,4 +93,7 @@ sysDOSTable:
     DW residentService
     DW fileopsService
     DW enumService
+    DW fontConfigService
+    DW moduleScope
+    DW dosCommandBatch
 sysDOSCount = ($-sysDOSTable)/2

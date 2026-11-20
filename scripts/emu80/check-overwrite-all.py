@@ -40,14 +40,14 @@ try:
  command('COPY B:/SRC B:/DST')
  command('COPY A:/FONTKOI.PF B:/SRC/ONE',True);finish('y')
  command('COPY B:/SRC B:/DST',True)
- assert m.m.read(n['ncOverwriteChoice'],1)==b'\2'
+ assert m.m.read(n['uiModalFocusIndex'],1)==b'\2'
  m.m.screenshot(O/'default-no.png')
- tap('left');assert m.m.read(n['ncOverwriteChoice'],1)==b'\1'
+ tap('left');assert m.m.read(n['uiModalFocusIndex'],1)==b'\1'
  m.m.screenshot(O/'yes-to-all.png');finish('enter')
  assert size()==1280
  command('COPY A:/README.TXT B:/SRC/ONE',True);finish('y')
  command('COPY B:/SRC B:/DST',True)
- tap('right');assert m.m.read(n['ncOverwriteChoice'],1)==b'\3'
+ tap('right');assert m.m.read(n['uiModalFocusIndex'],1)==b'\3'
  m.m.screenshot(O/'no-to-all.png');finish('enter')
  assert size()==1280,'No to all replaced existing data'
  # Следующая независимая операция снова спрашивает.

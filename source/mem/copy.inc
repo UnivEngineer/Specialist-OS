@@ -5,6 +5,7 @@
 ; AF=статус, CF=ошибка; BC/DE/HL, банк и SP сохранены; профиль окна остаётся COPY.
 ; Нереентерабельная атомарная петля: без callback и с запрещёнными IRQ.
 bankCopyFar:
+    call bankQueueBefore
     xor a
     ld (bankCopyMove),a
 bankCopyEnter:
@@ -42,6 +43,7 @@ bankCopyPrepared:
 ; поэтому пригоден и для вложенных вызовов из DOS, и из main.
 bankCopySector:
 bankCopyPhysical:
+    call bankQueueBefore
     push bc
     push de
     push hl
@@ -155,6 +157,8 @@ bankCommandWindow:
     xor a
     call MEM_SET_PROFILE_ENTRY
 bankWindowReady:
+    xor a
+    ld (BANK_BUFFER_KIND),a
     pop af
     ret
 

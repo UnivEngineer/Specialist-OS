@@ -8,11 +8,14 @@ typedef signed long mxos_i32;
 typedef struct { mxos_u8 bytes[64]; } MXOS_FILE;
 /* Целый файл по пути: 40 байт, рабочий дескриптор принадлежит вызывающему.
  * count — вместимость загрузки / длина сохранения; actual — результат.
- * path и buffer — NEAR-адреса; MXOS_DOS_FILE_LOAD_PATH/FILE_SAVE_PATH через mxos_call. */
+ * path и buffer — NEAR-адреса; библиотечные обёртки FILEHANDLE, не отдельные syscalls. */
 typedef struct {
     mxos_u16 path, buffer, count, actual;
     mxos_u8 descriptor[32];
 } MXOS_PATH_IO;
+
+mxos_u8 mxos_file_read_all(MXOS_PATH_IO *request);
+mxos_u8 mxos_file_write_all(MXOS_PATH_IO *request);
 
 /* MXOS_BIOS_FILE_BODY: общий загрузчик main, без разбора контейнера.
  * descriptor — готовая запись выбранного диска; header/tail — байты.
@@ -21,12 +24,14 @@ typedef struct {
     mxos_u8 descriptor[32];
     mxos_u16 buffer;
     mxos_u8 header, tail;
-    mxos_u16 trailer, actual;
+    mxos_u16 trailer, actual, parent;
 } MXOS_BODY_IO;
 
 /* Low-level mxos_file_call: bytes[63]=operation, bytes[41]=mode.
  * OPTIONS: bytes[57]=0 query / 1 exchange; word at 51 is flags, returns old flags. */
 #define MXOS_FILE_OP_OPTIONS 6
+#define MXOS_FILE_OP_OPEN_PATH 7
+#define MXOS_FILE_OP_OPEN_AT 8
 #define MXOS_DOS_IO_VERIFY_FILES 1
 #define MXOS_FILE_MODE_VERIFY 32
 #define MXOS_FILE_MODE_SCATTER 64
@@ -56,7 +61,6 @@ typedef struct {
 #define MXOS_FASTCALL
 #endif
 mxos_u8 mxos_file_call(MXOS_FILE *file) MXOS_FASTCALL;
-mxos_u8 mxos_dos_init(void);
 mxos_u8 mxos_current_drive(void);
 
 /* Объект выделяет вызывающий; функции не используют malloc и скрытые буферы. */

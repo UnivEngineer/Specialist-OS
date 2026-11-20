@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--nc', type=Path, default=ROOT/'bin/NC.i80')
     parser.add_argument('--symbols', type=Path, default=ROOT/'bin/NC.sym')
+    parser.add_argument('--origin', type=lambda value: int(value, 0))
     parser.add_argument('--ticks', type=Path, default=Path(
         'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
     parser.add_argument('--output', type=Path, default=ROOT/'.local/nc-sort/cpu')
@@ -48,6 +49,8 @@ def main():
         r'^([\w.]+): EQU 0x([\dA-Fa-f]+)',
         args.symbols.read_text(encoding='utf-8'), re.M)}
     nc = args.nc.read_bytes()
+    origin = args.origin if args.origin is not None else (0x100 if symbols['IMAGE_FLAGS'] & 2 else 0)
+    assert symbols['NC_END'] <= 0xb800, 'CPU harness overlaps NC buffers'
     bios = (ROOT/'bin/BIOS.sys').read_bytes()
     word = lambda x: x.to_bytes(2, 'little')
     suites = [[], [record('ONLY')], [
@@ -74,9 +77,11 @@ def main():
         for rows in suites:
             for mode in (0, 1, 2):
                 memory = bytearray(65536)
-                memory[:len(nc)] = nc
+                memory[origin:origin+len(nc)] = nc
                 memory[0xC000:0xC000+len(bios)] = bios
                 cache = symbols['FILE_CACHE_A' if panel == 0 else 'FILE_CACHE_B']
+                slot_base = symbols['ncCatalogBases'] + 2*panel
+                memory[slot_base:slot_base+2] = word(cache)
                 index = symbols['FILE_INDEX_A' if panel == 0 else 'FILE_INDEX_B']
                 other = symbols['FILE_INDEX_B' if panel == 0 else 'FILE_INDEX_A']
                 data = b''.join(rows) + b'\xff'
@@ -93,10 +98,10 @@ def main():
                 selected = min(19, max(0, len(rows)-1))
                 memory[symbols['state.panelA_curFile']+panel] = selected
                 # Проверяем штатный путь выбранного файла после перестроения.
-                code = (b'\x31'+word(0x8F00) + b'\xCD'+word(symbols['buildFileIndex']) +
-                        b'\xCD'+word(symbols['getSelectedFile']) + b'\x22'+word(0x8100) +
-                        b'\xC3'+word(0x80FF))
-                memory[0x8000:0x8000+len(code)] = code
+                code = (b'\x31'+word(0xBF00) + b'\xCD'+word(symbols['buildFileIndex']) +
+                        b'\xCD'+word(symbols['getSelectedFile']) + b'\x22'+word(0xB900) +
+                        b'\xC3'+word(0xB8FF))
+                memory[0xB800:0xB800+len(code)] = code
                 stem = args.output/f'{panel}-{len(rows)}-{mode}'
                 input_path = stem.with_suffix('.in.bin')
                 output_path = stem.with_suffix('.out.bin')
@@ -104,19 +109,19 @@ def main():
                 if args.prepare_only:
                     cases += 1
                     continue
-                run = subprocess.run([str(args.ticks), '-m8080', '-pc', '8000',
-                    '-end', '80ff', '-counter', '50000000', '-output',
+                run = subprocess.run([str(args.ticks), '-m8080', '-pc', 'b800',
+                    '-end', 'b8ff', '-counter', '50000000', '-output',
                     str(output_path), str(input_path)], check=True,
                     capture_output=True, text=True, timeout=30)
                 result = output_path.read_bytes()
-                assert int.from_bytes(result[65542:65544], 'little') == 0x80FF, run.stdout
+                assert int.from_bytes(result[65542:65544], 'little') == 0xB8FF, run.stdout
                 assert result[cache:cache+len(data)] == data, ('cache changed', stem)
                 assert result[other:other+256] == memory[other:other+256], stem
                 want = bytes(expected) + b'\xff'
                 assert result[index:index+len(want)] == want, (
                     stem, list(result[index:index+len(want)]), list(want))
                 assert result[index+len(want):index+256] == memory[index+len(want):index+256], stem
-                pointer = int.from_bytes(result[0x8100:0x8102], 'little')
+                pointer = int.from_bytes(result[0xB900:0xB902], 'little')
                 assert pointer == cache + (expected[selected]*16 if rows else 0), stem
                 cases += 1
     print(('PREPARED (CPU not started)' if args.prepare_only else 'NC SORT PASS'), cases)

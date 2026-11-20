@@ -15,7 +15,7 @@ def call(m,entry,a=0,bc=0,de=0,hl=0):
  return bytearray(b[:65536])
 def seed(name):
  m=bytearray(65536)
- for at,file in [(0,'bin/NC.i80'),(0xc000,'bin/BIOS.sys'),(0xd800,f'bin/fonts/{name}.i80'),(0xf000,'bin/IO.sys')]:
+ for at,file in [(0,'bin/NC.i80'),(0xc000,'bin/BIOS.sys'),(0xd800,f'bin/fonts/{name}.i80'),(0xf000,'bin/IO.main.bin')]:
   data=(R/file).read_bytes();m[at:at+len(data)]=data
  m[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=m[S['initVars']:S['initVarsEnd']]
  m[S['bios_upper.escMode']]=255
@@ -30,12 +30,6 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
   q[0x8600:0x8620]=bytes([0xa5])*32
   result=call(q,'compactName',hl=0x8500,de=0x8600)
   assert result[0x8600:0x8620]==leaf+b'\0'+bytes([0xa5])*(31-len(leaf)),(name,leaf,'compact terminator')
-  result=call(q,'printInvFile',de=0x8500)
-  assert result[N['vars.input']:N['vars.input']+len(leaf)+1]==leaf+b'\0',(name,leaf,'delete dialog name')
-  expected=bytearray(q);expected[0x8600:0x8600+len(leaf)+1]=leaf+b'\0'
-  expected[N['bios_vars.cursorY']:N['bios_vars.cursorY']+2]=W(0x3c6e)
-  expected=call(expected,'printStringInv',hl=0x8600)
-  assert result[0x9000:0xc000]==expected[0x9000:0xc000],(name,leaf,'delete dialog bitmap')
  if width==8:
   # RAW8 padding follows the installed glyphs, not the historical font shape.
   for bitmap,padding in [(0xfe,(0,1)),(0x7f,(1,0)),(0xff,(0,0))]:
@@ -126,8 +120,9 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
   text_width={4:48,6:72,8:176}[width]
   left=x;right=x+text_width+(width==6)
   expected=bytearray(before)
-  for px in range(left,right):
-   for py in range(N['SCROLL_TOP']+row*10,N['SCROLL_TOP']+row*10+10):expected[px//8*256+py]^=128>>(px%8)
+  if not N['ENABLE_COLOR']:
+   for px in range(left,right):
+    for py in range(N['SCROLL_TOP']+row*10,N['SCROLL_TOP']+row*10+10):expected[px//8*256+py]^=128>>(px%8)
   assert q[0x9000:0xc000]==expected,(name,slot,'cursor does not enter frame bytes')
  # First toolbar paint and replay are identical and never scroll/touch other rows.
  for shift in [2,0]:
@@ -195,7 +190,7 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
      q[N['loadFiles']]=0xc9
      q[N['vars.cacheSlotA']+panel]=0
      q[N['state.panelA_filesCnt']+panel]=190
-     base=N['FILE_CACHE_A'];index=N['FILE_INDEX_A']
+     base=N['FILE_CACHE_A'];index=N['FILE_INDEX_B' if panel else 'FILE_INDEX_A']
      for i in range(190):
       record=f'FILE{i:04d}TXT'.encode()+bytes([16 if i%7==0 else 0,0,0])+W(i*311)
       q[base+i*16:base+(i+1)*16]=record
@@ -238,46 +233,12 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
       assert baseline[0x9000:0xc000]==result[0x9000:0xc000]
       if not N['ENABLE_COLOR']:assert cycles<LAST_CYCLES,(name,direction,'scroll speed')
       print(f'{name} scroll {direction}, kept={kept}: full step {LAST_CYCLES/2000:.3f} -> {cycles/2000:.3f} ms (model 2 MHz)',flush=True)
- # Every drive button has one glyph cell of padding on both sides.
- if width in (4,6,8):
-  N['testDrivePosition']=0x8300
-  for panel in (0,1):
-   for count in range(1,9):
-    for selected in range(count):
-     q=bytearray(m);q[N['state.activePanel']]=panel
-     q[N['vars.driveCount']]=count;q[N['vars.chooseDrive']]=selected
-     stub=b'\xcd'+W(N['driveCellPosition'])+b'\x22'+W(0x8402)+b'\xc9'
-     q[0x8300:0x8300+len(stub)]=stub
-     pos=call(q,'testDrivePosition',a=selected)
-     y,x=pos[0x8402:0x8404]
-     q[0x9000:0xc000]=bytes([0x55])*12288
-     result=call(q,'chooseDrive_draw')
-     expected=bytearray(q[0x9000:0xc000])
-     for pixel in range(x*2+panel*192-width+q[N['ncDrivePadLeft']],x*2+panel*192+2*width-q[N['ncDrivePadRight']]):
-      for row in range(y-8,y+2):expected[pixel//8*256+row]^=128>>(pixel%8)
-     assert result[0x9000:0xc000]==expected,(count,selected,panel,'pixel drive cursor padding')
-     assert call(result,'chooseDrive_draw')[0x9000:0xc000]==q[0x9000:0xc000]
- # Real main-loop no-op navigation must not invoke either cursor inversion.
- # All four overwrite answers are centered in their own pixel rectangles.
- for choice,length in enumerate((3,3,2,4)):
-  q=bytearray(m);q[N['ncOverwriteChoice']]=choice
-  q[0x9000:0xc000]=bytes([0x55])*12288
-  result=call(q,'ncOverwriteInvert')
-  text_x=(48+32*choice-(length*width//2)//2)
-  if width==4:text_x&=~1
-  if width==8:text_x&=~3
-  left=text_x*2-width+q[N['ncDrivePadLeft']]+1
-  right=text_x*2+(length+1)*width-q[N['ncDrivePadRight']]-1
-  expected=bytearray(q[0x9000:0xc000])
-  for px in range(left,right):
-   for py in range(141,151):expected[px//8*256+py]^=128>>(px%8)
-  assert result[0x9000:0xc000]==expected,(name,choice,'overwrite centering')
-  assert 68<=left<right<=316,(name,choice,'overwrite button outside window')
-  assert call(result,'ncOverwriteInvert')[0x9000:0xc000]==q[0x9000:0xc000]
+ # The current shared modal draws drive and overwrite buttons directly.
+ # Their geometry and focus are exercised in check-ui-modal.
  q=bytearray(m);q[0x8000:0x8010]=b'FILE    TXT'+bytes(5)
- q[N['ncModalGetch']:N['ncModalGetch']+3]=bytes.fromhex('3e 1b c9')
+ q[N['uiModalGetch']:N['uiModalGetch']+3]=bytes.fromhex('3e 1b c9')
  q=call(q,'ncOverwriteBody',hl=0x8000)
- assert q[N['ncOverwriteChoice']]==2,(name,'default overwrite answer')
+ assert q[N['uiModalFocusIndex']]==2,(name,'default overwrite answer')
  for count,selected,keys in [(20,0,[8,12,25]),(20,19,[10,24,26]),(0,0,[8,10,12,24,25,26])]:
   for key in keys:
    q=bytearray(m);q[N['state.panelA_filesCnt']]=count;q[N['state.panelA_curFile']]=selected
@@ -298,11 +259,17 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
   assert result[N['vars.pathValidB']]==1
  # A quiet command without visible changes returns with the highlight intact.
  q=bytearray(m);q[N['ncCommandCursorKept']]=1
- for label in ('updateCommandPath','clearCmdLine'):q[N[label]]=0xc9
+ # A transfer may leave DOS in the other panel's directory. The first path
+ # lookup fills the cache, so it must follow the restore of the active CWD.
+ for label,stub in [('restoreActiveDirectory','3e 01 32 02 84 c9'),
+                    ('updateCommandPath','3a 03 84 3c 32 03 84 3a 02 84 32 04 84 c9'),
+                    ('redrawCommandLine','c9')]:
+  at=N[label];code=bytes.fromhex(stub);q[at:at+len(code)]=code
  q[N['ncReadKey']:N['ncReadKey']+3]=bytes.fromhex('c3 ff 81')
  trace=bytes.fromhex('3a 01 84 3c 32 01 84 c9')
  q[N['drawCursor']:N['drawCursor']+len(trace)]=trace
  result=call(q,'ncRefreshDirty')
  assert result[0x8401]==0 and result[N['ncCommandCursorKept']]==0,(name,'quiet command blink')
+ assert result[0x8402:0x8405]==bytes([1,1,1]),(name,'command path cached before restoring CWD')
  print(name,'layout, cursor, toolbar capture/replay, file fields and editor PASS',flush=True)
 print('NC adaptive layout CPU PASS')

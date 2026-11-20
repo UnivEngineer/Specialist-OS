@@ -4,6 +4,7 @@
     INCLUDE "mxos_syscall_ids.inc"
     PUBLIC _mxos_bios_call
     PUBLIC _mxos_call
+    PUBLIC _mxos_queue_bind, _mxos_queue_flush
     PUBLIC _mxos_memmove_far, _mxos_puts_local
     PUBLIC _mxos_printString_bank, _mxos_printString_main
     PUBLIC _mxos_memcpy_far
@@ -50,6 +51,36 @@ _mxos_putch:
 _mxos_puts:
     call 0F806h
     defw MXOS_BIOS_PRINT_STRING_BANK
+    ret
+; IO.SYS direct DOS/EXEC ABI. Preserve a valid key code 00h in the result.
+    PUBLIC _mxos_bank_key_poll, _mxos_bank_getch
+    PUBLIC _mxos_bank_getch_cursor
+    PUBLIC _mxos_bank_key_modifiers, _mxos_bank_key_shift
+_mxos_bank_key_modifiers:
+    call 0F04Ch
+    ld l,a
+    ld h,0
+    ret
+_mxos_bank_key_shift:
+    call 0F04Fh
+    ld l,a
+    ld h,0
+    ret
+_mxos_bank_getch_cursor:
+    call 0F049h
+    jp bankKeyResult
+_mxos_bank_getch:
+    call 0F040h
+    jp bankKeyResult
+_mxos_bank_key_poll:
+    call 0F043h
+bankKeyResult:
+    ld hl,0
+    ret z
+    ld l,a
+    ld h,1
+    ret nc
+    ld h,3
     ret
 _mxos_getch:
     call 0F806h
@@ -159,3 +190,8 @@ bios_target:
     inc hl
     ld (hl),d
     ret
+
+_mxos_queue_bind:
+    jp 0F809h
+_mxos_queue_flush:
+    jp 0F80Ch

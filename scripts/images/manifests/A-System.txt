@@ -1,4 +1,4 @@
-# Основной системный диск A:.
+﻿# Основной системный диск A:.
 # Метка тома (1–11 символов ASCII).
 
 @label SYSTEM
@@ -15,11 +15,11 @@
 #   CPU + соседний I80: CPU содержит адреса загрузки и входа (два hex-числа ASCII), I80 — код.
 #   CPU без I80: сырой код, загрузка и вход 0000h.
 #   RKS: адреса и нагрузка из стандартного контейнера; сумма проверяется.
-#   COM/EXE MXOS2: адреса и нагрузка из 16-байтного заголовка; суммы проверяются.
+#   COM/EXE MXOS2: адреса и нагрузка из 32-байтного заголовка v2; суммы проверяются.
 #   BIN/I80/старый сырой COM/EXE: код без заголовка; адрес загрузки и входа задаёт адрес_RAW (0 по умолчанию).
 #
 # Целевой формат задаёт расширение имени в первом столбце:
-#   COM/EXE/DLL: общий контейнер MXOS2 — заголовок 16 байт (загрузка, вход, размер, суммы) + нагрузка.
+#   COM/EXE/DLL: общий контейнер MXOS2 — заголовок 32 байта (загрузка, вход, размер, суммы) + нагрузка.
 #   COM/EXE с MAIN/DOS/BANK исполняет DOS; без флага среду выбирает RUN через CLI.EXT.
 #   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через CLI.EXT запускается RUN, по умолчанию -MON.
 #   При RKS -> COM/EXE заголовок и сумма RKS заменяются контейнером MXOS2; результат не является RAW.
@@ -31,7 +31,7 @@
 # Атрибуты: R — read-only, S — системный, RS — оба; без атрибутов — 0. Для пропуска адреса перед ними пишется 0.
 # Порядок строк задаёт порядок файлов; в больших системных образах загрузочные записи идут первыми.
 
-# Имя на диске                  Источник относительно assets/        Адрес RAW   Атрибуты
+# Имя на диске                  Источник относительно assets/           Адрес    Атрибуты
 
 # Система
 
@@ -41,6 +41,9 @@ IO.SYS                         ../bin/IO.sys                            0xF000  
 MEM.SYS                        ../bin/MEM.sys                           0x0000   RS
 DOS.SYS                        ../bin/DOS.sys                           0x0100   RS
 AUTOEXEC.BAT                   {AUTOEXEC}                               0x8000   S
+FILEOPS.DLL                    ../bin/FILEOPS.cpu                       0        RS
+ENUM.DLL                       ../bin/ENUM.cpu                          0        RS
+ERRORS.DAT                     ../bin/ERRORS.DAT                        0        RS
 
 # Драйверы накопителей
 
@@ -51,43 +54,57 @@ DRIVERS/AT2MXF.COM             ../bin/FlashFst.cpu                      0       
 DRIVERS/AT512KS.COM            ../bin/FlashSys.cpu                      0        RS
 DRIVERS/RAMDISK.COM            ../bin/RAMDISK.cpu                       0        RS
 DRIVERS/README.TXT             system-rom/drivers/README.TXT
-# TAPE.COM                       ../bin/tape.cpu                          0xEA00   RS
 
 # Шрифты
 
 FONT.COM                       ../bin/FONT.cpu                          0        RS
-FONTS/README.TXT              system-rom/fonts/README.TXT
-FONTS/8x8/Fast8.fnt            ../bin/fonts/Fast8.cpu                    0xD800   S
-FONTS/8x8/InitA.dll           ../bin/fonts/InitA.cpu                   0x5000   S
-FONTS/8x8/Win8.pf            system-rom/fonts/8x8/Win8.pf                  0        S
-FONTS/4x8/Cpm4.fnt            ../bin/fonts/Cpm4.cpu                    0xD800   S
-FONTS/4x8/Cpm4.pf             system-rom/fonts/4x8/Cpm4.pf                  0        S
-FONTS/4x8/InitA.dll           ../bin/fonts/InitA.cpu                   0x5000   S
-FONTS/6x8/Fast12K.fnt          ../bin/fonts/Fast12K.cpu                 0xD800   S
-FONTS/6x8/Fast12K.pre          ../bin/fonts/Fast12K.pre                 0        S
-FONTS/6x8/Packed6K.fnt         ../bin/fonts/Packed6K.cpu                0xD800   S
-FONTS/6x8/Packed6K.pre         ../bin/fonts/Packed6K.pre                0        S
+FONTS/README.TXT               system-rom/fonts/README.TXT
+FONTS/4x8/Fast.fnt             ../bin/fonts/Cpm4.cpu                    0xD800   S
+FONTS/4x8/Cpm4.pf              system-rom/fonts/4x8/Cpm4.pf             0        S
+FONTS/4x8/InitA.dll            ../bin/fonts/InitA.cpu                   0x5000   S
+FONTS/6x8/Fast.fnt             ../bin/fonts/Fast12K.cpu                 0xD800   S
+FONTS/6x8/Fast.pre             ../bin/fonts/Fast12K.pre                 0        S
+FONTS/6x8/Packed.fnt           ../bin/fonts/Packed6K.cpu                0xD800   S
+FONTS/6x8/Packed.pre           ../bin/fonts/Packed6K.pre                0        S
 FONTS/6x8/Rotate.fnt           ../bin/fonts/Rotate.cpu                  0xD800   S
-FONTS/6x8/Compact.fnt          ../bin/fonts/Compact.cpu                 0xD800   S
 FONTS/6x8/Init6.dll            ../bin/fonts/Init6.cpu                   0x5000   S
-FONTS/6x8/InitKoi.dll          ../bin/fonts/InitKoi.cpu                 0x5000   S
-FONTS/6x8/KOI8.pf             system-rom/fonts/6x8/KOI8.pf                      0        S
-FONTS/6x8/KOI8_IT.pf          system-rom/fonts/6x8/KOI8_IT.pf                   0        S
+FONTS/6x8/KOI8.pf              system-rom/fonts/6x8/KOI8.pf             0        S
+FONTS/6x8/KOI8_IT.pf           system-rom/fonts/6x8/KOI8_IT.pf          0        S
+FONTS/8x8/Rotate.fnt           ../bin/fonts/Graph8x4.cpu                0xD800   S
+FONTS/8x8/Packed.fnt           ../bin/fonts/GraphP8K.cpu                0xD800   S
+FONTS/8x8/Packed.pre           ../bin/fonts/GraphP8K.pre                0        S
+FONTS/8x8/Fast.fnt             ../bin/fonts/Graph14K.cpu                0xD800   S
+FONTS/8x8/Fast.pre             ../bin/fonts/Graph14K.pre                0        S
+FONTS/8x8/InitA.dll            ../bin/fonts/InitA.cpu                   0x5000   S
+FONTS/8x8/Win8.pf              system-rom/fonts/8x8/Win8.pf             0        S
 
 # Утилиты
 
 FORMAT.COM                     ../bin/FORMAT.cpu                        0        RS
 RUN.COM                        ../bin/RUN.cpu                           0        RS
-NC.COM                         ../bin/NC.cpu                            0        RS
-E.COM                          ../bin/E.cpu                             0        RS
+EXE.COM                        ../bin/EXE.cpu
+NC.COM                         ../bin/NC_DOS.cpu                        0        RS
+NC_MN.COM                      ../bin/NC.cpu                            0        RS
+NC_CORE.DLL                    ../bin/NC_CORE.cpu                       0        RS
+EDIT.COM                       ../bin/EDIT_DOS.cpu                      0        RS
+EDIT_MN.COM                    ../bin/EDIT.cpu                          0        RS
+EDITCORE.DLL                   ../bin/EDITCORE.cpu                      0        RS
+EDITHEX.DLL                    ../bin/EDITHEX.cpu                       0        RS
+EDITTEXT.DLL                   ../bin/EDITTEXT.cpu                      0        RS
+UI_GFX.DLL                     ../bin/UI_GFX.cpu                        0        RS
 CLI.COM                        ../bin/CLI.cpu                           0        RS
 CLI.EXT                         system-rom/CLI.EXT                      0        RS
 NC.CFG                          system-rom/NC.CFG                       0        S
 DEBUG.COM                      ../bin/Debug.cpu                         0        RS
 CHKDSK.COM                     ../bin/CHKDSK.cpu                        0        RS
-TEST-MX.COM                    ../bin/TESTMX.cpu
-TEST-SCR.COM                   ../bin/test-scr.cpu
+EDIT.HLP                       system-rom/EDIT.HLP
+NC.HLP                         system-rom/NC.HLP
 README.TXT                     system-rom/README.TXT
+
+# Temporarily excluded from the system image
+
+#TEST-MX.COM                   ../bin/TESTMX.cpu
+#TEST-SCR.COM                  ../bin/test-scr.cpu
 
 # Сменные BIOS-ядра RUN.COM
 
@@ -95,19 +112,9 @@ RAMFOS.MON                     ../bin/RAMFOS.mon                        0xC000  
 MONITOR2.MON                   ../bin/Monitor2.mon                      0xC000   RS
 MONWIN.MON                     ../bin/MONWIN.mon                        0xC000   RS
 
-# Бенчмарки
-
-
-
-
 # LLM80 бенчмарк
+
 #BENCH/LLM80/LLM80.EXE          programs/llm80/LLM80.cpu
 #BENCH/LLM80/LLM3.EXE           programs/llm80/LLM3.cpu
 #BENCH/LLM80/LLM3W.DLL          programs/llm80/LLM3W.cpu
 #BENCH/LLM80/README.TXT         programs/llm80/README.TXT
-
-# FontBen builds the production source at MAIN addresses.
-
-FILEOPS.DLL ../bin/FILEOPS.cpu
-
-ENUM.DLL ../bin/ENUM.cpu

@@ -13,7 +13,7 @@ def main():
                                         (ROOT/'bin/NC.sym').read_text(encoding='utf-8'),re.M)}
     word = lambda x:x.to_bytes(2,'little')
     memory = bytearray(65536)
-    for address,name in ((0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.sys')):
+    for address,name in ((0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin')):
         data = (ROOT/'bin'/name).read_bytes()
         memory[address:address+len(data)] = data
     for name in ('ncInputHookBegin','ncInputHookEnd','ncPrintField','ncPrintChar'):

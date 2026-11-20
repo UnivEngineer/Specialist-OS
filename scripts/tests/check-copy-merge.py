@@ -39,7 +39,7 @@ assert request('ONE','DST',source,parent,1)==(1,True)
 assert m[S['v_dosError']]==S['DOS_ERR_ACCESS']
 m[S['v_directory']:S['v_directory']+2]=W(parent)
 m[0x5400:0x5420]=word('DST')+bytes(21)
-assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)[1]
+assert run(S['fileCreate'],hl=0x5400,de=0x5700)[1]
 assert m[S['v_dosError']]==S['DOS_ERR_ACCESS']
 assert request('ONE','ONE',source,destination)==(2,True)
 assert request('ONE','ONE',source,destination,0)==(0,False)
@@ -103,12 +103,12 @@ assert not run(S['fileFindAny'],hl=0x5400)[1]
 command('CD /')
 for i in range(sector//32):
  m[0x5400:0x5420]=word('ROOT%02d'%i)+bytes(21)
- got=run(S['bios_fileCreate'],hl=0x5400,de=0x5700)
+ got=run(S['fileCreate'],hl=0x5400,de=0x5700)
  if got[1]:break
 else:raise AssertionError('root unexpectedly expanded')
 assert m[S['v_dosError']]==S['DOS_ERR_DIR_FULL']
 m[S['v_dosModuleReady']]=0
-assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)[1]
+assert run(S['fileCreate'],hl=0x5400,de=0x5700)[1]
 assert m[S['v_dosError']]==S['DOS_ERR_DIR_FULL']
 # Полный том: расширение не изменяет старую цепочку и возвращает FULL.
 m[S['v_dosModuleReady']]=1
@@ -123,7 +123,7 @@ original=bytes(m[at:at+3]);m[0x5900:0x5905]=bytes([0x3E,S['DOS_ERR_IO'],0xC3])+W
 m[at:at+3]=bytes([0xCD])+W(0x5900)
 fat_before_growth=bytes(m[sector:root])
 m[0x5400:0x5420]=word('IO_FAIL')+bytes(21)
-assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)[1]
+assert run(S['fileCreate'],hl=0x5400,de=0x5700)[1]
 assert m[S['v_dosError']]==S['DOS_ERR_IO']
 assert bytes(m[sector:root])==fat_before_growth,'unlinked directory cluster leaked'
 m[at:at+3]=original
@@ -133,7 +133,7 @@ for cl in range(2,2+29//spc):
 assert not run(S['fatFinishWrite'])[1]
 fat_full=bytes(m[sector:root])
 m[0x5400:0x5420]=word('NO_ROOM')+bytes(21)
-assert run(S['bios_fileCreate'],hl=0x5400,de=0x5700)[1]
+assert run(S['fileCreate'],hl=0x5400,de=0x5700)[1]
 assert m[S['v_dosError']]==S['DOS_ERR_FULL'],m[S['v_dosError']]
 assert bytes(m[sector:root])==fat_full
 print('COPY MERGE PASS; directory growth; overwrite Yes/No; identity guard; root/full-volume limits; sector',sector)

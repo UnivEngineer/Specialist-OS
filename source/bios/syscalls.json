@@ -280,6 +280,17 @@
         "name": "SET_FONT_ENCODING",
         "target": "FONT_ENGINE_ENCODING",
         "legacy": "bios_setFontEncoding"
+      },
+      {
+        "id": 44,
+        "name": "COMMAND_BATCH",
+        "target": "BIOS_BANK_GATE_ADDR"
+      },
+      {
+        "id": 45,
+        "name": "PRINT_STRING_RAW_PSEUDO",
+        "aliases": ["PRINT_STRING_RAW_PSEUDO_BANK"],
+        "target": "printStringRawPseudo"
       }
     ]
   },
@@ -300,18 +311,6 @@
         "legacy": "bios_fileGetSetDrive"
       },
       {
-        "id": 2,
-        "name": "FILE_CREATE",
-        "target": "dos_fileCreate",
-        "legacy": "bios_fileCreate"
-      },
-      {
-        "id": 3,
-        "name": "FILE_LOAD",
-        "target": "dos_fileLoad",
-        "legacy": "bios_fileLoad"
-      },
-      {
         "id": 4,
         "name": "FILE_DELETE",
         "target": "dos_fileDelete",
@@ -328,12 +327,6 @@
         "name": "FILE_LOAD_INFO",
         "target": "dos_fileLoadInfo",
         "legacy": "bios_fileLoadInfo"
-      },
-      {
-        "id": 7,
-        "name": "IMAGE_OPEN",
-        "target": "dos_imageOpen",
-        "legacy": "bios_imageOpen"
       },
       {
         "id": 8,
@@ -354,34 +347,10 @@
         "legacy": "bios_fileExec"
       },
       {
-        "id": 11,
-        "name": "FILE_LOAD2",
-        "target": "dos_fileLoad2",
-        "legacy": "bios_fileLoad2"
-      },
-      {
         "id": 12,
         "name": "GET_DRIVE_FREE_SPACE",
         "target": "dos_getDriveFreeSpace",
         "legacy": "bios_getDriveFreeSpace"
-      },
-      {
-        "id": 13,
-        "name": "FILE_CREATE_PREPARE",
-        "target": "dos_fileCreatePrepare",
-        "legacy": "bios_fileCreatePrepare"
-      },
-      {
-        "id": 14,
-        "name": "INSTALL_VOLUME",
-        "target": "dos_installVolume",
-        "legacy": "bios_installVolume"
-      },
-      {
-        "id": 15,
-        "name": "GET_VOLUME",
-        "target": "dos_getVolume",
-        "legacy": "bios_getVolume"
       },
       {
         "id": 16,
@@ -445,9 +414,8 @@
       },
       {
         "id": 26,
-        "name": "FILESTREAM",
-        "target": "dos_fileStream",
-        "legacy": "bios_fileStream"
+        "name": "TIMER",
+        "target": "timerService"
       },
       {
         "id": 27,
@@ -472,18 +440,6 @@
         "name": "SET_SHELL",
         "target": "dos_setShell",
         "legacy": "bios_setShell"
-      },
-      {
-        "id": 31,
-        "name": "FILE_LOAD_PATH",
-        "target": "filePathLoad",
-        "legacy": "bios_fileLoadPath"
-      },
-      {
-        "id": 32,
-        "name": "FILE_SAVE_PATH",
-        "target": "filePathSave",
-        "legacy": "bios_fileSavePath"
       },
       {
         "id": 33,
@@ -544,6 +500,21 @@
         "id": 44,
         "name": "ENUMERATE",
         "target": "enumService"
+      },
+      {
+        "id": 45,
+        "name": "FONT_CONFIG",
+        "target": "fontConfigService"
+      },
+      {
+        "id": 46,
+        "name": "MODULE_SCOPE",
+        "target": "moduleScope"
+      },
+      {
+        "id": 47,
+        "name": "COMMAND_BATCH",
+        "target": "dosCommandBatch"
       }
     ]
   }

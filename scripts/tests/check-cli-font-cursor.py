@@ -20,7 +20,7 @@ def main():
     def run(font, x, text, keys):
         memory = bytearray(65536)
         for address, name in ((0, 'CLI.i80'), (0xc000, 'BIOS.sys'),
-                              (0xf000, 'IO.sys'), (0xd800, f'fonts/{font}.i80')):
+                              (0xf000, 'IO.main.bin'), (0xd800, f'fonts/{font}.i80')):
             data = (ROOT / 'bin' / name).read_bytes()
             memory[address:address + len(data)] = data
         memory[bios['bios_vars']:bios['bios_vars'] + bios['BIOS_VARIABLES']] = \

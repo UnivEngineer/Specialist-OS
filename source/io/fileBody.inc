@@ -2,7 +2,7 @@
 ; HL=FILE_BODY_IO с готовым дескриптором выбранного диска.
 ; Выход CF/A=ошибка DOS, actual=передано тело; BC/DE/HL/флаги разрушены.
 ; Заголовок должен помещаться в первый кластер. Хвост необязателен.
-; Нереентерабельно: как FILESTREAM; код, стек и запрос нельзя затирать.
+; Нереентерабельно: как FILEHANDLE; код, стек и запрос нельзя затирать.
 fileBodyLoad:
     ld (fbRequest),hl
     ld de,FILE_BODY_IO.actual
@@ -26,10 +26,6 @@ fileBodyLoad:
     call fbField
     ld c,(hl)
     ld b,0
-    ld a,c
-    ld (fbCursor+2),a
-    xor a
-    ld (fbCursor+3),a
     inc hl
     ld l,(hl)
     ld h,0
@@ -49,17 +45,51 @@ fileBodyLoad:
     call fbRange
     ret c
     push hl
-    ld de,FILE_DESCRIPTOR.firstCluster
+    push bc
+    ld hl,fbHandle
+    ld b,FILE_HANDLE
+    xor a
+fbClearHandle:
+    ld (hl),a
+    inc hl
+    dec b
+    jp nz,fbClearHandle
+    ld hl,(fbRequest)
+    ld de,fbHandle
+    ld b,FILE_DESCRIPTOR
+fbCopyDescriptor:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    dec b
+    jp nz,fbCopyDescriptor
+    ld de,0
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    ld (fbHandle+FH_DRIVE),a
+    ld a,FILE_MODE_READ
+    ld (fbHandle+FH_MODE),a
+    ld de,FILE_BODY_IO.parent
     call fbField
     ld e,(hl)
     inc hl
     ld d,(hl)
     ex de,hl
-    ld (fbCursor),hl
+    ld (fbHandle+FH_SEEK),hl
+    ld a,FILE_OP_OPEN_AT
+    call fbCall
+    jp c,fbOpenError
+    ld de,FILE_BODY_IO.header
+    call fbField
+    ld l,(hl)
+    ld h,0
+    ld (fbHandle+FH_SEEK),hl
+    ld a,FILE_OP_SEEK
+    call fbCall
+    jp c,fbSeekError
+    pop bc
     pop hl
-    ld de,fbCursor
-    ld a,2
-    call bios_fileStream
+    call fbRead
     push af
     push bc
     ld de,FILE_BODY_IO.actual
@@ -69,27 +99,86 @@ fileBodyLoad:
     inc hl
     ld (hl),b
     pop af
-    ret c
+    jp c,fbClose
     ld de,FILE_BODY_IO.tail
     call fbField
     ld c,(hl)
     ld b,0
     ld a,c
     or a
-    ret z
+    jp z,fbClose
     inc hl
     ld e,(hl)
     inc hl
     ld d,(hl)
     ld a,d
     or e
-    ret z
+    jp z,fbClose
     ex de,hl
     call fbRange
+    jp c,fbClose
+    call fbRead
+fbClose:
+    push af
+    ld a,FILE_OP_CLOSE
+    call fbCall
+    pop bc
+    push af
+    pop de
+    ld a,c
+    and 1
+    jp nz,fbFirstError
+    push de
+    pop af
+    ret
+fbFirstError:
+    push bc
+    pop af
+    ret
+fbSeekError:
+    call fbClose
+fbOpenError:
+    pop bc
+    pop hl
+    ret
+fbRead:
+    ld (fbHandle+FH_BUFFER),hl
+    ld h,b
+    ld l,c
+    ld (fbHandle+FH_COUNT),hl
+    ld (fbReadCount),hl
+    ld a,FILE_OP_READ
+    call fbCall
+    push af
+    ld hl,(fbHandle+FH_COUNT)
+    ld b,h
+    ld c,l
+    ld hl,(fbHandle+FH_BUFFER)
+    add hl,bc
+    pop af
     ret c
-    ld de,fbCursor
-    ld a,2
-    jp bios_fileStream
+    push hl
+    ld hl,(fbReadCount)
+    ld a,h
+    cp b
+    jp nz,fbShortRead
+    ld a,l
+    cp c
+    jp nz,fbShortRead
+    pop hl
+    xor a
+    ret
+fbShortRead:
+    pop hl
+    ld a,DOS_ERR_BAD_IMAGE
+    scf
+    ret
+fbCall:
+    ld hl,fbHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
+    ret
+fbHandle = BIOS_TEMP_BUFFER+128
+fbReadCount = io_vars.fbCursor ; Two bytes; remaining two bytes are reserved.
 
 ; HL=приёмник, BC=число; нельзя затереть BIOS и параметры загрузки.
 ; AF/DE разрушены; HL/BC сохранены. Собственный стек защищает вызывающий.
@@ -148,5 +237,5 @@ fbField:
     ret
 fbRequest = io_vars.fbRequest
 fbEnd = io_vars.fbEnd
-fbCursor = io_vars.fbCursor
+
 fileBodyEnd:

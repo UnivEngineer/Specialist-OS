@@ -2,6 +2,9 @@
 ; KIND=3 GET16, 4 PUT16, 5 GET8, 6 PUT8. DE=адрес, BC=значение.
 ; Обычные kind 0..2 передаются полному транспорту.
 scalarCommandLanding:
+    ld a,(BANK_BUFFER_KIND)
+    or a
+    jp nz,BANK_LANDING
     ld a,(BANK_SCALAR_KIND)
     cp 3
     jp c,BANK_LANDING

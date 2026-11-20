@@ -149,11 +149,6 @@ ncPrintDecWord:
         pop de
         pop bc
         ret
-; Размер справа: три пробела и пять цифр, один выровненный пакет из 8 знаков.
-ncPrintFileSize:
-        call ncFormatDecimal
-        ld hl,ncDecimalPadding
-        jp bios_printStringReal
 ncFormatDecimal:
         ex de,hl
         ld a,0
@@ -212,5 +207,4 @@ ncDecimalStore:
         pop hl
         ret
 ncDecimalCount: DB 0
-ncDecimalPadding: DB "   "
 ncDecimalText: BLOCK 6,0

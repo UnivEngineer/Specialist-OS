@@ -1,7 +1,8 @@
 ; Colored text-cell copy. HL -> {source DW, destination DW, width DB,
 ; height DB, sourceColors DW, destinationColors DW}. Color tables have one
 ; byte per 10px row, in ascending Y order; height=0 or 10..200, width>0.
-; Same overlap/blank spacing/IRQ contracts as uiCopyTextRect. Color-table
+; Vertical overlap in either direction, horizontal only to the left.
+; Same blank spacing/IRQ contracts as uiCopyTextRect. Color-table
 ; overlap must follow the same direction as VRAM overlap. No color reads.
 ; Adjacent equal colors share one stack-copy batch. AF/BC/DE/HL destroyed;
 ; A=last written color (undefined for height=0), SP restored. Non-reentrant.

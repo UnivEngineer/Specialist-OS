@@ -50,9 +50,9 @@ def main():
     (out / 'splash-text.rle').write_bytes(packed)
     (out / 'splash-digit.bin').write_bytes(raw_digit)
     (out / 'splash-config.inc').write_text(
-        f'BOOT_LOGO_TEXT_Y = {108 + text_top}\n'
+        f'BOOT_LOGO_TEXT_Y = {112 + text_top}\n'
         f'BOOT_LOGO_TEXT_HEIGHT = {text_height}\n'
-        f'BOOT_LOGO_DIGIT_Y = {108 + digit_top}\n'
+        f'BOOT_LOGO_DIGIT_Y = {112 + digit_top}\n'
         f'BOOT_LOGO_DIGIT_HEIGHT = {digit_height}\n', encoding='utf-8')
     print(f'Boot splash: text {len(packed)} B RLE, digit {len(raw_digit)} B raw')
 

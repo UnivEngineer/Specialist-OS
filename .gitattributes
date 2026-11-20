@@ -8,3 +8,4 @@ hardware/import-notes.md -text
 # Текстовые ресурсы образов: сохраняем кодировку и окончания строк побайтно.
 # Регистр расширения не влияет на защиту; манифесты в scripts/ не затрагиваются.
 assets/**/*.[tT][xX][tT] -text
+source-emulators/emu80/*.patch text eol=lf

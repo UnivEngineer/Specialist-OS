@@ -1,6 +1,11 @@
 ; Raw PRE payload: exact expected byte count, no checksums or staging copy.
 ; On failure caller regenerates all planes before publishing the new module.
 checkWorkspace:
+    ld hl,0
+    ld bc,FONT_INIT_END
+    ld a,MEM_OP_MAINCLAIM
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret c
     ld hl,FONT_INIT_END
     ld (workspaceEnd),hl
     ld de,FONT_INIT_END-1
@@ -14,7 +19,7 @@ loadPrepared:
     ld a,(useFile)
     or a
     jp z,generateResources
-    ld hl,(staging+60)
+    ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ld a,h
     or l
     jp z,badImage
@@ -33,7 +38,7 @@ loadPrepared:
     call loadPath
     FONT_STAMP 18
     ret c
-    ld hl,(staging+60)
+    ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ex de,hl
     ld hl,(preparedIO+FILE_PATH_IO.actual)
     call bios_cmp_hl_de

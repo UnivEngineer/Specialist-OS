@@ -1,0 +1,40 @@
+; Minimal shell-path entry, resident in the spare IO.SYS tail.
+; Called only after bootstrap has installed IO; no MAIN code is required.
+biosRecoveryStart:
+    ld hl,biosShellPrompt
+    call bios_printString
+    ld hl,CMD_LINE
+    ld de,CMD_LINE+MAX_PATH-1
+    call bios_input
+    ld c,10
+    call bios_printChar
+    ld hl,CMD_LINE
+    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    jp c,biosRecoveryStart
+    jp biosBankShell
+biosShellPrompt: DB 'Shell path: ',0
+; The regular shell paths are explicit native images; a missing one returns
+; silently instead of badCommand's print/wait path.
+biosTryShell:
+    push hl
+    call bios_printString
+    ld c,10
+    call bios_printChar
+    pop hl
+    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    ret
+
+; Restore a selected FONT profile only when a destructive launch/Reset marked
+; it pending. This executes once before the shell, never during glyph output.
+biosRestoreFont:
+    ld hl,MAIN_COMMAND_ADDR
+    ld a,1
+    MXOS_CALL MXOS_DOS_FONT_CONFIG
+    ret c
+    or a
+    ret z
+    ld hl,MAIN_COMMAND_ADDR
+    call biosBootExec
+    ld a,2
+    MXOS_CALL MXOS_DOS_FONT_CONFIG
+    ret

@@ -8,10 +8,39 @@ static void prepare(MXOS_REGS *r, mxos_u16 entry)
 static mxos_u8 result(MXOS_REGS *r)
 {
     mxos_u8 error;
-    mxos_bios_call(r);
+    if (r->entry < 0x1000) {
+        MXOS_CALL q;
+        q.operation=r->entry; q.hl=r->hl; q.de=r->de; q.bc=r->bc; q.af=r->af;
+        mxos_call(&q);
+        r->hl=q.hl; r->de=q.de; r->bc=q.bc; r->af=q.af;
+    } else mxos_bios_call(r);
     if (!(r->af & MXOS_CF)) return 0;
     error=mxos_last_error(); return error ? error : 1;
 }
+static mxos_u16 timer_request(mxos_u8 op)
+{
+    MXOS_CALL request = {MXOS_DOS_TIMER, 0, 0, 0, 0};
+    request.af = (mxos_u16)op << 8;
+    return mxos_call(&request);
+}
+
+mxos_u8 mxos_bank_key_begin(MXOS_KEY_STATE *state)
+{
+    if (!state->timed) {
+        state->timed = !(timer_request(MXOS_TIMER_CLOCK) & MXOS_CF);
+        state->last_key = 255;
+    }
+    return state->timed;
+}
+
+void mxos_bank_key_end(MXOS_KEY_STATE *state)
+{
+    if (state->timed) {
+        timer_request(MXOS_TIMER_RELEASE);
+        state->timed = 0;
+    }
+}
+
 void *mxos_memcpy(void *dst, const void *src, mxos_u16 bytes)
 {
     MXOS_REGS r;
@@ -23,56 +52,56 @@ void *mxos_memmove(void *dst, const void *src, mxos_u16 bytes) { return mxos_mem
 mxos_u8 mxos_directory_get(mxos_u16 *cluster)
 {
     MXOS_REGS r; mxos_u8 error;
-    prepare(&r,MXOS_BIOS_ABI_DIRECTORY); error=result(&r);
+    prepare(&r,MXOS_DOS_DIRECTORY); error=result(&r);
     if (!error) *cluster=r.de;
     return error;
 }
 mxos_u8 mxos_directory_set(mxos_u16 cluster)
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DIRECTORY); r.af=0x0100; r.de=cluster;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_DIRECTORY); r.af=0x0100; r.de=cluster;
     return result(&r);
 }
 mxos_u8 mxos_getcwd(char path[MXOS_MAX_PATH])
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DIRECTORY); r.af=0x0400; r.hl=(mxos_u16)path;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_DIRECTORY); r.af=0x0400; r.hl=(mxos_u16)path;
     return result(&r);
 }
 mxos_u8 mxos_chdir(const char path[MXOS_MAX_PATH])
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DIRECTORY); r.af=0x0200; r.hl=(mxos_u16)path;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_DIRECTORY); r.af=0x0200; r.hl=(mxos_u16)path;
     return result(&r);
 }
 mxos_u8 mxos_mkdir(const char path[MXOS_MAX_PATH])
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DIRECTORY); r.af=0x0700; r.hl=(mxos_u16)path;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_DIRECTORY); r.af=0x0700; r.hl=(mxos_u16)path;
     return result(&r);
 }
 mxos_u8 mxos_rmdir(const char path[MXOS_MAX_PATH])
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DIRECTORY); r.af=0x0800; r.hl=(mxos_u16)path;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_DIRECTORY); r.af=0x0800; r.hl=(mxos_u16)path;
     return result(&r);
 }
 mxos_u8 mxos_file_move(void *request)
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_CLI); r.af=0x0700; r.hl=(mxos_u16)request;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_CLI); r.af=0x0700; r.hl=(mxos_u16)request;
     return result(&r);
 }
 mxos_u8 mxos_file_getattr(const void *name83, mxos_u8 *attributes)
 {
     MXOS_REGS r; mxos_u8 error;
-    prepare(&r,MXOS_BIOS_ABI_FILE_ATTR); r.hl=(mxos_u16)name83; error=result(&r);
+    prepare(&r,MXOS_DOS_FILE_GET_SET_ATTR); r.hl=(mxos_u16)name83; error=result(&r);
     if (!error) *attributes=r.af>>8;
     return error;
 }
 mxos_u8 mxos_file_setattr(const void *name83, mxos_u8 attributes)
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_FILE_ATTR); r.hl=(mxos_u16)name83;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_FILE_GET_SET_ATTR); r.hl=(mxos_u16)name83;
     r.bc=((mxos_u16)attributes<<8)|1; return result(&r);
 }
 mxos_u8 mxos_directory_list(MXOS_FILE_INFO *buffer, mxos_u16 capacity, mxos_u16 start, mxos_u16 *total)
 {
     MXOS_REGS r; mxos_u8 error;
-    prepare(&r,MXOS_BIOS_ABI_DIRECTORY); r.af=0x0300; r.hl=(mxos_u16)buffer; r.de=capacity; r.bc=start;
+    prepare(&r,MXOS_DOS_DIRECTORY); r.af=0x0300; r.hl=(mxos_u16)buffer; r.de=capacity; r.bc=start;
     error=result(&r); *total=r.de; return error;
 }
 mxos_u16 mxos_checksum(const void *buffer, mxos_u16 bytes)
@@ -123,9 +152,9 @@ int mxos_equal_n(const char *a, const char *b, mxos_u8 bytes, int ignore_case)
 }
 #ifndef __Z88DK
 #endif
-mxos_u8 mxos_drive_select(mxos_u8 drive) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DRIVE_SELECT); r.af=(mxos_u16)drive<<8; return result(&r); }
-mxos_u8 mxos_volume_flush(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_FLUSH); return result(&r); }
-mxos_u8 mxos_last_error(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_ERROR); mxos_bios_call(&r); return (mxos_u8)(r.af>>8); }
+mxos_u8 mxos_drive_select(mxos_u8 drive) { MXOS_REGS r; prepare(&r,MXOS_DOS_FILE_SELECT_DRIVE); r.af=(mxos_u16)drive<<8; return result(&r); }
+mxos_u8 mxos_volume_flush(void) { MXOS_REGS r; prepare(&r,MXOS_DOS_FLUSH_VOLUME); return result(&r); }
+mxos_u8 mxos_last_error(void) { MXOS_CALL q; q.operation=MXOS_DOS_GET_ERROR; q.hl=q.de=q.bc=q.af=0; mxos_call(&q); return (mxos_u8)(q.af>>8); }
 const MXOS_DISK_INFO *mxos_disk_info(mxos_u16 *physical_blocks)
 {
     MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DISK_DRIVER); r.bc=0x0300; mxos_bios_call(&r);
@@ -135,25 +164,38 @@ const MXOS_DISK_INFO *mxos_disk_info(mxos_u16 *physical_blocks)
 mxos_u8 mxos_file_list(MXOS_FILE_INFO *buffer, mxos_u16 capacity, mxos_u16 start, mxos_u16 *total)
 {
     MXOS_REGS r; mxos_u8 error;
-    prepare(&r,MXOS_BIOS_ABI_FILE_LIST); r.hl=(mxos_u16)buffer; r.de=capacity; r.bc=start;
+    prepare(&r,MXOS_DOS_FILE_LIST); r.hl=(mxos_u16)buffer; r.de=capacity; r.bc=start;
     error=result(&r); if (total) *total=r.de; return error;
 }
 static mxos_u8 file_call(mxos_u16 entry, const void *descriptor, const void *buffer)
 {
-    MXOS_REGS r; mxos_u8 error;
+    MXOS_REGS r;
     prepare(&r,entry); r.hl=(mxos_u16)descriptor; r.de=(mxos_u16)buffer;
-    mxos_bios_call(&r);
-    if (!(r.af & MXOS_CF)) return 0;
-    error=mxos_last_error(); return error ? error : 1;
+    return result(&r);
 }
-mxos_u8 mxos_file_stat(void *d) { return file_call(MXOS_BIOS_ABI_FILE_STAT,d,0); }
-mxos_u8 mxos_file_load(void *d, void *b) { return file_call(MXOS_BIOS_ABI_FILE_LOAD,d,b); }
-mxos_u8 mxos_file_save(void *d, const void *b) { return file_call(MXOS_BIOS_ABI_FILE_CREATE,d,b); }
-mxos_u8 mxos_file_delete(const void *n) { return file_call(MXOS_BIOS_ABI_FILE_DELETE,n,0); }
-mxos_u8 mxos_file_rename(const void *a, const void *b) { return file_call(MXOS_BIOS_ABI_FILE_RENAME,a,b); }
-mxos_u8 mxos_file_copy(void *q) { return file_call(MXOS_BIOS_ABI_FILE_COPY,q,0); }
+mxos_u8 mxos_file_stat(void *d) { return file_call(MXOS_DOS_FILE_LOAD_INFO,d,0); }
+static mxos_u8 record_io(void *descriptor,void *buffer,mxos_u8 writing)
+{
+    MXOS_FILE f; mxos_u8 i,error; mxos_u16 size;
+    mxos_u8 *d=(mxos_u8 *)descriptor;
+    for (i=0;i<64;++i) f.bytes[i]=0;
+    for (i=0;i<32;++i) f.bytes[i]=d[i];
+    if (d[30] || d[31]) return MXOS_ERR_ARGUMENT;
+    size=(mxos_u16)d[28]|((mxos_u16)d[29]<<8);
+    f.bytes[40]=mxos_current_drive(); f.bytes[41]=writing?14:1;
+    f.bytes[63]=0; error=mxos_file_call(&f); if (error) return error;
+    if (writing) mxos_write(&f,buffer,size); else mxos_read(&f,buffer,size);
+    error=f.bytes[43];
+    if (mxos_fclose(&f) && !error) error=f.bytes[43];
+    return error;
+}
+mxos_u8 mxos_file_load(void *d, void *b) { return record_io(d,b,0); }
+mxos_u8 mxos_file_save(void *d, const void *b) { return record_io(d,(void *)b,1); }
+mxos_u8 mxos_file_delete(const void *n) { return file_call(MXOS_DOS_FILE_DELETE,n,0); }
+mxos_u8 mxos_file_rename(const void *a, const void *b) { return file_call(MXOS_DOS_FILE_RENAME,a,b); }
+mxos_u8 mxos_file_copy(void *q) { return file_call(MXOS_DOS_FILE_COPY,q,0); }
 mxos_u8 mxos_sector_io(mxos_u8 op, mxos_u16 sector, void *b)
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_SECTOR); r.bc=(mxos_u16)op<<8; r.de=sector; r.hl=(mxos_u16)b;
+    MXOS_REGS r; prepare(&r,MXOS_DOS_SECTOR_IO); r.bc=(mxos_u16)op<<8; r.de=sector; r.hl=(mxos_u16)b;
     return result(&r);
 }

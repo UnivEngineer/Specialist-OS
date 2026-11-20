@@ -66,20 +66,25 @@ p.write_text(text, encoding='utf8')
 write_text(R / 'assets/benchmarks/fontben/Readme.txt', '''Бенчмарки FontBen и TextBen
 ==========================
 
+Каталог A:\\BENCH содержит CopyBen, SortBen, DiskBen,
+FontBen и TextBen со всеми модулями. Весь BENCH можно
+перенести в корень H: без пересборки программ.
+Модули загружаются с диска запуска бенчмарка.
+
 FontBen.com - MAIN/BANK сетка пяти текстовых API.
 FontBank.com - самостоятельный банковый участник.
 DLL движков самостоятельно не запускаются.
 
-Char и CharRaw: MAIN, BANK COMMAND, BANK TEXT.
-StringZ, StringRawZ, StringRawLim: MAIN, BANK Win20,
+Char и CharRaw: MAIN, BANK CMD, BANK CMD после StringZ.
+StringZ, StringRawZ, StringRawLim: MAIN, BANK NEAR,
 Far256 и собственный MAIN-буфер. MXCALL входит в замер.
-Строковые банковые вызовы автоматически режут текст.
+NEAR передаёт до 20 байт внутри COMMAND.
 
 Параметры (регистр не важен):
 -E=BIOS        установленный движок, по умолчанию
 -K             то же, что -E=BIOS
--E=STANDALONE  шесть актуальных актуальные standalone-движков
--E=ALL         BIOS и шесть актуальные standalone-движков
+-E=STANDALONE  коллекция standalone-движков
+-E=ALL         BIOS и коллекция standalone-движков
 -E=LEGACY      прежние контрольные реализации
 -E=имя,имя     отдельные движки
 -I             инверсия для BIOS и актуальные standalone
@@ -91,12 +96,17 @@ Far256 и собственный MAIN-буфер. MXCALL входит в зам�
 Вместо = можно использовать пробел.
 
 Актуальные standalone-движки:
-ROTATE6  - Rotate 6x8, вращение, четвёрки
-PACK6K - Packed6K 6x8, упакованные фазы
-FAST12K - Fast12K 6x8, полные фазы
+6RotateQuads - Rotate 6x8 по столбцам
+6RotateRows  - Rotate 6x8 по строкам внутри четвёрки
+6PackedQuads - Packed6K 6x8, упакованные фазы
+6FullQuads   - Fast12K 6x8, раздельные фазы
 COMPACT6  - Compact 6x8, 162 глифа FONTKOI
 FAST8    - Fast8 8x8, байты без масок
 CPM4    - Cpm4 4x8, пары повторенных полубайтов
+8RotateQuads  - невыровненный 8x8, по 4 байта
+8RotateStream - невыровненный 8x8, по 1 байту
+Для 8x8 -X0..3 задаёт сдвиг 0, 2, 4, 6 пикселей.
+Прежние имена: ROTATE6, PACK6K, FAST12K.
 
 актуальные standalone и устанавливаемые FONT DLL собираются из
 одних исходников. Все имеют отдельные обычные и
@@ -112,7 +122,7 @@ Packed6K/Fast12K с таблицей, остальные без неё.
 и не освобождает резидентный пререндер.
 
 Примеры:
-FONT 4x8/Cpm4
+FONT 4x8/Fast
 FontBen.com -E=BIOS -I
 FONT 6x8/Rotate
 FontBen.com -E=CPM4,FAST8 -Q
@@ -130,9 +140,10 @@ SCALAR12 (FULL) - посимвольная таблица 12 КиБ.
 кода и поддерживает только обычный вывод.
 FontLab/FontMap/FontBlk заменены общей сеткой и DLL.
 
-Текст: A:\\README.TXT, 24 блока по 46 байтов и CRLF,
-всего 1152 байта. Char/StringZ обрабатывают CRLF.
+Текст: A:\\README.TXT, 21 блок по 42 байта и CRLF,
+всего 924 байта. Char/StringZ обрабатывают CRLF.
 Raw рисует их глифы и переносится по краю экрана.
+-X0..3: 22 строки по 42 глифа, те же 924 байта.
 CharRaw рисует даже код 00h. RawZ завершается нулём,
 RawLim печатает заданное количество байтов.
 

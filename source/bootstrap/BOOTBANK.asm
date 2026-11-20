@@ -26,6 +26,10 @@ ioLoaded:
     ld bc,BOOT_FONT_RAM
     call moveCore
 fontLoaded:
+    ld hl,bootFontName
+    ld de,bootFontName+8
+    ld bc,BOOT_FONT_NAME_RAM
+    call moveCore
     ; Р”РµС‚РµРєС‚РѕСЂ СЂР°Р±РѕС‚Р°РµС‚ РґРѕ СѓСЃС‚Р°РЅРѕРІРєРё РѕР±С‰РµРіРѕ С€Р»СЋР·Р°.
     ld a,15
     ld hl,0FFBEh
@@ -40,7 +44,6 @@ fontLoaded:
     ld de,byteWindowEnd
     ld bc,0FFC0h
     call moveCore
-    call guardRamDisk
     ; Р”Рѕ РїРµСЂРµСѓСЃС‚Р°РЅРѕРІРєРё MEM РїСЂРѕРІРµСЂСЏРµРј РІРѕСЃРµРјСЊ Р±Р°Р№С‚РѕРІ РєРѕРїРёСЂРѕРІС‰РёРєР° РІ РїРµСЂРІРѕРј
     ; Р±Р°РЅРєРµ B:. РџРѕСЃР»Рµ РїРѕС‚РµСЂРё РћР—РЈ СЃРѕРґРµСЂР¶РёРјРѕРјСѓ boot-СЃРµРєС‚РѕСЂР° РґРѕРІРµСЂСЏС‚СЊ РЅРµР»СЊР·СЏ.
     ld a,1
@@ -112,7 +115,7 @@ loadDos:
     ld hl,MODULE_LOAD+4
     call 0FFC0h
 dosLoaded:
-    ; Р—Р°С‰РёС‚Р° СЂР°Р·РјРµС‚РєРё СѓР¶Рµ РїСЂРѕРІРµСЂРµРЅР°; FE00h Рё FF00h РїСЂРёРЅР°РґР»РµР¶Р°С‚ MEM.
+    ; Install the current MEM tails in DOS and data banks.
     ld hl,byteWindow
     ld de,byteWindowEnd
     ld bc,0FFC0h
@@ -145,6 +148,11 @@ installPages:
     ld de,clientImage
     ld hl,0F800h
     ld bc,clientEnd-clientImage
+    xor a
+    call install
+    ld de,BOOT_IO_ROM+BOOT_IO_BYTES
+    ld hl,BOOT_IO_KEYS
+    ld bc,BOOT_IO_KEY_BYTES
     xor a
     call install
     ld de,localBlockImage
@@ -269,7 +277,7 @@ romWindowEnd:
     ASSERT romWindowEnd-romWindow == 18
     INCLUDE "splash.inc"
     INCLUDE "memcpy.inc"
-    INCLUDE "ramdisk-guard.inc"
+bootFontName: DB BOOT_SELECTED_BASENAME
 pageCount: DB 16
 ramFresh: DB 1
 dosKind: DB 2

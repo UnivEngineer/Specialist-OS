@@ -13,11 +13,18 @@ Start:
             call bios_setFontEncoding ; Always restore KOI-8 before any NC output.
             ld hl,0
             ld (bios_vars.inverse),hl
+    IF !NC_BANKED
             call ncStartupCopyright
+    ENDIF
 ncStartupBannerReady:
             call ncLayoutInit
             call ncMemoryInit
             jp c,ncMemoryError
+    IF !NC_BANKED
+            ld de,0
+            ld a,RESIDENT_SHELL_SET
+            MXOS_CALL MXOS_DOS_RESIDENT
+    ENDIF
             xor a
             MXOS_CALL MXOS_DOS_SET_SHELL
             xor     a

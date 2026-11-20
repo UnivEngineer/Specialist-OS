@@ -1,0 +1,45 @@
+--- a/src/qt/qtMainWindow.h
++++ b/src/qt/qtMainWindow.h
+@@ -286,6 +286,7 @@
+ 
+     std::string m_platformName;
+     std::string m_platformGroupName;
++    bool m_endSentToMxos = false;
+ 
+     int m_clientWidth = 1;
+     int m_clientHeight = 1;
+--- a/src/qt/qtMainWindow.cpp
++++ b/src/qt/qtMainWindow.cpp
+@@ -2457,6 +2457,16 @@
+ void MainWindow::keyPressEvent(QKeyEvent* evt)
+ {
+     if (evt->key() == Qt::Key_End && !(evt->modifiers() & Qt::KeypadModifier)) {
++        if (m_windowType == EWT_EMULATION && m_platformGroupName == "specialist-os") {
++            if (evt->isAutoRepeat())
++                return;
++            m_endSentToMxos = !(evt->modifiers() & Qt::AltModifier);
++            if (m_endSentToMxos) {
++                // The Specialist layout maps Page Down to LF (MXOS End).
++                emuKeyboard(m_palWindow, PK_PGDN, true, 0);
++                return;
++            }
++        }
+         m_maxSpeedAction->setChecked(false);
+         emuSysReq(m_palWindow, evt->modifiers() & Qt::AltModifier ? SR_FULLTHROTTLE : SR_SPEEDUP);
+         return;
+@@ -2469,6 +2479,15 @@
+ void MainWindow::keyReleaseEvent(QKeyEvent* evt)
+ {
+     if (evt->key() == Qt::Key_End && !(evt->modifiers() & Qt::KeypadModifier)) {
++        if (m_windowType == EWT_EMULATION && m_platformGroupName == "specialist-os") {
++            if (evt->isAutoRepeat())
++                return;
++            if (m_endSentToMxos) {
++                m_endSentToMxos = false;
++                emuKeyboard(m_palWindow, PK_PGDN, false, 0);
++                return;
++            }
++        }
+         emuSysReq(m_palWindow, SR_SPEEDNORMAL);
+         return;
+     }

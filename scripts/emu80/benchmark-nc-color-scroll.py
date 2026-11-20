@@ -45,7 +45,7 @@ def seed(font,mono):
     n=sy(ROOT/('.local/nc-colors-bench/NC-mono.sym' if mono else 'bin/NC.sym'))
     m=bytearray(65536)
     files=[(0,ROOT/('.local/nc-colors-bench/NC-mono.i80' if mono else 'bin/NC.i80')),
-           (0xc000,ROOT/'bin/BIOS.sys'),(0xf000,ROOT/'bin/IO.sys'),
+           (0xc000,ROOT/'bin/BIOS.sys'),(0xf000,ROOT/'bin/IO.main.bin'),
            (0xd800,ROOT/f'bin/fonts/{font}.i80')]
     for at,path in files:
         data=path.read_bytes();m[at:at+len(data)]=data

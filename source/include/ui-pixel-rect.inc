@@ -7,6 +7,23 @@
 ; Edge masks preserve all outside bitmap pixels. The caller sets IO_COLOR;
 ; hardware attributes belong to whole bytes, including partially masked edges.
 ; AF/BC/DE/HL destroyed; normal SP use, no interrupt requirement. Non-reentrant.
+; HL=G_WINDOW/G_MODAL_WINDOW descriptor, A=relative X offset in screen bytes
+; (as uiDraw; ignored for absolute descriptors). Clear content, including
+; separators/buttons, preserving both border lines and modal outer padding.
+; Color is set by caller; AF/BC/DE/HL destroyed. Requires a valid window.
+    INCLUDE "ui-clear-window.inc"
+; Input background: HL=X, D=glyph baseline, BC=field width, A=glyph height.
+; Solid inverse field with one extra pixel above and below the glyph rows.
+; Text/cursor baseline stays unchanged. Color is set by caller; all destroyed.
+uiInputFieldPixels:
+    ld e,a
+    ld a,d
+    sub e
+    ld d,a
+    inc e
+    inc e
+    ld a,0FFh
+    jp uiFillRectPixels
 uiFillRectPixels:
     ld (uiRectPattern),a
     xor a
@@ -198,3 +215,24 @@ uiFrameWidth: DW 0
 uiFrameY: DB 0
 uiFrameHeight: DB 0
 uiFramePattern: DB 0
+
+; Font-independent 8x8 checkbox bitmap. HL=byte-aligned VRAM address,
+; A=0 unchecked / nonzero checked. Caller sets color. AF/BC/DE destroyed,
+; HL advances eight rows. Whole-byte writes set the same hardware palette.
+uiDrawCheckbox:
+    or a
+    ld de,uiCheckboxEmpty
+    jp z,uiCheckboxReady
+    ld de,uiCheckboxTick
+uiCheckboxReady:
+    ld b,8
+uiCheckboxRow:
+    ld a,(de)
+    ld (hl),a
+    inc de
+    inc l
+    dec b
+    jp nz,uiCheckboxRow
+    ret
+uiCheckboxEmpty: DB 0FFh,081h,081h,081h,081h,081h,081h,0FFh
+uiCheckboxTick: DB 0FFh,083h,087h,08Dh,0D9h,0B1h,0A1h,0FFh

@@ -10,6 +10,9 @@ mock=OUT/'driver.asm'
 mock.write_text('''    ORG 0A000h
 driver:
     ld a,b
+    inc a
+    jp z,capabilities
+    dec a
     cp 4
     ret z
     push hl
@@ -44,10 +47,14 @@ copy:
     pop hl
     or a
     ret
+capabilities:
+    ld bc,3
+    xor a
+    ret
 ''',encoding='utf-8')
 subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(OUT/'driver.bin'),str(mock)],check=True,capture_output=True)
 memory=bytearray(65536)
-kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel;io_image=(ROOT/'bin/IO.sys').read_bytes();memory[0xF000:0xF000+len(io_image)]=io_image
+kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel;io_image=(ROOT/'bin/IO.main.bin').read_bytes();memory[0xF000:0xF000+len(io_image)]=io_image
 module=(ROOT/'bin/DOS.native.sys').read_bytes();memory[S['DOS_CODE_START']:S['DOS_CODE_START']+len(module)]=module
 memory[S['v_dosModuleReady']]=1
 __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](memory, S)
@@ -60,7 +67,7 @@ for name,value in dict(sectorSize=256,sectorsPerCluster=1,resSectors=1,fatSector
 for name,value in dict(isValid=2,sectorShift=8,blockShift=8,fatCount=1).items():memory[S['v_diskInfo.'+name]]=value
 struct.pack_into('<H',memory,S['v_logicalCapacity'],32)
 rows=[]
-test_sp=S['STACK_ADDR']
+test_sp=S['BIOS_BANK_STACK_TOP'] # Reference CPU fixture: DOS scratch is not banked here.
 def run(addr,a=0,hl=0):
  global memory,last_cycles
  code=b'\x31'+W(test_sp)+b'\x21'+W(hl)+bytes([0x3E,a,0xCD])+W(addr)+bytes.fromhex('F5 E1 22 00 3B C3 00 3D')
@@ -69,9 +76,19 @@ def run(addr,a=0,hl=0):
  p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','3c00','-end','3d00','-counter','50000000','-output',str(OUT/'out.bin'),str(OUT/'in.bin')],capture_output=True,check=True)
  last_cycles=int(p.stdout.strip())
  snapshot=(OUT/'out.bin').read_bytes();assert int.from_bytes(snapshot[65542:65544],'little')==0x3D00
- memory=bytearray(snapshot[:65536]);return memory[0x3B01],bool(memory[0x3B00]&1)
+ memory=bytearray(snapshot[:65536])
+ if addr in (S['resetAllSectorCaches'],S['configureSectorCache']):
+  # The native CPU fixture has one flat address space. Unlike bank DOS,
+  # its historical cache base 9000h overlaps the new partial buffer 9100h
+  # and the synthetic driver A000h. Configure disjoint fixture buffers.
+  for i in range(S['CACHE_GRANULES']):
+   memory[S['cacheData']+i*8+2:S['cacheData']+i*8+4]=W(0x8000+i*128)
+  memory[S['v_cacheBuffer']:S['v_cacheBuffer']+2]=W(0x8000)
+  memory[S['partialCacheData']+2:S['partialCacheData']+4]=W(0xB400)
+  memory[S['v_cachePartialBuffer']:S['v_cachePartialBuffer']+2]=W(0xB400)
+ return memory[0x3B01],bool(memory[0x3B00]&1)
 def call(op,f=0x2000,error=0):
- got=run(S['bios_fileHandle'],op,f);assert got==(error,bool(error)),(op,got,error)
+ got=run(S['fileHandle'],op,f);assert got==(error,bool(error)),(op,got,error)
  rows.append(dict(cycles=last_cycles,op=op,error=error,position=int.from_bytes(memory[f+32:f+36],'little'),size=int.from_bytes(memory[f+28:f+32],'little'),count=int.from_bytes(memory[f+51:f+53],'little')))
 def open_file(name=b'CHECK   BIN',mode=15,f=0x2000,error=0):
  memory[f:f+64]=bytes(64);memory[f:f+11]=name;memory[f+40:f+42]=bytes([1,mode]);call(0,f,error)
@@ -82,9 +99,10 @@ def io(op,n,data=None,f=0x2000,error=0):
 def seek(n,origin=0,f=0x2000,error=0):
  memory[f+53:f+57]=struct.pack('<i',n);memory[f+57]=origin;call(3,f,error)
 
-assert run(S['configureSectorCache'])==(0,False)
+run(S['resetAllSectorCaches'])
+assert (run(S['resetAllSectorCaches']),run(S['configureSectorCache']))[-1]==(0,False)
 header=bytes(memory[0x8000:0x8040])
-for pointer in [0x7FE0,0x8000,0x8FDF,0xFFFF]:assert run(S['bios_fileHandle'],0,pointer)==(7,True)
+for pointer in [0x7FE0,0x8000,0x8FDF,0xFFFF]:assert run(S['fileHandle'],0,pointer)==(7,True)
 assert memory[0x8000:0x8040]==header
 open_file()
 payload=bytes((i*37+11)&255 for i in range(777))
@@ -96,6 +114,13 @@ seek(-100,1);assert io(1,100)==payload[577:677]
 seek(250);io(2,19,b'X'*19);payload=payload[:250]+b'X'*19+payload[269:]
 call(4);call(5);call(1,error=7)
 open_file(mode=1);assert io(1,800)==payload;call(5)
+caps=0xA000+(OUT/'driver.bin').stat().st_size-4
+assert memory[caps]==3
+memory[caps]=1
+open_file(error=S['DOS_ERR_WRITE_PROTECTED'])
+open_file(name=b'NOCHANGETXT',error=S['DOS_ERR_WRITE_PROTECTED'])
+open_file(mode=1);assert io(1,800)==payload;call(5)
+memory[caps]=3
 open_file(mode=19);seek(0);io(2,3,b'END');call(5);payload+=b'END'
 open_file(mode=1);assert io(1,1000)==payload;seek(-1000,1,error=7);call(5)
 open_file(mode=1,name=b'MISSING BIN',error=2)
@@ -112,7 +137,7 @@ test_sp=0x8F50
 open_file(mode=15,name=b'STACK   BIN',f=0x8F60)
 memory[0x8FC0:0x8FC3]=b'ABC';memory[0x8F60+49:0x8F60+53]=W(0x8FC0)+W(3);call(2,0x8F60)
 seek(0,f=0x8F60);memory[0x8FC0:0x8FC3]=bytes(3);memory[0x8F60+51:0x8F60+53]=W(3);call(1,0x8F60);assert memory[0x8FC0:0x8FC3]==b'ABC';call(5,0x8F60)
-test_sp=S['STACK_ADDR']
+test_sp=S['BIOS_BANK_STACK_TOP'] # Reference CPU fixture: DOS scratch is not banked here.
 # Повтор close после аппаратной ошибки сохраняет открытый объект и dirty-кэш.
 open_file(mode=15,name=b'RETRY   BIN');io(2,7,b'RETRIES')
 driver=bytes(memory[0xA000:0xA003]);memory[0xA000:0xA003]=b'\x37\xC9\x00'
@@ -129,11 +154,11 @@ first=int.from_bytes(memory[0x0200+26:0x0200+28],'little')
 last=first
 while int.from_bytes(memory[0x0100+last*2:0x0102+last*2],'little')<0xFFF8:last=int.from_bytes(memory[0x0100+last*2:0x0102+last*2],'little')
 saved=bytes(memory[0x0100+last*2:0x0102+last*2]);memory[0x0100+last*2:0x0102+last*2]=W(first)
-run(S['configureSectorCache']);open_file(mode=1);io(1,1600,error=8);assert memory[0x2000+44]==0;call(5)
-memory[0x0100+last*2:0x0102+last*2]=saved;run(S['configureSectorCache'])
+(run(S['resetAllSectorCaches']),run(S['configureSectorCache']))[-1];open_file(mode=1);io(1,1600,error=8);assert memory[0x2000+44]==0;call(5)
+memory[0x0100+last*2:0x0102+last*2]=saved;(run(S['resetAllSectorCaches']),run(S['configureSectorCache']))[-1]
 saved=bytes(memory[0x0100+first*2:0x0102+first*2]);memory[0x0100+first*2:0x0102+first*2]=W(0xFFF7)
-run(S['configureSectorCache']);open_file(mode=1);io(1,1600,error=8);call(5)
-memory[0x0100+first*2:0x0102+first*2]=saved;run(S['configureSectorCache'])
+(run(S['resetAllSectorCaches']),run(S['configureSectorCache']))[-1];open_file(mode=1);io(1,1600,error=8);call(5)
+memory[0x0100+first*2:0x0102+first*2]=saved;(run(S['resetAllSectorCaches']),run(S['configureSectorCache']))[-1]
 # Все выделенные кластеры достижимы из корня, включая отказ роста на полном диске.
 used={c for c in range(2,31) if int.from_bytes(memory[0x100+c*2:0x102+c*2],'little')}
 reachable=set()
@@ -159,7 +184,7 @@ for sector_size,cluster_sectors in [(128,1),(256,4),(512,2)]:
   text=text.replace('    ld b,e\n    ld c,0','    ld b,e\n    ld c,0\n    push af\n    ld a,b\n    or a\n    rra\n    ld b,a\n    ld a,c\n    rra\n    ld c,a\n    pop af')
  (OUT/'geometry.asm').write_text(text,encoding='utf-8')
  subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(OUT/'geometry.bin'),str(OUT/'geometry.asm')],check=True,capture_output=True)
- memory=bytearray(65536);kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel;io_image=(ROOT/'bin/IO.sys').read_bytes();memory[0xF000:0xF000+len(io_image)]=io_image
+ memory=bytearray(65536);kernel=(ROOT/'bin/BIOS.sys').read_bytes();memory[0xC000:0xC000+len(kernel)]=kernel;io_image=(ROOT/'bin/IO.main.bin').read_bytes();memory[0xF000:0xF000+len(io_image)]=io_image
  memory[S['DOS_CODE_START']:S['DOS_CODE_START']+len(module)]=module;memory[S['v_dosModuleReady']]=1
  __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](memory, S)
  driver=(OUT/'geometry.bin').read_bytes();memory[0xA000:0xA000+len(driver)]=driver
@@ -168,7 +193,7 @@ for sector_size,cluster_sectors in [(128,1),(256,4),(512,2)]:
  for name,value in dict(isValid=2,sectorShift=sector_size.bit_length()-1,blockShift=block_size.bit_length()-1,fatCount=1).items():memory[S['v_diskInfo.'+name]]=value
  memory[S['v_logicalShift']]=sector_size.bit_length()-block_size.bit_length()
  struct.pack_into('<H',memory,S['v_logicalCapacity'],32);memory[sector_size:sector_size+4]=bytes.fromhex('f8 ff ff ff')
- run(S['configureSectorCache']);open_file()
+ (run(S['resetAllSectorCaches']),run(S['configureSectorCache']))[-1];open_file()
  sample=bytes((i*41+3)&255 for i in range(1703));io(2,1000,sample[:1000]);io(2,703,sample[1000:])
  seek(33);io(2,37,b'Q'*37);sample=sample[:33]+b'Q'*37+sample[70:];call(5)
  open_file(mode=1);assert io(1,2000)==sample;seek(-128,2);assert io(1,128)==sample[-128:];call(5)
@@ -176,16 +201,16 @@ for sector_size,cluster_sectors in [(128,1),(256,4),(512,2)]:
 memory=default_memory
 # Публичный секторный ABI сохраняет проверку режима и границ LBA.
 for mode,lba in [(0,0),(3,0),(255,0),(1,32),(2,32),(2,65535)]:
- memory[0x3E00:0x3E09]=b'\x01'+W(mode<<8)+b'\x11'+W(lba)+b'\xC3'+W(S['bios_sectorIO'])
+ memory[0x3E00:0x3E09]=b'\x01'+W(mode<<8)+b'\x11'+W(lba)+b'\xC3'+W(S['logicalSectorIO'])
  assert run(0x3E00,hl=0x2400)==(7,True),(mode,lba)
 # Чистый writable-handle закрывается без записи каталога: запрещаем драйверу WRITE.
 memory[0x2000:0x2040]=bytes(64);memory[0x2000:0x200B]=b'CHECK   BIN';memory[0x2028:0x202A]=bytes([1,3])
-assert run(S['bios_fileHandle'],0,0x2000)==(0,False)
-assert run(S['bios_fileHandle'],4,0x2000)==(0,False)
+assert run(S['fileHandle'],0,0x2000)==(0,False)
+assert run(S['fileHandle'],4,0x2000)==(0,False)
 original=bytes(memory[0xA000:0xA003])
 stub=bytes.fromhex('78 FE 01 37 C8 78 FE 04 C3 03 A0')
 memory[0xA100:0xA100+len(stub)]=stub;memory[0xA000:0xA003]=bytes.fromhex('C3 00 A1')
-assert run(S['bios_fileHandle'],5,0x2000)==(0,False)
+assert run(S['fileHandle'],5,0x2000)==(0,False)
 memory[0xA000:0xA003]=original
 (OUT/'results.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
 (OUT/'geometries.json').write_text(json.dumps(geometries,indent=2),encoding='utf-8')

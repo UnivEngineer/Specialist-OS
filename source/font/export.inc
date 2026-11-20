@@ -12,7 +12,7 @@ saveImported:
     ld (exportDrive),a
 exportProbe:
     ld a,(exportDrive)
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     jp c,exportNextDrive
     ld b,0FFh
     MXOS_CALL MXOS_DOS_RAW_IO
@@ -43,15 +43,14 @@ exportNextDrive:
     cp 8
     jp c,exportProbe
     ld a,(oldDrive)
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ld hl,exportNoRam
     call bios_printStringZ
     xor a
     ret
 exportChosen:
     ld a,(oldDrive)
-    call bios_fileSelectDrive
-    ; Replace a supplied extension, or append .fnt to a bare output prefix.
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE ; Replace a supplied extension, or append .fnt to a bare output prefix.
     ld hl,outputPath
     call exportLeaf
 exportStem:
@@ -77,26 +76,26 @@ exportExtension:
     jp z,badImage
     ; Native executable checksum is needed for reloading this changed image.
     ld hl,(imageBytes)
-    ld de,staging+15
+    ld de,staging+IMAGE_HEADER_SIZE-1
     add hl,de
     ex de,hl
-    ld hl,staging+16
+    ld hl,staging+IMAGE_HEADER_SIZE
     call bios_calcCS
     ld h,b
     ld l,c
     ld (staging+12),hl
     ld hl,staging
-    ld de,staging+13
+    ld de,staging+IMAGE_HEADER_CHECKSUM-1
     call bios_calcCS
     ld h,b
     ld l,c
-    ld (staging+14),hl
+    ld (staging+IMAGE_HEADER_CHECKSUM),hl
     ld hl,outputPath
     ld (exportIO+FILE_PATH_IO.path),hl
     ld hl,staging
     ld (exportIO+FILE_PATH_IO.buffer),hl
     ld hl,(imageBytes)
-    ld de,16
+    ld de,IMAGE_HEADER_SIZE
     add hl,de
     ld (exportIO+FILE_PATH_IO.count),hl
     call exportWrite
@@ -104,7 +103,7 @@ exportExtension:
     ld hl,outputPath
     ld de,exportAuxPath
     call copyPath
-    ld hl,(staging+60)
+    ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ld a,h
     or l
     jp z,exportInitializer
@@ -140,7 +139,7 @@ exportInitializer:
     jp z,exportFinished
     ld hl,exportAuxPath
     ld (exportIO+FILE_PATH_IO.path),hl
-    ld hl,FONT_INIT_ADDR-16
+    ld hl,FONT_INIT_ADDR-IMAGE_HEADER_SIZE
     ld (exportIO+FILE_PATH_IO.buffer),hl
     ld hl,(initializerIO+FILE_PATH_IO.actual)
     ld (exportIO+FILE_PATH_IO.count),hl
@@ -157,7 +156,7 @@ exportFinished:
     ret
 exportWrite:
     ld hl,exportIO
-    call bios_fileSavePath
+    call fileWriteAll
     jp restoreDrive
 ; Return HL at basename after the final drive/path separator.
 exportLeaf:

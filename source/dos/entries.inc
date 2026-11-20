@@ -5,36 +5,28 @@
     jp fileList
     ASSERT $ == dos_fileGetSetDrive
     jp fileGetSetDrive
-    ASSERT $ == dos_fileCreate
-    jp fileCreate
-    ASSERT $ == dos_fileLoad
-    jp fileLoad
+    DS 3,0 ; Reserved; file I/O uses FILEHANDLE
+    DS 3,0 ; Reserved; file I/O uses FILEHANDLE
     ASSERT $ == dos_fileDelete
     jp fileDelete
     ASSERT $ == dos_fileRename
     jp fileRename
     ASSERT $ == dos_fileLoadInfo
     jp fileLoadInfo
-    ASSERT $ == dos_imageOpen
-    jp imageOpen
+    DS 3,0 ; Reserved; file I/O uses FILEHANDLE
     ASSERT $ == dos_fileGetSetAttr
     jp fileGetSetAttr
     ASSERT $ == dos_fileNamePrepare
     jp fileNamePrepare
     ASSERT $ == dos_fileExec
     jp fileExec
-    ASSERT $ == dos_fileLoad2
-    jp fileLoad2
+    DS 3,0 ; Reserved; file I/O uses FILEHANDLE
     ASSERT $ == dos_getDriveFreeSpace
     jp getDriveFreeSpace
-    ASSERT $ == dos_fileCreatePrepare
-    jp fileCreatePrepare
+    DS 3,0 ; No public preallocation facade; creation uses FILEHANDLE
     ASSERT $ == dos_dosUnsupported
     jp dosUnsupported
-    ASSERT $ == dos_installVolume
-    jp installVolume
-    ASSERT $ == dos_getVolume
-    jp getVolume
+    DS 6,0 ; No alternative filesystem registration facade
     ASSERT $ == dos_mountVolume
     jp mountVolume
     ASSERT $ == dos_flushVolume
@@ -51,8 +43,7 @@
     jp dosGetError
     ASSERT $ == dos_logicalSectorIO
     jp logicalSectorIO
-    ASSERT $ == dos_fileStream
-    jp fileStream
+    DS 3,0 ; Reserved; file I/O uses FILEHANDLE
     ASSERT $ == dos_fileHandle
     jp fileHandle
     ASSERT $ == dos_directoryService

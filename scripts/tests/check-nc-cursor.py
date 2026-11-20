@@ -25,7 +25,7 @@ def main():
         b=(out/'out.bin').read_bytes();assert int.from_bytes(b[65542:65544],'little')==0x6300,r.stdout
         return bytearray(b[:65536])
     def memory(panel=0,first=0,selected=35):
-        m=bytearray(65536);m[0xC000:0xC000+len(dos)]=dos;io=(ROOT/'bin/IO.sys').read_bytes();m[0xF000:0xF000+len(io)]=io;m[:len(nc)]=nc
+        m=bytearray(65536);m[0xC000:0xC000+len(dos)]=dos;io=(ROOT/'bin/IO.main.bin').read_bytes();m[0xF000:0xF000+len(io)]=io;m[:len(nc)]=nc
         module=(ROOT/'bin/DOS.native.sys').read_bytes();m[ds['DOS_CODE_START']:ds['DOS_CODE_START']+len(module)]=module;m[ds['v_dosModuleReady']]=1
         __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](m, ds)
         font=(ROOT/'bin/fonts/Compact.pf').read_bytes();m[ns['FONT_ADDR']:ns['FONT_ADDR']+len(font)]=font;m[0x8FE7:0x8FE9]=(ns['FONT_ADDR']//8).to_bytes(2,'little')

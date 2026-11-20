@@ -29,10 +29,12 @@ def check_memory():
     assert all(blocks[i]==255 for i in range(0,len(blocks),6)),'block leak'
     assert all(modules[i:i+2]==b'\0\0' for i in range(0,len(modules),k['MODULE_RECORD_SIZE'])),'module leak'
 rows=[]
+disk=O/'bench-h.bin'
+disk.write_bytes(b''.join((R/f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1,5)))
 try:
-    x.start('engine-selection',system=R/'images/SystemRom_emu80_writable.bin')
+    x.start('engine-selection',system=R/'images/SystemRom_emu80_writable.bin',disk=disk)
     m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
-    cmd='A:/Bench/FontBen/FontBen.com -E SCALAR12 -P ON -N -Q' if failure else 'A:/Bench/FontBen/FontBen.com -E SCALAR12 -E 4DUP -P ON -Q'
+    cmd='H:/Bench/FontBen/FontBen.com -E SCALAR12 -P ON -N -Q' if failure else 'H:/Bench/FontBen/FontBen.com -E SCALAR12 -E 4DUP -P ON -Q'
     keys={':':'colon','/':'slash','.':'period',' ':'space','-':'minus'}
     for c in cmd:m.tap(keys.get(c,c.lower()))
     assert m.read(n['vars.cmdLine'],len(cmd)).upper()==cmd.upper().encode()
@@ -46,7 +48,7 @@ try:
         m.call('bp_clear');m.call('debug_step',mode='into');until(s['bench_restore'])
     else:
         until(s['gridMeasured'])
-        corpus=m.read(s['gridText'],1152)
+        corpus=m.read(s['gridText'],s['GRID_TEXT_BYTES'])
         for stage in range(36):
             record=s['engineRecords']+m.read(s['engineId'],1)[0]*8
             name=int.from_bytes(m.read(record,2),'little')

@@ -34,6 +34,8 @@ gateway:
     jp z,memoryQuery
     cp {n['MXOS_DOS_DIRECTORY']&255}
     jp z,directoryQuery
+    cp {n['MXOS_DOS_FILE_GET_SET_DRIVE']&255}
+    jp z,getDrive
     xor a
     ret
 slowQuery:
@@ -54,7 +56,8 @@ directoryQuery:
     ld (listSkip+1),a
     ld a,c
     ld (listSkip),a
-    ld de,3
+    ld hl,(listTotal)
+    ex de,hl
     xor a
     ret
 contextQuery:
@@ -106,6 +109,7 @@ didFiles: DB 0
 panelCalls: DB 0
 lastPanel: DB 0
 listSkip: DW 0
+listTotal: DW 3
 visibleCount: DB 0
 requestedOp: DB 0
 contextDrive: DB 7
@@ -136,7 +140,7 @@ cursorCalls: DB 0
 
     def seed(font):
         m=bytearray(65536)
-        for at,path in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.sys'),(0xd800,f'fonts/{font}.i80')]:
+        for at,path in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin'),(0xd800,f'fonts/{font}.i80')]:
             data=(ROOT/'bin'/path).read_bytes();m[at:at+len(data)]=data
         m[b['bios_vars']:b['bios_vars']+b['BIOS_VARIABLES']]=m[b['initVars']:b['initVarsEnd']]
         m[b['bios_upper.escMode']]=255
@@ -168,40 +172,40 @@ cursorCalls: DB 0
         # starts in KOI7. BIOS cursor/scratch/stack lie above the font window.
         assert restored[0xd800:0xec80]==baseline[0xd800:0xec80],(font,'startup did not restore physical KOI-8 font layout')
         for panel in (0,1):
+            value_x=28 if font=='Fast8' else 32
+            label_end=26 if font=='Fast8' else 28
+            numeric_end=6 if font=='Fast8' else 7
             q=bytearray(m);q[n['state.activePanel']]=panel
             fast=call(q,'printInfoContents',stop=s['slowQuery'])
             final=call(q,'printInfoContents')
             changed=[i for i,(x,y) in enumerate(zip(fast[0x9000:0xc000],final[0x9000:0xc000])) if x!=y]
-            assert changed and all(1+24*panel<=i//256<7+24*panel and 137<=i%256<=144 for i in changed), (font,panel,'late update rewrote other text')
+            assert changed and all(1+24*panel<=i//256<numeric_end+24*panel and 123<=i%256<=130 for i in changed), (font,panel,'late update rewrote other text')
             assert final[s['didFree']]==1
+            total=call(q,'pip_printNumberOnly',a=120,de=512)
+            for col in range(1+24*panel,numeric_end+24*panel):
+                start=0x9000+col*256+113
+                assert total[start:start+8]==fast[start:start+8],(font,panel,'disk capacity')
             label=bytearray(q)
-            label[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([50,32+96*panel])
+            label[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([46,value_x+96*panel])
             label=call(label,'bios_printStringReal',hl=n['aMainRAM'])
-            for x in range(8+24*panel,23+24*panel):
-                assert fast[0x9000+x*256+43:0x9000+x*256+51]==label[0x9000+x*256+43:0x9000+x*256+51], (font,'memory label')
-            # Normal metadata has four rows, centered at baselines 182..212.
-            q[n['pipDetailX']]=fast[n['pipDetailX']]
-            q[n['pipDetailChars']]=fast[n['pipDetailChars']]
-            q[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([202,4+96*panel])
-            expected=call(q,'pip_printDetail',hl=n['aDiskTechnology'],de=n['aTypeFlash'])
-            expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([212,4+96*panel])
-            expected=call(expected,'ncPrintPanelText',hl=0x8648)
-            for x in range(1+24*panel,23+24*panel):
-                assert fast[0x9000+x*256+195:0x9000+x*256+213]==expected[0x9000+x*256+195:0x9000+x*256+213], (font,'Type/description order')
+            for x in range(value_x//4+24*panel,23+24*panel):
+                assert fast[0x9000+x*256+39:0x9000+x*256+47]==label[0x9000+x*256+39:0x9000+x*256+47], (font,'memory label')
             # Independently place each label/value: common left value edge,
             # right-aligned labels, no colon, and no label padding over values.
             char_width={'Cpm4':2,'Compact':3,'Fast8':4}[font]
-            value_x={'Cpm4':20,'Compact':28,'Fast8':32}[font]
             assert fast[n['pipDetailX']]==value_x
-            for y,label,value in [(182,b'Label ',b'SYSTEM'),(192,b'Driver ',b'AT512KS'),(202,b'Type ',b'Flash')]:
+            rows = [(160,b'Label',b'SYSTEM'),(170,b'Driver',b'AT512KS'),(180,b'Type',b'Flash'),
+                    (190,b'Info',b'512K ONBOARD FLASH')]
+            for y,label,value in rows:
+                value = value[:(92-value_x)//char_width]
                 expected=bytearray(m)
                 expected[0x8500:0x8500+len(label)+1]=label+b'\0'
-                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,value_x-len(label)*char_width+96*panel])
+                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,label_end-len(label)*char_width+96*panel])
                 expected=call(expected,'bios_printStringReal',hl=0x8500)
                 expected[0x8500:0x8500+len(value)+1]=value+b'\0'
                 expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,value_x+96*panel])
                 expected=call(expected,'bios_printStringReal',hl=0x8500)
-                for x in range(1+24*panel,23+24*panel):
+                for x in range(24*panel,23+24*panel):
                     assert fast[0x9000+x*256+y-7:0x9000+x*256+y+1]==expected[0x9000+x*256+y-7:0x9000+x*256+y+1],(font,panel,y,'metadata column alignment')
             # Same-drive Enter/CD redraws only the file panel. A drive change
             # must still refresh the opposite information panel.
@@ -228,18 +232,21 @@ cursorCalls: DB 0
             assert before_scan[s['didFiles']]==2 and before_scan[n['ncInfoFreeDeferred']]==0
             # Status navigation clears old size; ordinary files show only a leaf.
             q=bytearray(m);q[n['state.activePanel']]=panel;q[n['state.panelA_filesCnt']+panel]=1
-            for name,text,isdir in [(b'..      ',b'Go to parent dir',True),(b'\\       ',b'Go to drive root',True),(b'FILE    ',b'FILE.TXT',False)]:
+            for name,text,suffix,isdir in [
+                    (b'..      ',b'Go to parent dir',b'',True),
+                    (bytes([92])+b'       ',b'Go to drive root',b'',True),
+                    (b'GAMES   ',b'GAMES',b'<DIR>',True),
+                    (b'FILE    ',b'FILE.TXT',b'42',False)]:
                 q[0x8000:0x8010]=name+(b'   ' if isdir else b'TXT')+bytes([16 if isdir else 0,0,0])+W(42)
                 result=call(q,'printInfoLine')
-                expected=call(q,'printInfoEmpty')
+                width=m[n['ncStatusChars']]
+                assert width=={'Cpm4':43,'Compact':29,'Fast8':21}[font],(font,'right margin')
+                line=text.ljust(width-len(suffix))+suffix
+                assert len(line)==width
+                expected=bytearray(q)
                 expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=W((n['P_FILE_NAME_X']+panel*96)*256+n['P_FILE_NAME_Y'])
-                expected[0x8700:0x8700+len(text)+1]=text+b'\0'
-                if isdir:
-                    expected=call(expected,'bios_printStringReal',hl=0x8700)
-                else:
-                    expected=call(expected,'ncPrintField',hl=0x8700,bc=m[n['ncStatusChars']]<<8)
-                    expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([n['P_FILE_DATA_Y'],m[n['ncStatusSizeX']]+panel*96])
-                    expected=call(expected,'ncPrintFileSize',de=42,bc=32<<8)
+                expected[0x8700:0x8700+width]=line
+                expected=call(expected,'bios_printStringRawLim',hl=0x8700,bc=width)
                 assert result[0x9000:0xc000]==expected[0x9000:0xc000],(font,panel,name,'status text')
                 q=result
         print(font,'fast information, numeric-only late update, Type/description and status PASS')
@@ -285,20 +292,24 @@ cursorCalls: DB 0
             driver=b'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\0'+b'LONG FLASH DESCRIPTION\0'
             q[0x8640:0x8640+len(driver)]=driver
             fast=call(q,'printInfoContents',stop=s['slowQuery'])
-            assert fast[n['pipRows']]==4 and fast[n['bios_vars.cursorY']]==212,'fixed fields must never wrap'
-            expected=bytearray(m);prefix=b'ABCDEFGHIJKLMNO\0'
-            expected[0x8500:0x8500+len(prefix)]=prefix
-            expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([192,32])
-            expected=call(expected,'bios_printStringReal',hl=0x8500)
-            for col in range(8,23):
-                assert fast[0x9000+col*256+185:0x9000+col*256+193]==expected[0x9000+col*256+185:0x9000+col*256+193],'driver value must stop at 15 characters in 8px'
-            # Description alone can wrap; cap its lines before the frame.
-            desc=b'DESCRIPTION '*12+b'\0'
-            at=0x8640+driver.index(b'\0')+1
-            q[at:at+len(desc)]=desc
-            fast=call(q,'printInfoContents',stop=s['slowQuery'])
-            assert fast[n['pipRows']]==6 and fast[n['bios_vars.cursorY']]==222,'description must stay centered inside the frame'
+            assert fast[n['pipRows']]==4 and fast[n['bios_vars.cursorY']]==219,'fixed fields must never wrap'
+            for y, prefix in [(170,b'ABCDEFGHIJKLMNOP\0'),(190,b'LONG FLASH DESCR\0')]:
+                expected=bytearray(m)
+                expected[0x8500:0x8500+len(prefix)]=prefix
+                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,28])
+                expected=call(expected,'bios_printStringReal',hl=0x8500)
+                for col in range(7,24):
+                    start=0x9000+col*256+y-7
+                    assert fast[start:start+8]==expected[start:start+8],(y,'value must stop at 16 characters in 8px')
     m=seed('Compact')
+    for panel in (0,1):
+        for truncated in (0,1):
+            q=bytearray(m)
+            q[n['state.activePanel']]=panel
+            q[n['vars.panelFrameA']+panel]=truncated
+            final=call(q,'printInfoEmpty')
+            expected=0xc1 if truncated else 0xf1
+            assert final[n['ncCurrentColor']]==expected,(panel,truncated)
     # Compare the actual returned context, including both cluster bytes, before
     # updating panel state. CLI's "context command" flag alone is insufficient.
     for panel in (0,1):
@@ -311,7 +322,6 @@ cursorCalls: DB 0
             q[n['state.panelA_dirHigh']+panel]=old_dir>>8
             q[s['contextDrive']]=new_drive;q[s['contextDir']:s['contextDir']+2]=W(new_dir)
             q[n['ncCommandContext']]=4
-            patch(q,'bios_fileGetSetDrive','getDrive')
             result=call(q,'ncCommandUpdateContext')
             assert result[n['ncCommandContext']]==4*changed,(panel,old_drive,new_drive,old_dir,new_dir)
             assert result[n['state.panelA_drive']+panel]==new_drive
@@ -327,6 +337,20 @@ cursorCalls: DB 0
             assert result[s['cursorCalls']]==changed
             assert result[n['ncCommandCursorKept']]==1-changed
     print('Same drive/directory commands preserve the panel and highlight; real context changes reload PASS')
+    for panel in (0,1):
+        for was_info in (0,1):
+            q=bytearray(m)
+            q[n['state.activePanel']]=panel
+            q[n['state.panelA_info']+(panel^1)]=was_info
+            q[n['ncShiftState']]=2
+            patch(q,'drawCursor','cursorDrawn')
+            patch(q,'loadAndPrintPanel','panelDrawn')
+            result=call(q,'mainLoop_dispatchKey',a=2,stop=n['mainLoop_cursorReady'])
+            assert result[s['cursorCalls']]==0,(panel,was_info,'selection repainted')
+            assert result[s['panelCalls']]==1 and result[s['lastPanel']]==(panel^1)
+            assert result[n['state.activePanel']]==panel
+            assert result[n['state.panelA_info']+(panel^1)]==1-was_info
+    print('F3 toggles only the opposite panel, preserving the file selection PASS')
     for active,flags in [(0,(0,1)),(1,(1,0)),(0,(1,1)),(3,(1,1))]:
         q=bytearray(m)
         q[n['state.activePanel']]=active&1
@@ -343,6 +367,43 @@ cursorCalls: DB 0
         assert final[s['listSkip']:s['listSkip']+2]==W(bool(directory))
         assert final[s['visibleCount']]==3-bool(directory)
     print('F3 state restores either panel; subdirectory listing skips only FAT dot PASS')
+    for skip, capacity, total, old, overflow in [
+        (0, 64, 64, 0, 0), (0, 64, 65, 0, 1),
+        (1, 64, 65, 2, 0), (1, 64, 66, 2, 2),
+        (0, 255, 256, 0, 1), (1, 255, 256, 0, 0),
+    ]:
+        q=bytearray(m)
+        q[n['vars.cacheSlotA']]=0
+        q[n['state.panelA_dirLow']]=skip
+        q[n['ncCatalogCapacity']]=capacity
+        q[n['ncCatalogs']+n['CATALOG_OVERFLOW']]=old
+        q[s['listTotal']:s['listTotal']+2]=W(total)
+        patch(q,'lf_StoreCount','stopCount')
+        final=call(q,'lf_ReadCatalog')
+        assert final[s['visibleCount']]==min(total-skip,capacity)
+        assert final[n['ncCatalogs']+n['CATALOG_OVERFLOW']]==overflow
+        if overflow:
+            at=n['ncCatalogTotals']
+            assert final[at:at+2]==W(total-skip)
+    for shown,total in [(105,271),(255,65535)]:
+        q=bytearray(m)
+        at=n['ncCatalogTotals']+2
+        q[at:at+2]=W(total)
+        q[n['ncCatalogCapacity']]=shown
+        final=call(q,'ncCatalogFormatWarning',a=1)
+        line=f'Displayed {shown} records of {total}'.encode()
+        at=n['vars.displayPath']
+        assert len(line)<=30 and final[at:at+len(line)+1]==line+b'\0'
+    q=bytearray(m)
+    slot=n['ncCatalogs']+8
+    q[slot:slot+8]=bytes([0,7,0x34,0x12,64,255,0,2])
+    q[n['vars.cacheSlotB']]=1
+    q[n['state.panelA_dirLow']]=0x34
+    q[n['state.panelA_dirHigh']]=0x12
+    final=call(q,'ncCatalogAcquire',bc=7)
+    assert final[n['vars.cacheSlotA']]==1
+    assert final[slot]==0 and final[slot+n['CATALOG_OVERFLOW']]==2
+    print('Catalog overflow PASS: exact capacity, 16-bit totals, dot skip, acknowledgment reset')
 
 
 if __name__=='__main__':

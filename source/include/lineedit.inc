@@ -2,6 +2,8 @@
 ; HL=буфер MAX_PATH, DE=конец начального текста; B: bit0=Escape завершает ввод,
 ; bit1=вернуть CTRL/служебную клавишу вызывающему, bit2=вернуться при пустой строке.
 ; bit3=вернуть обычные Up/Down вызывающему (A=19h/1Ah, CF=0).
+; bit4 (LINEEDIT_RECALL): первая печатная клавиша заменяет подставленный текст.
+; Навигация и Backspace снимают состояние подстановки.
 ; C=ширина окна (0 — до правого края). Позиция начала берётся из BIOS.
 ; Ширина символа 4/6/8 px берётся из FONT_ENGINE_HEADER+5; X BIOS в полупикселях.
 ; Возврат A=Enter/Escape либо переданная клавиша; CF=1 для переданного CTRL.
@@ -117,6 +119,11 @@ lineEditOrdinaryKey:
     cp 08Bh
     jp z,lineEditUnhandled
     ld c,a
+    IFDEF LINEEDIT_RECALL
+    ld a,(lineEditFlags)
+    and 10h
+    jp nz,lineEditReplace
+    ENDIF
     ld a,(lineEditLength)
     cp MAX_PATH-1
     jp z,lineEditLoop
@@ -165,6 +172,27 @@ lineEditInserted:
     call bios_printChar
     ENDIF
     jp lineEditLoop
+    IFDEF LINEEDIT_RECALL
+lineEditReplace:
+    call lineEditCancelRecall
+    ld hl,(lineEditBuffer)
+    ld (hl),c
+    inc hl
+    ld (hl),0
+    ld a,1
+    ld (lineEditLength),a
+    ld (lineEditPosition),a
+    xor a
+    ld (lineEditOffset),a
+    jp lineEditRedraw
+lineEditCancelRecall:
+    push af
+    ld a,(lineEditFlags)
+    and 0EFh
+    ld (lineEditFlags),a
+    pop af
+    ret
+    ENDIF
 lineEditUnhandled:
     push af
     ld a,(lineEditFlags)
@@ -177,6 +205,9 @@ lineEditUnhandledIgnore:
     pop af
     jp lineEditLoop
 lineEditBackspace:
+    IFDEF LINEEDIT_RECALL
+    call lineEditCancelRecall
+    ENDIF
     ld a,(lineEditPosition)
     or a
     jp z,lineEditLoop
@@ -229,6 +260,9 @@ lineEditHome:
 lineEditEnd:
     ld a,(lineEditLength)
 lineEditMoved:
+    IFDEF LINEEDIT_RECALL
+    call lineEditCancelRecall
+    ENDIF
     ld (lineEditPosition),a
     call lineEditWindow
     jp nz,lineEditPaint

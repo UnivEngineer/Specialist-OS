@@ -39,8 +39,10 @@ overlayEnsure:
     jp nz,ovBadImage
     call cmp_hl_de
     jp nz,ovBadImage
-    add hl,bc
-    jp c,ovBadImage
+    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
+    call cmp_hl_de
+    jp nz,ovBadImage
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
     ld (ovImageEnd),hl
     push hl
     ld e,2
@@ -54,7 +56,7 @@ overlayEnsure:
     ld hl,(ovImageEnd)
     ex de,hl
     pop hl
-    call dosArenaCheck
+    call dosArenaImage
     jp c,ovLoadDone
     ld hl,(ovRecord)
     ld de,OV_END
@@ -152,7 +154,7 @@ ovImageEnd: DW 0
 ovDirectories: DS 16,0
 
 fileopsOverlay:
-    DW DOS_BANK_DRIVER_ADDR,DOS_BANK_DRIVER_END,fileopsName,fileopsHost
+    DW DOS_FILEOPS_ADDR,DOS_BANK_DRIVER_END,fileopsName,fileopsHost
     DB fileopsHostEnd-fileopsHost,0,0
     DW 0
 fileopsReady = fileopsOverlay+OV_READY

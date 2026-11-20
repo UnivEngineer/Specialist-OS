@@ -100,39 +100,78 @@ class Matrix:
             except Exception:time.sleep(.2)
         else:raise RuntimeError('Owned test emulator did not acquire MCP port 19781')
         nc_binary=nc_binary or ROOT/'bin/NC.i80'
-        nc=symbols(nc_symbols or ROOT/'bin/NC.sym');self.m.stop_at(nc['mainLoop'])
-        # Быстрая загрузка может закончиться до подключения MCP: NC уже ждёт
-        # клавишу внутри getch и сам до mainLoop не дойдёт. Escape возвращает
-        # его в обычный цикл, сохраняя проверку кода и страницу breakpoint.
-        if self.m.read(0,32)==nc_binary.read_bytes()[:32]:
-            self.m.tap('esc')
-        if 'moduleLoadError' in nc:self.m.call('bp_set',addr=nc['moduleLoadError'],type='exec')
-        diagnostic=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
-        if 'dosModuleBad' in diagnostic:self.m.call('bp_set',addr=diagnostic['dosModuleBad'],type='exec')
-        for attempt in range(120):
-            # NC may already be waiting in getch while its initial bytes have
-            # changed at runtime. Give its normal loop one keyboard event.
-            if attempt == 60:self.m.tap('esc')
-            self.m.call('emu_run_for',ms=500)
-            state=self.m.call('cpu_state')
-            if state['registers']['pc']['dec']==diagnostic.get('dosModuleBad'):
-                a=diagnostic['moduleImports'];n=diagnostic['moduleImportsEnd']-a
-                raise RuntimeError(('module header/import mismatch',state,self.m.read(a,n).hex()))
-            if state['registers']['pc']['dec']==nc.get('moduleLoadError'):
-                if self.m.read(0,32)!=nc_binary.read_bytes()[:32]:
-                    # До NC тот же адрес может исполнять FORMAT/RAMD.
-                    self.m.stop_at(nc['mainLoop'])
-                    continue
-                ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
-                self.m.screenshot(OUT/'module-error.png')
-                raise RuntimeError(('DOS module load failed',self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
-            if state['registers']['pc']['dec']==nc['mainLoop']:
-                if self.m.read(0,32)==nc_binary.read_bytes()[:32]:break
-                self.m.call('bp_clear');self.m.call('emu_run_for',ms=50);self.m.stop_at(nc['mainLoop'])
+        nc_symbols=nc_symbols or ROOT/'bin/NC.sym'
+        nc=symbols(nc_symbols)
+        # Existing MAIN measurements explicitly select that profile on new images.
+        image=(RUNTIME/'specialist-os'/('system-flash.bin' if flash else 'system.bin')).read_bytes()
+        selected_main=b'NC_MN   COM' in image
+        if selected_main:
+            core_path=nc_symbols.with_name('NC_CORE.sym')
+            core=symbols(core_path if core_path.exists() else ROOT/'bin/NC_CORE.sym')
+            cli=symbols(ROOT/'bin/CLI.sym')
+            self.m.stop_at(core['ncBankInputPoll'])
+            # Breakpoints also match DOS code at the same address during boot.
+            for _ in range(160):
+                self.m.until(core['ncBankInputPoll'],120)
+                if self.m.read(self.pageAddress,1)[0] > 1:
+                    break
+                self.m.call('debug_step',mode='into')
+            else:
+                raise RuntimeError('Resident NC did not reach keyboard input')
+            self.console()
+            def cli_command(line, target):
+                self.m.call('bp_clear')
+                self.m.call('emu_run_for',ms=500)
+                self.m.tap('esc')
+                names={' ':'space',':':'colon','/':'slash','.':'period'}
+                for char in line.lower():
+                    if char=='_':
+                        self.m.call('kbd_send',keys=['shift'],action='press')
+                        try:self.m.tap('0')
+                        finally:self.m.call('kbd_send',keys=['shift'],action='release')
+                    else:self.m.tap(names.get(char,char))
+                assert self.m.read(cli['CMD_LINE'],len(line)).upper()==line.encode()
+                self.m.stop_at(target)
+                self.m.tap('enter')
+                self.m.until(target,120,page=0)
+            cli_command('FONT 6X8/ROTATE',cli['cliInput'])
+            assert self.m.read(0xD827,1)==b'\x00'
+            cli_command('A:NC_MN.COM',nc['mainLoop'])
+            assert self.m.read(0,4)==nc_binary.read_bytes()[:4]
         else:
-            self.m.call('debug_break');state=self.m.call('cpu_state')
-            ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym');self.m.screenshot(OUT/'boot-timeout.png')
-            raise RuntimeError(('NC boot timeout',state,self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
+            self.m.stop_at(nc['mainLoop'])
+            # Быстрая загрузка может закончиться до подключения MCP: NC уже ждёт
+            # клавишу внутри getch и сам до mainLoop не дойдёт. Escape возвращает
+            # его в обычный цикл, сохраняя проверку кода и страницу breakpoint.
+            if self.m.read(0,32)==nc_binary.read_bytes()[:32]:
+                self.m.tap('esc')
+            if 'moduleLoadError' in nc:self.m.call('bp_set',addr=nc['moduleLoadError'],type='exec')
+            diagnostic=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
+            if 'dosModuleBad' in diagnostic:self.m.call('bp_set',addr=diagnostic['dosModuleBad'],type='exec')
+            for attempt in range(120):
+                # NC may already be waiting in getch while its initial bytes have
+                # changed at runtime. Give its normal loop one keyboard event.
+                if attempt == 60:self.m.tap('esc')
+                self.m.call('emu_run_for',ms=500)
+                state=self.m.call('cpu_state')
+                if state['registers']['pc']['dec']==diagnostic.get('dosModuleBad'):
+                    a=diagnostic['moduleImports'];n=diagnostic['moduleImportsEnd']-a
+                    raise RuntimeError(('module header/import mismatch',state,self.m.read(a,n).hex()))
+                if state['registers']['pc']['dec']==nc.get('moduleLoadError'):
+                    if self.m.read(0,32)!=nc_binary.read_bytes()[:32]:
+                        # До NC тот же адрес может исполнять FORMAT/RAMD.
+                        self.m.stop_at(nc['mainLoop'])
+                        continue
+                    ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
+                    self.m.screenshot(OUT/'module-error.png')
+                    raise RuntimeError(('DOS module load failed',self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
+                if state['registers']['pc']['dec']==nc['mainLoop']:
+                    if self.m.read(0,32)==nc_binary.read_bytes()[:32]:break
+                    self.m.call('bp_clear');self.m.call('emu_run_for',ms=50);self.m.stop_at(nc['mainLoop'])
+            else:
+                self.m.call('debug_break');state=self.m.call('cpu_state')
+                ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym');self.m.screenshot(OUT/'boot-timeout.png')
+                raise RuntimeError(('NC boot timeout',state,self.m.read(ds['v_dosError'],1).hex(),self.m.read(0x8000,16).hex()))
         self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
         self.ds=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
         expected=(bios or ROOT/'bin/BIOS.sys').read_bytes()
@@ -146,11 +185,11 @@ class Matrix:
     def console(self):
         """Выход из NC и CLS настоящими клавишами до прямых замеров ABI."""
         cli=symbols(ROOT/'bin/CLI.sym')
-        self.m.stop_at(cli['cliPrompt']);self.m.tap('f10');self.m.until(cli['cliPrompt'],120)
+        self.m.stop_at(cli['cliPrompt']);self.m.tap('f10');self.m.until(cli['cliPrompt'],120,page=0)
         self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
         for key in ('esc','c','l','s'):self.m.tap(key)
         assert self.m.read(cli['CMD_LINE'],3).upper()==b'CLS'
-        self.m.stop_at(cli['cliPrompt']);self.m.tap('enter');self.m.until(cli['cliPrompt'],120)
+        self.m.stop_at(cli['cliPrompt']);self.m.tap('enter');self.m.until(cli['cliPrompt'],120,page=0)
         self.m.call('bp_clear')
         self.m.screenshot(OUT/'console-before-benchmark.png')
 

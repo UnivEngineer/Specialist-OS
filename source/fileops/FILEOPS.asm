@@ -3,7 +3,7 @@
     DEFINE BANKED_DOS_BUILD 1
 KD_OBJECT = DOS_BANK_OBJECT_ADDR
     INCLUDE "../../bin/fileops-imports.inc"
-    ORG DOS_BANK_DRIVER_ADDR
+    ORG DOS_FILEOPS_ADDR
     jp foEntry
     INCLUDE "host.inc"
 foEntry:
@@ -62,5 +62,5 @@ foCapacity:
     INCLUDE "prepare.inc"
     INCLUDE "delete.inc"
 fileopsEnd:
-    ASSERT $ < DOS_BANK_DRIVER_END
+    ASSERT $ <= DOS_BANK_DRIVER_END
     END

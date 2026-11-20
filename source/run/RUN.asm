@@ -38,7 +38,7 @@ start:
     ld (callerKoi),a
     push de
     ld e,2
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (callerDrive),a
     pop de
     xor a
@@ -153,7 +153,7 @@ nameDone:
     ld (de),a
     pop hl
     ld de,descriptor
-    call bios_fileNamePrepare
+    MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
     jp c,argumentError
     jp argumentParsed
 programArgument:
@@ -211,26 +211,28 @@ argumentsDone:
     INCLUDE "monitor.inc"
 nativeOpen:
     ld hl,descriptor
-    ld a,16
-    call bios_imageOpen
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp c,badImage
-    ld (appEntry),hl
-    PUT_DE appLoad
-    ld h,b
-    ld l,c
-    ld (appSize),hl
-    ; Заголовок контейнера принадлежит RUN; общая загрузка тела его не разбирает.
-    ld hl,(descriptor+FILE_DESCRIPTOR.firstCluster)
-    ld (rksCursor),hl
-    ld hl,0
-    ld (rksCursor+2),hl
+    call runFileOpen
+    jp c,badImage
     ld hl,rksHeader
-    ld bc,16
+    ld bc,IMAGE_HEADER_SIZE
     call rksRead
+    jp c,badImage
+    call runNativeHeader
     jp c,badImage
     ld a,(rksHeader+5)
     or a
     jp nz,nativeForward
+    ld a,(mode)
+    inc a
+    jp nz,nativeModeReady
+    ld a,(rksHeader+IMAGE_MODE)
+    or a
+    jp z,nativeModeReady
+    dec a                    ; Header AUTO=0, MX/STD/MON/RF=1..4.
+    ld (mode),a
+nativeModeReady:
     ld hl,(rksHeader+12)
     ld (expectedChecksum),hl
     ld a,(mode)
@@ -291,7 +293,7 @@ nativeBridgeEnd:
 
 rksOpen:
     ld hl,descriptor
-    call bios_fileLoadInfo
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
@@ -302,10 +304,8 @@ rksOpen:
     ld de,6
     call bios_cmp_hl_de
     jp c,badImage
-    ld hl,(descriptor+FILE_DESCRIPTOR.firstCluster)
-    ld (rksCursor),hl
-    ld hl,0
-    ld (rksCursor+2),hl
+    call runFileOpen
+    jp c,badImage
     ld hl,rksHeader
     ld bc,4
     call rksRead
@@ -376,6 +376,11 @@ customMode:
     jp setDefault
     jp ready
 ready:
+    ld hl,0
+    ld bc,APP_MEMORY_END
+    ld a,MEM_OP_MAINCLAIM
+    MXOS_CALL MXOS_DOS_MEMORY
+    jp c,badImage
 upperSource = ready ; Метка прежнего CPU-стенда; верхнего размещения больше нет.
     ld hl,(appLoad)
     GET_DE appSize
@@ -436,7 +441,7 @@ rangeOK:
 cacheRangeReady:
     ; Сохранить описание приложения до поиска сменного ядра.
     ld e,2
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (appDrive),a
     ld hl,descriptor
     ld de,bodyRequest
@@ -444,7 +449,7 @@ cacheRangeReady:
     call copyBytes
     ld hl,(appLoad)
     ld (bodyRequest+FILE_BODY_IO.buffer),hl
-    ld a,16
+    ld a,IMAGE_HEADER_SIZE
     ld (bodyRequest+FILE_BODY_IO.header),a
     xor a
     ld (bodyRequest+FILE_BODY_IO.tail),a
@@ -482,9 +487,9 @@ bodyPrepared:
     ld hl,rfPath
 openCore:
     ld de,descriptor
-    call bios_fileNamePrepare
+    MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
     ld hl,descriptor
-    call bios_fileLoadInfo
+    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
@@ -504,7 +509,7 @@ coreSize:
     call bios_clearScreenOld
     ld hl,descriptor
     ld de,RAMFOS_TEMP
-    call bios_fileLoad2
+    call fileReadDescriptor
     jp c,notFound
     ld a,(mode)
     cp 3
@@ -546,7 +551,7 @@ install:
     ; Исходный том восстанавливается до последнего копирования тела/ядра.
     ld a,(appDrive)
     ld e,1
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld a,(callerDrive)
     ld (bodyCallerDrive),a
     ; Кодировка независима от MX/STD; сменные ядра задают её сами.
@@ -669,11 +674,107 @@ runBodyReady:
 
 ; Формат RKS целиком принадлежит RUN. HL=буфер, BC=точная длина.
 ; Курсор используется в нижнем RUN только до окончательной загрузки тела.
-rksRead:
-    ld de,rksCursor
-    ld a,2
-    MXOS_CALL MXOS_DOS_FILESTREAM
+runFileOpen:
+    ld hl,runHandle
+    ld b,FILE_HANDLE
+    xor a
+runHandleClear:
+    ld (hl),a
+    inc hl
+    dec b
+    jp nz,runHandleClear
+    ld hl,descriptor
+    ld de,runHandle
+    ld bc,FILE_DESCRIPTOR
+    call copyBytes
+    ld hl,appName
+    ld (runHandle+FH_BUFFER),hl
+    ld a,FILE_MODE_READ
+    ld (runHandle+FH_MODE),a
+    ld a,FILE_OP_OPEN_PATH
+    ld hl,runHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
+    ret c
+    ld a,DIR_OP_RESOLVED
+    MXOS_CALL MXOS_DOS_DIRECTORY
+    PUT_DE bodyRequest+FILE_BODY_IO.parent
+    xor a
     ret
+rksRead:
+    ld (runHandle+FH_BUFFER),hl
+    ld h,b
+    ld l,c
+    ld (runHandle+FH_COUNT),hl
+    ld hl,runHandle
+    ld a,FILE_OP_READ
+    MXOS_CALL MXOS_DOS_FILEHANDLE
+    ret c
+    ld hl,(runHandle+FH_COUNT)
+    ld b,h
+    ld c,l
+    ld hl,(runHandle+FH_BUFFER)
+    add hl,bc
+    or a
+    ret
+runNativeHeader:
+    ld hl,rksHeader
+    ld de,runImageMagic
+    ld b,5
+runMagicLoop:
+    ld a,(de)
+    cp (hl)
+    jp nz,runHeaderBad
+    inc de
+    inc hl
+    dec b
+    jp nz,runMagicLoop
+    ld a,(hl)
+    cp IMAGE_FLAG_MAIN
+    jp z,runHeaderFlagsReady
+    cp IMAGE_FLAG_BANK+1
+    jp nc,runHeaderBad
+runHeaderFlagsReady:
+    ld a,(rksHeader+IMAGE_HEADER_BYTES)
+    cp IMAGE_HEADER_SIZE
+    jp nz,runHeaderBad
+    ld a,(rksHeader+29)
+    or a
+    jp nz,runHeaderBad
+    ld a,(rksHeader+IMAGE_MODE)
+    cp 5
+    jp nc,runHeaderBad
+    ld hl,rksHeader
+    ld de,rksHeader+IMAGE_HEADER_CHECKSUM-1
+    call bios_calcCS
+    ld hl,(rksHeader+IMAGE_HEADER_CHECKSUM)
+    ld d,b
+    ld e,c
+    call bios_cmp_hl_de
+    jp nz,runHeaderBad
+    ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
+    ld a,h
+    or l
+    jp nz,runHeaderBad
+    ld hl,(rksHeader+10)
+    ld (appSize),hl
+    ld de,IMAGE_HEADER_SIZE
+    add hl,de
+    jp c,runHeaderBad
+    GET_DE descriptor+FILE_DESCRIPTOR.size
+    call bios_cmp_hl_de
+    jp nz,runHeaderBad
+    ld hl,(rksHeader+6)
+    ld (appLoad),hl
+    ld hl,(rksHeader+8)
+    ld (appEntry),hl
+    or a
+    ret
+runHeaderBad:
+    scf
+    ret
+runImageMagic:
+    MXOS_IMAGE_SIGNATURE
+runHandle: DS FILE_HANDLE,0
 ; BC=вычисленная сумма, HL=два байта суммы из RKS; CF=несовпадение.
 rksChecksum:
     ld e,(hl)
@@ -1003,8 +1104,8 @@ callerSP: DW 0
 appLoad: DW 0
 appEntry: DW 0
 appSize: DW 0
-rksCursor: FILE_STREAM_CURSOR
-rksHeader: BLOCK 16,0
+
+rksHeader: BLOCK IMAGE_HEADER_SIZE,0
 bridgeBase: DW 0
 bridgeDelta: DW 0
 argAddress: DW 0
@@ -1021,6 +1122,7 @@ txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
 txtNotFound: DB 0Ah,"FILE NOT FOUND",0
 txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
 upperEnd: ; Граница прежнего CPU-стенда, все эти байты теперь в нижнем RUN.
+    INCLUDE "../include/file-io.inc"
 bodyRequest: FILE_BODY_IO
 expectedChecksum: DW 0
 bodyCallerDrive: DB 0
@@ -1036,7 +1138,7 @@ loadStage:
     jp c,RUN_LOAD_STAGE+loadStageError-loadStage
     ld a,(RUN_BODY_REQUEST+FILE_BODY_IO+2)
     ld e,1
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     jp c,RUN_LOAD_STAGE+loadStageError-loadStage
     ld hl,(RUN_BODY_REQUEST+FILE_BODY_IO.buffer)
     push hl

@@ -14,9 +14,11 @@ def main():
         r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', path.read_text(encoding='utf-8-sig'), re.M)}
     n = symbols(ROOT / 'bin/NC.sym')
     memory = bytearray(65536)
-    for address, file in [(0, 'NC.i80'), (0xc000, 'BIOS.sys'), (0xf000, 'IO.sys')]:
+    for address, file in [(0, 'NC.i80'), (0xc000, 'BIOS.sys'), (0xf000, 'IO.main.bin')]:
         data = (ROOT / 'bin' / file).read_bytes()
         memory[address:address+len(data)] = data
+    memory[n['vars.driveCount']] = 3
+    memory[n['vars.driveList']:n['vars.driveList']+3] = bytes([0,1,7])
 
     def call(base, entry, hl=0):
         result = bytearray(base)
@@ -54,9 +56,28 @@ def main():
 
     shipped = parse((ROOT / 'assets/system-rom/NC.CFG').read_bytes())
     assert rules(shipped)['FNT'] == 0xa1 and rules(shipped)['BAT'] == 0xc1
+    drives = n['state.panelA_drive']
+    assert shipped[drives:drives+2] == bytes([0,7])
+    previous = bytearray(shipped)
+    for field in ('state.panelA_dirLow','state.panelA_dirHigh','vars.pathValidA'):
+        start = n[field]
+        previous[start:start+2] = b'\1\1'
+    result = parse(b'defaultleftdrive b:\r\nDefaultRightDrive a\n', previous)
+    assert result[drives:drives+2] == bytes([1,0])
+    for field in ('state.panelA_dirLow','state.panelA_dirHigh','vars.pathValidA'):
+        start = n[field]
+        assert result[start:start+2] == b'\0\0'
+    for bad in (b'', b'C:', b'I:', b'B:/', b'BX', b'1:'):
+        result = parse(b'DefaultRightDrive '+bad, previous)
+        assert result[drives:drives+2] == bytes([0,7])
+    no_external = bytearray(memory)
+    no_external[n['vars.driveCount']] = 2
+    no_external[n['buildDriveList']] = 0xc9  # The fixture already supplies A: and B:.
+    fallback = call(no_external, 'initRightDrive')
+    assert parse(b'DefaultRightDrive H:', fallback)[drives:drives+2] == bytes([0,1])
     for ext, attr, expected in [('fnt', 4, 0xa1), ('MON', 5, 0xa1), ('BAT', 0, 0xc1),
                                 ('cfg', 4, 0xc1), ('txt', 0, 0xb1), ('zip', 0, 0xd1),
-                                ('SYS', 4, 0x81), ('ZZZ', 0, 0xf1), ('exe', 16, 0xf1)]:
+                                ('SYS', 4, 0x71), ('ZZZ', 0, 0xf1), ('exe', 16, 0xf1)]:
         assert color(shipped, ext, attr) == expected, (ext, attr)
 
     for ending in (b'\r', b'\n', b'\r\n'):

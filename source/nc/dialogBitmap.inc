@@ -44,7 +44,7 @@ ncDialogScreenReady:
     ld a,(hl)
     add a,2
     ld (ncDialogRequest+2),a
-    ; Fixed scratch budget: largest snapshot fits 2560 bytes, including the 33*76 overwrite prompt.
+    ; Fixed scratch budget: largest snapshot fits 3072 bytes, including the 33*76 overwrite prompt.
     ld hl,(ncDialogRequest+2)
     ld a,l
     cp 34
@@ -64,7 +64,7 @@ ncDialogSize:
     add hl,de
     dec a
     jp nz,ncDialogSize
-    ld de,2561
+    ld de,3073
     call bios_cmp_hl_de
     jp nc,ncDialogFallback
     ld hl,ncDialogRequest
@@ -111,7 +111,11 @@ ncDialogOldColor: DB COLOR_FILE
 ncDialogRequest:
     DW 0
     DB 0,0
+    IF NC_BANKED
+    DW NC_MAIN_PIXELS,NC_MAIN_COLORS,1024,0
+    ELSE
     DW NC_DIALOG_PIXELS,NC_DIALOG_COLORS,NC_DIALOG_COLOR_BYTES,ncDialogColorRun
+    ENDIF
 
 ; Software palette lookup for file cells/frames and F3's memory/disk blocks.
 ; Empty blue pixels may use any foreground; all visible foregrounds and
@@ -232,13 +236,10 @@ ncDialogPaletteIndex:
     cp 6
     ld a,COLOR_CURSOR
     jp nz,ncDialogPaletteStore
-    ld b,a
     ld a,(ncDialogCellByte)
     cp 9
-    ld a,b
-    jp nz,ncDialogPaletteStore
-    and 0F0h
-    or COLOR_FILE & 15
+    jp z,ncDialogPaletteFinish
+    ld a,COLOR_CURSOR
     jp ncDialogPaletteStore
 ncDialogInfoPalette:
     ld a,e
@@ -273,7 +274,14 @@ ncDialogInfoNumberEnd:
     ld a,COLOR_INFONUMBER
     jp c,ncDialogPaletteStore
 ncDialogBorderPalette:
-    ld a,COLOR_BORDER
+    ; Both the outside frame and its dividers use the panel border color.
+    ld a,(ncDialogPanel)
+    ld e,a
+    ld d,0
+    ld hl,vars.panelFrameA
+    add hl,de
+    ld a,(hl)
+    call ncBorderColor
 ncDialogPaletteStore:
     ld (ncDialogColor),a
 ncDialogPaletteFinish:

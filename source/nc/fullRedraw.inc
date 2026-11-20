@@ -7,6 +7,13 @@ fullRedraw:
             push af
             COLOR COLOR_BORDER
 fullClearPanels:
+    IF NC_BANKED
+            ld hl,09000h
+            ld b,48
+            ld c,230
+            xor a
+            call uiFillRectBytes
+    ELSE
             ld hl,09000h
             ld b,48
 fullClearColumn:
@@ -23,6 +30,7 @@ fullClearPixels:
             inc h
             dec b
             jp nz,fullClearColumn
+    ENDIF
 fullDrawFrames:
             xor a
             ld (state.activePanel),a
@@ -67,7 +75,7 @@ fullDrawFiles:
 
 ; Рамка без заливки уже очищенной внутренней области.
 drawFullPanelFrame:
-            COLOR COLOR_BORDER
+            call ncResetPanelBorder
             call drawPanelHeader
             ld hl,g_panelEdges
             call draw
@@ -139,7 +147,12 @@ ncStartupCopyright:
             ld hl,aCopyright
             call bios_printStringReal
             ld c,10
+    IF NC_BANKED
+            call bios_printChar
+            jp ncBankFlush
+    ELSE
             jp bios_printChar
+    ENDIF
 ncStartupPrepared: DB 0
 
 ; Команды uiDraw: боковые штрихи и три строки нижней рамки.

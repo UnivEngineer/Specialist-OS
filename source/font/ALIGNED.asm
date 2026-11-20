@@ -3,7 +3,10 @@
 ; the cell boundary. Line pitch remains BIOS 10 pixels (eight bitmap rows).
     INCLUDE "../include/mxos.inc"
 FONT_MODE = 0
-FONT_LOWER_BYTES = 0
+    IFNDEF GRAPH_PRE_MODE
+GRAPH_PRE_MODE = 0
+    ENDIF
+FONT_LOWER_BYTES = GRAPH_PRE_MODE*6144
     ORG FONT_ENGINE_BASE
     IFDEF FONT_BENCH_MAIN
     jp benchInitialize
@@ -18,9 +21,14 @@ FONT_LOWER_BYTES = 0
     jp setEncoding
     jp scalar
     jp service
+    jp fontPseudoDraw
     DS FONT_ENGINE_HEADER-$,0
+    IFDEF FONT_GRAPHIC_X
+    DB 'FNT1',FONT_ENGINE_VERSION,CELL_WIDTH,8,FONT_FORMAT_GRAPH8+GRAPH_PRE_MODE
+    ELSE
     DB 'FNT1',FONT_ENGINE_VERSION,CELL_WIDTH,8,4-(CELL_WIDTH==4)
-    DW imageEnd-FONT_ENGINE_BASE,FONT_ADDR,0,initializerName
+    ENDIF
+    DW imageEnd-FONT_ENGINE_BASE,FONT_ADDR,FONT_LOWER_BYTES,initializerName
 initializerName: DB 'InitA.dll',0
 printChar2 = bios_fontControl
 printCharBody = bios_fontControl
@@ -31,7 +39,7 @@ printCharRawHelper:
     ld a,h
     cp 192
     ret c
-    jp bios_fontNewLine
+    jp fontLineEnd
 scalar:
     ld hl,(bios_vars.cursorY)
     ld a,h
@@ -39,7 +47,13 @@ scalar:
     jp nc,scalarWrap
 scalarPosition:
     ld a,h
+    IFDEF FONT_GRAPHIC_X
+    and 3
+    jp nz,graphicScalar
+    ld a,h
+    ELSE
     and 256-CELL_WIDTH/2
+    ENDIF
     ld h,a
     add a,CELL_WIDTH/2
     ld (bios_vars.cursorX),a
@@ -111,6 +125,9 @@ label:
     ENDM
     ALIGNED_CORE normalLeft,0,0
     ALIGNED_CORE inverseLeft,1,0
+    IFDEF FONT_GRAPHIC_X
+    INCLUDE "graphic8.inc"
+    ENDIF
     IF CELL_WIDTH == 4
     ALIGNED_CORE normalRight,0,1
     ALIGNED_CORE inverseRight,1,1
@@ -124,15 +141,27 @@ scalarWrap:
     ld hl,(bios_vars.cursorY)
     jp scalarPosition
 printChar_real2 = printCharRawHelper
-printChar_c0A = bios_fontNewLine
     IF CELL_WIDTH == 8
     INCLUDE "packet8.inc"
+    IFDEF FONT_GRAPHIC_X
+    INCLUDE "graphic8-packet.inc"
+    ENDIF
+    IFDEF FONT_ALIGNED_ROWS
+    INCLUDE "graphic8-packet.inc"
+    ENDIF
     ELSE
     INCLUDE "packet4.inc"
     ENDIF
     INCLUDE "string.inc"
     INCLUDE "install.inc"
     INCLUDE "bench.inc"
+PSEUDO_STEP = CELL_WIDTH/2
+PSEUDO_WRAP = 192
+    IFNDEF FONT_GRAPHIC_X
+    DEFINE PSEUDO_ROUND (256-PSEUDO_STEP)
+    ENDIF
+    INCLUDE "pseudo.inc"
+    FONT_PSEUDO_ENTRY
     ASSERT $ <= FONT_ADDR
     DS FONT_ADDR-$,0
 fontData:
@@ -141,6 +170,7 @@ fontData:
     ELSE
     INCBIN "../../bin/fonts/cpm4-paged.bin"
     ENDIF
+    FONT_PSEUDO_TAIL
 imageEnd:
     ASSERT $ <= FONT_ENGINE_END
 

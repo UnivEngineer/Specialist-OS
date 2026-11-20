@@ -79,13 +79,9 @@ def main():
         m.write(0x7500,io)
         m.write(0x7540,b'B:\\SORTBEN.TXT\0'+bytes(113))
         word = lambda x:x.to_bytes(2,'little')
-        code = (b'\x21\x00\x75\xcd'+word(sb['mx_callRegs'])+
-                word(sb['MXOS_DOS_FILE_LOAD_PATH'])+b'\xc3\xff\x81')
-        m.write(0x8100,code)
-        m.stop_at(0x81ff)
-        m.call('regs_set',pc=0x8100,sp=0x8b00)
-        state = m.until(0x81ff,120)
-        assert not state['flags']['C'],state
+        api=runpy.run_path(str(ROOT/'scripts/emu80/file-api.py'))
+        callback=lambda op,hl=0,a=0:api['main_call'](m,sb,op,hl,a)
+        api['path_io'](m,callback,sb,0x7500,handle=0x7400)
         assert int.from_bytes(m.read(0x7506,2),'little')==len(text)
         assert m.read(0x7600,len(text))==text
         (OUT/'result.json').write_text(json.dumps(dict(synthetic=True,hRoot=True,

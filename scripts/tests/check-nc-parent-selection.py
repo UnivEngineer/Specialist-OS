@@ -17,6 +17,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     n = symbols(ROOT / 'bin/NC.sym')
     b = symbols(ROOT / 'bin/BIOS.sym')
+    cache = n['FILE_CACHE_A']
 
     def call(memory, entry):
         memory = bytearray(memory)
@@ -34,11 +35,11 @@ def main():
 
     def seed(old, new, panel=0):
         memory = bytearray(65536)
-        for address, file in [(0, 'NC.i80'), (0xc000, 'BIOS.sys'), (0xf000, 'IO.sys')]:
+        for address, file in [(0, 'NC.i80'), (0xc000, 'BIOS.sys'), (0xf000, 'IO.main.bin')]:
             data = (ROOT / 'bin' / file).read_bytes()
             memory[address:address+len(data)] = data
         memory[n['getPanelPath']:n['getPanelPath']+5] = b'\x21' + W(0x8600) + b'\xb7\xc9'
-        memory[n['fileCacheBase']:n['fileCacheBase']+4] = b'\x21' + W(0x7000) + b'\xc9'
+        memory[n['fileCacheBase']:n['fileCacheBase']+4] = b'\x21' + W(cache) + b'\xc9'
         for address, value in [(n['vars.path'], old), (0x8600, new)]:
             data = value.encode('koi8-r') + b'\0'
             memory[address:address+len(data)] = data
@@ -71,7 +72,7 @@ def main():
                     rows += [record(f'D{i:07d}.{"ZIP" if i%2 else "AAA"}') for i in range(100)]
                     rows += [record(leaf), record('ZZZZZZZZ.ZZZ')]
                     original = b''.join(rows)
-                    memory[0x7000:0x7000+len(original)] = original
+                    memory[cache:cache+len(original)] = original
                     memory[n['state.panelA_filesCnt']+panel] = len(rows)
                     memory[n['state.panelA_sort']+panel] = mode
                     memory[n['ncVisibleCount']] = visible
@@ -92,7 +93,7 @@ def main():
                     assert first <= selected < first+visible, (selected, first, visible)
                     assert int.from_bytes(memory[n['vars.fileListPtr']:n['vars.fileListPtr']+2], 'little') == index+first
                     assert memory[n['ncParentPending']] == 0
-                    assert memory[0x7000:0x7000+len(original)] == original
+                    assert memory[cache:cache+len(original)] == original
                     assert memory[n['state.panelA_curFile']+(panel^1)] == 17
                     assert memory[n['state.panelA_firstFile']+(panel^1)] == 3
                     cases += 1
@@ -100,7 +101,7 @@ def main():
     # Missing/deleted folder and an empty parent consume the request safely.
     for count in (0, 1):
         memory = seed('A:\\GONE', 'A:\\')
-        memory[0x7000:0x7010] = record('OTHER')
+        memory[cache:cache+16] = record('OTHER')
         memory[n['state.panelA_filesCnt']] = count
         memory[n['ncVisibleCount']] = 19
         memory = call(memory, 'ncParentPrepare')

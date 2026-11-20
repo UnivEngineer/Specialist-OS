@@ -22,9 +22,11 @@ def call(op,hl=0,de=0,bc=0,a=0,error=False):
  assert bool(r['af']&1)==error,(hex(op),r)
  assert m.read(b['FONT_ADDR'],b['FONT_BYTES'])==font,'font damaged'
  return r
+def file_io(address,writing=False):
+ return runpy.run_path(str(R/'scripts/emu80/file-api.py'))['path_io'](m,call,k,address,writing)
 def save(name,data,drive='B'):
  m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x4000,data)
- m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34));call(k['MXOS_DOS_FILE_SAVE_PATH'],hl=0x3200)
+ m.write(0x3200,word(0x3400)+word(0x4000)+word(len(data))+bytes(34));file_io(0x3200,True)
 def job(name='TARGET',drive=1,source=b'SOURCE  BIN',extension='BIN',mode=0):
  page(1);before=m.read(k['v_directories'],16)+m.read(k['v_directory'],2)+m.read(k['v_drive'],1);page(0)
  j=bytearray(k['FILEOPS_JOB']);j[2]=mode;q=k['FILEOPS_JOB.request'];j[q+4]=1;j[q+5]=drive
@@ -41,7 +43,7 @@ def step(op=1):
  assert after==context,('STEP changed cwd',op,context.hex(),after.hex())
  return result
 def read(name,length,drive='B'):
- m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x3200,word(0x3400)+word(0x4000)+word(length)+bytes(34));call(k['MXOS_DOS_FILE_LOAD_PATH'],hl=0x3200);return m.read(0x4000,length)
+ m.write(0x3400,(drive+':\\'+name).encode()+b'\0'+bytes(110));m.write(0x3200,word(0x3400)+word(0x4000)+word(length)+bytes(34));file_io(0x3200);return m.read(0x4000,length)
 
 def cli(t,error=False):
  m.write(0x3400,t.encode()+b'\0'+bytes(127-len(t)));return call(k['MXOS_DOS_CLI'],hl=0x3400,error=error)
@@ -65,12 +67,14 @@ try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
  k=sy(R/'bin/banked/KERNEL.sym');b=sy(R/'bin/BIOS.sym');n=sy(fixture['nc_symbols'])
  x.start('PREPARE',**fixture);m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
+ call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0)
  data=bytes(range(256))*35+bytes(range(77))
  cli('MKDIR B:/SRC/SUB/DEEP');save('SRC/A.BIN',data);save('SRC/SUB/X.TXT',b'hello\n')
  begin('SRC');j,phases=finish();assert j[3]==2,j
  assert int.from_bytes(j[k['FILEOPS_JOB.total']:k['FILEOPS_JOB.total']+4],'little')==len(data)+6,j
  assert j[k['FILEOPS_JOB.known']]==1
+ assert int.from_bytes(j[k['FILEOPS_JOB.totalFiles']:k['FILEOPS_JOB.totalFiles']+2],'little')==2,j
  assert int.from_bytes(j[k['FILEOPS_JOB.required']:k['FILEOPS_JOB.required']+2],'little')==40,j
  assert phases[0]==1 and 0 in phases,phases
  assert read('DST/A.BIN',len(data))==data
@@ -113,6 +117,20 @@ try:
  step(4);cli('CD B:/NOFIT',error=True)
  cli('DEL B:/FILL');cli('DEL B:/BIG')
  print('PASS full-volume preflight refusal, no target creation and recursive cleanup',filled,flush=True)
+ # Empty DIR is diagnostic output, not a BAT failure. An invalid parent is
+ # a real error and must prevent the following command from running.
+ call(k['MXOS_DOS_SET_SHELL'],a=1)
+ cli('MKDIR B:/EMPTYDIR')
+ save('DIRZERO.BAT',b'@DIR B:/EMPTYDIR\r@MKDIR B:/AFTERDIR\r')
+ m.write(0x3400,b'B:/DIRZERO.BAT\0')
+ call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
+ cli('CD B:/AFTERDIR');cli('CD B:/')
+ save('DIRBAD.BAT',b'@DIR B:/ABSENT/\r@MKDIR B:/NOTRUN\r')
+ m.write(0x3400,b'B:/DIRBAD.BAT\0')
+ result=call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400,error=True)
+ assert result['af']>>8==k['DOS_ERR_NOT_FOUND'],result
+ cli('CD B:/NOTRUN',error=True)
+ print('DIR/BAT PASS: empty listing continues; invalid parent aborts',flush=True)
  print('FILEOPS PREPARE/DELETE PASS',flush=True)
 except Exception:
  if x.pid:

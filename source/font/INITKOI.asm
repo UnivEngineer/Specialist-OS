@@ -41,7 +41,7 @@ importFlat:
     add hl,de
     ex de,hl ; DE=staged compact font, not its resident address.
     ld hl,codes
-    ld c,162
+    ld c,codesEnd-codes
 nextGlyph:
     ld a,(hl)
     inc hl
@@ -75,4 +75,6 @@ nextRow:
     ret
 source: DW 0
 codes: INCBIN "../../bin/fonts/compact-codes.bin"
+codesEnd:
+    ASSERT codesEnd-codes <= 255
     ASSERT $ <= FONT_INIT_END

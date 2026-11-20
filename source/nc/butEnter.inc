@@ -27,6 +27,12 @@ but_Enter:  ; Если ком строка не пустая
             ; Check before building a command or touching the console screen.
             call ncEnterFileAction
             jp c,mainLoop_cursorReady
+            or a
+    IF NC_BANKED
+            jp nz,ncBankEditSelected
+    ELSE
+            jp nz,Enter_5
+    ENDIF
             call ncEnterHideCursor
             jp Enter_stdExec
 
@@ -109,13 +115,63 @@ ncEnterCopyExtension:
             ld hl,NC_SORT_KEYS
             ld a,CLI_OP_ASSOCIATION
             MXOS_CALL MXOS_DOS_CLI
+            ret c
+            ex de,hl
+            ld (ncAssocTransfer+1),hl
+    IF NC_BANKED
+            ld a,(ncBankNumber)
+            ld (ncAssocTransfer+3),a
+    ENDIF
+            ld hl,ncAssocTransfer
+            call mx_memcpyFar
+            ret c
+            ld de,ncAssociatedEditor
+            call ncMatchEditor
+    IF !NC_BANKED
+            ld de,aEditor
+    ENDIF
+            jp z,ncEditorMatched
+            xor a
             ret
-ncEnterNative:
-            pop hl
+ncEditorMatched:
+            ld a,1
             or a
             ret
+ncMatchEditor:
+            ld hl,NC_SORT_KEYS
+ncMatchEditorChar:
+            ld a,(hl)
+            cp 0FFh
+            jp z,ncMatchEnd
+            cp 20h
+            jp nc,ncMatchPrintable
+ncMatchEnd:
+            xor a
+ncMatchPrintable:
+            call bios_upperCase
+            ld b,a
+            ld a,(de)
+            cp b
+            ret nz
+            or a
+            ret z
+            inc hl
+            inc de
+            jp ncMatchEditorChar
+ncAssocTransfer:
+            DB DOS_BANK_PAGE
+            DW 0
+            DB 0
+            DW NC_SORT_KEYS,ncAssociatedEditorEnd-ncAssociatedEditor
+ncAssociatedEditor: DB 'A:',05Ch,'EDIT.COM',0
+ncAssociatedEditorEnd:
+ncEnterNative:
+            pop hl
+            xor a
+            ret
 
-Enter_5:   ; F4 задаёт явную команду редактора, ассоциации остаются в CLI.
+    IF !NC_BANKED
+Enter_5:   ; DE=explicit editor command selected by F4 or the file association.
             ld hl,vars.cmdLine
 EnterEditorCopy:
             ld a,(de)
@@ -130,6 +186,19 @@ EnterEditorArgument:
             inc hl
             ld (hl),0
             ld (vars.cmdLineEnd),hl
+            call getSelectedFile
+            call buildSelectedFilePath
+            jp c,mainReload
+            call appendPathToCommand
+            jp c,mainReload
+            ex de,hl
+            ld (vars.cmdLineEnd),hl
+ncLaunchEditor:
+            call ncEditorLoading
+            call ncSelectCommandDirectory
+            jp EnterExec
+    ENDIF
+
 Enter_stdExec:
             ; Получить выбранный файл
             call     getSelectedFile
@@ -144,12 +213,11 @@ Enter_stdExec:
             jp c,   mainReload
 
 EnterCmdLine:
+            xor a
+            ld (ncCommandScreen),a
             ld hl,(vars.cmdLineEnd)
             ld (hl),0
-            ld hl,state.panelA_drive
-            call readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
-            call restorePanelDirectory
+            call ncSelectCommandDirectory
             ld hl,vars.cmdLine
             ld a,CLI_OP_QUERY
             MXOS_CALL MXOS_DOS_CLI
@@ -170,10 +238,17 @@ EnterCmdLine:
             ld c,0Ah
             call bios_printChar
 ncCommandRun:
+    IF NC_BANKED
+            call ncBankFlush
+    ENDIF
             ld hl,vars.cmdLine
             ld de,ncOverwritePrompt
             ld a,CLI_OP_COMMAND
             MXOS_CALL MXOS_DOS_CLI
+ncCommandResult:
+    IF NC_BANKED
+            call ncBankSyncCursor
+    ENDIF
             jp c,ncCommandError
             cp 0FFh
             jp z,EnterExec
@@ -207,7 +282,7 @@ ncCommandSameContext:
 ; ncCommandContext=0/4 means unchanged/changed. Failed GET keeps CLI's flag.
 ncCommandUpdateContext:
             ld e,0
-            call bios_fileGetSetDrive
+            MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
             ld b,a
             ld hl,state.panelA_drive
             call readBytePanel
@@ -255,6 +330,11 @@ ncCommandRestoreScreen:
             jp drawToolbar
 ncCommandError:
             MXOS_CALL MXOS_DOS_GET_ERROR
+            push af
+            ld a,(ncCommandScreen)
+            or a
+            call nz,ncCommandErrorRestore
+            pop af
             call dosErrorText
             push hl
             ; В командном режиме поле диалога содержит ошибочную команду.
@@ -269,6 +349,13 @@ ncCommandErrorCopy:
             jp nz,ncCommandErrorCopy
             pop hl
             jp copyFileShowError
+; Recover the whole NC screen before placing an error dialog over it.
+; The console clear also erased the toolbar; panel-only refresh cannot fix it.
+ncCommandErrorRestore:
+            call ncCommandRestoreScreen
+            call fullRedraw
+            call mainResetReload
+            jp redrawCommandLine
 ncCommandScreen: DB 0
 ncCommandContext: DB 0
 ncCommandCursorKept: DB 0
@@ -282,12 +369,26 @@ ncCommandHideCursor:
             jp ncEnterHideCursor
 ncKeepFrames: DB 0
 ncCommandErrorText: DB 'Command error',0
+ncSelectCommandDirectory:
+            ld hl,state.panelA_drive
+            call readBytePanel
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            jp restorePanelDirectory
 EnterExec:
             call ncStopObserver
             call saveState
+    IF NC_BANKED
+            call ncBankFlush
+            call ncBankSaveEpoch
+            ld a,1
+            ld (ncBankChildActive),a
+            ld (ncBankExitAction),a
+            jp ncBankReturn
+    ELSE
+            ld a,MEM_OP_MAINRETIRE
+            MXOS_CALL MXOS_DOS_MEMORY
             ld hl,vars.cmdLine
             ; COM внутри BAT может затереть NC и вернуться обычным RET.
             ; Возвращаться следует в BIOS, который загрузит оболочку заново.
-            ld de,bios_reboot
-            push de
-            jp bios_fileExec
+            MXOS_EXEC bios_reboot
+    ENDIF

@@ -7,7 +7,7 @@ sym=lambda n:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\da-fA-F]+)
 s=sym('RUN');b=sym('BIOS')
 for kind,name in enumerate(('Monitor2','MONWIN','RAMFOS')):
  m=bytearray(65536)
- for addr,path in ((0,'RUN.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.sys')):
+ for addr,path in ((0,'RUN.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin')):
   data=(R/'bin'/path).read_bytes();m[addr:addr+len(data)]=data
  core=(R/'bin'/f'{name}.mon').read_bytes();m[0x9000:0x9000+len(core)]=core
  m[s['monitorKind']]=kind;m[s['monitorSize']:s['monitorSize']+2]=len(core).to_bytes(2,'little')

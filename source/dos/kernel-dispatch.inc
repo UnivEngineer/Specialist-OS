@@ -16,6 +16,39 @@ kernelLocalDispatch:
     ld a,DOS_IO_PAGE
     ld (BANK_FRAME_STATUS),a
 kdEntryCommon:
+    ; Nested calls from a directly entered DLL use its allocation owner.
+    push af
+    ld a,(bankHome)
+    cp MODULE_OWNER_BASE
+    jp c,kdDefaultOwner
+    ld l,a
+    ld a,(moduleActor)
+    ld h,a
+    push hl
+    ld a,l
+    ld (moduleActor),a
+    xor a
+    ld (bankHome),a
+    ld hl,3
+    add hl,sp
+    ld a,(hl)
+    call kdOwnedEntry
+    ex (sp),hl
+    push af
+    ld a,l
+    ld (bankHome),a
+    ld a,h
+    ld (moduleActor),a
+    pop af
+    ex (sp),hl
+    inc sp
+    inc sp
+    inc sp
+    inc sp
+    ret
+kdDefaultOwner:
+    pop af
+kdOwnedEntry:
     push af
     ld a,(kdBusy)
     or a
@@ -31,15 +64,6 @@ kdEntryCommon:
     jp nz,dosUnsupported
     ld a,c
     ld (kdFunction),a
-    ; Подготовленный образ действителен до следующего запроса DOS.
-    ; Чужой FILE_LOAD не может использовать курсор владельца образа.
-    cp MXOS_DOS_FILE_LOAD & 0FFh
-    jp z,kdImageContextReady
-    push af
-    xor a
-    ld (kiReady),a
-    pop af
-kdImageContextReady:
     ex de,hl
     ld de,kdRegs
     ld b,MX_REGS
@@ -53,6 +77,10 @@ kdPacketLoop:
     ld a,1
     ld (kdBusy),a
     ld a,(kdFunction)
+    cp MXOS_DOS_MODULE_SCOPE & 255
+    jp z,moduleScope
+    cp MXOS_DOS_COMMAND_BATCH & 255
+    jp z,dosCommandBatch
     cp MXOS_DOS_ENUMERATE & 0FFh
     jp z,enumService
     cp MXOS_DOS_FILEOPS & 0FFh
@@ -68,15 +96,11 @@ kdPacketLoop:
     cp MXOS_DOS_FILE_EXEC_NATIVE & 0FFh
     jp z,keRequest
     cp MXOS_DOS_MEMORY & 0FFh
-    jp z,kdMemory
+    jp z,kdLocal
     ld a,(kdPage)
     cp DOS_IO_PAGE
     jp z,kdLocal
     ld a,(kdFunction)
-    cp MXOS_DOS_FILE_CREATE & 0FFh
-    jp z,krCreate
-    cp MXOS_DOS_FILE_CREATE_PREPARE & 0FFh
-    jp z,krPrepare
     cp MXOS_DOS_SECTOR_IO & 0FFh
     jp z,krSector
     cp MXOS_DOS_RAW_IO & 0FFh
@@ -85,12 +109,6 @@ kdPacketLoop:
     jp z,keRequest
     cp MXOS_DOS_FILE_COPY & 0FFh
     jp z,kcCopy
-    cp MXOS_DOS_IMAGE_OPEN & 0FFh
-    jp z,kiOpen
-    cp MXOS_DOS_FILE_LOAD & 0FFh
-    jp z,kiLoad
-    cp MXOS_DOS_FILE_LOAD2 & 0FFh
-    jp z,kiRaw
     cp MXOS_DOS_FILE_GET_DRIVES & 0FFh
     jp z,kmDrives
     cp MXOS_DOS_FILE_NAME_PREPARE & 0FFh
@@ -107,8 +125,6 @@ kdPacketLoop:
     jp z,kmRename
     cp MXOS_DOS_FILE_RENAME_ON_DRIVE & 0FFh
     jp z,kmRename
-    cp MXOS_DOS_FILESTREAM & 0FFh
-    jp z,kfStream
     cp MXOS_DOS_FILE_LIST & 0FFh
     jp z,kdFileList
     cp MXOS_DOS_FILEHANDLE & 0FFh
@@ -117,10 +133,8 @@ kdPacketLoop:
     jp z,kdDirectory
     cp MXOS_DOS_CLI & 0FFh
     jp z,kdCli
-    cp MXOS_DOS_FILE_LOAD_PATH & 0FFh
-    jp z,kdPathIO
-    cp MXOS_DOS_FILE_SAVE_PATH & 0FFh
-    jp z,kdPathIO
+    cp MXOS_DOS_FONT_CONFIG & 0FFh
+    jp z,kdFontConfig
     ; Разрешены только функции, не возвращающие локальных указателей.
     ld de,kdScalars
 kdScalarFind:
@@ -141,10 +155,7 @@ kdScalarFound:
     inc de
     ld a,(de)
     ld h,a
-    ld (kdEntry),hl
-    call kdInvoke
-    call kdCapture
-    jp kdFinish
+    jp kdInvokeScalar
 kdLocal:
     ; Локальные драйверы получают те же номера, но исходные NEAR-указатели.
     ld a,(kdFunction)
@@ -159,7 +170,9 @@ kdLocal:
     inc hl
     ld d,(hl)
     ex de,hl
+kdInvokeScalar:
     ld (kdEntry),hl
+kdDirectoryScalar:
     call kdInvoke
     call kdCapture
     jp kdFinish
@@ -235,10 +248,6 @@ kdCwdClear:
     call kdStore
     jp c,kdBad
     jp kdRestorePointer
-kdDirectoryScalar:
-    call kdInvoke
-    call kdCapture
-    jp kdFinish
 
 ; Текстовые команды передаются как MAX_PATH. Наблюдатель вызывается в
 ; странице клиента; подтверждения COPY/MOVE требуют отдельного адаптера.
@@ -282,8 +291,12 @@ kdCliPath:
 ; Произвольная длина разбивается на пачки. Ошибка/EOF возвращают общий
 ; фактически переданный FH_COUNT, включая последнюю неполную пачку.
 kdHandle:
+    ld hl,(kdRegs)
+    ld bc,FILE_HANDLE
+    call kdFileRange
+    jp c,kdBad
     ld a,(kdRegs+7)
-    cp FILE_OP_OPTIONS+1
+    cp FILE_OP_OPEN_AT+1
     jp nc,kdBad
     ld (kdOperation),a
     ld hl,(kdRegs)
@@ -297,11 +310,50 @@ kdHandle:
     jp z,kdHandleIO
     cp FILE_OP_WRITE
     jp z,kdHandleIO
+    cp FILE_OP_OPEN_PATH
+    jp nz,kdHandleSimple
+    ld hl,(KD_OBJECT+FH_BUFFER)
+    ld (kdOriginalBuffer),hl
+    ld de,KD_PATH
+    ld a,MAX_PATH
+kdHandlePathScan:
+    push af
+    push hl
+    push de
+    ld bc,1
+    call kdFetch
+    pop de
+    pop hl
+    jp c,kdHandlePathError
+    ld a,(de)
+    or a
+    jp z,kdHandlePathEnd
+    inc hl
+    inc de
+    pop af
+    dec a
+    jp nz,kdHandlePathScan
+    jp kdBad
+kdHandlePathError:
+    pop af
+    jp kdBad
+kdHandlePathEnd:
+    pop af
+kdHandlePathReady:
+    ld hl,KD_PATH
+    ld (KD_OBJECT+FH_BUFFER),hl
+kdHandleSimple:
+    ld a,(kdOperation)
     ld hl,KD_OBJECT
     call fileHandle
     push af
     pop hl
     ld (kdResult),hl
+    ld a,(kdOperation)
+    cp FILE_OP_OPEN_PATH
+    jp nz,kdHandleReturn
+    ld hl,(kdOriginalBuffer)
+    ld (KD_OBJECT+FH_BUFFER),hl
     jp kdHandleReturn
 kdHandleIO:
     ld hl,(KD_OBJECT+FH_BUFFER)
@@ -311,8 +363,11 @@ kdHandleIO:
     ld (kdLeft),hl
     ld b,h
     ld c,l
+    ld a,b
+    or c
+    jp z,kdNoOverlap
     ld hl,(kdBuffer)
-    call kdRange
+    call kdFileRange
     jp c,kdBad
     ; Непустой буфер не может перекрывать объект FILE_HANDLE.
     ld a,b
@@ -485,6 +540,19 @@ kdRangeFail:
     pop hl
     scf
     ret
+; File objects/data must not overwrite the caller's MEM tail or context.
+; Driver registration uses kdRange separately to read installed service code.
+kdFileRange:
+    push hl
+    add hl,bc
+    jp c,kdRangeFail
+    push de
+    ld de,IO_BANK_KEYS
+    call cmp_hl_de
+    pop de
+    jp c,kdRangeOk
+    jp z,kdRangeOk
+    jp kdRangeFail
 ; HL=источник клиента, DE=локальный приёмник, BC=длина.
 kdFetch:
     call kdRange
@@ -517,6 +585,8 @@ kdCopyCount:
     jp bankCopyFar
 
 kdScalars:
+    DB MXOS_DOS_TIMER & 255
+    DW timerService
     DB MXOS_DOS_DRIVER_REFRESH & 0FFh
     DW dosDriverRefresh
     DB MXOS_DOS_DRIVER_SELECT & 0FFh
@@ -544,21 +614,81 @@ kdPage: DB 0
 kdFunction: DB 0
 kdOperation: DB 0
 kdIOStarted: DB 0
-kdRegs: DS MX_REGS,0
-kdEntry: DW 0
-kdClientObject: DW 0
-kdBuffer: DW 0
-kdOriginalBuffer: DW 0
-kdLeft: DW 0
-kdChunk: DW 0
-kdActual: DW 0
-kdTotal: DW 0
-kdResult: DW 0
-kdCopy: DS 8,0
+kdRegs = DOS_REQUEST_SCRATCH+0
+kdEntry = DOS_REQUEST_SCRATCH+8
+kdClientObject = DOS_REQUEST_SCRATCH+10
+kdBuffer = DOS_REQUEST_SCRATCH+12
+kdOriginalBuffer = DOS_REQUEST_SCRATCH+14
+kdLeft = DOS_REQUEST_SCRATCH+16
+kdChunk = DOS_REQUEST_SCRATCH+18
+kdActual = DOS_REQUEST_SCRATCH+20
+kdTotal = DOS_REQUEST_SCRATCH+22
+kdResult = DOS_REQUEST_SCRATCH+24
+kdCopy = DOS_REQUEST_SCRATCH+26
+    ASSERT DOS_REQUEST_SCRATCH+34 <= DOS_SERVICE_ADDR
 
-kdMemory:
-    ld hl,dosMemoryService
+
+; Caller submits one stream. Only the listed native operations share KD_DATA
+; safely. Each optional inline HL is local to this batch in DOS.
+dosCommandBatch:
+    ld hl,(kdRegs+4)
+    dec hl
+    ld a,h
+    or a
+    jp nz,kdBad
+    inc hl
+    ld b,h
+    ld c,l
+    ld de,KD_DATA
+    add hl,de
+    push hl
+    ld hl,(kdRegs)
+    call kdFetch
+    pop de
+    jp c,kdBad
+    ld hl,KD_DATA
+dosBatchNext:
+    call cmp_hl_de
+    jp nc,dosBatchDone
+    ld a,(hl)
+    or a
+    jp z,dosBatchDone
+    ld bc,fileChangeDrive
+    cp MXOS_DOS_FILE_SELECT_DRIVE & 255
+    jp z,dosBatchFound
+    ld bc,flushVolume
+    cp MXOS_DOS_FLUSH_VOLUME & 255
+    jp z,dosBatchFound
+    ld bc,fileDelete
+    cp MXOS_DOS_FILE_DELETE & 255
+    jp nz,dosBatchUnsupported
+dosBatchFound:
+    push de
+    inc hl
+    ld e,(hl)
+    ld d,0
+    dec hl
+    push hl
+    add hl,de
+    ex (sp),hl
+    inc hl
+    inc hl
+    push bc
+    DEFINE BATCH_REGS kdRegs
+    INCLUDE "../common/batch-args.inc"
+    UNDEFINE BATCH_REGS
+    pop hl
     ld (kdEntry),hl
     call kdInvoke
-    call kdCapture
-    jp kdFinish
+    pop hl
+    pop de
+    jp nc,dosBatchNext
+    call dosIoError
+    jp kdError
+dosBatchUnsupported:
+    ld a,DOS_ERR_UNSUPPORTED
+    scf
+    jp kdError
+dosBatchDone:
+    xor a
+    jp kdError

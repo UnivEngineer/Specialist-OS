@@ -2,7 +2,11 @@
 ; Графика находится в BIOS, внутренние импорты между двумя DOS не нужны.
 directoryExtendGate:
     jp directoryExtend
-v_imageHeader: DS 16,0
+    IFDEF BANKED_DOS_BUILD
+v_imageHeader = DOS_IMAGE_HEADER_ADDR
+    ELSE
+v_imageHeader: DS IMAGE_HEADER_SIZE,0
+    ENDIF
 setShell:
     cp 3
     jp z,getShellMode
@@ -22,13 +26,19 @@ getShellDrive:
     ret
 v_shell: DB 0
 v_shellDrive: DB 0
+    IFNDEF BANKED_DOS_BUILD
 pathCliCom: DB "A:",05Ch,"CLI.COM",0
+    ENDIF
 
     IFNDEF BANKED_DOS_BUILD
 ; В переходной основной сборке служебные банковые операции недоступны.
 dosRawIO:
     jp j_diskDriver
 dosMemoryService:
+timerService:
+fontConfigService:
+moduleScope:
+dosCommandBatch:
 moduleLoad:
 moduleCall:
 moduleUnload:

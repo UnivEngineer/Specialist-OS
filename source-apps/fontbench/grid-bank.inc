@@ -1,4 +1,5 @@
 ; Native BIOS API grid. Timing and corpus preparation are local to this bank.
+    INCLUDE "grid-corpus.inc"
 gridBank:
     ld a,c
     ld (gridKind),a
@@ -42,11 +43,11 @@ gridBankStart:
     or a
     jp nz,gridBankRawChar
     ld hl,02000h
-    ld b,72
-; По-прежнему 1152 отдельных MXOS_CALL, без накопления и пакетного рендера.
+    ld b,GRID_TEXT_BYTES/GRID_UNROLL
+; Отдельный MXOS_CALL на каждый байт, без накопления и пакетного рендера.
 ; Развёртка лишь убирает лишние расходы управляющего цикла стенда.
 gridBankCharLoop:
-    DUP 16
+    DUP GRID_UNROLL
     ld c,(hl)
     MXOS_CALL MXOS_BIOS_PRINT_CHAR
     inc hl
@@ -56,9 +57,9 @@ gridBankCharLoop:
     jp gridBankFinish
 gridBankRawChar:
     ld hl,02000h
-    ld b,72
+    ld b,GRID_TEXT_BYTES/GRID_UNROLL
 gridBankRawLoop:
-    DUP 16
+    DUP GRID_UNROLL
     ld a,(hl)
     MXOS_CALL MXOS_BIOS_PRINT_CHAR_RAW
     inc hl
@@ -71,7 +72,7 @@ gridBankString:
     or a
     jp nz,gridBankFar
     ld hl,02000h
-    ld bc,1152
+    ld bc,GRID_TEXT_BYTES
     ld a,(gridKind)
     sub 2
     jp z,gridBankZ
@@ -93,7 +94,7 @@ gridBankFar:
     ld a,(gridKind)
     sub 2
     ld (gridRequest),a
-    ld hl,1153
+    ld hl,GRID_TEXT_BYTES+1
     cp 2
     jp nz,gridBankCount
     dec hl
@@ -128,4 +129,4 @@ gridAllocation: DW 0
 gridEmpty: DS 21,0
 ; kind, transport, source, length, main destination, payload capacity.
 gridRequest: DB 0,0
-    DW 02000h,1153,0,2048
+    DW 02000h,GRID_TEXT_BYTES+1,0,2048

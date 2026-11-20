@@ -2,8 +2,7 @@
 but_F7:
             call drawWindow1
             ld hl,ncMkdirText
-            ld e,94
-            call ncPrintCentered
+            call uiModalTitle
             xor a
             ld (vars.input),a
             ld de,vars.input

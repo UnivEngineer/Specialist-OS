@@ -101,6 +101,7 @@ restoreByte:
     ret
     ENDMODULE
 
+    IFNDEF UI_BITMAP_RAW_ONLY
 ; Colored request (12 bytes): screen DW, width DB, height DB, pixels DW,
 ; attributes DW, attributeCapacity DW, colorRunCallback DW.
 ; Save callback: HL=VRAM, C=remaining height -> A=color, C=run length 1..C;
@@ -250,3 +251,5 @@ nextColumn:
 remaining: DB 0
 color: DB 0
     ENDMODULE
+
+    ENDIF

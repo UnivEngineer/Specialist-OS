@@ -61,6 +61,11 @@ def integrate(source):
         if current not in (original, previous, previous_mx2, data):
             raise ValueError(f"Unrelated modifications in {source / name}")
         changes[name] = data
+    apply = ["git", "-C", str(source), "apply"]
+    for name in ("mxos-end.patch", "mxos-underscore.patch", "mxos-cyrillic.patch", "mxos-scancodes.patch"):
+        patch = str(OVERLAY / name)
+        if subprocess.run(apply + ["--reverse", "--check", patch], stderr=subprocess.DEVNULL).returncode:
+            subprocess.run(apply + [patch], check=True)
     for name, data in changes.items():
         (source / name).write_bytes(data)
     for name in files:

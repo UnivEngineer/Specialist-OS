@@ -20,10 +20,6 @@ fileNamePr_1:
             ; Копируем текст до точки, пробела или конца строки, не более FILE_NAME_LENGTH символов.
 fileNamePr_2:
             ld      a, (hl)
-            and     a
-            jp p,   fileNamePr_3
-            sub     40h         ; проеобразование KOI?
-fileNamePr_3:
             cp      ' '+1
             jp c,   fileNamePr_5
             inc     hl
@@ -54,10 +50,6 @@ fileNamePr_5:
             ; Копируем текст до пробела или конца строки, не более 3 символов. 
 fileNamePr_6:
             ld      a, (hl)                         
-            and     a
-            jp p,   fileNamePr_7
-            sub     40h         ; проеобразование KOI?
-fileNamePr_7:
             cp      ' '+1
             jp c,   fileNamePr_11
             ld      (de),a

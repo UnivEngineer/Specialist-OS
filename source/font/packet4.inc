@@ -41,11 +41,19 @@ quotaReady:
     ld a,e
     or a
     jp z,empty
-    ld (pairs),a
     ld a,d
     add a,90h
     ld d,a
     ld (startColumn+1),a
+    ; D advances once per full video byte. Only RawLim needs a column limit below C0h.
+    ld a,(realMode)
+    cp 2
+    jp nz,limitReady
+    ld a,d
+    add a,e
+    ld (normalLimit+1),a
+    ld (inverseLimit+1),a
+limitReady:
     ld a,(bios_vars.cursorY)
     sub 7
     ld e,a
@@ -72,7 +80,7 @@ routeReady:
     ld sp,hl
 route: jp normalLim
 
-    MACRO PAIR_LOOP label, kind, inverse
+    MACRO PAIR_LOOP label, kind, inverse, limit
 label:
     pop hl ; low=first code, high=second; both now in registers
     IF kind != 2
@@ -111,17 +119,21 @@ label:
     sub 7
     ld e,a
     inc d
-    ld hl,pairs
-    dec (hl)
+    ld a,d
+    IF kind == 2
+limit: cp 0
+    ELSE
+    cp 0C0h
+    ENDIF
     jp nz,label
     jp finish
     ENDM
-    PAIR_LOOP normalZ,32,0
-    PAIR_LOOP normalRawZ,1,0
-    PAIR_LOOP normalLim,2,0
-    PAIR_LOOP inverseZ,32,1
-    PAIR_LOOP inverseRawZ,1,1
-    PAIR_LOOP inverseLim,2,1
+    PAIR_LOOP normalZ,32,0,unused
+    PAIR_LOOP normalRawZ,1,0,unused
+    PAIR_LOOP normalLim,2,0,normalLimit
+    PAIR_LOOP inverseZ,32,1,unused
+    PAIR_LOOP inverseRawZ,1,1,unused
+    PAIR_LOOP inverseLim,2,1,inverseLimit
 stopBeforePair:
     dec sp
     dec sp ; unconsumed control/NUL pair goes to scalar frontend
@@ -140,7 +152,7 @@ startColumn: cp 0
     cp 192
     jp c,done
     ld hl,(bios_vars.cursorY)
-    call bios_fontNewLine
+    call fontLineEnd
 done:
     ld hl,(text)
     or a
@@ -151,7 +163,6 @@ empty:
     ret
 normalRoutes: DW normalZ,normalRawZ,normalLim
 inverseRoutes: DW inverseZ,inverseRawZ,inverseLim
-pairs: DB 0
 text: DW 0
 realMode: DB 0
     ENDMODULE

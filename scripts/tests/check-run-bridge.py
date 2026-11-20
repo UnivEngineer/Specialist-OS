@@ -5,7 +5,7 @@ root=Path(__file__).resolve().parents[2];out=root/'docs/compat/sector-load-001/b
 def symbols(name):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(root/'bin'/name).with_suffix('.sym').read_text(),re.M)}
 ds=symbols('BIOS');rs=symbols('RUN');results=[]
 for mode,staged,returning in ((0,False,False),(0,True,False),(1,False,False),(2,False,False),(3,False,False),(3,True,False),(0,False,True),(0,True,True),(1,False,True)):
- m=bytearray(65536);d=(root/'bin/BIOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;io=(root/'bin/IO.sys').read_bytes();m[0xf000:0xf000+len(io)]=io;r=(root/'bin/RUN.i80').read_bytes();m[:len(r)]=r
+ m=bytearray(65536);d=(root/'bin/BIOS.sys').read_bytes();m[0xc000:0xc000+len(d)]=d;io=(root/'bin/IO.main.bin').read_bytes();m[0xf000:0xf000+len(io)]=io;r=(root/'bin/RUN.i80').read_bytes();m[:len(r)]=r
  # Text ABI belongs to the installed font DLL after its extraction from BIOS.
  font=(root/'bin/fonts/Rotate.i80').read_bytes();m[0xd800:0xd800+len(font)]=font
  m[ds['bios_fileGetSetDrive']:ds['bios_fileGetSetDrive']+2]=bytes.fromhex('B7 C9')

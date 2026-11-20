@@ -35,3 +35,4 @@ Buran/legacy/Buran-starwars-std.cpu,0,reference,Buran.exe,Побайтный и�
 Buran/legacy/Buran-starwars-std-tape.rks.bin,0,reference,17.rks,Побайтный исторический файл статического Бурана; не включается в образы
 Buran/legacy/Buran-starwars-std-germanovitsh.rks,0,reference,*0_16D8_1627.rks,Побайтный исторический файл статического Бурана; не включается в образы
 Buran/legacy/Buran-ramfos.cpu,0,reference,Buran..EXE,Побайтный исторический файл статического Бурана; не включается в образы
+Elite/Elite-jcuken.rks,268C,container-checked,elite_jcuken.rks,CityAceE; BBC cassette via reqw41/elite-v06c; JCUKEN; forum attachment 85280; H:Elite/Elite.exe

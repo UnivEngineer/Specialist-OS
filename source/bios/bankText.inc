@@ -1,10 +1,12 @@
 ; Общий исполнитель TEXT: окна MEM и одна команда copy+print.
     MODULE bankText
 dispatch:
+    cp 8
+    jp z,pseudo
+    cp 7
+    jp z,commands
     cp 5
     jp z,fromBank
-    cp 6
-    jp z,buffered
 ; A=0 Z, 1 RawZ, 2 RawLim, 3 Char, 4 CharRaw; HL=буфер, C=байты окна.
 window:
     or a
@@ -15,6 +17,9 @@ window:
     jp nz,one
     ld b,0
     jp bios_printStringRawLim
+pseudo:
+    ld b,0
+    jp bios_printStringRawPseudo
 one:
     ; DEC задаёт Z для Char, NZ для Raw; оба публичных вызова сохраняют
     ; AF и HL. Поэтому вторая условная CALL видит тот же флаг, а окно
@@ -25,6 +30,15 @@ one:
     call z,bios_printChar
     call nz,bios_printCharRaw
     inc hl
+    ret
+commands:
+    push bc
+    ld b,0
+    call 0F000h+9
+    pop bc
+    ld b,0
+    ld hl,0FFC8h
+    add hl,bc
     ret
 ; Принимающий адаптер уже сохранил пакет и установил main-стек.
 fromBank:
@@ -37,24 +51,6 @@ finish:
     pop hl
     ld (io_vars.bbRegs+6),hl
     jp 0F000h+6 ; Возврат через отдельный фиксированный вход bbFinish.
-buffered:
-    ld a,(io_vars.bbPage)
-    ld (copy),a
-    ld hl,(io_vars.bbRegs)
-    ld (source),hl
-    ex de,hl
-    ld hl,0F800h
-    call bios_sub_hl_de
-    ld (remaining),hl
-    ld a,(io_vars.bbFunction)
-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 0FFh
-    ld a,0
-    jp nz,bufferedKind
-    inc a
-bufferedKind:
-    ld (kind),a
-    call shared
-    jp finish
 request:
     xor a ; Нативный MAIN: запрос и источник находятся в main.
 execute:

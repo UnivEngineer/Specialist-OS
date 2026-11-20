@@ -83,7 +83,7 @@ encodingOld: cp 0
     ld h,FONT_ADDR >> 8
     ld b,8
     call swapPages
-    IF FONT_MODE
+    IF FONT_LOWER_BYTES
     ld hl,(fontPreBase)
     ld b,FONT_LOWER_BYTES/256
     call swapPages
@@ -120,14 +120,14 @@ service:
     jp z,query
     cp FONT_RENDER_DISABLE
     jp nz,unsupported
-    IF FONT_MODE
+    IF FONT_LOWER_BYTES
     jp unsupported
     ENDIF
 query:
     ld hl,(fontPreBase)
     ld de,FONT_ADDR
     ld bc,FONT_LOWER_BYTES
-    IF FONT_MODE
+    IF FONT_LOWER_BYTES
     ld a,1
     ELSE
     xor a

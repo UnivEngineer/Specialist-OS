@@ -1,5 +1,5 @@
 ; Compact KOI8 renderer: 162 glyphs * 8 bytes, no lower-memory tables.
-; Lookup maps unrepresented codes to space. KOI7 swaps map entries, not pixels.
+; Lookup maps unrepresented codes to DEL. KOI7 swaps map entries, not pixels.
     INCLUDE "../include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG FONT_ENGINE_BASE
@@ -16,6 +16,7 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     jp setEncoding
     jp scalar
     jp service
+    jp fontPseudoDraw
     DS FONT_ENGINE_HEADER-$,0
     DB 'FNT1',FONT_ENGINE_VERSION,6,8,3
     DW imageEnd-FONT_ENGINE_BASE,fontData,0,initializerName
@@ -30,7 +31,7 @@ printCharRawHelper:
     ld a,h
     cp 192
     ret c
-    jp bios_fontNewLine
+    jp fontLineEnd
 scalar:
     ld h,glyphMap/256
     ld l,c
@@ -157,10 +158,16 @@ query:
     xor a
     ret
     INCLUDE "bench.inc"
+PSEUDO_STEP = 3
+PSEUDO_WRAP = 190
+    DEFINE PSEUDO_COMPACT
+    INCLUDE "pseudo.inc"
+    FONT_PSEUDO_ENTRY
     DS (-$)&255,0
 ; Byte-aligned table gives the glyph index in two loads, no range search.
 glyphMap: INCBIN "../../bin/fonts/compact-map.bin"
 fontData: INCBIN "../../bin/fonts/compact-font.bin"
+    FONT_PSEUDO_TAIL
 imageEnd:
     ASSERT $ <= FONT_ENGINE_END
 

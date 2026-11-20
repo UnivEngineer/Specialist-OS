@@ -1,5 +1,5 @@
 ; Disposable font initializer ABI v1. MAIN-only; all registers volatile.
-; Native MAIN DLL loaded with its 16-byte header immediately below entry.
+; Native MAIN DLL loaded with IMAGE_HEADER_SIZE bytes immediately below entry.
 ; Entry: JMP implementation, then DB "FIN1",1 at +3.
 ; A=FONT_INIT_IMPORT or FONT_INIT_GENERATE; HL -> FONT_INIT_REQUEST.
 ; CF=0 success, CF=1 A=DOS error. No allocation, printing or file I/O.

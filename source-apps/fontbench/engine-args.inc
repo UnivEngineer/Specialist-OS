@@ -51,8 +51,31 @@ engineArgFind:
     add hl,de
     dec b
     jp nz,engineArgFind
+    ld hl,engineAliases
+    ld b,(engineAliasesEnd-engineAliases)/4
+engineArgAlias:
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    push hl
+    push bc
+    ld hl,argToken
+    call engineEqual
+    pop bc
+    pop hl
+    jp z,engineArgAliasFound
+    inc hl
+    inc hl
+    dec b
+    jp nz,engineArgAlias
     pop hl
     jp gridUsage
+engineArgAliasFound:
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a
 engineArgFound:
     ld de,5
     add hl,de
@@ -74,7 +97,7 @@ engineArgLegacy:
     ld a,1
     call engineSelectLoop
     ld a,1
-    ld (engineRecords+30*8+5),a ; historical window monitor, after shared modules
+    ld (windowEngineRecord+5),a
 engineArgDone:
     pop hl
     ld a,(hl)
@@ -170,3 +193,12 @@ argOff: DB 'OFF',0
 argOn: DB 'ON',0
 argBoth: DB 'BOTH',0
 argLegacy: DB 'LEGACY',0
+; Keep selectors used in previous benchmark reports and runners.
+engineAliases:
+    DW argRotate6,rotateQuadsRecord
+    DW argPack6K,packedQuadsRecord
+    DW argFast12K,fullQuadsRecord
+engineAliasesEnd:
+argRotate6: DB 'ROTATE6',0
+argPack6K: DB 'PACK6K',0
+argFast12K: DB 'FAST12K',0

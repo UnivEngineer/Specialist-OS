@@ -20,20 +20,19 @@
     ; FORMAT загружается по 0000h и затрёт RAMDISK. На её код не возвращаемся:
     ; на стеке остаётся возврат загрузчика DOS, который продолжит AUTOEXEC.
     ld hl,bankFormatCommand
-    jp bios_fileExec
-
+    MXOS_CALL MXOS_DOS_FILE_EXEC
+    ret
 BankPrepare:
     ld a,(bios_upper.ramPageCount)
     cp 2
     jp c,InstallFailed
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (bankPreviousDrive),a
     call BankCheckVolume
     push af
     ld a,(bankPreviousDrive)
-    call bios_fileSelectDrive
-    ; Ошибка исходного (возможно, неразмеченного B:) тома не заменяет
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE ; Ошибка исходного (возможно, неразмеченного B:) тома не заменяет
     ; результат проверки; физический выбор восстанавливается самим DOS.
     pop af
     ret
@@ -41,10 +40,10 @@ BankPrepare:
 ; A=0 — готов, A=1 — требуется FORMAT; CF=1 — нельзя форматировать автоматически.
 BankCheckVolume:
     ld a,1
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     jp c,BankMountError
     ; Повторная проверка нужна и при исходном текущем B: — не доверяем кэшу BPB.
-    call bios_mountVolume
+    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
     jp c,BankMountError
     xor a
     ret

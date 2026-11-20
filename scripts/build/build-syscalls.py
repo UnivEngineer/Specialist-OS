@@ -12,17 +12,18 @@ def generate(check=False):
          '#ifndef MXOS_SYSCALL_IDS_H', '#define MXOS_SYSCALL_IDS_H']
     tables = ['; Создано из source/bios/syscalls.json; внутренние адреса, не публичный ABI.']
     z80 = ['; Создано из source/bios/syscalls.json для ассемблера z88dk.']
-    legacy = ['; Создано из source/bios/syscalls.json; исторические файловые входы BIOS.',
-              '; Регистры передаются через общий диспетчер, выбор main/банка един.',
-              'sysLegacyStart:']
-    legacy_targets = set()
     for group in registry:
         group_id = group['group']
         asm.append(f"MXOS_GROUP_{group['name']} = {group_id}")
         c.append(f"#define MXOS_GROUP_{group['name']} {group_id}")
-        assert [s['id'] for s in group['services']] == list(range(len(group['services'])))
+        assert len({s['id'] for s in group['services']}) == len(group['services'])
         tables.append(f"sys{group['name']}Table:")
+        next_id = 0
         for service in group['services']:
+            while next_id < service['id']:
+                tables.append('    DW dos_dosUnsupported' if group_id == 2 else '    DW sysUnsupported')
+                next_id += 1
+            next_id += 1
             value = group_id*256+service['id']
             name = 'MXOS_'+group['name']+'_'+service['name']
             asm.append(f'{name} = 0{value:04X}h')
@@ -34,16 +35,11 @@ def generate(check=False):
                 c.append(f'#define {alias_name} {name}')
                 z80.append(f'defc {alias_name} = {name}')
             tables.append('    DW '+service['target'])
-            if group_id == 2 and service['target'].startswith('dos_') and service['target'] not in legacy_targets:
-                legacy_targets.add(service['target'])
-                legacy += ['sysLegacy_'+service['target'][4:]+':', f'    MXOS_CALL {name}', '    ret']
         tables.append(f"sys{group['name']}Count = ($-sys{group['name']}Table)/2")
     c.append('#endif')
-    legacy.append('sysLegacyEnd:')
     outputs = {
         ROOT/'source/include/syscall-ids.inc':asm,
         ROOT/'source/bios/syscall-tables.inc':tables,
-        ROOT/'source/io/legacy-files.inc':legacy,
         ROOT/'sdk/include/mxos_syscall_ids.h':c,
         ROOT/'sdk/src/mxos_syscall_ids.inc':z80,
     }

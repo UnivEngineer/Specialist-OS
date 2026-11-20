@@ -23,11 +23,14 @@ appEnter:
     call appSaveWord
     ld hl,(memoryMainEnd)
     call appSaveWord
+    ld hl,(appImage)
+    call appSaveWord
     xor a
     ld (moduleActor),a
     ld hl,0
     ld (memoryMainStart),hl
     ld (memoryMainEnd),hl
+    ld (appImage),hl
     ld a,(appDepth)
     add a,APP_OWNER_BASE
     ld (appOwner),a
@@ -57,6 +60,9 @@ appFrame:
     add hl,hl
     add hl,hl
     add hl,hl
+    ld e,a
+    ld d,0
+    add hl,de              ; 9 bytes per saved application
     ld de,appFrames
     add hl,de
     ret
@@ -93,8 +99,17 @@ appLeave:
     ld e,(hl)
     inc hl
     ld d,(hl)
+    push hl
     ex de,hl
     ld (memoryMainEnd),hl
+    pop hl
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
+    ld (appImage),hl
+    call memoryPublishTop
     pop hl
     pop de
     pop bc
@@ -103,6 +118,7 @@ appLeave:
 
 ; C=владелец. Освобождаем дочерние модули и обычные выделения.
 appReleaseOwner:
+    call timerReleaseOwner
     call fileopsReleaseOwner
     ld hl,MODULE_TABLE
     ld b,MODULE_MAX
@@ -176,6 +192,14 @@ residentKey:
 ; Резидент становится самостоятельным сервисом и доступен другим владельцам.
 residentService:
     ld a,(kdRegs+7)
+    cp RESIDENT_SHELL_SET
+    jp z,residentShellSet
+    cp RESIDENT_SHELL_RESUME
+    jp z,residentShellResume
+    cp RESIDENT_DIRECTORY_EPOCH
+    jp z,residentDirectoryEpoch
+    cp RESIDENT_RELEASE
+    jp z,residentRelease
     cp RESIDENT_RETAIN
     jp z,residentRetain
     cp RESIDENT_FIND
@@ -186,6 +210,149 @@ residentService:
     cp MODULE_MAX
     jp nc,residentNone
     jp residentScanStart
+; The shell owns its entry protocol. DOS stores a key, never a persistent PC/SP.
+residentShellSet:
+    ld hl,(kdRegs+2)
+    ld (residentShellKey),hl
+    xor a
+    jp kdError
+residentDirectoryEpoch:
+    ld a,(kdRegs+5)
+    cp RESIDENT_EPOCH_ALL
+    jp z,residentDriveEpochs
+    or a
+    jp nz,kdBad
+    ld hl,(cliChangeEpoch+2)
+    ex de,hl
+    ld hl,(cliChangeEpoch)
+    xor a
+    call kdCapture
+    jp kdFinish
+residentDriveEpochs:
+    ld hl,(kdRegs)
+    ld bc,32
+    call kdFileRange
+    jp c,kdBad
+    ex de,hl
+    ld hl,cliDriveEpochs
+    call kdStore
+    jp c,kdBad
+    xor a
+    jp kdError
+residentRelease:
+    ld a,(moduleActor)
+    sub MODULE_OWNER_BASE
+    cp MODULE_MAX
+    jp nc,residentDenied
+    ld b,a
+    ld l,a
+    ld h,0
+    add hl,hl
+    ld de,residentKeys
+    add hl,de
+    ld (hl),0
+    inc hl
+    ld (hl),0
+    ld hl,MODULE_TABLE+8
+    ld de,MODULE_RECORD_SIZE
+    ld a,b
+    or a
+    jp z,residentReleaseOwner
+residentReleaseRecord:
+    add hl,de
+    dec b
+    jp nz,residentReleaseRecord
+residentReleaseOwner:
+    ld (hl),DOS_IO_PAGE ; The system dispatcher releases it after the call.
+    xor a
+    jp kdError
+residentShellResume:
+    ld hl,(residentShellKey)
+    ld a,h
+    or l
+    jp z,residentShellMissing
+    ex de,hl
+    ld hl,residentKeys
+    ld b,MODULE_MAX
+residentShellScan:
+    ld a,(hl)
+    inc hl
+    cp e
+    jp nz,residentShellNext
+    ld a,(hl)
+    cp d
+    jp z,residentShellFound
+residentShellNext:
+    inc hl
+    dec b
+    jp nz,residentShellScan
+residentShellMissing:
+    ld hl,(residentShellKey)
+    ld (kdRegs),hl
+    xor a
+    scf
+    jp kdError
+residentShellFound:
+    ld a,MODULE_MAX
+    sub b
+    ld b,a
+    ld hl,MODULE_TABLE
+    ld de,MODULE_RECORD_SIZE
+    or a
+    jp z,residentShellRecord
+residentShellRecordNext:
+    add hl,de
+    dec b
+    jp nz,residentShellRecordNext
+residentShellRecord:
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
+    ld (residentShellHandle),hl
+    ld a,(kdPage)
+    push af
+    ld hl,(residentShellHandle)
+    push hl
+    ld hl,0100h ; AF: A=RESTORE, flags clear.
+    push hl
+    ld hl,0
+    push hl
+    push hl
+    push hl
+    add hl,sp
+    ex de,hl
+    ld hl,(residentShellHandle)
+    xor a
+    ld (kdBusy),a
+    MXOS_CALL MXOS_DOS_MODULE_CALL
+    jp c,residentShellStatusReady
+    ld hl,6
+    add hl,sp
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    push de
+    pop af
+residentShellStatusReady:
+    push af
+    pop bc
+    ld hl,8
+    add hl,sp
+    ld sp,hl
+    pop hl
+    push bc
+    ld a,1
+    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    pop bc
+    pop af
+    ld (kdPage),a
+    push bc
+    pop af
+    call kdCapture
+    jp kdFinish
+residentShellKey: DW NC_BANK_KEY
+residentShellHandle: DW 0
 residentFind:
     xor a
 residentScanStart:
@@ -372,7 +539,9 @@ residentDenied:
 
 appOwner: DB 0
 appDepth: DB 0
-appFrames: DS APP_MAX_DEPTH*8,0
+appImage: DW 0
+appFrames = DOS_APP_FRAMES
+    ASSERT appFrames+APP_MAX_DEPTH*9 <= DOS_CACHE_BOOT_ADDR
 residentKeys: DS MODULE_MAX*2,0
 residentIndex: DB 0
 

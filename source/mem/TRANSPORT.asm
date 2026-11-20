@@ -5,23 +5,17 @@
 ; Раскладки локальных стековых кадров: BANK_CALLER_* / BANK_CALLEE_* в abi.inc.
 ; До проверки kind и установки SP стек предыдущей страницы не трогаем.
 bankLanding:
+    ld a,(BANK_BUFFER_KIND)
+    or a
+    jp z,bankFrameLanding
+    dec a
+    jp z,MEM_BUFFER_MAIN_ENTRY
+    jp MEM_BUFFER_RETURN_ENTRY
+bankFrameLanding:
     ld a,(BANK_FRAME_KIND)
     cp 1
     jp z,bankResume
-    ld a,(bankDepth)
-    cp BANK_MAX_DEPTH
-    jp nc,bankRejectStack
-    ld hl,(bankStackFloor)
-    ld d,h
-    ld e,l
     ld hl,(bankServiceSP)
-    ld a,h
-    cp d
-    jp c,bankRejectStack
-    jp nz,bankEnter
-    ld a,l
-    cp e
-    jp c,bankRejectStack
 bankEnter:
     ld sp,hl
     ; Локальный кадр исполнителя: 8 байт, раскладка BANK_CALLEE_* в abi.inc.
@@ -72,17 +66,6 @@ bankPacketEnter:
 bankCall:
     call bankCommandWindow
     ld (BANK_FRAME_TARGET),a
-    push af
-    ld a,(bankPageCount)
-    ld (bankLimit+1),a
-    pop af
-bankLimit:
-    cp 16+1
-    jp c,bankCallValid
-    jp z,bankCallValid
-    ld a,BANK_ERROR_PAGE
-    scf
-    ret
 bankCallValid:
     ; Кадр вызывающей стороны: 12 байт с адресом от CALL; BANK_CALLER_* в abi.inc.
     push af
@@ -137,21 +120,14 @@ bankCallPacket:
     ld a,(BANK_PROFILE)
     or a
     call nz,bankCommandWindow
+    xor a
+    ld (BANK_BUFFER_KIND),a
     pop af
     ld (BANK_FRAME_TARGET),a
     push af
     ld a,1
     ld (BANK_FRAME_STATUS),a
-    ld a,(bankPageCount)
-    ld (bankPacketLimit+1),a
     pop af
-bankPacketLimit:
-    cp 16+1
-    jp c,bankPacketValid
-    jp z,bankPacketValid
-    ld a,BANK_ERROR_PAGE
-    scf
-    ret
 bankPacketValid:
     ld (BANK_FRAME_ENTRY),hl
     push af
@@ -195,6 +171,8 @@ bankServiceReturn:
     ld a,(BANK_PROFILE)
     or a
     call nz,bankCommandWindow
+    xor a
+    ld (BANK_BUFFER_KIND),a
     pop af
     ; После сохранения результата CPU-регистры уже не нужны: пишем слова
     ; прямо в окно, без восьмибайтной копии со стека и обратных POP.
@@ -241,15 +219,6 @@ bankResume:
     pop af
     ret
 
-; Ошибка входа не использует стек отвергнувшей страницы.
-bankRejectStack:
-    ld a,BANK_ERROR_STACK
-    ld (BANK_FRAME_REGS+7),a
-    ld a,3
-    ld (BANK_FRAME_REGS+6),a
-    ld a,1
-    ld (BANK_FRAME_KIND),a
-    ld a,(BANK_FRAME_PAGE)
 bankSwitch:
     or a
     ld hl,BANK_IO_MAIN
@@ -304,6 +273,7 @@ bankTextRangeError:
     scf
     ret
     INCLUDE "copy.inc"
+    INCLUDE "queue-hook.inc"
     ASSERT $ <= BANK_COMMAND_LANDING
     DS BANK_COMMAND_LANDING-$,0
     INCLUDE "scalar-command.inc"

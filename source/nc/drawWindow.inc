@@ -24,38 +24,31 @@ drawWindowIfSel:
 ; ---------------------------------------------------------------------------
 
 drawWindow1:
-        ld hl,g_window1
-        call ncDialogOpen
-        COLOR   COLOR_DIALOG
-
-        ; Рисуем окно
-        ld      hl, g_window1
-        call    draw
-      
-        ; Рисуем прямоугольник
-        ld      hl, 9F65h           ; x=120 y=101
-        ld      bc, (18 << 8) + 11  ; w=144 h=11
-        call    inverseRect
-        ld hl,ncInputOk
-        call ncDrawButton
-        ld hl,ncInputCancel
-        jp ncDrawButton
+        ld hl,ncInputModal
+        call ncModalOpen
+        ld hl,240
+        call ncProgressFieldWidth
+        ld a,b
+        ld (ncInputChars),a
+        call ncModalInputCursor
+        ld d,l
+        ld hl,72
+        ld bc,240
+        ld a,(ncGlyphHeight)
+        call uiInputFieldPixels
+        call ncModalInputCursor
+        call bios_setCursorPos
+        ld a,1
+        ld (bios_vars.inverse),a
+        ld hl,ncInputEmpty
+        ld a,(ncInputChars)
+        ld b,a
+        call ncPrintField
+        xor a
+        ld (bios_vars.inverse),a
+        ret
 
 ; ---------------------------------------------------------------------------
-
-drawWindow2:
-        ld hl,g_window2
-        call ncDialogOpen
-        COLOR   COLOR_DIALOG
-
-        ; Рисуем окно
-        ld      hl, g_window2
-        call    draw
-
-        ; Рисуем прямоугольник
-        ld      hl, 9E87h           ; x=112 y=135
-        ld      bc, (20 << 8) + 11  ; w=160 h=11
-        jp      inverseRect
 
 ; CF=нет обычного элемента. Псевдозаписи не являются целями операций.
 ; AF/HL разрушены; BC/DE сохраняются.
@@ -74,9 +67,14 @@ ncNoSelection:
         scf
         ret
 
-ncInputHint: DB "OK [Enter]  Cancel [Esc]",0
 
 ncInputOkText: DB 'OK [Enter]',0
 ncInputCancelText: DB 'Cancel [Esc]',0
-ncInputOk: UI_BUTTON ncInputOkText,36,56,122,14,6,1
-ncInputCancel: UI_BUTTON ncInputCancelText,100,56,122,14,6,0
+ncInputModal:
+    UI_MODAL_BEGIN 12,1,2
+ncInputOk:
+    UI_MODAL_BUTTON ncInputOkText,0,0,1
+ncInputCancel:
+    UI_MODAL_BUTTON ncInputCancelText,0,1,0
+    UI_MODAL_END
+ncInputEmpty: DB 0

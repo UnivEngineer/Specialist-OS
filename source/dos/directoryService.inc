@@ -23,13 +23,7 @@ directoryService:
             push de
             call fatCheckMounted
             jp c,directoryMountError
-            push hl
-            ld hl,(v_volumeTable)
-            ld de,fatVolumeDriver+VOLUME_DRIVER_HEADER
-            call cmp_hl_de
-            pop hl
             pop de
-            jp nz,directoryUnsupported
             pop af
             cp DIR_OP_GETCWD
             jp z,directoryGetCwd
@@ -44,9 +38,6 @@ directoryMountError:
             pop de
             pop bc
             ret
-directoryUnsupported:
-            pop af
-            jp dosUnsupported
 directoryGet:
             ld hl,(v_directory)
             ex de,hl

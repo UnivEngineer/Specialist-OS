@@ -1,17 +1,22 @@
     INCLUDE "../../source/include/mxos.inc"
     INCLUDE "../../bin/FONTBEN.bios.entries.inc"
     DEFINE FONT_NATIVE_GRID
-FONT_CORPUS_SIZE = 1152
+    INCLUDE "grid-corpus.inc"
+FONT_CORPUS_SIZE = GRID_TEXT_BYTES
 textCorpus = 03000h ; transient corpus, consumed before standalone DLL load
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 entry:
     push de
+    call gridSetModuleDrive
     call bench_init
     pop hl
     ret c
     call gridArgs
     jp c,gridExit
+    ld a,(gridPseudoOnly)
+    or a
+    call nz,gridPseudoSetup
     ld hl,(enginePreFirst)
     ld (gridRequestedPre),hl
     call bios_getMemTop
@@ -23,9 +28,13 @@ entry:
     jp c,gridError
     ld hl,textCorpus
     ld de,gridText
-    ld c,24
+    ld c,GRID_ROWS
+    ld a,(gridPhase)
+    inc a
+    jp z,gridPrepareRow
+    ld c,GRID_PHASE_ROWS
 gridPrepareRow:
-    ld b,46
+    ld b,GRID_GLYPHS
 gridPrepareChar:
     ld a,(hl)
     inc hl
@@ -33,7 +42,12 @@ gridPrepareChar:
     inc de
     dec b
     jp nz,gridPrepareChar
+    ld a,(gridPhase)
+    inc a
     ld a,13
+    jp z,gridRowEnd
+    xor a                 ; -X uses one ASCIZ string per row.
+gridRowEnd:
     ld (de),a
     inc de
     ld a,10
@@ -43,6 +57,9 @@ gridPrepareChar:
     jp nz,gridPrepareRow
     xor a
     ld (de),a
+    ld a,(gridPseudoOnly)
+    or a
+    call nz,gridPseudoCorpus
     xor a
     ld (engineId),a
 gridEngineNext:
@@ -100,6 +117,18 @@ gridEngineModeReady:
     ld a,(FONT_ENGINE_HEADER+5)
 gridWidthReady:
     ld (engineWidth),a
+    ld b,a
+    ld a,(gridPseudoOnly)
+    or a
+    ld a,b
+    jp nz,gridWidthAccepted
+    ld a,(gridPhase)
+    inc a
+    ld a,b
+    jp z,gridWidthAccepted
+    cp 8
+    jp nz,gridError
+gridWidthAccepted:
     add a,'0'
     ld (gridTitleWidth),a
     ld (gridTotalWidth),a
@@ -121,9 +150,24 @@ gridTotalReady:
     jp z,gridTotalStore
     ld hl,03630h ; 06 scalar stages for one pre-state.
 gridTotalStore:
+    ld a,(gridPseudoOnly)
+    or a
+    jp nz,gridTotalPseudo
+    ld a,(gridPhase)
+    inc a
+    jp z,gridTotalRegular
+    ld hl,03530h
+    ld a,(gridScalarOnly)
+    or a
+    jp z,gridTotalRegular
+    ld h,'2'
+    jp gridTotalRegular
+gridTotalPseudo:
+    ld hl,03230h ; '02'
+gridTotalRegular:
     ld (gridTotal+1),hl
     ld hl,gridResults
-    ld bc,240
+    ld bc,gridResultsEnd-gridResults
 gridClearResults:
     ld (hl),0FFh
     inc hl
@@ -138,7 +182,7 @@ gridClearResults:
 gridPreNext:
     call engineOpen
     jp c,gridError
-    xor a
+    call gridFirstKind
     ld (gridKind),a
 gridKindNext:
     xor a
@@ -212,6 +256,9 @@ gridMeasured:
     ld hl,gridMs
     call puts
 gridProgressDone:
+    ld a,(gridPhase)
+    inc a
+    jp nz,gridNextKind
     ld a,(gridRoute)
     inc a
     ld b,a
@@ -235,6 +282,9 @@ gridContinueRoute:
 gridNextKind:
     ld hl,gridKind
     inc (hl)
+    ld a,(gridPseudoOnly)
+    or a
+    jp nz,gridPseudoNext
     ld a,(hl)
     ld b,a
     ld a,(gridScalarOnly)
@@ -246,6 +296,11 @@ gridNextKind:
     jp gridKindsDone
 gridAllKinds:
     cp 5
+    jp c,gridKindNext
+    jp gridKindsDone
+gridPseudoNext:
+    ld a,(hl)
+    cp 6
     jp c,gridKindNext
 gridKindsDone:
     call engineClose
@@ -289,11 +344,19 @@ gridExit:
     ld hl,0
     ld (bios_vars.inverse),hl
     call engineUnhook
+    ; Quick mode leaves the last timing on the bottom line.
+    ld a,(bios_vars.cursorX)
+    or a
+    ld hl,gridCRLF
+    call nz,puts
     jp bench_restore
 ; Direct MAIN ABI calls: no transport in the measured interval.
 gridMainRun:
+    ld a,(gridPhase)
+    inc a
+    jp nz,gridPhaseRun
     ld hl,gridText
-    ld bc,1152
+    ld bc,GRID_TEXT_BYTES
     ld a,(gridKind)
     cp 2
     jp z,bios_printStringZ
@@ -303,9 +366,9 @@ gridMainRun:
     jp z,bios_printStringRawLim
     or a
     jp nz,gridMainRaw
-    ld b,72 ; 72 * 16 = 1152, B/HL сохраняются самим API.
+    ld b,GRID_TEXT_BYTES/GRID_UNROLL ; B/HL сохраняются самим API.
 gridMainChar:
-    DUP 16
+    DUP GRID_UNROLL
     ld c,(hl)
     call bios_printChar
     inc hl
@@ -314,9 +377,9 @@ gridMainChar:
     jp nz,gridMainChar
     ret
 gridMainRaw:
-    ld b,72
+    ld b,GRID_TEXT_BYTES/GRID_UNROLL
 gridMainRawLoop:
-    DUP 16
+    DUP GRID_UNROLL
     ld a,(hl)
     call bios_printCharRaw
     inc hl
@@ -324,6 +387,7 @@ gridMainRawLoop:
     dec b
     jp nz,gridMainRawLoop
     ret
+    INCLUDE "grid-phase.inc"
 ; One separately loaded native bank; loading and corpus copy are not timed.
 gridInvoke:
     ld a,080h
@@ -455,12 +519,21 @@ gridTable:
     call puts
     ld hl,gridCRLF
     call puts
+    ld a,(gridPhase)
+    inc a
+    ld hl,gridPhaseTitle
+    call nz,puts
+    ld a,(gridPhase)
+    inc a
+    ld hl,gridTitleWidth
+    jp nz,gridTableTitleReady
     ld hl,gridTitle
+gridTableTitleReady:
     call puts
     ld a,(enginePreFirst)
     ld (gridPre),a
 gridTablePre:
-    xor a
+    call gridFirstKind
     ld (gridKind),a
 gridTableKind:
     call gridPrintLabel
@@ -490,15 +563,22 @@ gridMissing:
 gridCellDone:
     ld a,' '
     call gridPrintChar
+    ld a,(gridPseudoOnly)
+    or a
+    jp nz,gridTableLineEnd
     ld hl,gridRoute
     inc (hl)
     ld a,(hl)
     cp 6
     jp c,gridTableValue
+gridTableLineEnd:
     ld hl,gridCRLF
     call puts
     ld hl,gridKind
     inc (hl)
+    ld a,(gridPseudoOnly)
+    or a
+    jp nz,gridTablePseudoNext
     ld a,(hl)
     ld b,a
     ld a,(gridScalarOnly)
@@ -510,6 +590,11 @@ gridCellDone:
     jp gridTableKindsDone
 gridTableAllKinds:
     cp 5
+    jp c,gridTableKind
+    jp gridTableKindsDone
+gridTablePseudoNext:
+    ld a,(hl)
+    cp 6
     jp c,gridTableKind
 gridTableKindsDone:
     ld hl,gridPre
@@ -563,10 +648,10 @@ gridSave:
     xor a
     ld (gridCapture),a
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (gridDrive),a
     ld a,1
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld a,(engineFileAppend)
     or a
@@ -577,7 +662,7 @@ gridFileMode:
     ld (gridHandle+FH_MODE),a
     ld a,FILE_OP_OPEN
     ld hl,gridHandle
-    call bios_fileHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
     jp c,gridRestoreDrive
     ld hl,(gridControl+8)
     ex de,hl
@@ -588,11 +673,11 @@ gridFileMode:
     ld (gridHandle+FH_BUFFER),hl
     ld hl,gridHandle
     ld a,FILE_OP_WRITE
-    call bios_fileHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
     push af
     ld hl,gridHandle
     ld a,FILE_OP_CLOSE
-    call bios_fileHandle
+    MXOS_CALL MXOS_DOS_FILEHANDLE
     jp c,gridCloseFailed
     pop af
     jp c,gridRestoreDrive
@@ -605,7 +690,8 @@ gridCloseFailed:
     pop af
 gridRestoreDrive:
     ld a,(gridDrive)
-    jp bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    ret
 gridArgs:
     ld a,h
     or l
@@ -638,7 +724,26 @@ gridArgsNext:
     jp z,gridArgK
     cp 'G'
     jp z,gridArgsNext
+    cp 'X'
+    jp z,gridArgX
+    cp 'R'
+    jp z,gridArgR
     jp gridUsage
+gridArgR:
+    ld a,1
+    ld (gridPseudoOnly),a
+    jp gridArgsNext
+gridArgX:
+    ld a,(hl)
+    sub '0'
+    cp 4
+    jp nc,gridUsage
+    ld (gridPhase),a
+    add a,a
+    add a,'0'
+    ld (gridPhasePixel),a
+    inc hl
+    jp gridArgsNext
 gridArgS:
     ld a,1
     ld (gridScalarOnly),a
@@ -681,6 +786,14 @@ gridCopy:
     or c
     jp nz,gridCopy
     ret
+; Companion programs and DLLs stay in BENCH/FontBen on the launch drive.
+gridSetModuleDrive:
+    call appProgramDrive
+    ld (gridBankPath),a
+    ld (enginePath),a
+    ret
+    DEFINE APP_COMMAND_ADDR MAIN_COMMAND_ADDR
+    INCLUDE "../../source/include/app-drive.inc"
     INCLUDE "engine-hooks.inc"
     INCLUDE "engine-select.inc"
     INCLUDE "../textbench/standalone.inc"
@@ -689,6 +802,8 @@ gridRequestedPre: DW 0
 gridPre: DB 0
 gridKind: DB 0
 gridRoute: DB 0
+gridPhase: DB 0FFh
+gridPseudoOnly: DB 0
 gridStage: DB 0
 gridQuick: DB 0
 gridScalarOnly: DB 0
@@ -703,14 +818,15 @@ gridFileFailed: DB 'Cannot save B:\FONTBEN.TXT',13,10,0
 gridFileSaved: DB 'Saved B:\FONTBEN.TXT',13,10,0
 gridControl: DW 0,0,0,08000h,0,gridText
     DB 0,0
-gridBankPath: DB 'H:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
+gridBankPath: DB 'A:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
 gridArgument: DB '0000',0
     DS MAX_PATH-($-gridBankPath),0
-gridResults: DS 240,0FFh
-gridTitle: DB 'FontBen: 1152 bytes, '
+gridResults: DS 264,0FFh
+gridResultsEnd:
+gridTitle: DB 'FontBen: 924 bytes, '
 gridTitleWidth: DB '6','x8, ms '
 gridInverseLabel: DB 'N',13,10
-    DB 'P API              MAIN CMD  TEXT W20  F256 USER',13,10,0
+    DB 'P API              MAIN CMD  CMDZ NEAR F256 USER',13,10,0
 gridProgress: DB ' Stage ',0
 gridTotal: DB '/36 '
 gridTotalWidth: DB '6','x8 ',0
@@ -721,22 +837,26 @@ gridDash: DB '   -',0
 gridRouteNames: DW gridRoute0,gridRoute1,gridRoute2,gridRoute3,gridRoute4,gridRoute5
 gridRoute0: DB 'MAIN ',0
 gridRoute1: DB 'BANK CMD ',0
-gridRoute2: DB 'BANK TEXT ',0
-gridRoute3: DB 'BANK Win20 ',0
+gridRoute2: DB 'BANK CMD+Z ',0
+gridRoute3: DB 'BANK NEAR ',0
 gridRoute4: DB 'BANK Far256 ',0
 gridRoute5: DB 'BANK Own ',0
-gridNames: DW gridName0,gridName1,gridName2,gridName3,gridName4
+gridNames: DW gridName0,gridName1,gridName2,gridName3,gridName4,gridName5
 gridName0: DB 'Char             ',0
 gridName1: DB 'CharRaw          ',0
 gridName2: DB 'StringZ          ',0
 gridName3: DB 'StringRawZ       ',0
 gridName4: DB 'StringRawLim     ',0
+gridName5: DB 'StringRawPseudo  ',0
 gridErrorText: DB 13,10,'FontBen failed (file, bank or memory)',13,10,0
 gridInverseErrorText: DB 'Inverse mode requires -E=BIOS',13,10,0
 gridHelp: DB 'FontBen -E=BIOS|ALL|STANDALONE|name[,name]',13,10
+    DB '-X0..3: 8x8, MAIN, 22 rows x 42 glyphs',13,10
+    DB '-R: MAIN RawLim vs RawPseudo, installed font',13,10
     DB '-S scalar only; -I inverse (BIOS/STANDALONE)',13,10
     DB '-P=OFF|ON|BOTH  -N no file  -Q no table/Enter',13,10
-    DB 'ROTATE6 PACK6K FAST12K COMPACT6 FAST8 CPM4',13,10
+    DB '6ROTATEQUADS 6ROTATEROWS 6PACKEDQUADS 6FULLQUADS',13,10
+    DB '8ROTATEQUADS 8ROTATESTREAM COMPACT6 FAST8 CPM4',13,10
     DB 'Legacy: MXOS1 OPT SCALAR12 CACHE QUAD COLD WARM ROTATE',13,10
     DB 'MON2 RAMFOS WIN8 ROTLINE FULLFAST COL6PRE TRIPACK',13,10
     DB 'HALF PACKED ROW6 REMAP32 BLOCK32 ROW8 4RAW 4PACK 4DUP',13,10,0
@@ -745,7 +865,7 @@ gridHandle: DB 'FONTBEN TXT'
     DB 1
     DB FILE_MODE_WRITE | FILE_MODE_CREATE | FILE_MODE_TRUNCATE
     DS FILE_HANDLE-FH_MODE-1,0
-gridText: DS 1201,0
+gridText: DS GRID_PHASE_ROWS*GRID_STRIDE+1,0
     ASSERT $ <= 02000h
     DS 02000h-$,0
 programEnd:

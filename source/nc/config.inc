@@ -21,7 +21,7 @@ ncConfigLoad:
 ncConfigRead:
     push hl
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     push af
     pop bc
     pop hl
@@ -32,7 +32,7 @@ ncConfigRead:
     ld hl,2047
     ld (ncStateIO+FILE_PATH_IO.count),hl
     ld hl,ncStateIO
-    MXOS_CALL MXOS_DOS_FILE_LOAD_PATH
+    call fileReadAll
     jp c,ncConfigLoaded
     ld hl,(ncStateIO+FILE_PATH_IO.actual)
     ld de,NC_SORT_KEYS
@@ -94,6 +94,8 @@ ncConfigDirective:
     call ncConfigLookup
     ret c
     ld (ncConfigKind),a
+    cp 15
+    jp nc,ncConfigDrive
     cp 4
     jp nc,ncStateConfig
     cp 3
@@ -129,6 +131,46 @@ ncConfigSort:
     ld (ncDefaultSort),a
     ld (state.panelA_sort),a
     ld (state.panelB_sort),a
+    ret
+; The installed drive list is prepared before either configuration layer.
+; Accept A..H with an optional colon. Missing drives keep the previous default.
+ncConfigDrive:
+    call ncConfigToken
+    ret c
+    ld a,b
+    dec a
+    jp z,ncConfigDriveLetter
+    dec a
+    ret nz
+    inc de
+    ld a,(de)
+    cp ':'
+    ret nz
+    dec de
+ncConfigDriveLetter:
+    ld a,(de)
+    sub 'A'
+    cp 8
+    ret nc
+    ld c,a
+    call findDrive
+    ret c
+    ld a,(ncConfigKind)
+    sub 15
+    ld e,a
+    ld d,0
+    ld hl,state.panelA_drive
+    add hl,de
+    ld (hl),c
+    ld hl,state.panelA_dirLow
+    add hl,de
+    ld (hl),0
+    ld hl,state.panelA_dirHigh
+    add hl,de
+    ld (hl),0
+    ld hl,vars.pathValidA
+    add hl,de
+    ld (hl),0
     ret
 ncConfigExtensions:
     call ncConfigToken
@@ -310,6 +352,7 @@ ncConfigPath: DB 'A:',05Ch,'NC.CFG',0
 ncConfigDirectives:
     DB 'FILECOLORUSER',0,0,'FILECOLORSYS',0,1,'FILECOLORDEF',0,2
     DB 'DEFAULTSORTMODE',0,3
+    DB 'DEFAULTLEFTDRIVE',0,15,'DEFAULTRIGHTDRIVE',0,16
 ncKeyActive: DB 'ACTIVEPANEL',0,4
 ncKeyLeftPath: DB 'LEFTPATH',0,5
 ncKeyRightPath: DB 'RIGHTPATH',0,6

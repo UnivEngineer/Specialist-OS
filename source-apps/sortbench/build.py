@@ -4,6 +4,8 @@ import subprocess
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+cpu_helpers = __import__('runpy').run_path(str(ROOT/'scripts/images/cpu.py'))
+cpu_format = cpu_helpers['format_cpu']
 
 
 def main():
@@ -25,7 +27,7 @@ def main():
     subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',
                     '--raw='+str(output/'SORTBEN.i80'),'--sym='+str(output/'SORTBEN.sym'),
                     '--lst='+str(output/'SORTBEN.lst'),'SORTBEN.asm'],cwd=HERE,check=True)
-    (output/'SORTBEN.cpu').write_bytes(b'0000\r\n0000\r\n04\r\n')
+    (output/'SORTBEN.cpu').write_text(cpu_format(0,flags=4,fields=cpu_helpers['fields_from_symbols']((output/'SORTBEN.sym').read_text('utf-8'))),encoding='ascii')
 
 
 if __name__=='__main__':

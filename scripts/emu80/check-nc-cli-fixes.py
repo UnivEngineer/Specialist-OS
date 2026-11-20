@@ -100,7 +100,7 @@ try:
     m.m.screenshot(O/'cli-bottom-edit.png')
     tap('esc');text('NC');tap('enter');m.m.call('emu_run_for',ms=2000)
     m.m.call('kbd_send',keys=['shift'],action='press');m.m.call('emu_run_for',ms=500)
-    e=h['symbols'](R/'bin/E.sym')
+    e=h['symbols'](R/'bin/EDIT.sym')
     m.m.stop_at(e['keyInput']);tap('f4');m.m.until(e['keyInput'],45)
     m.m.call('kbd_send',keys=['shift'],action='release')
     assert m.m.read(s['inputHook'],2)==b'\0\0'

@@ -13,7 +13,9 @@
 | `Almaz2-ramfos`           | «Специалист-RAMFOS» / Ramfos                | 16 цветов | Нет  | Программный звук, оригинальная скорость игры | Нет  |
 | `Almaz2-ramfos-optimized` | «Специалист-RAMFOS» / Ramfos                | 16 цветов | Есть | Звук ВИ53, реальные секунды                  | Есть |
 
-Имена внутри образов задаются манифестами. Например, `Almaz2MX.exe` на flash-диске берётся из `Almaz2-mx-optimized.cpu`. Сборка и публикация:
+Имена внутри образов задаются манифестами. Для `Almaz2MX.exe` и `Almaz2RF.exe` сборщик берёт заголовок из описателя `.cpu`, а машинный код из соседнего `.i80`. MXOS запускает `Almaz2MX.exe` напрямую по флагу MAIN. Для `Almaz2RF.exe` RUN автоматически выбирает RAMFOS по полю MODE в заголовке.
+
+Сборка и публикация:
 
 ```powershell
 powershell.exe -NoProfile -File scripts/build/build-almaz2.ps1 All -PublishMxTimer

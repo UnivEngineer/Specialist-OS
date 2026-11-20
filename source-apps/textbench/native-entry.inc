@@ -111,7 +111,7 @@ resultCopy: DB 0
 corpusCopy: DB 0
     DW 0
     DB 0
-    DW 02000h,1201
+    DW 02000h,GRID_TEXT_BYTES+1
 nativeUsageText: DB 'Run FONTBEN.COM to select tests.',13,10,0
     ELSE
 nativeUsageText: DB 'Run TEXTBEN.COM to select tests.',13,10,0

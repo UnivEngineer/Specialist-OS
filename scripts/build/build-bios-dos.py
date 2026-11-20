@@ -40,7 +40,7 @@ def main():
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
     lines += [inc(ROOT/'source/bios'/f) for f in ('getch.inc','cmp_hl_de_2.inc')]
-    lines += [inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/syscall-tables.inc')]
+    lines += [inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/syscall-tables.inc'), inc(ROOT/'source/io/shell-input.inc')]
     probe=out/'System.measure.asm'
     probe.write_text('\n'.join(lines+['    END','']),encoding='utf-8')
     h['assemble'](probe,out/'System.measure.bin',[])
@@ -57,6 +57,7 @@ def main():
               '    ORG_PAD BIOS_IO_ADDR',
               'bankBiosImageStart:',
               '    INCBIN "'+(out/'banked/MAINBIOS.bin').as_posix()+'"',
+              inc(ROOT/'source/io/shell-input.inc'),
               'bankBiosImageEnd:',
               '    ASSERT $ <= BIOS_BANK_GATE_END',
               'bankIoImageStart = BIOS_BANK_IO_ADDR',
@@ -80,7 +81,13 @@ def main():
     assert raw[:len(dos)]==dos, 'РљРѕРЅС‚СЂРѕР»СЊРЅР°СЏ СЃСѓРјРјР° РЅРµ РґРѕР»Р¶РЅР° РјРµРЅСЏС‚СЊ DOS'
     bios=raw[0xC000-dos_start:sy['biosLowEnd']-dos_start]
     io=raw[sy['BIOS_IO_ADDR']-dos_start:sy['ioImageEnd']-dos_start]
-    (out/'IO.sys').write_bytes(io)
+    key_imports = ('bankKeyEvent', 'bankCursorSet')
+    (out/'banked/key-imports.inc').write_text(''.join(
+        f'{name} = 0{sy[name]:04X}h\n' for name in key_imports), encoding='utf-8')
+    h['assemble'](ROOT/'source/io/KEYBANK.asm',out/'banked/KEYBANK.bin',[])
+    keybank=(out/'banked/KEYBANK.bin').read_bytes()
+    (out/'IO.main.bin').write_bytes(io)  # Flat MAIN segment for standalone CPU fixtures.
+    (out/'IO.sys').write_bytes(io+keybank)
     (out/'DOS.native.sys').write_bytes(dos)
     (out/'BIOS.sys').write_bytes(bios)
     (out/'banked/MAINIO.bin').write_bytes(bytes([0xC3,sy['mainBlockIO']&255,sy['mainBlockIO']>>8]))
@@ -94,7 +101,7 @@ def main():
         (out/f'{stem}.lst').write_bytes((out/'System.linked.lst').read_bytes())
     report=dict(bios=dict(start=0xC000,end=0xC000+len(bios),bytes=len(bios)),
                 fontEngine=dict(start=sy['FONT_ENGINE_BASE'],end=sy['FONT_ENGINE_END']),
-                io=dict(start=sy['BIOS_IO_ADDR'],end=sy['ioImageEnd'],bytes=len(io)),
+                io=dict(start=sy['BIOS_IO_ADDR'],end=sy['ioImageEnd'],bytes=len(io),bankAddress=sy['IO_BANK_KEYS'],bankBytes=len(keybank)),
                 diskBuffer=dict(start=sy['BIOS_DISK_BUFFER'],end=sy['BIOS_DISK_BUFFER_END']),
                 temporaryBuffer=dict(start=sy['BIOS_TEMP_BUFFER'],end=sy['BIOS_TEMP_BUFFER_END']),
                 upperReserve=dict(start=sy['FONT_ADDR']+sy['FONT_BYTES'],end=sy['BIOS_BANK_STACK_BOTTOM']),
@@ -103,13 +110,11 @@ def main():
                 units={k:[u['name'] for u in v] for k,v in groups.items()},windows=manifest['fixed'],
                 blocks=[dict(name=b['block']['key'],address=b['address'],size=b['block']['size'])
                         for b in sorted(bios_plan['placed'],key=lambda b:b['address'])
-                        if b['block']['key'] != 'mainAdapters']
+                        if b['block']['key'] not in ('fileBodyAdapter','rawLocalAdapter','glyphCacheAdapter')]
                        + [dict(name='bankBiosGateway', address=sy['bankBiosImageStart'],
                                size=sy['bankBiosImageEnd']-sy['bankBiosImageStart']),
                           dict(name='bankDiskBridge', address=sy['bankIoImageStart'],
                                size=sy['bankIoImageEnd']-sy['bankIoImageStart']),
-                          dict(name='legacyFileAdapters', address=sy['sysLegacyStart'],
-                               size=sy['sysLegacyEnd']-sy['sysLegacyStart']),
                           dict(name='fileBodyLoader', address=sy['fileBodyLoad'],
                                size=sy['fileBodyEnd']-sy['fileBodyLoad']),
                           dict(name='bankedBoot',address=sy['biosBankCold'],size=sy['ioTablesStart']-sy['biosBankCold']),

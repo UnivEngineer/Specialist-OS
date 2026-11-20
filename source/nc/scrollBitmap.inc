@@ -1,6 +1,7 @@
 ; Битмап-прокрутка 1/2/3 колонок NC через локальный стековый копировщик.
 ; Вход B=1 вперёд, B=2 назад; vars.scrollRows=модуль шага.
-; Обычно старый курсор стёрт. При scrollCursorKept его строка не копируется.
+; При scrollCursorKept инверсные пиксели исключаются из копии. Цветовое
+; выделение переносится с обычным цветом из таблицы ячеек.
 ; Атрибуты ячеек хранятся в vars.rowColors; соседние цвета объединяются.
 ; CF=1: список и новый курсор нарисованы; AF/BC/DE/HL разрушены.
 ; CF=0: шаг больше колонки, нужен текстовый путь; BC/DE/HL сохранены.
@@ -14,9 +15,7 @@ scrollBitmapPanel:
             cp      P_FILE_LIST_H + 1
             ret nc
             push    bc
-            ld      hl, state.panelA_drive
-            call    readBytePanel
-            call    loadFiles
+            call    lf_UpdateViewport
             COLOR   COLOR_FILE
             ld      a, (vars.scrollRows)
             add     a, a
@@ -61,6 +60,7 @@ scrollBitmapPanel:
             ld      l, a
             ld      a, (vars.scrollRemain)
             ld      e, a
+    IF !ENABLE_COLOR
             ld      a, (vars.scrollCursorKept)
             or      a
             jp z,   bitmapRightCopy
@@ -69,6 +69,7 @@ scrollBitmapPanel:
             sub     10
             ld      e, a
 bitmapRightCopy:
+    ENDIF
             call    bitmapCopy
 
             ; Общий цикл печатает только новые строки.
@@ -104,6 +105,7 @@ bitmapBackward:
             ld      c, a
             ld      a, (vars.scrollRemain)
             ld      e, a
+    IF !ENABLE_COLOR
             ld      a, (vars.scrollCursorKept)
             or      a
             jp z,   bitmapLeftCopy
@@ -116,6 +118,7 @@ bitmapBackward:
             sub     10
             ld      e, a
 bitmapLeftCopy:
+    ENDIF
             call    bitmapCopy
 
             ld      a, (vars.scrollRows)

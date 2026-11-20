@@ -130,7 +130,6 @@ fc_OverwriteReady:
             ; Создание заменяет существующий файл только после разрешения.
 
             xor     a
-            ld      (bios_upper.diskWriteErr), a
             ld      e, FILE_COPY_REQUEST.destination + FILE_DESCRIPTOR.firstCluster
             call    fc_Address
             ld      (hl), a
@@ -258,6 +257,7 @@ fc_Exists:
             jp nz,fc_OverwriteReady
             inc a
             ld (copySkipped),a
+            call foFileSkipped
             xor a
             ld (v_dosError),a
             jp fc_Return

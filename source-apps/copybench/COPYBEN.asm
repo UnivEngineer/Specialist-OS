@@ -3,10 +3,12 @@
 ; изменяемых данных, хвоста и общего окна. Файловые вызовы внутри теста запрещены.
     INCLUDE "../../source/include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
 PIT_HZ = 2000000
 BACKUP = 03000h
 EXPECTED = 05000h
 LENGTH = 02000h
+IMAGE_MEM_END = EXPECTED+LENGTH
 TARGET = 04000h
     MACRO LOAD_DE address
     push hl

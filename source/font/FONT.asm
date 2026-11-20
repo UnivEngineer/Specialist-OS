@@ -18,6 +18,8 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ENDM
     ORG 0
 start:
+    call rememberCommand
+    jp c,usage
     IFDEF FONT_BENCH
     call pitTimerInit
     jp c,error
@@ -32,8 +34,6 @@ skipSpace:
 argument:
     or a
     jp z,usage
-    ld a,1
-    ld (shortName),a
     ; An explicit drive path bypasses the A:\FONTS prefix.
     push hl
     inc hl
@@ -57,16 +57,6 @@ copyArgument:
     jp nz,notSlash
     ld a,05Ch
 notSlash:
-    cp 05Ch
-    jp z,qualifiedName
-    cp ':'
-    jp nz,nameCharacter
-qualifiedName:
-    push af
-    xor a
-    ld (shortName),a
-    pop af
-nameCharacter:
     cp '.'
     jp nz,notDot
     ld (hasExtension),a
@@ -97,15 +87,15 @@ terminatePath:
     call parseOption
     jp c,usage
     ld e,0
-    call bios_fileGetSetDrive
+    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (oldDrive),a
     ld hl,request
     FONT_STAMP 0
-    call loadEngine
+    call fileReadAll
     FONT_STAMP 2
     push af
     ld a,(oldDrive)
-    call bios_fileSelectDrive
+    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     jp c,error
     call validate
@@ -122,7 +112,7 @@ terminatePath:
     ; PRE is the sole destructive I/O phase; failed reads are regenerated.
     ld hl,(workspaceEnd)
     ex de,hl
-    ld hl,(staging+60)
+    ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ld bc,0100h+MEM_RESIDENT_FONT
     ld a,MEM_OP_RESIDENT
     MXOS_CALL MXOS_DOS_MEMORY
@@ -140,10 +130,10 @@ resourcesReady:
     ; The resident image is already complete. No file access, allocation or
     ; output is allowed between this copy and publication of the entry points.
     ld hl,(imageBytes)
-    ld de,staging+16
+    ld de,staging+IMAGE_HEADER_SIZE
     add hl,de
     ex de,hl
-    ld hl,staging+16
+    ld hl,staging+IMAGE_HEADER_SIZE
     ld bc,FONT_ENGINE_BASE
     call bios_memcpy_bc_hl
     FONT_STAMP 12
@@ -152,16 +142,53 @@ resourcesReady:
     call FONT_ENGINE_INIT
     FONT_STAMP 14
 committed:
+    ld a,3
+    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    ld hl,request+FILE_PATH_IO.descriptor
+    ld de,request+FILE_PATH_IO.descriptor+8
+    ld bc,io_vars.fontName
+    call bios_memcpy_bc_hl
+    ld hl,resumeCommand
+    xor a
+    MXOS_CALL MXOS_DOS_FONT_CONFIG
+    ld a,b
+    or a
+    jp nz,fontExportReady
     call saveImported
     jp c,error
+fontExportReady:
     ld a,(preparedError)
     or a
     jp nz,error
     ld hl,installed
     jp bios_printStringZ
+rememberCommand:
+    push hl
+    push bc
+    push de
+    ex de,hl
+    ld de,resumeCommand+12
+    ld b,MAX_PATH-12
+rememberCommandByte:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    or a
+    jp z,rememberCommandDone
+    dec b
+    jp nz,rememberCommandByte
+    scf
+rememberCommandDone:
+    pop de
+    pop bc
+    pop hl
+    ret
+resumeCommand: DB 'A:',05Ch,'FONT.COM '
+    DS MAX_PATH-12,0
 validate:
     ld hl,(request+FILE_PATH_IO.actual)
-    ld de,64
+    ld de,IMAGE_HEADER_SIZE+48
     call bios_cmp_hl_de
     jp c,badImage
     ld hl,staging
@@ -192,32 +219,32 @@ sizeFits:
     ld de,48
     call bios_cmp_hl_de
     jp c,badImage
-    ld de,16
+    ld de,IMAGE_HEADER_SIZE
     add hl,de
     ex de,hl
     ld hl,(request+FILE_PATH_IO.actual)
     call bios_cmp_hl_de
     jp nz,badImage
     ld hl,staging
-    ld de,staging+13
+    ld de,staging+IMAGE_HEADER_CHECKSUM-1
     call bios_calcCS
-    ld hl,(staging+14)
+    ld hl,(staging+IMAGE_HEADER_CHECKSUM)
     ld d,b
     ld e,c
     call bios_cmp_hl_de
     jp nz,badImage
     ld hl,(imageBytes)
-    ld de,staging+15
+    ld de,staging+IMAGE_HEADER_SIZE-1
     add hl,de
     ex de,hl
-    ld hl,staging+16
+    ld hl,staging+IMAGE_HEADER_SIZE
     call bios_calcCS
     ld hl,(staging+12)
     ld d,b
     ld e,c
     call bios_cmp_hl_de
     jp nz,badImage
-    ld hl,staging+48
+    ld hl,staging+IMAGE_HEADER_SIZE+32
     ld de,engineMagic
     ld b,5
 engineMagicLoop:
@@ -230,12 +257,12 @@ engineMagicLoop:
     jp nz,engineMagicLoop
     ld hl,(imageBytes)
     ex de,hl
-    ld hl,(staging+56)
+    ld hl,(staging+IMAGE_HEADER_SIZE+40)
     call bios_cmp_hl_de
     jp nz,badImage
     ; Lower allocation is opaque to FONT. MEM requires page-sized blocks;
     ; bitmap geometry and the transformation belong to the initializer.
-    ld hl,(staging+60)
+    ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ld a,l
     or a
     jp nz,badImage
@@ -286,65 +313,6 @@ usage:
     ld hl,help
     jp bios_printStringZ
 
-; Bare names search A:\FONTS, then the three cell-size directories.
-; Qualified paths are literal. Only NOT_FOUND permits another candidate:
-; malformed images and I/O failures must retain their actual error.
-loadEngine:
-    call bios_fileLoadPath
-    ret nc
-    cp DOS_ERR_NOT_FOUND
-    jp nz,loadEngineFailed
-    ld a,(shortName)
-    or a
-    jp z,loadEngineMissing
-    ; Insert four bytes before the basename, including its NUL in the move.
-    ld hl,path+9
-    ld b,1
-loadNameEnd:
-    ld a,(hl)
-    or a
-    jp z,moveNameStart
-    inc hl
-    inc b
-    jp loadNameEnd
-moveNameStart:
-    ld d,h
-    ld e,l
-    inc de
-    inc de
-    inc de
-    inc de
-moveNameBack:
-    ld a,(hl)
-    ld (de),a
-    dec hl
-    dec de
-    dec b
-    jp nz,moveNameBack
-    ld hl,03878h             ; 'x8'
-    ld (path+10),hl
-    ld a,05Ch
-    ld (path+12),a
-    ld a,'6'
-    call loadSizeDirectory
-    ret nc
-    cp DOS_ERR_NOT_FOUND
-    jp nz,loadEngineFailed
-    ld a,'8'
-    call loadSizeDirectory
-    ret nc
-    cp DOS_ERR_NOT_FOUND
-    jp nz,loadEngineFailed
-    ld a,'4'
-loadSizeDirectory:
-    ld (path+9),a
-    ld hl,request
-    jp bios_fileLoadPath
-loadEngineMissing:
-    ld a,DOS_ERR_NOT_FOUND
-loadEngineFailed:
-    scf
-    ret
     IFDEF FONT_BENCH
     INCLUDE "../include/timing-pit.inc"
 benchStamps: DS 20,0
@@ -353,7 +321,8 @@ benchStamps: DS 20,0
     INCLUDE "export.inc"
     INCLUDE "prepared-file.inc"
 lowerBase: DW 0
-magic: DB 0CDh,020h,'M','X',1,IMAGE_FLAG_MAIN
+magic: MXOS_IMAGE_SIGNATURE
+    DB IMAGE_FLAG_MAIN
 engineMagic: DB 'FNT1',FONT_ENGINE_VERSION
 extension: DB '.fnt',0
 help: DB 'FONT NAME|PATH [-FILE] [-IMPORT FILE.PF [-OUT PATH]]',13,10,0
@@ -422,14 +391,14 @@ msgUnknown: DB 'UNKNOWN ERROR',0
 newline: DB 13,10,0
 imageBytes: DW 0
 hasExtension: DB 0
-shortName: DB 0
 oldDrive: DB 0
 path: DB 'A:',05Ch,'FONTS',05Ch
     DS MAX_PATH-9,0
-request: DW path,staging,FONT_ENGINE_END-FONT_ENGINE_BASE+16,0
+request: DW path,staging,FONT_ENGINE_END-FONT_ENGINE_BASE+IMAGE_HEADER_SIZE,0
     DS FILE_DESCRIPTOR,0
-    DS (-$-16) & 255,0 ; Body starts on a page boundary after its DLL header.
-staging: DS FONT_ENGINE_END-FONT_ENGINE_BASE+16,0
+    INCLUDE "../include/file-io.inc"
+    DS (-$-IMAGE_HEADER_SIZE) & 255,0 ; Body starts on a page boundary after its DLL header.
+staging: DS FONT_ENGINE_END-FONT_ENGINE_BASE+IMAGE_HEADER_SIZE,0
 preStage = $ ; Uninitialized MAIN workspace, not zeroes in FONT.COM on disk.
     ASSERT preStage <= FONT_IMPORT_ADDR
 programEnd = FONT_INIT_END

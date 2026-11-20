@@ -91,7 +91,9 @@ def main():
     def mutation(offset,data):
         x=bytearray(base);x[offset:offset+len(data)]=data;return x
     scenarios=[('good',base,0),('bad-rks',mutation(5*256+8,b'\x99'),2),
-      ('bad-mx-header',mutation(8*256+14,b'\0\0'),2),
+      ('bad-mx-header',mutation(8*256+27,b'\0'),2),
+      ('bad-mx-header-checksum',mutation(8*256+30,bytes([base[8*256+30]^1])),2),
+      ('bad-mx-payload-checksum',mutation(8*256+32,bytes([base[8*256+32]^1])),2),
       ('cycle',mutation(256+2*3,struct.pack('<H',2)),1),
       ('cross-link',mutation(3*256+32+26,struct.pack('<H',2)),1),
       ('short-chain',mutation(256+4,struct.pack('<H',2)),1),
