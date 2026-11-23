@@ -1,5 +1,6 @@
 """CPU 8080: владельцы MAIN, тёплый сброс, FILL и статистика арены."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re
 import runpy
 import subprocess
@@ -215,6 +216,7 @@ dosRecords:
         runpy.run_path(str(ROOT / 'scripts/tests/mem-image.py'))['install'](memory, bios)
         data = (ROOT / 'bin/DOS.sys').read_bytes()
         memory[0x100:0x100 + len(data)] = data
+        initialize_dos_state(memory, kernel)
         code = (out / 'case.bin').read_bytes()
         memory[0xb800:0xb800 + len(code)] = code
         (out / 'in.bin').write_bytes(memory)

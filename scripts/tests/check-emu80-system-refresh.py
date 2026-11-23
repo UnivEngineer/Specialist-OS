@@ -1,4 +1,4 @@
-"""Emu80 no-build preparation: refresh A:, preserve edits/H:, no backups."""
+"""Emu80 no-build preparation: refresh C:, enable SDP, preserve edits and H:."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -63,28 +63,35 @@ def main():
 
         prepare('-UpdateSystemFlash')
         assert sha(system) == sha(seed) and sha(disk) == sha(disk_seed)
+        assert system_sdp.read_bytes() == b'\x01' and not disk_sdp.exists()
         assert json.loads(record.read_text())['systemSeedSha256'] == sha(seed)
         edit(system)
         edit(disk)
-        system_sdp.write_bytes(b'\x01')
+        system_sdp.write_bytes(b'\x00')
         disk_sdp.write_bytes(b'\x01\x00\x01\x00')
         system_edit, disk_edit = sha(system), sha(disk)
         prepare('-UpdateSystemFlash')
         assert sha(system) == system_edit and sha(disk) == disk_edit
-        assert system_sdp.read_bytes() == b'\x01' and disk_sdp.read_bytes() == b'\x01\x00\x01\x00'
+        assert system_sdp.read_bytes() == b'\x00' and disk_sdp.read_bytes() == b'\x01\x00\x01\x00'
         assert not backups()
-        print('Unchanged build preserves working A:/H: and SDP')
+        print('Unchanged build preserves working C:/H: and explicit SDP state')
 
-        # Simulate an installed older build. A: must be replaced directly;
+        system_sdp.unlink()
+        prepare('-UpdateSystemFlash')
+        assert sha(system) == system_edit and sha(disk) == disk_edit
+        assert system_sdp.read_bytes() == b'\x01' and disk_sdp.read_bytes() == b'\x01\x00\x01\x00'
+        print('Existing C: without an SDP sidecar is protected without replacing disk data')
+
+        # Simulate an installed older build. C: must be replaced directly;
         # the mutable H: and its per-chip protection must stay untouched.
         data = json.loads(record.read_text())
         data['systemSeedSha256'] = '0' * 64
         record.write_text(json.dumps(data))
         prepare('-UpdateSystemFlash')
         assert not backups()
-        assert sha(system) == sha(seed) and not system_sdp.exists()
+        assert sha(system) == sha(seed) and system_sdp.read_bytes() == b'\x01'
         assert sha(disk) == disk_edit and disk_sdp.read_bytes() == b'\x01\x00\x01\x00'
-        print('New system seed updates A:, preserves H:/SDP, creates no backups')
+        print('New system seed enables SDP on C:, preserves H:/SDP, creates no backups')
 
         # Plain -Flash must retain both images and the remembered seed hash.
         edit(system)
@@ -107,7 +114,7 @@ def main():
         prepare('-ResetFlash')
         assert not backups()
         assert sha(system) == sha(seed) and sha(disk) == sha(disk_seed)
-        assert not system_sdp.exists() and not disk_sdp.exists()
+        assert system_sdp.read_bytes() == b'\x01' and not disk_sdp.exists()
         print('Explicit full reset restores both disks without backups')
 
     assert before == [(p.stat().st_mtime_ns, sha(p)) for p in watched], 'no-build preparation rebuilt or changed source artifacts'

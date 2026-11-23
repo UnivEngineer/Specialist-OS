@@ -61,6 +61,3 @@ kiLoadSum:
     ld b,h
     ld c,l
     jp imageCheckSum
-
-kiSumActive: DB 0
-kiSum: DW 0

@@ -72,8 +72,8 @@ hexRestoreUnderlay:
     ex de,hl
     ld hl,(hexUnderlayVRAM)
     jp uiBitmapRestore
-hexUnderlay: DB 0
-hexUnderlayVRAM: DW 0
-hexUnderlaySize: DW 0
+hexUnderlay:        DB 0
+hexUnderlayVRAM:    DW 0
+hexUnderlaySize:    DW 0
     DEFINE UI_BITMAP_RAW_ONLY
     INCLUDE "../include/ui-bitmap.inc"

@@ -18,12 +18,12 @@ def shell(m,n,command,type_char,wait_nc,out):
         for char in value:type_char(char)
         m.stop_at(cli['cliPrompt']);m.tap('enter');ready()
     # Writes affect only the owning harness's disposable system flash.
-    command('COPY A:/NC_MN.COM B:/NC_MN.COM')
-    command('ATTRIB -RS A:/NC_MN.COM');command('DEL A:/NC_MN.COM')
+    command('COPY C:/DOS/NC_MN.COM B:/NC_MN.COM')
+    command('ATTRIB -RS C:/DOS/NC_MN.COM');command('DEL C:/DOS/NC_MN.COM')
     m.stop_at(cli['cliPrompt']);m.tap('f10');ready()
     line('NC_MN.COM');line('EXIT')
     print('Missing NC: failed command and EXIT return to CLI PASS',flush=True)
-    line('ATTRIB -RS A:/CLI.COM');line('DEL A:/CLI.COM')
+    line('ATTRIB -RS C:/DOS/CLI.COM');line('DEL C:/DOS/CLI.COM')
     for char in 'EXIT':type_char(char)
     m.stop_at(bio['bios_input']);m.tap('enter');m.until(bio['bios_input'],120,page=0)
     m.screenshot(out/'both-shells-missing.png')
@@ -36,7 +36,7 @@ def shell(m,n,command,type_char,wait_nc,out):
     m.stop_at(n['ncReadKey']);m.tap('enter');wait_nc()
     m.screenshot(out/'shell-recovered-from-B.png')
     print('BIOS shell-path prompt, invalid retry and B:/NC_MN.COM launch PASS',flush=True)
-    command('COPY B:/NC_MN.COM A:/NC_MN.COM')
+    command('COPY B:/NC_MN.COM C:/DOS/NC_MN.COM')
     m.stop_at(bio['biosBankShell']);m.tap('f10');m.until(bio['biosBankShell'],120,page=0)
     m.stop_at(n['ncReadKey']);m.call('debug_step',mode='into');wait_nc()
     print('Missing CLI: F10 falls back to NC PASS',flush=True)
@@ -94,7 +94,7 @@ def inputs(m,n,command,type_char,wait_nc,out):
         check_padding()
         cancel()
     command('A:')
-    for font,path in [('Cpm4','4x8/Fast'),('Rotate','6x8/Rotate'),('Fast8','8x8/Rotate')]:
+    for font,path in [('Cpm4','4x8/Packed'),('Rotate','6x8/Rotate'),('Fast8','8x8/Rotate')]:
         command('FONT '+path)
         m.tap('home');m.call('emu_run_for',ms=500)
         panel=m.read(n['state.activePanel'],1)[0]

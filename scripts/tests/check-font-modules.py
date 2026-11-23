@@ -28,7 +28,8 @@ for name in ('Rotate','Packed6K','Fast12K'):
    expected=bytearray(original[base:base+size])
    if mode:
     for row in range(0,size,256):
-     expected[row+0x60:row+0x80],expected[row+0xe0:row+0x100]=expected[row+0xe0:row+0x100],expected[row+0x60:row+0x80]
+     expected[row+0x60:row+0x7f],expected[row+0xe0:row+0xff]=expected[row+0xe0:row+0xff],expected[row+0x60:row+0x7f]
+     expected[row+0x7f]=0
    assert m[base:base+size]==expected,(name,'KOI',mode,base)
  m=call(m,S['FONT_ENGINE_ENCODING'],a=1)
  m=call(m,S['FONT_ENGINE_INIT'],de=0x3000)

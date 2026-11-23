@@ -92,7 +92,7 @@ fileCreate_dirEnd:
             or l
             ld a,DOS_ERR_DIR_FULL
             call z,dosSetError
-            call nz,directoryExtendGate
+            call nz,directoryExtend
             jp nc,fileCreate_placeFound
             jp popDBH_ret
 

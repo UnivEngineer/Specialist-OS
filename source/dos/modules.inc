@@ -60,8 +60,20 @@ mdClearResidents:
     ld (mdNext),hl
     ret
 
-; Владелец выделений: модуль, временное MAIN-приложение или исходный банк.
-; BC/DE/HL сохранены, AF разрушен. Это не идентификатор процесса.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Определить владельца выделений памяти для текущего вызова DOS.
+;
+; вход:
+;   moduleActor, appOwner и kdPage описывают текущий контекст. Регистровых аргументов
+;   нет.
+;
+; выход:
+;   a = первый ненулевой владелец из moduleActor и appOwner, иначе исходная страница
+;   kdPage. bc, de и hl сохранены. Флаги не задают единый статус.
+;----------------------------------------------------------------------------
+
 memoryOwnerCurrent:
     ld a,(moduleActor)
     or a
@@ -368,27 +380,15 @@ mdDos:
     pop hl
     jp z,mdRange
     ; One contiguous arena, shared by cached services and installers.
-    ld de,DOS_BANK_DRIVER_END
-    call cmp_hl_de
-    jp c,mdDosEndReady
-    jp z,mdDosEndReady
     ld de,DOS_BANK_MODULE_END
     call cmp_hl_de
-    jp c,mdDosBorrowBat
+    jp c,mdDosEndReady
     jp nz,mdRange
-mdDosBorrowBat:
-    ld a,(v_batDepth)
-    or a
-    jp nz,mdArenaBusy
-    ld a,1
 mdDosEndReady:
     ld hl,(mdMemoryStart)
-    ld de,DOS_BANK_DRIVER_ADDR
+    ld de,DOS_ARENA_START
     call cmp_hl_de
     jp c,mdRange
-    jp mdDosRange
-mdDosRange:
-    ld hl,(mdMemoryStart)
     MD_GET_DE mdMemoryEnd
     call dosArenaImage
     jp c,mdArenaBusy
@@ -589,7 +589,20 @@ mdInstallPart:
     ld hl,mdCopy
     jp bankCopySector
 
-; Проверка opaque ID и владельца. HL=запись, CF=0; AF/BC/DE разрушены.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти запись модуля по дескриптору запроса и проверить доступ к ней.
+;
+; вход:
+;   Первое слово kdRegs содержит непрозрачный дескриптор. Для частного модуля
+;   проверяется владелец текущего вызова.
+;
+; выход:
+;   cf = 0: hl указывает на запись MODULE_TABLE. cf = 1: a = код ошибки дескриптора,
+;   владельца или активного модуля. bc и de используются для поиска.
+;----------------------------------------------------------------------------
+
 mdResolve:
     MD_GET_DE kdRegs
     ld a,d
@@ -1074,29 +1087,5 @@ mdCallDone:
 
     INCLUDE "module-main-claim.inc"
     INCLUDE "module-reuse.inc"
-moduleActor: DB 0
-mdNext: DW 1
-mdRecord: DW 0
-mdClientRegs: DW 0
-mdCaller: DB 0
-mdOwner: DB 0
-mdPlacement: DB 0
-mdBankId: DB 0
-mdAddress: DW 0
-mdEntry: DW 0
-mdBytes: DW 0
-mdMemoryStart: DW 0
-mdMemoryEnd: DW 0
-mdCallEntry: DW 0
-mdCopy: DB 1
-    DW 0
-    DB 0
-    DW 0,0
-mdContext: DB 0,16,0,0,0
-    DW DOS_BANK_STACK_TOP,DOS_BANK_STACK_BOTTOM+64
-mdLocalContext: DW 0
-    DB MEM_BANK_EXEC
-    DW 0
-mdDataKind: DB MEM_BANK_DATA
 
     INCLUDE "lifecycle.inc"

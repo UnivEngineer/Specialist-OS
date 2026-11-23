@@ -2,26 +2,27 @@
 ; ВИ53: CLK1 / 256 -> CLK2, GATE1/2=1, без прерываний.
 ; Запись включает выделение кластеров, FAT, каталог и штатные барьеры DOS.
     INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "layout.inc"
     IFDEF DISKBEN_BANK
 IMAGE_FLAGS = IMAGE_FLAG_BANK
     ELSE
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
-IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
+IMAGE_FLAGS         = IMAGE_FLAG_MAIN
+IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
+IMAGE_API           = 2
     ENDIF
     IFNDEF PIT_HZ
 PIT_HZ = 2000000
     ENDIF
     ASSERT PIT_HZ == 2000000 || PIT_HZ == 2500000
-RATE_FACTOR = PIT_HZ / 1024
-TEST_SECTORS = 32
+RATE_FACTOR      = PIT_HZ / 1024
+TEST_SECTORS     = 32
 DEFAULT_FILE_KIB = 8
     IFNDEF MAX_FILE_KIB
 MAX_FILE_KIB = 24
     ENDIF
-MAX_FILE_SECTORS = MAX_FILE_KIB * 4
-LAYOUT_SIMPLE = 0
-LAYOUT_MAPPED = 1
-LAYOUT_MECHANICAL = 2
+MAX_FILE_SECTORS  = MAX_FILE_KIB * 4
+LAYOUT_SIMPLE     = 0
+LAYOUT_MAPPED     = 1
     MACRO LOAD_DE address
     push hl
     ld hl,(address)
@@ -36,6 +37,18 @@ LAYOUT_MECHANICAL = 2
     pop hl
     ENDM
     ORG 0
+;----------------------------------------------------------------------------
+; Выбрать режим дискового теста, запустить его и вывести результат.
+;
+; вход:
+;   MAIN: de = указатель на аргументы командной строки. BANK: b = диск, c = режим
+;   проверки, d = число проходов записи, e = размер файла в КиБ.
+;
+; выход:
+;   Возврат на исходный стек с cf = 0. Ошибки выводятся на экран. MAIN восстанавливает
+;   кодировку шрифта. Значения рабочих регистров и остальных флагов не заданы.
+;----------------------------------------------------------------------------
+
 entry:
     di
     IFNDEF DISKBEN_BANK
@@ -113,8 +126,13 @@ drive_selected:
     jp z,error
     STORE_DE v_capacity
     call detect_driver
+    IFNDEF DISKBEN_LEGACY_FIXTURE
+    ld de,512
+    call reserveBenchBuffer
+    jp c,benchMemoryError
+    ENDIF
     ld de,0
-    ld hl,sectorBuffer
+    ld hl,bootSectorBuffer
     ld b,2
     call raw_driver
     jp c,error
@@ -122,6 +140,7 @@ drive_selected:
     jp c,error
     IFNDEF DISKBEN_BANK
     call choose_executor
+    call choose_access
     call choose_alignment
     ENDIF
     IFDEF DISKBEN_BANK
@@ -144,8 +163,13 @@ drive_selected:
     or a
     jp z,prepare              ; -W=0: размер файла и проверка не нужны.
     ld a,(v_technology)
-    cp 'F'
+    cp DISK_TECH_MX_SYSTEM_FLASH
+    jp z,flashNotice
+    cp DISK_TECH_MX_VV55_FLASH
+    jp z,flashNotice
+    cp DISK_TECH_FLASH
     jp nz,choose_verify
+flashNotice:
     ld hl,txtFlashLife
     call puts
 choose_verify:
@@ -199,7 +223,7 @@ menu_size:
     jp c,menu_size
 file_size_value:
     ld (v_fileKiB),a
-    ; Текущий кластер = сектор = 256 байт: КиБ * 4 кластеров.
+    ; Рабочий буфер измерителя адресуется страницами по 256 байт.
     add a,a
     add a,a
     ld (v_fileSectors),a
@@ -303,52 +327,10 @@ puts:
     INCLUDE "args.inc"
     INCLUDE "fileTest.inc"
 
-; Выбор строк теста по технологии. Механика пока только зарезервирована
-; в B=FFh: физических драйверов Floppy/HDD здесь нет. A: ROM/Flash и сектор
-; 256 байт используют два буфера; прочие RAM/ROM/Flash — один, без RND.
-; Вход — переменные геометрии/драйвера. AF/HL/флаги разрушаются.
-select_layout:
-    xor a
-    ld (v_layout),a
-    IFDEF DISKBEN_BANK
-    ret
-    ENDIF
-    ld a,(v_technology)
-    cp DISK_TECH_FLOPPY
-    jp z,layout_mechanical
-    cp DISK_TECH_HDD
-    jp z,layout_mechanical
-    cp DISK_TECH_ROM
-    jp z,layout_mapped_check
-    cp DISK_TECH_FLASH
-    ret nz
-layout_mapped_check:
-    ld a,(v_drive)
-    or a
-    ret nz
-    ld hl,(v_sectorSize)
-    dec h
-    ld a,h
-    or l
-    ret nz
-    ld a,LAYOUT_MAPPED
-    jp layout_store
-layout_mechanical:
-    ld a,LAYOUT_MECHANICAL
-layout_store:
-    ld (v_layout),a
-    ret
-
 ; Строковый ввод BIOS с редактированием. Enter полностью потребляется здесь.
 ; Выход HL=буфер с нулём, остальные регистры и флаги разрушаются.
 ; Выбор нужен только при отсутствии -C:... или совместимого старого ключа.
 choose_executor:
-    ld a,(argMode)
-    or a
-    jp nz,executorModeReady
-    ld a,3
-    ld (argMode),a
-executorModeReady:
     ld a,(argBank)
     or a
     ret nz
@@ -370,12 +352,62 @@ menu_executor:
     ld (argBank),a
     jp menu_executor
 
+; Вход: разобраны ключи -M/-V/-W и известен носитель. Выход: argMode =
+; 1 RAW, 2 FILE, 3 ALL. Неполный интерактивный запуск запрашивает выбор.
+; При явно заданной проверке или числе проходов сохраняется пакетный запуск.
+choose_access:
+    ld a,(argMode)
+    or a
+    ret nz
+    ld a,(v_technology)
+    cp DISK_TECH_FLOPPY
+    ld a,2
+    jp nz,accessDefault
+    dec a
+accessDefault:
+    push af
+    ld a,(argWrites)
+    inc a
+    jp nz,accessUseDefault
+    ld a,(argCheck)
+    inc a
+    jp nz,accessUseDefault
+menu_access:
+    ld hl,txtAccess
+    call puts
+    pop af
+    push af
+    add a,'0'
+    ld c,a
+    call bench_printChar
+    ld hl,txtAccessEnd
+    call puts
+    call read_choice
+    jp c,menu_access
+    or a
+    jp z,accessUseDefault
+    sub '0'
+    cp 3
+    jp nc,menu_access
+    pop bc
+    jp accessStore
+accessUseDefault:
+    pop af
+accessStore:
+    inc a
+    ld (argMode),a
+    ret
+txtAccess:     DB 10,"Access: 0=RAW, 1=FILE, 2=ALL [",0
+txtAccessEnd:  DB "]: ",0
+
 choose_alignment:
     ld a,(argAlign)
     cp 0FFh
     ret nz
-    ld a,(v_drive)
-    cp 7
+    ld a,(v_technology)
+    cp DISK_TECH_MX_VV55_FLASH
+    jp z,menu_alignment
+    cp DISK_TECH_MX_VV55_ROM
     ld a,0
     jp nz,alignment_selected
 menu_alignment:
@@ -392,8 +424,8 @@ alignment_selected:
     ld (argAlign),a
     ret
 
-txtAlignmentPrompt: DB 10,"Buffer: 0=aligned, 1=unaligned [0]: ",0
-txtExecutor: DB 10,"Caller MAIN/DOS/BANK/ALL [MAIN]: ",0
+txtAlignmentPrompt:     DB 10,"Buffer: 0=aligned, 1=unaligned [0]: ",0
+txtExecutor:            DB 10,"Caller MAIN/DOS/BANK/ALL [MAIN]: ",0
 read_line:
     ld hl,inputBuffer
     ld de,inputBuffer+16
@@ -428,6 +460,14 @@ choice_bad:
     scf
     ret
 
+; Z=1 для системного ROM/flash. A и флаги рабочие, BC/DE/HL сохранены.
+benchMapped:
+    ld a,(v_technology)
+    cp DISK_TECH_MX_SYSTEM_FLASH
+    ret z
+    cp DISK_TECH_MX_SYSTEM_ROM
+    ret
+
 ; B=FFh возвращает описание, технологию и возможности самого драйвера.
 ; До обращения к неизвестному драйверу выбираем безопасный режим чтения.
 detect_driver:
@@ -454,7 +494,18 @@ detect_unknown:
     or a                        ; Отсутствие метаданных не является ошибкой чтения.
     ret
 
-; Сводка отделена пустыми строками; поиск участка и печать вне измерения.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вывести сводку настроек теста до начала измерения.
+;
+; вход:
+;   v_drive, v_info и v_driverInfo описывают выбранный том.
+;   Геометрия проверена. Размер файла и v_budget заданы.
+;
+; выход:
+;   Сводка напечатана. AF, BC, DE, HL и флаги могут измениться.
+;----------------------------------------------------------------------------
 print_summary:
     ld a,(argBank)
     ld hl,txtCaller
@@ -490,22 +541,23 @@ summaryCaller:
     ld hl,txtType
     call puts
     ld a,(v_technology)
-    ld hl,txtROM
-    cp 'O'
-    jp z,summary_type
-    ld hl,txtRAM
-    cp 'R'
-    jp z,summary_type
-    ld hl,txtFlash
-    cp 'F'
-    jp z,summary_type
-    ld hl,txtFloppy
-    cp DISK_TECH_FLOPPY
-    jp z,summary_type
-    ld hl,txtHDD
-    cp DISK_TECH_HDD
-    jp z,summary_type
-    ld hl,txtUnknown
+    ld c,a
+    ld hl,summaryTypes
+summaryTypeNext:
+    ld a,(hl)
+    inc hl
+    or a
+    jp z,summaryTypeFound
+    cp c
+    jp z,summaryTypeFound
+    inc hl
+    inc hl
+    jp summaryTypeNext
+summaryTypeFound:
+    ld a,(hl)
+    inc hl
+    ld h,(hl)
+    ld l,a
 summary_type:
     call puts
     ld hl,txtDriver
@@ -520,7 +572,11 @@ summary_type:
     call puts
     ld hl,(v_capacity)
     call bench_div_hl_2
+    ld a,(v_sectorSize+1)
+    cp 2
+    jp z,summary_capacity
     call bench_div_hl_2
+summary_capacity:
     ex de,hl
     ld b,0
     call bench_printDecWord
@@ -582,20 +638,53 @@ summary_passes:
     call bench_printDecWord
     ld hl,txtClusters
     call puts
-    ld a,(v_fileSectors)
-    ld e,a
-    ld d,0
+    call requiredClusters
+    ex de,hl
+    ld b,0
     call bench_printDecWord
 summary_end:
     ld hl,txtLineBreak
     jp puts
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вычислить число кластеров для одного файла с округлением вверх.
+;
+; вход:
+;   v_sectorSize, v_spc — проверенные размер сектора в байтах и секторов
+;   в кластере. v_fileSectors — размер файла в страницах по 256 байт.
+;
+; выход:
+;   hl = число кластеров. AF, BC, DE и флаги разрушаются.
+;----------------------------------------------------------------------------
+requiredClusters:
+    ld a,(v_sectorSize+1)
+    ld h,0
+    ld l,a
+    ld a,(v_spc)
+    ld e,a
+    ld d,0
+    call bench_mul_hl_de
+    ex de,hl                   ; DE = страниц по 256 байт на кластер.
+    ld a,(v_fileSectors)
+    ld h,0
+    ld l,a
+    add hl,de
+    dec hl
+    jp bench_div_hl_de
+
 ; BPB -> геометрия физического ABI. AF/BC/DE/HL/флаги разрушаются.
 ; Поддерживаются секторы 256..4096, один/два FAT, корень с округлением вверх.
-; При неизвестном формате нет доступа на запись. FAT12/FAT32 не вводятся.
+; Для дискеты допускается FAT12, у остальных драйверов требуется FAT16.
 geometry:
-    ld hl,sectorBuffer+036h
+    ld hl,bootSectorBuffer+036h
+    ld a,(v_technology)
+    cp DISK_TECH_FLOPPY
     ld de,txtFAT16
+    jp nz,geometry_expected
+    ld de,txtFAT12
+geometry_expected:
     ld b,8
 geometry_signature:
     ld a,(de)
@@ -605,7 +694,7 @@ geometry_signature:
     inc de
     dec b
     jp nz,geometry_signature
-    ld hl,(sectorBuffer+00Bh)
+    ld hl,(bootSectorBuffer+00Bh)
     ld a,l
     or a
     jp nz,bad_geometry
@@ -618,7 +707,7 @@ geometry_signature:
     and h
     jp nz,bad_geometry
     ld (v_sectorSize),hl
-    ld a,(sectorBuffer+00Dh)
+    ld a,(bootSectorBuffer+00Dh)
     or a
     jp z,bad_geometry
     ld (v_spc),a
@@ -627,12 +716,12 @@ geometry_signature:
     inc a
     and b
     jp nz,bad_geometry
-    ld hl,(sectorBuffer+00Eh)
+    ld hl,(bootSectorBuffer+00Eh)
     ld a,h
     or l
     jp z,bad_geometry
     ld (v_reserved),hl
-    ld hl,(sectorBuffer+016h)
+    ld hl,(bootSectorBuffer+016h)
     ld a,h
     and 080h
     jp nz,bad_geometry
@@ -640,7 +729,7 @@ geometry_signature:
     or l
     jp z,bad_geometry
     ld (v_fatSize),hl
-    ld a,(sectorBuffer+010h)
+    ld a,(bootSectorBuffer+010h)
     dec a
     cp 2
     jp nc,bad_geometry
@@ -652,7 +741,7 @@ geometry_signature:
     add hl,de
     jp c,bad_geometry
     ld (v_dataStart),hl
-    ld hl,(sectorBuffer+011h)
+    ld hl,(bootSectorBuffer+011h)
     ld a,h
     cp 4
     jp nc,bad_geometry
@@ -666,7 +755,7 @@ geometry_signature:
     add hl,de
     jp c,bad_geometry
     ld (v_dataStart),hl
-    ld hl,(sectorBuffer+013h)
+    ld hl,(bootSectorBuffer+013h)
     ld a,h
     or l
     jp z,bad_geometry
@@ -684,6 +773,7 @@ bad_geometry:
     scf
     ret
 
+    IFDEF DISKBEN_LEGACY_FIXTURE
 ; Участок старого теста READ без временного файла. Данные могут быть заняты:
 ; запись здесь не выполняется. Для RAM исключаем служебный сектор xxFFh.
 ; Выход v_start; CF=ошибка, все регистры разрушены.
@@ -731,6 +821,7 @@ print_case_name:
 
 print_result:
     call print_case_name
+    ENDIF
 print_result_value:
     ld hl,v_elapsed
     call print_time_ms
@@ -742,7 +833,7 @@ print_result_value:
     jp puts
 
 calculate_rate:
-    ; dividend = operations * (sectorSize/256) * floor(CLK1/1024).
+    ; FILE на дискете считает страницы буфера по 256 байт, а не LBA.
     xor a
     ld hl,v_dividend
     ld b,4
@@ -751,10 +842,13 @@ clear_dividend:
     inc hl
     dec b
     jp nz,clear_dividend
-    ld hl,(v_sectorSize)
-    ld e,h
-    ld d,0
+    ld a,(v_technology)
+    cp DISK_TECH_FLOPPY
     ld hl,(v_operations)
+    jp z,rate_multiply
+    ld a,(v_sectorSize+1)
+    ld e,a
+    ld d,0
     call bench_mul_hl_de
 rate_multiply:
     push hl
@@ -882,9 +976,9 @@ rate_subtract:
 rate_quotient_done:
     ret
 
-inputBuffer:     BLOCK 17,0
-callerSP:        DW 0
-callerKoi:       DB 0
+inputBuffer:     BLOCK  17,0
+callerSP:        DW     0
+callerKoi:       DB     0
     INCLUDE "timer.inc"
 txtTitle:        DB "Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     IF PIT_HZ == 2000000
@@ -894,22 +988,21 @@ txtTitle:        DB "Disk benchmark",00Ah,"DISKBEN / MXOS / PIT "
     ENDIF
 txtDrive:        DB 00Ah,"Drive A-H [A], Q=exit: ",0
 txtFlashLife:    DB 00Ah,"FLASH: writes consume limited program life.",0
-txtVerify:       DB 00Ah,"Check [0]: 0=plain, 1=file, 2=sector verify: ",0
+txtVerify:       DB 00Ah,"Verify [0]: 0=none, 1=read back, 2=sector: ",0
 txtFragment:     DB 10,"Allocation [0]: 0=sequential, 1=random: ",0
 txtWrites:       DB 00Ah,"Each pass uses and removes DISKBEN.TMP.",00Ah
                  DB "Creation excluded; WRITE includes flush.",00Ah
                  DB "Passes (0-9) [1], 0=skip: ",0
-txtDosLimit: DB 10,"DOS buffer limit: 8 KiB",0
-txtFileSizePrompt: DB 00Ah,"File size in KiB (1-24) [8]: ",0
-txtFileSize:     DB 00Ah,"File size (KiB):",009h,009h,0
-txtClusters:     DB 00Ah,"Clusters:   ",009h,009h,009h,0
-txtRegion:       DB 00Ah,"Sectors (hex): ",0
-txtDash:         DB "-",0
-txtError:        DB 00Ah,"I/O / format / free space error",0
-txtTimerError:   DB 00Ah,"PIT clock stopped/invalid",0
-txtDone:         DB 00Ah,"Press any key to exit",0
-txtRate:         DB " ms",009h,0
-txtUnits:        DB " KiB/s",00Ah,0
+txtDosLimit:        DB 10,"DOS buffer limit: 8 KiB",0
+txtFileSizePrompt:  DB 00Ah,"File size in KiB (1-24) [8]: ",0
+txtFileSize:        DB 00Ah,"File size (KiB):",009h,009h,0
+txtClusters:        DB 00Ah,"Clusters:   ",009h,009h,009h,0
+txtDash:            DB "-",0
+txtError:           DB 00Ah,"I/O / format / free space error",0
+txtTimerError:      DB 00Ah,"PIT clock stopped/invalid",0
+txtDone:            DB 00Ah,"Press any key to exit",0
+txtRate:            DB " ms",009h,0
+txtUnits:           DB " KiB/s",00Ah,0
     IFDEF DISKBEN_BANK
 txtCaller:       DB 00Ah,"Caller: BANK",0
     ELSE
@@ -919,39 +1012,66 @@ txtCallerDos:    DB 00Ah,"Caller: DOS",0
 txtCallerMainDll = txtCaller
 txtCallerBatch:   DB 00Ah,"Caller: MAIN / DOS / BANK",0
     ENDIF
-txtSummaryDrive: DB 00Ah,"Drive:  ",009h,009h,009h,009h,0
-txtLabel:        DB 00Ah,"Label:  ",009h,009h,009h,009h,0
-txtCapacity:    DB 00Ah,"Size (KiB): ",009h,009h,009h,0
-txtSectorSize:  DB 00Ah,"Sector (bytes): ",009h,009h,0
-txtSpc:         DB 00Ah,"Sectors/cluster:",009h,009h,0
-txtType:         DB 00Ah,"Type:   ",009h,009h,009h,009h,0
-txtDriver:       DB 00Ah,"Driver: ",009h,009h,009h,009h,0
-txtMode:         DB 00Ah,"Test mode:  ",009h,009h,009h,0
-txtAligned:     DB 10,"Buffer:",9,9,9,9," aligned (256 bytes)",0
-txtUnaligned:   DB 10,"Buffer:",9,9,9,9," unaligned (+1 byte)",0
-txtBuffers:      DB 00Ah,"Buffers:",009h,009h,009h,009h,"Low / High direct",0
-txtPasses:       DB 00Ah,"Passes: ",009h,009h,009h,009h,0
-txtBlankLines:   DB 00Ah,00Ah,0
+txtSummaryDrive:    DB 00Ah,"Drive:  ",009h,009h,009h,009h,0
+txtLabel:           DB 00Ah,"Label:  ",009h,009h,009h,009h,0
+txtCapacity:        DB 00Ah,"Size (KiB): ",009h,009h,009h,0
+txtSectorSize:      DB 00Ah,"Sector (bytes): ",009h,009h,0
+txtSpc:             DB 00Ah,"Sectors/cluster:",009h,009h,0
+txtType:            DB 00Ah,"Type:   ",009h,009h,009h,009h,0
+txtDriver:          DB 00Ah,"Driver: ",009h,009h,009h,009h,0
+txtMode:            DB 00Ah,"Write mode: ",009h,009h,009h,0
+txtAligned:         DB 10,"Buffer: ",9,9,9,9,"aligned (256 bytes)",0
+txtUnaligned:       DB 10,"Buffer: ",9,9,9,9,"unaligned (+1 byte)",0
+txtBuffers:         DB 00Ah,"Buffers:",009h,009h,009h,009h,"Low / High direct",0
+txtPasses:          DB 00Ah,"Passes: ",009h,009h,009h,009h,0
+txtBlankLines:      DB 00Ah,00Ah,0
 txtLineBreak = txtBlankLines+1
-txtROM:          DB "ROM",0
-txtRAM:          DB "RAM",0
-txtFlash:        DB "Flash",0
-txtFloppy:       DB "Floppy",0
-txtHDD:          DB "HDD",0
-txtReadOnly:     DB "read only",0
-txtWrite:        DB "write",0
-txtWriteVerify:  DB "driver sector verify",0
-txtWriteFileVerify: DB "write + file verify",0
-txtUnknown:      DB "Unknown",0,0
-txtSkipped:      DB "skipped (read only / 0 passes)",00Ah,0
+summaryTypes:
+    DB DISK_TECH_ROM
+    DW txtROM
+    DB DISK_TECH_RAM
+    DW txtRAM
+    DB DISK_TECH_FLASH
+    DW txtFlash
+    DB DISK_TECH_FLOPPY
+    DW txtFloppy
+    DB DISK_TECH_HDD
+    DW txtHDD
+    DB DISK_TECH_MX_SYSTEM_FLASH
+    DW txtSystemFlash
+    DB DISK_TECH_MX_SYSTEM_ROM
+    DW txtSystemRom
+    DB DISK_TECH_MX_VV55_FLASH
+    DW txtVv55Flash
+    DB DISK_TECH_MX_VV55_ROM
+    DW txtVv55Rom
+    DB 0
+    DW txtUnknown
+txtROM:                 DB "ROM",0
+txtRAM:                 DB "RAM",0
+txtFlash:               DB "Flash",0
+txtSystemFlash:         DB "MX System Flash",0
+txtSystemRom:           DB "MX System ROM",0
+txtVv55Flash:           DB "MX VV55 Flash",0
+txtVv55Rom:             DB "MX VV55 ROM",0
+txtFloppy:              DB "Floppy",0
+txtHDD:                 DB "HDD",0
+txtReadOnly:            DB "read only",0
+txtWrite:               DB "write",0
+txtWriteVerify:         DB "driver sector verify",0
+txtWriteFileVerify:     DB "write + readback",0
+txtUnknown:             DB "Unknown",0,0
+txtSkipped:             DB "skipped (read only / 0 passes)",00Ah,0
 
 txtFAT16:        DB "FAT16   "
+txtFAT12:        DB "FAT12   "
 txtRead:         DB "Read:   ",009h,009h,0
 txtWriteRow:     DB "Write:  ",009h,009h,0
 txtReadLow:      DB "Read low:   ",009h,0
 txtReadHigh:     DB "Read high:  ",009h,0
 txtWriteLow:     DB "Write low:  ",009h,0
 txtWriteHigh:    DB "Write high: ",009h,0
+    IFDEF DISKBEN_LEGACY_FIXTURE
 txtReadSeq:      DB 00Ah,"Read seq: ",0
 txtReadRnd:      DB "Read rnd: ",0
 txtWriteSeq:     DB "Write seq: ",0
@@ -959,6 +1079,7 @@ txtWriteRnd:     DB "Write rnd: ",0
 case_names:      DW txtRead,txtRead,txtWriteRow,txtWriteRow
                  DW txtReadHigh,txtReadLow,txtWriteHigh,txtWriteLow
                  DW txtReadSeq,txtReadRnd,txtWriteSeq,txtWriteRnd
+    ENDIF
 v_layout:        DB LAYOUT_SIMPLE
 v_drive:         DB 0
 v_technology:    DB 0
@@ -989,13 +1110,13 @@ v_dividend:      DD 0
 v_subByte:       DB 0
 code_end:
     IFNDEF sectorBuffer
-sectorBuffer = 02100h
+sectorBuffer = BENCH_CONTROLLER_BUFFER
     ENDIF
     ASSERT code_end <= sectorBuffer
-    ASSERT batchStats == sectorBuffer
+    ASSERT code_end <= batchStats
 verifyBuffer = sectorBuffer
     IFNDEF fatBuffer
-fatBuffer = 08100h
+fatBuffer = 08200h
     ENDIF
 rawSectors = fatBuffer+256
     ASSERT MAX_FILE_SECTORS*2 <= 256
@@ -1003,7 +1124,7 @@ rawSectors = fatBuffer+256
 lower_buffers_end = sectorBuffer + MAX_FILE_KIB*1024
     ASSERT lower_buffers_end <= fatBuffer
     IFNDEF highBuffer
-highBuffer = 08300h
+highBuffer = 08400h
     ENDIF
     IFNDEF HIGH_SECTORS
 HIGH_SECTORS = (LEGACY_APP_MEMORY_END-highBuffer)/256
@@ -1012,12 +1133,22 @@ HIGH_SECTORS = (LEGACY_APP_MEMORY_END-highBuffer)/256
     ASSERT fatBuffer+256 <= highBuffer || highBuffer+HIGH_SECTORS*256 <= fatBuffer
 program_end = highBuffer + HIGH_SECTORS*256
     IFNDEF DISKBEN_BANK
-IMAGE_MEM_END = program_end
+    IFDEF DISKBEN_LEGACY_FIXTURE
+IMAGE_BSS_SIZE = 0
+IMAGE_MEM_END = code_end
+bootSectorBuffer = sectorBuffer
+    ELSE
+    ASSERT code_end <= BENCH_MAIN_STATS_ADDR
+; Статистика MAIN живёт в контроллере, в том числе при копировании результата.
+IMAGE_BSS_SIZE = BENCH_MAIN_WORK_ADDR-code_end
+IMAGE_MEM_END = BENCH_MAIN_WORK_ADDR
+bootSectorBuffer = BENCH_MAIN_BUFFER_ADDR
+    ENDIF
     ENDIF
 ; EQU-псевдонимы сохраняют адреса в .sym даже при задании через -D.
 diskbench_source = sectorBuffer
-diskbench_high = highBuffer
-diskbench_fat = fatBuffer
+diskbench_high   = highBuffer
+diskbench_fat    = fatBuffer
     IF highBuffer >= 0FB00h
     ; Только опыт с нижним кэшем: прежняя область FB00h–FEFFh свободна.
     ASSERT FAT_CACHE_ADDR != 0FB00h

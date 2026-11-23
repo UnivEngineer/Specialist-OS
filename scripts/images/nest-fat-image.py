@@ -4,7 +4,7 @@ from pathlib import Path
 import struct
 
 
-def nest(image, paths, staging_entries=None):
+def nest(image, paths, staging_entries=None, fat12=False):
     data=bytearray(image)
     u16=lambda offset:struct.unpack_from('<H',data,offset)[0]
     sector=u16(11);spc=data[13];reserved=u16(14);copies=data[16]
@@ -15,9 +15,22 @@ def nest(image, paths, staging_entries=None):
     first_data=root+root_bytes;cluster_bytes=sector*spc
     clusters=(total*sector-first_data)//cluster_bytes
     fat=reserved*sector
-    def get(c):return u16(fat+c*2)
+    def get(c):
+        if not fat12:
+            return u16(fat+c*2)
+        value = u16(fat + c + c//2)
+        return (value >> 4) if c & 1 else (value & 0xfff)
     def put(c,value):
-        for i in range(copies):struct.pack_into('<H',data,fat+i*fat_sectors*sector+c*2,value)
+        for i in range(copies):
+            base = fat + i*fat_sectors*sector
+            if fat12:
+                offset = base + c + c//2
+                neighbor = u16(offset)
+                value12 = value & 0xfff
+                packed = (neighbor & 0xf) | (value12 << 4) if c & 1 else (neighbor & 0xf000) | value12
+                struct.pack_into('<H', data, offset, packed)
+            else:
+                struct.pack_into('<H', data, base+c*2, value)
     def address(c):return first_data+(c-2)*cluster_bytes
     def short(name):
         if name in ('.','..') or not name or name.count('.')>1:raise ValueError('Invalid 8.3 component: '+name)
@@ -95,7 +108,8 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('image',type=Path);parser.add_argument('paths',nargs='+')
     parser.add_argument('--entries',type=Path)
+    parser.add_argument('--fat12', action='store_true')
     args=parser.parse_args()
-    data,count=nest(args.image.read_bytes(),args.paths,args.entries.read_bytes() if args.entries else None)
+    data,count=nest(args.image.read_bytes(),args.paths,args.entries.read_bytes() if args.entries else None,args.fat12)
     args.image.write_bytes(data)
     print('Nested FAT image:',count,'directories,',len(args.paths),'files')

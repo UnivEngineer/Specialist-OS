@@ -8,8 +8,8 @@ from hashlib import sha256
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGET = ROOT / 'assets/games/Adskok.rks'
-ORIGINAL = ROOT / 'assets/games/originals/adskok/Adskok.rks.bin'
+TARGET = ROOT / 'assets/games/families/adskok/repaired/Adskok.rks'
+ORIGINAL = ROOT / 'assets/games/families/adskok/originals/Adskok.rks.bin'
 ORIGINAL_SHA = 'cdabd464f516f97581f9f32dd35599911eed3cef6eb88c91e15bcbc6ed5b062d'
 
 

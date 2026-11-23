@@ -43,7 +43,7 @@ try:
  enter('MD TESTDIR');enter('CD TESTDIR');cwd('B:\\TESTDIR')
  enter('MKDIR INNER');enter('CD INNER');cwd('B:\\TESTDIR\\INNER')
  enter('CD /');cwd('B:\\')
- enter('COPY A:/README.TXT B:/TESTDIR/SHOW.TXT');cwd('B:\\')
+ enter('COPY C:/README.TXT B:/TESTDIR/SHOW.TXT');cwd('B:\\')
  enter('TYPE B:/TESTDIR/SHOW.TXT')
  enter('REN B:/TESTDIR/SHOW.TXT B:/TESTDIR/RENAMED.TXT')
  enter('MOVE B:/TESTDIR/RENAMED.TXT B:/MOVED.TXT')

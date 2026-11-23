@@ -1,15 +1,27 @@
 ; Byte offsets address the document. Display columns are 24-bit: a MAIN
 ; line consisting of tabs can exceed 65535 display cells. Tab stops: configurable 2/4/6/8 cells.
-v_visualColumn: DW 0
-v_visualColumnHi: DB 0
-v_goalColumn: DW 0
-v_goalColumnHi: DB 0
-v_goalValid: DB 0
-editorCalcHi: DB 0
-editorRemainingHi: DB 0
-editorTabPending: DB 0
-v_tabWidth: DB 4
-editorTabLeft: DB 4
+v_visualColumn:     DW 0
+v_visualColumnHi:   DB 0
+v_goalColumn:       DW 0
+v_goalColumnHi:     DB 0
+v_goalValid:        DB 0
+editorCalcHi:       DB 0
+editorRemainingHi:  DB 0
+editorTabPending:   DB 0
+v_tabWidth:         DB 4
+editorTabLeft:      DB 4
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Отменить запомненную целевую колонку вертикального движения.
+;
+; вход:
+;   Регистровых параметров нет.
+;
+; выход:
+;   v_goalValid и a равны 0, z = 1, cf = 0. bc, de и hl сохранены.
+;----------------------------------------------------------------------------
 
 editorResetGoal:
         XOR A
@@ -367,13 +379,13 @@ editorKoi7Done:
         RET
 
 ; Six decimal cells, right aligned; no wrap at 65535 visual columns.
-editorNumberLow: DW 0
-editorNumberHigh: DB 0
-editorNumberDiv: DW 0
-editorNumberOut: DW 0
-editorNumberCount: DB 0
-editorNumberLeading: DB 0
-editorNumberBuffer: DS 6,32
+editorNumberLow:        DW 0
+editorNumberHigh:       DB 0
+editorNumberDiv:        DW 0
+editorNumberOut:        DW 0
+editorNumberCount:      DB 0
+editorNumberLeading:    DB 0
+editorNumberBuffer:     DS 6,32
                     DB 0 ; terminator for centered status values
 editorNumberPowers: DB 0A0h,086h,1, 010h,027h,0, 0E8h,3,0
                     DB 100,0,0, 10,0,0, 1,0,0

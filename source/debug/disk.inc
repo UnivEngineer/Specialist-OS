@@ -117,8 +117,8 @@ txtNoFile:      DB 0AH,0DH,"NO FILE ",00H
 
 Dir_A:  LD HL,txtHeaderAddress
         JP bios_printString
-txtHeaderAddress: DB 0AH,"ADDRESS IS IN FILE HEADER",0
-v_dumpAddress: DW 0
+txtHeaderAddress:   DB 0AH,"ADDRESS IS IN FILE HEADER",0
+v_dumpAddress:      DW 0
 
 ;----------------------------------------------------------------------------
 ; Директива V - загрузка файла в память по указанному адресу

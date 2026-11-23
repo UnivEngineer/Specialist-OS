@@ -62,10 +62,10 @@ ncMemoryWait:
     ld a,1
     MXOS_CALL MXOS_DOS_SET_SHELL
     jp bios_reboot
-ncCatalogCapacity: DB FILE_CACHE_CAPACITY
-ncMemoryTop: DW 0
-ncMemoryEnd: DW NC_END
-ncMemoryMessage: DB 'NC: not enough MAIN memory. MEMTOP=',0
-ncMemoryNeed: DB ', need >= ',0
-ncMemoryReserveMessage: DB 'NC: catalog allocation error ',0
-ncMemoryPrompt: DB 13,10,'Press Enter for CLI.',13,10,0
+ncCatalogCapacity:          DB FILE_CACHE_CAPACITY
+ncMemoryTop:                DW 0
+ncMemoryEnd:                DW NC_END
+ncMemoryMessage:            DB 'NC: not enough MAIN memory. MEMTOP=',0
+ncMemoryNeed:               DB ', need >= ',0
+ncMemoryReserveMessage:     DB 'NC: catalog allocation error ',0
+ncMemoryPrompt:             DB 13,10,'Press Enter for CLI.',13,10,0

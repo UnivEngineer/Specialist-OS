@@ -1,6 +1,7 @@
 ﻿.vs/mxos/v15
 .vs
 images/*.bin
+/images/Floppy720.img
 bin/
 docs/
 tmp/

@@ -1,16 +1,17 @@
 """РџР°СЂРЅР°СЏ СЃР±РѕСЂРєР° BIOS C000h Рё РїР»РѕС‚РЅРѕР№ Р±Р°РЅРєРѕРІРѕР№ DOS СЃ 0100h."""
+import os
 import json
 import runpy
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
 
 def component_groups():
     """Р Р°Р·РґРµР»СЊРЅС‹Рµ СЃРѕСЃС‚Р°РІС‹ BIOS/DOS; РѕР±С‰РёРµ РїСЂРёРјРёС‚РёРІС‹ РЅР°С…РѕРґСЏС‚СЃСЏ РІ common."""
     manifests={region:json.loads((ROOT/f'source/{region}/layout.json').read_text('utf-8'))
                for region in ('bios','dos')}
     def resolve(unit,region):
-        return {**unit,'files':[str((ROOT/f'source/{region}'/f).resolve()) for f in unit['files']]}
+        return {**unit,'files':[os.path.normpath(ROOT/f'source/{region}'/f) for f in unit['files']]}
     manifest=manifests['bios']
     manifest['fixed']=[resolve(f,'bios') if 'files' in f else f for f in manifest['fixed']]
     groups={region:[resolve(u,region) for u in manifests[region]['units']]
@@ -32,7 +33,7 @@ def main():
     for u in groups['dos']:
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
-    lines += ['dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX','    ORG 0C000h']
+    lines += [h['include'](source/'variables.inc'),'dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX','    ORG 0C000h']
     for f in manifest['fixed']:
         lines += [f'    ORG_PAD {h["number"](f["address"])}',*h['emit_fixed'](f)]
     for u in groups['bios']:
@@ -49,7 +50,7 @@ def main():
     lines=['    ORG DOS_CODE_START','dosCoreStart:']
     for u in groups['dos']:
         lines += h['emit_unit'](u,u['name'])
-    lines += ['dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX']
+    lines += [h['include'](source/'variables.inc'),'dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX']
     lines += [h['emit_plan'](bios_plan,manifest['fixed']).replace('    ORG 0C000h','    ORG_PAD 0C000h',1),
               inc(ROOT/'source/bios/banked-start.inc'),
               'ioTablesStart:', inc(ROOT/'source/bios/syscall-tables.inc'), 'ioTablesEnd:',
@@ -130,6 +131,7 @@ def main():
     bank_layout=json.loads((out/'banked/KERNEL.layout.json').read_text(encoding='utf-8'))
     report['dos']=dict(start=bank_layout['dosCoreStart'],end=bank_layout['kernelEnd'],bytes=len(bank),page=1,
                        coreEnd=bank_layout['dosCoreEnd'],extensionStart=bank_layout['dosCoreEnd'],
+                       variablesStart=bank_layout['dosWorkStart'],variablesEnd=bank_layout['dosWorkEnd'],
                        dataStart=bank_layout['DOS_BANK_DATA_ADDR'])
     (out/'System.layout.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     print(f'BIOS: {len(bios)} bytes; IO: {len(io)} bytes; bank DOS: {len(bank)} bytes, end {bank_layout['kernelEnd']:04X}h')

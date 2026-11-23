@@ -9,9 +9,10 @@ sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)
 s=sy(R/'bin/FONTCOM.sym');n=sy(R/'bin/NC.sym');f=sy(R/'bin/FONT.sym');t=sy(R/'bin/banked/TRANSPORT.sym')
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=O,RUNTIME=R/'.local/font-import-runtime')
 x=h['Matrix']();m=x.m
-cases=[('Rotate','6x8/Rotate','BIOS','OFF',6),('PagedOff','6x8/Rotate','ROW6','OFF',6),('Packed6K','6x8/Packed','BIOS','ON',6),('Tripack','6x8/Rotate','TRIPACK','ON',6),('Fast12K','6x8/Fast','BIOS','ON',6),('PagedOn','6x8/Rotate','ROW6','ON',6),('Fast8','8x8/Rotate','BIOS','OFF',8),('Standalone8','8x8/Rotate','ROW8','ON',8),('Cpm4','4x8/Fast','BIOS','OFF',4),('Dup4','4x8/Fast','4DUP','ON',4)]
-cases += [('SharedRotate','6x8/Rotate','6RotateRows','OFF',6),('SharedPacked','6x8/Rotate','PACK6K','ON',6),('SharedFull','6x8/Rotate','FAST12K','ON',6),('SharedCompact','6x8/Rotate','COMPACT6','OFF',6),('Shared8','8x8/Rotate','FAST8','OFF',8),('Shared4','4x8/Fast','CPM4','OFF',4),('Colpre','6x8/Rotate','COL6PRE','ON',6)]
+cases=[('Rotate','6x8/Rotate','BIOS','OFF',6),('PagedOff','6x8/Rotate','ROW6','OFF',6),('Packed6K','6x8/Packed','BIOS','ON',6),('Tripack','6x8/Rotate','TRIPACK','ON',6),('Fast12K','6x8/Fast','BIOS','ON',6),('PagedOn','6x8/Rotate','ROW6','ON',6),('Fast8','8x8/Rotate','BIOS','OFF',8),('Standalone8','8x8/Rotate','ROW8','ON',8),('Cpm4','4x8/Packed','BIOS','OFF',4),('Dup4','4x8/Packed','4DUP','ON',4)]
+cases += [('SharedRotate','6x8/Rotate','6RotateCol4','OFF',6),('SharedPacked','6x8/Rotate','PACK6K','ON',6),('SharedFull','6x8/Rotate','FAST12K','ON',6),('SharedCompact','6x8/Rotate','COMPACT6','OFF',6),('Shared8','8x8/Rotate','FAST8','OFF',8),('Shared4','4x8/Packed','CPM4','OFF',4),('Colpre','6x8/Rotate','COL6PRE','ON',6)]
 cases += [('Window8','8x8/Rotate','WIN8','OFF',8)]
+cases += [('SharedFast4','4x8/Packed','FAST4','ON',4)]
 cases.sort(key=lambda c: {'Window8':-1,'Packed6K':0,'Fast12K':1}.get(c[0],2))
 inverse='--inverse' in sys.argv
 selected=[arg for arg in sys.argv[1:] if arg!='--inverse']
@@ -72,7 +73,7 @@ try:
   if engine=='WIN8':font=(R/'source/monitor_win/originals/monitor_win.rom').read_bytes()[0x1800:0x2000]
   elif width==8:font=(R/'assets/system-rom/fonts/8x8/Win8.pf').read_bytes()
   elif width==4:
-   font=(R/'assets/system-rom/fonts/4x8/Fast.pf').read_bytes()
+   font=(R/'assets/system-rom/fonts/4x8/Cpm4.pf').read_bytes()
   elif tag in ('Compact','SharedCompact'):
    src=(R/'bin/fonts/compact-font.bin').read_bytes();lookup=(R/'bin/fonts/compact-map.bin').read_bytes();font=bytes(src[lookup[c]*8+y] for c in range(256) for y in range(8))
   else:font=bytes(b&63 for b in (R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes())

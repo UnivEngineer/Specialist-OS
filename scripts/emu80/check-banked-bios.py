@@ -54,7 +54,7 @@ def main():
             m.write(cs['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
             if page == 0:
                 m.write(live['MEM_NATIVE_CALL'], word(live['sysCall']))
-                m.write(live['MEM_LOCAL_A'], word(live['bios_blockIO']))
+                m.write(live['MEM_LOCAL_SYSTEM'], word(live['bios_blockIO']))
                 m.write(live['MEM_LOCAL_CHECKED'], word(live['localBlockChecked']))
                 m.write(live['MEM_NEAR_COPY'], word(live['bios_memcpy_bc_hl']))
         select(0)

@@ -110,7 +110,7 @@ sysInstall:
     ld hl,bios_memcpy_bc_hl
     ld (MEM_NEAR_COPY),hl
     ld hl,bios_blockIO
-    ld (MEM_LOCAL_A),hl
+    ld (MEM_LOCAL_SYSTEM),hl
     ld hl,localBlockChecked
     ld (MEM_LOCAL_CHECKED),hl
     ld a,MEM_BANK_EXEC

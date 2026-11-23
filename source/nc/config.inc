@@ -340,30 +340,30 @@ ncConfigSkipName:
     inc hl
     pop de
     jp ncConfigLookup
-ncDefaultSort: DB 2
-ncFileDefaultColor: DB COLOR_FILE
-ncFileSystemColor: DB 071h
-ncConfigCursor: DW 0
-ncConfigNext: DW 0
-ncConfigRuleEnd: DW 0
-ncConfigKind: DB 0
-ncConfigColor: DB 0
-ncConfigPath: DB 'A:',05Ch,'NC.CFG',0
+ncDefaultSort:          DB 2
+ncFileDefaultColor:     DB COLOR_FILE
+ncFileSystemColor:      DB 071h
+ncConfigCursor:         DW 0
+ncConfigNext:           DW 0
+ncConfigRuleEnd:        DW 0
+ncConfigKind:           DB 0
+ncConfigColor:          DB 0
+ncConfigPath:           DB 'C:',05Ch,'DOS',05Ch,'NC.CFG',0
 ncConfigDirectives:
     DB 'FILECOLORUSER',0,0,'FILECOLORSYS',0,1,'FILECOLORDEF',0,2
     DB 'DEFAULTSORTMODE',0,3
     DB 'DEFAULTLEFTDRIVE',0,15,'DEFAULTRIGHTDRIVE',0,16
-ncKeyActive: DB 'ACTIVEPANEL',0,4
-ncKeyLeftPath: DB 'LEFTPATH',0,5
-ncKeyRightPath: DB 'RIGHTPATH',0,6
-ncKeyLeftSort: DB 'LEFTSORT',0,7
-ncKeyRightSort: DB 'RIGHTSORT',0,8
-ncKeyLeftInfo: DB 'LEFTINFO',0,9
-ncKeyRightInfo: DB 'RIGHTINFO',0,10
-ncKeyLeftSelected: DB 'LEFTSELECTED',0,11
-ncKeyRightSelected: DB 'RIGHTSELECTED',0,12
-ncKeyLeftFirst: DB 'LEFTFIRST',0,13
-ncKeyRightFirst: DB 'RIGHTFIRST',0,14
+ncKeyActive:            DB 'ACTIVEPANEL',0,4
+ncKeyLeftPath:          DB 'LEFTPATH',0,5
+ncKeyRightPath:         DB 'RIGHTPATH',0,6
+ncKeyLeftSort:          DB 'LEFTSORT',0,7
+ncKeyRightSort:         DB 'RIGHTSORT',0,8
+ncKeyLeftInfo:          DB 'LEFTINFO',0,9
+ncKeyRightInfo:         DB 'RIGHTINFO',0,10
+ncKeyLeftSelected:      DB 'LEFTSELECTED',0,11
+ncKeyRightSelected:     DB 'RIGHTSELECTED',0,12
+ncKeyLeftFirst:         DB 'LEFTFIRST',0,13
+ncKeyRightFirst:        DB 'RIGHTFIRST',0,14
     DB 0
 ncConfigColors:
     DB 'BLACK',0,001h,'BLUE',0,011h,'GREEN',0,021h,'CYAN',0,031h

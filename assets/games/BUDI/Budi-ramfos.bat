@@ -1,1 +1,0 @@
-RUN -RF BUDI-RF.exe

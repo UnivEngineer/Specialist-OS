@@ -38,19 +38,19 @@ def command(value,frames,reads,prompt=False):
  print(value,actual,flush=True)
 try:
  m.start('dirty',disk=R/'bin/nested-Games2M.bin')
- command('COPY A:/README.TXT B:/ONE.TXT',[],[])
+ command('COPY C:/README.TXT B:/ONE.TXT',[],[])
  command('MKDIR B:/D1',[],[])
  command('REN B:/ONE.TXT B:/TWO.TXT',[],[])
  command('MOVE B:/TWO.TXT B:/D1/THREE.TXT',[],[])
  command('DEL B:/D1/THREE.TXT',[],[])
  command('CD B:/D1',[0],[0])
- command('COPY A:/README.TXT B:/D1/ONE.TXT',[0],[0])
+ command('COPY C:/README.TXT B:/D1/ONE.TXT',[0],[0])
  command('MD B:/OTHER',[],[])
- command('COPY A:/README.TXT B:/OTHER/TWO.TXT',[],[])
+ command('COPY C:/README.TXT B:/OTHER/TWO.TXT',[],[])
  command('CD B:/OTHER',[0],[0])
  tap('tab');command('CD B:/OTHER',[1],[1])
  command('REN TWO.TXT THREE.TXT',[0,1],[0,1])
- command('COPY A:/README.TXT B:/D1/ONE.TXT',[],[],prompt=True)
+ command('COPY C:/README.TXT B:/D1/ONE.TXT',[],[],prompt=True)
  assert observe('n')==([0,1],[]),'No must restore cached panels'
  m.m.screenshot(O/'both-panels.png')
  tap('f7');assert observe('esc')==([0,1],[]),'cancelled dialog must reuse caches'

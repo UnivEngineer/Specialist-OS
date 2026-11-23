@@ -15,7 +15,7 @@ def main():
     result = json.loads(args.results.read_text(encoding='utf-8'))
     source = (ROOT / 'source-apps/fontbench/matrix-data.inc').read_text(encoding='utf-8')
     label_source = source + (ROOT / 'source-apps/fontbench/engines/kernel-api.inc').read_text(encoding='utf-8')
-    labels = dict(re.findall(r"^(label\w+): DB '([^']*)',0", label_source, re.M))
+    labels = dict(re.findall(r"^(label\w+):[ \t]+DB[ \t]+'([^']*)',0", label_source, re.M))
     rows = []
     for case in re.findall(r'^    CASE (.+)$', source, re.M):
         core, kind, flags, main, bank, main_misses, bank_misses, label = case.split(',')

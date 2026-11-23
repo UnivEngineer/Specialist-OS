@@ -1,4 +1,18 @@
 ; EXEC profile runtime. Rendering is queued; only flush/key calls enter MAIN.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Установить или возобновить резидентную оболочку NC_CORE.DLL в EXEC.
+;
+; вход:
+;   a = 2 для закрытия, 1 для восстановления либо буква диска при установке. При b != 0
+;   выполняется регистрация, при b = 0 запускается интерфейс.
+;
+; выход:
+;   При штатном завершении a = 0, cf = 0; при ошибке a = код, cf = 1. Графика
+;   выполняется через UI_GFX в MAIN.
+;----------------------------------------------------------------------------
+
 ncBankEntry:
     cp 2 ; Shared resident convention: RESTORE=1, CLOSE=2.
     jp z,ncBankClose
@@ -75,6 +89,8 @@ ncBankGraphicsReady:
     xor a
     ld (ncBankExitAction),a
     ld (ncBankScopeError),a
+    ; A warm restart can discard the scope and its timer lease while retaining NC.
+    ld (ncInputState.timed),a
     MXOS_KEY_BEGIN ncInputState
     ld hl,(ncGfxHandle)
     ld de,ncBankController
@@ -116,19 +132,37 @@ ncBankExecDone:
     ret
 ; Synchronous child. Both UIs release the drawing scope before handing
 ; over MAIN. RET resumes this same NC, independently of the selected shell.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запустить банковый редактор после выхода из области действия UI_GFX.
+;
+; вход:
+;   vars.pathArg = путь ASCIIZ; ncBankNumber = страница NC.
+;
+; выход:
+;   После синхронного вызова и попытки выгрузки EDITCORE устанавливаются ncEditorReturn
+;   = 1 и ncEditorError = код ошибки или 0. Управление передаётся ncBankEnterUI.
+;----------------------------------------------------------------------------
+
 ncBankEdit:
     call ncBankReleaseGraphics
     ld hl,ncEditorPath
+    ld (ncEditorErrorContext),hl
     ld a,MODULE_TARGET_BANK
     MXOS_CALL MXOS_DOS_MODULE_LOAD
     jp c,ncBankEditResult
     ld (ncEditorHandle),hl
+    ld hl,ncEditorCallLabel
+    ld (ncEditorErrorContext),hl
     ld hl,vars.pathArg
     ld (ncEditorRegs+2),hl
     ld a,1
     ld (ncEditorRegs+7),a
     ld a,(ncBankNumber)
     ld (ncEditorRegs+4),a
+    ld a,(ncEditorPath)
+    ld (ncEditorRegs+5),a
     ld hl,(ncEditorHandle)
     ld de,ncEditorRegs
     MXOS_CALL MXOS_DOS_MODULE_CALL
@@ -227,7 +261,7 @@ ncBankResumeToolbar:
     call mainPrepareReload
     call fullRedraw
     call mainResetReload
-    ld hl,ncEditorPath
+    ld hl,(ncEditorErrorContext)
     ld de,vars.input
 ncBankEditErrorPath:
     ld a,(hl)
@@ -269,6 +303,19 @@ ncBankReleaseGraphics:
     ld (ncGfxHandle),hl
     xor a
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Закрыть интерфейс резидентного NC в EXEC.
+;
+; вход:
+;   Состояние хранится в ncBankInitialized и ncGfxHandle.
+;
+; выход:
+;   Для инициализированного интерфейса снимается наблюдатель и сохраняется состояние
+;   панелей. Предпринимается выгрузка UI_GFX. a = 0, cf = 0.
+;----------------------------------------------------------------------------
+
 ncBankClose:
     ld a,(ncBankInitialized)
     or a
@@ -331,6 +378,19 @@ ncBankEpochNextDrive:
     dec b
     jp nz,ncBankEpochDrive
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Настроить приём команд UI_GFX и подготовить отступ глифа.
+;
+; вход:
+;   ncGfxHandle = дескриптор DLL в MAIN.
+;
+; выход:
+;   Возвращается AF от GFX_BIND при его отказе или от GFX_GLYPH_PADDING после успешной
+;   настройки.
+;----------------------------------------------------------------------------
+
 ncGfxBind:
     ld hl,NC_GFX_QUEUE_BYTES
     ld (ncGfxRegisters+4),hl
@@ -342,6 +402,19 @@ ncGfxBind:
     ld hl,8
     ld (ncGfxRegisters+4),hl
     ld a,GFX_GLYPH_PADDING
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Непосредственно вызвать диспетчер UI_GFX из EXEC.
+;
+; вход:
+;   a = операция GFX_*; аргументы заданы в ncGfxRegisters, дескриптор DLL в ncGfxHandle.
+;
+; выход:
+;   При отказе маршрутизации возвращается AF DOS. После выполненного вызова AF
+;   извлекается из пакета результата.
+;----------------------------------------------------------------------------
+
 ncGfxCall:
     ld (ncGfxRegisters+7),a
     ld hl,(ncGfxHandle)
@@ -359,6 +432,18 @@ ncGfxReadBytes8:
     ld (ncQTransfer+4),hl
     ld hl,8
     jp ncGfxReadTransfer
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Скопировать результат непосредственного вызова UI_GFX из MAIN в EXEC.
+;
+; вход:
+;   ncBankNumber = страница NC. GFX_RESULT содержит GFX_RESULT_BYTES байт.
+;
+; выход:
+;   При cf = 0 данные скопированы в ncGfxResult; при cf = 1 в a код ошибки mx_memcpyFar.
+;----------------------------------------------------------------------------
+
 ncGfxReadResult:
     ld hl,GFX_RESULT
     ld (ncQTransfer+1),hl
@@ -373,6 +458,19 @@ ncGfxReadTransfer:
     ld (ncQTransfer),a
     ld hl,ncQTransfer
     jp mx_memcpyFar
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вывести очередь NC в MAIN перед синхронной операцией.
+;
+; вход:
+;   Активна область действия графического контроллера.
+;
+; выход:
+;   При успехе регистры и флаги сохранены. При cqError область действия
+;   завершается с кодом в ncBankScopeError.
+;----------------------------------------------------------------------------
+
 ncBankFlush:
     call mx_queueFlush
     push af
@@ -695,6 +793,19 @@ ncBankUp:
 ncBankSetCursor:
     ld (ncBankCursor),hl
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Дождаться события клавиатуры в EXEC, обслуживая курсор, Shift и статус.
+;
+; вход:
+;   Локальная клавиатура, графическая очередь и координаты курсора инициализированы.
+;   Регистровых параметров нет.
+;
+; выход:
+;   A = клавиша, CF = признак Ctrl, BC, DE и HL сохранены. Остальные флаги
+;   не определены. Метка платформы обновляется только при основном вводе NC.
+;----------------------------------------------------------------------------
 ncBankGetch:
     push bc
     push de
@@ -714,9 +825,7 @@ ncBankInputPoll:
     ld d,(hl)              ; Previous raw key, preserved by io_bankKeyPoll.
     call io_bankKeyPoll
     jp nz,ncBankInputKey   ; F1 is zero in A, but NZ denotes an event.
-    IF NC_STATUS_DEFER
     call ncStatusIdle
-    ENDIF
     call io_bankKeyTicks
     sub c
     cp b
@@ -874,36 +983,38 @@ ncMemoryInit:
     ret
 ncMemoryError:
     jp ncBankReturn
-ncCatalogCapacity: DB FILE_CACHE_CAPACITY
-ncMemoryTop: DW 0
-ncMemoryEnd: DW NC_END
-ncBankNumber: DB 0
-ncBankInitialized: DB 0
-ncBankRegistered: DB 0
-ncBankInitOnly: DB 0
-ncBankChildActive: DB 0
-ncBankResumedChild: DB 0
-ncBankEpoch: DS 32,0
-ncBankNewEpoch: DS 32,0
-ncBankEpochDiff: DB 0
-ncBankReturnSP: DW 0
-ncBankExecSP: DW 0
-ncGfxHandle: DW 0
-ncGfxRegisters: DS MX_REGS,0
-ncGfxResult: DS GFX_RESULT_BYTES,0
-ncEditorHandle: DW 0
-ncEditorRegs: DS MX_REGS,0
-ncEditorReturn: DB 0
-ncEditorError: DB 0
-ncEditorPath: DB 'A:',05Ch,'EDITCORE.DLL',0
-ncGfxPath: DB 'A:',05Ch,'UI_GFX.DLL',0
-ncBankExitAction: DB 0
-ncBankScopeError: DB 0
-ncQPayloadSize: DW 0
-ncQTextStart: DW 0
-ncQOperation: DB 0
-ncQRegisters: DS MX_REGS,0
-ncQTransfer: DS MEM_COPY_REQUEST,0
-ncInputState: IO_KEY_STATE
+ncCatalogCapacity:      DB FILE_CACHE_CAPACITY
+ncMemoryTop:            DW 0
+ncMemoryEnd:            DW NC_END
+ncBankNumber:           DB 0
+ncBankInitialized:      DB 0
+ncBankRegistered:       DB 0
+ncBankInitOnly:         DB 0
+ncBankChildActive:      DB 0
+ncBankResumedChild:     DB 0
+ncBankEpoch:            DS 32,0
+ncBankNewEpoch:         DS 32,0
+ncBankEpochDiff:        DB 0
+ncBankReturnSP:         DW 0
+ncBankExecSP:           DW 0
+ncGfxHandle:            DW 0
+ncGfxRegisters:         DS MX_REGS,0
+ncGfxResult:            DS GFX_RESULT_BYTES,0
+ncEditorHandle:         DW 0
+ncEditorErrorContext:   DW ncEditorPath
+ncEditorCallLabel:      DB "EDIT",0
+ncEditorRegs:           DS MX_REGS,0
+ncEditorReturn:         DB 0
+ncEditorError:          DB 0
+ncEditorPath:           DB 'C:',05Ch,'DOS',05Ch,'EDITCORE.DLL',0
+ncGfxPath:              DB 'C:',05Ch,'DOS',05Ch,'UI_GFX.DLL',0
+ncBankExitAction:       DB 0
+ncBankScopeError:       DB 0
+ncQPayloadSize:         DW 0
+ncQTextStart:           DW 0
+ncQOperation:           DB 0
+ncQRegisters:           DS MX_REGS,0
+ncQTransfer:            DS MEM_COPY_REQUEST,0
+ncInputState:           IO_KEY_STATE
 
     INCLUDE "../include/command-queue.inc"

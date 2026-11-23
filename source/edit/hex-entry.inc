@@ -1,13 +1,13 @@
 ; Bridge between the text and HEX views. Both keep logical file positions.
-hexActive:      DB 0
-hexRestoreLF:   DB 0
-hexMode6:       DB 0            ; CS, KOI7-R, KOI8-R, All
-hexFiltered:    DB 1            ; active glyph filter
-hexTop:         DW 0            ; first physical screen row in the dump
-hexCaret:       DW 0            ; file offset, including EOF
-hexChangedBreak: DB 0
-editorPendingHex: DB 0
-hexUnsupported: DB 'Invalid/unsupported executable',0
+hexActive:          DB 0
+hexRestoreLF:       DB 0
+hexMode6:           DB 0        ; CS, KOI7-R, KOI8-R, All
+hexFiltered:        DB 1        ; active glyph filter
+hexTop:             DW 0        ; first physical screen row in the dump
+hexCaret:           DW 0        ; file offset, including EOF
+hexChangedBreak:    DB 0
+editorPendingHex:   DB 0
+hexUnsupported:     DB 'Invalid/unsupported executable',0
     INCLUDE "hex-container.inc"
 
 ; A nonmoving command such as Save or Help keeps the half-CRLF position.
@@ -30,12 +30,37 @@ hexCheckTextCaret:
     ld (hexRestoreLF),a
     ret
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Пометить документ изменённым и сбросить сохранённую позицию внутри CRLF.
+;
+; вход:
+;   Регистровых параметров нет.
+;
+; выход:
+;   v_documentDirty = 1, hexRestoreLF = 0. a = 1, cf = 0, zf = 0; bc, de и hl сохранены.
+;----------------------------------------------------------------------------
+
 editorSetDirty:
     xor a
     ld (hexRestoreLF),a
     inc a
     ld (v_documentDirty),a
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Получить логический адрес позиции редактирования для выделения блока.
+;
+; вход:
+;   Текущий режим задан hexActive; в текстовом режиме учитывается hexRestoreLF.
+;
+; выход:
+;   hl = логический адрес, включая EOF. При сохранённой позиции внутри CRLF возвращается
+;   адрес LF.
+;----------------------------------------------------------------------------
 
 editorMarkPointer:
     ld a,(hexActive)
@@ -124,6 +149,20 @@ hexGridFileReady:
 hexToggle:
     call testShiftKey
     ret z
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Войти в HEX и по завершении восстановить текстовое представление.
+;
+; вход:
+;   Подготовлено состояние документа и курсора. MAIN использует встроенный HEX; EXEC
+;   загружает EDITHEX.DLL после вывода очереди.
+;
+; выход:
+;   a = 0, cf = 0 после возврата к тексту. В EXEC при отказе входа показан диалог, cf =
+;   1.
+;----------------------------------------------------------------------------
+
 hexEnter:
     IF EDIT_BANKED
     call ebFlush
@@ -222,20 +261,29 @@ hexEnterError:
 hexQueueCapacity:
     ld (cqAllocation),hl
     jp cqSetCapacity
-; The overlay pair is installed alongside EDITCORE.
+; B = drive containing EDITCORE. Update both overlay paths, preserving BC/DE/HL.
 editorOverlayDrive:
-    ld a,(ebQuiet)
-    or a
-    ld a,'A'
-    jp nz,hexCoreDrive
     ld a,b
-hexCoreDrive:
     ld (hexCorePath),a
     ld (textCorePath),a
     ret
 
 ; Back up the overlapping work area so a failed switch leaves the active
 ; code, text row widths and cache tags intact. No modal bitmap is live here.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Заменить оверлей с резервным копированием перекрываемой области.
+;
+; вход:
+;   hl = дескриптор из четырёх слов: путь ASCIIZ, назначение, размер, контрольная сумма.
+;   Буфер EDIT_MAIN_PIXELS свободен.
+;
+; выход:
+;   cf = 0 при успехе. При отказе cf = 1, a = код; исходная область сохранена. Ошибка её
+;   восстановления завершает контроллер через ebFailed.
+;----------------------------------------------------------------------------
+
 editorSwitchOverlay:
     push hl
     ld hl,EDIT_HEX_OVERLAY
@@ -255,6 +303,19 @@ editorSwitchOverlay:
     pop af
     ret
     ASSERT EDIT_BANK_STATE-EDIT_HEX_OVERLAY <= 32*148
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Загрузить и проверить оверлей в текущей странице EXEC.
+;
+; вход:
+;   hl = дескриптор из четырёх слов: путь ASCIIZ, назначение, размер, контрольная сумма.
+;
+; выход:
+;   cf = 0 при успехе. cf = 1, a = код при ошибке файла, проверки или возврата на
+;   прежний диск. Запись может начаться до проверки.
+;----------------------------------------------------------------------------
 
 editorLoadOverlay:
     ld (editorOverlayFile),hl
@@ -345,18 +406,18 @@ hexOpenError:
     call dosErrorText
     call editorErrorWithTitle
     jp editorCloseModal
-hexLoadError: DB 'Cannot load editor view',0
-hexCorePath: DB 'A:',05Ch,'EDITHEX.DLL',0
-textCorePath: DB 'A:',05Ch,'EDITTEXT.DLL',0
+hexLoadError:   DB 'Cannot load editor view',0
+hexCorePath:    DB 'C:',05Ch,'DOS',05Ch,'EDITHEX.DLL',0
+textCorePath:   DB 'C:',05Ch,'DOS',05Ch,'EDITTEXT.DLL',0
     IFNDEF EDIT_HEX_CS
-EDIT_HEX_CS = 0
+EDIT_HEX_CS  = 0
 EDIT_TEXT_CS = 0
     ENDIF
-hexOverlayFile: DW hexCorePath,EDIT_HEX_OVERLAY,hexOverlayBytes,EDIT_HEX_CS
-textOverlayFile: DW textCorePath,EDIT_TEXT_OVERLAY,textOverlayBytes,EDIT_TEXT_CS
-editorOverlayFile: DW 0
-editorOverlayLength: DW 0
-editorOverlayChecksum: DW 0
+hexOverlayFile:         DW hexCorePath,EDIT_HEX_OVERLAY,hexOverlayBytes,EDIT_HEX_CS
+textOverlayFile:        DW textCorePath,EDIT_TEXT_OVERLAY,textOverlayBytes,EDIT_TEXT_CS
+editorOverlayFile:      DW 0
+editorOverlayLength:    DW 0
+editorOverlayChecksum:  DW 0
     MODULE hexLocal
     INCLUDE "../common/calcCS.inc"
     ENDMODULE

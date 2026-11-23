@@ -73,7 +73,7 @@ try:
  call(k['MXOS_BIOS_SET_CURSOR_POS'],hl=0)
  if baseline!=(0,0):
   m.screenshot(O/'startup-failure.png')
-  m.write(0x3400,b'A:/DRIVERS/RAMDISK.COM -P 4\0'+bytes(80))
+  m.write(0x3400,b'C:/DRIVERS/RAMDISK.COM -P 4\0'+bytes(80))
   print('RAMDISK startup failure',baseline,call(k['MXOS_DOS_FILE_EXEC'],hl=0x3400,error='carry'),flush=True)
   raise AssertionError(baseline)
  page(1)
@@ -98,7 +98,7 @@ try:
  # DOS-инициализатор повторно принимает готовый B:, не трогает main/данные.
  page(2);ram_guard=m.read(0,4096);page(0);main_guard=m.read(0,256)
  for args,error in (('-P 4',None),('',None),('-P 8','carry')):
-  m.write(0x3400,('A:/DRIVERS/RAMDISK.COM '+args+'\0').encode()+bytes(80))
+  m.write(0x3400,('C:/DRIVERS/RAMDISK.COM '+args+'\0').encode()+bytes(80))
   call(k['MXOS_DOS_FILE_EXEC'],hl=0x3400,error=error)
   assert m.read(0,256)==main_guard
   page(2);assert m.read(0,4096)==ram_guard;page(1)
@@ -297,7 +297,7 @@ try:
  assert snapshot()==baseline,snapshot()
  check('normal-NC-controller-launch-with-B-files-after-DOS-reload')
  # Существующая DLL с корректным контейнером не исполняется из редактора NC.
- for command in ('B:/BANKMOD.DLL','A:/FILEOPS.DLL'):
+ for command in ('B:/BANKMOD.DLL','C:/DOS/FILEOPS.DLL'):
   m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
   before=m.read(0,32)
   for c in command:m.tap({':':'colon','/':'slash','.':'period'}.get(c,c.lower()))

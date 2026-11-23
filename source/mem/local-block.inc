@@ -1,25 +1,26 @@
 ; Внутренний вход клиента: C=диск, B=1/2/4/5, DE=блок, HL=буфер этой страницы.
 ; CF/A=ошибка, BC/DE/HL сохраняются. DOS проверяет геометрию и владение.
-; Для A: установщик задаёт локальный физический обработчик в MEM_LOCAL_A.
+; Для C: BIOS регистрирует локальный физический обработчик в MEM_LOCAL_SYSTEM.
     ORG_PAD LOCAL_BLOCK_ENTRY
 localBlock:
     ld a,b
     cp 5
     jp z,bankLocalChecked
     ld a,c
-    or a
+    cp SYSTEM_DRIVE
     jp z,localSystemBlock
-    dec a
+    cp RAM_DRIVE
     jp z,localRamBlock
-    cp 6
+    cp EXTERNAL_DRIVE
     jp nz,bankLocalBlockBad
     jp LOCAL_DRIVER_ADDR
 localSystemBlock:
     ld a,(bankPage)
     or a
     jp nz,MEM_IO_SYSTEM
+    ld a,c                ; BIOS blockIO принимает номер системного диска в A.
     push hl
-    ld hl,(MEM_LOCAL_A)
+    ld hl,(MEM_LOCAL_SYSTEM)
     ex (sp),hl
     ret
 localRamBlock:

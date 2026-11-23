@@ -17,6 +17,8 @@ m[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=m[S['initVars']:S['initVars
 m[S['bios_upper.escMode']]=255
 m=call(m,S['FONT_ENGINE_INIT'])
 font=(R/'bin/fonts/compact-font.bin').read_bytes();lookup=(R/'bin/fonts/compact-map.bin').read_bytes()
+blank=len(font)//8
+font+=bytes(8)
 present=set(range(0x20,0x80))|set(range(0xc0,0x100))|{0xa3,0xb3}
 assert all(lookup[c]==lookup[0x7f] for c in range(256) if c not in present)
 assert font[lookup[0x7f]*8:lookup[0x7f]*8+8]==bytes([63,33,33,33,33,33,63,0])
@@ -26,7 +28,9 @@ text=bytes(range(256));m[0x1000:0x1100]=text
 for koi in (0,1,0):
  m=call(m,S['bios_setFontEncoding'],a=koi)
  map_=bytearray(lookup)
- if koi:map_[0x60:0x80],map_[0xe0:0x100]=map_[0xe0:0x100],map_[0x60:0x80]
+ if koi:
+  map_[0x60:0x7f],map_[0xe0:0xff]=map_[0xe0:0xff],map_[0x60:0x7f]
+  map_[0x7f]=blank
  for inv in (0,255):
   for x in range(4):
    seed=bytearray(m);seed[0x9000:0xc000]=bytes([0x55])*12288

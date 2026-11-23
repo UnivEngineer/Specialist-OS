@@ -81,7 +81,7 @@ gridFirstKind:
     ld a,4
     ret
 
-; Put two dividers in each README row and a rule across the middle.
+; Добавить два вертикальных разделителя и среднюю горизонтальную линию.
 ; Both entry points receive these exact same bytes and coordinates.
 gridPseudoCorpus:
     ld hl,gridText

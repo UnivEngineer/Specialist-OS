@@ -1,4 +1,4 @@
-; CP/M repeated-nibble packet, lifted from FontBen 4DUP.
+; Пакет CP/M для двух знакомест в одном байте экрана.
 ; SP reads two character codes with POP HL. No CALL/PUSH while borrowed.
 ; BIOS/MXCALL executes with interrupts disabled. The caller stack is restored
 ; before controls, scrolling or return. Cursor and 16-bit remaining length
@@ -46,17 +46,29 @@ quotaReady:
     ld d,a
     ld (startColumn+1),a
     ; D advances once per full video byte. Only RawLim needs a column limit below C0h.
+    IFDEF FONT4_COMPACT
+    ld a,d
+    add a,e
+    ld (compactLimit+1),a
+    ld (compactUpLimit+1),a
+    ELSE
     ld a,(realMode)
     cp 2
     jp nz,limitReady
     ld a,d
     add a,e
     ld (normalLimit+1),a
+    ld (normalReverseLimit+1),a
     ld (inverseLimit+1),a
+    ld (inverseReverseLimit+1),a
 limitReady:
+    ENDIF
     ld a,(bios_vars.cursorY)
     sub 7
     ld e,a
+    IFDEF FONT4_COMPACT
+    INCLUDE "compact4-packet.inc"
+    ELSE
     ld a,(realMode)
     add a,a
     ld l,a
@@ -80,9 +92,8 @@ routeReady:
     ld sp,hl
 route: jp normalLim
 
-    MACRO PAIR_LOOP label, kind, inverse, limit
-label:
-    pop hl ; low=first code, high=second; both now in registers
+    MACRO PAIR_CODES kind, row
+    pop hl ; L — левый глиф, H — правый.
     IF kind != 2
     ld a,l
     cp kind
@@ -92,32 +103,39 @@ label:
     jp c,stopBeforePair
     ENDIF
     ld c,h
-    ld h,FONT_ADDR/256
-    ld b,h
+    IFDEF FONT4_FAST
+    ld h,FONT_ADDR/256+row
+    ELSE
+    ld h,b
+    ENDIF
+    ENDM
+
+    MACRO PAIR_ROWS inverse, reverse
     DUP 7
-        ld a,(bc)
-        xor (hl)
-        and 0Fh
-        xor (hl)
-        IF inverse
-        cpl
-        ENDIF
-        ld (de),a
+        PAIR_ROW inverse
+        IF reverse
+        dec h
+        dec b
+        dec e
+        ELSE
         inc h
         inc b
         inc e
+        ENDIF
     EDUP
-    ld a,(bc)
-    xor (hl)
-    and 0Fh
-    xor (hl)
-    IF inverse
-    cpl
+    PAIR_ROW inverse
+    ENDM
+
+    MACRO PAIR_LOOP label, kind, inverse, limit, reverseLimit, page
+label:
+    IFDEF FONT4_FAST
+page: ld b,0
+    ELSE
+    ld b,FONT_ADDR/256
     ENDIF
-    ld (de),a
-    ld a,e
-    sub 7
-    ld e,a
+.forward:
+    PAIR_CODES kind,0
+    PAIR_ROWS inverse,0
     inc d
     ld a,d
     IF kind == 2
@@ -125,15 +143,41 @@ limit: cp 0
     ELSE
     cp 0C0h
     ENDIF
-    jp nz,label
+    jp z,finish
+    ; E и B уже у последней строки, начинаем с неё следующую пару.
+    PAIR_CODES kind,7
+    PAIR_ROWS inverse,1
+    inc d
+    ld a,d
+    IF kind == 2
+reverseLimit: cp 0
+    ELSE
+    cp 0C0h
+    ENDIF
+    jp nz,.forward
     jp finish
     ENDM
-    PAIR_LOOP normalZ,32,0,unused
-    PAIR_LOOP normalRawZ,1,0,unused
-    PAIR_LOOP normalLim,2,0,normalLimit
-    PAIR_LOOP inverseZ,32,1,unused
-    PAIR_LOOP inverseRawZ,1,1,unused
-    PAIR_LOOP inverseLim,2,1,inverseLimit
+    MACRO PAIR_ROW inverse
+    ld a,(bc)
+    IFDEF FONT4_FAST
+    or (hl)
+    ELSE
+    xor (hl)
+    and 0Fh
+    xor (hl)
+    ENDIF
+    IF inverse
+    cpl
+    ENDIF
+    ld (de),a
+    ENDM
+    PAIR_LOOP normalZ,32,0,unused,unused,normalZRightPage
+    PAIR_LOOP normalRawZ,1,0,unused,unused,normalRawZRightPage
+    PAIR_LOOP normalLim,2,0,normalLimit,normalReverseLimit,normalLimRightPage
+    PAIR_LOOP inverseZ,32,1,unused,unused,inverseZRightPage
+    PAIR_LOOP inverseRawZ,1,1,unused,unused,inverseRawZRightPage
+    PAIR_LOOP inverseLim,2,1,inverseLimit,inverseReverseLimit,inverseLimRightPage
+    ENDIF
 stopBeforePair:
     dec sp
     dec sp ; unconsumed control/NUL pair goes to scalar frontend
@@ -161,8 +205,10 @@ empty:
     ld hl,(text)
     scf
     ret
-normalRoutes: DW normalZ,normalRawZ,normalLim
-inverseRoutes: DW inverseZ,inverseRawZ,inverseLim
-text: DW 0
-realMode: DB 0
+    IFNDEF FONT4_COMPACT
+normalRoutes:   DW normalZ,normalRawZ,normalLim
+inverseRoutes:  DW inverseZ,inverseRawZ,inverseLim
+    ENDIF
+text:           DW 0
+realMode:       DB 0
     ENDMODULE

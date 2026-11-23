@@ -245,10 +245,10 @@ memScalarRange:
     pop hl
     pop bc
     jp memBad
-memScalarKinds: DB 5,3,6,4
-memScalarAddress: DW 0
-memScalarValue: DW 0
-memScalarBank: DB 0
+memScalarKinds:     DB 5,3,6,4
+memScalarAddress:   DW 0
+memScalarValue:     DW 0
+memScalarBank:      DB 0
 
 memRouteInvoke:
     call bankCallPacket

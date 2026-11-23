@@ -173,7 +173,7 @@ done:
     pop bc
     pop af
     ret
-text: dw 0
-codes: ds 4
-remaining: db 0
+text:           dw 0
+codes:          ds 4
+remaining:      db 0
     ENDMODULE

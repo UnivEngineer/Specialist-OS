@@ -38,7 +38,7 @@ def main():
   visual='--visual-only' in sys.argv
   focus='--focus' in sys.argv
   for font,width in [('Rotate',6),('Cpm4',4),('Fast8',8)]:
-   command('FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}[font])
+   command('FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Packed','Fast8':'8x8/Rotate'}[font])
    assert byte('ncFontWidth')==width,(font,byte('ncFontWidth'))
    shot(font+'-panels')
    if focus:
@@ -93,7 +93,7 @@ def main():
    observed_command('MD B:/PARENT',True)
    observed_command('MD B:/PARENT/CHILD',False)
    observed_command('MD B:/PARENT/CHILD/LEAF',False)
-   observed_command('COPY A:/README.TXT B:/PARENT/CHILD/FILE.TXT',False)
+   observed_command('COPY C:/README.TXT B:/PARENT/CHILD/FILE.TXT',False)
    observed_command('DEL B:/PARENT/CHILD/FILE.TXT',False)
    print('NC drive title and unrelated-directory refresh PASS',flush=True)
    return
@@ -102,7 +102,7 @@ def main():
    command('MD '+p)
   command('CD B:/FOLDER1/FOLDER2/FOLDER3')
   for font,width in [('Cpm4',4),('Fast8',8),('Rotate',6)]:
-   command('FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}[font]);assert byte('ncFontWidth')==width
+   command('FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Packed','Fast8':'8x8/Rotate'}[font]);assert byte('ncFontWidth')==width
    type_text('echo testing');shot(font+'-long-path');m.tap('esc')
   print('NC ADAPTIVE FONT UI PASS',flush=True)
  except Exception:

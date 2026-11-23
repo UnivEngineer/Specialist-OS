@@ -1,13 +1,28 @@
 ; Preserved full post-row standalone engines; MAIN descriptor ABI.
     INCLUDE "../../source/include/mxos.inc"
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_FLAGS     = IMAGE_FLAG_MAIN
 PAGED_FONT_BASE = 02800h
-PAGED_PRE_BASE = 03000h
+PAGED_PRE_BASE  = 03000h
     ORG 02000h
 entry: jp initialize
 descriptor: DB 6,4
     DW scalarSix,batch6Raw,empty
     DS 06000h-$,0
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить движок измерений шрифта enginep и вернуть его дескриптор.
+;
+; вход:
+;   a = вариант реализации, b = режим предварительных таблиц. Движок и его рабочая
+;   память доступны в MAIN.
+;
+; выход:
+;   hl = адрес локального дескриптора с размерами и точками входа вывода, a = 0, cf =
+;   0.
+;----------------------------------------------------------------------------
+
 initialize:
     ld (variant),a
     ld a,b
@@ -193,6 +208,18 @@ batch8: ret
     ENDIF
 ; Private scalar callback: public hooks preserve AF/BC/DE/HL once.
 ; String heads/tails preserve only their live HL around this callback.
+;----------------------------------------------------------------------------
+; Вывести одно восьмипиксельное знакоместо из построчной таблицы.
+;
+; вход:
+;   c = код символа. Текущую позицию задают bios_vars.cursorY и cursorX.
+;   Рендерер выбирается дескриптором после initialize.
+;
+; выход:
+;   Восемь экранных байтов заменены, cursorX увеличен на 4.
+;   AF, DE, HL меняются, BC сохраняется.
+;----------------------------------------------------------------------------
+
 scalar8:
     ld e,c
     ld hl,(bios_vars.cursorY)
@@ -221,6 +248,18 @@ scalar8:
     ld a,(hl)
     ld (de),a
     ret
+;----------------------------------------------------------------------------
+; Вывести одно шестипиксельное знакоместо в текущей позиции.
+;
+; вход:
+;   c = код символа, позиция в bios_vars.cursorY. Таблица глифов
+;   подготовлена при initialize.
+;
+; выход:
+;   Позиция по горизонтали увеличена на 3 внутренних единицы. Рендерер
+;   обновляет только биты знакоместа. Рабочие регистры и флаги меняются.
+;----------------------------------------------------------------------------
+
 scalar:
 scalarSix:
     IFDEF FONT_BLOCK32
@@ -255,8 +294,8 @@ copy:
     or c
     jp nz,copy
     ret
-variant: DB 0
-preEnabled: DB 0
+variant:        DB 0
+preEnabled:     DB 0
     IFDEF FONT_BLOCK32
     INCLUDE "engines/block32.inc"
     INCLUDE "engines/block-adapter.inc"

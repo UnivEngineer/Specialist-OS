@@ -9,10 +9,12 @@ from hashlib import sha256
 import json
 from pathlib import Path
 import re
+import runpy
 from math import gcd
 
 
 ROOT = Path(__file__).resolve().parents[2]
+decode = runpy.run_path(str(ROOT / 'scripts/images/executable.py'))['decode']
 TABLES = (
     ("t_sound_stone", 0x09D4, 1), ("t_sound_smoke", 0x09F5, 3),
     ("t_sound_step", 0x0AF6, 0), ("t_sound_diamond", 0x0AF9, 2),
@@ -384,7 +386,7 @@ def check_fungus_gate(data, symbols):
 
 
 def load(stem):
-    data = (ROOT / "bin" / (stem + ".cpu")).read_bytes()
+    data = (ROOT / "bin" / (stem + ".i80")).read_bytes()
     symbols = dict((name, int(value, 16)) for name, value in re.findall(
         r"(?m)^(\w+): EQU 0x([0-9A-Fa-f]+)",
         (ROOT / "bin" / (stem + ".sym")).read_text()))
@@ -752,7 +754,7 @@ def main():
     for total in range(65536, 65536 + 10000):
         require(divmod(total, 10000) == (6 + (total - 60000) // 10000, (total - 60000) % 10000),
                 "Real-time carry decomposition differs")
-    reference = (ROOT / "assets/games/Almaz-2/legacy/Almaz2-original.cpu").read_bytes()
+    reference = (ROOT / "assets/games/families/almaz-2/originals/Almaz2-original.cpu").read_bytes()
     bios_source = (ROOT / "source/bios/keyTable.inc").read_text(encoding="utf-8")
     row = bios_source.split("v_keybTbl:", 1)[1].splitlines()[1]
     bios_codes = [int(value, 16) for value in re.findall(r"([0-9A-Fa-f]+)h", row)]
@@ -814,22 +816,24 @@ def main():
                     f"{stem}: unexpected monitor exit hook")
         if pit and optimized:
             check_color_exit_clear(payload, symbols)
-    # Проверить заголовок, всё тело и сумму RKS независимо от сборщика.
-    for stem in ("Almaz2", "Almaz2-optimized", "Almaz2-8color", "Almaz2-8color-optimized", "Almaz2-mx",
-                 "Almaz2-mx-optimized", "Almaz2-ramfos", "Almaz2-ramfos-optimized"):
+    # Проверить контейнер и тело независимо от PowerShell-сборщика.
+    containers = {
+        "Almaz2": ("rks", 0, 0),
+        "Almaz2-optimized": ("rks", 0, 0),
+        "Almaz2-8color": ("rks", 0, 0),
+        "Almaz2-8color-optimized": ("rks", 0, 0),
+        "Almaz2-mx": ("exe", 1, 0),
+        "Almaz2-mx-optimized": ("exe", 0, 4),
+        "Almaz2-ramfos": ("exe", 4, 0),
+        "Almaz2-ramfos-optimized": ("exe", 4, 0),
+    }
+    for stem, (kind, mode, flags) in containers.items():
         payload, _ = load(stem)
-        rks = (ROOT / "bin" / (stem + ".rks")).read_bytes()
-        require(rks[:4] == b"\0\0" + (len(payload) - 1).to_bytes(2, "little"),
-                f"{stem}: RKS address range differs")
-        require(rks[4:-2] == payload, f"{stem}: RKS payload differs")
-        running_sum = 0
-        high = 0
-        for value in payload[:-1]:
-            running_sum += value
-            high += value + (running_sum >> 8)
-            running_sum &= 0xFF
-        checksum = bytes(((running_sum + payload[-1]) & 0xFF, high & 0xFF))
-        require(rks[-2:] == checksum, f"{stem}: RKS checksum differs")
+        packed = (ROOT / "bin" / f"{stem}.{kind}").read_bytes()
+        image = decode(packed, kind)
+        require((image.load, image.entry, image.mode, image.flags) == (0, 0, mode, flags),
+                f"{stem}: container addresses or platform differ")
+        require(image.data == payload, f"{stem}: container payload differs")
     report = {"reference_sha256": sha256(data).hexdigest(), "pit_clock_hz": None,
               "variants": [], "runtime_emulation": False}
 

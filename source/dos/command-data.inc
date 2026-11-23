@@ -57,6 +57,9 @@ cliCommands:
     DB 'ECHO',0
     DW cliEcho
     DB 1
+    DB 'PAUSE',0
+    DW cliPause
+    DB 1
     DB 'REM',0
     DW cliSuccess
     DB 0
@@ -67,20 +70,9 @@ cliCommands:
     DW cliExit
     DB 0
     DB 0
-cliExtensions: DB 'COMEXEBAT',0
-cliHelpText: DB 'DIR CD PWD PATH A: MD RD COPY MOVE REN DEL TYPE CLS ECHO REM HELP EXIT ATTRIB',0
-cliDirText: DB '<DIR>',0
-cliOutput: DB 0
-cliQuery: DB 0
-cliAttribSet: DB 0
-cliAttribClear: DB 0
-cliArgs: DW 0
-cliTail: DW 0
-cliExtPtr: DW 0
-cliSearchDrive: DB 0
-cliNeedExtension: DB 0
-cliPathCursor: DW 0
-cliLine: DS MAX_PATH,0
+cliExtensions:      DB 'COMEXEBAT',0
+cliHelpText:        DB 'DIR CD PWD PATH A: MD RD COPY MOVE REN DEL TYPE CLS ECHO PAUSE REM HELP EXIT ATTRIB',0
+cliDirText:         DB '<DIR>',0
     IFDEF BANKED_DOS_BUILD
 cliPath1 = DOS_CLI_PATH1
 cliPath2 = DOS_CLI_PATH2
@@ -89,6 +81,3 @@ cliPath1: DS MAX_PATH,0
 cliPath2: DS MAX_PATH,0
     ENDIF
 cliSearchDirectory EQU cliPath2
-cliCopyHook: DW 0
-cliDirRecursive: DB 0
-cliTransferMatched: DB 0

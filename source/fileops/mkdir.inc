@@ -68,6 +68,6 @@ fmDone:
     call foContextRestore
     pop af
     ret
-fmCursor: DW 0
-fmSeparator: DB 0
-fmPath: DS MAX_PATH,0
+fmCursor:       DW 0
+fmSeparator:    DB 0
+fmPath:         DS MAX_PATH,0

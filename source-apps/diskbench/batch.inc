@@ -65,8 +65,7 @@ printBatch:
     ld a,(argMode)
     and 1
     jp z,batchReadOnly
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchReadLow
     ld a,52
     ld (batchOffset),a
@@ -76,8 +75,7 @@ batchReadLow:
     ld a,10
     ld (batchOffset),a
     ld hl,txtBatchRawRead
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchReadLabel
     ld hl,txtBatchRawReadLow
 batchReadLabel:
@@ -86,8 +84,7 @@ batchWrite:
     ld a,(v_budget)
     or a
     jp z,batchReadOnly
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchWriteLow
     ld a,48
     ld (batchOffset),a
@@ -97,8 +94,7 @@ batchWriteLow:
     xor a
     ld (batchOffset),a
     ld hl,txtBatchRawWrite
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchWriteLabel
     ld hl,txtBatchRawWriteLow
 batchWriteLabel:
@@ -106,8 +102,7 @@ batchWriteLabel:
     ld a,(v_writeMode)
     cp 6
     jp nz,batchReadOnly
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchVerifyLow
     ld a,104
     ld (batchOffset),a
@@ -117,8 +112,7 @@ batchVerifyLow:
     ld a,100
     ld (batchOffset),a
     ld hl,txtBatchRawVerify
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchVerifyLabel
     ld hl,txtBatchRawLowVerify
 batchVerifyLabel:
@@ -127,8 +121,7 @@ batchReadOnly:
     ld a,(argMode)
     and 2
     ret z
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchFileReadLow
     ld a,70
     ld (batchOffset),a
@@ -144,8 +137,7 @@ batchFileReadLow:
     ld a,(v_budget)
     or a
     ret z
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchFileWriteLow
     ld a,60
     ld (batchOffset),a
@@ -161,8 +153,7 @@ batchFileWriteLow:
     ld a,(v_writeMode)
     cp 6
     ret nz
-    ld a,(v_drive)
-    or a
+    call benchMapped
     jp nz,batchFileVerifyLow
     ld a,108
     ld (batchOffset),a
@@ -240,7 +231,7 @@ batchMissing:
     call puts
 batchAdvance:
     ld hl,(batchCell)
-    ld de,88
+    ld de,BENCH_MAIN_STATS_SIZE
     add hl,de
     ld (batchCell),hl
     ld hl,batchColumns
@@ -248,46 +239,50 @@ batchAdvance:
     jp nz,batchColumn
     ld hl,txtLineBreak
     jp puts
-batchEnabled: DB 0
-moduleCheckMode: DB 0
-batchNext: DW 0
-batchCell: DW 0
-batchColumns: DB 0
-batchOffset: DB 0
-batchVerifyOffset: DB 0
-verifiedStat: DS 10,0
-; MAIN выполняется первым. После MODULE_UNLOAD его арена 2100h свободна;
+batchEnabled:       DB 0
+moduleCheckMode:    DB 0
+batchNext:          DW 0
+batchCell:          DW 0
+batchColumns:       DB 0
+batchOffset:        DB 0
+batchVerifyOffset:  DB 0
+verifiedStat:       DS 10,0
+; MAIN выполняется первым. После MODULE_UNLOAD его арена свободна;
 ; DOS/BANK не пишут в неё. До завершения MAIN пакетных результатов ещё нет.
-batchStats = 02100h
-    ASSERT batchStats+3*88 <= 02C00h
-txtRawHighVerified: DB "WRITE HIGH + VERIFY:",9,0
-txtRawLowVerified: DB "WRITE LOW + VERIFY:",9,0
-txtWriteVerified: DB "WRITE + VERIFY:",9,0
-txtBatchHeader: DB 10,10,"KiB/s       ",9,"       MAIN",9,"        DOS",9,"       BANK",10,0
-txtBatchRawRead: DB "Raw READ    ",0
-txtBatchRawWrite: DB "Raw WRITE   ",0
-txtBatchRawReadLow: DB "READ LOW    ",0
-txtBatchRawWriteLow: DB "WRITE LOW   ",0
-txtBatchRawReadHigh: DB "READ HIGH   ",0
-txtBatchRawWriteHigh: DB "WRITE HIGH  ",0
-txtBatchRawHighVerify: DB "HIGH W+VFY  ",0
-txtBatchRawLowVerify: DB "LOW W+VERIFY",0
-txtBatchRawVerify: DB "Raw W+VERIFY",0
-txtBatchDosRead: DB "FILE READ   ",0
-txtBatchDosWrite: DB "FILE WRITE  ",0
-txtBatchDosVerify: DB "FILE W+VERIFY",0
-txtBatchMissing: DB "        -- ",0
+    IFDEF DISKBEN_LEGACY_FIXTURE
+batchStats = BENCH_MAIN_WORK_ADDR
+    ELSE
+; После прохода MAIN содержимое обменного буфера больше не нужно.
+batchStats = BENCH_MAIN_BUFFER_ADDR
+    ENDIF
+    ASSERT 3*BENCH_MAIN_STATS_SIZE <= 512
+txtRawHighVerified:     DB "WRITE HIGH + VERIFY:",9,0
+txtRawLowVerified:      DB "WRITE LOW + VERIFY:",9,0
+txtWriteVerified:       DB "WRITE + VERIFY:",9,0
+txtBatchHeader:         DB 10,10,"KiB/s       ",9,"       MAIN",9,"        DOS",9,"       BANK",10,0
+txtBatchRawRead:        DB "RAW READ    ",0
+txtBatchRawWrite:       DB "RAW WRITE   ",0
+txtBatchRawReadLow:     DB "RAW READ LO ",0
+txtBatchRawWriteLow:    DB "RAW WRITE LO",0
+txtBatchRawReadHigh:    DB "RAW READ HI ",0
+txtBatchRawWriteHigh:   DB "RAW WRITE HI",0
+txtBatchRawHighVerify:  DB "RAW HI W+VFY",0
+txtBatchRawLowVerify:   DB "RAW LO W+VFY",0
+txtBatchRawVerify:      DB "RAW W+VERIFY",0
+txtBatchDosRead:        DB "FILE READ   ",0
+txtBatchDosWrite:       DB "FILE WRITE  ",0
+txtBatchDosVerify:      DB "FILE W+VERIFY",0
+txtBatchMissing:        DB "        -- ",0
 
-txtBatchFileReadHigh: DB "FILE READ HI",0
-txtBatchFileWriteHigh: DB "FILE WRITE H",0
-txtBatchFileVerifyHigh: DB "FILE HIGH+V ",0
+txtBatchFileReadHigh:       DB "FILE READ HI",0
+txtBatchFileWriteHigh:      DB "FILE WRITE H",0
+txtBatchFileVerifyHigh:     DB "FILE HIGH+V ",0
 
 batchFileLowName:
-    ld a,(v_drive)
-    or a
+    call benchMapped
     ret nz
     ex de,hl
     ret
-txtBatchFileReadLow: DB "FILE READ LO",0
-txtBatchFileWriteLow: DB "FILE WRITE L",0
-txtBatchFileVerifyLow: DB "FILE LOW+V  ",0
+txtBatchFileReadLow:    DB "FILE READ LO",0
+txtBatchFileWriteLow:   DB "FILE WRITE L",0
+txtBatchFileVerifyLow:  DB "FILE LOW+V  ",0

@@ -1,12 +1,24 @@
-; Transient initializer ABI v1, loaded at 5000h; never copied to D800h.
-; A=0 import flat 256*8 font, A=1 generate lower planes.
-; HL -> { word staged engine BODY, word flat font, word lower destination }.
-; All registers destroyed. CF=0 success. No I/O, allocation or printing.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/font-init.inc"
     ORG FONT_INIT_ADDR
     jp initialize
     DB 'FIN1',1
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить таблицы движка шрифта по протоколу FIN1 для 6×8.
+;
+; вход:
+;   a = FONT_INIT_IMPORT или FONT_INIT_GENERATE. hl = адрес FONT_INIT_REQUEST в MAIN.
+;   Для импорта flat указывает на 256 глифов по 8 строк.
+;
+; выход:
+;   При IMPORT обновлены восемь страниц глифов в промежуточном образе
+;   движка, при GENERATE подготовлены нижние плоскости Packed или Fast
+;   (Rotate обходится без них). a = 0, cf = 0. Остальные регистры меняются.
+;----------------------------------------------------------------------------
+
 initialize:
     ld (operation),a
     ld e,(hl)
@@ -110,9 +122,9 @@ prepareSource:
     ret
     INCLUDE "prepare-packed.inc"
     INCLUDE "prepare-full.inc"
-source: DW 0
-flatSource: DW 0
-lowerBase: DW 0
-mode: DB 0
-operation: DB 0
-    ASSERT $ <= FONT_INIT_END
+source:         DW 0
+flatSource:     DW 0
+lowerBase:      DW 0
+mode:           DB 0
+operation:      DB 0
+    ASSERT $ <= packedP3

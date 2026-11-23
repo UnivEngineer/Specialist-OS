@@ -79,9 +79,15 @@ handleWritePolicy:
             ld (v_handleChecked),a
             ret
 
-; LFSR x^16+x^14+x^13+x^11+1. Остаток даёт позицию по всему тому;
-; общий поиск выбирает первый свободный кластер от неё, с возвратом к 2.
+; Выделить кластер с FILE_MODE_SCATTER. FH_ALLOC_SEED содержит состояние LFSR.
+; Вход: открытый для записи v_handle, смонтированный том. Выход через
+; handleAllocateFound, CF/A — статус, рабочие регистры изменены.
+; На плотно заполненном образе несколько случайных проб предотвращают
+; сведение всех попаданий в занятую область к одному линейному хвосту.
 handleAllocateScatter:
+            ld b,16
+handleScatterTry:
+            push bc
             ld a,FH_ALLOC_SEED
             call handleLoadWord
             ld a,h
@@ -111,7 +117,23 @@ handleSeedReady:
             call div_hl_de
             inc de
             inc de
+            pop bc
+            dec b
+            jp z,handleScatterScan
+            push de
+            call fatReadCluster
+            jp c,handleScatterError
+            ld a,d
+            or e
+            pop de
+            jp nz,handleScatterTry
+            ex de,hl
+            ld (v_findCluster),hl
+            ex de,hl
+            jp handleAllocateFound
+handleScatterError:
+            pop de
+            ret
+handleScatterScan:
             call fatFindClusterAt
             jp handleAllocateFound
-v_fileOptions: DB 0
-v_handleChecked: DB 0

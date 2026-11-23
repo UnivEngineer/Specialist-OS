@@ -31,7 +31,7 @@ def main():
   x.start('main-buffers',system=snap/'A.bin',disk=ROOT/'docs/nc/application-return-2026-11-17/build/H128.bin',nc_binary=snap/'bin/NC.i80',nc_symbols=snap/'bin/NC.sym',bios=snap/'bin/BIOS.sys',dos=snap/'bin/DOS.sys')
   nc_tail()
   cli=module['symbols']('CLI')
-  c.type('A:CLI')
+  c.type('C:/DOS/CLI')
   m.call('bp_clear');m.call('bp_set',addr=cli['cliPrompt'],type='exec');c.tap('enter')
   c.wait(cli['cliPrompt'],0)
   assert not any(q['bank']==0 and q['base']==c.n['FILE_CACHE_A'] for q in allocations()),'old NC catalogs survived replacement'

@@ -16,7 +16,7 @@
 
 ## Записи
 
-Дополнительная ручная гипотеза вне автоматического ABI-фильтра: **BUDI2** (`BUDI/legacy/BUDI2.rks`, нормализованная копия `BUDI/Budi2-color-f000.rks`) — кандидат на незавершённую RAMFOS-адаптацию по уточнению автора 02.11.2026. Происхождение не подтверждено; записи цвета F000h не доказывают отдельный нестандартный контроллер. Это дополнение не меняет 62 записи результатов сканирования в JSON. Не путать с RF-006, который относится к другому бинарнику Budi-ramfos.exe. Подробности и хеши — в [README BUDI](BUDI/README.md).
+Дополнительная ручная гипотеза вне автоматического ABI-фильтра: **BUDI2** (`families/budi/originals/Budi2-std.rks`, нормализованная копия `families/budi/patched/Budi2-std.exe`) — кандидат на незавершённую RAMFOS-адаптацию по уточнению автора 02.11.2026. Происхождение не подтверждено; записи цвета F000h не доказывают отдельный нестандартный контроллер. Это дополнение не меняет 62 записи результатов сканирования в JSON. Не путать с RF-006, который относится к другому бинарнику Budi-ramfos.exe. Подробности и хеши — в [README BUDI](families/budi/README.md).
 
 База внешних путей в таблице: `D:/Projects/RetroPC/Specialist/`. `{repo}` означает текущий репозиторий. Смещения в JSON относятся к началу нагрузки, без RKS-заголовка. Адрес загрузки для части raw-файлов предположен или взят из имени; его надо подтвердить перед запуском.
 
@@ -27,7 +27,7 @@
 | RF-003 | `Beat2.COM` | `strong-candidate` | C84Eh, C851h | `Soft/Lafan/LafanG2/GameMX1/Beat2.COM` |
 | RF-004 | `Beat_3.COM` | `strong-candidate` | C84Eh, C851h | `Soft/Lafan/LafanG2/GameMX1/Beat_3.COM` |
 | RF-005 | `Boulder1.COM` | `strong-candidate` | C84Eh, C851h; C63Eh | `Soft/Lafan/LafanG2/GameMX1/Boulder1.COM` |
-| RF-006 | `Budi-ramfos.exe` | `user-confirmed` | C84Eh, C851h; пользователь подтвердил запуск через LAUNCH -RF | `{repo}/assets/games/BUDI/Budi-ramfos.cpu` |
+| RF-006 | `Budi-ramfos.exe` | `user-confirmed` | C84Eh, C851h; пользователь подтвердил запуск через LAUNCH -RF | `{repo}/assets/games/families/budi/originals/Budi-ramfos.cpu` |
 | RF-007 | `Budi.COM` | `strong-candidate` | C84Eh, C851h; C63Eh | `Soft/Lafan/LafanG2/GameMX1/Budi.COM` |
 | RF-008 | `Budi_NEW.EXE` | `strong-candidate` | C84Eh, C851h; C63Eh | `Soft/Lafan/LafanG2/GameMX1/Budi_NEW.EXE` |
 | RF-009 | `DIGGER.I80` | `strong-candidate` | C80Fh, C84Bh; символ в A → C80Fh | `Soft/games_mx_i80/DIGGER.I80` |
@@ -61,15 +61,15 @@
 | RF-037 | `Wertole..EXE` | `strong-candidate` | C63Eh | `Soft/Lafan/bst_mx0/Games/Gam1/Wertole..EXE` |
 | RF-038 | `ZOO_.I80` | `strong-candidate` | C84Eh, C851h; C63Eh | `Soft/games_mx_i80/ZOO_.I80` |
 | RF-039 | `[ahmaty2.EXE` | `strong-candidate` | C80Fh, C84Bh; символ в A → C80Fh | `Soft/Lafan/LafanG1/GameMX4/[ahmaty2.EXE` |
-| RF-040 | `Buran-ramfos.exe` | `user-tested-issues` | C80Fh; C63Eh; символ в A → C80Fh | `{repo}/assets/games/Buran/Buran-ramfos.cpu` |
-| RF-041 | `StarWars2-ramfos.exe` | `user-tested-issues` | C84Bh; C63Eh | `{repo}/assets/games/StarWars/StarWars2-ramfos.cpu` |
+| RF-040 | `Buran-ramfos.exe` | `user-tested-issues` | C80Fh; C63Eh; символ в A → C80Fh | `{repo}/assets/games/families/buran/repacked/Buran-ramfos.exe` |
+| RF-041 | `StarWars2-ramfos.exe` | `user-tested-issues` | C84Bh; C63Eh | `{repo}/assets/games/families/starwars/repacked/StarWars2-ramfos.exe` |
 | RF-042 | `30.rks` | `weak-candidate` | C836h | `Soft/games_rks/30.rks` |
 | RF-043 | `Boulder2.COM` | `weak-candidate` | C84Eh | `Soft/Lafan/LafanG2/GameMX1/Boulder2.COM` |
 | RF-044 | `GOLD.I80` | `weak-candidate` | C854h | `Soft/games_mx_i80/GOLD.I80` |
 | RF-045 | `JET_SET.EXE` | `weak-candidate` | F80Fh | `Soft/Lafan/LafanG2/GameMX2/JET_SET.EXE` |
 | RF-046 | `LABIRINT.I80` | `weak-candidate` | C836h | `Soft/games_mx_i80/LABIRINT.I80` |
 | RF-047 | `PACMAN2.I80` | `weak-candidate` | C851h, F83Ch | `Soft/games_mx_i80/PACMAN2.I80` |
-| RF-048 | `Paket.rks` | `weak-candidate` | C836h | `{repo}/assets/games/Paket.rks` |
+| RF-048 | `Paket.rks` | `weak-candidate` | C836h | `{repo}/assets/games/std/Paket.rks` |
 | RF-049 | `PIKFAMA.I80` | `weak-candidate` | F83Ch | `Soft/games_mx_i80/PIKFAMA.I80` |
 | RF-050 | `Poker.COM` | `weak-candidate` | C84Eh | `Soft/Lafan/LafanG2/GameMX2/Poker.COM` |
 | RF-051 | `POKER.I80` | `weak-candidate` | C84Eh | `Soft/games_mx_i80/POKER.I80` |
@@ -80,10 +80,10 @@
 | RF-056 | `Sohrani.COM` | `weak-candidate` | C84Eh | `Soft/Lafan/LafanG1/GameMX3/Sohrani.COM` |
 | RF-057 | `VAVILON.I80` | `weak-candidate` | F80Fh | `Soft/games_mx_i80/VAVILON.I80` |
 | RF-058 | `XTREE.COM` | `weak-candidate` | C84Eh | `Soft/Lafan/LafanG2/GameMX3/XTREE.COM` |
-| RF-059 | `Almaz2-ramfos-optimized.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/Almaz-2/Almaz2-ramfos-optimized.cpu` |
-| RF-060 | `Almaz2-ramfos-original-broken.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/Almaz-2/legacy/Almaz2-ramfos-original-broken.cpu` |
-| RF-061 | `Almaz2-ramfos-original-fixed.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/Almaz-2/legacy/Almaz2-ramfos-original-fixed.cpu` |
-| RF-062 | `Almaz2-ramfos.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/Almaz-2/Almaz2-ramfos.cpu` |
+| RF-059 | `Almaz2-ramfos-optimized.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/families/almaz-2/builds/archive/Almaz2-ramfos-optimized-20261102.cpu` |
+| RF-060 | `Almaz2-ramfos-original-broken.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/families/almaz-2/originals/Almaz2-ramfos-original-broken.cpu` |
+| RF-061 | `Almaz2-ramfos-original-fixed.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/families/almaz-2/repaired/Almaz2-ramfos-fixed.cpu` |
+| RF-062 | `Almaz2-ramfos.exe` | `known-ramfos` | C851h; C63Eh | `{repo}/assets/games/families/almaz-2/builds/archive/Almaz2-ramfos-20261104.cpu` |
 
 ## Контроль происхождения
 

@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--passes',type=int,default=3);a=p.parse_args()
 ns=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'));Matrix=ns['Matrix']
 out=ROOT/'docs/diskbench/readback-001';out.mkdir(parents=True,exist_ok=True);Matrix.__init__.__globals__['OUT']=out
-x=Matrix();m=x.m;s=x.s
+x=Matrix(legacy=True);m=x.m;s=x.s
 m.call('debug_break');nc=ns['symbols'](ROOT/'bin/NC.sym');m.stop_at(nc['mainLoop']);m.tap('ESC');m.until(nc['mainLoop'])
 x.install('FlashSys')
 records=[]

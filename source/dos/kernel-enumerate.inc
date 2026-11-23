@@ -173,9 +173,3 @@ enumReleaseOwner:
     xor a
     ld (enumActive),a
     ret
-eqOwner: DB 0
-eqHandle: DW 0
-eqNextHandle: DW 1
-eqOperation: DB 0
-eqLeft: DB 0
-eqBuffer: DW 0

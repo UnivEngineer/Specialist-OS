@@ -30,7 +30,7 @@ def save(name, data):
     callback=lambda op,hl=0,a=0:api['main_call'](m,k,op,hl,a)
     api['path_io'](m,callback,k,0x3200,True)
 
-def enter(command, menu=False):
+def enter(command, menu=False, direct=False):
     page(0)
     m.write(0x5200, word(0))
     m.call('bp_clear')
@@ -42,7 +42,8 @@ def enter(command, menu=False):
     assert m.read(n['vars.cmdLine'], len(command)).upper() == command.upper().encode()
     stem = str(len(rows)+1)
     m.screenshot(O/(stem+'-command.png'))
-    m.stop_at(r['modeKey'] if menu else 0xc000)
+    returned = n['mainLoop'] if direct else 0xc000
+    m.stop_at(r['modeKey'] if menu else returned)
     m.tap('enter')
     if menu:
         m.until(r['modeKey'], 120, page=0)
@@ -50,7 +51,7 @@ def enter(command, menu=False):
         m.stop_at(0xc000)
         m.call('emu_run_for', ms=500) # Дать getch завершить отпускание Enter.
         m.tap('1')  # MX
-    m.until(0xc000, 120, page=0)
+    m.until(returned, 120, page=0)
     assert m.read(0x5200, 2) == word(0x55aa), (command, m.read(0x5200,2).hex())
     m.screenshot(O/(stem+'-result.png'))
     page(1)
@@ -59,8 +60,9 @@ def enter(command, menu=False):
     assert all(allocations[i]==255 for i in range(0,len(allocations),6)), command
     assert all(modules[i:i+2]==bytes(2) for i in range(0,len(modules),k['MODULE_RECORD_SIZE'])), command
     page(0)
-    m.stop_at(n['mainLoop'])
-    m.until(n['mainLoop'], 120, page=0)
+    if not direct:
+        m.stop_at(n['mainLoop'])
+        m.until(n['mainLoop'], 120, page=0)
     rows.append(dict(command=command, menu=menu, returned=True, resourcesReleased=True))
     print('PASS', command, 'menu' if menu else 'native', flush=True)
 
@@ -73,10 +75,12 @@ try:
         save(name+'.EXE', data)
     neutral=e['decode']((R/'bin/moduletest/MAINAPP.COM').read_bytes(), 'com')
     neutral.flags=0
+    neutral.mode=1  # В заголовке рекомендован MX, но RUN без ключа показывает меню.
     for ext in ('COM','EXE'):
         save('UNKNOWN.'+ext, e['encode'](neutral, ext))
-    # Подтверждаем, что EXE→RUN включена именно в проверяемом системном образе.
-    assert b'EXE A:\\RUN.COM' in (R/'assets/system-rom/cli.ext').read_bytes()
+    extensions = {line.split()[0] for line in (R/'assets/system-rom/CLI.EXT').read_bytes().splitlines() if line.split()}
+    assert not extensions & {b'COM', b'EXE'}
+    assert {b'RKS', b'MON'} <= extensions
     page(0)
     m.stop_at(n['mainLoop'])
     m.call('emu_reset')
@@ -88,8 +92,9 @@ try:
             enter('RUN B:/'+name+'.EXE Test')
         enter('RUN B:/MAINAPP.COM Test')
         enter('RUN B:/UNKNOWN.COM Test', menu=True)
-        enter('B:/UNKNOWN.EXE Test', menu=True)
-        enter('B:/UNKNOWN.COM Test', menu=True)
+        enter('RUN B:/UNKNOWN.EXE Test', menu=True)
+        enter('B:/UNKNOWN.EXE Test', direct=True)
+        enter('B:/UNKNOWN.COM Test', direct=True)
         enter('RUN B:/UNKNOWN.COM -MX Test')
     (O/'result.json').write_text(json.dumps(rows, indent=2)+'\n', 'utf-8')
     print('RUN NATIVE PASS', len(rows), flush=True)

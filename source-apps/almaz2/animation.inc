@@ -363,18 +363,18 @@ t_animation_banks:
     DW t_sprites_phase_zero, t_sprites_phase_one
     DW t_sprites_phase_two, t_sprites_phase_three
 
-v_animation_seed:       DB 0A5h
-v_animation_salt:       DB 0
-v_animation_active:     DB 0
-v_animation_direct:     DB 0
-v_animation_static_count: DB ANIMATION_QUOTA+1
-v_animation_sweep:      DB 0
-v_animation_cursor:    DW MAP_BUFFER
-v_animation_stride:    DW 1
-v_animation_walk_left: DW 0200h
-v_animation_quota:      DB 0
-v_animation_quota_left: DB 0
-v_animation_scan_left: DB 0
+v_animation_seed:           DB 0A5h
+v_animation_salt:           DB 0
+v_animation_active:         DB 0
+v_animation_direct:         DB 0
+v_animation_static_count:   DB ANIMATION_QUOTA+1
+v_animation_sweep:          DB 0
+v_animation_cursor:         DW MAP_BUFFER
+v_animation_stride:         DW 1
+v_animation_walk_left:      DW 0200h
+v_animation_quota:          DB 0
+v_animation_quota_left:     DB 0
+v_animation_scan_left:      DB 0
 
     IF ALMAZ_OPTIMIZE && ANIMATION_QUOTA != ANIMATION_MIN_QUOTA
 ; Индексация сырым байтом карты: 0FFh уменьшает остаток бюджета на единицу.

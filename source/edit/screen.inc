@@ -44,6 +44,20 @@ compareHLDE:  LD    A,H           ; [34]
         LD    A,L
         CP    E
         RET
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вычесть адрес или смещение HL из DE.
+;
+; вход:
+;   de = уменьшаемое, hl = вычитаемое.
+;
+; выход:
+;   de = разность по модулю 65536. a = старший байт результата. cf = 1 при заёме. hl и
+;   bc сохранены.
+;----------------------------------------------------------------------------
+
 subtractHLFromDE:  LD    A,E           ; [9]
         SUB   L
         LD    E,A
@@ -90,6 +104,20 @@ editorScanEnd:
         CALL gapLogical
         XOR A
         RET
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запомнить координаты курсора для restoreCursor.
+;
+; вход:
+;   В bios_vars.cursorY и следующем байте хранятся текущие Y и X. Операнд
+;   восстановления доступен для записи.
+;
+; выход:
+;   Координаты записаны в операнд smc_restoreCursor. Регистры и флаги сохранены.
+;----------------------------------------------------------------------------
+
 saveCursor:  PUSH  HL            ; [7]
         LD    HL,(bios_vars.cursorY)
         ; САМОМОДИФИКАЦИЯ: сохранение курсора в операнде LD HL,nn.
@@ -330,6 +358,19 @@ editorStatusLanguage:
 editorStatusPrintLanguage:
         CALL bios_printString
         JP disableInverse
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Получить бит раскладки клавиатуры из состояния BIOS.
+;
+; вход:
+;   bios_vars.keyLocks содержит выбранные переключатели клавиатуры.
+;
+; выход:
+;   a = значение бита 0, z = 1 если он сброшен, cf = 0. bc, de и hl сохранены.
+;----------------------------------------------------------------------------
+
 editorReadLanguage:
         LD A,(bios_vars.keyLocks)
         AND 1
@@ -418,26 +459,26 @@ editorStatusXY:
         LD L,8
         LD (bios_vars.cursorY),HL
         RET
-editorStatusLnText: DB 'Ln',0
-editorStatusColText: DB 'Col',0
-editorStatusTabText: DB 'TAB',0
-editorEncodingLabel: DB 'KOI'
-editorEncodingDigit: DB '8','-R',0
-editorStatusTabValue: DB '4',0
-editorStatusNumBytes: DB 5
-editorStatusTabBytes: DB 2
-editorStatusLat: DB 'LAT',0
-editorStatusRus: DB 'RUS',0
-editorStatusColPos: DB 16
-editorStatusTabPos: DB 34
-editorStatusModePos: DB 47
-editorStatusLangPos: DB 61
-editorLastLine: DW 0FFFFh
-editorLastCol: DW 0FFFFh
-editorLastColHi: DB 255
-editorLastMode: DB 2
-editorLastTab: DB 255
-editorLastLanguage: DB 255
+editorStatusLnText:     DB 'Ln',0
+editorStatusColText:    DB 'Col',0
+editorStatusTabText:    DB 'TAB',0
+editorEncodingLabel:    DB 'KOI'
+editorEncodingDigit:    DB '8','-R',0
+editorStatusTabValue:   DB '4',0
+editorStatusNumBytes:   DB 5
+editorStatusTabBytes:   DB 2
+editorStatusLat:        DB 'LAT',0
+editorStatusRus:        DB 'RUS',0
+editorStatusColPos:     DB 16
+editorStatusTabPos:     DB 34
+editorStatusModePos:    DB 47
+editorStatusLangPos:    DB 61
+editorLastLine:         DW 0FFFFh
+editorLastCol:          DW 0FFFFh
+editorLastColHi:        DB 255
+editorLastMode:         DB 2
+editorLastTab:          DB 255
+editorLastLanguage:     DB 255
 
 ; The public input hook updates RUS/LAT even when the modifier itself does
 ; not return from getch. It lives only during the main editor key wait.
@@ -765,6 +806,19 @@ editorWordNextLine:
         CALL keyHandler_Home
         CALL getLineBufferCursor
         JP editorWordSpaces
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Продвинуть логическую колонку редактора на одну позицию.
+;
+; вход:
+;   v_column = текущая 16-битная колонка.
+;
+; выход:
+;   v_column увеличена на единицу по модулю 65536. Все регистры и флаги сохранены.
+;----------------------------------------------------------------------------
+
 editorIncrementColumn:
         PUSH HL
         LD HL,(v_column)

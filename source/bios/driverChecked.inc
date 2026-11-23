@@ -43,7 +43,7 @@ popDBHA_error:
 ; Чтение блока.
 
 diskDriver_r:
-            or      a
+            cp      SYSTEM_DRIVE
             jp nz,  ramDRead
     IF ROM_64K == 0
             jp      romBankRead
@@ -137,7 +137,7 @@ ramDRead:
 ; Запись блока RAM-диска.
 
 diskDriver_w:
-            or      a
+            cp      SYSTEM_DRIVE
             jp z,   diskWriteFailed
 
             call    ramDValidate
@@ -189,7 +189,7 @@ ramDValid:
 
 diskDriver_s:
             ld      a, (v_drive)
-            or      a
+            cp      SYSTEM_DRIVE
             jp z,   diskDriver_s_rom
 
             ; Геометрию B: публикует реестр DOS/драйвер, не детектор банков BIOS.

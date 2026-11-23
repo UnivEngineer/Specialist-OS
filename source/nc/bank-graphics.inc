@@ -118,9 +118,9 @@ ncQColorDone:
     pop bc
     ld a,(ncQColorLast)
     ret
-ncQColorCount: DB 0
-ncQColorLast: DB COLOR_FILE
-ncQColorRect: DS 26,0
+ncQColorCount:  DB 0
+ncQColorLast:   DB COLOR_FILE
+ncQColorRect:   DS 26,0
 
 ; Palette runs are prepared in EXEC. The final pixels and runs are stored
 ; in NC's MAIN allocation before the window is drawn.
@@ -192,5 +192,5 @@ ncQSnapshotFull:
     pop bc
     scf
     ret
-ncQSnapshotLeft: DB 0
-ncQSnapshotHeight: DB 0
+ncQSnapshotLeft:    DB 0
+ncQSnapshotHeight:  DB 0

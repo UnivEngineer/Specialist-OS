@@ -331,12 +331,12 @@ editorRowBuffer = EDIT_TAGS+EDIT_CACHE_MAX_ROWS*8
     ELSE
 editorRowBuffer: DS 96,32
     ENDIF
-editorRowLengths: DS EDITOR_ROWS,0
-editorWholeRow: DB 0
-editorPaintLength: DB 0
-editorTextLength: DB 0
-editorPartialRow: DB 0
-editorEditStart: DB 0
+editorRowLengths:   DS EDITOR_ROWS,0
+editorWholeRow:     DB 0
+editorPaintLength:  DB 0
+editorTextLength:   DB 0
+editorPartialRow:   DB 0
+editorEditStart:    DB 0
 ; Return HL = cache entry for the current screen baseline; preserve BC/DE.
 editorRowLengthAddress:
         PUSH BC
@@ -367,9 +367,9 @@ editorResetLengthLoop:
         POP BC
         POP HL
         RET
-editorSliceStart: DB 0
-editorSliceWidth: DB 0
-editorPageRetained: DB 0
+editorSliceStart:       DB 0
+editorSliceWidth:       DB 0
+editorPageRetained:     DB 0
 testPositionSelected:
         PUSH DE
         EX DE,HL
@@ -503,6 +503,19 @@ editorClampToText:
         EX DE,HL
         LD (v_column),HL
         RET
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прибавить номер колонки курсора к адресу строки.
+;
+; вход:
+;   hl = исходный адрес, v_column = 16-битное смещение.
+;
+; выход:
+;   hl = сумма, cf = перенос за пределы слова. a, bc и de сохранены.
+;----------------------------------------------------------------------------
+
 addCursorColumn:
         PUSH DE
         EX DE,HL
@@ -578,6 +591,19 @@ editorUndoNoMemory:
         POP BC
         SCF
         RET
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Принять текущие изменения строки и сбросить длину отмены.
+;
+; вход:
+;   v_lineDirty и v_undoLength принадлежат активному сеансу редактора.
+;
+; выход:
+;   Оба поля обнулены. a = 0, z = 1, cf = 0. bc, de и hl сохранены.
+;----------------------------------------------------------------------------
+
 commitLineEdit:
         XOR A
         LD (v_lineDirty),A
@@ -623,6 +649,20 @@ editorStoreChar:
         INC HL
         LD (v_column),HL
         JP editorRedrawEditedLine
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Переключить режим вставки и замены.
+;
+; вход:
+;   v_insertMode содержит байт режима, 00h либо FFh.
+;
+; выход:
+;   a и v_insertMode содержат инвертированный байт режима. bc, de, hl и флаги
+;   сохранены.
+;----------------------------------------------------------------------------
+
 editorToggleInsert:
         LD A,(v_insertMode)
         CPL

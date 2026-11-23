@@ -21,7 +21,7 @@ try:
     m.select(0)
     m.m.write(s['v_shell'],b'\x01')
     m.select(1)
-    cmd=b'A:\\FORMAT.COM B: -R -Y\0'
+    cmd=b'C:\\DOS\\FORMAT.COM B: -R -Y\0'
     m.m.write(0x5000,cmd)
     timed('format-with-cli-resolver',s['bios_fileExec'],hl=0x5000)
     # Явное имя, старый прямой вход: та же программа, без PATH/ассоциаций.

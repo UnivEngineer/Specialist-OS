@@ -1,24 +1,55 @@
 ; Exact half-open intervals in DOS. No fixed-size slots or rounding.
 ; Loaded DLLs register start/end in MODULE_TABLE; an active installer and the
-; cached FILEOPS/ENUM images are the extra intervals. Active code is pinned.
+; cached overlays and resident floppy code also occupy exact intervals. Active code is pinned.
 ; HL=start, DE=end; BC/DE/HL preserved. CF/A=ACTIVE on an intersection.
 ; Cached, idle overlays may be discarded, but never a live DLL or installer.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Проверить интервал загружаемого образа в арене DOS.
+;
+; вход:
+;   hl = начало, de = первый адрес за образом. Политика размещения берётся из
+;   v_imageHeader+IMAGE_POLICY.
+;
+; выход:
+;   cf = 0 при доступном интервале, при конфликте cf = 1 и a = MEM_ERROR_ACTIVE.
+;   Незанятый кэш оверлея может быть освобождён. bc, de и hl сохранены.
+;----------------------------------------------------------------------------
+
 dosArenaImage:
     ld a,(v_imageHeader+IMAGE_POLICY)
-    jp arenaEnter
-dosArenaCheck:
-    ld a,IMAGE_POLICY_MANAGED
-arenaEnter:
     ld (arenaPolicy),a
+    xor a                   ; Проверка и затем вытеснение в два прохода.
+    jp arenaEnter
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти препятствие для необязательного буфера BAT без выгрузки DLL.
+;
+; вход:
+;   hl = начало, de = исключающий конец проверяемого интервала.
+;
+; выход:
+;   cf = 0 при свободном интервале. При cf = 1 arenaObstacle содержит
+;   начало пересекающегося образа. bc, de, hl и состояние загрузчика сохранены.
+;----------------------------------------------------------------------------
+arenaProbe:
+    ld a,IMAGE_POLICY_PRESERVE
+    ld (arenaPolicy),a
+    ld a,2                  ; Только чтение реестра, один проход.
+arenaEnter:
     push bc
     push de
     push hl
     ld (arenaStart),hl
     ex de,hl
     ld (arenaEnd),hl
-    call imageSaveContext
-    xor a
     ld (arenaPhase),a
+    or a
+    call z,imageSaveContext
 arenaRestart:
     ld a,(diActive)
     or a
@@ -28,6 +59,15 @@ arenaRestart:
     call arenaOverlap
     jp nz,arenaConflict
 arenaModules:
+    ld hl,(diFloppyEnd)
+    ld a,h
+    or l
+    jp z,arenaModuleTable
+    ex de,hl
+    ld hl,DOS_FLOPPY_ADDR
+    call arenaOverlap
+    jp nz,arenaConflict
+arenaModuleTable:
     ld hl,MODULE_TABLE
     ld b,MODULE_MAX
 arenaNext:
@@ -106,13 +146,35 @@ arenaModulePinned:
     pop bc
     jp arenaConflict
 arenaFree:
+    ld a,(arenaPhase)
+    cp 2
+    jp z,arenaAvailable
+    ld hl,(batWindowEnd)
+    ld a,h
+    or l
+    jp z,arenaRestore
+    ex de,hl
+    ld hl,(BAT_HANDLE+FH_BUFFER)
+    call arenaOverlap
+    call nz,batDetach
+arenaRestore:
     call imageRestoreContext
+arenaAvailable:
     pop hl
     pop de
     pop bc
     xor a
     ret
 arenaConflict:
+    ld a,(arenaPhase)
+    cp 2
+    jp nz,arenaReject
+    pop hl
+    pop de
+    pop bc
+    scf
+    ret
+arenaReject:
     call imageRestoreContext
     pop hl
     pop de
@@ -158,7 +220,6 @@ arenaCached:
     ld (hl),0
     or a
     ret
-arenaCacheRecord: DW 0
 ; HL=otherStart, DE=otherEnd. NZ=overlap, Z=disjoint, BC preserved.
 arenaOverlap:
     push hl
@@ -171,14 +232,10 @@ arenaOverlap:
     MD_GET_DE arenaEnd
     call cmp_hl_de
     jp nc,arenaApart
+    ld (arenaObstacle),hl
     ld a,1
     or a
     ret
 arenaApart:
     xor a
     ret
-arenaStart: DW 0
-arenaEnd: DW 0
-
-arenaPhase: DB 0
-arenaPolicy: DB IMAGE_POLICY_MANAGED

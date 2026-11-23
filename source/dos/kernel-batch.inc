@@ -1,16 +1,16 @@
 ; Полные 256-байтные сектора: один обход FAT собирает локальную пачку LBA.
 ; Прямой планировщик проверяет цепочку, расширяет запись штатным HANDLE
 ; и согласует кэш. Неполные сектора обслуживает общий поток.
-sbPacket = DOS_IO_BATCH_ADDR
-sbCount = sbPacket+4
-sbList = sbPacket+6
+sbPacket     = DOS_IO_BATCH_ADDR
+sbCount      = sbPacket+4
+sbList       = sbPacket+6
 sbCheckpoint = sbList+128
-sbLimit = sbCheckpoint+8
-sbNext = sbLimit+1
-sbDone = sbNext+2
-sbSpan = sbDone+1
-sbSector = sbSpan+1
-sbPrevious = sbSector+2
+sbLimit      = sbCheckpoint+8
+sbNext       = sbLimit+1
+sbDone       = sbNext+2
+sbSpan       = sbDone+1
+sbSector     = sbSpan+1
+sbPrevious   = sbSector+2
     ASSERT sbPrevious+2 <= DOS_APP_FRAMES
 
 streamBatchStart:
@@ -36,7 +36,7 @@ streamBatchStart:
     ld a,5
 sbOperation:
     ld b,a
-    ld a,(v_drive)
+    call dosPhysicalDrive
     ld c,a
     ld h,b
     ld l,c
@@ -140,16 +140,16 @@ sbExecute:
     ld a,DOS_IO_PAGE
     ld (kdPage),a
 sbHavePage:
-    ld a,(v_drive)
-    cp 7
+    call dosPhysicalDrive
+    cp EXTERNAL_DRIVE
     jp nz,sbInstalled
     call klInstall
     jp c,sbInstallFailed
 sbInstalled:
-    ld a,(v_drive)
-    cp 1
+    call dosPhysicalDrive
+    cp RAM_DRIVE
     jp z,sbRamCandidate
-    or a
+    cp SYSTEM_DRIVE
     jp nz,sbLocalWorker
     ld a,(sbPacket+1)
     cp 2
@@ -201,8 +201,8 @@ sbInstallFailed:
 sbCopyRuns:
     xor a
     ld (sbDone),a
-    ld a,(v_drive)
-    or a
+    call dosPhysicalDrive
+    cp SYSTEM_DRIVE
     ld hl,07FE6h             ; AND 7Fh, затем JP Z для ROM.
     ld a,0CAh
     jp z,sbMaskReady

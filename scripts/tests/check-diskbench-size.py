@@ -47,3 +47,43 @@ for kib in [1,8,24]:
     result=(out/'cpu-out.bin').read_bytes()
     assert result[s['v_bufferEndHi']]==s['sectorBuffer']//256+kib*4
 print('DISKBEN exact buffer end: 1/8/24 KiB PASS')
+
+# Стаб MXOS_CALL пропускает слово операции, сохраняет HL и возвращает число
+# свободных кластеров либо указанную ошибку. Байт 9002h отмечает вызов DOS.
+space_cases = [
+    (256, 1, 8, 31, 1, 0, s['DOS_ERR_FULL']),
+    (256, 1, 8, 32, 1, 0, None),
+    (512, 2, 8, 7, 1, 0, s['DOS_ERR_FULL']),
+    (512, 2, 8, 8, 1, 0, None),
+    (512, 4, 7, 3, 1, 0, s['DOS_ERR_FULL']),
+    (512, 4, 7, 4, 1, 0, None),
+    (256, 1, 8, 0, 0, s['DOS_ERR_IO'], None),
+    (256, 1, 8, 32, 1, s['DOS_ERR_IO'], s['DOS_ERR_IO']),
+]
+for sector, spc, kib, free, passes, io_error, expected in space_cases:
+    def setup(mem):
+        mem[s['v_budget']] = passes
+        mem[s['v_fileSectors']] = kib * 4
+        struct.pack_into('<H', mem, s['v_sectorSize'], sector)
+        mem[s['v_spc']] = spc
+        at = s['mx_callRegs']
+        stub = bytes.fromhex('e32323e33e0132029011') + struct.pack('<H', free)
+        stub += bytes((0x3e, io_error, 0x37, 0xc9)) if io_error else bytes.fromhex('afc9')
+        mem[at:at+len(stub)] = stub
+    value, carry = run('checkFreeSpace', setup)
+    assert (carry, value if carry else None) == (expected is not None, expected)
+    assert (out/'cpu-out.bin').read_bytes()[0x9002] == bool(passes)
+print('DISKBEN free-space preflight: exact fit, shortfall, cluster rounding, read only, I/O error PASS')
+
+# Контейнеры должны занимать только собственные статические области.
+main_sym = ROOT/'source-apps/diskbench/build/DISKMAIN.sym'
+worker = {k: int(v, 16) for k, v in re.findall(
+    r'^(\w+): EQU 0x([0-9A-Fa-f]+)', main_sym.read_text(), re.M
+)}
+assert s['IMAGE_MEMORY_POLICY'] == worker['IMAGE_MEMORY_POLICY'] == s['IMAGE_POLICY_MANAGED']
+assert s['IMAGE_MEM_END'] == worker['entry']
+assert worker['IMAGE_MEM_END'] == worker['buffer'] == s['bootSectorBuffer']
+assert s['code_end'] <= worker['stats'] < s['IMAGE_MEM_END']
+assert worker['stats'] + s['BENCH_MAIN_STATS_SIZE'] == s['IMAGE_MEM_END']
+assert s['batchStats'] == worker['buffer']
+print('DISKBEN MAIN image ranges: managed controller and worker PASS')

@@ -188,8 +188,8 @@ drawShift:
     dec b
     jp nz,drawRow
     ret
-glyphCode: DB 0
-glyph: DW 0
-screen: DW 0
-solid: DS 8,03Fh
+glyphCode:      DB 0
+glyph:          DW 0
+screen:         DW 0
+solid:          DS 8,03Fh
     ENDMODULE

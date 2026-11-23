@@ -118,9 +118,9 @@ memPrintHaveHL:
 memPrintNative:
     pop af
     jp bios_printStringZ
-memTextRemaining: DW 0
-memSavedSP: DW 0
-memTextNext: DW 0
-memOperation: DB 0
-memSelect: DB 0
-memBack: DB 0
+memTextRemaining:   DW 0
+memSavedSP:         DW 0
+memTextNext:        DW 0
+memOperation:       DB 0
+memSelect:          DB 0
+memBack:            DB 0

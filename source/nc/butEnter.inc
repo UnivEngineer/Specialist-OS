@@ -163,7 +163,7 @@ ncAssocTransfer:
             DW 0
             DB 0
             DW NC_SORT_KEYS,ncAssociatedEditorEnd-ncAssociatedEditor
-ncAssociatedEditor: DB 'A:',05Ch,'EDIT.COM',0
+ncAssociatedEditor: DB 'C:',05Ch,'DOS',05Ch,'EDIT.COM',0
 ncAssociatedEditorEnd:
 ncEnterNative:
             pop hl
@@ -356,9 +356,9 @@ ncCommandErrorRestore:
             call fullRedraw
             call mainResetReload
             jp redrawCommandLine
-ncCommandScreen: DB 0
-ncCommandContext: DB 0
-ncCommandCursorKept: DB 0
+ncCommandScreen:        DB 0
+ncCommandContext:       DB 0
+ncCommandCursorKept:    DB 0
 ; Only a retained command highlight is erased; callers own the next redraw.
 ncCommandHideCursor:
             ld a,(ncCommandCursorKept)
@@ -367,8 +367,8 @@ ncCommandHideCursor:
             xor a
             ld (ncCommandCursorKept),a
             jp ncEnterHideCursor
-ncKeepFrames: DB 0
-ncCommandErrorText: DB 'Command error',0
+ncKeepFrames:           DB 0
+ncCommandErrorText:     DB 'Command error',0
 ncSelectCommandDirectory:
             ld hl,state.panelA_drive
             call readBytePanel

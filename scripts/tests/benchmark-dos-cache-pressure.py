@@ -1,6 +1,7 @@
 """Нагрузка на реальный кэш DOS в модели 8080; синтетический секторный драйвер."""
 import argparse, hashlib, json, re, struct, subprocess
 from pathlib import Path
+from dos_state import initialize_dos_state
 R=Path(__file__).resolve().parents[2]
 TICKS=Path('D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe')
 
@@ -144,6 +145,8 @@ drive: DB 0
   subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(binary),'--sym='+str(sym),str(asm)],check=True,capture_output=True)
   ss={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\dA-Fa-f]+)',sym.read_text(),re.M)}
   memory=bytearray(65536); data=kernel.read_bytes();memory[0x100:0x100+len(data)]=data
+  if "dosWorkStart" in syms:  # Pre-BSS benchmark bundle.
+   initialize_dos_state(memory, syms)
   data=binary.read_bytes();memory[0x8000:0x8000+len(data)]=data
   requests=b''.join(bytes((d,))+struct.pack('<H',n) for d,n in seq);memory[0xC000:0xC000+len(requests)]=requests
   for phase,pc in [('warm',0x8200),('measured',ss['measure'])]:

@@ -93,8 +93,10 @@ try:
  launch('f4',shift=True)
  arrive('shift-f4',b'');leave()
  tap('esc')
- for ch in 'A:EDIT':tap('colon' if ch==':' else ch.lower())
- assert m.read(n['vars.cmdLine'],6).upper()==b'A:EDIT'
+ command = 'C:/DOS/EDIT'
+ keys = {':': 'colon', '/': 'slash'}
+ for ch in command.lower():tap(keys.get(ch, ch))
+ assert m.read(n['vars.cmdLine'],len(command)).upper()==command.encode()
  m.screenshot(O/'console-command.png')
  launch('enter',notice=False);arrive('console-edit',b'');leave()
  print('EDIT 6.0 LAUNCH PASS',flush=True)

@@ -51,9 +51,9 @@ biosBootWaitEnter:
     call bios_printChar
     scf
     ret
-biosBootError: DB 'BOOT ERROR ',0
-biosNcResumeError: DB 'NC BANK ERROR ',0
-biosBootWaitText: DB 'Press Enter',0
+biosBootError:      DB 'BOOT ERROR ',0
+biosNcResumeError:  DB 'NC BANK ERROR ',0
+biosBootWaitText:   DB 'Press Enter',0
 
  ; Только холодный старт: физический объём, включая зарезервированный банк DOS.
 ; Геометрия и свободный объём B: определяются отдельно драйвером и MEM.
@@ -78,14 +78,14 @@ biosPrintPhysicalRam:
     call printDecWord
     ld hl,biosRamEndText
     jp printString
-biosRamText: DB 'RAM: ',0
-biosRamBanksText: DB ' KiB, ',0
-biosRamEndText: DB ' banks',10,0
+biosRamText:        DB 'RAM: ',0
+biosRamBanksText:   DB ' KiB, ',0
+biosRamEndText:     DB ' banks',10,0
 
 biosInstallBootDrive:
     ld hl,2048
     ld (v_diskInfo.totalSectors),hl
-    xor a
+    ld a,SYSTEM_DRIVE
     ld (v_drive),a
     jp sysInstall
 
@@ -108,7 +108,7 @@ biosBankWarm:
     ; Согласовать реестр DOS со встроенным ROM после восстановления BIOS.
     ; Драйверы повторно устанавливает только явный сценарий пользователя.
     ld hl,0                     ; ROM-SYS: описание по умолчанию из DOS
-    xor a
+    ld a,SYSTEM_DRIVE
     MXOS_CALL MXOS_DOS_DRIVER_REFRESH
     ld hl,biosAutoexecPath
     call biosBootExec
@@ -146,13 +146,13 @@ biosRunShell:
     jp nz,biosTryShell
     ld hl,biosNcMainPath
     jp biosTryShell
-biosAutoexecPath: DB "A:",05Ch,"AUTOEXEC.BAT",0
-biosNcPath: DB "A:",05Ch,"NC.COM",0
-biosNcMainPath: DB "A:",05Ch,"NC_MN.COM",0
-biosCliPath: DB "A:",05Ch,"CLI.COM",0
-biosBootPages: DB 16
-biosBootWarm: DB 0
-biosBootEntered: DB 0
+biosAutoexecPath:   DB "C:",05Ch,"AUTOEXEC.BAT",0
+biosNcPath:         DB "C:",05Ch,"DOS",05Ch,"NC.COM",0
+biosNcMainPath:     DB "C:",05Ch,"DOS",05Ch,"NC_MN.COM",0
+biosCliPath:        DB "C:",05Ch,"DOS",05Ch,"CLI.COM",0
+biosBootPages:      DB 16
+biosBootWarm:       DB 0
+biosBootEntered:    DB 0
 
 ; Повторный C000h возвращается в DOS, как C800h; bootstrap нужен для Reset.
 ; Свежая копия BIOS имеет нулевой флаг; native-вариант сохраняет старый вход.
@@ -259,7 +259,7 @@ bios_reset_sound:
     ld (bios_vars.beepFreq),hl
     ret
 
-; В банковой системе BIOS обслуживает только физический A:. B:/H:
+; В банковой системе BIOS обслуживает только физический C:. B:/H:
 ; принадлежат DOS; старый BIOS-драйвер B: иначе затёр бы её страницу.
 ; A сохранён, BC/DE/HL сохранены; CF=1 при недопустимом диске.
 biosPhysicalDriveCheck:
@@ -270,7 +270,7 @@ biosPhysicalDriveCheck:
     ld a,b
     pop bc
     jp z,biosPhysicalNative
-    or a
+    cp SYSTEM_DRIVE
     ret z
     scf
     ret

@@ -377,18 +377,6 @@
         "legacy": "bios_fileSelectDrive"
       },
       {
-        "id": 20,
-        "name": "FILE_RENAME_ON_DRIVE",
-        "target": "dos_fileRename",
-        "legacy": "bios_fileRenameOnDrive"
-      },
-      {
-        "id": 21,
-        "name": "FILE_DELETE_ON_DRIVE",
-        "target": "dos_fileDelete",
-        "legacy": "bios_fileDeleteOnDrive"
-      },
-      {
         "id": 22,
         "name": "FILE_COPY",
         "target": "dos_fileCopy",
@@ -445,11 +433,6 @@
         "id": 33,
         "name": "RAW_IO",
         "target": "dosRawIO"
-      },
-      {
-        "id": 34,
-        "name": "DRIVER_SELECT",
-        "target": "dosDriverSelect"
       },
       {
         "id": 35,

@@ -289,20 +289,20 @@ foFileDone:
     inc hl
     ld (foJob.files),hl
     ret
-foJob: FILEOPS_JOB
-foChunkStarted: DB 0
-foHasRun: DB 0
-foAsync: DB 0
-foCancelFlag: DB 0
-foFinished: DB 0
-foSP: DW 0
-foHostSP: DW 0
-foResume: DW 0
-foCallerDirectory: DW 0
-foOperationDrive: DB 0
-foOperationDirectory: DW 0
-foCallerDrive: DB 0
-foCallerDirectories: DS 16,0
+foJob:                  FILEOPS_JOB
+foChunkStarted:         DB 0
+foHasRun:               DB 0
+foAsync:                DB 0
+foCancelFlag:           DB 0
+foFinished:             DB 0
+foSP:                   DW 0
+foHostSP:               DW 0
+foResume:               DW 0
+foCallerDirectory:      DW 0
+foOperationDrive:       DB 0
+foOperationDirectory:   DW 0
+foCallerDrive:          DB 0
+foCallerDirectories:    DS 16,0
 foContextSave:
     ld hl,(v_directory)
     ld (foCallerDirectory),hl
@@ -343,6 +343,6 @@ foStackFailed:
     ld (foFinished),a
     scf
     ret
-foStackGuard: DW 0A55Ah
-foStack: DS 512,0
+foStackGuard:   DW 0A55Ah
+foStack:        DS 512,0
 foStackEnd:

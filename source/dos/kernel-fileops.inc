@@ -140,11 +140,6 @@ fileopsReply:
 fileopsApiError:
     call kdCapture
     jp kdRestorePointer
-fileopsOp: DB 0
-fileopsPublic: DB 0
-fileopsOwner: DB 0
-fileopsHandle: DW 0
-fileopsNext: DW 1
 
 ; C=terminating allocation owner. Cancel before its caller buffers disappear.
 fileopsReleaseOwner:
@@ -162,4 +157,3 @@ fileopsReleaseOwner:
     ld (fileopsActive),a
     pop bc
     ret
-fileopsPathStamp: DB 0FFh

@@ -49,8 +49,8 @@ ncPrintChar:
         pop hl
         pop af
         ret
-ncCharText: DB 0,0
-ncTextBuffer: BLOCK 97,0
+ncCharText:     DB     0,0
+ncTextBuffer:   BLOCK  97,0
 
 ; HL=ASCIIZ, B=maximum characters (1..96). Never wraps or pads the field.
 ; AF/BC/DE preserved; HL points after the printed prefix (NUL or truncation).
@@ -206,5 +206,5 @@ ncDecimalStore:
         pop de
         pop hl
         ret
-ncDecimalCount: DB 0
-ncDecimalText: BLOCK 6,0
+ncDecimalCount:     DB     0
+ncDecimalText:      BLOCK  6,0

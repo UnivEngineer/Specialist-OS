@@ -257,10 +257,10 @@ bitmapAdaptiveNewRow:
             COLOR COLOR_FILE
             scf
             ret
-bitmapDirection: DB 0
-bitmapColumnsLeft: DB 0
-bitmapColumn: DB 0
-bitmapSlot: DB 0
+bitmapDirection:    DB 0
+bitmapColumnsLeft:  DB 0
+bitmapColumn:       DB 0
+bitmapSlot:         DB 0
 
 ; Относительные HL/BC, D=ширина, E=высота, кратная 10. Ноль — no-op.
 ; Сохраняет BC/DE/HL; AF/флаги разрушены. Цвет уже выбран.

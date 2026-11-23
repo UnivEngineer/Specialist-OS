@@ -12,15 +12,15 @@
 ;----------------------------------------------------------------------------
 
 ; Функции DOS
-fileGetSetDrive =  0C842h ; Получить/установить активное устройство
-installDriver   =  0C860h ; Установить драйвер накопителя
+fileGetSetDrive = 0C842h  ; Получить/установить активное устройство
+installDriver   = 0C860h  ; Установить драйвер накопителя
 
 ; Порты
-IO_KEYB_MODE  =  0FFE3h 
-IO_PROG_A     =  0FFE4h 
-IO_PROG_B     =  0FFE5h 
-IO_PROG_C     =  0FFE6h 
-IO_PROG_MODE  =  0FFE7h 
+IO_KEYB_MODE  = 0FFE3h
+IO_PROG_A     = 0FFE4h
+IO_PROG_B     = 0FFE5h
+IO_PROG_C     = 0FFE6h
+IO_PROG_MODE  = 0FFE7h
 
     ORG     0FA00h
 

@@ -129,11 +129,11 @@ ncCatalogFormatWarning:
     call ncFormatDecimal
     pop de
     jp copyPanelPath
-ncCatalogWarnPending: DB 0
-ncCatalogWarningTitle: DB 'Directory is too large',0
-ncCatalogWarningMemory: DB 'Not enough memory.',0
-ncCatalogDisplayedText: DB 'Displayed ',0
-ncCatalogRecordsText: DB ' records of ',0
+ncCatalogWarnPending:       DB 0
+ncCatalogWarningTitle:      DB 'Directory is too large',0
+ncCatalogWarningMemory:     DB 'Not enough memory.',0
+ncCatalogDisplayedText:     DB 'Displayed ',0
+ncCatalogRecordsText:       DB ' records of ',0
 ncCatalogWarningModal:
     UI_MODAL_BEGIN 26,1,1
     UI_MODAL_BUTTON ncErrorHint,0,0,1

@@ -27,15 +27,15 @@ blockIOModeReady:
     ld a,(v_dosBanked)
     or a
     jp z,blockIONative
-    ; В банковой системе BIOS обслуживает только A: (проверено выше).
-    ; Если локальный контекст уже A:, не выбираем и не восстанавливаем
+    ; В банковой системе BIOS обслуживает только C: (проверено выше).
+    ; Если локальный контекст уже C:, не выбираем и не восстанавливаем
     ; тот же диск повторно. Прямой RET сохраняет все параметры драйвера.
     ld a,(v_drive)
-    or a
+    cp SYSTEM_DRIVE
     jp nz,blockIONative
     pop af
     push hl
-    ld hl,(v_drives)
+    ld hl,(v_drives+2*SYSTEM_DRIVE)
     ex (sp),hl
     ret
 blockIONative:

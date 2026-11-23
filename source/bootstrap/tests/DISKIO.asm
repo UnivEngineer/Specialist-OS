@@ -8,6 +8,12 @@
     INCLUDE "diskio.inc"
     INCLUDE "../../dos/ramdisk.inc"
     INCLUDE "../../dos/romproxy.inc"
+; Private working data of the stand-alone physical I/O fixture.
+dosRamCopy: DB 0
+    DW 0
+    DB 0
+    DW 0,256
+dosSystemRequest: DS 5,0
 dosIoEnd:
     ASSERT $ <= DOS_IO_BUFFER
     END

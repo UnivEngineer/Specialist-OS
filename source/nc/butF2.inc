@@ -281,8 +281,8 @@ ncDriveCaption:
     call uiModalPanelOpen
     ld hl,aChooseDrive
     jp uiModalTitle
-ncDriveModal: DW 0
-ncDriveCaptions: DB 'A',0,'B',0,'C',0,'D',0,'E',0,'F',0,'G',0,'H',0
+ncDriveModal:       DW 0
+ncDriveCaptions:    DB 'A',0,'B',0,'C',0,'D',0,'E',0,'F',0,'G',0,'H',0
 ncDriveModalTable:
     DW ncDriveModal1,ncDriveModal2,ncDriveModal3,ncDriveModal4
     DW ncDriveModal5,ncDriveModal6,ncDriveModal7,ncDriveModal8

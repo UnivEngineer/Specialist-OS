@@ -9,6 +9,16 @@ DRIVER_LOAD_ADDR = DRIVER_ORIGIN
     IFNDEF ROM_LEGACY
     DEFINE ROM_LEGACY 0
     ENDIF
+    ex de,hl
+    ld c,EXTERNAL_DRIVE
+    call driverLetter
+    ret c
+    push af
+    call argNext
+    pop bc
+    jp nc,driverLetterBad
+    ld a,b
+    ld (registration+DRIVER_INSTALL.drive),a
     IF LOCAL_KIND == 0
     call initRom.detect
     ret c
@@ -26,18 +36,20 @@ DRIVER_LOAD_ADDR = DRIVER_ORIGIN
     ld hl,registration
     MXOS_CALL MXOS_DOS_DRIVER_INSTALL
     ret
+    INCLUDE "../common/argNext.inc"
+    INCLUDE "../common/driver-letter.inc"
 registration:
     DB DRIVER_INSTALL_VERSION,7,LOCAL_KIND,8
     IF LOCAL_KIND == 0
     DW 256,0
-    DB DISK_CAP_READ,DISK_TECH_ROM
+    DB DISK_CAP_READ,DISK_TECH_MX_VV55_ROM
     ELSE
         IF LOCAL_KIND == 1
     DW 0,0
-    DB DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY,DISK_TECH_FLASH
+    DB DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY,DISK_TECH_MX_VV55_FLASH
         ELSE
     DW 0,0800h
-    DB DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY+DISK_CAP_FLUSH,DISK_TECH_FLASH
+    DB DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY+DISK_CAP_FLUSH,DISK_TECH_MX_VV55_FLASH
         ENDIF
     ENDIF
     DW serviceImage,serviceEnd-serviceImage,description
@@ -186,22 +198,22 @@ chipDescription: DB "0X512K "
     MODULE initProbe
     IF LOCAL_KIND == 1
 SectorLimit = serviceImage+local1SectorLimit
-v_chipMap = serviceImage+local1v_chipMap
+v_chipMap   = serviceImage+local1v_chipMap
     ELSE
 SectorLimit = serviceImage+local2SectorLimit
-v_chipMap = serviceImage+local2v_chipMap
+v_chipMap   = serviceImage+local2v_chipMap
     ENDIF
 DriverDescription = chipDescription
 ; Старый стенд ожидает патч FuncSize+2, здесь он попадает в дескриптор.
-FuncSize = registration+DRIVER_INSTALL.blocks-1
-LATCH_0 = 00Ah
-LATCH_1 = 00Bh
-WRITE_0 = 00Ch
-WRITE_1 = 00Dh
-MASK_STANDBY = 0C0h
-MASK_READ = 040h
+FuncSize       = registration+DRIVER_INSTALL.blocks-1
+LATCH_0        = 00Ah
+LATCH_1        = 00Bh
+WRITE_0        = 00Ch
+WRITE_1        = 00Dh
+MASK_STANDBY   = 0C0h
+MASK_READ      = 040h
 PPI_MODE_WRITE = 080h
-PPI_MODE_READ = 090h
+PPI_MODE_READ  = 090h
     INCLUDE "../bootstrap/tests/flash-init.inc"
     ENDMODULE
     ENDIF

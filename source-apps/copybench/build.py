@@ -22,7 +22,7 @@ def main():
                               encoding='utf-8')
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'--raw={OUT/name}.bin', f'--sym={OUT/name}.sym',
-                        f'--lst={OUT/name}.lst', str(source)], check=True)
+                        f'--lst={OUT/name}.lst', source.as_posix()], check=True)
 
     lines = ['; Генерируется build.py: локальные снимки копировщиков.']
     for name in VARIANTS:
@@ -47,7 +47,7 @@ def main():
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         *['-D'+value for value in defines], f'--raw={OUT/name}.bin',
                         f'--sym={OUT/name}.sym', f'--lst={OUT/name}.lst',
-                        str(HERE/source)], check=True)
+                        (HERE/source).as_posix()], check=True)
 
 if __name__ == '__main__':
     python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']

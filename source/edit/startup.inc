@@ -15,29 +15,29 @@ editorStart:
         LD HL,beginSession
         LD (smc_entryDispatch+1),HL
         JP beginSession
-v_documentDirty: DB 0
-editorInterfaceReady: DB 0
-v_column: DW 0                 ; Байтовый индекс курсора в строке, с нуля.
-v_leftColumn: DW 0             ; Визуальная колонка левого края, младшие 16 бит.
-v_leftColumnHi: DB 0
-v_columns: DB 64
-v_charStep: DB 3
-v_undoStart: DW 0
-v_undoLength: DW 0
-v_undoColumn: DW 0
-v_undoLine: DW 0
-v_undoLineNumber: DW 0
-v_undoLeftColumn: DW 0
-v_undoLeftColumnHi: DB 0
-v_topLine:   DW    0000H ; первая строка видимой страницы
-v_textEnd:   DW    0000H ; логическая исключительная граница файла
-v_currentLine:   DW    0000H ; начало строки курсора в документе
-v_lineDirty:   DB    00H ; есть снимок текущей строки для F8
-v_insertMode:   DB    0FFH ; 0 = замена, 0FFh = вставка
-v_selectionBegin:   DW    0000H
-v_selectionEnd:   DW    0000H ; исключающая граница выделенных байтов
-v_lineNumber:   DW    0000H
-v_searchText:  DS MAX_PATH,0
+v_documentDirty:        DB  0
+editorInterfaceReady:   DB  0
+v_column:               DW  0       ; Байтовый индекс курсора в строке, с нуля.
+v_leftColumn:           DW  0       ; Визуальная колонка левого края, младшие 16 бит.
+v_leftColumnHi:         DB  0
+v_columns:              DB  64
+v_charStep:             DB  3
+v_undoStart:            DW  0
+v_undoLength:           DW  0
+v_undoColumn:           DW  0
+v_undoLine:             DW  0
+v_undoLineNumber:       DW  0
+v_undoLeftColumn:       DW  0
+v_undoLeftColumnHi:     DB  0
+v_topLine:              DW  0000H   ; первая строка видимой страницы
+v_textEnd:              DW  0000H   ; логическая исключительная граница файла
+v_currentLine:          DW  0000H   ; начало строки курсора в документе
+v_lineDirty:            DB  00H     ; есть снимок текущей строки для F8
+v_insertMode:           DB  0FFH    ; 0 = замена, 0FFh = вставка
+v_selectionBegin:       DW  0000H
+v_selectionEnd:         DW  0000H   ; исключающая граница выделенных байтов
+v_lineNumber:           DW  0000H
+v_searchText:           DS  MAX_PATH,0
 
 txtIns:     DB    "INSERT",00H
 txtOvr:     DB    "OVR   ",00H

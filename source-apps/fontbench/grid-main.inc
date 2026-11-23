@@ -2,9 +2,8 @@
     INCLUDE "../../bin/FONTBEN.bios.entries.inc"
     DEFINE FONT_NATIVE_GRID
     INCLUDE "grid-corpus.inc"
-FONT_CORPUS_SIZE = GRID_TEXT_BYTES
-textCorpus = 03000h ; transient corpus, consumed before standalone DLL load
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+GRID_MIN_MAIN_TOP = 035FFh ; Нижний предел memTop для буфера отчёта в MAIN.
+IMAGE_FLAGS      = IMAGE_FLAG_MAIN
     ORG 0
 entry:
     push de
@@ -20,43 +19,27 @@ entry:
     ld hl,(enginePreFirst)
     ld (gridRequestedPre),hl
     call bios_getMemTop
-    ld de,CORPUS_IO_BUFFER+255
+    ld de,GRID_MIN_MAIN_TOP
     call bios_cmp_hl_de
     jp c,gridError
     call engineSave
-    call loadCorpus
-    jp c,gridError
-    ld hl,textCorpus
-    ld de,gridText
-    ld c,GRID_ROWS
     ld a,(gridPhase)
     inc a
-    jp z,gridPrepareRow
-    ld c,GRID_PHASE_ROWS
-gridPrepareRow:
-    ld b,GRID_GLYPHS
-gridPrepareChar:
-    ld a,(hl)
-    inc hl
-    ld (de),a
-    inc de
-    dec b
-    jp nz,gridPrepareChar
-    ld a,(gridPhase)
-    inc a
-    ld a,13
-    jp z,gridRowEnd
-    xor a                 ; -X uses one ASCIZ string per row.
-gridRowEnd:
-    ld (de),a
-    inc de
-    ld a,10
-    ld (de),a
-    inc de
-    dec c
-    jp nz,gridPrepareRow
+    jp nz,gridPreparePhase
     xor a
-    ld (de),a
+    ld (gridText+GRID_TEXT_BYTES),a
+    jp gridCorpusReady
+gridPreparePhase:
+    ld hl,gridText+GRID_GLYPHS
+    ld de,GRID_STRIDE
+    ld b,GRID_PHASE_ROWS
+    xor a
+gridTerminatePhaseRow:
+    ld (hl),a
+    add hl,de
+    dec b
+    jp nz,gridTerminatePhaseRow
+gridCorpusReady:
     ld a,(gridPseudoOnly)
     or a
     call nz,gridPseudoCorpus
@@ -102,6 +85,7 @@ gridSharedMode:
     ld de,-5
     add hl,de
     ld a,(hl)
+    and 1
 gridNativeMode:
     ld (enginePreFirst),a
     inc a
@@ -650,7 +634,11 @@ gridSave:
     ld e,0
     MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (gridDrive),a
-    ld a,1
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret c
+    ld a,e
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld a,(engineFileAppend)
@@ -765,6 +753,31 @@ gridArgQ:
 gridUsage:
     ld hl,gridHelp
     call puts
+    ld hl,engineRecords
+    ld bc,ENGINE_COUNT*256+3
+gridHelpEngine:
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    dec hl
+    push hl
+    ex de,hl
+    call puts
+    ld a,' '
+    call gridPrintChar
+    dec c
+    jp nz,gridHelpNext
+    ld hl,gridCRLF
+    call puts
+    ld c,3
+gridHelpNext:
+    pop hl
+    ld de,8
+    add hl,de
+    dec b
+    jp nz,gridHelpEngine
+    ld hl,gridCRLF
+    call puts
     scf
     ret
     INCLUDE "engine-args.inc"
@@ -797,75 +810,79 @@ gridSetModuleDrive:
     INCLUDE "engine-hooks.inc"
     INCLUDE "engine-select.inc"
     INCLUDE "../textbench/standalone.inc"
-    INCLUDE "corpus.inc"
-gridRequestedPre: DW 0
-gridPre: DB 0
-gridKind: DB 0
-gridRoute: DB 0
-gridPhase: DB 0FFh
-gridPseudoOnly: DB 0
-gridStage: DB 0
-gridQuick: DB 0
-gridScalarOnly: DB 0
-gridInverse: DB 0
-gridNoFile: DB 0
-gridCapture: DB 0
-gridDrive: DB 0
-gridWrite: DW 0
-gridFileResult: DW gridFileSkipped
-gridFileSkipped: DB 'Report disabled',13,10,0
-gridFileFailed: DB 'Cannot save B:\FONTBEN.TXT',13,10,0
-gridFileSaved: DB 'Saved B:\FONTBEN.TXT',13,10,0
-gridControl: DW 0,0,0,08000h,0,gridText
+gridRequestedPre:   DW 0
+gridPre:            DB 0
+gridKind:           DB 0
+gridRoute:          DB 0
+gridPhase:          DB 0FFh
+gridPseudoOnly:     DB 0
+gridStage:          DB 0
+gridQuick:          DB 0
+gridScalarOnly:     DB 0
+gridInverse:        DB 0
+gridNoFile:         DB 0
+gridCapture:        DB 0
+gridDrive:          DB 0
+gridWrite:          DW 0
+gridFileResult:     DW gridFileSkipped
+gridFileSkipped:    DB 'Report disabled',13,10,0
+gridFileFailed:     DB 'Cannot save FONTBEN.TXT on RAM disk',13,10,0
+gridFileSaved:      DB 'Saved FONTBEN.TXT on RAM disk',13,10,0
+gridControl:        DW 0,0,0,08000h,0,gridText
     DB 0,0
-gridBankPath: DB 'A:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
+gridBankPath: DB 'C:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
 gridArgument: DB '0000',0
     DS MAX_PATH-($-gridBankPath),0
 gridResults: DS 264,0FFh
 gridResultsEnd:
-gridTitle: DB 'FontBen: 924 bytes, '
-gridTitleWidth: DB '6','x8, ms '
-gridInverseLabel: DB 'N',13,10
+gridTitle:          DB 'FontBen: 924 bytes, '
+gridTitleWidth:     DB '6','x8, ms '
+gridInverseLabel:   DB 'N',13,10
     DB 'P API              MAIN CMD  CMDZ NEAR F256 USER',13,10,0
-gridProgress: DB ' Stage ',0
-gridTotal: DB '/36 '
-gridTotalWidth: DB '6','x8 ',0
-gridNextText: DB 'Press Enter to continue',13,10,0
-gridMs: DB ' ms',0
-gridCRLF: DB 13,10,0
-gridDash: DB '   -',0
-gridRouteNames: DW gridRoute0,gridRoute1,gridRoute2,gridRoute3,gridRoute4,gridRoute5
-gridRoute0: DB 'MAIN ',0
-gridRoute1: DB 'BANK CMD ',0
-gridRoute2: DB 'BANK CMD+Z ',0
-gridRoute3: DB 'BANK NEAR ',0
-gridRoute4: DB 'BANK Far256 ',0
-gridRoute5: DB 'BANK Own ',0
-gridNames: DW gridName0,gridName1,gridName2,gridName3,gridName4,gridName5
-gridName0: DB 'Char             ',0
-gridName1: DB 'CharRaw          ',0
-gridName2: DB 'StringZ          ',0
-gridName3: DB 'StringRawZ       ',0
-gridName4: DB 'StringRawLim     ',0
-gridName5: DB 'StringRawPseudo  ',0
-gridErrorText: DB 13,10,'FontBen failed (file, bank or memory)',13,10,0
-gridInverseErrorText: DB 'Inverse mode requires -E=BIOS',13,10,0
-gridHelp: DB 'FontBen -E=BIOS|ALL|STANDALONE|name[,name]',13,10
-    DB '-X0..3: 8x8, MAIN, 22 rows x 42 glyphs',13,10
-    DB '-R: MAIN RawLim vs RawPseudo, installed font',13,10
-    DB '-S scalar only; -I inverse (BIOS/STANDALONE)',13,10
-    DB '-P=OFF|ON|BOTH  -N no file  -Q no table/Enter',13,10
-    DB '6ROTATEQUADS 6ROTATEROWS 6PACKEDQUADS 6FULLQUADS',13,10
-    DB '8ROTATEQUADS 8ROTATESTREAM COMPACT6 FAST8 CPM4',13,10
-    DB 'Legacy: MXOS1 OPT SCALAR12 CACHE QUAD COLD WARM ROTATE',13,10
-    DB 'MON2 RAMFOS WIN8 ROTLINE FULLFAST COL6PRE TRIPACK',13,10
-    DB 'HALF PACKED ROW6 REMAP32 BLOCK32 ROW8 4RAW 4PACK 4DUP',13,10,0
+gridProgress:           DB ' Stage ',0
+gridTotal:              DB '/36 '
+gridTotalWidth:         DB '6','x8 ',0
+gridNextText:           DB 'Press Enter to continue',13,10,0
+gridMs:                 DB ' ms',0
+gridCRLF:               DB 13,10,0
+gridDash:               DB '   -',0
+gridRouteNames:         DW gridRoute0,gridRoute1,gridRoute2,gridRoute3,gridRoute4,gridRoute5
+gridRoute0:             DB 'MAIN ',0
+gridRoute1:             DB 'BANK CMD ',0
+gridRoute2:             DB 'BANK CMD+Z ',0
+gridRoute3:             DB 'BANK NEAR ',0
+gridRoute4:             DB 'BANK Far256 ',0
+gridRoute5:             DB 'BANK Own ',0
+gridNames:              DW gridName0,gridName1,gridName2,gridName3,gridName4,gridName5
+gridName0:              DB 'Char             ',0
+gridName1:              DB 'CharRaw          ',0
+gridName2:              DB 'StringZ          ',0
+gridName3:              DB 'StringRawZ       ',0
+gridName4:              DB 'StringRawLim     ',0
+gridName5:              DB 'StringRawPseudo  ',0
+gridErrorText:          DB 13,10,'FontBen failed (file, bank or memory)',13,10,0
+gridInverseErrorText:   DB 'Inverse mode requires -E=BIOS',13,10,0
+gridHelp:               DB 'FontBen -E=ALL|STANDALONE|LEGACY|name[,name]',13,10
+    DB '-X0..3 8x8 phase; -R BIOS pseudo',13,10
+    DB '-S scalar; -I inverse; -N no file; -Q quiet',13,10
+    DB '-P=OFF|ON|BOTH legacy prerender',13,10
+    DB 'See BENCH/FONTBEN/README.TXT',13,10,13,10,0
 gridHandle: DB 'FONTBEN TXT'
     DS FH_DRIVE-11,0
     DB 1
     DB FILE_MODE_WRITE | FILE_MODE_CREATE | FILE_MODE_TRUNCATE
     DS FILE_HANDLE-FH_MODE-1,0
-gridText: DS GRID_PHASE_ROWS*GRID_STRIDE+1,0
+; Обычная сетка использует CR/LF между строками. При явном позиционировании
+; вместо CR записывается NUL, курсор каждой строки задаётся отдельно.
+gridText:
+gridCorpusOffset = 0
+    DUP GRID_PHASE_ROWS
+      INCBIN "corpus.koi8",gridCorpusOffset,GRID_GLYPHS
+      DB 13,10
+gridCorpusOffset = gridCorpusOffset+GRID_GLYPHS
+    EDUP
+    DB 0
+    ASSERT $-gridText == GRID_PHASE_ROWS*GRID_STRIDE+1
     ASSERT $ <= 02000h
     DS 02000h-$,0
 programEnd:

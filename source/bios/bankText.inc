@@ -51,6 +51,23 @@ finish:
     pop hl
     ld (io_vars.bbRegs+6),hl
     jp 0F000h+6 ; Возврат через отдельный фиксированный вход bbFinish.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Скопировать строку из банка источника порциями в MAIN и вывести её.
+;
+; вход:
+;   hl = NEAR-адрес TEXT_PRINT_REQUEST. request выбирает MAIN, общий вход
+;   execute принимает FAR-код банка в a. Пакет и строка в одном банке.
+;   count ограничивает чтение. При TEXT_PRINT_MAIN_BUFFER вызывающий выделяет
+;   capacity байт в MAIN и ещё байт под NUL для режимов Z/RAW_Z.
+;
+; выход:
+;   cf = 0, a = 0, hl указывает за выведенными байтами (на NUL для строк,
+;   остановленных по терминатору). При отказе cf = 1, a = код ошибки.
+;   Ранее выведенные порции при ошибке не отменяются.
+;----------------------------------------------------------------------------
+
 request:
     xor a ; Нативный MAIN: запрос и источник находятся в main.
 execute:
@@ -189,10 +206,10 @@ copy: DB 0
     DB 0
     DW 0,0
 requestData:
-kind: DB 0
-method: DB 0
-source: DW 0
-remaining: DW 0
-destination: DW 0
-capacity: DW 0
+kind:           DB 0
+method:         DB 0
+source:         DW 0
+remaining:      DW 0
+destination:    DW 0
+capacity:       DW 0
     ENDMODULE

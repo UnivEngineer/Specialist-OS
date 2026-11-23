@@ -16,14 +16,14 @@
 
 ## Сборка и запуск
 
-Ядро для MXOS собирается вместе с системой в `bin/RAMFOS.mon` — сырой образ 6880 байт без контейнера COM/EXE. Расширение SYS зарезервировано за DOS. Сборка `scripts/build/build-project.ps1 OS` включает ядро и общий [RUN.COM](../run/README.md); они находятся в большом системном flash-образе A-System.txt.
+Ядро для MXOS собирается вместе с системой в `bin/RAMFOS.mon` — сырой образ 6880 байт без контейнера COM/EXE. Расширение SYS зарезервировано за DOS. Сборка `scripts/build/build-project.ps1 OS` включает ядро и общий [RUN.COM](../run/README.md); они находятся в большом системном flash-образе C-System.txt.
 
-Для самостоятельного образа Emu80 сборщик `scripts/images/build-ramfos.py` проверяет нагрузки по SHA-256 из `assets/games/ramfos-candidates.json`. Два варианта Almaz-2 из этого реестра закреплены в `assets/games/Almaz-2/legacy/` по историческим сборкам, чтобы пересборка текущей игры не меняла тестовый RAM-диск.
+Для самостоятельного образа Emu80 сборщик `scripts/images/build-ramfos.py` проверяет нагрузки по SHA-256 из `assets/games/ramfos-candidates.json`. Два варианта Almaz-2 из этого реестра закреплены в `assets/games/families/almaz-2/builds/archive/` по историческим сборкам, чтобы пересборка текущей игры не меняла тестовый RAM-диск.
 
 ```text
-A:RUN.COM -RF H:GAME.RKS
-A:RUN.COM -RF H:GAME.EXE аргументы
-A:RUN.COM -RF H:GAME.COM
+C:\DOS\RUN.COM -RF H:GAME.RKS
+C:\DOS\RUN.COM -RF H:GAME.EXE аргументы
+C:\DOS\RUN.COM -RF H:GAME.COM
 ```
 
 Отдельный RAMRUN заменён общим RUN. RKS сохраняется стандартным контейнером, COM/EXE используют 32-байтный заголовок v2 с адресами загрузки и запуска. Адрес в FAT больше не хранится, размер файла равен N, без исторической поправки N−1. DE при запуске указывает на строку аргументов, максимум 127 байт.

@@ -80,7 +80,7 @@ def main():
         select(b'README  TXT')
         enter(n['EnterExec'],(n['ncCommandError'],))
         command = m.read(n['vars.cmdLine'],128).split(b'\0')[0]
-        assert command.upper()==b'A:\\README.TXT',command
+        assert command.upper()==b'C:\\README.TXT',command
         results.append(dict(name='README.TXT',registered=True,launchCommand=command.decode()))
 
         # Separate ABI check for native extensions and case folding. All UI

@@ -1,5 +1,6 @@
 """CPU 8080: системные ассоциации, временный буфер и восстановление диска."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import json,re,subprocess
 
 
@@ -12,13 +13,14 @@ def main():
      for address,name in [(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin')]:
       binary=(R/'bin'/name).read_bytes();m[address:address+len(binary)]=binary
      m[0x100:0x100+len(dos)]=dos
-     m[0x7800:0x7c01]=b'\xA5'*1025;m[0x7400:0x7800]=data[:1024]+bytes([255])*(1024-len(data[:1024]));m[0x7d00:0x7d03]=ext.encode();m[s['v_drive']]=7
+     initialize_dos_state(m, s)
+     m[0x7800:0x7c01]=b'\xA5'*1025;m[0xA000:0xA400]=data[:1024]+bytes([255])*(1024-len(data[:1024]));m[0x7d00:0x7d03]=ext.encode();m[s['v_drive']]=7
      n=len(data) if size is None or isinstance(size,str) else size
      m[s['v_tmpFileDescr']+28:s['v_tmpFileDescr']+32]=n.to_bytes(4,'little');m[s['v_tmpFileDescr']+26:s['v_tmpFileDescr']+28]=b'\2\0'
      name=bytes.fromhex('AF 32')+s['v_drive'].to_bytes(2,'little')+b'\xC9';m[0x8400:0x8400+len(name)]=name
      m[0x8420:0x8422]=bytes((0x37 if size=='stat-error' else 0xAF,0xC9))
      count=(len(data)+255)//256
-     transfer=bytes.fromhex('3E 01 32 00 85 EB 21 00 74 CD')+s['moveBytesForward'].to_bytes(2,'little')+bytes.fromhex('B7 C9');m[0x8440:0x8440+len(transfer)]=transfer
+     transfer=bytes.fromhex('3E 01 32 00 85 EB 21 00 A0 CD')+s['moveBytesForward'].to_bytes(2,'little')+bytes.fromhex('B7 C9');m[0x8440:0x8440+len(transfer)]=transfer
      sel=b'\x32'+s['v_drive'].to_bytes(2,'little')+bytes.fromhex('37 C9');m[0x8480:0x8480+len(sel)]=sel
      for label,target in [('fileNamePrepare',0x8400),('fileLoadInfo',0x8420),('fatStream',0x8440),('fileSelectDrive',0x8480)]:m[s[label]:s[label]+3]=b'\xC3'+target.to_bytes(2,'little')
      # Isolated parser/core check with mocked file I/O. Native programs use

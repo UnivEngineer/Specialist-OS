@@ -191,14 +191,14 @@ checkNarrowSixAddress:
     ld h,a
     ld a,c
     ret
-checkNarrowFirst: DB 0
-checkNarrowSecond: DB 0
-checkNarrowText: DW 0
-checkNarrowP0: DW 0
-checkNarrowP1: DW 0
-checkNarrowP2: DW 0
-checkNarrowP3: DW 0
-checkNarrowMode: DB 0
-checkNarrowRows: DB 0
-checkNarrowLeft: DB 0
-checkNarrowLines: DB 0
+checkNarrowFirst:   DB 0
+checkNarrowSecond:  DB 0
+checkNarrowText:    DW 0
+checkNarrowP0:      DW 0
+checkNarrowP1:      DW 0
+checkNarrowP2:      DW 0
+checkNarrowP3:      DW 0
+checkNarrowMode:    DB 0
+checkNarrowRows:    DB 0
+checkNarrowLeft:    DB 0
+checkNarrowLines:   DB 0

@@ -1,5 +1,17 @@
-; MAIN/EXEC/DOS используют один измеритель с полным локальным буфером файла.
-; Настройки копируются из main до замера; 88 байт результата — до unload.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить, загрузить и запустить измеритель MAIN, DOS или BANK.
+;
+; вход:
+;   Выбран накопитель v_drive, проверен BPB. v_budget = число проходов
+;   записи (0 — чтение), v_fileSectors = размер в страницах по 256 байт.
+;   argBank, argMode, argAlign, argFrag и v_writeMode задают режимы теста.
+;
+; выход:
+;   Печатает результат или ошибку и завершает программу через done.
+;   После вызова измерителя пытается выгрузить его, регистры разрушаются.
+;----------------------------------------------------------------------------
 run_bank_module:
     ld a,(argBank)
     cp 2
@@ -7,7 +19,7 @@ run_bank_module:
     cp 4
     jp nz,moduleSizeReady
 moduleLimitDos:
-    ld a,(v_fileSectors)
+    ld a,(v_fileSectors)       ; Страницы буфера 256 байт.
     cp BENCH_DOS_BUFFER_KIB*4+1
     jp c,moduleSizeReady
     ld a,BENCH_DOS_BUFFER_KIB*4
@@ -17,18 +29,31 @@ moduleLimitDos:
     ld hl,txtDosLimit
     call puts
 moduleSizeReady:
+    ld a,(v_technology)
+    cp DISK_TECH_FLOPPY
+    jp z,moduleGeometryFloppy
     ld hl,(v_sectorSize)
     dec h
     ld a,h
     or l
-    jp nz,bank_module_error
+    jp nz,error
     ld a,(v_spc)
     dec a
-    jp nz,bank_module_error
+    jp nz,error
+    jp moduleGeometryReady
+moduleGeometryFloppy:
+    ld hl,(v_sectorSize)
+    ld a,h
+    cp 2
+    jp nz,error
 moduleGeometryReady:
     xor a
     ld (v_layout),a
     call print_summary
+    IFNDEF DISKBEN_LEGACY_FIXTURE
+    call checkFreeSpace
+    jp c,bank_module_error
+    ENDIF
     ld hl,batchStats
     ld (batchNext),hl
     ld a,(argBank)
@@ -75,19 +100,35 @@ moduleFragmentDefault:
     call bench_mul_hl_de
     ld (v_operations),hl
 moduleOperationsReady:
-    ld hl,(v_reserved)
-    ld (workerConfig+4),hl
+    ld a,(v_spc)
+    ld (workerConfig+4),a
+    ld a,(v_sectorSize+1)
+    ld (workerConfig+5),a
     ld hl,(v_dataStart)
     ld (workerConfig+6),hl
     ld a,(argBank)
     cp 3
     jp nz,moduleSelect
+    IFDEF DISKBEN_LEGACY_FIXTURE
     ld a,MEM_OP_ARENA
     ld b,0
-    ld hl,02100h
-    ld de,LEGACY_APP_MEMORY_END-02100h
+    ld hl,BENCH_MAIN_WORK_ADDR
+    ld de,LEGACY_APP_MEMORY_END-BENCH_MAIN_WORK_ADDR
     MXOS_CALL MXOS_DOS_MEMORY
     jp c,bank_module_error
+    ELSE
+    ld b,0
+    ld hl,BENCH_MAIN_BUFFER_ADDR
+    ld a,MEM_OP_FREE
+    MXOS_CALL MXOS_DOS_MEMORY
+    jp c,bank_module_error
+    ld a,(v_fileSectors)
+    ld d,a
+    ld a,(argAlign)
+    ld e,a
+    call reserveBenchBuffer
+    jp c,benchMemoryError
+    ENDIF
 moduleSelect:
     ld a,(argBank)
     cp 2
@@ -286,10 +327,9 @@ moduleRawLayout:
     ld a,(argBank)
     cp 3
     ret nz
-    ld a,(v_drive)
-    or a
+    call benchMapped
     ret nz
-    inc a
+    ld a,LAYOUT_MAPPED
     ld (v_layout),a
     ld hl,statRawVerifyHigh
     ld de,resultsHigh
@@ -303,6 +343,103 @@ moduleRawLayout:
     ld de,statRawVerifyHigh
     ld b,4
     jp copy_bytes
+    IFNDEF DISKBEN_LEGACY_FIXTURE
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Зарегистрировать точный общий буфер BPB, измерителя MAIN и сводки ALL.
+;
+; вход:
+;   de = длина в байтах, от 512 до 24577. Старый блок должен быть освобождён.
+;
+; выход:
+;   cf = 0: диапазон с BENCH_MAIN_BUFFER_ADDR принадлежит контроллеру.
+;   cf = 1: a = ошибка MEM. Память буфера при отказе использовать нельзя.
+;   Регистры разрушаются.
+;----------------------------------------------------------------------------
+reserveBenchBuffer:
+    push de
+    ld b,d
+    ld c,e
+    ld hl,BENCH_MAIN_BUFFER_ADDR
+    ld a,MEM_OP_MAINCLAIM
+    MXOS_CALL MXOS_DOS_MEMORY
+    pop de
+    ret c
+    ld b,0
+    ld hl,BENCH_MAIN_BUFFER_ADDR
+    ld a,MEM_OP_MAINREGISTER
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Показать отказ регистрации обменного буфера.
+;
+; вход:
+;   a = код MEM после отказа MAINCLAIM или MAINREGISTER.
+;
+; выход:
+;   Переход к выходу программы. Код диапазона выводится как нехватка
+;   памяти, остальные передаются общему обработчику. Регистры разрушаются.
+;----------------------------------------------------------------------------
+benchMemoryError:
+    cp MEM_ERROR_RANGE
+    jp nz,bank_module_error
+    ld hl,txtNoMemory
+    jp show_error
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Проверить место для одного временного файла до загрузки измерителя.
+;
+; вход:
+;   Выбран v_drive. Геометрия проверена, размер файла уже ограничен
+;   исполнителем. v_budget = число проходов с записью, 0 для чтения.
+;
+; выход:
+;   cf = 0 при достаточном месте или для чтения. cf = 1: a содержит
+;   DOS_ERR_FULL либо исходную ошибку подсчёта FAT. Регистры разрушаются.
+;   Не создаёт временный файл и не выделяет его кластеры.
+;----------------------------------------------------------------------------
+checkFreeSpace:
+    ld a,(v_budget)
+    or a
+    ret z
+    call requiredClusters
+    MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
+    ret c
+    ex de,hl
+    call bench_cmp_hl_de
+    ld a,DOS_ERR_FULL
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Напечатать текст ошибки DOS и перейти к выходу из DISKBEN.
+;
+; вход:
+;   a = код DOS. Если измеритель был загружен, уже сделана попытка выгрузки.
+;
+; выход:
+;   Не возвращается. Сообщение берётся из ERRORS.DAT с числовым запасным
+;   вариантом. Регистры разрушаются, после вывода ожидается клавиша.
+;----------------------------------------------------------------------------
+bank_module_error:
+    push af
+    ld hl,txtLineBreak
+    call puts
+    pop af
+    call dosErrorText
+    jp show_error
+
+    DEFINE FILE_IO_HANDLE_ONLY
+    INCLUDE "../../source/include/file-io.inc"
+    INCLUDE "../../source/include/errors.inc"
+    ELSE
 bank_module_error:
     push af
     ld hl,txtBankModuleError
@@ -313,22 +450,26 @@ bank_module_error:
     ld b,0
     call bench_printDecWord
     jp done
-bankModuleHandle: DW 0
-bankModuleRegs: DW workerConfig,0,0,0
-workerConfig: DS 11,0
-workerResultCopy: DB 0
+    ENDIF
+bankModuleHandle:   DW 0
+bankModuleRegs:     DW workerConfig,0,0,0
+workerConfig:       DS 11,0
+workerResultCopy:   DB 0
     DW 0
     DB 0
     DW resultsLow,40
+    DEFINE APP_COMMAND_ADDR MAIN_COMMAND_ADDR
     INCLUDE "../../source/include/app-drive.inc"
 ; Share one path between workers; capture its drive at controller entry.
-modulePath: DB 'A:',05Ch,'BENCH',05Ch,'DiskBen',05Ch
-moduleFileName: DS 13,0
-bankModuleName: DB 'DiskBank.dll',0
-dosModuleName: DB 'DiskDos.dll',0
-mainModuleName: DB 'DiskMain.dll',0
+modulePath:         DB 'C:',05Ch,'BENCH',05Ch,'DiskBen',05Ch
+moduleFileName:     DS 13,0
+bankModuleName:     DB 'DiskBank.dll',0
+dosModuleName:      DB 'DiskDos.dll',0
+mainModuleName:     DB 'DiskMain.dll',0
 ; MODULE_LOAD только читает ASCIIZ; 128 доступных байт обеспечены последующим кодом.
     ASSERT modulePath+MAX_PATH <= sectorBuffer
-txtBankModuleError: DB 10,'Disk module error ',0
+    IFDEF DISKBEN_LEGACY_FIXTURE
+txtBankModuleError: DB 10,'Error ',0
+    ENDIF
 
     INCLUDE "batch.inc"

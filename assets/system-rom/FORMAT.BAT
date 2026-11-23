@@ -1,1 +1,1 @@
-A:\FORMAT.COM B: -R -Y
+C:\DOS\FORMAT.COM B: -R -Y

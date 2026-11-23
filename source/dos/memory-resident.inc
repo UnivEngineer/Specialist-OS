@@ -273,7 +273,6 @@ memoryCeilingBlockNext:
     pop de
     pop bc
     ret
-memoryPublishedEnd: DW APP_MEMORY_END
 ; Cold DOS start or Bootstrap restoration of the default upper engine only.
 ; Ordinary shell/app returns must never call this reset.
 memoryResidentReset:
@@ -288,11 +287,3 @@ mrResetLoop:
     ld hl,APP_MEMORY_END
     ld (memorySystemEnd),hl
     ret
-memorySystemEnd: DW APP_MEMORY_END
-mrSlots: DS MEM_RESIDENT_SLOTS*4,0
-mrSlot: DW 0
-mrSize: DW 0
-mrFloor: DW 0
-mrBase: DW 0
-mrCeiling: DW 0
-mrOperation: DB 0

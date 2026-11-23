@@ -184,6 +184,6 @@ cpmSetup:
     ld a,0FFh
     ld (0FFD8h),a
     ret
-cpmSource: DW 0
-cpmDestination: DW 0
-cpmRemainder: DB 0
+cpmSource:          DW 0
+cpmDestination:     DW 0
+cpmRemainder:       DB 0

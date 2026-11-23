@@ -18,7 +18,7 @@ def loaded_nc():
  raise AssertionError(('NC return timeout',m.call('cpu_state')))
 try:
  x.start('std-mx-return',disk=R/'bin/nested-Games2M.bin')
- for name,asset,warn in [('Almaz2-8.rks','Almaz-2/Almaz2-8color.rks',True),('Dash2.rks','DASH2.RKS',False)]:
+ for name,asset,warn in [('Almaz2-8.rks','families/almaz-2/builds/Almaz2-8color.rks',True),('Dash2.rks','std/Dash2.rks',False)]:
   m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc')
   text='RUN -MX H:/Almaz-2/STD/'+name
   for ch in text:m.tap({' ':'space',':':'colon','.':'period','/':'slash','-':'minus'}.get(ch,ch.lower()))

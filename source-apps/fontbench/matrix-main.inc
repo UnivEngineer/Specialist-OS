@@ -23,8 +23,10 @@ entry:
     ld (cachePrivateStart),hl
     ld hl,08600h
     ld (cachePrivateEnd),hl
-    call loadCorpus
-    jp c,corpusFailed
+    ld hl,fontCorpus
+    ld de,fontCorpus+FONT_CORPUS_SIZE
+    ld bc,textCorpus
+    call bios_memcpy_bc_hl
     IFDEF FONT_BLOCK32
     call blockNormalizeCorpus
     ENDIF
@@ -395,10 +397,6 @@ corpusNoMemory:
     ld hl,corpusMemoryText
     call puts
     jp bench_finish
-corpusFailed:
-    ld hl,corpusErrorText
-    call puts
-    jp bench_finish
 matrixModuleFailedRestore:
     call streamRestore
     call restoreOriginal
@@ -408,18 +406,17 @@ matrixModuleFailed:
     ld hl,bankErrorText
     call puts
     jp bench_finish
-title: DB 'FONTBEN README 48x24, ms: main / BANK',13,10,0
-corpusMemoryText: DB 'Need main RAM through 8AAFh',13,10,0
-corpusErrorText: DB 'Cannot read A:\README.TXT',13,10,0
-matchText: DB 'Bitmap: PASS',13,10,0
-failText: DB 'Bitmap: FAIL',13,10,0
-newlineText: DB 13,10,0
-slashText: DB ' / ',0
-mainRows: DB 0
-matrixBank: DB 0
-matrixKind: DB 0
-matrixFlags: DB 0
-matrixSummaryY: DB 0
-matrixCase: DW 0
-bitmapResult: DW 0
-bitmapFailedStage: DB 0
+title:              DB 'FONTBEN CORPUS 48x24, ms: main / BANK',13,10,0
+corpusMemoryText:   DB 'Need main RAM through 8AAFh',13,10,0
+matchText:          DB 'Bitmap: PASS',13,10,0
+failText:           DB 'Bitmap: FAIL',13,10,0
+newlineText:        DB 13,10,0
+slashText:          DB ' / ',0
+mainRows:           DB 0
+matrixBank:         DB 0
+matrixKind:         DB 0
+matrixFlags:        DB 0
+matrixSummaryY:     DB 0
+matrixCase:         DW 0
+bitmapResult:       DW 0
+bitmapFailedStage:  DB 0

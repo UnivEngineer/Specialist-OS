@@ -2,7 +2,7 @@
 from pathlib import Path
 import subprocess,runpy,argparse,sys,re
 from tempfile import TemporaryDirectory
-R=Path(__file__).resolve().parents[2]
+R=Path(__file__).absolute().parents[2]
 cpu=runpy.run_path(str(R/'scripts/images/cpu.py'))
 exe=runpy.run_path(str(R/'scripts/images/executable.py'))
 p=argparse.ArgumentParser(description=__doc__)

@@ -80,7 +80,7 @@ try:
  if args.upper_only:cases=[('UHIGH.EXE','MX',None)]
  for name,mode,choice in cases:
   payload,load,tag=fixtures[name]
-  text=f'A:/RUN.COM H:/{name}'+('' if args.menu_only else f' -{mode}')
+  text=f'C:/DOS/RUN.COM H:/{name}'+('' if args.menu_only else f' -{mode}')
   command(text,choice)
   request=m.read(r['RUN_BODY_REQUEST'],43)
   assert request[34:36]==(b'\x04\x02' if name.endswith('RKS') else b'\x10\x00')
@@ -101,7 +101,7 @@ try:
   row=dict(file=name,mode=mode,payloadBytes=len(payload),entryReached=True,returnedNC=True)
   rows.append(row);print(row,flush=True)
  if not args.menu_only and not args.high_only and not args.upper_only:
-  command('A:/RUN.COM H:/UBAD.RKS -MX')
+  command('C:/DOS/RUN.COM H:/UBAD.RKS -MX')
   m.write(0x8800,b'\0');returned();assert m.read(0x8800,1)!=bytes([fixtures['UBAD.RKS'][2]])
   rows.append(dict(file='UBAD.RKS',badChecksumRejected=True,returnedNC=True))
  (OUT/('menu-results.json' if args.menu_only else 'high-results.json' if args.high_only else 'upper-results.json' if args.upper_only else 'results.json')).write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')

@@ -4,13 +4,15 @@ import re,subprocess
 R=Path(__file__).resolve().parents[2]; O=R/'.local/nc-layout-cpu'; O.mkdir(exist_ok=True)
 def sy(p): return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text(encoding='utf-8'),re.M)}
 N=sy(R/'bin/NC.sym'); S=sy(R/'bin/BIOS.sym'); W=lambda n:n.to_bytes(2,'little')
+# The trampoline belongs above the NC workspace so it cannot overwrite a catalog record.
+CALL_ADDR=N['APP_MEMORY_END']; STOP_ADDR=CALL_ADDR+0xff
 def call(m,entry,a=0,bc=0,de=0,hl=0):
  global LAST_CYCLES
  m=bytearray(m)
- code=b'\x31'+W(0x8b00)+b'\x3e'+bytes([a])+b'\x01'+W(bc)+b'\x11'+W(de)+b'\x21'+W(hl)+b'\xcd'+W(N.get(entry,S.get(entry)))+b'\xc3'+W(0x81ff)
- m[0x8100:0x8100+len(code)]=code;(O/'in.bin').write_bytes(m)
- p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8100','-end','81ff','-counter','30000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,check=True,timeout=20)
- b=(O/'out.bin').read_bytes();assert b[65542:65544]==W(0x81ff),(entry,p.stdout,b[65542:65544].hex())
+ code=b'\x31'+W(0x8b00)+b'\x3e'+bytes([a])+b'\x01'+W(bc)+b'\x11'+W(de)+b'\x21'+W(hl)+b'\xcd'+W(N.get(entry,S.get(entry)))+b'\xc3'+W(STOP_ADDR)
+ m[CALL_ADDR:CALL_ADDR+len(code)]=code;(O/'in.bin').write_bytes(m)
+ p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{CALL_ADDR:x}','-end',f'{STOP_ADDR:x}','-counter','30000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,check=True,timeout=20)
+ b=(O/'out.bin').read_bytes();assert b[65542:65544]==W(STOP_ADDR),(entry,p.stdout,b[65542:65544].hex())
  LAST_CYCLES=int(p.stdout.strip().splitlines()[-1])
  return bytearray(b[:65536])
 def seed(name):
@@ -242,7 +244,7 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
  for count,selected,keys in [(20,0,[8,12,25]),(20,19,[10,24,26]),(0,0,[8,10,12,24,25,26])]:
   for key in keys:
    q=bytearray(m);q[N['state.panelA_filesCnt']]=count;q[N['state.panelA_curFile']]=selected
-   reader=bytes.fromhex('3a 00 84 3c 32 00 84 fe 02 ca ff 81 3e')+bytes([key])+bytes.fromhex('b7 c9')
+   reader=bytes.fromhex('3a 00 84 3c 32 00 84 fe 02 ca')+W(STOP_ADDR)+bytes([0x3e,key,0xb7,0xc9])
    q[N['ncReadKey']:N['ncReadKey']+len(reader)]=reader
    trace=bytes.fromhex('3a 01 84 3c 32 01 84 c9')
    q[N['drawCursor']:N['drawCursor']+len(trace)]=trace
@@ -265,7 +267,7 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
                     ('updateCommandPath','3a 03 84 3c 32 03 84 3a 02 84 32 04 84 c9'),
                     ('redrawCommandLine','c9')]:
   at=N[label];code=bytes.fromhex(stub);q[at:at+len(code)]=code
- q[N['ncReadKey']:N['ncReadKey']+3]=bytes.fromhex('c3 ff 81')
+ q[N['ncReadKey']:N['ncReadKey']+3]=b'\xc3'+W(STOP_ADDR)
  trace=bytes.fromhex('3a 01 84 3c 32 01 84 c9')
  q[N['drawCursor']:N['drawCursor']+len(trace)]=trace
  result=call(q,'ncRefreshDirty')

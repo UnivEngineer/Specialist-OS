@@ -23,7 +23,12 @@ function Get-ExecutableChecksum {
 }
 
 function Convert-ExecutableFile {
-    param([string]$Path,[ValidateSet('com','exe','dll','fnt','rks')][string]$Format,[int]$LoadAddress=0)
+    param(
+        [string]$Path,
+        [ValidateSet('com','exe','dll','fnt','rks')][string]$Format,
+        [int]$LoadAddress=0,
+        [ValidateSet('AUTO','MX','STD','MON','RF','NATIVE')][string]$GameMode
+    )
     try {
         $data=[IO.File]::ReadAllBytes($Path);$kind=[IO.Path]::GetExtension($Path).ToLowerInvariant()
         $load=$LoadAddress;$entry=$load;$flags=0;$offset=0;$size=$data.Length;$expected=$null
@@ -70,7 +75,17 @@ function Convert-ExecutableFile {
         $heap=Read-ImageNumber 'MIN_HEAP' 0;$stack=Read-ImageNumber 'STACK' 0
         $policy=if($fields.ContainsKey('POLICY') -and $fields.POLICY -in @('EXCLUSIVE','PRESERVE','MANAGED')){@{EXCLUSIVE=0;PRESERVE=1;MANAGED=2}[$fields.POLICY]}else{Read-ImageNumber 'POLICY' $(if($nativeDefaults){2}else{0})}
         $api=Read-ImageNumber 'API' $(if($nativeDefaults){2}else{0})
-        $mode=if($fields.ContainsKey('MODE') -and $fields.MODE -in @('AUTO','MX','STD','MON','RF')){@{AUTO=0;MX=1;STD=2;MON=3;RF=4}[$fields.MODE]}else{Read-ImageNumber 'MODE' 0}
+        $modes = @{AUTO=0;MX=1;STD=2;MON=3;RF=4}
+        $mode=if($fields.ContainsKey('MODE') -and $modes.ContainsKey($fields.MODE)){$modes[$fields.MODE]}else{Read-ImageNumber 'MODE' 0}
+        if ($GameMode) {
+            if ($Format -ne 'exe') { throw 'GameMode requires EXE output' }
+            if ($GameMode -eq 'NATIVE') {
+                if ($flags -ne 4) { throw 'NATIVE requires a source with IMAGE_FLAG_MAIN' }
+            } else {
+                if ($flags) { throw 'RUN modes require a source with flags=0' }
+                $mode = $modes[$GameMode]
+            }
+        }
         $options=Read-ImageNumber 'CACHEABLE' 0
         if($Format -ne 'rks') {
             if($bss -lt 0 -or $bss -gt 65535 -or $begin -lt 0 -or $begin -gt $load -or $end -lt $load+$size -or $end -gt 65535 -or ($bss -ne 65535 -and $load+$size+$bss -gt $end)){throw 'Invalid image memory interval'}

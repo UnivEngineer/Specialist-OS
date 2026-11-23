@@ -70,9 +70,6 @@ memoryFillCount:
 memoryFillBad:
     pop hl
     jp memoryBad
-memoryFillSize: DW 0
-memoryFillDone: DW 0
-memoryFillCopy: DS 8,0
 
 ; QUERY: B=банк; HL=свободные байты, DE=наибольший промежуток,
 ; B=банк, C=свободные записи реестра. AF разрушен, CF/A=статус.
@@ -225,13 +222,6 @@ memoryQueryUsed:
     pop hl
     xor a
     ret
-memoryQueryBank: DB 0
-memoryQueryCursor: DW 0
-memoryQueryEnd: DW 0
-memoryQueryNext: DW 0
-memoryQueryBlockEnd: DW 0
-memoryQueryTotal: DW 0
-memoryQueryMax: DW 0
 
 ; C=0: B=размер пула, C=0 свободен/1 DOS/2 старый резидент; D=новое ОЗУ, E=0.
 ; C=1: DRIVER-инициализатор передаёт подготовленный пул самой DOS.
@@ -240,8 +230,14 @@ memoryRamDisk:
     ld a,c
     or a
     jp z,memoryRamDiskStatus
+    cp MEM_RAMDISK_CHECK_LETTER
+    jp z,memoryRamCheckLetter
     cp MEM_RAMDISK_COMMIT
     jp nz,memoryBad
+    call memoryRamCheckLetter
+    ret c
+    ld a,b
+    ld (ramRequestedDrive),a
     ld a,(diActive)
     or a
     jp z,memoryDenied
@@ -258,6 +254,8 @@ memoryRamDiskValidate:
     ; Повторно проверяем геометрию B:, не форматируя и не меняя данные.
     call memoryExistingVolume
     ret c
+    call memoryRamPublishLetter
+    ret c
     ld a,DOS_IO_PAGE
     ld (memoryRamOwner),a
     xor a
@@ -265,7 +263,8 @@ memoryRamDiskValidate:
 memoryRamDiskStatus:
     ld a,(memoryRamFresh)
     ld d,a
-    ld e,0
+    ld a,(kernelRamDrive)
+    ld e,a
     ld a,(memoryRamPages)
     ld b,a
     ld c,0
@@ -279,6 +278,62 @@ memoryRamDiskStatus:
 memoryRamDiskReady:
     xor a
     ret
+
+; B = requested RAM letter. Check the installer, one-time placement and the
+; target slot. B stays intact. CF/A report errors; AF and HL are scratch.
+memoryRamCheckLetter:
+    ld a,(diActive)
+    or a
+    jp z,memoryDenied
+    ld a,(kernelRamDrive)
+    cp b
+    jp z,dosClearError
+    cp RAM_DRIVE
+    jp nz,memoryBad
+    ld a,b
+    cp RAM_ALTERNATE_DRIVE
+    jp nz,memoryBad
+    ld a,(memoryRamOwner)
+    or a
+    jp nz,memoryDenied
+    ld a,(kernelFloppyDrive)
+    cp b
+    jp z,memoryDenied
+    ld a,(kernelExternalDrive)
+    cp b
+    jp z,memoryDenied
+    jp dosClearError
+
+; After a successful mount, move the RAM registry from B: to D: if requested.
+; CF/A report a flush failure before publication; all other registers are scratch.
+memoryRamPublishLetter:
+    ld a,(ramRequestedDrive)
+    ld hl,kernelRamDrive
+    cp (hl)
+    jp z,dosClearError
+    call flushVolume
+    ret c
+    ld hl,DOS_DRIVER_REGISTRY+RAM_DRIVE*DRIVER_RECORD_SIZE
+    ld de,DOS_DRIVER_REGISTRY+RAM_ALTERNATE_DRIVE*DRIVER_RECORD_SIZE
+    ld bc,DRIVER_RECORD_SIZE
+    call moveBytesForward
+    ld hl,DOS_DRIVER_REGISTRY+RAM_DRIVE*DRIVER_RECORD_SIZE
+    ld bc,DRIVER_RECORD_SIZE
+    call cliZero
+    ld hl,diskDriverDummy
+    ld (v_drives+2*RAM_DRIVE),hl
+    ld hl,diskDriver
+    ld (v_drives+2*RAM_ALTERNATE_DRIVE),hl
+    ld a,RAM_ALTERNATE_DRIVE
+    ld (kernelRamDrive),a
+    call invalidateDriveCache
+    ld a,RAM_DRIVE
+    call invalidateDriveCache
+    ld a,(v_drive)
+    cp RAM_DRIVE
+    jp nz,dosClearError
+    ld a,RAM_ALTERNATE_DRIVE
+    jp fileSelectDrive
 
 ; Исторический API: закрепить пул B: за модульным резидентом.
 memoryDiskClaim:

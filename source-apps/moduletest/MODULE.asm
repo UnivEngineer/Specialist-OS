@@ -88,6 +88,20 @@ readFile:
 info:
     call mx_memInfo
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вернуть узнаваемые регистры для проверки ABI модульного вызова.
+;
+; вход:
+;   hl, de и bc переданы вызывающим.
+;
+; выход:
+;   hl, de и bc увеличены на единицу. a = 0, z = 1, cf = 1, что позволяет проверить
+;   возврат флагов отдельно от a.
+;----------------------------------------------------------------------------
+
 registers:
     inc hl
     inc de
@@ -130,14 +144,14 @@ shared:
     ld a,MEM_OP_PUT16
     call mx_memory
     ret
-message: DB 'Module BIOS/DOS call',13,10,0
-childPath: DB 'B:',05Ch,'MRET.DLL',0
+message:        DB 'Module BIOS/DOS call',13,10,0
+childPath:      DB 'B:',05Ch,'MRET.DLL',0
     DS MAX_PATH-($-childPath),0
-childRegs: DW 1,2,3,0
-driverPath: DB 'B:',05Ch,'DOSAPP.EXE',0
+childRegs:      DW 1,2,3,0
+driverPath:     DB 'B:',05Ch,'DOSAPP.EXE',0
     DS MAX_PATH-($-driverPath),0
-sectorBuffer: DS 512,0
-rootPath: DB 'A:',05Ch,0
+sectorBuffer:   DS 512,0
+rootPath:       DB 'A'+SYSTEM_DRIVE,':',05Ch,0
     DS MAX_PATH-($-rootPath),0
 readHandle:
     DB 'README  TXT'

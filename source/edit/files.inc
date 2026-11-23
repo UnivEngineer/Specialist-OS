@@ -157,9 +157,9 @@ fileOperationErrorText:
 fileOperationShowError:
         CALL editorErrorWithTitle
         JP editorCloseModal
-editorSaveErrorTitle: DB 'Cannot save file',0
-editorOpenErrorTitle: DB 'Cannot open file',0
-editorInvalidPath: DB 'Invalid file name or path',0
+editorSaveErrorTitle:   DB 'Cannot save file',0
+editorOpenErrorTitle:   DB 'Cannot open file',0
+editorInvalidPath:      DB 'Invalid file name or path',0
 ;----------------------------------------------------------------------
 
 ; Вход: inputBuf. Выход: файл добавлен по логическому концу либо сигнал ошибки.
@@ -254,10 +254,10 @@ cancelFilePrompt:
 
 ;----------------------------------------------------------------------
 
-txtFile:        DB    "File name",0
-txtAppendFile:  DB    "Append file",0
-editorFilePrompt: DW txtFile
-editorFileCancelled: DB 0
+txtFile:                DB  "File name",0
+txtAppendFile:          DB  "Append file",0
+editorFilePrompt:       DW  txtFile
+editorFileCancelled:    DB  0
 
     IF STANDARD_EDITOR
 

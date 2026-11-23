@@ -44,6 +44,11 @@ def generate(check=False):
         ROOT/'sdk/src/mxos_syscall_ids.inc':z80,
     }
     for path, lines in outputs.items():
+        if path.suffix == '.inc':
+            parts = [line.partition(' = ') for line in lines]
+            width = max((len(name) for name, separator, _ in parts if separator), default=0)
+            lines = [f'{name:<{width}}{separator}{value}' if separator else name
+                     for name, separator, value in parts]
         text = '\n'.join(lines)+'\n'
         if path.exists() and path.read_text('utf-8') == text:
             continue

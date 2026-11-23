@@ -5,7 +5,7 @@ base=Path(__file__).with_name('check-aligned-font.py').read_text().split('for na
 exec(base)
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',p.read_text(),re.M)}
 count=0
-for native,shared in [('Rotate','RotRows'),('Packed6K','FontPack'),('Fast12K','FontFull'),('Compact','FontKoi'),('Fast8','Font8'),('Cpm4','Font4')]:
+for native,shared in [('Rotate','Rot6Col4'),('Packed6K','FontPack'),('Fast12K','FontFull'),('Compact','FontKoi'),('Fast8','Font8'),('Cpm4','Font4'),('Cpm4Fast','Font4Fst')]:
  m=seed(native);ss=sy(R/f'bin/fonts/{shared}.sym')
  other=bytearray(m);data=(R/f'bin/fonts/{shared}.i80').read_bytes();other[0x2000:0x2000+len(data)]=data
  other=call(other,ss['benchInitialize'])
@@ -34,7 +34,8 @@ for native,shared in [('Rotate','RotRows'),('Packed6K','FontPack'),('Fast12K','F
 print(count,'shared frontend/KOI/inversion cases PASS')
 
 # Public register contract on resident modules (same code is shared in MAIN).
-for native in ('Rotate','Packed6K','Fast12K','Compact','Fast8','Cpm4'):
+register_cases=0
+for native in ('Rotate','Packed6K','Fast12K','Compact','Fast8','Cpm4','Cpm4Fast'):
  m=seed(native);m[0x1000:0x1005]=b'ABCD\0'
  for inverse in (0,1,255):
   for api in ('printChar','printCharRaw','printStringZ','printStringRawZ','printStringRawLim','setFontEncoding'):
@@ -47,4 +48,5 @@ for native in ('Rotate','Packed6K','Fast12K','Compact','Fast8','Cpm4'):
    regs=(O/'abi-out.bin').read_bytes()[65536:]
    assert regs[:4]==W(af)+W(bc) and regs[12:14]==W(de) and regs[8:10]==W(0x8fe0),(native,api,inverse,'registers',regs.hex())
    assert regs[4:6]==W(hl+4 if api.startswith('printString') else hl),(native,api,'HL')
-print('108 public register/stack cases PASS')
+   register_cases+=1
+print(register_cases,'public register/stack cases PASS')

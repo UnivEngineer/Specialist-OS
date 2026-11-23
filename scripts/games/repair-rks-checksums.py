@@ -14,8 +14,13 @@ ORIGINALS = {
     'StarW2.rks': '999775c6ef2bfc73922822131b1a8e83563bad16af1dbc3b376b6ec655909bce',
     'Lines.rks': '06892a22e898f319cc9dafed1ea7e3f2fe4ec8810955c8c7e2fa1d8114d39bd8',
 }
-# Имя архивной копии сохраняется; рабочий исторический RKS перенесён в семейство.
-CURRENT_PATHS = {'StarW2.rks': 'StarWars/legacy/StarWars2-mx.rks'}
+# Архивные имена связывают известные суммы с нормализованными именами семейства.
+FAMILIES = {
+    'Jet-set.rks': ('jet-set', 'Jet-set.rks'),
+    'KOM13_1.rks': ('kom13', 'Komanda13-part1.rks'),
+    'StarW2.rks': ('starwars', 'StarWars2-mx.rks'),
+    'Lines.rks': ('lines', 'Lines.rks'),
+}
 
 
 def sha(data):
@@ -38,13 +43,14 @@ def checksum(data):
 
 
 def main():
-    backups = ROOT / 'assets/games/originals/rks-checksums'
+    families = ROOT / 'assets/games/families'
     report_path = ROOT / 'docs/games/rks-repair-001.json'
     prepared = []
     # Сначала проверить все источники; не начинать частичную правку при ошибке.
     for name, expected in ORIGINALS.items():
-        path = ROOT / 'assets/games' / CURRENT_PATHS.get(name, name)
-        backup = backups / (name + '.bin')
+        family, repaired_name = FAMILIES[name]
+        path = families / family / 'repaired' / repaired_name
+        backup = families / family / 'originals' / (repaired_name + '.bin')
         current = path.read_bytes()
         original = backup.read_bytes() if backup.exists() else current
         if sha(original) != expected:
@@ -73,9 +79,9 @@ def main():
                 entry['author_reference_sha256'] = sha(source)
                 entry['author_reference_equals_backup'] = True
         prepared.append((path, backup, original, fixed, entry))
-    backups.mkdir(parents=True, exist_ok=True)
     for path, backup, original, fixed, _ in prepared:
         if not backup.exists():
+            backup.parent.mkdir(parents=True, exist_ok=True)
             backup.write_bytes(original)
         path.write_bytes(fixed)
     # Независимый побайтовый проход с переносом, как в bios_calcCS.

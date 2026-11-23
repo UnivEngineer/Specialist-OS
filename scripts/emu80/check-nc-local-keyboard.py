@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, required=True)
     parser.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
-    parser.add_argument('--font', help='Switch font in MAIN before starting NC_BANK, e.g. 4x8/Fast')
+    parser.add_argument('--font', help='Switch font in MAIN before starting NC_BANK, e.g. 4x8/Packed')
     parser.add_argument('--reselect', action='store_true', help='Start NC_BANK again from its own command prompt')
     parser.add_argument('--editor', action='store_true', help='Check banked F4 and TXT handoff and return')
     parser.add_argument('--editor-h', nargs='?', const='COPTER.RKS', choices=['COPTER.RKS','RAIN.RKS'],
@@ -49,7 +49,7 @@ def main():
             # The matrix can sample the key and Shift on different scans.
             for attempt in range(3):
                 try:
-                    c.type('A:NC.COM')
+                    c.type('C:/DOS/NC.COM')
                     return
                 except AssertionError:
                     if attempt == 2:
@@ -76,7 +76,7 @@ def main():
             record_name = (stem.ljust(8) + ext.ljust(3)).encode('ascii')
             drive = 'H' if panel else 'A'
             path = (drive + ':\\' + filename).encode('ascii')
-            payload = ROOT / 'assets' / ('games' if panel else 'system-rom') / filename
+            payload = ROOT / 'assets' / ('games/rks' if panel else 'system-rom') / filename
             c.free()
             if c.panel()!=panel:
                 c.tap('tab')
@@ -377,7 +377,7 @@ def main():
         assert path[1:3] == b':\\' and inserted == path+b' ', inserted
         m.screenshot(out/'ctrl-enter.png')
         press('esc')
-        c.type('A:CLI')
+        c.type('C:/DOS/CLI')
         cli = profile['symbols']('CLI')
         m.call('bp_clear')
         m.call('bp_set', addr=cli['cliPrompt'], type='exec')
@@ -392,7 +392,7 @@ def main():
         print('NC local keyboard PASS: Shift, F1/Escape, arrows/repeat, Ctrl+Enter, command line, CLI return')
         bank, core = c.page, c.n
         main_nc = profile['symbols']('NC')
-        c.type('A:NC_MN.COM')
+        c.type('C:/DOS/NC_MN.COM')
         m.call('bp_set', addr=main_nc['mainLoop'], type='exec')
         c.tap('enter')
         c.wait(main_nc['mainLoop'], 0)
@@ -430,6 +430,18 @@ def main():
             c.wait(core['ncBankInputPoll'], bank)
             c.page, c.n = bank, core
             print(f'Shift+F10 -> CLI {command} -> BANK NC.COM PASS', flush=True)
+
+        # Reset abandons the input scope without running its normal cleanup.
+        # The NC bank survives, but DOS must grant it a fresh timer lease.
+        c.free()
+        owner = c.read(1, c.k['timerOwner'], 1)
+        assert owner != b'\x00'
+        m.call('emu_reset')
+        c.wait(core['ncBankInputPoll'], bank)
+        assert c.read(0, c.b['biosBootWarm'], 1) == b'\x01'
+        assert c.read(bank, core['ncInputState.timed'], 1) == b'\x01'
+        assert c.read(1, c.k['timerOwner'], 1) == owner
+        print('Warm Reset -> resident NC reacquires the keyboard timer PASS', flush=True)
     finally:
         matrix.stop()
 

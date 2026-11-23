@@ -91,11 +91,11 @@ bankLine:
 bankFinish:
     call moduleTimerSample
     jp moduleTimerResult
-kind: DB 0
-flags: DB 0
-action: DB 0
-rowsLeft: DB 0
-bulkRequest: DB 0
+kind:           DB 0
+flags:          DB 0
+action:         DB 0
+rowsLeft:       DB 0
+bulkRequest:    DB 0
     DW 02000h
     DB 0
     DW 0,1201
@@ -135,9 +135,9 @@ endRow:
     or l
     jp nz,row
     jp moduleTimerResult
-mode: DB 0
-rowsLeft: DW 0
-text: DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
+mode:           DB 0
+rowsLeft:       DW 0
+text:           DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
     ENDIF
     IF FONT_TEST
     INCLUDE "../fontbench/grid-bank.inc"

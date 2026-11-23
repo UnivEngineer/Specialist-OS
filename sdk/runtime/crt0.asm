@@ -1,10 +1,10 @@
 ; Старт sccz80/8080 для MAIN и BANK. Стек предоставляет загрузчик MXOS.
 ; BSS обнуляется, локальная куча занимает остаток до границы профиля.
-    defc __crt_model = 0
-    defc __crt_org_bss = 0
-    defc __crt_org_bss_fardata_start = 0
+    defc __crt_model                  = 0
+    defc __crt_org_bss                = 0
+    defc __crt_org_bss_fardata_start  = 0
     defc __crt_org_bss_compiler_start = 0
-    defc __crt_org_graphics = 0
+    defc __crt_org_graphics           = 0
     INCLUDE "crt/classic/crt_section_standard.asm"
     INCLUDE "../src/mxos_syscall_ids.inc"
     SECTION code_crt_init
@@ -12,6 +12,22 @@
     PUBLIC __Start
     EXTERN _main, _mxos_heap_init, _mxos_default_heap
     EXTERN __BSS_head, __BSS_END_tail
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить окружение sccz80 и вызвать main.
+;
+; вход:
+;   de = указатель аргументов запуска. Стек и текущую страницу установил загрузчик
+;   MXOS.
+;
+; выход:
+;   BSS обнулена, сохранены адрес аргументов и номер страницы. При успехе
+;   инициализирована куча и возвращён результат main в hl. Если куча недоступна, hl =
+;   0FFFFh, cf = 1.
+;----------------------------------------------------------------------------
+
 __Start:
     push de
     ld hl,__BSS_head
@@ -88,5 +104,5 @@ crtNoHeap:
     ret
     SECTION bss_crt
     PUBLIC _mxos_args, _mxos_home_page
-_mxos_args: defw 0
-_mxos_home_page: defb 0
+_mxos_args:         defw 0
+_mxos_home_page:    defb 0

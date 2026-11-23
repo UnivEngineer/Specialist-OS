@@ -11,6 +11,8 @@ bios, run, base, word = [model[k] for k in ('bs', 'run', 'base', 'w')]
 
 variants = (
     ('Cpm4', 4, '4x8/Cpm4.pf'),
+    ('Cpm4Compact', 4, '4x8/Cpm4.pf'),
+    ('Cpm4Fast', 4, '4x8/Cpm4.pf'),
     ('Rotate', 6, '6x8/KOI8.pf'),
     ('Packed6K', 6, '6x8/KOI8.pf'),
     ('Fast12K', 6, '6x8/KOI8.pf'),

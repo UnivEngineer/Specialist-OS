@@ -1,7 +1,7 @@
 ; Drive lists use linear navigation even when broken across two rows.
-UI_FOCUS_GRID = 0
+UI_FOCUS_GRID   = 0
 UI_FOCUS_LINEAR = 1
-UI_FOCUS_PAIR = 2 ; Left selects the first button, Right selects the second.
+UI_FOCUS_PAIR   = 2  ; Left selects the first button, Right selects the second.
 
 ; Configure before drawing. HL=descriptor, A=initial index, B=mode,
 ; C=populated count (0=whole descriptor). AF/BC/DE/HL destroyed.
@@ -235,8 +235,8 @@ uiFocusButtonAt:
     ld hl,(uiModalCurrent)
     jp uiModalButtonAt
 
-uiModalFocusIndex: DB 0
-uiModalFocusMode: DB 0
-uiFocusCount: DB 0
-uiFocusCols: DB 0
-uiFocusTop: DB 0
+uiModalFocusIndex:  DB 0
+uiModalFocusMode:   DB 0
+uiFocusCount:       DB 0
+uiFocusCols:        DB 0
+uiFocusTop:         DB 0

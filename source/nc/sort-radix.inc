@@ -173,10 +173,10 @@ ncRadixFinalCopy:
     jp nz,ncRadixFinalCopy
     ret
 
-ncRadixNameOrder: DB 10,9,8,7,6,5,4,3,2,1,0,11,0FFh
-ncRadixExtOrder: DB 7,6,5,4,3,2,1,0,10,9,8,11,0FFh
-ncRadixOrder: DW 0
-ncRadixInput: DB 0
-ncRadixOutput: DB 0
-ncRadixMinimum: DB 0
-ncRadixSpan: DB 0
+ncRadixNameOrder:   DB 10,9,8,7,6,5,4,3,2,1,0,11,0FFh
+ncRadixExtOrder:    DB 7,6,5,4,3,2,1,0,10,9,8,11,0FFh
+ncRadixOrder:       DW 0
+ncRadixInput:       DB 0
+ncRadixOutput:      DB 0
+ncRadixMinimum:     DB 0
+ncRadixSpan:        DB 0

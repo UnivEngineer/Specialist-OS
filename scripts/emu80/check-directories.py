@@ -45,7 +45,7 @@ try:
     cd('/Almaz/MXOS');saved=current();m.select(0);m.select(7);assert current()==saved
     m.m.write(0x7600,b'RKS')
     state=ok(s['bios_fileAssociation'],hl=0x7600,de=0x4000,bc=8192)
-    assert m.m.read(state['registers']['hl']['dec'],11)==b'A:\\RUN.COM\r'
+    assert m.m.read(state['registers']['hl']['dec'],11)==b'C:\\DOS\\RUN.COM\r'
     assert current()==saved
     payload=b'NESTED FILE WRITE\r\n';open_file('DIRTEST.TXT',15);transfer(2,len(payload),payload);cd('/');handle(5)
     cd('/');cd('Almaz/MXOS');open_file('DIRTEST.TXT',1);assert transfer(1,len(payload))==payload;handle(5)

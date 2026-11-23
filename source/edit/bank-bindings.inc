@@ -21,8 +21,8 @@
     DEFINE bios_setInputHook ebSetHook
     DEFINE bios_reboot ebReturn
     DEFINE UI_BUTTON_RECOLOR ebRecolor
-ebCursor = EDIT_BANK_STATE
-ebInverse = EDIT_BANK_STATE+2
+ebCursor    = EDIT_BANK_STATE
+ebInverse   = EDIT_BANK_STATE+2
 ebCursorCfg = EDIT_BANK_STATE+4
-ebFont = EDIT_BANK_STATE+8
-ebColor = EDIT_BANK_STATE+16
+ebFont      = EDIT_BANK_STATE+8
+ebColor     = EDIT_BANK_STATE+16

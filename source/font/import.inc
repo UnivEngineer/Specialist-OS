@@ -251,15 +251,15 @@ importOutputChecked:
     xor a
     call FONT_INIT_ADDR
     ret
-optFile: DB '-FILE',0
-optImport: DB '-IMPORT',0
-optOut: DB '-OUT',0
-optionName: DS 13,0
-importPath: DS MAX_PATH,0
-initializerPath: DS MAX_PATH+13,0
-initializerMagic: DB 'FIN1',1
-initContext: DW staging+IMAGE_HEADER_SIZE,FONT_IMPORT_ADDR,0
-initializerIO: DW initializerPath,FONT_INIT_ADDR-IMAGE_HEADER_SIZE,FONT_INIT_END-FONT_INIT_ADDR+IMAGE_HEADER_SIZE,0
+optFile:            DB '-FILE',0
+optImport:          DB '-IMPORT',0
+optOut:             DB '-OUT',0
+optionName:         DS 13,0
+importPath:         DS MAX_PATH,0
+initializerPath:    DS MAX_PATH+13,0
+initializerMagic:   DB 'FIN1',1
+initContext:        DW staging+IMAGE_HEADER_SIZE,FONT_IMPORT_ADDR,0
+initializerIO:      DW initializerPath,FONT_INIT_ADDR-IMAGE_HEADER_SIZE,FONT_INIT_END-FONT_INIT_ADDR+IMAGE_HEADER_SIZE,0
     DS FILE_DESCRIPTOR,0
 importIO: DW importPath,FONT_IMPORT_ADDR,2048,0
     DS FILE_DESCRIPTOR,0

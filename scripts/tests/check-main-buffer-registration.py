@@ -1,5 +1,6 @@
 """8080: exact owned MAIN buffers, protection, FREE and executable handoff."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re,subprocess
 ROOT=Path(__file__).resolve().parents[2];OUT=ROOT/'.local/main-buffer-registration';OUT.mkdir(parents=True,exist_ok=True)
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/KERNEL.sym').read_text(encoding='utf-8'),re.M)}
@@ -12,6 +13,7 @@ def run(mem,entry,hl=0,de=0,bc=0,a=0):
  return bytearray(data[:65536]),data[65536],data[65537],int.from_bytes(data[65540:65542],'little')
 def seed():
  m=bytearray(65536);b=(ROOT/'bin/DOS.sys').read_bytes();m[0x100:0x100+len(b)]=b
+ initialize_dos_state(m, S)
  m[S['memoryPublishTop']]=0xc9
  m[S['MEM_ALLOC_TABLE']:S['MEM_ALLOC_TABLE']+32*6]=bytes([255])*192
  m[S['MODULE_TABLE']:S['MODULE_TABLE']+S['MODULE_RECORD_SIZE']*8]=bytes(S['MODULE_RECORD_SIZE']*8)

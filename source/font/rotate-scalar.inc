@@ -27,6 +27,18 @@ inverse:
     dec a
     jp z,inverse2
     jp inverse3
+    IFDEF FONT_KOI7
+    IF K7_MODE == 1 || K7_MODE == 3
+    DEFINE SCALAR6_PHASE_TABLES
+    ENDIF
+    ENDIF
+    IFDEF SCALAR6_PHASE_TABLES
+    IF K7_MODE == 1
+    INCLUDE "koi7-packed-scalar.inc"
+    ELSE
+    INCLUDE "koi7-fast-scalar.inc"
+    ENDIF
+    ELSE
     MACRO STEP_GLYPH
     IFDEF SCALAR_LINEAR
     inc hl
@@ -34,11 +46,14 @@ inverse:
     inc h
     ENDIF
     ENDM
+    MACRO READ_SCALAR_ROW
+    ld a,(hl)
+    ENDM
     MACRO ONE shifts, keep, inv, advance
     ld a,(bc)
     and keep
     ld e,a
-    ld a,(hl)
+    READ_SCALAR_ROW
     IF inv
     xor 3Fh
     ENDIF
@@ -55,7 +70,7 @@ inverse:
     ENDIF
     ENDM
     MACRO TWO shifts, left, right, inv, advance
-    ld a,(hl)
+    READ_SCALAR_ROW
     IF inv
     xor 3Fh
     ENDIF
@@ -82,19 +97,61 @@ inverse:
     ENDM
     MACRO ONE_CORE label, shifts, keep, inv
 label:
+    IFDEF FONT_KOI7
+    IF K7_MODE != 3
+    call .half
+    ld h,K7_RAW/256
+    ld a,l
+    or 80h
+    ld l,a
+.half:
+    DUP 4
+        ONE shifts,keep,inv,1
+    EDUP
+    ret
+    ELSE
     DUP 7
         ONE shifts,keep,inv,1
     EDUP
     ONE shifts,keep,inv,0
     ret
+    ENDIF
+    ELSE
+    DUP 7
+        ONE shifts,keep,inv,1
+    EDUP
+    ONE shifts,keep,inv,0
+    ret
+    ENDIF
     ENDM
     MACRO TWO_CORE label, shifts, left, right, inv
 label:
+    IFDEF FONT_KOI7
+    IF K7_MODE != 3
+    call .half
+    ld h,K7_RAW/256
+    ld a,l
+    or 80h
+    ld l,a
+.half:
+    DUP 4
+        TWO shifts,left,right,inv,1
+    EDUP
+    ret
+    ELSE
     DUP 7
         TWO shifts,left,right,inv,1
     EDUP
     TWO shifts,left,right,inv,0
     ret
+    ENDIF
+    ELSE
+    DUP 7
+        TWO shifts,left,right,inv,1
+    EDUP
+    TWO shifts,left,right,inv,0
+    ret
+    ENDIF
     ENDM
     ONE_CORE normal0,0,0C0h,0
     ONE_CORE normal3,2,3,0
@@ -104,4 +161,5 @@ label:
     ONE_CORE inverse3,2,3,1
     TWO_CORE inverse1,2,0F0h,3Fh,1
     TWO_CORE inverse2,4,0FCh,0Fh,1
+    ENDIF
     ENDMODULE

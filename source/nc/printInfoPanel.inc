@@ -218,6 +218,21 @@ pip_drawDriver:
             ld de,aTypeFlash
             cp DISK_TECH_FLASH
             jp z,pip_driverType
+            ld de,aTypeFloppy
+            cp DISK_TECH_FLOPPY
+            jp z,pip_driverType
+            ld de,aTypeSystemFlash
+            cp DISK_TECH_MX_SYSTEM_FLASH
+            jp z,pip_driverType
+            ld de,aTypeSystemRom
+            cp DISK_TECH_MX_SYSTEM_ROM
+            jp z,pip_driverType
+            ld de,aTypeVv55Flash
+            cp DISK_TECH_MX_VV55_FLASH
+            jp z,pip_driverType
+            ld de,aTypeVv55Rom
+            cp DISK_TECH_MX_VV55_ROM
+            jp z,pip_driverType
             ld de,aDriverUnknown
 pip_driverType:
             ld hl,aDiskTechnology
@@ -325,13 +340,13 @@ pip_fontAppend:
             inc hl
             inc de
             jp pip_fontAppend
-pipDriverInfoLabel: DB 'Info',0
-pipFontLabel: DB 'Font',0
-pipFontComma: DB ', ',0
-pipFontUnit: DB ' bytes',0
-pipFontUnit8: DB ' B',0
-pipFontBytes: DW 0
-pipFontText: DS 28,0
+pipDriverInfoLabel:     DB 'Info',0
+pipFontLabel:           DB 'Font',0
+pipFontComma:           DB ', ',0
+pipFontUnit:            DB ' bytes',0
+pipFontUnit8:           DB ' B',0
+pipFontBytes:           DW 0
+pipFontText:            DS 28,0
     IF NC_BANKED
 pipFontName: DS 8,0
     ENDIF
@@ -340,19 +355,19 @@ pip_volumeLabel:
             ld de,DISK_INFO.volumeLabel
             add hl,de
             ret
-pipHasVolume: DB 0
-pipMainFree: DW 0
-pipDiskBlocks: DW 0
-pipReservedPages: DB 0
-pipRows: DB 0
-pipDetailX: DB 0
-pipDetailChars: DB 0
-pipHasDescription: DB 0
-ncInfoDrive: DB 0FFh
-pipDriverTech: DB 0
-pipDriverName: DW 0
-pipDriverDescription: DW 0
-ncInfoFreeDeferred: DB 0
+pipHasVolume:           DB 0
+pipMainFree:            DW 0
+pipDiskBlocks:          DW 0
+pipReservedPages:       DB 0
+pipRows:                DB 0
+pipDetailX:             DB 0
+pipDetailChars:         DB 0
+pipHasDescription:      DB 0
+ncInfoDrive:            DB 0FFh
+pipDriverTech:          DB 0
+pipDriverName:          DW 0
+pipDriverDescription:   DW 0
+ncInfoFreeDeferred:     DB 0
 
 ; Sequential metadata rows; the description is a single centered line.
 ; Preserve the original string pointer in HL and the value pointer in DE.

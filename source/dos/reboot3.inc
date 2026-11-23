@@ -57,7 +57,7 @@ reboot3_1:
             ; Запуск файла "A:FORMAT.BAT"
             ; До форматирования B: нельзя восстанавливать его контекст
             ; после поиска ассоциаций. Сначала выбрать системный том.
-            xor a
+            ld a,SYSTEM_DRIVE
             call fileSelectDrive
             ld      hl, pathFormatBat
             call    fileExec
@@ -73,7 +73,7 @@ skipFormat:
             jp z,   reboot3_2
 
             ; Драйверы выбираются только явными командами AUTOEXEC.
-            xor     a
+            ld a,SYSTEM_DRIVE
             call    fileSelectDrive
 
 reboot3_autoexec:
@@ -89,9 +89,9 @@ reboot3_autoexec:
 reboot3_fallback:
             ; Отменяем установленный AUTOEXEC драйвер A: и заново монтируем том.
             ld      hl, diskDriver
-            ld      (v_drives), hl
+            ld      (v_drives+2*SYSTEM_DRIVE), hl
             ld      (j_diskDriver+1), hl
-            xor     a
+            ld a,SYSTEM_DRIVE
             ld      (v_drive), a
             call    mountVolume
 

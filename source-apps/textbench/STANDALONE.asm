@@ -2,6 +2,21 @@
     INCLUDE "../../source/include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сравнить посимвольный и строковый вывод BIOS в MAIN и через банковый модуль.
+;
+; вход:
+;   Программа запущена из DOS. Диск запуска определяет путь к банковому модулю; время
+;   измеряется службами теста.
+;
+; выход:
+;   После проходов выводятся отдельные результаты измерений. Ошибка инициализации идёт
+;   в bench_finish, ошибка открытия модуля — в moduleFailed.
+;----------------------------------------------------------------------------
+
 entry:
     call appProgramDrive
     ld (bankPath),a
@@ -86,15 +101,16 @@ moduleFailed:
     ld hl,bankErrorText
     call puts
     jp bench_finish
-text: DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
-summary: DB 13,10,'TEXTBEN: 32 x 48 chars + CR/LF, PIT 2 MHz',13,10,'Main char:   ',0
-stringText: DB ' ms',13,10,'Main string: ',0
-bankText: DB ' ms',13,10,'BANK char:   ',0
-bankStringText: DB ' ms',13,10,'BANK string: ',0
-msText: DB ' ms',13,10,'Includes wrapping and scrolling.',13,10,0
-charTicks: DD 0
-stringTicks: DD 0
-bankCharTicks: DD 0
+text:               DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
+summary:            DB 13,10,'TEXTBEN: 32 x 48 chars + CR/LF, PIT 2 MHz',13,10,'Main char:   ',0
+stringText:         DB ' ms',13,10,'Main string: ',0
+bankText:           DB ' ms',13,10,'BANK char:   ',0
+bankStringText:     DB ' ms',13,10,'BANK string: ',0
+msText:             DB ' ms',13,10,'Includes wrapping and scrolling.',13,10,0
+charTicks:          DD 0
+stringTicks:        DD 0
+bankCharTicks:      DD 0
+    DEFINE APP_COMMAND_ADDR MAIN_COMMAND_ADDR
     INCLUDE "../../source/include/app-drive.inc"
     INCLUDE "bank-runtime.inc"
     INCLUDE "standalone.inc"

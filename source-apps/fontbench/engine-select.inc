@@ -227,16 +227,16 @@ engineSelectLoop:
     dec b
     jp nz,engineSelectLoop
     ret
-engineId: DB 0
-engineWidth: DB 6
-engineHooked: DB 0
-engineHandle: DW 0
-engineAllocation: DW 0
-engineRegs: DS 8,0
-engineFirstArg: DB 0
-enginePreFirst: DB 0
-enginePreEnd: DB 2
-engineFileAppend: DB 0
+engineId:           DB 0
+engineWidth:        DB 6
+engineHooked:       DB 0
+engineHandle:       DW 0
+engineAllocation:   DW 0
+engineRegs:         DS 8,0
+engineFirstArg:     DB 0
+enginePreFirst:     DB 0
+enginePreEnd:       DB 2
+engineFileAppend:   DB 0
     MACRO ENGINE name, variant, path, selected, width
     DW name
     DB variant
@@ -304,6 +304,14 @@ fullQuadsRecord:
     DB 0
     DW pathFont4
     DB 0,4,80h
+    DW nameFont4Fast
+    DB 1
+    DW pathFont4Fast
+    DB 0,4,80h
+    DW nameRot6Col4
+    DB 0
+    DW pathRot6Col4
+    DB 0,6,80h
 windowEngineRecord:
     DW nameWindow
     DB 0
@@ -322,61 +330,91 @@ experimentalEngineRecords:
     DB 0
     DW pathRot8Stream
     DB 0,8,80h
+    MACRO DIRECT_ENGINE name, pre, path, width
+    DW name
+    DB pre
+    DW path
+    DB 0,width,80h
+    ENDM
+; For direct DLLs the low bit selects the pre-state and bit 7 the row loop.
+ENGINE_STREAM = 80h
+    DIRECT_ENGINE nameFont4Compact,0,pathFont4Compact,4
+    DIRECT_ENGINE nameRot6Stream,ENGINE_STREAM,pathRotRows,6
+    DIRECT_ENGINE namePack6Stream,ENGINE_STREAM+1,pathFontPack,6
+    DIRECT_ENGINE nameFast6Stream,ENGINE_STREAM+1,pathFontFull,6
+    DIRECT_ENGINE namePack4Stream,ENGINE_STREAM,pathFont4,4
+    DIRECT_ENGINE nameFast4Stream,ENGINE_STREAM+1,pathFont4Fast,4
+    DIRECT_ENGINE nameComp4Stream,ENGINE_STREAM,pathFont4Compact,4
+    ENGINE nameOrionM1,0,pathOrionM1,0,6
 engineRecordsEnd:
 ENGINE_COUNT = (engineRecordsEnd-engineRecords)/8
-nameBios: DB 'BIOS',0
-nameMonitor: DB 'MXOS1',0
-nameOpt: DB 'OPT',0
-nameFull: DB 'SCALAR12',0
-nameCache: DB 'CACHE',0
-nameQuad: DB 'QUAD',0
-nameCold: DB 'COLD',0
-nameWarm: DB 'WARM',0
-nameRotate: DB 'ROTATE',0
-nameHalf: DB 'HALF',0
-namePacked: DB 'PACKED',0
-namePaged: DB 'ROW6',0
-nameEight: DB 'ROW8',0
-nameFour: DB '4RAW',0
-nameFourPack: DB '4PACK',0
-nameFourDup: DB '4DUP',0
-path6: DB 'Engine6.dll',0
-pathP: DB 'EngineP.dll',0
-path4: DB 'Engine4.dll',0
-nameRemap: DB 'REMAP32',0
-nameBlock: DB 'BLOCK32',0
-pathM: DB 'EngineM.dll',0
-pathB: DB 'EngineB.dll',0
+nameBios:       DB 'BIOS',0
+nameMonitor:    DB 'MXOS1',0
+nameOpt:        DB 'OPT',0
+nameFull:       DB 'SCALAR12',0
+nameCache:      DB 'CACHE',0
+nameQuad:       DB 'QUAD',0
+nameCold:       DB 'COLD',0
+nameWarm:       DB 'WARM',0
+nameRotate:     DB 'ROTATE',0
+nameHalf:       DB 'HALF',0
+namePacked:     DB 'PACKED',0
+namePaged:      DB 'ROW6',0
+nameEight:      DB 'ROW8',0
+nameFour:       DB '4RAW',0
+nameFourPack:   DB '4PACK',0
+nameFourDup:    DB '4DUP',0
+path6:          DB 'Engine6.dll',0
+pathP:          DB 'EngineP.dll',0
+path4:          DB 'Engine4.dll',0
+nameRemap:      DB 'REMAP32',0
+nameBlock:      DB 'BLOCK32',0
+pathM:          DB 'EngineM.dll',0
+pathB:          DB 'EngineB.dll',0
 
-nameMon2: DB 'MON2',0
-nameRamfos: DB 'RAMFOS',0
-nameLinear: DB 'ROTLINE',0
-nameFullFast: DB 'FULLFAST',0
-pathS: DB 'EngineS.dll',0
+nameMon2:       DB 'MON2',0
+nameRamfos:     DB 'RAMFOS',0
+nameLinear:     DB 'ROTLINE',0
+nameFullFast:   DB 'FULLFAST',0
+pathS:          DB 'EngineS.dll',0
 
-nameColPre: DB 'COL6PRE',0
-nameTriple: DB 'TRIPACK',0
-pathQ: DB 'EngineQ.dll',0
-nameFontRot: DB '6ROTATEQUADS',0
-pathFontRot: DB 'FontRot.dll',0
-nameFontPack: DB '6PACKEDQUADS',0
-pathFontPack: DB 'FontPack.dll',0
-nameFontFull: DB '6FULLQUADS',0
-pathFontFull: DB 'FontFull.dll',0
-nameFontKoi: DB 'COMPACT6',0
-pathFontKoi: DB 'FontKoi.dll',0
-nameFont8: DB 'FAST8',0
-pathFont8: DB 'Font8.dll',0
-nameFont4: DB 'CPM4',0
-pathFont4: DB 'Font4.dll',0
-nameWindow: DB 'WIN8',0
-pathWindow: DB 'EngineW.dll',0
-nameRotRows: DB '6ROTATEROWS',0
-pathRotRows: DB 'RotRows.dll',0
-nameRot8Quad: DB '8ROTATEQUADS',0
-pathRot8Quad: DB 'Rot8Quad.dll',0
-nameRot8Stream: DB '8ROTATESTREAM',0
-pathRot8Stream: DB 'Rot8Strm.dll',0
-enginePath: DB 'A:/Bench/FontBen/'
+nameColPre:         DB 'COL6PRE',0
+nameTriple:         DB 'TRIPACK',0
+pathQ:              DB 'EngineQ.dll',0
+nameFontRot:        DB '6ROTATEQUADS',0
+pathFontRot:        DB 'FontRot.dll',0
+nameFontPack:       DB '6PACKEDQUADS',0
+pathFontPack:       DB 'FontPack.dll',0
+nameFontFull:       DB '6FULLQUADS',0
+pathFontFull:       DB 'FontFull.dll',0
+nameFontKoi:        DB 'COMPACT6',0
+pathFontKoi:        DB 'FontKoi.dll',0
+nameFont8:          DB 'FAST8',0
+pathFont8:          DB 'Font8.dll',0
+nameFont4:          DB 'CPM4',0
+pathFont4:          DB 'Font4.dll',0
+nameFont4Fast:      DB 'FAST4',0
+pathFont4Fast:      DB 'Font4Fst.dll',0
+nameWindow:         DB 'WIN8',0
+pathWindow:         DB 'EngineW.dll',0
+nameRotRows:        DB '6ROTATEROWS',0
+pathRotRows:        DB 'RotRows.dll',0
+nameRot6Col4:       DB '6ROTATECOL4',0
+pathRot6Col4:       DB 'Rot6Col4.dll',0
+nameRot8Quad:       DB '8ROTATEQUADS',0
+pathRot8Quad:       DB 'Rot8Quad.dll',0
+nameRot8Stream:     DB '8ROTATESTREAM',0
+pathRot8Stream:     DB 'Rot8Strm.dll',0
+nameFont4Compact:   DB '4COMPACT',0
+pathFont4Compact:   DB 'Font4Cmp.dll',0
+nameRot6Stream:     DB '6ROTATESTREAM',0
+namePack6Stream:    DB '6PACKEDSTREAM',0
+nameFast6Stream:    DB '6FASTSTREAM',0
+namePack4Stream:    DB '4PACKEDSTREAM',0
+nameFast4Stream:    DB '4FASTSTREAM',0
+nameComp4Stream:    DB '4COMPACTSTREAM',0
+nameOrionM1:        DB 'ORIONM1',0
+pathOrionM1:        DB 'OrionM1.dll',0
+enginePath:         DB 'H:/Bench/FontBen/'
 engineBasename:
     DS MAX_PATH-($-enginePath),0 ; DOS copies the full path buffer.

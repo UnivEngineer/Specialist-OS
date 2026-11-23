@@ -60,6 +60,21 @@ editorShowFileTooLarge:
         LD HL,editorFileTooLargeMessage
         JP editorErrorModal
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Инициализировать документ и обработать стартовый путь.
+;
+; вход:
+;   de = аргументы ASCIIZ. Префикс -NC подавляет баннер в MAIN; графический вызов EXEC
+;   передаёт путь напрямую и использует ebQuiet.
+;
+; выход:
+;   editorStart получает загруженный или пустой документ. MAIN регистрирует буфер в DOS
+;   до первой записи. При нехватке памяти, недопустимом размере или пути к каталогу
+;   показан диалог и вызван bios_reboot.
+;----------------------------------------------------------------------------
+
 openCommandLineFile:
         ; NC already drew its launch notice. A banked graphical caller
         ; supplies a plain path; the COM handoff prefixes it with -NC.
@@ -185,9 +200,9 @@ editorMemoryTooSmall:
         LD HL,editorMemoryMessage
         CALL editorErrorModal
         JP bios_reboot
-editorMemoryMessage: DB 'No memory for text buffer.',0
-editorFileTooLargeMessage: DB 'File does not fit in memory.',0
-editorDirectoryMessage: DB 'Path is a directory.',0
+editorMemoryMessage:        DB 'No memory for text buffer.',0
+editorFileTooLargeMessage:  DB 'File does not fit in memory.',0
+editorDirectoryMessage:     DB 'Path is a directory.',0
 
 editorControlKey:
         CP 0Ch

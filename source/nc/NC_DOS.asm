@@ -5,6 +5,22 @@
 DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
     ENDIF
     ORG DRIVER_ORIGIN
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сделать банковую версию Commander текущей оболочкой.
+;
+; вход:
+;   Запуск из DOS. Диск из командной строки определяет, где искать NC_CORE.DLL. Ключ
+;   NC_BANK_KEY идентифицирует уже зарегистрированную оболочку.
+;
+; выход:
+;   При успехе a = 0, cf = 0. Ядро оболочки загружено и зарегистрировано либо выбран
+;   имеющийся резидент. При отказе выводится код, AF ошибки восстанавливается для
+;   возврата.
+;----------------------------------------------------------------------------
+
 entry:
     ld hl,copyright
     MXOS_CALL MXOS_BIOS_PRINT_STRING
@@ -63,10 +79,10 @@ failed:
     MXOS_CALL MXOS_BIOS_GETCH
     pop af
     ret
-copyright: DB 'Commander 3.0 BANK (C) Omsk/SPb 1992-2026',0
-corePath: DB 'A:',05Ch,'NC_CORE.DLL',0
-message: DB 'NC BANK: load/call error ',0
-coreHandle: DW 0
-registers: DS MX_REGS,0
+copyright:      DB 'Commander 3.0 BANK (C) Omsk/SPb 1992-2026',0
+corePath:       DB 'C:',05Ch,'DOS',05Ch,'NC_CORE.DLL',0
+message:        DB 'NC BANK: load/call error ',0
+coreHandle:     DW 0
+registers:      DS MX_REGS,0
     INCLUDE "../include/app-drive.inc"
     END

@@ -68,7 +68,7 @@ ROWS = """
 90 22 00 08 00 22 00 08 00
 91 2a 15 2a 15 2a 15 2a 15
 92 1d 3f 37 3f 1d 3f 37 3f
-93 06 09 08 08 08 08 08 08
+93 02 05 04 04 04 04 04 04
 94 00 00 1e 1e 1e 1e 00 00
 95 00 00 0c 1e 1e 0c 00 00
 96 07 04 04 04 14 0c 04 00
@@ -76,7 +76,7 @@ ROWS = """
 98 02 04 08 10 08 04 1e 00
 99 10 08 04 02 04 08 1e 00
 9a 00 00 00 00 00 00 00 00
-9b 08 08 08 08 08 08 24 18
+9b 04 04 04 04 04 04 14 08
 9c 0c 12 12 0c 00 00 00 00
 9d 0c 12 04 08 1e 00 00 00
 9e 00 00 00 0c 0c 00 00 00
@@ -101,9 +101,9 @@ b0 14 14 14 17 14 14 14 14
 b1 14 14 17 10 17 14 14 14
 b2 08 08 38 08 38 08 08 08
 b3 0a 1f 10 1e 10 10 1f 00
-b4 14 14 14 3c 14 14 14 14
+b4 14 14 14 34 14 14 14 14
 b5 14 14 34 04 34 14 14 14
-b6 00 00 3f 08 3f 08 08 08
+b6 00 00 3f 00 3f 08 08 08
 b7 00 00 00 3f 14 14 14 14
 b8 00 00 3f 00 37 14 14 14
 b9 08 08 3f 08 3f 00 00 00
@@ -137,6 +137,9 @@ def main():
             # Match this font's own lowercase e and uppercase E.
             font[0xa3*8:0xa4*8] = bytes.fromhex('0a 00 0e 11 1f 10 0e 00')
             font[0xb3*8:0xb4*8] = bytes.fromhex('0a 1f 10 1e 10 10 1f 00')
+            # This face keeps its own junctions for these two frame glyphs.
+            font[0xb4*8:0xb5*8] = bytes.fromhex('14 14 14 3c 14 14 14 14')
+            font[0xb6*8:0xb7*8] = bytes.fromhex('00 00 3f 08 3f 08 08 08')
         assert font[0x20*8:0x80*8] == original[0x20*8:0x80*8]
         # ASCII 7Ch is vertical bar, including the italic source; the old
         # italic asset incorrectly used an empty box at this position.

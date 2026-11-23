@@ -14,12 +14,17 @@ diskDriver:
     push bc
     push de
     push hl
-    ld a,(v_drive)
-    cp 7
+    call dosPhysicalDrive
+    cp FLOPPY_DRIVE
+    jp z,kernelFloppyIO
+    cp EXTERNAL_DRIVE
     jp z,kernelExternalIO
-    or a
+    cp SYSTEM_DRIVE
     jp nz,kernelRamIO
     call dosSystemDriver
+    jp kernelDiskDone
+kernelFloppyIO:
+    call DOS_FLOPPY_ADDR
     jp kernelDiskDone
 kernelExternalIO:
     call fastDriver
@@ -36,6 +41,34 @@ diskDriverDummy:
     ld bc,0
     ld hl,v_diskInfo
     or a
+    ret
+; Current DOS letter -> stable local transport selector in A.
+; AF changes, BC/DE/HL stay intact. C: and B: use their own indices.
+dosPhysicalDrive:
+    push hl
+    ld a,(v_drive)
+    cp SYSTEM_DRIVE
+    jp z,dosPhysicalDone
+    ld hl,kernelRamDrive
+    cp (hl)
+    jp nz,dosPhysicalExternal
+    ld a,RAM_DRIVE
+    jp dosPhysicalDone
+dosPhysicalExternal:
+    ld hl,kernelExternalDrive
+    cp (hl)
+    jp nz,dosPhysicalFloppy
+    ld a,EXTERNAL_DRIVE
+    pop hl
+    ret
+dosPhysicalFloppy:
+    dec hl
+    cp (hl)
+    ld a,0FFh
+    jp nz,dosPhysicalDone
+    ld a,FLOPPY_DRIVE
+dosPhysicalDone:
+    pop hl
     ret
     INCLUDE "ramdisk.inc"
     INCLUDE "romproxy.inc"

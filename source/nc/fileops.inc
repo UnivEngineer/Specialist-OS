@@ -1,4 +1,18 @@
 ; All long operations use FILEOPS; no screen clear or recursive UI code.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выполнить файловую операцию из NC через пошаговый интерфейс FILEOPS.
+;
+; вход:
+;   a = CLI_OP_DELETE, CLI_OP_COPY или CLI_OP_MOVE; vars.copyRequest заполнен. Вход
+;   ncFileopsMode принимает a = FILEOPS_* напрямую.
+;
+; выход:
+;   При успехе или отмене a = 0, cf = 0. При ошибке a = код, cf = 1. Цикл обслуживает
+;   диалоги и клавиши.
+;----------------------------------------------------------------------------
+
 ncFileops:
     cp CLI_OP_DELETE
     ld b,FILEOPS_DELETE
@@ -105,6 +119,19 @@ ncFileopsAbort:
     pop af
     scf
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выполнить один запрос DOS FILEOPS для задания NC.
+;
+; вход:
+;   a = операция FILEOPS_*; vars.fileJob содержит описание задания.
+;
+; выход:
+;   DOS получает hl = vars.fileJob. После вызова задание и AF содержат результат
+;   FILEOPS. EXEC предварительно выводит очередь графики.
+;----------------------------------------------------------------------------
+
 ncFileopsCall:
     IF NC_BANKED
     call ncBankFlush
@@ -113,6 +140,20 @@ ncFileopsCall:
     MXOS_CALL MXOS_DOS_FILEOPS
     ret
 ; Only newly pressed keys activate buttons; held Enter from the input is ignored.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выбрать следующий шаг задания по клавиатуре и фазе FILEOPS.
+;
+; вход:
+;   vars.fileJob.phase = фаза. Учитывается фокус видимого окна подготовки. MAIN
+;   сканирует клавиатуру BIOS, EXEC опрашивает io_bankKeyPoll.
+;
+; выход:
+;   a = FILEOPS_STEP, FILEOPS_SKIP_PREPARE или FILEOPS_CANCEL. Повторы клавиши
+;   пропускаются; флаги не являются результатом.
+;----------------------------------------------------------------------------
+
 ncProgressInput:
     IF NC_BANKED
     ld hl,ncInputState
@@ -659,6 +700,19 @@ ncProgressIntegerReady:
     ex de,hl
     jp ncProgressAppendWord
 ncProgressCountShift: DB 0
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Начать новую строку состояния файловой операции.
+;
+; вход:
+;   ncProgressText доступен для записи. Регистровых параметров нет.
+;
+; выход:
+;   hl и ncProgressOut указывают на начало пустой ASCIIZ-строки. af, bc и de сохранены.
+;----------------------------------------------------------------------------
+
 ncProgressTextBegin:
     ld hl,ncProgressText
     ld (ncProgressOut),hl
@@ -684,6 +738,21 @@ ncProgressAppendDone:
     ex de,hl
     ld (ncProgressOut),hl
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Дописать символ в строку состояния файловой операции.
+;
+; вход:
+;   a = символ; ncProgressOut указывает на терминатор, в буфере есть место ещё для
+;   одного байта и нуля.
+;
+; выход:
+;   На прежнее место нуля записан символ. hl и ncProgressOut указывают на новый нуль.
+;   af, bc и de сохранены.
+;----------------------------------------------------------------------------
+
 ncProgressAppendChar:
     ld hl,(ncProgressOut)
     ld (hl),a
@@ -710,6 +779,20 @@ ncProgressShiftByte:
     dec b
     jp nz,ncProgressShiftByte
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вычесть два 16-битных счётчика.
+;
+; вход:
+;   hl = уменьшаемое, de = вычитаемое.
+;
+; выход:
+;   hl = разность по модулю 65536, a = старший байт результата, cf = заём. bc и de
+;   сохранены.
+;----------------------------------------------------------------------------
+
 ncProgressSubtract:
     ld a,l
     sub e
@@ -718,40 +801,40 @@ ncProgressSubtract:
     sbc a,d
     ld h,a
     ret
-ncProgressTitle: DB 'Copying files...',0
-ncProgressMoveTitle: DB 'Moving files...',0
-ncProgressPrepareTitle: DB 'Preparing to copy files...',0
-ncProgressPrepareMoveTitle: DB 'Preparing to move files...',0
-ncProgressDeleteTitle: DB 'Deleting files...',0
-ncProgressCancel: DB 'Cancel [Esc]',0
-ncProgressAbort: DB 'Abort [A]',0
-ncProgressAbortEsc: DB 'Abort [Esc]',0
-ncProgressFilesLabel: DB 'Files: ',0
-ncProgressSizeLabel: DB 'Size: ',0
-ncProgressSlash: DB '/',0
-ncProgressActivityX: DB 0
-ncProgressB: DB ' B',0
-ncProgressKiBText: DB ' KiB',0
-ncProgressMiB: DB ' MiB',0
-ncProgressVisible: DB 0
-ncProgressTimer: DB 0
-ncProgressPhase: DB 0FFh
-ncProgressChoice: DB 0
+ncProgressTitle:                DB 'Copying files...',0
+ncProgressMoveTitle:            DB 'Moving files...',0
+ncProgressPrepareTitle:         DB 'Preparing to copy files...',0
+ncProgressPrepareMoveTitle:     DB 'Preparing to move files...',0
+ncProgressDeleteTitle:          DB 'Deleting files...',0
+ncProgressCancel:               DB 'Cancel [Esc]',0
+ncProgressAbort:                DB 'Abort [A]',0
+ncProgressAbortEsc:             DB 'Abort [Esc]',0
+ncProgressFilesLabel:           DB 'Files: ',0
+ncProgressSizeLabel:            DB 'Size: ',0
+ncProgressSlash:                DB '/',0
+ncProgressActivityX:            DB 0
+ncProgressB:                    DB ' B',0
+ncProgressKiBText:              DB ' KiB',0
+ncProgressMiB:                  DB ' MiB',0
+ncProgressVisible:              DB 0
+ncProgressTimer:                DB 0
+ncProgressPhase:                DB 0FFh
+ncProgressChoice:               DB 0
     IF !NC_BANKED
 ncProgressKey: DB 0
     ENDIF
-ncProgressPercent: DB 0
-ncProgressStart: DW 0
-ncProgressOut: DW 0
-ncProgressBarWidth: DB 0
-ncProgressLastPath: DS 61,0FFh
-ncProgressUnits: DW 0
-ncProgressDenom: DS 4,0
-ncProgressNumer: DS 4,0
-ncProgressNumber: DS 4,0
-ncProgressRemainder: DS 4,0
+ncProgressPercent:      DB 0
+ncProgressStart:        DW 0
+ncProgressOut:          DW 0
+ncProgressBarWidth:     DB 0
+ncProgressLastPath:     DS 61,0FFh
+ncProgressUnits:        DW 0
+ncProgressDenom:        DS 4,0
+ncProgressNumer:        DS 4,0
+ncProgressNumber:       DS 4,0
+ncProgressRemainder:    DS 4,0
 ncProgressText EQU vars.displayPath
-ncProgressPath EQU vars.pathArg ; Reuse the existing modal path buffer.
+ncProgressPath EQU vars.pathArg  ; Reuse the existing modal path buffer.
     IF NC_BANKED
 ncProgressReadClock = io_bankClockRead
     ELSE

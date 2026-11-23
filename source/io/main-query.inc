@@ -2,9 +2,9 @@
 ; DISK_INFO и строки принадлежат DOS; указатель MAIN наружу не передаётся.
 mainIoQuery:
     ld b,a
-    xor a
+    ld a,SYSTEM_DRIVE
     call bios_blockIO
     ld hl,0
     ret
 mainIoRequest = io_vars.mainIoRequest
-mainIoCopy = io_vars.mainIoCopy
+mainIoCopy    = io_vars.mainIoCopy

@@ -22,10 +22,10 @@
     DEFINE bios_keyScan io_bankKeyScan
     DEFINE bios_diskDriver ncBankDiskInfo
     DEFINE bios_reboot ncBankReturn
-ncBankQueue = 0D000h
-ncBankCursor = 0DF00h
-ncBankInverse = 0DF02h
-ncBankCursorCfg = 0DF04h
-ncBankRamPages = 0DF05h
+ncBankQueue      = 0D000h
+ncBankCursor     = 0DF00h
+ncBankInverse    = 0DF02h
+ncBankCursorCfg  = 0DF04h
+ncBankRamPages   = 0DF05h
 ncBankFontHeader = 0DF08h
     DEFINE UI_BUTTON_RECOLOR ncBankRecolor

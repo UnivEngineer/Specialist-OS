@@ -70,6 +70,20 @@ ngHelpSetActive:
     ld (bios_vars.inverse),hl
     pop af
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Снять координаты курсора и атрибуты вывода перед работой со справкой.
+;
+; вход:
+;   В MAIN доступны слова bios_vars.cursorY и bios_vars.inverse.
+;
+; выход:
+;   Слова скопированы в ngHelpCursor и ngHelpInverse соответственно. af, bc и de
+;   сохранены, hl содержит последнее считанное слово.
+;----------------------------------------------------------------------------
+
 ngHelpSaveCursor:
     ld hl,(bios_vars.cursorY)
     ld (ngHelpCursor),hl
@@ -83,6 +97,19 @@ ngHelpFrame:
     ld (bios_vars.inverse+1),a
     ld a,(FONT_ENGINE_HEADER+5)
     jp uiModalOpen
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выбрать аппаратный цвет текста справки.
+;
+; вход:
+;   Параметров нет.
+;
+; выход:
+;   В IO_COLOR записано 07h, a = 07h. bc, de, hl и флаги сохранены.
+;----------------------------------------------------------------------------
+
 ngHelpColor:
     ld a,007h
     ld (IO_COLOR),a
@@ -129,14 +156,14 @@ ngHelpClose:
     ld a,(ngHelpPalette)
     ld (IO_COLOR),a
     jp uiBitmapRestore
-ngHelpActive: DB 0
-ngHelpPixels: DW 0
-ngHelpScreen: DW 0
-ngHelpSize: DW 0
-ngHelpCursor: DW 0
-ngHelpInverse: DW 0
-ngHelpPalette: DB 0
-ngHelpBuffer: DS MAX_PATH,0
+ngHelpActive:   DB 0
+ngHelpPixels:   DW 0
+ngHelpScreen:   DW 0
+ngHelpSize:     DW 0
+ngHelpCursor:   DW 0
+ngHelpInverse:  DW 0
+ngHelpPalette:  DB 0
+ngHelpBuffer:   DS MAX_PATH,0
 
     INCLUDE "../include/ui-text-align.inc"
     INCLUDE "../include/ui-button.inc"

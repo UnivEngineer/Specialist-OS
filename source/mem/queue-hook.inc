@@ -2,7 +2,7 @@
 ; Bind patches this one opcode. The callback may clobber all CPU registers.
     ASSERT $ <= MEM_ROUTE_STATE
     DS MEM_ROUTE_STATE-$,0
-    DS 6,0 ; handle, entry, target bank, allocation owner
+    DS 6,0  ; handle, entry, target bank, allocation owner
     ASSERT $ == MEM_QUEUE_HOOK
     DW 0 ; per-bank callback
 bankQueueBefore:

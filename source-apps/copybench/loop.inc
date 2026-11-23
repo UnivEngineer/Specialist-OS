@@ -6,7 +6,7 @@
 ramdBuffer = 0FFC3h
 ramdSource = 0FFD3h
 ramdTarget = 0FFD5h
-ramdCount = 0FFD7h
+ramdCount  = 0FFD7h
 ramdLength = 0FFD8h
 driverBufferedStart:
             jp ramdBufferedRead

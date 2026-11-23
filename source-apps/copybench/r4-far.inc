@@ -149,5 +149,5 @@ bankCopyWindow:
     ld a,0
     ld (BANK_IO_RAM),a
     jp bankCopyWrite4
-bankCopyRequest: DS 8,0
-bankCopySavedWindow: DS 32,0
+bankCopyRequest:        DS 8,0
+bankCopySavedWindow:    DS 32,0

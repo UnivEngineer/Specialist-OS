@@ -165,8 +165,8 @@ editorSelectionPixelLoop:
         DEC B
         JP NZ,editorSelectionPixelLoop
         RET
-editorSelectionRow: DW 0
-editorSelectionLimit: DW 0
-editorSelectionTerm: DB 0
-editorSelectionLeft: DB 0
-editorSelectionRight: DB 0
+editorSelectionRow:     DW 0
+editorSelectionLimit:   DW 0
+editorSelectionTerm:    DB 0
+editorSelectionLeft:    DB 0
+editorSelectionRight:   DB 0

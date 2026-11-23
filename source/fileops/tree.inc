@@ -2,8 +2,8 @@
 ; и чтения исходного дескриптора; прежний диск лежит в стеке.
 ; Системный стек не растёт с глубиной: кадры содержат кластеры и индекс.
 ; Данные файлов идут через явный буфер исходного FILE_COPY_REQUEST.
-TREE_DEPTH EQU ENUM_MAX_DEPTH
-TREE_FRAME EQU 8
+TREE_DEPTH    EQU ENUM_MAX_DEPTH
+TREE_FRAME    EQU 8
 TREE_CLI_SAVE EQU cliOldDirectory+2-cliSavedDirectories
 treeCopyStart:
     pop af
@@ -415,13 +415,13 @@ treeFindLoop:
     jp nz,fileFindAny
     ld (hl),0E5h
     jp fileFindAny
-treeOldDrive: DB 0
-treeCapacity: DB 0
-treeDepth: DB 0
-treeFrame: DW 0
-treeChild: DW 0
-treeRoot: FILE_COPY_REQUEST
-treeRequest: FILE_COPY_REQUEST
-treeCliSave: DS TREE_CLI_SAVE,0
-treeScratch: DS 11,0
-treeFrames: DS TREE_FRAME*(TREE_DEPTH+1),0
+treeOldDrive:   DB 0
+treeCapacity:   DB 0
+treeDepth:      DB 0
+treeFrame:      DW 0
+treeChild:      DW 0
+treeRoot:       FILE_COPY_REQUEST
+treeRequest:    FILE_COPY_REQUEST
+treeCliSave:    DS TREE_CLI_SAVE,0
+treeScratch:    DS 11,0
+treeFrames:     DS TREE_FRAME*(TREE_DEPTH+1),0

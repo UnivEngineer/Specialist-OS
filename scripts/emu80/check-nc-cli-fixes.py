@@ -55,7 +55,7 @@ try:
     tap('f7');text('SUBX');tap('backspace');tap('d');tap('home');tap('end')
     assert m.m.read(n['vars.input'],128).split(b'\0')[0].upper()==b'SUBD'
     m.m.screenshot(O/'mkdir.png');tap('enter');m.m.call('emu_run_for',ms=1000)
-    quiet('COPY A:/README.TXT B:/TEST.TXT')
+    quiet('COPY C:/README.TXT B:/TEST.TXT')
     tap('home');tap('down')
     m.m.call('kbd_send',keys=['shift'],action='press');m.m.call('emu_run_for',ms=300)
     tap('f6');m.m.call('kbd_send',keys=['shift'],action='release')
@@ -74,8 +74,8 @@ try:
     m.m.screenshot(O/'move-result.png')
     # Дерево: COPY RAM -> Flash, затем MOVE Flash -> RAM с удалением источника.
     quiet('CD B:/');quiet('MD TREE');quiet('MD TREE/CHILD')
-    quiet('COPY A:/README.TXT B:/TREE/CHILD/ONE.TXT')
-    quiet('COPY A:/README.TXT B:/TREE/CHILD/TWO.TXT')
+    quiet('COPY C:/README.TXT B:/TREE/CHILD/ONE.TXT')
+    quiet('COPY C:/README.TXT B:/TREE/CHILD/TWO.TXT')
     quiet('COPY B:/TREE A:/TREE')
     quiet('MOVE A:/TREE B:/MOVED')
     quiet('CD B:/MOVED/CHILD')

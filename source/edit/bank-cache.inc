@@ -1,8 +1,21 @@
 ; EDITCORE owns the row metadata and registers the glyph storage in MAIN.
 ; Tags contain line DW, continuation DW, unused width, older/newer indices.
 ; The last byte links entries with the same hash.
-EDIT_SCAN_BYTES = 32
+EDIT_SCAN_BYTES          = 32
 EDIT_PREFETCH_LEFT_LIMIT = 96
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Зарегистрировать графическую область и кэш строк EDITCORE в MAIN.
+;
+; вход:
+;   UI_GFX загружен в MAIN; ширина шрифта доступна по EDIT_MAIN_FONT_WIDTH.
+;
+; выход:
+;   cf = 0 при успехе, ebCacheStride и ebCacheRows заданы. При нехватке места кэш может
+;   иметь нулевую ёмкость. При отказе обязательной регистрации cf = 1, a = код.
+;----------------------------------------------------------------------------
 
 ebRegisterWorkspace:
     ld hl,EDIT_MAIN_FONT_WIDTH
@@ -72,6 +85,19 @@ ebWorkspaceFailed:
     pop af
     ret
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сбросить кэш подготовленных строк и фоновую подготовку в банковом редакторе.
+;
+; вход:
+;   Рабочие переменные оверлея доступны в текущей странице.
+;
+; выход:
+;   ebValid, ebPrefetchPhase и ebBelowValid обнулены. Голова и хвост списка LRU равны
+;   0FFh. Регистры и флаги сохранены.
+;----------------------------------------------------------------------------
+
 ebInvalidateRows:
     push af
     xor a
@@ -106,23 +132,23 @@ ebTimesThree:
     add hl,bc
     ret
 
-ebCacheRows: DB 0
-ebCacheStride: DB 0
-ebValid: DB 0
-ebOldest: DB 0FFh
-ebNewest: DB 0FFh
-ebSlotIndex: DB 0
-ebHashNext: DB 0
-ebLeft: DW 0
-ebLeftHigh: DB 0
-ebRowOp: DB 0
-ebSlotAddress: DW 0
-ebPrefetchPhase: DB 0 ; 0=rebase, 1=forward, 2=backward, FF=done
-ebPrefetchSkip: DB 0
-ebPrefetchLeft: DB 0
-ebPrefetchTop: DW 0
-ebScanPointer: DW 0
-ebBelow: DW 0
-ebBelowTop: DW 0
-ebBelowValid: DB 0
-ebPrefetched: DW 0
+ebCacheRows:        DB 0
+ebCacheStride:      DB 0
+ebValid:            DB 0
+ebOldest:           DB 0FFh
+ebNewest:           DB 0FFh
+ebSlotIndex:        DB 0
+ebHashNext:         DB 0
+ebLeft:             DW 0
+ebLeftHigh:         DB 0
+ebRowOp:            DB 0
+ebSlotAddress:      DW 0
+ebPrefetchPhase:    DB 0    ; 0=rebase, 1=forward, 2=backward, FF=done
+ebPrefetchSkip:     DB 0
+ebPrefetchLeft:     DB 0
+ebPrefetchTop:      DW 0
+ebScanPointer:      DW 0
+ebBelow:            DW 0
+ebBelowTop:         DW 0
+ebBelowValid:       DB 0
+ebPrefetched:       DW 0

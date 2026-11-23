@@ -17,17 +17,14 @@
     IFNDEF NC_BANKED
 NC_BANKED = 0
     ENDIF
-    IFNDEF NC_STATUS_DEFER
-NC_STATUS_DEFER = 0
-    ENDIF
     IF NC_BANKED
 NC_CATALOG_SLOTS = 4
-IMAGE_FLAGS = IMAGE_FLAG_BANK
+IMAGE_FLAGS      = IMAGE_FLAG_BANK
     INCLUDE "bank-api.inc"
     INCLUDE "bank-bindings.inc"
     ELSE
 NC_CATALOG_SLOTS = 2
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_FLAGS      = IMAGE_FLAG_MAIN
     ENDIF
 
     INCLUDE "../include/ui.inc"
@@ -397,6 +394,12 @@ aTypeROM:           DB "ROM",0
 aTypeRAM:           DB "RAM",0
 
 aTypeFlash:         DB "Flash",0
+aTypeSystemFlash:       DB "MX System Flash",0
+aTypeSystemRom:         DB "MX System ROM",0
+aTypeVv55Flash:         DB "MX VV55 Flash",0
+aTypeVv55Rom:           DB "MX VV55 ROM",0
+
+aTypeFloppy:        DB "Floppy",0
 
 aDriverUnknown:     DB "n/a",0,0
 
@@ -408,7 +411,7 @@ aNotFormatted:      DB " ","is not formatted",0
 
 
 
-aEditor:            DB "A:",05Ch,"EDIT.COM -NC",0Dh      ; терминатором тут должно быть 0Dh
+aEditor:            DB "C:",05Ch,"DOS",05Ch,"EDIT.COM -NC",0Dh      ; терминатором тут должно быть 0Dh
 
 
 
@@ -566,7 +569,7 @@ panelA_dirLow       DB    0
 
 panelB_dirLow       DB    0
 
-panelA_drive        DB    0     ; номер диска панели A
+panelA_drive        DB    SYSTEM_DRIVE     ; номер диска панели A
 
 panelB_drive        DB    7     ; номер диска панели B
 
@@ -608,109 +611,109 @@ stateEnd:           ; адрес конца блока переменных со
 
     STRUCT NC_VARIABLES
 
-panelA_filesCnt DB    0
+panelA_filesCnt     DB                 0
 
-panelB_filesCnt DB    0
+panelB_filesCnt     DB                 0
 
-path           BLOCK MAX_PATH,0
+path                BLOCK              MAX_PATH,0
 
-pathA          BLOCK MAX_PATH,0 ; Полный путь левой панели.
+pathA               BLOCK              MAX_PATH,0           ; Полный путь левой панели.
 
-pathB          BLOCK MAX_PATH,0 ; Полный путь правой панели.
+pathB               BLOCK              MAX_PATH,0           ; Полный путь правой панели.
 
-pathValidA     DB 0
+pathValidA          DB                 0
 
-pathValidB     DB 0
+pathValidB          DB                 0
 
-pathDriveA     DB 0
+pathDriveA          DB                 0
 
-pathDriveB     DB 0
+pathDriveB          DB                 0
 
-pathLowA       DB 0
+pathLowA            DB                 0
 
-pathLowB       DB 0
+pathLowB            DB                 0
 
-pathHighA      DB 0
+pathHighA           DB                 0
 
-pathHighB      DB 0
+pathHighB           DB                 0
 
-drawnLeftA     DB 0             ; Занятые строки в первой колонке.
+drawnLeftA          DB                 0                    ; Занятые строки в первой колонке.
 
-drawnLeftB     DB 0
+drawnLeftB          DB                 0
 
-drawnRightA    DB 0             ; Занятые строки во второй колонке.
+drawnRightA         DB                 0                    ; Занятые строки во второй колонке.
 
-drawnRightB    DB 0
+drawnRightB         DB                 0
 
-newRows        DB 0             ; Временный размер видимого списка.
+newRows             DB                 0                    ; Временный размер видимого списка.
 
-rowColors      BLOCK 6*P_FILE_LIST_H,0 ; Displayed cells, including spare columns.
+rowColors           BLOCK              6*P_FILE_LIST_H,0    ; Displayed cells, including spare columns.
 
-pathArg        BLOCK MAX_PATH,0
+pathArg             BLOCK              MAX_PATH,0
 
-displayPath    BLOCK MAX_PATH,0
+displayPath         BLOCK              MAX_PATH,0
 
-fileListPtr     DW    0         ; Видимое окно индексной таблицы активной панели.
+fileListPtr         DW                 0                    ; Видимое окно индексной таблицы активной панели.
 
-cacheValidA     DB    0
+cacheValidA         DB                 0
 
-cacheValidB     DB    0
+cacheValidB         DB                 0
 
-cacheSlotA      DB    0FFh     ; Номер общего каталога; FF — ещё не назначен.
+cacheSlotA          DB                 0FFh                 ; Номер общего каталога; FF — ещё не назначен.
 
-cacheSlotB      DB    0FFh
+cacheSlotB          DB                 0FFh
 
-panelFrameA     DB    0         ; 1 while the painted file panel is truncated.
+panelFrameA         DB                 0                    ; 1 while the painted file panel is truncated.
 
-panelFrameB     DB    0
+panelFrameB         DB                 0
 
-cacheSortA      DB    0
+cacheSortA          DB                 0
 
-cacheSortB      DB    0
+cacheSortB          DB                 0
 
-fileColorRules  BLOCK 4*32+1,0 ; Runtime NC.CFG extension rules, terminated by 0.
+fileColorRules      BLOCK              4*32+1,0             ; Runtime NC.CFG extension rules, terminated by 0.
 
-savedSelectedA  BLOCK 13,0
+savedSelectedA      BLOCK              13,0
 
-savedSelectedB  BLOCK 13,0
+savedSelectedB      BLOCK              13,0
 
-restoreSelectedA DB 0
+restoreSelectedA    DB                 0
 
-restoreSelectedB DB 0
+restoreSelectedB    DB                 0
 
-cmdLinePos      DW    0
+cmdLinePos          DW                 0
 
-cmdLineEnd      DW    0
+cmdLineEnd          DW                 0
 
-cmdTextPos      DW    0         ; Начало видимой части команды после приглашения.
+cmdTextPos          DW                 0                    ; Начало видимой части команды после приглашения.
 
-cmdCapacity     DB    0         ; Число видимых символов команды.
+cmdCapacity         DB                 0                    ; Число видимых символов команды.
 
-cmdOffset       DB    0         ; Смещение видимого окна в буфере команды.
+cmdOffset           DB                 0                    ; Смещение видимого окна в буфере команды.
 
-chooseDrive     DB    0
+chooseDrive         DB                 0
 
-copyRequest     FILE_COPY_REQUEST
+copyRequest         FILE_COPY_REQUEST
 
-fileJob         FILEOPS_JOB
+fileJob             FILEOPS_JOB
 
-scrollCursorKept DB   0         ; Старый курсор остаётся на краю при шаге 1.
+scrollCursorKept    DB                 0                    ; Старый курсор остаётся на краю при шаге 1.
 
-scrollRows      DB    0         ; Модуль изменения начала списка (1..255).
+scrollRows          DB                 0                    ; Модуль изменения начала списка (1..255).
 
-scrollPixels    DB    0         ; Высота новых строк, не более одной колонки.
+scrollPixels        DB                 0                    ; Высота новых строк, не более одной колонки.
 
-scrollRemain    DB    0         ; Высота сохраняемой части колонки.
+scrollRemain        DB                 0                    ; Высота сохраняемой части колонки.
 
-diskInfoPtr     DW    0         ; адрес структуны DISK_INFO
+diskInfoPtr         DW                 0                    ; адрес структуны DISK_INFO
 
-driveCount     DB    0         ; число установленных дисковых драйверов
+driveCount          DB                 0                    ; число установленных дисковых драйверов
 
-driveList      BLOCK 8, 0     ; номера дисков с установленным драйвером
+driveList           BLOCK              8, 0                 ; номера дисков с установленным драйвером
 
 
 
-input           BLOCK MAX_PATH, 0
+input               BLOCK              MAX_PATH, 0
 
     ENDS
 
@@ -790,7 +793,7 @@ NC_MIN_END = FILE_CACHE_A + NC_CATALOG_SLOTS * (NC_MIN_CATALOG_CAPACITY + 1) * F
     IF !NC_BANKED
 ; Fixed state, toolbar, indices and shared sort/dialog scratch are ordinary
 ; image BSS. Only the two variable-capacity catalogs use the MAIN heap.
-IMAGE_BSS_SIZE = FILE_CACHE_A-vars
+IMAGE_BSS_SIZE      = FILE_CACHE_A-vars
 IMAGE_MIN_HEAP_SIZE = NC_MIN_END-FILE_CACHE_A
     ENDIF
 

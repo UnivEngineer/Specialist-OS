@@ -1,12 +1,12 @@
 """Link each one-shot installer against the exclusive upper arena boundary."""
 from pathlib import Path
 import runpy,sys,tempfile
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).absolute().parents[2]
 cpu_helpers = __import__('runpy').run_path(str(ROOT/'scripts/images/cpu.py'))
 cpu_format = cpu_helpers['format_cpu']
 def cpu_fields(path): return cpu_helpers['fields_from_symbols'](path.read_text('utf-8'))
 def build(source):
-    source=Path(source).resolve();name=source.stem
+    source=Path(source).absolute();name=source.stem
     h=runpy.run_path(str(ROOT/'scripts/build/pack-dos.py'))
     k=h['symbols'](ROOT/'bin/banked/KERNEL.sym')
     # Never publish the deliberately wrong measurement origin to image builders.

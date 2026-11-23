@@ -1,7 +1,7 @@
 ; Текстовый отчёт строится в отдельном буфере после всех измерений.
 ; Открытие, запись и закрытие — штатные fopen/fwrite/fclose через FILE_HANDLE.
 REPORT_BUFFER = 07C00h
-REPORT_LIMIT = 08B00h
+REPORT_LIMIT  = 08B00h
 matrixSaveReport:
     ld hl,reportFailedText
     ld (reportMessage),hl
@@ -47,7 +47,11 @@ reportBuilt:
     ld e,0
     MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (reportDrive),a
-    ld a,1
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret c
+    ld a,e
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     jp c,reportRestoreDrive
     ld a,DIR_OP_GET

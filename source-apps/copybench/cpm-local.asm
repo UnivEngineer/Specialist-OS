@@ -35,13 +35,13 @@ windowReady:
     ld a,1
     ld (0FFDFh),a
     ld a,(request)
-    call pair
+    call pagePortPair
     ld (paramsSource),hl
     ld a,(request+3)
-    call pair
+    call pagePortPair
     ld (paramsDest),hl
     ld a,(callerPage)
-    call pair
+    call pagePortPair
     ld (paramsReturn),hl
     ld a,h
     ld (cloneReturnValue+1),a
@@ -95,7 +95,7 @@ countReady:
 
 ; Подготовка обеих локальных копий выполняется CPU и входит в замер.
 clone:
-    call pair
+    call pagePortPair
     ld a,h
     ld (0FFC0h+cloneValue-cloneTemplate+1),a
     ld a,l
@@ -157,7 +157,7 @@ bytes:
     dec b
     jp nz,bytes
     ret
-pair:
+pagePortPair:
     or a
     jp m,romPair
     ld h,a
@@ -175,12 +175,12 @@ request: DB 0
     DW 0
     DB 0
     DW 0,0
-savedSP: DW 0
-callerPage: DB 0
-paramsSource: DW 0
-paramsDest: DW 0
-paramsReturn: DW 0
-commandShadow: DS 32,0
+savedSP:        DW 0
+callerPage:     DB 0
+paramsSource:   DW 0
+paramsDest:     DW 0
+paramsReturn:   DW 0
+commandShadow:  DS 32,0
 frontEnd:
     ASSERT $ < 07800h
 tailImage:
@@ -246,10 +246,10 @@ index = index+1
     ld (hl),a
     jp returned
 tailParams:
-tailSource: DW 0
-tailDest: DW 0
-tailReturn: DW 0
-tailCount: DW 0
+tailSource:     DW 0
+tailDest:       DW 0
+tailReturn:     DW 0
+tailCount:      DW 0
 tailEnd:
     ASSERT $ <= 0FFC0h
     ENT

@@ -194,7 +194,7 @@ column:
     xor (hl)
     ld (hl),a
     ret
-text: DW 0
-codes: DS 4,0
-remaining: DB 0
+text:           DW 0
+codes:          DS 4,0
+remaining:      DB 0
     ENDMODULE

@@ -32,9 +32,9 @@ try {
     $imageFlags = [Convert]::ToUInt16($Matches[1], 16)
     [IO.File]::WriteAllText((Join-Path $root 'bin/DISKBEN.cpu'), (New-CpuDescriptor -Load 0 -Flags $imageFlags -Fields (Get-CpuFieldsFromSymbols $symbols)), [Text.Encoding]::ASCII)
     foreach ($worker in @(
-        @{ Name='DISKBANK'; Define='-DWORKER_BANK=1'; Load='C000'; Flags='02' },
-        @{ Name='DISKDOS'; Define='-DWORKER_DOS=1'; Load='C000'; Flags='01' },
-        @{ Name='DISKMAIN'; Define='-DWORKER_MAIN=1'; Load='2100'; Flags='04' }
+        @{ Name='DISKBANK'; Define='-DWORKER_BANK=1'; Flags='02' },
+        @{ Name='DISKDOS'; Define='-DWORKER_DOS=1'; Flags='01' },
+        @{ Name='DISKMAIN'; Define='-DWORKER_MAIN=1'; Flags='04' }
     )) {
         $name = $worker.Name
         & (Join-Path $root 'tasm/sjasmplus.exe') --i8080 -Wno-rdlow $worker.Define "--lst=build/$name.lst" "--sym=build/$name.sym" "--raw=build/$name.i80" worker.asm

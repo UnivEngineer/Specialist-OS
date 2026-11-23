@@ -333,9 +333,9 @@
       "evidence": [
         "сочетание C84Eh/C851h"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\budi\\Budi-mx.exe",
       "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\legacy\\Budi-MX.exe",
+        "D:\\Projects\\Specialist-OS\\assets\\games\\families\\budi\\legacy\\Budi-MX.exe",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS\\ROM\\disabled\\games-mx\\Budi.0.EXE",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS-Z80\\ROM\\disabled\\games-mx\\Budi.0.EXE",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\Games-MX\\Budi.0.EXE",
@@ -346,8 +346,8 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\budi.i80",
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Budi.rks"
       ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\BUDI\\Budi-mx.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\originals\\budi-game-over\\Budi-ramfos.cpu.bin",
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\budi\\Budi-mx.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\budi\\originals\\Budi-ramfos.cpu",
       "source_verified_now": true,
       "id": "RF-006",
       "user_validation": {
@@ -2279,16 +2279,16 @@
         "запись курсора SHLD C63Eh",
         "пользователь сообщил об ошибках под текущей MXOS"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\buran\\repacked\\Buran-ramfos.exe",
       "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\legacy\\Buran-ramfos.exe",
+        "D:\\Projects\\Specialist-OS\\assets\\games\\families\\buran\\originals\\Buran-ramfos.cpu",
         "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Buran..EXE",
         "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Buran..EXE",
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\emu_tests\\ВИ53_аудио\\Буран.i80",
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Буран.i80"
       ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Buran\\Buran-ramfos.cpu",
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\buran\\repacked\\Buran-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\buran\\repacked\\Buran-ramfos.exe",
       "source_verified_now": true,
       "id": "RF-040"
     },
@@ -2328,9 +2328,9 @@
         "уже известный RAMFOS-вариант; запись сохраняется для полноты",
         "пользователь сообщил об ошибках под текущей MXOS"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\starwars\\repacked\\StarWars2-ramfos.exe",
       "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\legacy\\StarWars2-ramfos.exe",
+        "D:\\Projects\\Specialist-OS\\assets\\games\\families\\starwars\\originals\\StarWars2-ramfos.cpu",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS\\ROM\\disabled\\games-mx\\StarW2.0.EXE",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS-Z80\\ROM\\disabled\\games-mx\\StarW2.0.EXE",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\Games-MX\\Star-W2.0.EXE",
@@ -2342,8 +2342,8 @@
         "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Starwar..EXE",
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Starwar.i80"
       ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\StarWars\\StarWars2-ramfos.cpu",
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\starwars\\repacked\\StarWars2-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\starwars\\repacked\\StarWars2-ramfos.exe",
       "source_verified_now": true,
       "id": "RF-041"
     },
@@ -2622,7 +2622,7 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games1_rks.rar :: PAKET.RKS"
       ],
       "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Paket.rks",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Paket.rks",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\std\\Paket.rks",
       "source_verified_now": true,
       "id": "RF-048"
     },
@@ -3003,12 +3003,10 @@
         "запись курсора SHLD C63Eh",
         "уже известный RAMFOS-вариант; запись сохраняется для полноты"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
-      "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.rks"
-      ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos-optimized.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-optimized-20261102.cpu",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\builds\\Almaz2-ramfos-optimized.exe",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\builds\\Almaz2-ramfos-optimized.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\builds\\archive\\Almaz2-ramfos-optimized-20261102.cpu",
       "source_verified_now": true,
       "id": "RF-059"
     },
@@ -3037,9 +3035,9 @@
         "запись курсора SHLD C63Eh",
         "уже известный RAMFOS-вариант; запись сохраняется для полноты"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
       "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.rks",
+        "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\legacy\\Almaz2-ramfos-original-broken.rks",
         "D:\\Projects\\Specialist-OS\\assets\\games\\originals\\almaz2\\Almaz2-ramfos-original-broken.exe.bin",
         "D:\\Projects\\Specialist-OS\\assets\\games\\originals\\almaz2\\Almaz2-ramfos-original-broken.rks.bin",
         "D:\\Projects\\RetroPC\\Specialist\\MySoft\\MXOS\\ROM\\disabled\\games-mx\\Almaz2.0.EXE",
@@ -3057,8 +3055,8 @@
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Алмаз.rks",
         "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Emu80_4.rar :: Emu80_40250\\_stuff\\spmx\\cpu\\Almaz_2.i80"
       ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-broken.cpu",
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\legacy\\Almaz2-ramfos-original-broken.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\originals\\Almaz2-ramfos-original-broken.cpu",
       "source_verified_now": true,
       "id": "RF-060"
     },
@@ -3087,12 +3085,10 @@
         "запись курсора SHLD C63Eh",
         "уже известный RAMFOS-вариант; запись сохраняется для полноты"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
-      "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.rks"
-      ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-original-fixed.cpu",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\legacy\\Almaz2-ramfos-original-fixed.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\repaired\\Almaz2-ramfos-fixed.cpu",
       "source_verified_now": true,
       "id": "RF-061"
     },
@@ -3121,12 +3117,10 @@
         "запись курсора SHLD C63Eh",
         "уже известный RAMFOS-вариант; запись сохраняется для полноты"
       ],
-      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
-      "aliases": [
-        "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.rks"
-      ],
-      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\Almaz2-ramfos.exe",
-      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\Almaz-2\\legacy\\Almaz2-ramfos-20261104.cpu",
+      "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\builds\\Almaz2-ramfos.exe",
+      "aliases": [],
+      "sample_file_at_scan": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\builds\\Almaz2-ramfos.exe",
+      "verified_source": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\almaz-2\\builds\\archive\\Almaz2-ramfos-20261104.cpu",
       "source_verified_now": true,
       "id": "RF-062"
     }

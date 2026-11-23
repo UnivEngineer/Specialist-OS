@@ -1,8 +1,8 @@
 ; Полностью автономный снимок старого FAR/R4, без текущего транспорта MEM.
     INCLUDE "r4-abi.inc"
     ORG 0FC00h
-bankPage: DB 0
-bankPageCount: DB 16
+bankPage:       DB 0
+bankPageCount:  DB 16
 bankCopyBytes:
     ld a,(hl)
     ld (de),a

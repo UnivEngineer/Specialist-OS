@@ -261,11 +261,11 @@ quadFullBase:
     add a,h
     ld h,a
     ret
-quadP0: DW 0
-quadP6: DW 0
-quadP4: DW 0
-quadRaw: DW 0
-quadText: DW 0
-quadRemaining: DB 0
-quadUseFull: DB 0
+quadP0:         DW 0
+quadP6:         DW 0
+quadP4:         DW 0
+quadRaw:        DW 0
+quadText:       DW 0
+quadRemaining:  DB 0
+quadUseFull:    DB 0
     INCLUDE "quad-direct.inc"

@@ -207,6 +207,6 @@ fpPutFull:
     pop af
     pop hl
     jp blockArgument
-foPathStamp: DB 0
-foPathText: DS MAX_PATH,0
+foPathStamp:    DB 0
+foPathText:     DS MAX_PATH,0
 

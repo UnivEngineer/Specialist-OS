@@ -82,5 +82,5 @@ ncToolbarReplayNext:
     dec b
     jp nz,ncToolbarReplayColumn
     ret
-ncToolbarValid: DB 0,0
-ncToolbarBuffer: DW 0
+ncToolbarValid:     DB 0,0
+ncToolbarBuffer:    DW 0

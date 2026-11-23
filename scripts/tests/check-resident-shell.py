@@ -1,5 +1,6 @@
 """8080 shell resume dispatch, module AF propagation, release and epochs."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re
 import subprocess
 
@@ -16,6 +17,7 @@ def main():
     seed = bytearray(65536)
     binary = (ROOT / 'bin/DOS.sys').read_bytes()
     seed[0x100:0x100+len(binary)] = binary
+    initialize_dos_state(seed, s)
     for label in ('kdFinish', 'kdError'):
         seed[s[label]] = 0xc9
     # Nested MODULE_CALL/UNLOAD transport stub; the kernel wrapper is real.

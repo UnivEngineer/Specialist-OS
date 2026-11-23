@@ -1060,40 +1060,40 @@ LCF43:
 
 ; Строки Monitor-2: исходные байты КОИ-7 сохранены без перекодирования.
 monitor2_messages:
-    DB 020h,06Fh,07Bh,069h,062h,06Bh,061h,021h ; CF49h
-    DB 000h                                    ; CF51h
+    DB 020h,06Fh,07Bh,069h,062h,06Bh,061h,021h  ; CF49h
+    DB 000h                                     ; CF51h
 LCF52:
-    DB 00Ah,02Ah,020h,06Dh,06Fh,06Eh,069h,074h ; CF52h
-    DB 06Fh,072h,020h,03Fh,020h,000h           ; CF5Ah
+    DB 00Ah,02Ah,020h,06Dh,06Fh,06Eh,069h,074h  ; CF52h
+    DB 06Fh,072h,020h,03Fh,020h,000h            ; CF5Ah
 LCF60:
-    DB 06Bh,06Fh,06Eh,074h,072h,06Fh,06Ch,078h ; CF60h
-    DB 06Eh,061h,071h,020h,073h,075h,06Dh,06Dh ; CF68h
-    DB 061h,020h,03Dh,000h                     ; CF70h
+    DB 06Bh,06Fh,06Eh,074h,072h,06Fh,06Ch,078h  ; CF60h
+    DB 06Eh,061h,071h,020h,073h,075h,06Dh,06Dh  ; CF68h
+    DB 061h,020h,03Dh,000h                      ; CF70h
 LCF74:
-    DB 00Dh,020h,020h,020h,020h,020h,020h,020h ; CF74h
-    DB 020h,020h,020h,02Eh,000h                ; CF7Ch
+    DB 00Dh,020h,020h,020h,020h,020h,020h,020h  ; CF74h
+    DB 020h,020h,020h,02Eh,000h                 ; CF7Ch
 LCF81:
-    DB 069h,06Dh,071h,020h,066h,061h,06Ah,06Ch ; CF81h
-    DB 061h,020h,03Fh,020h,000h                ; CF89h
+    DB 069h,06Dh,071h,020h,066h,061h,06Ah,06Ch  ; CF81h
+    DB 061h,020h,03Fh,020h,000h                 ; CF89h
 LCF8E:
     DB 00Ah,066h,061h,06Ah,06Ch,03Ah,020h,000h ; CF8Eh
 LCF96:
-    DB 00Ah,06Eh,061h,07Eh,061h,06Ch,078h,06Eh ; CF96h
-    DB 079h,06Ah,020h,061h,064h,072h,065h,073h ; CF9Eh
-    DB 020h,03Dh,000h                          ; CFA6h
+    DB 00Ah,06Eh,061h,07Eh,061h,06Ch,078h,06Eh  ; CF96h
+    DB 079h,06Ah,020h,061h,064h,072h,065h,073h  ; CF9Eh
+    DB 020h,03Dh,000h                           ; CFA6h
 LCFA9:
-    DB 00Ah,06Bh,06Fh,06Eh,065h,07Eh,06Eh,079h ; CFA9h
-    DB 06Ah,020h,020h,061h,064h,072h,065h,073h ; CFB1h
-    DB 020h,03Dh,000h                          ; CFB9h
+    DB 00Ah,06Bh,06Fh,06Eh,065h,07Eh,06Eh,079h  ; CFA9h
+    DB 06Ah,020h,020h,061h,064h,072h,065h,073h  ; CFB1h
+    DB 020h,03Dh,000h                           ; CFB9h
 LCFBC:
-    DB 00Dh,00Ah,06Fh,07Bh,069h,062h,06Bh,061h ; CFBCh
-    DB 020h,070h,072h,069h,020h,077h,077h,06Fh ; CFC4h
-    DB 064h,065h,02Eh,020h,020h,020h,020h,020h ; CFCCh
-    DB 020h,000h                               ; CFD4h
+    DB 00Dh,00Ah,06Fh,07Bh,069h,062h,06Bh,061h  ; CFBCh
+    DB 020h,070h,072h,069h,020h,077h,077h,06Fh  ; CFC4h
+    DB 064h,065h,02Eh,020h,020h,020h,020h,020h  ; CFCCh
+    DB 020h,000h                                ; CFD4h
 monitor2_registerNames:
-    DB 041h,03Dh,000h,046h,03Dh,000h,042h,03Dh ; CFD6h
-    DB 000h,043h,03Dh,000h,044h,03Dh,000h,045h ; CFDEh
-    DB 03Dh,000h,048h,03Dh,000h,04Ch,03Dh,000h ; CFE6h
-    DB 00Ah,020h,04Dh,028h,048h,04Ch,029h,03Dh ; CFEEh
-    DB 000h,050h,043h,03Dh,000h,053h,050h,03Dh ; CFF6h
-    DB 000h,000h                               ; CFFEh
+    DB 041h,03Dh,000h,046h,03Dh,000h,042h,03Dh  ; CFD6h
+    DB 000h,043h,03Dh,000h,044h,03Dh,000h,045h  ; CFDEh
+    DB 03Dh,000h,048h,03Dh,000h,04Ch,03Dh,000h  ; CFE6h
+    DB 00Ah,020h,04Dh,028h,048h,04Ch,029h,03Dh  ; CFEEh
+    DB 000h,050h,043h,03Dh,000h,053h,050h,03Dh  ; CFF6h
+    DB 000h,000h                                ; CFFEh

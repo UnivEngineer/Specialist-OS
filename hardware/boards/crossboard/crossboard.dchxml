@@ -65285,9 +65285,9 @@
 <Id>0</Id>
 <Name>Лист 1</Name>
 <Type>Normal</Type>
-<XPos>-2160.9451</XPos>
-<YPos>-220.0717</YPos>
-<Scale>0.8763</Scale>
+<XPos>2571.9473</XPos>
+<YPos>-1818.9589</YPos>
+<Scale>3.6605</Scale>
 <SheetWidth>11692.9134</SheetWidth>
 <SheetHeight>8267.7165</SheetHeight>
 <LeftMargin>787.4016</LeftMargin>
@@ -65371,7 +65371,7 @@
 <PinNumbers Visible="Y" Font="4"/>
 <NetName FontSize="4"/>
 <HidePower>N</HidePower>
-<ProjectDir>D:\Projects\RetroPC\Specialist\Schemes\MyScheme</ProjectDir>
+<ProjectDir>G:\Projects\Specialist-OS\hardware\boards\crossboard</ProjectDir>
 </Settings>
 <ProjectLibs Sorted="N"/>
 <DesignCache Count="132"/>
@@ -67957,7 +67957,6 @@
 </Wire>
 <Wire Id="5" Sheet="0" Connected1="Pin" Bus1="-1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="0" Object2="3" SubObject2="3" HiddenPower="N" CanUnhide="N">
 <Points>
-<Point X="3400" Y="-4790.9449" Dir="-1"/>
 <Point X="3400" Y="-4790.9449" Dir="1"/>
 <Point X="3400" Y="-4050" Dir="1"/>
 </Points>
@@ -67965,7 +67964,7 @@
 <Wire Id="6" Sheet="-1" Connected1="Wire" Bus1="0" Object1="0" SubObject1="1" Connected2="Wire" Bus2="0" Object2="3" SubObject2="3" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="6850" Y="-5350" Dir="0"/>
+<Point X="6850" Y="-5350" Dir="1"/>
 <Point X="6850" Y="-5350" Dir="1"/>
 </Points>
 </Wire>
@@ -68127,884 +68126,885 @@
 <Wire Id="1" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="3" Connected2="Free" Bus2="-1" Object2="31" SubObject2="0" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="6900" Y="2700" Dir="-1"/>
-<Point X="-2800" Y="-100" Dir="0"/>
+<Point X="-2800" Y="-100" Dir="1"/>
 <Point X="-2800" Y="-100" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="2" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="3" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="4" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="5" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="6" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="7" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="8" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="9" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="10" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="11" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="12" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="13" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="14" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="15" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="16" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="17" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="18" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="19" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="-1" Object2="47" SubObject2="0" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="22500" Y="-8200" Dir="-1"/>
+<Point X="22500" Y="-8600" Dir="0"/>
 <Point X="22500" Y="-8600" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="20" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="21" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="22" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="23" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="24" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="25" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="26" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="27" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="28" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="29" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="30" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="31" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="32" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="33" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="34" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="35" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="36" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="37" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="38" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="39" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="40" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="41" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="42" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="43" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="44" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="45" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="19" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="46" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="47" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="48" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="49" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="50" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="51" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="52" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="53" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="54" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="55" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="56" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="57" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="58" Sheet="-1" Connected1="Wire" Bus1="1" Object1="5" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="59" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="60" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="61" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="62" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="63" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="64" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="65" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="66" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="67" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="68" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="69" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="70" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="71" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="72" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="73" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="74" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="75" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="76" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="5" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="77" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="78" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="79" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="80" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="81" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="82" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="83" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="84" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="0" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="85" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="0" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="86" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="87" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="88" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="89" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="90" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="91" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="92" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="93" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="94" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="95" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="96" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="97" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="98" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="99" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="100" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="101" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="102" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="103" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="0" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="104" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="105" Sheet="-1" Connected1="Pin" Bus1="0" Object1="59" SubObject1="0" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="106" Sheet="-1" Connected1="Pin" Bus1="0" Object1="59" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="107" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="108" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="109" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="110" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="111" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="112" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="113" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="114" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="115" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="4" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="116" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="4" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="117" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="118" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="119" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="120" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="121" Sheet="-1" Connected1="Pin" Bus1="0" Object1="16" SubObject1="0" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="122" Sheet="-1" Connected1="Pin" Bus1="0" Object1="18" SubObject1="0" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="123" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="124" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="125" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="3" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="126" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="3" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="127" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="128" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="129" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="130" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="131" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="132" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="133" Sheet="-1" Connected1="Pin" Bus1="0" Object1="40" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="134" Sheet="-1" Connected1="Pin" Bus1="0" Object1="68" SubObject1="0" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="135" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="136" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="137" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="138" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Free" Bus2="1" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="139" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="3" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="140" Sheet="-1" Connected1="Pin" Bus1="0" Object1="24" SubObject1="0" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="141" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="142" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="143" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="144" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="145" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="146" Sheet="-1" Connected1="Wire" Bus1="1" Object1="0" SubObject1="2" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="147" Sheet="-1" Connected1="Wire" Bus1="1" Object1="1" SubObject1="1" Connected2="Wire" Bus2="1" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="148" Sheet="0" Connected1="Wire" Bus1="1" Object1="0" SubObject1="4" Connected2="Pin" Bus2="-1" Object2="55" SubObject2="7" HiddenPower="N" CanUnhide="N">
@@ -69474,7 +69474,6 @@
 <Point X="5600" Y="-4000" Dir="1"/>
 <Point X="6350" Y="-4000" Dir="0"/>
 <Point X="6350" Y="-4781.8898" Dir="1"/>
-<Point X="6350" Y="-4781.8898" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="2" Sheet="0" Connected1="Wire" Bus1="4" Object1="1" SubObject1="2" Connected2="Pin" Bus2="-1" Object2="35" SubObject2="0" HiddenPower="N" CanUnhide="N">
@@ -69486,7 +69485,7 @@
 <Wire Id="3" Sheet="-1" Connected1="Wire" Bus1="4" Object1="0" SubObject1="1" Connected2="Wire" Bus2="4" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="6850" Y="-4200" Dir="0"/>
+<Point X="6850" Y="-4200" Dir="1"/>
 <Point X="6850" Y="-4200" Dir="1"/>
 </Points>
 </Wire>
@@ -70850,356 +70849,356 @@
 <Wire Id="1" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Free" Bus2="-1" Object2="97" SubObject2="0" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="17900" Y="700" Dir="0"/>
-<Point X="17900" Y="600" Dir="1"/>
 <Point X="17900" Y="600" Dir="0"/>
+<Point X="17900" Y="600" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="2" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="3" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="4" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="5" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="6" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="7" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="8" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="9" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="10" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="11" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="12" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="13" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="14" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="15" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="127" Object2="11" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="16" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="127" Object2="11" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="17" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="18" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="19" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="20" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="21" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="22" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="1"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="23" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="24" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="25" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="26" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="27" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="155" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="1"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="28" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="155" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="1"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="29" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="1"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="30" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="31" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="32" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="33" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="34" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="35" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="36" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="37" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="38" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="39" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="40" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="41" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="42" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="43" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="44" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="45" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="46" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="47" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="48" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="49" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Free" Bus2="29" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="50" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="51" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="52" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="53" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="54" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="55" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="56" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="57" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="58" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="59" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="60" Sheet="0" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Pin" Bus2="-1" Object2="47" SubObject2="1" HiddenPower="N" CanUnhide="N">
@@ -71212,379 +71211,379 @@
 <Wire Id="61" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="62" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="2" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="63" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="64" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="6" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="65" Sheet="-1" Connected1="Pin" Bus1="0" Object1="59" SubObject1="2" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="66" Sheet="-1" Connected1="Pin" Bus1="0" Object1="59" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="67" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="68" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="69" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="70" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="71" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="72" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="73" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="74" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="75" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="76" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="77" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="78" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="29" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="79" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="80" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="81" Sheet="-1" Connected1="Pin" Bus1="0" Object1="16" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="82" Sheet="-1" Connected1="Pin" Bus1="0" Object1="18" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="83" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="84" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="85" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="86" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="87" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="88" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="89" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="90" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="91" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="92" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="93" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="94" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="95" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="96" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="97" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="98" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="99" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="100" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="101" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="102" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="103" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="104" Sheet="-1" Connected1="Pin" Bus1="0" Object1="24" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="105" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="106" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="107" Sheet="-1" Connected1="Pin" Bus1="0" Object1="59" SubObject1="28" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="108" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="28" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="109" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="29" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="110" Sheet="-1" Connected1="Pin" Bus1="0" Object1="58" SubObject1="30" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="111" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="112" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="113" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="114" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="115" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="116" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="117" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="118" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="119" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="120" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="121" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="122" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="123" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="124" Sheet="-1" Connected1="Wire" Bus1="38" Object1="0" SubObject1="3" Connected2="Wire" Bus2="38" Object2="0" SubObject2="3" HiddenPower="N" CanUnhide="N">
@@ -71602,7 +71601,7 @@
 <Wire Id="126" Sheet="-1" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="2" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="127" Sheet="0" Connected1="Wire" Bus1="38" Object1="60" SubObject1="1" Connected2="Wire" Bus2="38" Object2="60" SubObject2="1" HiddenPower="N" CanUnhide="N">
@@ -71916,13 +71915,13 @@
 <Wire Id="176" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="177" Sheet="-1" Connected1="Wire" Bus1="38" Object1="2" SubObject1="1" Connected2="Wire" Bus2="38" Object2="1" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="0"/>
+<Point X="0" Y="0" Dir="1"/>
 </Points>
 </Wire>
 <Wire Id="178" Sheet="-1" Connected1="Pin" Bus1="0" Object1="68" SubObject1="25" Connected2="Wire" Bus2="38" Object2="0" SubObject2="3" HiddenPower="N" CanUnhide="N">
@@ -72601,7 +72600,7 @@
 <Wire Id="8" Sheet="-1" Connected1="Wire" Bus1="60" Object1="0" SubObject1="1" Connected2="Free" Bus2="31" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="12900" Y="2900" Dir="0"/>
+<Point X="12900" Y="2900" Dir="1"/>
 <Point X="12900" Y="2900" Dir="0"/>
 </Points>
 </Wire>
@@ -72669,7 +72668,7 @@
 <Wire Id="19" Sheet="-1" Connected1="Wire" Bus1="60" Object1="0" SubObject1="1" Connected2="Wire" Bus2="60" Object2="8" SubObject2="1" HiddenPower="N" CanUnhide="N">
 <Points>
 <Point X="0" Y="0" Dir="0"/>
-<Point X="0" Y="0" Dir="1"/>
+<Point X="0" Y="0" Dir="0"/>
 </Points>
 </Wire>
 <Wire Id="20" Sheet="-1" Connected1="Wire" Bus1="60" Object1="0" SubObject1="2" Connected2="Wire" Bus2="60" Object2="0" SubObject2="1" HiddenPower="N" CanUnhide="N">
@@ -75760,13 +75759,13 @@
 </Shape>
 <Shape Id="126" Type="Text" Sheet="0" Angle="0" HorzAlign="Left" VertAlign="Top" TextAlign="Left" FontVector="Y" FontSize="6" FontWidth="-2" FontScale="1" FontColor="12632256" LineSpacing="1.2">
 <Points>
-<Point X="3691.1735" Y="-1554.9459"/>
+<Point X="3691.1732" Y="-1554.9462"/>
 </Points>
 <FontName>Tahoma</FontName>
 <TextLines>
 <TextLine>Ошибки</TextLine>
 <TextLine>Разъем питания неправильный</TextLine>
-<TextLine>+ Увеличить отверстия для XP1</TextLine>
+<TextLine>Увеличить отверстия для XP1</TextLine>
 <TextLine>XS4 - это распиновка DB15M а не DB25F</TextLine>
 <TextLine>Параллельно зуммеру включить резистор 1 кОм,</TextLine>
 <TextLine>или убрать транзистор</TextLine>
@@ -75775,6 +75774,7 @@
 <TextLine>Сделать везде термоинтерфейсы</TextLine>
 <TextLine>Сделать центральные направляющие для слотов</TextLine>
 <TextLine>Обозначить + электролитов на шелкографии</TextLine>
+<TextLine>Логика DD3.3 неправильная, дожно быть И-НЕ</TextLine>
 </TextLines>
 </Shape>
 </Shapes>

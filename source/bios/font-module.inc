@@ -1,12 +1,12 @@
 ; Internal BIOS callers use fixed module entries. Only public BIOS jumps are patched.
-printChar = FONT_ENGINE_CHAR
-printCharRaw = FONT_ENGINE_RAW
-printCharReal = FONT_ENGINE_RAW
-printString = FONT_ENGINE_Z
-printStringZ = FONT_ENGINE_Z
-printStringRawZ = FONT_ENGINE_RAWZ
-printStringReal = FONT_ENGINE_RAWZ
-printStringRawLim = FONT_ENGINE_LIM
+printChar            = FONT_ENGINE_CHAR
+printCharRaw         = FONT_ENGINE_RAW
+printCharReal        = FONT_ENGINE_RAW
+printString          = FONT_ENGINE_Z
+printStringZ         = FONT_ENGINE_Z
+printStringRawZ      = FONT_ENGINE_RAWZ
+printStringReal      = FONT_ENGINE_RAWZ
+printStringRawLim    = FONT_ENGINE_LIM
 printStringRawPseudo = FONT_ENGINE_PSEUDO
 ; Tab remains a control operation in the BIOS interpreter.
 printChar_c9:

@@ -16,6 +16,21 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     pop hl
     ENDM
     ORG 0
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Проверить геометрию и файловые цепочки тома из MAIN.
+;
+; вход:
+;   de = адрес строки с буквой диска либо пустой строки для запроса с клавиатуры. Для
+;   карты кластеров необходима память до IMAGE_MEM_END.
+;
+; выход:
+;   Результаты выведены на экран. При обычном завершении после нажатия клавиши
+;   восстановлены кодировка и SP вызывающего; проверка читает секторы тома.
+;----------------------------------------------------------------------------
+
 entry:
     STORE_DE argumentPtr
     di
@@ -71,6 +86,12 @@ clearCounts:
     jp nz,clearCounts
     ld b,3
     call bios_diskDriver
+    jp c,ioError
+    ld bc,DISK_INFO.blockShift
+    add hl,bc
+    ld a,(hl)
+    cp 8
+    jp nz,badGeometry         ; Проверяем до чтения в 256-байтный sectorBuffer.
     ex de,hl
     ld (capacity),hl
     ld de,0
@@ -166,6 +187,21 @@ ioError:
     jp waitPrompt
 
 ; DE=физический сектор, HL=буфер; BC/DE/HL сохраняются драйвером.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать сектор проверяемого диска через физический драйвер.
+;
+; вход:
+;   de = номер сектора, hl = доступный для записи секторный буфер. Выбран диск,
+;   геометрия которого используется проверкой.
+;
+; выход:
+;   При успехе буфер заполнен и bc восстановлен. При ошибке ввода-вывода управление
+;   передаётся общей диагностике ioError.
+;----------------------------------------------------------------------------
+
 readSector:
     push bc
     ld b,2
@@ -611,6 +647,19 @@ fatNextCached:
     ld d,(hl)
     ret
 ; DE=кластер. CF=1 вне области данных; HL/AF разрушаются.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Проверить, находится ли кластер в области данных проверяемого тома.
+;
+; вход:
+;   de = проверяемый номер, lastCluster = последняя допустимая запись.
+;
+; выход:
+;   cf = 0 для диапазона 2..lastCluster, cf = 1 вне его. de сохранён; hl и af рабочие.
+;----------------------------------------------------------------------------
+
 validCluster:
     ld hl,2
     call compare
@@ -773,6 +822,19 @@ reservedError:
     call structureError
     ld hl,txtReserved
     jp puts
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Учесть структурную ошибку текущей фазы проверки диска.
+;
+; вход:
+;   phase = индекс фазы, errors = 16-битный счётчик ошибок.
+;
+; выход:
+;   result = phase + 1, errors увеличен на единицу. Регистры и флаги сохранены.
+;----------------------------------------------------------------------------
+
 structureError:
     push af
     ld a,(phase)
@@ -788,6 +850,21 @@ structureError:
 
 ; Чтение потока по уже проверенной цепочке. Выход A=байт, остальные регистры
 ; сохраняются. Ошибка чтения немедленно прерывает утилиту, диск не изменяется.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Взять следующий байт файла из предварительно проверенной цепочки.
+;
+; вход:
+;   streamPtr и состояние потока указывают на следующий байт. При переходе на другой
+;   сектор требуется доступ к выбранному диску.
+;
+; выход:
+;   a = прочитанный байт, позиция потока продвинута. hl, de и bc сохранены. Ошибка
+;   чтения передаётся общей диагностике и прерывает проверку.
+;----------------------------------------------------------------------------
+
 streamByte:
     push hl
     push de
@@ -1093,45 +1170,45 @@ checked:        DW 0
 skipped:        DW 0
 result:         DB 0
 countsEnd:
-capacity:       DW 0
-total:          DW 0
-fatStart:       DW 0
-fatSectors:     DB 0
-fatCachedSector: DB 0
-dirStart:       DW 0
-dirSectors:     DW 0
-rootEntries:    DW 0
-dataStart:      DW 0
-lastCluster:    DW 0
-dirSector:      DW 0
-dirLeft:        DW 0
-dirEntriesLeft: DW 0
-entryPtr:       DW 0
-entriesLeft:    DB 0
-phase:          DB 0
-namesEnd:       DW 0
-cluster:        DW 0
-chainLeft:      DW 0
-streamCluster:  DW 0
-streamPtr:      DW 0
-payloadLeft:    DW 0
-expected:       DW 0
-runningSum:     DW 0
-rksMode:        DB 0
-sumLastByte:    DB 0
-driveInput:     DB 0,0
-directoryDotMask: DB 0
-txtDirectoryDots: DB 10,"MISSING . OR .. DIRECTORY ENTRY",0
-currentDirectory: DW 0
-currentParent: DW 0
-scanCluster: DW 0
-queueRead: DW 0
-queueWrite: DW 0
-txtDirectoryLimit: DB 10,"DIRECTORY SCAN LIMIT",0
-argumentPtr:     DW 0
-callerSP:       DW 0
-callerKoi:      DB 0
-txtNoMemory: DB "NOT ENOUGH MEMORY",0
+capacity:           DW 0
+total:              DW 0
+fatStart:           DW 0
+fatSectors:         DB 0
+fatCachedSector:    DB 0
+dirStart:           DW 0
+dirSectors:         DW 0
+rootEntries:        DW 0
+dataStart:          DW 0
+lastCluster:        DW 0
+dirSector:          DW 0
+dirLeft:            DW 0
+dirEntriesLeft:     DW 0
+entryPtr:           DW 0
+entriesLeft:        DB 0
+phase:              DB 0
+namesEnd:           DW 0
+cluster:            DW 0
+chainLeft:          DW 0
+streamCluster:      DW 0
+streamPtr:          DW 0
+payloadLeft:        DW 0
+expected:           DW 0
+runningSum:         DW 0
+rksMode:            DB 0
+sumLastByte:        DB 0
+driveInput:         DB 0,0
+directoryDotMask:   DB 0
+txtDirectoryDots:   DB 10,"MISSING . OR .. DIRECTORY ENTRY",0
+currentDirectory:   DW 0
+currentParent:      DW 0
+scanCluster:        DW 0
+queueRead:          DW 0
+queueWrite:         DW 0
+txtDirectoryLimit:  DB 10,"DIRECTORY SCAN LIMIT",0
+argumentPtr:        DW 0
+callerSP:           DW 0
+callerKoi:          DB 0
+txtNoMemory:        DB "NOT ENOUGH MEMORY",0
 
     MODULE checkMath
     DEFINE MATH_DIV2
@@ -1139,16 +1216,16 @@ txtNoMemory: DB "NOT ENOUGH MEMORY",0
     ENDMODULE
 
 codeEnd:
-names = (codeEnd+255) & 0FF00h
-directoryQueue = names+1000h
+names             = (codeEnd+255) & 0FF00h
+directoryQueue    = names+1000h
 directoryQueueEnd = directoryQueue+1000h
-fatBuffer = directoryQueueEnd
-usedMap = fatBuffer+256
-sectorBuffer = usedMap+1024
-dirBuffer = sectorBuffer+256
-entryCopy = dirBuffer+256
-fileBuffer = entryCopy+256
-sumBuffer = fileBuffer+256
-header = sumBuffer+512
-IMAGE_MEM_END = header+256
+fatBuffer         = directoryQueueEnd
+usedMap           = fatBuffer+256
+sectorBuffer      = usedMap+1024
+dirBuffer         = sectorBuffer+256
+entryCopy         = dirBuffer+256
+fileBuffer        = entryCopy+256
+sumBuffer         = fileBuffer+256
+header            = sumBuffer+512
+IMAGE_MEM_END     = header+256
     END

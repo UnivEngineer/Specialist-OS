@@ -1,5 +1,6 @@
 """8080: v2 image validation and transactional MAIN/DOS arena policies."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re,subprocess,sys,struct
 R=Path(__file__).resolve().parents[2];O=R/'.local/image-memory';O.mkdir(exist_ok=True)
 s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/banked/KERNEL.sym').read_text('utf-8'),re.M)}
@@ -7,6 +8,7 @@ sys.path.insert(0,str(R/'scripts/images'));from executable import Image,encode
 W=lambda v:struct.pack('<H',v)
 def seed():
  m=bytearray(65536);p=(R/'bin/DOS.sys').read_bytes();m[0x100:0x100+len(p)]=p
+ initialize_dos_state(m, s)
  m[s['MEM_ALLOC_TABLE']:s['MEM_ALLOC_TABLE']+32*6]=b'\xff'*192
  m[s['MODULE_TABLE']:s['MODULE_TABLE']+8*16]=bytes(128)
  for name in ('klReclaim','fileopsReleaseOwner','enumReleaseOwner','memoryPublishTop'):m[s[name]:s[name]+2]=b'\xaf\xc9'

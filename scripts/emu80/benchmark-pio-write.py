@@ -136,7 +136,7 @@ def main():
                 nc_binary=frozen/'NC.i80', nc_symbols=frozen/'NC.sym')
         for driver in args.drivers:
             if driver != current_driver:
-                command(f'a:/drivers/{driver.lower()}.com')
+                command(f'C:/drivers/{driver.lower()}.com')
                 trap(ns['mainLoop']); m.tap('enter'); m.until(ns['mainLoop'], 120, page=0)
                 current_driver = driver
             kind = {'AT2MX': 1, 'AT2MXF': 2}[driver]

@@ -26,11 +26,22 @@ ncGetch:
     call ncInputHookBegin
     call bios_getch
     jp ncInputHookEnd
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Опросить Shift и обслужить статус во время ожидания ввода в MAIN.
+;
+; вход:
+;   Вызывается из BIOS при ожидании клавиши, когда матрица опрашивает все клавиши.
+;   Регистровых параметров нет.
+;
+; выход:
+;   Панель кнопок может обновиться по Shift. Метка платформы дописывается только
+;   при основном вводе NC. Регистры, флаги и состояние текстового ввода сохранены.
+;----------------------------------------------------------------------------
 ncShiftPoll:
     push af
-    IF NC_STATUS_DEFER
     call ncStatusIdle
-    ENDIF
     ld a,(IO_KEYB_B)
     and 2
     push hl
@@ -70,9 +81,9 @@ ncTapeStub:
     call uiModalBodyText
     call uiModalGetch
     jp ncRefreshDirty
-ncTapeStubText: DB 'Tape is not implemented',0
-ncShiftState: DB 2
+ncTapeStubText:     DB 'Tape is not implemented',0
+ncShiftState:       DB 2
     IF !NC_BANKED
-ncInputColor: DB COLOR_CMDLINE
-ncPreviousHook: DW 0
+ncInputColor:       DB COLOR_CMDLINE
+ncPreviousHook:     DW 0
     ENDIF

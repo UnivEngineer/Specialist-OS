@@ -25,7 +25,7 @@ def main():
     s = symbols('FORMAT')
     cases = [
         ('B: -R -Y', 'Format', 'B', True, True),
-        ('-Y -R c:', 'Format', 'C', True, True),
+        ('-Y a:', 'Format', 'A', False, True),
         ('  h:   -y  ', 'Format', 'H', False, True),
         ('B: -R -R -Y', 'Format', 'B', True, True),
         ('B:', 'ConfirmRequest', 'B', False, False),
@@ -38,12 +38,12 @@ def main():
         ('B: C: -Y', None, None, None, None),
         ('I: -Y', None, None, None, None),
         ('B: -Y UNKNOWN', None, None, None, None),
-        ('A:', None, None, None, None),
-        ('A: -Y', None, None, None, None),
-        ('a: -r -y', None, None, None, None),
-        ('-Y -R A:', None, None, None, None),
-        ('', None, None, None, None, 'A'),
-        ('-Y', None, None, None, None, 'A'),
+        ('C:', None, None, None, None),
+        ('C: -Y', None, None, None, None),
+        ('c: -r -y', None, None, None, None),
+        ('-Y -R C:', None, None, None, None),
+        ('', None, None, None, None, 'C'),
+        ('-Y', None, None, None, None, 'C'),
     ]
     cases += [
         ('h', None, None, None, None),
@@ -62,7 +62,8 @@ def main():
         for base, file in ((0xC000, 'BIOS.sys'), (0xF000, 'IO.main.bin'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
             data = (ROOT / f'bin/{file}').read_bytes()
             m[base:base+len(data)] = data
-        m[0xC818] = 0xC9            # печать не нужна для проверки парсера
+        for routine in ('bios_printString', 'bios_printChar', 'bios_setFontEncoding'):
+            m[s[routine]] = 0xc9
         # Редактор проверяется настоящей клавиатурой отдельно; здесь его ответ
         # задан строкой, завершённой Enter, а не одиночным нажатием.
         answer = (keys[0] if keys else 'B').encode('ascii') + b'\0'

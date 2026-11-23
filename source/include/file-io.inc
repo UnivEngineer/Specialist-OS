@@ -295,7 +295,7 @@ flHandle: DS FILE_HANDLE,0
     IFNDEF FILE_IO_DESCRIPTOR_ONLY
 flRequest: DW 0
     ENDIF
-flBuffer: DW 0
-flCount: DW 0
-flWrite: DB 0
+flBuffer:       DW 0
+flCount:        DW 0
+flWrite:        DB 0
     ENDIF

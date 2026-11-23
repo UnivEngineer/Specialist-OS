@@ -69,7 +69,7 @@ FuncRead:
     MODULE pioRead
     INCLUDE "pio-read.inc"
     ENDMODULE
-ReadLoop = pioRead.ReadLoop
+ReadLoop        = pioRead.ReadLoop
 ReadAlignedLoop = pioRead.ReadAlignedLoop
 
     or      a
@@ -112,7 +112,7 @@ FuncWrite:
     MODULE pioWrite
     INCLUDE "pio-write.inc"
     ENDMODULE
-WriteLoop = pioWrite.WriteLoop
+WriteLoop        = pioWrite.WriteLoop
 WriteAlignedLoop = pioWrite.WriteAlignedLoop
 
     ex      de, hl              ; HL=конец источника
@@ -172,6 +172,19 @@ DisableWriteProtection:
     pop     de
     ret
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Защёлкнуть старший байт адреса flash через порт B программатора.
+;
+; вход:
+;   d = старший байт адреса. Драйвер уже настроил ВВ55 программатора.
+;
+; выход:
+;   IO_PROG_B получает d между LATCH_1 и LATCH_0. a = LATCH_0, bc, de, hl и флаги
+;   сохранены.
+;----------------------------------------------------------------------------
+
 LatchHiAddr:
     ld      a, LATCH_1
     ld      (IO_PROG_MODE), a
@@ -213,7 +226,7 @@ WriteByteToChip:
     IFNDEF DRIVER_IO_ONLY
 ; B=0FFh: HL=две строки, B=технология, C=возможности (DISK_CAP_*).
 FuncInfo:
-    ld      bc, DISK_TECH_FLASH * 256 + DISK_CAP_READ + DISK_CAP_WRITE + DISK_CAP_VERIFY
+    ld      bc, DISK_TECH_MX_VV55_FLASH * 256 + DISK_CAP_READ + DISK_CAP_WRITE + DISK_CAP_VERIFY
     ld      hl, DriverInfo
     or      a
     ret

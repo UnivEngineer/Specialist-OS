@@ -39,8 +39,8 @@
 		push hl
 		jp exec2
 
-a_rks:	DB "RKS"
-a_monitor2_sys:	DB "Monitor2 SYS"
+a_rks:              DB "RKS"
+a_monitor2_sys:     DB "Monitor2 SYS"
 
 defExec2:
     ENDIF

@@ -77,5 +77,5 @@ cdMatchEnd:
 cdMatched:
             xor a
             ret
-cdShort: DB 'CD',0
-cdLong: DB 'CHDIR',0
+cdShort:        DB 'CD',0
+cdLong:         DB 'CHDIR',0

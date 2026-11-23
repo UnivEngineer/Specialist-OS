@@ -119,10 +119,10 @@ matrixProgressNoTens:
     ld c,a
     jp bios_printChar
 
-matrixMainText: DB 'MAIN ',0
-matrixDosText: DB 'BANK ',0
-matrixFont6Text: DB '6x8 ',0
-matrixFont8Text: DB '8x8 ',0
-matrixFont4Text: DB '4x8 ',0
-matrixMsText: DB ' ms',0
-matrixStage: DB 0
+matrixMainText:     DB 'MAIN ',0
+matrixDosText:      DB 'BANK ',0
+matrixFont6Text:    DB '6x8 ',0
+matrixFont8Text:    DB '8x8 ',0
+matrixFont4Text:    DB '4x8 ',0
+matrixMsText:       DB ' ms',0
+matrixStage:        DB 0

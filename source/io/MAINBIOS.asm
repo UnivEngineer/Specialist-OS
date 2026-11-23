@@ -1,8 +1,18 @@
-; IO.SYS: receiving BIOS adapter and command batches at F000h.
-; +0: receive/copy batch, +3: register packet, +6: finish TEXT_PRINT,
-; +9: execute local inline command stream. All offsets are internal MEM ABI.
-; Live size/end: bin/System.layout.json; slot ends before MEM at F1C0h.
-; Packet addresses, operation IDs and stack limits are caller preconditions.
+; IO.SYS, сегмент MAIN. Смещения от BANK_BIOS_GATE (F000h) образуют
+; внутренний ABI MEM/BIOS. Размер и конец сегмента задаёт System.layout.json.
+;
+; +0  FAR-список: A = банк источника, HL = адрес, BC = 1..256 байт.
+; +3  Регистровый пакет: A = банк источника, C = номер функции BIOS.
+;     Транспорт заранее помещает MX_REGS в BANK_FRAME_REGS. Поддерживаются
+;     скалярные функции таблицы bbModes (режим 1) и TEXT_PRINT (режим 5).
+;     При выполнении AF/BC/DE/HL содержат результат, BANK_FRAME_STATUS = 0.
+;     Для остальных режимов A = DOS_ERR_UNSUPPORTED, CF = 1.
+; +6  Завершение TEXT_PRINT: принимает результат в bbRegs, открывает командное
+;     окно, снимает bbBusy и возвращает AF/BC/DE/HL из пакета.
+; +9  Локальный список: HL = адрес в MAIN, BC = длина. Возвращает A = 0,
+;     CF = 0 и открывает командное окно, результаты записей не собираются.
+;
+; Вызывающий гарантирует границы пакетов, номера операций и доступный стек.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../mem/biosabi.inc"
     INCLUDE "../mem/abi.inc"
@@ -106,9 +116,9 @@ bbUnsupported:
 ; 2 — ASCIIZ; 5 — запрос TEXT_PRINT.
 ; Дисковые функции, memcpy/strcmp, установка драйверов/хуков и memtop
 ; нельзя исполнять над NEAR-адресами клиента в контексте main.
-; A=source FAR bank, HL=source, BC=bytes (1..256). Trusted command stream.
-; Record: opcode, totalBytes, registerMask, packed words, inline data.
-; The sender owns record bounds, valid operation IDs and lifetimes.
+; Формат записи: номер функции, полный размер, маска регистров, слова
+; регистров и встроенные данные. Нулевой номер завершает список. F000h
+; возвращает CF=1, A=DOS_ERR_ARGUMENT при длине вне диапазона 1..256.
 biosCommandBatch:
     push af
     dec bc
@@ -174,66 +184,66 @@ bbBatchTooLarge:
     ret
 
 bbModes:
-    DB 1 ; GETCH
-    DB 0 ; TAPE_READ
-    DB 1 ; PRINT_CHAR
-    DB 0 ; TAPE_WRITE
-    DB 0 ; INPUT
-    DB 1 ; KEY_CHECK
-    DB 1 ; PRINT_HEX_BYTE
-    DB 2 ; PRINT_STRING_Z
-    DB 1 ; KEY_SCAN
-    DB 1 ; GET_CURSOR_POS
-    DB 1 ; SET_CURSOR_POS
-    DB 0 ; TAPE_LOAD
-    DB 0 ; TAPE_SAVE
-    DB 0 ; CALC_CS
-    DB 1 ; PRINT_HEX_WORD
-    DB 1 ; SET_MEM_TOP: scalar HL, used by persistent MEM reservations
-    DB 1 ; GET_MEM_TOP: scalar HL result
-    DB 1 ; PRINTER
-    DB 0 ; INSTALL_DRIVER
-    DB 0 ; DISK_DRIVER
-    DB 1 ; PRINT_CHAR_RAW
-    DB 1 ; PRINT_DEC_WORD
-    DB 0 ; SET_RAMD_DRIVER
-    DB 1 ; UPPERCASE
-    DB 0 ; STRCMP
-    DB 0 ; STRICMP
-    DB 1 ; SUB_HL_DE
-    DB 1 ; BEEP_TIMER
-    DB 0 ; DISK_WRITE_CHECKED
-    DB 0 ; ARG_NEXT
-    DB 0 ; INSTALL_BLOCK_DRIVER
-    DB 0 ; SET_INPUT_HOOK
-    DB 0 ; BLOCK_IO
-    DB 0 ; MEMCPY
-    DB 0 ; FILE_BODY
-    DB 1 ; GLYPH_CACHE
-    DB 1 ; PRINT_STRING_Z_MAIN
-    DB 1 ; FONT_RENDER
-    DB 2 ; PRINT_STRING_RAW_Z
-    DB 1 ; PRINT_STRING_RAW_Z_MAIN
-    DB 0 ; PRINT_STRING_RAW_LIM
-    DB 1 ; PRINT_STRING_RAW_LIM_MAIN
-    DB 5 ; TEXT_PRINT
-    DB 1 ; SET_FONT_ENCODING
-    DB 1 ; COMMAND_BATCH
-    DB 0 ; PRINT_STRING_RAW_PSEUDO: intercepted by MEM
+    DB 1    ; GETCH
+    DB 0    ; TAPE_READ
+    DB 1    ; PRINT_CHAR
+    DB 0    ; TAPE_WRITE
+    DB 0    ; INPUT
+    DB 1    ; KEY_CHECK
+    DB 1    ; PRINT_HEX_BYTE
+    DB 2    ; PRINT_STRING_Z
+    DB 1    ; KEY_SCAN
+    DB 1    ; GET_CURSOR_POS
+    DB 1    ; SET_CURSOR_POS
+    DB 0    ; TAPE_LOAD
+    DB 0    ; TAPE_SAVE
+    DB 0    ; CALC_CS
+    DB 1    ; PRINT_HEX_WORD
+    DB 1    ; SET_MEM_TOP: scalar HL, used by persistent MEM reservations
+    DB 1    ; GET_MEM_TOP: scalar HL result
+    DB 1    ; PRINTER
+    DB 0    ; INSTALL_DRIVER
+    DB 0    ; DISK_DRIVER
+    DB 1    ; PRINT_CHAR_RAW
+    DB 1    ; PRINT_DEC_WORD
+    DB 0    ; SET_RAMD_DRIVER
+    DB 1    ; UPPERCASE
+    DB 0    ; STRCMP
+    DB 0    ; STRICMP
+    DB 1    ; SUB_HL_DE
+    DB 1    ; BEEP_TIMER
+    DB 0    ; DISK_WRITE_CHECKED
+    DB 0    ; ARG_NEXT
+    DB 0    ; INSTALL_BLOCK_DRIVER
+    DB 0    ; SET_INPUT_HOOK
+    DB 0    ; BLOCK_IO
+    DB 0    ; MEMCPY
+    DB 0    ; FILE_BODY
+    DB 1    ; GLYPH_CACHE
+    DB 1    ; PRINT_STRING_Z_MAIN
+    DB 1    ; FONT_RENDER
+    DB 2    ; PRINT_STRING_RAW_Z
+    DB 1    ; PRINT_STRING_RAW_Z_MAIN
+    DB 0    ; PRINT_STRING_RAW_LIM
+    DB 1    ; PRINT_STRING_RAW_LIM_MAIN
+    DB 5    ; TEXT_PRINT
+    DB 1    ; SET_FONT_ENCODING
+    DB 1    ; COMMAND_BATCH
+    DB 0    ; PRINT_STRING_RAW_PSEUDO: intercepted by MEM
 bbModesEnd:
     ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-0100h+1
-bbBusy = io_vars.bbBusy
-bbFast = io_vars.bbFast
-bbPage = io_vars.bbPage
-bbFunction = io_vars.bbFunction
-bbMode = io_vars.bbMode
+bbBusy          = io_vars.bbBusy
+bbFast          = io_vars.bbFast
+bbPage          = io_vars.bbPage
+bbFunction      = io_vars.bbFunction
+bbMode          = io_vars.bbMode
 bbPacketAddress = io_vars.bbPacketAddress
-bbSource = io_vars.bbSource
-bbChunk = io_vars.bbChunk
-bbScanLeft = io_vars.bbScanLeft
-bbMore = io_vars.bbMore
-bbRegs = io_vars.bbRegs
-bbCopy = io_vars.bbCopy
+bbSource        = io_vars.bbSource
+bbChunk         = io_vars.bbChunk
+bbScanLeft      = io_vars.bbScanLeft
+bbMore          = io_vars.bbMore
+bbRegs          = io_vars.bbRegs
+bbCopy          = io_vars.bbCopy
 ; Общий временный буфер: UI и физический A: не вложены друг в друга.
 bbBuffer = BIOS_BANK_IO_BUFFER
 bankBiosEnd:

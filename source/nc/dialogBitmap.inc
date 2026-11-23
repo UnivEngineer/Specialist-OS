@@ -106,8 +106,8 @@ ncDialogClose:
 ncDialogCloseDone:
     pop af
     ret
-ncDialogActive: DB 0
-ncDialogOldColor: DB COLOR_FILE
+ncDialogActive:     DB 0
+ncDialogOldColor:   DB COLOR_FILE
 ncDialogRequest:
     DW 0
     DB 0,0
@@ -295,9 +295,9 @@ ncDialogPaletteFinish:
 ncDialogPaletteReturn:
     ld a,(ncDialogColor)
     ret
-ncDialogRun: DB 0
-ncDialogColor: DB 0
-ncDialogByte: DB 0
-ncDialogCellByte: DB 0
-ncDialogPanel: DB 0
-ncDialogSlot: DB 0
+ncDialogRun:        DB 0
+ncDialogColor:      DB 0
+ncDialogByte:       DB 0
+ncDialogCellByte:   DB 0
+ncDialogPanel:      DB 0
+ncDialogSlot:       DB 0

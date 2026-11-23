@@ -1,5 +1,6 @@
 """8080: РЎР‚Р ВµР В°Р В»РЎРЉР Р…РЎвЂ№Р в„– Р С—Р В»Р В°Р Р…Р С‘РЎР‚Р С•Р Р†РЎвЂ°Р С‘Р С” FAT Р С‘ Р С‘РЎРѓР С—Р С•Р В»Р Р…Р С‘РЎвЂљР ВµР В»РЎРЉ Р С—Р В°РЎвЂЎР С”Р С‘, Р С•РЎв‚¬Р С‘Р В±Р С”Р С‘ Р С‘ Р С”РЎС“РЎР‚РЎРѓР С•РЎР‚РЎвЂ№."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re, struct, subprocess, json, argparse
 R=Path(__file__).resolve().parents[2]
 O=R/'docs/bench/cpm32-system-2026-11-13/batch-cpu'; O.mkdir(parents=True,exist_ok=True)
@@ -12,6 +13,8 @@ k=sy(args.bundle/'banked/KERNEL.sym'); t=sy(args.bundle/'banked/TRANSPORT.sym')
 base=bytearray(65536)
 for name,start in [('KERNEL',256),('LOCALBLOCK',k['MEM_IMAGE_LOCAL_START']),('TRANSPORT',0xfc00),('CLIENT',0xf800)]:
  b=(args.bundle/'banked'/f'{name}.bin').read_bytes();base[start:start+len(b)]=b
+if "dosWorkStart" in k:  # Historical benchmark bundles carry initialized data in the image.
+ initialize_dos_state(base, k)
 # The only capacity-dependent instruction; otherwise the machine code is identical.
 start=k['streamBatchStart']; pattern=bytes([0x3e,k['DOS_IO_BATCH_SECTORS'],0x32])
 at=base.index(pattern,start,start+32);base[at+1]=args.batch_size

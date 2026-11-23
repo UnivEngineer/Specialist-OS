@@ -106,10 +106,10 @@ ngRowsBad:
     pop hl                     ; discard the dispatcher continuation
     jp ngBad
 
-ngRowsCursor: DW 0
-ngRowsSource: DW 0
-ngRowsDestination: DW 0
-ngRowsLeft: DB 0
-ngRowsWidth: DB 0
-ngRowsStride: DB 0
-ngRowsStep: DB 0
+ngRowsCursor:       DW 0
+ngRowsSource:       DW 0
+ngRowsDestination:  DW 0
+ngRowsLeft:         DB 0
+ngRowsWidth:        DB 0
+ngRowsStride:       DB 0
+ngRowsStep:         DB 0

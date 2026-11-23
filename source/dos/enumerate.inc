@@ -69,10 +69,6 @@ enumReturned:
 enumReturnError:
     ld (v_dosError),a
     ret
-enumOperation: DB 0
-enumDrive: DB 0
-enumDirectory: DW 0
-enumDirectories: DS 16,0
     ELSE
 enumRun:
     jp dosUnsupported

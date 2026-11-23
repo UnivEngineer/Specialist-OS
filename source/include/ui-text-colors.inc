@@ -319,15 +319,15 @@ inlineLastColor:
     ld a,(bc)
     ret
 ; Request fields must stay contiguous and in this order.
-source: DW 0
-destination: DW 0
-width: DB 0
-height: DB 0
-sourceColors: DW 0
-destinationColors: DW 0
-rows: DB 0
-direction: DB 0
-color: DB 0
-runHeight: DB 0
-colorsBuffer: DS 20,0
+source:             DW 0
+destination:        DW 0
+width:              DB 0
+height:             DB 0
+sourceColors:       DW 0
+destinationColors:  DW 0
+rows:               DB 0
+direction:          DB 0
+color:              DB 0
+runHeight:          DB 0
+colorsBuffer:       DS 20,0
     ENDMODULE

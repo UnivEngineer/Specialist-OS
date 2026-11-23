@@ -1,7 +1,7 @@
 ; Independent MAIN index-sort benchmark. DOS and output are outside PIT intervals.
     INCLUDE "../../source/include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
-PIT_HZ = 2000000
+PIT_HZ      = 2000000
     DEFINE SORTBEN_STANDALONE
     ORG 0
     jp start
@@ -13,6 +13,20 @@ PREUPPER = 0
 PREUPPER = 1
     INCLUDE "build/upper-kernels.inc"
     ENDMODULE
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запустить интерактивное сравнение сортировок индексов каталога в MAIN.
+;
+; вход:
+;   Доступен стек вызывающего. Требуется верхняя граница памяти не ниже 8AFFh; набор и
+;   размер данных выбираются с клавиатуры.
+;
+; выход:
+;   Результаты измерений выдаются пользователю. Используется собственный стек с
+;   вершиной 8B00h; исходный SP хранится в savedSP для выхода.
+;----------------------------------------------------------------------------
 
 start:
     ld hl,0
@@ -262,10 +276,18 @@ save:
     ld de,REPORT
     call math.sub_hl_de
     ld (saveIO+FILE_PATH_IO.count),hl
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL MXOS_DOS_MEMORY
+    jp c,saveFailed
+    ld a,e
+    add a,'A'
+    ld (savePath),a
     ld hl,saveIO
     call fileWriteAll
     ld hl,savedText
     jp nc,saveMessage
+saveFailed:
     ld hl,saveErrorText
 saveMessage:
     call bios_printStringZ
@@ -606,13 +628,13 @@ millisecondsReady:
     ex de,hl
     pop hl
     ENDM
-timing_print = output
+timing_print     = output
 timing_printChar = character
 timing_div_hl_de = math.div_hl_de
-timer_read = raw.pitTimerRead
-v_elapsed: DD 0
-v_setup: DD 0
-v_last: DW 0
+timer_read       = raw.pitTimerRead
+v_elapsed:      DD 0
+v_setup:        DD 0
+v_last:         DW 0
     INCLUDE "../../source/include/timing.inc"
     INCLUDE "../../source/include/timing-ms.inc"
     ENDMODULE
@@ -631,65 +653,65 @@ rows:
     ROW 1,1,upper.benchMerge,mergeUpper
     ROW 1,1,upper.benchQuick,quickUpper
     DB 0FFh
-sizes: DB 32,64,128,250,255
-baseName: DB 'FILE0000'
-extensions: DB 'ASMTXTCOM   '
-title: DB 'SORTBEN / Intel 8080 / PIT 2 MHz',13,10,0
-clearScreen: DB 01Fh,0
-sourcePrompt: DB 'Source: S=synthetic(default), H=H: root',13,10,0
-sizePrompt: DB 'N: 1=32 2=64 3=128(default) 4=250 5=255',13,10,0
-countText: DB 'Records: ',0
-syntheticText: DB 'Source: synthetic LFSR, seed 5A',13,10,0
-hRootText: DB 'Source: H: root (first N entries)',13,10,0
-noMemoryText: DB 'SORTBEN requires free MAIN through 8AFFh',13,10,0
-nameTitle: DB 13,10,'NAME 8+3',13,10,0
-extTitle: DB 13,10,'EXTENSION 3+8',13,10,0
-upperPrepText: DB 'Uppercase preparation: ',0
-radixPrepText: DB 'Radix preparation:     ',0
-shellRaw: DB 'Shell raw:       ',0
-insertionRaw: DB 'Insertion raw:   ',0
-mergeRaw: DB 'Merge raw:       ',0
-quickRaw: DB 'Quicksort raw:   ',0
-shellUpper: DB 'Shell upper:     ',0
-insertionUpper: DB 'Insertion upper: ',0
-mergeUpper: DB 'Merge upper:     ',0
-quickUpper: DB 'Quicksort upper: ',0
-radixText: DB 'Radix keys:      ',0
-msText: DB ' ms',0
-okText: DB ' OK',13,10,0
-doneText: DB 13,10,'All indices match. Source checksum OK.',13,10,0
-failText: DB 13,10,'BENCHMARK FAILED',13,10,0
-timerErrorText: DB 13,10,'PIT clock stopped / invalid',13,10,0
-savedText: DB 'Saved B:\SORTBEN.TXT',13,10,0
-saveErrorText: DB 'Cannot save B:\SORTBEN.TXT',13,10,0
-waitText: DB 'Press any key to exit',13,10,0
-betweenText: DB 13,10,'Press Enter for the next table',13,10,0
-crlf: DB 13,10,0
-oneChar: DB 0,0
-DECIMAL: DS 11,0
-ticks: DW 0,0
-savedSP: DW 0
-reportEnd: DW REPORT
-rowCursor: DW 0
-rowTicks: DW 0
-radixTicks: DW 0
-sourceSum: DW 0
-oldDirectory: DW 0
-oldDrive: DB 0
-sourceKind: DB 0
-count: DB 0
-mode: DB 0
-rowUpper: DB 0
-divisor: DB 1
-random: DB 05Ah
-failed: DB 0
+sizes:              DB 32,64,128,250,255
+baseName:           DB 'FILE0000'
+extensions:         DB 'ASMTXTCOM   '
+title:              DB 'SORTBEN / Intel 8080 / PIT 2 MHz',13,10,0
+clearScreen:        DB 01Fh,0
+sourcePrompt:       DB 'Source: S=synthetic(default), H=H: root',13,10,0
+sizePrompt:         DB 'N: 1=32 2=64 3=128(default) 4=250 5=255',13,10,0
+countText:          DB 'Records: ',0
+syntheticText:      DB 'Source: synthetic LFSR, seed 5A',13,10,0
+hRootText:          DB 'Source: H: root (first N entries)',13,10,0
+noMemoryText:       DB 'SORTBEN requires free MAIN through 8AFFh',13,10,0
+nameTitle:          DB 13,10,'NAME 8+3',13,10,0
+extTitle:           DB 13,10,'EXTENSION 3+8',13,10,0
+upperPrepText:      DB 'Uppercase preparation: ',0
+radixPrepText:      DB 'Radix preparation:     ',0
+shellRaw:           DB 'Shell raw:       ',0
+insertionRaw:       DB 'Insertion raw:   ',0
+mergeRaw:           DB 'Merge raw:       ',0
+quickRaw:           DB 'Quicksort raw:   ',0
+shellUpper:         DB 'Shell upper:     ',0
+insertionUpper:     DB 'Insertion upper: ',0
+mergeUpper:         DB 'Merge upper:     ',0
+quickUpper:         DB 'Quicksort upper: ',0
+radixText:          DB 'Radix keys:      ',0
+msText:             DB ' ms',0
+okText:             DB ' OK',13,10,0
+doneText:           DB 13,10,'All indices match. Source checksum OK.',13,10,0
+failText:           DB 13,10,'BENCHMARK FAILED',13,10,0
+timerErrorText:     DB 13,10,'PIT clock stopped / invalid',13,10,0
+savedText:          DB 'Saved SORTBEN.TXT on RAM disk',13,10,0
+saveErrorText:      DB 'Cannot save SORTBEN.TXT on RAM disk',13,10,0
+waitText:           DB 'Press any key to exit',13,10,0
+betweenText:        DB 13,10,'Press Enter for the next table',13,10,0
+crlf:               DB 13,10,0
+oneChar:            DB 0,0
+DECIMAL:            DS 11,0
+ticks:              DW 0,0
+savedSP:            DW 0
+reportEnd:          DW REPORT
+rowCursor:          DW 0
+rowTicks:           DW 0
+radixTicks:         DW 0
+sourceSum:          DW 0
+oldDirectory:       DW 0
+oldDrive:           DB 0
+sourceKind:         DB 0
+count:              DB 0
+mode:               DB 0
+rowUpper:           DB 0
+divisor:            DB 1
+random:             DB 05Ah
+failed:             DB 0
 saveIO:
     DW savePath,REPORT,0,0
     DS FILE_DESCRIPTOR,0
 savePath: DB 'B:\SORTBEN.TXT',0
     DS MAX_PATH-($-savePath),0
 REFERENCE = 07200h
-REPORT = 07300h
+REPORT    = 07300h
     ASSERT $ < raw.benchRaw
     INCLUDE "../../source/include/file-io.inc"
     END

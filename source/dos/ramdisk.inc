@@ -54,8 +54,4 @@ dosRamBad:
     ld a,DOS_ERR_ARGUMENT
     scf
     ret
-dosRamCopy: DB 0
-    DW 0
-    DB 0
-    DW 0,256
 

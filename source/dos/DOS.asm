@@ -44,10 +44,11 @@ dosExtensionStart:
     INCLUDE "memory.inc"
     INCLUDE "modules.inc"
     INCLUDE "arena.inc"
+    INCLUDE "variables.inc"
 kernelEnd:
 dosImageEnd = kernelEnd
     ASSERT $ <= DOS_CODE_END_MAX
-    ASSERT DOS_BANK_DATA_ADDR-kernelEnd <= 1024
+    ASSERT kernelEnd <= dosWorkStart
     ASSERT $ <= DOS_BANK_OBJECT_ADDR
     ASSERT FAT_CACHE_ADDR+FAT_CACHE_SIZE <= DOS_BANK_STACK_BOTTOM
     END

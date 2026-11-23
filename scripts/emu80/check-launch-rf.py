@@ -35,8 +35,9 @@ def main():
     m = Machine('http://127.0.0.1:19781/mcp')
     image = (ROOT / 'images/SystemRom_emu80_writable.bin').read_bytes()
     kernel = (ROOT / 'bin/RAMFOS.mon').read_bytes()
-    cases = [('H:BUDI2-MX.EXE', 'assets/games/BUDI/Budi2-mx.rks'),
-             ('H:BURAN-RF.EXE', 'assets/games/Buran/Buran-ramfos.cpu')]
+    cases = [('H:/BUDI/BUDI-RF.EXE', 'assets/games/families/budi/patched/Budi-ramfos.exe'),
+             ('H:/Buran/Buran-RF.EXE', 'assets/games/families/buran/repacked/Buran-ramfos.exe')]
+    decode = runpy.run_path(str(ROOT/'scripts/images/executable.py'))['decode']
     results = {'system_sha256': hashlib.sha256(image).hexdigest(), 'cases': []}
     for name, source in cases:
         owner()
@@ -45,7 +46,7 @@ def main():
         assert m.read(0, 32768) == image[:32768]
         m.call('emu_run_for', ms=2500)
         assert m.read(SYSTEM['NC_LOAD_ADDR'], 32) == (ROOT / 'bin/NC.i80').read_bytes()[:32]
-        command = f'A:RUN.COM -RF {name} /X one\0'.encode('ascii')
+        command = f'C:/DOS/RUN.COM -RF {name} /X one\0'.encode('ascii')
         m.write(0x7300, command)
         m.write(0x8000, bytes.fromhex('21 00 73 cd 5d c8 c3 00 81'))
         m.call('bp_set', addr=0x8100, type='exec')
@@ -67,9 +68,7 @@ def main():
         assert state['pc']['dec'] == 0xF85A, (name, state)
         assert m.read(0xC000, 0x1300) == kernel[:0x1300]
         assert m.read(0xF800, 0x7E0) == kernel[0x1300:]
-        expected = (ROOT / source).read_bytes()
-        if source.endswith('.rks'):
-            expected = expected[4:-2]
+        expected = decode((ROOT / source).read_bytes(), 'exe').data
         assert m.read(0, len(expected)) == expected
         actual_args = m.read(0x8E00, 128).split(b'\0', 1)[0]
         assert actual_args.lstrip(b' ') == b'/X one', actual_args

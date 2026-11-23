@@ -165,11 +165,11 @@ hexPacketFlush:
     ld hl,(hexPacketEnd)
     jp commandQueueCommit
 
-hexPacketActive: DB 0
-hexPacketStart: DW 0
-hexPacketEnd: DW 0
-hexPacketRows: DB 0
-hexPacketBytes: DB 0
-hexPacketGroup: DB 0
-hexPacketKind: DB 0
-hexRowTarget: DW hexRow
+hexPacketActive:    DB 0
+hexPacketStart:     DW 0
+hexPacketEnd:       DW 0
+hexPacketRows:      DB 0
+hexPacketBytes:     DB 0
+hexPacketGroup:     DB 0
+hexPacketKind:      DB 0
+hexRowTarget:       DW hexRow

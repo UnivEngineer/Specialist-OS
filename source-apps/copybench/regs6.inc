@@ -3,17 +3,17 @@
 ; Первая порция четыре байта, затем 42 по шесть, без промежуточного буфера.
 ; Вход FFC0h/FFD0h: C=страница, DE=сектор, HL=основная RAM.
 ; Выход: основная RAM включена, SP сохранён; AF/BC/DE/HL/флаги разрушены.
-regSource = 0FFC3h
-regSourceSP = regSource+1
-regPage = regSource+4
-regSourcePort = regSource+6
+regSource         = 0FFC3h
+regSourceSP       = regSource+1
+regPage           = regSource+4
+regSourcePort     = regSource+6
 regSourceCallback = regSource+9
-regOldSP = 0FFCEh
-regTarget = 0FFD3h
-regTargetSP = regTarget+1
-regTargetPort = regTarget+4
+regOldSP          = 0FFCEh
+regTarget         = 0FFD3h
+regTargetSP       = regTarget+1
+regTargetPort     = regTarget+4
 regTargetCallback = regTarget+7
-regCount = 0FFDCh
+regCount          = 0FFDCh
 driverBufferedStart:
             jp regInitRead
             ld sp,0
@@ -25,8 +25,8 @@ driverBufferedStart:
             ld sp,0
             ld (IO_PAGE_RAM),a
             jp regPush4
-            DB 0
-            BLOCK 3,0
+            DB     0
+            BLOCK  3,0
 driverBufferedEnd:
             ASSERT driverBufferedEnd-driverBufferedStart == 32
 

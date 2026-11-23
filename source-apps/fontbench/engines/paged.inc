@@ -237,9 +237,9 @@ done:
     pop bc
     pop af
     ret
-text: dw 0
-codes: ds 4
-remaining: db 0
+text:           dw 0
+codes:          ds 4
+remaining:      db 0
     IFDEF FONT_REMAP32
     ALIGN 8,0
 blockMap: DB 00h,20h,40h,60h,80h,0A0h,0C0h,0E0h

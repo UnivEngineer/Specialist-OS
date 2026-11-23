@@ -271,14 +271,14 @@ imageRestoreContext:
     ld bc,IMAGE_HEADER_SIZE
     jp moveBytesForward
     IFDEF BANKED_DOS_BUILD
-imageSavedContext = DOS_IMAGE_CONTEXT_ADDR
-imageSavedDrive = imageSavedContext+64
-imageSavedDirectory = imageSavedContext+65
+imageSavedContext     = DOS_IMAGE_CONTEXT_ADDR
+imageSavedDrive       = imageSavedContext+64
+imageSavedDirectory   = imageSavedContext+65
 imageSavedDirectories = imageSavedContext+67
     ASSERT imageSavedDirectories+16 == DOS_IMAGE_HEADER_ADDR
     ELSE
-imageSavedContext: DS 32+IMAGE_HEADER_SIZE,0
-imageSavedDrive: DB 0
-imageSavedDirectory: DW 0
-imageSavedDirectories: DS 16,0
+imageSavedContext:      DS 32+IMAGE_HEADER_SIZE,0
+imageSavedDrive:        DB 0
+imageSavedDirectory:    DW 0
+imageSavedDirectories:  DS 16,0
     ENDIF

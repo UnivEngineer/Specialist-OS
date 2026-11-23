@@ -2,14 +2,14 @@
 ; Последние обнаруженные страницы временно используются с полным сохранением
 ; изменяемых данных, хвоста и общего окна. Файловые вызовы внутри теста запрещены.
     INCLUDE "../../source/include/mxos.inc"
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_FLAGS         = IMAGE_FLAG_MAIN
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
-PIT_HZ = 2000000
-BACKUP = 03000h
-EXPECTED = 05000h
-LENGTH = 02000h
-IMAGE_MEM_END = EXPECTED+LENGTH
-TARGET = 04000h
+PIT_HZ              = 2000000
+BACKUP              = 03000h
+EXPECTED            = 05000h
+LENGTH              = 02000h
+IMAGE_MEM_END       = EXPECTED+LENGTH
+TARGET              = 04000h
     MACRO LOAD_DE address
     push hl
     ld hl,(address)
@@ -17,6 +17,19 @@ TARGET = 04000h
     pop hl
     ENDM
     ORG 0
+;----------------------------------------------------------------------------
+; Выполнить тесты копирования ROM, MAIN и дополнительного ОЗУ с ВИ53.
+;
+; вход:
+;   Запуск образа MAIN с политикой EXCLUSIVE. Стек содержит адрес возврата.
+;   Для прогона требуются memTop >= 88FFh и доступная страница ОЗУ.
+;
+; выход:
+;   Результаты выводятся на экран. Затронутые данные тестируемой страницы,
+;   общее окно и хвосты страниц восстанавливаются. Стек восстановлен.
+;   Регистры и флаги результата не задаются.
+;----------------------------------------------------------------------------
+
 entry:
     di
     ld hl,0
@@ -231,6 +244,17 @@ bankRead:
     or c
     jp nz,bankRead
     ret
+;----------------------------------------------------------------------------
+; Скопировать блок из MAIN в тестируемую страницу.
+;
+; вход:
+;   de = адрес источника MAIN, hl = адрес назначения в странице targetPage,
+;   bc = ненулевая длина в байтах.
+;
+; выход:
+;   bc = 0, hl и de указывают за блоки, a = 0. Флаги от проверки счётчика.
+;----------------------------------------------------------------------------
+
 bankWrite:
     push bc
     ld a,(de)
@@ -245,6 +269,17 @@ bankWrite:
     or c
     jp nz,bankWrite
     ret
+;----------------------------------------------------------------------------
+; Копировать блок вперёд внутри текущей страницы.
+;
+; вход:
+;   hl = источник, de = назначение, bc = ненулевая длина. Перекрытие с началом
+;   назначения внутри источника недопустимо.
+;
+; выход:
+;   bc = 0, hl и de указывают за блоки, a = 0. Флаги от проверки счётчика.
+;----------------------------------------------------------------------------
+
 localCopy:
     ld a,(hl)
     ld (de),a
@@ -290,38 +325,38 @@ verifyBad:
 inputBuffer: DS 11,0
 ; Локальные настройки общей измерительной библиотеки приложений.
     INCLUDE "../../source/include/timing-pit.inc"
-timer_read = pitTimerRead
+timer_read   = pitTimerRead
 timing_print = puts
 
     MODULE copyMath
     DEFINE MATH_DIV
     INCLUDE "../../source/include/math.inc"
     ENDMODULE
-timing_div_hl_de = copyMath.div_hl_de
+timing_div_hl_de    = copyMath.div_hl_de
 TIMING_NUMBER_WIDTH = 8
-DECIMAL = inputBuffer
+DECIMAL             = inputBuffer
 timing_printChar:
     ld c,a
     jp bios_printChar
     INCLUDE "../../source/include/timing.inc"
     INCLUDE "../../source/include/timing-ms.inc"
-callerSP: DW 0
-callerKoi: DB 0
-targetPage: DB 0
-expectedPointer: DW 0
-directOK: DB 0
-blockOK: DB 0
-byteOK: DB 0
-timerError: DB 0
-v_elapsed: DD 0
-v_setup: DD 0
-v_last: DW 0
-directTicks: DD 0
-blockTicks: DD 0
-byteTicks: DD 0
-oldWindow: DS 32,0
-oldMainTail: DS 192,0
-oldBankTail: DS 192,0
+callerSP:           DW 0
+callerKoi:          DB 0
+targetPage:         DB 0
+expectedPointer:    DW 0
+directOK:           DB 0
+blockOK:            DB 0
+byteOK:             DB 0
+timerError:         DB 0
+v_elapsed:          DD 0
+v_setup:            DD 0
+v_last:             DW 0
+directTicks:        DD 0
+blockTicks:         DD 0
+byteTicks:          DD 0
+oldWindow:          DS 32,0
+oldMainTail:        DS 192,0
+oldBankTail:        DS 192,0
     INCLUDE "text.inc"
     INCLUDE "../../bin/COPYBEN.variants.inc"
 programEnd:

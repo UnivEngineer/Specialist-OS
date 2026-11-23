@@ -119,5 +119,5 @@ cliAttribPrintChar:
     call bios_printString
     call cliNewLine
     jp cliFileDone
-cliAttribLettersText: DB 'RHSA',0
-cliAttribBits: DB 1,2,4,020h
+cliAttribLettersText:   DB 'RHSA',0
+cliAttribBits:          DB 1,2,4,020h

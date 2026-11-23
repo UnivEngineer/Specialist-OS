@@ -38,6 +38,20 @@ BankPrepare:
     ret
 
 ; A=0 — готов, A=1 — требуется FORMAT; CF=1 — нельзя форматировать автоматически.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выбрать B: и повторно проверить состояние тома RAM-диска.
+;
+; вход:
+;   Установлен драйвер B:. Параметров в регистрах нет.
+;
+; выход:
+;   cf = 0, a = 0 для готового тома, a = 1 если требуется FORMAT. При cf = 1
+;   автоматическое форматирование запрещено. Процедура меняет выбранный диск.
+;----------------------------------------------------------------------------
+
 BankCheckVolume:
     ld a,1
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
@@ -104,11 +118,11 @@ BankReportError:
     scf
     ret
 
-bankPreviousDrive: DB 0
-bankFormatCommand: DB 'A:',05Ch,'FORMAT.COM B: -R -Y',0
-bankFormatText: DB 'RAMDISK: PREPARING B:',0Ah,0
-bankErrorText: DB 'RAMDISK: B: UNCHANGED, ERROR ',0
-bankBootSector: DS 256,0
+bankPreviousDrive:  DB 0
+bankFormatCommand:  DB 'C:',05Ch,'DOS',05Ch,'FORMAT.COM B: -R -Y',0
+bankFormatText:     DB 'RAMDISK: PREPARING B:',0Ah,0
+bankErrorText:      DB 'RAMDISK: B: UNCHANGED, ERROR ',0
+bankBootSector:     DS 256,0
 
 ; RAMDISK -P n: ограничение B: перед его первоначальным форматированием.
 ; Готовый том с иной геометрией и выделенные FAR-блоки не изменяются.

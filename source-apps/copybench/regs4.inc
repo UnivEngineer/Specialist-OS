@@ -3,12 +3,12 @@
 ; SP служит вторым указателем. Нет промежуточной копии данных в общей RAM.
 ; Вход FFC0h/FFD0h: C=страница, DE=сектор, HL=основная RAM.
 ; Выход: основная RAM включена, SP сохранён; AF/BC/DE/HL/флаги разрушены.
-regSelect = 0FFC3h
-regDiskSP = regSelect+1
-regPage = regSelect+4
+regSelect   = 0FFC3h
+regDiskSP   = regSelect+1
+regPage     = regSelect+4
 regCallback = regSelect+9
-regOldSP = 0FFCEh
-regMain = 0FFD3h
+regOldSP    = 0FFCEh
+regMain     = 0FFD3h
 driverBufferedStart:
             jp regInitRead
             ld sp,0

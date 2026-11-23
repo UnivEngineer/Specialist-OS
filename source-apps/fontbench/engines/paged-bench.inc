@@ -2,12 +2,12 @@
 ; После этапа прежние фазы восстанавливаются вне измеряемого интервала.
     DEFINE PAGED_CUSTOM_PHASES
 PAGED_FONT_BASE = 07E00h
-PAGED_PRE_BASE = 03000h
-PAGED_PHASE0 = 03000h
-PAGED_PHASE1 = 04000h
-PAGED_PHASE2 = 04800h
-PAGED_PHASE3 = 05000h
-PAGED_PHASE4 = 05800h
+PAGED_PRE_BASE  = 03000h
+PAGED_PHASE0    = 03000h
+PAGED_PHASE1    = 04000h
+PAGED_PHASE2    = 04800h
+PAGED_PHASE3    = 05000h
+PAGED_PHASE4    = 05800h
     IFDEF FONT_BLOCK32
     INCLUDE "block32.inc"
     ELSE
@@ -178,5 +178,5 @@ pagedRestore6:
     or c
     jp nz,pagedRestore6
     ret
-pagedDirty: DB 0
-pagedMode: DB 0
+pagedDirty:     DB 0
+pagedMode:      DB 0

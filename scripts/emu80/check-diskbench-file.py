@@ -14,7 +14,7 @@ m.call('debug_break')
 assert m.read(0xC000,3)==bytes.fromhex('C309C0')
 m.stop_at(0x8100)
 m.subroutine(0xC842,af=0,de=1)
-if m.subroutine(0xC863,bc=0xFF00)['registers']['bc']['dec']>>8!=ord('F'):
+if m.subroutine(0xC863,bc=0xFF00)['registers']['bc']['dec']>>8!=s['DISK_TECH_MX_SYSTEM_FLASH']:
     m.install_flash('FlashSys')
 results={}
 scenarios=[('h-default','h','Flash','0','2',''),('h-one','h','FlashFst','0','1','1'),('h-nine','h','FlashFst','0','1','9'),('h-max','h','FlashFst','0','1','24'),('h-verify','h','FlashFst','1','1','16'),('a-max','a',None,'0','1','24'),('a-verify','a',None,'1','1','9'),('b-max','b',None,'0','2','24'),('h-zero','h','FlashFst','0','0',None)]

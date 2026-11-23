@@ -34,19 +34,23 @@ skipSpace:
 argument:
     or a
     jp z,usage
-    ; An explicit drive path bypasses the A:\FONTS prefix.
+    ; An explicit drive path bypasses the C:\FONTS prefix.
     push hl
     inc hl
     ld a,(hl)
     pop hl
     cp ':'
-    ld de,path+9
-    jp nz,fontPathReady
-    ld de,path
-fontPathReady:
-    ld b,MAX_PATH-18          ; prefix + optional size directory + .fnt + NUL
-    xor a
+    ld de,relativeEnginePath
+    ld a,0
     ld (hasExtension),a
+    jp nz,fontRelativePath
+    ld de,path
+    jp fontPathReady
+fontRelativePath:
+    call fontExpandShortName
+    jp nc,pathDone
+fontPathReady:
+    ld b,MAX_PATH-(relativeEnginePath-path)-5 ; Reserve .fnt and its terminator.
 copyArgument:
     ld a,(hl)
     or a
@@ -162,13 +166,83 @@ fontExportReady:
     jp nz,error
     ld hl,installed
     jp bios_printStringZ
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Развернуть короткое имя штатного шрифта в путь относительно C:\FONTS.
+;
+; вход:
+;   hl = начало аргумента, имя заканчивается пробелом или нулём.
+;   de = начало свободной области длиной не менее 10 байтов.
+;
+; выход:
+;   cf = 0 при совпадении, hl указывает на разделитель, de — за записанным
+;   путём без нуля. При cf = 1 hl, de и буфер сохранены. af и bc разрушены.
+;----------------------------------------------------------------------------
+fontExpandShortName:
+    ld bc,fontAliases
+fontAliasNext:
+    ld a,(bc)
+    or a
+    jp z,fontAliasMiss
+    push hl
+fontAliasCompare:
+    ld a,(bc)
+    or a
+    jp z,fontAliasEnd
+    push de
+    ld d,a
+    ld a,(hl)
+    and 0DFh
+    cp d
+    pop de
+    jp nz,fontAliasMismatch
+    inc hl
+    inc bc
+    jp fontAliasCompare
+fontAliasEnd:
+    ld a,(hl)
+    cp ' '+1
+    jp nc,fontAliasMismatch
+    pop af
+    inc bc
+fontAliasCopy:
+    ld a,(bc)
+    or a
+    ret z
+    ld (de),a
+    inc bc
+    inc de
+    jp fontAliasCopy
+fontAliasMismatch:
+    pop hl
+fontAliasSkipName:
+    ld a,(bc)
+    inc bc
+    or a
+    jp nz,fontAliasSkipName
+fontAliasSkipPath:
+    ld a,(bc)
+    inc bc
+    or a
+    jp nz,fontAliasSkipPath
+    jp fontAliasNext
+fontAliasMiss:
+    scf
+    ret
+fontAliases:
+    DB "ROTATE",0,"6x8",05Ch,"Rotate",0
+    DB "FAST8",0,"8x8",05Ch,"Fast",0
+    DB "CPM4",0,"4x8",05Ch,"Packed",0
+    DB 0
+
 rememberCommand:
     push hl
     push bc
     push de
     ex de,hl
-    ld de,resumeCommand+12
-    ld b,MAX_PATH-12
+    ld de,resumeArguments
+    ld b,MAX_PATH-(resumeArguments-resumeCommand)
 rememberCommandByte:
     ld a,(hl)
     ld (de),a
@@ -184,8 +258,9 @@ rememberCommandDone:
     pop bc
     pop hl
     ret
-resumeCommand: DB 'A:',05Ch,'FONT.COM '
-    DS MAX_PATH-12,0
+resumeCommand: DB 'C:',05Ch,'DOS',05Ch,'FONT.COM '
+resumeArguments:
+    DS MAX_PATH-(resumeArguments-resumeCommand),0
 validate:
     ld hl,(request+FILE_PATH_IO.actual)
     ld de,IMAGE_HEADER_SIZE+48
@@ -323,13 +398,13 @@ benchStamps: DS 20,0
 lowerBase: DW 0
 magic: MXOS_IMAGE_SIGNATURE
     DB IMAGE_FLAG_MAIN
-engineMagic: DB 'FNT1',FONT_ENGINE_VERSION
-extension: DB '.fnt',0
-help: DB 'FONT NAME|PATH [-FILE] [-IMPORT FILE.PF [-OUT PATH]]',13,10,0
-installed: DB 'FONT ENGINE INSTALLED.',13,10,0
-failed: DB 'FONT ERROR: ',0
-errorSeparator: DB ' - ',0
-errorCode: DB 0
+engineMagic:        DB 'FNT1',FONT_ENGINE_VERSION
+extension:          DB '.fnt',0
+help:               DB 'FONT NAME|PATH [-FILE] [-IMPORT FILE.PF [-OUT PATH]]',13,10,0
+installed:          DB 'FONT ENGINE INSTALLED.',13,10,0
+failed:             DB 'FONT ERROR: ',0
+errorSeparator:     DB ' - ',0
+errorCode:          DB 0
 ; Public DOS and MEM status codes; keep the number for diagnostics.
 errorMessages:
     DB DOS_ERR_IO
@@ -369,31 +444,32 @@ errorMessages:
     DB MEM_ERROR_ACTIVE
     DW msgActive
     DB 0FFh
-msgIO: DB 'DISK READ OR WRITE FAILED',0
-msgMissing: DB 'ENGINE OR REQUIRED FILE NOT FOUND',0
-msgExists: DB 'OUTPUT FILE ALREADY EXISTS',0
-msgFull: DB 'DISK FULL',0
-msgDirFull: DB 'DIRECTORY FULL',0
-msgAccess: DB 'FILE ACCESS DENIED',0
-msgArgument: DB 'INVALID ARGUMENT, SIZE OR FORMAT',0
-msgCorrupt: DB 'DAMAGED FILESYSTEM',0
-msgDriver: DB 'DISK DRIVER NOT INSTALLED',0
-msgUnsupported: DB 'UNSUPPORTED FORMAT OR OPERATION',0
-msgImage: DB 'NOT A VALID FONT ENGINE',0
-msgBank: DB 'INVALID MEMORY BANK',0
-msgStack: DB 'BANK CALL STACK ERROR',0
-msgRange: DB 'MEMORY ADDRESS OUT OF RANGE',0
-msgMemory: DB 'NOT ENOUGH MAIN MEMORY',0
-msgOwner: DB 'MEMORY OWNER MISMATCH',0
-msgHandle: DB 'INVALID MEMORY HANDLE',0
-msgActive: DB 'MEMORY RESOURCE IS BUSY',0
-msgUnknown: DB 'UNKNOWN ERROR',0
-newline: DB 13,10,0
-imageBytes: DW 0
-hasExtension: DB 0
-oldDrive: DB 0
-path: DB 'A:',05Ch,'FONTS',05Ch
-    DS MAX_PATH-9,0
+msgIO:              DB 'DISK READ OR WRITE FAILED',0
+msgMissing:         DB 'ENGINE OR REQUIRED FILE NOT FOUND',0
+msgExists:          DB 'OUTPUT FILE ALREADY EXISTS',0
+msgFull:            DB 'DISK FULL',0
+msgDirFull:         DB 'DIRECTORY FULL',0
+msgAccess:          DB 'FILE ACCESS DENIED',0
+msgArgument:        DB 'INVALID ARGUMENT, SIZE OR FORMAT',0
+msgCorrupt:         DB 'DAMAGED FILESYSTEM',0
+msgDriver:          DB 'DISK DRIVER NOT INSTALLED',0
+msgUnsupported:     DB 'UNSUPPORTED FORMAT OR OPERATION',0
+msgImage:           DB 'NOT A VALID FONT ENGINE',0
+msgBank:            DB 'INVALID MEMORY BANK',0
+msgStack:           DB 'BANK CALL STACK ERROR',0
+msgRange:           DB 'MEMORY ADDRESS OUT OF RANGE',0
+msgMemory:          DB 'NOT ENOUGH MAIN MEMORY',0
+msgOwner:           DB 'MEMORY OWNER MISMATCH',0
+msgHandle:          DB 'INVALID MEMORY HANDLE',0
+msgActive:          DB 'MEMORY RESOURCE IS BUSY',0
+msgUnknown:         DB 'UNKNOWN ERROR',0
+newline:            DB 13,10,0
+imageBytes:         DW 0
+hasExtension:       DB 0
+oldDrive:           DB 0
+path:               DB 'C:',05Ch,'FONTS',05Ch
+relativeEnginePath:
+    DS MAX_PATH-(relativeEnginePath-path),0
 request: DW path,staging,FONT_ENGINE_END-FONT_ENGINE_BASE+IMAGE_HEADER_SIZE,0
     DS FILE_DESCRIPTOR,0
     INCLUDE "../include/file-io.inc"

@@ -3,6 +3,21 @@
 ; Подпрограммы разрушают AF/BC/DE/HL и флаги; внешних ABI-входов нет.
 CLI_HISTORY_COUNT = 32
     ASSERT MAX_PATH == 128
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Добавить завершённую команду в кольцо истории CLI.
+;
+; вход:
+;   CMD_LINE содержит строку с завершающим нулём в пределах MAX_PATH.
+;
+; выход:
+;   Пустая строка и повтор последней команды пропускаются. В остальных случаях
+;   обновлены запись, индекс следующей записи и число занятых мест. af, bc, de, hl
+;   рабочие.
+;----------------------------------------------------------------------------
+
 cliHistoryAdd:
     ld hl,CMD_LINE
     ld a,(hl)
@@ -41,7 +56,19 @@ cliHistoryAppend:
     ret z
     inc (hl)
     ret
-; A=индекс, HL=запись; BC сохранён, AF/DE разрушены.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти адрес записи в кольце истории.
+;
+; вход:
+;   a = индекс, используются младшие пять бит.
+;
+; выход:
+;   hl = cliHistoryEntries + (индекс × MAX_PATH). bc сохранён; de, a и флаги
+;   изменяются.
+;----------------------------------------------------------------------------
+
 cliHistorySlot:
     and CLI_HISTORY_COUNT-1
     ld l,a
@@ -56,7 +83,18 @@ cliHistorySlot:
     ld de,cliHistoryEntries
     add hl,de
     ret
-; HL/DE — два буфера MAX_PATH; перенос вместе с нулём, без хвостового мусора.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Скопировать текст записи истории вместе с завершающим нулём.
+;
+; вход:
+;   hl = источник с нулём в пределах MAX_PATH, de = буфер назначения достаточной длины.
+;
+; выход:
+;   hl и de указывают за нулевым байтом, a = 0, z = 1, cf = 0. bc сохранён.
+;----------------------------------------------------------------------------
+
 cliHistoryCopy:
     ld a,(hl)
     ld (de),a
@@ -114,6 +152,22 @@ cliHistoryRecallCopy:
 
 ; Внешняя COM может затереть весь CLI: сохраняем историю на RAM-диске B:.
 ; Обе процедуры сохраняют диск и CWD B:, ошибки истории не мешают командам.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Загрузить кольцевую историю команд из B:\CLI.HST.
+;
+; вход:
+;   cliHistoryDisabled разрешает дисковый обмен при нулевом значении. В оперативной
+;   памяти выделен блок cliHistoryData.
+;
+; выход:
+;   При корректном файле восстановлены записи и индексы кольца. Отсутствующий файл
+;   допустим. Ошибка ввода может отключить дисковую историю. После попытки
+;   восстанавливается прежний контекст диска.
+;----------------------------------------------------------------------------
+
 cliHistoryLoad:
     ld a,(cliHistoryDisabled)
     or a
@@ -185,6 +239,22 @@ cliHistoryLoadFailed:
     ld (cliHistoryCount),a
     ld (cliHistoryNext),a
     jp cliHistoryDisable
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сохранить кольцо истории CLI в скрытом файле CLI.HST на RAM-диске.
+;
+; вход:
+;   cliHistoryData содержит записи и индексы. cliHistoryDisabled = 0 для разрешения
+;   записи.
+;
+; выход:
+;   В файл записаны сигнатура MCH1 и кольцо команд. При отказе устанавливается
+;   cliHistoryDisabled, кольцо остаётся доступным в памяти. Предпринята попытка
+;   восстановить прежний диск и каталог.
+;----------------------------------------------------------------------------
+
 cliHistorySave:
     ld a,(cliHistoryDisabled)
     or a
@@ -212,13 +282,32 @@ cliHistoryDisable:
     ld a,1
     ld (cliHistoryDisabled),a
     jp cliHistoryDiskEnd
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перейти в корень RAM-диска для чтения или записи истории CLI.
+;
+; вход:
+;   Файловые службы DOS доступны. Слот сохранения контекста истории свободен.
+;
+; выход:
+;   cf = 0 при успешном переходе. cliHistoryOldDrive и, после DIR_OP_GET,
+;   cliHistoryOldDirectory сохранены для cliHistoryDiskEnd. При ошибке cf = 1, возможна
+;   частичная смена текущего контекста.
+;----------------------------------------------------------------------------
+
 cliHistoryDiskBegin:
     ld e,0
     MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
     ld (cliHistoryOldDrive),a
     xor a
     ld (cliHistoryDiskReady),a
-    ld a,1
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret c
+    ld a,e
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld a,DIR_OP_GET
@@ -244,18 +333,18 @@ cliHistoryRestoreDrive:
     ld a,(cliHistoryOldDrive)
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     ret
-cliHistoryOldDrive: DB 0
-cliHistoryDisabled: DB 0
-cliHistoryDiskReady: DB 0
-cliHistoryOldDirectory: DW 0
+cliHistoryOldDrive:         DB 0
+cliHistoryDisabled:         DB 0
+cliHistoryDiskReady:        DB 0
+cliHistoryOldDirectory:     DW 0
 cliHistoryDescriptor:
     DB 'CLI     HST',2
     DS FILE_DESCR_SIZE-12,0
-cliHistoryBrowse: DB 0
-cliHistoryDraft: DS MAX_PATH,0
+cliHistoryBrowse:   DB 0
+cliHistoryDraft:    DS MAX_PATH,0
 cliHistoryData:
     DB 'MCH1'
-cliHistoryCount: DB 0
-cliHistoryNext: DB 0
-cliHistoryEntries: DS CLI_HISTORY_COUNT*MAX_PATH,0
+cliHistoryCount:    DB 0
+cliHistoryNext:     DB 0
+cliHistoryEntries:  DS CLI_HISTORY_COUNT*MAX_PATH,0
 cliHistoryEnd:

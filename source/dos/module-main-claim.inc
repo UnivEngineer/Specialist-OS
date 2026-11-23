@@ -303,12 +303,6 @@ mmcOverlap:
 mmcSeparate:
     or a
     ret
-mmcStart: DW 0
-mmcEnd: DW 0
-mmcOwner: DB 0
-mmcPolicy: DB IMAGE_POLICY_MANAGED
-mmcPhase: DB 0
-mmcAllowOwner: DB 0
 
 ; A whole-MAIN launch releases a lower font prerender. The system font is
 ; trusted: load it directly into its fixed slot, using the normal image loader.
@@ -367,6 +361,5 @@ mfDone:
     ld (kdPage),a
     pop af
     ret
-mfFontPath: DB 'A:',05Ch,'FONTS',05Ch,'6X8',05Ch,'ROTATE.FNT',0
-mfFallbackName: DB "Rotate  "
-mfCaller: DB 0
+mfFontPath:         DB 'C:',05Ch,'FONTS',05Ch,'6X8',05Ch,'ROTATE.FNT',0
+mfFallbackName:     DB "Rotate  "

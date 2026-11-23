@@ -2,9 +2,9 @@
 
 Запуск из любого каталога: python scripts/games/repair-almaz2x.py
 Проверка готового файла: python scripts/games/repair-almaz2x.py --check
-Оригинал сохранён в assets/games/Almaz-2/legacy/Almaz2-original-ramfos-broken.exe.
-Старый MXOS-вариант: Almaz-2/legacy/Almaz2X-mxos-legacy.bin.
-Новый assets/games/Almaz-2/Almaz2-mx-optimized.cpu собирается из source-apps/almaz2 отдельно.
+Оригинал сохранён в assets/games/families/almaz-2/originals/Almaz2-ramfos-original-broken.cpu.
+Старый MXOS-вариант: Almaz-2/repaired/Almaz2-mxos-repaired.bin.
+Новый assets/games/families/almaz-2/builds/Almaz2-mx-optimized.exe собирается из source-apps/almaz2 отдельно.
 """
 
 import argparse
@@ -145,12 +145,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="только проверить готовый файл")
     args = parser.parse_args()
-    original = checked_read(GAMES / "Almaz-2/legacy/Almaz2-ramfos-original-broken.cpu", ORIGINAL_HASH)
-    mono = checked_read(GAMES / "Almaz-2/legacy/Almaz2-original.cpu", MONO_HASH)
+    original = checked_read(GAMES / "families/almaz-2/originals/Almaz2-ramfos-original-broken.cpu", ORIGINAL_HASH)
+    mono = checked_read(GAMES / "families/almaz-2/originals/Almaz2-original.cpu", MONO_HASH)
     variants = (
-        ("Almaz-2/legacy/Almaz2-ramfos-original-fixed.cpu", repair(original, mono, mxos=False), RAMFOS_HASH, 29),
-        ("Almaz-2/legacy/Almaz2X-mxos-legacy.bin", repair(original, mono), FIXED_HASH, 42),
-        ("Almaz-2/legacy/Almaz2D.cpu", user_colors(repair(original, mono)), USER_HASH, 104),
+        ("families/almaz-2/repaired/Almaz2-ramfos-fixed.cpu", repair(original, mono, mxos=False), RAMFOS_HASH, 29),
+        ("families/almaz-2/repaired/Almaz2-mxos-repaired.bin", repair(original, mono), FIXED_HASH, 42),
+        ("families/almaz-2/patched/Almaz2-mxos-custom-palette.cpu", user_colors(repair(original, mono)), USER_HASH, 104),
     )
     # Проверить все назначения до записи первого файла.
     for name, fixed, digest, count in variants:
@@ -159,7 +159,7 @@ def main():
             if target.read_bytes() != fixed:
                 raise ValueError(f"Patched file differs: {target}")
         elif target.exists() and sha256(target.read_bytes()).hexdigest() not in (
-            ORIGINAL_HASH, digest, DARK_HASH if name.endswith("Almaz2D.cpu") else digest
+            ORIGINAL_HASH, digest, DARK_HASH if name.endswith("Almaz2-mxos-custom-palette.cpu") else digest
         ):
             raise ValueError(f"Refusing to overwrite unknown file: {target}")
     for name, fixed, digest, count in variants:

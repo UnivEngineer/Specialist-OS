@@ -55,7 +55,7 @@ try:
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0x2500)
  data=bytes(range(256))*35+bytes(range(77));save('SOURCE.BIN',data)
  # Different per-drive CWDs exercise both the loader and every STEP return.
- for command_line in ('MD B:/CONTEXT','CD B:/CONTEXT','CD A:/DRIVERS','H:'):
+ for command_line in ('MD B:/CONTEXT','CD B:/CONTEXT','CD C:/DRIVERS','H:'):
   m.write(0x3400,command_line.encode()+b'\0'+bytes(100));call(k['MXOS_DOS_CLI'],hl=0x3400)
  m.write(0x3900,b'\0')
  job();states=[]
@@ -84,7 +84,7 @@ try:
  def cli(value):
   print('PREPARE',value,flush=True)
   m.write(0x3400,value.encode()+b'\0'+bytes(100));call(k['MXOS_DOS_CLI'],hl=0x3400)
- for value in ('MD B:/TROOT','MD B:/TROOT/A','COPY B:/SOURCE.BIN B:/TROOT/A/ONE.BIN','COPY A:/README.TXT B:/TROOT/TWO.TXT','H:'):cli(value)
+ for value in ('MD B:/TROOT','MD B:/TROOT/A','COPY B:/SOURCE.BIN B:/TROOT/A/ONE.BIN','COPY C:/README.TXT B:/TROOT/TWO.TXT','H:'):cli(value)
  for policy in (None,2,3):
   job('TDEST',source=b'TROOT      ',extension='   ');confirmations=0
   for _ in range(250):
@@ -118,14 +118,14 @@ try:
  unload(load_handle)
  job('RELOAD');step(4)
  page(1);cached=m.read(k['DOS_FILEOPS_ADDR'],(R/'bin/FILEOPS.i80').stat().st_size);page(0)
- m.write(0x3400,b'A:/DRIVERS/RAMDISK.COM\0'+bytes(100))
+ m.write(0x3400,b'C:/DRIVERS/RAMDISK.COM\0'+bytes(100))
  call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
  page(1)
  if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
  page(0)
  # Both flash variants and ROM install from different measured origins.
  for installer in ('AT2MXF.COM','ROM2M.COM','AT2MX.COM'):
-  m.write(0x3400,('A:/DRIVERS/'+installer).encode()+b'\0'+bytes(100))
+  m.write(0x3400,('C:/DRIVERS/'+installer).encode()+b'\0'+bytes(100))
   call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
   page(1)
   if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
@@ -151,7 +151,7 @@ try:
   m.call('bp_clear');m.call('emu_run_for',ms=250)
   print('COMMAND',value,flush=True)
  command('MD B:/TREE')
- command('COPY A:/README.TXT B:/TREE/ONE.TXT')
+ command('COPY C:/README.TXT B:/TREE/ONE.TXT')
  command('COPY B:/TREE B:/TREE2')
  command('MOVE B:/TREE2 B:/TREE3')
  print('PASS NC command editor, recursive COPY and metadata MOVE',flush=True)

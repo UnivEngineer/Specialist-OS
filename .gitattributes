@@ -10,4 +10,9 @@ hardware/import-notes.md -text
 assets/**/*.[tT][xX][tT] -text
 assets/**/*.[bB][aA][tT] -text
 assets/**/*.[hH][lL][pP] -text
+# Архивные пары CPU/I80 для «Специалиста-MX» сохраняем побайтно.
+assets/games/mx/*.[cC][pP][uU] -text
+assets/games/mx/*.[iI]80 binary
+assets/games/families/starwars/originals/StarWars2-mx.cpu -text
+assets/games/families/starwars/originals/StarWars2-mx.i80 binary
 source-emulators/emu80/*.patch text eol=lf

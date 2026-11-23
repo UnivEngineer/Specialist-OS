@@ -68,8 +68,8 @@ sysDOSTable:
     DW dos_flushVolume
     DW dos_fileAssociation
     DW dos_fileChangeDrive
-    DW dos_fileRename
-    DW dos_fileDelete
+    DW dos_dosUnsupported
+    DW dos_dosUnsupported
     DW dos_fileCopy
     DW dos_fileGetDrives
     DW dos_dosGetError
@@ -82,7 +82,7 @@ sysDOSTable:
     DW dos_dosUnsupported
     DW dos_dosUnsupported
     DW dosRawIO
-    DW dosDriverSelect
+    DW dos_dosUnsupported
     DW dosDriverInstall
     DW dosDriverRefresh
     DW dosMemoryService
@@ -96,4 +96,4 @@ sysDOSTable:
     DW fontConfigService
     DW moduleScope
     DW dosCommandBatch
-sysDOSCount = ($-sysDOSTable)/2
+sysDOSCount  = ($-sysDOSTable)/2

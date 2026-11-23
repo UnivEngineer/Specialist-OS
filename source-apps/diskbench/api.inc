@@ -27,15 +27,15 @@ bench_upperCase:
 bench_cmp_hl_de:
     INCLUDE "../../source/common/cmp_hl_de.inc"
     ELSE
-bench_getch = bios_getch
-bench_getMemTop = bios_getMemTop
-bench_input = bios_input
-bench_printChar = bios_printChar
+bench_getch        = bios_getch
+bench_getMemTop    = bios_getMemTop
+bench_input        = bios_input
+bench_printChar    = bios_printChar
 bench_printDecWord = bios_printDecWord
 bench_printHexWord = bios_printHexWord
-bench_printString = bios_printString
-bench_upperCase = bios_upperCase
-bench_cmp_hl_de = bios_cmp_hl_de
+bench_printString  = bios_printString
+bench_upperCase    = bios_upperCase
+bench_cmp_hl_de    = bios_cmp_hl_de
     ENDIF
 
 ; Арифметика всегда локальна, включая EXEC DLL: MXOS_CALL здесь только замедляет.
@@ -46,5 +46,5 @@ bench_cmp_hl_de = bios_cmp_hl_de
     INCLUDE "../../source/include/math.inc"
     ENDMODULE
 bench_mul_hl_de = benchMath.mul_hl_de
-bench_div_hl_2 = benchMath.div_hl_2
+bench_div_hl_2  = benchMath.div_hl_2
 bench_div_hl_de = benchMath.div_hl_de

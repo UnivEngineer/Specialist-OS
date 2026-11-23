@@ -4,7 +4,7 @@ import subprocess
 import sys
 import runpy
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
 cpu_helpers = runpy.run_path(str(ROOT/'scripts/images/cpu.py'))
 exe = runpy.run_path(str(ROOT/'scripts/images/executable.py'))
 cpu_format = cpu_helpers['format_cpu']

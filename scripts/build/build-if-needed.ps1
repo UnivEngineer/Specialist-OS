@@ -51,6 +51,7 @@ $editor = $SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repository
 $commander = $SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')
 $dos = $SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')
 $flashDriver = $SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')
+$floppyDriver = $SourceBase -eq 'FLOPPY' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\floppy')
 $ramDriver = $SourceBase -eq 'RAMDISK' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\ramdisk')
 $monitor2 = $SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor2')
 $monitorWin = $SourceBase -eq 'MONWIN' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor_win')
@@ -59,7 +60,7 @@ if (-not $RunBuild) {
     $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), $OutputBase)
     $inputs = @()
     $outputs = @()
-    if ($editor -or $commander -or $dos -or $flashDriver -or $ramDriver) {
+    if ($editor -or $commander -or $dos -or $flashDriver -or $ramDriver -or $floppyDriver) {
         $cacheArgs += @('--project-inputs', '--scan-output', $outputDirectory)
         if ($dos) {
             $outputs += @('bin/fonts/Compact.pf', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc',
@@ -119,7 +120,7 @@ if ($flashDriver) {
 }
 
 # Fixed-address installers are linked from their measured size, against arenaEnd.
-if ($flashDriver -or $ramDriver) {
+if ($flashDriver -or $ramDriver -or $floppyDriver) {
     & python (Join-Path $PSScriptRoot 'build-driver.py') $sourcePath
     exit $LASTEXITCODE
 }
@@ -131,7 +132,7 @@ Write-Host "[build] $sourcePath"
     ("--lst={0}" -f $listingPath) `
     ("--sym={0}" -f $symbolPath) `
     ("--raw={0}" -f $rawOutputPath) `
-    $sourcePath
+    ($sourcePath.Replace('\', '/'))
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # CPU — текстовые адреса, машинный образ находится в соседнем I80.

@@ -106,9 +106,9 @@ level_timer_done:
     POP AF
     RET
 
-v_level_timer_last:      DW 0
-v_level_timer_remainder: DW 0
-v_level_timer_initial_remainder: DW 0
+v_level_timer_last:                 DW 0
+v_level_timer_remainder:            DW 0
+v_level_timer_initial_remainder:    DW 0
 
 ; Замена исходного LD (v_time_hundreds),A в конце level_load.
 ; Вход A=сотни старого лимита; все регистры и флаги сохраняются.

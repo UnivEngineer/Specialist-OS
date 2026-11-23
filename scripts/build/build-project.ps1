@@ -13,7 +13,6 @@ Set-StrictMode -Version 2.0
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $buildScript = Join-Path $PSScriptRoot 'build-if-needed.ps1'
 $allExtras = @(
-    @{ Directory = 'source-apps/test-scr'; Source = 'test-scr'; Output = 'test-scr'; Extension = 'cpu'; Address = '0' },
     @{ Directory = 'source/ramfos'; Source = 'test-low'; Output = 'RFTEST'; Extension = 'cpu'; Address = '0' },
     @{ Directory = 'source/ramfos'; Source = 'test-high'; Output = 'RFTESTHI'; Extension = 'cpu'; Address = '0xE800' }
 )
@@ -38,7 +37,7 @@ if (-not $RunBuild) {
         if ($Force) { $fontArgs += '--force' }
         & python @fontArgs
         if ($LASTEXITCODE -ne 0) { throw 'Font engine build failed.' }
-        $cacheArgs += @('--project-inputs', '--z88dk', '--input', (Join-Path $repositoryRoot 'bin/fonts'))
+        $cacheArgs += @('--project-inputs', '--input', (Join-Path $repositoryRoot 'bin/fonts'))
         foreach ($directory in 'bin', 'source-apps/diskbench/build', 'source-apps/sortbench/build') {
             $cacheArgs += @('--scan-output', (Join-Path $repositoryRoot $directory))
         }
@@ -98,6 +97,7 @@ try {
     }
 } finally { Pop-Location }
 $components = @(
+    @{ Directory = 'source-apps/test-scr'; Source = 'test-scr'; Extension = 'cpu'; Address = '0' },
     @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = 'GFX_BASE' },
     @{ Directory = 'source/exe'; Source = 'EXE'; Extension = 'cpu'; Address = 'EXE_LOAD_ADDR' },
     @{ Directory = 'source/font'; Source = 'FONT'; Extension = 'cpu'; Address = '0' },
@@ -105,6 +105,7 @@ $components = @(
     @{ Directory = "source-apps\copybench"; Source = "COPYBEN"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source-apps\\chkdsk"; Source = "CHKDSK"; Extension = "cpu"; Address = "0" },
     @{ Directory = "source\\dos";    Source = "DOS"; Extension = "sys"; Address = "0x0100" },
+    @{ Directory = 'source/floppy'; Source = 'FLOPPY'; Extension = 'cpu'; Address = 'DOS_BANK_DRIVER_ADDR' },
     @{ Directory = "source\\tape";   Source = "tape";    Extension = "cpu"; Address = "SYSTEM_PROGRAM_ADDR" },
     @{ Directory = "source\\flash";  Source = "Flash"; Extension = "cpu"; Address = "DOS_BANK_DRIVER_ADDR" },
     @{ Directory = "source\\flash";  Source = "FlashFst"; Extension = "cpu"; Address = "DOS_BANK_DRIVER_ADDR" },
@@ -130,6 +131,7 @@ $components += @(
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINE6'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEP'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEW'; Extension = 'cpu'; Address = '0x2000' },
+    @{ Directory = 'source-apps/fontbench'; Source = 'ORIONM1'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEQ'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINES'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINE4'; Extension = 'cpu'; Address = '0x2000' },

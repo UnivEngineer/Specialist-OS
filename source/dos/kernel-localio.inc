@@ -6,15 +6,15 @@ dosRawPrepare:
     jp nz,dosUnsupported
     call flushVolume
     ret c
-    ld a,(v_drive)
-    cp 7
+    call dosPhysicalDrive
+    cp EXTERNAL_DRIVE
     jp nz,klPrepareChecked
     call klInstall
     ret c
 klPrepareChecked:
     ld hl,LOCAL_BLOCK_ENTRY
     ld de,0
-    ld a,(v_drive)
+    call dosPhysicalDrive
     ld c,a
     ld b,8
     xor a
@@ -29,14 +29,14 @@ klBlock:
     ld (klRegs),hl
     ex de,hl
     ld (klRegs+2),hl
-    ld a,(v_drive)
+    call dosPhysicalDrive
     ld c,a
     ld h,b
     ld l,c
     ld (klRegs+4),hl
-    or a
+    cp SYSTEM_DRIVE
     jp nz,klRamBounds
-    ld hl,(DOS_DRIVER_REGISTRY)
+    ld hl,(DOS_DRIVER_REGISTRY+SYSTEM_DRIVE*DRIVER_RECORD_SIZE)
     ld a,(klRegs+3)
     cp h
     jp c,klNotRam
@@ -62,7 +62,7 @@ klRamBounds:
     jp nz,klRamDirect
 klNotRam:
     ld a,c
-    or a
+    cp SYSTEM_DRIVE
     jp nz,klNotSystem
     ld a,(klRegs+5)
     cp 2
@@ -95,7 +95,7 @@ klSystemRead:
     jp klRamRead
 klNotSystem:
     ld a,c
-    cp 7
+    cp EXTERNAL_DRIVE
     jp nz,klInvoke
     call klInstall
     jp c,klDone
@@ -145,38 +145,23 @@ klRamRead:
     ld hl,klRamCopy
     call bankCopyPhysical
     jp klDone
-klRamCopy: DB 0
-    DW 0
-    DB 0
-    DW 0,256
 klBad:
     ld a,DOS_ERR_ARGUMENT
     scf
     jp klDone
 
-; Все существующие физические драйверы A:/B:/H:, любой EXEC-клиент.
+; Все существующие физические драйверы C:/B:/H:, любой EXEC-клиент.
 ; Выход Z=прямой путь, AF разрушен. Геометрия остальных устройств не меняется.
 klEligible:
     ld a,(v_diskInfo.blockShift)
     cp 8
     ret nz
-    ld a,(v_drive)
-    cp 1
+    call dosPhysicalDrive
+    cp RAM_DRIVE
     ret z
-    or a
+    cp SYSTEM_DRIVE
     ret z
-    cp 7
-    ret nz
-    push hl
-    ld hl,(DOS_DRIVER_REGISTRY+7*DRIVER_RECORD_SIZE)
-    ld a,h
-    or l
-    pop hl
-    jp nz,klEligibleH
-    inc a
-    ret
-klEligibleH:
-    xor a
+    cp EXTERNAL_DRIVE
     ret
 
 ; У каждой страницы своя отметка установленной копии. После нового профиля
@@ -231,7 +216,6 @@ klRequestInstalled:
     ld (klRequestReady),a
     or a
     ret
-klRequestReady: DB 0
 ; Внутренняя установка в фиксированный служебный слот клиента. Публичный
 ; kdStore правильно запрещает FA00h в EXEC; здесь размер проверен реестром.
 klStoreDriver:
@@ -253,10 +237,6 @@ klInvalidateNext:
     dec b
     jp nz,klInvalidateNext
     ret
-klInstalled: DS 17,0
-klMarker: DW 0
-klProbe: DB 0
-klRegs: DS MX_REGS,0
 
 ; Владелец конвейера — FAR-код страницы, DOS=1, MAIN=0.
 ; Смена владельца ждёт старую копию; последующие сектора одного клиента
@@ -301,8 +281,6 @@ fastDriver:
     pop bc
     ret c
     jp LOCAL_DRIVER_ADDR
-klFastOwner: DB DOS_IO_PAGE
-klFlushRegs: DW 0,0,0407h,0
 
 ; Прямая серия RAW не требует перехода main -> DOS на каждом блоке.
 ; Пакет результата уже сохранён в kdRegs; AF/BC/DE/HL разрушены.
@@ -314,18 +292,16 @@ klGrant:
     and 1
     ret nz
     ld a,(v_drive)
-    push af
     call registryRecord
     ld e,(hl)
     inc hl
     ld d,(hl)
     ex de,hl
     ld (klLease+1),hl
-    pop af
+    call dosPhysicalDrive
     inc a
     ld (klLease),a
     ld hl,klLease
     ld de,MAIN_RAW_LEASE
     ld bc,3
     jp kdStore
-klLease: DS 3,0

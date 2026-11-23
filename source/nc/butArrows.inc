@@ -186,20 +186,12 @@ scrollDeltaReady:
             call    printFilePanel
 
 ncArrowSelectionChanged:
-            call ncArrowStatus
+            call printInfoLine
             jp mainLoop
-ncArrowStatus:
-    IF NC_STATUS_DEFER
-            ld a,1
-            ld (ncStatusPending),a
-            ret
-    ELSE
-            jp printInfoLine
-    ENDIF
 
 scrollFinished:
             ; Курсор уже нарисован после первой строки списка.
-            call    ncArrowStatus
+            call    printInfoLine
             jp      mainLoop_cursorReady
 
 ; ---------------------------------------------------------------------------

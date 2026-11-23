@@ -72,6 +72,6 @@ pairWrite:
     or c
     jp nz,pairByte
     ret
-renderFont8: DW 02800h/8
-variant: DB 0
-preEnabled: DB 0
+renderFont8:    DW 02800h/8
+variant:        DB 0
+preEnabled:     DB 0

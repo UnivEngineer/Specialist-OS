@@ -1,5 +1,6 @@
 """8080: FILEHANDLE options, scatter allocation and checked sector routing."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import json,re,struct,subprocess
 R=Path(__file__).resolve().parents[2]
 O=R/'docs/diskbench/fragment-2026-11-10/cpu';O.mkdir(parents=True,exist_ok=True)
@@ -8,6 +9,7 @@ base=(R/'bin/DOS.sys').read_bytes();rows=[]
 def word(x):return struct.pack('<H',x)
 def mem():
  m=bytearray(65536);m[0x100:0x100+len(base)]=base
+ initialize_dos_state(m, s)
  struct.pack_into('<H',m,s['v_handle'],0xD000)
  return m
 def patch(m,label,code):m[s[label]:s[label]+len(code)]=code
@@ -45,6 +47,21 @@ for i in range(64):
  assert 2<=candidate<2048;clusters.append(candidate)
 assert max(clusters)-min(clusters)>1800 and len(set(clusters))>56
 rows.append(['scatter',clusters])
+# A packed prefix occupies clusters 2..511 on a 720 KiB volume. The first
+# seven candidates are busy. A single linear scan would always return 512.
+m=mem()
+struct.pack_into('<H',m,0xD03C,0xACE1)
+struct.pack_into('<H',m,s['v_diskInfo.dataClusters'],713)
+patch(m,'fatReadCluster',bytes.fromhex('7A E6 02 EE 02 5F 16 00 C9'))
+patch(m,'handleAllocateFound',bytes.fromhex('C9'))
+b,cf,_=run(m,'handleAllocateScatter')
+assert not cf and int.from_bytes(b[s['v_findCluster']:s['v_findCluster']+2],'little')==665
+rows.append(['scatter-packed-prefix',665])
+# A read error must reach the caller without trying another cluster.
+patch(m,'fatReadCluster',bytes((0x3E,s['DOS_ERR_IO'],0x37,0xC9)))
+b,cf,status=run(m,'handleAllocateScatter')
+assert cf and status==s['DOS_ERR_IO'] and not any(b[s['v_findCluster']:s['v_findCluster']+2])
+rows.append(['scatter-read-error',status])
 # Full and partial I/O use B=5 only for checked writes. Failed partial writes remain dirty.
 for mode,checked,fail in [(1,0,False),(1,4,False),(2,4,False),(1,4,True)]:
  m=mem();m[s['v_streamMode']]=mode;m[s['v_streamChecked']]=checked

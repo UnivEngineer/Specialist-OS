@@ -1,5 +1,6 @@
 """Независимый обход FAT16: вложения, . / .., размеры и владельцы цепочек."""
-from pathlib import Path
+import argparse
+from pathlib import Path, PurePosixPath
 import hashlib,json,struct
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -55,10 +56,14 @@ def read_tree(image):
 
 if __name__=='__main__':
     image=(ROOT/'bin/nested-Games2M.bin').read_bytes();files,dirs=read_tree(image)
-    manifest=ROOT/'scripts/images/manifests/H-Directories.txt'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('manifest', nargs='?', type=Path, default=ROOT / 'assets/H-Games2M.txt')
+    manifest = parser.parse_args().manifest
     expected=[line.split()[0].replace('\\','/') for line in manifest.read_text(encoding='utf-8-sig').splitlines() if line.strip() and not line.lstrip().startswith(('#','@'))]
     assert set(files)==set(expected),(set(files)-set(expected),set(expected)-set(files))
-    assert set(dirs)=={'Almaz','Almaz/MXOS','Almaz/STD','Almaz/RAMFOS'}
+    expected_dirs = {str(parent) for name in expected for parent in PurePosixPath(name).parents
+                     if parent != PurePosixPath('.')}
+    assert set(dirs) == expected_dirs, (set(dirs) - expected_dirs, expected_dirs - set(dirs))
     report=dict(files={p:dict(bytes=len(b),sha256=hashlib.sha256(b).hexdigest()) for p,b in files.items()},directories=dirs)
     out=ROOT/'docs/fat/directories-001';out.mkdir(parents=True,exist_ok=True)
     (out/'image.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')

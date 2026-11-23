@@ -24,16 +24,16 @@
         DB A|12h, Y, 90h+(X>>3), H-6, (W>>3)-2
     ENDM
     STRUCT UI_SCROLLBAR
-x DW 0
-y DB 0
-length DB 0
-thickness DB 0
-horizontal DB 0
-total DW 0
-visible DW 0
-position DW 0
+x               DW 0
+y               DB 0
+length          DB 0
+thickness       DB 0
+horizontal      DB 0
+total           DW 0
+visible         DW 0
+position        DW 0
     ENDS
-uiNoticeTop = 112
+uiNoticeTop    = 112
 uiNoticeHeight = 32
     MACRO UI_MODAL_NOTICE
         DB 131,120,0,0,0
@@ -42,15 +42,15 @@ uiNoticeHeight = 32
         DB 0
     ENDM
     STRUCT UI_BUTTON
-text DW 0
-left DB 0       ; X/2
-width DB 0      ; Width/2
-top DB 0
-height DB 14
-font DB 6
-selected DB 0
-normal DB 007h
-focused DB 003h
+text            DW 0
+left            DB 0    ; X/2
+width           DB 0    ; Width/2
+top             DB 0
+height          DB 14
+font            DB 6
+selected        DB 0
+normal          DB 007h
+focused         DB 003h
     ENDS
     MACRO G_LINE A,X,Y,W
         DB A|1, Y, 90h+(X>>3), (((X&7)+W+7)>>3)-2, 0FFh>>(X&7), (0FF00h>>((W+X)&7)) & 0FFh
@@ -274,8 +274,8 @@ uiDrawLineLoop:
 ; Рисуем окно (b=ширина-2, с=высота-6)
 
     IFDEF UI_MODAL_BORDER
-uiDrawKind: DB 0
-uiWindowPadding: DB 0
+uiDrawKind:         DB 0
+uiWindowPadding:    DB 0
 uiDrawModalWindow:
             ld a,2
             jp uiDrawWindowPadding
@@ -610,11 +610,11 @@ toolbarNativeMultiply:
     ret z
     add a,c
     jp toolbarNativeMultiply
-toolbarNativeColumn: DB 0
-toolbarNativeFieldSpec: DB 0
-toolbarNativeFieldWidth: DB 0
-toolbarNativeKeyColor: DB 0
-toolbarNativeLabelColor: DB 0
+toolbarNativeColumn:        DB 0
+toolbarNativeFieldSpec:     DB 0
+toolbarNativeFieldWidth:    DB 0
+toolbarNativeKeyColor:      DB 0
+toolbarNativeLabelColor:    DB 0
 
 
 

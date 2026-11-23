@@ -1,11 +1,14 @@
 """8080: shared directory scan and lookup, including root limits and sector boundaries."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re,struct,subprocess,json,argparse
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--bundle',type=Path,default=R/'bin');p.add_argument('--report',type=Path,default=R/'docs/diskbench/dos-fast-2026-11-13/directory-cpu');args=p.parse_args();O=args.report;O.mkdir(parents=True,exist_ok=True)
 k={n:int(v,16) for n,v in re.findall(r'^([\w.]+): EQU 0x([\dA-Fa-f]+)',(args.bundle/'banked/KERNEL.sym').read_text(),re.M)}
 w=lambda n:struct.pack('<H',n&65535)
 base=bytearray(65536); b=(args.bundle/'banked/KERNEL.bin').read_bytes();base[256:256+len(b)]=b
+if "dosWorkStart" in k:  # Pre-BSS benchmark bundle.
+ initialize_dos_state(base, k)
 # Cache hook returns a stable sector address; all iteration and comparisons are production code.
 base[k['fatCheckMounted']:k['fatCheckMounted']+2]=b'\xaf\xc9'
 base[k['getSectorAddressInCache']:k['getSectorAddressInCache']+3]=b'\xc3'+w(0xe400)

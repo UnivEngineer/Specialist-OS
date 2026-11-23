@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '.local/nc-info-ui'
 
 
-FONT_PATHS = {'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}
+FONT_PATHS = {'Rotate':'6x8/Rotate','Cpm4':'4x8/Packed','Fast8':'8x8/Rotate'}
 
 def main():
     parser=argparse.ArgumentParser(add_help=False)
@@ -185,7 +185,7 @@ def main():
                 assert toolbar_pixels()==before,('toolbar missing after Enter',value)
                 print('ATTRIB error/toolbar PASS',value,flush=True)
 
-            command('COPY A:/README.TXT B:/ATTR.TXT')
+            command('COPY C:/README.TXT B:/ATTR.TXT')
             attrib_error('ATTRIB B:/ATTR.TXT -R-S',False)
             attrib_error('ATTRIB -R-S B:/ATTR.TXT',False)
             command('ATTRIB -RS B:/ATTR.TXT')
@@ -212,7 +212,7 @@ def main():
                 m.stop_at(cli['cliPrompt']);m.tap('f10');m.until(cli['cliPrompt'],120,page=0)
                 m.call('bp_clear');m.call('emu_run_for',ms=500)
                 m.tap('esc')
-                value='A:/NC_MN.COM'
+                value='C:/DOS/NC_MN.COM'
                 for char in value:type_char(char)
                 assert m.read(n['CMD_LINE'],len(value)).upper()==value.encode()
                 # Breakpoints are installed only after ordinary command editing.
@@ -280,7 +280,7 @@ def main():
                 assert m.read(n['state.activePanel'],1)[0]==active
                 assert m.read(n['state.panelA_info'],2)==infos
                 assert m.read(n['state.panelA_sort'],2)==b'\1\2'
-                for panel,want in enumerate((b'A:\\FONTS\\6X8',b'H:\\')):
+                for panel,want in enumerate((b'C:\\FONTS\\6X8',b'H:\\')):
                     if infos[panel]:
                         m.tap('f3');wait() # Reveal the inactive F3 panel's list.
                     path=n['vars.pathA'] if panel==0 else n['vars.pathB']
@@ -293,7 +293,7 @@ def main():
             command('FONT 6x8/Rotate')
             if m.read(n['state.activePanel'],1)[0]:m.tap('tab');wait()
             if m.read(n['state.panelB_info'],1)[0]:m.tap('f3');wait()
-            command('CD A:/FONTS/6x8');focus(b'ROTATE.FNT')
+            command('CD C:/FONTS/6x8');focus(b'ROTATE.FNT')
             m.call('kbd_send',keys=['shift'],action='press');m.call('emu_run_for',ms=600)
             m.tap('f1');m.call('kbd_send',keys=['shift'],action='release');wait()
             m.tap('up');m.tap('enter');wait()
@@ -320,7 +320,7 @@ def main():
             saved=m.read(n['NC_SORT_KEYS'],size)
             assert b'\0' not in saved and saved.count(b'\r\n')==11,saved
             assert b'FILECOLOR' not in saved
-            for line in (b'ACTIVEPANEL 0',b'LEFTPATH A:\\FONTS\\6x8',b'LEFTSORT 1',
+            for line in (b'ACTIVEPANEL 0',b'LEFTPATH C:\\FONTS\\6x8',b'LEFTSORT 1',
                          b'RIGHTPATH H:\\',b'RIGHTSORT 2',b'RIGHTINFO 1'):
                 assert line.upper() in saved.upper(),(line,saved)
             (OUT/'saved-NC-STATE.CFG').write_bytes(saved)
@@ -336,9 +336,9 @@ def main():
             cli_command('TYPE B:/NC-STATE.CFG')
             m.screenshot(OUT/'text-state-in-cli.png')
             # Insert an earlier item while NC is absent: saved ordinals are stale.
-            cli_command('COPY A:/README.TXT A:/FONTS/6x8/'+added_name)
+            cli_command('COPY C:/README.TXT C:/FONTS/6x8/'+added_name)
             m.tap('esc')
-            for char in 'A:/NC_MN.COM':type_char(char)
+            for char in 'C:/DOS/NC_MN.COM':type_char(char)
             m.tap('enter');wait_nc()
             assert_restore(0,b'\0\1',names)
             assert m.read(n['state.panelA_curFile'],1)[0]==old_cursor+1
@@ -385,7 +385,7 @@ def main():
                 for _ in range(2):
                     panel=m.read(n['state.activePanel'],1)[0]
                     if m.read(n['state.panelA_info']+(panel^1),1)[0]:m.tap('f3');wait()
-                    command('CD A:/FONTS/6x8')
+                    command('CD C:/FONTS/6x8')
                     m.tap('home');m.tap('enter');wait()
                     assert selected().upper()==b'6X8',(font,panel,selected())
                     command('CD ..');assert selected().upper()==b'FONTS'
@@ -403,7 +403,7 @@ def main():
             assert selected().upper()==b'ZZZ.EXT'
             print('Parent catalog changed while inside child: refreshed sorted index selects ZZZ.EXT PASS',flush=True)
 
-            command('COPY A:/README.TXT B:/CASE.TXT');command('CD B:/')
+            command('COPY C:/README.TXT B:/CASE.TXT');command('CD B:/')
             def rename_case(name):
                 focus(name);before=selected()
                 m.call('kbd_send',keys=['shift'],action='press');m.call('emu_run_for',ms=600)
@@ -520,7 +520,7 @@ def main():
                 m.call('bp_clear');m.call('emu_run_for',ms=500)
                 assert m.read(n['ncDialogActive'],1)==b'\0'
                 assert panels()==before,(label,'panel pixels did not restore')
-            command('COPY A:/README.TXT B:/NCLOOK.TXT')
+            command('COPY C:/README.TXT B:/NCLOOK.TXT')
             for font in ('Cpm4','Rotate','Fast8'):
                 command('FONT '+FONT_PATHS[font]);command('A:');command('CD /');m.tap('home');wait()
                 panel=m.read(n['state.activePanel'],1)[0]
@@ -540,7 +540,7 @@ def main():
                     print(font,'F3' if info else 'files','8 dialog cancels: exact pixels, no panel redraw or list reads PASS',flush=True)
                 if m.read(n['state.panelA_info']+other,1)[0]:m.tap('f3');wait()
                 for _ in range(9):m.tap('down')
-                for value,target in [('COPY A:/README.TXT B:/NCLOOK.TXT','ncOverwriteKey'),
+                for value,target in [('COPY C:/README.TXT B:/NCLOOK.TXT','ncOverwriteKey'),
                                      ('DEL A:/NCSAVEZZ.TMP','copyFileAnyKey')]:
                     m.tap('esc');m.call('emu_run_for',ms=250)
                     for char in value:type_char(char)
@@ -595,11 +595,11 @@ def main():
                 print(font,'normal colors, forward/backward bitmap scroll, palette table and cursor PASS',flush=True)
                 m.tap('tab');wait()
             if '--launch-colors' in sys.argv:
-                command('CD A:/FONTS/6x8');check_colors()
+                command('CD C:/FONTS/6x8');check_colors()
                 m.screenshot(OUT/'launch-FNT-system-modules.png')
                 print('Launchable FNT and MON retain executable colors despite System/Read-only attributes PASS',flush=True)
                 return
-            command('COPY A:/README.TXT B:/COLOR.ZIP')
+            command('COPY C:/README.TXT B:/COLOR.ZIP')
             command('B:');command('CD /');check_colors()
             m.screenshot(OUT/'Fast8-archive-color.png')
             print('Archive palette and ordinary DOS COPY through the NC editor PASS',flush=True)
@@ -689,7 +689,7 @@ def main():
         for font in (() if '--state-only' in sys.argv else fonts):
             command('FONT '+FONT_PATHS[font])
             if '--overwrite-ui' in sys.argv:
-                copy='COPY A:/README.TXT B:/NCLOOK.TXT'
+                copy='COPY C:/README.TXT B:/NCLOOK.TXT'
                 if not overwrite_fixture:
                     command(copy) # README has no read-only attribute.
                     overwrite_fixture=True
@@ -747,7 +747,7 @@ def main():
                 m.tap('home');wait()
                 unchanged() # .. -> FONTS through ordinary Enter.
                 path=n['vars.pathA'] if panel==0 else n['vars.pathB']
-                assert m.read(path,128).split(b'\0')[0].upper()==b'A:\\FONTS'
+                assert m.read(path,128).split(b'\0')[0].upper()==b'C:\\FONTS'
                 command('H:')
                 assert m.read(n['ncInfoDrive'],1)==b'\x07','drive switch did not refresh information'
                 m.screenshot(OUT/(font+'-info-drive-H.png'))
@@ -854,7 +854,7 @@ def main():
             assert m.read(n['vars.pathArg'],128).split(b'\0')[0].upper()==leaf.upper(),'status contains a path instead of the leaf'
             m.screenshot(OUT/'file-leaf-status.png')
             m.tap('home');m.tap('enter');wait()
-            assert m.read(n['vars.pathA'],128).split(b'\0')[0].upper()==b'A:\\FONTS'
+            assert m.read(n['vars.pathA'],128).split(b'\0')[0].upper()==b'C:\\FONTS'
             print('F3 persistence: FONT return on both panels, CLI return, dot filtering, parent navigation and leaf status PASS',flush=True)
     finally:
         try:

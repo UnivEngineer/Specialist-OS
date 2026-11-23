@@ -59,8 +59,20 @@ keyClockDone:
     pop hl
     ret
 
-; Isolate the ПС contact (column PA3, row PB2). Sample Shift in the same read.
-; Restore the standard 82h matrix configuration; A and flags report the mask.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; ПС подключён к контакту PA3/PB2.
+; Опросить контакты Shift и ПС в одной выборке клавиатуры.
+;
+; вход:
+;   Параметров нет. Доступны порты ВВ55 в текущей странице.
+;
+; выход:
+;   a = маска IO_KEY_MOD_SHIFT и IO_KEY_MOD_CTRL, z = 1 при нулевой маске, cf = 0.
+;   Восстановлен режим 82h. bc, de и hl сохранены.
+;----------------------------------------------------------------------------
+
 keyReadModifiers:
     ld a,083h
     ld (IO_KEYB_MODE),a
@@ -76,6 +88,19 @@ keyReadModifiers:
     ret
 
 ; Mode 82 selects all columns. FF means no ordinary key (Shift is independent).
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перевести ВВ55 клавиатуры в штатный режим опроса.
+;
+; вход:
+;   Параметров нет.
+;
+; выход:
+;   IO_KEYB_MODE получает 82h, a = 82h. bc, de, hl и флаги сохранены.
+;----------------------------------------------------------------------------
+
 keyMode82:
     ld a,082h
     ld (IO_KEYB_MODE),a

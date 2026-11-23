@@ -73,18 +73,18 @@ kernelRealBatch:
     ld (hl),a
     ex de,hl
     ret
-labelApiChar: DB 'API BIOS chr:',0
-apiCharMain: DD 0
-apiCharBank: DD 0
-labelApiReal: DB 'API real chr:',0
-apiRealMain: DD 0
-apiRealBank: DD 0
-labelApiString: DB 'API Win20 :  ',0
-apiStringMain: DD 0
-apiStringBank: DD 0
-labelApiFar48: DB 'API Far48:   ',0
-apiFar48Main: DD 0
-apiFar48Bank: DD 0
-labelApiBulk: DB 'API Far1152: ',0
-apiBulkMain: DD 0
-apiBulkBank: DD 0
+labelApiChar:       DB 'API BIOS chr:',0
+apiCharMain:        DD 0
+apiCharBank:        DD 0
+labelApiReal:       DB 'API real chr:',0
+apiRealMain:        DD 0
+apiRealBank:        DD 0
+labelApiString:     DB 'API Win20 :  ',0
+apiStringMain:      DD 0
+apiStringBank:      DD 0
+labelApiFar48:      DB 'API Far48:   ',0
+apiFar48Main:       DD 0
+apiFar48Bank:       DD 0
+labelApiBulk:       DB 'API Far1152: ',0
+apiBulkMain:        DD 0
+apiBulkBank:        DD 0

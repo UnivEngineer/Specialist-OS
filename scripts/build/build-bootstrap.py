@@ -8,11 +8,12 @@ p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--probe', action='store_true')
 p.add_argument('--font-body', type=Path)
 p.add_argument('--font-name')
+p.add_argument('--fonts-ready', action='store_true', help='Use the font engines prepared by the OS build')
 p.add_argument('--force', action='store_true')
 p.add_argument('--run-build', action='store_true', help=argparse.SUPPRESS)
 a = p.parse_args()
 if a.font_body is None:
- lines=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig').splitlines()
+ lines=(ROOT/'assets/C-System.txt').read_text(encoding='utf-8-sig').splitlines()
  names=[line.split()[1] for line in lines if line.strip().lower().startswith('@bootfont ')]
  if len(names)!=1:raise ValueError('System manifest requires exactly one @bootfont')
  entries=[line.split() for line in lines if line.strip() and not line.lstrip().startswith(('#','@'))]
@@ -23,10 +24,11 @@ if a.font_body is None:
 font_path=a.font_body.with_suffix('.i80') if a.font_body.suffix.lower()=='.cpu' else a.font_body
 out = ROOT / 'bin/bootstrap'
 if not a.run_build:
-    subprocess.run([sys.executable, str(ROOT / 'scripts/build/build-font-engines.py')], check=True)
+    if not a.fonts_ready:
+        subprocess.run([sys.executable, str(ROOT / 'scripts/build/build-font-engines.py')], check=True)
     options = ['Bootstrap', '--scan-output', str(out), '--output', str(out / 'sector.bin')]
     for name in ('source/bootstrap', 'source/include', 'tasm/sjasmplus.exe', 'scripts/build/build-boot-splash.py',
-                 'scripts/images/executable.py', 'scripts/images/cpu.py', 'scripts/images/manifests/A-System.txt',
+                 'scripts/images/executable.py', 'scripts/images/cpu.py', 'assets/C-System.txt',
                  'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/DOS.sys',
                  'bin/System.layout.json', 'bin/banked/TRANSPORT.sym', 'bin/banked/KERNEL.sym', 'bin/MEM.sym'):
         options.extend(('--input', str(ROOT / name)))
@@ -82,7 +84,7 @@ with (out/'config.inc').open('a',encoding='utf-8') as f:
   f.write(f'{alias} = 0{int(ts[key],16):04X}h\n')
 ks=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/KERNEL.sym').read_text(),re.M))
 with (out/'config.inc').open('a',encoding='utf-8') as f:
- f.write(f'BOOT_MEM_LOCAL_A = 0{int(symbols["MEM_LOCAL_A"],16):04X}h\n')
+ f.write(f'BOOT_MEM_LOCAL_SYSTEM = 0{int(symbols["MEM_LOCAL_SYSTEM"],16):04X}h\n')
  f.write(f'BOOT_MEM_NEAR_COPY = 0{int(symbols["MEM_NEAR_COPY"],16):04X}h\n')
  f.write(f'BOOT_DOS_NEAR_COPY = 0{int(ks["memcpy_bc_hl"],16):04X}h\n')
  f.write(f'BOOT_DOS_LOCAL_A = 0{int(ks["dosSystemDriver"],16):04X}h\n')
@@ -101,5 +103,5 @@ subprocess.run(['python', str(ROOT/'scripts/build/build-boot-splash.py')], check
 for name,source,defines in [('BOOT','BOOTBANK',[]),('legacy' ,'SECTOR',[]),('sector','SECTOR',['-DSTAGED_BOOT=1'])]:
  if name=='sector':
   (out/'sector-config.inc').write_text(f'BOOT_COLOR_PORT = 0{int(symbols["IO_COLOR"],16):04X}h\nBOOT_STAGE_BASE = 08000h\nBOOT_STAGE_BYTES = {(out/"BOOT.bin").stat().st_size}\n',encoding='utf-8')
- subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',*defines,f'--raw={out/name}.bin',f'--sym={out/name}.sym',f'--lst={out/name}.lst',str(ROOT/f'source/bootstrap/{source}.asm')],check=True)
+ subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',*defines,f'--raw={out/name}.bin',f'--sym={out/name}.sym',f'--lst={out/name}.lst',(ROOT/f'source/bootstrap/{source}.asm').as_posix()],check=True)
 assert (out/'legacy.bin').read_bytes()==(ROOT/'assets/system-rom/boot-system.bin').read_bytes()

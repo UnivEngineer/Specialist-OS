@@ -20,26 +20,26 @@ BANK_FRAME_TARGET = BANK_PACKET+14
 
 ; Профиль вызова MX_REGS: восемь байт регистров передаются прямо в окне.
 ; KIND=2, ENTRY/OPERATION не занимают регистры вызываемой функции.
-BANK_FRAME_STATUS = BANK_PACKET+15
-BANK_FRAME_ENTRY = BANK_PACKET+16
+BANK_FRAME_STATUS    = BANK_PACKET+15
+BANK_FRAME_ENTRY     = BANK_PACKET+16
 BANK_FRAME_OPERATION = BANK_PACKET+18
     ASSERT BANK_FRAME_OPERATION+2 == BANK_WINDOW+28
 
 ; Последний байт физически общий и не пересекается с командами/CPM16.
-BANK_PROFILE = BANK_WINDOW+31
-BANK_PROFILE_COMMAND = 0
-BANK_PROFILE_COPY = 1
-BANK_PROFILE_LOCAL = 2
-BANK_PROFILE_COUNT = 3
-BANK_BUFFER_KIND = BANK_WINDOW+30 ; 0=register frame, 1=inline to MAIN, 2=return
-BANK_LANDING      = 0FC00h
-BANK_COMMAND_LANDING = 0FED0h ; Постоянный короткий обработчик во всех банках
-BANK_SCALAR_KIND = BANK_FRAME_KIND
+BANK_PROFILE            = BANK_WINDOW+31
+BANK_PROFILE_COMMAND    = 0
+BANK_PROFILE_COPY       = 1
+BANK_PROFILE_LOCAL      = 2
+BANK_PROFILE_COUNT      = 3
+BANK_BUFFER_KIND        = BANK_WINDOW+30  ; 0=register frame, 1=inline to MAIN, 2=return
+BANK_LANDING            = 0FC00h
+BANK_COMMAND_LANDING    = 0FED0h          ; Постоянный короткий обработчик во всех банках
+BANK_SCALAR_KIND        = BANK_FRAME_KIND
 BANK_SCALAR_RETURN_PAIR = BANK_WINDOW+28
 BANK_SCALAR_RETURN_GATE = BANK_WINDOW+4
 
 ; Временный вход полной банковой DOS после локальной таблицы JMP.
-BANK_DOS_GATE     = 0015Dh
+BANK_DOS_GATE     = DOS_BANK_CODE_ADDR + (dos_setShell-dos_dosBoot) + 3
 BANK_STACK_LOW    = 0F800h
 BANK_STACK_TOP    = 0FC00h
 BANK_MAX_DEPTH    = 8
@@ -55,12 +55,12 @@ BANK_ERROR_RANGE  = MEM_ERROR_RANGE
 ; Локальные кадры стека, не поля общего аппаратного окна.
 ; Все слова little-endian. Смещения от SP сразу после создания кадра.
 ; Кадр вызывающей стороны: BANK_FRAME_SP указывает на его начало.
-BANK_CALLER_SERVICE_SP = 0  ; Предыдущее значение локального bankServiceSP
-BANK_CALLER_HL         = 2  ; Сохранённый HL
-BANK_CALLER_DE         = 4  ; Сохранённый DE
-BANK_CALLER_BC         = 6  ; Сохранённый BC
-BANK_CALLER_AF         = 8  ; Сохранённый AF: F по +8, A по +9
-BANK_CALLER_PC         = 10 ; Адрес возврата, записанный исходным CALL
+BANK_CALLER_SERVICE_SP = 0   ; Предыдущее значение локального bankServiceSP
+BANK_CALLER_HL         = 2   ; Сохранённый HL
+BANK_CALLER_DE         = 4   ; Сохранённый DE
+BANK_CALLER_BC         = 6   ; Сохранённый BC
+BANK_CALLER_AF         = 8   ; Сохранённый AF: F по +8, A по +9
+BANK_CALLER_PC         = 10  ; Адрес возврата, записанный исходным CALL
 BANK_CALLER_BYTES      = 12
 ; Кадр исполнителя: SP на входе в целевую процедуру.
 BANK_CALLEE_RETURN     = 0  ; Адрес bankServiceReturn для обычного RET

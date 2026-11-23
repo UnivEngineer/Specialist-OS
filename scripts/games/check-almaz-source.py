@@ -217,7 +217,7 @@ class CPU:
 
 
 def main():
-    original = (ROOT / "assets/games/Almaz.rks").read_bytes()
+    original = (ROOT / "assets/games/std/Almaz.rks").read_bytes()
     rebuilt = (ROOT / "bin/Almaz-original.rks").read_bytes()
     assert sha256(original).hexdigest() == "62170eb15cd668cb6f8dd3ca7a745d63b4549adc249fd3439fc8e6632ed66397"
     assert original == rebuilt, "RKS не совпадает с оригиналом"

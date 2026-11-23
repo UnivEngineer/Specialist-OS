@@ -186,19 +186,19 @@ engineEqual:
     inc de
     inc hl
     jp engineEqual
-argToken: DS 16,0
-argAll: DB 'ALL',0
-argStandalone: DB 'STANDALONE',0
-argOff: DB 'OFF',0
-argOn: DB 'ON',0
-argBoth: DB 'BOTH',0
-argLegacy: DB 'LEGACY',0
+argToken:       DS 16,0
+argAll:         DB 'ALL',0
+argStandalone:  DB 'STANDALONE',0
+argOff:         DB 'OFF',0
+argOn:          DB 'ON',0
+argBoth:        DB 'BOTH',0
+argLegacy:      DB 'LEGACY',0
 ; Keep selectors used in previous benchmark reports and runners.
 engineAliases:
     DW argRotate6,rotateQuadsRecord
     DW argPack6K,packedQuadsRecord
     DW argFast12K,fullQuadsRecord
 engineAliasesEnd:
-argRotate6: DB 'ROTATE6',0
-argPack6K: DB 'PACK6K',0
-argFast12K: DB 'FAST12K',0
+argRotate6:     DB 'ROTATE6',0
+argPack6K:      DB 'PACK6K',0
+argFast12K:     DB 'FAST12K',0

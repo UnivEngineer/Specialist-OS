@@ -1,13 +1,16 @@
 ; Общий измеритель MAIN/EXEC/DOS: один FILEHANDLE-запрос на весь локальный буфер.
-; Вход HL=main-адрес одиннадцати байтов настроек: диск, проверка, проходы, секторы,
-; reserved:word, dataStart:word, RAW/FILE mask, scatter, смещение буфера 0/1. Выход B=FAR-банк, HL=88 байт статистики.
+; Вход HL=main-адрес одиннадцати байтов настроек: диск, проверка, проходы, страницы по 256 байт,
+; секторов/кластер, страниц/сектор, dataStart:word, RAW/FILE mask, scatter, смещение буфера 0/1. Выход B=FAR-банк, HL=88 байт статистики.
 ; Первые 48 байт прежние; +48/+52 — RAW WRITE/READ HIGH, +56 — VERIFY HIGH U32.
 ; +60/+70 — FILE HIGH WRITE/READ (по 10 байт), +84 — VERIFY HIGH U32.
 ; CF/A=ошибка DOS. Загрузка/пересылка результатов вне замеров.
     INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "layout.inc"
     IFDEF WORKER_MAIN
-    ORG 02100h
+    ORG BENCH_MAIN_WORK_ADDR
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
+IMAGE_API           = 2
     ELSE
     ORG DOS_BANK_DRIVER_ADDR
     IFDEF WORKER_DOS
@@ -16,6 +19,24 @@ IMAGE_FLAGS = IMAGE_FLAG_DRIVER
 IMAGE_FLAGS = IMAGE_FLAG_BANK
     ENDIF
     ENDIF
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выполнить измерение дискового обмена в выбранной странице и восстановить опции.
+;
+; вход:
+;   hl = адрес 11 байт настроек в MAIN: диск, проверка, число проходов, страницы по 256 байт,
+;   секторы/кластер, страницы/сектор, первое LBA данных, маска RAW/FILE, размещение и смещение буфера 0 или 1.
+;   Для MAIN контроллер владеет буфером с BENCH_MAIN_BUFFER_ADDR и областью
+;   BENCH_MAIN_STATS_ADDR на весь вызов; длина буфера включает смещение.
+;
+; выход:
+;   cf = 0: b = FAR-страница, hl = локальный адрес 88 байт статистики. При отказе cf =
+;   1, a = код. restoreOptions выполняется на обоих путях и сохраняет регистры
+;   результата.
+;----------------------------------------------------------------------------
+
 entry:
     call workerEntry
     push af
@@ -56,8 +77,12 @@ workerEntry:
     ret c
     ld a,c
     ld (caps),a
+    ld a,b
+    ld (technology),a
+    ld a,(config+5)
+    ld (sectorPages),a
     ld hl,stats
-    ld b,88
+    ld b,BENCH_MAIN_STATS_SIZE
     xor a
 clearStats:
     ld (hl),a
@@ -167,8 +192,7 @@ rawVerified:
     call validateRawData
     jp c,failed
     IFDEF WORKER_MAIN
-    ld a,(config)
-    or a
+    call workerMapped
     call z,rawHigh
     jp c,failed
     ENDIF
@@ -265,6 +289,8 @@ begin:
 ; RAW использует один стабильный секторный буфер. Подготовка и обычная
 ; валидация отделены от непрерывной измеряемой передачи всего списка LBA.
 prepareRawBuffer:
+    ld a,(sectorPages)
+    ld d,a
     ld hl,(bufferAddress)
     ld a,(operation)
     cp 1
@@ -284,6 +310,8 @@ rawFill:
     inc hl
     dec c
     jp nz,rawFill
+    dec d
+    jp nz,rawFill
     ret
 rawSeries:
     ld a,(operation)
@@ -295,14 +323,14 @@ rawSeries:
     jp nz,rawSelect
     ld b,5
 rawSelect:
-    ld hl,(rawCall+1)
+    ld hl,(rawJump+1)
 rawSelected:
     ld (rawActive+1),hl
     ld a,b
     ld (rawOperation),a
     ld hl,sectors
     ld (list),hl
-    ld a,(config+3)
+    call rawCount
     ld (index),a
 rawBlock:
     ld hl,(list)
@@ -314,7 +342,7 @@ rawBlock:
     ld hl,(bufferAddress)
     ld a,(rawOperation)
     ld b,a
-    ld a,(config)
+    ld a,(rawCall+1)
     ld c,a
     call rawActive
     ret c
@@ -333,7 +361,7 @@ validateRawData:
     ret nz
     ld hl,sectors
     ld (list),hl
-    ld a,(config+3)
+    call rawCount
     ld (index),a
 validateRawNext:
     ld hl,(list)
@@ -348,6 +376,8 @@ validateRawNext:
     ld c,a
     call rawCall
     ret c
+    ld a,(sectorPages)
+    ld d,a
     ld hl,(bufferAddress)
     ld c,0
 validateRawByte:
@@ -357,6 +387,8 @@ validateRawByte:
     jp nz,mismatch
     inc hl
     dec c
+    jp nz,validateRawByte
+    dec d
     jp nz,validateRawByte
 validateRawSectorDone:
     ld hl,index
@@ -513,47 +545,79 @@ flushDone:
     pop af
     ret
 
-; Только подготовка пересекает DOS. Список LBA уже находится здесь.
-; Нельзя вызывать DOS между prepareRaw и последним локальным flush.
+; Выход CF/A — статус, rawCall настроен для B=1/2/4/5. BC/DE/HL рабочие.
+; Блоки 512 байт идут через RAW_IO. Аренда локального входа для блоков
+; 256 байт действует до следующего вызова DOS. Список LBA уже подготовлен.
 prepareRaw:
+    ld a,(sectorPages)
+    dec a
+    ld hl,rawViaDos
+    ld c,0
+    jp nz,prepareRawReady
     ld b,RAW_OP_PREPARE
     MXOS_CALL MXOS_DOS_RAW_IO
     ret c
-    ld (rawCall+1),hl
+prepareRawReady:
+    ld (rawJump+1),hl
+    ld a,c
+    ld (rawCall+1),a
     xor a
     ret
+rawViaDos:
+    MXOS_CALL MXOS_DOS_RAW_IO
+    ret
 rawCall:
+    ld c,0
+rawJump:
     jp 0
 
+; Выход A = число физических секторов испытания, BC/DE/HL сохранены.
+rawCount:
+    ld a,(sectorPages)
+    dec a
+    ld a,(config+3)
+    ret z
+    rrca
+    ret
+
     IFDEF WORKER_MAIN
-; Полный FILE HIGH: экран сохраняется в уже отработавший LOW-буфер.
-; Вся подготовка/восстановление вне измерения; общий FILEHANDLE не меняется.
+; Z=1 для системного ROM/flash, CF=0. A разрушен, BC/DE/HL сохранены.
+workerMapped:
+    ld a,(technology)
+    xor DISK_TECH_MX_SYSTEM_FLASH
+    ret z
+    xor DISK_TECH_MX_SYSTEM_FLASH ^ DISK_TECH_MX_SYSTEM_ROM
+    ret
+
+BENCH_HIGH_SCREEN = 09000h
+    ASSERT BENCH_HIGH_SCREEN+8193 <= 0C000h
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Измерить полный файл через экран для системного ROM/flash.
+;
+; вход:
+;   config задаёт режим, размеры и смещение. LOW-буфер свободен после FILE.
+;
+; выход:
+;   Статистика FILE HIGH дополняется. Экран и рабочие указатели возвращаются
+;   в исходное состояние. CF/A — статус обмена, регистры разрушаются.
+;----------------------------------------------------------------------------
 fileHigh:
-    ld a,(config)
-    or a
+    call workerMapped
     ret nz
     ld a,(config+3)
-    cp 33                       ; Целиком до 8 КиБ, без порционного FILE API.
+    cp 33
     ret nc
     ld hl,txtScreenBuffer
     MXOS_CALL MXOS_BIOS_PRINT_STRING
-    ld hl,09000h
-    ld (copyRequest+1),hl
-    ld hl,buffer
-    ld (copyRequest+4),hl
     ld a,(config+3)
     ld h,a
     ld a,(config+10)
-    ld l,a                      ; Включая дополнительный байт смещения.
-    ld (copyRequest+6),hl
-    ld hl,copyRequest
-    call mx_memcpyFar
-    ret c
-    xor a
-    ld (IO_COLOR),a              ; Экранный буфер остаётся чёрным во время теста.
-    ld hl,09000h
-    ld a,(config+10)
     ld l,a
+    call saveHighScreen
+    ret c
     ld (dataBuffer),hl
     ld hl,stats+60
     ld (fileStats),hl
@@ -569,33 +633,44 @@ fileHigh:
 fileHighRead:
     call fileReadPass
 fileHighReturn:
-    push af
-    ld a,COLOR_BIOS
-    ld (IO_COLOR),a              ; Цвет консоли до восстановления её байтов.
-    ld hl,buffer
-    ld (copyRequest+1),hl
-    ld hl,09000h
-    ld (copyRequest+4),hl
-    ld hl,copyRequest
-    call mx_memcpyFar
-    ld hl,(bufferAddress)        ; Постоянный LOW-адрес, уже учитывает +1.
+    call restoreHighScreen
+    ld hl,(bufferAddress)
     ld (dataBuffer),hl
     ld hl,stats+20
     ld (fileStats),hl
-    ld hl,config
-    ld (copyRequest+4),hl
-    ld hl,11
-    ld (copyRequest+6),hl
-    pop af
     ret
 
-; A: верхний буфер одновременно виден с ROM. Подготовка/сравнение
-; исключены так же, как для нижнего буфера; число секторов одинаковое.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Измерить RAW HIGH через экран, сохранив его в начале LOW-буфера.
+;
+; вход:
+;   Выбран системный ROM/flash с физическим блоком 256 байт. Список секторов
+;   готов. config+2 задаёт число проходов записи, config+10 — смещение 0/1.
+;
+; выход:
+;   Статистика RAW HIGH дополняется. Экран и bufferAddress восстановлены.
+;   CF/A — статус обмена или восстановления, регистры разрушаются.
+;----------------------------------------------------------------------------
 rawHigh:
-    ld hl,08200h
-    ld a,(config+10)
-    ld l,a
+    ld hl,257
+    call saveHighScreen
+    ret c
     ld (bufferAddress),hl
+    ld a,(config+2)
+    or a
+    jp z,rawHighReadStart
+    call rawHighWrite
+    jp c,rawHighReturn
+rawHighReadStart:
+    call rawHighRead
+rawHighReturn:
+    call restoreHighScreen
+    ld hl,(dataBuffer)
+    ld (bufferAddress),hl
+    ret
+rawHighWrite:
     ld a,1
     ld (operation),a
     call prepareRawBuffer
@@ -612,19 +687,17 @@ rawHigh:
     call addElapsed
     ld a,(config+1)
     cp 6
-    jp nz,readHigh
+    jp z,rawHighVerify
+    or a
+    ret
+rawHighVerify:
     call begin
     call validateRawData
     ret c
     call timer_sample
     ld de,stats+56
-    call addElapsed
-    jp readHigh
-readHigh:
-    ld hl,08200h
-    ld a,(config+10)
-    ld l,a
-    ld (bufferAddress),hl
+    jp addElapsed
+rawHighRead:
     ld a,2
     ld (operation),a
     call prepareRawBuffer
@@ -634,12 +707,70 @@ readHigh:
     call timer_sample
     ld de,stats+52
     call addElapsed
-    call validateRawData
+    jp validateRawData
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сохранить часть экрана в начале LOW-буфера, затем выбрать чёрный цвет.
+;
+; вход:
+;   hl = длина в байтах с учётом выравнивания, 1..8193. Начало LOW-буфера
+;   свободно на эту длину, config+10 задаёт смещение 0/1.
+;
+; выход:
+;   cf = 0: hl = адрес обмена в экране. cf = 1: a = ошибка MEM, цвет не меняется.
+;   Остальные регистры разрушаются.
+;----------------------------------------------------------------------------
+saveHighScreen:
+    ld (copyRequest+6),hl
+    ld hl,BENCH_HIGH_SCREEN
+    ld de,buffer
+    call copyHighScreen
+    ret c
+    xor a
+    ld (IO_COLOR),a
+    ld hl,BENCH_HIGH_SCREEN
+    ld a,(config+10)
+    ld l,a
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вернуть сохранённую часть экрана и цвет консоли.
+;
+; вход:
+;   LOW-буфер содержит снимок, copyRequest+6 — длина снимка, AF — статус I/O.
+;
+; выход:
+;   CF/A возвращают исходный статус при успешном восстановлении, иначе ошибку MEM.
+;   Остальные регистры разрушаются. Поля copyRequest подготовлены для запуска.
+;----------------------------------------------------------------------------
+restoreHighScreen:
     push af
-    ld hl,(dataBuffer)
-    ld (bufferAddress),hl
+    ld a,COLOR_BIOS
+    ld (IO_COLOR),a
+    ld hl,buffer
+    ld de,BENCH_HIGH_SCREEN
+    call copyHighScreen
+    ld hl,config
+    ld (copyRequest+4),hl
+    ld hl,11
+    ld (copyRequest+6),hl
+    pop bc
+    ret c
+    push bc
     pop af
     ret
+
+; hl = источник, de = приёмник в MAIN. Длина уже задана, CF/A — статус MEM.
+copyHighScreen:
+    ld (copyRequest+1),hl
+    ex de,hl
+    ld (copyRequest+4),hl
+    ld hl,copyRequest
+    jp mx_memcpyFar
     ENDIF
 
 ; DE=WRITE, HL=VERIFY статистика. Проверяется готовый файл после flush.
@@ -687,25 +818,58 @@ addByte:
     jp nz,addByte
     ret
 
-; FAT16, физический/логический сектор 256, один сектор на кластер.
-; Список строится вне замера; FAT и данные используют разные буферы.
+; Собрать список физических секторов собственного DISKBEN.TMP до замера.
+; Вход: config+4 = секторов/кластер, config+5 = страниц по 256 байт/сектор.
+; Выход: sectors содержит только LBA данных файла. CF/A — ошибка DOS
+; или геометрии. Регистры рабочие. При ошибке cleanup закрывает объект.
+; READ одного байта материализует курсор DOS. Упакованную FAT читает ядро.
 buildChain:
-    ld hl,0FFFFh
-    ld (chainFatSector),hl
-    ld hl,(descriptor+FILE_DESCRIPTOR.firstCluster)
-    ld (cluster),hl
+    call bhReadOpen
+    ret c
     ld hl,sectors
     ld (list),hl
     xor a
     ld (index),a
 chainNext:
-    ld hl,(cluster)
-    dec hl
-    dec hl
-    push hl
-    ld hl,(config+6)
+    ld a,(index)
+    ld h,a
+    ld l,0
+    ld (bhHandle+FH_SEEK),hl
+    ld a,FILE_OP_SEEK
+    call bhCall
+    ret c
+    ld hl,(bufferAddress)
+    ld bc,1
+    ld a,2
+    call bhTransfer
+    ret c
+    ld hl,(bhHandle+FH_CURSOR)
+    ld de,0FFFEh
+    add hl,de
+    jp nc,chainInvalid            ; Кластеры 0 и 1 не содержат данных.
+    ld a,(config+4)
+chainScale:
+    rrca
+    jp c,chainBase
+    add hl,hl
+    jp nc,chainScale
+    jp chainInvalid
+chainBase:
+    ld a,(bhHandle+FH_CURSOR+3)   ; Страницы с начала кластера после READ 1.
+    ld e,a
+    ld a,(sectorPages)
+    dec a
+    ld a,e
+    jp z,chainInside
+    or a
+    rra
+chainInside:
+    ld e,a
+    ld d,0
+    add hl,de
+    jp c,chainInvalid
     ex de,hl
-    pop hl
+    ld hl,(config+6)
     add hl,de
     jp c,chainInvalid
     ex de,hl
@@ -718,49 +882,20 @@ chainNext:
     inc hl
     ld (list),hl
     ld hl,index
-    inc (hl)
+    ld a,(sectorPages)
+    add a,(hl)
+    ld (hl),a
     ld a,(config+3)
     cp (hl)
-    ret z
-    ld hl,(cluster)
-    add hl,hl
-    ld a,l
-    ld (offset),a
-    ld e,h
-    ld d,0
-    ld hl,(config+4)
-    add hl,de
-    ex de,hl
-    ld hl,(chainFatSector)
-    ld a,h
-    cp d
-    jp nz,chainFatRead
-    ld a,l
-    cp e
-    jp z,chainFatReady
-chainFatRead:
-    ld hl,fatBuffer
-    ld b,2
-    MXOS_CALL MXOS_DOS_RAW_IO
-    ret c
-    ex de,hl
-    ld (chainFatSector),hl
-chainFatReady:
-    ld a,(offset)
-    ld l,a
-    ld h,fatBuffer/256
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ex de,hl
-    ld (cluster),hl
-    jp chainNext
+    jp nz,chainNext
+    jp bhClose
 chainInvalid:
     ld a,DOS_ERR_ARGUMENT
     scf
     ret
 
-; Только RAW READ: фиксированные 32 сектора, без создания файла.
+
+; Только чтение: до 8 КиБ, число физических секторов зависит от носителя.
 readOnly:
     ld a,3
     ld (readOnlyLeft),a
@@ -773,6 +908,10 @@ readOnly:
     ld a,32
 readOnlySize:
     ld (config+3),a
+    ld a,(config+8)
+    and 1
+    jp z,readOnlyNext
+    call rawCount
     push hl
     ld hl,(config+6)
     ex de,hl
@@ -807,9 +946,8 @@ readOnlyNext:
     ld de,stats+10
     call addStats
     IFDEF WORKER_MAIN
-    ld a,(config)
-    or a
-    call z,readHigh
+    call workerMapped
+    call z,rawHigh
     ret c
     ENDIF
 readOnlyFile:
@@ -844,8 +982,8 @@ validateSector:
     cp l
     jp nc,sectorOutside
 sectorInside:
-    ld a,(config)
-    dec a
+    ld a,(technology)
+    cp DISK_TECH_RAM
     jp nz,sectorValid
     ld a,e
     cp 0FFh
@@ -902,12 +1040,16 @@ exchangeOptions:
     ld hl,bhHandle
     MXOS_CALL MXOS_DOS_FILEHANDLE
     ret
-; Разбросанные цепочки медленнее: период 33,55 с вместо 8,39 с.
+; Дискеты и разбросанные цепочки медленнее: период 33,55 с вместо 8,39 с.
 ; В отчёт по-прежнему возвращаются эквивалентные тики по 128 мкс.
 timerRange:
+    ld a,(sectorPages)
+    cp 2
+    jp z,timerLongRange
     ld a,(config+9)
     or a
     ret z
+timerLongRange:
     ld a,2
     ld (elapsedShift),a
     ld hl,IO_TIMER_MODE
@@ -938,51 +1080,54 @@ scaleTimeByte:
     dec c
     jp nz,scaleTimeBit
     ret
-elapsedShift: DB 0
-oldOptions: DB 0
-optionsSaved: DB 0
-txtScattered: DB "  Allocation: random",0
+elapsedShift:   DB 0
+oldOptions:     DB 0
+optionsSaved:   DB 0
+txtScattered:   DB "  Allocation: random",0
 
 copyRequest: DB 0
     DW 0
     DB 0
     DW config,11
-config: DS 11,0
-bankId: DB 0
-caps: DB 0
-capacity: DW 0
-owned: DB 0
-pass: DB 0
-operation: DB 0
-raw: DB 0
-verify: DB 0
-rawOperation: DB 0
-readUnknown: DB 0
-readOnlyLeft: DB 0
-index: DB 0
-offset: DB 0
-cluster: DW 0
-chainFatSector: DW 0FFFFh
-list: DW 0
-dataBuffer: DW buffer
-bufferAddress: DW buffer
-writeStat: DW 0
-verifyStat: DW 0
-flushStart: DW 0
-flushTicks: DD 0
-flushCount: DW 0
-v_elapsed: DD 0
-v_setup: DD 0
-v_last: DW 0
-fileStats: DW stats+20
-stats: DS 88,0
-descriptor: DB "DISKBEN TMP",0
+config:             DS 11,0
+bankId:             DB 0
+caps:               DB 0
+technology:         DB 0
+capacity:           DW 0
+owned:              DB 0
+pass:               DB 0
+operation:          DB 0
+raw:                DB 0
+verify:             DB 0
+rawOperation:       DB 0
+readUnknown:        DB 0
+readOnlyLeft:       DB 0
+index:              DB 0
+sectorPages:        DB 1
+list:               DW 0
+dataBuffer:         DW buffer
+bufferAddress:      DW buffer
+writeStat:          DW 0
+verifyStat:         DW 0
+flushStart:         DW 0
+flushTicks:         DD 0
+flushCount:         DW 0
+v_elapsed:          DD 0
+v_setup:            DD 0
+v_last:             DW 0
+fileStats:          DW stats+20
+    IFNDEF WORKER_MAIN
+stats:              DS BENCH_MAIN_STATS_SIZE,0
+    ENDIF
+descriptor:         DB "DISKBEN TMP",0
     DS 20,0
     ASSERT $-descriptor == FILE_DESCRIPTOR
+    IFNDEF WORKER_MAIN
 sectors: DS 24*4*2,0
+    ENDIF
     IFDEF WORKER_MAIN
-txtPass: DB 10,"MAIN: Pass ",0
-txtScreenBuffer: DB 10,"SCREEN WILL BE USED AS A TEMPORARY BUFFER",10,0
+txtPass:            DB 10,"MAIN: Pass ",0
+txtScreenBuffer:    DB 10,"HIGH USES SCREEN BUFFER",10,0
     ELSE
     IFDEF WORKER_DOS
 txtPass: DB 10,"DOS:  Pass ",0
@@ -991,20 +1136,23 @@ txtPass: DB 10,"BANK: Pass ",0
     ENDIF
     ENDIF
     ALIGN 256
-; FAT нужен только после окончания FILE-чтения/сравнения, при подготовке RAW.
-; RAW использует первые 256 байт (+1 при смещении), FAT — отдельную страницу.
+; RAW использует один сектор в начале рабочего буфера.
 workerCodeEnd:
     IFDEF WORKER_MAIN
 BUFFER_SECTORS = 24*4
     ASSERT $ <= 02B00h
-    ; Controller reserves 2100h..memTop before MODULE_LOAD. The scratch
-    ; buffer is filled before use; omit its 24 KiB from the disk image.
-    ; DOS keeps its buffer in the payload: its size reserves the DOS arena.
-buffer = 02B00h
+    ; Точный диапазон буфера регистрирует контроллер до вызова DLL.
+buffer = BENCH_MAIN_BUFFER_ADDR
+    ; После FILE список LBA использует тот же буфер за сектором RAW.
+sectors = buffer+514
+    ASSERT buffer+257 <= sectors
+    ASSERT sectors+2*BUFFER_SECTORS <= buffer+1024
     ELSE
     IFDEF WORKER_DOS
 BUFFER_SECTORS = BENCH_DOS_BUFFER_KIB*4
-buffer: DS BUFFER_SECTORS*256+1,0
+buffer = $
+IMAGE_BSS_SIZE = BUFFER_SECTORS*256+1
+IMAGE_MEM_END = buffer+IMAGE_BSS_SIZE
     ELSE
 BUFFER_SECTORS = 24*4
 ; EXEC-банк целиком принадлежит DLL; нижняя область свободна от её тела.
@@ -1012,11 +1160,17 @@ buffer = 02000h
     ASSERT buffer+BUFFER_SECTORS*256+1 <= DOS_BANK_DRIVER_ADDR
     ENDIF
     ENDIF
-fatBuffer = buffer+512
     IFDEF WORKER_MAIN
+stats = BENCH_MAIN_STATS_ADDR
 workerEnd = buffer+BUFFER_SECTORS*256+1
+IMAGE_BSS_SIZE = 0
+IMAGE_MEM_END = workerCodeEnd
+    ELSE
+    IFDEF WORKER_DOS
+workerEnd = IMAGE_MEM_END
     ELSE
 workerEnd = $
+    ENDIF
     ENDIF
     IFDEF WORKER_MAIN
     ASSERT workerEnd <= LEGACY_APP_MEMORY_END
@@ -1024,6 +1178,6 @@ workerEnd = $
     IFDEF WORKER_DOS
     ASSERT workerEnd <= DOS_BANK_MODULE_END
     ELSE
-    ASSERT workerEnd <= DOS_BANK_DRIVER_END
+    ASSERT workerEnd <= DOS_SERVICE_END
     ENDIF
     ENDIF

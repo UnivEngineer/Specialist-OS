@@ -66,10 +66,10 @@ ncOverwriteModal:
     UI_MODAL_BUTTON ncOverwriteNo,1,0,0
     UI_MODAL_BUTTON ncOverwriteNoAll,1,1,0
     UI_MODAL_END
-ncOverwriteAnswers: DB 1,2,0,3
-ncOverwriteTitle: DB 'Overwrite file?',0
-ncOverwriteYes: DB 'Yes [Y]',0
-ncOverwriteYesAll: DB 'All [A]',0
-ncOverwriteNo: DB 'No [N]',0
-ncOverwriteNoAll: DB 'Skip all [S]',0
-ncOverwriteName: DS 16,0
+ncOverwriteAnswers:     DB 1,2,0,3
+ncOverwriteTitle:       DB 'Overwrite file?',0
+ncOverwriteYes:         DB 'Yes [Y]',0
+ncOverwriteYesAll:      DB 'All [A]',0
+ncOverwriteNo:          DB 'No [N]',0
+ncOverwriteNoAll:       DB 'Skip all [S]',0
+ncOverwriteName:        DS 16,0

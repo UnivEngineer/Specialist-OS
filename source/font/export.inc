@@ -178,10 +178,10 @@ exportLeafMark:
 exportLeafDone:
     ex de,hl
     ret
-exportDrive: DB 0
-outputPath: DS MAX_PATH+4,0
-exportAuxPath: DS MAX_PATH+13,0
-exportIO: DW 0,0,0,0
+exportDrive:    DB 0
+outputPath:     DS MAX_PATH+4,0
+exportAuxPath:  DS MAX_PATH+13,0
+exportIO:       DW 0,0,0,0
     DS FILE_DESCRIPTOR,0
 exportNoRam: DB 'NO WRITABLE RAM DISK: FONT NOT SAVED.',13,10,0
 exportSaved: DB 'SAVED: ',0

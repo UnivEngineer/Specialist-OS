@@ -121,7 +121,7 @@ def main():
         m.write(buffer_addr, entry[:12] + entry[18:20] + entry[28:30])
         # Источник FONT.PF отличается от COPYCHK.TXT по размеру и содержимому.
         # Отказ должен происходить до любой записи, включая FAT и каталог.
-        for destination in [b'H:COPYCHK.TXT\0', b'H:copychk.txt\0', b'A:FONT.PF\0']:
+        for destination in [b'H:COPYCHK.TXT\0', b'H:copychk.txt\0', b'C:/DOS/FONT.PF\0']:
             before = image_path.read_bytes()
             system_path = args.runtime / 'specialist-os/system-flash.bin'
             if not system_path.exists():

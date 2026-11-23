@@ -2,8 +2,8 @@
 ; REGISTER receives a NEAR command; PREPARE returns it to a caller buffer.
 ; Only BIOS restores it, before entering a shell. No saved renderer bitmap.
 FONT_CONFIG_REGISTER = 0
-FONT_CONFIG_PREPARE = 1
-FONT_CONFIG_FINISH = 2
+FONT_CONFIG_PREPARE  = 1
+FONT_CONFIG_FINISH   = 2
 kdFontConfig:
     ld hl,(kdRegs)
     ld (kdClientObject),hl
@@ -136,14 +136,14 @@ fontConfigReset:
     xor a
     ld (fontConfigRestoring),a
     jp memoryResidentReset
-fontConfigValid = DOS_FONT_STATE_ADDR
-fontConfigPending = fontConfigValid+1
-fontConfigRestoring = fontConfigValid+2
-fontConfigDrive = fontConfigValid+3
-fontConfigDirectory = fontConfigValid+4
-fontConfigDirectories = fontConfigValid+6
-fontConfigReturnDrive = fontConfigValid+22
-fontConfigReturnDirectory = fontConfigValid+23
+fontConfigValid             = DOS_FONT_STATE_ADDR
+fontConfigPending           = fontConfigValid+1
+fontConfigRestoring         = fontConfigValid+2
+fontConfigDrive             = fontConfigValid+3
+fontConfigDirectory         = fontConfigValid+4
+fontConfigDirectories       = fontConfigValid+6
+fontConfigReturnDrive       = fontConfigValid+22
+fontConfigReturnDirectory   = fontConfigValid+23
 fontConfigReturnDirectories = fontConfigValid+25
-fontConfigCommand = fontConfigValid+41
+fontConfigCommand           = fontConfigValid+41
     ASSERT fontConfigCommand+MAX_PATH <= DOS_BANK_OBJECT_ADDR

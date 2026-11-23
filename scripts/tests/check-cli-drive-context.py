@@ -1,5 +1,6 @@
 """8080: bare drives preserve their saved directory; root aliases stay quiet."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re
 import subprocess
 
@@ -16,6 +17,7 @@ def main():
     base = bytearray(65536)
     kernel = (ROOT/'bin/banked/KERNEL.bin').read_bytes()
     base[256:256+len(kernel)] = kernel
+    initialize_dos_state(base, symbols)
     # Only the two context-changing backends are replaced. Parsing, QUERY and
     # COMMAND execute the actual linked DOS machine code.
     hooks = ''' ORG 0C000h

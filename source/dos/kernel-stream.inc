@@ -107,15 +107,6 @@ ksCopyError:
     pop hl
     ld (ksResult),hl
     jp ksReturn
-kdFarActive: DB 0
-kdFarCurrent: DW 0
-ksMode: DB 0
-ksLeft: DW 0
-ksChunk: DW 0
-ksActual: DW 0
-ksResult: DW 0
-ksDirect: DB 0
-ksDirectStart: DW 0
 
 ; Загруженный образ суммируется в странице назначения: назад данные не идут.
 ; AF=статус, остальные регистры сохранены. BIOS использует прежнюю сумму.
@@ -216,5 +207,3 @@ ksRouteKnown:
     or a
     pop hl
     ret
-ksRouteDrive: DB 0FFh
-ksRouteBuffered: DB 1

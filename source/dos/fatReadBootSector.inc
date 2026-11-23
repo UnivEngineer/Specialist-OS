@@ -1,42 +1,47 @@
-;----------------------------------------------------------------------------
-; MXOS
-; Считывание загрузочного сектора и инициализация структуры v_diskInfo.
-; Подпрограмма затирает дисковый кэш!
-;
-; На выходе
-;  cf - ошибка
-;  регистры bc, de, hl сохраняются
-;
-; 2022-02-13 Разработано SpaceEngineer
-;----------------------------------------------------------------------------
-
 ; Структура загрузочного сектора FAT12/16
 
     STRUCT  FAT_BOOT_SECTOR
-BS_JmpBoot      BLOCK   3   ; смещение  00h,   3 байт - Jump instruction to the bootstrap code (x86 instruction): EBh, ??h, 90h (Short jump + NOP) or E9h, ??h, ??h (Near jump).
-BS_OEMName      BLOCK   8   ; смещение  03h,   8 байт - "MSWIN 4.1" is recommended but also "MSDOS 5.0" is often used.
-BPB_BytsPerSec  BLOCK   2   ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But most drivers use 512.
-BPB_SecPerClus  BLOCK   1   ; смещение  0Dh,   1 байт - Number of sectors per cluster. Valid values are 1, 2, 4, 8, ... 128.
-BPB_RsvdSecCnt  BLOCK   2   ; смещение  0Eh,   2 байт - Number of sectors in reserved area. This field hould be 1 on FAT12/16 volume.
-BPB_NumFATs     BLOCK   1   ; смещение  10h,   1 байт - Number of FATs. The value of this field should always be 2. On memory cards, it may be 1, but some FAT driver may not recognize such a volume properly.
-BPB_RootEntCnt  BLOCK   2   ; смещение  11h,   2 байт - Number of 32-byte directory entries in the root directory. For max compatibility, must be 512 on FAT16 volume.
-BPB_TotSec16    BLOCK   2   ; смещение  13h,   2 байт - Total number of sectors of the volume in old 16-bit field. If >= 0x10000, this field = 0, and the true value is set to BPB_TotSec32.
-BPB_Media       BLOCK   1   ; смещение  15h,   1 байт - Valid values are F0h, F8h ... FFh. The same value must be put in the lower 8-bits of FAT[0].
-BPB_FATSz16     BLOCK   2   ; смещение  16h,   2 байт - Number of sectors occupied by a FAT. The size of the FAT area becomes BPB_FATSz16 * BPB_NumFATs sectors.
-BPB_SecPerTrk   BLOCK   2   ; смещение  18h,   2 байт - Number of sectors per track. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
-BPB_NumHeads    BLOCK   2   ; смещение  1Ah,   2 байт - Number of heads. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
-BPB_HiddSec     BLOCK   4   ; смещение  1Ch,   4 байт - Number of hidden physical sectors preceding the FAT volume. Should always be 0 if the volume starts at the beginning of the storage.
-BPB_TotSec32    BLOCK   4   ; смещение  20h,   4 байт - Total number of sectors of the FAT volume in new 32-bit field. 
-BS_DrvNum       BLOCK   1   ; смещение  24h,   1 байт - Drive number used by disk BIOS of IBM PC. This field is used in MS-DOS bootstrap, 0x00 for floppy disk and 0x80 for fixed disk.
-BS_Reserved     BLOCK   1   ; смещение  25h,   1 байт - Reserved (used by Windows NT). It should be set 0 when create the volume.
-BS_BootSig      BLOCK   1   ; смещение  26h,   1 байт - Extended boot signature (0x29). This is a signature byte indicates that the following three fields are present.
-BS_VolID        BLOCK   4   ; смещение  27h,   4 байт - Volume serial number used with BS_VolLab to track a volume on the removable storage. It enables to detect a wrong media change by FAT driver.
+BS_JmpBoot      BLOCK  3    ; смещение  00h,   3 байт - Jump instruction to the bootstrap code (x86 instruction): EBh, ??h, 90h (Short jump + NOP) or E9h, ??h, ??h (Near jump).
+BS_OEMName      BLOCK  8    ; смещение  03h,   8 байт - "MSWIN 4.1" is recommended but also "MSDOS 5.0" is often used.
+BPB_BytsPerSec  BLOCK  2    ; смещение  0Bh,   2 байт - Sector size in unit of byte. Valid values are 512, 1024, 2048, 4096. But most drivers use 512.
+BPB_SecPerClus  BLOCK  1    ; смещение  0Dh,   1 байт - Number of sectors per cluster. Valid values are 1, 2, 4, 8, ... 128.
+BPB_RsvdSecCnt  BLOCK  2    ; смещение  0Eh,   2 байт - Number of sectors in reserved area. This field hould be 1 on FAT12/16 volume.
+BPB_NumFATs     BLOCK  1    ; смещение  10h,   1 байт - Number of FATs. The value of this field should always be 2. On memory cards, it may be 1, but some FAT driver may not recognize such a volume properly.
+BPB_RootEntCnt  BLOCK  2    ; смещение  11h,   2 байт - Number of 32-byte directory entries in the root directory. For max compatibility, must be 512 on FAT16 volume.
+BPB_TotSec16    BLOCK  2    ; смещение  13h,   2 байт - Total number of sectors of the volume in old 16-bit field. If >= 0x10000, this field = 0, and the true value is set to BPB_TotSec32.
+BPB_Media       BLOCK  1    ; смещение  15h,   1 байт - Valid values are F0h, F8h ... FFh. The same value must be put in the lower 8-bits of FAT[0].
+BPB_FATSz16     BLOCK  2    ; смещение  16h,   2 байт - Number of sectors occupied by a FAT. The size of the FAT area becomes BPB_FATSz16 * BPB_NumFATs sectors.
+BPB_SecPerTrk   BLOCK  2    ; смещение  18h,   2 байт - Number of sectors per track. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
+BPB_NumHeads    BLOCK  2    ; смещение  1Ah,   2 байт - Number of heads. This field is relevant only for media that have geometry and used for only disk BIOS of IBM PC.
+BPB_HiddSec     BLOCK  4    ; смещение  1Ch,   4 байт - Number of hidden physical sectors preceding the FAT volume. Should always be 0 if the volume starts at the beginning of the storage.
+BPB_TotSec32    BLOCK  4    ; смещение  20h,   4 байт - Total number of sectors of the FAT volume in new 32-bit field.
+BS_DrvNum       BLOCK  1    ; смещение  24h,   1 байт - Drive number used by disk BIOS of IBM PC. This field is used in MS-DOS bootstrap, 0x00 for floppy disk and 0x80 for fixed disk.
+BS_Reserved     BLOCK  1    ; смещение  25h,   1 байт - Reserved (used by Windows NT). It should be set 0 when create the volume.
+BS_BootSig      BLOCK  1    ; смещение  26h,   1 байт - Extended boot signature (0x29). This is a signature byte indicates that the following three fields are present.
+BS_VolID        BLOCK  4    ; смещение  27h,   4 байт - Volume serial number used with BS_VolLab to track a volume on the removable storage. It enables to detect a wrong media change by FAT driver.
 BS_VolLab       BLOCK  11   ; смещение  2Bh,  11 байт - Volume label, matches volume label recorded in the root directory. When volume label is not present, "NO NAME " should be set.
-BS_FilSysType   BLOCK   8   ; смещение  36h,   8 байт - "FAT12   ", "FAT16   " or "FAT     ". Microsoft's FAT driver does not use this field to determine the FAT type.
-BS_BootCode     BLOCK 448   ; смещение  3Eh, 448 байт - Bootstrap program. It is platform dependent and filled with zero when not used.
-BS_BootSign     BLOCK   2   ; смещение 1FEh,   2 байт - 0xAA55. A boot signature indicating that this is a valid boot sector.
+BS_FilSysType   BLOCK  8    ; смещение  36h,   8 байт - "FAT12   ", "FAT16   " or "FAT     ". Microsoft's FAT driver does not use this field to determine the FAT type.
+BS_BootCode     BLOCK  448  ; смещение  3Eh, 448 байт - Bootstrap program. It is platform dependent and filled with zero when not used.
+BS_BootSign     BLOCK  2    ; смещение 1FEh,   2 байт - 0xAA55. A boot signature indicating that this is a valid boot sector.
     ENDS
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Чтение BPB и проверка заголовка FAT на выбранном накопителе.
+;
+; вход:
+;   v_drive = номер диска, j_diskDriver = переход к его драйверу.
+;   v_blockShifts[v_drive] = log2 размера физического блока в байтах.
+;
+; выход:
+;   cf = 0: a = 0, v_diskInfo.isValid = DISK_VALID, геометрия тома заполнена.
+;   cf = 1: a и v_dosError = причина отказа. isValid = DISK_NO_DRIVER для
+;   пустого драйвера, DISK_INVALID при ошибке чтения или формата.
+;   bc, de, hl сохраняются. Рабочий буфер DOS_CACHE_BOOT_ADDR перезаписывается.
+;   При смене размера сектора сбрасываются строки кэша выбранного диска.
+;
+; 2022-02-13 Разработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
 fatReadBootSector:
@@ -46,6 +51,10 @@ fatReadBootSector:
             ld hl,0
             ld (v_diskInfo.rootDirMaxFiles),hl
             ld (v_diskInfo.dataClusters),hl
+    IFDEF BANKED_DOS_BUILD
+            xor a
+            ld (v_fat12),a
+    ENDIF
             ld a,DISK_NO_DRIVER
             ld (v_diskInfo.isValid),a
             ld hl,(j_diskDriver+1)
@@ -144,7 +153,7 @@ frbs_CapacityReady:
             ld b,2
             call logicalSectorIOChecked
             jp c,frbs_Io
-            ; 128/256 — явно обозначенные расширения. 512 — стандарт FAT16.
+            ; 128/256 — явно обозначенные расширения. 512 — стандарт FAT12/16.
             ld a,(v_diskInfo.sectorShift)
             cp 9
             jp z,frbs_Standard
@@ -288,7 +297,11 @@ frbs_FatAreaReady:
             jp nz,frbs_TypeReady
             ld de,4085
             call cmp_hl_de
-            jp c,frbs_Bad      ; FAT12 отдельно, не угадывать по строке FAT16
+    IFDEF BANKED_DOS_BUILD
+            jp c,frbs_Packed
+    ELSE
+            jp c,frbs_Bad
+    ENDIF
             ld de,65525
             call cmp_hl_de
             jp nc,frbs_Bad
@@ -299,6 +312,15 @@ frbs_TypeReady:
             ld hl,(v_diskInfo.fatNumCells)
             call cmp_hl_de
             jp c,frbs_Bad
+    IFDEF BANKED_DOS_BUILD
+            jp frbs_Label
+frbs_Packed:
+            call f12Capacity
+            jp c,frbs_Bad
+            ld a,1
+            ld (v_fat12),a
+frbs_Label:
+    ENDIF
             ld hl,DOS_CACHE_BOOT_ADDR+43
             ld de,DOS_CACHE_BOOT_ADDR+54
             ld bc,v_diskInfo.volumeLabel
@@ -327,11 +349,17 @@ frbs_TypeReady:
             ld a,(hl)
             cp 0FFh
             jp nz,frbs_Corrupt
+    IFDEF BANKED_DOS_BUILD
+            ld a,(v_fat12)
+            or a
+            jp nz,frbs_Valid
+    ENDIF
             inc hl
             ld a,(hl)
             or 0C0h
             cp 0FFh
             jp nz,frbs_Corrupt
+frbs_Valid:
             ld a,DISK_VALID
             ld (v_diskInfo.isValid),a
             xor a
@@ -354,7 +382,5 @@ frbs_Exit:
             pop de
             pop hl
             ret
-aMxos256: DB "MXOS256 "
-aMxos128: DB "MXOS128 "
-v_logicalCapacity: DW 0
-v_logicalShift: DB 0 ; Проверенный log2 числа физических блоков на сектор
+aMxos256:           DB "MXOS256 "
+aMxos128:           DB "MXOS128 "

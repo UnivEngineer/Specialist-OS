@@ -7,17 +7,17 @@
     INCLUDE "text-find-entry.inc"
     INCLUDE "text-find-match.inc"
     ENDIF
-editorSearchMissingText: DB 'Text not found.',0
-editorFindTitle: DB 'Find',0
-editorFindButton: DB 'Find [Enter]',0
+editorSearchMissingText:    DB 'Text not found.',0
+editorFindTitle:            DB 'Find',0
+editorFindButton:           DB 'Find [Enter]',0
 editorFindDescriptor:
         UI_MODAL_BEGIN 12,1,2
         UI_MODAL_BUTTON editorFindButton,0,0,1
         UI_MODAL_BUTTON editorModalCancel,0,1,0
         UI_MODAL_END
-editorSearchStop: DW 0
-editorSearchWrapped: DB 0
-editorFoundPointer: DW 0
+editorSearchStop:       DW 0
+editorSearchWrapped:    DB 0
+editorFoundPointer:     DW 0
 
 ; Вход: HL = указатель в тексте. Выход: HL = начало предыдущей строки.
 ; Z = достигнуто начало текста, NZ = найден переход; DE сохранён, AF разрушен.
@@ -236,7 +236,7 @@ editorBlockCaret:
         CALL editorResetGoal
         CALL editorPositionCursor
         JP redrawPreservingCursor
-editorBlockTarget: DW 0
-editorBlockLength: DW 0
-editorBlockResult: DW 0
-editorBlockMove: DB 0
+editorBlockTarget:  DW 0
+editorBlockLength:  DW 0
+editorBlockResult:  DW 0
+editorBlockMove:    DB 0

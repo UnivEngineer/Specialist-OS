@@ -66,8 +66,8 @@ bench_copy:
     or c
     jp nz,bench_copy
     ret
-bankHandle: DW 0
-bankRegs: DW 0,0,0,0
+bankHandle:     DW 0
+bankRegs:       DW 0,0,0,0
     IFDEF FONT_CORPUS_TEST
     DW 0,bankImage
     ELSE
@@ -76,9 +76,9 @@ bankRegs: DW 0,0,0,0
 bankPageCode: DB 0,0
 bankPath:
     IFDEF FONT_CORPUS_TEST
-    DB 'A:',05Ch,'BENCH',05Ch,'FONTBEN',05Ch,'FONTBANK.COM '
+    DB 'C:',05Ch,'BENCH',05Ch,'FONTBEN',05Ch,'FONTBANK.COM '
     ELSE
-    DB 'A:',05Ch,'BENCH',05Ch,'FONTBEN',05Ch,'TEXTBANK.COM '
+    DB 'C:',05Ch,'BENCH',05Ch,'FONTBEN',05Ch,'TEXTBANK.COM '
     ENDIF
 bankArgument: DB '0000',0
     DS MAX_PATH-($-bankPath),0

@@ -235,9 +235,9 @@ dosIoInstallBad:
     ld a,DOS_ERR_ARGUMENT
     scf
     ret
-dosIoDrivers: DS 8*4,0
-dosIoBusy: DB 0
-dosIoLength: DW 0
-dosIoRequest: DS DOS_IO_REQUEST_SIZE,0
-dosIoCopy: DS 8,0
+dosIoDrivers:   DS 8*4,0
+dosIoBusy:      DB 0
+dosIoLength:    DW 0
+dosIoRequest:   DS DOS_IO_REQUEST_SIZE,0
+dosIoCopy:      DS 8,0
 

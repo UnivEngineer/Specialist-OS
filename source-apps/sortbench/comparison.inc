@@ -337,18 +337,18 @@ ncRankDirectory:
     ld a,2
     ret
 
-ncSortBase: DW 0
-ncSortKeyPtr: DW 0
-ncSortCount: DB 0
-ncSortMode: DB 0
-ncSortGap: DB 0
-ncSortI: DB 0
-ncSortJ: DB 0
-ncSortPrev: DB 0
-ncSortKey: DB 0
-ncSortLeft: DB 0
+ncSortBase:     DW 0
+ncSortKeyPtr:   DW 0
+ncSortCount:    DB 0
+ncSortMode:     DB 0
+ncSortGap:      DB 0
+ncSortI:        DB 0
+ncSortJ:        DB 0
+ncSortPrev:     DB 0
+ncSortKey:      DB 0
+ncSortLeft:     DB 0
 ncSortRecords = ncSortRecordLoad+1
-ncSortComparator: DW 0
-ncSortPaddingSafe: DB 0
+ncSortComparator:   DW 0
+ncSortPaddingSafe:  DB 0
 
     INCLUDE "sort-radix.inc"

@@ -50,7 +50,7 @@ def main():
         assert s['registers']['hl']['dec'] == 0x8DDE
         results['mem_top'] = s['registers']['hl']['hex']
         # Имя готовится штатно; затем весь NC читается с A: в нижнее RAM.
-        m.write(0x8400, b'A:NC.COM\0' + bytes(32))
+        m.write(0x8400, b'C:/DOS/NC.COM\0' + bytes(32))
         s = execute(bytes.fromhex('21 00 84 11 00 85 CD 5A C8 21 00 85 11 00 40 CD 66 C8 C3 00 83'))
         assert not s['flags']['C']
         nc = (ROOT / 'bin/NC.i80').read_bytes()

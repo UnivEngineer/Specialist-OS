@@ -139,15 +139,15 @@ uiRectByteAddress:
     or e
     add a,090h
     ret
-uiRectMasks: DB 0,080h,0C0h,0E0h,0F0h,0F8h,0FCh,0FEh,0FFh
-uiRectPattern: DB 0
-uiRectInverse: DB 0
-uiRectHeight: DB 0
-uiRectY: DB 0
-uiRectFirstMask: DB 0
-uiRectLastMask: DB 0
-uiRectLastColumn: DB 0
-uiRectColumns: DB 0
+uiRectMasks:        DB 0,080h,0C0h,0E0h,0F0h,0F8h,0FCh,0FEh,0FFh
+uiRectPattern:      DB 0
+uiRectInverse:      DB 0
+uiRectHeight:       DB 0
+uiRectY:            DB 0
+uiRectFirstMask:    DB 0
+uiRectLastMask:     DB 0
+uiRectLastColumn:   DB 0
+uiRectColumns:      DB 0
 
 uiFrameRectPixels:
     ld (uiFramePattern),a
@@ -210,11 +210,11 @@ uiFrameSide:
     ld bc,1
     ld a,(uiFramePattern)
     jp uiFillRectPixels
-uiFrameX: DW 0
-uiFrameWidth: DW 0
-uiFrameY: DB 0
-uiFrameHeight: DB 0
-uiFramePattern: DB 0
+uiFrameX:           DW 0
+uiFrameWidth:       DW 0
+uiFrameY:           DB 0
+uiFrameHeight:      DB 0
+uiFramePattern:     DB 0
 
 ; Font-independent 8x8 checkbox bitmap. HL=byte-aligned VRAM address,
 ; A=0 unchecked / nonzero checked. Caller sets color. AF/BC/DE destroyed,
@@ -234,5 +234,5 @@ uiCheckboxRow:
     dec b
     jp nz,uiCheckboxRow
     ret
-uiCheckboxEmpty: DB 0FFh,081h,081h,081h,081h,081h,081h,0FFh
-uiCheckboxTick: DB 0FFh,083h,087h,08Dh,0D9h,0B1h,0A1h,0FFh
+uiCheckboxEmpty:    DB 0FFh,081h,081h,081h,081h,081h,081h,0FFh
+uiCheckboxTick:     DB 0FFh,083h,087h,08Dh,0D9h,0B1h,0A1h,0FFh

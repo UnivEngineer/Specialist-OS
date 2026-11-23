@@ -53,7 +53,7 @@ def main():
         print('MAIN', samples, flush=True)
         for attempt in range(3):
             try:
-                campaign.type('A:NC.COM')
+                campaign.type('C:/DOS/NC.COM')
                 break
             except AssertionError:
                 if attempt == 2:

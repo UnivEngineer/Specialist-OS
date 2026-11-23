@@ -260,10 +260,10 @@ hexInvalidDigit:
     scf
     ret
 
-hexZeroTitle: DB 'Zero byte count (hex)',0
-hexWordTitle: DB 'Fill word (hex)',0
-hexRawTitle: DB 'F7: switch to raw HEX.',0
-hexSelectTitle: DB 'Mark a block with F4.',0
-hexOverlapTitle: DB 'Caret is inside the block.',0
-hexOverwriteTitle: DB 'Block exceeds end of data.',0
-hexBadWordTitle: DB 'Enter 1-4 hex digits.',0
+hexZeroTitle:       DB 'Zero byte count (hex)',0
+hexWordTitle:       DB 'Fill word (hex)',0
+hexRawTitle:        DB 'F7: switch to raw HEX.',0
+hexSelectTitle:     DB 'Mark a block with F4.',0
+hexOverlapTitle:    DB 'Caret is inside the block.',0
+hexOverwriteTitle:  DB 'Block exceeds end of data.',0
+hexBadWordTitle:    DB 'Enter 1-4 hex digits.',0

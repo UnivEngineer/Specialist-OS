@@ -17,6 +17,21 @@ entry:
     cp GFX_GLYPH_PADDING
     jp z,ngPadding
     jp ngBatch
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сбросить состояние графического модуля при активации.
+;
+; вход:
+;   Точка выбрана диспетчером по операции MODULE_ACTIVATE. Поля ngHelpActive и
+;   ngBatches доступны в MAIN.
+;
+; выход:
+;   Справка закрыта, счётчик пакетов обнулён. a = 0, hl = 0, z = 1, cf = 0; bc и de
+;   сохранены.
+;----------------------------------------------------------------------------
+
 ngActivate:
     xor a
     ld (ngHelpActive),a
@@ -24,6 +39,9 @@ ngActivate:
     ld l,a
     ld (ngBatches),hl
     ret
+; BIND: BC = доступная длина буфера MAIN по GFX_PACKET (1..GFX_MAX_PACKET).
+; При успехе сбрасывает состояние справки, заполняет GFX_RESULT и возвращает
+; A=0, CF=0. Недопустимая длина возвращает A=MEM_ERROR_RANGE, CF=1.
 ngBind:
     ld hl,GFX_MAX_PACKET
     ld a,b
@@ -95,6 +113,8 @@ ngSaveCursor:
     ld (GFX_RESULT+2),hl
     xor a
     ret
+; CURSOR: HL = позиция BIOS, B = конфигурация курсора на один вывод,
+; C = цвет. Восстанавливает прежнюю конфигурацию и возвращает A=0, CF=0.
 ngCursor:
     ld (bios_vars.cursorY),hl
     ld a,c
@@ -391,15 +411,15 @@ ngSlotReady:
     pop hl
     ld b,0
     jp bios_printStringRawLim
-ngBatches: DW 0
-ngStoredTexts: DW 0
-ngPacketBytes: DW 0
-ngGlyphBytes: DW 0
-ngEnd: DW 0
-ngNextRecord: DW 0
-ngRegisters: DW 0
-ngPayload: DW 0
-ngOperation: DB 0
+ngBatches:      DW 0
+ngStoredTexts:  DW 0
+ngPacketBytes:  DW 0
+ngGlyphBytes:   DW 0
+ngEnd:          DW 0
+ngNextRecord:   DW 0
+ngRegisters:    DW 0
+ngPayload:      DW 0
+ngOperation:    DB 0
     DEFINE UI_SCROLL_BAR
     DEFINE UI_PIXEL_RECT
     DEFINE UI_BYTE_RECT
@@ -416,10 +436,10 @@ ngTransfer: DB 0
     DW GFX_PACKET,0
 ngPacketLimit: DW 0
 ngFileEnd:
-IMAGE_BSS_SIZE = GFX_PACKET-ngFileEnd
-IMAGE_CACHEABLE = IMAGE_OPTION_CACHEABLE|IMAGE_OPTION_REUSABLE
+IMAGE_BSS_SIZE      = GFX_PACKET-ngFileEnd
+IMAGE_CACHEABLE     = IMAGE_OPTION_CACHEABLE|IMAGE_OPTION_REUSABLE
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
-IMAGE_MEM_END = GFX_PACKET
-IMAGE_API = 2
+IMAGE_MEM_END       = GFX_PACKET
+IMAGE_API           = 2
     ASSERT ngFileEnd <= GFX_RESULT
     END

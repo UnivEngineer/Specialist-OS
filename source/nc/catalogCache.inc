@@ -19,6 +19,20 @@ ncCatalogClear:
     ret
 
 ; A=номер слота, HL=метаданные; BC сохранены, DE разрушается.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти запись каталога панели в таблице NC.
+;
+; вход:
+;   a = индекс каталога. Индекс должен находиться в границах таблицы.
+;
+; выход:
+;   hl = ncCatalogs + 8 × индекс, de = ncCatalogs. a и bc сохранены, cf определяется
+;   сложением адресов.
+;----------------------------------------------------------------------------
+
 ncCatalogEntry:
     ld l,a
     ld h,0
@@ -30,6 +44,19 @@ ncCatalogEntry:
     ret
 
 ; A=слот, HL=физический список; BC/DE сохранены.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать базовый адрес буфера записей каталога.
+;
+; вход:
+;   a = индекс каталога в ncCatalogBases.
+;
+; выход:
+;   hl = 16-битный адрес буфера, a = его младший байт. bc и de сохранены.
+;----------------------------------------------------------------------------
+
 ncCatalogBase:
     push de
     add a,a
@@ -411,6 +438,20 @@ ncCatalogOtherPlaced:
 ncCatalogSetBase:
     ld a,(ncCatalogChoice)
     ; Fall through to write the base for this physical slot.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Назначить буфер записей выбранному каталогу.
+;
+; вход:
+;   a = индекс каталога, hl = базовый адрес буфера.
+;
+; выход:
+;   Адрес сохранён в ncCatalogBases в порядке от младшего байта к старшему. de =
+;   исходный адрес, hl указывает на старший байт ячейки. af и bc изменяются.
+;----------------------------------------------------------------------------
+
 ncCatalogStoreBase:
     add a,a
     ld e,a
@@ -635,6 +676,20 @@ ncCatalogRememberTotal:
     ret
 
 ; A=slot, HL=address of its 16-bit total. DE destroyed.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти счётчик общего числа записей каталога.
+;
+; вход:
+;   a = индекс каталога в ncCatalogTotals.
+;
+; выход:
+;   hl = адрес 16-битного счётчика, de = смещение записи. a и флаги изменяются, bc
+;   сохранён.
+;----------------------------------------------------------------------------
+
 ncCatalogTotalAddress:
     add a,a
     ld e,a
@@ -671,18 +726,18 @@ ncCatalogBases:
     ELSE
     DW FILE_CACHE_A,FILE_CACHE_A
     ENDIF
-ncCatalogs: BLOCK NC_CATALOG_SLOTS*8,0
-ncCatalogTotals: BLOCK NC_CATALOG_SLOTS*2,0 ; Only used for a valid truncated listing.
-ncCatalogDrive: DB 0
-ncCatalogDirectory: DW 0
-ncCatalogChoice: DB 0
+ncCatalogs:             BLOCK  NC_CATALOG_SLOTS*8,0
+ncCatalogTotals:        BLOCK  NC_CATALOG_SLOTS*2,0     ; Only used for a valid truncated listing.
+ncCatalogDrive:         DB     0
+ncCatalogDirectory:     DW     0
+ncCatalogChoice:        DB     0
     IF NC_BANKED
-ncCatalogOther: DB 0
-ncCatalogBest: DB 0
-ncCatalogBestAge: DB 0
-ncCatalogTouchAge: DB 0
+ncCatalogOther:     DB 0
+ncCatalogBest:      DB 0
+ncCatalogBestAge:   DB 0
+ncCatalogTouchAge:  DB 0
     ENDIF
-ncCatalogReadOk: DB 0
-ncCatalogNotifyDrive: DB 0
-ncCatalogNotifyDirectory: DW 0
-ncCatalogNotifyAll: DB 0
+ncCatalogReadOk:            DB 0
+ncCatalogNotifyDrive:       DB 0
+ncCatalogNotifyDirectory:   DW 0
+ncCatalogNotifyAll:         DB 0

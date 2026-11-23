@@ -27,7 +27,7 @@ try:
  m.start('nc-editor-module')
  before=m.m.read(0x8000,0xC00)
  m.m.call('bp_clear');m.m.call('emu_run_for',ms=500);tap('esc');m.m.call('emu_run_for',ms=250)
- command='A:EDIT.COM A:README.TXT';keys={' ':'space',':':'colon','.':'period'}
+ command='C:/DOS/EDIT.COM C:README.TXT';keys={' ':'space',':':'colon','.':'period'}
  for ch in command:tap(keys.get(ch,ch.lower()))
  assert m.m.read(s['CMD_LINE'],len(command)).upper()==command.encode()
  m.m.screenshot(o/'nc-command.png');tap('enter');m.m.call('emu_run_for',ms=1500);m.m.call('debug_break')

@@ -75,9 +75,9 @@ editorToolbarFiles:
         UI_TOOLBAR_FIELD 3,0,'F10'
         UI_TOOLBAR_FIELD 4,080h,'Exit'
         DB 0
-editorToolbarMark: DB 'Mark'
-editorToolbarEnd: DB 'End '
-editorToolbarUnmark: DB 'Unmk'
+editorToolbarMark:      DB 'Mark'
+editorToolbarEnd:       DB 'End '
+editorToolbarUnmark:    DB 'Unmk'
 
 editorHelp:
         LD HL,editorHelpPath
@@ -98,8 +98,8 @@ editorHelpColor:
         RET
     ENDIF
     DB COLOR_TEXT ; Background palette passed with the FAR help path.
-editorHelpPath: DB 'A:',05Ch,'EDIT.HLP',0
-editorHelpError: DB 'Cannot read A: EDIT.HLP',0
+editorHelpPath:     DB 'C:',05Ch,'DOS',05Ch,'EDIT.HLP',0
+editorHelpError:    DB 'Cannot read C:/DOS/EDIT.HLP',0
 
 
 editorInfoModal:
@@ -169,9 +169,9 @@ editorFinishFileProgress:
         JP editorCloseModal
 editorProgressDescriptor:
         UI_MODAL_NOTICE
-editorProgressVisible: DB 0
-editorBusyLoading: DB 'Loading...',0
-editorBusySaving: DB 'Saving...',0
+editorProgressVisible:  DB 0
+editorBusyLoading:      DB 'Loading...',0
+editorBusySaving:       DB 'Saving...',0
 
 ; SDK owns the frame, separators, button geometry and text alignment.
 editorModalBegin:
@@ -263,9 +263,9 @@ editorInputColumns:
         LD A,B
         LD (editorInputWidth),A
         RET
-editorErrorTitle: DB 'Error',0
-editorModalOk: DB 'OK [Enter]',0
-editorModalCancel: DB 'Cancel [Esc]',0
+editorErrorTitle:   DB 'Error',0
+editorModalOk:      DB 'OK [Enter]',0
+editorModalCancel:  DB 'Cancel [Esc]',0
 editorErrorDescriptor:
         UI_MODAL_BEGIN 20,1,1
         UI_MODAL_BUTTON editorModalOk,0,0,1
@@ -279,9 +279,9 @@ editorFileDescriptor:
         UI_MODAL_BUTTON editorModalOk,0,0,1
         UI_MODAL_BUTTON editorModalCancel,0,1,0
         UI_MODAL_END
-editorModalCursor: DW 0
-editorInputWidth: DB 0
-editorInputTitle: DW 0
+editorModalCursor:  DW 0
+editorInputWidth:   DB 0
+editorInputTitle:   DW 0
 
 editorExitPrompt:
         LD HL,editorSaveDescriptor
@@ -321,10 +321,10 @@ editorSaveFile:
         OR A
         RET NZ
         JP editorRunPendingAction
-editorSaveQuestion: DB 'Save changes?',0
-editorSaveLabel: DB 'Save',0
-editorDiscardLabel: DB 'Discard',0
-editorCancelLabel: DB 'Cancel',0
+editorSaveQuestion:     DB 'Save changes?',0
+editorSaveLabel:        DB 'Save',0
+editorDiscardLabel:     DB 'Discard',0
+editorCancelLabel:      DB 'Cancel',0
 editorSaveDescriptor:
         UI_MODAL_BUTTONS_BEGIN 1,3
         UI_MODAL_BUTTON editorSaveLabel,0,0,1

@@ -14,13 +14,13 @@ FILE_KIB = 1
 
 def fixture(variant='large'):
     folder = OUT/(variant+'-image'); folder.mkdir(exist_ok=True)
-    manifest = (ROOT/'scripts/images/manifests/A-System.txt').read_text('utf-8-sig')
+    manifest = (ROOT/'assets/C-System.txt').read_text('utf-8-sig')
     manifest = manifest.replace('../bin/DOS.sys', os.path.relpath(OUT/variant/'DOS.sys', ROOT/'assets'))
     (OUT/(variant+'-manifest.txt')).write_text(manifest, encoding='utf-8')
     builder = (ROOT/'scripts/images/build-image.ps1').read_text('utf-8-sig')
     builder = builder.replace('$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)', '$repositoryRoot = '+ps(ROOT))
     builder = builder.replace('$imageDirectory = Join-Path $repositoryRoot "images"', '$imageDirectory = '+ps(folder))
-    builder = builder.replace('Join-Path $PSScriptRoot "manifests\\A-System.txt"', ps(OUT/(variant+'-manifest.txt')))
+    builder = builder.replace('Join-Path $assetDirectory "C-System.txt"', ps(OUT/(variant+'-manifest.txt')))
     path = folder/'build.ps1'; path.write_text(builder, encoding='utf-8-sig')
     command(['powershell.exe','-NoProfile','-File',path,'SystemEmuWritable'])
     return folder/'SystemRom_emu80_writable.bin'
@@ -107,7 +107,7 @@ def main():
     Matrix.__init__.__globals__['OUT']=OUT
     if (OUT/'results.json').exists(): raise RuntimeError('Completed report already exists')
     images={k:fixture(k) for k in args.variants if k!='baseline' or args.sampled}
-    x=Matrix(); result=dict(fileBytes=FILE_KIB*1024,passes=3,cpuHz=2000000,sampled=args.sampled,rows=[])
+    x=Matrix(legacy=True); result=dict(fileBytes=FILE_KIB*1024,passes=3,cpuHz=2000000,sampled=args.sampled,rows=[])
     if args.resume:
         result=json.loads((OUT/'partial.json').read_text())
         assert result['fileBytes']==FILE_KIB*1024 and result['sampled']==args.sampled

@@ -144,8 +144,4 @@ cwdOverflow:
             pop af
             pop hl
             jp blockArgument
-cwdDots: DB '..         '
-cwdBuffer: DW 0
-cwdWrite: DW 0
-cwdChild: DW 0
-cwdLength: DB 0
+cwdDots:        DB '..         '

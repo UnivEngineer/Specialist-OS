@@ -89,7 +89,7 @@ FuncReadReady:
     MODULE legacyPioRead
     INCLUDE "pio-read.inc"
     ENDMODULE
-ReadLoop = legacyPioRead.ReadLoop
+ReadLoop        = legacyPioRead.ReadLoop
 ReadAlignedLoop = legacyPioRead.ReadAlignedLoop
 
     ; Восстановление портов, регистров и выход
@@ -131,7 +131,7 @@ FlashRead:
     MODULE flashPioRead
     INCLUDE "pio-read.inc"
     ENDMODULE
-FlashReadLoop = flashPioRead.ReadLoop
+FlashReadLoop        = flashPioRead.ReadLoop
 FlashReadAlignedLoop = flashPioRead.ReadAlignedLoop
     ld      a,0C0h             ; оба управляющих сигнала неактивны
     ld      (IO_PROG_C),a
@@ -170,7 +170,7 @@ ReadByteFromChip:
 ;
 ; Выход:
 ;   hl = адрес имени и описания (две ASCII-строки с нулём), CF=0;
-;   b = DISK_TECH_ROM, c = DISK_CAP_READ.
+;   b = DISK_TECH_MX_VV55_ROM, c = DISK_CAP_READ.
 ;
 ; Сохраняет:
 ;   de.
@@ -179,7 +179,7 @@ ReadByteFromChip:
 ;   af и флаги.
     IFNDEF DRIVER_IO_ONLY
 FuncInfo:
-    ld      bc, DISK_TECH_ROM * 256 + DISK_CAP_READ
+    ld      bc, DISK_TECH_MX_VV55_ROM * 256 + DISK_CAP_READ
     ld      hl, DriverInfo
     or      a
     ret

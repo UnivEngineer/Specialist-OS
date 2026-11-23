@@ -64,7 +64,7 @@ def main():
 
     def finish(name):
         m.stop_at(s['exit_wait'])
-        for label in ('error', 'file_exists'):
+        for label in ('error', 'bank_module_error'):
             m.call('bp_set', addr=s[label], type='exec')
         x.until(s['exit_wait'])
         if name not in ('readonly', 'bad-size'):

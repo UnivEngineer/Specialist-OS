@@ -227,6 +227,6 @@ ncSortOptions:
     DB '[ ] Extension',0
     DS 3,0
     ASSERT $-ncSortOptions == 3*17
-ncSortChoice: DB 0
-ncSortNext: DB 0
-ncSortSelected: DB 0
+ncSortChoice:       DB 0
+ncSortNext:         DB 0
+ncSortSelected:     DB 0

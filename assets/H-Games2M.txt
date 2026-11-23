@@ -1,0 +1,195 @@
+# Игровой flash-диск H: объёмом 2 МиБ.
+# Метка тома (1–11 символов ASCII).
+@label GAMES
+
+# Формат строки: имя_на_диске источник [адрес_RAW [атрибуты]].
+# Имя на диске — FAT 8.3; пути к источникам отсчитываются от assets/.
+# ../bin/ — результаты сборки; {AUTOEXEC} — вариант AUTOEXEC для выбранного образа.
+#
+# Источники:
+#   CPU + соседний I80: CPU содержит адреса загрузки и входа (два hex-числа ASCII), I80 — код.
+#   CPU без I80: сырой код, загрузка и вход 0000h.
+#   RKS: адреса и нагрузка из стандартного контейнера; сумма проверяется.
+#   COM/EXE MXOS2: адреса и нагрузка из 32-байтного заголовка v2; суммы проверяются.
+#   BIN/I80/старый сырой COM/EXE: код без заголовка; адрес загрузки и входа задаёт адрес_RAW (0 по умолчанию).
+#
+# Целевой формат задаёт расширение имени в первом столбце:
+#   COM/EXE: общий контейнер MXOS2 — заголовок 32 байта (загрузка, вход, размер, суммы) + нагрузка.
+#   Для игровых EXE режим RUN берётся из games/catalog.csv; нативный MAIN запускается через DOS.
+#   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через CLI.EXT запускается RUN, по умолчанию -MON.
+#   При RKS -> COM/EXE заголовок и сумма RKS заменяются контейнером MXOS2; результат не является RAW.
+#   При преобразовании в RKS адрес входа должен совпадать с адресом загрузки.
+#   SYS/MON и остальные целевые расширения: побайтовая копия; SYS — DOS, MON — сырой образ сменного ядра.
+#
+# Адреса CPU/I80, RKS и COM/EXE берутся из источника, а не из адрес_RAW; в FAT адрес не записывается.
+# Для DOS.SYS адрес_RAW используется загрузчиком. Для источника RKS столбцы адреса и атрибутов запрещены.
+# Атрибуты: R — read-only, S — системный, RS — оба; без атрибутов — 0. Для пропуска адреса перед ними пишется 0.
+# Порядок строк задаёт порядок файлов; в больших системных образах загрузочные записи идут первыми.
+
+# Имя на диске    Источник относительно assets/                          Адрес RAW Атрибуты
+ADSKOK.RKS       games/families/adskok/repaired/Adskok.rks
+ADVENTUR.RKS     games/mx/ADVENTUR.CPU
+Almaz.RKS        games/std/Almaz.rks
+Dash1.rks        games/std/Dash1.rks
+Almaz-2/MXOS/Almaz2MX.exe     games/families/almaz-2/builds/Almaz2-mx-optimized.exe
+Almaz-2/STD/Almaz2.rks        games/families/almaz-2/builds/Almaz2-optimized.rks
+Almaz-2/STD/Almaz2-8.rks      games/families/almaz-2/builds/Almaz2-8color.rks
+Almaz-2/STD/Dash2.rks         games/std/Dash2.rks
+Almaz-2/RAMFOS/Almaz2RF.exe   games/families/almaz-2/builds/Almaz2-ramfos-optimized.exe
+ARCANOID.RKS     games/std/Arcanoid.rks
+Ball.exe         games/std/Ball.rks
+Ball.bat         programs/Ball.bat
+BKT.RKS          games/std/BKT.rks
+BUDI/BUDI-STD.EXE     games/families/budi/patched/Budi-std.exe
+BUDI/BUDI-RF.EXE      games/families/budi/patched/Budi-ramfos.exe
+BUDI/BUDI-RF.BAT      games/families/budi/patched/Budi-ramfos.bat
+BUDI/BUDI2STD.EXE     games/families/budi/patched/Budi2-std.exe
+BUDI/BUD2FFF8.EXE     games/families/budi/patched/Budi2-std-fff8.exe
+Buran/Buran.rks        games/families/buran/originals/Buran-std.rks
+Buran/Buran-SW.rks     games/families/buran/originals/Buran-starwars-std.rks
+Buran/Buran-RF.exe     games/families/buran/repacked/Buran-ramfos.exe
+Buran/Buran-RF.bat     games/families/buran/repacked/Buran-ramfos.bat
+canball.rks      games/std/Canball.rks
+CAT.RKS          games/mx/FISH_CAT.CPU
+CHECKERS.RKS     games/std/Checkers.rks
+Chess/CHESS.RKS        games/std/Chess.rks
+Chess/CHESS2.RKS       games/std/Chess2.rks
+Chess/CHESS3.RKS       games/std/Chess3.rks
+CIRCUS.RKS       games/std/Circus.rks
+COOKY.RKS        games/std/Cooky.rks
+COPTER.RKS       games/std/Copter.rks
+COSMAN.RKS       games/std/Cosman.rks
+DEFENCE.RKS      games/std/Defence.rks
+DIGGER.RKS       games/std/Digger.rks
+DRILLER.RKS      games/std/Driller.rks
+DUNGEON.RKS      games/std/Dungeon.rks
+DUNGEON2.RKS     games/std/Dungeon2.rks
+DUSHMAN.RKS      games/std/Dushman.rks
+DUSHMAN2.RKS     games/std/Dushman2.rks
+DwnEarth.rks     games/std/DwnEarth.rks
+Elite/Elite.exe  games/families/elite/originals/Elite-jcuken.rks
+Elite/Elite.txt  games/families/elite/manuals/Elite.txt
+EXOLON.EXE       games/mx/exolonmx.i80  0x0000
+FOOTBALL.RKS     games/std/Football.rks
+GOLD.RKS         games/std/Gold.rks
+GR_DEMO.RKS      games/std/Gr_demo.rks
+HARRIER.RKS      games/std/Harrier.rks
+HELICOPT.RKS     games/std/Helicopt.rks
+JET-SET.RKS      games/families/jet-set/repaired/Jet-set.rks
+JUMPJEK.RKS      games/std/JumpJek.rks
+Kamikaze.rks     games/std/Kamikaze.rks
+KLAD.RKS         games/std/Klad.rks
+KLAD2.RKS        games/std/Klad2.rks
+KOLOBKI.RKS      games/std/Kolobki.rks
+KOM13_1.RKS      games/families/kom13/repaired/Komanda13-part1.rks
+KOM13_2.RKS      games/families/kom13/originals/Komanda13-part2.rks
+KRESTNO.RKS      games/std/KrestNo.rks
+KROT.RKS         games/std/Krot.rks
+LADDER.RKS       games/std/Ladder.rks
+LAMP.RKS         games/std/Lamp.rks
+LAND.RKS         games/std/Land.rks
+LAND_C.RKS       games/std/Land_c.rks
+LAND_S.RKS       games/std/Land_s.rks
+LINES.RKS        games/families/lines/repaired/Lines.rks
+LODERUN.RKS      games/std/LodeRun.rks
+LRUNNER.RKS      games/std/LRunner.rks
+MANAGER.RKS      games/std/Manager.rks
+MARS.RKS         games/std/Mars.rks
+MARS2.RKS        games/std/Mars2.rks
+MUSIC.RKS        games/std/Music.rks
+NARDY.RKS        games/std/Nardy.rks
+NARDY2.RKS       games/std/Nardy2.rks
+OCHKO.RKS        games/std/Ochko.rks
+PACMAN.RKS       games/std/Pacman.rks
+PACMAN2.RKS      games/std/Pacman2.rks
+PAKET.RKS        games/std/Paket.rks
+PANGO.RKS        games/std/Pango.rks
+PATROL.RKS       games/std/Patrol.rks
+PENTAX.RKS       games/std/Pentax.rks
+PEREGON.RKS      games/std/Peregon.rks
+PEREGON2.RKS     games/std/Peregon2.rks
+PILOT.RKS        games/std/Pilot.rks
+POGONYA.RKS      games/std/Pogonya.rks
+POOL.RKS         games/std/Pool.rks
+POPCORN.RKS      games/std/Popcorn.rks
+PSST.RKS         games/std/PSST.rks
+PUSHER.RKS       games/std/Pusher.rks
+Python1.rks      games/std/Python1.rks
+RAIN.RKS         games/std/Rain.rks
+RALLY.RKS        games/std/Rally.rks
+RALLY2.RKS       games/std/Rally2.rks
+REVERSI.RKS      games/std/Reversi.rks
+REVERSI2.RKS     games/std/Reversi2.rks
+RISEOUT.RKS      games/std/Riseout.rks
+SABOTEUR.RKS     games/std/Saboteur.rks
+SAMFOX.RKS       games/std/Samfox.rks
+SCRAP2.RKS       games/std/Scrap2.rks
+SCRAPPER.RKS     games/std/Scrapper.rks
+SEX0.EXE         games/mx/sex0.cpu
+SEX1.EXE         games/mx/sex1.cpu
+SKACHKI.RKS      games/std/Skachki.rks
+SKACHKI2.RKS     games/std/Skachki2.rks
+SONATA.RKS       games/std/Sonata.rks
+spatrol.rks      games/std/SPatrol.rks
+SpKing.rks       games/std/SpKing.rks
+SPKING2.RKS      games/std/SpKing2.rks
+SQUARE.RKS       games/std/Square.rks
+StarTrek.exe     games/families/startrek/originals/StarTrek-std.rks
+StarWars/StarWars.rks     games/families/starwars/originals/StarWars-std.rks
+StarWars/StarWar2.rks     games/families/starwars/repacked/StarWars2-std.rks
+StarWars/StarWar2.exe     games/families/starwars/originals/StarWars2-mx.cpu
+StarWars/SW2-RF.exe       games/families/starwars/repacked/StarWars2-ramfos.exe
+STENA.RKS        games/std/Stena.rks
+STENA2.RKS       games/std/Stena2.rks
+SUPPITON.RKS     games/std/Suppiton.rks
+TENNIS.RKS       games/std/Tennis.rks
+TENNIS2.RKS      games/std/Tennis2.rks
+TENNIS3.RKS      games/std/Tennis3.rks
+TETRIS1.RKS      games/std/Tetris1.rks
+TETRIS-M.RKS     games/std/Tetris-m.rks
+TIP-TOP.RKS      games/std/Tip-top.rks
+TIP-TOP2.RKS     games/std/Tip-top2.rks
+TITAN.RKS        games/std/Titan.rks
+TREASUR2.RKS     games/std/Treasur2.rks
+TREASURE.RKS     games/std/Treasure.rks
+TUTANKH.RKS      games/std/Tutankh.rks
+UDAV.RKS         games/std/Udav.rks
+VAMPIR.RKS       games/std/Vampir.rks
+V-PEREHV.RKS     games/std/V-perehv.rks
+WWAR.RKS         games/std/WWAR.rks
+XONIX.RKS        games/std/Xonix.rks
+ZOO.RKS          games/families/zoo/originals/Zoo-std.rks
+
+# Бенчмарки (без System/Read-only).
+BENCH/CopyBen/CopyBen.com      ../bin/COPYBEN.cpu                       0
+BENCH/SortBen/SortBen.com      ../bin/SORTBEN.cpu                       0
+BENCH/DiskBen/DiskBen.com      ../bin/DISKBEN.cpu                       0
+BENCH/DiskBen/DiskBank.dll     ../bin/DISKBANK.cpu                      0
+BENCH/DiskBen/DiskDos.dll      ../bin/DISKDOS.cpu                       0
+BENCH/DiskBen/DiskMain.dll     ../bin/DISKMAIN.cpu                      0
+BENCH/FontBen/FontBen.com      ../bin/FONTCOM.cpu                       0
+BENCH/FontBen/TextBen.com      ../bin/TEXTCOM.cpu                       0
+BENCH/FontBen/FontBank.com     ../bin/FONTBANK.cpu                      0x4000
+BENCH/FontBen/TextBank.com     ../bin/TEXTBANK.cpu                      0x4000
+BENCH/FontBen/Engine6.dll      ../bin/ENGINE6.cpu 0x2000
+BENCH/FontBen/EngineP.dll      ../bin/ENGINEP.cpu 0x2000
+BENCH/FontBen/EngineW.dll      ../bin/ENGINEW.cpu 0x2000
+BENCH/FontBen/OrionM1.dll      ../bin/ORIONM1.cpu 0x2000
+BENCH/FontBen/EngineQ.dll      ../bin/ENGINEQ.cpu 0x2000
+BENCH/FontBen/Engine4.dll      ../bin/ENGINE4.cpu 0x2000
+BENCH/FontBen/EngineM.dll      ../bin/ENGINEM.cpu 0x2000
+BENCH/FontBen/EngineB.dll      ../bin/ENGINEB.cpu 0x2000
+BENCH/FontBen/EngineS.dll      ../bin/ENGINES.cpu 0x2000
+BENCH/FontBen/README.TXT       benchmarks/fontben/Readme.txt
+BENCH/FontBen/FontRot.dll    ../bin/fonts/FontRot.cpu    0x2000
+BENCH/FontBen/RotRows.dll    ../bin/fonts/RotRows.cpu    0x2000
+BENCH/FontBen/Rot6Col4.dll   ../bin/fonts/Rot6Col4.cpu   0x2000
+BENCH/FontBen/Rot8Quad.dll   ../bin/fonts/Rot8Quad.cpu   0x2000
+BENCH/FontBen/Rot8Strm.dll   ../bin/fonts/Rot8Strm.cpu   0x2000
+BENCH/FontBen/Font4Cmp.dll   ../bin/fonts/Font4Cmp.cpu   0x2000
+BENCH/FontBen/FontPack.dll    ../bin/fonts/FontPack.cpu    0x2000
+BENCH/FontBen/FontFull.dll    ../bin/fonts/FontFull.cpu    0x2000
+BENCH/FontBen/FontKoi.dll    ../bin/fonts/FontKoi.cpu    0x2000
+BENCH/FontBen/Font8.dll    ../bin/fonts/Font8.cpu    0x2000
+BENCH/FontBen/Font4.dll    ../bin/fonts/Font4.cpu    0x2000
+BENCH/FontBen/Font4Fst.dll ../bin/fonts/Font4Fst.cpu 0x2000

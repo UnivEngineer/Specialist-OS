@@ -527,6 +527,20 @@ hexDivideRow:
     call hexShiftRight
     call hexShiftRight
     jp hexShiftRight
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Разделить смещение HEX-представления на два.
+;
+; вход:
+;   hl = беззнаковое смещение.
+;
+; выход:
+;   hl = результат с округлением вниз, cf = исходный младший бит. a = l результата, bc
+;   и de сохранены.
+;----------------------------------------------------------------------------
+
 hexShiftRight:
     ld a,h
     or a
@@ -990,6 +1004,19 @@ hexClearVacatedRows:
     jp uiFillRectBytes
 ; Every HEX draw supplies absolute coordinates. In BANK queue a glyph string
 ; without simulating the cursor through each glyph of a completed row.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перенести координату текущей строки HEX в системный курсор.
+;
+; вход:
+;   hexY = экранная координата Y.
+;
+; выход:
+;   bios_vars.cursorY и a = hexY. bc, de, hl и флаги сохранены.
+;----------------------------------------------------------------------------
+
 hexSetRowY:
     ld a,(hexY)
     ld (bios_vars.cursorY),a
@@ -1154,6 +1181,20 @@ hexUseLayout:
     ld (hexRules),hl
     ENDIF
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать экранную колонку по индексу в таблице раскладки.
+;
+; вход:
+;   a = индекс, hexColumns указывает на таблицу колонок текущего режима.
+;
+; выход:
+;   a = байт таблицы, de = индекс с нулевым старшим байтом, hl = адрес прочитанной
+;   записи. bc сохранён.
+;----------------------------------------------------------------------------
+
 hexColumn:
     ld e,a
     ld d,0
@@ -1871,63 +1912,63 @@ hexLayoutKOI6: DB 62,0,46,0
     DB 6,8,11,13,16,18,21,23,26,28,31,33,36,38,41,43
     DB 5,0
     ASSERT 62*6 <= 376
-hexUniformBytes: DB 0
-hexFilters6: DB 1,255,1,0
-hexAllLabel: DB 'All glyphs'
-hexKoi8Label: DB 'KOI8-R    '
-hexKoi7Label: DB 'KOI7-R    '
-hexEntry: DW 0
-hexExpectedCS: DW 0
+hexUniformBytes:    DB 0
+hexFilters6:        DB 1,255,1,0
+hexAllLabel:        DB 'All glyphs'
+hexKoi8Label:       DB 'KOI8-R    '
+hexKoi7Label:       DB 'KOI7-R    '
+hexEntry:           DW 0
+hexExpectedCS:      DW 0
     IF !EDIT_BANKED
 ; Text reconstructs the entire visible width table when leaving HEX.
 editorPageWidths:
     ENDIF
 hexWorkspace:
-hexFirstY: DB 0
-hexDamageCol: DB 0
-hexOldFilter: DB 0
-hexPatchFirst: DB 0
-hexPatchEnd: DB 0
-hexFinalSummary: DW 0
-hexPrintedCaret: DW 0
-hexDisplayRow: DW 0
-hexSummary: DB 0
-hexBlockRows: DB 0
-hexByteMask: DB 0
-hexBase: DW 0
-hexLoad: DW 0
-hexViewType: DB 0
-hexHeaderY: DB 0
-hexSize: DW 0
-hexAcross: DB 0
-hexLineLen: DB 0
-hexSumCol: DB 0
-hexTextCol: DB 0
-hexColumns: DW 0
+hexFirstY:          DB 0
+hexDamageCol:       DB 0
+hexOldFilter:       DB 0
+hexPatchFirst:      DB 0
+hexPatchEnd:        DB 0
+hexFinalSummary:    DW 0
+hexPrintedCaret:    DW 0
+hexDisplayRow:      DW 0
+hexSummary:         DB 0
+hexBlockRows:       DB 0
+hexByteMask:        DB 0
+hexBase:            DW 0
+hexLoad:            DW 0
+hexViewType:        DB 0
+hexHeaderY:         DB 0
+hexSize:            DW 0
+hexAcross:          DB 0
+hexLineLen:         DB 0
+hexSumCol:          DB 0
+hexTextCol:         DB 0
+hexColumns:         DW 0
     IF EDIT_HEX_PSEUDO
 hexRules: DW 0
     ENDIF
-hexShiftRows: DB 0
-hexMarkDirty: DB 0
-hexGoal: DB 0
-hexCaretRow: DW 0
-hexCachedLine: DW 0
-hexLineBytes: DW 0
-hexLineCount: DB 0
-hexOffset: DW 0
-hexPaintedTop: DW 0
-hexDrawLimit: DB 0
-hexDirtyScreen: DB 0
-hexReformatEnd: DB 0
-hexY: DB 0
-hexCount: DB 0
-hexSlotsLeft: DB 0
-hexMarkFirst: DB 0
-hexMarkEnd: DB 0
+hexShiftRows:       DB 0
+hexMarkDirty:       DB 0
+hexGoal:            DB 0
+hexCaretRow:        DW 0
+hexCachedLine:      DW 0
+hexLineBytes:       DW 0
+hexLineCount:       DB 0
+hexOffset:          DW 0
+hexPaintedTop:      DW 0
+hexDrawLimit:       DB 0
+hexDirtyScreen:     DB 0
+hexReformatEnd:     DB 0
+hexY:               DB 0
+hexCount:           DB 0
+hexSlotsLeft:       DB 0
+hexMarkFirst:       DB 0
+hexMarkEnd:         DB 0
     IF EDIT_BANKED
 ; Filename input and HEX redraw do not overlap. Help and Save return to
 ; hexRepaint, which invalidates the cached pointer into hexScratch.
-hexRow = inputBuf
+hexRow     = inputBuf
 hexScratch = hexRow+HEX_ROW_BYTES
     ASSERT HEX_ROW_BYTES+16 <= MAX_PATH
     ELSE
@@ -1939,15 +1980,15 @@ hexScratch: DS 16,0
 hexBar: UI_SCROLLBAR 376,EDITOR_TEXT_TOP,EDITOR_BAR_Y-EDITOR_TEXT_TOP,8,3,1,EDITOR_ROWS,0
 
     INCLUDE "hex-edit.inc"
-hexContainerEntryLabel: DB 'Entry'
-hexContainerEndLabel: DB 'End  '
-hexContainerTitle: DB 'MX2  Load '
-hexContainerLoad: DB '0000  '
-hexContainerEntry: DB 'Entry'
+hexContainerEntryLabel:     DB 'Entry'
+hexContainerEndLabel:       DB 'End  '
+hexContainerTitle:          DB 'MX2  Load '
+hexContainerLoad:           DB '0000  '
+hexContainerEntry:          DB 'Entry'
     DB ' '
-hexContainerEntryValue: DB '0000  CS '
-hexContainerSum: DB '0000'
-hexContainerWarn: DB ' '
+hexContainerEntryValue:     DB '0000  CS '
+hexContainerSum:            DB '0000'
+hexContainerWarn:           DB ' '
 hexContainerEnd:
 ; HL=file offset -> HL=relative offset, DE=section start (0 or header length).
 ; BC is preserved. Only the body starts at the load address.
@@ -2029,8 +2070,8 @@ hexHeaderDivider:
     call hexBlockColumn
     jp hexBlockSlot
 
-hexHeaderRows: DB 0
-hexHeaderBlockLabel: DB 'Header'
+hexHeaderRows:          DB 0
+hexHeaderBlockLabel:    DB 'Header'
 ; The load address contributes only the low nibble to the body's grid.
 hexGrid:
     call hexSection
@@ -2058,6 +2099,19 @@ hexFirstHalfBit:
     ld a,l
     and 8
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти первую используемую колонку строки в таблице раскладки.
+;
+; вход:
+;   hexColumns = базовый адрес таблицы, hexLead = смещение начальной колонки.
+;
+; выход:
+;   hl = адрес колонки, a и de содержат смещение. bc сохранён.
+;----------------------------------------------------------------------------
+
 hexRowColumns:
     ld a,(hexLead)
     ld e,a
@@ -2069,6 +2123,19 @@ hexTextColumnStart:
     ld a,(hexTextCol)
     or a
     ret z
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Учесть ведущие колонки строки HEX при вычислении позиции.
+;
+; вход:
+;   a = индекс, hexLead = количество ведущих колонок.
+;
+; выход:
+;   a = сумма по модулю 256, cf = перенос. bc, de и hl сохранены.
+;----------------------------------------------------------------------------
+
 hexAddLead:
     push hl
     ld hl,hexLead
@@ -2089,7 +2156,7 @@ hexDividerTarget:
     ld b,h
     ld c,l
     ret
-hexTrailerLabel: DB 'RKS CS'
-hexTrailerRow: DW 0
-hexLead: DB 0
-hexAlign: DB 0
+hexTrailerLabel:    DB 'RKS CS'
+hexTrailerRow:      DW 0
+hexLead:            DB 0
+hexAlign:           DB 0

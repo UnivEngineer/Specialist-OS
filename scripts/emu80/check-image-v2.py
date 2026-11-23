@@ -64,8 +64,8 @@ try:
    save('B:/'+name+'.EXE',encode(Image(b'\xc9',0,0,0,mode=mode),'exe'))
   restore_nc()
   for mode,name in [(1,'mx'),(2,'std'),(3,'mon'),(4,'rf')]:
-   command('run b:/'+name+'.exe')
-   print('PASS RUN uses header MODE without menu:',name,flush=True)
+   command(f'run b:/{name}.exe -{name}')
+   print('PASS explicit RUN mode:',name,flush=True)
  elif a.modules_only:
   from executable import Image,encode
   restore_nc();baseline=allocation_count()

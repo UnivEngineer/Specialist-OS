@@ -83,6 +83,15 @@ typedef struct { MXOS_DESCRIPTOR descriptor; char path[128]; } MXOS_ENUM_ENTRY;
 #define MXOS_ENUM_CHECK_CANCEL 2
 mxos_u16 mxos_enumerate(mxos_u8 operation,MXOS_ENUM_REQUEST *request);
 #define MXOS_MAX_PATH 128
+/* RAW_IO B=0xFF returns medium technology in B and these capabilities in C. */
+#define MXOS_DISK_CAP_READ   0x01
+#define MXOS_DISK_CAP_WRITE  0x02
+#define MXOS_DISK_CAP_VERIFY 0x04
+#define MXOS_DISK_CAP_FLUSH  0x08
+#define MXOS_DISK_TECH_MX_SYSTEM_FLASH 'S'
+#define MXOS_DISK_TECH_MX_SYSTEM_ROM   'T'
+#define MXOS_DISK_TECH_MX_VV55_FLASH   'P'
+#define MXOS_DISK_TECH_MX_VV55_ROM     'Q'
 #define MXOS_RAW_PREPARE 6 /* RAW_IO B=6: unified entry HL (B=1/2/4/5), DE=0, shift B, drive C. */
 
 /* TEXT_PRINT: near request/source, explicit main buffer for method 2.

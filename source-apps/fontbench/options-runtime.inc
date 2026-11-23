@@ -154,21 +154,21 @@ benchFont: DB 1
     ELSE
 benchFont: DB 7
     ENDIF
-benchPacked: DB 7
-benchBanks: DB 3
-benchCalls: DB 63
-benchNoSave: DB 0
-benchQuick: DB 0
-benchHelp: DB 0
+benchPacked:    DB 7
+benchBanks:     DB 3
+benchCalls:     DB 63
+benchNoSave:    DB 0
+benchQuick:     DB 0
+benchHelp:      DB 0
     IFDEF FONT_PAGE6
 benchEngine: DB 4
     ELSE
 benchEngine: DB 7
     ENDIF
-benchCaseCount: DB MATRIX_CASE_COUNT
-benchStageTotal: DB MATRIX_STAGE_COUNT
-benchMissingText: DB '-',0
-benchSkippedText: DB 'Report disabled',13,10,0
+benchCaseCount:     DB MATRIX_CASE_COUNT
+benchStageTotal:    DB MATRIX_STAGE_COUNT
+benchMissingText:   DB '-',0
+benchSkippedText:   DB 'Report disabled',13,10,0
 
 benchIsPaged:
     push hl

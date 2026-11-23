@@ -14,7 +14,7 @@ a=p.parse_args();O=a.report.resolve()/a.variant;O.mkdir(parents=True,exist_ok=Tr
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(a.binary_dir/(a.editor_base+'.sym')).read_text(),re.M)}
 W=lambda v:int(v).to_bytes(2,'little')
 body=(a.binary_dir/(a.editor_base+'.i80')).read_bytes();T=S['EDITOR_TEXT_BEGIN']
-elite=(R/'assets/games/Elite.txt').read_bytes()
+elite=(R/'assets/games/families/elite/manuals/Elite.txt').read_bytes()
 counter=0
 
 def word(m,name,v):m[S[name]:S[name]+2]=W(v)
@@ -111,7 +111,7 @@ for font in ['Rotate','Packed6K','Fast12K']:
     assert document(out)==payload[:8]+b'X'+payload[8:]
 
 report=dict(cpu='z88dk-ticks Intel 8080',cpuHz=2000000,variant=a.variant,editorTextBegin=T,
-            input=dict(path='assets/games/Elite.txt',bytes=len(elite),sha256=hashlib.sha256(elite).hexdigest()),
+            input=dict(path='assets/games/families/elite/manuals/Elite.txt',bytes=len(elite),sha256=hashlib.sha256(elite).hexdigest()),
             hashes={name:hashlib.sha256((R/'bin'/name).read_bytes()).hexdigest() for name in ['BIOS.sys','IO.main.bin','fonts/Rotate.i80','fonts/Packed6K.i80','fonts/Packed6K.pre','fonts/Fast12K.i80','fonts/Fast12K.pre']},
             editorSha256=hashlib.sha256(body).hexdigest(),results=rows,calls=counter,
             scope='Tail: full Elite; page render: same complete-line prefix bounded by 16000 bytes and current Fast12K capacity, fitting all three fonts. Calls exclude keyboard wait and status fields; insertion includes initial F8 line snapshot and row redraw.')

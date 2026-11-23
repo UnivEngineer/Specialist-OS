@@ -383,6 +383,18 @@ loc_FB05:	push bc
 		 call	memcpy_fd_fd2
 		pop bc
 
+;----------------------------------------------------------------------------
+; RAMFOS
+;
+; Прочитать адреса начала и конца из заголовка файла RAMFOS.
+;
+; вход:
+;   v_header_start и v_header_stop содержат 16-битные адреса.
+;
+; выход:
+;   hl = начало, de = конец. bc, a и флаги сохранены.
+;----------------------------------------------------------------------------
+
 loadDStartDStop: ; de=v_header_stop, hl=v_header_start
 		ld hl, (v_header_stop)
 		ex de, hl
@@ -392,6 +404,19 @@ loadDStartDStop: ; de=v_header_stop, hl=v_header_start
 ; ---------------------------------------------------------------------------
 
 ; de = v_header_start = hl; v_header_stop = f_fileBodySize+hl;
+
+;----------------------------------------------------------------------------
+; RAMFOS
+;
+; Пересчитать границы тела файла при смене адреса загрузки.
+;
+; вход:
+;   hl = новое начало, f_fileBodySize = прибавляемая длина в байтах.
+;
+; выход:
+;   v_header_start и de = новое начало, v_header_stop и hl = начало плюс длина. bc и a
+;   сохранены, cf = перенос сложения.
+;----------------------------------------------------------------------------
 
 fileChangeAddr:	ld (v_header_start), hl
 		ex de, hl
@@ -699,8 +724,8 @@ dlg_redraw:
 a_panelOA:	DB "AM"
     IF NICE
 		DB '\'
-p_pageNum:	DB "0 "
-a_panelFilter:	DB "          "
+p_pageNum:      DB "0 "
+a_panelFilter:  DB "          "
     ELSE
 		DB "_V6.0"
 		DB 92
@@ -710,27 +735,27 @@ p_pageNum:	DB "0  "
     ENDIF
 
     IF NICE
-		DB 0C4h, 0C1h,	0D4h, 0C1h ; дата
+		DB 0C4h, 0C1h,	0D4h, 0C1h              ; дата
 		DB ' ', ' ', ' ', ' ', ' ', ' '
-		DB 0C1h, 0C4h, 0D2h, 0C5h, 0D3h ; "адрес"
+		DB 0C1h, 0C4h, 0D2h, 0C5h, 0D3h         ; "адрес"
 		DB ' ', ' ', ' '
-		DB 0D3h, 0D5h, 0CDh, 0CDh, 0C1h ; "сумма"
+		DB 0D3h, 0D5h, 0CDh, 0CDh, 0C1h         ; "сумма"
 		DB ' '
-		DB 0D2h, 0C1h, 0DAh, 0CDh, 0C5h, 0D2h ; "размер"
+		DB 0D2h, 0C1h, 0DAh, 0CDh, 0C5h, 0D2h   ; "размер"
 		DB ' '
     ELSE
-		DB 0C4h, 0C1h,	0D4h, 0C1h ; дата
+		DB 0C4h, 0C1h,	0D4h, 0C1h          ; дата
 		DB ' ', ' ', ' ', ' '
-		DB 0C1h, 0C4h, 0CEh ; "адн"
+		DB 0C1h, 0C4h, 0CEh                 ; "адн"
 		DB ' '
 		DB 2Ch
-		DB 0C1h, 0C4h, 0CBh ; "адк"
+		DB 0C1h, 0C4h, 0CBh                 ; "адк"
 		DB ' '
 		DB 2Dh
-		DB 0D3h, 0D5h, 0CDh, 0CDh, 0C1h ; "сумма"
+		DB 0D3h, 0D5h, 0CDh, 0CDh, 0C1h     ; "сумма"
 		DB ' '
 		DB ' '
-		DB 0C4h, 0CCh, 0C9h, 0CEh, 0C1h ; "длина"
+		DB 0C4h, 0CCh, 0C9h, 0CEh, 0C1h     ; "длина"
 		DB ' '
     ENDIF
 
@@ -771,7 +796,7 @@ dlg_checkMsg:	 ; Выйти с флагом Z, если выбрана посл�
 dlg_msg:	 ; Вывод сообщения
 		push af
 		 call	printStringEx
-		 DB C_POPCURSORS, C_LEFT, C_INVERSE, ' ', ' ', ' ', 0C6h, 0C1h, 0CAh, 0CCh ; файл тип
+		 DB C_POPCURSORS, C_LEFT, C_INVERSE, ' ', ' ', ' ', 0C6h, 0C1h, 0CAh, 0CCh  ; файл тип
 		 DB ' ', ' ', 2Eh, 0D4h, 0C9h, 0D0h, ' ', 0Eh, ' ', 0
 		 
 		 ex de, hl

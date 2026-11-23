@@ -174,6 +174,20 @@ uiModalText:
     pop hl
     jp bios_printStringReal
 ; Body-relative baseline: A=offset, returns E=absolute baseline. HL preserved.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перевести вертикальное смещение элемента в координату модального окна.
+;
+; вход:
+;   a = смещение, uiModalCurrent содержит адрес описателя с координатой Y во втором
+;   байте.
+;
+; выход:
+;   e и a = базовая координата плюс смещение; cf = перенос. hl, bc и d сохранены.
+;----------------------------------------------------------------------------
+
 uiModalBodyY:
     push hl
     ld hl,(uiModalCurrent)
@@ -222,7 +236,7 @@ uiModalGetch:
     ret
     INCLUDE "ui-modal-focus.inc"
     ENDIF
-uiModalCurrent: DW 0
-uiModalFont: DB 6
-uiModalCount: DB 0
-uiModalDelta: DB 0
+uiModalCurrent:     DW 0
+uiModalFont:        DB 6
+uiModalCount:       DB 0
+uiModalDelta:       DB 0

@@ -7,6 +7,9 @@ param(
     [switch] $Hidden,
     [switch] $Flash,
     [switch] $ResetFlash,
+    [switch] $ResetFloppy,
+    [switch] $FreshFloppy,
+    [switch] $TestFlashSeed,
     [switch] $UpdateSystemFlash,
     [switch] $ProtectSystemFlash,
     [switch] $Mcp,
@@ -16,6 +19,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2.0
+if ($TestFlashSeed -and -not ($Flash -and $Mcp)) { throw '-TestFlashSeed requires a flash MCP test slot.' }
+if ($FreshFloppy -and $ResetFloppy) { throw 'Choose either -FreshFloppy or -ResetFloppy.' }
 if ($ResetFlash -and -not $Flash) { throw '-ResetFlash requires -Flash.' }
 if ($UpdateSystemFlash -and -not $Flash) { throw '-UpdateSystemFlash requires -Flash.' }
 if ($ProtectSystemFlash -and -not $Flash) { throw '-ProtectSystemFlash requires -Flash.' }
@@ -32,7 +37,18 @@ $persistentImage = Join-Path $runtime 'specialist-os/flash-disk.bin'
 $persistentSystem = Join-Path $runtime 'specialist-os/system-flash.bin'
 $deployment = Join-Path $runtime 'specialist-os'
 $deploymentFile = Join-Path $deployment 'deployment.json'
-# Remember the installed seed, not the mutable flash hash. A user edit to A:
+$floppySource = Join-Path $root 'images/Floppy720.img'
+$floppyName = if ($FreshFloppy) { 'floppy720-test.img' } else { 'floppy720.img' }
+$mountedFloppy = Join-Path $deployment $floppyName
+$hasFloppySeed = Test-Path -LiteralPath $floppySource -PathType Leaf
+$hasFloppy = Test-Path -LiteralPath $mountedFloppy -PathType Leaf
+$seedFloppy = $FreshFloppy -or $ResetFloppy -or ($hasFloppySeed -and -not $hasFloppy)
+if ($seedFloppy -and -not $hasFloppySeed) { throw "Required floppy seed not found: $floppySource" }
+if ($seedFloppy -and (Get-Item -LiteralPath $floppySource).Length -ne 720KB) { throw "Unexpected floppy seed size: $floppySource" }
+if ($hasFloppy -and -not $seedFloppy -and (Get-Item -LiteralPath $mountedFloppy).Length -ne 720KB) {
+    throw "Unexpected working floppy size: $mountedFloppy"
+}
+# Remember the installed seed, not the mutable flash hash. A user edit to C:
 # must survive another launch when the build itself has not changed.
 $systemSeedHash = $null
 if ($Flash -and (Test-Path -LiteralPath $deploymentFile -PathType Leaf)) {
@@ -41,7 +57,7 @@ if ($Flash -and (Test-Path -LiteralPath $deploymentFile -PathType Leaf)) {
         $systemSeedHash = $previousDeployment.systemSeedSha256
     }
 }
-$needsDiskSource = -not $Flash -or $ResetFlash -or -not (Test-Path -LiteralPath $persistentImage -PathType Leaf)
+$needsDiskSource = $TestFlashSeed -or -not $Flash -or $ResetFlash -or -not (Test-Path -LiteralPath $persistentImage -PathType Leaf)
 $needsSystemSource = -not $Flash -or $ResetFlash -or $UpdateSystemFlash -or -not (Test-Path -LiteralPath $persistentSystem -PathType Leaf)
 foreach ($path in @($executable, (Join-Path $runtime 'emu80.conf'), $configSource)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Required file not found: $path" }
@@ -78,31 +94,56 @@ if (Test-Path -LiteralPath $marker) {
 # Не заменяем образы и профиль работающего экземпляра этой установки.
 $running = @(Get-Process -Name Emu80qt,Emu80qt-mcp -ErrorAction SilentlyContinue | Where-Object { $_.Path -and (Split-Path -Parent $_.Path) -eq $runtime })
 if ($running.Count -ne 0) { throw 'Close this Emu80 instance before preparing or launching the profile.' }
+if ($hasFloppy) {
+    try {
+        $probe = [IO.File]::Open($mountedFloppy, 'Open', 'Read', 'None')
+        $probe.Dispose()
+    } catch [IO.IOException] {
+        throw "Floppy image is in use: $mountedFloppy. Unmount it in ImDisk before launching Emu80."
+    }
+}
 New-Item -ItemType Directory -Path $deployment -Force | Out-Null
+if ($seedFloppy) {
+    Copy-Item -LiteralPath $floppySource -Destination $mountedFloppy -Force
+    $hasFloppy = $true
+    Write-Host "[deploy] A: $floppySource -> $mountedFloppy"
+}
 if ($Flash) {
     $protectionFile = $persistentImage + '.sdp'
     $systemProtection = $persistentSystem + '.sdp'
     if ($ResetFlash -or -not (Test-Path -LiteralPath $persistentImage)) {
         Copy-Item -LiteralPath $diskSource -Destination $persistentImage -Force
         if (Test-Path -LiteralPath $protectionFile -PathType Leaf) { Remove-Item -LiteralPath $protectionFile }
+        Write-Host "[deploy] H: $diskSource -> $persistentImage"
     }
     if ($refreshSystem) {
         Copy-Item -LiteralPath $systemSource -Destination $persistentSystem -Force
-        if (Test-Path -LiteralPath $systemProtection -PathType Leaf) { Remove-Item -LiteralPath $systemProtection }
         $systemSeedHash = $systemSourceHash
-        Write-Host "System flash A: updated from $systemSource"
+        Write-Host "[deploy] C: $systemSource -> $persistentSystem"
     } elseif ($UpdateSystemFlash) {
-        Write-Host 'System flash A: build unchanged; keeping working image.'
+        Write-Host "[keep] C: $persistentSystem"
     }
     if ((Get-Item -LiteralPath $persistentImage).Length -ne $diskSize) { throw 'Persistent flash image has an invalid size.' }
     if ((Get-Item -LiteralPath $persistentSystem).Length -ne $systemSize) { throw 'Persistent system flash image has an invalid size.' }
+    # Системный образ подготовлен к эксплуатации. Штатный драйвер пишет с SDP.
+    if ($refreshSystem -or -not (Test-Path -LiteralPath $systemProtection -PathType Leaf)) {
+        [IO.File]::WriteAllBytes($systemProtection, [byte[]]@(1))
+    }
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'specialist-mx2-flash.conf') -Destination (Join-Path $deployment 'specialist-mx2-flash.conf') -Force
 } else {
     Copy-Item -LiteralPath $systemSource -Destination (Join-Path $deployment 'system.bin') -Force
     Copy-Item -LiteralPath $diskSource -Destination (Join-Path $deployment 'rom-disk.bin') -Force
 }
 Copy-Item -LiteralPath $configSource -Destination (Join-Path $deployment 'specialist-mx2.conf') -Force
-$launchConfig = $(if ($mx2Models) { "define MX2_MODELS`n" }) + $(if ($Flash) { "define FLASH_DISK`ndefine SYSTEM_FLASH`n" }) + $(if ($ProtectSystemFlash) { "define SYSTEM_FLASH_LOCKED`n" }) + "include specialist-os/specialist-mx2.conf`n"
+$launchConfig = $(if ($mx2Models) { "define MX2_MODELS`n" }) + $(if ($Flash) { "define FLASH_DISK`ndefine SYSTEM_FLASH`n" }) + $(if ($ProtectSystemFlash) { "define SYSTEM_FLASH_LOCKED`n" })
+if ($hasFloppy) { $launchConfig += "define FLOPPY_720`n" }
+if ($FreshFloppy) { $launchConfig += "define FRESH_FLOPPY`n" }
+$launchConfig += "include specialist-os/specialist-mx2.conf`n"
+if ($TestFlashSeed) {
+    # Тест читает инструменты со свежего H:, сохраняя рабочий flash-диск слота.
+    Copy-Item -LiteralPath $diskSource -Destination (Join-Path $deployment 'test-flash.bin') -Force
+    $launchConfig += "flashDisk.image = `"specialist-os/test-flash.bin`"`n"
+}
 $launchConfig += "kbdLayout.layout = smart`n"
 if ($Mcp -or $Mute) {
     $launchConfig += "pitSoundSource.muted = yes`ntapeMonitor.muted = yes`n"
@@ -110,8 +151,10 @@ if ($Mcp -or $Mute) {
 [IO.File]::WriteAllText((Join-Path $deployment 'launch.conf'), $launchConfig, (New-Object Text.UTF8Encoding($false)))
 $diskName = if ($Flash) { 'flash-disk.bin' } else { 'rom-disk.bin' }
 $systemName = if ($Flash) { 'system-flash.bin' } else { 'system.bin' }
+$deployedFiles = @($systemName, $diskName, 'specialist-mx2.conf')
+if ($hasFloppy) { $deployedFiles += $floppyName }
 $record = [ordered]@{ systemImage = $SystemImage; mutableDisk = [bool]$Flash; systemSeedSha256 = $systemSeedHash; files = @(
-    foreach ($name in @($systemName, $diskName, 'specialist-mx2.conf')) {
+    foreach ($name in $deployedFiles) {
         [ordered]@{ path = $name; sha256 = (Get-FileHash -LiteralPath (Join-Path $deployment $name) -Algorithm SHA256).Hash.ToLowerInvariant() }
     }
 ) }

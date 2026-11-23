@@ -17,8 +17,8 @@ editorDebuger:	 ; В режиме выбора файла запускать н�
 		; Запуск
 		jp exec
 		
-a_editor:	DB "Editor   EXE"
-a_debuger:	DB "Debuger  EXE"
+a_editor:       DB "Editor   EXE"
+a_debuger:      DB "Debuger  EXE"
 
 ; ---------------------------------------------------------------------------
 

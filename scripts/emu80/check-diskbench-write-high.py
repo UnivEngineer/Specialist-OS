@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[2]
 n=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
 Matrix=n['Matrix']; out=ROOT/'docs/diskbench/write-high-001';out.mkdir(exist_ok=True)
 Matrix.__init__.__globals__['OUT']=out
-x=Matrix();rows=[]
+x=Matrix(legacy=True);rows=[]
 try:
     x.start('write-high');x.install('FlashSys')
     for kib in [1,8,24]:

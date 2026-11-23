@@ -47,7 +47,7 @@ try:
  reset();choose('EDIT','COM');m.stop_at(e['editorStatusLoop']);m.tap('enter');m.until(e['editorStatusLoop'],120,page=0);editor('enter-edit',True)
  reset();cmd('EDIT.COM',e['editorStatusLoop']);editor('nc-empty',True)
  reset();m.stop_at(c['cliPrompt']);m.tap('f10');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM',e['editorStatusLoop']);editor('cli-empty',True)
- m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM A:/README.TXT',e['editorStatusLoop']);editor('cli-readme',False)
+ m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM C:/README.TXT',e['editorStatusLoop']);editor('cli-readme',False)
  # Открытие FFh-текста, изменение строки, добавление файла и сохранение без NUL.
  m.stop_at(c['cliPrompt']);m.call('emu_reset');m.until(c['cliPrompt'],120,page=0);cmd('EDIT.COM H:/MARKER.TXT',e['editorStatusLoop'])
  assert m.read(e['EDITOR_TEXT_BEGIN'],9)==b'A\xffB\rC\xffD\r\0'

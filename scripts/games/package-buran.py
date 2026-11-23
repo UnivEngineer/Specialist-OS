@@ -1,11 +1,11 @@
-"""Копии «Бурана» в платформенных контейнерах из побайтных legacy-эталонов."""
+"""Проверка оригиналов «Бурана» и упаковка версии RAMFOS в EXE."""
 import argparse
 import hashlib
 from pathlib import Path
 import runpy
 
 ROOT = Path(__file__).resolve().parents[2]
-GAMES = ROOT / 'assets/games/Buran'
+GAMES = ROOT / 'assets/games/families/buran'
 SOURCES = {
     'Buran-std.rks': '092f321c30b6d89d7df4136a28ca9512d0285782e992ad7a841c4d52399fe1fa',
     'Buran-starwars-std.rks': '8706c2ae313ccdc1ea23368524d1a02b9213a727f906f484fb00b1671790bd68',
@@ -24,29 +24,26 @@ def main():
     parse, checksum = helpers['parse'], helpers['checksum']
     original = {}
     for name, expected in SOURCES.items():
-        data = (GAMES / 'legacy' / name).read_bytes()
+        data = (GAMES / 'originals' / name).read_bytes()
         if hashlib.sha256(data).hexdigest() != expected:
             raise ValueError(f'Неизвестный оригинал: {name}')
         original[name] = data
     # Старый EXE фактически содержит нагрузку STD и её хвост суммы RKS.
     if original['Buran-starwars-std.cpu'] != original['Buran-starwars-std.rks'][4:]:
         raise ValueError('Исторические EXE/RKS не соответствуют друг другу')
-    prepared = {}
     for name in ('Buran-std.rks', 'Buran-starwars-std.rks'):
-        source = original[name]
-        start, end, data, tail = parse(source)
-        if start != 0 or len(tail) != 2:
+        start, _, data, tail = parse(original[name])
+        if start != 0 or tail != checksum(data).to_bytes(2, 'little'):
             raise ValueError(f'Неизвестная структура RKS: {name}')
-        prepared[name] = source[:4] + data + checksum(data).to_bytes(2, 'little')
-    prepared['Buran-ramfos.cpu'] = original['Buran-ramfos.cpu']
-    for name, data in prepared.items():
-        target = GAMES / name
-        if args.check:
-            if not target.exists() or target.read_bytes() != data:
-                raise ValueError(f'Платформенная копия отличается: {name}')
-        else:
-            target.write_bytes(data)
-    print('Проверены 6 исторических файлов и 3 платформенные копии «Бурана».')
+    container = runpy.run_path(str(ROOT / 'scripts/images/executable.py'))
+    data = container['encode'](container['Image'](original['Buran-ramfos.cpu'], mode=4), 'exe')
+    target = GAMES / 'repacked/Buran-ramfos.exe'
+    if args.check:
+        if target.read_bytes() != data:
+            raise ValueError(f'Контейнер RAMFOS отличается: {target}')
+    else:
+        target.write_bytes(data)
+    print('Проверены 6 исторических файлов и контейнер RAMFOS «Бурана».')
 
 
 if __name__ == '__main__':

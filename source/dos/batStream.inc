@@ -1,32 +1,37 @@
-; Восемь независимых кадров: FILE_HANDLE, команда, номер/смещение строки
-; и 512 байт чтения. Дочерний BAT возвращается обычным RET в родителя.
-BAT_POS = 64
-BAT_LEFT = 66
-BAT_LINE = 68
-BAT_OFFSET = 70             ; DWORD: начало текущей строки в файле
-BAT_CR = 74
-BAT_COMMAND = 76
-BAT_INPUT = BAT_FRAME_SIZE-BAT_READ_SIZE
-    ASSERT BAT_COMMAND+MAX_PATH+2 <= BAT_INPUT
-    ASSERT BAT_INPUT+BAT_READ_SIZE <= BAT_FRAME_SIZE
+; Имя 8.3 используется для диагностики. Следующие десять байтов BAT_FILE
+; соответствуют firstCluster, size и FH_POSITION в общем дескрипторе чтения.
+BAT_DRIVE    = 11
+BAT_FILE     = 12
+BAT_RESUME   = BAT_FILE+6
+BAT_LINE     = BAT_RESUME+4
+BAT_OFFSET   = BAT_LINE+2
+BAT_CR       = BAT_OFFSET+4
+    ASSERT BAT_CR+1 == BAT_FRAME_SIZE
+    ASSERT FILE_DESCRIPTOR.firstCluster+6 == FH_POSITION
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выполнить BAT из разрешённого каталога и возобновить вызывающий сценарий.
+;
+; вход:
+;   v_curFileDescr = короткое имя, v_drive и v_directory задают каталог.
+;   На стеке лежат указатель аргументов и адрес возврата загрузчика.
+;
+; выход:
+;   cf = 0 при успехе, иначе cf = 1 и a = ошибка DOS. Кадр родителя
+;   восстановлен. af, bc, de и hl используются.
+;----------------------------------------------------------------------------
 execBat:
-    pop de                  ; Аргументы, положенные загрузчиком.
-    IFDEF BANKED_DOS_BUILD
-    ld hl,BAT_BUFFER
-    ld de,BAT_BUFFER+BAT_BUFFER_SIZE
-    call dosArenaCheck
-    jp nc,batArenaFree
-    ld a,DOS_ERR_ACCESS
-    jp dosSetError
-batArenaFree:
-    ENDIF
+    pop de
     ld a,(v_batDepth)
     cp BAT_MAX_DEPTH
     jp nc,blockArgument
     or a
+    call nz,batDetach
+    ld a,(v_batDepth)
+    or a
     jp nz,batNested
-    xor a
     ld (v_batReported),a
 batNested:
     inc a
@@ -37,53 +42,36 @@ batNested:
     add hl,de
     ld (v_batFrame),hl
     ex de,hl
-    ld b,BAT_COMMAND
+    ld b,BAT_FRAME_SIZE
     xor a
     call memset_de_a_b
     ld hl,(v_batFrame)
-    ld b,h
-    ld c,l
-    ld hl,v_curFileDescr
-    ld de,v_curFileDescr+11
-    call memcpy_bc_hl
-    ld a,FH_DRIVE
-    call batField
-    ld a,(v_drive)
-    ld (hl),a
-    inc hl
-    ld (hl),FILE_MODE_READ
-    ld hl,(v_batFrame)
-    ld de,BAT_INPUT
-    add hl,de
     ex de,hl
-    ld a,FH_BUFFER
+    ld hl,v_curFileDescr
+    ld bc,11
+    call cliCopyBytes
+    ld a,(v_drive)
+    ld (de),a
+    ld hl,v_curFileDescr
+    call fileFind
+    jp nc,batFound
+    ld a,(v_dosError)
+    jp batDone
+batFound:
+    ld a,BAT_FILE
     call batField
-    ld (hl),e
-    inc hl
-    ld (hl),d
-    xor a
-    call batIo
-    call nc,batRun
-    push af
-    ld a,FH_STATE
-    call batField
-    ld a,(hl)
-    cp 046h
-    jp nz,batNoClose
-    ld a,FILE_OP_CLOSE
-    call batIo
-    push af
-    pop de
-    pop af
-    jp c,batClosed
-    push de
-    pop af
-    jp batClosed
-batNoClose:
-    pop af
-batClosed:
+    ex de,hl
+    ld hl,v_tmpFileDescr+FILE_DESCRIPTOR.firstCluster
+    ld bc,6
+    call cliCopyBytes
+    call batCheckCycle
+    jp c,batUnwind          ; Ошибка относится к строке вызова родителя.
+    call batRun
+batDone:
     call c,batError
+batUnwind:
     push af
+    call batDiscard
     ld hl,v_batDepth
     dec (hl)
     pop bc
@@ -93,7 +81,94 @@ batClosed:
     pop af
     ret
 
-; A=смещение поля, HL=его адрес; BC/DE/A сохраняются.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Отклонить повторный вход в сценарий, уже присутствующий в стеке.
+;
+; вход:
+;   v_batFrame и v_batDepth описывают стек вместе с новым кадром.
+;   v_tmpFileDescr содержит найденную запись, v_drive — диск файла.
+;
+; выход:
+;   cf = 0, если можно продолжить. При совпадении диска и начального
+;   кластера cf = 1 и a = DOS_ERR_ARGUMENT. Все регистры рабочие.
+;----------------------------------------------------------------------------
+batCheckCycle:
+    ld a,(v_batDepth)
+    dec a
+    ld hl,(v_batFrame)
+    ld de,0-BAT_FRAME_SIZE
+    add hl,de
+    call batFindActive
+    ret nc
+    jp blockArgument
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Проверить, удерживает ли активный BAT цепочку найденного файла.
+;
+; вход:
+;   a = число проверяемых кадров, hl = самый новый из них.
+;   v_drive и v_tmpFileDescr задают том и первый кластер объекта.
+;
+; выход:
+;   cf = 1 при совпадении, иначе cf = 0. af, bc, de, hl используются.
+;----------------------------------------------------------------------------
+batFindActive:
+    or a
+    ret z
+    ld c,a
+    ld de,BAT_DRIVE
+    add hl,de
+    ld a,(v_drive)
+    ld b,a
+    ex de,hl
+    ld hl,(v_tmpFileDescr+FILE_DESCRIPTOR.firstCluster)
+    ex de,hl
+batActiveNext:
+    ld a,b
+    cp (hl)
+    jp nz,batActiveSkip
+    inc hl
+    ld a,e
+    cp (hl)
+    inc hl
+    jp nz,batActiveBack
+    ld a,d
+    cp (hl)
+    jp z,batActiveFound
+batActiveBack:
+    dec hl
+    dec hl
+batActiveSkip:
+    dec c
+    jp z,batActiveAbsent
+    push de
+    ld de,0-BAT_FRAME_SIZE
+    add hl,de
+    pop de
+    jp batActiveNext
+batActiveAbsent:
+    or a
+    ret
+batActiveFound:
+    scf
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти поле активного кадра BAT.
+;
+; вход:
+;   a = байтовое смещение, v_batFrame = адрес кадра.
+;
+; выход:
+;   hl указывает на поле, cf определяется сложением адресов. a, bc и de сохранены.
+;----------------------------------------------------------------------------
+
 batField:
     push de
     ld hl,(v_batFrame)
@@ -103,29 +178,26 @@ batField:
     pop de
     ret
 
-; Локальный FILE_HANDLE: восстановить диск и временный каталог команды.
-batIo:
-    ld c,a
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать порцию через общий FILE_HANDLE, сохранив каталог команды.
+;
+; вход:
+;   BAT_HANDLE содержит открытый курсор чтения, адрес и размер запроса.
+;
+; выход:
+;   cf/a = результат чтения либо ошибка восстановления диска. FH_COUNT =
+;   число переданных байтов. bc, de и hl используются.
+;----------------------------------------------------------------------------
+batRead:
     ld a,(v_drive)
     push af
     ld hl,(v_directory)
     push hl
-    ld a,c
-    ld hl,(v_batFrame)
-    or a
-    jp z,batIoOpen
+    ld a,FILE_OP_READ
+    ld hl,BAT_HANDLE
     call fileHandle
-    jp batIoDone
-batIoOpen:
-    ; Имя уже разрешено загрузчиком: OPEN не должен сбросить временный
-    ; каталог пути A:\DIR\FILE.BAT к сохранённому CWD этого диска.
-    ld (v_handle),hl
-    ld (v_handleOp),a
-    ld hl,0
-    ld (v_handleNew),hl
-    call dosClearError
-    call handleOpen
-batIoDone:
     push af
     pop bc
     pop hl
@@ -145,76 +217,195 @@ batIoDone:
     pop af
     ret
 
-; CF=0/A=байт; CF=1/A=0 — EOF; CF=1/A!=0 — ошибка. BC/DE/HL сохранены.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вернуть общий дескриптор и буфер родителю или загрузчику DLL.
+;
+; вход:
+;   v_batFrame указывает на активный сценарий. batLeft = непрочитанные байты.
+;
+; выход:
+;   BAT_RESUME указывает на первый непрочитанный байт. batDiscard освобождает
+;   окно без сохранения позиции при выходе из сценария. Все регистры рабочие.
+;----------------------------------------------------------------------------
+batDetach:
+    ld a,(BAT_HANDLE+FH_STATE)
+    or a
+    ret z
+    ld hl,(batLeft)
+    ex de,hl
+    ld a,BAT_RESUME
+    call batSavePosition
+batDiscard:
+    xor a
+    ld (BAT_HANDLE+FH_STATE),a
+    ld hl,0
+    ld (batWindowEnd),hl
+    ld (batLeft),hl
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить чтение целого BAT либо очередных 128 байтов потока.
+;
+; вход:
+;   v_batFrame = активный сценарий, предыдущее окно исчерпано.
+;
+; выход:
+;   cf/a = статус DOS, batPtr и batLeft описывают прочитанный диапазон.
+;   Нулевой остаток при успехе означает EOF. Все регистры рабочие.
+;----------------------------------------------------------------------------
+batFill:
+    ld a,(BAT_HANDLE+FH_STATE)
+    or a
+    jp nz,batCheckEOF
+    ld a,BAT_DRIVE
+    call batField
+    ld a,(hl)
+    ld (BAT_HANDLE+FH_DRIVE),a
+    inc hl
+    ld de,BAT_HANDLE+FILE_DESCRIPTOR.firstCluster
+    ld bc,10
+    call cliCopyBytes
+    ld (BAT_HANDLE+FH_VALID),a   ; cliCopyBytes вернула ноль.
+    ld a,FILE_MODE_READ
+    ld (BAT_HANDLE+FH_MODE),a
+    ld a,046h
+    ld (BAT_HANDLE+FH_STATE),a
+    IFDEF BANKED_DOS_BUILD
+    ; Ищем место только при первом чтении. После вытеснения остаёмся в потоке.
+    ld hl,BAT_HANDLE+FH_POSITION
+    ld a,(hl)
+    inc hl
+    or (hl)
+    inc hl
+    or (hl)
+    inc hl
+    or (hl)
+    jp nz,batSmall
+    ld hl,(BAT_HANDLE+FILE_DESCRIPTOR.size+2)
+    ld a,h
+    or l
+    jp nz,batSmall
+    ld hl,(BAT_HANDLE+FILE_DESCRIPTOR.size)
+    ld b,h
+    ld c,l
+    ld de,BAT_READ_SIZE
+    call cmp_hl_de
+    jp c,batSmall
+    jp z,batSmall
+    ld hl,DOS_BANK_MODULE_END
+batFindHole:
+    push hl
+    ld d,b
+    ld e,c
+    call sub_hl_de
+    pop de
+    jp c,batSmall
+    push de
+    ld de,DOS_ARENA_START
+    call cmp_hl_de
+    pop de
+    jp c,batSmall
+    call arenaProbe
+    jp nc,batWhole
+    ld hl,(arenaObstacle)
+    jp batFindHole
+batWhole:
+    ex de,hl
+    ld (batWindowEnd),hl
+    ex de,hl
+    jp batReadWindow
+    ELSE
+    jp batSmall
+    ENDIF
+batCheckEOF:
+    ; При пустом окне позиция ещё в общем дескрипторе. Конец уже известен:
+    ; не выбираем дисковод повторно после последней команды на другом томе.
+    ld hl,BAT_HANDLE+FH_POSITION
+    ld de,BAT_HANDLE+FILE_DESCRIPTOR.size
+    ld b,4
+batCompareSize:
+    ld a,(de)
+    cp (hl)
+    jp nz,batSmall
+    inc de
+    inc hl
+    dec b
+    jp nz,batCompareSize
+    ld hl,0
+    ret                     ; Последнее сравнение дало CF=0.
+batSmall:
+    ld hl,0
+    ld (batWindowEnd),hl
+    ld hl,BAT_INPUT
+    ld bc,BAT_READ_SIZE
+batReadWindow:
+    ld (BAT_HANDLE+FH_BUFFER),hl
+    ld (batPtr),hl
+    ld h,b
+    ld l,c
+    ld (BAT_HANDLE+FH_COUNT),hl
+    call batRead
+    ret c
+    ld hl,(BAT_HANDLE+FH_COUNT)
+    ld (batLeft),hl
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Получить следующий байт BAT из общего окна, пополняя его при необходимости.
+;
+; вход:
+;   v_batFrame = текущий сценарий.
+;
+; выход:
+;   cf = 0 и a = байт, cf = 1 и a = 0 при EOF, иначе cf = 1 и a = ошибка.
+;   bc, de и hl сохранены.
+;----------------------------------------------------------------------------
 batByte:
     push hl
-    push de
-    push bc
-    ld a,BAT_LEFT
-    call batField
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ld a,d
-    or e
+    ld hl,(batLeft)
+    ld a,h
+    or l
     jp nz,batByteReady
-    ld a,FH_COUNT
-    call batField
-    ld (hl),BAT_READ_SIZE & 0FFh
-    inc hl
-    ld (hl),BAT_READ_SIZE / 256
-    ld a,FILE_OP_READ
-    call batIo
+    push bc
+    push de
+    call batFill
+    pop de
+    pop bc
     jp c,batByteExit
-    ld a,FH_COUNT
-    call batField
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ld a,BAT_LEFT
-    call batField
-    ld (hl),e
-    inc hl
-    ld (hl),d
-    ld a,d
-    or e
+    ld a,h
+    or l
     scf
     jp z,batByteExit
-    ld hl,(v_batFrame)
-    ld de,BAT_INPUT
-    add hl,de
-    ex de,hl
-    ld a,BAT_POS
-    call batField
-    ld (hl),e
-    inc hl
-    ld (hl),d
-    ld a,BAT_LEFT
-    call batField
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
 batByteReady:
-    dec de
-    ld (hl),d
     dec hl
-    ld (hl),e
-    dec hl
-    ld d,(hl)
-    dec hl
-    ld e,(hl)
-    ld a,(de)
-    inc de
-    ld (hl),e
+    ld (batLeft),hl
+    ld hl,(batPtr)
+    ld a,(hl)
     inc hl
-    ld (hl),d
+    ld (batPtr),hl
     or a
 batByteExit:
-    pop bc
-    pop de
     pop hl
     ret
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Разбирать строки текущего BAT и передавать их штатному FILE_EXEC.
+;
+; вход:
+;   v_batFrame = активный кадр. Длина строки с нулём ограничена MAX_PATH.
+;
+; выход:
+;   cf = 0 на конце файла, иначе a = ошибка чтения, синтаксиса или команды
+;   и cf = 1. Кадр хранит номер строки и её смещение. Все регистры рабочие.
+;----------------------------------------------------------------------------
 batRun:
     call batByte
     jp c,batEnd
@@ -246,8 +437,7 @@ batLineReady:
     dec hl
     ld (hl),e
     call batOffset
-    ld a,BAT_COMMAND
-    call batField
+    ld hl,BAT_COMMAND
     ld b,MAX_PATH-1
     pop af
 batCharacter:
@@ -276,8 +466,7 @@ batTerminator:
     jp nz,batCommand
     ld (hl),1
 batCommand:
-    ld a,BAT_COMMAND
-    call batField
+    ld hl,BAT_COMMAND
     ld a,(hl)
     or a
     jp z,batRun
@@ -316,45 +505,33 @@ batFail:
     scf
     ret
 
-; Первый байт уже прочитан: смещение строки = FH_POSITION - LEFT - 1.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сохранить точную позицию строки или точку продолжения после вытеснения.
+;
+; вход:
+;   batOffset учитывает уже выданный первый байт. Для batSavePosition
+;   a = смещение поля кадра, de = число байтов для вычитания из FH_POSITION.
+;
+; выход:
+;   поле кадра содержит 32-битное смещение от начала файла. b, de, hl и af
+;   используются, c сохранён.
+;----------------------------------------------------------------------------
 batOffset:
-    ld a,FH_POSITION
-    call batField
+    ld hl,(batLeft)
     ex de,hl
-    ld a,BAT_OFFSET
-    call batField
-    ld b,4
-batOffsetCopy:
-    ld a,(de)
-    ld (hl),a
-    inc de
-    inc hl
-    dec b
-    jp nz,batOffsetCopy
-    ld a,BAT_LEFT
-    call batField
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
     inc de
     ld a,BAT_OFFSET
+batSavePosition:
     call batField
-    ld a,(hl)
-    sub e
-    ld (hl),a
-    inc hl
-    ld a,(hl)
-    sbc a,d
-    ld (hl),a
-    inc hl
-    ld a,(hl)
-    sbc a,0
-    ld (hl),a
-    inc hl
-    ld a,(hl)
-    sbc a,0
-    ld (hl),a
-    ret
+    push hl
+    push de
+    ld de,BAT_HANDLE+FH_POSITION
+    call handleCopy4
+    pop de
+    pop hl
+    jp handleSubtractWord
 
 batError:
     call dosSetError
@@ -417,9 +594,6 @@ batErrorNameNext:
     dec b
     jp nz,batErrorName
     ret
-batErrorText: DB "BAT ",0
-batLineText: DB " LINE ",0
-batCodeText: DB ": ERROR ",0
-v_batDepth: DB 0
-v_batReported: DB 0
-v_batFrame: DW BAT_BUFFER-BAT_FRAME_SIZE
+batErrorText:   DB "BAT ",0
+batLineText:    DB " LINE ",0
+batCodeText:    DB ": ERROR ",0

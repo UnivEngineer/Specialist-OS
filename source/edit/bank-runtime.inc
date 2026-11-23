@@ -1,6 +1,20 @@
 ; EXEC document engine. SDK geometry stays local; bitmap primitives run in MAIN.
 ; A=0: launcher in MAIN. A=1: graphical caller, C=source FAR bank.
 ; DE addresses a MAX_PATH argument buffer in that bank in both cases.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запустить EDITCORE.DLL и выполнить редактор в области действия UI_GFX.
+;
+; вход:
+;   a = 0 при запуске из DOS, a = 1 при вызове из NC; c = страница источника, de = буфер
+;   аргументов размером MAX_PATH. b = буква накопителя с EDITCORE и его оверлеями.
+;
+; выход:
+;   При успехе a = 0, cf = 0; при отказе a = код, cf = 1. Аргументы копируются в EXEC,
+;   графика выполняется в MAIN.
+;----------------------------------------------------------------------------
+
 editorBankEntry:
     ld (ebQuiet),a
     ld a,c
@@ -134,6 +148,19 @@ ebToMain:
     ld (ebTransfer+3),a
     ld hl,ebTransfer
     jp mx_memcpyFar
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выполнить накопленные операции рисования в MAIN.
+;
+; вход:
+;   Активна очередь банкового редактора.
+;
+; выход:
+;   При успехе регистры и флаги сохранены. При ошибке ebFailed завершает область
+;   действия контроллера с кодом из cqError.
+;----------------------------------------------------------------------------
+
 ebFlush:
     push af
     push bc
@@ -148,6 +175,19 @@ ebFlush:
     pop bc
     pop af
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Добавить команду графики в очередь банкового редактора.
+;
+; вход:
+;   ebQOperation = операция GFX_*, регистры содержат её аргументы.
+;
+; выход:
+;   Очередь дополнена снимком аргументов, курсора, цвета и данных. Регистры и флаги
+;   сохранены. Ошибка резервирования передаётся ebFailed.
+;----------------------------------------------------------------------------
+
 ebQueueCommand:
     push af
     push bc
@@ -566,9 +606,23 @@ ebRestoreSnapshot:
     call ebQueueCommand
     ; Make the restored document visible before a following disk operation.
     jp ebFlush
-ebSnapshotActive: DB 0
-ebSnapshotScreen: DW 0
-ebSnapshotSize: DW 0
+ebSnapshotActive:   DB 0
+ebSnapshotScreen:   DW 0
+ebSnapshotSize:     DW 0
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Дождаться клавиши после вывода графической очереди в MAIN.
+;
+; вход:
+;   Настроено ebKeyState. ebHook задаёт обработчик смены регистров клавиатуры и
+;   разрешает фоновую подготовку строк.
+;
+; выход:
+;   a = клавиша, cf = состояние Ctrl/ПС при событии. bc, de и hl сохранены; видимый
+;   курсор скрыт.
+;----------------------------------------------------------------------------
+
 ebGetch:
     push bc
     push de
@@ -679,6 +733,18 @@ ebToggleCaret:
     pop de
     pop bc
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Заменить обработчик изменений состояния клавиатуры в EXEC.
+;
+; вход:
+;   hl = новый адрес или 0 для отключения.
+;
+; выход:
+;   hl = прежний адрес; af, bc и de сохранены.
+;----------------------------------------------------------------------------
+
 ebSetHook:
     push de
     ex de,hl
@@ -712,21 +778,21 @@ ebSubtract:
     ENDMODULE
     INCLUDE "bank-cache.inc"
     INCLUDE "../include/command-queue.inc"
-ebNumber: DB 0
-ebQuiet: DB 0
-ebArgBank: DB 0
-ebArguments: DW 0
-ebGfxHandle: DW 0
-ebGfxRegisters: DS MX_REGS,0
-ebGfxPath: DB 'A:',05Ch,'UI_GFX.DLL',0
-ebScopeSP: DW 0
-ebStatus: DB 0
-ebQPayloadSize: DW 0
-ebQTextStart: DW 0
-ebQOperation: DB 0
-ebQRegisters: DS MX_REGS,0
-ebTransfer: DS MEM_COPY_REQUEST,0
-ebHook: DW 0
-ebKeyState: IO_KEY_STATE
+ebNumber:           DB 0
+ebQuiet:            DB 0
+ebArgBank:          DB 0
+ebArguments:        DW 0
+ebGfxHandle:        DW 0
+ebGfxRegisters:     DS MX_REGS,0
+ebGfxPath:          DB 'C:',05Ch,'DOS',05Ch,'UI_GFX.DLL',0
+ebScopeSP:          DW 0
+ebStatus:           DB 0
+ebQPayloadSize:     DW 0
+ebQTextStart:       DW 0
+ebQOperation:       DB 0
+ebQRegisters:       DS MX_REGS,0
+ebTransfer:         DS MEM_COPY_REQUEST,0
+ebHook:             DW 0
+ebKeyState:         IO_KEY_STATE
 ebKeyLocks = ebKeyState.locks
 ebCaretVisible: DB 0

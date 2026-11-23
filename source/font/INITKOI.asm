@@ -1,10 +1,25 @@
-; Disposable compact initializer. ABI and flat input match Init6.dll.
-; IMPORT keeps only KOI8 20..7F, C0..FF, A3/B3. GENERATE needs no MAIN data.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/font-init.inc"
     ORG FONT_INIT_ADDR
     jp initialize
     DB 'FIN1',1
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить таблицы движка шрифта по протоколу FIN1 для Compact 6×8.
+;
+; вход:
+;   a = FONT_INIT_IMPORT или FONT_INIT_GENERATE. hl = адрес FONT_INIT_REQUEST в MAIN.
+;   Для импорта flat указывает на 256 глифов по 8 строк.
+;
+; выход:
+;   IMPORT обновляет 162 глифа в промежуточном образе движка (коды
+;   20h–7Fh, C0h–FFh, A3h и B3h). GENERATE не требует нижних таблиц.
+;   При успехе a = 0, cf = 0. Для неизвестной операции a = DOS_ERR_ARGUMENT,
+;   cf = 1. Остальные регистры могут меняться.
+;----------------------------------------------------------------------------
+
 initialize:
     or a
     jp z,importFlat
@@ -73,8 +88,8 @@ nextRow:
     jp nz,nextGlyph
     xor a
     ret
-source: DW 0
-codes: INCBIN "../../bin/fonts/compact-codes.bin"
+source:         DW      0
+codes:          INCBIN  "../../bin/fonts/compact-codes.bin"
 codesEnd:
     ASSERT codesEnd-codes <= 255
     ASSERT $ <= FONT_INIT_END

@@ -279,9 +279,9 @@ hookDone:
     pop bc
     pop af
     ret
-hookMode: DB 0
-hookLeft: DB 0
-hookRemaining: DW 0
+hookMode:       DB 0
+hookLeft:       DB 0
+hookRemaining:  DW 0
 ; Fixed JMP operand plus all dispatcher aliases for the five public APIs.
     MACRO HOOK_SLOT abi, id, idMain
     DW abi+1,BASE_BIOS_TABLE+2*(id-0100h)
@@ -354,9 +354,9 @@ directEntryCopy:
     dec c
     jp nz,directEntryCopy
     ret
-directTargets: DS 26,0
-directScalar: DW 0
-directEncoding: DW 0
-savedModuleScalar: DW 0
-savedEncoding: DW 0
-savedWidth: DB 0
+directTargets:      DS 26,0
+directScalar:       DW 0
+directEncoding:     DW 0
+savedModuleScalar:  DW 0
+savedEncoding:      DW 0
+savedWidth:         DB 0

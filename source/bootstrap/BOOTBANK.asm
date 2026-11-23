@@ -4,6 +4,22 @@
     ORG 02000h
 stageImage:
     DISP BOOT_STAGE_BASE
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Установить банковую среду MXOS и передать управление BIOS.
+;
+; вход:
+;   Загрузочный сектор разместил эту ступень по BOOT_STAGE_BASE. Адреса системных
+;   сегментов в ROM уже заданы конфигурацией сборки.
+;
+; выход:
+;   Стартует BIOS по C000h в MAIN с установленным транспортом. На холодном пути
+;   загружается DOS; тёплый путь определяется состоянием памяти и ревизией. Возврат в
+;   сектор загрузки не предусмотрен.
+;----------------------------------------------------------------------------
+
 entry:
 stage:
     di
@@ -123,6 +139,11 @@ dosLoaded:
     ld a,(BIOS_BOOT_WARM)
     or a
     jp nz,ramStateReady
+    ; A freshly installed image has no initialized data at DOS_READY.
+    ld hl,DOS_READY
+    ld c,0
+    ld (0FFC1h),a
+    call 0FFC0h
     ld de,ramFresh
     ld hl,BOOT_RAM_FRESH
     ld bc,1
@@ -166,7 +187,7 @@ installPages:
     xor a
     call install
     ld de,dosLocalA
-    ld hl,BOOT_MEM_LOCAL_A
+    ld hl,BOOT_MEM_LOCAL_SYSTEM
     ld bc,2
     xor a
     call install
@@ -277,27 +298,27 @@ romWindowEnd:
     ASSERT romWindowEnd-romWindow == 18
     INCLUDE "splash.inc"
     INCLUDE "memcpy.inc"
-bootFontName: DB BOOT_SELECTED_BASENAME
-pageCount: DB 16
-ramFresh: DB 1
-dosKind: DB 2
-dosLocalA: DW BOOT_DOS_LOCAL_A
-dosNearCopy: DW BOOT_DOS_NEAR_COPY
+bootFontName:   DB BOOT_SELECTED_BASENAME
+pageCount:      DB 16
+ramFresh:       DB 1
+dosKind:        DB 2
+dosLocalA:      DW BOOT_DOS_LOCAL_A
+dosNearCopy:    DW BOOT_DOS_NEAR_COPY
 dosContext:
     DB 1
     ; Р§РёСЃР»Рѕ СЃС‚СЂР°РЅРёС† РїРѕСЃР»Рµ РґРµС‚РµРєС‚РѕСЂР° РєРѕРїРёСЂСѓРµС‚СЃСЏ СЃСЋРґР° РїРµСЂРµРґ СѓСЃС‚Р°РЅРѕРІРєРѕР№.
     DB 16,0,0,0
     DW BOOT_DOS_STACK_TOP,BOOT_DOS_STACK_BOTTOM+64
 dosContextEnd:
-memImage = BOOT_MEM_ROM
-transportImage = memImage+MEM_TRANSPORT_OFFSET
-transportEnd = transportImage+MEM_TRANSPORT_SIZE
-clientImage = memImage+MEM_CLIENT_OFFSET
-clientEnd = clientImage+MEM_CLIENT_SIZE
+memImage        = BOOT_MEM_ROM
+transportImage  = memImage+MEM_TRANSPORT_OFFSET
+transportEnd    = transportImage+MEM_TRANSPORT_SIZE
+clientImage     = memImage+MEM_CLIENT_OFFSET
+clientEnd       = clientImage+MEM_CLIENT_SIZE
 localBlockImage = memImage+MEM_LOCAL_OFFSET
-localBlockEnd = localBlockImage+MEM_LOCAL_SIZE
-windowImage = memImage+MEM_WINDOW_OFFSET
-windowEnd = windowImage+MEM_WINDOW_SIZE
+localBlockEnd   = localBlockImage+MEM_LOCAL_SIZE
+windowImage     = memImage+MEM_WINDOW_OFFSET
+windowEnd       = windowImage+MEM_WINDOW_SIZE
     ENT
 romTailStorage:
     DISP 0FF00h
@@ -338,7 +359,7 @@ romSamePage:
     ENT
 romTailStorageEnd:
 romTailImage = BOOT_STAGE_BASE+romTailStorage-stageImage
-romTailEnd = romTailImage+romTailStorageEnd-romTailStorage
+romTailEnd   = romTailImage+romTailStorageEnd-romTailStorage
 stageEnd:
     ASSERT stageEnd <= 03000h
     ; РҐРѕР»РѕРґРЅС‹Р№ bootstrap РІСЂРµРјРµРЅРЅРѕ Р·Р°РЅРёРјР°РµС‚ С‚Р°РєР¶Рµ СЃРІРѕР±РѕРґРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ RUN.

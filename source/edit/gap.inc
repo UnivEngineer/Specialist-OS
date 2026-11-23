@@ -1,12 +1,12 @@
 ; Logical document pointers never include the gap. Only mutations move it.
 ; [gapLo,gapHi) is free, except the current line's F8 snapshot at its high end.
-v_gapLo: DW 0
-v_gapHi: DW 0
-gapTarget: DW 0
-gapAmount: DW 0
-gapDelta: DW 0
-gapOld: DW 0
-gapNew: DW 0
+v_gapLo:        DW 0
+v_gapHi:        DW 0
+gapTarget:      DW 0
+gapAmount:      DW 0
+gapDelta:       DW 0
+gapOld:         DW 0
+gapNew:         DW 0
 
 ; Initialize from the exact logical end of the contiguous file bytes.
 gapInitialize:

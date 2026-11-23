@@ -1,5 +1,5 @@
-DEFC TMP  =  07FFFh 
-DEFC IO_RAM  =  0FFFCh 
+DEFC TMP    = 07FFFh
+DEFC IO_RAM = 0FFFCh
 
 .org 0E000h
 

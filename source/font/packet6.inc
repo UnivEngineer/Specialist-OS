@@ -38,18 +38,8 @@ stateReady:
     ld a,l
     cp 7
     jp c,emptyGroup
-    IF FONT_MODE
-    ld hl,columnsPackedNormal
-    ld de,columnsPackedInverse
-    ELSE
-    IFDEF FONT_ROTATE_ROWS
-    ld hl,rotateRowsNormal
-    ld de,rotateRowsInverse
-    ELSE
-    ld hl,columnsRawNormal
-    ld de,columnsRaw
-    ENDIF
-    ENDIF
+    ld hl,groupNormalDown
+    ld de,groupInverseDown
 selectInverse:
     ; Обычное ядро не содержит NOP. Инверсное содержит CPL после слияния.
     ; Выбираем вход один раз перед пакетом, без проверки в пиксельном цикле.
@@ -96,11 +86,15 @@ routeReady:
     jp c,endReady
     ld a,0BEh
 endReady:
-    ld (endColumn+1),a
+    ld (normalDownLimit+1),a
+    ld (normalUpLimit+1),a
+    ld (inverseDownLimit+1),a
+    ld (inverseUpLimit+1),a
     ld a,l
     sub 7
     ld e,a
-nextGroup:
+route: jp groupNormalDown
+scanGroup:
     ld hl,(text)
     ; Выбор проверок один раз на пакет. Длина RawLim уже ограничена квотой.
 scanRoute:
@@ -108,6 +102,13 @@ scanRoute:
 scanRaw:
     MACRO READ_CODE offset
         ld a,(hl)
+        IFDEF FONT_KOI7
+        IF K7_MODE == 3 && (offset & 1)
+        or 80h
+        ELSE
+        and 7Fh
+        ENDIF
+        ENDIF
         ld (codes+offset),a
         inc hl
     ENDM
@@ -123,764 +124,58 @@ scanByte:
     ld a,(hl)
 scanLow:
     cp 20h
-    jp c,noGroup
+    jp c,abortScan
+    IFDEF FONT_KOI7
+    and 7Fh
+    ENDIF
     ld (bc),a
     inc bc
     inc hl
     ld a,c
     cp (codes+4) & 0FFh
     jp nz,scanByte
+    IFDEF FONT_KOI7
+    IF K7_MODE == 3
+    ; Tag the two right-hand indices once. The middle phase pair has its
+    ; halves swapped, so the same tagged codes serve all three columns.
+    ld b,h
+    ld c,l
+    ld hl,codes+1
+    ld a,(hl)
+    or 80h
+    ld (hl),a
+    inc hl
+    inc hl
+    ld a,(hl)
+    or 80h
+    ld (hl),a
+    ld h,b
+    ld l,c
+    ENDIF
+    ENDIF
 scanDone:
     ld (text),hl
-route:
-    IF FONT_MODE
-    jp columnsPackedNormal
+    ret
+abortScan:
+    pop hl
+    jp noGroup
+
+    MACRO GROUP_FINISH next, limit
+    inc d
+    ld a,d
+limit: cp 0BEh
+    jp c,next
+    jp noGroup
+    ENDM
+    IFDEF FONT_KOI7
+    INCLUDE "koi7-columns.inc"
     ELSE
-    IFDEF FONT_ROTATE_ROWS
-    jp rotateRowsNormal
-    ELSE
-    jp columnsRawNormal
-    ENDIF
-    ENDIF
-    IF !FONT_MODE
     IFDEF FONT_ROTATE_ROWS
     INCLUDE "rotate-rows.inc"
     ELSE
-columnsRawNormal:
-    ld hl,(codes+0)
-    ld c,h
-    ld h,FONT_ADDR >> 8
-    ld b,h
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_0Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_0Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_1Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_1Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_2Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_2Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_3Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_3Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_4Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_4Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_5Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_5Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_6Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_6Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_7Normal+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_7Normal: or 0
-    ld (de),a
-    ld a,e
-    sub 7
-    ld e,a
-    inc d
-    ld hl,(codes+1)
-    ld c,h
-    ld h,FONT_ADDR >> 8
-    ld b,h
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_0Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_0Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_1Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_1Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_2Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_2Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_3Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_3Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_4Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_4Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_5Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_5Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_6Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_6Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_7Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_7Normal: or 0
-    ld (de),a
-    ld a,e
-    sub 7
-    ld e,a
-    inc d
-    ld hl,(codes+2)
-    ld c,h
-    ld h,FONT_ADDR >> 8
-    ld b,h
-    ld a,(bc)
-    ld (merge2_0Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_0Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_1Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_1Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_2Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_2Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_3Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_3Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_4Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_4Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_5Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_5Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_6Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_6Normal: or 0
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_7Normal+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_7Normal: or 0
-    ld (de),a
-    jp done
-columnsRaw:
-    ld hl,(codes+0)
-    ld c,h
-    ld h,FONT_ADDR >> 8
-    ld b,h
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_0+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_0: or 0
-invRaw0_0: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_1+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_1: or 0
-invRaw0_1: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_2+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_2: or 0
-invRaw0_2: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_3+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_3: or 0
-invRaw0_3: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_4+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_4: or 0
-invRaw0_4: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_5+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_5: or 0
-invRaw0_5: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_6+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_6: or 0
-invRaw0_6: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 3
-    ld (merge0_7+1),a
-    ld a,(hl)
-    add a,a
-    add a,a
-merge0_7: or 0
-invRaw0_7: cpl
-    ld (de),a
-    ld a,e
-    sub 7
-    ld e,a
-    inc d
-    ld hl,(codes+1)
-    ld c,h
-    ld h,FONT_ADDR >> 8
-    ld b,h
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_0+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_0: or 0
-invRaw1_0: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_1+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_1: or 0
-invRaw1_1: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_2+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_2: or 0
-invRaw1_2: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_3+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_3: or 0
-invRaw1_3: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_4+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_4: or 0
-invRaw1_4: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_5+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_5: or 0
-invRaw1_5: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_6+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_6: or 0
-invRaw1_6: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    rrca
-    rrca
-    and 0Fh
-    ld (merge1_7+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    rrca
-    rrca
-    and 0F0h
-merge1_7: or 0
-invRaw1_7: cpl
-    ld (de),a
-    ld a,e
-    sub 7
-    ld e,a
-    inc d
-    ld hl,(codes+2)
-    ld c,h
-    ld h,FONT_ADDR >> 8
-    ld b,h
-    ld a,(bc)
-    ld (merge2_0+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_0: or 0
-invRaw2_0: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_1+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_1: or 0
-invRaw2_1: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_2+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_2: or 0
-invRaw2_2: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_3+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_3: or 0
-invRaw2_3: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_4+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_4: or 0
-invRaw2_4: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_5+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_5: or 0
-invRaw2_5: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_6+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_6: or 0
-invRaw2_6: cpl
-    ld (de),a
-    inc b
-    inc h
-    inc e
-    ld a,(bc)
-    ld (merge2_7+1),a
-    ld a,(hl)
-    rrca
-    rrca
-    and 0C0h
-merge2_7: or 0
-invRaw2_7: cpl
-    ld (de),a
-    jp done
-    ENDIF
-    ELSE
     INCLUDE "packed-columns.inc"
     ENDIF
-done:
-    ; The pixel kernel leaves DE at the bottom of the third column.
-    ld a,e
-    sub 7
-    ld e,a
-    inc d
-    ld a,d
-endColumn: cp 0BEh
-    jp c,nextGroup
+    ENDIF
 noGroup:
     ; A rejected control/NUL quad leaves D and the text pointer intact.
     ; Recover both progress and cursor X from D; no separate quad count.
@@ -903,7 +198,7 @@ emptyGroup:
     ld hl,(text)
     scf
     ret
-realMode: DB 0
-text: DW 0
-codes: DS 4
+realMode:       DB 0
+text:           DW 0
+codes:          DS 4
     ENDMODULE

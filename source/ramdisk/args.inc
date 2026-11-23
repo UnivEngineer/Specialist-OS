@@ -1,5 +1,20 @@
 ; RAMDISK -P n: ограничение B: перед его первоначальным форматированием.
 ; Готовый том с иной геометрией и выделенные FAR-блоки не изменяются.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выбрать количество страниц RAM-диска B: перед его первым форматированием.
+;
+; вход:
+;   hl = строка аргументов. Допускается ключ -P с десятичным числом страниц.
+;
+; выход:
+;   cf = 0 при принятом ограничении или уже выбранном пуле без новых параметров. При
+;   ошибке cf = 1. Отказ MEM или неверное значение препятствуют установке нового
+;   размера.
+;----------------------------------------------------------------------------
+
 BankArguments:
     call argNext
     jp c,BankNoArguments
@@ -77,8 +92,8 @@ BankNoArguments:
     ret nz
     ld hl,bankDefaultArgs
     jp BankArguments
-bankDefaultArgs: DB '-P 4',0
-bankArgumentText: DB 'RAMDISK: INVALID -P OR RAM DISK IS IN USE',0Dh,0Ah,0
+bankDefaultArgs:    DB '-P 4',0
+bankArgumentText:   DB 'RAMDISK: INVALID -P OR RAM DISK IS IN USE',0Dh,0Ah,0
 
 InstallFailed:
     ld hl,txtNoRAM
@@ -88,3 +103,4 @@ InstallFailed:
 txtNoRAM: DB 'RAMDISK: NO RAM DISK',0Ah,0
     INCLUDE "../common/cmp_hl_de.inc"
     INCLUDE "../common/argNext.inc"
+    INCLUDE "../common/driver-letter.inc"

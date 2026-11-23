@@ -68,8 +68,8 @@ ncNoSelection:
         ret
 
 
-ncInputOkText: DB 'OK [Enter]',0
-ncInputCancelText: DB 'Cancel [Esc]',0
+ncInputOkText:      DB 'OK [Enter]',0
+ncInputCancelText:  DB 'Cancel [Esc]',0
 ncInputModal:
     UI_MODAL_BEGIN 12,1,2
 ncInputOk:

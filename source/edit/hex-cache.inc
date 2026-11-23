@@ -205,13 +205,13 @@ hexPrefetchReverse:
     ld (hexPrefetchLeft),a
     jp hexPrefetchNext
 
-hexCacheAddress: DW 0
-hexCacheTag: DW 0
-hexCacheSlots: DB 0
-hexCacheMask: DB 0
-hexCacheValue: DB 0
-hexPrefetchTop: DW 0
-hexPrefetchAt: DW 0
-hexPrefetchLeft: DB 0
-hexPrefetchBack: DB 0
-hexPrefetchAhead: DB 0
+hexCacheAddress:    DW 0
+hexCacheTag:        DW 0
+hexCacheSlots:      DB 0
+hexCacheMask:       DB 0
+hexCacheValue:      DB 0
+hexPrefetchTop:     DW 0
+hexPrefetchAt:      DW 0
+hexPrefetchLeft:    DB 0
+hexPrefetchBack:    DB 0
+hexPrefetchAhead:   DB 0

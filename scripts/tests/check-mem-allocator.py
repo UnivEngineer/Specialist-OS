@@ -1,9 +1,11 @@
 """Аллокатор DOS: дробление, повторное использование, realloc и ошибки."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import runpy,re,subprocess,json
 R=Path(__file__).resolve().parents[2];O=R/'docs/banked/memory-054/allocator';O.mkdir(parents=True,exist_ok=True)
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text(),re.M)}
 s=sy(R/'bin/BIOS.sym');k=sy(R/'bin/banked/KERNEL.sym');m=bytearray(65536);runpy.run_path(str(R/'scripts/tests/mem-image.py'))['install'](m,s);b=(R/'bin/DOS.sys').read_bytes();m[0x100:0x100+len(b)]=b
+initialize_dos_state(m, k)
 m[0x3040:0x3080]=bytes(range(64))
 imports=''.join(f'{n} = 0{k[n]:04X}h\n' for n in ('memoryInit','dosMemoryService','kdPage','memoryRamPages'))
 code=imports+f' INCLUDE "{(R/"source/include/mxos.inc").as_posix()}"\n'+"""

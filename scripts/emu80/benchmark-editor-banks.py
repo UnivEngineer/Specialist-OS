@@ -32,7 +32,7 @@ h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'))
 gl=h['Matrix'].__init__.__globals__;gl.update(OUT=O,RUNTIME=a.runtime.resolve())
 gl['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
 x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp'
-rows=[];elite=(R/'assets/games/Elite.txt').read_bytes()
+rows=[];elite=(R/'assets/games/families/elite/manuals/Elite.txt').read_bytes()
 shellend=n['mainLoop'];shellenter=n['but_Enter']
 short=elite[:0x6400-sy('EDIT.sym')['EDITOR_TEXT_BEGIN']-129].rsplit(b'\r',1)[0]+b'\r'
 if a.bars_only:short=b'X'*180+b'\r'+b'Text\r'*28
@@ -245,9 +245,9 @@ try:
   m.stop_at(n['mainLoop']);m.call('regs_set',pc=k['bios_reboot'],sp=k['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
  if a.font!='Rotate':
   # The current NC MAIN body does not fit below Fast12K: use native CLI.
-  ready();tap('esc');text('A:CLI');m.stop_at(c['cliPrompt']);tap('enter');m.until(c['cliPrompt'],90,page=0);ready()
+  ready();tap('esc');text('C:/DOS/CLI');m.stop_at(c['cliPrompt']);tap('enter');m.until(c['cliPrompt'],90,page=0);ready()
   shellend=c['cliPrompt'];shellenter=c['cliHistoryAdd']
-  ready();tap('esc');text('A:FONT 6x8/'+{'Packed6K':'Packed','Fast12K':'Fast'}.get(a.font,a.font));m.stop_at(0);tap('enter');m.until(0,90,page=0)
+  ready();tap('esc');text('C:/DOS/FONT 6x8/'+{'Packed6K':'Packed','Fast12K':'Fast'}.get(a.font,a.font));m.stop_at(0);tap('enter');m.until(0,90,page=0)
   m.stop_at(shellend)
   for _ in range(120):
    state=m.until(shellend,90,page=0)

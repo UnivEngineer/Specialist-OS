@@ -14,9 +14,9 @@
 ; До запуска приложения 8C00h также служит временным ID-кодом FLASHSYS.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/ramfos.inc"
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_FLAGS      = IMAGE_FLAG_MAIN
 RUN_BODY_REQUEST = RAMFOS_CONTEXT
-RUN_LOAD_STAGE = RAMFOS_CONTEXT+48
+RUN_LOAD_STAGE   = RAMFOS_CONTEXT+48
     MACRO GET_DE address
         push hl
         ld hl,(address)
@@ -224,15 +224,7 @@ nativeOpen:
     ld a,(rksHeader+5)
     or a
     jp nz,nativeForward
-    ld a,(mode)
-    inc a
-    jp nz,nativeModeReady
-    ld a,(rksHeader+IMAGE_MODE)
-    or a
-    jp z,nativeModeReady
-    dec a                    ; Header AUTO=0, MX/STD/MON/RF=1..4.
-    ld (mode),a
-nativeModeReady:
+    ; Режим задаёт ключ RUN или меню, а не рекомендация из заголовка.
     ld hl,(rksHeader+12)
     ld (expectedChecksum),hl
     ld a,(mode)
@@ -268,6 +260,22 @@ nativeForward:
     ld bc,nativeBridgeEnd-nativeBridge
     call copyBytes
     jp RAMFOS_BRIDGE
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перенести аргумент программы в строку банкового переходника.
+;
+; вход:
+;   hl = строка с завершающим нулём, de = свободное место назначения, b = ненулевой
+;   лимит.
+;
+; выход:
+;   При cf = 0 hl указывает на исходный ноль, de — на место для следующего байта. Ноль
+;   не копируется. При исчерпании b выставлен cf, скопированный префикс остаётся в
+;   назначении.
+;----------------------------------------------------------------------------
+
 nativeCopyArgument:
     ld a,(hl)
     or a
@@ -674,6 +682,21 @@ runBodyReady:
 
 ; Формат RKS целиком принадлежит RUN. HL=буфер, BC=точная длина.
 ; Курсор используется в нижнем RUN только до окончательной загрузки тела.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Открыть приложение на чтение и запомнить его каталог для загрузки тела.
+;
+; вход:
+;   appName содержит путь с нулём, descriptor = подготовленный дескриптор. runHandle
+;   доступен для записи.
+;
+; выход:
+;   При успехе runHandle открыт, родительский каталог записан в bodyRequest, a = 0, cf
+;   = 0. При ошибке открытия возвращается статус DOS. bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 runFileOpen:
     ld hl,runHandle
     ld b,FILE_HANDLE
@@ -700,6 +723,20 @@ runHandleClear:
     PUT_DE bodyRequest+FILE_BODY_IO.parent
     xor a
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать часть файла RKS через открытый дескриптор.
+;
+; вход:
+;   hl = буфер назначения, bc = запрошенная длина, runHandle открыт на чтение.
+;
+; выход:
+;   При cf = 0 bc = фактическая длина, hl указывает за прочитанными данными. Короткое
+;   чтение проверяет вызывающий. При cf = 1 возвращается ошибка DOS.
+;----------------------------------------------------------------------------
+
 rksRead:
     ld (runHandle+FH_BUFFER),hl
     ld h,b
@@ -803,12 +840,42 @@ monAfterInitEntry:
     ld hl,0
     jp (hl)
 monAfterInitEnd:
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сравнить ключ RUN с именем без учёта регистра.
+;
+; вход:
+;   hl и de указывают на сравниваемые строки, c задаёт число символов для bios_stricmp.
+;
+; выход:
+;   z = 1 при совпадении, hl сохранён. Для остальных регистров действует контракт
+;   bios_stricmp.
+;----------------------------------------------------------------------------
+
 option:
     push hl
     call bios_stricmp
     pop hl
     ret
 ; HL — имя до пробела/терминатора, сохраняется позиция разделителя.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сформировать путь сменного ядра по аргументу команды RUN.
+;
+; вход:
+;   hl указывает на первый символ имени. Завершает имя пробел или байт ниже 20h.
+;   Рабочий буфер corePath вмещает MAX_PATH байтов.
+;
+; выход:
+;   При cf = 0 в corePath находится строка с нулём, hl указывает на разделитель. При
+;   отсутствии явных диска и расширения подставляются C:\DOS и суффикс monSuffix
+;   соответственно. При пустом или слишком длинном имени cf = 1.
+;----------------------------------------------------------------------------
+
 coreName:
     ld a,(hl)
     cp 021h
@@ -821,16 +888,12 @@ coreName:
     cp ':'
     pop hl
     jp z,coreCopyStart
-    ld a,'A'
-    ld (de),a
-    inc de
-    ld a,':'
-    ld (de),a
-    inc de
-    ld a,05Ch
-    ld (de),a
-    inc de
-    ld b,MAX_PATH-4
+    push hl
+    ld hl,monSystemDirectory
+    ld bc,monSystemDirectoryEnd-monSystemDirectory
+    call copyBytes
+    pop hl
+    ld b,MAX_PATH-1-(monSystemDirectoryEnd-monSystemDirectory)
 coreCopyStart:
     ld c,0
 coreCopy:
@@ -867,6 +930,20 @@ coreTerm:
 coreBad:
     scf
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Последовательно скопировать блок для загрузчика RUN.
+;
+; вход:
+;   hl = источник, de = назначение, bc = ненулевая длина. Запись вперёд не должна
+;   уничтожать ещё не прочитанные байты.
+;
+; выход:
+;   hl и de продвинуты на длину, bc = 0, a = 0, z = 1, cf = 0.
+;----------------------------------------------------------------------------
+
 copyBytes:
     ld a,(hl)
     ld (de),a
@@ -1026,6 +1103,21 @@ bridgeRestoreKoi:
 ; ядро 9000h -> C000h/F800h. BC>0; AF/BC/DE/HL разрушаются.
 ; Свой копировальщик, без вызовов уже заменяемого DOS.
 ; Полный блок: 135 тактов/4 байта, четыре чтения и четыре записи.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перенести тело программы или сменное ядро при переключении среды RUN.
+;
+; вход:
+;   hl = начало источника, de = начало назначения, bc = ненулевой размер в байтах.
+;   Диапазоны не перекрываются, код переходника доступен на всём протяжении переноса.
+;
+; выход:
+;   Байты скопированы в порядке возрастания адресов без обращения к DOS. af, bc, de и
+;   hl рабочие.
+;----------------------------------------------------------------------------
+
 bridgeMove:
     ld a,c
     and 3
@@ -1087,45 +1179,47 @@ bridgeRelocations:
     DB bridgeReloc19+1-bridge
 bridgeRelocationsEnd:
 
-keyMX: DB "MX"
-keyKOI7: DB "KOI7"
-keyRF: DB "RF"
-keySTD: DB "STD"
-keyMON: DB "MON"
-modeMap: DB 0,1,3,2
-monSuffix: DB ".MON"
-monExtension: DB "MON"
-rfPath: DB "A:",05Ch,"RAMFOS.MON",0
-corePath: DB "A:",05Ch,"MONITOR2.MON",0
+keyMX:          DB "MX"
+keyKOI7:        DB "KOI7"
+keyRF:          DB "RF"
+keySTD:         DB "STD"
+keyMON:         DB "MON"
+modeMap:        DB 0,1,3,2
+monSystemDirectory: DB 'A'+SYSTEM_DRIVE,':',05Ch,"DOS",05Ch
+monSystemDirectoryEnd:
+monSuffix:      DB ".MON"
+monExtension:   DB "MON"
+rfPath:         DB "C:",05Ch,"DOS",05Ch,"RAMFOS.MON",0
+corePath:       DB "C:",05Ch,"DOS",05Ch,"MONITOR2.MON",0
     BLOCK MAX_PATH-($-corePath),0
-appArgs: BLOCK 128,0
-mode: DB 0FFh
-callerSP: DW 0
-appLoad: DW 0
-appEntry: DW 0
-appSize: DW 0
+appArgs:        BLOCK  128,0
+mode:           DB     0FFh
+callerSP:       DW     0
+appLoad:        DW     0
+appEntry:       DW     0
+appSize:        DW     0
 
-rksHeader: BLOCK IMAGE_HEADER_SIZE,0
-bridgeBase: DW 0
-bridgeDelta: DW 0
-argAddress: DW 0
-staged: DB 0
-callerDrive: DB 0
-callerKoi: DB 0
-launchKoi: DB 0
-fileSize: DW 0
-appDrive: DB 0
-monSP: DW 07FFFh
-monInit: DW 0C444h
-descriptor: BLOCK FILE_DESCR_SIZE,0
-txtUsage: DB 0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
-txtNotFound: DB 0Ah,"FILE NOT FOUND",0
-txtBad: DB 0Ah,"BAD IMAGE OR ADDRESS RANGE",0
+rksHeader:      BLOCK  IMAGE_HEADER_SIZE,0
+bridgeBase:     DW     0
+bridgeDelta:    DW     0
+argAddress:     DW     0
+staged:         DB     0
+callerDrive:    DB     0
+callerKoi:      DB     0
+launchKoi:      DB     0
+fileSize:       DW     0
+appDrive:       DB     0
+monSP:          DW     07FFFh
+monInit:        DW     0C444h
+descriptor:     BLOCK  FILE_DESCR_SIZE,0
+txtUsage:       DB     0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
+txtNotFound:    DB     0Ah,"FILE NOT FOUND",0
+txtBad:         DB     0Ah,"BAD IMAGE OR ADDRESS RANGE",0
 upperEnd: ; Граница прежнего CPU-стенда, все эти байты теперь в нижнем RUN.
     INCLUDE "../include/file-io.inc"
-bodyRequest: FILE_BODY_IO
-expectedChecksum: DW 0
-bodyCallerDrive: DB 0
+bodyRequest:        FILE_BODY_IO
+expectedChecksum:   DW 0
+bodyCallerDrive:    DB 0
 bodyRequestEnd:
     ASSERT bodyRequestEnd-bodyRequest <= RUN_LOAD_STAGE-RUN_BODY_REQUEST
 
@@ -1163,17 +1257,17 @@ loadStageEnd:
     ASSERT RUN_LOAD_STAGE+loadStageEnd-loadStage <= RAMFOS_CONTEXT+128
     ASSERT $ < RAMFOS_BRIDGE
 
-txtTitle: DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
-txtLoad: DB ": LOAD ADDRESS ",0
-txtEntry: DB ", RUN ADDRESS ",0
-txtModes: DB 0Ah,"CHOOSE THE RUNTIME MODE:",0Ah
+txtTitle:       DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
+txtLoad:        DB ": LOAD ADDRESS ",0
+txtEntry:       DB ", RUN ADDRESS ",0
+txtModes:       DB 0Ah,"CHOOSE THE RUNTIME MODE:",0Ah
     DB "1 - MX:  MX  HARDWARE, MXOS2 CORE",0Ah
     DB "2 - STD: STD HARDWARE, MXOS2 CORE",0Ah
     DB "3 - RF:  MX  HARDWARE, RAMFOS CORE",0Ah
     DB "4 - MON: STD HARDWARE, MONITOR-2 CORE",0Ah
     DB "5 - MON:CUSTOM: STD HARDWARE, CUSTOM CORE",0Ah,"> ",0
-coreInput: BLOCK MAX_PATH,0
-appName: BLOCK MAX_PATH,0
-txtCustom: DB 0Ah,"MONITOR FILE: ",0
-cacheToken: DW 0
+coreInput:      BLOCK  MAX_PATH,0
+appName:        BLOCK  MAX_PATH,0
+txtCustom:      DB     0Ah,"MONITOR FILE: ",0
+cacheToken:     DW     0
     END

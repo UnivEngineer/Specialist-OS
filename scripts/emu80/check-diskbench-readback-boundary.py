@@ -8,7 +8,7 @@ Matrix = ns['Matrix']
 out = ROOT / 'docs/diskbench/readback-boundary-001'
 out.mkdir(parents=True, exist_ok=True)
 Matrix.__init__.__globals__['OUT'] = out
-x = Matrix()
+x = Matrix(legacy=True)
 rows = []
 try:
     x.start('boundary')

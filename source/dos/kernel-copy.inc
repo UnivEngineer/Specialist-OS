@@ -67,4 +67,3 @@ kcConfirm:
     ld c,l
     pop hl
     jp ktCallConfirm
-kcHook: DW 0

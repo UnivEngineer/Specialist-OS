@@ -96,7 +96,7 @@ reportCharScreen:
     ld c,a
     jp bios_printChar
     INCLUDE "../../source/include/timing-pit.inc"
-timer_read = pitTimerRead
+timer_read   = pitTimerRead
 timing_print = puts
 
     MODULE textMath
@@ -104,7 +104,7 @@ timing_print = puts
     INCLUDE "../../source/include/math.inc"
     ENDMODULE
 timing_div_hl_de = textMath.div_hl_de
-PIT_HZ = 2000000
+PIT_HZ           = 2000000
     IFDEF FONT_NATIVE_GRID
     DEFINE TIMING_NUMBER_WIDTH 4
     ELSE
@@ -120,13 +120,13 @@ DECIMAL = decimalBuffer
     ENDM
     INCLUDE "../../source/include/timing.inc"
     INCLUDE "../../source/include/timing-ms.inc"
-savedKoi: DB 0
-savedInverse: DB 0
-savedEsc: DB 0
-savedFont: DW 0
-v_elapsed: DD 0
-v_setup: DD 0
-v_last: DW 0
-noTimer: DB 'PIT timer unavailable',13,10,0
-noMemory: DB 'Need main RAM through 84FFh',13,10,0
-keyText: DB 13,10,'Press Enter to return',13,10,0
+savedKoi:       DB 0
+savedInverse:   DB 0
+savedEsc:       DB 0
+savedFont:      DW 0
+v_elapsed:      DD 0
+v_setup:        DD 0
+v_last:         DW 0
+noTimer:        DB 'PIT timer unavailable',13,10,0
+noMemory:       DB 'Need main RAM through 84FFh',13,10,0
+keyText:        DB 13,10,'Press Enter to return',13,10,0

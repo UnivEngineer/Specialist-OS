@@ -1,9 +1,11 @@
 """8080 system reservation lifecycle; BIOS publication is tested in Emu80."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re,subprocess
 R=Path(__file__).resolve().parents[2];S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/banked/KERNEL.sym').read_text(),re.M)}
 O=R/'.local/resident-cpu';O.mkdir(exist_ok=True);W=lambda x:x.to_bytes(2,'little')
-m=bytearray(65536);d=(R/'bin/DOS.sys').read_bytes();m[0x100:0x100+len(d)]=d;m[S['memoryPublishTop']]=0xc9
+m=bytearray(65536);d=(R/'bin/DOS.sys').read_bytes();m[0x100:0x100+len(d)]=d
+initialize_dos_state(m, S);m[S['memoryPublishTop']]=0xc9
 # Flat CPU fixture: only bank 0 is queried; transport/page validation is external.
 m[S['bankCopyPageCheck']:S['bankCopyPageCheck']+2]=bytes([0xaf,0xc9])
 

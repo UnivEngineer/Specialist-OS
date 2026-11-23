@@ -3,8 +3,8 @@
 diskDriverInfo:
             pop     af
             ld      a, (v_drive)
-            or      a
-            ld      bc, DISK_TECH_ROM * 256 + DISK_CAP_READ
+            cp      SYSTEM_DRIVE
+            ld      bc, DISK_TECH_MX_SYSTEM_ROM * 256 + DISK_CAP_READ
             ld      hl, 0
             ret z
             ld      bc, DISK_TECH_RAM * 256 + DISK_CAP_READ + DISK_CAP_WRITE

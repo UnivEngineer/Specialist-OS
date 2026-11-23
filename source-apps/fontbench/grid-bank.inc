@@ -123,10 +123,10 @@ gridBankFree:
     ld a,MEM_OP_FREE
     MXOS_CALL MXOS_DOS_MEMORY
     ret
-gridKind: DB 0
-gridMethod: DB 0
-gridAllocation: DW 0
-gridEmpty: DS 21,0
+gridKind:           DB 0
+gridMethod:         DB 0
+gridAllocation:     DW 0
+gridEmpty:          DS 21,0
 ; kind, transport, source, length, main destination, payload capacity.
-gridRequest: DB 0,0
+gridRequest:        DB 0,0
     DW 02000h,GRID_TEXT_BYTES+1,0,2048

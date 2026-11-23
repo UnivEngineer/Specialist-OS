@@ -2,8 +2,9 @@
 import json, runpy
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
-h=runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))
-m=h['Bench']('http://127.0.0.1:19781/mcp');s=h['symbols'](ROOT/'source-apps/diskbench/build/DISKBEN.sym')
+h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
+binary, listing = h['legacy_diskbench'](ROOT / 'docs/diskbench/file-safety')
+m=h['Bench']('http://127.0.0.1:19781/mcp');s=h['app_symbols'](listing)
 # Адрес и профиль те же, что проверены check-diskbench-file.py.
 query=__import__('subprocess').run(['powershell.exe','-NoProfile','-Command','(Get-Process -Id (Get-NetTCPConnection -State Listen -LocalPort 19781 | Select-Object -First 1 -ExpandProperty OwningProcess)).Path'],capture_output=True,text=True,check=True).stdout.strip()
 assert Path(query).resolve()==Path('D:/Projects/RetroPC/Specialist/Emulator/Emu80-flash-test/Emu80qt-mcp.exe').resolve()
@@ -16,7 +17,7 @@ m.call('debug_break');m.stop_at(0x8100)
 m.subroutine(0xC842,af=0x0700,de=1)
 image=Path(query).parent/'specialist-os/flash-disk.bin'
 def setup():
-    m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())
+    m.write(0,binary.read_bytes())
     m.stop_at(0x8100)
     m.subroutine(s['detect_driver'])
     m.write(s['v_drive'],b'\7');m.write(s['v_budget'],b'\1');m.write(s['v_case'],b'\2')

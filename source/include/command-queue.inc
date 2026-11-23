@@ -308,16 +308,16 @@ cqDeliverDll:
     jp mx_routeCall
 cqPacket: DW 0,0,0,0
     ENDIF
-cqError: DB 0
-cqTarget: DB 0
-cqHandle: DW 0
-cqTransfer: DW 0
-cqAllocation: DW 0
-cqMaximum: DW 0
-cqCapacity: DW 0
-cqLimit: DW 0
-cqBegin: DW 0
-cqNext: DW 0
-cqEnd: DW 0
-cqUsed: DW 0
-cqBank: DB 0
+cqError:        DB 0
+cqTarget:       DB 0
+cqHandle:       DW 0
+cqTransfer:     DW 0
+cqAllocation:   DW 0
+cqMaximum:      DW 0
+cqCapacity:     DW 0
+cqLimit:        DW 0
+cqBegin:        DW 0
+cqNext:         DW 0
+cqEnd:          DW 0
+cqUsed:         DW 0
+cqBank:         DB 0

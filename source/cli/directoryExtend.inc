@@ -71,6 +71,3 @@ directoryExtendRollback:
 directoryRootFull:
     ld a,DOS_ERR_DIR_FULL
     jp dosSetError
-directoryNewCluster: DW 0
-directoryNewSector: DW 0
-directorySectorsLeft: DW 0

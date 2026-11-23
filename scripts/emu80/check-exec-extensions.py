@@ -22,9 +22,9 @@ def call(address,**regs):
     m.write(0x8800,bytes((0xCD,address&255,address>>8,0xC3,0,0x87)))
     m.call('regs_set',pc=0x8800,sp=SYSTEM['STACK_ADDR'],**regs)
     return m.until(stop)
-for drive in [0,7]:
+for drive, technology in [(2,'S'),(7,'P')]:
     assert not call(0xC842,af=drive<<8,de=1)['flags']['C']
-    assert call(0xC863,bc=0xFF00)['registers']['bc']['dec']>>8==ord('F')
+    assert call(0xC863,bc=0xFF00)['registers']['bc']['dec']>>8==ord(technology)
 assert not call(0xC842,af=0x0100,de=1)['flags']['C']
 assert not call(0xC896)['flags']['C']
 def create(name,payload,address):

@@ -66,7 +66,18 @@ dwcBuffer:
             add     hl, sp
     ENDIF
     ENDIF
+    IFDEF DWC_BLOCK_SIZE
+            ; 128/256/512: один неполный проход или один-два полных по 256.
+            ld      a,(DWC_BLOCK_SIZE)
+            ld      b,a
+            ld      a,(DWC_BLOCK_SIZE+1)
+            or      a
+            jp nz,  dwcPages
+            inc     a
+dwcPages:   ld      c,a
+    ELSE
             ld      b, 0
+    ENDIF
 ; 11 байт, 49 тактов на совпавший байт: два чтения ОЗУ, без доступа к flash.
 dwcCompare:
             ld      a, (de)
@@ -76,6 +87,10 @@ dwcCompare:
             inc     hl
             dec     b
             jp nz,  dwcCompare
+    IFDEF DWC_BLOCK_SIZE
+            dec     c
+            jp nz,  dwcCompare
+    ENDIF
             or      a
             jp      dwcFree
 dwcFailed:

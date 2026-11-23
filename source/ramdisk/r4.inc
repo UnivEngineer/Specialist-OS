@@ -6,12 +6,12 @@
 ; Порция чтения 163 такта, записи 173; POP/PUSH данных — 2688 тактов/сектор.
 ; Основной хвост 175 байт: код 77, входы 66, шаблон общего окна 32.
 ; В дополнительных страницах нужны только первые 77 байт.
-regSelect = 0FFC3h
-regDiskSP = regSelect+1
-regPage = regSelect+4
+regSelect   = 0FFC3h
+regDiskSP   = regSelect+1
+regPage     = regSelect+4
 regCallback = regSelect+9
-regOldSP = 0FFCEh
-regMain = 0FFD3h
+regOldSP    = 0FFCEh
+regMain     = 0FFD3h
 ramdTailImage:
     DISP 0FF00h
 regReadPop:

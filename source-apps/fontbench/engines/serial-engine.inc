@@ -75,6 +75,6 @@ serialError:
     pop af
     scf
     ret
-serialKind: DB 0
-serialRemaining: DB 0
+serialKind:         DB 0
+serialRemaining:    DB 0
 

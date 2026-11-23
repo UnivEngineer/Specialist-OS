@@ -207,11 +207,3 @@ mdActivate:
     ld a,MEM_ERROR_RANGE
     scf
     ret
-
-mdReuseHit: DB 0
-mdReuseSpare: DW 0
-mdReuseBegin: DW 0
-mdReuseEnd: DW 0
-mdReuseKey: DS 7,0
-mdReuseKeys: DS (MODULE_MAX-1)*8+7,0
-mdReuseRegs: DB 0,0,0,0,0,0,0,MODULE_ACTIVATE

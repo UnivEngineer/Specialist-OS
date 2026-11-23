@@ -177,8 +177,8 @@ fbCall:
     ld hl,fbHandle
     MXOS_CALL MXOS_DOS_FILEHANDLE
     ret
-fbHandle = BIOS_TEMP_BUFFER+128
-fbReadCount = io_vars.fbCursor ; Two bytes; remaining two bytes are reserved.
+fbHandle    = BIOS_TEMP_BUFFER+128
+fbReadCount = io_vars.fbCursor  ; Two bytes; remaining two bytes are reserved.
 
 ; HL=приёмник, BC=число; нельзя затереть BIOS и параметры загрузки.
 ; AF/DE разрушены; HL/BC сохранены. Собственный стек защищает вызывающий.
@@ -231,11 +231,24 @@ fbBad:
     ld a,DOS_ERR_ARGUMENT
     scf
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Получить адрес поля текущего запроса файлового ввода-вывода.
+;
+; вход:
+;   de = смещение внутри структуры, fbRequest содержит адрес её начала.
+;
+; выход:
+;   hl = адрес поля. de, bc и a сохранены; cf определяется 16-битным сложением.
+;----------------------------------------------------------------------------
+
 fbField:
     ld hl,(fbRequest)
     add hl,de
     ret
 fbRequest = io_vars.fbRequest
-fbEnd = io_vars.fbEnd
+fbEnd     = io_vars.fbEnd
 
 fileBodyEnd:

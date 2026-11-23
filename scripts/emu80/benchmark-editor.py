@@ -19,7 +19,7 @@ s=sy(a.binary_dir/(a.editor_base+'.sym'));n=sy(a.shell_dir/'NC.sym');k=sy(a.shel
 c=sy(a.shell_dir/'CLI.sym')
 editor_image=a.editor_base+'.i80'
 images={name:(a.binary_dir/name if name==editor_image else a.shell_dir/name).read_bytes() for name in [editor_image,'NC.i80','CLI.i80']}
-elite=(R/'assets/games/Elite.txt').read_bytes();short=elite[:min(16000,0x6400-s['EDITOR_TEXT_BEGIN']-129)].rsplit(b'\r',1)[0]+b'\r'
+elite=(R/'assets/games/families/elite/manuals/Elite.txt').read_bytes();short=elite[:min(16000,0x6400-s['EDITOR_TEXT_BEGIN']-129)].rsplit(b'\r',1)[0]+b'\r'
 tree=runpy.run_path(str(R/'scripts/tests/check-nested-image.py'))['read_tree'](a.system_image.read_bytes())[0]
 assert tree[a.editor_base+'.COM'][s['IMAGE_HEADER_SIZE']:]==images[editor_image],'stale editor in image'
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'))
@@ -88,8 +88,8 @@ try:
   if font=='Fast12K':
    # The current large MAIN NC exceeds Fast12K's memtop. CLI is itself a
    # normal keyboard-launched MAIN shell and fits under all three engines.
-   command('A:CLI',c['cliPrompt']);shell='CLI'
-  command('A:FONT 6x8/'+{'Packed6K':'Packed','Fast12K':'Fast'}.get(font,font),shell_pc(),True)
+   command('C:/DOS/CLI',c['cliPrompt']);shell='CLI'
+  command('C:/DOS/FONT 6x8/'+{'Packed6K':'Packed','Fast12K':'Fast'}.get(font,font),shell_pc(),True)
   if font!='Rotate':
    # Document the actual refusal, rather than overrun reserved font tables.
    command('A:'+a.editor_base+' H:/ELITE.TXT',s.get('editorStartupErrorWait',s['editorErrorWait']))

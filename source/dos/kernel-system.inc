@@ -13,8 +13,11 @@ dosRawIO:
     ret
     MODULE dosVerify
     DEFINE DWC_NO_ERROR_FLAG
-    DEFINE DWC_READ_BUFFER DOS_VERIFY_BUFFER
+    ; Буфер BPB свободен во время проверяющей записи. Он вмещает сектор D:.
+    DEFINE DWC_READ_BUFFER DOS_CACHE_BOOT_ADDR
+    DEFINE DWC_BLOCK_SIZE v_diskInfo.blockSize
     INCLUDE "../common/diskWriteChecked.inc"
+    UNDEFINE DWC_BLOCK_SIZE
     UNDEFINE DWC_READ_BUFFER
     UNDEFINE DWC_NO_ERROR_FLAG
     ENDMODULE
@@ -134,7 +137,6 @@ krFlush:
     call kdInvoke
     call kdCapture
     jp kdFinish
-krOperation: DB 0
 krSize:
     ld b,3
     call j_diskDriver
@@ -158,6 +160,18 @@ krStoreInfo:
     jp c,kdBad
     ld (kdRegs),hl
     jp kdFinish
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Получить размер блока активного диска для ядра.
+;
+; вход:
+;   v_diskInfo.blockSize содержит размер блока в байтах.
+;
+; выход:
+;   bc = размер блока. af, de и hl сохранены.
+;----------------------------------------------------------------------------
 
 krBlockSize:
     push hl
@@ -185,8 +199,6 @@ ktCallConfirm:
     ld hl,bankCallback
     ld de,ktRegs
     jp bankCallPacket
-ktHook: DW 0
-ktRegs: DS MX_REGS,0
 
 ; Логический сектор: размер берётся из BPB текущего тома.
 krSector:
@@ -254,9 +266,3 @@ krSectorDirect:
     ld (ksDirect),a
     pop af
     ret
-krSectorSize: DW 0
-
- ; Старый выбор встроенных шаблонов больше не используется: запускается COM.
-dosDriverSelect:
-    jp dosUnsupported
-kernelHDriverKind: DB 0

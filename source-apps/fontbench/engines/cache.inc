@@ -410,24 +410,24 @@ cacheDiscard:
     ld hl,0
     ld (GLYPH_CACHE_ENTRIES),hl
     ret
-cacheIndex: DW 0
-cachePool: DW 0
-cacheBuildBase: DW 0
-cacheArenaStart: DW 0
-cacheArenaEnd: DW 0
-cacheMisses: DW 0
-cacheEvictions: DW 0
-cacheSlots: DB 0
-cacheFilled: DB 0
-cacheVictim: DB 1
-cacheOwnersPage: DB 0
-cacheCode: DB 0
-cacheKeyPhase: DB 0
-cacheBuildPage: DB 0
-cacheEpoch: DB 0
-cacheLastToken: DB 0
-cacheLifeRecent: DB 0
-cacheLifeOlder: DB 0
+cacheIndex:         DW 0
+cachePool:          DW 0
+cacheBuildBase:     DW 0
+cacheArenaStart:    DW 0
+cacheArenaEnd:      DW 0
+cacheMisses:        DW 0
+cacheEvictions:     DW 0
+cacheSlots:         DB 0
+cacheFilled:        DB 0
+cacheVictim:        DB 1
+cacheOwnersPage:    DB 0
+cacheCode:          DB 0
+cacheKeyPhase:      DB 0
+cacheBuildPage:     DB 0
+cacheEpoch:         DB 0
+cacheLastToken:     DB 0
+cacheLifeRecent:    DB 0
+cacheLifeOlder:     DB 0
 
-cachePrivateStart: DW 0
-cachePrivateEnd: DW 0
+cachePrivateStart:  DW 0
+cachePrivateEnd:    DW 0

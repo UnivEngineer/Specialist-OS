@@ -31,18 +31,11 @@
     "z80-macroasm.suggestOnInstructions": true,
     "z80-macroasm.format.enabled": false,
     "task.autoDetect": "off",
+    "python.analysis.languageServerMode": "light",
     "python.analysis.exclude": [
-      ".codex-tmp",
-      ".local",
-      "assets",
-      "bin",
-      "datasheets",
-      "docs",
-      "hardware",
-      "images",
-      "tasm",
-      "tmp"
+      "**"
     ],
+    "python.analysis.indexing": false,
     "search.exclude": {
       "**/.vs/**": true,
       "**/*.lst": true,
@@ -91,6 +84,47 @@
         ],
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build"
+      },
+      {
+        "label": "run: Emu80 fresh A:",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
+          "Floppy720"
+        ],
+        "problemMatcher": [],
+        "group": "build"
+      },
+      {
+        "label": "mount: ImDisk A: (read/write)",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\imdisk-floppy.ps1",
+          "Mount"
+        ],
+        "problemMatcher": []
+      },
+      {
+        "label": "unmount: ImDisk A:",
+        "type": "process",
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\scripts\\emu80\\imdisk-floppy.ps1",
+          "Unmount"
+        ],
+        "problemMatcher": []
       },
       {
         "label": "run: Emu80 H-Flash2M (no build)",

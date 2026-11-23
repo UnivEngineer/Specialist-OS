@@ -33,6 +33,17 @@ def command(args):
     if p.returncode:raise RuntimeError(p.stdout+'\n'+p.stderr)
     return p.stdout
 
+def legacy_diskbench(directory):
+    directory.mkdir(parents=True, exist_ok=True)
+    binary = directory / 'DISKBEN-legacy.i80'
+    listing = directory / 'DISKBEN-legacy.sym'
+    subprocess.run([
+        str(ROOT / 'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
+        '-DDISKBEN_LEGACY_FIXTURE=1', f'--raw={binary}', f'--sym={listing}',
+        'DISKBEN.asm',
+    ], cwd=ROOT / 'source-apps/diskbench', check=True)
+    return binary, listing
+
 def prepare_fixtures():
     OUT.mkdir(parents=True,exist_ok=True)
     command(['powershell.exe','-NoProfile','-File','scripts/build/build-project.ps1','OS'])
@@ -40,7 +51,7 @@ def prepare_fixtures():
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','Games2M'])
     payload=OUT/'readonly.tmp';payload.write_bytes(bytes(1^(a>>8)^(a&255) for a in range(0x2000,0x4000)))
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
-    base=(ROOT/'scripts/images/manifests/A-System.txt').read_text(encoding='utf-8-sig')
+    base=(ROOT/'assets/C-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
     keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.PF','FONTKOI.PF','Drivers/RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','Drivers/ROM2M.COM','Drivers/ROM64K.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
@@ -52,8 +63,8 @@ def prepare_fixtures():
         text=builder.replace('$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)','$repositoryRoot = '+ps(ROOT))
         text=text.replace(". (Join-Path $PSScriptRoot 'executable.ps1')",". "+ps(ROOT/'scripts/images/executable.ps1'))
         text=text.replace('$imageDirectory = Join-Path $repositoryRoot "images"','$imageDirectory = '+ps(folder))
-        for key in ['A-System.txt','H-ROM64k.txt']:
-            text=text.replace('Join-Path $PSScriptRoot "manifests\\'+key+'"',ps(OUT/manifest))
+        for key in ['C-System.txt','H-ROM64k.txt']:
+            text=text.replace('Join-Path $assetDirectory "'+key+'"',ps(OUT/manifest))
         script=folder/'build-fixture.ps1';script.write_text(text,encoding='utf-8-sig')
         command(['powershell.exe','-NoProfile','-File',script,target])
     build('rom512','system-ro-full.txt','SystemEmuWritable')
@@ -61,10 +72,14 @@ def prepare_fixtures():
     build('external-rom64','disk-ro.txt','Games64k')
 
 class Matrix:
-    def __init__(self):
+    def __init__(self, legacy=False):
         self.m=Bench('http://127.0.0.1:19781/mcp');self.pid=None
-        self.appBinary=ROOT/'bin/DISKBEN.i80'
-        self.s=app_symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
+        if legacy:
+            self.appBinary, listing = legacy_diskbench(OUT)
+        else:
+            self.appBinary = ROOT / 'bin/DISKBEN.i80'
+            listing = ROOT / 'source-apps/diskbench/build/DISKBEN.sym'
+        self.s = app_symbols(listing)
         self.pageAddress=symbols(ROOT/'bin/banked/TRANSPORT.sym')['bankPage']
         self.report={'startedUtc':datetime.now(timezone.utc).isoformat(),'cpuHz':2000000,'pitHz':2000000,'fileBytes':SIZE,'passes':PASSES,'units':'KiB/s (1024 bytes); ms','rows':[],'inventory':{},'phases':{}}
     def save(self):
@@ -136,7 +151,7 @@ class Matrix:
                 self.m.until(target,120,page=0)
             cli_command('FONT 6X8/ROTATE',cli['cliInput'])
             assert self.m.read(0xD827,1)==b'\x00'
-            cli_command('A:NC_MN.COM',nc['mainLoop'])
+            cli_command('C:/DOS/NC_MN.COM',nc['mainLoop'])
             assert self.m.read(0,4)==nc_binary.read_bytes()[:4]
         else:
             self.m.stop_at(nc['mainLoop'])
@@ -204,7 +219,7 @@ class Matrix:
         if name in ('Flash','FlashFst','Rom'):
             # Инициализатор COM исполняется загрузчиком в странице DOS.
             filename={'Flash':'AT2MX','FlashFst':'AT2MXF','Rom':'ROM2M'}[name]
-            self.m.write(0x7E00,('A:\\DRIVERS\\'+filename+'.COM\0').encode('ascii'))
+            self.m.write(0x7E00,('C:\\DRIVERS\\'+filename+'.COM\0').encode('ascii'))
             installed = self.func(0xC85D,hl=0x7E00)
             assert not installed['flags']['C'], (name, installed)
         else:
@@ -228,15 +243,18 @@ class Matrix:
         return {'drive':chr(65+drive),'capacityBytes':capacity*256,'driver':name.decode(),'description':desc.decode(),'caps':self.m.read(self.s['v_caps'],1)[0]}
     def traps(self,target):
         self.m.stop_at(target)
-        for key in ['error','file_exists']:self.m.call('bp_set',addr=self.s[key],type='exec')
+        for key in ('error', 'file_exists', 'bank_module_error'):
+            if key in self.s:
+                self.m.call('bp_set', addr=self.s[key], type='exec')
     def until(self,target):
+        errors = tuple(self.s[key] for key in ('error', 'file_exists', 'bank_module_error') if key in self.s)
         for _ in range(180):
             state=self.m.call('cpu_state');pc=state['registers']['pc']['dec']
-            if pc in (target,self.s['error'],self.s['file_exists']) and self.m.read(self.pageAddress,1)!=b'\0':
+            if pc in (target, *errors) and self.m.read(self.pageAddress,1)!=b'\0':
                 self.m.call('debug_step',mode='into')
                 continue
             if pc==target:return state
-            if pc in [self.s['error'],self.s['file_exists']]:
+            if pc in errors:
                 self.m.screenshot(OUT/'failure.png');raise RuntimeError(('DISKBEN error',state))
             self.m.call('emu_run_for',ms=1000)
         raise RuntimeError(('timeout',self.m.call('cpu_state')))
@@ -353,7 +371,7 @@ def main():
     if RUNTIME.name!='Emu80-flash-test' and not RUNTIME.is_relative_to(ROOT/'.local'):parser.error('Use isolated Emu80-flash-test or a workspace .local runtime')
     if (OUT/'raw.json').exists() and not args.resume:parser.error('Report already exists; choose a new --report-directory or --resume')
     if not args.resume:prepare_fixtures()
-    matrix=Matrix()
+    matrix=Matrix(legacy=True)
     if args.resume:
         matrix.report=json.loads((OUT/'raw.json').read_text(encoding='utf-8'))
         expected=next(iter(matrix.report['phases'].values()))['dosSha256']
@@ -378,7 +396,8 @@ def main():
         matrix.start('rom64',flash=False,system=OUT/'rom64/SystemRom_emulator.bin',disk=OUT/'external-rom64/FlashDisk_64K.bin')
         matrix.install('Rom');matrix.readonly(7,'H-ROM-64K',RUNTIME/'specialist-os/rom-disk.bin')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
-        matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','DISKBEN.i80','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMDISK.i80']}
+        matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMDISK.i80']}
+        matrix.report['binaries'][matrix.appBinary.name] = sha(matrix.appBinary)
         matrix.save()
     finally:matrix.stop()
 

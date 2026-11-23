@@ -1,5 +1,20 @@
 ; Minimal shell-path entry, resident in the spare IO.SYS tail.
 ; Called only after bootstrap has installed IO; no MAIN code is required.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запросить путь к оболочке, когда BIOS требуется восстановить командную среду.
+;
+; вход:
+;   Работают BIOS, IO.SYS и файловая служба DOS. Буфер CMD_LINE доступен в основной
+;   памяти.
+;
+; выход:
+;   При отказе FILE_EXEC_NATIVE ввод повторяется. После успешного выполнения управление
+;   передаётся biosBankShell. Обычного возврата через RET нет.
+;----------------------------------------------------------------------------
+
 biosRecoveryStart:
     ld hl,biosShellPrompt
     call bios_printString

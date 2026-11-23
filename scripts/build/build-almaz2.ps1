@@ -23,7 +23,7 @@ $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $assembler = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 $sourcePath = Join-Path $repositoryRoot "source-apps\almaz2\Almaz2.asm"
 $outputDirectory = Join-Path $repositoryRoot "bin"
-$archive = Join-Path $repositoryRoot 'assets\games\Almaz-2'
+$archive = Join-Path $repositoryRoot 'assets\games\families\almaz-2\builds'
 
 function Get-FileSignature([string] $Path) {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $null }
@@ -31,33 +31,27 @@ function Get-FileSignature([string] $Path) {
 }
 
 $modes = @(
-    @{ Name = "Base";        Output = "Almaz2-optimized";   Color = 0; Pit = 0; Ramfos = 0; Hud = 1 },
-    @{ Name = "Color8";      Output = "Almaz2-8color";       Color = 2; Pit = 0; Ramfos = 0; Hud = 0 },
-    @{ Name = "Color8Optimized"; Output = "Almaz2-8color-optimized"; Color = 2; Pit = 0; Ramfos = 0; Hud = 1 },
-    @{ Name = "MX";          Output = "Almaz2-mx";           Color = 1; Pit = 0; Ramfos = 0; Hud = 0 },
-    @{ Name = "MXOptimized"; Output = "Almaz2-mx-optimized"; Color = 1; Pit = 1; Ramfos = 0; Hud = 1 },
-    @{ Name = "Ramfos";      Output = "Almaz2-ramfos";       Color = 1; Pit = 0; Ramfos = 1; Hud = 0 },
-    @{ Name = "RamfosOptimized"; Output = "Almaz2-ramfos-optimized"; Color = 1; Pit = 1; Ramfos = 1; Hud = 1 },
-    @{ Name = "Reference";   Output = "Almaz2";              Color = 0; Pit = 0; Ramfos = 0; Hud = 0 }
+    @{ Name = "Base";        Output = "Almaz2-optimized";   Color = 0; Pit = 0; Ramfos = 0; Hud = 1; Format = 'rks' },
+    @{ Name = "Color8";      Output = "Almaz2-8color";       Color = 2; Pit = 0; Ramfos = 0; Hud = 0; Format = 'rks' },
+    @{ Name = "Color8Optimized"; Output = "Almaz2-8color-optimized"; Color = 2; Pit = 0; Ramfos = 0; Hud = 1; Format = 'rks' },
+    @{ Name = "MX";          Output = "Almaz2-mx";           Color = 1; Pit = 0; Ramfos = 0; Hud = 0; Format = 'exe' },
+    @{ Name = "MXOptimized"; Output = "Almaz2-mx-optimized"; Color = 1; Pit = 1; Ramfos = 0; Hud = 1; Format = 'exe' },
+    @{ Name = "Ramfos";      Output = "Almaz2-ramfos";       Color = 1; Pit = 0; Ramfos = 1; Hud = 0; Format = 'exe' },
+    @{ Name = "RamfosOptimized"; Output = "Almaz2-ramfos-optimized"; Color = 1; Pit = 1; Ramfos = 1; Hud = 1; Format = 'exe' },
+    @{ Name = "Reference";   Output = "Almaz2";              Color = 0; Pit = 0; Ramfos = 0; Hud = 0; Format = 'rks' }
 )
 $selected = @($modes | Where-Object { $Mode -eq "All" -or $_.Name -eq $Mode })
-if ($PublishMxTimer -and -not ($selected | Where-Object { $_.Name -eq "MXOptimized" })) {
-    throw "PublishMxTimer requires Mode=All or MXOptimized"
-}
-
 if (-not $RunBuild) {
     $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), "Almaz-2 ($Mode)", '--content', '--asm', $sourcePath)
-    if ($PublishMxTimer) { $cacheArgs += @('--input', (Join-Path $repositoryRoot 'scripts/images/cpu.ps1')) }
+    $cacheArgs += @('--input', (Join-Path $repositoryRoot 'scripts/images/executable.ps1'),
+        '--input', (Join-Path $repositoryRoot 'scripts/images/cpu.ps1'))
     foreach ($variant in $selected) {
         $stem = $variant.Output
-        foreach ($extension in 'cpu', 'rks', 'lst', 'sym') {
+        foreach ($extension in 'cpu', 'i80', $variant.Format, 'lst', 'sym') {
             $cacheArgs += @('--output', (Join-Path $outputDirectory "$stem.$extension"))
         }
         if ($PublishMxTimer) {
-            $cacheArgs += @('--output', (Join-Path $archive "$stem.cpu"), '--output', (Join-Path $archive "$stem.rks"))
-            if ($variant.Name -in @('MXOptimized', 'RamfosOptimized')) {
-                $cacheArgs += @('--output', (Join-Path $archive "$stem.i80"))
-            }
+            $cacheArgs += @('--output', (Join-Path $archive "$stem.$($variant.Format)"))
         }
     }
     if ($Force) { $cacheArgs += '--force' }
@@ -70,36 +64,15 @@ if (-not $RunBuild) {
 }
 
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-
-function Write-AlmazRks([string] $Executable, [string] $Destination) {
-    # Начало 0000h и включительный конец — слова little-endian.
-    # Контрольная сумма Монитора: перенос в старший байт, кроме последнего.
-    $payload = [System.IO.File]::ReadAllBytes($Executable)
-    if ($payload.Length -lt 1 -or $payload.Length -ge 0x7F00) {
-        throw "Unexpected Almaz2 payload size: $($payload.Length)"
-    }
-    $endAddress = $payload.Length - 1
-    $low = 0
-    $high = 0
-    for ($i = 0; $i -lt $payload.Length; $i++) {
-        $sum = $low + [int]$payload[$i]
-        $low = $sum -band 0xFF
-        if ($i -lt $payload.Length - 1) {
-            $high = ($high + [int]$payload[$i] + ($sum -shr 8)) -band 0xFF
-        }
-    }
-    [byte[]]$rks = @([byte]0, [byte]0, [byte]($endAddress -band 0xFF),
-        [byte]($endAddress -shr 8)) + $payload + @([byte]$low, [byte]$high)
-    [System.IO.File]::WriteAllBytes($Destination, $rks)
-    Write-Host "[app] $Destination ($($rks.Length) bytes)"
-}
+if ($PublishMxTimer) { New-Item -ItemType Directory -Path $archive -Force | Out-Null }
+. (Join-Path $repositoryRoot 'scripts/images/executable.ps1')
 
 foreach ($variant in $selected) {
     $prefix = Join-Path $outputDirectory $variant.Output
     $extraDefines = @()
     $optimize = if ($variant.Name -in @("Reference", "Color8", "MX", "Ramfos") -or $NoOptimizations) { 0 } else { 1 }
     $extraDefines += "-DALMAZ_OPTIMIZE=$optimize"
-    $monitorTarget = if ($variant.Name -in @("Reference", "Base", "Color8", "Color8Optimized")) { 1 } else { 0 }
+    $monitorTarget = [int]($variant.Format -eq 'rks')
     $extraDefines += "-DALMAZ_MONITOR_TARGET=$monitorTarget"
     if ($StepHz -gt 0) { $extraDefines += "-DALMAZ_STEP_HZ=$StepHz" }
     if ($InputCellStride -gt 0) { $extraDefines += "-DINPUT_POLL_CELL_STRIDE=$InputCellStride" }
@@ -112,43 +85,34 @@ foreach ($variant in $selected) {
         ("-DALMAZ_RAMFOS={0}" -f $variant.Ramfos) `
         ("-DALMAZ_HUD={0}" -f $variant.Hud) `
         @extraDefines `
-        ("--raw={0}.cpu" -f $prefix) ("--lst={0}.lst" -f $prefix) `
-        ("--sym={0}.sym" -f $prefix) $sourcePath
+        ("--raw={0}.i80" -f $prefix) ("--lst={0}.lst" -f $prefix) `
+        ("--sym={0}.sym" -f $prefix) ($sourcePath.Replace('\', '/'))
     if ($LASTEXITCODE -ne 0) { throw "Assembly failed: $($variant.Name)" }
-    Write-AlmazRks "$prefix.cpu" "$prefix.rks"
-}
-
-if ($PublishMxTimer) {
-    . (Join-Path $repositoryRoot "scripts\images\cpu.ps1")
-    # Публикация всех выбранных вариантов в обоих форматах.
-    foreach ($variant in $selected) {
-        $stem = $variant.Output
-        $descriptor = switch ($variant.Name) {
-            "MXOptimized" {
-                # Игра использует собственный стек и рабочую карту до 81FFh.
-                New-CpuDescriptor -Load 0 -Flags 4 -Fields ([ordered]@{POLICY='EXCLUSIVE'; MEM_END='8200'})
-            }
-            "RamfosOptimized" {
-                New-CpuDescriptor -Load 0 -Monitor 'ramfos.mon' -Fields @{MODE='RF'}
-            }
+    $payloadSize = (Get-Item -LiteralPath "$prefix.i80").Length
+    if ($payloadSize -lt 1 -or $payloadSize -ge 0x7F00) {
+        throw "Unexpected Almaz2 payload size: $payloadSize"
+    }
+    $descriptor = switch ($variant.Name) {
+        "MXOptimized" {
+            # Игра использует собственный стек и рабочую карту до 81FFh.
+            New-CpuDescriptor -Load 0 -Flags 4 -Fields ([ordered]@{POLICY='EXCLUSIVE'; MEM_END='8200'})
         }
-        foreach ($extension in @("cpu", "rks")) {
-            $fileName = "$stem.$extension"
-            $source = Join-Path $outputDirectory $fileName
-            if ($extension -eq 'cpu' -and $descriptor) {
-                $fileName = "$stem.i80"
-            }
-            $destination = Join-Path $archive $fileName
-            if ((Get-FileSignature $source) -ne (Get-FileSignature $destination)) {
-                Copy-Item -LiteralPath $source -Destination $destination -Force
-            }
-        }
-        if ($descriptor) {
-            $path = Join-Path $archive "$stem.cpu"
-            if (-not (Test-Path -LiteralPath $path) -or [IO.File]::ReadAllText($path) -cne $descriptor) {
-                [IO.File]::WriteAllText($path, $descriptor, [Text.Encoding]::ASCII)
-            }
+        "MX" { New-CpuDescriptor -Load 0 -Monitor 'mxos2.mon' -Fields @{MODE='MX'} }
+        { $variant.Ramfos } { New-CpuDescriptor -Load 0 -Monitor 'ramfos.mon' -Fields @{MODE='RF'} }
+        default { New-CpuDescriptor -Load 0 }
+    }
+    [IO.File]::WriteAllText("$prefix.cpu", $descriptor, [Text.Encoding]::ASCII)
+    $packed = Convert-ExecutableFile "$prefix.cpu" $variant.Format
+    $fileName = "$($variant.Output).$($variant.Format)"
+    $source = Join-Path $outputDirectory $fileName
+    [IO.File]::WriteAllBytes($source, $packed)
+    if ($PublishMxTimer) {
+        $destination = Join-Path $archive $fileName
+        if ((Get-FileSignature $source) -ne (Get-FileSignature $destination)) {
+            Copy-Item -LiteralPath $source -Destination $destination -Force
         }
     }
+}
+if ($PublishMxTimer) {
     Write-Host ("[app] Published {0}" -f $archive)
 }

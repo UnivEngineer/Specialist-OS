@@ -10,9 +10,9 @@
 ; Код хвоста 159 байт. На сектор: 45 записей маппера и 1024 обращения
 ; к полезным данным (диск, общий буфер, основная RAM), без учёта параметров.
 
-ramdBuffer = 0FFC3h
+ramdBuffer  = 0FFC3h
 ramdBuffer2 = 0FFD3h
-ramdSetSP  = 0FFDAh
+ramdSetSP   = 0FFDAh
 
 driverBufferedStart:
             jp      ramdBufferedRead

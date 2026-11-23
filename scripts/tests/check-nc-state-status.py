@@ -1,4 +1,4 @@
-"""8080 regressions: F3 state, hidden root entry, status names and late FAT scan."""
+"""8080 regressions: F3 state, hidden root entry, status line and late FAT scan."""
 from pathlib import Path
 import re
 import runpy
@@ -17,6 +17,7 @@ def main():
     OUT.mkdir(exist_ok=True)
     n,b = sy(ROOT/'bin/NC.sym'),sy(ROOT/'bin/BIOS.sym')
     trace_tools=runpy.run_path(str(ROOT/'scripts/tests/benchmark-nc-color-scroll.py'))
+    executable=runpy.run_path(str(ROOT/'scripts/images/executable.py'))
     asm = f'''
     ORG 8200h
 gateway:
@@ -36,6 +37,10 @@ gateway:
     jp z,directoryQuery
     cp {n['MXOS_DOS_FILE_GET_SET_DRIVE']&255}
     jp z,getDrive
+    cp {n['MXOS_DOS_FILE_SELECT_DRIVE']&255}
+    jp z,restoreDrive
+    cp {n['MXOS_DOS_FILEHANDLE']&255}
+    jp z,statusHandle
     xor a
     ret
 slowQuery:
@@ -67,6 +72,50 @@ contextQuery:
     ret
 getDrive:
     ld a,(contextDrive)
+    ret
+restoreDrive:
+    ld a,(requestedOp)
+    ld (contextDrive),a
+    xor a
+    ret
+statusHandle:
+    ld a,(requestedOp)
+    cp {n['FILE_OP_OPEN_AT']}
+    jp z,statusOpen
+    cp {n['FILE_OP_READ']}
+    jp z,statusRead
+    cp {n['FILE_OP_CLOSE']}
+    scf
+    ret nz
+    ld hl,statusClosed
+    inc (hl)
+    xor a
+    ret
+statusOpen:
+    ld a,({n['flHandle']+n['FH_DRIVE']})
+    ld (contextDrive),a
+    ld (statusOpenedDrive),a
+    ld hl,({n['flHandle']+n['FH_SEEK']})
+    ld (statusOpenedParent),hl
+    ld hl,12345
+    ld ({n['flHandle']+n['FILE_DESCRIPTOR.size']}),hl
+    xor a
+    ret
+statusRead:
+    ld hl,({n['flHandle']+n['FH_COUNT']})
+    ld (statusRequested),hl
+    ld hl,({n['flHandle']+n['FH_BUFFER']})
+    ex de,hl
+    ld hl,8740h
+    ld b,{n['IMAGE_HEADER_SIZE']}
+statusReadByte:
+    ld a,(hl)
+    ld (de),a
+    inc hl
+    inc de
+    dec b
+    jp nz,statusReadByte
+    xor a
     ret
 cursorDrawn:
     ld hl,cursorCalls
@@ -115,6 +164,10 @@ requestedOp: DB 0
 contextDrive: DB 7
 contextDir: DW 0
 cursorCalls: DB 0
+statusOpenedDrive: DB 0
+statusOpenedParent: DW 0
+statusRequested: DW 0
+statusClosed: DB 0
     ASSERT $ < 8500h
 '''
     (OUT/'fixture.asm').write_text(asm,encoding='utf-8')
@@ -249,6 +302,76 @@ cursorCalls: DB 0
                 expected=call(expected,'bios_printStringRawLim',hl=0x8700,bc=width)
                 assert result[0x9000:0xc000]==expected[0x9000:0xc000],(font,panel,name,'status text')
                 q=result
+            for stem,flags,mode,extension,full,short,bad in [
+                    (b'PLATFORM',4,0,b'COM',b'MXOS',b'MX',False),
+                    (b'P',0,1,b'EXE',b'MXOS',b'MX',False),
+                    (b'STD',0,2,b'exe',b'STD',b'ST',False),
+                    (b'MONITOR',0,3,b'EXE',b'MON2',b'M2',False),
+                    (b'LEGACY',0,4,b'EXE',b'RAMFOS',b'RF',False),
+                    (b'AUTO',0,0,b'EXE',b'',b'',False),
+                    (b'BAD',0,4,b'EXE',b'',b'',True)]:
+                q=bytearray(m);q[n['state.activePanel']]=panel;q[n['state.panelA_filesCnt']+panel]=1
+                q[n['state.panelA_drive']+panel]=panel+2
+                q[n['state.panelA_dirLow']+panel]=0x34
+                q[n['state.panelA_dirHigh']+panel]=0x12
+                q[0x8000:0x8010]=stem.ljust(8)+extension+bytes(3)+W(12345)
+                image=executable['Image'](bytes(12345-n['IMAGE_HEADER_SIZE']),flags=flags,mode=mode)
+                header=bytearray(executable['encode'](image,'exe')[:n['IMAGE_HEADER_SIZE']])
+                if bad:
+                    header[-1]^=1
+                q[0x8740:0x8740+len(header)]=header
+                result=call(q,'printInfoLine')
+                width=m[n['ncStatusChars']]
+                line=result[n['ncTextBuffer']:n['ncTextBuffer']+width]
+                leaf=stem+b'.'+extension
+                assert line==leaf.ljust(width-5)+b'12345',(font,panel,line)
+                assert result[s['statusClosed']]==0 and result[n['ncStatusPending']]==1
+                quiet=n['ncStatusQuiet']
+                result[quiet:quiet+2]=W(1)
+                # Ожидание клавиши в диалоге не должно обслуживать статус.
+                result=call(result,'ncStatusIdle')
+                assert result[quiet:quiet+2]==W(1) and result[s['statusClosed']]==0
+                result[n['ncStatusInput']]=1
+                result[n['IO_KEYB_B']]=0xfb
+                result=call(result,'ncStatusIdle')
+                assert result[quiet:quiet+2]==W(n['NC_STATUS_QUIET_POLLS'])
+                assert result[s['statusClosed']]==0
+                result[n['IO_KEYB_B']]=0xff
+                result[quiet:quiet+2]=W(2)
+                waiting=call(result,'ncStatusIdle')
+                assert waiting[quiet:quiet+2]==W(1) and waiting[s['statusClosed']]==0
+                position=n['bios_vars.cursorY']
+                inverse=n['bios_vars.inverse']
+                waiting[position:position+2]=W(0x16f2)
+                waiting[inverse:inverse+2]=W(1)
+                waiting[n['ncCurrentColor']]=0x71
+                result=call(waiting,'ncStatusIdle')
+                assert result[position:position+2]==W(0x16f2)
+                assert result[inverse:inverse+2]==W(1) and result[n['ncCurrentColor']]==0x71
+                platform=short if font=='Fast8' else full
+                expected=leaf
+                if platform:
+                    expected=expected.ljust(13 if font=='Fast8' else 14)+platform
+                expected=expected.ljust(width-5)+b'12345'
+                reference=bytearray(q)
+                reference[position:position+2]=W((n['P_FILE_NAME_X']+panel*96)*256+n['P_FILE_NAME_Y'])
+                reference[0x8700:0x8700+width]=expected
+                reference=call(reference,'bios_printStringRawLim',hl=0x8700,bc=width)
+                assert result[0x9000:0xc000]==reference[0x9000:0xc000],(font,panel,expected)
+                assert result[s['statusOpenedDrive']]==panel+2
+                assert result[s['statusOpenedParent']:s['statusOpenedParent']+2]==W(0x1234)
+                assert result[s['statusRequested']:s['statusRequested']+2]==W(n['IMAGE_HEADER_SIZE'])
+                assert result[s['statusClosed']]==1 and result[s['contextDrive']]==7
+                assert result[n['ncStatusPending']]==0
+                assert call(result,'ncStatusIdle')[s['statusClosed']]==1
+            # Смена выбора на обычный файл отменяет запланированное чтение.
+            q=call(q,'printInfoLine')
+            q[0x8000:0x8010]=b'FILE    TXT'+bytes(3)+W(42)
+            q=call(q,'printInfoLine')
+            q[n['ncStatusInput']]=1
+            q[n['IO_KEYB_B']]=0xff
+            assert q[n['ncStatusPending']]==0
+            assert call(q,'ncStatusIdle')[s['statusClosed']]==0
         print(font,'fast information, numeric-only late update, Type/description and status PASS')
         # Repainting an unchanged prompt must never erase its pixels first.
         q=bytearray(m)

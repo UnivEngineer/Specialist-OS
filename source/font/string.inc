@@ -1,3 +1,6 @@
+    IFNDEF FONT_BENCH_STREAM
+    DEFINE stringTryGroup fast6.tryGroup
+    ENDIF
 ; ASCIIZ HL; AF/BC/DE сохранены, HL возвращается на завершающем нуле.
 ; Общий набор регистров сохраняется один раз на строку.
 printString:
@@ -11,7 +14,7 @@ printString_1:
     or a
     jp z,printString_2
     push hl
-    call fast6.tryGroup
+    call stringTryGroup
     jp c,printStringChar
     pop de ; Старый указатель не нужен: HL уже указывает на остаток пакета.
     jp printString_1
@@ -44,7 +47,7 @@ realStringNext:
     or a
     jp z,realStringDone
     push hl
-    call fast6.tryGroup
+    call stringTryGroup
     jp c,realStringChar
     pop de
     jp realStringNext
@@ -79,7 +82,7 @@ rawLimNext:
     jp z,realStringDone
     push bc
     push hl
-    call fast6.tryGroup
+    call stringTryGroup
     pop de ; DE=начало пакета; POP не меняет CF от tryGroup.
     pop bc ; BC=остаток перед пакетом, HL=следующий непрочитанный байт.
     jp c,rawLimChar

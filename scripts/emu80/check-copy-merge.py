@@ -24,13 +24,13 @@ def finish(key):
 def error():return m.m.read(d['v_dosError'],1)[0]
 try:
  m.start('copy-merge',disk=R/'bin/nested-Games2M.bin')
- command('COPY A:/README.TXT B:/ONE.TXT');assert error()==0,error()
- command('COPY A:/README.TXT B:/ONE.TXT',prompt=True)
+ command('COPY C:/README.TXT B:/ONE.TXT');assert error()==0,error()
+ command('COPY C:/README.TXT B:/ONE.TXT',prompt=True)
  assert m.m.read(n['uiModalFocusIndex'],1)==b'\2'
  m.m.screenshot(O/'overwrite-default-no.png')
  tap('left');tap('left');assert m.m.read(n['uiModalFocusIndex'],1)==b'\0'
  m.m.screenshot(O/'overwrite-yes.png');finish('enter');assert error()==0,error()
- command('COPY A:/README.TXT B:/ONE.TXT',prompt=True);finish('esc');assert error()==0,error()
+ command('COPY C:/README.TXT B:/ONE.TXT',prompt=True);finish('esc');assert error()==0,error()
  command('B:');tap('tab');command('CD H:/')
  entries=m.m.read(n['FILE_CACHE_B'],n['FILE_CACHE_BYTES'])
  index=next(i for i in range(255) if entries[i*16:i*16+8].rstrip().upper()==b'BIGTEST')

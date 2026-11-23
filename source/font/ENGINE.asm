@@ -1,3 +1,8 @@
+; Резидентные движки 6×8 с общим входом FONT_ENGINE_INIT.
+; FONT_MODE=0 (Rotate): повороты на лету, нижняя память не требуется.
+; FONT_MODE=1 (Packed): 4096 байт нижних таблиц; FONT_MODE=2 (Fast): 10240.
+; Перед Attach DE = база подготовленных страниц MAIN или 0 для Rotate.
+; Attach подключает входы BIOS, выбирает KOI-8 и возвращает A=0, CF=0.
     INCLUDE "../include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     IFNDEF FONT_MODE
@@ -29,8 +34,8 @@ FONT_LOWER_BYTES = FONT_MODE*4096
     DW FONT_LOWER_BYTES
     DW initializerName
 initializerName: DB "Init6.dll",0
-printChar2 = bios_fontControl
-printCharBody = bios_fontControl
+printChar2     = bios_fontControl
+printCharBody  = bios_fontControl
 calcCursorAd_0 = bios_fontPosition
     INCLUDE "char.inc"
 printChar_real2:
@@ -44,6 +49,9 @@ printCharRawHelper:
     jp fontLineEnd
     INCLUDE "string.inc"
     INCLUDE "packet6.inc"
+    IFDEF FONT_BENCH_STREAM
+    INCLUDE "stream.inc"
+    ENDIF
     IF FONT_MODE == 2
     INCLUDE "full-scalar.inc"
 scalar = scalarPre.draw

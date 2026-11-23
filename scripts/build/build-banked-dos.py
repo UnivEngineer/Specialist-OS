@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 import runpy
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
             else:
                 lines.append(h['include'](ROOT/'source/dos'/filename))
     for name in ('cmp_hl_de','math','strcmp','move8080','memcpy_bc_hl','memmove_bc_hl',
-                 'memset_de_20_b','argNext','calcCS','biosState','installDriver'):
+                 'memset_de_20_b','argNext','calcCS','installDriver'):
         lines.append(h['include'](ROOT/f'source/common/{name}.inc'))
     (out/'kernel-layout.inc').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     registry = json.loads((ROOT/'source/bios/syscalls.json').read_text(encoding='utf-8'))
@@ -30,7 +30,7 @@ def main():
     h['assemble'](ROOT/'source/dos/DOS.asm', out/'KERNEL.bin', [])
     sy = h['symbols'](out/'KERNEL.sym')
     runpy.run_path(str(ROOT/'scripts/build/build-overlays.py'))['build'](sy)
-    report = {key:sy[key] for key in ('dosCoreStart','dosCoreEnd','kernelEnd','DOS_BANK_DATA_ADDR','BANK_KERNEL_CACHE',
+    report = {key:sy[key] for key in ('dosCoreStart','dosCoreEnd','kernelEnd','dosWorkStart','dosDefaultsEnd','dosWorkEnd','DOS_BANK_DATA_ADDR','BANK_KERNEL_CACHE',
                                      'bankKernelCommand','kernelDispatch','v_drives','v_diskInfo')}
     report['bytes'] = (out/'KERNEL.bin').stat().st_size
     (out/'KERNEL.layout.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')

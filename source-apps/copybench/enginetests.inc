@@ -321,12 +321,12 @@ matrixRead:
 matrixReadMain:
     ld c,(hl)
     ret
-engineMode: DB 0
-engineBank: DB 0
-engineStatus: DB 0
-engineErrors: DB 0
-engineTail: DW 0
-engineTailSize: DW 0
-engineOutput: DW 0
-engineTimings: DS 48,0
-engineNames: DW r4BlockName,cpmBlockName,r4UniversalName,cpmUniversalName
+engineMode:         DB 0
+engineBank:         DB 0
+engineStatus:       DB 0
+engineErrors:       DB 0
+engineTail:         DW 0
+engineTailSize:     DW 0
+engineOutput:       DW 0
+engineTimings:      DS 48,0
+engineNames:        DW r4BlockName,cpmBlockName,r4UniversalName,cpmUniversalName

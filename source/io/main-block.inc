@@ -22,7 +22,7 @@ mainBlockIO:
     cp 2
     jp nc,mainIoDispatch
     ld b,3
-    xor a
+    ld a,SYSTEM_DRIVE
     call bios_blockIO
     jp c,mainIoFailed
     ex de,hl
@@ -52,11 +52,11 @@ mainIoDispatch:
     jp nz,mainIoBad
     ; Прямую запись выполняем только для установленного AT29C-драйвера.
     ld b,0FFh
-    xor a
+    ld a,SYSTEM_DRIVE
     call bios_blockIO
     jp c,mainIoFailed
     ld a,b
-    cp DISK_TECH_FLASH
+    cp DISK_TECH_MX_SYSTEM_FLASH
     jp nz,mainIoFailed
     ; Сначала полный сектор в верхнюю MAIN, затем штатный AT29-драйвер.
     ld a,(io_vars.romBufferPage)
@@ -76,7 +76,7 @@ mainIoDispatch:
     ex de,hl
     ld hl,BIOS_DISK_BUFFER
     ld b,1
-    xor a
+    ld a,SYSTEM_DRIVE
     call bios_blockIO
     ret nc
     jp mainIoFailed

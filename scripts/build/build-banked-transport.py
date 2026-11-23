@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 import re
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
 OUT = ROOT / 'bin/banked'
 
 def main():
@@ -11,7 +11,7 @@ def main():
     for name in ('WINDOW', 'TRANSPORT'):
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'--lst={OUT/name}.lst', f'--sym={OUT/name}.sym',
-                        f'--raw={OUT/name}.bin', str(ROOT/f'source/mem/{name}.asm')], check=True)
+                        f'--raw={OUT/name}.bin', (ROOT/f'source/mem/{name}.asm').as_posix()], check=True)
     sy = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
                                           (OUT/'TRANSPORT.sym').read_text(),re.M)}
     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
@@ -27,7 +27,7 @@ def main():
         folder='source/io' if name in ('MAINIO','MAINBIOS') else ('source/bootstrap/tests' if name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV') else 'source/mem')
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'--lst={OUT/name}.lst', f'--sym={OUT/name}.sym',
-                        f'--raw={OUT/name}.bin', str(ROOT/f'{folder}/{name}.asm')], check=True)
+                        f'--raw={OUT/name}.bin', (ROOT/f'{folder}/{name}.asm').as_posix()], check=True)
     # Одна сборка разрешает ссылки LOCAL <-> TEXT без фиксированных перемычек.
     # Установочный формат по-прежнему содержит отдельные LOCAL и CLIENT.
     cs = dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (OUT/'LOCALBLOCK.sym').read_text(), re.M))
@@ -47,7 +47,7 @@ def main():
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'-DLOCAL_KIND={kind}', f'--lst={OUT/name}.lst',
                         f'--sym={OUT/name}.sym', f'--raw={OUT/name}.bin',
-                        str(ROOT/'source/mem/LOCALDRV.asm')], check=True)
+                        (ROOT/'source/mem/LOCALDRV.asm').as_posix()], check=True)
 
     def symbols(path):
         return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', path.read_text(),re.M)}
@@ -64,7 +64,7 @@ def main():
 
     subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                     f'--lst={ROOT/"bin/MEM.lst"}', f'--sym={ROOT/"bin/MEM.sym"}',
-                    f'--raw={ROOT/"bin/MEM.sys"}', str(ROOT/'source/mem/MEM.asm')], check=True)
+                    f'--raw={ROOT/"bin/MEM.sys"}', (ROOT/'source/mem/MEM.asm').as_posix()], check=True)
 
 if __name__ == '__main__':
     main()

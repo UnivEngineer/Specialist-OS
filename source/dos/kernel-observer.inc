@@ -43,6 +43,4 @@ koNotify:
     ld hl,bankCallback
     ld de,koRegs
     jp bankCallPacket
-koAddress: DW 0
-koPage: DB 0
 koRegs = DOS_REQUEST_SCRATCH+34 ; separate from the interrupted DOS request

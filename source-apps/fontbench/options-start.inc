@@ -76,9 +76,9 @@ benchArgsDone:
 benchArgsBad:
     scf
     ret
-benchArgCursor: DW 0
-benchToken: DW 0
-benchTokenLength: DB 0
+benchArgCursor:     DW 0
+benchToken:         DW 0
+benchTokenLength:   DB 0
 benchOptionTable:
     DB '-F=4',0,0,4
     DB '-F=6',0,0,1

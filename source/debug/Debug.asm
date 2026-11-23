@@ -5,9 +5,9 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+IMAGE_FLAGS         = IMAGE_FLAG_MAIN
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
-IMAGE_BSS_SIZE = IMAGE_BSS_UNKNOWN
+IMAGE_BSS_SIZE      = IMAGE_BSS_UNKNOWN
 
     INCLUDE "state.inc" ; Рабочая память и размещение программы
     INCLUDE "command.inc" ; Приглашение, ввод и диспетчер директив
@@ -20,6 +20,22 @@ IMAGE_BSS_SIZE = IMAGE_BSS_UNKNOWN
     INCLUDE "vectors.inc" ; Фиксированная таблица совместимости F800h
 
 ; Собственные фиксированные буферы допустимы только ниже текущего memtop.
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Проверить, помещается ли рабочая область DEBUG в MAIN.
+;
+; вход:
+;   bios_getMemTop возвращает последний доступный адрес. Рабочие данные начинаются по
+;   vars1.
+;
+; выход:
+;   При достаточной памяти управление передаётся debugMemoryReady. Иначе выводится
+;   сообщение NOT ENOUGH MEMORY и программа возвращается вызывающему. af, de и hl
+;   рабочие.
+;----------------------------------------------------------------------------
+
 debugCheckMemory:
         CALL bios_getMemTop
         LD DE,vars1+MON2_VARS_1-1

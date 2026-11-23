@@ -24,5 +24,5 @@ batch:
     ld a,MEM_OP_ALLOC
     MXOS_CALL MXOS_DOS_MEMORY
     ret
-receivedBytes: DW 0
-firstByte: DB 0
+receivedBytes:  DW 0
+firstByte:      DB 0

@@ -43,7 +43,7 @@ def inventory():
             for row in csv.DictReader(stream):
                 if row.get('LoadAddress'):
                     addresses[(Path('assets') / folder / row['File']).as_posix().lower()] = int(row['LoadAddress'], 0)
-    for manifest in (ROOT / 'scripts/images/manifests').glob('*.txt'):
+    for manifest in (ROOT / 'assets').glob('[A-Z]-*.txt'):
         for line in manifest.read_text(encoding='utf-8-sig').splitlines():
             words = line.split()
             if len(words) >= 2 and not line.lstrip().startswith('#'):
@@ -56,9 +56,15 @@ def inventory():
                     addresses[source.relative_to(ROOT).as_posix().lower()] = address
     for folder in ('games', 'programs'):
         for path in sorted((ROOT / 'assets' / folder).rglob('*')):
-            if not path.is_file() or path.suffix.lower() not in ('.rks','.exe','.com','.cpu'):
+            if not path.is_file():
                 continue
             name=path.relative_to(ROOT).as_posix()
+            kind=path.suffix.lower()
+            if kind == '.i80':
+                if name.lower() not in addresses:
+                    continue
+            elif kind not in ('.rks','.exe','.com','.cpu'):
+                continue
             raw=path.read_bytes()
             record={'file':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
             try:
@@ -66,7 +72,7 @@ def inventory():
             except ValueError as error:
                 yield record | {'error':str(error)}, None
                 continue
-            if path.suffix.lower()=='.rks':
+            if kind=='.rks':
                 record['container_sum_ok']=True
             record.update(load=image.load,end=image.load+len(image.data)-1,
                           entry=image.entry,payload_bytes=len(image.data))

@@ -18,14 +18,14 @@ def main():
     entries = {image[i:i+11].decode('ascii').strip(): image[i:i+32]
                for i in range(rootsector * secsize, datastart * secsize, 32) if image[i] != 255}
     label_lines = [line.strip()[7:].strip() for line in
-                   (ROOT/'scripts/images/manifests/H-Games2M.txt').read_text('utf-8-sig').splitlines()
+                   (ROOT/'assets/H-Games2M.txt').read_text('utf-8-sig').splitlines()
                    if line.strip().startswith('@label ')]
     assert len(label_lines) == 1
     assert image[0x2B:0x36] == label_lines[0].ljust(11).encode('ascii')
     allclusters = set()
     chips = [0] * 4
     files = 0
-    for line in (ROOT / 'scripts/images/manifests/H-Games2M.txt').read_text(encoding='utf-8-sig').splitlines():
+    for line in (ROOT / 'assets/H-Games2M.txt').read_text(encoding='utf-8-sig').splitlines():
         if not line.strip() or line.lstrip().startswith(('#','@')):
             continue
         fields = line.split()

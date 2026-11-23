@@ -123,15 +123,28 @@ ncDirtyFrames:
     xor a
     ld (ncCommandCursorKept),a
     jp mainLoop_cursorReady
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Пометить обе панели NC для перерисовки.
+;
+; вход:
+;   Параметров нет.
+;
+; выход:
+;   ncDamageMask и a равны 3. bc, de, hl и флаги сохранены.
+;----------------------------------------------------------------------------
+
 ncDamageBoth:
     ld a,3
     ld (ncDamageMask),a
     ret
-ncDirtyMask: DB 0
-ncDamageMask: DB 0
-ncListMask: DB 0 ; Repaint cached list without clearing its panel/frame.
-ncSelectiveRefresh: DB 0
-ncRefreshMask: DB 0
+ncDirtyMask:            DB 0
+ncDamageMask:           DB 0
+ncListMask:             DB 0    ; Repaint cached list without clearing its panel/frame.
+ncSelectiveRefresh:     DB 0
+ncRefreshMask:          DB 0
 
 ; Строка сведений также принадлежит обновляемой панели. Кэш другой панели
 ; используется только для восстановления указателя выделения, без рисования.

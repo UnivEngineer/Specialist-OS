@@ -12,17 +12,29 @@ import base64
 ROOT = Path(__file__).resolve().parents[2]
 SYSTEM = runpy.run_path(str(ROOT/'scripts/emu80/system-map.py'))['MEMORY_MAP']
 sys.path.insert(0, str(ROOT / 'scripts/images'))
-from executable import Image, convert, convert_batch, decode, encode
+from executable import HEADER_SIZE, Image, convert, convert_batch, decode, encode
 
 
 def host_checks():
     count = 0
+    round_trips = 0
+
+    def checked_container(image, kind):
+        nonlocal round_trips
+        packed = encode(image, kind)
+        decoded = decode(packed, kind)
+        assert len(packed) == len(image.data) + HEADER_SIZE
+        assert (decoded.data, decoded.load, decoded.entry, decoded.flags, decoded.mode) == (
+            image.data, image.load, image.entry, image.flags, image.mode)
+        assert encode(decoded, kind) == packed
+        round_trips += 1
+        return packed
+
     for size in (1, 239, 240, 241, 255, 256, 257, 4096):
         image = Image(bytes(i & 255 for i in range(size)), 0x1000, 0x1000 + size - 1)
         for kind in ('com', 'exe'):
-            packed = encode(image, kind)
-            assert len(packed) == size + 16 and decode(packed, kind) == image
-            for offset in (0, 6, 8, 10, 12, 14, 16, len(packed)-1):
+            packed = checked_container(image, kind)
+            for offset in (0, 6, 8, 10, 12, 14, 16, 26, HEADER_SIZE - 2, len(packed) - 1):
                 bad = bytearray(packed)
                 bad[offset] ^= 1
                 try:
@@ -34,6 +46,7 @@ def host_checks():
                 count += 1
         rks = Image(image.data, image.load, image.load)
         assert decode(encode(rks, 'rks'), 'rks') == rks
+        round_trips += 1
     with tempfile.TemporaryDirectory() as tmp:
         cpu = Path(tmp) / 'game.cpu'
         cpu.write_bytes(b'\xc9')
@@ -43,18 +56,18 @@ def host_checks():
         cpu.with_suffix('.i80').write_bytes(bytes(17))
         assert convert(cpu, 'exe')[1] == Image(bytes(17), 0x1000, 0x1010)
         driver = Image(b'\xc9', 0x9000, 0x9000, 1)
-        assert decode(encode(driver, 'com'), 'com') == driver
-        cpu.write_text('9000\n9000\n01\n', encoding='ascii')
+        checked_container(driver, 'com')
+        cpu.write_text('9000\n9000\nmxos2.mon\nFLAGS=01\n', encoding='ascii')
         cpu.with_suffix('.i80').write_bytes(driver.data)
         assert convert(cpu, 'com')[1] == driver
         bank = Image(b"\xc9", 0x100, 0x100, 2)
         for kind in ("com", "exe", "dll"):
-            assert decode(encode(bank, kind), kind) == bank
-        cpu.write_text("0100\n0100\n02\n", encoding="ascii")
+            checked_container(bank, kind)
+        cpu.write_text("0100\n0100\nmxos2.mon\nFLAGS=02\n", encoding="ascii")
         cpu.with_suffix(".i80").write_bytes(bank.data)
         assert convert(cpu, "dll")[1] == bank
         main = Image(b"\xc9", 0x100, 0x100, 4)
-        assert decode(encode(main, "exe"), "exe") == main
+        checked_container(main, "exe")
         for flags in (3, 5, 6, 7, 8, 0x80, 0xff):
             try:
                 encode(Image(b'\xc9', 0x9000, 0x9000, flags), 'com')
@@ -64,7 +77,7 @@ def host_checks():
                 raise AssertionError(('Unknown flags accepted', flags))
         bad = Path(tmp) / 'bad.exe'
         packed = bytearray(encode(Image(b'\xc9'), 'exe'))
-        packed[4] = 2
+        packed[4] = 3
         bad.write_bytes(packed)
         try:
             convert(bad, 'com')
@@ -91,7 +104,7 @@ def host_checks():
         result = subprocess.run([sys.executable,str(ROOT/'scripts/images/executable.py'),
                                  '--batch',str(batch)],capture_output=True,text=True)
         assert result.returncode != 0 and not result.stdout and 'bad.exe' in result.stderr
-    return {'corruptions_rejected': count, 'round_trips': 24, 'cpu_pair_and_bare': True}
+    return {'corruptions_rejected': count, 'round_trips': round_trips, 'cpu_pair_and_bare': True}
 
 
 def emulator_checks(runtime):

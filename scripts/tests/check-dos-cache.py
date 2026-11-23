@@ -5,6 +5,7 @@ import re
 import struct
 import subprocess
 from pathlib import Path
+from dos_state import initialize_dos_state
 
 ROOT = Path(__file__).resolve().parents[2]
 W = lambda n: struct.pack('<H', n)
@@ -35,7 +36,7 @@ def main():
     ld h,0
     ld l,e
     {'\n    '.join(['add hl,hl']*shift)}
-    ld de,0C000h
+    ld de,09B00h
     add hl,de
     ld a,(08103h)
     cp 2
@@ -76,6 +77,7 @@ failed:
         memory = bytearray(65536)
         kernel = (ROOT/'bin/banked/KERNEL.bin').read_bytes()
         memory[0x100:0x100+len(kernel)] = kernel
+        initialize_dos_state(memory, s)
         memory[0x8000:0x8000+(out/'mock.bin').stat().st_size] = (out/'mock.bin').read_bytes()
         memory[s['j_diskDriver']+1:s['j_diskDriver']+3] = W(0x8000)
         for name in ('sectorSize', 'blockSize'):
@@ -84,7 +86,7 @@ failed:
         memory[s['v_logicalCapacity']:s['v_logicalCapacity']+2] = W(128)
         memory[s['v_logicalShift']] = 0
         payload = bytes((i*13+(i//size)*7)&255 for i in range((8192//size+8)*size))
-        memory[0xC000:0xC000+len(payload)] = payload
+        memory[0x9B00:0x9B00+len(payload)] = payload
 
         def call(name, sector=0, dirty=0, error=False, slot=None):
             nonlocal memory
@@ -104,7 +106,7 @@ failed:
         call('configureSectorCache')
         assert memory[s['v_cacheCount']] == 64
         call('getSectorAddressInCache', 1)
-        assert memory[0x9000:0x9000+size] == payload[size:2*size]
+        assert memory[s['DOS_BANK_CACHE_ADDR']:s['DOS_BANK_CACHE_ADDR']+size] == payload[size:2*size]
         call('getSectorAddressInCache', 1)
         assert memory[0x8100] == 1
         call('cachePartialSector', 2, 1)
@@ -112,7 +114,7 @@ failed:
         assert int.from_bytes(memory[s['cacheData']:s['cacheData']+2], 'little') == 1
         memory[s['DOS_BANK_PARTIAL_ADDR']:s['DOS_BANK_PARTIAL_ADDR']+size] = b'X'*size
         call('cachePartialSector', 3, 1)
-        assert memory[0xC000+2*size:0xC000+3*size] == b'X'*size
+        assert memory[0x9B00+2*size:0x9B00+3*size] == b'X'*size
         memory[s['DOS_BANK_PARTIAL_ADDR']:s['DOS_BANK_PARTIAL_ADDR']+size] = b'Y'*size
         memory[0x8102] = 1
         call('cachePartialSector', 4, error=True)
@@ -120,7 +122,7 @@ failed:
         assert memory[partial:partial+2] == W(3) and memory[partial+6] == 1
         memory[0x8102] = 0
         call('saveSectorCache')
-        assert memory[0xC000+3*size:0xC000+4*size] == b'Y'*size
+        assert memory[0x9B00+3*size:0x9B00+4*size] == b'Y'*size
         assert memory[partial+6] == 0
         # Полный прямой обмен сначала сохраняет частичный dirty-сектор,
         # затем инвалидирует ровно его описатель (не соседнюю память).
@@ -140,7 +142,7 @@ failed:
         call('cachePartialSector', 4)
         assert memory[s['DOS_BANK_PARTIAL_ADDR']:s['DOS_BANK_PARTIAL_ADDR']+size] == payload[4*size:5*size]
         call('getSectorAddressInCache', 1)
-        assert memory[0x9000:0x9000+size] == payload[size:2*size]
+        assert memory[s['DOS_BANK_CACHE_ADDR']:s['DOS_BANK_CACHE_ADDR']+size] == payload[size:2*size]
         # Один диск может занять весь пул, а не только прежние 4 КиБ.
         call('resetAllSectorCaches')
         call('configureSectorCache')
@@ -163,7 +165,7 @@ failed:
 
         # Одинаковые LBA разных дисков не должны совпасть в поиске.
         select(1)
-        memory[0xC000:0xC000+size] = b'B'*size
+        memory[0x9B00:0x9B00+size] = b'B'*size
         call('getSectorAddressInCache', 0)
         pointer = int.from_bytes(memory[0x8106:0x8108],'little')
         assert memory[pointer:pointer+size] == b'B'*size
@@ -197,6 +199,9 @@ failed:
         memory[0x8102] = 0
         call('saveSectorCache')
         if size == 128:
+            # Both simulated drives share the mock backing store. Start the
+            # mixed-geometry case after invalidating the earlier A:/B: data.
+            call('resetAllSectorCaches')
             # Смесь секторов 128 и 512 байт: вытеснение охватывает целые головы.
             for iteration in range(120):
                 select(iteration%2, 512 if iteration%2 else 128)
@@ -204,7 +209,7 @@ failed:
                 pointer = int.from_bytes(memory[0x8106:0x8108],'little')
                 geometry = 512 if iteration%2 else 128
                 start = ((iteration//2)%24)*geometry
-                assert memory[pointer:pointer+geometry] == memory[0xC000+start:0xC000+start+geometry]
+                assert memory[pointer:pointer+geometry] == memory[0x9B00+start:0x9B00+start+geometry], (iteration,hex(pointer),geometry,start)
                 spans=[]
                 for index in range(64):
                     slot=s['cacheData']+index*8

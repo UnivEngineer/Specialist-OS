@@ -33,7 +33,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     h = runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
     h['Matrix'].__init__.__globals__.update(OUT=out, RUNTIME=ROOT/'.local/monitor2-001', PASSES=3)
-    x = h['Matrix']()
+    x = h['Matrix'](legacy=True)
     try:
         x.start('dos-cache',**prepare_fixture(h,out))
         x.console()

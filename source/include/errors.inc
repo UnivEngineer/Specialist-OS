@@ -1,10 +1,22 @@
-; Common DOS error strings from A:\ERRORS.DAT.
-; A=error code, HL=NUL-terminated local text, BC/DE preserved.
-; The result lasts until the next lookup. Uses the local file-io handle.
-; Codes outside the index or an unavailable database show a local hex code.
-DOS_ERROR_RECORDS = 14
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Получить текст ошибки из C:\DOS\ERRORS.DAT или сформировать её код.
+;
+; вход:
+;   a = DOS_ERR_* из A при отказе FILEHANDLE, из FH_ERROR или из GET_ERROR.
+;   Для FILEHANDLE сначала проверяют CF, для сохранённого FH_ERROR — ненулевой
+;   код. Чтение с FH_EOF не является ошибкой. Используется локальный flHandle;
+;   пользовательский FILE_HANDLE и буфер обмена при этом не нужны.
+;
+; выход:
+;   hl = адрес локальной строки с нулём, действительной до следующего вызова.
+;   Если справочник недоступен или код вне диапазона, строка содержит
+;   шестнадцатеричный код. BC и DE сохранены, AF не определён.
+;----------------------------------------------------------------------------
+DOS_ERROR_RECORDS     = DOS_ERR_WRITE_PROTECTED + 1
 DOS_ERROR_INDEX_BYTES = DOS_ERROR_RECORDS*3
-DOS_ERROR_TEXT_MAX = 31
+DOS_ERROR_TEXT_MAX    = 31
 dosErrorText:
     push bc
     push de
@@ -113,9 +125,9 @@ dosTextReadAt:
     scf
     ret
 
-dosTextPath: DB 'A:',05Ch,'ERRORS.DAT',0
-dosTextUnavailable: DB 'DOS error '
-dosTextHex: DB '00h',0
-dosTextCode: DB 0
-dosTextDrive: DB 0
-dosTextBuffer: DS DOS_ERROR_TEXT_MAX+1,0
+dosTextPath:            DB 'C:',05Ch,'DOS',05Ch,'ERRORS.DAT',0
+dosTextUnavailable:     DB 'DOS error '
+dosTextHex:             DB '00h',0
+dosTextCode:            DB 0
+dosTextDrive:           DB 0
+dosTextBuffer:          DS DOS_ERROR_TEXT_MAX+1,0

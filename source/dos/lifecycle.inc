@@ -46,6 +46,20 @@ appOverflow:
     ld a,MEM_ERROR_STACK
     scf
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Дописать слово в кадр сохранения состояния приложения.
+;
+; вход:
+;   hl = значение, de = адрес двух свободных байтов.
+;
+; выход:
+;   Слово записано от младшего байта к старшему, de продвинут на два, a = h. bc, hl и
+;   флаги сохранены.
+;----------------------------------------------------------------------------
+
 appSaveWord:
     ld a,l
     ld (de),a
@@ -351,8 +365,6 @@ residentShellStatusReady:
     pop af
     call kdCapture
     jp kdFinish
-residentShellKey: DW NC_BANK_KEY
-residentShellHandle: DW 0
 residentFind:
     xor a
 residentScanStart:
@@ -510,19 +522,6 @@ residentRetainRecord:
     or a
     pop hl
     jp z,kdBad             ; MAIN-резидент не защищён от следующей загрузки.
-    cp DOS_IO_PAGE
-    jp nz,residentRetainAllowed
-    push hl
-    ld de,12             ; Actual end, not the entry address.
-    add hl,de
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ld hl,DOS_BANK_DRIVER_END
-    call cmp_hl_de
-    pop hl
-    jp c,residentDenied ; Borrowed BAT memory cannot survive Reset.
-residentRetainAllowed:
     call residentKey
     push hl
     ld hl,(kdRegs+2)
@@ -537,13 +536,8 @@ residentDenied:
     ld a,MEM_ERROR_OWNER
     jp mdError
 
-appOwner: DB 0
-appDepth: DB 0
-appImage: DW 0
 appFrames = DOS_APP_FRAMES
     ASSERT appFrames+APP_MAX_DEPTH*9 <= DOS_CACHE_BOOT_ADDR
-residentKeys: DS MODULE_MAX*2,0
-residentIndex: DB 0
 
  ; Z=текущий модуль и его предки не резиденты. BC/DE/HL сохранены.
 residentActorCheck:

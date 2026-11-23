@@ -23,5 +23,5 @@ ncHelpColor:
     ret
     ENDIF
     DB 0 ; This client redraws its background.
-ncHelpPath: DB 'A:',05Ch,'NC.HLP',0
-ncHelpError: DB 'Cannot read A: NC.HLP',0
+ncHelpPath:     DB 'C:',05Ch,'DOS',05Ch,'NC.HLP',0
+ncHelpError:    DB 'Cannot read C:/DOS/NC.HLP',0

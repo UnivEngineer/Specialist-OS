@@ -1,23 +1,25 @@
 """Платформенные контейнеры StarWars из неизменяемых исторических файлов.
 
-Без аргументов обновляет только копии в корне StarWars; --check ничего не пишет.
+Без аргументов обновляет только контейнеры в repacked/; --check ничего не пишет.
 Код игры и адрес загрузки не меняются. Неизвестные оригиналы отклоняются.
 """
 import argparse
 import hashlib
 from pathlib import Path
+import runpy
 
 ROOT = Path(__file__).resolve().parents[2]
-GAMES = ROOT / 'assets/games/StarWars'
+GAMES = ROOT / 'assets/games/families/starwars'
+MX_PAYLOAD = GAMES / 'originals/StarWars2-mx.i80'
 SOURCES = {
     'StarWars-std-C800.cpu': 'a8ac2914135e32f47aea3c2408565974dceac8d51a3c615515c93dc911d21bab',
     'StarWars-std.rks': '45f28d909c77d0bae25cdd69bf83c8b96e2f9bb90b0bf87becfdc24a8cd57177',
-    'StarWars2-mx.cpu': 'de9287ea25309a25bcc796246d55c1938729823ed76f4f977b9a742b78af2796',
     'StarWars2-mx.rks': '642326f85a1b6009a80a08d47b7c62a7fc0042e6c2f6c8f9076704ce4bf43b15',
     'StarWars2-ramfos.cpu': 'b7dd022fc87f3280a7f54ea1a4d0fc87916d4f2d5cb91a80f8afa6c518f4cd5c',
     'StarWars2-std-tape.rks.bin': '51d6a9babdec423f8489db7fb0cb2a959ef0b273f42bc0824c2d6a3dcc3bbb8f',
     'StarWars2-std-germanovitsh.rks': 'b119f11eb438dcf7b15dfd96531b7ec95dcc5ab736287b92d0d0d19ad9992708',
 }
+MX_SHA256 = 'de9287ea25309a25bcc796246d55c1938729823ed76f4f977b9a742b78af2796'
 
 
 def checksum(data):
@@ -40,35 +42,46 @@ def main():
     args = parser.parse_args()
     original = {}
     for name, expected in SOURCES.items():
-        data = (GAMES / 'legacy' / name).read_bytes()
+        source_dir = 'repaired' if name == 'StarWars2-mx.rks' else 'originals'
+        data = (GAMES / source_dir / name).read_bytes()
         if hashlib.sha256(data).hexdigest() != expected:
             raise ValueError(f'Неизвестный оригинал: {name}')
         original[name] = data
     tape = original['StarWars2-std-tape.rks.bin']
     if tape[:3] != b'\xd9\xd9\xd9' or tape[778:782] != bytes.fromhex('00 00 ff 23'):
         raise ValueError('Неизвестный ленточный заголовок')
+    mx = MX_PAYLOAD.read_bytes()
+    if hashlib.sha256(mx).hexdigest() != MX_SHA256:
+        raise ValueError(f'Исторический MX-образ отличается: {MX_PAYLOAD}')
     payloads = {
         'StarWars-std-C800.rks': original['StarWars-std-C800.cpu'],
         'StarWars-std.rks': original['StarWars-std.rks'][4:-2],
-        'StarWars2-mx.cpu': original['StarWars2-mx.cpu'],
         'StarWars2-ramfos.cpu': original['StarWars2-ramfos.cpu'],
         'StarWars2-std.rks': tape[782:782 + 9216],
         'StarWars2-std-germanovitsh.rks': original['StarWars2-std-germanovitsh.rks'][4:-2],
     }
-    if original['StarWars2-mx.rks'] != rks(payloads['StarWars2-mx.cpu']):
+    if original['StarWars2-mx.rks'] != rks(mx):
         raise ValueError('Исторические EXE/RKS MX не соответствуют друг другу')
-    if len({hashlib.sha256(data).digest() for data in payloads.values()}) != 6:
+    if len({hashlib.sha256(data).digest() for data in (*payloads.values(), mx)}) != 6:
         raise ValueError('Ожидались шесть различных нагрузок')
-    prepared = {name: rks(data) if name.endswith('.rks') else data
-                for name, data in payloads.items()}
-    for name, data in prepared.items():
-        target = GAMES / name
+    container = runpy.run_path(str(ROOT / 'scripts/images/executable.py'))
+    for name, data in payloads.items():
+        if name in ('StarWars-std.rks', 'StarWars2-std-germanovitsh.rks'):
+            if rks(data) != original[name]:
+                raise ValueError(f'Исторический RKS отличается: {name}')
+            continue
+        target = GAMES / 'repacked' / name
+        if name == 'StarWars2-ramfos.cpu':
+            target = target.with_suffix('.exe')
+            data = container['encode'](container['Image'](data, mode=4), 'exe')
+        else:
+            data = rks(data)
         if args.check:
             if not target.exists() or target.read_bytes() != data:
                 raise ValueError(f'Платформенная копия отличается: {name}')
         else:
             target.write_bytes(data)
-    print('Проверены 7 исторических файлов и 6 платформенных копий; нагрузки сохранены.')
+    print('Проверены 6 нагрузок StarWars и их платформенные контейнеры.')
 
 
 if __name__ == '__main__':

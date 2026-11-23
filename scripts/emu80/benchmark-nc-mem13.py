@@ -135,7 +135,7 @@ def main():
             if bank and args.phase == 'after':
                 row['cli_return_ticks'] = campaign.cli_return()
                 cli = profile['symbols']('CLI')
-                campaign.type('A:CLI')
+                campaign.type('C:/DOS/CLI')
                 m.call('bp_clear')
                 m.call('bp_set', addr=cli['cliPrompt'], type='exec')
                 campaign.tap('enter')

@@ -12,6 +12,6 @@ def install(memory, symbols):
     for i in range(data[5]):
         address,size,offset=struct.unpack_from('<HHH',data,6+6*i)
         memory[address:address+size]=data[offset:offset+size]
-    for name,target in [('MEM_NATIVE_CALL','sysCall'),('MEM_LOCAL_A','bios_blockIO'),('MEM_LOCAL_CHECKED','localBlockChecked'),('MEM_NEAR_COPY','bios_memcpy_bc_hl')]:
+    for name,target in [('MEM_NATIVE_CALL','sysCall'),('MEM_LOCAL_SYSTEM','bios_blockIO'),('MEM_LOCAL_CHECKED','localBlockChecked'),('MEM_NEAR_COPY','bios_memcpy_bc_hl')]:
         address=symbols[name]
         memory[address:address+2]=symbols[target].to_bytes(2,'little')

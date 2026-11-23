@@ -27,7 +27,6 @@ memoryInitLoop:
     jp memoryResidentReset
 
 ; One machine-wide lease. Store owner+1 so the anonymous MAIN owner is valid.
-timerOwner: DB 0
 timerReleaseOwner:       ; C = allocation owner, preserved
     ld a,(timerOwner)
     dec a
@@ -623,7 +622,11 @@ memoryBlankNext:
 memoryApplyLimit:
     ld a,(memoryRequestedPages+1)
     ld (memoryRamPages),a
-    ld (DOS_DRIVER_REGISTRY+DRIVER_RECORD_SIZE+1),a
+    ld b,a
+    ld a,(kernelRamDrive)
+    call registryRecord
+    inc hl
+    ld (hl),b
     xor a
     ret
 ; После перезагрузки DOS готовый B: мог уже иметь запрошенный размер.
@@ -631,7 +634,7 @@ memoryApplyLimit:
 memoryExistingVolume:
     ld a,(v_drive)
     push af
-    ld a,1
+    ld a,(kernelRamDrive)
     call fileChangeDrive
     jp c,memoryVolumeResult
     ld hl,(v_diskInfo.sectorSize)
@@ -655,27 +658,6 @@ memoryVolumeResult:
     pop af
     jp c,memoryDenied
     jp memoryApplyLimit
-memoryRamOwner: DB 0
-memoryRamFresh: DB 0        ; Bootstrap: 1 — хвост первого банка B: утрачен.
-memoryRamPages: DB 0
-memoryRequestedPages: DW 0
-memoryMainOwner: DB 0
-memoryMainStart: DW 0
-memoryMainEnd: DW 0
-memoryPlacement: DB 0
-memoryBank: DB 0
-memorySize: DW 0
-memoryCandidate: DW 0
-memoryLimit: DW 0
-memoryNewEnd: DW 0
-memoryBlockEnd: DW 0
-memorySlotPtr: DW 0
-memoryOldSlot: DW 0
-memoryOldBank: DB 0
-memoryOldAddress: DW 0
-memoryOldSize: DW 0
-memoryResize: DW 0
-memoryCopy: DS 8,0
 
     INCLUDE "memory-extra.inc"
     INCLUDE "memory-resident.inc"

@@ -139,11 +139,11 @@ nextColumn:
 restoreSP:
     ld sp,0
     ret
-source: DW 0
-destination: DW 0
-height: DB 0
-rows: DB 0
-width: DB 0
-direction: DB 0
-columnStep: DB 1
+source:         DW 0
+destination:    DW 0
+height:         DB 0
+rows:           DB 0
+width:          DB 0
+direction:      DB 0
+columnStep:     DB 1
     ENDMODULE

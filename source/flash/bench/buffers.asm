@@ -104,9 +104,9 @@ validateByte:
     dec b
     jp nz,validateByte
     jp WORKER_VALIDATE_RESUME
-userBuffer: DW 0
-sector: DW 0
-operation: DB 0
+userBuffer:     DW 0
+sector:         DW 0
+operation:      DB 0
 copyToDos:
     DB 0
     DW 0

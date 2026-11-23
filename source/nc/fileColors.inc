@@ -1,7 +1,7 @@
 ; NC-style palette. Yellow is reserved for future marked-file selections.
-COLOR_DIRECTORY = 0F1h
-COLOR_EXECUTABLE = 0A1h
-COLOR_ARCHIVE = 0D1h
+COLOR_DIRECTORY   = 0F1h
+COLOR_EXECUTABLE  = 0A1h
+COLOR_ARCHIVE     = 0D1h
 COLOR_SYSTEM_FILE = 071h
 
 ; HL=FILE_INFO -> A=normal palette. BC/DE/HL preserved. No DOS queries.

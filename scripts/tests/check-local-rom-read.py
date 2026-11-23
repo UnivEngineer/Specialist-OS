@@ -1,6 +1,7 @@
 """Локальный ROM READ MEM: границы банков, регистры и отсутствие MAIN-вызова."""
 import re,struct,subprocess
 from pathlib import Path
+from dos_state import initialize_dos_state
 R=Path(__file__).resolve().parents[2];O=R/'docs/diskbench/rom-local-2026-11-10/cpu';O.mkdir(parents=True,exist_ok=True)
 W=lambda n:struct.pack('<H',n)
 def syms(name):
@@ -57,6 +58,7 @@ print('LOCAL ROM READ PASS:',count,'cases; ROM banks, unaligned buffer, preserve
 
 # Публичные/внутренние DOS-обёртки проверяют границы до доверенного MEM.
 k=syms('KERNEL');base=bytearray(65536);code=(R/'bin/DOS.sys').read_bytes();base[0x100:0x100+len(code)]=code
+initialize_dos_state(base, k)
 # Обмен подменён только на успешный обработчик с отметкой вызова.
 hook=b'\x3e\x01\x32'+W(0x8321)+b'\xaf\xc9';base[0x8000:0x8000+len(hook)]=hook
 base[k['MEM_IO_SYSTEM']:k['MEM_IO_SYSTEM']+3]=b'\xc3'+W(0x8000)

@@ -744,13 +744,13 @@ font4TransposeRow:
     ld a,1
     ld (packedOverlay),a
     jp font4RestorePackedOverlay
-font4Format: DB 0
-font4Remaining: DB 0
-font4SingleCode: DB 0
-font4Parity: DB 0
-font4Pairs: DB 0
-font4Tail: DB 0
-font4EndX: DB 0
+font4Format:        DB 0
+font4Remaining:     DB 0
+font4SingleCode:    DB 0
+font4Parity:        DB 0
+font4Pairs:         DB 0
+font4Tail:          DB 0
+font4EndX:          DB 0
 ; После резервного FONTKOI 4072 восстанавливаем фазу 4 перед следующим тестом.
 font4RestorePackedOverlay:
     ld a,(packedOverlay)

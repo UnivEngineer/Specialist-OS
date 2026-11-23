@@ -396,11 +396,11 @@ fontPseudoFullByte:
     dec c
     ld (hl),a
     ret
-fontPseudoStart: DW 0
-fontPseudoCount: DB 0
-fontPseudoVideo: DW 0
-fontPseudoPhase: DB 0
-fontPseudoLeft: DB 0
-fontPseudoMask: DB 0
-fontPseudoCoverage: DB 0
+fontPseudoStart:        DW 0
+fontPseudoCount:        DB 0
+fontPseudoVideo:        DW 0
+fontPseudoPhase:        DB 0
+fontPseudoLeft:         DB 0
+fontPseudoMask:         DB 0
+fontPseudoCoverage:     DB 0
     ENDM

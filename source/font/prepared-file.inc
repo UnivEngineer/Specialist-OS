@@ -51,11 +51,11 @@ generateResources:
     ld hl,initContext
     ld a,1
     jp FONT_INIT_ADDR
-workspaceEnd: DW 0
-argTail: DW 0
-useFile: DB 0
-preparedError: DB 0
-preparedPath: DS MAX_PATH,0
-preExtension: DB 'pre',0
-preparedIO: DW preparedPath,0,0,0
+workspaceEnd:   DW 0
+argTail:        DW 0
+useFile:        DB 0
+preparedError:  DB 0
+preparedPath:   DS MAX_PATH,0
+preExtension:   DB 'pre',0
+preparedIO:     DW preparedPath,0,0,0
     DS FILE_DESCRIPTOR,0

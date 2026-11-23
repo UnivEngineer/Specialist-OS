@@ -1,14 +1,14 @@
 ; Isolated NC index-sort benchmark. No DOS, drawing or font preparation here.
-FILE_INDEX_A = 06000h
-FILE_INDEX_B = 06100h
-NC_SORT_RADIX = 1
-NC_SORT_KEYS = 06300h
-NC_SORT_RANKS = NC_SORT_KEYS + 11 * 256
-NC_SORT_COUNTS = 06F00h
+FILE_INDEX_A    = 06000h
+FILE_INDEX_B    = 06100h
+NC_SORT_RADIX   = 1
+NC_SORT_KEYS    = 06300h
+NC_SORT_RANKS   = NC_SORT_KEYS + 11 * 256
+NC_SORT_COUNTS  = 06F00h
 NC_SORT_SCRATCH = 07000h
-benchScratch = 06100h
-benchCounts = 06200h
-benchRaw = 04000h
+benchScratch    = 06100h
+benchCounts     = 06200h
+benchRaw        = 04000h
 benchNormalized = 05000h
 
 benchRun:
@@ -513,25 +513,25 @@ readBytePanel:
     ret
 
 state:
-.activePanel: DB 0
-.panelA_filesCnt: DB 0
-.panelA_sort: DB 2
-benchNameOrder: DB 10,9,8,7,6,5,4,3,2,1,0,12,0FFh
-benchExtOrder: DB 7,6,5,4,3,2,1,0,10,9,8,12,0FFh
-benchOrder: DW 0
-benchOffset: DB 0
-benchStart: DW 0
-benchElapsed: DW 0
-benchRank: DB 0
-benchWidth: DB 0
-benchLeft: DB 0
-benchMid: DB 0
-benchEnd: DB 0
-benchI: DB 0
-benchJ: DB 0
-benchK: DB 0
-benchPivot: DB 0
-benchDivisorHigh: DB 1
+.activePanel:       DB 0
+.panelA_filesCnt:   DB 0
+.panelA_sort:       DB 2
+benchNameOrder:     DB 10,9,8,7,6,5,4,3,2,1,0,12,0FFh
+benchExtOrder:      DB 7,6,5,4,3,2,1,0,10,9,8,12,0FFh
+benchOrder:         DW 0
+benchOffset:        DB 0
+benchStart:         DW 0
+benchElapsed:       DW 0
+benchRank:          DB 0
+benchWidth:         DB 0
+benchLeft:          DB 0
+benchMid:           DB 0
+benchEnd:           DB 0
+benchI:             DB 0
+benchJ:             DB 0
+benchK:             DB 0
+benchPivot:         DB 0
+benchDivisorHigh:   DB 1
 
     INCLUDE "@TIMING@"
     INCLUDE "@CORE@"

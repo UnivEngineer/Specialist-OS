@@ -1,5 +1,6 @@
 """8080: reclaim MAIN module code/BSS, preserve disjoint CLI and EXEC owner."""
 from pathlib import Path
+from dos_state import initialize_dos_state
 import re
 import subprocess
 
@@ -16,6 +17,7 @@ def main():
     seed = bytearray(65536)
     binary = (ROOT / 'bin/DOS.sys').read_bytes()
     seed[0x100:0x100+len(binary)] = binary
+    initialize_dos_state(seed, s)
     seed[s['klReclaim']:s['klReclaim']+2] = b'\xaf\xc9'
     seed[s['memoryPublishTop']] = 0xc9 # Ceiling itself is exercised below.
     seed[s['MEM_ALLOC_TABLE']:s['MEM_ALLOC_TABLE']+32*6] = bytes([255])*192

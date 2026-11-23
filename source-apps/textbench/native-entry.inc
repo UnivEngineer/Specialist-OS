@@ -97,9 +97,9 @@ nativeUsage:
     ld hl,nativeUsageText
     MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
     ret
-nativeBank: DB 0
-nativeControl: DS 14,0
-controlCopy: DB 0
+nativeBank:     DB 0
+nativeControl:  DS 14,0
+controlCopy:    DB 0
     DW 0
     DB 0
     DW nativeControl,14

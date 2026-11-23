@@ -68,7 +68,7 @@ def listing(pattern,flags=0,interleave=False):
    out.append(record[32:].split(b'\0')[0].decode('ascii'))
   if q[-1]:break
   if interleave:
-   cli('DIR A:/DRIVERS/*.COM')
+   cli('DIR C:/DRIVERS/*.COM')
  else:raise AssertionError('cursor loop')
  request(2,handle=handle)
  return out
@@ -95,7 +95,7 @@ try:
   # Pin protection, ownership/handle checks and filesystem calls between batches.
   q=request(0,pattern='B:/ROOT/*',flags=1);handle=q[0]
   request(1,handle=handle+1,error=True)
-  cli('DIR A:/DRIVERS/*.COM',error=True) # one active cursor, no state corruption
+  cli('DIR C:/DRIVERS/*.COM',error=True) # one active cursor, no state corruption
   request(1,handle=handle)
   request(2,handle=handle)
   request(1,handle=handle,error=True)

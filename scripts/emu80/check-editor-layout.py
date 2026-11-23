@@ -100,7 +100,7 @@ try:
  call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
  m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['bios_reboot'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
  for font,width in [('Rotate',6),('Fast8',8)]:
-  command('A:FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Fast','Fast8':'8x8/Rotate'}[font],0,font_program=True)
+  command('C:/DOS/FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Packed','Fast8':'8x8/Rotate'}[font],0,font_program=True)
   m.stop_at(n['mainLoop'])
   for label in ['error','usage']:m.call('bp_set',addr=fs[label],type='exec')
   for _ in range(90):
@@ -113,7 +113,7 @@ try:
   else:raise AssertionError(('FONT did not return to NC',font,state))
   ready()
   assert m.read(s['FONT_ENGINE_HEADER']+5,1)==bytes([width])
-  command('A:EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop'])
+  command('C:/DOS/EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop'])
   expected=payload
   assert doc()==expected
   m.screenshot(O/(font+'-loaded.png'))
@@ -274,7 +274,7 @@ try:
    action('save',s['lineEditLoop']);edit('enter')
    assert (val('v_gapLo'),val('v_gapHi'))==gap
    m.stop_at(n['mainLoop']);tap('clear');m.until(n['mainLoop'],90,page=0);ready()
-   command('A:EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop']);assert doc()==modified
+   command('C:/DOS/EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop']);assert doc()==modified
    edit('right');edit('right');edit('right');assert visual()==16 and val('v_column')==3
    edit('down');assert visual()==6 and val('v_column')==6
    edit('down');assert visual()==9 and val('v_column')==2
@@ -324,10 +324,10 @@ try:
    edit('clear',s['editorSaveWait']);edit('enter',s['lineEditLoop'])
    replace_input('B:/EDITTEST.TXT')
    m.stop_at(n['mainLoop']);tap('enter');m.until(n['mainLoop'],90,page=0);ready()
-   command('A:EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop']);assert doc()==expected
+   command('C:/DOS/EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop']);assert doc()==expected
    edit('x');edit('clear',s['editorSaveWait'])
    m.stop_at(n['mainLoop']);tap('d');m.until(n['mainLoop'],90,page=0);ready()
-   command('A:EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop']);assert doc()==expected
+   command('C:/DOS/EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop']);assert doc()==expected
    m.stop_at(n['mainLoop']);tap('clear');m.until(n['mainLoop'],90,page=0);ready()
    print('PASS',font,'editing keys, INS default, CTRL navigation, save/cancel/discard/error',flush=True)
    continue
@@ -382,7 +382,7 @@ try:
   print('PASS',font,'editing, undo, Esc menu and save',flush=True)
   # Native Specialist STR (1Fh) is the MCP 'clear' key.
   m.stop_at(n['mainLoop']);tap('clear');m.until(n['mainLoop'],90,page=0);ready()
-  command('A:EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop'])
+  command('C:/DOS/EDIT_MN B:/EDITTEST.TXT',s['editorStatusLoop'])
   assert doc()==expected
   m.stop_at(n['mainLoop']);tap('clear');m.until(n['mainLoop'],90,page=0);ready()
   # Restore fixture for next font.

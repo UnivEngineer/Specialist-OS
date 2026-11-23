@@ -1,29 +1,29 @@
 ; EXE.COM: conversion between RAW, RKS and MXOS executable containers.
     INCLUDE "../include/mxos.inc"
 
-EXE_LOAD_ADDR = 0100h
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
-IMAGE_API = 2
+EXE_LOAD_ADDR       = 0100h
+IMAGE_FLAGS         = IMAGE_FLAG_MAIN
+IMAGE_API           = 2
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
 
 ; Prefix fields shared by v1 and v2.
-HDR_VERSION = 4
-HDR_FLAGS = 5
-HDR_LOAD = 6
-HDR_ENTRY = 8
-HDR_SIZE = 10
-HDR_SUM = 12
-HDR_RESERVED = IMAGE_OPTIONS+1
-V1_SIZE = 16
-RKS_HEADER_SIZE = 4
+HDR_VERSION      = 4
+HDR_FLAGS        = 5
+HDR_LOAD         = 6
+HDR_ENTRY        = 8
+HDR_SIZE         = 10
+HDR_SUM          = 12
+HDR_RESERVED     = IMAGE_OPTIONS+1
+V1_SIZE          = 16
+RKS_HEADER_SIZE  = 4
 RKS_TRAILER_SIZE = 2
-BLOCK_SIZE = 1024
-ARG_LIMIT = CMD_LINE_SIZE-2
-OPT_LOAD = 1
-OPT_ENTRY = 2
-OPT_BEGIN = 4
-OPT_END = 8
-OPT_POLICY = 16
+BLOCK_SIZE       = 1024
+ARG_LIMIT        = CMD_LINE_SIZE-2
+OPT_LOAD         = 1
+OPT_ENTRY        = 2
+OPT_BEGIN        = 4
+OPT_END          = 8
+OPT_POLICY       = 16
 
     MACRO GET_DE address
         push hl
@@ -33,6 +33,20 @@ OPT_POLICY = 16
     ENDM
 
     ORG EXE_LOAD_ADDR
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запустить конвертер в MAIN с временной сменой кодировки консоли.
+;
+; вход:
+;   de указывает на строку параметров с нулём в конце. DOS передал управление программе
+;   через обычную точку входа.
+;
+; выход:
+;   После convert прежняя кодировка восстанавливается через bios_setFontEncoding. Вход
+;   использует стек вызывающего.
+;----------------------------------------------------------------------------
 
 exeStart:
     ld hl,bssStart
@@ -47,7 +61,20 @@ exeRestoreEncoding:
     pop af
     jp bios_setFontEncoding
 
-; DE = argument string. HL = exit status, other registers and flags clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Преобразовать файл RAW, RKS или исполняемый контейнер по параметрам EXE.COM.
+;
+; вход:
+;   de = адрес строки параметров с завершающим нулём. Доступны рабочая область
+;   программы и службы файлового ввода-вывода DOS.
+;
+; выход:
+;   hl = статус завершения. Выбранная операция создаёт или обновляет целевой файл;
+;   диагностические сообщения выводятся на консоль. af, bc и de изменяются.
+;----------------------------------------------------------------------------
+
 convert:
     ld hl,work.command
     ld b,ARG_LIMIT
@@ -283,8 +310,20 @@ declined:
     ld hl,1
     ret
 
-; Tokenize a private copy on the first pass. Later passes skip its NULs.
-; Z = end, otherwise HL = ASCIIZ token. AF/BC/DE clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Выделить очередной аргумент в рабочей копии командной строки.
+;
+; вход:
+;   work.argCursor = текущая позиция, work.argEnd = адрес завершающего нуля. Буфер
+;   доступен для записи.
+;
+; выход:
+;   z = 1 по достижении конца. При nz регистр hl указывает на аргумент с нулём в конце.
+;   Разделительный пробел заменяется нулём, work.argCursor продвигается.
+;----------------------------------------------------------------------------
+
 nextArg:
     ld hl,(work.argCursor)
     GET_DE work.argEnd
@@ -317,8 +356,21 @@ nextArg:
     or a
     ret
 
-; Import MX v1/v2 or RKS metadata. RAW keeps the initial defaults.
-; CF = invalid format or I/O error. AF/BC/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Распознать контейнер MX v1/v2 или RKS и выделить его полезную нагрузку.
+;
+; вход:
+;   work.inputHandle открыт для чтения, work.bodySize = размер файла. Ненулевой
+;   work.rawInput задаёт принудительный RAW.
+;
+; выход:
+;   cf = 0 при успехе. Для контейнера заполнены смещение и длина нагрузки и данные
+;   заголовка. Для RAW остаются исходные значения. cf = 1 при ошибке формата или
+;   чтения. af, bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 importHeader:
     ld a,(work.rawInput)
     or a
@@ -456,10 +508,23 @@ importHeader:
     or a
     ret
 
-; Scan before any target write. BIOS returns the last-byte pointer and
-; the carry from adding it to the low sum. Include that byte in the high
-; sum for every chunk, then remove its contribution once for the whole file.
-; CF = read/checksum error. AF/BC/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вычислить контрольную сумму нагрузки до записи выходного файла.
+; Для склейки блоков учитывается последний байт каждого блока в старшей сумме.
+; Вклад последнего байта всей нагрузки вычитается один раз в конце.
+;
+; вход:
+;   work.inputHandle открыт, work.bodyOffset и work.bodySize задают нагрузку. Перед
+;   первым блоком work.bodySum = 0.
+;
+; выход:
+;   work.bodySum содержит сумму всей нагрузки при cf = 0. Для контейнера сумма сверена
+;   с work.expectedSum. cf = 1 при пустой нагрузке, ошибке чтения или несовпадении
+;   суммы. af, bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 scanBody:
     ld hl,(work.bodySize)
     ld a,h
@@ -507,8 +572,21 @@ invalid:
     scf
     ret
 
-; Update remaining and read a nonempty chunk. BC = count, CF = failure.
-; AF/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать очередной блок нагрузки в work.buffer.
+;
+; вход:
+;   work.inputHandle установлен на первый байт блока, work.remaining = ненулевое число
+;   оставшихся байтов.
+;
+; выход:
+;   bc = запрошенное число байтов, не более BLOCK_SIZE. work.remaining уменьшен на bc
+;   ещё до обращения к DOS. cf = 1 при ошибке или коротком чтении, иначе cf = 0. af, de
+;   и hl рабочие.
+;----------------------------------------------------------------------------
+
 readBlock:
     ld hl,(work.remaining)
     ld b,h
@@ -528,7 +606,20 @@ readBlock:
     pop bc
     ret
 
-; HL = option token following '-'. CF = invalid. All registers clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Разобрать один ключ конвертера и обновить параметры преобразования.
+;
+; вход:
+;   hl указывает на имя ключа без начального дефиса в рабочей строке с завершающим
+;   нулём.
+;
+; выход:
+;   cf = 0, если ключ принят. cf = 1 при неизвестном имени или недопустимом значении.
+;   af, bc, de и hl используются при разборе.
+;----------------------------------------------------------------------------
+
 applyOption:
     ld de,overwriteName
     call sameText
@@ -632,7 +723,19 @@ applyOption:
     ld (work.overrides),a
     ret
 
-; A = offset within the header, HL = field address. A/flags clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вычислить адрес поля собираемого заголовка MX.
+;
+; вход:
+;   a = байтовое смещение относительно work.header.
+;
+; выход:
+;   hl = адрес поля с учётом переноса из младшего байта. a = старший байт адреса. bc и
+;   de сохранены.
+;----------------------------------------------------------------------------
+
 headerField:
     add a,work.header & 0FFh
     ld l,a
@@ -641,8 +744,20 @@ headerField:
     ld h,a
     ret
 
-; Fill metadata defaults, then validate the full image range before writing.
-; CF = invalid metadata. AF/BC/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подставить умолчания и проверить размещение исполняемого образа.
+;
+; вход:
+;   work.header, work.bodySize, work.overrides и сведения об исходном формате заполнены
+;   предыдущими шагами.
+;
+; выход:
+;   cf = 0 при допустимой комбинации адресов и метаданных, заголовок подготовлен к
+;   записи. При cf = 1 преобразование следует прекратить. af, bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 finishHeader:
     ld a,(work.overrides)
     and OPT_LOAD|OPT_ENTRY
@@ -760,8 +875,20 @@ finishHeader:
     jp nz,invalid
     ret
 
-; Write the RKS load/end pair or the complete MX v2 header.
-; CF = write error. AF/BC/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Записать заголовок RKS или MX v2 перед полезной нагрузкой.
+;
+; вход:
+;   work.outputHandle открыт для записи, work.header подготовлен. work.rksOutput
+;   выбирает RKS, ноль выбирает MX. Длина и сумма нагрузки вычислены.
+;
+; выход:
+;   При cf = 0 записан весь заголовок, позиция файла указывает на начало нагрузки. cf =
+;   1 при ошибке DOS или короткой записи. af, bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 writeHeader:
     ld a,(work.rksOutput)
     or a
@@ -796,8 +923,20 @@ writeHeader:
     ld bc,IMAGE_HEADER_SIZE
     jp writeOutput
 
-; HL = handle, DE = path, A = mode. FILEHANDLE returns status in A/CF.
-; BC/DE/HL may be clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Инициализировать FILE_HANDLE и открыть путь через DOS.
+;
+; вход:
+;   hl = адрес доступной для записи структуры FILE_HANDLE, de = имя с завершающим
+;   нулём, a = режим FILE_MODE_*.
+;
+; выход:
+;   cf и a = результат FILE_OP_OPEN_PATH. При успехе структуру можно передавать
+;   следующим файловым операциям. bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 openPath:
     push hl
     push af
@@ -836,7 +975,19 @@ openPath:
     ld a,FILE_OP_OPEN_PATH
     jp fileHandle
 
-; HL = absolute offset in input. FILEHANDLE returns A/CF, BC/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Установить абсолютную позицию во входном файле.
+;
+; вход:
+;   hl = смещение в байтах от начала файла, work.inputHandle открыт.
+;
+; выход:
+;   Старшее слово смещения обнулено. cf и a = результат FILE_OP_SEEK, bc, de и hl
+;   рабочие.
+;----------------------------------------------------------------------------
+
 seekInput:
     ld (work.inputHandle+FH_SEEK),hl
     ld hl,0
@@ -847,26 +998,120 @@ seekInput:
     ld a,FILE_OP_SEEK
     jp fileHandle
 
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Закрыть входной файл конвертера.
+;
+; вход:
+;   work.inputHandle содержит открытый дескриптор.
+;
+; выход:
+;   cf и a = результат FILE_OP_CLOSE. bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 closeInput:
     ld hl,work.inputHandle
     jp closeHandle
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Закрыть выходной файл и завершить отложенную запись DOS.
+;
+; вход:
+;   work.outputHandle содержит открытый дескриптор.
+;
+; выход:
+;   cf и a = результат FILE_OP_CLOSE, включая возможную ошибку сброса. bc, de и hl
+;   рабочие.
+;----------------------------------------------------------------------------
+
 closeOutput:
     ld hl,work.outputHandle
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Закрыть выбранный файловый дескриптор через DOS.
+;
+; вход:
+;   hl = адрес открытого FILE_HANDLE.
+;
+; выход:
+;   cf и a = результат FILE_OP_CLOSE. bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 closeHandle:
     ld a,FILE_OP_CLOSE
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вызвать службу DOS для файлового дескриптора конвертера.
+;
+; вход:
+;   a = FILE_OP_*, hl указывает на подготовленный FILE_HANDLE в MAIN.
+;
+; выход:
+;   cf = 0 при успехе, при cf = 1 регистр a содержит ошибку DOS. Поля результата
+;   определяются операцией. bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 fileHandle:
     MXOS_CALL MXOS_DOS_FILEHANDLE
     ret
 
-; DE = data, BC = requested bytes. CF = DOS error or short transfer.
-; AF/BC/DE/HL clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать точное число байтов через входной дескриптор.
+;
+; вход:
+;   de = адрес доступного для записи буфера, bc = требуемое число байтов.
+;   work.inputHandle открыт.
+;
+; выход:
+;   cf = 0 только при полном чтении. cf = 1 также при коротком чтении у конца файла.
+;   af, bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 readInput:
     ld hl,work.inputHandle
     ld a,FILE_OP_READ
     jp transfer
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Записать точное число байтов через выходной дескриптор.
+;
+; вход:
+;   de = адрес данных, bc = размер блока в байтах. work.outputHandle открыт.
+;
+; выход:
+;   cf = 0 только при полной записи. cf = 1 при ошибке DOS или короткой записи. af, bc,
+;   de и hl рабочие.
+;----------------------------------------------------------------------------
+
 writeOutput:
     ld hl,work.outputHandle
     ld a,FILE_OP_WRITE
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Заполнить параметры обмена и сверить фактическую длину с запрошенной.
+;
+; вход:
+;   a = FILE_OP_READ или FILE_OP_WRITE, hl = FILE_HANDLE, de = адрес буфера, bc = число
+;   байтов.
+;
+; выход:
+;   cf = 0 при полном обмене. cf = 1 при ошибке DOS или несовпадении длины. Фактическая
+;   длина успешной операции DOS остаётся в дескрипторе. af, bc, de и hl рабочие.
+;----------------------------------------------------------------------------
+
 transfer:
     push af
     push hl
@@ -899,7 +1144,19 @@ transfer:
     scf
     ret
 
-; DE = ASCIIZ hex value. HL = result, CF = invalid, AF/BC/DE clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Преобразовать от одной до четырёх шестнадцатеричных цифр в слово.
+;
+; вход:
+;   de указывает на строку с завершающим нулём. Буквы A–F допустимы в обоих регистрах.
+;
+; выход:
+;   cf = 0, hl = число. При пустой строке, неверной цифре или длине более четырёх cf =
+;   1. af, bc и de рабочие.
+;----------------------------------------------------------------------------
+
 parseHex:
     ld hl,0
     ld b,4
@@ -932,8 +1189,19 @@ parseHex:
     jp nz,.digit
     jp invalid
 
-; HL = text, DE = table (value, ASCIIZ, ..., FFh).
-; A = value, CF = no match, HL preserved, BC/DE clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти строку в таблице именованных значений без учёта регистра.
+;
+; вход:
+;   hl = строка с завершающим нулём, de = таблица пар «байт значения, строка с нулём».
+;   Байт FFh на месте значения завершает таблицу.
+;
+; выход:
+;   cf = 0 и a = значение при совпадении, иначе cf = 1. hl сохранён, bc и de рабочие.
+;----------------------------------------------------------------------------
+
 lookup:
     ld a,(de)
     cp 0FFh
@@ -956,7 +1224,19 @@ lookup:
     or a
     ret
 
-; HL/DE = ASCIIZ strings, Z = equal, HL preserved, AF/C/DE clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сравнить две строки без учёта регистра.
+;
+; вход:
+;   hl и de указывают на строки с завершающим нулём.
+;
+; выход:
+;   z = 1, если строки равны целиком, иначе z = 0. hl сохранён, af, c и de используются
+;   при сравнении.
+;----------------------------------------------------------------------------
+
 sameText:
     push hl
 .next:
@@ -976,7 +1256,19 @@ sameText:
     pop hl
     ret
 
-; HL = path, HL returns last dot or terminating NUL. AF/DE clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти последнюю точку в переданном пути.
+;
+; вход:
+;   hl = начало строки пути с завершающим нулём.
+;
+; выход:
+;   hl указывает на последнюю точку или, если точек нет, на завершающий ноль. bc
+;   сохранён, af и de рабочие.
+;----------------------------------------------------------------------------
+
 extension:
     ld de,0
 .next:
@@ -997,8 +1289,19 @@ extension:
     ex de,hl
     ret
 
-; HL = ASCIIZ, B = nonzero byte. HL = match (NZ) or terminator (Z).
-; A/flags clobbered.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Найти первое вхождение байта в строку.
+;
+; вход:
+;   hl = строка с завершающим нулём, b = искомый ненулевой байт.
+;
+; выход:
+;   При nz регистр hl указывает на совпадение и a = b. При z регистр hl указывает на
+;   завершающий ноль и a = 0. bc и de сохранены.
+;----------------------------------------------------------------------------
+
 findByte:
     ld a,(hl)
     or a
@@ -1011,7 +1314,19 @@ findByte:
     or a
     ret
 
-; HL -= DE, CF = borrow. A/flags clobbered, BC/DE preserved.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Вычислить разность двух беззнаковых слов.
+;
+; вход:
+;   hl = уменьшаемое, de = вычитаемое.
+;
+; выход:
+;   hl = разность по модулю 65536, cf = заём. a содержит старший байт результата. bc и
+;   de сохранены.
+;----------------------------------------------------------------------------
+
 subtract:
     ld a,l
     sub e
@@ -1021,7 +1336,19 @@ subtract:
     ld h,a
     ret
 
-; HL = destination, B = nonzero length. AF/B/HL clobbered, flags unspecified.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Обнулить последовательные байты рабочей области.
+;
+; вход:
+;   hl = первый адрес, b = число байтов. При нуле счётчика цикл проходит 256 раз.
+;
+; выход:
+;   Указанный диапазон обнулён, hl = первый адрес за ним, a и b равны нулю. c и de
+;   сохранены.
+;----------------------------------------------------------------------------
+
 clearBytes:
     xor a
 .next:
@@ -1052,9 +1379,9 @@ modes:
     DB IMAGE_MODE_MON,"MON",0, IMAGE_MODE_RF,"RF",0, 0FFh
 outputTypes:
     DB 1,".RKS",0, 0,".EXE",0, 0,".COM",0, 0,".DLL",0, 0,".FNT",0, 0FFh
-rksExtension: DB ".RKS",0
-rawName: DB "RAW",0
-overwriteName: DB "Y",0
+rksExtension:   DB ".RKS",0
+rawName:        DB "RAW",0
+overwriteName:  DB "Y",0
 
 banner: DB "EXE 1.0",10,0
 usage:
@@ -1063,18 +1390,18 @@ usage:
     DB "-P=EXCLUSIVE|PRESERVE|MANAGED -HEAP=hex -STACK=hex",10
     DB "-MODE=AUTO|MX|STD|MON|RF -CACHE=0|1 -RAW",10
     DB "All numbers are hexadecimal. Source is preserved.",10,0
-invalidCommandText: DB "Invalid arguments",10,0
-samePathText: DB "Source and target must differ",10,0
-openErrorText: DB "Cannot open source",10,0
-tooLargeText: DB "Source is too large",10,0
-metadataErrorText: DB "Invalid metadata or arguments",10,0
-readErrorText: DB "Invalid source or read error",10,0
-writeErrorText: DB "Write failed: target is incomplete",10,0
-closeErrorText: DB "Cannot close target",10,0
-overwritePrompt: DB "Overwrite file? [Y/N] ",0
-savedText: DB "Saved ",0
-loadText: DB " LOAD=",0
-entryText: DB " ENTRY=",0
+invalidCommandText:     DB "Invalid arguments",10,0
+samePathText:           DB "Source and target must differ",10,0
+openErrorText:          DB "Cannot open source",10,0
+tooLargeText:           DB "Source is too large",10,0
+metadataErrorText:      DB "Invalid metadata or arguments",10,0
+readErrorText:          DB "Invalid source or read error",10,0
+writeErrorText:         DB "Write failed: target is incomplete",10,0
+closeErrorText:         DB "Cannot close target",10,0
+overwritePrompt:        DB "Overwrite file? [Y/N] ",0
+savedText:              DB "Saved ",0
+loadText:               DB " LOAD=",0
+entryText:              DB " ENTRY=",0
 
     STRUCT EXE_WORK
 sourcePath      BLOCK 2
@@ -1103,7 +1430,7 @@ work EXE_WORK = bssStart
 bssEnd = bssStart+EXE_WORK
 
 IMAGE_BSS_SIZE = bssEnd-bssStart
-IMAGE_MEM_END = bssEnd
+IMAGE_MEM_END  = bssEnd
     ASSERT bssStart == $
     ASSERT EXE_WORK.prefix <= 255
     ASSERT BLOCK_SIZE % 256 == 0

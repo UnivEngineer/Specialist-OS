@@ -12,8 +12,8 @@ def run(mem,code,stub=0x1000):
  out=(O/'out.bin').read_bytes();assert int.from_bytes(out[65542:65544],'little')==0x1fff
  return out
 rows=[]
-for name,origin in [('DISKMAIN',0x2100),('DISKDOS',0xc000),('DISKBANK',0xc000)]:
- s=sy(R/f'source-apps/diskbench/build/{name}.sym');base=bytearray(65536);raw=(R/f'bin/{name}.i80').read_bytes();base[origin:origin+len(raw)]=raw
+for name in ('DISKMAIN', 'DISKDOS', 'DISKBANK'):
+ s=sy(R/f'source-apps/diskbench/build/{name}.sym');origin=s['entry'];base=bytearray(65536);raw=(R/f'bin/{name}.i80').read_bytes();base[origin:origin+len(raw)]=raw
  for offset in (0,1,15,255):
   for kib in ((1,8) if name=='DISKDOS' else (1,8,24)):
    address=s['buffer']+offset;count=kib*1024
@@ -28,12 +28,29 @@ for name,origin in [('DISKMAIN',0x2100),('DISKDOS',0xc000),('DISKBANK',0xc000)]:
    bad=bytearray(out[:65536]);bad[address+count-1]^=1
    outbad=run(bad,b'\xcd'+W(s['compareFileBuffer']));assert outbad[0x1f00]&1
    rows.append(dict(worker=name,offset=offset,KiB=kib,lastByteChecked=True))
-  m=bytearray(base);m[s['bufferAddress']:s['bufferAddress']+2]=W(address);m[s['pass']]=3;m[s['operation']]=1;m[address-1]=0xa5;m[address+256]=0x5a
-  out=run(m,b'\xcd'+W(s['prepareRawBuffer']))
-  assert out[address:address+256]==bytes(3^((address+i)&255) for i in range(256))
-  assert out[address-1]==0xa5 and out[address+256]==0x5a
+  for sector_bytes in (256,512):
+   m=bytearray(base)
+   m[s['bufferAddress']:s['bufferAddress']+2]=W(address)
+   m[s['sectorPages']]=sector_bytes//256
+   m[s['config']+3]=sector_bytes//256
+   m[s['pass']]=3
+   m[s['operation']]=1
+   m[address-1]=0xa5
+   m[address+sector_bytes]=0x5a
+   out=run(m,b'\xcd'+W(s['prepareRawBuffer']))
+   assert out[address:address+sector_bytes]==bytes(3^((address+i)&255) for i in range(sector_bytes))
+   assert out[address-1]==0xa5 and out[address+sector_bytes]==0x5a
+   m=bytearray(out[:65536])
+   # Стаб уже подготовил сектор в буфере. RET с CF=0 имитирует чтение LBA.
+   m[0x1010:0x1012]=bytes((0xaf,0xc9))
+   m[s['rawCall']+1:s['rawCall']+3]=W(0x1010)
+   out=run(m,b'\xcd'+W(s['validateRawData']))
+   assert not out[0x1f00]&1
+   m[address+sector_bytes-1]^=1
+   out=run(m,b'\xcd'+W(s['validateRawData']))
+   assert out[0x1f00]&1, (name,sector_bytes,offset)
 (O/'results.json').write_text(json.dumps(rows,indent=2)+'\n')
-print('DISKBEN BUFFER CPU PASS',len(rows),'whole-file fill/compare cases; 12 RAW sectors; aligned/unaligned, guards, last-byte mismatch')
+print('DISKBEN BUFFER CPU PASS',len(rows),'whole-file fill/compare cases; 24 RAW sectors (256/512 bytes); aligned/unaligned, guards, last-byte mismatch')
 
 front=sy(R/'source-apps/diskbench/build/DISKBEN.sym');base=bytearray(65536)
 raw=(R/'bin/DISKBEN.i80').read_bytes();base[:len(raw)]=raw
@@ -49,8 +66,17 @@ out=run(m,b'\x21'+W(0x8d00)+b'\x06'+bytes([len(word)])+b'\xcd'+W(front['argument
 assert out[0x1f00]&1,'Duplicate alignment must be rejected'
 print('DISKBEN ALIGNMENT ARGUMENTS PASS',len(arguments)+1,'cases')
 
-for drive in (0,1):
- m=bytearray(base);m[front['argAlign']]=255;m[front['v_drive']]=drive
- out=run(m,b'\xcd'+W(front['choose_alignment']),stub=0x8c00)
- assert out[front['argAlign']]==0
-print('DISKBEN A:/B: alignment prompt skipped PASS')
+# Stub the prompt and answer so the test can distinguish a question from a default.
+base[front['puts']:front['puts']+3]=b'\xc3'+W(0x8d00)
+base[0x8d00:0x8d06]=b'\x3e\x01\x32\x10\x8d\xc9'
+base[front['read_choice']:front['read_choice']+2]=b'\xaf\xc9'
+for drive in (front['SYSTEM_DRIVE'],front['EXTERNAL_DRIVE'],ord('F')-ord('A')):
+ for technology in (0,front['DISK_TECH_MX_SYSTEM_FLASH'],front['DISK_TECH_MX_VV55_FLASH'],front['DISK_TECH_MX_VV55_ROM']):
+  m=bytearray(base)
+  m[front['argAlign']]=255
+  m[front['v_drive']]=drive
+  m[front['v_technology']]=technology
+  out=run(m,b'\xcd'+W(front['choose_alignment']),stub=0x8c00)
+  assert out[front['argAlign']]==0
+  assert bool(out[0x8d10])==(technology in (front['DISK_TECH_MX_VV55_FLASH'],front['DISK_TECH_MX_VV55_ROM'])),(drive,technology)
+print('DISKBEN alignment prompt follows VV55 driver type PASS')

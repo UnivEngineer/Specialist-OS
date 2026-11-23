@@ -34,7 +34,7 @@ def size():
 try:
  m.start('overwrite-all',disk=R/'bin/nested-Games2M.bin')
  command('MD B:/SRC');command('MD B:/DST')
- command('COPY A:/README.TXT B:/SRC/ONE')
+ command('COPY C:/README.TXT B:/SRC/ONE')
  command('COPY A:/FONTKOI.PF B:/SRC/TWO')
  command('ATTRIB -RS B:/SRC/TWO')
  command('COPY B:/SRC B:/DST')
@@ -45,7 +45,7 @@ try:
  tap('left');assert m.m.read(n['uiModalFocusIndex'],1)==b'\1'
  m.m.screenshot(O/'yes-to-all.png');finish('enter')
  assert size()==1280
- command('COPY A:/README.TXT B:/SRC/ONE',True);finish('y')
+ command('COPY C:/README.TXT B:/SRC/ONE',True);finish('y')
  command('COPY B:/SRC B:/DST',True)
  tap('right');assert m.m.read(n['uiModalFocusIndex'],1)==b'\3'
  m.m.screenshot(O/'no-to-all.png');finish('enter')

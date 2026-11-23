@@ -193,15 +193,15 @@ read:
     ld c,a
     ret
 ; Descriptor fields stay contiguous in their published order.
-screen: DW 0
-width: DB 0
-height: DB 0
-pixels: DW 0
-attributes: DW 0
-capacity: DW 0
-callback: DW 0
-remaining: DB 0
-color: DB 0
+screen:         DW 0
+width:          DB 0
+height:         DB 0
+pixels:         DW 0
+attributes:     DW 0
+capacity:       DW 0
+callback:       DW 0
+remaining:      DB 0
+color:          DB 0
     ENDMODULE
 
 uiBitmapRestoreColors:
@@ -248,8 +248,8 @@ nextColumn:
     jp nz,column
     ld a,(color)
     ret
-remaining: DB 0
-color: DB 0
+remaining:      DB 0
+color:          DB 0
     ENDMODULE
 
     ENDIF

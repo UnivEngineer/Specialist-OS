@@ -2,6 +2,20 @@
     INCLUDE "../../source/include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прогнать проверки загрузки и вызова модулей в MAIN, DOS и EXEC.
+;
+; вход:
+;   Запуск в MAIN, доступны файлы тестовых модулей и консоль BIOS.
+;
+; выход:
+;   testResult = 55AAh при успехе либо 0DEADh при отказе. Выведен итог; перед возвратом
+;   программа ожидает клавишу и восстанавливает кодировку.
+;----------------------------------------------------------------------------
+
 entry:
     ld a,(bios_upper.koi7)
     push af
@@ -66,14 +80,14 @@ finish:
     pop af
     call bios_setFontEncoding
     ret
-testResult: DW 0
-handle: DW 0
-regs: DW 01234h,02345h,03456h,0
-bankPath: DB 'B:',05Ch,'BANKMOD.DLL',0
+testResult:     DW 0
+handle:         DW 0
+regs:           DW 01234h,02345h,03456h,0
+bankPath:       DB 'B:',05Ch,'BANKMOD.DLL',0
     DS MAX_PATH-($-bankPath),0
 mainPath: DB 'B:',05Ch,'MAINMOD.DLL',0
     DS MAX_PATH-($-mainPath),0
 dosPath: DB 'B:',05Ch,'DOSMOD.DLL',0
     DS MAX_PATH-($-dosPath),0
-ok: DB 'Module API PASS',13,10,0
-error: DB 'Module API FAIL',13,10,0
+ok:             DB 'Module API PASS',13,10,0
+error:          DB 'Module API FAIL',13,10,0

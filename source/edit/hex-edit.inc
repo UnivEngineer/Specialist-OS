@@ -294,8 +294,8 @@ hexBreakChanged:
     IF !EDIT_BANKED
     INCLUDE "hex-text-return.inc"
     ENDIF
-hexNibble: DB 0
-hexPatchWord: DB 0
+hexNibble:      DB 0
+hexPatchWord:   DB 0
 
 hexPatchWrittenSum:
     ld a,(hexViewType)

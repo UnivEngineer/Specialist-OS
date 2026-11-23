@@ -55,7 +55,7 @@ biosLoadFailure:
 biosLoadHalt:
     jp biosLoadHalt
 
-biosVersion: DB "BIOS ",'0'+BIOS_VERSION_MAJOR,'.','0'+BIOS_VERSION_MINOR,10,0
-biosDosVersion: DB "DOS ",'0'+DOS_VERSION_MAJOR,'.','0'+DOS_VERSION_MINOR,10,0
-biosLoadError: DB "DOS LOAD ERROR",10,0
+biosVersion:        DB "BIOS ",'0'+BIOS_VERSION_MAJOR,'.','0'+BIOS_VERSION_MINOR,10,0
+biosDosVersion:     DB "DOS ",'0'+DOS_VERSION_MAJOR,'.','0'+DOS_VERSION_MINOR,10,0
+biosLoadError:      DB "DOS LOAD ERROR",10,0
 

@@ -43,5 +43,5 @@ moduleTimerResult:
     DEFINE TIMING_PIT_READ_ONLY
     INCLUDE "../../source/include/timing-pit.inc"
     UNDEFINE TIMING_PIT_READ_ONLY
-elapsed: DD 0
-lastTick: DW 0
+elapsed:        DD 0
+lastTick:       DW 0

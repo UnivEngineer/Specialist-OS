@@ -20,3 +20,9 @@ Ramfos.cpu,0,unverified,Ramfos.0.exe,
 RBAS1.cpu,0x8672,unverified,RBAS1.34418.EXE,
 romfnt.COM,0,unverified,romfnt.0.com,
 SP-580.COM,0xD800,unverified,SP-580.55296.COM,
+mx/Penx_2.3.COM,0xD400,unverified,Penx_2.3.COM,LafanL3 GR on Floppy720 as PENX23.EXE
+mx/Penx_MX.EXE,0xD400,unverified,Penx_MX.EXE,LafanL3 GR on Floppy720 as PENX28.EXE
+mx/Penx_MX.COM,0xD400,unverified,Penx_MX.COM,LafanL3 GR on Floppy720 as PENX32.EXE
+mx/Trs_MX-3.COM,0x0D30,unverified,Trs_MX-3.COM,LafanL3 GR on Floppy720 as TRS-MX-3.EXE
+mx/Trs_MX-p.COM,0x0000,unverified,Trs_MX-p.COM,LafanL3 GR on Floppy720 as TRS-MX-P.EXE
+mx/Trs_MX-u.COM,0x0000,unverified,Trs_MX-u.COM,LafanL3 GR on Floppy720 as TRS-MX-U.EXE

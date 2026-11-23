@@ -1,6 +1,22 @@
-; Второй этап: исполняется из верхней main RAM, BIOS ещё не используется.
+; Архивный второй этап с релокацией из ROM. Штатный путь задаёт BOOTBANK.asm.
     INCLUDE "../../bin/bootstrap/config.inc"
     ORG 02000h
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Перенести второй этап в верхнюю MAIN RAM и передать управление BIOS.
+;
+; вход:
+;   Первая страница системного ROM подключена, образ доступен с 2000h.
+;   Регистровых параметров нет; этап сам запрещает IRQ и задаёт стек.
+;
+; выход:
+;   BIOS, IO и тело шрифтового движка скопированы по адресам конфигурации.
+;   Управление передано по C000h. При отказе BIOS_BOOT_LOAD_DOS этап
+;   пропускает пробную установку и тоже передаёт управление BIOS. В текущем
+;   BIOS этот архивный вход всегда возвращает DOS_ERR_UNSUPPORTED.
+;----------------------------------------------------------------------------
+
 entry:
     di
     ld hl,stageImage
@@ -84,7 +100,7 @@ bootDone:
     ld (0FFFEh),a
     jp 0C000h
 bootFailed:
-    ; BIOS сможет показать диагностику после установки шрифта и экрана.
+    ; Передать диагностику BIOS после копирования его кода и шрифта.
     jp 0C000h
     INCLUDE "memcpy.inc"
 byteWindow:
@@ -138,7 +154,7 @@ ramWrite4:
     ENT
 tailStorageEnd:
 tailImage = 08000h+tailStorage-stageImage
-tailEnd = tailImage+tailStorageEnd-tailStorage
+tailEnd   = tailImage+tailStorageEnd-tailStorage
     ASSERT tailEnd-tailImage <= 192
 stageEnd:
     ASSERT stageEnd <= 03000h

@@ -1,6 +1,16 @@
-; MAIN-only geometry contract: FNT1 +5 is pixel width, +6 glyph height.
-; BIOS line pitch remains 10; cursorX is in half-pixels. No DLL bitmap access.
-; Re-entered after external programs, even for another font of the same width.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Обновить геометрию NC и временное состояние интерфейса при входе или возврате.
+;
+; вход:
+;   В FNT1 +5 находится ширина знака в пикселях, в +6 высота. Регистровых параметров нет.
+;
+; выход:
+;   Геометрия, палитра строк и кэши ввода сброшены для установленного шрифта.
+;   Шаг строки BIOS равен 10, X курсора задан в полупикселях. Старый запрос статуса
+;   сброшен. AF, BC, DE, HL и флаги разрушены.
+;----------------------------------------------------------------------------
 ncLayoutInit:
     ld hl,vars.rowColors
     ld b,6*P_FILE_LIST_H
@@ -15,6 +25,8 @@ ncRowColorsInit:
     ld (ncToolbarValid+1),a
     ld (ncCommandEditResume),a
     ld (ncCommandCursorKept),a
+    ld (ncStatusInput),a
+    ld (ncStatusPending),a
     ld a,(FONT_ENGINE_HEADER+6)
     ld (ncGlyphHeight),a
     ld a,(FONT_ENGINE_HEADER+5)
@@ -46,21 +58,21 @@ ncLayout8: DB 8,1,88,22,P_FILE_LIST_H,22,21,46,18,20
     DW ncDividers8
 ncLayout6: DB 6,2,48,10,FILE_LIST_SIZE,28,29,62,24,26
     DW g_fileDividers
-ncFontWidth: DB 6
-ncColumns: DB 2
-ncColumnStep: DB 48
-ncCellBytes: DB 10
-ncVisibleCount: DB FILE_LIST_SIZE
-ncHeaderChars: DB 28
-ncStatusChars: DB 29
-ncCommandChars: DB 62
-ncInputChars: DB 24
-ncErrorChars: DB 26
-ncDividers: DW g_fileDividers
+ncFontWidth:        DB 6
+ncColumns:          DB 2
+ncColumnStep:       DB 48
+ncCellBytes:        DB 10
+ncVisibleCount:     DB FILE_LIST_SIZE
+ncHeaderChars:      DB 28
+ncStatusChars:      DB 29
+ncCommandChars:     DB 62
+ncInputChars:       DB 24
+ncErrorChars:       DB 26
+ncDividers:         DW g_fileDividers
 ncLayoutEnd:
-ncGlyphHeight: DB 8
-ncDrivePadLeft: DB 1
-ncDrivePadRight: DB 0
+ncGlyphHeight:      DB 8
+ncDrivePadLeft:     DB 1
+ncDrivePadRight:    DB 0
 
 ; 4/6px glyphs have one empty left column. For RAW8 use the actual A..H
 ; glyphs, so shifting the 8px font's blank column needs no NC code change.

@@ -10,15 +10,15 @@ bankCopyBytes:
     dec b
     jp nz,bankCopyBytes
     ret
-bankPage: DB 0
-bankPageCount: DB 0
-farRequest: DB 0
+bankPage:       DB 0
+bankPageCount:  DB 0
+farRequest:     DB 0
     DW TARGET
     DB 0
     DW TARGET,LENGTH
-sourcePhysical: DB 0
-destinationPhysical: DB 0
-otherTail: DS 192,0
+sourcePhysical:         DB 0
+destinationPhysical:    DB 0
+otherTail:              DS 192,0
 farTailImage:
     DISP 0FF00h
     INCLUDE "r4-tail.inc"

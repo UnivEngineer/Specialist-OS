@@ -1,4 +1,4 @@
-; Восстановлено из assets/games/Almaz.rks; без внешних бинарных включений.
+; Восстановлено из assets/games/std/Almaz.rks; без внешних бинарных включений.
 
 ; Указатель исходной карты; соседние нулевые байты сохранены.
 
@@ -8,58 +8,58 @@ v_level_pointer:
 ; Исходная карта: 24 столбца по 16 клеток. Копия меняется при игре.
 
 t_level:
-    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh ; 26B0h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Fh ; 26C0h
-    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Fh ; 26D0h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh ; 26E0h
-    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh ; 26F0h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Ah,00Fh ; 2700h
-    db      00Fh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 2710h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 2720h
-    db      00Fh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,009h,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 2730h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,008h,009h,00Dh,009h,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,00Fh ; 2740h
-    db      00Fh,009h,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Ah,00Fh ; 2750h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 2760h
-    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 2770h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 2780h
-    db      00Fh,009h,00Dh,00Dh,009h,00Dh,010h,00Dh,009h,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,00Fh ; 2790h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,001h,009h,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Ah,00Fh ; 27A0h
-    db      00Fh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 27B0h
-    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 27C0h
-    db      00Fh,009h,00Dh,00Dh,009h,00Dh,009h,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh ; 27D0h
-    db      00Fh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh ; 27E0h
-    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh ; 27F0h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Fh ; 2800h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh ; 2810h
-    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh ; 2820h
+    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh     ; 26B0h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Fh     ; 26C0h
+    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Fh     ; 26D0h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 26E0h
+    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 26F0h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Ah,00Fh     ; 2700h
+    db      00Fh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 2710h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 2720h
+    db      00Fh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,009h,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 2730h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,008h,009h,00Dh,009h,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 2740h
+    db      00Fh,009h,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Ah,00Fh     ; 2750h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 2760h
+    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 2770h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 2780h
+    db      00Fh,009h,00Dh,00Dh,009h,00Dh,010h,00Dh,009h,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 2790h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,001h,009h,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Ah,00Fh     ; 27A0h
+    db      00Fh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 27B0h
+    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 27C0h
+    db      00Fh,009h,00Dh,00Dh,009h,00Dh,009h,00Dh,00Dh,00Dh,00Fh,00Eh,00Eh,00Eh,00Eh,00Fh     ; 27D0h
+    db      00Fh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh     ; 27E0h
+    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 27F0h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Fh     ; 2800h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 2810h
+    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh     ; 2820h
 
 ; Рабочая карта 24*16, строки подряд; исходное содержимое сохранено.
 
 v_map:
-    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh ; 2830h
-    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh ; 2840h
-    db      00Dh,00Dh,009h,00Dh,00Fh,00Dh,009h,00Dh,00Dh,00Dh,009h,009h,00Dh,00Dh,00Dh,00Fh ; 2850h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,00Dh ; 2860h
-    db      009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,009h,00Dh,009h,00Dh,00Dh,00Dh ; 2870h
-    db      00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Fh ; 2880h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Fh,00Dh,009h,00Dh ; 2890h
-    db      00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh ; 28A0h
-    db      00Dh,008h,009h,00Dh,00Fh,00Dh,00Dh,00Dh,00Eh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh ; 28B0h
-    db      00Fh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Fh,00Dh,010h,00Eh ; 28C0h
-    db      009h,00Eh,00Eh,00Dh,00Eh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh ; 28D0h
-    db      00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,009h,00Dh,00Eh,009h,00Eh,009h,00Eh,000h,00Fh ; 28E0h
-    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,009h,009h,00Dh,00Dh,00Fh,00Dh,009h,00Dh ; 28F0h
-    db      00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh ; 2900h
-    db      00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Fh ; 2910h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh ; 2920h
-    db      00Fh,00Fh,00Fh,009h,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Eh,00Eh,00Eh ; 2930h
-    db      00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Dh,00Dh,00Dh,00Fh ; 2940h
-    db      00Fh,00Dh,009h,00Dh,00Dh,00Eh,00Eh,00Eh,00Ah,00Dh,00Eh,00Eh,00Eh,00Ah,00Dh,00Eh ; 2950h
-    db      00Eh,00Eh,00Ah,00Dh,00Dh,009h,00Dh,00Fh,00Fh,009h,00Dh,00Dh,00Dh,00Eh,00Eh,00Eh ; 2960h
-    db      00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Dh,00Dh,00Dh,00Fh ; 2970h
-    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh ; 2980h
-    db      00Eh,00Eh,00Eh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh ; 2990h
-    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh ; 29A0h
+    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh     ; 2830h
+    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh     ; 2840h
+    db      00Dh,00Dh,009h,00Dh,00Fh,00Dh,009h,00Dh,00Dh,00Dh,009h,009h,00Dh,00Dh,00Dh,00Fh     ; 2850h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,00Dh     ; 2860h
+    db      009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,009h,00Dh,009h,00Dh,00Dh,00Dh     ; 2870h
+    db      00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,009h,00Dh,00Dh,00Fh     ; 2880h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Fh,00Dh,009h,00Dh     ; 2890h
+    db      00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh     ; 28A0h
+    db      00Dh,008h,009h,00Dh,00Fh,00Dh,00Dh,00Dh,00Eh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 28B0h
+    db      00Fh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Dh,00Fh,00Dh,010h,00Eh     ; 28C0h
+    db      009h,00Eh,00Eh,00Dh,00Eh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh     ; 28D0h
+    db      00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,009h,00Dh,00Eh,009h,00Eh,009h,00Eh,000h,00Fh     ; 28E0h
+    db      00Fh,00Dh,00Dh,009h,00Dh,00Dh,00Dh,00Dh,009h,009h,00Dh,00Dh,00Fh,00Dh,009h,00Dh     ; 28F0h
+    db      00Dh,009h,00Dh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh     ; 2900h
+    db      00Dh,00Dh,00Dh,00Dh,00Fh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,00Dh,009h,00Dh,00Fh     ; 2910h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh     ; 2920h
+    db      00Fh,00Fh,00Fh,009h,00Dh,00Dh,00Dh,00Fh,00Fh,00Dh,00Dh,00Dh,00Dh,00Eh,00Eh,00Eh     ; 2930h
+    db      00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 2940h
+    db      00Fh,00Dh,009h,00Dh,00Dh,00Eh,00Eh,00Eh,00Ah,00Dh,00Eh,00Eh,00Eh,00Ah,00Dh,00Eh     ; 2950h
+    db      00Eh,00Eh,00Ah,00Dh,00Dh,009h,00Dh,00Fh,00Fh,009h,00Dh,00Dh,00Dh,00Eh,00Eh,00Eh     ; 2960h
+    db      00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Dh,00Dh,00Dh,00Fh     ; 2970h
+    db      00Fh,00Dh,00Dh,00Dh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh,00Eh,00Eh,00Eh,00Dh,00Eh     ; 2980h
+    db      00Eh,00Eh,00Eh,00Dh,00Dh,00Dh,00Dh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh     ; 2990h
+    db      00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh,00Fh     ; 29A0h
 
 ; Три записи по три байта: X, Y, направление (вниз, вправо, вверх, влево).
 
@@ -180,31 +180,31 @@ v_death_repeat:
 ; Строка KOI-7 «ИГРА ОКОНЧЕНА! ВЫ УКРАЛИ»; затем число алмазов в HEX.
 
 t_game_over:
-    db      01Fh,00Ah,00Ah,00Ah,020h,020h,020h,020h,020h,020h,020h,020h,020h,020h,020h,020h ; 29F1h
-    db      069h,020h,067h,020h,072h,020h,061h,020h,020h,020h,06Fh,020h,06Bh,020h,06Fh,020h ; 2A01h
-    db      06Eh,020h,07Eh,020h,065h,020h,06Eh,020h,061h,020h,021h,00Ah,00Ah,00Dh,020h,020h ; 2A11h
-    db      020h,020h,020h,020h,020h,020h,020h,077h,020h,079h,020h,020h,020h,075h,020h,06Bh ; 2A21h
-    db      020h,072h,020h,061h,020h,06Ch,020h,069h,020h,000h ; 2A31h
+    db      01Fh,00Ah,00Ah,00Ah,020h,020h,020h,020h,020h,020h,020h,020h,020h,020h,020h,020h     ; 29F1h
+    db      069h,020h,067h,020h,072h,020h,061h,020h,020h,020h,06Fh,020h,06Bh,020h,06Fh,020h     ; 2A01h
+    db      06Eh,020h,07Eh,020h,065h,020h,06Eh,020h,061h,020h,021h,00Ah,00Ah,00Dh,020h,020h     ; 2A11h
+    db      020h,020h,020h,020h,020h,020h,020h,077h,020h,079h,020h,020h,020h,075h,020h,06Bh     ; 2A21h
+    db      020h,072h,020h,061h,020h,06Ch,020h,069h,020h,000h                                   ; 2A31h
 
 t_diamonds_suffix:
-    db      020h,061h,020h,06Ch,020h,06Dh,020h,061h,020h,07Ah,020h,06Fh,020h,077h,020h,021h ; 2A3Bh
-    db      000h ; 2A4Bh
+    db      020h,061h,020h,06Ch,020h,06Dh,020h,061h,020h,07Ah,020h,06Fh,020h,077h,020h,021h  ; 2A3Bh
+    db      000h    ; 2A4Bh
 
 ; Неиспользуемая строка авторства: «АВТОР ФИШЕР Е.А.».
 
 t_author_unused:
-    db      061h,077h,074h,06Fh,072h,020h,066h,069h,07Bh,065h,072h,020h,065h,02Eh,061h,02Eh ; 2A4Ch
-    db      000h ; 2A5Ch
+    db      061h,077h,074h,06Fh,072h,020h,066h,069h,07Bh,065h,072h,020h,065h,02Eh,061h,02Eh  ; 2A4Ch
+    db      000h    ; 2A5Ch
 
 t_zero_padding:
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2A5Dh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2A6Dh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2A7Dh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2A8Dh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2A9Dh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2AADh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2ABDh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2ACDh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2ADDh
-    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h ; 2AEDh
-    db      000h,000h,000h ; 2AFDh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2A5Dh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2A6Dh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2A7Dh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2A8Dh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2A9Dh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2AADh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2ABDh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2ACDh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2ADDh
+    db      000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h  ; 2AEDh
+    db      000h,000h,000h  ; 2AFDh

@@ -2,6 +2,24 @@
 ; Данные и размещение общие. Печать и разбор цепочки вне замеров.
 ; Сравнение входит в WRITE только в режиме полной проверки файла.
 ; Все процедуры ниже разрушают AF/BC/DE/HL, если не указано обратное.
+
+    IFDEF DISKBEN_LEGACY_FIXTURE
+; Прямой вход для стендов, вызывающих прежний измеритель по адресу из .sym.
+;----------------------------------------------------------------------------
+; Выполнить проходы записи и чтения одного временного файла.
+;
+; вход:
+;   Диск выбран. v_sectorSize = 256, v_spc = 1, v_capacity <= 8192.
+;   v_budget = число проходов, v_fileSectors = размер файла в секторах.
+;   v_layout определяет, требуется ли измерение и через верхнее окно.
+;
+; выход:
+;   Статистика напечатана, на успешном пути тестовый файл удалён.
+;   Ветка error закрывает и очищает собственный файл, если это позволяет DOS.
+;   При обнаружении чужого DISKBEN.TMP управление передано show_error.
+;   Процедура завершает программу через done, регистрового результата нет.
+;----------------------------------------------------------------------------
+
 file_write_case:
     ld hl,(v_sectorSize)
     dec h
@@ -170,6 +188,8 @@ print_progress:
     ld c,a
     call bench_printChar
     ret
+
+    ENDIF
 
 ; A=0 — шаблон записи, A=FFh — противоположные байты перед чтением.
 ; AF/BC/HL разрушены. Вызов всегда вне измеряемого интервала.
@@ -388,8 +408,8 @@ raw_chain:
     call bench_cmp_hl_de
     jp c,raw_chain_invalid
     jp z,raw_chain_invalid
-    ld a,(v_drive)
-    cp 1
+    ld a,(v_technology)
+    cp DISK_TECH_RAM
     jp nz,raw_chain_valid
     ld a,e
     cp 0FFh
@@ -500,6 +520,8 @@ raw_warmup:
     MXOS_CALL MXOS_DOS_RAW_IO
     jp c,raw_prepare_done
     ld (raw_local_call+1),hl
+    ld a,c
+    ld (raw_local_dispatch+1),a
 raw_prepare_done:
     pop hl
     pop de
@@ -521,8 +543,7 @@ raw_local_ready:
     pop bc
     ret
 raw_local_dispatch:
-    ld a,(v_drive)
-    ld c,a
+    ld c,0
 raw_local_call:
     jp 0
 raw_warmup_file:
@@ -622,6 +643,18 @@ file_cleanup:
     ld (v_fileOwned),a
     ret
 
+;----------------------------------------------------------------------------
+; Прочитать тестовый файл в нижний буфер и закрыть его.
+;
+; вход:
+;   bhHandle открыт для чтения. v_fileSectors задаёт ожидаемую длину файла
+;   в 256-байтовых секторах, verifyBuffer вмещает весь файл.
+;
+; выход:
+;   cf = 0: весь файл в verifyBuffer, bhHandle закрыт.
+;   cf = 1: a = ошибка чтения, неполной передачи или закрытия.
+;----------------------------------------------------------------------------
+
 file_read_low:
     ld hl,verifyBuffer
     ld a,(v_fileSectors)
@@ -636,14 +669,18 @@ file_read_low:
     DEFINE BH_DRIVE v_drive
     INCLUDE "file-handle.inc"
 
+    IFDEF DISKBEN_LEGACY_FIXTURE
 txtFileExists:    DB 00Ah,"DISKBEN.TMP exists; rename/delete.",0
+    ENDIF
 txtFlush:         DB "FLUSH:  ",009h,009h,0
 txtFlushMapped:   DB "FLUSH:  ",009h,009h,0
 txtTimes:         DB " times",00Ah,0
 txtFileAccess:    DB 00Ah,"File access: reading and writing file with DOS",00Ah,0
-txtRawAccess:     DB 00Ah,"Raw access: direct reading and writing of sectors",00Ah,0
+txtRawAccess:     DB 00Ah,"RAW access: physical sectors",00Ah,0
+    IFDEF DISKBEN_LEGACY_FIXTURE
 txtPass:          DB 00Ah,"Pass ",0
 txtPassDone:      DB " done",0
+    ENDIF
 v_outputBase:     DW 0
 v_outputMode:     DB 0
 v_fileOwned:      DB 0
@@ -655,23 +692,23 @@ v_flushTicks:     DD 0
 v_flushCount:     DW 0
 statAll:
 resultsLow:
-statRawWrite:     BLOCK 10,0
-statRawRead:      BLOCK 10,0
-statFileWrite:    BLOCK 10,0
-statFileRead:     BLOCK 10,0
-resultsHigh:     BLOCK 40,0
-statRawVerify:   DD 0
-statFileVerify:  DD 0
-statRawVerifyHigh: DD 0
-statFileVerifyHigh: DD 0
-statRawHighPostVerify: DD 0
-statFileHigh: BLOCK 28,0
+statRawWrite:           BLOCK  10,0
+statRawRead:            BLOCK  10,0
+statFileWrite:          BLOCK  10,0
+statFileRead:           BLOCK  10,0
+resultsHigh:            BLOCK  40,0
+statRawVerify:          DD     0
+statFileVerify:         DD     0
+statRawVerifyHigh:      DD     0
+statFileVerifyHigh:     DD     0
+statRawHighPostVerify:  DD     0
+statFileHigh:           BLOCK  28,0
 statFileHighVerify = statFileHigh+24
 tmpDescriptor:    DB "DISKBEN TMP",0
-                  BLOCK 6,0
-                  DW 0
-                  BLOCK 8,0
-                  DD DEFAULT_FILE_KIB*1024
+                  BLOCK  6,0
+                  DW     0
+                  BLOCK  8,0
+                  DD     DEFAULT_FILE_KIB*1024
     ASSERT $-tmpDescriptor == FILE_DESCRIPTOR
 v_rawOp:          DB 0
 v_rawCluster:     DW 0

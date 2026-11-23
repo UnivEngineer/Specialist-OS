@@ -192,10 +192,10 @@ ncParentNext:
             inc hl
             inc c
             jp ncParentFind
-ncParentPending: DB 0
-ncParentName: BLOCK 13,0
-ncSelectName: DW 0
-ncSelectAttrib: DB 0
+ncParentPending:    DB     0
+ncParentName:       BLOCK  13,0
+ncSelectName:       DW     0
+ncSelectAttrib:     DB     0
 
 ; Полное приглашение хранится в path; экран показывает хвост длинного пути.
 ; При длинной команде строка прокручивается, исходные байты не обрезаются.
@@ -491,7 +491,7 @@ compactPathCopy:
             jp nz,compactPathCopy
             ld hl,vars.displayPath
             ret
-ncPathSource: DW 0
-ncPathWidth: DB 0
-ncPathLength: DB 0
-ncPathHead: DB 0
+ncPathSource:   DW 0
+ncPathWidth:    DB 0
+ncPathLength:   DB 0
+ncPathHead:     DB 0

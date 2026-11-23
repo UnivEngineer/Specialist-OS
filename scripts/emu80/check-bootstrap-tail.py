@@ -20,7 +20,7 @@ try:
  # ABI-вызов установщика: текущая раскладка/битмап шрифта сохраняются.
  font=m.read(b['FONT_ADDR'],2048);encoding=m.read(b['bios_upper.koi7'],1)
  for args in ('-P 4','-P 0'):
-  page(0);command=('A:\\DRIVERS\\RAMDISK.COM '+args).encode()+b'\0';m.write(0x5000,command+bytes(128-len(command)))
+  page(0);command=('C:\\DRIVERS\\RAMDISK.COM '+args).encode()+b'\0';m.write(0x5000,command+bytes(128-len(command)))
   m.write(0x5100,struct.pack('<4H',0x5000,0,0,0));m.write(0x5200,bytes.fromhex('cd00f8c30053'));m.stop_at(0x5300)
   m.call('regs_set',pc=0x5200,sp=0x8f00,bc=k['MXOS_DOS_FILE_EXEC_NATIVE'],de=0x5100);state=m.until(0x5300,40)
   if args=='-P 4':assert not state['flags']['C'],state

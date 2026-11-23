@@ -50,7 +50,7 @@ def main():
         'source/bios/driverFFC0.inc','source/dos/driverBuffered.inc','source/dos/driverChecked.inc',
         'source/bios/reboot2.inc','source/dos/reboot3.inc','source/nc/saveLoadState.inc',
         'scripts/build/build-if-needed.ps1','scripts/build/build-project.ps1','scripts/emu80/check-boot.py',
-        'scripts/images/manifests/A-System.txt','source-apps/diskbench/','source-apps/README.md',
+        'assets/C-System.txt','source-apps/diskbench/','source-apps/README.md',
         'Specialist-OS.code-workspace','README.md','docs/MXOS-banked-kernel.md']
     text=f'''# RAM-драйверы MXOS: DISKBEN / ramd-001
 

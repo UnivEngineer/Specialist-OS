@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet('Flash2M', 'CPM', 'RAMFOS')]
+    [ValidateSet('Flash2M', 'Floppy720', 'CPM', 'RAMFOS')]
     [string] $Profile,
     [string] $EmulatorDirectory,
     [switch] $PrepareOnly,
@@ -18,13 +18,20 @@ switch ($Profile) {
         & (Join-Path $scripts 'build/build-project.ps1') OS
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         $buildImage = Join-Path $scripts 'images/build-image.ps1'
-        foreach ($target in 'SystemEmuWritable', 'Games2M') {
+        & $buildImage SystemEmuWritable -FontsReady
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        foreach ($target in 'Games2M', 'Floppy720') {
             & $buildImage $target
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         }
         & (Join-Path $PSScriptRoot 'seed-flash.ps1')
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        & (Join-Path $PSScriptRoot 'run.ps1') -Flash -ResetFlash @launch
+        & (Join-Path $PSScriptRoot 'run.ps1') -Flash -ResetFlash -FreshFloppy @launch
+    }
+    'Floppy720' {
+        & (Join-Path $scripts 'images/build-image.ps1') Floppy720
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & (Join-Path $PSScriptRoot 'run.ps1') -Flash -FreshFloppy @launch
     }
     'CPM' {
         & python -X utf8 (Join-Path $scripts 'images/build-cpm.py')

@@ -1,6 +1,6 @@
 ; The vertical track reflects exact logical line counts. Its column is reserved
 ; only for documents taller than the viewport. Clip text to full glyphs.
-EDITOR_BAR_Y = 239
+EDITOR_BAR_Y     = 239
 EDITOR_BAR_COLOR = 0F1h
 
 ; BC = unsigned number of separators inserted or removed.
@@ -123,6 +123,19 @@ editorNoPrecedingByte:
     xor a
     inc a
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Сделать обе сохранённые позиции полос прокрутки недействительными.
+;
+; вход:
+;   Регистровых параметров нет.
+;
+; выход:
+;   Старшие байты editorBarV.position и editorBarH.position равны 0FFh. Регистры и
+;   флаги сохранены.
+;----------------------------------------------------------------------------
 
 editorInvalidateBars:
     push af
@@ -434,10 +447,10 @@ editorBarGroupBit:
     jp nz,editorBarGroupBit
     ret
 
-editorBarV: UI_SCROLLBAR 376,EDITOR_TEXT_TOP,EDITOR_BAR_Y-EDITOR_TEXT_TOP,8,3,1,EDITOR_ROWS,0FFFFh
-editorBarH: UI_SCROLLBAR 0,EDITOR_BAR_Y,48,8,2,0,0,0
-editorCopyWidth: DB 48
-editorScreenColumns: DB 64
-editorLineWidth: DW 0
-editorLineWidthHi: DB 0
-editorHShown: DB 0
+editorBarV:             UI_SCROLLBAR  376,EDITOR_TEXT_TOP,EDITOR_BAR_Y-EDITOR_TEXT_TOP,8,3,1,EDITOR_ROWS,0FFFFh
+editorBarH:             UI_SCROLLBAR  0,EDITOR_BAR_Y,48,8,2,0,0,0
+editorCopyWidth:        DB            48
+editorScreenColumns:    DB            64
+editorLineWidth:        DW            0
+editorLineWidthHi:      DB            0
+editorHShown:           DB            0

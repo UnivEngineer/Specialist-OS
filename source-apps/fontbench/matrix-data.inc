@@ -91,287 +91,287 @@ matrixCases:
     CASE kernelRealString,2,64,ApiRealFar48Main,ApiRealFar48Bank,0,0,labelApiRealFar48
     CASE kernelRealString,2,32,ApiRealFar1152Main,ApiRealFar1152Bank,0,0,labelApiRealFar1152
 matrixCasesEnd:
-MATRIX_CASE_COUNT = (matrixCasesEnd-matrixCases)/14
+MATRIX_CASE_COUNT  = (matrixCasesEnd-matrixCases)/14
 MATRIX_STAGE_COUNT = MATRIX_CASE_COUNT*2
     ASSERT MATRIX_STAGE_COUNT < 256
     DW 0
-labelBIOS: DB 'Monitor char:',0
-labelFont8: DB '8x8 char:    ',0
-font8Ticks: DD 0
-bankFont8Ticks: DD 0
-labelFont8Serial: DB '8x8 serial:  ',0
-font8SerialTicks: DD 0
-bankFont8SerialTicks: DD 0
-labelWindow8: DB 'Win20  8x8:   ',0
-window8Main: DD 0
-window8Ticks: DD 0
-labelFar48Font8: DB 'Far48 8x8:   ',0
-Far48Font8Main: DD 0
-Far48Font8Ticks: DD 0
-labelBulk8: DB 'Far1152 8x8: ',0
-bulk8Main: DD 0
-bulk8Ticks: DD 0
-labelWindowOpt: DB 'Win20  opt:   ',0
-windowOptMain: DD 0
-windowOptTicks: DD 0
-labelBulkOpt: DB 'Far1152 opt: ',0
-bulkOptMain: DD 0
-bulkOptTicks: DD 0
-labelFar48Opt: DB 'Far48 opt:   ',0
-Far48OptMain: DD 0
-Far48OptTicks: DD 0
-labelOpt: DB 'Opt char:    ',0
-labelSerialBIOS: DB 'Monitor line:',0
-labelSerialOpt: DB 'Opt serial:  ',0
-labelFull: DB 'Full char:   ',0
-labelSerialFull: DB 'Full serial: ',0
-labelCold: DB 'Cache cold:  ',0
-labelWarm: DB 'Cache warm:  ',0
-labelSerialCold: DB 'Serial cold: ',0
-labelSerialWarm: DB 'Serial warm: ',0
-labelQuadFull: DB 'Quad full:   ',0
-labelQuadCold: DB 'Quad cold:   ',0
-labelQuadWarm: DB 'Quad warm:   ',0
-labelRaw: DB 'Quad raw:    ',0
-labelHalf: DB 'Quad rot4:   ',0
-labelWindowBIOS: DB 'Win20  Mon:   ',0
-labelWindowFull: DB 'Win20  full:  ',0
-labelWindowQuad: DB 'Win20  quad:  ',0
-labelWindowCold: DB 'Win20  cold:  ',0
-labelWindowWarm: DB 'Win20  warm:  ',0
-labelBulkBIOS: DB 'Far1152 Mon: ',0
-labelBulkFull: DB 'Far1152 full:',0
-labelBulkQuad: DB 'Far1152 quad:',0
-labelBulkCold: DB 'Far1152 cold:',0
-labelBulkWarm: DB 'Far1152 warm:',0
-biosTicks: DD 0
-bankBiosTicks: DD 0
-optTicks: DD 0
-bankOptTicks: DD 0
-serialBiosTicks: DD 0
-bankSerialBiosTicks: DD 0
-serialOptTicks: DD 0
-bankSerialOptTicks: DD 0
-shiftTicks: DD 0
-bankShiftTicks: DD 0
-serialFullTicks: DD 0
-bankSerialFullTicks: DD 0
-coldTicks: DD 0
-bankColdTicks: DD 0
-warmTicks: DD 0
-bankWarmTicks: DD 0
-serialColdTicks: DD 0
-bankSerialColdTicks: DD 0
-serialWarmTicks: DD 0
-bankSerialWarmTicks: DD 0
-quadFullTicks: DD 0
-bankQuadFullTicks: DD 0
-quadColdTicks: DD 0
-bankQuadColdTicks: DD 0
-quadWarmTicks: DD 0
-bankQuadWarmTicks: DD 0
-quadDynamicTicks: DD 0
-bankQuadDynamicTicks: DD 0
-quadHalfTicks: DD 0
-bankQuadHalfTicks: DD 0
-coldMisses: DW 0
-warmMisses: DW 0
-bankColdMisses: DW 0
-bankWarmMisses: DW 0
-serialColdMisses: DW 0
-serialWarmMisses: DW 0
-bankSerialColdMisses: DW 0
-bankSerialWarmMisses: DW 0
-quadColdMisses: DW 0
-quadWarmMisses: DW 0
-bankQuadColdMisses: DW 0
-bankQuadWarmMisses: DW 0
-windowBiosMain: DD 0
-windowBiosTicks: DD 0
-windowFullMain: DD 0
-windowFullTicks: DD 0
-windowColdMain: DD 0
-windowColdTicks: DD 0
-windowWarmMain: DD 0
-windowWarmTicks: DD 0
-bulkBiosMain: DD 0
-bulkBiosTicks: DD 0
-bulkFullMain: DD 0
-bulkFullTicks: DD 0
-bulkColdMain: DD 0
-bulkColdTicks: DD 0
-bulkWarmMain: DD 0
-bulkWarmTicks: DD 0
-windowColdMainMiss: DW 0
-windowWarmMainMiss: DW 0
-windowColdMisses: DW 0
-windowWarmMisses: DW 0
-bulkColdMainMiss: DW 0
-bulkWarmMainMiss: DW 0
-bulkColdMisses: DW 0
-bulkWarmMisses: DW 0
-windowQuadMain: DD 0
-windowQuadTicks: DD 0
-bulkQuadMain: DD 0
-bulkQuadTicks: DD 0
+labelBIOS:              DB 'Monitor char:',0
+labelFont8:             DB '8x8 char:    ',0
+font8Ticks:             DD 0
+bankFont8Ticks:         DD 0
+labelFont8Serial:       DB '8x8 serial:  ',0
+font8SerialTicks:       DD 0
+bankFont8SerialTicks:   DD 0
+labelWindow8:           DB 'Win20  8x8:   ',0
+window8Main:            DD 0
+window8Ticks:           DD 0
+labelFar48Font8:        DB 'Far48 8x8:   ',0
+Far48Font8Main:         DD 0
+Far48Font8Ticks:        DD 0
+labelBulk8:             DB 'Far1152 8x8: ',0
+bulk8Main:              DD 0
+bulk8Ticks:             DD 0
+labelWindowOpt:         DB 'Win20  opt:   ',0
+windowOptMain:          DD 0
+windowOptTicks:         DD 0
+labelBulkOpt:           DB 'Far1152 opt: ',0
+bulkOptMain:            DD 0
+bulkOptTicks:           DD 0
+labelFar48Opt:          DB 'Far48 opt:   ',0
+Far48OptMain:           DD 0
+Far48OptTicks:          DD 0
+labelOpt:               DB 'Opt char:    ',0
+labelSerialBIOS:        DB 'Monitor line:',0
+labelSerialOpt:         DB 'Opt serial:  ',0
+labelFull:              DB 'Full char:   ',0
+labelSerialFull:        DB 'Full serial: ',0
+labelCold:              DB 'Cache cold:  ',0
+labelWarm:              DB 'Cache warm:  ',0
+labelSerialCold:        DB 'Serial cold: ',0
+labelSerialWarm:        DB 'Serial warm: ',0
+labelQuadFull:          DB 'Quad full:   ',0
+labelQuadCold:          DB 'Quad cold:   ',0
+labelQuadWarm:          DB 'Quad warm:   ',0
+labelRaw:               DB 'Quad raw:    ',0
+labelHalf:              DB 'Quad rot4:   ',0
+labelWindowBIOS:        DB 'Win20  Mon:   ',0
+labelWindowFull:        DB 'Win20  full:  ',0
+labelWindowQuad:        DB 'Win20  quad:  ',0
+labelWindowCold:        DB 'Win20  cold:  ',0
+labelWindowWarm:        DB 'Win20  warm:  ',0
+labelBulkBIOS:          DB 'Far1152 Mon: ',0
+labelBulkFull:          DB 'Far1152 full:',0
+labelBulkQuad:          DB 'Far1152 quad:',0
+labelBulkCold:          DB 'Far1152 cold:',0
+labelBulkWarm:          DB 'Far1152 warm:',0
+biosTicks:              DD 0
+bankBiosTicks:          DD 0
+optTicks:               DD 0
+bankOptTicks:           DD 0
+serialBiosTicks:        DD 0
+bankSerialBiosTicks:    DD 0
+serialOptTicks:         DD 0
+bankSerialOptTicks:     DD 0
+shiftTicks:             DD 0
+bankShiftTicks:         DD 0
+serialFullTicks:        DD 0
+bankSerialFullTicks:    DD 0
+coldTicks:              DD 0
+bankColdTicks:          DD 0
+warmTicks:              DD 0
+bankWarmTicks:          DD 0
+serialColdTicks:        DD 0
+bankSerialColdTicks:    DD 0
+serialWarmTicks:        DD 0
+bankSerialWarmTicks:    DD 0
+quadFullTicks:          DD 0
+bankQuadFullTicks:      DD 0
+quadColdTicks:          DD 0
+bankQuadColdTicks:      DD 0
+quadWarmTicks:          DD 0
+bankQuadWarmTicks:      DD 0
+quadDynamicTicks:       DD 0
+bankQuadDynamicTicks:   DD 0
+quadHalfTicks:          DD 0
+bankQuadHalfTicks:      DD 0
+coldMisses:             DW 0
+warmMisses:             DW 0
+bankColdMisses:         DW 0
+bankWarmMisses:         DW 0
+serialColdMisses:       DW 0
+serialWarmMisses:       DW 0
+bankSerialColdMisses:   DW 0
+bankSerialWarmMisses:   DW 0
+quadColdMisses:         DW 0
+quadWarmMisses:         DW 0
+bankQuadColdMisses:     DW 0
+bankQuadWarmMisses:     DW 0
+windowBiosMain:         DD 0
+windowBiosTicks:        DD 0
+windowFullMain:         DD 0
+windowFullTicks:        DD 0
+windowColdMain:         DD 0
+windowColdTicks:        DD 0
+windowWarmMain:         DD 0
+windowWarmTicks:        DD 0
+bulkBiosMain:           DD 0
+bulkBiosTicks:          DD 0
+bulkFullMain:           DD 0
+bulkFullTicks:          DD 0
+bulkColdMain:           DD 0
+bulkColdTicks:          DD 0
+bulkWarmMain:           DD 0
+bulkWarmTicks:          DD 0
+windowColdMainMiss:     DW 0
+windowWarmMainMiss:     DW 0
+windowColdMisses:       DW 0
+windowWarmMisses:       DW 0
+bulkColdMainMiss:       DW 0
+bulkWarmMainMiss:       DW 0
+bulkColdMisses:         DW 0
+bulkWarmMisses:         DW 0
+windowQuadMain:         DD 0
+windowQuadTicks:        DD 0
+bulkQuadMain:           DD 0
+bulkQuadTicks:          DD 0
 
-labelPacked: DB 'Quad KOI4072:',0
-PackedMain: DD 0
-PackedTicks: DD 0
-labelWin20Cold: DB 'Win20  q cold:',0
-Win20ColdMain: DD 0
-Win20ColdTicks: DD 0
-Win20ColdMainMiss: DW 0
-Win20ColdMisses: DW 0
-labelWin20Warm: DB 'Win20  q warm:',0
-Win20WarmMain: DD 0
-Win20WarmTicks: DD 0
-Win20WarmMainMiss: DW 0
-Win20WarmMisses: DW 0
-labelWin20Raw: DB 'Win20  q raw:',0
-Win20RawMain: DD 0
-Win20RawTicks: DD 0
-labelWin20Half: DB 'Win20  q rot4:',0
-Win20HalfMain: DD 0
-Win20HalfTicks: DD 0
-labelWin20Packed: DB 'Win20  KOI4072:',0
-Win20PackedMain: DD 0
-Win20PackedTicks: DD 0
-labelFar1152Cold: DB 'Far1152 q cold:',0
-Far1152ColdMain: DD 0
-Far1152ColdTicks: DD 0
-Far1152ColdMainMiss: DW 0
-Far1152ColdMisses: DW 0
-labelFar1152Warm: DB 'Far1152 q warm:',0
-Far1152WarmMain: DD 0
-Far1152WarmTicks: DD 0
-Far1152WarmMainMiss: DW 0
-Far1152WarmMisses: DW 0
-labelFar1152Raw: DB 'Far1152 q raw:',0
-Far1152RawMain: DD 0
-Far1152RawTicks: DD 0
-labelFar1152Half: DB 'Far1152 q rot4:',0
-Far1152HalfMain: DD 0
-Far1152HalfTicks: DD 0
-labelFar1152Packed: DB 'Far1152 KOI4072:',0
-Far1152PackedMain: DD 0
-Far1152PackedTicks: DD 0
-labelFar48Cold: DB 'Far48 q cold:',0
-Far48ColdMain: DD 0
-Far48ColdTicks: DD 0
-Far48ColdMainMiss: DW 0
-Far48ColdMisses: DW 0
-labelFar48Warm: DB 'Far48 q warm:',0
-Far48WarmMain: DD 0
-Far48WarmTicks: DD 0
-Far48WarmMainMiss: DW 0
-Far48WarmMisses: DW 0
-labelFar48Raw: DB 'Far48 q raw:',0
-Far48RawMain: DD 0
-Far48RawTicks: DD 0
-labelFar48Half: DB 'Far48 q rot4:',0
-Far48HalfMain: DD 0
-Far48HalfTicks: DD 0
-labelFar48Packed: DB 'Far48 KOI4072:',0
-Far48PackedMain: DD 0
-Far48PackedTicks: DD 0
-labelFar48Bios: DB 'Far48 Mon: ',0
-Far48BiosMain: DD 0
-Far48BiosTicks: DD 0
-labelFar48Full: DB 'Far48 full:',0
-Far48FullMain: DD 0
-Far48FullTicks: DD 0
-labelFar48Quad: DB 'Far48 q full:',0
-Far48QuadMain: DD 0
-Far48QuadTicks: DD 0
-labelFar48ColdSerial: DB 'Far48 s cold:',0
-Far48ColdSerialMain: DD 0
-Far48ColdSerialTicks: DD 0
-Far48ColdSerialMainMiss: DW 0
-Far48ColdSerialMisses: DW 0
-labelFar48WarmSerial: DB 'Far48 s warm:',0
-Far48WarmSerialMain: DD 0
-Far48WarmSerialTicks: DD 0
-Far48WarmSerialMainMiss: DW 0
-Far48WarmSerialMisses: DW 0
-label4RawChar: DB '4raw char:',0
-f4RawCharMain: DD 0
-f4RawCharDOS: DD 0
-label4RawSerial: DB '4raw serial:',0
-f4RawSerialMain: DD 0
-f4RawSerialDOS: DD 0
-label4RawWin20: DB '4raw Win20 :',0
-f4RawWin20Main: DD 0
-f4RawWin20DOS: DD 0
-label4RawFar48: DB '4raw Far48:',0
-f4RawFar48Main: DD 0
-f4RawFar48DOS: DD 0
-label4RawFar1152: DB '4raw Far1152:',0
-f4RawFar1152Main: DD 0
-f4RawFar1152DOS: DD 0
-label4PackedChar: DB '4pack char:',0
-f4PackedCharMain: DD 0
-f4PackedCharDOS: DD 0
-label4PackedSerial: DB '4pack serial:',0
-f4PackedSerialMain: DD 0
-f4PackedSerialDOS: DD 0
-label4PackedWin20: DB '4pack Win20 :',0
-f4PackedWin20Main: DD 0
-f4PackedWin20DOS: DD 0
-label4PackedFar48: DB '4pack Far48:',0
-f4PackedFar48Main: DD 0
-f4PackedFar48DOS: DD 0
-label4PackedFar1152: DB '4pack Far1152:',0
-f4PackedFar1152Main: DD 0
-f4PackedFar1152DOS: DD 0
-label4RepeatChar: DB '4dup char:',0
-f4RepeatCharMain: DD 0
-f4RepeatCharDOS: DD 0
-label4RepeatSerial: DB '4dup serial:',0
-f4RepeatSerialMain: DD 0
-f4RepeatSerialDOS: DD 0
-label4RepeatWin20: DB '4dup Win20 :',0
-f4RepeatWin20Main: DD 0
-f4RepeatWin20DOS: DD 0
-label4RepeatFar48: DB '4dup Far48:',0
-f4RepeatFar48Main: DD 0
-f4RepeatFar48DOS: DD 0
-label4RepeatFar1152: DB '4dup Far1152:',0
-f4RepeatFar1152Main: DD 0
-f4RepeatFar1152DOS: DD 0
-labelPageRawLine: DB 'PageRaw Win20 :',0
-PageRawLineMain: DD 0
-PageRawLineBank: DD 0
-labelPageRawFar48: DB 'PageRaw Far48:',0
-PageRawFar48Main: DD 0
-PageRawFar48Bank: DD 0
-labelPageRawFar1152: DB 'PageRaw Far1152:',0
-PageRawFar1152Main: DD 0
-PageRawFar1152Bank: DD 0
-labelPagePreLine: DB 'PagePre Win20 :',0
-PagePreLineMain: DD 0
-PagePreLineBank: DD 0
-labelPagePreFar48: DB 'PagePre Far48:',0
-PagePreFar48Main: DD 0
-PagePreFar48Bank: DD 0
-labelPagePreFar1152: DB 'PagePre Far1152:',0
-PagePreFar1152Main: DD 0
-PagePreFar1152Bank: DD 0
-labelPage8Line: DB 'Page8 Win20 :',0
-Page8LineMain: DD 0
-Page8LineBank: DD 0
-labelPage8Far48: DB 'Page8 Far48:',0
-Page8Far48Main: DD 0
-Page8Far48Bank: DD 0
-labelPage8Far1152: DB 'Page8 Far1152:',0
-Page8Far1152Main: DD 0
-Page8Far1152Bank: DD 0
-labelApiRealWin20: DB 'API real Win20 :',0
-ApiRealWin20Main: DD 0
-ApiRealWin20Bank: DD 0
-labelApiRealFar48: DB 'API real Far48:',0
-ApiRealFar48Main: DD 0
-ApiRealFar48Bank: DD 0
-labelApiRealFar1152: DB 'API real Far1152:',0
-ApiRealFar1152Main: DD 0
-ApiRealFar1152Bank: DD 0
+labelPacked:                DB 'Quad KOI4072:',0
+PackedMain:                 DD 0
+PackedTicks:                DD 0
+labelWin20Cold:             DB 'Win20  q cold:',0
+Win20ColdMain:              DD 0
+Win20ColdTicks:             DD 0
+Win20ColdMainMiss:          DW 0
+Win20ColdMisses:            DW 0
+labelWin20Warm:             DB 'Win20  q warm:',0
+Win20WarmMain:              DD 0
+Win20WarmTicks:             DD 0
+Win20WarmMainMiss:          DW 0
+Win20WarmMisses:            DW 0
+labelWin20Raw:              DB 'Win20  q raw:',0
+Win20RawMain:               DD 0
+Win20RawTicks:              DD 0
+labelWin20Half:             DB 'Win20  q rot4:',0
+Win20HalfMain:              DD 0
+Win20HalfTicks:             DD 0
+labelWin20Packed:           DB 'Win20  KOI4072:',0
+Win20PackedMain:            DD 0
+Win20PackedTicks:           DD 0
+labelFar1152Cold:           DB 'Far1152 q cold:',0
+Far1152ColdMain:            DD 0
+Far1152ColdTicks:           DD 0
+Far1152ColdMainMiss:        DW 0
+Far1152ColdMisses:          DW 0
+labelFar1152Warm:           DB 'Far1152 q warm:',0
+Far1152WarmMain:            DD 0
+Far1152WarmTicks:           DD 0
+Far1152WarmMainMiss:        DW 0
+Far1152WarmMisses:          DW 0
+labelFar1152Raw:            DB 'Far1152 q raw:',0
+Far1152RawMain:             DD 0
+Far1152RawTicks:            DD 0
+labelFar1152Half:           DB 'Far1152 q rot4:',0
+Far1152HalfMain:            DD 0
+Far1152HalfTicks:           DD 0
+labelFar1152Packed:         DB 'Far1152 KOI4072:',0
+Far1152PackedMain:          DD 0
+Far1152PackedTicks:         DD 0
+labelFar48Cold:             DB 'Far48 q cold:',0
+Far48ColdMain:              DD 0
+Far48ColdTicks:             DD 0
+Far48ColdMainMiss:          DW 0
+Far48ColdMisses:            DW 0
+labelFar48Warm:             DB 'Far48 q warm:',0
+Far48WarmMain:              DD 0
+Far48WarmTicks:             DD 0
+Far48WarmMainMiss:          DW 0
+Far48WarmMisses:            DW 0
+labelFar48Raw:              DB 'Far48 q raw:',0
+Far48RawMain:               DD 0
+Far48RawTicks:              DD 0
+labelFar48Half:             DB 'Far48 q rot4:',0
+Far48HalfMain:              DD 0
+Far48HalfTicks:             DD 0
+labelFar48Packed:           DB 'Far48 KOI4072:',0
+Far48PackedMain:            DD 0
+Far48PackedTicks:           DD 0
+labelFar48Bios:             DB 'Far48 Mon: ',0
+Far48BiosMain:              DD 0
+Far48BiosTicks:             DD 0
+labelFar48Full:             DB 'Far48 full:',0
+Far48FullMain:              DD 0
+Far48FullTicks:             DD 0
+labelFar48Quad:             DB 'Far48 q full:',0
+Far48QuadMain:              DD 0
+Far48QuadTicks:             DD 0
+labelFar48ColdSerial:       DB 'Far48 s cold:',0
+Far48ColdSerialMain:        DD 0
+Far48ColdSerialTicks:       DD 0
+Far48ColdSerialMainMiss:    DW 0
+Far48ColdSerialMisses:      DW 0
+labelFar48WarmSerial:       DB 'Far48 s warm:',0
+Far48WarmSerialMain:        DD 0
+Far48WarmSerialTicks:       DD 0
+Far48WarmSerialMainMiss:    DW 0
+Far48WarmSerialMisses:      DW 0
+label4RawChar:              DB '4raw char:',0
+f4RawCharMain:              DD 0
+f4RawCharDOS:               DD 0
+label4RawSerial:            DB '4raw serial:',0
+f4RawSerialMain:            DD 0
+f4RawSerialDOS:             DD 0
+label4RawWin20:             DB '4raw Win20 :',0
+f4RawWin20Main:             DD 0
+f4RawWin20DOS:              DD 0
+label4RawFar48:             DB '4raw Far48:',0
+f4RawFar48Main:             DD 0
+f4RawFar48DOS:              DD 0
+label4RawFar1152:           DB '4raw Far1152:',0
+f4RawFar1152Main:           DD 0
+f4RawFar1152DOS:            DD 0
+label4PackedChar:           DB '4pack char:',0
+f4PackedCharMain:           DD 0
+f4PackedCharDOS:            DD 0
+label4PackedSerial:         DB '4pack serial:',0
+f4PackedSerialMain:         DD 0
+f4PackedSerialDOS:          DD 0
+label4PackedWin20:          DB '4pack Win20 :',0
+f4PackedWin20Main:          DD 0
+f4PackedWin20DOS:           DD 0
+label4PackedFar48:          DB '4pack Far48:',0
+f4PackedFar48Main:          DD 0
+f4PackedFar48DOS:           DD 0
+label4PackedFar1152:        DB '4pack Far1152:',0
+f4PackedFar1152Main:        DD 0
+f4PackedFar1152DOS:         DD 0
+label4RepeatChar:           DB '4dup char:',0
+f4RepeatCharMain:           DD 0
+f4RepeatCharDOS:            DD 0
+label4RepeatSerial:         DB '4dup serial:',0
+f4RepeatSerialMain:         DD 0
+f4RepeatSerialDOS:          DD 0
+label4RepeatWin20:          DB '4dup Win20 :',0
+f4RepeatWin20Main:          DD 0
+f4RepeatWin20DOS:           DD 0
+label4RepeatFar48:          DB '4dup Far48:',0
+f4RepeatFar48Main:          DD 0
+f4RepeatFar48DOS:           DD 0
+label4RepeatFar1152:        DB '4dup Far1152:',0
+f4RepeatFar1152Main:        DD 0
+f4RepeatFar1152DOS:         DD 0
+labelPageRawLine:           DB 'PageRaw Win20 :',0
+PageRawLineMain:            DD 0
+PageRawLineBank:            DD 0
+labelPageRawFar48:          DB 'PageRaw Far48:',0
+PageRawFar48Main:           DD 0
+PageRawFar48Bank:           DD 0
+labelPageRawFar1152:        DB 'PageRaw Far1152:',0
+PageRawFar1152Main:         DD 0
+PageRawFar1152Bank:         DD 0
+labelPagePreLine:           DB 'PagePre Win20 :',0
+PagePreLineMain:            DD 0
+PagePreLineBank:            DD 0
+labelPagePreFar48:          DB 'PagePre Far48:',0
+PagePreFar48Main:           DD 0
+PagePreFar48Bank:           DD 0
+labelPagePreFar1152:        DB 'PagePre Far1152:',0
+PagePreFar1152Main:         DD 0
+PagePreFar1152Bank:         DD 0
+labelPage8Line:             DB 'Page8 Win20 :',0
+Page8LineMain:              DD 0
+Page8LineBank:              DD 0
+labelPage8Far48:            DB 'Page8 Far48:',0
+Page8Far48Main:             DD 0
+Page8Far48Bank:             DD 0
+labelPage8Far1152:          DB 'Page8 Far1152:',0
+Page8Far1152Main:           DD 0
+Page8Far1152Bank:           DD 0
+labelApiRealWin20:          DB 'API real Win20 :',0
+ApiRealWin20Main:           DD 0
+ApiRealWin20Bank:           DD 0
+labelApiRealFar48:          DB 'API real Far48:',0
+ApiRealFar48Main:           DD 0
+ApiRealFar48Bank:           DD 0
+labelApiRealFar1152:        DB 'API real Far1152:',0
+ApiRealFar1152Main:         DD 0
+ApiRealFar1152Bank:         DD 0

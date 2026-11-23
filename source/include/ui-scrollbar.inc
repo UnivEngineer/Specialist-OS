@@ -243,11 +243,11 @@ scrollScaleNext:
     jp nz,scrollScaleStep
     ld a,(scrollQuotient)
     ret
-scrollDescriptor: DW 0
-scrollPosition: DW 0
-scrollRange: DW 0
-scrollLength: DB 0
-scrollThickness: DB 0
-scrollHorizontal: DB 0
-scrollThumb: DB 0
-scrollQuotient: DB 0
+scrollDescriptor:   DW 0
+scrollPosition:     DW 0
+scrollRange:        DW 0
+scrollLength:       DB 0
+scrollThickness:    DB 0
+scrollHorizontal:   DB 0
+scrollThumb:        DB 0
+scrollQuotient:     DB 0

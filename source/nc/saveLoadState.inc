@@ -1,8 +1,8 @@
-; Text state is an overlay on A:\NC.CFG. No private binary format or migration.
+; Text state is an overlay on C:\DOS\NC.CFG. No private binary format or migration.
 ; Save only navigation/view fields, leaving the system color configuration alone.
     ASSERT 2*MAX_PATH+2*13+11*20 < 2048 ; Maximum two paths/leaves plus keys/numbers.
 loadState:
-    ld hl,ncStatePath
+    call ncRamStatePath
     call ncConfigRead
     jp nc,ncStateValidate
     cp DOS_ERR_NOT_FOUND
@@ -225,7 +225,7 @@ saveState:
     ld de,NC_SORT_KEYS
     call bios_sub_hl_de
     ld (ncStateIO+FILE_PATH_IO.count),hl
-    ld hl,ncStatePath
+    call ncRamStatePath
     call ncConfigSetPath
     ld hl,NC_SORT_KEYS
     ld (ncStateIO+FILE_PATH_IO.buffer),hl
@@ -396,6 +396,19 @@ ncStateOnes:
     add a,'0'
     ld (de),a
     inc de
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Дописать перевод строки DOS в буфер конфигурации NC.
+;
+; вход:
+;   de = адрес двух доступных для записи байтов.
+;
+; выход:
+;   Записаны CR и LF, de указывает за LF, a = 10. bc, hl и флаги сохранены.
+;----------------------------------------------------------------------------
+
 ncStateWriteNewline:
     ld a,13
     ld (de),a
@@ -413,11 +426,21 @@ ncStateLeftKeys:
     DW ncKeyLeftPath,ncKeyLeftSort,ncKeyLeftInfo,ncKeyLeftSelected,ncKeyLeftFirst
 ncStateRightKeys:
     DW ncKeyRightPath,ncKeyRightSort,ncKeyRightInfo,ncKeyRightSelected,ncKeyRightFirst
-ncStateDisabled: DB 0
-ncStateDrive: DB 0
-ncStateActive: DB 0
-ncStateKeys: DW 0
+ncStateDisabled:    DB 0
+ncStateDrive:       DB 0
+ncStateActive:      DB 0
+ncStateKeys:        DW 0
 ncStateIO:
     DW vars.pathArg,NC_SORT_KEYS,2047,0
     DS FILE_DESCRIPTOR,0
+ ; Return HL = NC state path for the current RAM disk. AF/BC/DE are scratch.
+ncRamStatePath:
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL MXOS_DOS_MEMORY
+    ld a,e
+    add a,'A'
+    ld (ncStatePath),a
+    ld hl,ncStatePath
+    ret
 ncStatePath: DB 'B:',05Ch,'NC-STATE.CFG',0

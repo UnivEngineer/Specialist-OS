@@ -6,14 +6,14 @@
 ; uiShowHelp: HL=absolute ASCIIZ path. Returns CF/A on failure.
 ; Format: KOI8-R, LF or CRLF, Tab stops at columns 13 and 26 (zero based).
 ; Each line is clipped to 28 cells. Requests are synchronous, non-reentrant.
-UI_HELP_ROWS = 9
-UI_HELP_COLUMNS = 28
-UI_HELP_BODY = UI_HELP_ROWS*10
-UI_HELP_Y = (256-UI_HELP_BODY-58)/2+26
-UI_HELP_BLOCK = 128
-UI_HELP_INDEX_LAST = 56
+UI_HELP_ROWS        = 9
+UI_HELP_COLUMNS     = 28
+UI_HELP_BODY        = UI_HELP_ROWS*10
+UI_HELP_Y           = (256-UI_HELP_BODY-58)/2+26
+UI_HELP_BLOCK       = 128
+UI_HELP_INDEX_LAST  = 56
 UI_HELP_INDEX_BYTES = (UI_HELP_INDEX_LAST/8+1)*4
-UI_HELP_BITMAP = 09900h+UI_HELP_Y-1
+UI_HELP_BITMAP      = 09900h+UI_HELP_Y-1
 
 uiShowHelp:
     push hl
@@ -427,18 +427,18 @@ uiHelpEof:
     scf
     ret
 
-uiHelpTitle: DB 'Help',0
-uiHelpOk: DB 'OK [Enter]',0
+uiHelpTitle:    DB 'Help',0
+uiHelpOk:       DB 'OK [Enter]',0
 uiHelpDescriptor:
     UI_MODAL_BEGIN UI_HELP_BODY,1,1
     UI_MODAL_BUTTON uiHelpOk,0,0,1
     UI_MODAL_END
-uiHelpScroll: UI_SCROLLBAR 304,UI_HELP_Y,UI_HELP_BODY,8,3,0,UI_HELP_ROWS,0
-uiHelpLast: DW 0
-uiHelpTarget: DW 0
-uiHelpStreamLine: DW 0
-uiHelpIndex: DS UI_HELP_INDEX_BYTES,0
-uiHelpNext: DW 0
-uiHelpRemaining: DB 0
-uiHelpError: DB 0
-uiHelpRow: DS UI_HELP_COLUMNS,0
+uiHelpScroll:       UI_SCROLLBAR  304,UI_HELP_Y,UI_HELP_BODY,8,3,0,UI_HELP_ROWS,0
+uiHelpLast:         DW            0
+uiHelpTarget:       DW            0
+uiHelpStreamLine:   DW            0
+uiHelpIndex:        DS            UI_HELP_INDEX_BYTES,0
+uiHelpNext:         DW            0
+uiHelpRemaining:    DB            0
+uiHelpError:        DB            0
+uiHelpRow:          DS            UI_HELP_COLUMNS,0

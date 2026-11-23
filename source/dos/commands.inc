@@ -287,12 +287,36 @@ cliEchoSet:
     xor a
     ld (cliOutput),a
     jp cliSuccess
-cliEchoOffText: DB 'OFF',0
-cliEchoOnText: DB 'ON',0
+cliEchoOffText:     DB 'OFF',0
+cliEchoOnText:      DB 'ON',0
 cliNewLine:
     ld c,0Ah
     call bios_printChar
     jp cliSuccess
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Показать приглашение PAUSE и дождаться одной клавиши.
+;
+; вход:
+;   cliArgs указывает на остаток строки, допустима только пустая строка.
+;
+; выход:
+;   cf = 0 и a = 0 после клавиши, иначе cf = 1 и a = DOS_ERR_ARGUMENT.
+;   Нажатая клавиша потребляется. af, bc, de и hl используются.
+;----------------------------------------------------------------------------
+cliPause:
+    ld hl,(cliArgs)
+    ld a,(hl)
+    or a
+    jp nz,blockArgument
+    ld hl,cliPauseText
+    call bios_printString
+cliPauseWait:
+    call j_getch
+    jp cliNewLine
+cliPauseText: DB 'PRESS ANY KEY TO CONTINUE',10,0
+
 cliCls:
     ld c,01Fh
     call bios_printChar

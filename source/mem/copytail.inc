@@ -45,9 +45,9 @@ index = index+1
     ld (hl),a
     jp bankCopyReturn
 bankCopyLocalParams:
-bankCopySourcePair: DW 0
-bankCopyDestPair: DW 0
-bankCopyReturnPair: DW 0
-bankCopyCount: DW 0
+bankCopySourcePair:     DW 0
+bankCopyDestPair:       DW 0
+bankCopyReturnPair:     DW 0
+bankCopyCount:          DW 0
 bankCopyTailEnd:
     ASSERT $ <= BANK_WINDOW

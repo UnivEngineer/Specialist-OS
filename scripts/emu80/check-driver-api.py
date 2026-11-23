@@ -49,7 +49,7 @@ def main():
         assert len(name)<=22 and 0<len(description)<=30
         bc=state['registers']['bc']['dec']
         technology,capabilities=bc>>8,bc&255
-        assert technology==ord('R' if expected=='RAMD' else 'O' if expected=='ROM' else 'F')
+        assert technology==ord(dict(RAMD='R',ROM='Q',FLASH='P',FLASHFST='P',FLASHSYS='S')[expected])
         assert capabilities==dict(RAMD=3,ROM=1,FLASH=7,FLASHFST=15,FLASHSYS=7)[expected]
         report['descriptors'][expected+'/'+description.decode()] = dict(address=addr,
             technology=chr(technology),capabilities=capabilities)

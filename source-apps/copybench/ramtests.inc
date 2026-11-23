@@ -213,11 +213,11 @@ getWord:
     ld d,(hl)
     inc hl
     ret
-blockDesc: DW builtinBlockImage,32,0,0,blockName
-byteDesc: DW builtinByteImage,32,0,0,byteName
-cpmDesc: DW cpmBlob,164,cpmBlob,164,cpmName
-descriptor: DW 0
-tablePointer: DW 0
-readDirection: DB 0
-lastOK: DB 0
-ramErrors: DB 0
+blockDesc:      DW builtinBlockImage,32,0,0,blockName
+byteDesc:       DW builtinByteImage,32,0,0,byteName
+cpmDesc:        DW cpmBlob,164,cpmBlob,164,cpmName
+descriptor:     DW 0
+tablePointer:   DW 0
+readDirection:  DB 0
+lastOK:         DB 0
+ramErrors:      DB 0

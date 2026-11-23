@@ -338,7 +338,7 @@ keDriverStackReady:
     jp nz,keDriverBusy
     ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
     ld (diStart),hl
-    ld de,DOS_BANK_DRIVER_ADDR
+    ld de,DOS_ARENA_START
     call cmp_hl_de
     jp c,keDriverBad
     ld hl,(v_imageHeader+IMAGE_MEMORY_END)
@@ -418,7 +418,6 @@ keBat:
     jp execBat
 keBatDone:
     jp keDone
-keRegs: DS MX_REGS,0
 
 ; Верхняя утилита занимает часть арены: токен прежнего конца остаётся
 ; в локальном стеке DOS на время её исполнения, включая вложенные запуски.
@@ -446,7 +445,6 @@ keCacheRelease:
     ld a,1
     MXOS_CALL MXOS_BIOS_GLYPH_CACHE
     ret
-keCacheToken: DW 0
 
 ; Static MAIN interval is tracked separately from the application's heap.
 keReserveImage:
@@ -514,7 +512,6 @@ keBindDone:
     pop hl
     pop bc
     ret
-keImageToken: DW 0
 
 ; Nonreturning MAIN clients can also hand off to a DOS launcher whose child
 ; needs their MAIN intervals. The command and return stack remain accessible.

@@ -1474,10 +1474,10 @@ buildLoop4:
     jp nz,buildPage4
     ret
 buildAllEnd:
-realMode: DB 0
-produced: DB 0
-text: DW 0
-codes: DS 4
-preBase: DW 0
-preEpoch: DB 0
+realMode:       DB 0
+produced:       DB 0
+text:           DW 0
+codes:          DS 4
+preBase:        DW 0
+preEpoch:       DB 0
     ENDMODULE

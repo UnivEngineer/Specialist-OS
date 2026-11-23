@@ -8,10 +8,35 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     jp initialize
 descriptor: DB 8,1
     DW scalar,batch,empty,scalar
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить движок измерений шрифта enginew и вернуть его дескриптор.
+;
+; вход:
+;   Движок загружен в MAIN. Регистровые параметры этой реализации не требуются.
+;
+; выход:
+;   hl = адрес локального дескриптора с размерами и точками входа вывода, a = 0, cf =
+;   0.
+;----------------------------------------------------------------------------
+
 initialize:
     ld hl,descriptor
     xor a
     ret
+;----------------------------------------------------------------------------
+; Нарисовать один символ заменой восьми экранных строк в текущей позиции.
+;
+; вход:
+;   c = код KOI8. Позиция задана bios_vars.cursorY и bios_vars.cursorX,
+;   положение должно допускать запись знакоместа без переноса строки.
+;
+; выход:
+;   bios_vars.cursorX увеличен на 4. AF, BC, DE, HL и флаги меняются.
+;----------------------------------------------------------------------------
+
 scalar:
     ld hl,(bios_vars.cursorY)
     ld a,h
@@ -65,6 +90,17 @@ rows:
     ret                         ; window cursor advancement is adapted above
 rowOperation: jp plainRow
 plainRow: ret                    ; original D1A8, normal replace operation
+;----------------------------------------------------------------------------
+; Вывести последовательность символов без переноса строки.
+;
+; вход:
+;   hl = адрес кодов KOI8, c = длина 1..255. Все знакоместа должны помещаться
+;   в строке. Начальная позиция та же, что у scalar.
+;
+; выход:
+;   Позиция продвинута на длину последовательности. AF, BC, DE, HL сохранены.
+;----------------------------------------------------------------------------
+
 batch:
     push af
     push bc
@@ -87,10 +123,10 @@ next:
     pop af
     ret
 empty: ret
-screenCursor: DW 0
+screenCursor:   DW 0
 ; Identity KOI8 map for the common 256-code corpus. Historical default KOI7
 ; selects different blocks; the lookup machinery itself is unchanged.
-blockMap: DW font,font+256,font+512,font+768,font+1024,font+1280,font+1536,font+1792
+blockMap:       DW font,font+256,font+512,font+768,font+1024,font+1280,font+1536,font+1792
     DS 02800h-$,0
 font: INCBIN "../../source/monitor_win/originals/monitor_win.rom",01800h,00800h
     ASSERT $ == 03000h

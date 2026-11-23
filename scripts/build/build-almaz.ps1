@@ -24,7 +24,7 @@ if (-not $RunBuild) {
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 & $assembler "--i8080" "-Wno-rdlow" `
     ("--raw={0}.bin" -f $prefix) ("--lst={0}.lst" -f $prefix) `
-    ("--sym={0}.sym" -f $prefix) $sourcePath
+    ("--sym={0}.sym" -f $prefix) ($sourcePath.Replace('\', '/'))
 if ($LASTEXITCODE -ne 0) { throw "Almaz assembly failed" }
 
 # Заголовок RKS: начало и включительный конец, оба слова little-endian.

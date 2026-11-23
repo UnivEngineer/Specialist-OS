@@ -241,10 +241,10 @@ packedPixels:
 packedRestore:
     ld sp,0
     jp quadPixelsEnd
-packedBase: DW 0
-packedWrite: DW 0
-packedCount: DB 0
-packedHeader: INCBIN "../../../bin/FONTKOI.packed.bin",0,32
-packedIndex: INCBIN "../../../bin/FONTKOI.packed.index.bin"
-packedCodes: INCBIN "../../../bin/FONTKOI.packed.codes.bin"
+packedBase:     DW      0
+packedWrite:    DW      0
+packedCount:    DB      0
+packedHeader:   INCBIN  "../../../bin/FONTKOI.packed.bin",0,32
+packedIndex:    INCBIN  "../../../bin/FONTKOI.packed.index.bin"
+packedCodes:    INCBIN  "../../../bin/FONTKOI.packed.codes.bin"
     INCLUDE "../../../bin/FONTKOI.packed.overrides.inc"

@@ -1,10 +1,11 @@
-"""Единый вход B=5: MAIN/DOS/BANK, A:/B:/H:, ошибки и сохранение регистров."""
+"""Единый вход B=5: MAIN/DOS/BANK, C:/B:/H:, ошибки и сохранение регистров."""
 import json,re,struct,subprocess
 from pathlib import Path
 R=Path(__file__).resolve().parents[2];O=R/'docs/diskbench/unified-b5-2026-11-11/cpu';O.mkdir(parents=True,exist_ok=True)
 W=lambda x:struct.pack('<H',x)
 s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\da-fA-F]+)',(R/'bin/banked/CLIENT.sym').read_text(),re.M)}
 source='''    ORG 08000h
+    ld (08101h),a
     push bc
     push de
     push hl
@@ -57,13 +58,13 @@ for name,origin in [('LOCALBLOCK',s['MEM_IMAGE_LOCAL_START']),('TRANSPORT',s['BA
 ls={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\da-fA-F]+)',(R/'bin/banked/LOCALBLOCK.sym').read_text(),re.M)}
 # Подменены только физические операции. Диспетчер B=5 и сравнение настоящие.
 for addr in (ls['localRamBlock'],s['LOCAL_DRIVER_ADDR'],s['MEM_IO_SYSTEM']):base[addr:addr+3]=b'\xc3'+W(0x8000)
-struct.pack_into('<H',base,s['MEM_LOCAL_A'],0x8000)
+struct.pack_into('<H',base,s['MEM_LOCAL_SYSTEM'],0x8000)
 struct.pack_into('<H',base,s['MEM_LOCAL_CHECKED'],s['MEM_IO_CHECKED'])
 driver=(O/'driver.bin').read_bytes();base[0x8000:0x8000+len(driver)]=driver
 payload=bytes((n*37+11)&255 for n in range(256));base[0x3fff:0x4101]=b'X'+payload+b'Y'
 # Искажение в storage после WRITE будет прочитано и обнаружено VERIFY.
 rows=[]
-for page,drive,source_addr,mode in __import__("itertools").product((0,1,2),(0,1,7),(0x4000,0xB400),range(4)):
+for page,drive,source_addr,mode in __import__("itertools").product((0,1,2),(s['SYSTEM_DRIVE'],s['RAM_DRIVE'],s['EXTERNAL_DRIVE']),(0x4000,0xB400),range(4)):
  mem=bytearray(base);mem[0x8100]=mode;mem[s["bankPage"]]=page
  mem[source_addr-1:source_addr+257]=b"X"+payload+b"Y"
  stub=b'\x31'+W(0xE000)+b'\x21'+W(source_addr)+b'\x11'+W(0x1234)+b'\x01'+W(0x0500+drive)+b'\xcd'+W(s['LOCAL_BLOCK_ENTRY'])
@@ -71,6 +72,7 @@ for page,drive,source_addr,mode in __import__("itertools").product((0,1,2),(0,1,
  mem[0x8200:0x8200+len(stub)]=stub;(O/'in.bin').write_bytes(mem)
  subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8200','-end','82ff','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True)
  result=(O/'out.bin').read_bytes();assert int.from_bytes(result[65542:65544],'little')==0x82ff
+ if page==0 and drive==s['SYSTEM_DRIVE']:assert result[0x8101]==drive
  assert bool(result[0x8300]&1)==bool(mode),(mode,result[0x8300:0x8302].hex())
  assert result[source_addr-1:source_addr+256]==b'X'+payload,(page,source_addr,mode)
  if source_addr+256!=s['DOS_VERIFY_BUFFER']:assert result[source_addr+256]==ord('Y')
@@ -78,4 +80,4 @@ for page,drive,source_addr,mode in __import__("itertools").product((0,1,2),(0,1,
  assert struct.unpack_from('<HHH',result,0x8302)==(source_addr,0x1234,0x0500+drive)
  if page==1:assert result[0xDD00:0xDEC0]==base[0xDD00:0xDEC0]
  rows.append(dict(page=page,source=source_addr,mode=mode,error=bool(mode)))
-(O/'result.json').write_text(json.dumps(rows,indent=2)+'\n');print('UNIFIED BLOCK PASS:',len(rows),'MAIN/DOS/BANK A/B/H cases: success, write/read failure, mismatch; BC/DE/HL/SP preserved')
+(O/'result.json').write_text(json.dumps(rows,indent=2)+'\n');print('UNIFIED BLOCK PASS:',len(rows),'MAIN/DOS/BANK C/B/H cases: success, write/read failure, mismatch; BC/DE/HL/SP preserved')

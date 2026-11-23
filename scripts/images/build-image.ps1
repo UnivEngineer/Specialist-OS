@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("SystemEmu", "SystemEmuFlash", "SystemEmuWritable", "SystemRamfos", "SystemHardware", "Games64k", "Games2M")]
+    [ValidateSet("SystemEmu", "SystemEmuFlash", "SystemEmuWritable", "SystemRamfos", "SystemHardware", "Games64k", "Games2M", "Floppy720")]
     [string] $Target,
 
     [Parameter(Position = 1)]
@@ -12,12 +12,14 @@ param(
     [switch] $BootstrapProbe,
     [switch] $Force,
     [Parameter(DontShow)]
+    [switch] $FontsReady,
+    [Parameter(DontShow)]
     [switch] $RunBuild
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version 2.0
-if ($BootFont -and $Target -notin @('SystemEmuWritable','SystemHardware')) { throw '-BootFont requires SystemEmuWritable or SystemHardware.' }
+if ($BootFont -and $Target -notin @('SystemEmuWritable','SystemRamfos','SystemHardware')) { throw '-BootFont requires SystemEmuWritable, SystemRamfos or SystemHardware.' }
 if ($ManifestFile -and $Target -ne 'Games2M') { throw '-ManifestFile is currently supported only for Games2M.' }
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -25,6 +27,9 @@ $assetDirectory = Join-Path $repositoryRoot "assets"
 $imageDirectory = Join-Path $repositoryRoot "images"
 $sectorSize = 256
 $sectorsPerCluster = 1
+$floppy = $Target -eq 'Floppy720'
+$fatCopies = 1
+$mediaByte = 0xF8
 
 function Join-Bytes {
     param([Parameter(ValueFromRemainingArguments = $true)][byte[][]] $Arrays)
@@ -136,7 +141,7 @@ function Get-Manifest {
                 default { throw "Invalid attributes at ${Path}:${lineNumber}: use R, S or RS" }
             }
         }
-        [pscustomobject]@{ ImageName = $fields[0]; Source = $source; LoadAddress = $address; Format = $format; Attributes = $attributes }
+        [pscustomobject]@{ ImageName = $fields[0]; Source = $source; LoadAddress = $address; Format = $format; Attributes = $attributes; Location = "${Path}:${lineNumber}" }
     }
     if ($null -eq $volumeLabel) {
         throw "Missing @label in manifest: $Path"
@@ -144,24 +149,10 @@ function Get-Manifest {
     return [pscustomobject]@{ Entries = @($entries); VolumeLabel = $volumeLabel; BootFont = $bootFontName }
 }
 
+$ramfosManifestPath = $null
 switch ($Target) {
-    "SystemRamfos" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
-        $manifest = @((Get-Manifest $manifestPath "emu").Entries |
-            Where-Object { $_.ImageName -notin @("Test-Kb.COM", "Test-Fif.COM", "Test-MX.COM") })
-        $ramfosManifestPath = Join-Path $PSScriptRoot "manifests\A-RAMFOS.txt"
-        $manifestData = Get-Manifest $ramfosManifestPath "emu"
-        $manifest += @($manifestData.Entries)
-        $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-system.bin"
-        $volumeSize = 64KB
-        $chipSize = 64KB
-        $maxFiles = 64
-        $imageFormat = "Mx2"
-        $outputPath = Join-Path $imageDirectory "SystemRom_ramfos_emulator.bin"
-        $makeBootDisk = $true
-    }
     { $_ -in @('SystemEmu', 'SystemEmuFlash') } {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
+        $manifestPath = Join-Path $assetDirectory "C-System.txt"
         $autoexecVariant = if ($Target -eq 'SystemEmuFlash') { 'emu-flash' } else { 'emu' }
         $manifestData = Get-Manifest $manifestPath $autoexecVariant
         $manifest = @($manifestData.Entries)
@@ -174,15 +165,21 @@ switch ($Target) {
         $outputPath = Join-Path $imageDirectory $outputName
         $makeBootDisk = $true
     }
-    "SystemEmuWritable" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
+    { $_ -in @('SystemEmuWritable', 'SystemRamfos') } {
+        $manifestPath = Join-Path $assetDirectory "C-System.txt"
         $manifestData = Get-Manifest $manifestPath "emu-writable"
         $allEntries = @($manifestData.Entries)
+        if ($Target -eq 'SystemRamfos') {
+            $ramfosManifestPath = Join-Path $assetDirectory 'C-RAMFOS.txt'
+            $ramfosManifest = Get-Manifest $ramfosManifestPath 'emu-writable'
+            $allEntries += @($ramfosManifest.Entries)
+            $manifestData.VolumeLabel = $ramfosManifest.VolumeLabel
+        }
         # Стабильный порядок служб; RAMD при необходимости запускает FORMAT.
         # Физические позиции BOOT/BIOS/DOS задаются отдельными проверками ниже.
         if ($BootFont) { $manifestData.BootFont = $BootFont.Replace('\', '/') }
         if (-not $manifestData.BootFont) { throw 'System manifest requires @bootfont path/to/engine.fnt' }
-        $early = @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$manifestData.BootFont,'FORMAT.COM','AUTOEXEC.BAT','NC.COM')
+        $early = @('DOS/BOOT.SYS','DOS/BIOS.SYS','DOS/IO.SYS','DOS/MEM.SYS','DOS/DOS.SYS',$manifestData.BootFont,'DOS/FORMAT.COM','AUTOEXEC.BAT','DOS/NC.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -193,17 +190,18 @@ switch ($Target) {
         $chipSize = 64KB
         $maxFiles = 64
         $imageFormat = "Raw"
-        $outputPath = Join-Path $imageDirectory "SystemRom_emu80_writable.bin"
+        $outputName = if ($Target -eq 'SystemRamfos') { 'SystemRom_ramfos_emulator.bin' } else { 'SystemRom_emu80_writable.bin' }
+        $outputPath = Join-Path $imageDirectory $outputName
         $makeBootDisk = $true
     }
     "SystemHardware" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\A-System.txt"
+        $manifestPath = Join-Path $assetDirectory "C-System.txt"
         $manifestData = Get-Manifest $manifestPath "hardware"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
         if ($BootFont) { $manifestData.BootFont = $BootFont.Replace('\', '/') }
         if (-not $manifestData.BootFont) { throw 'System manifest requires @bootfont path/to/engine.fnt' }
-        $early = @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$manifestData.BootFont,'FORMAT.COM','AUTOEXEC.BAT','NC.COM')
+        $early = @('DOS/BOOT.SYS','DOS/BIOS.SYS','DOS/IO.SYS','DOS/MEM.SYS','DOS/DOS.SYS',$manifestData.BootFont,'DOS/FORMAT.COM','AUTOEXEC.BAT','DOS/NC.COM')
         foreach ($name in $early) {
             if (@($allEntries | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "System boot requires exactly one $name" }
         }
@@ -223,7 +221,7 @@ switch ($Target) {
         $makeBootDisk = $true
     }
     "Games64k" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\H-ROM64k.txt"
+        $manifestPath = Join-Path $assetDirectory "H-ROM64k.txt"
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
@@ -236,27 +234,51 @@ switch ($Target) {
         $makeBootDisk = $false
     }
     "Games2M" {
-        $manifestPath = Join-Path $PSScriptRoot "manifests\H-Games2M.txt"
+        $manifestPath = Join-Path $assetDirectory "H-Games2M.txt"
         if ($ManifestFile) { $manifestPath = (Resolve-Path -LiteralPath $ManifestFile).Path }
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
         $volumeSize = 2MB
         $chipSize = 512KB
-        $maxFiles = 192
+        # Size the fixed FAT root in whole sectors. Only top-level names and
+        # the volume label need slots here; subdirectories use data clusters.
+        $rootNames = @($manifest | ForEach-Object { ($_.ImageName -split '[/\\]', 2)[0] } | Sort-Object -Unique)
+        $entriesPerSector = [int]($sectorSize / 32)
+        $maxFiles = [int]([Math]::Ceiling(($rootNames.Count + 1) / $entriesPerSector) * $entriesPerSector)
+        if ($maxFiles -gt 256) { throw "Games2M root exceeds the MXOS limit of 256 entries" }
         $imageFormat = "Split"
         $outputPath = Join-Path $imageDirectory "FlashDisk_512K.bin"
         $partNamePattern = "FlashDisk_chip{0}_512K.bin"
         $makeBootDisk = $false
     }
+    "Floppy720" {
+        $manifestPath = Join-Path $assetDirectory "A-Floppy720k.txt"
+        $manifestData = Get-Manifest $manifestPath
+        $manifest = @($manifestData.Entries)
+        $bootPath = $null
+        $sectorSize = 512
+        $sectorsPerCluster = 2
+        $fatCopies = 2
+        $mediaByte = 0xF9
+        $volumeSize = 720KB
+        $maxFiles = 112
+        $imageFormat = "Raw"
+        $outputPath = Join-Path $imageDirectory "Floppy720.img"
+        $makeBootDisk = $false
+    }
 }
 
 $volumeLabel = $manifestData.VolumeLabel
+$gameExeEntries = @($manifest | Where-Object {
+    $_.Source -match '^games[/\\]' -and $_.ImageName -match '\.exe$'
+})
+$gameCatalogPath = Join-Path $assetDirectory 'games/catalog.csv'
 
 # Линейный bootstrap: фиксированные адреса не зависят от длины соседних файлов.
 $stagedBoot = $makeBootDisk -and $imageFormat -eq 'Raw'
-if ($makeBootDisk -and -not $stagedBoot) { throw 'Split BIOS/DOS requires a linear system image: use SystemEmuWritable or SystemHardware (128/256/512 KB).' }
-$fixedBootFiles = @{ 'BOOT.SYS' = 0x2000; 'BIOS.SYS' = 0x3000; 'IO.SYS' = 0x6000; 'MEM.SYS' = 0x7000; 'DOS.SYS' = 0x8000 }
+if ($makeBootDisk -and -not $stagedBoot) { throw 'Split BIOS/DOS requires a linear system image: use SystemEmuWritable, SystemRamfos or SystemHardware (128/256/512 KB).' }
+$fixedBootFiles = @{ 'DOS/BOOT.SYS' = 0x2000; 'DOS/BIOS.SYS' = 0x3000; 'DOS/IO.SYS' = 0x6000; 'DOS/MEM.SYS' = 0x7000; 'DOS/DOS.SYS' = 0x8000 }
 if ($BootstrapProbe -and -not $stagedBoot) { throw '-BootstrapProbe requires a linear system image.' }
 if ($stagedBoot) {
     $bootFontName = $manifestData.BootFont
@@ -267,12 +289,13 @@ if ($stagedBoot) {
     $bootstrapArgs = @('--font-body', $fontSource, '--font-name', [IO.Path]::GetFileNameWithoutExtension($bootFontName))
     if ($BootstrapProbe) { $bootstrapArgs += '--probe' }
     if (-not $RunBuild) {
+        if ($FontsReady) { $bootstrapArgs += '--fonts-ready' }
         if ($Force) { $bootstrapArgs += '--force' }
         & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
         if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
     }
     $bootPath = Join-Path $repositoryRoot 'bin/bootstrap/sector.bin'
-    foreach ($name in @('BOOT.SYS','BIOS.SYS','IO.SYS','MEM.SYS','DOS.SYS',$bootFontName)) {
+    foreach ($name in @('DOS/BOOT.SYS','DOS/BIOS.SYS','DOS/IO.SYS','DOS/MEM.SYS','DOS/DOS.SYS',$bootFontName)) {
         if (@($manifest | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "Bootstrap requires exactly one $name" }
     }
     if ($BootstrapProbe) { $outputPath = $outputPath -replace '\.bin$', '-bootprobe.bin' }
@@ -282,8 +305,11 @@ $hasNestedFiles = @($manifest | Where-Object { $_.ImageName -match '[/\\]' }).Co
 $errorBuilder = Join-Path $repositoryRoot 'scripts/build/build-error-strings.py'
 $errorTable = Join-Path $repositoryRoot 'bin/ERRORS.DAT'
 if (-not $RunBuild) {
-    $inputs = @($manifestPath, $bootPath, (Join-Path $PSScriptRoot 'executable.ps1'), (Join-Path $PSScriptRoot 'cpu.ps1'))
-    if ($stagedBoot) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'bin/banked/KERNEL.sym')) }
+    $inputs = @($manifestPath, (Join-Path $PSScriptRoot 'executable.ps1'), (Join-Path $PSScriptRoot 'cpu.ps1'))
+    if ($ramfosManifestPath) { $inputs += $ramfosManifestPath }
+    if ($bootPath) { $inputs += $bootPath }
+    if ($gameExeEntries.Count) { $inputs += $gameCatalogPath }
+    if ($stagedBoot) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'source/include/mxos.inc'), (Join-Path $repositoryRoot 'bin/banked/KERNEL.sym')) }
     if ($hasNestedFiles) { $inputs += (Join-Path $PSScriptRoot 'nest-fat-image.py') }
     $inputs += @(foreach ($entry in $manifest) {
         $path = [IO.Path]::GetFullPath([IO.Path]::Combine($assetDirectory, $entry.Source))
@@ -314,6 +340,14 @@ if (-not $RunBuild) {
 }
 
 . (Join-Path $PSScriptRoot 'executable.ps1')
+$gameModes = @{}
+if ($gameExeEntries.Count) {
+    foreach ($game in Import-Csv -LiteralPath $gameCatalogPath -Encoding UTF8) {
+        $key = 'games/' + $game.File.Replace('\', '/')
+        if ($gameModes.ContainsKey($key)) { throw "Duplicate game in catalog: $key" }
+        $gameModes[$key] = $game.RunMode
+    }
+}
 if ($stagedBoot) {
     & python $errorBuilder $errorTable
     if ($LASTEXITCODE -ne 0) { throw 'Cannot build ERRORS.DAT' }
@@ -321,23 +355,25 @@ if ($stagedBoot) {
 New-Item -ItemType Directory -Path $imageDirectory -Force | Out-Null
 
 $volumeSectors = [int]($volumeSize / $sectorSize)
-$fatSectors = [int]($volumeSectors * 2 / $sectorSize)
+$fatSectors = if ($floppy) { 3 } else { [int]($volumeSectors * 2 / $sectorSize) }
 $directorySectors = [int]($maxFiles * 32 / $sectorSize)
-$dataStartSector = 1 + $fatSectors + $directorySectors
-$dataSectors = $volumeSectors - $fatSectors - $directorySectors - 1
+$dataStartSector = 1 + $fatCopies * $fatSectors + $directorySectors
+$dataSectors = $volumeSectors - $dataStartSector
 if ($imageFormat -eq 'Mx2') {
     # STD-вход занимает первые четыре байта физической половины ROM.
     # Последний логический сектор доступен не целиком; файлы в него не кладём.
     $dataSectors--
 }
-$dataClusters = [int]($dataSectors / $sectorsPerCluster)
+$dataClusters = [int][Math]::Floor($dataSectors / $sectorsPerCluster)
+$clusterSize = $sectorSize * $sectorsPerCluster
 
-$boot = [IO.File]::ReadAllBytes($bootPath)
+$boot = if ($floppy) { ,([byte[]]::new($sectorSize)) } else { ,([IO.File]::ReadAllBytes($bootPath)) }
 if ($boot.Length -ne $sectorSize) {
     throw "boot.bin must be exactly $sectorSize bytes"
 }
-$fat = [uint16[]]::new($fatSectors * $sectorSize / 2)
-$fat[0] = 0xFFF8
+$fatEntryCount = if ($floppy) { [int]($fatSectors * $sectorSize * 2 / 3) } else { [int]($fatSectors * $sectorSize / 2) }
+$fat = [uint16[]]::new($fatEntryCount)
+$fat[0] = 0xFF00 + $mediaByte
 $fat[1] = 0xFFFF
 $directory = New-Object IO.MemoryStream
 $fileData = New-Object IO.MemoryStream
@@ -345,15 +381,17 @@ $fileData = New-Object IO.MemoryStream
 # Физическая нумерация остаётся обычной. В 2-МБ образе чередуем только
 # кластеры данных через FAT; загрузочный сектор, FAT и корень остаются на чипе 0.
 $interleaveFiles = $Target -eq 'Games2M'
-$chipSectors = [int]($chipSize / $sectorSize)
 $usedClusters = New-Object bool[] ($dataClusters + 2)
 if ($interleaveFiles) {
+    $chipSectors = [int]($chipSize / $sectorSize)
     $emptyData = Expand-Bytes ([byte[]]@()) ($dataSectors * $sectorSize)
     $fileData.Write($emptyData, 0, $emptyData.Length)
 }
 # Запас таблицы не относится к области данных и не должен считаться свободным.
-for ($index = $dataClusters + 2; $index -lt $fat.Length; $index++) {
-    $fat[$index] = 0xFFFF
+if (-not $floppy) {
+    for ($index = $dataClusters + 2; $index -lt $fat.Length; $index++) {
+        $fat[$index] = 0xFFFF
+    }
 }
 if ($imageFormat -eq 'Mx2') {
     # Частично недоступный сектор внутри объявленного тома — bad cluster,
@@ -371,20 +409,26 @@ $dosCluster = 0
 $dosAddress = 0
 $dosSectors = 0
 $imageNames = @{}
-$sectorPadding = Expand-Bytes ([byte[]]@()) $sectorSize
+$clusterPadding = Expand-Bytes ([byte[]]@()) $clusterSize
 
 try {
     foreach ($manifestEntry in $manifest) {
         $sourcePath = [IO.Path]::Combine($assetDirectory, $manifestEntry.Source)
         if (-not [IO.File]::Exists($sourcePath)) {
-            throw "Manifest input not found: $($manifestEntry.Source)"
+            throw "Manifest input not found at $($manifestEntry.Location): $sourcePath"
         }
-        $sourceName = $manifestEntry.ImageName
+        $sourceName = if ($floppy) { $manifestEntry.ImageName.ToUpperInvariant() } else { $manifestEntry.ImageName }
         $extension = [IO.Path]::GetExtension($sourceName).TrimStart(".")
 
         $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
         $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
-        if ($extension.ToLowerInvariant() -in @('com', 'exe', 'dll', 'fnt', 'rks')) {
+        $gameMode = $gameModes[$manifestEntry.Source.Replace('\', '/')]
+        if ($extension -eq 'exe' -and $manifestEntry.Source -match '^games[/\\]') {
+            if ($gameMode -notin @('AUTO','MX','STD','MON','RF','NATIVE')) {
+                throw "Missing or invalid RunMode in the game catalog for $($manifestEntry.Source) at $($manifestEntry.Location)"
+            }
+            $storedBytes = Convert-ExecutableFile $sourcePath $extension $loadAddress -GameMode $gameMode
+        } elseif ($extension -in @('com', 'exe', 'dll', 'fnt', 'rks')) {
             $storedBytes = Convert-ExecutableFile $sourcePath $extension $loadAddress
         } else {
             $storedBytes = [IO.File]::ReadAllBytes($sourcePath)
@@ -407,13 +451,13 @@ try {
 
         if ($stagedBoot -and $fixedBootFiles.ContainsKey($sourceName)) {
             $fixedAddress = $fixedBootFiles[$sourceName]
-            $limit = switch ($sourceName) { 'BOOT.SYS' { 0x3000 }; 'BIOS.SYS' { 0x4800 }; 'IO.SYS' { 0x7000 }; 'MEM.SYS' { 0x8000 }; 'DOS.SYS' { 0x18000 } }
+            $limit = switch ($sourceName) { 'DOS/BOOT.SYS' { 0x3000 }; 'DOS/BIOS.SYS' { 0x4800 }; 'DOS/IO.SYS' { 0x7000 }; 'DOS/MEM.SYS' { 0x8000 }; 'DOS/DOS.SYS' { 0x18000 } }
             if ($sourceName -eq $bootFontName) { $limit = 0x6000 }
             if ($fixedAddress -lt $dataStartSector * $sectorSize -or $fixedAddress + $originalSize -gt $limit) { throw "Fixed bootstrap slot overflow: $sourceName" }
             if ($sourceName -eq $bootFontName -and $loadAddress -ne 0xD800) { throw 'Boot font must load at D800h' }
-            if ($sourceName -eq 'IO.SYS' -and $loadAddress -ne 0xF000) { throw 'Invalid IO load range' }
-            if ($sourceName -eq 'BIOS.SYS' -and ($loadAddress -ne 0xC000 -or $loadAddress+$originalSize -gt 0xF000)) { throw 'Invalid BIOS load range' }
-            if ($sourceName -eq 'DOS.SYS') {
+            if ($sourceName -eq 'DOS/IO.SYS' -and $loadAddress -ne 0xF000) { throw 'Invalid IO load range' }
+            if ($sourceName -eq 'DOS/BIOS.SYS' -and ($loadAddress -ne 0xC000 -or $loadAddress+$originalSize -gt 0xF000)) { throw 'Invalid BIOS load range' }
+            if ($sourceName -eq 'DOS/DOS.SYS') {
                 $kernelSymbols = [IO.File]::ReadAllText((Join-Path $repositoryRoot 'bin/banked/KERNEL.sym'))
                 $codeLimit = [regex]::Match($kernelSymbols, '(?m)^DOS_CODE_END_MAX: EQU 0x([0-9A-Fa-f]+)')
                 if (-not $codeLimit.Success) { throw 'Missing DOS_CODE_END_MAX in KERNEL.sym' }
@@ -425,7 +469,7 @@ try {
 
         $firstCluster = 0
         $previousCluster = 0
-        for ($offset = 0; $offset -lt $storedBytes.Length; $offset += $sectorSize) {
+        for ($offset = 0; $offset -lt $storedBytes.Length; $offset += $clusterSize) {
             $searched = 0
             while ($true) {
                 if ($nextCluster -ge $dataClusters + 2) { $nextCluster = 2 }
@@ -454,15 +498,15 @@ try {
             $fat[$cluster] = 0xFFFF
             $previousCluster = $cluster
 
-            $count = [Math]::Min($sectorSize, $storedBytes.Length - $offset)
-            $fileData.Position = ($cluster - 2) * $sectorSize
+            $count = [Math]::Min($clusterSize, $storedBytes.Length - $offset)
+            $fileData.Position = ($cluster - 2) * $clusterSize
             $fileData.Write($storedBytes, $offset, $count)
-            if ($count -lt $sectorSize) {
-                $fileData.Write($sectorPadding, 0, $sectorSize - $count)
+            if ($count -lt $clusterSize) {
+                $fileData.Write($clusterPadding, 0, $clusterSize - $count)
             }
         }
 
-        if ($Target -in @('SystemEmuWritable', 'SystemHardware') -and $sourceName -eq 'BIOS.SYS' -and
+        if ($stagedBoot -and $sourceName -eq 'DOS/BIOS.SYS' -and
             ($firstCluster -eq 0 -or ($dataStartSector + $nextCluster - 2) * $sectorSize -gt 32768)) {
             throw "Boot file must fit in the first 32-KB page: $sourceName"
         }
@@ -478,7 +522,7 @@ try {
         Set-Word $entry 30 ($originalSize -shr 16)
         $directory.Write($entry, 0, $entry.Length)
 
-        if ($makeBootDisk -and "$baseName.$extension".Equals("BIOS.SYS", [StringComparison]::OrdinalIgnoreCase)) {
+        if ($makeBootDisk -and $sourceName.Equals("DOS/BIOS.SYS", [StringComparison]::OrdinalIgnoreCase)) {
             $dosCluster = $firstCluster
             $dosAddress = $loadAddress
             $dosSectors = [int][Math]::Ceiling($originalSize / 256.0)
@@ -489,7 +533,22 @@ try {
         $directory.WriteByte(0)
     }
 
-    [Array]::Copy([Text.Encoding]::ASCII.GetBytes("MXOS256 "), 0, $boot, 3, 8)
+    if ($floppy) {
+        [Array]::Copy([byte[]](0xEB, 0x3C, 0x90), $boot, 3)
+        $boot[0x0E] = 1
+        $boot[0x10] = $fatCopies
+        $boot[0x15] = $mediaByte
+        Set-Word $boot 0x18 9
+        Set-Word $boot 0x1A 2
+        $boot[0x26] = 0x29
+        [Array]::Copy([Text.Encoding]::ASCII.GetBytes("FAT12   "), 0, $boot, 0x36, 8)
+        $boot[0x3E] = 0xEB
+        $boot[0x3F] = 0xFE
+        $boot[510] = 0x55
+        $boot[511] = 0xAA
+    }
+    $oemName = if ($floppy) { "MXOS2   " } else { "MXOS256 " }
+    [Array]::Copy([Text.Encoding]::ASCII.GetBytes($oemName), 0, $boot, 3, 8)
     Set-Word $boot 0x0B $sectorSize
     $boot[0x0D] = $sectorsPerCluster
     Set-Word $boot 0x11 $maxFiles
@@ -525,15 +584,32 @@ try {
         [IO.File]::WriteAllBytes($entryListPath, $rootBytes)
         $rootBytes = New-Object byte[] ($directorySectors * $sectorSize)
     }
-    $fatBytes = [byte[]]::new($fat.Length * 2)
-    [Buffer]::BlockCopy($fat, 0, $fatBytes, 0, $fatBytes.Length)
+    $fatBytes = [byte[]]::new($fatCopies * $fatSectors * $sectorSize)
+    if ($floppy) {
+        for ($index = 0; $index -lt $fat.Length; $index += 2) {
+            $position = ($index -shr 1) * 3
+            $even = $fat[$index]
+            $odd = $fat[$index + 1]
+            $fatBytes[$position] = $even -band 0xFF
+            $fatBytes[$position + 1] = (($even -shr 8) -band 0x0F) -bor (($odd -band 0x0F) -shl 4)
+            $fatBytes[$position + 2] = ($odd -shr 4) -band 0xFF
+        }
+        [Array]::Copy($fatBytes, 0, $fatBytes, $fatSectors * $sectorSize, $fatSectors * $sectorSize)
+    } else {
+        [Buffer]::BlockCopy($fat, 0, $fatBytes, 0, $fatBytes.Length)
+    }
     $start = Join-Bytes $boot $fatBytes $rootBytes
     $data = $fileData.ToArray()
     $nestedPaths = @($manifest | ForEach-Object { $_.ImageName })
     if ($hasNestedFiles) {
         $stagingPath = Join-Path $repositoryRoot "bin/nested-$Target.bin"
         [IO.File]::WriteAllBytes($stagingPath, (Expand-Bytes (Join-Bytes $start $data) $volumeSize))
-        & python (Join-Path $PSScriptRoot 'nest-fat-image.py') $stagingPath @nestedPaths --entries $entryListPath
+        $nestOptions = @('--entries', $entryListPath)
+        if ($floppy) {
+            $nestOptions += '--fat12'
+            $nestedPaths = @($nestedPaths | ForEach-Object { $_.ToUpperInvariant() })
+        }
+        & python (Join-Path $PSScriptRoot 'nest-fat-image.py') $stagingPath @nestedPaths @nestOptions
         if ($LASTEXITCODE -ne 0) { throw 'Nested FAT image generation failed.' }
         $nestedImage = [IO.File]::ReadAllBytes($stagingPath)
         [Array]::Copy($nestedImage, 0, $start, 0, $start.Length)

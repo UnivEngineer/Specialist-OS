@@ -74,12 +74,13 @@ def main():
     spec = spec_from_file_location("repair", Path(__file__).with_name("repair-almaz2x.py"))
     repair = module_from_spec(spec)
     spec.loader.exec_module(repair)
-    games = ROOT / "assets/games"
-    mono = repair.checked_read(games / "Almaz-2/legacy/Almaz2-original.exe", repair.MONO_HASH)
-    original = repair.checked_read(games / "Almaz-2/legacy/Almaz2-original-ramfos-broken.exe", repair.ORIGINAL_HASH)
-    fixed = repair.checked_read(games / "Almaz-2/legacy/Almaz2X-mxos-legacy.bin", repair.FIXED_HASH)
-    dark = repair.checked_read(games / "Almaz-2/legacy/Almaz2D.exe", repair.USER_HASH)
-    ramfos_game = repair.checked_read(games / "Almaz-2/Almaz2-original-ramfos.exe", repair.RAMFOS_HASH)
+    games = ROOT / "assets/games/families/almaz-2"
+    originals = games / "originals"
+    mono = repair.checked_read(originals / "Almaz2-original.cpu", repair.MONO_HASH)
+    original = repair.checked_read(originals / "Almaz2-ramfos-original-broken.cpu", repair.ORIGINAL_HASH)
+    fixed = repair.checked_read(games / "repaired/Almaz2-mxos-repaired.bin", repair.FIXED_HASH)
+    dark = repair.checked_read(games / "patched/Almaz2-mxos-custom-palette.cpu", repair.USER_HASH)
+    ramfos_game = repair.checked_read(games / "repaired/Almaz2-ramfos-fixed.cpu", repair.RAMFOS_HASH)
     require(repair.repair(original, mono) == fixed, "Patch reproduction failed")
     require(repair.user_colors(fixed) == dark, "User palette reproduction failed")
     allowed = set(range(0x3414, 0x3424))
@@ -96,7 +97,7 @@ def main():
     # загрузчики до входа в оболочку; проверяем именно результат переноса.
     ramfos_images = {}
     for filename, source, destination, size, shell in (
-        ("Ramfos.EXE", 0x0030, 0xC000, 0x12A0, 0x12D0),
+        ("Ramfos.cpu", 0x0030, 0xC000, 0x12A0, 0x12D0),
         ("RAMFOS.COM", 0x0430, 0xC600, 0x0BF0, 0x1020),
     ):
         program = (ROOT / "assets/programs" / filename).read_bytes()
@@ -112,7 +113,7 @@ def main():
 
     # Вариант для Ramfos проверяем с настоящим перемещённым ядром:
     # звуковую процедуру C851h оставляем, ввод и печать заменяем заглушками.
-    data = bytearray(ramfos_images["Ramfos.EXE"])
+    data = bytearray(ramfos_images["Ramfos.cpu"])
     data[:len(ramfos_game)] = ramfos_game
     for address, code in ((0xC818, "c9"), (0xC809, "c9"), (0xC81B, "3e ff c9")):
         block = bytes.fromhex(code)

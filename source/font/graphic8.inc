@@ -1,23 +1,19 @@
-; A=X mod 4, H=X in two-pixel units, L=cursor Y, C=glyph.
+; A=X mod 4, L=код глифа, DE=верхняя строка экранного столбца.
 graphicScalar:
     ld b,a
-    ld a,h
-    add a,4
-    ld (bios_vars.cursorX),a
-    ld a,l
-    sub 7
-    ld e,a
-    ld a,h
-    rrca
-    rrca
-    and 3Fh
-    add a,90h
-    ld d,a
-    ld l,c
     ld h,FONT_ADDR/256
     ld a,d
     cp 0BFh
     jp z,graphicClipped
+    IF GRAPH_PRE_MODE == 1
+    ld a,b
+    dec a
+    call graphPrePage
+    ENDIF
+    IF GRAPH_PRE_MODE != 2
+    ; C свободен после загрузки кода в L. Счётчик общий для всех фаз.
+    ld c,8
+    ENDIF
     ld a,(bios_vars.inverse)
     or a
     ld a,b
@@ -54,7 +50,7 @@ graphPrePage:
 ; screen column uses a separate clipped loop and never addresses C000h.
     MACRO GRAPHIC_ROWS label, shift, inverse, clipped
 label:
-    IF GRAPH_PRE_MODE
+    IF GRAPH_PRE_MODE == 2
     ld a,shift/2-1
     call graphPrePage
     ld a,h
@@ -123,11 +119,11 @@ label:
     ENDIF
     inc e
     inc h
+    IF GRAPH_PRE_MODE == 2
     ld a,h
-    IF GRAPH_PRE_MODE
 .end: cp 0
     ELSE
-    cp FONT_ADDR/256+8
+    dec c
     ENDIF
     jp nz,.row
     ret

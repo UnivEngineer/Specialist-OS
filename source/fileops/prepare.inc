@@ -392,7 +392,21 @@ fpNeed:
 fpFull:
     ld a,DOS_ERR_FULL
     jp dosSetError
-; ceil(uint32 size / destination clusterBytes), checked 16-bit cluster count.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Посчитать число кластеров назначения, нужное для файла.
+;
+; вход:
+;   hl = адрес 32-битного размера файла, fpClusterBytes = размер кластера назначения
+;   (степень двойки, в байтах).
+;
+; выход:
+;   cf = 0: hl = число кластеров, округлённое вверх. При переполнении сложения или
+;   16-битного ответа cf = 1, a = DOS_ERR_FULL. fpSize используется для промежуточных
+;   вычислений.
+;----------------------------------------------------------------------------
+
 fpClusters:
     ld de,fpSize
     ld bc,4
@@ -447,7 +461,20 @@ fpSizeReady:
     jp nz,fpFull
     ld hl,(fpSize)
     ret
-; HL=u32 source, DE=u32 destination. Checked; no hidden bank transitions.
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прибавить четырёхбайтный счётчик к итогу подготовки файловой операции.
+;
+; вход:
+;   hl = адрес слагаемого, de = адрес доступного для записи итога. Оба числа без знака,
+;   младший байт первым.
+;
+; выход:
+;   cf = 0: сумма помещается в 32 бита. При переполнении записаны младшие 32 бита, cf =
+;   1, a = DOS_ERR_ARGUMENT. hl и de продвинуты на 4, b = 0, c сохранён.
+;----------------------------------------------------------------------------
+
 fpAdd32:
     ld b,4
     or a
@@ -461,18 +488,18 @@ fpAddByte:
     jp nz,fpAddByte
     ret nc
     jp blockArgument
-fpClusterBytes: DW 256
-fpDirectoryCluster: DW 0
-fpFree: DW 0
-fpFrame: DW 0
-fpWanted: DW 0
-fpSize: DS 4,0
-fpDepth: DB 0
-fpLength: DB 0
-fpExists: DB 0
-fpZero: DB 0
-fpSkip: DB 0
-fpOpen: DB 0
+fpClusterBytes:         DW 256
+fpDirectoryCluster:     DW 0
+fpFree:                 DW 0
+fpFrame:                DW 0
+fpWanted:               DW 0
+fpSize:                 DS 4,0
+fpDepth:                DB 0
+fpLength:               DB 0
+fpExists:               DB 0
+fpZero:                 DB 0
+fpSkip:                 DB 0
+fpOpen:                 DB 0
 
 fpSingleFile:
     ld hl,1

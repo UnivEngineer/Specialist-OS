@@ -8,7 +8,7 @@ import re
 import subprocess
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).absolute().parents[2]
 SOURCE = ROOT / 'source/bios'
 ASSEMBLER = ROOT / 'tasm/sjasmplus.exe'
 MANIFEST = SOURCE / 'layout.json'
@@ -56,7 +56,7 @@ def emit_fixed(item):
 def assemble(source, output, defines):
     command = [str(ASSEMBLER), '--i8080', '-Wno-rdlow', *['-D'+d for d in defines],
                f'--raw={output}', f'--sym={output.with_suffix(".sym")}',
-               f'--lst={output.with_suffix(".lst")}', str(source)]
+               f'--lst={output.with_suffix(".lst")}', Path(source).as_posix()]
     subprocess.run(command, cwd=SOURCE, check=True)
 
 

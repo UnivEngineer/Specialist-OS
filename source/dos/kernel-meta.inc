@@ -156,6 +156,3 @@ kmDrivesSize:
     call kdStore
     jp c,kdBad
     jp kdFinish
-kmWrite: DB 0
-kmSize: DB 0
-kmSecond: DW 0

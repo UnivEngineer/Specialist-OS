@@ -162,10 +162,10 @@ context_limit:
     cp 5
     jp nz,context_next
     jp argument_bad
-namedMode: DB 0
-modeNames: DB "RAW",0,"FILE",0,"ALL",0
-alignmentNames: DB "ALIGNED",0,"UNALIGNED",0
-contextNames: DB "BANK",0,"DOS",0,"MAIN",0,"ALL",0
+namedMode:          DB 0
+modeNames:          DB "RAW",0,"FILE",0,"ALL",0
+alignmentNames:     DB "ALIGNED",0,"UNALIGNED",0
+contextNames:       DB "BANK",0,"DOS",0,"MAIN",0,"ALL",0
 argument_value:
     cp 4
     jp c,argument_bad
@@ -282,7 +282,7 @@ argument_digit:
 ; CF=ошибка/нет DISK_CAP_VERIFY, AF разрушен, остальные регистры сохранены.
 select_check:
     or a
-    jp z,check_plain
+    jp z,check_none
     cp 1
     jp z,check_file
     cp 2
@@ -295,7 +295,7 @@ select_check:
 check_file:
     ld a,6
     jp check_ready
-check_plain:
+check_none:
     ld a,1
 check_ready:
     ld (v_writeMode),a
@@ -318,13 +318,13 @@ txtArgumentsHelp:
     DB "-S=1..24 KiB [8], DOS/ALL <=8",10
     DB "-F=0/1 seq/rnd; -? help",10
     DB "Missing?",10,0
-v_arguments: DW 0
-argDrive: DB 0FFh
-argCheck: DB 0FFh
-argWrites: DB 0FFh
-argSize: DB 0
-argHelp: DB 0
-argBank: DB 0
+v_arguments:    DW 0
+argDrive:       DB 0FFh
+argCheck:       DB 0FFh
+argWrites:      DB 0FFh
+argSize:        DB 0
+argHelp:        DB 0
+argBank:        DB 0
 
 argFrag: DB 0FFh
 argMode: DB 0

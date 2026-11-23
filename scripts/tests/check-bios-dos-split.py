@@ -7,13 +7,12 @@ OUT=ROOT/'docs/bios-dos-split-2026-11-06/cpu';OUT.mkdir(parents=True,exist_ok=Tr
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 W=lambda n:n.to_bytes(2,'little')
 base=bytearray(65536)
-for name,start in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
- data=(ROOT/f'bin/{name}.sys').read_bytes();base[start:start+len(data)]=data
+for name,start in [('BIOS.sys',0xC000),('IO.main.bin',S['BIOS_IO_ADDR']),
+                   ('DOS.native.sys',0x4000),('fonts/Rotate.i80',S['FONT_ENGINE_BASE'])]:
+ data=(ROOT/'bin'/name).read_bytes();base[start:start+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-rawfont=(ROOT/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
-font=bytes(rawfont[c*8+y] for y in range(8) for c in range(256))
-base[S['bios_upper.charGen']:S['bios_upper.charGen']+9]=base[S['initTextVars']:S['initTextVarsEnd']]
-base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
+text_vars=base[S['initTextVars']:S['initTextVarsEnd']]
+base[S['bios_upper.charGen']:S['bios_upper.charGen']+len(text_vars)]=text_vars
 base[S['v_dosModuleReady']]=1
 for line in (ROOT/'source/dos/entries.inc').read_text().splitlines():
  if line.strip().startswith('jp '):
@@ -27,9 +26,15 @@ def run(memory,body):
  code=(OUT/'call.bin').read_bytes();memory[0x2000:0x2000+len(code)]=code
  (OUT/'input.bin').write_bytes(memory)
  result=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','2000','-end','2100','-counter','20000000','-output',str(OUT/'output.bin'),str(OUT/'input.bin')],capture_output=True,check=True)
- cycles=int(result.stdout.strip());data=(OUT/'output.bin').read_bytes()
+ ticks=result.stdout.strip()
+ assert ticks.isdigit(), result.stdout.decode(errors='replace')
+ cycles=int(ticks);data=(OUT/'output.bin').read_bytes()
  assert int.from_bytes(data[65542:65544],'little')==0x2100
  return data[:65536],cycles
+
+def init_font(memory):
+ initialized,_=run(memory, ' ld de,0\n call FONT_ENGINE_INIT\n')
+ return bytearray(initialized)
 
 render=''' call bios_clearScreenOld
  ld hl,0
@@ -39,9 +44,11 @@ render=''' call bios_clearScreenOld
  ld c,'b'
  call bios_printChar
 '''
-normal,t1=run(bytearray(base),render)
+normal,t1=run(init_font(bytearray(base)),render)
 without=bytearray(base);without[0x4000:0x8C00]=b'\x76'*0x4C00;without[S['v_dosModuleReady']]=0
-standalone,t2=run(without,render)
+without=init_font(without)
+standalone,t2=run(bytearray(without),render)
+assert any(normal[0x9000:0xC000]), 'BIOS did not draw either character'
 assert normal[0x9000:0xC000]==standalone[0x9000:0xC000]
 assert t1==t2
 

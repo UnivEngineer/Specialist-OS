@@ -130,8 +130,8 @@ def check(runtime):
         tag=b'MX'+bytes((i,0x5A))
         assert before!=tag, 'Повторный запуск требует подготовки свежих тестовых данных'
         command=f'H:{name}' if mode is None else (
-            f'A:RUN.COM H:{name}' if choice or name.endswith(('.COM','.RKS')) else
-            f'A:RUN.COM -{mode} H:{name}')
+            f'C:/DOS/RUN.COM H:{name}' if choice or name.endswith(('.COM','.RKS')) else
+            f'C:/DOS/RUN.COM -{mode} H:{name}')
         if name.startswith('ORDER'):
             command=f'run H:{name} /x -{mode} one'
         tap('esc')

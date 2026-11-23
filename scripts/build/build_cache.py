@@ -1,8 +1,10 @@
 """Shared incremental check for the Windows build entry points."""
 
 import argparse
+from collections import defaultdict
 from contextlib import contextmanager
 import errno
+from functools import cache
 import hashlib
 import json
 import msvcrt
@@ -36,36 +38,64 @@ def z88dk_directory():
     return Path(os.environ.get('SPECIALIST_Z88DK_DIR', default)).absolute()
 
 
+@cache
+def drive_root(drive):
+    return os.path.normcase(os.path.realpath(drive + '\\')).rstrip('\\')
+
+
 def path_key(path):
-    return os.path.normcase(os.path.abspath(path))
+    absolute = os.path.normcase(os.path.abspath(path))
+    drive, tail = os.path.splitdrive(absolute)
+    if drive.endswith(':'):
+        # Resolve the drive once so mapped and UNC paths share cache entries.
+        return drive_root(drive) + tail
+    return absolute
 
 
 def metadata(stat):
     return [stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns]
 
 
-def snapshot(paths, excluded=(), content=False, hashed=()):
+def snapshot(paths, excluded=(), content=False, hashed=(), *, files_only=False):
     skip = {path_key(path) for path in excluded}
+    skipped_subtrees = tuple(key.rstrip(os.sep) + os.sep for key in skip)
     hash_paths = {path_key(path) for path in hashed}
     records = {}
 
     def record(path, key, info):
         records[key] = hashlib.sha256(Path(path).read_bytes()).hexdigest() if content or key in hash_paths else metadata(info)
 
-    def visit(directory):
+    def visit(directory, selected=None):
         with os.scandir(directory) as entries:
             for entry in entries:
+                if selected is not None and os.path.normcase(entry.name) not in selected:
+                    continue
                 key = path_key(entry.path)
                 if key in skip or entry.name == '__pycache__':
                     continue
-                if entry.is_dir(follow_symlinks=False):
+                if selected is None and entry.is_dir(follow_symlinks=False):
                     visit(entry.path)
                 elif entry.is_file():
                     record(entry.path, key, entry.stat())
 
+    if files_only:
+        groups = defaultdict(list)
+        for path in paths:
+            groups[path.parent].append(path)
+        paths = []
+        for directory, files in groups.items():
+            # On SMB, one directory listing is cheaper than many file queries.
+            if len(files) < 8:
+                paths.extend(files)
+                continue
+            try:
+                visit(directory, {os.path.normcase(path.name) for path in files})
+            except (FileNotFoundError, NotADirectoryError):
+                pass
+
     for path in paths:
         key = path_key(path)
-        if key in skip:
+        if key in skip or key.startswith(skipped_subtrees):
             continue
         try:
             info = path.stat()
@@ -130,7 +160,8 @@ def run_cached(label, input_state, output_paths, scan_paths, command, force=Fals
     """Run an existing builder and record its products only after success."""
     # Aliases with the same arguments share a stamp. Different variants share output
     # filenames, so the stamp also validates that their files are still installed.
-    key = [label, path_key(Path.cwd()), command, list(map(path_key, output_paths)),
+    command_key = [path_key(arg) if os.path.isabs(arg) else arg for arg in command]
+    key = [label, path_key(Path.cwd()), command_key, list(map(path_key, output_paths)),
            list(map(path_key, scan_paths)), content, list(map(path_key, hashed))]
     digest = hashlib.sha256(json.dumps(key).encode()).hexdigest()[:24]
     stamp_path = CACHE / f'{digest}.json'
@@ -139,7 +170,7 @@ def run_cached(label, input_state, output_paths, scan_paths, command, force=Fals
         stamp = read_stamp(stamp_path)
         previous = stamp.get('outputs')
         if not force and stamp.get('inputs') == inputs and isinstance(previous, dict) and previous:
-            current = snapshot((Path(path) for path in previous), content=content, hashed=hashed)
+            current = snapshot((Path(path) for path in previous), content=content, hashed=hashed, files_only=True)
             if previous == current:
                 print(f'[up-to-date] {label}', flush=True)
                 return 0
@@ -164,7 +195,7 @@ def run_cached(label, input_state, output_paths, scan_paths, command, force=Fals
         return 0
 
 
-def python_build(script, label, build, *, inputs, outputs=(), scan_outputs=(), exclude=(), z88dk=False):
+def python_build(script, label, build, *, inputs, asm=(), outputs=(), scan_outputs=(), exclude=(), z88dk=False):
     """Keep a standalone Python builder on the same cache as the VS Code tasks."""
     parser = argparse.ArgumentParser(description=f'Build {label}')
     parser.add_argument('--force', action='store_true')
@@ -174,7 +205,8 @@ def python_build(script, label, build, *, inputs, outputs=(), scan_outputs=(), e
         build()
         return 0
     options = [label, '--z88dk'] if z88dk else [label, '--input', str(ROOT / 'tasm/sjasmplus.exe')]
-    for flag, paths in (('input', inputs), ('output', outputs), ('scan-output', scan_outputs), ('exclude', exclude)):
+    for flag, paths in (('input', inputs), ('asm', asm), ('output', outputs),
+                        ('scan-output', scan_outputs), ('exclude', exclude)):
         for name in paths:
             options.extend(('--' + flag, str(ROOT / name)))
     if args.force:
@@ -222,7 +254,7 @@ def main(argv):
         paths.extend(z88dk / name for name in ('bin', 'include', 'lib'))
     project_excluded = tuple(ROOT / name for name in (
         *GENERATED_INPUTS, *BENCH_OUTPUT_DIRS, 'source-apps/llm80',
-        'source-apps/almaz', 'source-apps/almaz2', 'source-apps/test-scr',
+        'source-apps/almaz', 'source-apps/almaz2',
         'source/ramfos/test-low.asm', 'source/ramfos/test-high.asm',
     )) if args.project_inputs else ()
 

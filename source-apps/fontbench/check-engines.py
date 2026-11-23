@@ -15,7 +15,8 @@ for name,at,ext in [('BIOS',0xC000,'sys'),('IO',0xF000,'sys'),('FONTCOM',0,'i80'
     data=(R/f'bin/{name}.{ext}').read_bytes();base[at:at+len(data)]=data
 base[bs['bios_vars']:bs['bios_vars']+bs['BIOS_VARIABLES']]=base[bs['initVars']:bs['initVarsEnd']]
 base[bs['bios_upper.charGen']:bs['bios_upper.charGen']+9]=base[bs['initTextVars']:bs['initTextVarsEnd']]
-base[bs['FONT_ADDR']:bs['FONT_ADDR']+2048]=bytes(font[c*8+y] for y in range(8) for c in range(256))
+resident=(R/'bin/fonts/Rotate.i80').read_bytes()
+base[bs['FONT_ENGINE_BASE']:bs['FONT_ENGINE_BASE']+len(resident)]=resident
 base[bs['bios_upper.escMode']]=255
 base[bs['bios_upper.koi7']]=0
 base[bs['bios_vars.inverse']]=0
@@ -30,6 +31,7 @@ def run(mem,entry,af=0xA597,bc=0x1357,hl=0x8600,de=0x2468):
     out=(O/'output.bin').read_bytes()
     assert out[65544:65546]==w(0x8F00),('SP',out[65544:65546].hex())
     return bytearray(out[:65536]),out[65536:],int(r.stdout.strip())
+base,_,_=run(base,bs['FONT_ENGINE_INIT'],de=0)
 def put(mem,key,value):mem[s[key]:s[key]+2]=w(value)
 def init(module,variant,pre,width):
     mem=bytearray(base);data=(R/f'bin/{module}.i80').read_bytes();mem[0x2000:0x2000+len(data)]=data
@@ -72,7 +74,7 @@ def oracle(text,raw,width,x=0,background=0):
     return out,bytes([y,xp//2])
 cases=[('ENGINE6',i,6) for i in range(10)]+[('ENGINEP',0,6),('ENGINEP',1,8),('ENGINEM',0,6),('ENGINEB',0,6)]+[('ENGINE4',i,4) for i in range(3)]
 cases += [('ENGINES',i,6) for i in range(5)]
-cases += [('ENGINEQ',0,6)]
+cases += [('ENGINEQ',0,6),('ORIONM1',0,6)]
 results=[];checks=0
 if len(sys.argv)>1: cases=[c for c in cases if c[0] in sys.argv[1:]]
 for module,variant,width in cases:

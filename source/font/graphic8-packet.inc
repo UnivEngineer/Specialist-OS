@@ -383,13 +383,13 @@ graphRoutes: DW graphNormal2,graphNormal4,graphNormal6
     DW graphInverse2,graphInverse4,graphInverse6
 graphPhase: DB 0
     ENDIF
-graphStart: DB 0
-graphEnd: DB 0
-graphNext: DW 0
+graphStart:     DB 0
+graphEnd:       DB 0
+graphNext:      DW 0
     IFDEF FONT_GRAPHIC_PAIR
     IFDEF FONT_GRAPHIC_QUAD
 graphQuadEnd: DB 0
     ENDIF
-graphPairEnd: DB 0
-graphLast: DB 0
+graphPairEnd:   DB 0
+graphLast:      DB 0
     ENDIF

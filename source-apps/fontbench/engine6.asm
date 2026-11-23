@@ -6,8 +6,23 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 entry: jp initialize
 descriptor: DB 6,4
     DW monitor.scalar,serialBIOS,stageReset
-    DW monitor.body ; historical printString uses the unwrapped pixel body
+    DW monitor.body     ; historical printString uses the unwrapped pixel body
     DS 06000h-$,0
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Подготовить движок измерений шрифта engine6 и вернуть его дескриптор.
+;
+; вход:
+;   a = вариант реализации, b = режим предварительных таблиц. Движок и его рабочая
+;   память доступны в MAIN.
+;
+; выход:
+;   hl = адрес локального дескриптора с размерами и точками входа вывода, a = 0, cf =
+;   0.
+;----------------------------------------------------------------------------
+
 initialize:
     ld (variant),a
     ld a,b
@@ -212,17 +227,17 @@ pairWrite:
     or c
     jp nz,pairByte
     ret
-renderFont8: DW 02800h/8
-variant: DB 0
-preEnabled: DB 0
+renderFont8:    DW 02800h/8
+variant:        DB 0
+preEnabled:     DB 0
     MODULE shift
 SHIFT_ORIGIN = $
     INCLUDE "engines/SHIFT.asm"
     ENDMODULE
-CACHE_GLYPHBODY = shift.glyphBody
+CACHE_GLYPHBODY      = shift.glyphBody
 CACHE_RENDERERRETURN = shift.rendererReturn
-CACHE_ONEBYTE = shift.oneByte
-CACHE_TWOBYTES = shift.twoBytes
+CACHE_ONEBYTE        = shift.oneByte
+CACHE_TWOBYTES       = shift.twoBytes
     INCLUDE "engines/monitor.inc"
     DEFINE FONTBEN_EMBED_OPT
     DEFINE OPT_DRAW_ORIGIN $

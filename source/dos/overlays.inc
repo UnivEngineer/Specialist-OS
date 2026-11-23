@@ -1,9 +1,9 @@
 ; Shared, non-reentrant loader for matched system overlays.
 ; Record: base,limit,name,host (words), hostBytes,ready,active (bytes),end (word).
 ; Caller pins its descriptor while executing. Loader leaves filesystem context.
-OV_READY = 9
+OV_READY  = 9
 OV_ACTIVE = 10
-OV_END = 11
+OV_END    = 11
 overlayEnsure:
     ld (ovRecord),hl
     ld e,OV_READY
@@ -149,31 +149,14 @@ ovWord:
 overlayBusy:
     ld a,MEM_ERROR_ACTIVE
     jp dosSetError
-ovRecord: DW 0
-ovImageEnd: DW 0
-ovDirectories: DS 16,0
 
-fileopsOverlay:
-    DW DOS_FILEOPS_ADDR,DOS_BANK_DRIVER_END,fileopsName,fileopsHost
-    DB fileopsHostEnd-fileopsHost,0,0
-    DW 0
-fileopsReady = fileopsOverlay+OV_READY
-fileopsActive = fileopsOverlay+OV_ACTIVE
-fileopsLoadedEnd = fileopsOverlay+OV_END
-fileopsName: DB "A:",05Ch,"FILEOPS.DLL",0
+fileopsName: DB "C:",05Ch,"DOS",05Ch,"FILEOPS.DLL",0
 fileopsHost:
     INCLUDE "../fileops/host.inc"
 fileopsHostEnd:
     ASSERT fileopsHostEnd-fileopsHost < 256
 
-enumOverlay:
-    DW DOS_SERVICE_ADDR,DOS_SERVICE_END,enumName,enumHost
-    DB enumHostEnd-enumHost,0,0
-    DW 0
-enumReady = enumOverlay+OV_READY
-enumActive = enumOverlay+OV_ACTIVE
-enumLoadedEnd = enumOverlay+OV_END
-enumName: DB "A:",05Ch,"ENUM.DLL",0
+enumName: DB "C:",05Ch,"DOS",05Ch,"ENUM.DLL",0
 enumHost:
     INCLUDE "../enumerate/host.inc"
 enumHostEnd:

@@ -51,82 +51,101 @@ quotaReady:
     add a,90h
     ld d,a
     ld (startColumn+1),a
-    ; D advances once per full video byte. Only RawLim needs a column limit below C0h.
-    ld a,(realMode)
-    cp 2
-    jp nz,limitReady
     ld a,d
     add a,e
-    ld (normalLimit+1),a
-    ld (inverseLimit+1),a
-limitReady:
+    ld (normalDownLimit+1),a
+    ld (normalUpLimit+1),a
+    ld (inverseDownLimit+1),a
+    ld (inverseUpLimit+1),a
     ld a,(bios_vars.cursorY)
     sub 7
     ld e,a
     ld a,(realMode)
-    add a,a
-    ld l,a
-    ld h,0
-    ld bc,normalRoutes
+    cp 2
+    jp z,unrestricted
+    or a
+    ld a,1
+    jp nz,thresholdReady
+    ld a,32
+thresholdReady:
+    ld (normalDownMin+1),a
+    ld (normalUpMin+1),a
+    ld (inverseDownMin+1),a
+    ld (inverseUpMin+1),a
+    ld hl,normalDown
+    ld bc,normalUp
+    ld a,(bios_vars.inverse)
+    or a
+    jp z,checkedRoute
+    ld hl,inverseDown
+    ld bc,inverseUp
+checkedRoute:
+    jp routeReady
+unrestricted:
+    ld hl,normalDownRaw
+    ld bc,normalUpRaw
     ld a,(bios_vars.inverse)
     or a
     jp z,routeReady
-    ld bc,inverseRoutes
+    ld hl,inverseDownRaw
+    ld bc,inverseUpRaw
 routeReady:
-    add hl,bc
-    ld a,(hl)
-    ld (route+1),a
-    inc hl
-    ld a,(hl)
-    ld (route+2),a
+    ld (route+1),hl
+    ld (normalFromUp+1),hl
+    ld (inverseFromUp+1),hl
+    ld h,b
+    ld l,c
+    ld (normalFromDown+1),hl
+    ld (inverseFromDown+1),hl
     ld hl,(text)
     ld b,h
     ld c,l
-route: jp normalLim
+route: jp normalDownRaw
 
-    MACRO BYTE_LOOP label, kind, inverse, limit
+    MACRO BYTE_LOOP label, raw, threshold, inverse, up, limit, next
 label:
     ld a,(bc)
-    IF kind != 2
-    cp kind
+threshold: cp 0
     jp c,finish
-    ENDIF
+raw:
+    ; RawLim enters here with no inspection of character codes.
+    ld a,(bc)
     inc bc
     ld l,a
+    IF up
+    ld h,FONT_ADDR/256+7
+    ELSE
     ld h,FONT_ADDR/256
+    ENDIF
     DUP 7
         ld a,(hl)
         IF inverse
         cpl
         ENDIF
         ld (de),a
+        IF up
+        dec h
+        dec e
+        ELSE
         inc h
         inc e
+        ENDIF
     EDUP
     ld a,(hl)
     IF inverse
     cpl
     ENDIF
     ld (de),a
-    ld a,e
-    sub 7
-    ld e,a
     inc d
     ld a,d
-    IF kind == 2
 limit: cp 0
-    ELSE
-    cp 0C0h
-    ENDIF
-    jp nz,label
+next: jp nz,0
     jp finish
     ENDM
-    BYTE_LOOP normalZ,32,0,unused
-    BYTE_LOOP normalRawZ,1,0,unused
-    BYTE_LOOP normalLim,2,0,normalLimit
-    BYTE_LOOP inverseZ,32,1,unused
-    BYTE_LOOP inverseRawZ,1,1,unused
-    BYTE_LOOP inverseLim,2,1,inverseLimit
+    BYTE_LOOP normalDown,normalDownRaw,normalDownMin,0,0,normalDownLimit,normalFromDown
+    BYTE_LOOP normalUp,normalUpRaw,normalUpMin,0,1,normalUpLimit,normalFromUp
+    BYTE_LOOP inverseDown,inverseDownRaw,inverseDownMin,1,0,inverseDownLimit,inverseFromDown
+    BYTE_LOOP inverseUp,inverseUpRaw,inverseUpMin,1,1,inverseUpLimit,inverseFromUp
 finish:
     ld h,b
     ld l,c
@@ -151,10 +170,6 @@ empty:
     ld hl,(text)
     scf
     ret
-    IFNDEF FONT_ALIGNED_ROWS
-normalRoutes: DW normalZ,normalRawZ,normalLim
-inverseRoutes: DW inverseZ,inverseRawZ,inverseLim
-    ENDIF
-text: DW 0
-realMode: DB 0
+text:           DW 0
+realMode:       DB 0
     ENDMODULE

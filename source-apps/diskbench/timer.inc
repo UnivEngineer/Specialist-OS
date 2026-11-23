@@ -1,7 +1,7 @@
 ; Локальный ВИ53: одинаковый путь независимо от страницы измерителя.
     INCLUDE "../../source/include/timing-pit.inc"
-timer_init = pitTimerInit
-timer_read = pitTimerRead
+timer_init   = pitTimerInit
+timer_read   = pitTimerRead
 timing_print = puts
 timing_printChar:
     ld c,a

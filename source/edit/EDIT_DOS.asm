@@ -4,6 +4,22 @@
 DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
     ENDIF
     ORG DRIVER_ORIGIN
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Запустить банковую версию редактора через EDITCORE.DLL.
+;
+; вход:
+;   de = адрес аргументов в странице DOS. Командная строка содержит диск запуска для
+;   поиска DLL.
+;
+; выход:
+;   При успешной загрузке и вызове возвращается AF обработчика редактора после попытки
+;   выгрузки. При отказе загрузки или вызова печатается код, после Enter
+;   восстанавливается AF ошибки.
+;----------------------------------------------------------------------------
+
 entry:
     ex de,hl
     ld (registers+2),hl
@@ -46,13 +62,13 @@ waitEnter:
     jp nz,waitEnter
     pop af
     ret
-corePath: DB 'A:',05Ch,'EDITCORE.DLL',0
-error: DB 'EDIT BANK: load/call error ',0
-prompt: DB 13,10,'Press Enter to return.',13,10,0
-coreHandle: DW 0
-registers: DS MX_REGS,0
+corePath:       DB 'C:',05Ch,'DOS',05Ch,'EDITCORE.DLL',0
+error:          DB 'EDIT BANK: load/call error ',0
+prompt:         DB 13,10,'Press Enter to return.',13,10,0
+coreHandle:     DW 0
+registers:      DS MX_REGS,0
     INCLUDE "../include/app-drive.inc"
-IMAGE_BSS_SIZE = 0
-IMAGE_MEM_END = $
+IMAGE_BSS_SIZE      = 0
+IMAGE_MEM_END       = $
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
-IMAGE_API = 2
+IMAGE_API           = 2

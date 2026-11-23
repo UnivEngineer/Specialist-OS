@@ -1,5 +1,8 @@
-; Compact KOI8 renderer: 162 glyphs * 8 bytes, no lower-memory tables.
-; Lookup maps unrepresented codes to DEL. KOI7 swaps map entries, not pixels.
+; Компактный движок KOI-8 6×8, 162 встроенных глифа по 8 байт.
+; Карта заменяет отсутствующие коды исходным глифом DEL. Переключение
+; KOI-7R меняет карту и подставляет пробел для кода 7Fh.
+; Attach не требует нижних таблиц, восстанавливает KOI-8 и подключает
+; входы BIOS. Выход A=0, CF=0.
     INCLUDE "../include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG FONT_ENGINE_BASE
@@ -21,8 +24,8 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     DB 'FNT1',FONT_ENGINE_VERSION,6,8,3
     DW imageEnd-FONT_ENGINE_BASE,fontData,0,initializerName
 initializerName: DB 'InitKoi.dll',0
-printChar2 = bios_fontControl
-printCharBody = bios_fontControl
+printChar2     = bios_fontControl
+printCharBody  = bios_fontControl
 calcCursorAd_0 = bios_fontPosition
     INCLUDE "char.inc"
 printCharRawHelper:
@@ -126,7 +129,7 @@ encodingOld: cp 0
     ld (bios_upper.koi7),a
     ld hl,glyphMap+060h
     ld de,glyphMap+0E0h
-    ld b,32
+    ld b,31
 encodingSwap:
     ld c,(hl)
     ld a,(de)
@@ -137,12 +140,19 @@ encodingSwap:
     inc de
     dec b
     jp nz,encodingSwap
+    ; HL указывает на 7Fh. Не меняем глиф-заполнитель пропущенных кодов.
+    ld a,(encodingDel)
+    ld c,(hl)
+    ld (hl),a
+    ld a,c
+    ld (encodingDel),a
 encodingDone:
     pop hl
     pop de
     pop bc
     pop af
     ret
+encodingDel: DB (blankGlyph-fontData)/8
 service:
     or a
     jp z,query
@@ -165,8 +175,9 @@ PSEUDO_WRAP = 190
     FONT_PSEUDO_ENTRY
     DS (-$)&255,0
 ; Byte-aligned table gives the glyph index in two loads, no range search.
-glyphMap: INCBIN "../../bin/fonts/compact-map.bin"
-fontData: INCBIN "../../bin/fonts/compact-font.bin"
+glyphMap:       INCBIN  "../../bin/fonts/compact-map.bin"
+fontData:       INCBIN  "../../bin/fonts/compact-font.bin"
+blankGlyph:     DS      8,0
     FONT_PSEUDO_TAIL
 imageEnd:
     ASSERT $ <= FONT_ENGINE_END

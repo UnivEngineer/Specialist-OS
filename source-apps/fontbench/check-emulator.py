@@ -227,7 +227,7 @@ try:
     if not options[4]:
         assert 0 < size <= s['REPORT_LIMIT'] - s['REPORT_BUFFER']
         report_bytes = m.read(s['REPORT_BUFFER'], size)
-        assert report_bytes.startswith(b'FONTBEN README 48x24') and b'Bitmap: PASS\r\n' in report_bytes
+        assert report_bytes.startswith(b'FONTBEN CORPUS 48x24') and b'Bitmap: PASS\r\n' in report_bytes
         assert report_bytes.count(b' / ') == len(cases) + 2
     else:
         assert size == 0

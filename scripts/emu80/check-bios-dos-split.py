@@ -31,7 +31,7 @@ try:
   m.call('bp_clear');return state
  if '--game-only' not in sys.argv:
   command('mkdir B:/SPLIT')
-  command('copy A:/README.TXT B:/SPLIT/README.TXT')
+  command('copy C:/README.TXT B:/SPLIT/README.TXT')
   command('ren B:/SPLIT/README.TXT B:/SPLIT/TEST.TXT')
   command('cd B:/SPLIT')
   assert int.from_bytes(m.read(d['v_directories']+2,2),'little')>=2
@@ -40,7 +40,7 @@ try:
   command('cd B:/')
  command('H:')
  if '--driver-write' in sys.argv:
-  command('copy A:/README.TXT H:/ABI-TMP.TXT')
+  command('copy C:/README.TXT H:/ABI-TMP.TXT')
   command('copy H:/ABI-TMP.TXT B:/H-READ.TXT')
   command('del H:/ABI-TMP.TXT')
   command('del B:/H-READ.TXT')
@@ -50,7 +50,7 @@ try:
  for mode in ([] if '--files-only' in sys.argv else ['MX','STD','MON']):
   command('H:/Ball.bat' if mode=='MX' else 'RUN -'+mode+' H:/Ball.exe',r['ready'])
   m.stop_at(0);m.until(0,40)
-  assert m.read(0,32)==(ROOT/'assets/games/BALL.RKS').read_bytes()[4:36]
+  assert m.read(0,32)==(ROOT/'assets/games/std/Ball.rks').read_bytes()[4:36]
   if mode in ['MX','STD']:assert m.read(d['bios_upper.koi7'],1)==b'\xff'
   m.call('bp_clear');m.call('emu_run_for',ms=2000);m.screenshot(OUT/('ball-'+mode.lower()+'.png'))
   m.tap('enter');m.call('emu_run_for',ms=1000);m.screenshot(OUT/('ball-menu-'+mode.lower()+'.png'))

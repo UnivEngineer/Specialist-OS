@@ -3,9 +3,9 @@
 ; NEAR-объекты принадлежат клиенту, локальные копии — только банку DOS.
 ; Повторный вход не разрешает вторую файловую транзакцию.
 KD_OBJECT = DOS_BANK_OBJECT_ADDR
-KD_PATH = DOS_BANK_PATH_ADDR
-KD_DATA = DOS_BANK_DATA_ADDR
-KD_CHUNK = DOS_BANK_DATA_SIZE
+KD_PATH   = DOS_BANK_PATH_ADDR
+KD_DATA   = DOS_BANK_DATA_ADDR
+KD_CHUNK  = DOS_BANK_DATA_SIZE
 kernelDispatch:
     ; Межстраничный пакет находится в общем окне, даже для инициатора DOS.
     ld de,BANK_FRAME_REGS
@@ -119,11 +119,7 @@ kdPacketLoop:
     jp z,kmAttr
     cp MXOS_DOS_FILE_DELETE & 0FFh
     jp z,kmDelete
-    cp MXOS_DOS_FILE_DELETE_ON_DRIVE & 0FFh
-    jp z,kmDelete
     cp MXOS_DOS_FILE_RENAME & 0FFh
-    jp z,kmRename
-    cp MXOS_DOS_FILE_RENAME_ON_DRIVE & 0FFh
     jp z,kmRename
     cp MXOS_DOS_FILE_LIST & 0FFh
     jp z,kdFileList
@@ -589,8 +585,6 @@ kdScalars:
     DW timerService
     DB MXOS_DOS_DRIVER_REFRESH & 0FFh
     DW dosDriverRefresh
-    DB MXOS_DOS_DRIVER_SELECT & 0FFh
-    DW dosDriverSelect
     DB MXOS_DOS_GET_DRIVE_FREE_SPACE & 0FFh
     DW getDriveFreeSpace
     DB MXOS_DOS_MOUNT_VOLUME & 0FFh
@@ -609,22 +603,17 @@ kdScalars:
 kdLocalTable:
     INCLUDE "../../bin/banked/kernel-services.inc"
 kdLocalEnd:
-kdBusy: DB 0
-kdPage: DB 0
-kdFunction: DB 0
-kdOperation: DB 0
-kdIOStarted: DB 0
-kdRegs = DOS_REQUEST_SCRATCH+0
-kdEntry = DOS_REQUEST_SCRATCH+8
-kdClientObject = DOS_REQUEST_SCRATCH+10
-kdBuffer = DOS_REQUEST_SCRATCH+12
+kdRegs           = DOS_REQUEST_SCRATCH+0
+kdEntry          = DOS_REQUEST_SCRATCH+8
+kdClientObject   = DOS_REQUEST_SCRATCH+10
+kdBuffer         = DOS_REQUEST_SCRATCH+12
 kdOriginalBuffer = DOS_REQUEST_SCRATCH+14
-kdLeft = DOS_REQUEST_SCRATCH+16
-kdChunk = DOS_REQUEST_SCRATCH+18
-kdActual = DOS_REQUEST_SCRATCH+20
-kdTotal = DOS_REQUEST_SCRATCH+22
-kdResult = DOS_REQUEST_SCRATCH+24
-kdCopy = DOS_REQUEST_SCRATCH+26
+kdLeft           = DOS_REQUEST_SCRATCH+16
+kdChunk          = DOS_REQUEST_SCRATCH+18
+kdActual         = DOS_REQUEST_SCRATCH+20
+kdTotal          = DOS_REQUEST_SCRATCH+22
+kdResult         = DOS_REQUEST_SCRATCH+24
+kdCopy           = DOS_REQUEST_SCRATCH+26
     ASSERT DOS_REQUEST_SCRATCH+34 <= DOS_SERVICE_ADDR
 
 

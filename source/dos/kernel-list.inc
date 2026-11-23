@@ -105,6 +105,3 @@ klCopyFailed:
     ld a,DOS_ERR_ARGUMENT
     ld (klFailed),a
     jp blockArgument
-klActive: DB 0
-klFailed: DB 0
-klCursor: DW 0

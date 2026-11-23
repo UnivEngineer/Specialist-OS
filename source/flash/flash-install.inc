@@ -3,6 +3,12 @@
 ; Временный ID использует 8C00h–8CFFh, общий системный резерв переходников.
 ; Выход CF=0: установлен; CF=1: ошибка flush, нет ID или неподдерживаемый чип.
 Install:
+    IF SYSTEM_FLASH
+    ex de,hl
+    ld c,SYSTEM_DRIVE
+    call driverFixedLetter
+    ret c
+    ENDIF
     ld a,(bios_upper.koi7)
     push af
     xor a
@@ -93,7 +99,7 @@ probeNext:
     ld (FuncSize+4),hl
     IF SYSTEM_FLASH
     ld hl,DriverInfo
-    xor a
+    ld a,SYSTEM_DRIVE
     MXOS_CALL MXOS_DOS_DRIVER_REFRESH
     ret c
     ENDIF
@@ -108,6 +114,10 @@ InstallFailed:
     call bios_printString
     scf
     ret
+    IF SYSTEM_FLASH
+    INCLUDE "../common/argNext.inc"
+    INCLUDE "../common/driver-letter.inc"
+    ENDIF
 txtIDError: DB "FLASH: UNSUPPORTED / MISSING CHIP",00Ah,0
 
 ; 30720 тактов цикла (15,36 мс при 2 МГц, 12,288 мс при 2,5 МГц).
@@ -177,6 +187,20 @@ SysProbe:
     pop bc
     ld (IO_PAGE_RAM),a
     ret
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Послать команду системной flash после двух байтов разблокировки.
+;
+; вход:
+;   c = код команды, 5555h и 2AAAh отображают командные адреса чипа.
+;
+; выход:
+;   Последовательно записаны 0AAh, 55h и c. a = c; bc, de, hl и флаги сохранены.
+;   Ожидание готовности в этот вход не входит.
+;----------------------------------------------------------------------------
+
 SysCommand:
     ld a,0AAh
     ld (05555h),a
