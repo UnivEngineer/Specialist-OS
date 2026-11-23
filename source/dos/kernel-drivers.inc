@@ -35,6 +35,10 @@ kernelDiskDone:
     pop hl
     pop de
     pop bc
+    ret nc
+    cp DOS_ERR_NO_MEDIA
+    jp z,dosMediaMissing
+    scf
     ret
 diskDriverDummy:
     ld de,0
@@ -47,8 +51,6 @@ diskDriverDummy:
 dosPhysicalDrive:
     push hl
     ld a,(v_drive)
-    cp SYSTEM_DRIVE
-    jp z,dosPhysicalDone
     ld hl,kernelRamDrive
     cp (hl)
     jp nz,dosPhysicalExternal
@@ -64,8 +66,12 @@ dosPhysicalExternal:
 dosPhysicalFloppy:
     dec hl
     cp (hl)
+    jp z,dosPhysicalIsFloppy
+    cp SYSTEM_DRIVE
+    jp z,dosPhysicalDone
     ld a,0FFh
-    jp nz,dosPhysicalDone
+    jp dosPhysicalDone
+dosPhysicalIsFloppy:
     ld a,FLOPPY_DRIVE
 dosPhysicalDone:
     pop hl

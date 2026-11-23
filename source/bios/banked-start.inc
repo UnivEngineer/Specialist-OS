@@ -83,7 +83,7 @@ biosRamBanksText:   DB ' KiB, ',0
 biosRamEndText:     DB ' banks',10,0
 
 biosInstallBootDrive:
-    ld hl,2048
+    ld hl,(biosBootRomBlocks)
     ld (v_diskInfo.totalSectors),hl
     ld a,SYSTEM_DRIVE
     ld (v_drive),a
@@ -107,7 +107,7 @@ biosBankWarm:
     call setMemTop
     ; Согласовать реестр DOS со встроенным ROM после восстановления BIOS.
     ; Драйверы повторно устанавливает только явный сценарий пользователя.
-    ld hl,0                     ; ROM-SYS: описание по умолчанию из DOS
+    ld hl,0                     ; ROM512KS: описание по умолчанию из DOS
     ld a,SYSTEM_DRIVE
     MXOS_CALL MXOS_DOS_DRIVER_REFRESH
     ld hl,biosAutoexecPath
@@ -150,6 +150,7 @@ biosAutoexecPath:   DB "C:",05Ch,"AUTOEXEC.BAT",0
 biosNcPath:         DB "C:",05Ch,"DOS",05Ch,"NC.COM",0
 biosNcMainPath:     DB "C:",05Ch,"DOS",05Ch,"NC_MN.COM",0
 biosCliPath:        DB "C:",05Ch,"DOS",05Ch,"CLI.COM",0
+biosBootRomBlocks:   DW 2048
 biosBootPages:      DB 16
 biosBootWarm:       DB 0
 biosBootEntered:    DB 0

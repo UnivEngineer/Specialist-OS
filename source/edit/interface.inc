@@ -98,8 +98,8 @@ editorHelpColor:
         RET
     ENDIF
     DB COLOR_TEXT ; Background palette passed with the FAR help path.
-editorHelpPath:     DB 'C:',05Ch,'DOS',05Ch,'EDIT.HLP',0
-editorHelpError:    DB 'Cannot read C:/DOS/EDIT.HLP',0
+editorHelpPath:     DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'EDIT.HLP',0
+editorHelpError:    DB 'Cannot read EDIT.HLP',0
 
 
 editorInfoModal:

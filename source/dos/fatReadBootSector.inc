@@ -37,7 +37,8 @@ BS_BootSign     BLOCK  2    ; смещение 1FEh,   2 байт - 0xAA55. A bo
 ; выход:
 ;   cf = 0: a = 0, v_diskInfo.isValid = DISK_VALID, геометрия тома заполнена.
 ;   cf = 1: a и v_dosError = причина отказа. isValid = DISK_NO_DRIVER для
-;   пустого драйвера, DISK_INVALID при ошибке чтения или формата.
+;   пустого драйвера, DISK_NO_MEDIA без носителя или при неверном формате ROM/flash,
+;   DISK_INVALID при прочих ошибках чтения или формата.
 ;   bc, de, hl сохраняются. Рабочий буфер DOS_CACHE_BOOT_ADDR перезаписывается.
 ;   При смене размера сектора сбрасываются строки кэша выбранного диска.
 ;
@@ -365,6 +366,10 @@ frbs_Valid:
             xor a
             jp frbs_Exit
 frbs_Bad:
+    IFDEF BANKED_DOS_BUILD
+            call frbs_CheckRomFlash
+            jp z,frbs_NoMedia
+    ENDIF
             ld a,DOS_ERR_UNSUPPORTED
             call dosSetError
             jp frbs_Exit
@@ -373,14 +378,32 @@ frbs_NoDriver:
             call dosSetError
             jp frbs_Exit
 frbs_Corrupt:
+    IFDEF BANKED_DOS_BUILD
+            call frbs_CheckRomFlash
+            jp z,frbs_NoMedia
+    ENDIF
             call dosCorrupt
             jp frbs_Exit
 frbs_Io:
+            cp DOS_ERR_NO_MEDIA
+            jp z,frbs_NoMedia
             call dosIoError
+            jp frbs_Exit
+frbs_NoMedia:
+            call dosMediaMissing
 frbs_Exit:
             pop bc
             pop de
             pop hl
             ret
+    IFDEF BANKED_DOS_BUILD
+; Z=1 у системного и внешнего ROM/flash. Рабочий HL сохранён шлюзом DOS.
+frbs_CheckRomFlash:
+            call dosPhysicalDrive
+            cp EXTERNAL_DRIVE
+            ret z
+            cp SYSTEM_DRIVE
+            ret
+    ENDIF
 aMxos256:           DB "MXOS256 "
 aMxos128:           DB "MXOS128 "

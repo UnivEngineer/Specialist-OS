@@ -63,6 +63,7 @@ fatCheckMounted:
             ld a,(v_diskInfo.isValid)
             cp DISK_VALID
             ret z
+            ; Значения DISK_* для отказов смещены от DOS_ERR_NO_DRIVER.
             add a,DOS_ERR_NO_DRIVER
             jp dosSetError
 ;----------------------------------------------------------------------------

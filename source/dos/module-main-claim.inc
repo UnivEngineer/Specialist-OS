@@ -361,5 +361,5 @@ mfDone:
     ld (kdPage),a
     pop af
     ret
-mfFontPath:         DB 'C:',05Ch,'FONTS',05Ch,'6X8',05Ch,'ROTATE.FNT',0
+mfFontPath:         DB BOOT_VOLUME_LETTER,':',05Ch,'FONTS',05Ch,'6X8',05Ch,'ROTATE.FNT',0
 mfFallbackName:     DB "Rotate  "

@@ -24,7 +24,7 @@ def main():
     matrix.report['commit'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     matrix.report['workingTreeDiff'] = subprocess.check_output(['git', 'diff', '--stat'], cwd=ROOT, text=True)
     matrix.report['sha256'] = {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in (
-        'bin/BIOS.sys', 'bin/DOS.sys', 'bin/DISKBEN.i80', 'images/SystemRom_emu80_writable.bin')}
+        'bin/BIOS.sys', 'bin/DOS.sys', 'bin/DISKBEN.i80', 'images/C-Flash-512k-MMX-System-Emu80.bin')}
     try:
         matrix.start('local-drivers')
         matrix.console()

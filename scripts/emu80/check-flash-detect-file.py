@@ -46,7 +46,7 @@ try:
     assert image.read_bytes()[:root]==before[:root]
     results['twoChipDosFile']=dict(bytes=4096,readback=True,afterProcessRestart=True,deleted=True,fatRestored=True,chips=sorted(chips))
     # Физический чип 512 КиБ, BPB тома 128 КиБ: запись всё равно страницами 256.
-    system=bytearray((ROOT/'images/SystemRom_512K.bin').read_bytes())
+    system=bytearray((ROOT/'images/C-Flash-512k-MMX-System.bin').read_bytes())
     struct.pack_into('<H',system,19,512)
     path=out/'physical512-volume128.bin';path.write_bytes(system)
     x.start('physical-vs-bpb',system=path)

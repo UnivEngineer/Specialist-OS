@@ -12,6 +12,7 @@ import sys
 ROOT = Path(__file__).absolute().parents[2]
 START, END = 0x2000, 0xFFFC
 REGISTRY = ROOT / 'assets/games/ramfos-candidates.json'
+MX_MANIFEST = ROOT / 'assets/C-ROM-32k-MX-RAMFOS.txt'
 
 
 def checksum(data):
@@ -61,8 +62,8 @@ def record(name, extension, address, data, offset):
     return header + data + struct.pack('<H', offset)
 
 
-def assemble(name, defines=()):
-    output = ROOT / 'bin' / ('RAMFOS-ROM-' + name)
+def assemble(name, defines=(), prefix='RAMFOS-ROM-'):
+    output = ROOT / 'bin' / (prefix + name)
     subprocess.run([str(ROOT / 'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                     *defines, '--lst=' + str(output.with_suffix('.lst')),
                     '--raw=' + str(output.with_suffix('.bin')), name + '.asm'],
@@ -70,13 +71,52 @@ def assemble(name, defines=()):
     return output.with_suffix('.bin').read_bytes()
 
 
-def build(library):
+def system_prefix(mx_rom32=False, prebuilt=False):
     (ROOT / 'bin').mkdir(exist_ok=True)
-    kernel = assemble('ramfos', ('-DMXOS_KERNEL=0', '-DROM_PAGE_START=02000h', '-DDLG_START_PAGE=0'))
-    boot = assemble('romboot')
+    prefix = 'RAMFOS-MX32-' if mx_rom32 else 'RAMFOS-ROM-'
+    platform = ['-DMX_LINEAR_ROM32=1'] if mx_rom32 else []
+    start_page = '080h' if mx_rom32 else '0'
+    if prebuilt:
+        kernel = (ROOT / f'bin/{prefix}ramfos.bin').read_bytes()
+        boot = (ROOT / f'bin/{prefix}romboot.bin').read_bytes()
+    else:
+        kernel = assemble('ramfos', ['-DMXOS_KERNEL=0', '-DROM_PAGE_START=02000h',
+                                     '-DDLG_START_PAGE=' + start_page, *platform], prefix)
+        boot = assemble('romboot', platform, prefix)
     assert len(kernel) == 0x3FE0
     packed = kernel[:0x1300] + kernel[0x3800:]
     assert 0x100 + len(packed) <= START
+    return boot.ljust(0x100, b'\0') + packed
+
+
+def mx_files():
+    entries = []
+    for number, line in enumerate(MX_MANIFEST.read_text(encoding='utf-8-sig').splitlines(), 1):
+        fields = line.partition('#')[0].split()
+        if not fields:
+            continue
+        if len(fields) != 3 or not re.fullmatch(r'[^.\s/\\]{1,8}\.[^.\s/\\]{1,3}', fields[0]):
+            raise ValueError(f'{MX_MANIFEST}:{number}: expected name.ext source load_address')
+        name, source, load = fields
+        entries.append((name, MX_MANIFEST.parent / source, int(load, 0)))
+    return entries
+
+
+def build_mx_rom(entries, prebuilt=False):
+    rom = bytearray(system_prefix(mx_rom32=True, prebuilt=prebuilt).ljust(START, b'\0'))
+    for filename, path, address in entries:
+        name, extension = filename.split('.')
+        rom.extend(record(name, extension, address, path.read_bytes(), len(rom)))
+    if len(rom) + 30 > 0x8000:
+        raise ValueError(f'{MX_MANIFEST}: ROM directory exceeds 32 KiB')
+    target = ROOT / 'images' / MX_MANIFEST.with_suffix('.bin').name
+    target.parent.mkdir(exist_ok=True)
+    target.write_bytes(rom.ljust(0x8000, b'\0'))
+    print(f'{target.name}: 32 KiB, {len(entries)} file(s)')
+
+
+def build(library):
+    prefix = system_prefix()
     entries = json.loads(REGISTRY.read_text(encoding='utf-8'))['entries']
     monitor = (library / 'OS/RAMFOS-master/RomDisk/Monitor2.49152.sys').read_bytes()
     # Системный монитор доступен в каждом томе для штатного RKS-загрузчика.
@@ -109,8 +149,7 @@ def build(library):
                             bytes=len(data), page=page, offset=offset))
         offsets[page] += len(encoded)
     logical = bytearray(65536)
-    logical[:len(boot)] = boot
-    logical[0x100:0x100 + len(packed)] = packed
+    logical[:len(prefix)] = prefix
     logical[START:START + len(base)] = base
     # BIG_ROM: адреса >=8000h читаются из STD ROM со сдвигом +4.
     physical = bytes.fromhex('31fff7c7') + logical[0x8000:0xFFFC] + logical[:0x8000]
@@ -141,10 +180,35 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--library', type=Path, default=Path('D:/Projects/RetroPC/Specialist'))
     parser.add_argument('--force', action='store_true')
+    parser.add_argument('--prebuilt', action='store_true')
+    parser.add_argument('--mx-rom32', action='store_true', help='Build the standalone linear MX ROM from its file manifest')
     parser.add_argument('--run-build', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
-        if args.run_build:
+        if args.mx_rom32:
+            entries = mx_files()
+            if args.run_build:
+                build_mx_rom(entries, args.prebuilt)
+            else:
+                options = ['image: MxRamfos32', '--input-content', '--input', str(MX_MANIFEST),
+                           '--output', str(ROOT / 'images' / MX_MANIFEST.with_suffix('.bin').name)]
+                for _, path, _ in entries:
+                    options.extend(('--input', str(path)))
+                for name in ('ramfos', 'romboot'):
+                    if args.prebuilt:
+                        options.extend(('--input', str(ROOT / f'bin/RAMFOS-MX32-{name}.bin')))
+                        continue
+                    options.extend(('--asm', str(ROOT / f'source/ramfos/{name}.asm')))
+                    for ext in ('bin', 'lst'):
+                        options.extend(('--output', str(ROOT / f'bin/RAMFOS-MX32-{name}.{ext}')))
+                if args.force:
+                    options.append('--force')
+                cached_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['main']
+                if not args.prebuilt:
+                    options.extend(('--input', str(ROOT / 'tasm/sjasmplus.exe')))
+                sys.exit(cached_build([*options, '--', __file__, '--mx-rom32', '--run-build',
+                                       *(['--prebuilt'] if args.prebuilt else [])]))
+        elif args.run_build:
             build(args.library)
         else:
             entries = json.loads(REGISTRY.read_text(encoding='utf-8'))['entries']

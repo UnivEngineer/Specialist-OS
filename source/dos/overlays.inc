@@ -150,14 +150,14 @@ overlayBusy:
     ld a,MEM_ERROR_ACTIVE
     jp dosSetError
 
-fileopsName: DB "C:",05Ch,"DOS",05Ch,"FILEOPS.DLL",0
+fileopsName: DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"FILEOPS.DLL",0
 fileopsHost:
-    INCLUDE "../fileops/host.inc"
+    INCLUDE "../include/fileops-host.inc"
 fileopsHostEnd:
     ASSERT fileopsHostEnd-fileopsHost < 256
 
-enumName: DB "C:",05Ch,"DOS",05Ch,"ENUM.DLL",0
+enumName: DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"ENUM.DLL",0
 enumHost:
-    INCLUDE "../enumerate/host.inc"
+    INCLUDE "../include/enumerate-host.inc"
 enumHostEnd:
     ASSERT enumHostEnd-enumHost < 256

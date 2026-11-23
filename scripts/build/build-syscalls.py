@@ -43,6 +43,7 @@ def generate(check=False):
         ROOT/'sdk/include/mxos_syscall_ids.h':c,
         ROOT/'sdk/src/mxos_syscall_ids.inc':z80,
     }
+    changed = False
     for path, lines in outputs.items():
         if path.suffix == '.inc':
             parts = [line.partition(' = ') for line in lines]
@@ -55,8 +56,13 @@ def generate(check=False):
         if check:
             raise SystemExit('Устаревший реестр: '+str(path))
         path.write_text(text,encoding='utf-8')
+        changed = True
+    return changed
 
 if __name__ == '__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--check', action='store_true')
-    generate(p.parse_args().check)
+    print('[checking] System call registry', flush=True)
+    changed = generate(p.parse_args().check)
+    status = 'updated' if changed else 'up-to-date'
+    print(f'[{status}] System call registry', flush=True)

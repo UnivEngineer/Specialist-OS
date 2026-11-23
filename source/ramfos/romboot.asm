@@ -42,6 +42,10 @@ copy2:
     ld a, b
     or c
     jp nz, copy2
+    IFDEF MX_LINEAR_ROM32
+    ; F800h и ядро видны при включённом ПЗУ MX. init сам включает MAIN.
+    jp 0F800h
+    ELSE
     ; 8000h доступен как основное ОЗУ и при включённом MX ПЗУ.
     ld hl, gate
     ld de, 08000h
@@ -57,4 +61,5 @@ copyGate:
 gate:
     ld (0FFFCh), a
     jp 0F800h
+    ENDIF
     ASSERT $ <= 0100h

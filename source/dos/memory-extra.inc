@@ -249,7 +249,7 @@ memoryRamDisk:
 memoryRamDiskValidate:
     ld a,(memoryRamPages)
     or a
-    jp z,memoryBad
+    jp z,dosNoMedia
     ld (memoryRequestedPages+1),a
     ; Повторно проверяем геометрию B:, не форматируя и не меняя данные.
     call memoryExistingVolume

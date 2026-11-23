@@ -243,7 +243,7 @@ def main():
         assert font in ('Rotate','Packed6K','Fast12K')
         machine=h['Matrix']()
         try:
-            machine.start('text-alignment-'+font,disk=ROOT/'images/FlashDisk_emu80_seed.bin')
+            machine.start('text-alignment-'+font,disk=ROOT/'images/H-Flash-2M-Games.bin')
             m=machine.m
             def command(value):
                 m.tap('esc');m.call('emu_run_for',ms=250)

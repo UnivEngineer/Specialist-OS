@@ -17,7 +17,7 @@ def main():
         r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
         (ROOT / 'bin/CLI.sym').read_text(encoding='utf-8'), re.M)}
     try:
-        machine.start('cli-font-cursor', disk=ROOT / 'images/FlashDisk_emu80_seed.bin')
+        machine.start('cli-font-cursor', disk=ROOT / 'images/H-Flash-2M-Games.bin')
         m = machine.m
 
         def byte(label):

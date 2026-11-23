@@ -64,7 +64,7 @@ def main():
             custom_system=None
             if '--navigation-settings' in sys.argv:
                 # A copied test image changes only NC.CFG, without rebuilding NC.
-                data=bytearray((ROOT/'images/SystemRom_emu80_writable.bin').read_bytes())
+                data=bytearray((ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes())
                 word=lambda at:int.from_bytes(data[at:at+2],'little')
                 sector=word(11);reserved=word(14);fat=data[16]*word(22)
                 root=(reserved+fat)*sector;root_bytes=word(17)*32
@@ -84,7 +84,7 @@ def main():
                     cluster=word(reserved*sector+cluster*2)
                 data[entry+28:entry+32]=len(config).to_bytes(4,'little')
                 custom_system=OUT/'settings-system.bin';custom_system.write_bytes(data)
-            machine.start('nc-info', system=custom_system, disk=ROOT / 'images/FlashDisk_emu80_seed.bin')
+            machine.start('nc-info', system=custom_system, disk=ROOT / 'images/H-Flash-2M-Games.bin')
         m = machine.m
         if '--boot-only' in sys.argv:
             assert m.read(n['bios_upper.koi7'],1)==b'\x00'

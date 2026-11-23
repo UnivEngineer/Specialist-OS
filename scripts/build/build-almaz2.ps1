@@ -11,6 +11,8 @@ param(
     [switch] $PublishMxTimer,
     [switch] $Force,
     [Parameter(DontShow)]
+    [switch] $Describe,
+    [Parameter(DontShow)]
     [switch] $RunBuild
 )
 
@@ -42,7 +44,7 @@ $modes = @(
 )
 $selected = @($modes | Where-Object { $Mode -eq "All" -or $_.Name -eq $Mode })
 if (-not $RunBuild) {
-    $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), "Almaz-2 ($Mode)", '--content', '--asm', $sourcePath)
+    $cacheArgs = @("Almaz-2 ($Mode)", '--content', '--asm', $sourcePath)
     $cacheArgs += @('--input', (Join-Path $repositoryRoot 'scripts/images/executable.ps1'),
         '--input', (Join-Path $repositoryRoot 'scripts/images/cpu.ps1'))
     foreach ($variant in $selected) {
@@ -59,7 +61,8 @@ if (-not $RunBuild) {
         '-InputCellStride', $InputCellStride, '-RunBuild')
     if ($NoOptimizations) { $cacheArgs += '-NoOptimizations' }
     if ($PublishMxTimer) { $cacheArgs += '-PublishMxTimer' }
-    & python @cacheArgs
+    if ($Describe) { return @{ cwd = (Get-Location).ProviderPath; args = [string[]]$cacheArgs } }
+    & python (Join-Path $PSScriptRoot 'build_cache.py') @cacheArgs
     exit $LASTEXITCODE
 }
 

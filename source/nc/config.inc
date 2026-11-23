@@ -348,7 +348,7 @@ ncConfigNext:           DW 0
 ncConfigRuleEnd:        DW 0
 ncConfigKind:           DB 0
 ncConfigColor:          DB 0
-ncConfigPath:           DB 'C:',05Ch,'DOS',05Ch,'NC.CFG',0
+ncConfigPath:           DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'NC.CFG',0
 ncConfigDirectives:
     DB 'FILECOLORUSER',0,0,'FILECOLORSYS',0,1,'FILECOLORDEF',0,2
     DB 'DEFAULTSORTMODE',0,3

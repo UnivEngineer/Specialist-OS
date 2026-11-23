@@ -96,7 +96,7 @@ def cursor():
  page(0);v=int.from_bytes(m.read(b['bios_vars.cursorY'],2),'little');page(6);return v
 rows=[]
 try:
- x.start('command queue',system=R/'images/SystemRom_emu80_writable.bin');m.call('debug_break');m.call('bp_clear')
+ x.start('command queue',system=R/'images/C-Flash-512k-MMX-System-Emu80.bin');m.call('debug_break');m.call('bp_clear')
  cli=sy(R/'bin/CLI.sym');m.stop_at(cli['cliPrompt']);m.tap('f10');m.until(cli['cliPrompt'],90,page=0);m.call('bp_clear')
  page(6)
  for addr,name in ((k['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(k['mx_call'],'CLIENT'),(t['BANK_LANDING'],'TRANSPORT')):m.write(addr,(R/f'bin/banked/{name}.bin').read_bytes())

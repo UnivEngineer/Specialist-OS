@@ -124,7 +124,7 @@ try:
  if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
  page(0)
  # Both flash variants and ROM install from different measured origins.
- for installer in ('AT2MXF.COM','ROM2M.COM','AT2MX.COM'):
+ for installer in ('AT2MXF.COM','ROM2MX.COM','AT2MX.COM'):
   m.write(0x3400,('C:/DRIVERS/'+installer).encode()+b'\0'+bytes(100))
   call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
   page(1)

@@ -4,6 +4,10 @@
 dosRawPrepare:
     call klEligible
     jp nz,dosUnsupported
+    call registrySize
+    ld a,d
+    or e
+    jp z,dosNoMedia
     call flushVolume
     ret c
     call dosPhysicalDrive
@@ -53,6 +57,8 @@ klRamBounds:
     cp RAMDISK_DATA_BLOCK_LIMIT
     jp nc,klBad
     ld a,(memoryRamPages)
+    or a
+    jp z,klNoMedia
     ld hl,klRegs+3
     cp (hl)
     jp c,klBad
@@ -77,6 +83,11 @@ klNotRam:
     jp m,klInvoke
 klSystemRead:
     ld hl,(klRegs+2)
+    IFDEF MX_FLOPPY_BOOT
+    ld a,080h
+    ld (klRamCopy),a
+    ld a,l
+    ELSE
     ld a,l
     add a,a
     ld a,h
@@ -85,6 +96,7 @@ klSystemRead:
     ld (klRamCopy),a
     ld a,l
     and 07Fh
+    ENDIF
     ld h,a
     ld l,0
     ld (klRamCopy+1),hl
@@ -148,6 +160,9 @@ klRamRead:
 klBad:
     ld a,DOS_ERR_ARGUMENT
     scf
+    jp klDone
+klNoMedia:
+    call dosNoMedia
     jp klDone
 
 ; Все существующие физические драйверы C:/B:/H:, любой EXEC-клиент.

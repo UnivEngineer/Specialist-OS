@@ -74,6 +74,18 @@ cliDriveOnly:
     call fileChangeDrive
     ret c
     jp cliContextChanged
+    IFDEF MX_FLOPPY_BOOT
+; SYSROM C: публикует существующую службу BIOS в файловой системе MX.
+cliSysRom:
+    call cliOnePath
+    ret c
+    ld de,cliSystemLetter
+    ld c,3
+    call stricmp
+    jp nz,blockArgument
+    jp registryUseBuiltin
+cliSystemLetter: DB 'A'+SYSTEM_DRIVE,':',0
+    ENDIF
 cliFindCommand:
     ld de,cliCommands
 cliNextCommand:

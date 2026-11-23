@@ -52,5 +52,8 @@ def main():
 if __name__ == '__main__':
     python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']
     sys.exit(python_build(__file__, 'COPYBEN variants', main,
-                          inputs=(HERE, 'source/include', 'source/common'),
+                          asm=(HERE / name for name in (
+                              *(name + '.inc' for name in (*VARIANTS, 'builtin_byte', 'builtin_block')),
+                              'CPMCOPY.asm', 'r4-reference.asm', 'near-engines.asm', 'cpm-local.asm')),
+                          inputs=(), input_content=True,
                           outputs=('bin/COPYBEN.variants.inc',), scan_outputs=(OUT,)))

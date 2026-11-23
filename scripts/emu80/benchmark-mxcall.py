@@ -17,7 +17,7 @@ def main():
  rows=[]
  try:
   (out/a.label).mkdir(parents=True,exist_ok=True)
-  fixture=dict(system=R/'images/SystemRom_emu80_writable.bin')
+  fixture=dict(system=R/'images/C-Flash-512k-MMX-System-Emu80.bin')
   x.start('MXOS_CALL '+a.label,**fixture);m.call('debug_break');m.call('bp_clear')
   expected_font=m.read(s['FONT_ADDR'],s['FONT_BYTES'])
   page(6)

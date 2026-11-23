@@ -20,7 +20,7 @@ def run(version):
   q=root/'bin'/filename
   if q.exists():shutil.copyfile(q,out/filename)
  shutil.copyfile(root/'bin/banked/KERNEL.sym',out/'KERNEL.sym')
- shutil.copyfile(root/'images/SystemRom_emu80_writable.bin',out/'system.bin')
+ shutil.copyfile(root/'images/C-Flash-512k-MMX-System-Emu80.bin',out/'system.bin')
  k=sy(out/'KERNEL.sym');n=sy(out/'NC.sym');c=sy(out/'CLI.sym')
  x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp'
  def until(pc,seconds=60,page=None):

@@ -24,7 +24,7 @@ def main():
     word=lambda n:struct.unpack_from('<H',image,n)[0]
     root=word(14)+image[16]*word(22)
     label_lines = [line.strip()[7:].strip() for line in
-                   (ROOT/'assets/C-System.txt').read_text('utf-8-sig').splitlines()
+                   (ROOT/'assets/C-Flash-512k-MMX-System.txt').read_text('utf-8-sig').splitlines()
                    if line.strip().startswith('@label ')]
     assert len(label_lines) == 1
     assert image[0x2B:0x36] == label_lines[0].ljust(11).encode('ascii')
@@ -55,7 +55,7 @@ def main():
                 directory=payload
             else:
                 return entry,payload[:struct.unpack_from('<I',entry,28)[0]]
-    for line in (ROOT/'assets/C-System.txt').read_text('utf-8-sig').splitlines():
+    for line in (ROOT/'assets/C-Flash-512k-MMX-System.txt').read_text('utf-8-sig').splitlines():
         if not line.strip() or line.lstrip().startswith(('#','@')):continue
         name,source,*options=line.split()
         if source=='{AUTOEXEC}':source=f'system-rom/autoexec.{args.autoexec}.bat'

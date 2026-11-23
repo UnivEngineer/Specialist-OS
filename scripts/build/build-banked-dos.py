@@ -29,7 +29,6 @@ def main():
         f'    DW {next((v["target"].removeprefix("dos_") for v in services if v["id"] == i), "dosUnsupported")}\n' for i in range(max(v['id'] for v in services)+1)), encoding='utf-8')
     h['assemble'](ROOT/'source/dos/DOS.asm', out/'KERNEL.bin', [])
     sy = h['symbols'](out/'KERNEL.sym')
-    runpy.run_path(str(ROOT/'scripts/build/build-overlays.py'))['build'](sy)
     report = {key:sy[key] for key in ('dosCoreStart','dosCoreEnd','kernelEnd','dosWorkStart','dosDefaultsEnd','dosWorkEnd','DOS_BANK_DATA_ADDR','BANK_KERNEL_CACHE',
                                      'bankKernelCommand','kernelDispatch','v_drives','v_diskInfo')}
     report['bytes'] = (out/'KERNEL.bin').stat().st_size

@@ -44,13 +44,13 @@ def main():
                    f"- {name} ROM запуска: `{d['rom_sha256']}`.",
                    f"- {name} упакованный ROM при измерении: `{d['packaged_rom_sha256']}`."]
     for name in ['legacy','buffered']:
-        path=ROOT/f'images/SystemRom_ramd-{name}.bin'
-        hashes.append(f"- Финальный SystemRom_ramd-{name}.bin: `{hashlib.sha256(path.read_bytes()).hexdigest()}`.")
+        path=ROOT/f'images/C-ROM-64k-MMX-System-RAMD-{name}.bin'
+        hashes.append(f"- Финальный C-ROM-64k-MMX-System-RAMD-{name}.bin: `{hashlib.sha256(path.read_bytes()).hexdigest()}`.")
     filelist=['source/include/mxos.inc','source/dos/DOS.asm','source/dos/DOSChecked.asm',
         'source/bios/driverFFC0.inc','source/dos/driverBuffered.inc','source/dos/driverChecked.inc',
         'source/bios/reboot2.inc','source/dos/reboot3.inc','source/nc/saveLoadState.inc',
         'scripts/build/build-if-needed.ps1','scripts/build/build-project.ps1','scripts/emu80/check-boot.py',
-        'assets/C-System.txt','source-apps/diskbench/','source-apps/README.md',
+        'assets/C-Flash-512k-MMX-System.txt','source-apps/diskbench/','source-apps/README.md',
         'Specialist-OS.code-workspace','README.md','docs/MXOS-banked-kernel.md']
     text=f'''# RAM-драйверы MXOS: DISKBEN / ramd-001
 
@@ -175,8 +175,8 @@ COM в обоих сравнениях загружался через MCP из 
 `check-boot.py` для обоих ROM. Ошибок и предупреждений SjASMPlus нет.
 Финальные проверки и выбранный вариант сборки указаны в сообщении о завершении.
 
-Генерируемые выходы: `bin/DISKBEN.i80`, `images/SystemRom_ramd-legacy.bin`,
-`images/SystemRom_ramd-buffered.bin`; архивы листингов/символов/бинарников
+Генерируемые выходы: `bin/DISKBEN.i80`, `images/C-ROM-64k-MMX-System-RAMD-legacy.bin`,
+`images/C-ROM-64k-MMX-System-RAMD-buffered.bin`; архивы листингов/символов/бинарников
 находятся в `source-apps/diskbench/build/Legacy/` и `Buffered/`.
 
 SHA-256 DISKBEN.COM: `{old['bench_sha256']}`.

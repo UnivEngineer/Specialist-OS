@@ -36,7 +36,7 @@ message: DB 'Return benchmark: press Enter',13,10,0
   image=executable['Image'](body,origin,origin,2 if bank else 4,bss=end-origin-len(body),memory_begin=origin,memory_end=end,policy=0 if policy=='EXCLUSIVE' else 2,api=2)
   (folder/f'{name}.COM').write_bytes(executable['encode'](image,'com'))
   fixtures[name]=dict(origin=origin,end=end,bank=bank)
- manifest=(ROOT/'assets/C-System.txt').read_text(encoding='utf-8-sig')
+ manifest=(ROOT/'assets/C-Flash-512k-MMX-System.txt').read_text(encoding='utf-8-sig')
  manifest=manifest.replace('../bin/',os.path.relpath(SNAP/'bin',ROOT/'assets').replace(chr(92),'/')+'/')
  for name in fixtures:manifest+=f"\n{name}.COM {os.path.relpath(OUT/'fixtures'/f'{name}.COM',ROOT/'assets').replace(chr(92),'/')}\n"
  (OUT/'A-test.txt').write_text(manifest,encoding='utf-8')
@@ -45,12 +45,12 @@ message: DB 'Return benchmark: press Enter',13,10,0
  script=script.replace('$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)','$repositoryRoot = '+ps(ROOT))
  script=script.replace('$imageDirectory = Join-Path $repositoryRoot "images"','$imageDirectory = '+ps(SNAP))
  script=script.replace(". (Join-Path $PSScriptRoot 'executable.ps1')",'. '+ps(ROOT/'scripts/images/executable.ps1'))
- script=script.replace('Join-Path $assetDirectory "C-System.txt"',ps(OUT/'A-test.txt'))
+ script=script.replace('Join-Path $assetDirectory "C-Flash-512k-MMX-System.txt"',ps(OUT/'A-test.txt'))
  script=script.replace("Join-Path $PSScriptRoot 'nest-fat-image.py'",ps(ROOT/'scripts/images/nest-fat-image.py'))
  (OUT/'build-image.ps1').write_text(script,encoding='utf-8-sig')
  h['command'](['powershell.exe','-NoProfile','-File',OUT/'build-image.ps1','SystemEmuWritable'])
- shutil.copyfile(SNAP/'SystemRom_emu80_writable.bin',SNAP/'A.bin')
- image=bytearray((ROOT/'images/FlashDisk_emu80_seed.bin').read_bytes())
+ shutil.copyfile(SNAP/'C-Flash-512k-MMX-System-Emu80.bin',SNAP/'A.bin')
+ image=bytearray((ROOT/'images/H-Flash-2M-Games.bin').read_bytes())
  word=lambda at:int.from_bytes(image[at:at+2],'little')
  root=(word(14)+image[16]*word(22))*word(11);kept=[]
  for at in range(root,root+word(17)*32,32):

@@ -258,7 +258,7 @@ rememberCommandDone:
     pop bc
     pop hl
     ret
-resumeCommand: DB 'C:',05Ch,'DOS',05Ch,'FONT.COM '
+resumeCommand: DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'FONT.COM '
 resumeArguments:
     DS MAX_PATH-(resumeArguments-resumeCommand),0
 validate:
@@ -467,7 +467,7 @@ newline:            DB 13,10,0
 imageBytes:         DW 0
 hasExtension:       DB 0
 oldDrive:           DB 0
-path:               DB 'C:',05Ch,'FONTS',05Ch
+path:               DB BOOT_VOLUME_LETTER,':',05Ch,'FONTS',05Ch
 relativeEnginePath:
     DS MAX_PATH-(relativeEnginePath-path),0
 request: DW path,staging,FONT_ENGINE_END-FONT_ENGINE_BASE+IMAGE_HEADER_SIZE,0

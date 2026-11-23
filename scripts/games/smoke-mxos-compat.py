@@ -25,7 +25,7 @@ def main():
     if runtime != ROOT / '.local/monitor-compat-001':
         raise ValueError('Разрешена только изолированная monitor-compat-001')
     image = (runtime / 'specialist-os/system.bin').read_bytes()
-    if image != (ROOT / 'images/SystemRom_emulator.bin').read_bytes():
+    if image != (ROOT / 'images/C-ROM-64k-MMX-System-Emu80.bin').read_bytes():
         raise ValueError('Образ тестовой машины отличается от текущей сборки')
     # До любых записей убедиться, что единственный слушатель — наш экземпляр.
     command = "$ErrorActionPreference='Stop'; @(Get-NetTCPConnection -State Listen -LocalPort 19781 | ForEach-Object { (Get-CimInstance Win32_Process -Filter ('ProcessId = '+$_.OwningProcess)).ExecutablePath }) | ConvertTo-Json -Compress"

@@ -17,7 +17,7 @@ def main():
     n = symbols(ROOT/'bin/NC.sym')
     results = []
     try:
-        machine.start('nc-enter',disk=ROOT/'images/FlashDisk_emu80_seed.bin')
+        machine.start('nc-enter',disk=ROOT/'images/H-Flash-2M-Games.bin')
         m = machine.m
         m.call('debug_break')
         if m.read(n['state.activePanel'],1)!=b'\0':

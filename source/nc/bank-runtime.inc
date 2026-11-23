@@ -28,6 +28,10 @@ ncBankEntry:
     cp 'H'+1
     jp nc,ncBankEntryDriveReady
     ld (ncGfxPath),a
+    ld (ncEditorPath),a
+    ld (ncAssociatedEditor),a
+    ld (ncConfigPath),a
+    ld (ncHelpPath),a
 ncBankEntryDriveReady:
     ld a,(ncBankChildActive)
     ld (ncBankResumedChild),a

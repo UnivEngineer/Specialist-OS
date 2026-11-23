@@ -1,6 +1,7 @@
 ; Блочный драйвер B: в странице DOS. Первую физическую страницу занимает DOS.
 ; Как прежде, два последних блока каждой страницы недоступны носителю.
-; B=1/2, DE=логический блок, HL=буфер DOS, CF/A=ошибка. BC/DE/HL разрушены.
+; B=1/2, DE=логический блок, HL=буфер DOS, CF/A=ошибка. Без пула — No media.
+; BC/DE/HL разрушены.
 ; Страница DOS логически равна 1; данные RAM-диска начинаются с FAR=2.
 dosRamDriver:
     ; Последний допустимый 256-байтный буфер начинается с FE00h.
@@ -21,6 +22,8 @@ dosRamBufferOK:
     ld a,(bankPageCount)
     dec a
     ENDIF
+    or a
+    jp z,dosRamNoMedia
     cp d
     jp c,dosRamBad
     jp z,dosRamBad
@@ -55,3 +58,7 @@ dosRamBad:
     scf
     ret
 
+dosRamNoMedia:
+    ld a,DOS_ERR_NO_MEDIA
+    scf
+    ret

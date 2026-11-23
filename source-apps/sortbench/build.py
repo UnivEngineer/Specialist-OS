@@ -35,6 +35,8 @@ def main():
 if __name__=='__main__':
     python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']
     sys.exit(python_build(__file__, 'SORTBEN', main,
-                          inputs=(HERE, 'source/include', 'scripts/images/cpu.py'), exclude=(HERE / 'build',),
+                          asm=(HERE / 'SORTBEN.asm',), input_content=True,
+                          inputs=(HERE, 'source/include/timing-pit.inc', 'scripts/images/cpu.py'),
+                          exclude=(HERE / 'build',),
                           outputs=tuple(f'bin/SORTBEN.{ext}' for ext in ('cpu', 'i80', 'sym', 'lst')),
                           scan_outputs=(HERE / 'build',)))

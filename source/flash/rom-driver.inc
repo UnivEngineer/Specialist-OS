@@ -183,7 +183,7 @@ FuncInfo:
     ld      hl, DriverInfo
     or      a
     ret
-DriverInfo:     DB "ROM2M",0,"64K READ ONLY",0
+DriverInfo:     DB "ROM64KX",0,"64K READ ONLY",0
 
 ;----------------------------------------------------------------------------
 ; Адрес DISK_INFO, полученный при регистрации драйвера.

@@ -10,7 +10,7 @@ def symbols(name):
 n=symbols('NC');d=symbols('DOS');r=symbols('RUN')
 x=h['Matrix']();rows=[]
 try:
- x.start('split',system=ROOT/'images/SystemRom_emu80_writable.bin')
+ x.start('split',system=ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin')
  m=x.m
  def command(text,stop=None):
   m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)

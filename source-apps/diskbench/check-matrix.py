@@ -14,7 +14,7 @@ def main():
    if binary.is_file() and binary.suffix.lower() in ('.bin','.sys','.sym','.i80','.cpu','.inc','.json'):shutil.copy2(binary,f/'bin'/binary.name)
   for directory in ('banked','bootstrap'):shutil.copytree(ROOT/'bin'/directory,f/'bin'/directory,dirs_exist_ok=True)
   for name in ('DISKBEN','DISKMAIN','DISKDOS','DISKBANK'):shutil.copy2(ROOT/f'source-apps/diskbench/build/{name}.sym',f/f'{name}.sym')
-  shutil.copy2(ROOT/'images/SystemRom_emu80_writable.bin',f/'system.bin');shutil.copy2(ROOT/'images/FlashDisk_emu80_seed.bin',f/'h.bin')
+  shutil.copy2(ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin',f/'system.bin');shutil.copy2(ROOT/'images/H-Flash-2M-Games.bin',f/'h.bin')
   make_rom(f)
   inputs={str(q.relative_to(f)):hashlib.sha256(q.read_bytes()).hexdigest() for q in f.rglob('*') if q.is_file()}
   (out/'sha256.json').write_text(json.dumps(inputs,indent=2)+'\n')
@@ -46,7 +46,7 @@ def main():
  def start(key,system,locked=False):
   x.start(key,system=system,disk=f/'h.bin',locked=locked,dos=f/'bin/DOS.sys',bios=f/'bin/BIOS.sys',nc_binary=f/'bin/NC.i80',nc_symbols=f/'bin/NC.sym')
  def install(name):
-  command('a:/drivers/'+name.lower()+'.com');trap(nc['mainLoop']);m.tap('enter');m.until(nc['mainLoop'],120,page=0);m.call('bp_clear');m.call('emu_run_for',ms=500)
+  command('c:/drivers/'+name.lower()+'.com');trap(nc['mainLoop']);m.tap('enter');m.until(nc['mainLoop'],120,page=0);m.call('bp_clear');m.call('emu_run_for',ms=500)
  def bench(drive,driver,align,frag,check,readonly=False):
   key=f'{drive}-{driver}-b{align}-f{frag}-v{check}'
   if sum(r['key']==key for r in rows)==3:print('SKIP',key,flush=True);return

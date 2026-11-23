@@ -44,8 +44,8 @@ def main():
         source = ROOT/'bin'/name
         if not source.exists(): source = ROOT/'source-apps/diskbench/build'/name
         shutil.copyfile(source, frozen/name)
-    shutil.copyfile(ROOT/'images/SystemRom_emu80_writable.bin', frozen/'system.bin')
-    shutil.copyfile(ROOT/'images/FlashDisk_emu80_seed.bin', frozen/'h.bin')
+    shutil.copyfile(ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin', frozen/'system.bin')
+    shutil.copyfile(ROOT/'images/H-Flash-2M-Games.bin', frozen/'h.bin')
     for kind in (1, 2):
         shutil.copyfile(ROOT/f'bin/banked/LOCALDRV{kind}.sym', frozen/f'LOCALDRV{kind}.sym')
     shutil.copyfile(ROOT/'bin/banked/TRANSPORT.sym', frozen/'TRANSPORT.sym')
@@ -136,7 +136,7 @@ def main():
                 nc_binary=frozen/'NC.i80', nc_symbols=frozen/'NC.sym')
         for driver in args.drivers:
             if driver != current_driver:
-                command(f'C:/drivers/{driver.lower()}.com')
+                command(f'c:/drivers/{driver.lower()}.com')
                 trap(ns['mainLoop']); m.tap('enter'); m.until(ns['mainLoop'], 120, page=0)
                 current_driver = driver
             kind = {'AT2MX': 1, 'AT2MXF': 2}[driver]

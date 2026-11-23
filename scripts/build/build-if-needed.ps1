@@ -14,6 +14,8 @@ param(
 
     [switch] $Force,
     [Parameter(DontShow)]
+    [switch] $Describe,
+    [Parameter(DontShow)]
     [switch] $RunBuild
 )
 
@@ -50,30 +52,63 @@ $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 $editor = $SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\EDIT')
 $commander = $SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')
 $dos = $SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')
-$flashDriver = $SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')
+$flashDriver = $SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64', 'SysRom') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')
 $floppyDriver = $SourceBase -eq 'FLOPPY' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\floppy')
 $ramDriver = $SourceBase -eq 'RAMDISK' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\ramdisk')
 $monitor2 = $SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor2')
 $monitorWin = $SourceBase -eq 'MONWIN' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor_win')
 
 if (-not $RunBuild) {
-    $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), $OutputBase)
+    $cacheArgs = @($OutputBase, '--input-content', '--asm', $sourcePath)
     $inputs = @()
     $outputs = @()
-    if ($editor -or $commander -or $dos -or $flashDriver -or $ramDriver -or $floppyDriver) {
-        $cacheArgs += @('--project-inputs', '--scan-output', $outputDirectory)
-        if ($dos) {
-            $outputs += @('bin/fonts/Compact.pf', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc',
-                'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
-        } else {
-            $inputs += 'bin/banked/KERNEL.sym'
+    if ($dos) {
+        # The linker selects some INCLUDEs from the layout manifests at build time.
+        $inputs += @('source/bios/layout.json', 'source/dos/layout.json', 'source/bios/syscalls.json',
+            'assets/system-rom/fonts/6x8/KOI8.pf', 'scripts/build/build-compact-font.py',
+            'scripts/build/font-format.py', 'scripts/build/build-syscalls.py',
+            'scripts/build/build-banked-transport.py', 'scripts/build/build-banked-dos.py',
+            'scripts/build/build-bios-dos.py', 'scripts/build/pack-dos.py')
+        foreach ($folder in 'bios', 'dos', 'io', 'mem', 'common', 'bootstrap/tests') {
+            $cacheArgs += @('--asm', (Join-Path $repositoryRoot "source/$folder"))
         }
-        if ($flashDriver) { $inputs += 'bin/BIOS.sym' }
+        foreach ($path in 'bin', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc') {
+            $cacheArgs += @('--exclude', (Join-Path $repositoryRoot $path))
+        }
+        $cacheArgs += @('--scan-output', $outputDirectory)
+        $outputs += @('bin/BIOS.sys', 'bin/BIOS.sym', 'bin/DOS.sys', 'bin/IO.sys', 'bin/MEM.sys', 'bin/MEM.sym',
+            'bin/System.layout.json', 'bin/banked/KERNEL.sym', 'bin/banked/TRANSPORT.sym',
+            'bin/fonts/Compact.pf', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc',
+            'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
+    } elseif ($editor -or $commander) {
+        $inputs += @('bin/banked/KERNEL.sym', 'scripts/build/build-driver.py', 'scripts/build/pack-dos.py',
+            'scripts/images/executable.py', 'scripts/images/cpu.py')
+        if ($editor) {
+            $inputs += 'scripts/build/build-editor.py'
+            $cacheArgs += @('--asm', (Join-Path $buildDirectory 'EDIT_DOS.asm'))
+            $stems = @('EDIT', 'EDITCORE', 'EDIT_DOS')
+            $outputs += @('bin/EDIT_MN.com', 'bin/EDIT.com', 'bin/EDITCORE.dll')
+            foreach ($stem in 'EDITHEX', 'EDITTEXT') {
+                foreach ($ext in 'cpu', 'i80', 'dll') { $outputs += "bin/$stem.$ext" }
+            }
+        } else {
+            $inputs += 'scripts/build/build-nc.py'
+            $cacheArgs += @('--asm', (Join-Path $buildDirectory 'NC_DOS.asm'))
+            $stems = @('NC', 'NC_CORE', 'NC_DOS')
+            $outputs += @('bin/NC_MN.com', 'bin/NC.com')
+        }
+        foreach ($stem in $stems) {
+            foreach ($ext in 'cpu', 'i80', 'sym', 'lst') { $outputs += "bin/$stem.$ext" }
+        }
     } else {
-        $cacheArgs += @('--asm', $sourcePath, '--output', $listingPath, '--output', $symbolPath, '--output', $outputPath)
+        $cacheArgs += @('--output', $listingPath, '--output', $symbolPath, '--output', $outputPath)
         if ($Extension -eq 'cpu') {
             $cacheArgs += @('--output', $rawOutputPath)
             $inputs += 'scripts/images/cpu.ps1'
+        }
+        if ($flashDriver -or $ramDriver -or $floppyDriver) {
+            $inputs += @('bin/banked/KERNEL.sym', 'scripts/build/build-driver.py', 'scripts/build/pack-dos.py',
+                'scripts/images/cpu.py')
         }
         if ($SourceBase -eq 'UI_GFX') {
             $inputs += @('scripts/images/executable.py', 'scripts/images/cpu.py')
@@ -92,7 +127,24 @@ if (-not $RunBuild) {
     foreach ($path in $outputs) { $cacheArgs += @('--output', (Join-Path $repositoryRoot $path)) }
     if ($Force) { $cacheArgs += '--force' }
     $cacheArgs += @('--', $PSCommandPath, $SourceBase, $Extension, $Address, $OutputBase, '-RunBuild')
-    & python @cacheArgs
+    if ($Describe) {
+        return @{ cwd = $buildDirectory; args = $cacheArgs }
+    }
+    if ($flashDriver) {
+        Push-Location (Join-Path $repositoryRoot 'source/dos')
+        try {
+            $coreJob = & $PSCommandPath DOS sys 0x0100 -Describe
+            $coreArgs = $coreJob.args
+            & python (Join-Path $PSScriptRoot 'build_cache.py') @coreArgs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        } finally { Pop-Location }
+    }
+    & python (Join-Path $PSScriptRoot 'build_cache.py') @cacheArgs
+    if ($dos -and $LASTEXITCODE -eq 0) {
+        $overlayArgs = @((Join-Path $PSScriptRoot 'build-overlays.py'))
+        if ($Force) { $overlayArgs += '--force' }
+        & python @overlayArgs
+    }
     exit $LASTEXITCODE
 }
 
@@ -111,12 +163,6 @@ if ($commander) {
 if ($dos) {
     & python (Join-Path $PSScriptRoot 'build-bios-dos.py')
     exit $LASTEXITCODE
-}
-
-# Одноразовый установщик включает переносимую службу и её адреса патчей.
-if ($flashDriver) {
-    & python (Join-Path $PSScriptRoot 'build-banked-transport.py')
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 # Fixed-address installers are linked from their measured size, against arenaEnd.

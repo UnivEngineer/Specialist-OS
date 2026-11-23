@@ -1,6 +1,6 @@
 """Сборка локального bootstrap, без вызовов BIOS и зависимости от COPYBEN."""
 from pathlib import Path
-import argparse, subprocess, runpy, re, json, sys
+import argparse, subprocess, runpy, re, json, sys, hashlib
 from build_cache import main as cached_build
 
 ROOT = Path(__file__).absolute().parents[2]
@@ -13,7 +13,7 @@ p.add_argument('--force', action='store_true')
 p.add_argument('--run-build', action='store_true', help=argparse.SUPPRESS)
 a = p.parse_args()
 if a.font_body is None:
- lines=(ROOT/'assets/C-System.txt').read_text(encoding='utf-8-sig').splitlines()
+ lines=(ROOT/'assets/C-Flash-512k-MMX-System.txt').read_text(encoding='utf-8-sig').splitlines()
  names=[line.split()[1] for line in lines if line.strip().lower().startswith('@bootfont ')]
  if len(names)!=1:raise ValueError('System manifest requires exactly one @bootfont')
  entries=[line.split() for line in lines if line.strip() and not line.lstrip().startswith(('#','@'))]
@@ -22,22 +22,25 @@ if a.font_body is None:
  a.font_body=ROOT/'assets'/sources[0]
  if a.font_name is None:a.font_name=Path(names[0]).stem
 font_path=a.font_body.with_suffix('.i80') if a.font_body.suffix.lower()=='.cpu' else a.font_body
+a.font_name = a.font_name or font_path.stem
 out = ROOT / 'bin/bootstrap'
 if not a.run_build:
     if not a.fonts_ready:
         subprocess.run([sys.executable, str(ROOT / 'scripts/build/build-font-engines.py')], check=True)
-    options = ['Bootstrap', '--scan-output', str(out), '--output', str(out / 'sector.bin')]
-    for name in ('source/bootstrap', 'source/include', 'tasm/sjasmplus.exe', 'scripts/build/build-boot-splash.py',
-                 'scripts/images/executable.py', 'scripts/images/cpu.py', 'assets/C-System.txt',
+    options = ['Bootstrap', '--input-content', '--exclude', str(out), '--exclude', str(ROOT / 'bin/mx'), '--scan-output', str(out)]
+    for source in ('BOOTBANK.asm', 'SECTOR.asm'):
+        options.extend(('--asm', str(ROOT / 'source/bootstrap' / source)))
+    for product in ('BOOT.bin', 'sector.bin', 'boot-set.json'):
+        options.extend(('--output', str(out / product)))
+    for name in ('source/bootstrap/splash.bin', 'scripts/build/build-boot-splash.py',
+                 'scripts/images/executable.py', 'scripts/images/cpu.py', 'assets/C-Flash-512k-MMX-System.txt',
                  'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/DOS.sys',
                  'bin/System.layout.json', 'bin/banked/TRANSPORT.sym', 'bin/banked/KERNEL.sym', 'bin/MEM.sym'):
         options.extend(('--input', str(ROOT / name)))
     options.extend(('--input', str(font_path.absolute())))
     if a.force:
         options.append('--force')
-    command = [__file__, '--run-build', '--font-body', str(a.font_body.absolute())]
-    if a.font_name is not None:
-        command.extend(('--font-name', a.font_name))
+    command = [__file__, '--run-build', '--font-body', str(a.font_body.absolute()), '--font-name', a.font_name]
     if a.probe:
         command.append('--probe')
     sys.exit(cached_build([*options, '--', *command]))
@@ -105,3 +108,9 @@ for name,source,defines in [('BOOT','BOOTBANK',[]),('legacy' ,'SECTOR',[]),('sec
   (out/'sector-config.inc').write_text(f'BOOT_COLOR_PORT = 0{int(symbols["IO_COLOR"],16):04X}h\nBOOT_STAGE_BASE = 08000h\nBOOT_STAGE_BYTES = {(out/"BOOT.bin").stat().st_size}\n',encoding='utf-8')
  subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',*defines,f'--raw={out/name}.bin',f'--sym={out/name}.sym',f'--lst={out/name}.lst',(ROOT/f'source/bootstrap/{source}.asm').as_posix()],check=True)
 assert (out/'legacy.bin').read_bytes()==(ROOT/'assets/system-rom/boot-system.bin').read_bytes()
+files = {'DOS/BOOT.SYS': out/'BOOT.bin', 'sector': out/'sector.bin',
+         **{f'DOS/{name}.SYS': ROOT/f'bin/{name}.sys' for name in ('BIOS', 'IO', 'MEM', 'DOS')}}
+boot_set = {'dosLimit': int(ks['DOS_CODE_END_MAX'], 16), 'fontName': (a.font_name or font_path.stem),
+            'fontHash': hashlib.sha256(font).hexdigest(), 'probe': a.probe,
+            'files': {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()}}
+(out/'boot-set.json').write_text(json.dumps(boot_set, indent=2)+'\n', encoding='utf-8')

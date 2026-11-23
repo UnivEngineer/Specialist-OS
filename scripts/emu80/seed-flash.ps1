@@ -7,8 +7,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $imageDirectory = Join-Path $root 'images'
-$parts = @(1..4 | ForEach-Object { Join-Path $imageDirectory "FlashDisk_chip$($_)_512K.bin" })
-$target = Join-Path $imageDirectory 'FlashDisk_emu80_seed.bin'
+$parts = @(1..4 | ForEach-Object { Join-Path $imageDirectory "H-Flash-2M-Games-chip$($_).bin" })
+$target = Join-Path $imageDirectory 'H-Flash-2M-Games.bin'
 if (-not $RunBuild) {
     $cacheArgs = @((Join-Path $root 'scripts/build/build_cache.py'), 'Emu80 flash seed', '--output', $target)
     foreach ($path in $parts) { $cacheArgs += @('--input', $path) }

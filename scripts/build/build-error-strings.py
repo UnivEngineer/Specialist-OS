@@ -19,6 +19,7 @@ MESSAGES = {
     'DOS_ERR_BAD_IMAGE':       'Invalid executable file',
     'DOS_ERR_CANCELLED':       'Operation cancelled',
     'DOS_ERR_WRITE_PROTECTED': 'Disk is write-protected',
+    'DOS_ERR_NO_MEDIA':        'No media',
 }
 
 
@@ -34,8 +35,8 @@ def ordered_messages(path):
         missing = sorted(codes.keys() - MESSAGES.keys())
         stale = sorted(MESSAGES.keys() - codes.keys())
         raise ValueError(f'DOS error texts out of sync: missing={missing}, stale={stale}')
-    if sorted(codes.values()) != list(range(1, codes['DOS_ERR_WRITE_PROTECTED'] + 1)):
-        raise ValueError('DOS error codes must be contiguous, ending at DOS_ERR_WRITE_PROTECTED')
+    if sorted(codes.values()) != list(range(1, codes['DOS_ERR_NO_MEDIA'] + 1)):
+        raise ValueError('DOS error codes must be contiguous, ending at DOS_ERR_NO_MEDIA')
     names = sorted(codes, key=codes.__getitem__)
     return ['Unknown error', *(MESSAGES[name] for name in names)]
 

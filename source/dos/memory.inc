@@ -16,8 +16,12 @@ memoryInitLoop:
     add hl,de
     dec b
     jp nz,memoryInitLoop
+    IFDEF MX_FLOPPY_BOOT
+    xor a                         ; RAMDISK сам запросит пул при установке из AUTOEXEC.
+    ELSE
     ld a,(bankPageCount)
     dec a
+    ENDIF
     ld (memoryRamPages),a
     xor a
     ld (memoryRamOwner),a
@@ -572,16 +576,16 @@ memoryResizeZero:
     jp memoryNull
 
 memoryRamLimit:
+    ld a,(bankPageCount)
+    dec a
+    cp b
+    jp c,dosNoMedia
     ld a,(memoryRamPages)
     cp b
     ret z
     ld a,(memoryRamOwner)
     or a
     jp nz,memoryDenied
-    ld a,(bankPageCount)
-    dec a
-    cp b
-    jp c,memoryBad
     push hl
     ld h,b
     ld l,c

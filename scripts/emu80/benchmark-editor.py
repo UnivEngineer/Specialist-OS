@@ -11,7 +11,7 @@ p.add_argument('--shell-dir',type=Path,default=R/'bin',help='Symbols/images matc
 p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782')
 p.add_argument('--port',type=int,choices=range(19781,19785),default=19782)
 p.add_argument('--report',type=Path,default=R/'docs/editor/performance-2026-11-17')
-p.add_argument('--system-image',type=Path,default=R/'images/SystemRom_emu80_writable.bin')
+p.add_argument('--system-image',type=Path,default=R/'images/C-Flash-512k-MMX-System-Emu80.bin')
 p.add_argument('--font',choices=['Rotate','Packed6K','Fast12K'])
 a=p.parse_args();O=a.report.resolve()/('emu-'+a.variant);O.mkdir(parents=True,exist_ok=True)
 sy=lambda path:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',path.read_text(),re.M)}

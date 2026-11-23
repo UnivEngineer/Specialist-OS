@@ -51,9 +51,9 @@ def prepare_fixtures():
     command(['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','Games2M'])
     payload=OUT/'readonly.tmp';payload.write_bytes(bytes(1^(a>>8)^(a&255) for a in range(0x2000,0x4000)))
     entry='DISKBEN.TMP '+os.path.relpath(payload,ROOT/'assets')+' 0x2000\n'
-    base=(ROOT/'assets/C-System.txt').read_text(encoding='utf-8-sig')
+    base=(ROOT/'assets/C-Flash-512k-MMX-System.txt').read_text(encoding='utf-8-sig')
     (OUT/'system-ro-full.txt').write_text(base+'\n'+entry,encoding='utf-8')
-    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.PF','FONTKOI.PF','Drivers/RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','Drivers/ROM2M.COM','Drivers/ROM64K.COM'}
+    keep={'DOS.SYS','DOSMOD.COM','NC.COM','FONT.PF','FONTKOI.PF','Drivers/RAMDISK.COM','FORMAT.BAT','FORMAT.COM','AUTOEXEC.BAT','Drivers/ROM2MX.COM','Drivers/ROM64KX.COM'}
     minimal='@label SYSTEM ROM\n'+'\n'.join(line for line in base.splitlines() if line.split() and line.split()[0] in keep)+'\n'+entry
     (OUT/'system-ro-small.txt').write_text(minimal,encoding='utf-8')
     (OUT/'disk-ro.txt').write_text('@label ROM BENCH\n'+entry,encoding='utf-8')
@@ -63,7 +63,7 @@ def prepare_fixtures():
         text=builder.replace('$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)','$repositoryRoot = '+ps(ROOT))
         text=text.replace(". (Join-Path $PSScriptRoot 'executable.ps1')",". "+ps(ROOT/'scripts/images/executable.ps1'))
         text=text.replace('$imageDirectory = Join-Path $repositoryRoot "images"','$imageDirectory = '+ps(folder))
-        for key in ['C-System.txt','H-ROM64k.txt']:
+        for key in ['C-Flash-512k-MMX-System.txt','H-ROM-64k-Games.txt']:
             text=text.replace('Join-Path $assetDirectory "'+key+'"',ps(OUT/manifest))
         script=folder/'build-fixture.ps1';script.write_text(text,encoding='utf-8-sig')
         command(['powershell.exe','-NoProfile','-File',script,target])
@@ -218,7 +218,7 @@ class Matrix:
     def install(self,name):
         if name in ('Flash','FlashFst','Rom'):
             # Инициализатор COM исполняется загрузчиком в странице DOS.
-            filename={'Flash':'AT2MX','FlashFst':'AT2MXF','Rom':'ROM2M'}[name]
+            filename={'Flash':'AT2MX','FlashFst':'AT2MXF','Rom':'ROM2MX'}[name]
             self.m.write(0x7E00,('C:\\DRIVERS\\'+filename+'.COM\0').encode('ascii'))
             installed = self.func(0xC85D,hl=0x7E00)
             assert not installed['flags']['C'], (name, installed)
@@ -390,10 +390,10 @@ def main():
         for mode in [1,6]:matrix.writable(1,'RAMD',mode,'R3')
         matrix.install('RAMD');matrix.select(1)
         for mode in [1,6]:matrix.writable(1,'RAMD',mode,'R4')
-        matrix.start('rom512',system=OUT/'rom512/SystemRom_emu80_writable.bin',locked=True)
+        matrix.start('rom512',system=OUT/'rom512/C-Flash-512k-MMX-System-Emu80.bin',locked=True)
         matrix.func(0xC860,af=0,hl=matrix.ds['diskDriver']);matrix.func(0xC842,af=0x0100,de=1)
         matrix.readonly(0,'A-native-ROM-512K',RUNTIME/'specialist-os/system-flash.bin')
-        matrix.start('rom64',flash=False,system=OUT/'rom64/SystemRom_emulator.bin',disk=OUT/'external-rom64/FlashDisk_64K.bin')
+        matrix.start('rom64',flash=False,system=OUT/'rom64/C-ROM-64k-MMX-System-Emu80.bin',disk=OUT/'external-rom64/H-ROM-64k-Games.bin')
         matrix.install('Rom');matrix.readonly(7,'H-ROM-64K',RUNTIME/'specialist-os/rom-disk.bin')
         matrix.report['completedUtc']=datetime.now(timezone.utc).isoformat()
         matrix.report['binaries']={name:sha(ROOT/'bin'/name) for name in ['DOS.sys','Flash.i80','FlashFst.i80','FlashSys.i80','Rom.i80','RAMDISK.i80']}

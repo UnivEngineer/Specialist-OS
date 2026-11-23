@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not $RunBuild) {
-    $cacheArgs = @((Join-Path $root 'scripts/build/build_cache.py'), "DISKBEN ($PitHz Hz)",
+    $cacheArgs = @((Join-Path $root 'scripts/build/build_cache.py'), "DISKBEN ($PitHz Hz)", '--input-content',
         '--asm', (Join-Path $PSScriptRoot 'DISKBEN.asm'), '--asm', (Join-Path $PSScriptRoot 'worker.asm'),
         '--input', (Join-Path $root 'scripts/images/cpu.ps1'), '--scan-output', (Join-Path $PSScriptRoot 'build'))
     foreach ($name in 'DISKBEN', 'DISKBANK', 'DISKDOS', 'DISKMAIN') {

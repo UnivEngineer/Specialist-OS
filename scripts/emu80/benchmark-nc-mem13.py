@@ -28,9 +28,9 @@ def main():
             parser.error('baseline already frozen, use --reuse-build')
         shutil.copytree(ROOT / 'bin', snap / 'bin', dirs_exist_ok=True,
                         ignore=shutil.ignore_patterns('*.lst', '*.log', '__pycache__'))
-        shutil.copyfile(ROOT / 'images/SystemRom_emu80_writable.bin', snap / 'A.bin')
+        shutil.copyfile(ROOT / 'images/C-Flash-512k-MMX-System-Emu80.bin', snap / 'A.bin')
         if args.phase == 'before':
-            shutil.copyfile(ROOT / 'images/FlashDisk_emu80_seed.bin', disk)
+            shutil.copyfile(ROOT / 'images/H-Flash-2M-Games.bin', disk)
         shutil.copyfile(disk, snap / 'H128.bin')
     profile['symbols'].__globals__.update(SNAP=snap, OUT=folder)
     profile['verify_snapshot']()

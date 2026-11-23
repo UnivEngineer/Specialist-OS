@@ -55,11 +55,11 @@ def oracle(corpus,font,width,raw):
 try:
  # Refuse a stale image after a failed build, before opening an emulator.
  disk=O/'bench-h.bin'
- disk.write_bytes(b''.join((R/f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1,5)))
+ disk.write_bytes(b''.join((R/f'images/H-Flash-2M-Games-chip{i}.bin').read_bytes() for i in range(1,5)))
  tree=runpy.run_path(str(R/'scripts/tests/check-nested-image.py'))['read_tree'](disk.read_bytes())[0]
  assert s['CORPUS_IO_BUFFER']==0x3500,'corpus scratch overlaps resident table'
  assert tree['BENCH/FontBen/FontBen.com'][32:]==(R/'bin/FONTCOM.i80').read_bytes(),'stale FontBen image'
- x.start('paired-font-grid',system=R/'images/SystemRom_emu80_writable.bin',disk=disk)
+ x.start('paired-font-grid',system=R/'images/C-Flash-512k-MMX-System-Emu80.bin',disk=disk)
  for tag,module,engine,pre,width in cases:
   folder=O/(tag+('-inverse' if inverse else ''));folder.mkdir(exist_ok=True)
   (folder/'verified.json').unlink(missing_ok=True)
@@ -100,7 +100,7 @@ try:
   assert start<end<start+2304,(tag,'report size')
   (folder/'FONTBEN.TXT').write_bytes(m.read(start,end-start))
   resume(n['mainLoop'],True)
-  (folder/'verified.json').write_text(json.dumps(dict(pixels=True,abiRestored=True,residentPreserved=True,returnedToNC=True,cpuHz=2000000,pitHz=2000000,imageSha256=hashlib.sha256((R/'images/SystemRom_emu80_writable.bin').read_bytes()).hexdigest()),indent=2))
+  (folder/'verified.json').write_text(json.dumps(dict(pixels=True,abiRestored=True,residentPreserved=True,returnedToNC=True,cpuHz=2000000,pitHz=2000000,imageSha256=hashlib.sha256((R/'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes()).hexdigest()),indent=2))
   print(tag,'PASS',flush=True)
  command('FONT 6x8/Rotate',f['committed']);resume(n['mainLoop'],True)
 finally:x.stop()

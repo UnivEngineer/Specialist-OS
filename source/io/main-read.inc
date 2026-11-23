@@ -1,9 +1,6 @@
 mainIoRead:
     call mainIoAddress
-    ld a,(io_vars.romPage)
-    or 080h
     ld (mainIoCopy),a
-    ld hl,(io_vars.romTarget)
     ld (mainIoCopy+1),hl
     ld a,(io_vars.romBufferPage)
     ld (mainIoCopy+3),a

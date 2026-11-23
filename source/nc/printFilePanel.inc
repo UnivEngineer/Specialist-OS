@@ -49,11 +49,11 @@ printFilePanel:
         push bc
         call ncPreparePrintFilePanel
         COLOR COLOR_FILE
-        call ncPrintAdaptiveList
         pop bc
         ld a,b
         or a
-        ret z
+        jp z,printWholeFileList
+        call ncPrintAdaptiveList
         COLOR COLOR_CURSOR
         jp drawCursor
 ncLegacyPanel:
@@ -94,12 +94,32 @@ ncPreparePrintFilePanel:
 printWholeFileList:
         ld a,(ncFontWidth)
         cp 6
-        jp nz,ncPrintAdaptiveList
+        jp nz,pfAdaptiveWhole
         ; Полная отрисовка вызывается и напрямую после стадий рамок/метаданных.
         ; loadFiles разрушает B: число видимых строк задаём здесь, не у caller.
         ld b,FILE_LIST_SIZE
         call printFilesUpDown
-        jp clearPanelTail
+        call clearPanelTail
+        jp pfShowDiskStatus
+pfAdaptiveWhole:
+        call ncPrintAdaptiveList
+pfShowDiskStatus:
+        ld hl,vars.panelA_diskError
+        call readBytePanel
+        cp DOS_ERR_NO_MEDIA
+        ret nz
+        ld a,(ncFontWidth)
+        cp 6
+        jp nz,pfNoMediaText
+        ; При следующей перерисовке очистить эту строку вместе со списком.
+        ld a,1
+        ld hl,vars.drawnLeftA
+        call writeBytePanel
+pfNoMediaText:
+        ld hl,(P_FILE_LIST_X1 << 8)+P_FILE_LIST_Y
+        call setCursorPosPanel
+        ld hl,aNoMedia
+        jp ncPrintPanelText
 
 ; Стираем только строки, оставшиеся после прежнего видимого списка.
 ; По две высоты принадлежат каждой панели; рамки и соседняя панель сохранены.

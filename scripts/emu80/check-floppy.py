@@ -24,7 +24,7 @@ def check_copy(path):
     assert copies == 2 and fat == data[first + fat_bytes:first + 2 * fat_bytes]
     root = first + copies * fat_bytes
     start = root + ((32 * entries + sector - 1) // sector) * sector
-    original = (ROOT/'images/Floppy720.img').read_bytes()
+    original = (ROOT/'images/A-Floppy-720k-Programs.img').read_bytes()
     for number in range(2, 2 + (len(data) - start) // cluster_bytes):
         at = first + number + number // 2
         pair = struct.unpack_from('<H', original, at)[0]
@@ -102,7 +102,7 @@ def main():
 
     with TemporaryDirectory() as folder:
         floppy = Path(folder)/'test.img'
-        shutil.copyfile(ROOT/'images/Floppy720.img', floppy)
+        shutil.copyfile(ROOT/'images/A-Floppy-720k-Programs.img', floppy)
         launch = subprocess.run(['powershell.exe', '-NoProfile', '-File',
             str(ROOT/'scripts/emu80/run-mcp-slot.ps1'), '-Port', str(args.port), '-TestFlashSeed'],
             capture_output=True)

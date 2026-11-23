@@ -19,15 +19,13 @@ fileChangeDrive:
             jp nc,  fileOpError
             call    fileSelectDrive
             ret c
-            ld      a,(v_diskInfo.isValid)
-            cp      DISK_VALID
     IFDEF DOS_SPLIT_BUILD
-            jp z,   dosClearError
+            call    fatCheckMounted
+            ret c
+            jp      dosClearError
     ELSE
-            ret z
+            jp      fatCheckMounted
     ENDIF
-            add     a,DOS_ERR_NO_DRIVER
-            jp      dosSetError
 
 ;----------------------------------------------------------------------------
 ; MXOS

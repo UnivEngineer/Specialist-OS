@@ -1,0 +1,90 @@
+# Системная дискета DD для Специалиста-MX/MX2, 720 КиБ (80 дорожек, две стороны, по девять секторов 512 байт).
+# ПЗУ загружает систему с привода 0. Загрузочные сектора до первой FAT сборщик берёт из ../bin/mx/reserved.bin.
+# Они содержат вторую ступень, BIOS, IO, MEM, начальный шрифт, DOS и службу ВГ93. Ниже перечислены файлы тома FAT12.
+# Привод 0 остаётся диском A: после загрузки. Строка SYSROM C: в AUTOEXEC.BAT подключает системное ПЗУ.
+@label MX PROGRAMS
+
+# Для каждой записи укажите имя на диске и путь от assets/. Третий и четвёртый столбцы необязательны.
+# Для сырого исполняемого файла третий столбец задаёт адрес загрузки и входа (по умолчанию 0).
+# У пары CPU/I80 адреса берутся из CPU, код из I80. У источника RKS адрес и сумма находятся в заголовке.
+# Цели COM, EXE, DLL и FNT получают контейнер MXOS2. Для игровых EXE режим запуска задан в games/catalog.csv.
+# TXT, BAT, CFG, EXT, HLP, PF и DAT копируются побайтно. Атрибуты R, S и RS означают «только чтение», «системный» и оба.
+# Чтобы задать атрибуты без адреса, поставьте 0 в третьем столбце. У источника RKS дополнительных столбцов нет.
+
+# Имя на диске                 Источник относительно assets/                          Адрес RAW Атрибуты
+
+# Оболочка и редактор. NC_MN и EDIT_MN работают в MAIN даже при одном банке ДОЗУ.
+# NC и EDIT загружают свои DLL в EXEC. Чтобы выбрать банковую оболочку, укажите A:\DOS\NC.COM в конце AUTOEXEC.BAT.
+DOS/NC_MN.COM                  ../bin/mx/NC.cpu
+DOS/EDIT_MN.COM                ../bin/mx/EDIT.cpu
+DOS/NC.COM                     ../bin/NC_DOS.cpu
+DOS/EDIT.COM                   ../bin/EDIT_DOS.cpu
+DOS/NC_CORE.DLL                ../bin/NC_CORE.cpu
+DOS/EDITCORE.DLL               ../bin/EDITCORE.cpu
+DOS/EDITTEXT.DLL               ../bin/EDITTEXT.cpu
+DOS/EDITHEX.DLL                ../bin/EDITHEX.cpu
+DOS/UI_GFX.DLL                 ../bin/UI_GFX.cpu
+DOS/CLI.COM                    ../bin/mx/CLI.cpu
+DOS/FORMAT.COM                 ../bin/FORMAT.cpu
+DOS/DEBUG.COM                  ../bin/Debug.cpu
+DOS/CHKDSK.COM                 ../bin/CHKDSK.cpu
+
+# Игры и руководство Elite. Части текста помещаются в рабочую память EDIT MAIN.
+GAMES/ALMAZ2MX.EXE             games/families/almaz-2/builds/Almaz2-mx-optimized.exe
+GAMES/STARWARS.EXE             games/families/starwars/originals/StarWars2-mx.cpu
+GAMES/EXOLON.EXE               games/mx/exolonmx.i80                                  0x0000
+GAMES/ELITE.EXE                games/families/elite/originals/Elite-jcuken.rks
+GAMES/ELITE.TXT                ../bin/mx/ELITE1.TXT
+GAMES/ELITE2.TXT               ../bin/mx/ELITE2.TXT
+GAMES/ELITE3.TXT               ../bin/mx/ELITE3.TXT
+GAMES/ELITE4.TXT               ../bin/mx/ELITE4.TXT
+GAMES/BUDI2.EXE                games/families/budi/patched/Budi2-std.exe
+
+# Введение, руководство пользователя и сценарий холодного запуска.
+README.TXT                     system-rom/mx-readme.txt
+GUIDE1.TXT                     ../bin/mx/GUIDE1.TXT
+GUIDE2.TXT                     ../bin/mx/GUIDE2.TXT
+GUIDE3.TXT                     ../bin/mx/GUIDE3.TXT
+# AUTOEXEC подключает ROM-диск H:. Без носителя драйвер регистрируется с нулевой ёмкостью.
+AUTOEXEC.BAT                   system-rom/autoexec.mx.bat
+
+# Файловые службы DOS, ассоциации, настройки и справка.
+DOS/ENUM.DLL                   ../bin/mx/ENUM.cpu
+DOS/FILEOPS.DLL                ../bin/mx/FILEOPS.cpu
+DOS/ERRORS.DAT                 ../bin/ERRORS.DAT
+DOS/CLI.EXT                    system-rom/CLI-MX.EXT
+DOS/NC.CFG                     system-rom/NC-MX.CFG
+DOS/NC.HLP                     system-rom/NC.HLP
+DOS/EDIT.HLP                   system-rom/EDIT.HLP
+
+# Устанавливаемые драйверы. Драйвер загрузочного привода уже находится в системных секторах.
+DRIVERS/ROM2MX.COM             ../bin/Rom.cpu                                         0         RS
+DRIVERS/ROM64KX.COM            ../bin/Rom64.cpu                                       0         RS
+DRIVERS/AT2MX.COM              ../bin/Flash.cpu                                       0         RS
+DRIVERS/AT2MXF.COM             ../bin/FlashFst.cpu                                    0         RS
+DRIVERS/RAMDISK.COM            ../bin/mx/RAMDISK.cpu                                  0         RS
+DRIVERS/README.TXT             system-rom/drivers/README.TXT
+
+# Утилита выбора шрифта, движки, таблицы знаков и модули инициализации.
+DOS/FONT.COM                   ../bin/mx/FONT.cpu                                     0         RS
+FONTS/README.TXT               system-rom/fonts/README.TXT
+FONTS/4x8/Compact.fnt          ../bin/fonts/Cpm4Compact.cpu                           0xD800    S
+FONTS/4x8/Packed.fnt           ../bin/fonts/Cpm4.cpu                                  0xD800    S
+FONTS/4x8/Fast.fnt             ../bin/fonts/Cpm4Fast.cpu                              0xD800    S
+FONTS/4x8/Cpm4.pf              system-rom/fonts/4x8/Cpm4.pf                           0         S
+FONTS/4x8/InitA.dll            ../bin/fonts/InitA.cpu                                 0x5000    S
+FONTS/6x8/Fast.fnt             ../bin/fonts/Fast12K.cpu                               0xD800    S
+FONTS/6x8/Packed.fnt           ../bin/fonts/Packed6K.cpu                              0xD800    S
+FONTS/6x8/Rotate.fnt           ../bin/fonts/Rotate.cpu                                0xD800    S
+FONTS/6x8/K7Rotate.fnt         ../bin/fonts/K7Rotate.cpu                              0xD800    S
+FONTS/6x8/K7Packed.fnt         ../bin/fonts/K7Packed.cpu                              0xD800    S
+FONTS/6x8/K7Hybrid.fnt         ../bin/fonts/K7Hybrid.cpu                              0xD800    S
+FONTS/6x8/Init6.dll            ../bin/fonts/Init6.cpu                                 0x5000    S
+FONTS/6x8/Init7.dll            ../bin/fonts/Init7.cpu                                 0x5000    S
+FONTS/6x8/KOI8.pf              system-rom/fonts/6x8/KOI8.pf                           0         S
+FONTS/6x8/KOI8_IT.pf           system-rom/fonts/6x8/KOI8_IT.pf                        0         S
+FONTS/8x8/Rotate.fnt           ../bin/fonts/Graph8x4.cpu                              0xD800    S
+FONTS/8x8/Packed.fnt           ../bin/fonts/GraphP8K.cpu                              0xD800    S
+FONTS/8x8/Fast.fnt             ../bin/fonts/Graph14K.cpu                              0xD800    S
+FONTS/8x8/InitA.dll            ../bin/fonts/InitA.cpu                                 0x5000    S
+FONTS/8x8/Win8.pf              system-rom/fonts/8x8/Win8.pf                           0         S

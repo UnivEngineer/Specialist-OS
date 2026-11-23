@@ -32,7 +32,7 @@ def api(name, af=0, hl=0):
     return m.until(0x8E10, 120, page=0)
 
 try:
-    x.start('bios-font', system=R/'images/SystemRom_emu80_writable.bin')
+    x.start('bios-font', system=R/'images/C-Flash-512k-MMX-System-Emu80.bin')
     m.screenshot(O/'nc.png')
     # F7 открывает штатный диалог NC с логическим inverse=1; отмена без записи.
     m.call('bp_clear')

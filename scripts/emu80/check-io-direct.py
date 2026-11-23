@@ -28,7 +28,7 @@ def transfer(mode,block,payload=None,error=None):
     page(1);data=m.read(0x6000,256);page(0)
     return data
 try:
-    seed=bytearray((ROOT/'images/SystemRom_emu80_writable.bin').read_bytes()[:args.chip_kib*1024]);seed[19:21]=w(args.chip_kib*4)
+    seed=bytearray((ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes()[:args.chip_kib*1024]);seed[19:21]=w(args.chip_kib*4)
     image=OUT/'system.bin';image.write_bytes(seed)
     x.start('io-direct',system=image,locked=args.locked)
     for block in (127,128,255,256,args.chip_kib*4-1):

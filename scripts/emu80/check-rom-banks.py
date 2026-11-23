@@ -25,7 +25,7 @@ def main():
     reportdir = ROOT / 'docs/rom-banks'
     reportdir.mkdir(parents=True, exist_ok=True)
     if args.phase == 'pattern':
-        source = ROOT / ('images/SystemRom_emu80_writable.bin' if args.size == 512 else f'images/SystemRom_{args.size}K.bin')
+        source = ROOT / ('images/C-Flash-512k-MMX-System-Emu80.bin' if args.size == 512 else f'images/C-Flash-{args.size}k-MMX-System.bin')
         b = bytearray(source.read_bytes())
         for sector in BOUNDARIES:
             if sector >= 127 and sector < args.size * 4:
@@ -34,7 +34,7 @@ def main():
         print(f'Уникальные данные на границах банков, том {args.size} КБ')
         return
     if args.phase == 'relocate':
-        b = bytearray((ROOT / 'images/SystemRom_emu80_writable.bin').read_bytes())
+        b = bytearray((ROOT / 'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes())
         word = lambda n: struct.unpack_from('<H', b, n)[0]
         fat = word(14)*256
         root = word(14)+b[16]*word(22)

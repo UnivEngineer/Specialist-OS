@@ -14,7 +14,8 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 ;
 ; выход:
 ;   При EXIT сохраняется история и управление передаётся bios_reboot. Внешняя программа
-;   получает строку из CMD_LINE и собственный путь возврата в оболочку.
+;   получает строку из CMD_LINE и собственный путь возврата в оболочку. Сохранённый код
+;   отказа FILE_EXEC печатается один раз перед первым приглашением.
 ;----------------------------------------------------------------------------
 
 cliStart:
@@ -27,6 +28,11 @@ cliStart:
     MXOS_CALL MXOS_DOS_SET_SHELL
     MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
     call cliHistoryLoad
+    ld hl,bios_cliExecError
+    ld a,(hl)
+    ld (hl),0
+    or a
+    jp nz,cliShowError
 cliPrompt:
     ld a,1
     MXOS_CALL MXOS_DOS_SET_SHELL
@@ -60,12 +66,26 @@ cliExternal:
     MXOS_CALL MXOS_DOS_SET_SHELL
     ld hl,CMD_LINE
     ; После RET приложения код CLI в main уже может быть затёрт.
-    MXOS_EXEC bios_reboot
+    MXOS_EXEC bios_cliExecDone
 cliLeave:
     call cliHistorySave
     jp bios_reboot
+
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Показать сообщение об отказе и вывести очередное приглашение CLI.
+;
+; вход:
+;   cliError читает последнюю ошибку DOS, cliShowError принимает её код в a.
+;
+; выход:
+;   Строка сообщения и перевод строки выводятся в консоль. Управление переходит
+;   на cliPrompt, обычного возврата через RET нет. Все регистры рабочие.
+;----------------------------------------------------------------------------
 cliError:
     MXOS_CALL MXOS_DOS_GET_ERROR
+cliShowError:
     call dosErrorText
     call bios_printStringReal
     ld c,0Ah

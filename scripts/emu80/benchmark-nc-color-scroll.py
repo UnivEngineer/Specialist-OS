@@ -21,7 +21,7 @@ def call(m,n,entry,hl=0,bc=0,de=0,a=0):
 
 
 def datasets():
-    image=(ROOT/'images/FlashDisk_emu80_seed.bin').read_bytes()
+    image=(ROOT/'images/H-Flash-2M-Games.bin').read_bytes()
     word=lambda a:struct.unpack_from('<H',image,a)[0]
     root=(word(14)+image[16]*word(22))*word(11)
     records=[]

@@ -1,5 +1,6 @@
 ; Каталог панели кэшируется целиком до предела 8-разрядной навигации.
 ; Вход A=диск, активная панель выбирает слот общего кэша. AF/BC/DE/HL разрушены.
+; При отказе сохраняет код DOS для панели и публикует пустой список.
 ; На попадании кэша дисковый список не читается; выбирается окно индексов.
 ; Готовый индекс возвращается вместе с каталогом, сортировка — только при miss режима.
 loadFiles:
@@ -7,14 +8,30 @@ loadFiles:
             ld      e, 1
             MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             push    bc
-            call    restorePanelDirectory
+            call nc,restorePanelDirectory
+            ld a,0
+            jp nc,lf_SelectReady
+            MXOS_CALL MXOS_DOS_GET_ERROR
+lf_SelectReady:
+            ld hl,vars.panelA_diskError
+            call writeBytePanel
             pop     bc
+            push af
             call    ncCatalogAcquire
             jp c,   lf_ReadCatalog
+            pop af
+            or a
+            jp nz,lf_DiscardCatalog
             call    ncCatalogUseIndex
             jp      lf_Cached
 
+lf_DiscardCatalog:
+            call invalidateFileCache
+            jp lf_EmptyCatalog
 lf_ReadCatalog:
+            pop af
+            or a
+            jp nz,lf_EmptyCatalog
             ld a,1
             ld (ncCatalogReadOk),a
             call    fileCacheBase
@@ -42,6 +59,10 @@ lf_ListFirstReady:
             dec de ; DOS total includes the skipped "." record.
             jp lf_ListReady
 lf_ListFailed:
+            MXOS_CALL MXOS_DOS_GET_ERROR
+            ld hl,vars.panelA_diskError
+            call writeBytePanel
+lf_EmptyCatalog:
             xor a
             ld (ncCatalogReadOk),a
             ld de,0

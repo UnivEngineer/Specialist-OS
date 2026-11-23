@@ -4,7 +4,6 @@ import argparse
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import tempfile
@@ -21,9 +20,10 @@ def main():
     parser.add_argument('--runtime', type=Path,
                         default=Path(os.environ.get('SPECIALIST_EMU80_DIR', '')))
     args = parser.parse_args()
-    seed = ROOT / 'images/SystemRom_emu80_writable.bin'
-    disk_seed = ROOT / 'images/FlashDisk_emu80_seed.bin'
-    watched = [seed, disk_seed, ROOT / 'bin/NC.i80']
+    seed = ROOT / 'images/C-Flash-512k-MMX-System-Emu80.bin'
+    disk_seed = ROOT / 'images/H-Flash-2M-Games.bin'
+    floppy_seed = ROOT / 'images/A-Floppy-720k-Programs.img'
+    watched = [seed, disk_seed, floppy_seed, ROOT / 'bin/NC.i80']
     before = [(p.stat().st_mtime_ns, sha(p)) for p in watched]
     local = ROOT / '.local'
     local.mkdir(exist_ok=True)
@@ -35,6 +35,7 @@ def main():
         deployment = runtime / 'specialist-os'
         system = deployment / 'system-flash.bin'
         disk = deployment / 'flash-disk.bin'
+        floppy = deployment / 'floppy720.img'
         system_sdp = system.with_suffix('.bin.sdp')
         disk_sdp = disk.with_suffix('.bin.sdp')
         record = deployment / 'deployment.json'
@@ -117,10 +118,35 @@ def main():
         assert system_sdp.read_bytes() == b'\x01' and not disk_sdp.exists()
         print('Explicit full reset restores both disks without backups')
 
+        prepare('-SyncProfileImages')
+        assert sha(floppy) == sha(floppy_seed)
+        for image in (system, disk, floppy):
+            edit(image)
+        working = [sha(image) for image in (system, disk, floppy)]
+        prepare('-SyncProfileImages')
+        assert working == [sha(image) for image in (system, disk, floppy)]
+
+        data = json.loads(record.read_text())
+        data['diskSeedSha256'] = '0' * 64
+        data['floppySeedSha256'] = '0' * 64
+        record.write_text(json.dumps(data))
+        prepare('-SyncProfileImages')
+        assert sha(system) == working[0]
+        assert sha(disk) == sha(disk_seed) and sha(floppy) == sha(floppy_seed)
+        print('Profile sync refreshes H: and A: independently and preserves unchanged C:')
+
     assert before == [(p.stat().st_mtime_ns, sha(p)) for p in watched], 'no-build preparation rebuilt or changed source artifacts'
     workspace = (ROOT / 'Specialist-OS.code-workspace').read_text(encoding='utf-8-sig')
-    task = json.loads(re.search(r'\{\s*"label": "run: Emu80 H-Flash2M \(no build\)".*?\n\s*\}', workspace, re.S)[0])
-    assert '-UpdateSystemFlash' in task['args'] and not task.get('dependsOn')
+    tasks = {task['label']: task for task in json.loads(workspace)['tasks']['tasks']}
+    assert all(task['group'] == 'build' for task in tasks.values())
+    expected = {'Build all'}
+    for profile in ('MMX Flash + floppy', 'MX ROM + floppy', 'RAMFOS'):
+        build, run = f'Build and run Emu80 {profile}', f'Run Emu80 {profile}'
+        expected.update((build, run))
+        assert tasks[build]['args'] == tasks[run]['args'] + ['-Build']
+        assert tasks[run]['args'][-2:] == [r'${workspaceFolder}\scripts\emu80\run-profile.ps1', profile]
+        assert 'dependsOn' not in tasks[run]
+    assert tasks.keys() == expected
     print('NO-BUILD SYSTEM REFRESH PASS: task has no build dependencies; source binaries/images unchanged')
 
 

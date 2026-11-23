@@ -52,7 +52,7 @@ flashProbeNext:
 flashProbeFailed:
     pop bc
 flashProbeEmpty:
-    ld a,DOS_ERR_NO_DRIVER
+    ld a,DOS_ERR_NO_MEDIA
     scf
     ret
 ProbeDelay:

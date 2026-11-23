@@ -166,4 +166,5 @@ if __name__ == '__main__':
                                   'scripts/build/build-font-prerender.py', 'scripts/build/build-compact-font.py',
                                   'scripts/build/font-format.py', 'scripts/images/cpu.py'),
                           exclude=('bin/fonts',),
+                          input_content=True,
                           outputs=('bin/fonts/Compact.pf',), scan_outputs=('bin/fonts',)))

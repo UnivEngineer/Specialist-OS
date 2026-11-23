@@ -220,6 +220,10 @@ copyPanelPath:
 ; Полный путь принадлежит панели; ключ — диск и кластер каталога.
 ; HL=ASCIIZ, CF/A=ошибка DOS. Остальные регистры разрушены.
 getPanelPath:
+            ld hl,vars.panelA_diskError
+            call readBytePanel
+            cp DOS_ERR_NO_MEDIA
+            jp z,panelNoMediaPath
             ld hl,vars.pathValidA
             call readBytePanel
             or a
@@ -254,7 +258,30 @@ panelPathMiss:
             ld a,DIR_OP_GETCWD
             MXOS_CALL MXOS_DOS_DIRECTORY
             pop hl
-            ret c
+            jp nc,panelPathStore
+            cp DOS_ERR_NO_MEDIA
+            scf
+            ret nz
+panelNoMediaPath:
+            call panelPathBase
+            ; Без тома заголовок и приглашение по-прежнему обозначают диск.
+            push hl
+            ld hl,state.panelA_drive
+            call readBytePanel
+            pop hl
+            push hl
+            add a,'A'
+            ld (hl),a
+            inc hl
+            ld (hl),':'
+            inc hl
+            ld (hl),05Ch
+            inc hl
+            ld (hl),0
+            pop hl
+            or a
+            ret
+panelPathStore:
             push hl
             ld hl,state.panelA_drive
             call readBytePanel

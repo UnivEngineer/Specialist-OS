@@ -117,7 +117,7 @@ def main():
                   repeats=args.repeats, results=results,
                   source_sha256=hashlib.sha256((ROOT/'source-apps/sortbench/comparison.inc').read_bytes()).hexdigest())
     try:
-        disk = ROOT/'images/FlashDisk_emu80_seed.bin'
+        disk = ROOT/'images/H-Flash-2M-Games.bin'
         if args.fill_h:
             disk = runpy.run_path(str(ROOT/'scripts/emu80/nc-sort-image.py'))['make_full_h'](args.output/'H-sort250.bin')
         matrix.start('sort', disk=disk)

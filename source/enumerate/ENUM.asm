@@ -1,9 +1,13 @@
 ; Lazy shared wildcard/recursive enumerator. No public fixed entry address.
     INCLUDE "../include/mxos.inc"
+    IFDEF MX_FLOPPY_BOOT
+    INCLUDE "../../bin/mx/enumerate-imports.inc"
+    ELSE
     INCLUDE "../../bin/enumerate-imports.inc"
+    ENDIF
     ORG DOS_SERVICE_ADDR
     jp enumEntry
-    INCLUDE "host.inc"
+    INCLUDE "../include/enumerate-host.inc"
 
 ;----------------------------------------------------------------------------
 ; MXOS

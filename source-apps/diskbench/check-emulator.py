@@ -92,7 +92,7 @@ def main():
                 HERE/'build/DISKBEN.com']:
         (out/src.name).write_bytes(src.read_bytes())
     boot_rom = (args.runtime/'specialist-os/system.bin').read_bytes()
-    (out/'SystemRom_emulator.bin').write_bytes(boot_rom)
+    (out/'C-ROM-64k-MMX-System-Emu80.bin').write_bytes(boot_rom)
     m.stop_at(0x8100)
     if args.variant == 'Buffered':
         # Штатный DOS загружается с байтовым RAMD; R4 устанавливается отдельно.
@@ -150,7 +150,7 @@ def main():
         'dos_bytes':(ROOT/'bin/DOS.sys').stat().st_size,
         'dos_sha256':hashlib.sha256((ROOT/'bin/DOS.sys').read_bytes()).hexdigest(),
         'rom_sha256':hashlib.sha256(boot_rom).hexdigest(),
-        'packaged_rom_sha256':hashlib.sha256((ROOT/'images/SystemRom_emulator.bin').read_bytes()).hexdigest(),
+        'packaged_rom_sha256':hashlib.sha256((ROOT/'images/C-ROM-64k-MMX-System-Emu80.bin').read_bytes()).hexdigest(),
         'bench_sha256':hashlib.sha256((HERE/'build/DISKBEN.com').read_bytes()).hexdigest(),
         'metadata_sha256':hashlib.sha256(metadata).hexdigest(),'data_start':data_start,'runs':[]}
     names = ['read','write']

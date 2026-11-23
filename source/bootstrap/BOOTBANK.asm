@@ -1,6 +1,10 @@
 ; РҐРѕР»РѕРґРЅР°СЏ Р·Р°РіСЂСѓР·РєР°: BIOS РІ main, DOS РІ С„РёР·РёС‡РµСЃРєСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ Р”РћР—РЈ 0.
 ; РђРґСЂРµСЃР° С„Р°Р№Р»РѕРІ С„РёРєСЃРёСЂРѕРІР°РЅС‹ СЃР±РѕСЂС‰РёРєРѕРј. FAT РЅРµ РЅСѓР¶РµРЅ bootstrap.
     INCLUDE "../../bin/bootstrap/config.inc"
+    IFDEF ORIGINAL_MX
+    INCLUDE "../../bin/mx/imports.inc"
+    ASSERT BOOT_FONT_ROM+MX_ROM_FONT_BYTES <= BOOT_IO_ROM
+    ENDIF
     ORG 02000h
 stageImage:
     DISP BOOT_STAGE_BASE
@@ -24,8 +28,17 @@ entry:
 stage:
     di
     ld sp,08FDFh
+    IFDEF ORIGINAL_MX
+    ld a,0
+    rla
+    ld (mxBootMedium),a
+    call mxPickBundle
+    jp c,mxRetry
+    ENDIF
+    IFNDEF ORIGINAL_MX
     call drawBootLogo
 logoShown:
+    ENDIF
     ld hl,03000h
     ld de,03000h+DOS_BYTES
     ld bc,0C000h
@@ -39,6 +52,13 @@ ioLoaded:
     ; Fixed-slot module includes its prepared font. Skip the DLL header in ROM.
     ld hl,BOOT_FONT_ROM
     ld de,BOOT_FONT_ROM+BOOT_FONT_BYTES
+    IFDEF ORIGINAL_MX
+    ld a,(mxRomBundle)
+    or a
+    jp z,mxFontSelected
+    ld de,BOOT_FONT_ROM+MX_ROM_FONT_BYTES
+mxFontSelected:
+    ENDIF
     ld bc,BOOT_FONT_RAM
     call moveCore
 fontLoaded:
@@ -62,6 +82,10 @@ fontLoaded:
     call moveCore
     ; Р”Рѕ РїРµСЂРµСѓСЃС‚Р°РЅРѕРІРєРё MEM РїСЂРѕРІРµСЂСЏРµРј РІРѕСЃРµРјСЊ Р±Р°Р№С‚РѕРІ РєРѕРїРёСЂРѕРІС‰РёРєР° РІ РїРµСЂРІРѕРј
     ; Р±Р°РЅРєРµ B:. РџРѕСЃР»Рµ РїРѕС‚РµСЂРё РћР—РЈ СЃРѕРґРµСЂР¶РёРјРѕРјСѓ boot-СЃРµРєС‚РѕСЂР° РґРѕРІРµСЂСЏС‚СЊ РЅРµР»СЊР·СЏ.
+    IFDEF ORIGINAL_MX
+    INCLUDE "mx-load.inc"
+    INCLUDE "mx-bundle.inc"
+    ELSE
     ld a,1
     ld (0FFC0h+byteRead-byteWindow+1),a
     ld hl,0FF04h
@@ -130,6 +154,7 @@ loadDos:
     ld (0FFD3h),a
     ld hl,MODULE_LOAD+4
     call 0FFC0h
+    ENDIF
 dosLoaded:
     ; Install the current MEM tails in DOS and data banks.
     ld hl,byteWindow
@@ -201,8 +226,10 @@ installPages:
     ld bc,dosContextEnd-dosContext
     xor a
     call install
+    IFNDEF ORIGINAL_MX
     xor a
     ld (0FFFEh),a             ; MEM.SYS С‡РёС‚Р°РµС‚СЃСЏ РёР· СЃРѕР±СЃС‚РІРµРЅРЅРѕРіРѕ ROM-СЃР»РѕС‚Р°.
+    ENDIF
     ld hl,transportImage
     ld de,transportEnd
     ld bc,0FC00h
@@ -257,6 +284,7 @@ installLoop:
     ret
 ; DE: РІСЂРµРјРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ stage РЅР°С…РѕРґСЏС‚СЃСЏ РІ MAIN, MEM.SYS вЂ” РІ ROM 7000h.
 readSource:
+    IFNDEF ORIGINAL_MX
     ld a,d
     or a
     jp m,readSourceRam
@@ -269,6 +297,7 @@ readSource:
     pop af
     ret
 readSourceRam:
+    ENDIF
     ld a,(de)
     ret
 byteWindow:
@@ -296,14 +325,21 @@ romWindow:
     jp ramWrite4
 romWindowEnd:
     ASSERT romWindowEnd-romWindow == 18
+    IFNDEF ORIGINAL_MX
     INCLUDE "splash.inc"
+    ENDIF
     INCLUDE "memcpy.inc"
 bootFontName:   DB BOOT_SELECTED_BASENAME
 pageCount:      DB 16
 ramFresh:       DB 1
 dosKind:        DB 2
+    IFDEF ORIGINAL_MX
+dosLocalA:      DW MX_DOS_LOCAL_A
+dosNearCopy:    DW MX_DOS_NEAR_COPY
+    ELSE
 dosLocalA:      DW BOOT_DOS_LOCAL_A
 dosNearCopy:    DW BOOT_DOS_NEAR_COPY
+    ENDIF
 dosContext:
     DB 1
     ; Р§РёСЃР»Рѕ СЃС‚СЂР°РЅРёС† РїРѕСЃР»Рµ РґРµС‚РµРєС‚РѕСЂР° РєРѕРїРёСЂСѓРµС‚СЃСЏ СЃСЋРґР° РїРµСЂРµРґ СѓСЃС‚Р°РЅРѕРІРєРѕР№.

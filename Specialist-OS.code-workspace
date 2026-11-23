@@ -55,11 +55,10 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "build: all",
+        "label": "Build all",
         "type": "process",
         "command": "powershell.exe",
         "args": [
-          "-NoLogo",
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
@@ -70,36 +69,38 @@
         "group": "build"
       },
       {
-        "label": "run: Emu80 H-Flash2M",
+        "label": "Build and run Emu80 MMX Flash + floppy",
         "type": "process",
         "command": "powershell.exe",
         "args": [
-          "-NoLogo",
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
-          "Flash2M"
+          "${workspaceFolder}\\scripts\\emu80\\run-profile.ps1",
+          "MMX Flash + floppy",
+          "-Build"
         ],
         "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build"
       },
       {
-        "label": "run: Emu80 fresh A:",
+        "label": "Run Emu80 MMX Flash + floppy",
         "type": "process",
         "command": "powershell.exe",
         "args": [
           "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
-          "Floppy720"
+          "${workspaceFolder}\\scripts\\emu80\\run-profile.ps1",
+          "MMX Flash + floppy"
         ],
         "problemMatcher": [],
         "group": "build"
       },
       {
-        "label": "mount: ImDisk A: (read/write)",
+        "label": "Build and run Emu80 MX ROM + floppy",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -107,13 +108,15 @@
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\imdisk-floppy.ps1",
-          "Mount"
+          "${workspaceFolder}\\scripts\\emu80\\run-profile.ps1",
+          "MX ROM + floppy",
+          "-Build"
         ],
-        "problemMatcher": []
+        "problemMatcher": "$errmatcher-sjasmplus",
+        "group": "build"
       },
       {
-        "label": "unmount: ImDisk A:",
+        "label": "Run Emu80 MX ROM + floppy",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -121,27 +124,14 @@
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\imdisk-floppy.ps1",
-          "Unmount"
-        ],
-        "problemMatcher": []
-      },
-      {
-        "label": "run: Emu80 H-Flash2M (no build)",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoProfile",
-          "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run.ps1",
-          "-Flash",
-          "-UpdateSystemFlash"
+          "${workspaceFolder}\\scripts\\emu80\\run-profile.ps1",
+          "MX ROM + floppy"
         ],
         "problemMatcher": [],
         "group": "build"
       },
       {
-        "label": "run: Emu80 H-Flash2M (MCP slot, no build)",
+        "label": "Build and run Emu80 RAMFOS",
         "type": "process",
         "command": "powershell.exe",
         "args": [
@@ -149,72 +139,27 @@
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run-mcp-slot.ps1",
-          "-Port",
-          "${input:emu80McpPort}"
+          "${workspaceFolder}\\scripts\\emu80\\run-profile.ps1",
+          "RAMFOS",
+          "-Build"
         ],
-        "problemMatcher": [],
+        "problemMatcher": "$errmatcher-sjasmplus",
         "group": "build"
       },
       {
-        "label": "run: Emu80 H-ROM64k (no build)",
+        "label": "Run Emu80 RAMFOS",
         "type": "process",
         "command": "powershell.exe",
         "args": [
-          "-NoLogo",
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run.ps1"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "run: Emu80 CP/M",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
-          "CPM"
-        ],
-        "problemMatcher": [],
-        "group": "build"
-      },
-      {
-        "label": "run: Emu80 RAMFOS",
-        "type": "process",
-        "command": "powershell.exe",
-        "args": [
-          "-NoLogo",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-File",
-          "${workspaceFolder}\\scripts\\emu80\\run-built-profile.ps1",
+          "${workspaceFolder}\\scripts\\emu80\\run-profile.ps1",
           "RAMFOS"
         ],
         "problemMatcher": [],
         "group": "build"
-      }
-    ],
-    "inputs": [
-      {
-        "id": "emu80McpPort",
-        "type": "pickString",
-        "description": "Свободный порт локального Emu80 MCP",
-        "options": [
-          "19781",
-          "19782",
-          "19783",
-          "19784"
-        ]
       }
     ]
   }

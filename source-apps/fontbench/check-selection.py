@@ -30,9 +30,9 @@ def check_memory():
     assert all(modules[i:i+2]==b'\0\0' for i in range(0,len(modules),k['MODULE_RECORD_SIZE'])),'module leak'
 rows=[]
 disk=O/'bench-h.bin'
-disk.write_bytes(b''.join((R/f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1,5)))
+disk.write_bytes(b''.join((R/f'images/H-Flash-2M-Games-chip{i}.bin').read_bytes() for i in range(1,5)))
 try:
-    x.start('engine-selection',system=R/'images/SystemRom_emu80_writable.bin',disk=disk)
+    x.start('engine-selection',system=R/'images/C-Flash-512k-MMX-System-Emu80.bin',disk=disk)
     m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
     cmd='H:/Bench/FontBen/FontBen.com -E SCALAR12 -P ON -N -Q' if failure else 'H:/Bench/FontBen/FontBen.com -E SCALAR12 -E 4DUP -P ON -Q'
     keys={':':'colon','/':'slash','.':'period',' ':'space','-':'minus'}

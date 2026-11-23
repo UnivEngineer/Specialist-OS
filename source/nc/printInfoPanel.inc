@@ -20,6 +20,7 @@ pip_prepareInfo:
 pip_infoDrive:
             ld a,(hl)
             ld (ncInfoDrive),a
+            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
             call pip_readMain
             ex de,hl
             ld (pipMainFree),hl
@@ -41,8 +42,9 @@ pip_infoDrive:
             ld bc,DISK_INFO.isValid
             add hl,bc
             ld a,(hl)
+            ld (pipDiskState),a
             cp DISK_VALID
-            jp c,pip_readDriver
+            jp nz,pip_readDriver
             ld a,1
             ld (pipHasVolume),a
 pip_readDriver:
@@ -157,9 +159,17 @@ pip_fieldLimits:
             call pip_printDiskLabel
             jp pip_printDriver
 pip_printDiskError:
+            COLOR COLOR_INFOTEXT
+            ld a,(pipDiskState)
+            cp DISK_NO_MEDIA
+            jp nz,pip_printInvalidDisk
+            ld e,125
+            ld hl,aNoMedia
+            call ncPrintPanelCentered
+            jp pip_printDriver
+pip_printInvalidDisk:
             ld hl,047Dh ; One error row centered in the disk block.
             call setCursorPosPanel
-            COLOR COLOR_INFOTEXT
             ld hl,aDrive
             call ncPrintPanelText
             call pip_printInfoDrive
@@ -356,6 +366,7 @@ pip_volumeLabel:
             add hl,de
             ret
 pipHasVolume:           DB 0
+pipDiskState:           DB 0
 pipMainFree:            DW 0
 pipDiskBlocks:          DW 0
 pipReservedPages:       DB 0

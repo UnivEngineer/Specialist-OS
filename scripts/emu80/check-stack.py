@@ -21,7 +21,7 @@ def main():
                            capture_output=True, text=True, check=True).stdout.strip()
     assert Path(owner).resolve() == runtime / 'Emu80qt-mcp.exe'
     assert runtime == ROOT / '.local/monitor-compat-001'
-    image = (ROOT / 'images/SystemRom_emulator.bin').read_bytes()
+    image = (ROOT / 'images/C-ROM-64k-MMX-System-Emu80.bin').read_bytes()
     m = Machine('http://127.0.0.1:19781/mcp')
     m.call('debug_break')
     m.call('bp_clear')

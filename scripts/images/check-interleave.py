@@ -1,69 +1,82 @@
 """Проверка чередования данных Games2M и совпадения с входным манифестом."""
+import csv
 import json
+import runpy
+from dataclasses import replace
 import struct
 from pathlib import Path
-from executable import convert
+from executable import convert, encode
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def main():
-    image = b''.join((ROOT / f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1, 5))
+    image = b''.join((ROOT / f'images/H-Flash-2M-Games-chip{i}.bin').read_bytes() for i in range(1, 5))
     word = lambda n: struct.unpack_from('<H', image, n)[0]
     secsize = word(11)
     fatstart = word(14) * secsize
     rootsector = word(14) + image[16] * word(22)
     datastart = rootsector + (word(17) * 32 + secsize - 1) // secsize
     assert len(image) == 2097152 and datastart < 2048
-    entries = {image[i:i+11].decode('ascii').strip(): image[i:i+32]
-               for i in range(rootsector * secsize, datastart * secsize, 32) if image[i] != 255}
+    assert image == (ROOT / 'images/H-Flash-2M-Games.bin').read_bytes()
+    entries = {}
+    files_by_path, _ = runpy.run_path(str(ROOT / 'scripts/tests/check-nested-image.py'))['read_tree'](image, entries)
+    modes = ('AUTO', 'MX', 'STD', 'MON', 'RF')
+    with (ROOT / 'assets/games/catalog.csv').open(encoding='utf-8-sig', newline='') as catalog:
+        game_modes = {'games/' + row['File'].replace('\\', '/').lower(): row['RunMode'] for row in csv.DictReader(catalog)}
     label_lines = [line.strip()[7:].strip() for line in
-                   (ROOT/'assets/H-Games2M.txt').read_text('utf-8-sig').splitlines()
+                   (ROOT/'assets/H-Flash-2M-Games.txt').read_text('utf-8-sig').splitlines()
                    if line.strip().startswith('@label ')]
     assert len(label_lines) == 1
     assert image[0x2B:0x36] == label_lines[0].ljust(11).encode('ascii')
     allclusters = set()
     chips = [0] * 4
+    capacity = [2048 - datastart, 2048, 2048, 2048]
+    next_chip = 0
     files = 0
-    for line in (ROOT / 'assets/H-Games2M.txt').read_text(encoding='utf-8-sig').splitlines():
+    for line in (ROOT / 'assets/H-Flash-2M-Games.txt').read_text(encoding='utf-8-sig').splitlines():
         if not line.strip() or line.lstrip().startswith(('#','@')):
             continue
         fields = line.split()
         name, source = fields[:2]
-        stem, _, ext = name.rpartition('.')
-        key = stem.ljust(8) + ext.ljust(3)
-        entry = entries[key.strip()]
+        ext = Path(name).suffix[1:].lower()
+        entry = entries[name]
         path = ROOT / 'assets' / source
         address = int(fields[2], 0) if len(fields) >= 3 else 0
-        expected = (convert(path, ext, address)[0] if ext.lower() in ('com','exe','rks')
-                    else path.read_bytes())
+        if ext in ('com', 'exe', 'dll', 'fnt', 'rks'):
+            expected, program = convert(path, ext, address)
+            if ext == 'exe' and source.lower().startswith('games/'):
+                mode = game_modes[source.lower()]
+                if mode != 'NATIVE':
+                    expected = encode(replace(program, mode=modes.index(mode)), ext)
+        else:
+            expected = path.read_bytes()
         stored_size = struct.unpack_from('<I', entry, 28)[0]
         assert entry[18:20] == bytes(2), name
         assert stored_size == len(expected), (name, stored_size, len(expected))
         count = (len(expected) + secsize - 1) // secsize
         c = struct.unpack_from('<H', entry, 26)[0]
         data = bytearray()
-        filechips = []
         for n in range(count):
             assert 2 <= c < word(19) - datastart + 2
             assert c not in allclusters, (name, c)
             allclusters.add(c)
             sector = datastart + c - 2
             chip = sector // 2048
+            while chips[next_chip] == capacity[next_chip]:
+                next_chip = (next_chip + 1) % 4
+            assert chip == next_chip, (name, n, chip, next_chip)
             chips[chip] += 1
-            filechips.append(chip)
+            next_chip = (chip + 1) % 4
             data += image[sector * secsize:(sector + 1) * secsize]
             following = struct.unpack_from('<H', image, fatstart + 2*c)[0]
             if n == count - 1:
                 assert 0xFFF8 <= following <= 0xFFFF, name
             c = following
         assert bytes(data[:len(expected)]) == expected, name
-        assert all(b == (a + 1) % 4 for a, b in zip(filechips, filechips[1:])), name
         files += 1
-    assert max(chips) - min(chips) <= 1
-    # Все ненулевые записи данных принадлежат ровно одному файлу.
-    for c in range(2, word(19) - datastart + 2):
-        assert (struct.unpack_from('<H', image, fatstart + 2*c)[0] != 0) == (c in allclusters)
+    # read_tree также проверил владение кластерами каталогов, обе FAT и свободные записи.
+    assert files == len(files_by_path)
     report = dict(files=files, dataSectors=len(allclusters), sectorsPerChip=chips,
                   metadataChip=0, allPayloadsMatch=True, noSharedClusters=True,
                   numbering='physical, compatible with Flash and FlashFst')

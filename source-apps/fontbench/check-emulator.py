@@ -105,7 +105,7 @@ def read_report(expected):
 
 
 try:
-    x.start('font4-001', system=R / 'images/SystemRom_emu80_writable.bin')
+    x.start('font4-001', system=R / 'images/C-Flash-512k-MMX-System-Emu80.bin')
     request = urllib.request.Request(m.url, json.dumps({'jsonrpc': '2.0', 'id': 999, 'method': 'tools/list'}).encode(), {'Content-Type': 'application/json'})
     listing = json.load(urllib.request.urlopen(request, timeout=30))
     (O / 'tools.json').write_text(json.dumps(listing, indent=2), encoding='utf-8')
@@ -275,7 +275,7 @@ try:
     m.until(n['mainLoop'], 120, page=0)
     m.screenshot(O / 'returned.png')
     result.update(enterOnlyVerified=not bool(options[5]), quickReturnVerified=bool(options[5]), returnedToNC=True)
-    result['binarySha256'] = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path('bin/FONTRMP.i80' if args.remap32 else 'bin/FONTBLK.i80' if args.block32 else 'bin/FONTLAB.i80'), Path('images/SystemRom_emu80_writable.bin')]}
+    result['binarySha256'] = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path('bin/FONTRMP.i80' if args.remap32 else 'bin/FONTBLK.i80' if args.block32 else 'bin/FONTLAB.i80'), Path('images/C-Flash-512k-MMX-System-Emu80.bin')]}
     (O / 'results.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
 finally:
     x.stop()

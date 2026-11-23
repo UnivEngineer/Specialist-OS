@@ -7,7 +7,7 @@ def main():
  h['Matrix'].__init__.__globals__.update(RUNTIME=ROOT/'.local/nc-sort-benchmark-runtime',OUT=OUT)
  machine=h['Matrix']();n=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-nc-sort.py'))['symbols'](ROOT/'bin/NC.sym')
  try:
-  machine.start('adaptive-font',disk=ROOT/'images/FlashDisk_emu80_seed.bin')
+  machine.start('adaptive-font',disk=ROOT/'images/H-Flash-2M-Games.bin')
   m=machine.m
   def byte(k):return m.read(n[k],1)[0]
   def text():

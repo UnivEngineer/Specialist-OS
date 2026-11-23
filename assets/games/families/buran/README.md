@@ -66,7 +66,7 @@ RAMFOS использует MX-карту: ВВ55 клавиатуры расп�
 | `Buran-SW.rks` | [Buran-starwars-std.rks](originals/Buran-starwars-std.rks) |
 | `Buran-RF.exe` | [Buran-ramfos.exe](repacked/Buran-ramfos.exe) |
 
-Имена задаёт `assets/H-Games2M.txt`; код и нагрузка при включении в образ не меняются.
+Имена задаёт `assets/H-Flash-2M-Games.txt`; код и нагрузка при включении в образ не меняются.
 
 ## Воспроизведение контейнеров
 

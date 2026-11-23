@@ -264,6 +264,8 @@ hexQueueCapacity:
 ; B = drive containing EDITCORE. Update both overlay paths, preserving BC/DE/HL.
 editorOverlayDrive:
     ld a,b
+    ld (ebGfxPath),a
+    ld (editorHelpPath),a
     ld (hexCorePath),a
     ld (textCorePath),a
     ret

@@ -1,7 +1,7 @@
 ﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("SystemEmu", "SystemEmuFlash", "SystemEmuWritable", "SystemRamfos", "SystemHardware", "Games64k", "Games2M", "Floppy720")]
+    [ValidateSet("SystemEmu", "SystemEmuFlash", "SystemEmuWritable", "SystemRamfos", "SystemHardware", "Games64k", "Games2M", "Floppy720", "MxFloppy", "MxRom32", "MxRom48", "MxRamfos32")]
     [string] $Target,
 
     [Parameter(Position = 1)]
@@ -9,6 +9,8 @@ param(
     [int] $HardwareSizeKB = 128,
     [string] $ManifestFile,
     [string] $BootFont,
+    [switch] $Prebuilt,
+    [switch] $MxUseRomBundle,
     [switch] $BootstrapProbe,
     [switch] $Force,
     [Parameter(DontShow)]
@@ -23,13 +25,32 @@ if ($BootFont -and $Target -notin @('SystemEmuWritable','SystemRamfos','SystemHa
 if ($ManifestFile -and $Target -ne 'Games2M') { throw '-ManifestFile is currently supported only for Games2M.' }
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ($Target -eq 'MxRamfos32') {
+    $ramfosArgs = @('--mx-rom32')
+    if ($Prebuilt) { $ramfosArgs += '--prebuilt' }
+    if ($Force) { $ramfosArgs += '--force' }
+    & python -X utf8 (Join-Path $PSScriptRoot 'build-ramfos.py') @ramfosArgs
+    exit $LASTEXITCODE
+}
 $assetDirectory = Join-Path $repositoryRoot "assets"
 $imageDirectory = Join-Path $repositoryRoot "images"
 $sectorSize = 256
 $sectorsPerCluster = 1
-$floppy = $Target -eq 'Floppy720'
+$mxFloppy = $Target -eq 'MxFloppy'
+if ($MxUseRomBundle -and -not $mxFloppy) { throw '-MxUseRomBundle requires MxFloppy.' }
+$nestedTarget = if ($MxUseRomBundle) { 'MxFloppyRomBundle' } else { $Target }
+$mxBootPayload = if ($MxUseRomBundle) { 'bin/mx/reserved-rom.bin' } else { 'bin/mx/reserved.bin' }
+$mxFlashStem = if ($MxUseRomBundle) { 'A-Flash-1M-MX-ROM-Bundle' } else { 'A-Flash-1M-MX-System' }
+$floppy = $Target -eq 'Floppy720' -or $mxFloppy
+$mxRom = $Target -in @('MxRom32','MxRom48')
 $fatCopies = 1
 $mediaByte = 0xF8
+
+function Get-ImageHash([byte[]] $Bytes, [int] $Offset = 0) {
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($hasher.ComputeHash($Bytes, $Offset, $Bytes.Length - $Offset)).Replace('-', '') }
+    finally { $hasher.Dispose() }
+}
 
 function Join-Bytes {
     param([Parameter(ValueFromRemainingArguments = $true)][byte[][]] $Arrays)
@@ -152,7 +173,7 @@ function Get-Manifest {
 $ramfosManifestPath = $null
 switch ($Target) {
     { $_ -in @('SystemEmu', 'SystemEmuFlash') } {
-        $manifestPath = Join-Path $assetDirectory "C-System.txt"
+        $manifestPath = Join-Path $assetDirectory "C-Flash-512k-MMX-System.txt"
         $autoexecVariant = if ($Target -eq 'SystemEmuFlash') { 'emu-flash' } else { 'emu' }
         $manifestData = Get-Manifest $manifestPath $autoexecVariant
         $manifest = @($manifestData.Entries)
@@ -161,16 +182,16 @@ switch ($Target) {
         $chipSize = 64KB
         $maxFiles = 64
         $imageFormat = "Mx2"
-        $outputName = if ($Target -eq 'SystemEmuFlash') { 'SystemRom_emu80_flash.bin' } else { 'SystemRom_emulator.bin' }
+        $outputName = if ($Target -eq 'SystemEmuFlash') { 'C-Flash-64k-MMX-System-Emu80.bin' } else { 'C-ROM-64k-MMX-System-Emu80.bin' }
         $outputPath = Join-Path $imageDirectory $outputName
         $makeBootDisk = $true
     }
     { $_ -in @('SystemEmuWritable', 'SystemRamfos') } {
-        $manifestPath = Join-Path $assetDirectory "C-System.txt"
+        $manifestPath = Join-Path $assetDirectory "C-Flash-512k-MMX-System.txt"
         $manifestData = Get-Manifest $manifestPath "emu-writable"
         $allEntries = @($manifestData.Entries)
         if ($Target -eq 'SystemRamfos') {
-            $ramfosManifestPath = Join-Path $assetDirectory 'C-RAMFOS.txt'
+            $ramfosManifestPath = Join-Path $assetDirectory 'C-Flash-512k-MMX-RAMFOS-Tests.txt'
             $ramfosManifest = Get-Manifest $ramfosManifestPath 'emu-writable'
             $allEntries += @($ramfosManifest.Entries)
             $manifestData.VolumeLabel = $ramfosManifest.VolumeLabel
@@ -190,12 +211,12 @@ switch ($Target) {
         $chipSize = 64KB
         $maxFiles = 64
         $imageFormat = "Raw"
-        $outputName = if ($Target -eq 'SystemRamfos') { 'SystemRom_ramfos_emulator.bin' } else { 'SystemRom_emu80_writable.bin' }
+        $outputName = if ($Target -eq 'SystemRamfos') { 'C-Flash-512k-MMX-RAMFOS-Tests.bin' } else { 'C-Flash-512k-MMX-System-Emu80.bin' }
         $outputPath = Join-Path $imageDirectory $outputName
         $makeBootDisk = $true
     }
     "SystemHardware" {
-        $manifestPath = Join-Path $assetDirectory "C-System.txt"
+        $manifestPath = Join-Path $assetDirectory "C-Flash-512k-MMX-System.txt"
         $manifestData = Get-Manifest $manifestPath "hardware"
         $allEntries = @($manifestData.Entries)
         # Стабильный порядок загрузочных файлов; первая страница обязательна лишь для DOS.
@@ -213,15 +234,15 @@ switch ($Target) {
         $maxFiles = 64
         $imageFormat = "Raw"
         $outputName = switch ($HardwareSizeKB) {
-            128 { "SystemRom_128K.bin" }
-            256 { "SystemRom_256K.bin" }
-            512 { "SystemRom_512K.bin" }
+            128 { "C-Flash-128k-MMX-System.bin" }
+            256 { "C-Flash-256k-MMX-System.bin" }
+            512 { "C-Flash-512k-MMX-System.bin" }
         }
         $outputPath = Join-Path $imageDirectory $outputName
         $makeBootDisk = $true
     }
     "Games64k" {
-        $manifestPath = Join-Path $assetDirectory "H-ROM64k.txt"
+        $manifestPath = Join-Path $assetDirectory "H-ROM-64k-Games.txt"
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
         $bootPath = Join-Path $repositoryRoot "assets\system-rom\boot-flash.bin"
@@ -229,12 +250,12 @@ switch ($Target) {
         $chipSize = 64KB
         $maxFiles = 64
         $imageFormat = "Split"
-        $outputPath = Join-Path $imageDirectory "FlashDisk_64K.bin"
-        $partNamePattern = "FlashDisk_64K.bin"
+        $outputPath = Join-Path $imageDirectory "H-ROM-64k-Games.bin"
+        $partNamePattern = [IO.Path]::ChangeExtension([IO.Path]::GetFileName($manifestPath), ".bin")
         $makeBootDisk = $false
     }
     "Games2M" {
-        $manifestPath = Join-Path $assetDirectory "H-Games2M.txt"
+        $manifestPath = Join-Path $assetDirectory "H-Flash-2M-Games.txt"
         if ($ManifestFile) { $manifestPath = (Resolve-Path -LiteralPath $ManifestFile).Path }
         $manifestData = Get-Manifest $manifestPath
         $manifest = @($manifestData.Entries)
@@ -248,13 +269,28 @@ switch ($Target) {
         $maxFiles = [int]([Math]::Ceiling(($rootNames.Count + 1) / $entriesPerSector) * $entriesPerSector)
         if ($maxFiles -gt 256) { throw "Games2M root exceeds the MXOS limit of 256 entries" }
         $imageFormat = "Split"
-        $outputPath = Join-Path $imageDirectory "FlashDisk_512K.bin"
-        $partNamePattern = "FlashDisk_chip{0}_512K.bin"
+        $stem = [IO.Path]::GetFileNameWithoutExtension($manifestPath)
+        $outputPath = Join-Path $imageDirectory "$stem.bin"
+        $partNamePattern = "$stem-chip{0}.bin"
         $makeBootDisk = $false
     }
-    "Floppy720" {
-        $manifestPath = Join-Path $assetDirectory "A-Floppy720k.txt"
+    { $mxRom } {
+        $manifestPath = Join-Path $assetDirectory 'C-ROM-32k-MX-System.txt'
         $manifestData = Get-Manifest $manifestPath
+        $manifest = @($manifestData.Entries)
+        $volumeSize = if ($Target -eq 'MxRom48') { 48KB } else { 32KB }
+        $maxFiles = 16
+        $imageFormat = 'Raw'
+        $bootPath = Join-Path $repositoryRoot 'bin/mx/rom-sector.bin'
+        $romName = [IO.Path]::GetFileNameWithoutExtension($manifestPath).Replace('-32k-', ('-{0}k-' -f ($volumeSize / 1KB)))
+        $outputPath = Join-Path $imageDirectory "$romName.bin"
+        $makeBootDisk = $false
+    }
+    { $floppy } {
+        $manifestName = if ($mxFloppy) { "A-Floppy-720k-MX-System.txt" } else { "A-Floppy-720k-Programs.txt" }
+        $manifestPath = Join-Path $assetDirectory $manifestName
+        $autoexecVariant = if ($mxFloppy) { 'mx' } else { 'emu' }
+        $manifestData = Get-Manifest $manifestPath $autoexecVariant
         $manifest = @($manifestData.Entries)
         $bootPath = $null
         $sectorSize = 512
@@ -264,7 +300,8 @@ switch ($Target) {
         $volumeSize = 720KB
         $maxFiles = 112
         $imageFormat = "Raw"
-        $outputPath = Join-Path $imageDirectory "Floppy720.img"
+        $diskName = if ($MxUseRomBundle) { 'A-Floppy-720k-MX-ROM-Bundle.img' } else { [IO.Path]::ChangeExtension($manifestName, ".img") }
+        $outputPath = Join-Path $imageDirectory $diskName
         $makeBootDisk = $false
     }
 }
@@ -288,13 +325,19 @@ if ($stagedBoot) {
     $fixedBootFiles[$bootFontName] = 0x4800
     $bootstrapArgs = @('--font-body', $fontSource, '--font-name', [IO.Path]::GetFileNameWithoutExtension($bootFontName))
     if ($BootstrapProbe) { $bootstrapArgs += '--probe' }
-    if (-not $RunBuild) {
+    if (-not $RunBuild -and -not $Prebuilt) {
         if ($FontsReady) { $bootstrapArgs += '--fonts-ready' }
         if ($Force) { $bootstrapArgs += '--force' }
         & python (Join-Path $repositoryRoot 'scripts/build/build-bootstrap.py') @bootstrapArgs
         if ($LASTEXITCODE -ne 0) { throw 'Bootstrap build failed.' }
     }
     $bootPath = Join-Path $repositoryRoot 'bin/bootstrap/sector.bin'
+    $bootSetPath = Join-Path $repositoryRoot 'bin/bootstrap/boot-set.json'
+    $bootSet = Get-Content -LiteralPath $bootSetPath -Raw | ConvertFrom-Json
+    if ($bootSet.probe -ne [bool]$BootstrapProbe -or $bootSet.fontName -ne [IO.Path]::GetFileNameWithoutExtension($bootFontName)) {
+        throw "Boot sector set does not match the selected boot font or probe mode: $bootSetPath"
+    }
+    if ((Get-ImageHash ([IO.File]::ReadAllBytes($bootPath))) -ne $bootSet.files.sector) { throw "Boot sector does not match $bootSetPath" }
     foreach ($name in @('DOS/BOOT.SYS','DOS/BIOS.SYS','DOS/IO.SYS','DOS/MEM.SYS','DOS/DOS.SYS',$bootFontName)) {
         if (@($manifest | Where-Object { $_.ImageName -eq $name }).Count -ne 1) { throw "Bootstrap requires exactly one $name" }
     }
@@ -306,27 +349,36 @@ $errorBuilder = Join-Path $repositoryRoot 'scripts/build/build-error-strings.py'
 $errorTable = Join-Path $repositoryRoot 'bin/ERRORS.DAT'
 if (-not $RunBuild) {
     $inputs = @($manifestPath, (Join-Path $PSScriptRoot 'executable.ps1'), (Join-Path $PSScriptRoot 'cpu.ps1'))
+    if ($mxFloppy) { $inputs += Join-Path $repositoryRoot $mxBootPayload }
+    if ($mxRom) { $inputs += Join-Path $repositoryRoot 'bin/mx/rom-recovery.bin' }
     if ($ramfosManifestPath) { $inputs += $ramfosManifestPath }
     if ($bootPath) { $inputs += $bootPath }
     if ($gameExeEntries.Count) { $inputs += $gameCatalogPath }
-    if ($stagedBoot) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'source/include/mxos.inc'), (Join-Path $repositoryRoot 'bin/banked/KERNEL.sym')) }
+    if ($stagedBoot) { $inputs += $bootSetPath }
+    if ($stagedBoot -and -not $Prebuilt) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'source/include/mxos.inc')) }
     if ($hasNestedFiles) { $inputs += (Join-Path $PSScriptRoot 'nest-fat-image.py') }
     $inputs += @(foreach ($entry in $manifest) {
         $path = [IO.Path]::GetFullPath([IO.Path]::Combine($assetDirectory, $entry.Source))
-        if (-not $stagedBoot -or $path -ne $errorTable) { $path }
+        if ($Prebuilt -or -not $stagedBoot -or $path -ne $errorTable) { $path }
         if ([IO.Path]::GetExtension($path) -eq '.cpu' -and $entry.ImageName -match '\.(com|exe|dll|fnt|rks)$') {
             [IO.Path]::ChangeExtension($path, '.i80')
         }
     })
 
-    $cacheArgs = @((Join-Path $repositoryRoot 'scripts/build/build_cache.py'), "image: $Target", '--inputs-from-stdin')
+    $cacheArgs = @((Join-Path $repositoryRoot 'scripts/build/build_cache.py'), "image: $nestedTarget", '--inputs-from-stdin')
+    if ($stagedBoot) { $cacheArgs += '--input-content' }
     $outputs = switch ($Target) {
-        'Games2M' { 1..4 | ForEach-Object { Join-Path $imageDirectory ($partNamePattern -f $_) } }
+        'MxFloppy' {
+            $outputPath
+            Join-Path $imageDirectory "$mxFlashStem.bin"
+            1..2 | ForEach-Object { Join-Path $imageDirectory "$mxFlashStem-chip$_.bin" }
+        }
+        'Games2M' { $outputPath; 1..4 | ForEach-Object { Join-Path $imageDirectory ($partNamePattern -f $_) } }
         default { $outputPath }
     }
-    if ($stagedBoot) { $outputs = @($outputs) + $errorTable }
+    if ($stagedBoot -and -not $Prebuilt) { $outputs = @($outputs) + $errorTable }
     if ($hasNestedFiles) {
-        $outputs = @($outputs) + (Join-Path $repositoryRoot "bin/nested-$Target.entries") + (Join-Path $repositoryRoot "bin/nested-$Target.bin")
+        $outputs = @($outputs) + (Join-Path $repositoryRoot "bin/nested-$nestedTarget.entries") + (Join-Path $repositoryRoot "bin/nested-$nestedTarget.bin")
     }
     foreach ($path in $outputs) { $cacheArgs += @('--output', $path) }
     if ($Force) { $cacheArgs += '--force' }
@@ -334,6 +386,8 @@ if (-not $RunBuild) {
     if ($ManifestFile) { $cacheArgs += @('-ManifestFile', $manifestPath) }
     if ($BootFont) { $cacheArgs += @('-BootFont', $BootFont) }
     if ($BootstrapProbe) { $cacheArgs += '-BootstrapProbe' }
+    if ($Prebuilt) { $cacheArgs += '-Prebuilt' }
+    if ($MxUseRomBundle) { $cacheArgs += '-MxUseRomBundle' }
     $OutputEncoding = [Text.UTF8Encoding]::new($false)
     ConvertTo-Json -InputObject $inputs -Compress | & python -X utf8 @cacheArgs
     exit $LASTEXITCODE
@@ -348,16 +402,25 @@ if ($gameExeEntries.Count) {
         $gameModes[$key] = $game.RunMode
     }
 }
-if ($stagedBoot) {
+if ($stagedBoot -and -not $Prebuilt) {
     & python $errorBuilder $errorTable
     if ($LASTEXITCODE -ne 0) { throw 'Cannot build ERRORS.DAT' }
 }
 New-Item -ItemType Directory -Path $imageDirectory -Force | Out-Null
 
 $volumeSectors = [int]($volumeSize / $sectorSize)
-$fatSectors = if ($floppy) { 3 } else { [int]($volumeSectors * 2 / $sectorSize) }
+$fatSectors = if ($floppy) { 3 } elseif ($mxRom) { 2 } else { [int]($volumeSectors * 2 / $sectorSize) }
 $directorySectors = [int]($maxFiles * 32 / $sectorSize)
-$dataStartSector = 1 + $fatCopies * $fatSectors + $directorySectors
+$reservedPayload = [byte[]]@()
+if ($mxFloppy) {
+    $reservedPayload = [IO.File]::ReadAllBytes((Join-Path $repositoryRoot $mxBootPayload))
+    if ($reservedPayload.Length % 512) { throw 'Unaligned MX bootstrap payload' }
+} elseif ($mxRom) {
+    $reservedPayload = [IO.File]::ReadAllBytes((Join-Path $repositoryRoot 'bin/mx/rom-recovery.bin'))
+    if ($reservedPayload.Length -ne $sectorSize) { throw 'Invalid MX recovery sector size' }
+}
+$reservedSectors = 1 + [int]($reservedPayload.Length / $sectorSize)
+$dataStartSector = $reservedSectors + $fatCopies * $fatSectors + $directorySectors
 $dataSectors = $volumeSectors - $dataStartSector
 if ($imageFormat -eq 'Mx2') {
     # STD-вход занимает первые четыре байта физической половины ROM.
@@ -370,6 +433,12 @@ $clusterSize = $sectorSize * $sectorsPerCluster
 $boot = if ($floppy) { ,([byte[]]::new($sectorSize)) } else { ,([IO.File]::ReadAllBytes($bootPath)) }
 if ($boot.Length -ne $sectorSize) {
     throw "boot.bin must be exactly $sectorSize bytes"
+}
+if ($mxRom) {
+    if ($boot[0] -ne 0xC3 -or [BitConverter]::ToUInt16($boot, 1) -ne $dataStartSector * $sectorSize -or
+        $manifest[0].ImageName -ne 'BOOT.SYS' -or $manifest[0].Source -ne '../bin/mx/loader.bin') {
+        throw 'MX ROM reset must point to BOOT.SYS in the first data cluster'
+    }
 }
 $fatEntryCount = if ($floppy) { [int]($fatSectors * $sectorSize * 2 / 3) } else { [int]($fatSectors * $sectorSize / 2) }
 $fat = [uint16[]]::new($fatEntryCount)
@@ -409,6 +478,8 @@ $dosCluster = 0
 $dosAddress = 0
 $dosSectors = 0
 $imageNames = @{}
+$mxRomBundleOffsets = @{ "BIOS.SYS" = 0x24; "ROTATE.FNT" = 0x26; "IO.SYS" = 0x28; "MEM.SYS" = 0x2A }
+$mxRomBundleFiles = 0
 $clusterPadding = Expand-Bytes ([byte[]]@()) $clusterSize
 
 try {
@@ -445,11 +516,14 @@ try {
         $imageNames[$imageNameKey] = $sourceName
 
         if ($fileCount -ge $maxFiles -and -not $hasNestedFiles) {
-            throw "Root directory is full while adding $sourceName ($fileCount of $maxFiles files)"
+            throw "$($Target): root directory is full while adding $sourceName ($fileCount of $maxFiles files) at $($manifestEntry.Location)"
         }
         $fileCount++
 
         if ($stagedBoot -and $fixedBootFiles.ContainsKey($sourceName)) {
+            if ($sourceName -eq $bootFontName) {
+                if ((Get-ImageHash $storedBytes 32) -ne $bootSet.fontHash) { throw "Boot font does not match $bootSetPath" }
+            } elseif ((Get-ImageHash $storedBytes) -ne $bootSet.files.$sourceName) { throw "$sourceName does not match $bootSetPath" }
             $fixedAddress = $fixedBootFiles[$sourceName]
             $limit = switch ($sourceName) { 'DOS/BOOT.SYS' { 0x3000 }; 'DOS/BIOS.SYS' { 0x4800 }; 'DOS/IO.SYS' { 0x7000 }; 'DOS/MEM.SYS' { 0x8000 }; 'DOS/DOS.SYS' { 0x18000 } }
             if ($sourceName -eq $bootFontName) { $limit = 0x6000 }
@@ -458,10 +532,7 @@ try {
             if ($sourceName -eq 'DOS/IO.SYS' -and $loadAddress -ne 0xF000) { throw 'Invalid IO load range' }
             if ($sourceName -eq 'DOS/BIOS.SYS' -and ($loadAddress -ne 0xC000 -or $loadAddress+$originalSize -gt 0xF000)) { throw 'Invalid BIOS load range' }
             if ($sourceName -eq 'DOS/DOS.SYS') {
-                $kernelSymbols = [IO.File]::ReadAllText((Join-Path $repositoryRoot 'bin/banked/KERNEL.sym'))
-                $codeLimit = [regex]::Match($kernelSymbols, '(?m)^DOS_CODE_END_MAX: EQU 0x([0-9A-Fa-f]+)')
-                if (-not $codeLimit.Success) { throw 'Missing DOS_CODE_END_MAX in KERNEL.sym' }
-                $dosLimit = [Convert]::ToInt32($codeLimit.Groups[1].Value, 16)
+                $dosLimit = $bootSet.dosLimit
                 if ($loadAddress -ne 0x0100 -or $loadAddress+$originalSize -gt $dosLimit) { throw 'Invalid DOS load range' }
             }
             $nextCluster = [int]($fixedAddress / $sectorSize) - $dataStartSector + 2
@@ -477,7 +548,9 @@ try {
                 $nextCluster++
                 $searched++
                 if ($searched -ge $dataClusters) {
-                    throw "Image data area is full while adding $sourceName"
+                    $required = [int][Math]::Ceiling($storedBytes.Length / $clusterSize)
+                    $available = [int]($offset / $clusterSize)
+                    throw "$($Target): image data area is full while adding $sourceName at $($manifestEntry.Location). Needs $required clusters, $available were free ($clusterSize bytes per cluster)."
                 }
             }
             $cluster = $nextCluster
@@ -511,6 +584,12 @@ try {
             throw "Boot file must fit in the first 32-KB page: $sourceName"
         }
 
+        if ($mxRom -and $mxRomBundleOffsets.ContainsKey($sourceName)) {
+            $fileOffset = ($dataStartSector + $firstCluster - 2) * $sectorSize
+            if ($sourceName -eq 'ROTATE.FNT') { $fileOffset += 32 }
+            Set-Word $reservedPayload $mxRomBundleOffsets[$sourceName] $fileOffset
+            $mxRomBundleFiles++
+        }
         $entry = New-Object byte[] 32
         $nameBytes = [Text.Encoding]::ASCII.GetBytes(($baseName + "        ").Substring(0, 8))
         $extensionBytes = [Text.Encoding]::ASCII.GetBytes(($extension + "   ").Substring(0, 3))
@@ -535,7 +614,7 @@ try {
 
     if ($floppy) {
         [Array]::Copy([byte[]](0xEB, 0x3C, 0x90), $boot, 3)
-        $boot[0x0E] = 1
+        Set-Word $boot 0x0E $reservedSectors
         $boot[0x10] = $fatCopies
         $boot[0x15] = $mediaByte
         Set-Word $boot 0x18 9
@@ -550,6 +629,7 @@ try {
     $oemName = if ($floppy) { "MXOS2   " } else { "MXOS256 " }
     [Array]::Copy([Text.Encoding]::ASCII.GetBytes($oemName), 0, $boot, 3, 8)
     Set-Word $boot 0x0B $sectorSize
+    if ($mxRom) { Set-Word $boot 0x0E $reservedSectors }
     $boot[0x0D] = $sectorsPerCluster
     Set-Word $boot 0x11 $maxFiles
     Set-Word $boot 0x13 $volumeSectors
@@ -580,7 +660,7 @@ try {
     # nest-fat-image writes only top-level children into the real root.
     $rootBytes = $directory.ToArray()
     if ($hasNestedFiles) {
-        $entryListPath = Join-Path $repositoryRoot "bin/nested-$Target.entries"
+        $entryListPath = Join-Path $repositoryRoot "bin/nested-$nestedTarget.entries"
         [IO.File]::WriteAllBytes($entryListPath, $rootBytes)
         $rootBytes = New-Object byte[] ($directorySectors * $sectorSize)
     }
@@ -598,11 +678,12 @@ try {
     } else {
         [Buffer]::BlockCopy($fat, 0, $fatBytes, 0, $fatBytes.Length)
     }
-    $start = Join-Bytes $boot $fatBytes $rootBytes
+    if ($mxRom -and $mxRomBundleFiles -ne $mxRomBundleOffsets.Count) { throw 'Incomplete MX ROM BIOS bundle' }
+    $start = Join-Bytes $boot $reservedPayload $fatBytes $rootBytes
     $data = $fileData.ToArray()
     $nestedPaths = @($manifest | ForEach-Object { $_.ImageName })
     if ($hasNestedFiles) {
-        $stagingPath = Join-Path $repositoryRoot "bin/nested-$Target.bin"
+        $stagingPath = Join-Path $repositoryRoot "bin/nested-$nestedTarget.bin"
         [IO.File]::WriteAllBytes($stagingPath, (Expand-Bytes (Join-Bytes $start $data) $volumeSize))
         $nestOptions = @('--entries', $entryListPath)
         if ($floppy) {
@@ -639,11 +720,23 @@ try {
             Write-Host ("[image] {0}" -f $outputPath)
         }
         "Raw" {
-            [IO.File]::WriteAllBytes($outputPath, (Expand-Bytes (Join-Bytes $start $data) $volumeSize))
+            $raw = Expand-Bytes (Join-Bytes $start $data) $volumeSize
+            [IO.File]::WriteAllBytes($outputPath, $raw)
+            if ($mxFloppy) {
+                $flash = Expand-Bytes $raw 1MB
+                $flash[514] = 0x46  # MXF1, ??????????? ????????? ??????? flash
+                [IO.File]::WriteAllBytes((Join-Path $imageDirectory "$mxFlashStem.bin"), $flash)
+                $part = [byte[]]::new(512KB)
+                foreach ($chip in 1..2) {
+                    [Array]::Copy($flash, ($chip - 1) * 512KB, $part, 0, 512KB)
+                    [IO.File]::WriteAllBytes((Join-Path $imageDirectory "$mxFlashStem-chip$chip.bin"), $part)
+                }
+            }
             Write-Host ("[image] {0}" -f $outputPath)
         }
         "Split" {
             $image = Join-Bytes $start $data
+            if ($Target -eq 'Games2M') { [IO.File]::WriteAllBytes($outputPath, (Expand-Bytes $image $volumeSize)) }
             $outputDirectory = Split-Path -Parent $outputPath
             $partNumber = 0
             for ($offset = 0; $offset -lt $image.Length; $offset += $chipSize) {

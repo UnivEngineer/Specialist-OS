@@ -11,7 +11,7 @@ powershell.exe -NoProfile -File scripts/build/build-almaz.ps1
 python scripts/games/check-almaz-source.py
 ```
 
-В VS Code игра входит в `build: all`. Отдельная сборка выполняется через `scripts/build/build-almaz.ps1`. SjASMPlus вызывается с `--i8080`. Результаты:
+В VS Code игра входит в `Build all`. Отдельная сборка выполняется через `scripts/build/build-almaz.ps1`. SjASMPlus вызывается с `--i8080`. Результаты:
 
 - `bin/Almaz-original.bin` — 4611 байт, загрузка `1EFDh..30FFh`;
 - `bin/Almaz-original.rks` — 4617 байт, адрес запуска `1EFDh`;

@@ -7,7 +7,7 @@ f=a.report/'input';f.mkdir(exist_ok=True)
 for name in ('NC.i80','NC.sym','BIOS.sys','DOS.sys','DOS.sym','DISKBEN.i80','DISKMAIN.i80'):
  shutil.copy2(R/'bin'/name,f/name)
 for name in ('DISKBEN','DISKMAIN'):shutil.copy2(R/f'source-apps/diskbench/build/{name}.sym',f/f'{name}.sym')
-shutil.copy2(R/'bin/banked/KERNEL.sym',f/'KERNEL.sym');shutil.copy2(R/'images/SystemRom_emu80_writable.bin',f/'system.bin')
+shutil.copy2(R/'bin/banked/KERNEL.sym',f/'KERNEL.sym');shutil.copy2(R/'images/C-Flash-512k-MMX-System-Emu80.bin',f/'system.bin')
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__;g.update(OUT=a.report,RUNTIME=a.runtime.resolve());g['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
 x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp';sy=h['symbols'];ns=sy(f/'NC.sym');cs=sy(f/'DISKBEN.sym');ws=sy(f/'DISKMAIN.sym');ks=sy(f/'KERNEL.sym');rows=[];traces=[];phases=[];lookups=[]
 def word(address):return int.from_bytes(m.read(address,2),'little')

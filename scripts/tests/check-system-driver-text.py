@@ -47,7 +47,7 @@ for payload,pointer,arg,error in [(b'AT512KS\0' + b'512K ONBOARD FLASH\0',0xD000
  record=z[record_start:record_start+80]
  if error:assert record==b'Z'*80
  else:
-  want=payload if pointer else b'ROM-SYS\0BUILT-IN, READ ONLY\0'
+  want=payload if pointer else b'ROM512KS\0BUILT-IN, READ ONLY\0'
   assert record[8:72]==want.ljust(64,b'\0');assert record[:2]==w(2048)
   assert record[4:6]==bytes([7,s['DISK_TECH_MX_SYSTEM_FLASH']])
 print('SYSTEM DRIVER TEXT PASS: 6 descriptor/default/boundary/error cases')

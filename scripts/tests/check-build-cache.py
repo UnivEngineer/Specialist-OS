@@ -1,6 +1,7 @@
 """Exercise invalidation and failed builds without touching the project outputs."""
 
 import hashlib
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -9,6 +10,25 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).absolute().parents[1] / 'build'))
 import build_cache
+
+
+def check_assembly_dependencies(root, worker, output):
+    source = root / 'main.asm'
+    header = root / 'shared.inc'
+    binary = root / 'data.bin'
+    source.write_text('    INCLUDE "shared.inc"\n', encoding='utf-8')
+    header.write_text('data: INCBIN "data.bin"\n', encoding='utf-8')
+    binary.write_bytes(b'first')
+    command = ['assembly', '--input-content', '--asm', str(source), '--output', str(output),
+               '--', str(worker), str(binary), str(output), 'A']
+
+    assert build_cache.main(command) == 0 and output.read_bytes() == b'firstA'
+    created = output.stat().st_mtime_ns
+    mtime = source.stat().st_mtime_ns
+    os.utime(source, ns=(mtime, mtime + 1_000_000_000))
+    assert build_cache.main(command) == 0 and output.stat().st_mtime_ns == created
+    binary.write_bytes(b'changed')
+    assert build_cache.main(command) == 0 and output.read_bytes() == b'changedA'
 
 
 def main():
@@ -49,7 +69,8 @@ def main():
             source.write_bytes(b'recovered')
             assert build() == 0 and output.read_bytes() == b'recoveredA'
             assert build(force=True) == 0
-    print('Build cache: hit, configuration, invalidation, missing output, failure and recovery OK')
+            check_assembly_dependencies(root, worker, output)
+    print('Build cache: hits, configuration, assembly dependencies, invalidation, failure and recovery OK')
 
 
 if __name__ == '__main__':

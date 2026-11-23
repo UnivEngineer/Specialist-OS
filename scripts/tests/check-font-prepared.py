@@ -51,7 +51,7 @@ print('Direct destination and exact PRE length PASS')
 
 # Real generated initializer containers must use the same native header as
 # the engine. A stale 16-byte base otherwise rejects every current DLL.
-files=runpy.run_path(str(R/'scripts/tests/check-nested-image.py'))['read_tree']((R/'images/SystemRom_emu80_writable.bin').read_bytes())[0]
+files=runpy.run_path(str(R/'scripts/tests/check-nested-image.py'))['read_tree']((R/'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes())[0]
 for size,engine,initializer in [('6x8','Rotate','Init6'),('8x8','Rotate','InitA')]:
  for damage in [None,'header','payload']:
   m=bytearray(65536)

@@ -100,7 +100,7 @@ def main():
             raise ValueError('For the system-flash profile use check-system-flash.py --locked; do not reinstall FlashSys.')
         # Устанавливаем один раз: установщик сохраняет старые адреса обёрток ABI.
         machine.write(0, (ROOT / "bin/FlashSys.i80").read_bytes())
-        assert machine.subroutine(0)["flags"]["C"], "ROM must reject software ID"
+        assert not machine.subroutine(0)["flags"]["C"], "The flash upgrade must skip a readable ROM"
         machine.subroutine(0xC842, af=0x0000, de=1)
         entry = 0xC863
         image = (args.runtime / "specialist-os/system.bin").read_bytes()
@@ -161,7 +161,7 @@ def main():
         print(f"Persistence after process restart: {len(report['writes'])} sectors OK")
         return
 
-    seed = (ROOT / "images/FlashDisk_emu80_seed.bin").read_bytes()
+    seed = (ROOT / "images/H-Flash-2M-Games.bin").read_bytes()
     assert image_path.stat().st_size == len(seed) == 2097152
     results = {"writes": [], "drivers": [], "checks": []}
     sectors = [0, 1, 0x7F, 0x80, 0xFF, 0x100, 0x7FF, 0x800, 0xFFF, 0x1000, 0x17FF, 0x1800, 0x1FFF]

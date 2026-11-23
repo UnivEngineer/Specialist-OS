@@ -1,0 +1,15 @@
+# Системное ПЗУ Специалиста-MX. При сбросе процессор переходит в первый кластер BOOT.SYS.
+# BIOS.SYS, ROTATE.FNT (8×8), IO.SYS и MEM.SYS образуют резервный комплект C:.
+@label MX BOOT
+
+# SYSROM C: подключает том только для чтения. BOOT.SYS должен идти первым.
+# Имя FAT 8.3   Источник относительно assets/   Адрес RAW   Атрибуты
+BOOT.SYS        ../bin/mx/loader.bin             0           R
+BIOS.SYS        ../bin/BIOS.sys                  0           R
+ROTATE.FNT      ../bin/fonts/Graph8x4.cpu        0           R
+IO.SYS          ../bin/IO.sys                    0           R
+MEM.SYS         ../bin/mx/MEM.sys                 0           R
+TEST-MX.COM     ../bin/TESTMX.cpu
+TEST-SCR.COM    ../bin/test-scr.cpu
+DOSTEST.BAT     system-rom/dostest.bat
+DOSTEST.TXT     system-rom/dostest.txt

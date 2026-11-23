@@ -100,7 +100,7 @@ def main():
     report = dict(cpu_hz=2000000,pit_hz=2000000,tick_ms=0.128,repeats=3,results=[])
     try:
         for goal in (127,250,300):
-            disk = ROOT/'images/FlashDisk_emu80_seed.bin'
+            disk = ROOT/'images/H-Flash-2M-Games.bin'
             if goal != 127:
                 disk = runpy.run_path(str(ROOT/'scripts/emu80/nc-sort-image.py'))['make_full_h'](
                     OUT/f'H-sort{goal}.bin', target=goal)

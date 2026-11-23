@@ -117,4 +117,4 @@ fa_Return:
             call    fileSelectDrive
             pop     af
             ret
-pathCliExt:  DB "C:",05Ch,"DOS",05Ch,"CLI.EXT",0
+pathCliExt:  DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"CLI.EXT",0

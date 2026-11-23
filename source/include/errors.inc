@@ -14,7 +14,7 @@
 ;   Если справочник недоступен или код вне диапазона, строка содержит
 ;   шестнадцатеричный код. BC и DE сохранены, AF не определён.
 ;----------------------------------------------------------------------------
-DOS_ERROR_RECORDS     = DOS_ERR_WRITE_PROTECTED + 1
+DOS_ERROR_RECORDS     = DOS_ERR_NO_MEDIA + 1
 DOS_ERROR_INDEX_BYTES = DOS_ERROR_RECORDS*3
 DOS_ERROR_TEXT_MAX    = 31
 dosErrorText:
@@ -125,7 +125,7 @@ dosTextReadAt:
     scf
     ret
 
-dosTextPath:            DB 'C:',05Ch,'DOS',05Ch,'ERRORS.DAT',0
+dosTextPath:            DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'ERRORS.DAT',0
 dosTextUnavailable:     DB 'DOS error '
 dosTextHex:             DB '00h',0
 dosTextCode:            DB 0

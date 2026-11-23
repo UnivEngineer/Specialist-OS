@@ -6,7 +6,7 @@ import hashlib,json,struct
 ROOT=Path(__file__).resolve().parents[2]
 
 
-def read_tree(image):
+def read_tree(image, file_entries=None):
     u16=lambda offset:struct.unpack_from('<H',image,offset)[0]
     sector=u16(11);spc=image[13];fat=u16(14)*sector;fat_size=u16(22)*sector
     root=(u16(14)+image[16]*u16(22))*sector;entries=u16(17)
@@ -46,6 +46,8 @@ def read_tree(image):
                 assert len(payload)>=length and (not length)==(not first),(child,length)
                 assert len(payload)-length<size if length else not payload,child
                 files[child]=payload[:length]
+                if file_entries is not None:
+                    file_entries[child]=e
     visit(image[root:root+entries*32],'',0,0)
     for c in range(2,clusters+2):
         value=u16(fat+c*2)
@@ -57,7 +59,7 @@ def read_tree(image):
 if __name__=='__main__':
     image=(ROOT/'bin/nested-Games2M.bin').read_bytes();files,dirs=read_tree(image)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('manifest', nargs='?', type=Path, default=ROOT / 'assets/H-Games2M.txt')
+    parser.add_argument('manifest', nargs='?', type=Path, default=ROOT / 'assets/H-Flash-2M-Games.txt')
     manifest = parser.parse_args().manifest
     expected=[line.split()[0].replace('\\','/') for line in manifest.read_text(encoding='utf-8-sig').splitlines() if line.strip() and not line.lstrip().startswith(('#','@'))]
     assert set(files)==set(expected),(set(files)-set(expected),set(expected)-set(files))

@@ -5,23 +5,8 @@
 registryBoot:
     ld hl,DOS_DRIVER_REGISTRY
     ld bc,8*DRIVER_RECORD_SIZE
-    xor a
-registryClear:
-    ld (hl),a
-    inc hl
-    dec bc
-    ld a,b
-    or c
-    jp z,registryDefaults
-    xor a
-    jp registryClear
-registryDefaults:
-    ld hl,diskDriverDummy
-    ld (v_drives+14),hl
-    ld a,7
-    call invalidateDriveCache
-    ld a,(bankPageCount)
-    dec a
+    call cliZero
+    ld a,(memoryRamPages)
     ld (DOS_DRIVER_REGISTRY+DRIVER_RECORD_SIZE+1),a
     ld hl,(DISK_TECH_RAM << 8)+DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY
     ld (DOS_DRIVER_REGISTRY+DRIVER_RECORD_SIZE+4),hl
@@ -31,9 +16,35 @@ registryDefaults:
     ld de,DOS_DRIVER_REGISTRY+DRIVER_RECORD_SIZE+8
     ld bc,registryRamNameEnd-registryRamName
     call moveBytesForward
-    ld hl,0
+    IFDEF MX_FLOPPY_BOOT
+    ; Stage has installed the physical floppy service, independently of ROM C:.
+    ld hl,(bootFloppyEnd)
+    ld (diFloppyEnd),hl
+    ld hl,diskDriver
+    ld (v_drives+2*FLOPPY_DRIVE),hl
+    ld a,FLOPPY_DRIVE
+    ld (kernelFloppyDrive),a
+    ld a,9
+    ld (v_blockShifts+FLOPPY_DRIVE),a
+    ld hl,bootFloppyRecord
+    ld de,DOS_DRIVER_REGISTRY+FLOPPY_DRIVE*DRIVER_RECORD_SIZE
+    ld bc,bootFloppyRecordEnd-bootFloppyRecord
+    call moveBytesForward
+    xor a
+    ret
+    ELSE
     ld a,SYSTEM_DRIVE
+    ld hl,0
     jp dosDriverRefresh
+    ENDIF
+    IFDEF MX_FLOPPY_BOOT
+bootFloppyEnd: DW 0
+bootFloppyRecord:
+    DW 1440,0
+    DB DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY,DISK_TECH_FLOPPY,9,DRIVER_KIND_FLOPPY
+    DB "MX FDD",0,"VG93 720K DD",0
+bootFloppyRecordEnd:
+    ENDIF
 registryRamName: DB "BANK RAM",0,"CPM32; DOS RESERVED",0
 registryRamNameEnd:
 
@@ -81,7 +92,7 @@ registryInfo:
     ret
 
 ; A=0: обновить реестр A:. HL=две ASCIIZ клиента, всего <=64 байт;
-; HL=0 выбирает встроенное описание ROM-SYS из DOS. BIOS возвращает только BC.
+; HL=0 выбирает встроенное описание ROM512KS из DOS. BIOS возвращает только BC.
 ; CF/A=ошибка, остальные регистры разрушены. Геометрия FAT не меняется.
 dosDriverRefresh:
     cp SYSTEM_DRIVE
@@ -113,6 +124,9 @@ registryValidateNext:
     jp nz,registryValidateByte
     jp blockArgument
 registryValidateReady:
+    ld a,65
+    sub b
+    ld (registryCopyLength+1),a
     ld b,3
     ld hl,0
     call dosSystemDriver
@@ -132,39 +146,39 @@ registryValidateReady:
     ld a,8
     ld (DOS_DRIVER_REGISTRY+SYSTEM_DRIVE*DRIVER_RECORD_SIZE+6),a
     ld hl,(registrySystemText)
-registrySystemCopy:
-    ; Две строки ограничены полем реестра. Остаток не содержит кода установщика.
     ld de,DOS_DRIVER_REGISTRY+SYSTEM_DRIVE*DRIVER_RECORD_SIZE+8
-    ld b,64
-    ld c,2
-registrySystemCopyByte:
-    ld a,(hl)
-    inc hl
-    ld (de),a
-    inc de
-    or a
-    jp nz,registrySystemCopyNext
-    dec c
-    jp z,registrySystemClear
-registrySystemCopyNext:
-    dec b
-    jp nz,registrySystemCopyByte
-    jp blockArgument
-registrySystemClear:
-    dec b
-    jp z,registrySystemTextReady
-    xor a
-registrySystemClearByte:
-    ld (de),a
-    inc de
-    dec b
-    jp nz,registrySystemClearByte
-registrySystemTextReady:
+registryCopyLength:
+    ld a,0
+    call registryCopyText
+    IFDEF MX_FLOPPY_BOOT
+    ld hl,diskDriver
+    ld (v_drives+2*SYSTEM_DRIVE),hl
+    ENDIF
     ld a,SYSTEM_DRIVE
     call invalidateDriveCache
     jp dosClearError
 
-registryRomName:        DB "ROM-SYS",0,"BUILT-IN, READ ONLY",0
+    IFDEF MX_FLOPPY_BOOT
+registryRomName:        DB "ROM48KS",0,"MX LINEAR ROM",0
+    ELSE
+registryRomName:        DB "ROM512KS",0,"BUILT-IN, READ ONLY",0
+    ENDIF
+
+; HL — две проверенные строки, DE — поле реестра, A — длина с обоими нулями.
+registryCopyText:
+    push af
+    ld c,a
+    ld b,0
+    call moveBytesForward
+    ld h,b
+    ld l,c
+    pop af
+    cpl
+    add a,65
+    ret z
+    ld c,a
+    ld b,0
+    jp cliZero
 
 ; HL=DRIVER_INSTALL в загруженном инициализаторе. Сначала проверяем все
 ; указатели/размеры и завершаем запись, затем заменяем запись и код.
@@ -218,20 +232,14 @@ diCheckLetter:
 diCheckBlockShift:
     ld a,(hl)
     cp DRIVER_KIND_FLOPPY
-    inc hl
-    ld a,(hl)
-    jp z,diCheckFloppyShift
-    cp 8
-    jp diCheckShift
-diCheckFloppyShift:
-    cp 9
+    ld a,8
+    jp nz,diCheckShift
+    inc a
 diCheckShift:
+    inc hl
+    cp (hl)
     jp nz,blockArgument
-    inc hl
-    ld a,(hl)
-    inc hl
-    or (hl)
-    jp z,blockArgument
+    ; Нулевая ёмкость допустима для службы без носителя.
     ld hl,(diDescriptor)
     ld de,DRIVER_INSTALL.image
     add hl,de
@@ -331,24 +339,7 @@ diPublishRegistry:
     inc de
     ld hl,(diText)
     ld a,(diTextSize)
-    ld c,a
-    ld b,0
-    call moveBytesForward
-    ld d,b
-    ld e,c
-    ; Остаток строки обнуляем, чтобы реестр не выдавал прежнее описание.
-    ld a,64
-    ld hl,diTextSize
-    sub (hl)
-    ld b,a
-    or a
-    jp z,diCopyCode
-    xor a
-diClearText:
-    ld (de),a
-    inc de
-    dec b
-    jp nz,diClearText
+    call registryCopyText
 diCopyCode:
     call diKind
     cp DRIVER_KIND_FLOPPY
@@ -488,18 +479,14 @@ diRangeBad:
     pop hl
     jp blockArgument
 
-; HL=буфер восьми номеров. B=число, HL=конец; AF/C/DE разрушены.
+; HL=буфер восьми номеров драйверов, включая службы без носителя.
+; B=число, HL=конец; AF/C/DE разрушены.
 registryDrives:
-    ld de,DOS_DRIVER_REGISTRY
+    ld de,DOS_DRIVER_REGISTRY+5 ; Технология ненулевая для установленной службы.
     ld bc,0
 registryDriveLoop:
     ld a,(de)
-    inc de
-    push hl
-    ld h,a
-    ld a,(de)
-    or h
-    pop hl
+    or a
     jp z,registryDriveNext
     ld (hl),c
     inc hl
@@ -507,7 +494,7 @@ registryDriveLoop:
 registryDriveNext:
     ex de,hl
     push bc
-    ld bc,DRIVER_RECORD_SIZE-1
+    ld bc,DRIVER_RECORD_SIZE
     add hl,bc
     pop bc
     ex de,hl

@@ -1,7 +1,7 @@
 ﻿.vs/mxos/v15
 .vs
 images/*.bin
-/images/Floppy720.img
+/images/*.img
 bin/
 docs/
 tmp/
@@ -26,3 +26,4 @@ __pycache__/
 /images/CPM-images.json
 /images/CPM-original.rks
 /images/CPM-seed.dsk
+Thumbs.db

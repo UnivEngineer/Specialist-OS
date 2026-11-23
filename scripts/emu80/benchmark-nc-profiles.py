@@ -247,8 +247,8 @@ def main():
   helpers['command'](['powershell.exe','-NoProfile','-File','scripts/images/build-image.ps1','SystemEmuWritable'])
   SNAP.mkdir(parents=True,exist_ok=True)
   shutil.copytree(ROOT/'bin',SNAP/'bin',dirs_exist_ok=True,ignore=shutil.ignore_patterns('*.lst','*.log','__pycache__'))
-  shutil.copyfile(ROOT/'images/SystemRom_emu80_writable.bin',SNAP/'A.bin')
-  shutil.copyfile(ROOT/'images/FlashDisk_emu80_seed.bin',SNAP/'H128.bin')
+  shutil.copyfile(ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin',SNAP/'A.bin')
+  shutil.copyfile(ROOT/'images/H-Flash-2M-Games.bin',SNAP/'H128.bin')
  verify_snapshot()
  if args.verify_only:
   print('Frozen system/application payloads match the measured binaries');return

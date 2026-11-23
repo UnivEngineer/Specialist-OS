@@ -10,7 +10,7 @@ def main():
     system = runpy.run_path(str(root/'scripts/emu80/system-map.py'))['MEMORY_MAP']
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("image", nargs="?", type=Path,
-                        default=root / "images/SystemRom_emulator.bin")
+                        default=root / "images/C-ROM-64k-MMX-System-Emu80.bin")
     args = parser.parse_args()
     image = args.image.read_bytes()
     if len(image) not in (65536, 524288):

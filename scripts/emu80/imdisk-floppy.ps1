@@ -60,7 +60,7 @@ if ($running.Count) { throw 'Close this Emu80 instance before mounting the flopp
 
 if (-not (Test-Path -LiteralPath $image -PathType Leaf)) {
     $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $seed = Join-Path $root 'images/Floppy720.img'
+    $seed = Join-Path $root 'images/A-Floppy-720k-Programs.img'
     if (-not (Test-Path -LiteralPath $seed -PathType Leaf) -or (Get-Item -LiteralPath $seed).Length -ne 720KB) {
         throw "Build the Floppy720 image first: expected a 720 KiB image at $seed."
     }

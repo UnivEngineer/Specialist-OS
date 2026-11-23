@@ -9,6 +9,14 @@ DRIVER_LOAD_ADDR = DRIVER_ORIGIN
     IFNDEF ROM_LEGACY
     DEFINE ROM_LEGACY 0
     ENDIF
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Установить службу внешнего накопителя, в том числе при отсутствии носителя.
+; вход: de — строка аргументов, код и стек находятся в банке DOS.
+; выход: cf=0 — драйвер зарегистрирован, cf=1/a — ошибка аргументов, сброса
+;   записи или регистрации. AF/BC/DE/HL рабочие. Данные тома не меняются.
+;----------------------------------------------------------------------------
     ex de,hl
     ld c,EXTERNAL_DRIVE
     call driverLetter
@@ -20,19 +28,22 @@ DRIVER_LOAD_ADDR = DRIVER_ORIGIN
     ld a,b
     ld (registration+DRIVER_INSTALL.drive),a
     IF LOCAL_KIND == 0
-    call initRom.detect
+    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
     ret c
+    call initRom.detect
+    jp c,installNoMedia
     ld (registration+DRIVER_INSTALL.blocks),hl
     ENDIF
     IF LOCAL_KIND != 0
     call initProbe.flashDosInit
-    ret c
+    jp c,installNoMedia
     ld a,(initProbe.flashChipCount)
     add a,a
     add a,a
     add a,a
     ld (registration+DRIVER_INSTALL.blocks+1),a
     ENDIF
+installDriver:
     ld hl,registration
     MXOS_CALL MXOS_DOS_DRIVER_INSTALL
     ret
@@ -64,19 +75,18 @@ serviceImage:
         ENDIF
     ENDIF
 serviceEnd:
+    INCLUDE "no-media.inc"
 description:
     IF LOCAL_KIND == 0
         IF ROM_LEGACY
-    DB "ROM64K",0,"64K DIRECT PPI",0
+    DB "ROM64KX",0,"64K DIRECT PPI",0
         ELSE
-    DB "ROM2M",0,"PIO READ ONLY",0
+    DB "ROM2MX",0,"PIO READ ONLY",0
         ENDIF
 ; Опрос использует отдельную нерезидентную копию: прежний слот H:
 ; не затрагивается до успешной проверки BPB и регистрации в DOS.
     MODULE initRom
 detect:
-    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
-    ret c
         IF !ROM_LEGACY
     ld hl,FlashRead
     ld (RomReadSelect+1),hl
@@ -173,7 +183,7 @@ good:
     or a
     ret
 bad:
-    ld a,DOS_ERR_CORRUPT
+    ld a,DOS_ERR_NO_MEDIA
     scf
     ret
 oem256: DB "MXOS256 "

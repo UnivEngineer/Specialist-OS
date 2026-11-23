@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param(
     [string] $EmulatorDirectory,
-    [ValidateSet('SystemRom_emulator.bin', 'SystemRom_ramfos_emulator.bin', 'SystemRom_emu80_flash.bin', 'SystemRom_emu80_writable.bin', 'SystemRom_128K.bin', 'SystemRom_256K.bin', 'SystemRom_512K.bin')]
-    [string] $SystemImage = 'SystemRom_emulator.bin',
+    [ValidateSet('C-ROM-64k-MMX-System-Emu80.bin', 'C-Flash-512k-MMX-RAMFOS-Tests.bin', 'C-Flash-64k-MMX-System-Emu80.bin', 'C-Flash-512k-MMX-System-Emu80.bin', 'C-Flash-128k-MMX-System.bin', 'C-Flash-256k-MMX-System.bin', 'C-Flash-512k-MMX-System.bin')]
+    [string] $SystemImage = 'C-ROM-64k-MMX-System-Emu80.bin',
     [switch] $PrepareOnly,
     [switch] $Hidden,
     [switch] $Flash,
@@ -11,6 +11,7 @@ param(
     [switch] $FreshFloppy,
     [switch] $TestFlashSeed,
     [switch] $UpdateSystemFlash,
+    [switch] $SyncProfileImages,
     [switch] $ProtectSystemFlash,
     [switch] $Mcp,
     [switch] $Mute,
@@ -23,49 +24,60 @@ if ($TestFlashSeed -and -not ($Flash -and $Mcp)) { throw '-TestFlashSeed require
 if ($FreshFloppy -and $ResetFloppy) { throw 'Choose either -FreshFloppy or -ResetFloppy.' }
 if ($ResetFlash -and -not $Flash) { throw '-ResetFlash requires -Flash.' }
 if ($UpdateSystemFlash -and -not $Flash) { throw '-UpdateSystemFlash requires -Flash.' }
+if ($SyncProfileImages -and -not $Flash) { throw '-SyncProfileImages requires -Flash.' }
 if ($ProtectSystemFlash -and -not $Flash) { throw '-ProtectSystemFlash requires -Flash.' }
 . (Join-Path $PSScriptRoot 'runtime.ps1')
 $runtime = Resolve-Emu80Runtime -Directory $EmulatorDirectory -Flash:$Flash
 $exeName = if ($Mcp) { 'Emu80qt-mcp.exe' } else { 'Emu80qt.exe' }
 $executable = Join-Path $runtime $exeName
-if ($Flash -and -not $PSBoundParameters.ContainsKey('SystemImage')) { $SystemImage = 'SystemRom_emu80_writable.bin' }
+if ($Flash -and -not $PSBoundParameters.ContainsKey('SystemImage')) { $SystemImage = 'C-Flash-512k-MMX-System-Emu80.bin' }
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $systemSource = Join-Path $root ('images/' + $SystemImage)
-$diskSource = Join-Path $root $(if ($Flash) { 'images/FlashDisk_emu80_seed.bin' } else { 'images/FlashDisk_64K.bin' })
+$diskSource = Join-Path $root $(if ($Flash) { 'images/H-Flash-2M-Games.bin' } else { 'images/H-ROM-64k-Games.bin' })
 $configSource = Join-Path $PSScriptRoot 'specialist-mx2.conf'
 $persistentImage = Join-Path $runtime 'specialist-os/flash-disk.bin'
 $persistentSystem = Join-Path $runtime 'specialist-os/system-flash.bin'
 $deployment = Join-Path $runtime 'specialist-os'
 $deploymentFile = Join-Path $deployment 'deployment.json'
-$floppySource = Join-Path $root 'images/Floppy720.img'
+$floppySource = Join-Path $root 'images/A-Floppy-720k-Programs.img'
 $floppyName = if ($FreshFloppy) { 'floppy720-test.img' } else { 'floppy720.img' }
 $mountedFloppy = Join-Path $deployment $floppyName
 $hasFloppySeed = Test-Path -LiteralPath $floppySource -PathType Leaf
 $hasFloppy = Test-Path -LiteralPath $mountedFloppy -PathType Leaf
-$seedFloppy = $FreshFloppy -or $ResetFloppy -or ($hasFloppySeed -and -not $hasFloppy)
+$seedHashes = @{ systemSeedSha256 = $null; diskSeedSha256 = $null; floppySeedSha256 = $null }
+if ($Flash -and (Test-Path -LiteralPath $deploymentFile -PathType Leaf)) {
+    $previousDeployment = Get-Content -LiteralPath $deploymentFile -Raw | ConvertFrom-Json
+    foreach ($key in @($seedHashes.Keys)) {
+        if ($previousDeployment.PSObject.Properties[$key]) {
+            $seedHashes[$key] = $previousDeployment.$key
+        }
+    }
+}
+
+function Get-SeedHash([string] $Path) {
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw "Required image not found: $Path" }
+    (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+$floppySourceHash = if ($SyncProfileImages -or $ResetFloppy -or ($hasFloppySeed -and -not $hasFloppy)) { Get-SeedHash $floppySource }
+$seedFloppy = $FreshFloppy -or $ResetFloppy -or ($hasFloppySeed -and -not $hasFloppy) -or
+    ($SyncProfileImages -and $floppySourceHash -ne $seedHashes.floppySeedSha256)
 if ($seedFloppy -and -not $hasFloppySeed) { throw "Required floppy seed not found: $floppySource" }
 if ($seedFloppy -and (Get-Item -LiteralPath $floppySource).Length -ne 720KB) { throw "Unexpected floppy seed size: $floppySource" }
 if ($hasFloppy -and -not $seedFloppy -and (Get-Item -LiteralPath $mountedFloppy).Length -ne 720KB) {
     throw "Unexpected working floppy size: $mountedFloppy"
 }
-# Remember the installed seed, not the mutable flash hash. A user edit to C:
-# must survive another launch when the build itself has not changed.
-$systemSeedHash = $null
-if ($Flash -and (Test-Path -LiteralPath $deploymentFile -PathType Leaf)) {
-    $previousDeployment = Get-Content -LiteralPath $deploymentFile -Raw | ConvertFrom-Json
-    if ($previousDeployment.PSObject.Properties['systemSeedSha256']) {
-        $systemSeedHash = $previousDeployment.systemSeedSha256
-    }
-}
-$needsDiskSource = $TestFlashSeed -or -not $Flash -or $ResetFlash -or -not (Test-Path -LiteralPath $persistentImage -PathType Leaf)
-$needsSystemSource = -not $Flash -or $ResetFlash -or $UpdateSystemFlash -or -not (Test-Path -LiteralPath $persistentSystem -PathType Leaf)
+$diskMissing = -not (Test-Path -LiteralPath $persistentImage -PathType Leaf)
+$needsDiskSource = $TestFlashSeed -or -not $Flash -or $ResetFlash -or $SyncProfileImages -or $diskMissing
+$needsSystemSource = -not $Flash -or $ResetFlash -or $UpdateSystemFlash -or $SyncProfileImages -or -not (Test-Path -LiteralPath $persistentSystem -PathType Leaf)
 foreach ($path in @($executable, (Join-Path $runtime 'emu80.conf'), $configSource)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Required file not found: $path" }
 }
-if ($needsDiskSource -and -not (Test-Path -LiteralPath $diskSource -PathType Leaf)) { throw "Required disk seed not found: $diskSource" }
-if ($needsSystemSource -and -not (Test-Path -LiteralPath $systemSource -PathType Leaf)) { throw "Required system seed not found: $systemSource" }
-$systemSourceHash = if ($needsSystemSource) { (Get-FileHash -LiteralPath $systemSource -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-$refreshSystem = $ResetFlash -or -not (Test-Path -LiteralPath $persistentSystem -PathType Leaf) -or ($UpdateSystemFlash -and $systemSourceHash -ne $systemSeedHash)
+$diskSourceHash = if ($needsDiskSource) { Get-SeedHash $diskSource }
+$systemSourceHash = if ($needsSystemSource) { Get-SeedHash $systemSource }
+$refreshDisk = $ResetFlash -or $diskMissing -or ($SyncProfileImages -and $diskSourceHash -ne $seedHashes.diskSeedSha256)
+$refreshSystem = $ResetFlash -or -not (Test-Path -LiteralPath $persistentSystem -PathType Leaf) -or
+    (($UpdateSystemFlash -or $SyncProfileImages) -and $systemSourceHash -ne $seedHashes.systemSeedSha256)
 $version = (Get-Item -LiteralPath $executable).VersionInfo
 if ($version.FileMajorPart -lt 4 -or ($version.FileMajorPart -eq 4 -and $version.FileMinorPart -eq 0 -and $version.FileBuildPart -lt 571)) {
     throw "Emu80 4.0.571 or newer is required; found $($version.FileVersion)."
@@ -106,19 +118,21 @@ New-Item -ItemType Directory -Path $deployment -Force | Out-Null
 if ($seedFloppy) {
     Copy-Item -LiteralPath $floppySource -Destination $mountedFloppy -Force
     $hasFloppy = $true
+    if ($Flash -and -not $FreshFloppy) { $seedHashes.floppySeedSha256 = $floppySourceHash }
     Write-Host "[deploy] A: $floppySource -> $mountedFloppy"
 }
 if ($Flash) {
     $protectionFile = $persistentImage + '.sdp'
     $systemProtection = $persistentSystem + '.sdp'
-    if ($ResetFlash -or -not (Test-Path -LiteralPath $persistentImage)) {
+    if ($refreshDisk) {
         Copy-Item -LiteralPath $diskSource -Destination $persistentImage -Force
+        $seedHashes.diskSeedSha256 = $diskSourceHash
         if (Test-Path -LiteralPath $protectionFile -PathType Leaf) { Remove-Item -LiteralPath $protectionFile }
         Write-Host "[deploy] H: $diskSource -> $persistentImage"
     }
     if ($refreshSystem) {
         Copy-Item -LiteralPath $systemSource -Destination $persistentSystem -Force
-        $systemSeedHash = $systemSourceHash
+        $seedHashes.systemSeedSha256 = $systemSourceHash
         Write-Host "[deploy] C: $systemSource -> $persistentSystem"
     } elseif ($UpdateSystemFlash) {
         Write-Host "[keep] C: $persistentSystem"
@@ -153,7 +167,13 @@ $diskName = if ($Flash) { 'flash-disk.bin' } else { 'rom-disk.bin' }
 $systemName = if ($Flash) { 'system-flash.bin' } else { 'system.bin' }
 $deployedFiles = @($systemName, $diskName, 'specialist-mx2.conf')
 if ($hasFloppy) { $deployedFiles += $floppyName }
-$record = [ordered]@{ systemImage = $SystemImage; mutableDisk = [bool]$Flash; systemSeedSha256 = $systemSeedHash; files = @(
+$record = [ordered]@{
+    systemImage = $SystemImage
+    mutableDisk = [bool]$Flash
+    systemSeedSha256 = $seedHashes.systemSeedSha256
+    diskSeedSha256 = $seedHashes.diskSeedSha256
+    floppySeedSha256 = $seedHashes.floppySeedSha256
+    files = @(
     foreach ($name in $deployedFiles) {
         [ordered]@{ path = $name; sha256 = (Get-FileHash -LiteralPath (Join-Path $deployment $name) -Algorithm SHA256).Hash.ToLowerInvariant() }
     }

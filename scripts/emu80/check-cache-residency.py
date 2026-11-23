@@ -10,7 +10,7 @@ Matrix.__init__.__globals__['OUT']=out/'residency'
 (out/'residency').mkdir(exist_ok=True)
 x=Matrix()
 try:
-    x.start('residency',system=out/'large-image/SystemRom_emu80_writable.bin',dos=out/'large/DOS.sys')
+    x.start('residency',system=out/'large-image/C-Flash-512k-MMX-System-Emu80.bin',dos=out/'large/DOS.sys')
     x.install('FlashFst'); x.init_app(7,1)
     disk=n['RUNTIME']/'specialist-os/flash-disk.bin'; before=disk.read_bytes()
     for sector in range(1,89):

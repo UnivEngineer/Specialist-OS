@@ -57,7 +57,11 @@ ksRouteDrive:       DB 0FFh
 ksRouteBuffered:    DB 1
 
 ; lifecycle
+    IFDEF MX_FLOPPY_BOOT
+residentShellKey:       DW 0                  ; MAIN до явного запуска банкового NC
+    ELSE
 residentShellKey:       DW NC_BANK_KEY
+    ENDIF
 
 ; memory-resident
 memoryPublishedEnd: DW APP_MEMORY_END
@@ -117,17 +121,20 @@ kernelFloppyDrive: DB 0FFh
 kernelExternalDrive: DB 0FFh
 v_drive:        DB RAM_DRIVE
 v_drives:       DW diskDriverDummy, diskDriver      ; A:, B:
+    IFDEF MX_FLOPPY_BOOT
+                DW diskDriverDummy, diskDriverDummy ; C: подключается командой SYSROM
+    ELSE
                 DW diskDriver, diskDriverDummy      ; C:, D:
+    ENDIF
                     DW diskDriverDummy, diskDriverDummy  ; E:, F:
                     DW diskDriverDummy, diskDriverDummy  ; G:, H:
-v_diskInfo          DISK_INFO
 
 ; installDriver
 v_blockShifts: DB 8,8,8,8,8,8,8,8
     ENDIF
 
 ; PATH занимает MAX_PATH байт и переживает тёплый перезапуск.
-v_cliPath: DB "C:",05Ch,"DOS",0
+v_cliPath: DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",0
 dosDefaultsEnd:
     IFDEF BANKED_DOS_BUILD
     ENT
@@ -248,6 +255,11 @@ dosWorkNext = dosWorkNext + FILE_COPY_REQUEST
     DOS_FIELD v_freeEnd, 2
 
 ; fatReadBootSector
+    IFDEF BANKED_DOS_BUILD
+    ; Геометрия заполняется при первом монтировании; в образе DOS ей места не нужно.
+v_diskInfo DISK_INFO = dosWorkNext
+dosWorkNext = dosWorkNext + DISK_INFO
+    ENDIF
     DOS_FIELD v_logicalCapacity, 2
     DOS_FIELD v_logicalShift, 1
 
@@ -516,6 +528,9 @@ dosWorkNext = dosWorkNext + FILE_DESCRIPTOR
 ; BOOTBANK writes this byte before kernelCold. It survives BSS initialization.
 dosZeroEnd = dosWorkNext
     DOS_FIELD memoryRamFresh, 1
+    IFDEF MX_FLOPPY_BOOT
+    DOS_FIELD mxBootCookie, 6   ; Носитель, источник комплекта и идентификатор сборки
+    ENDIF
     ENDIF
 dosWorkEnd = dosWorkNext
     IFDEF BANKED_DOS_BUILD

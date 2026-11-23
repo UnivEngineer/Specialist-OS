@@ -49,7 +49,7 @@ kernelCold:
 kernelNoFlash:
     ld hl,kernelVersion
     call bankDosPrintString
-    ld a,SYSTEM_DRIVE
+    ld a,BOOT_VOLUME
     call fileChangeDrive
     ret c
     ld a,1

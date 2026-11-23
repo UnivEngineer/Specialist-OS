@@ -12,7 +12,7 @@
 ; выход:
 ;   cf = 0 при принятом ограничении или уже выбранном пуле без новых параметров. При
 ;   ошибке cf = 1. Отказ MEM или неверное значение препятствуют установке нового
-;   размера.
+;   размера. При физической нехватке банков a = DOS_ERR_NO_MEDIA.
 ;----------------------------------------------------------------------------
 
 BankArguments:
@@ -59,16 +59,6 @@ BankPageDigits:
     call argNext
     pop bc
     jp nc,BankArgumentError
-    push bc
-    call mx_memInfo
-    ld a,b
-    pop bc
-    dec a                 ; Только банк DOS; служба находится внутри него.
-    jp c,BankArgumentError
-    cp c
-    jp nc,BankPagesAvailable
-    ld c,a
-BankPagesAvailable:
     ld a,c
     or a
     jp z,BankArgumentError
@@ -76,6 +66,8 @@ BankPagesAvailable:
     ld a,MEM_OP_RAMLIMIT
     MXOS_CALL MXOS_DOS_MEMORY
     ret nc
+    cp DOS_ERR_NO_MEDIA
+    jp z,InstallFailed
 BankArgumentError:
     ld hl,bankArgumentText
     MXOS_CALL MXOS_BIOS_PRINT_STRING
@@ -96,11 +88,9 @@ bankDefaultArgs:    DB '-P 4',0
 bankArgumentText:   DB 'RAMDISK: INVALID -P OR RAM DISK IS IN USE',0Dh,0Ah,0
 
 InstallFailed:
-    ld hl,txtNoRAM
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    ld a,DOS_ERR_NO_MEDIA
     scf
     ret
-txtNoRAM: DB 'RAMDISK: NO RAM DISK',0Ah,0
     INCLUDE "../common/cmp_hl_de.inc"
     INCLUDE "../common/argNext.inc"
     INCLUDE "../common/driver-letter.inc"

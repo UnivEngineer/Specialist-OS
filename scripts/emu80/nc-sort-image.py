@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def make_full_h(destination, target=250):
-    original = (ROOT/'images/FlashDisk_emu80_seed.bin').read_bytes()
+    original = (ROOT/'images/H-Flash-2M-Games.bin').read_bytes()
     image = bytearray(original)
     tree = runpy.run_path(str(ROOT/'scripts/tests/check-nested-image.py'))['read_tree']
     old_files, old_dirs = tree(original)

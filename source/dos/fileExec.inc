@@ -6,7 +6,8 @@
 ;  hl - ком строка в формате [Диск:]файл[ аргументы]
 ;
 ; выход:
-;  сf - ошибка
+;  cf = 0 при успехе. При ошибке cf = 1. В режиме CLI a содержит код DOS.
+;  af, bc, de, hl рабочие.
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
@@ -226,15 +227,14 @@ badCommand:
             ld a,(v_batDepth)
             or a
             jp nz,batUnknownCommand
-            ld      hl, txtBadCommand
-            call    j_printString
             ld a,(v_shell)
             or a
-            jp nz,execCommandErrorDone
+            jp nz,dosIoError
+            ld      hl, txtBadCommand
+            call    j_printString
             ld      a, (v_bootAutoexec)
             or      a
             call z, j_getch          ; при автозагрузке не задерживать fallback
-execCommandErrorDone:
             call printCharA
 stc_ret:
             scf

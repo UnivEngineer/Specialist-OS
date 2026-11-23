@@ -36,15 +36,21 @@ memSystemRead:
     ld a,(bankPage)
     ld (memRomCopy+3),a
     ld a,e
+    IFNDEF MX_FLOPPY_BOOT
     and 07Fh
+    ENDIF
     ld h,a
     ld l,0
     ld (memRomCopy+1),hl
+    IFDEF MX_FLOPPY_BOOT
+    ld a,080h
+    ELSE
     ld a,e
     add a,a
     ld a,d
     rla
     or 080h
+    ENDIF
     ld (memRomCopy),a
     ld hl,memRomCopy
     call bankCopySector

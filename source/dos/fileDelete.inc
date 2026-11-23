@@ -6,8 +6,8 @@
 ;  hl - имя файла
 ;
 ; выход:
-;  cf - ошибка
-;  bc, de, hl - сохраняются
+;  cf = 0 при успехе. При отказе cf = 1, a = код DOS.
+;  hl и de сохраняются, b может измениться при сбросе кэша.
 ;
 ; 2013-12-12 Дизассемблировано vinxru
 ; 2022-02-11 Переработано SpaceEngineer
@@ -25,11 +25,8 @@ fatFileDelete: ; Найти файл с именем из hl
             call    deleteFileInt
             ret c
 
-            ; Сохранить изменения на диск
-            call    saveSectorCache
-
-            ; Результат
-            jp      fatFinishWrite
+            ; Сохранить изменения на диск и дождаться физической записи.
+            jp      fatVolumeFlush
             
 ; ---------------------------------------------------------------------------
 
@@ -66,20 +63,30 @@ fileCheckDeleteAllowed:
 ;   Проверку атрибутов и сброс изменений на диск выполняет вызывающий код.
 ;
 ; выход:
-;   cf = 0 при успехе. При активном BAT запись и цепочка сохранены, cf = 1
-;   и a = DOS_ERR_ACCESS. Другие ошибки возвращаются от FAT и кэша.
+;   cf = 0 при успехе. При активном BAT или защите тома в банковой DOS запись
+;   и цепочка сохранены, cf = 1, a и v_dosError содержат соответствующий код DOS.
+;   Другие ошибки возвращаются от FAT и кэша.
 ;   bc, de и hl сохранены.
 ;----------------------------------------------------------------------------
 deleteFileInt:
             push    hl
             push    bc
             push    de
+    IFDEF BANKED_DOS_BUILD
+            ; Режим тома известен до изменения записи каталога и кэша FAT.
+            call registryInfo
+            ld a,c
+            and DISK_CAP_WRITE
+            ld a,DOS_ERR_WRITE_PROTECTED
+            jp z,deleteFileDenied
+    ENDIF
             ; Сюда также входят RMDIR, рекурсивное удаление и замена файла.
             ld a,(v_batDepth)
             ld hl,(v_batFrame)
             call batFindActive
             jp nc,deleteFileAllowed
             ld a,DOS_ERR_ACCESS
+deleteFileDenied:
             call dosSetError
             jp popDBH_ret
 deleteFileAllowed:

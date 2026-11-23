@@ -2,6 +2,8 @@
 param(
     [switch] $Force,
     [Parameter(DontShow)]
+    [switch] $Describe,
+    [Parameter(DontShow)]
     [switch] $RunBuild
 )
 
@@ -13,11 +15,12 @@ $sourcePath = Join-Path $repositoryRoot "source-apps\almaz\Almaz.asm"
 $outputDirectory = Join-Path $repositoryRoot "bin"
 $prefix = Join-Path $outputDirectory "Almaz-original"
 if (-not $RunBuild) {
-    $cacheArgs = @((Join-Path $PSScriptRoot 'build_cache.py'), 'Almaz', '--asm', $sourcePath)
+    $cacheArgs = @('Almaz', '--asm', $sourcePath)
     foreach ($extension in 'bin', 'lst', 'sym', 'rks') { $cacheArgs += @('--output', "$prefix.$extension") }
     if ($Force) { $cacheArgs += '--force' }
     $cacheArgs += @('--', $PSCommandPath, '-RunBuild')
-    & python @cacheArgs
+    if ($Describe) { return @{ cwd = (Get-Location).ProviderPath; args = $cacheArgs } }
+    & python (Join-Path $PSScriptRoot 'build_cache.py') @cacheArgs
     exit $LASTEXITCODE
 }
 

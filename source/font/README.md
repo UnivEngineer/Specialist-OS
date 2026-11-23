@@ -92,7 +92,7 @@ python scripts/build/build-font-prerender.py --font assets/system-rom/fonts/6x8/
 
 ## Выбор движка Bootstrap
 
-В `assets/C-System.txt`:
+В `assets/C-Flash-512k-MMX-System.txt`:
 
 ```text
 @bootfont FONTS/6x8/Rotate.fnt

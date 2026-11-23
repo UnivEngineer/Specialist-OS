@@ -36,7 +36,7 @@
 ;   F6C0-F7FF - [  320 B] MAIN: AT512KS; DOS/EXEC: службы A:, проверки и суммы
 ;   F800-F8BF - [  192 B] MEM.SYS: публичные входы CLIENT и резерв
 ;   F8C0-F9BF - [  256 B] MEM.SYS: inline-данные COMMAND и контроллер вызова DLL
-;   F9C0-FBFF - [  576 B] Один слот ROM2M/AT2MX/AT2MXF, одинаковый во всех EXEC
+;   F9C0-FBFF - [  576 B] Один слот ROM2MX/AT2MX/AT2MXF, одинаковый во всех EXEC
 ;   FC00-FEFF - [  768 B] MEM.SYS: транспорт и контексты
 ;   FF00-FFBF - [  192 B] Защищённый хвост копировщика и резерв
 ;   FFC0-FFDF - [   32 B] Общее аппаратное окно команд/переноса данных
@@ -100,7 +100,7 @@
 ;   F6C0-F7FF - [  320 B] MAIN: AT512KS; DOS/EXEC: службы A:, проверки и суммы
 ;   F800-F8BF - [  192 B] MEM.SYS: публичные входы CLIENT и резерв
 ;   F8C0-F9BF - [  256 B] MEM.SYS: inline-данные COMMAND и контроллер вызова DLL
-;   F9C0-FBFF - [  576 B] Один слот ROM2M/AT2MX/AT2MXF, одинаковый во всех EXEC
+;   F9C0-FBFF - [  576 B] Один слот ROM2MX/AT2MX/AT2MXF, одинаковый во всех EXEC
 ;   FC00-FEFF - [  768 B] MEM.SYS: транспорт, контексты и общий копировщик
 ;   FF00-FFBF - [  192 B] Копия хвоста копировщика и резерв
 ;   FFC0-FFDF - [   32 B] То же физическое 32-байтное окно, что в основной памяти
@@ -160,7 +160,7 @@ MXOS_GROUP_MEMORY     = 3
 ; Нулевой размер — успех, предел диапазонов FF00h, перекрытие запрещено.
 ; Пакет, код и стек инициатора не должны попадать в область назначения.
 MEM_ABI_VERSION      = 00103h  ; Публичный ABI MEM 1.3
-MEM_RUNTIME_REVISION = 57      ; Повысить при изменении транспорта или раскладки DOS
+MEM_RUNTIME_REVISION = 58      ; Повысить при изменении транспорта или раскладки DOS
 MEM_WINDOW_VERSION   = 2       ; Внутренний протокол физического окна
     IFNDEF DOS_IO_BATCH_SECTORS
 DOS_IO_BATCH_SECTORS = 32      ; 16/32/64 полных физических секторов за серию
@@ -553,6 +553,8 @@ bios_cmp_hl_de          = 0C427h  ; [OLD] Сравнить hl и de
 bios_memcpy_bc_hl       = 0C42Dh  ; [OLD] HL..DE исключительно -> BC, с учётом перекрытия
 bios_printStringOld     = 0C438h  ; [OLD] Вывод строки на экран
 
+bios_cliExecDone        = 0C496h ; [MXOS2] Возврат CLI после FILE_EXEC, CF/A — результат
+bios_cliExecError       = 0C49Fh ; [MXOS2] Код отказа для следующего запуска CLI
 bios_keybTable          = 0C4A0h ; [OLD] Матрица клавиатуры Загрузчика, 96 байт до C4FFh
 
 ; Стандартные точки C800h
@@ -733,6 +735,13 @@ RAW_OP_PREPARE   = 6    ; MXOS_DOS_RAW_IO: подготовить локальн
 DRIVER_INSTALL_VERSION = 1
 DRIVER_RECORD_SIZE     = 80
 DRIVER_KIND_FLOPPY     = 3
+; Физический диск C: — системное ПЗУ. Файлы MXOS могут загружаться с дискеты A:.
+    IFDEF MX_FLOPPY_BOOT
+BOOT_VOLUME            = 0
+    ELSE
+BOOT_VOLUME            = 2
+    ENDIF
+BOOT_VOLUME_LETTER     = 'A'+BOOT_VOLUME
 SYSTEM_DRIVE           = 2
 RAM_DRIVE              = 1
 FLOPPY_DRIVE           = 0
@@ -742,7 +751,7 @@ version             DB 1
 drive               DB 7
 kind                DB 0       ; 0 ROM, 1 FLASH, 2 FLASHFST, 3 FLOPPY
 blockShift          DB 8
-blocks              DW 0
+blocks              DW 0       ; Физическая ёмкость, 0 для службы без носителя
 allocationStep      DW 0
 capabilities        DB 0
 technology          DB 0
@@ -854,6 +863,7 @@ DOS_ERR_UNSUPPORTED     = 10  ; Формат тома или операция н
 DOS_ERR_CANCELLED       = 12  ; Cooperative cancellation at a safe boundary.
 DOS_ERR_BAD_IMAGE       = 11  ; Неверный заголовок или контрольная сумма программы.
 DOS_ERR_WRITE_PROTECTED = 13  ; Драйвер тома не поддерживает запись.
+DOS_ERR_NO_MEDIA        = 14  ; Носитель отсутствует или его формат не распознан.
 
 ;-----------------------------------------------------------------------
 ; Дескриптор файла (одна запись в каталоге) FAT12/16/32
@@ -1149,7 +1159,7 @@ fatNumCells         BLOCK  2    ; количество ячеек в табли�
 dirStartSector      BLOCK  2    ; первый сектор корневого каталога
 dataStartSector     BLOCK  2    ; первый сектор области данных
 volumeLabel         BLOCK  12   ; метка тома и 0 в конце
-isValid             BLOCK  1    ; 0 = нет драйвера, 1 = диск не распознан, 2 = диск распознан, корректно отформатирован
+isValid             BLOCK  1    ; Состояние DISK_* после монтирования
 allocationStep      BLOCK  2    ; Подсказка физического драйвера B=3: шаг по чипам, секторов; 0 = линейно
 dataClusters        BLOCK  2    ; Допустимые кластеры данных, без двух резервных записей FAT
 blockSize           DW     256  ; Физический блок выбранного драйвера
@@ -1163,6 +1173,7 @@ physicalBlocks      DW     0    ; Ёмкость драйвера B=3, в физ
 DISK_NO_DRIVER = 0
 DISK_INVALID   = 1
 DISK_VALID     = 2
+DISK_NO_MEDIA  = DOS_ERR_NO_MEDIA-DOS_ERR_NO_DRIVER
 
 ;-----------------------------------------------------------------------
 ; Буферы в памяти

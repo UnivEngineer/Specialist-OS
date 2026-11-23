@@ -163,7 +163,7 @@ ncAssocTransfer:
             DW 0
             DB 0
             DW NC_SORT_KEYS,ncAssociatedEditorEnd-ncAssociatedEditor
-ncAssociatedEditor: DB 'C:',05Ch,'DOS',05Ch,'EDIT.COM',0
+ncAssociatedEditor: DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'EDIT.COM',0
 ncAssociatedEditorEnd:
 ncEnterNative:
             pop hl

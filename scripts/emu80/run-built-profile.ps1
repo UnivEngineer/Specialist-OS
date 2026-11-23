@@ -15,18 +15,8 @@ if ($EmulatorDirectory) { $launch.EmulatorDirectory = $EmulatorDirectory }
 
 switch ($Profile) {
     'Flash2M' {
-        & (Join-Path $scripts 'build/build-project.ps1') OS
+        & (Join-Path $PSScriptRoot 'run-profile.ps1') 'MMX Flash + floppy' -Build @launch
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        $buildImage = Join-Path $scripts 'images/build-image.ps1'
-        & $buildImage SystemEmuWritable -FontsReady
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        foreach ($target in 'Games2M', 'Floppy720') {
-            & $buildImage $target
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        }
-        & (Join-Path $PSScriptRoot 'seed-flash.ps1')
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        & (Join-Path $PSScriptRoot 'run.ps1') -Flash -ResetFlash -FreshFloppy @launch
     }
     'Floppy720' {
         & (Join-Path $scripts 'images/build-image.ps1') Floppy720

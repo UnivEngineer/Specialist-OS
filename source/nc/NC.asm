@@ -406,12 +406,13 @@ aDriverUnknown:     DB "n/a",0,0
 aDrive:             DB "Drive ",0
 
 aNotFormatted:      DB " ","is not formatted",0
+aNoMedia:           DB "No media",0
 
 
 
 
 
-aEditor:            DB "C:",05Ch,"DOS",05Ch,"EDIT.COM -NC",0Dh      ; терминатором тут должно быть 0Dh
+aEditor:            DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"EDIT_MN.COM -NC",0Dh      ; терминатором тут должно быть 0Dh
 
 
 
@@ -569,7 +570,7 @@ panelA_dirLow       DB    0
 
 panelB_dirLow       DB    0
 
-panelA_drive        DB    SYSTEM_DRIVE     ; номер диска панели A
+panelA_drive        DB    BOOT_VOLUME     ; номер диска панели A
 
 panelB_drive        DB    7     ; номер диска панели B
 
@@ -614,6 +615,8 @@ stateEnd:           ; адрес конца блока переменных со
 panelA_filesCnt     DB                 0
 
 panelB_filesCnt     DB                 0
+panelA_diskError    DB                 0
+panelB_diskError    DB                 0
 
 path                BLOCK              MAX_PATH,0
 

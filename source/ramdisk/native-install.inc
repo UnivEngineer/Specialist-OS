@@ -127,7 +127,7 @@ BankReportError:
     ret
 
 bankPreviousDrive:  DB 0
-bankFormatCommand:  DB 'C:',05Ch,'DOS',05Ch,'FORMAT.COM '
+bankFormatCommand:  DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'FORMAT.COM '
 bankFormatLetter:   DB 'B',': -R -Y',0
 bankFormatText:     DB 'RAMDISK: PREPARING VOLUME',0Ah,0
 bankErrorText:      DB 'RAMDISK: VOLUME UNCHANGED, ERROR ',0

@@ -69,9 +69,9 @@ if engine.startswith('4'):
 results=[]
 ui_only='--ui-only' in sys.argv
 disk=O/'bench-h.bin'
-disk.write_bytes(b''.join((R/f'images/FlashDisk_chip{i}_512K.bin').read_bytes() for i in range(1,5)))
+disk.write_bytes(b''.join((R/f'images/H-Flash-2M-Games-chip{i}.bin').read_bytes() for i in range(1,5)))
 try:
-    x.start('native-grid',system=R/'images/SystemRom_emu80_writable.bin',disk=disk)
+    x.start('native-grid',system=R/'images/C-Flash-512k-MMX-System-Emu80.bin',disk=disk)
     m.call('bp_clear');m.call('emu_run_for',ms=500);m.tap('esc');m.call('emu_run_for',ms=250)
     cmd='H:/Bench/FontBen/FontBen.com'+(' -E '+engine if engine!='BIOS' else '')+(' -P '+preOnly if preOnly!='BOTH' else '')+(' -I' if inverse else '')+(' -S' if scalarOnly else '')
     keys={':':'colon','/':'slash','.':'period',' ':'space','-':'minus','=':'equals'}
@@ -145,6 +145,6 @@ try:
         assert len(actual)<=len(report)
     api(0x500,0x8B20)
     assert actual==report,'RAM report readback'
-    (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',stages=STAGES,results=results,reportBytes=size,fileReadback='PASS',allocations='no leaks',modules='unloaded',prerender='disabled',returnedToNC=True,cpuHz=2000000,pitHz=2000000,binarySha256={f:hashlib.sha256((R/f).read_bytes()).hexdigest() for f in ('bin/BIOS.sys','bin/IO.sys','bin/MEM.sys','bin/FONTCOM.i80','bin/FONTBANK.i80','images/SystemRom_emu80_writable.bin')}),indent=2)+'\n')
+    (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',stages=STAGES,results=results,reportBytes=size,fileReadback='PASS',allocations='no leaks',modules='unloaded',prerender='disabled',returnedToNC=True,cpuHz=2000000,pitHz=2000000,binarySha256={f:hashlib.sha256((R/f).read_bytes()).hexdigest() for f in ('bin/BIOS.sys','bin/IO.sys','bin/MEM.sys','bin/FONTCOM.i80','bin/FONTBANK.i80','images/C-Flash-512k-MMX-System-Emu80.bin')}),indent=2)+'\n')
     print(engine,'GRID PASS',flush=True)
 finally:x.stop()

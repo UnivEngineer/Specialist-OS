@@ -33,7 +33,7 @@ def main():
 
     owner()
     m = Machine('http://127.0.0.1:19781/mcp')
-    image = (ROOT / 'images/SystemRom_emu80_writable.bin').read_bytes()
+    image = (ROOT / 'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes()
     kernel = (ROOT / 'bin/RAMFOS.mon').read_bytes()
     cases = [('H:/BUDI/BUDI-RF.EXE', 'assets/games/families/budi/patched/Budi-ramfos.exe'),
              ('H:/Buran/Buran-RF.EXE', 'assets/games/families/buran/repacked/Buran-ramfos.exe')]

@@ -1,7 +1,8 @@
 ; Нерезидентный установщик, COM загружается с 0000h. Резидент копируется
 ; только после успешного ID; при отказе прежний драйвер остаётся установлен.
 ; Временный ID использует 8C00h–8CFFh, общий системный резерв переходников.
-; Выход CF=0: установлен; CF=1: ошибка flush, нет ID или неподдерживаемый чип.
+; Выход CF=0: установлен либо сохранена прежняя служба без подходящего ID.
+; CF=1: ошибка аргументов, flush или регистрации.
 Install:
     IF SYSTEM_FLASH
     ex de,hl
@@ -31,7 +32,7 @@ InstallBody:
     call bios_memcpy_bc_hl
     call SysProbe
     call DecodeSystemID
-    jp c,InstallFailed
+    jp c,InstallSkipped             ; Системный том может находиться в обычном ПЗУ.
     ld (resident_file+FuncSize+1-Driver),hl
     ld (resident_file+SectorLimit+1-Driver),a
     ld a,c
@@ -102,23 +103,24 @@ probeNext:
     ld a,SYSTEM_DRIVE
     MXOS_CALL MXOS_DOS_DRIVER_REFRESH
     ret c
+InstallSkipped:
     ENDIF
     xor a
     ret
     IF !SYSTEM_FLASH
 probeUnsupported:
     pop bc
-    ENDIF
 InstallFailed:
     ld hl,txtIDError
     call bios_printString
     scf
     ret
+txtIDError: DB "FLASH: UNSUPPORTED / MISSING CHIP",00Ah,0
+    ENDIF
     IF SYSTEM_FLASH
     INCLUDE "../common/argNext.inc"
     INCLUDE "../common/driver-letter.inc"
     ENDIF
-txtIDError: DB "FLASH: UNSUPPORTED / MISSING CHIP",00Ah,0
 
 ; 30720 тактов цикла (15,36 мс при 2 МГц, 12,288 мс при 2,5 МГц).
 ; HL/AF разрушены; BC/DE сохраняются. Нужна пауза 10 мс входа/выхода ID.

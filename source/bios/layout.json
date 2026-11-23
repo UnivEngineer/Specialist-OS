@@ -84,6 +84,14 @@
       "target": "t_tapeReadError"
     },
     {
+      "address": 50326,
+      "size": 10,
+      "files": [
+        "cli-exec-return.inc"
+      ],
+      "abi": "bios_cliExecDone"
+    },
+    {
       "address": 50336,
       "size": 96,
       "files": [

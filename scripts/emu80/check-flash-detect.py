@@ -36,7 +36,7 @@ def check_sectors(drive,image,sectors,flush=False):
     assert image.read_bytes()==before
 
 try:
-    seed=(ROOT/'images/FlashDisk_emu80_seed.bin').read_bytes()
+    seed=(ROOT/'images/H-Flash-2M-Games.bin').read_bytes()
     for count in ([] if args.no_id_only else [2,1,3,4]):
         disk=out/f'flash-{count}.bin';disk.write_bytes(seed[:count*524288])
         x.start(f'chips-{count}',disk=disk,chip_count=count)
@@ -72,7 +72,7 @@ try:
             x.m.write(driver_symbols['v_chipMap'],old)
             rows.append(dict(sparseMappingSynthetic=True,hardwareEmptyMiddleNotTested=True));save()
     for kib in ([] if args.no_id_only else [128,256,512]):
-        source=ROOT/f'images/SystemRom_{kib}K.bin'
+        source=ROOT/f'images/C-Flash-{kib}k-MMX-System.bin'
         x.start(f'system-{kib}',system=source)
         image=n['RUNTIME']/'specialist-os/system-flash.bin';before=image.read_bytes()
         x.install('FlashSys');assert image.read_bytes()==before

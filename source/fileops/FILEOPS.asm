@@ -2,10 +2,14 @@
     INCLUDE "../include/mxos.inc"
     DEFINE BANKED_DOS_BUILD 1
 KD_OBJECT = DOS_BANK_OBJECT_ADDR
+    IFDEF MX_FLOPPY_BOOT
+    INCLUDE "../../bin/mx/fileops-imports.inc"
+    ELSE
     INCLUDE "../../bin/fileops-imports.inc"
+    ENDIF
     ORG DOS_FILEOPS_ADDR
     jp foEntry
-    INCLUDE "host.inc"
+    INCLUDE "../include/fileops-host.inc"
 
 ;----------------------------------------------------------------------------
 ; MXOS

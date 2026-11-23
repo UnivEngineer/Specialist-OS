@@ -28,7 +28,11 @@ WORK_WITHOUT_ARAM = 0  ; 32			Размер буфера в основном ОЗ
     IFNDEF ROM_PAGE_START
 ROM_PAGE_START		= 01880h	 ; 04000h	Первый байт страницы ПЗУ
     ENDIF
+    IFDEF MX_LINEAR_ROM32
+ROM_PAGE_END            = 08000h
+    ELSE
 ROM_PAGE_END            = 0FFFCh         ; 0C000h	Конец страницы ПЗУ плюс один
+    ENDIF
 CURSOR_BLINK_SPEED      = 767            ; 767		Задержка мигания курсора
 ARAM_MAX_PAGE           = 0Fh            ; 6			Максимальный номер страницы RAM-диска
 ARAM_PAGE_END           = 0FFBBh         ; 0FFBBh	Конец страницы RAM-диска, далее общее ОЗУ

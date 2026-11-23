@@ -1,0 +1,44 @@
+# Дискета с программами для MMX. FAT12, 720 КиБ, секторы по 512 байт.
+@label MXOS FLOPPY
+
+# Для каждой записи укажите имя на диске и путь от assets/. Третий и четвёртый столбцы необязательны.
+# Для сырого исполняемого файла третий столбец задаёт адрес загрузки и входа (по умолчанию 0).
+# У пары CPU/I80 адреса берутся из CPU, код из I80. У источника RKS адрес и сумма находятся в заголовке.
+# Цели COM, EXE, DLL и FNT получают контейнер MXOS2. Для игровых EXE режим запуска задан в games/catalog.csv.
+# TXT, BAT, CFG, EXT, HLP, PF и DAT копируются побайтно. Атрибуты R, S и RS означают «только чтение», «системный» и оба.
+# Чтобы задать атрибуты без адреса, поставьте 0 в третьем столбце. У источника RKS дополнительных столбцов нет.
+
+# Имя на диске                 Источник относительно assets/                          Адрес RAW Атрибуты
+
+# Игры и руководство Elite.
+GAMES/ADSKOK.RKS               games/families/adskok/repaired/Adskok.rks
+GAMES/Almaz2MX.EXE             games/families/almaz-2/builds/Almaz2-mx-optimized.exe
+GAMES/ARCANOID.RKS             games/std/Arcanoid.rks
+GAMES/BUDI-STD.EXE             games/families/budi/patched/Budi-std.exe
+GAMES/CHESS.RKS                games/std/Chess.rks
+GAMES/DASH1.RKS                games/std/Dash1.rks
+GAMES/DIGGER.RKS               games/std/Digger.rks
+GAMES/Elite.exe                games/families/elite/originals/Elite-jcuken.rks
+GAMES/Elite.txt                games/families/elite/manuals/Elite.txt
+GAMES/KLAD.RKS                 games/std/Klad.rks
+GAMES/LAND.RKS                 games/std/Land.rks
+GAMES/PACMAN.RKS               games/std/Pacman.rks
+GAMES/SABOTEUR.RKS             games/std/Saboteur.rks
+GAMES/TETRIS1.RKS              games/std/Tetris1.rks
+GAMES/XONIX.RKS                games/std/Xonix.rks
+
+# Утилиты LafanL3 для RAMFOS, руководства KOI8 и примеры чертежей.
+LAFAN/PENX23.EXE               programs/mx/Penx_2.3.COM                               0xD400
+LAFAN/PENX28.EXE               programs/mx/Penx_MX.EXE                                0xD400
+LAFAN/PENX32.EXE               programs/mx/Penx_MX.COM                                0xD400
+LAFAN/TRS-MX-3.EXE             programs/mx/Trs_MX-3.COM                               0x0D30
+LAFAN/TRS-MX-P.EXE             programs/mx/Trs_MX-p.COM                               0x0000
+LAFAN/TRS-MX-U.EXE             programs/mx/Trs_MX-u.COM                               0x0000
+LAFAN/DOCS/RP_penx0.TXT        programs/mx/manuals/RP_penx0.TXT
+LAFAN/DOCS/RP_penx!.TXT        programs/mx/manuals/RP_penx!.TXT
+LAFAN/DOCS/Tras0_MX.TXT        programs/mx/manuals/Tras0_MX.TXT
+LAFAN/DOCS/Tras!_MX.TXT        programs/mx/manuals/Tras!_MX.TXT
+LAFAN/DOCS/Shemy-14.TXT        programs/mx/manuals/Shemy-14.TXT
+LAFAN/EXAMPLES/C_ngmd.PNX      programs/mx/examples/C_ngmd.PNX
+LAFAN/EXAMPLES/M_ngmd.PNX      programs/mx/examples/M_ngmd.PNX
+LAFAN/EXAMPLES/P_ngmd.PLT      programs/mx/examples/P_ngmd.PLT

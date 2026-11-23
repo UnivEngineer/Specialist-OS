@@ -23,5 +23,5 @@ ncHelpColor:
     ret
     ENDIF
     DB 0 ; This client redraws its background.
-ncHelpPath:     DB 'C:',05Ch,'DOS',05Ch,'NC.HLP',0
-ncHelpError:    DB 'Cannot read C:/DOS/NC.HLP',0
+ncHelpPath:     DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'NC.HLP',0
+ncHelpError:    DB 'Cannot read NC.HLP',0

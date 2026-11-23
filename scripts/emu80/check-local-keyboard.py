@@ -207,7 +207,7 @@ def check_keys(bank, timed=False):
         m.write(state,original)
 
 try:
-    test.start('local keyboard',system=ROOT/'images/SystemRom_emu80_writable.bin')
+    test.start('local keyboard',system=ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin')
     m.call('debug_break'); m.call('bp_clear')
     check_keys(1)
     page(0)

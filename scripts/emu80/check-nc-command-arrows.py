@@ -15,7 +15,7 @@ def main():
     machine = h['Matrix']()
     n = symbols(ROOT/'bin/NC.sym')
     try:
-        machine.start('nc-command-arrows',disk=ROOT/'images/FlashDisk_emu80_seed.bin')
+        machine.start('nc-command-arrows',disk=ROOT/'images/H-Flash-2M-Games.bin')
         m = machine.m
         m.call('bp_clear');m.call('emu_run_for',ms=500)
 
