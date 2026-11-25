@@ -29,7 +29,7 @@ biosRecoveryFlag:
     ; MAIN: не затирать установленный AT512KS локальными службами DOS/EXEC.
     ld de,BANK_MAIN_LOCAL_BYTES
     call biosRecoverRange
-    ld hl,mx_call
+    ld hl,mx_callPacket
     ; Общий CLIENT включает таблицу вызовов и текстовый шлюз.
     ld de,BANK_MAIN_CLIENT_BYTES
     call biosRecoverRange

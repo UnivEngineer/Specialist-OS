@@ -15,7 +15,7 @@ parse_arguments:
     ld (argBank),a
     ld (argMode),a
 argument_next:
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp c,arguments_done
     push hl
     ex de,hl

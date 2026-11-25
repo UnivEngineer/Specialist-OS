@@ -24,12 +24,12 @@ ncMemorySizeReady:
     ld hl,FILE_CACHE_A
     ld b,0
     ld a,MEM_OP_ARENA
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,ncMemoryReserveError
     ld hl,(ncCatalogPoolSize)
     ld b,0
     ld a,MEM_OP_ALLOC
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret nc
 ncMemoryReserveError:
     push af
@@ -60,7 +60,7 @@ ncMemoryWait:
     ; Avoid retrying NC forever when it cannot fit. CLI can install a smaller
     ; font module or release other resident resources before the next attempt.
     ld a,1
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     jp bios_reboot
 ncCatalogCapacity:          DB FILE_CACHE_CAPACITY
 ncMemoryTop:                DW 0

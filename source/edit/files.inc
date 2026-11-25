@@ -53,7 +53,7 @@ openFile:
         CALL  prepareFileName
         JP    C,filePathError
         LD    HL,fileDescName
-        MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+        MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
         JP    C,fileOperationError
         CALL  editorCheckFileSize
         JP    C,editorFileTooLarge
@@ -77,7 +77,7 @@ editorFileTooLarge:
 prepareFileName:
         LD    HL,inputBuf
         LD    DE,fileDescName
-        MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+        MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
         RET
 
 ;----------------------------------------------------------------------
@@ -171,7 +171,7 @@ insertFile:
         LD    HL,fileDescName
 
         ; Запрашиваем дескриптор файла
-        MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+        MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
         JP    C,fileOperationError
         CALL  editorCheckFileSize
         JP    C,editorFileTooLarge

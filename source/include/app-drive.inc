@@ -24,7 +24,7 @@ appProgramDrive:
     ld a,(APP_COMMAND_ADDR)
     jp z,appDriveUpper
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     add a,'A'
     ret
 appDriveUpper:

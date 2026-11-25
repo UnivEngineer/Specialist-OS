@@ -65,15 +65,15 @@ workerEntry:
     ld (dataBuffer),hl
     ld (bufferAddress),hl
     ld a,(config)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld b,3
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret c
     ex de,hl
     ld (capacity),hl
     ld b,0FFh
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret c
     ld a,c
     ld (caps),a
@@ -102,9 +102,9 @@ clearStats:
     or a
     jp z,readOnly
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp nc,exists
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
     cp DOS_ERR_NOT_FOUND
     jp z,fileAbsent
     scf
@@ -115,7 +115,7 @@ fileAbsent:
 nextPass:
     ; Обратная связь вне измеряемого интервала.
     ld hl,txtPass
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld a,(pass)
     add a,'0'
     ld c,a
@@ -130,7 +130,7 @@ nextPass:
     or a
     ld hl,txtScattered
     jp z,passAllocationReady
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 passAllocationReady:
     ld a,1
     ld (operation),a
@@ -226,7 +226,7 @@ cleanup:
     or a
     ret z
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_DELETE
+    MXOS_CALL_REGS MXOS_DOS_FILE_DELETE
     ret c
     xor a
     ld (owned),a
@@ -555,7 +555,7 @@ prepareRaw:
     ld c,0
     jp nz,prepareRawReady
     ld b,RAW_OP_PREPARE
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret c
 prepareRawReady:
     ld (rawJump+1),hl
@@ -564,7 +564,7 @@ prepareRawReady:
     xor a
     ret
 rawViaDos:
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret
 rawCall:
     ld c,0
@@ -611,7 +611,7 @@ fileHigh:
     cp 33
     ret nc
     ld hl,txtScreenBuffer
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld a,(config+3)
     ld h,a
     ld a,(config+10)
@@ -621,7 +621,7 @@ fileHigh:
     ld (dataBuffer),hl
     ld hl,stats+60
     ld (fileStats),hl
-    MXOS_CALL MXOS_DOS_GET_ERROR ; Восстановить COMMAND вне таймера.
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR ; Восстановить COMMAND вне таймера.
     ld a,(config+2)
     or a
     jp z,fileHighRead
@@ -955,7 +955,7 @@ readOnlyFile:
     and 2
     jp z,readOnlyDone
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp c,readOnlyDone
     call fileReadPass
     ret c
@@ -1038,7 +1038,7 @@ exchangeOptions:
     ld (bhHandle+FH_ORIGIN),a
     ld a,FILE_OP_OPTIONS
     ld hl,bhHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret
 ; Дискеты и разбросанные цепочки медленнее: период 33,55 с вместо 8,39 с.
 ; В отчёт по-прежнему возвращаются эквивалентные тики по 128 мкс.

@@ -11,6 +11,7 @@ header=(R/'sdk/include/mxos.h').read_text(encoding='utf-8')
 macros={k:int(v,16) for k,v in re.findall(r'^#define MXOS_BIOS_ABI_(\w+) (0x[0-9A-Fa-f]+)',header,re.M)}
 mapping=dict(MEMCPY='memcpy_bc_hl',GETCH='getch',PUTCH='printChar',INPUT='input',PUTS='printString',KEY_SCAN='keyScan',PRINT_HEX8='printHexByte',PRINT_HEX16='printHexWord',CURSOR_GET='getCursorPos',CURSOR_SET='setCursorPos',CHECKSUM='calcCS',MEMTOP_SET='setMemTop',MEMTOP_GET='getMemTop',FILE_LIST='fileList',DRIVE='fileGetSetDrive',FILE_CREATE='fileCreate',FILE_DELETE='fileDelete',FILE_RENAME='fileRename',FILE_STAT='fileLoadInfo',FILE_ATTR='fileGetSetAttr',FILE_NAME='fileNamePrepare',FILE_LOAD='fileLoad2',DISK_DRIVER='diskDriver',PRINT_DEC='printDecWord',UPPER='upperCase',STRCMP='strcmp',STRICMP='stricmp',FLUSH='flushVolume',ARG_NEXT='argNext',DRIVE_SELECT='fileSelectDrive',FILE_COPY='fileCopy',ERROR='getError',SECTOR='sectorIO')
 mapping['PUTS_REAL']='printStringReal'
+mapping['PRINT_STRING_LIM']='printStringLim'
 mapping.update(PRINT_CHAR_RAW='printCharRaw',PRINT_STRING_Z='printStringZ',PRINT_STRING_RAW_Z='printStringRawZ',PRINT_STRING_RAW_LIM='printStringRawLim')
 mapping['DIRECTORY']='directory'
 mapping['CLI']='cli'
@@ -28,9 +29,12 @@ assert macros.keys()==mapping.keys(),(macros.keys()-mapping.keys(),mapping.keys(
 for name,value in macros.items():assert value==s['bios_'+mapping[name]],(name,value,s['bios_'+mapping[name]])
 for name,value in dict(FILE_HANDLE=64,FILE_DESCR_SIZE=32,FILE_INFO=16,DISK_INFO=48,FILE_COPY_REQUEST=86,FILE_PATH_IO=40).items():assert s[name]==value,(name,s[name],value)
 runpy.run_path(str(R/'scripts/build/build-syscalls.py'))['generate'](check=True)
-for name,value in dict(mx_call=0xF800,mx_CallCPM=0xF803,mx_callRegs=0xF806).items():assert s[name]==value
+for name,value in dict(mx_callPacket=0xF800,mx_CallCPM=0xF803,mx_callRegs=0xF806).items():assert s[name]==value
 sdk_asm=(R/'sdk/src/mxos_syscall_ids.inc').read_text(encoding='utf-8')
 direct={name:int(value,16) for name,value in re.findall(r'^defc (mx_\w+)\s*= 0([0-9A-F]{4})h$',sdk_asm,re.M)}
+assert direct['mx_callPacket']==0xF800 and direct['mx_callRegs']==0xF806
+assert 'mx_call' not in s and 'mx_call' not in direct
+assert not re.search(r'\b(?:mxos_call|MXOS_CALL)\b',header)
 for name,value in direct.items():
  assert s[name]==value,(name,value)
 fast_entries=dict(mx_printChar=0xF81B,mx_getCursorPos=0xF81E,mx_setCursorPos=0xF821,
@@ -49,6 +53,8 @@ print('C SDK ABI PASS',len(macros),'addresses;',len(errors),'error codes')
 
 assert s['IO_KEY_STATE'] == 11
 keyboard_wrappers = (R/'sdk/src/mxos_z88dk.asm').read_text(encoding='utf-8')
+assert re.search(r'^\s+PUBLIC _mxos_call_packet$',keyboard_wrappers,re.M)
+assert not re.search(r'\b_mxos_call\b',keyboard_wrappers)
 for wrapper, entry in [('getch','io_bankGetCh'), ('key_poll','io_bankKeyPoll'), ('getch_cursor','io_bankGetChCursor'),
                        ('key_modifiers','io_bankKeyModifiers'), ('key_shift','io_bankKeyShift')]:
     assert re.search(rf'^_mxos_bank_{wrapper}:\s+call 0{s[entry]:04X}h$',keyboard_wrappers,re.M), entry
@@ -82,6 +88,10 @@ assert s['MXOS_BIOS_FONT_RENDER']==0x125
 for name in ('FONT_PRERENDER_BYTES','FONT_RENDER_QUERY','FONT_RENDER_BUILD','FONT_RENDER_DISABLE'):
  assert re.search(r'^#define MXOS_'+name+r' '+str(s[name])+r'$',header,re.M),name
 assert s['MXOS_DOS_MEMORY']==0x225
+for name,value in [('Z',0x124),('RAW_Z',0x127),('RAW_LIM',0x129),('LIM',0x12a)]:
+ symbol='MXOS_BIOS_PRINT_STRING_'+name+'_MAIN'
+ assert s[symbol]==value and f'#define {symbol} 0x{value:04X}' in ids_header
+assert 'MXOS_BIOS_TEXT_PRINT' not in s and 'MXOS_TEXT_PRINT_REQUEST' not in header
 print('MEM operations, capabilities, errors and string routes ASM/C PASS')
 
 assert s["MXOS_DOS_MODULE_LOAD"]==0x226 and s["MXOS_DOS_MODULE_CALL"]==0x227 and s["MXOS_DOS_MODULE_UNLOAD"]==0x228
@@ -136,24 +146,46 @@ for macro,symbol in [('MXOS_RELOC_IMAGE_HEADER_SIZE','IMAGE_RELOC_HEADER'),
 
 # Размер и смещения вычисляет целевой C-компилятор с реальным заголовком SDK.
 checks={'sizeof(MXOS_IMAGE_HEADER)':s['IMAGE_HEADER_SIZE'],
-        'sizeof(MXOS_RELOC_IMAGE_HEADER)':s['IMAGE_RELOC_HEADER']}
+        'sizeof(MXOS_RELOC_IMAGE_HEADER)':s['IMAGE_RELOC_HEADER'],
+        'sizeof(MXOS_CALL_PACKET)':10}
 for field,symbol in [('reloc_kind','MODE'),('align_log2','ALIGN'),('reloc_count','COUNT'),
                      ('table_checksum','CHECKSUM'),('reserved','RESERVED')]:
  checks[f'((char *)&hdr.{field} - (char *)&hdr)']=s['IMAGE_RELOC_'+symbol]
+for offset,field in enumerate(('operation','hl','de','bc','af')):
+ checks[f'((char *)&packet.{field} - (char *)&packet)']=2*offset
 with tempfile.TemporaryDirectory() as temp:
  directory=Path(temp)
  source=directory/'layout.c'
- source.write_text('#include "mxos.h"\nint main(void) { MXOS_RELOC_IMAGE_HEADER hdr;\n'+''.join(
+ source.write_text('#include "mxos.h"\nstatic const char text[] = "A\\0B";\n'
+     'int main(void) { MXOS_RELOC_IMAGE_HEADER hdr;\n'
+     '  MXOS_CALL_PACKET packet;\n'+''.join(
      f'  if ({expr} != {value}) return {i};\n'
-     for i,(expr,value) in enumerate(checks.items(),1))+'  return 0;\n}\n',encoding='ascii')
+     for i,(expr,value) in enumerate(checks.items(),1))
+     +'  if (mxos_printStringLim(text, 0) != text) return 30;\n'
+     +'  if (mxos_printStringLim(text, 3) != text+3) return 31;\n'
+     +'  packet.operation = MXOS_BIOS_PRINT_STRING_LIM; packet.hl = (mxos_u16)text;\n'
+     +'  packet.de = 0; packet.bc = 3; packet.af = 0;\n'
+     +'  if ((mxos_call_packet(&packet) & MXOS_CF) || packet.hl != (mxos_u16)(text+3)) return 32;\n'
+     +'  packet.operation = 0x0102; packet.de = 0x5678; packet.af = 0x1234;\n'
+     +'  if ((mxos_call_packet(&packet) & 0xff01) != ((MXOS_ERR_UNSUPPORTED << 8) | MXOS_CF)) return 33;\n'
+     +'  if (packet.operation != 0x0102 || packet.hl != (mxos_u16)(text+3) ||\n'
+     +'      packet.de != 0x5678 || packet.bc != 3 || packet.af != 0x1234) return 34;\n'
+     +'  return 0;\n}\n',encoding='ascii')
  z88dk=runpy.run_path(str(R/'scripts/build/build_cache.py'))['z88dk_directory']()
  environment={**os.environ,'ZCCCFG':str(z88dk/'lib/config'),
               'PATH':str(z88dk/'bin')+os.pathsep+os.environ['PATH']}
  subprocess.run([str(z88dk/'bin/zcc.exe'),'+cpm','-clib=8080','-compiler=sccz80',
                  '-I'+str(R/'sdk/include'),'-crt0='+str(R/'sdk/tests/file-crt'),'-zorg=8192',
-                 str(source),'-o','layout.bin'],cwd=directory,env=environment,check=True)
+                 str(source),str(R/'sdk/src/mxos_z88dk.asm'),'-o','layout.bin'],cwd=directory,env=environment,check=True)
  body=(directory/'layout_code_crt_init.bin').read_bytes()
  memory=bytearray(65536)
+ bios={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/BIOS.sym').read_text(encoding='utf-8'),re.M)}
+ runpy.run_path(str(R/'scripts/tests/mem-image.py'))['install'](memory,bios)
+ # Штатные MAIN F800h и F806h вызывают C8F9h. Перехватчик C809h считает байты.
+ putch=bios['bios_printChar']
+ memory[putch:putch+3]=bytes.fromhex('c3 00 60')
+ hook=bytes.fromhex('f5 79 32 83 5e 3a 82 5e 3c 32 82 5e f1 c9')
+ memory[0x6000:0x6000+len(hook)]=hook
  memory[0x2000:0x2000+len(body)]=body
  memory[0x5e80:0x5e82]=b'\xff\xff'
  (directory/'input.bin').write_bytes(memory)
@@ -161,7 +193,8 @@ with tempfile.TemporaryDirectory() as temp:
                  '-counter','100000','-output','result.bin','input.bin'],cwd=directory,check=True,capture_output=True)
  result=(directory/'result.bin').read_bytes()
  assert result[65542:65544]==b'\x00\x61' and result[0x5e80:0x5e82]==b'\0\0','v3 C layout'
-print('EXE v2/v3, target C header layout, module record and FONT restoration ABI PASS')
+ assert result[0x5e82:0x5e84]==b'\x06B','sccz80 printStringLim via F800h and F806h'
+print('EXE v2/v3, C packet calls and layout, module record and FONT restoration ABI PASS')
 
 assert s['mx_queueBind']==0xf809 and s['mx_queueFlush']==0xf80c
 assert s['MXOS_BIOS_COMMAND_BATCH']==0x12c

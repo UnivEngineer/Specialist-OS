@@ -22,7 +22,7 @@ Install:
     pop af
     ret
 InstallBody:
-    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_FLUSH_VOLUME
     ret c
     call ProbeDelay                  ; завершить ранее запущенное программирование
     IF SYSTEM_FLASH
@@ -101,7 +101,7 @@ probeNext:
     IF SYSTEM_FLASH
     ld hl,DriverInfo
     ld a,SYSTEM_DRIVE
-    MXOS_CALL MXOS_DOS_DRIVER_REFRESH
+    MXOS_CALL_REGS MXOS_DOS_DRIVER_REFRESH
     ret c
 InstallSkipped:
     ENDIF

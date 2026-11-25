@@ -39,7 +39,7 @@ start:
     ld (callerKoi),a
     push de
     ld e,2
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (callerDrive),a
     pop de
     xor a
@@ -154,7 +154,7 @@ nameDone:
     ld (de),a
     pop hl
     ld de,descriptor
-    MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+    MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
     jp c,argumentError
     jp argumentParsed
 programArgument:
@@ -212,7 +212,7 @@ argumentsDone:
     INCLUDE "monitor.inc"
 nativeOpen:
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp c,badImage
     call runFileOpen
     jp c,badImage
@@ -290,7 +290,7 @@ nativeCopyArgument:
     ret
 nativeBridge:
     ld hl,RAMFOS_ARGS
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     jp nc,0C000h
     ld hl,RAMFOS_BRIDGE+nativeError-nativeBridge
     call bios_printString
@@ -302,7 +302,7 @@ nativeBridgeEnd:
 
 rksOpen:
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
@@ -388,7 +388,7 @@ ready:
     ld hl,0
     ld bc,APP_MEMORY_END
     ld a,MEM_OP_MAINCLAIM
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,badImage
 upperSource = ready ; Метка прежнего CPU-стенда; верхнего размещения больше нет.
     ld hl,(appLoad)
@@ -443,14 +443,14 @@ rangeOK:
     cp SYSTEM_PROGRAM_ADDR/256
     jp c,cacheRangeReady
     ld a,1
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     jp c,badImage
     ex de,hl
     ld (cacheToken),hl
 cacheRangeReady:
     ; Сохранить описание приложения до поиска сменного ядра.
     ld e,2
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (appDrive),a
     ld hl,descriptor
     ld de,bodyRequest
@@ -496,9 +496,9 @@ bodyPrepared:
     ld hl,rfPath
 openCore:
     ld de,descriptor
-    MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+    MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
@@ -560,7 +560,7 @@ install:
     ; Исходный том восстанавливается до последнего копирования тела/ядра.
     ld a,(appDrive)
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld a,(callerDrive)
     ld (bodyCallerDrive),a
     ; Кодировка независима от MX/STD; сменные ядра задают её сами.
@@ -717,10 +717,10 @@ runHandleClear:
     ld (runHandle+FH_MODE),a
     ld a,FILE_OP_OPEN_PATH
     ld hl,runHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret c
     ld a,DIR_OP_RESOLVED
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     PUT_DE bodyRequest+FILE_BODY_IO.parent
     xor a
     ret
@@ -745,7 +745,7 @@ rksRead:
     ld (runHandle+FH_COUNT),hl
     ld hl,runHandle
     ld a,FILE_OP_READ
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret c
     ld hl,(runHandle+FH_COUNT)
     ld b,h
@@ -970,7 +970,7 @@ error:
     or l
     jp z,errorCacheReady
     ld a,1
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
 errorCacheReady:
     pop hl
     ld a,COLOR_BIOS
@@ -1089,7 +1089,7 @@ bridgeCacheLimit:
 bridgeReloc19:
     jp z,bridgeCacheDone
     ld a,1
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
 bridgeCacheDone:
 bridgeRestoreKoi:
     ld a,0
@@ -1230,11 +1230,11 @@ bodyRequestEnd:
 ; Адреса внутри блока отсутствуют, кроме патча последнего JP.
 loadStage:
     ld hl,RUN_BODY_REQUEST
-    MXOS_CALL MXOS_BIOS_FILE_BODY
+    MXOS_CALL_REGS MXOS_BIOS_FILE_BODY
     jp c,RUN_LOAD_STAGE+loadStageError-loadStage
     ld a,(RUN_BODY_REQUEST+FILE_BODY_IO+2)
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     jp c,RUN_LOAD_STAGE+loadStageError-loadStage
     ld hl,(RUN_BODY_REQUEST+FILE_BODY_IO.buffer)
     push hl

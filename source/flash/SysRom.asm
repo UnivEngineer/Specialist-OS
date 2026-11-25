@@ -50,7 +50,7 @@ volumeReady:
     ld (serviceImage+limit+1-LOCAL_DRIVER_ADDR),a
 installDriver:
     ld hl,registration
-    MXOS_CALL MXOS_DOS_DRIVER_INSTALL
+    MXOS_CALL_REGS MXOS_DOS_DRIVER_INSTALL
     ret
     INCLUDE "no-media.inc"
     INCLUDE "../common/argNext.inc"

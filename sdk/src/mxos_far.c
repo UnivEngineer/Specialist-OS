@@ -1,40 +1,40 @@
 /* FAR-память: блоки распределяет DOS, доступ к байтам выполняет локальный MEM. */
 #include "mxos.h"
 
-static mxos_u16 memory_call(MXOS_CALL *r, mxos_u8 op, mxos_u8 bank, mxos_u16 address, mxos_u16 value)
+static mxos_u16 memory_call(MXOS_CALL_PACKET *r, mxos_u8 op, mxos_u8 bank, mxos_u16 address, mxos_u16 value)
 {
     r->operation=MXOS_DOS_MEMORY; r->af=(mxos_u16)op<<8;
     r->bc=(mxos_u16)bank<<8; r->hl=address; r->de=value;
-    return mxos_call(r);
+    return mxos_call_packet(r);
 }
 mxos_u16 mxos_malloc_far(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out)
 {
-    MXOS_CALL r; mxos_u16 af;
+    MXOS_CALL_PACKET r; mxos_u16 af;
     af=memory_call(&r,MXOS_MEM_OP_ALLOC,bank,bytes,0);
     if (!(af & MXOS_CF)) { out->bank=r.bc>>8; out->offset=r.hl; }
     return af;
 }
 mxos_u16 mxos_free_far(MXOS_FAR_ADDRESS *address)
 {
-    MXOS_CALL r; mxos_u16 af;
+    MXOS_CALL_PACKET r; mxos_u16 af;
     af=memory_call(&r,MXOS_MEM_OP_FREE,address->bank,address->offset,0);
     if (!(af & MXOS_CF)) { address->bank=0; address->offset=0; }
     return af;
 }
 mxos_u16 mxos_realloc_far(MXOS_FAR_ADDRESS *address, mxos_u16 bytes)
 {
-    MXOS_CALL r; mxos_u16 af;
+    MXOS_CALL_PACKET r; mxos_u16 af;
     af=memory_call(&r,MXOS_MEM_OP_REALLOC,address->bank,address->offset,bytes);
     if (!(af & MXOS_CF)) { address->bank=r.bc>>8; address->offset=r.hl; }
     return af;
 }
 mxos_u16 mxos_main_arena(void *start, mxos_u16 bytes)
 {
-    MXOS_CALL r; return memory_call(&r,MXOS_MEM_OP_ARENA,0,(mxos_u16)start,bytes);
+    MXOS_CALL_PACKET r; return memory_call(&r,MXOS_MEM_OP_ARENA,0,(mxos_u16)start,bytes);
 }
 mxos_u16 mxos_main_register(void *start, mxos_u16 bytes)
 {
-    MXOS_CALL r; return memory_call(&r,MXOS_MEM_OP_MAINREGISTER,0,(mxos_u16)start,bytes);
+    MXOS_CALL_PACKET r; return memory_call(&r,MXOS_MEM_OP_MAINREGISTER,0,(mxos_u16)start,bytes);
 }
 static mxos_u16 access(MXOS_FAR_ADDRESS *p, mxos_u8 op, mxos_u16 value, mxos_u16 *out)
 {
@@ -57,10 +57,10 @@ mxos_u16 mxos_put16_far(MXOS_FAR_ADDRESS *p, mxos_u16 value) { return access(p,M
 
 mxos_u16 mxos_fill_far(MXOS_FAR_ADDRESS *p, mxos_u8 value, mxos_u16 bytes)
 {
-    MXOS_CALL r;
+    MXOS_CALL_PACKET r;
     r.operation=MXOS_DOS_MEMORY; r.af=MXOS_MEM_OP_FILL<<8;
     r.bc=((mxos_u16)p->bank<<8)|value; r.hl=p->offset; r.de=bytes;
-    return mxos_call(&r);
+    return mxos_call_packet(&r);
 }
 mxos_u16 mxos_calloc_far(mxos_u8 bank,mxos_u16 count,mxos_u16 size,MXOS_FAR_ADDRESS *out)
 {
@@ -74,24 +74,24 @@ mxos_u16 mxos_calloc_far(mxos_u8 bank,mxos_u16 count,mxos_u16 size,MXOS_FAR_ADDR
 }
 mxos_u16 mxos_memory_query(mxos_u8 bank,MXOS_MEMORY_INFO *out)
 {
-    MXOS_CALL r; mxos_u16 af;
+    MXOS_CALL_PACKET r; mxos_u16 af;
     af=memory_call(&r,MXOS_MEM_OP_QUERY,bank,0,0);
     if (!(af&MXOS_CF)) { out->free_bytes=r.hl; out->largest=r.de; out->free_records=r.bc; }
     return af;
 }
 mxos_u16 mxos_ramdisk_status(mxos_u8 *pages,mxos_u8 *state,mxos_u8 *fresh)
 {
-    MXOS_CALL r; mxos_u16 af;
+    MXOS_CALL_PACKET r; mxos_u16 af;
     r.operation=MXOS_DOS_MEMORY; r.af=MXOS_MEM_OP_RAMDISK<<8;
     r.bc=MXOS_RAMDISK_STATUS; r.hl=r.de=0;
-    af=mxos_call(&r);
+    af=mxos_call_packet(&r);
     if (!(af&MXOS_CF)) { *pages=r.bc>>8; *state=r.bc; *fresh=r.de>>8; }
     return af;
 }
 mxos_u16 mxos_ramdisk_commit(void)
 {
-    MXOS_CALL r;
+    MXOS_CALL_PACKET r;
     r.operation=MXOS_DOS_MEMORY; r.af=MXOS_MEM_OP_RAMDISK<<8;
     r.bc=MXOS_RAMDISK_COMMIT; r.hl=r.de=0;
-    return mxos_call(&r);
+    return mxos_call_packet(&r);
 }

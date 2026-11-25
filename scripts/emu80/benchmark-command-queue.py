@@ -27,25 +27,25 @@ def asm(n,custom=False):
  section('copyAppend',' ld hl,(cqNext)\n ld (hl),MXOS_BIOS_MEMCPY & 255\n inc hl\n ld (hl),9\n inc hl\n ld (hl),7\n inc hl\n ld (hl),0\n inc hl\n ld (hl),061h\n inc hl\n ld (hl),1\n inc hl\n ld (hl),061h\n inc hl\n ld (hl),0\n inc hl\n ld (hl),060h\n inc hl\n call commandQueueCommit')
  section('copy',' ld hl,copyReq\n call mx_memcpyFar')
  section('oversize',' ld bc,257\n call commandQueueReserve')
- section('emptyBatch',' ld a,6\n ld hl,04000h\n ld bc,0\n MXOS_CALL MXOS_BIOS_COMMAND_BATCH')
- section('dosBatch',' MXOS_CALL MXOS_DOS_COMMAND_BATCH')
- section('badBatch',' ld a,6\n ld hl,04000h\n ld bc,257\n MXOS_CALL MXOS_BIOS_COMMAND_BATCH')
+ section('emptyBatch',' ld a,6\n ld hl,04000h\n ld bc,0\n MXOS_CALL_REGS MXOS_BIOS_COMMAND_BATCH')
+ section('dosBatch',' MXOS_CALL_REGS MXOS_DOS_COMMAND_BATCH')
+ section('badBatch',' ld a,6\n ld hl,04000h\n ld bc,257\n MXOS_CALL_REGS MXOS_BIOS_COMMAND_BATCH')
  section('wide',' ld hl,04000h\n ld bc,1024\n ld de,32\n call commandQueueInit')
- section('loadBank',' ld hl,dllPath\n ld a,MODULE_TARGET_BANK\n MXOS_CALL MXOS_DOS_MODULE_LOAD\n ld (handle),hl')
- section('loadDll',' ld hl,dllPath\n xor a\n MXOS_CALL MXOS_DOS_MODULE_LOAD\n ld (handle),hl')
- section('scope',' ld hl,(handle)\n ld de,controller\n MXOS_CALL MXOS_DOS_MODULE_SCOPE')
- section('coldCall',' ld hl,(handle)\n ld de,inputRegs\n MXOS_CALL MXOS_DOS_MODULE_CALL')
- section('scopePerf',' ld hl,(handle)\n ld de,runDirect\n MXOS_CALL MXOS_DOS_MODULE_SCOPE')
+ section('loadBank',' ld hl,dllPath\n ld a,MODULE_TARGET_BANK\n MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD\n ld (handle),hl')
+ section('loadDll',' ld hl,dllPath\n xor a\n MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD\n ld (handle),hl')
+ section('scope',' ld hl,(handle)\n ld de,controller\n MXOS_CALL_REGS MXOS_DOS_MODULE_SCOPE')
+ section('coldCall',' ld hl,(handle)\n ld de,inputRegs\n MXOS_CALL_REGS MXOS_DOS_MODULE_CALL')
+ section('scopePerf',' ld hl,(handle)\n ld de,runDirect\n MXOS_CALL_REGS MXOS_DOS_MODULE_SCOPE')
  section('legacyPerf',' call runLegacy')
- for label,op in (('runLegacy','MXOS_CALL MXOS_DOS_MODULE_CALL'),('runDirect','call mx_routeCall')):
+ for label,op in (('runLegacy','MXOS_CALL_REGS MXOS_DOS_MODULE_CALL'),('runDirect','call mx_routeCall')):
   text+=label+':\n'+(' ld hl,(handle)\n ld de,inputRegs\n '+op+'\n')*16+' ret\n'
  section('expired',' ld hl,(handle)\n ld de,inputRegs\n call mx_routeCall')
- section('unload',' ld hl,(handle)\n xor a\n MXOS_CALL MXOS_DOS_MODULE_UNLOAD')
+ section('unload',' ld hl,(handle)\n xor a\n MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD')
  for symbol,legacy in [('UPPERCASE','upperCase'),('GET_CURSOR_POS','getCursorPos'),
                        ('SET_CURSOR_POS','setCursorPos'),('SUB_HL_DE','sub_hl_de')]:
-  section(symbol,' call mx_'+legacy if symbol.endswith('_CURSOR_POS') else ' MXOS_CALL MXOS_BIOS_'+symbol)
+  section(symbol,' call mx_'+legacy if symbol.endswith('_CURSOR_POS') else ' MXOS_CALL_REGS MXOS_BIOS_'+symbol)
   section('legacy_'+symbol,f' call 0{b["bios_"+legacy]:04x}h')
- section('getError',' MXOS_CALL MXOS_DOS_GET_ERROR')
+ section('getError',' MXOS_CALL_REGS MXOS_DOS_GET_ERROR')
  section('legacy_getError',f' call 0{dos["dosGetError"]:04x}h')
  text+='''controller:
  ld hl,(handle)
@@ -75,7 +75,7 @@ def asm(n,custom=False):
  xor a
  call commandQueueSelect
  ld hl,(handle)
- MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+ MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
  ld (pinnedError),a
  ret
 handle: DW 0
@@ -114,7 +114,7 @@ try:
    if attempt==4:raise
  m.call('bp_clear')
  page(6)
- for addr,name in ((k['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(k['mx_call'],'CLIENT'),(t['BANK_LANDING'],'TRANSPORT')):m.write(addr,(R/f'bin/banked/{name}.bin').read_bytes())
+ for addr,name in ((k['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(k['mx_callPacket'],'CLIENT'),(t['BANK_LANDING'],'TRANSPORT')):m.write(addr,(R/f'bin/banked/{name}.bin').read_bytes())
  m.write(k['MEM_BANK_KIND'],bytes([k['MEM_BANK_EXEC']]))
  for bank in (0,6):
   page(bank);m.write(t['bankPage'],bytes([bank]));m.write(t['bankOwner'],bytes([7+bank,bank]));m.write(t['bankDepth'],b'\0');m.write(t['bankServiceSP'],W(k['DOS_BANK_STACK_TOP'] if bank else b['BIOS_BANK_STACK_TOP']));m.write(t['bankStackFloor'],W((k['DOS_BANK_STACK_BOTTOM'] if bank else b['BIOS_BANK_STACK_BOTTOM'])+64))

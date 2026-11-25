@@ -26,7 +26,7 @@ BankArguments:
     jp nz,BankArgumentError
     inc de
     ld a,(de)
-    MXOS_CALL MXOS_BIOS_UPPERCASE
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     cp 'P'
     jp nz,BankArgumentError
     call argNext
@@ -64,20 +64,20 @@ BankPageDigits:
     jp z,BankArgumentError
     ld b,c
     ld a,MEM_OP_RAMLIMIT
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret nc
     cp DOS_ERR_NO_MEDIA
     jp z,InstallFailed
 BankArgumentError:
     ld hl,bankArgumentText
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     scf
     ret
 BankNoArguments:
     ; Без аргументов первый запуск использует четыре банка, повтор сохраняет пул.
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld a,c
     or a

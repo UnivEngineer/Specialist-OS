@@ -1,5 +1,5 @@
 ; Общий ASCIIZ-фронтенд standalone. Подмена действует только внутри этапа.
-; MXOS_CALL использует sysBIOSTable, банковый адаптер — также старые JMP-входы.
+; MXOS_CALL_REGS использует sysBIOSTable, банковый адаптер — также старые JMP-входы.
 streamInstall:
     xor a
     ld (streamReal),a

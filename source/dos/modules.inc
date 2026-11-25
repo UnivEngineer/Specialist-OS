@@ -1,5 +1,5 @@
 ; Модули v2/v3. Фактические адреса и владение хранит DOS.
-; Публичный вызов через MXOS_CALL; все NEAR-параметры находятся у kdPage.
+; Публичный вызов через MXOS_CALL_REGS; все NEAR-параметры находятся у kdPage.
 ; Запись: handle:word, active:byte, bank:byte, entry:word,
 ; allocation:word, owner:byte, allocationOwner:byte, start:word, end:word,
 ; options:byte, policy:byte. With handle=0, active=1 marks a vacant image.
@@ -586,8 +586,8 @@ mdInstall:
     ld bc,MEM_IMAGE_LOCAL_START-IO_BANK_KEYS+BANK_LOCAL_BYTES
     call mdInstallPart
     ret c
-    ld hl,mx_call
-    ld de,mx_call
+    ld hl,mx_callPacket
+    ld de,mx_callPacket
     ld bc,BANK_CLIENT_BYTES
     call mdInstallPart
     ret c

@@ -102,10 +102,10 @@ ncStatePathValue:
     ex de,hl
     ; Resolve an absolute path afresh; no on-disk cluster IDs become stale.
     ld a,CLI_OP_CHDIR
-    MXOS_CALL MXOS_DOS_CLI
+    MXOS_CALL_REGS MXOS_DOS_CLI
     jp c,ncStatePathDone
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld hl,state.panelA_drive
     call writeBytePanel
     call savePanelDirectory
@@ -185,7 +185,7 @@ saveState:
     or a
     ret nz
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (ncStateDrive),a
     ld a,(state.activePanel)
     ld (ncStateActive),a
@@ -234,7 +234,7 @@ saveState:
     jp c,ncStateDisable
     ld hl,ncStateIO+FILE_PATH_IO.descriptor
     ld bc,0201h ; Hide the generated state from ordinary directory listings.
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_ATTR
     jp c,ncStateDisable
     jp ncStateFinish
 ncStateDisable:
@@ -242,7 +242,7 @@ ncStateDisable:
     ld (ncStateDisabled),a
 ncStateFinish:
     ld a,(ncStateDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret
 ncStateCapture:
     ld (state.activePanel),a
@@ -277,7 +277,7 @@ ncStatePanelKeys:
     push de
     ld hl,state.panelA_drive
     call readBytePanel
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     call restorePanelDirectory
     call getPanelPath
     pop de
@@ -437,7 +437,7 @@ ncStateIO:
 ncRamStatePath:
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ld a,e
     add a,'A'
     ld (ncStatePath),a

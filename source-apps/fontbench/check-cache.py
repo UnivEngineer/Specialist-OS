@@ -29,7 +29,7 @@ def main():
     def word(m, at, value):
         m[at:at + 2] = value.to_bytes(2, 'little')
 
-    # Только стенд MXOS_CALL Query заменён переходником к реальной службе IO.
+    # Только стенд MXOS_CALL_REGS Query заменён переходником к реальной службе IO.
     # Пропускаются два байта номера операции после CALL; транспорта здесь нет.
     base[0xf806:0xf806 + 7] = b'\xe1\x23\x23\xe5\xc3' + io['glyphCacheService'].to_bytes(2, 'little')
     arena_start, arena_end = 0x4b90, 0x5b90

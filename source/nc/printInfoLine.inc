@@ -193,7 +193,7 @@ ncStatusReadPlatform:
         ; OPEN_AT принимает диск и кластер каталога активной панели.
         ; Возврат к прежнему диску восстанавливает его сохранённый каталог.
         ld de,0
-        MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+        MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
         push af
         ld hl,state.panelA_drive
         call readBytePanel
@@ -220,7 +220,7 @@ ncStatusRestoreDrive:
         pop bc
         push af
         ld a,b
-        MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+        MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
         pop bc
         jp c,ncStatusNoPlatform
         ld a,c

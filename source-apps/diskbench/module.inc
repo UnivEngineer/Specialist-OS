@@ -114,13 +114,13 @@ moduleOperationsReady:
     ld b,0
     ld hl,BENCH_MAIN_WORK_ADDR
     ld de,LEGACY_APP_MEMORY_END-BENCH_MAIN_WORK_ADDR
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,bank_module_error
     ELSE
     ld b,0
     ld hl,BENCH_MAIN_BUFFER_ADDR
     ld a,MEM_OP_FREE
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,bank_module_error
     ld a,(v_fileSectors)
     ld d,a
@@ -162,11 +162,11 @@ moduleCopyName:
     ld (workerResultCopy+6),hl
     pop hl
     pop af
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,bank_module_error
     ld (bankModuleHandle),hl
     ld de,bankModuleRegs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,moduleUnload
     ld a,(bankModuleRegs+6)
     rra
@@ -193,7 +193,7 @@ moduleCopyName:
 moduleUnload:
     push af
     ld hl,(bankModuleHandle)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop bc
     jp c,bank_module_error
     ld a,c
@@ -363,13 +363,13 @@ reserveBenchBuffer:
     ld c,e
     ld hl,BENCH_MAIN_BUFFER_ADDR
     ld a,MEM_OP_MAINCLAIM
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     pop de
     ret c
     ld b,0
     ld hl,BENCH_MAIN_BUFFER_ADDR
     ld a,MEM_OP_MAINREGISTER
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret
 
 ;----------------------------------------------------------------------------
@@ -409,7 +409,7 @@ checkFreeSpace:
     or a
     ret z
     call requiredClusters
-    MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
+    MXOS_CALL_REGS MXOS_DOS_GET_DRIVE_FREE_SPACE
     ret c
     ex de,hl
     call bench_cmp_hl_de

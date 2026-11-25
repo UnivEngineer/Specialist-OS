@@ -82,12 +82,12 @@ try:
     ld de,01000h
     ld b,0
     ld a,MEM_OP_ARENA
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld hl,64
     ld b,0
     ld a,MEM_OP_ALLOC
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret
  END
 '''

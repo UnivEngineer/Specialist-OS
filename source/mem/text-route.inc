@@ -4,26 +4,32 @@ memBiosRoute:
     ld a,c
     cp MXOS_BIOS_COMMAND_BATCH & 255
     jp z,memBiosQueue
-    ld a,c
-    cp MXOS_BIOS_PRINT_STRING_Z & 0FFh
-    ld a,0
-    jp z,memBiosText
-    ld a,c
-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 0FFh
-    ld a,1
-    jp z,memBiosText
-    ld a,c
-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 0FFh
-    ld a,2
-    jp z,memBiosText
-    ld a,c
-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
-    ld a,8
+    call memBiosTextMode
     jp z,memBiosText
 memBiosGeneric:
     xor a
     ld hl,BIOS_BANK_GATE_ADDR+3
     jp bankMxInvoke
+; A содержит младший байт BIOS ID. При совпадении Z=1, A содержит режим.
+memBiosTextMode:
+    sub MXOS_BIOS_PRINT_STRING_Z & 255
+    ret z
+    sub MXOS_BIOS_PRINT_STRING_RAW_Z-MXOS_BIOS_PRINT_STRING_Z
+    jp z,memBiosTextModeRawZ
+    ASSERT MXOS_BIOS_PRINT_STRING_RAW_LIM-MXOS_BIOS_PRINT_STRING_RAW_Z == MEM_TEXT_RAW_LIM
+    cp MEM_TEXT_RAW_LIM
+    ret z
+    ; Смежные 012Dh/012Eh дают 2/3 после вычитания общей базы.
+    ASSERT MXOS_BIOS_PRINT_STRING_RAW_PSEUDO+1 == MXOS_BIOS_PRINT_STRING_LIM
+    sub MXOS_BIOS_PRINT_STRING_LIM-MXOS_BIOS_PRINT_STRING_RAW_Z-MEM_TEXT_LIM
+    cp MEM_TEXT_LIM
+    ret z
+    cp MEM_TEXT_LIM-1
+    ld a,MEM_TEXT_RAW_PSEUDO
+    ret
+memBiosTextModeRawZ:
+    ld a,MEM_TEXT_RAW_Z
+    ret
 memBiosText:
     ld (memOperation),a
 memBiosString:
@@ -48,8 +54,14 @@ memBiosString:
     ld l,a
     ex (sp),hl
     call memPrintTyped
-    jp c,bankBiosStringError
     xor a
     ld (BANK_FRAME_STATUS),a
     pop af
     jp bankMxResult
+
+bankMxNativeRegs:
+    ld hl,(MEM_NATIVE_CALL)
+    inc hl
+    inc hl
+    inc hl
+    jp (hl)

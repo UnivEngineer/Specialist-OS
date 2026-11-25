@@ -38,7 +38,7 @@ try:
   assert m.read(0xffc0,portion)==payload[-portion:]
   # Вызов BIOS после COPY печатает строку по адресу MAIN.
   m.write(0xa500,struct.pack('<HHHH',0x6000,0x4567,0x89ab,0x5502))
-  r,t=invoke(api['mx_call'],bc=api['MXOS_BIOS_PRINT_STRING_Z_MAIN'],de=0xa500)
+  r,t=invoke(api['mx_callPacket'],bc=api['MXOS_BIOS_PRINT_STRING_Z_MAIN'],de=0xa500)
   assert r['hl']==0x6000+length and r['de']==0x4567 and r['bc']==0x89ab,r
   page(0);assert m.read(0x6000,len(payload))==payload
   rows.append(dict(case='COPY-TEXT-TEXT-COPY-BIOS',bytes=length))
@@ -50,7 +50,7 @@ try:
  # Изолированный стенд удаляет разметку только собственного B: для разделения пула.
  page(2);m.write(0,bytes(256));page(0)
  def dos(op,bank=0,address=0,value=0):
-  m.write(0x3000,struct.pack('<HHHH',address,value,bank*256,op*256+2));return invoke(api['mx_call'],bc=api['MXOS_DOS_MEMORY'],de=0x3000)
+  m.write(0x3000,struct.pack('<HHHH',address,value,bank*256,op*256+2));return invoke(api['mx_callPacket'],bc=api['MXOS_DOS_MEMORY'],de=0x3000)
  r,t=dos(10,4);assert not r['af']&1,r
  r,t=dos(6,255,128);assert not r['af']&1 and r['bc']>>8==6 and r['hl']==0,r;rows.append(dict(case='allocate-bank',bank=6,ticks=t))
  page(6);m.write(0,initial[:128]);page(0)

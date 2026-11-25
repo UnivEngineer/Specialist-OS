@@ -6,7 +6,7 @@
 
 ## Контракт
 
-`MXOS_CALL MXOS_DOS_ENUMERATE` (022Ch): A=ENUM_OPEN/NEXT/CLOSE, HL=ENUM_REQUEST в банке вызывающего. CF=1/A=код DOS означает ошибку; пакет и выходной буфер — NEAR-адреса в том же банке. C SDK: `mxos_enumerate(operation, &request)`.
+`MXOS_CALL_REGS MXOS_DOS_ENUMERATE` (022Ch): A=ENUM_OPEN/NEXT/CLOSE, HL=ENUM_REQUEST в банке вызывающего. CF=1/A=код DOS означает ошибку; пакет и выходной буфер — NEAR-адреса в том же банке. C SDK: `mxos_enumerate(operation, &request)`.
 
 | Смещение | Поле | Размер |
 |---:|---|---:|

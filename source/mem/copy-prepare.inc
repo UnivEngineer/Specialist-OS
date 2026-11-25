@@ -56,6 +56,11 @@ memRouteInvoke:
     ret
     MEM_CURSOR_GATE memFixedSetCursor,0
     ASSERT $ <= MEM_MAIN_IO_BRIDGE
+memPrintZEmpty:
+    pop de
+    pop hl
+    pop bc
+    jp memPrintHaveHL
     DS MEM_MAIN_IO_BRIDGE-$,0
 memMainIoBridge:
     jp MAIN_BLOCK_IO_TARGET      ; Генерируется после размещения BIOS.
@@ -123,9 +128,10 @@ copyCountReady:
     ld a,h
     or a
     jp nz,bankCopyTail
-    ld a,l
-    cp 32
-    jp nc,bankCopyTail
+    ; Для физического входа Z сброшен и при размере ровно 32.
+    ld a,31
+    cp l
+    jp c,bankCopyTail
     jp bankCopyReturn
 copyClone:
     ld a,h
@@ -169,6 +175,7 @@ memBatchFailedCopy:
     INCLUDE "queue-work.inc"
     INCLUDE "fixed-word-return.inc"
     ASSERT $ <= MEM_COPY_BYTES_ENTRY
+memOperation: DB 0
     DS MEM_COPY_BYTES_ENTRY-$,0
     DEFINE COPY_HELPER_BYTES
     INCLUDE "copy-helpers.inc"

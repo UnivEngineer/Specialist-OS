@@ -48,7 +48,7 @@ for kib in [1,8,24]:
     assert result[s['v_bufferEndHi']]==s['sectorBuffer']//256+kib*4
 print('DISKBEN exact buffer end: 1/8/24 KiB PASS')
 
-# Стаб MXOS_CALL пропускает слово операции, сохраняет HL и возвращает число
+# Стаб MXOS_CALL_REGS пропускает слово операции, сохраняет HL и возвращает число
 # свободных кластеров либо указанную ошибку. Байт 9002h отмечает вызов DOS.
 space_cases = [
     (256, 1, 8, 31, 1, 0, s['DOS_ERR_FULL']),

@@ -21,12 +21,12 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 cliStart:
     ld hl,0
     ld a,CLI_OP_OBSERVER
-    MXOS_CALL MXOS_DOS_CLI
+    MXOS_CALL_REGS MXOS_DOS_CLI
     xor a
     call bios_setFontEncoding
     ld a,2
-    MXOS_CALL MXOS_DOS_SET_SHELL
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     call cliHistoryLoad
     ld hl,bios_cliExecError
     ld a,(hl)
@@ -35,10 +35,10 @@ cliStart:
     jp nz,cliShowError
 cliPrompt:
     ld a,1
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     ld a,DIR_OP_GETCWD
     ld hl,cliPromptPath
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,cliError
     ld hl,cliPromptPath
     call bios_printString
@@ -51,7 +51,7 @@ cliPrompt:
     ld hl,CMD_LINE
     ld de,cliOverwritePrompt
     ld a,CLI_OP_COMMAND
-    MXOS_CALL MXOS_DOS_CLI
+    MXOS_CALL_REGS MXOS_DOS_CLI
     jp c,cliError
     cp 0FFh
     jp z,cliExternal
@@ -63,7 +63,7 @@ cliExternal:
     call cliHistorySave
     ; Нижнее ОЗУ может быть затёрто программой; возврат через загрузку оболочки.
     ld a,1
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     ld hl,CMD_LINE
     ; После RET приложения код CLI в main уже может быть затёрт.
     MXOS_EXEC bios_cliExecDone
@@ -84,7 +84,7 @@ cliLeave:
 ;   на cliPrompt, обычного возврата через RET нет. Все регистры рабочие.
 ;----------------------------------------------------------------------------
 cliError:
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
 cliShowError:
     call dosErrorText
     call bios_printStringReal

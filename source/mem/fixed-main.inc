@@ -1,4 +1,7 @@
 memFixedMain = MAIN_FIXED_TARGET
+memPrintNear:
+    call bankTextCopyPartial
+    jp memPrintFilled
 ; Возврат TEXT начинает запись в маппер, затем использует стек клиента.
 ; Вход: A — обратный селектор, DE — SP клиента, C — выведено байтов.
     ASSERT $ <= MEM_TEXT_RETURN
@@ -13,10 +16,11 @@ memPrintReturn:
     ld (bankServiceSP),hl
     pop de
     pop hl
-    ld a,d
-    sub c
-    jp nz,memPrintAtNul
-    pop de
+    ld b,0
+    add hl,bc
+    ld a,c
+    cp BANK_TEXT_BYTES
+    jp nz,memPrintShort
     ex (sp),hl
     ld a,l
     sub c
@@ -26,16 +30,17 @@ memPrintReturn:
     ld b,a
     pop hl
     jp memPrintLoop
-memPrintAtNul:
-    dec hl
-    pop de
-    pop de
+memPrintShort:
+    pop bc
 memPrintHaveHL:
     pop de
     pop bc
-    pop af
-    or a
+    xor a
     ret
+memPrintStack:
+    call bankTextCopy32
+    ld c,BANK_TEXT_BYTES
+    jp memPrintFilled
     ASSERT $ <= MEM_SCREEN_RETURN
     DS MEM_SCREEN_RETURN-$,0
     ld (BANK_IO_RAM),a

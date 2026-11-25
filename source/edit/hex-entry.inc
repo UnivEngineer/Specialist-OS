@@ -322,20 +322,20 @@ editorSwitchOverlay:
 editorLoadOverlay:
     ld (editorOverlayFile),hl
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     push af
     call hexReadOverlay
     pop bc
     push af
     ld a,b
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,hexRestoreError
     pop af
     ret
 hexRestoreError:
     pop af
     ret c
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
     ret
 hexReadOverlay:
     call flClear

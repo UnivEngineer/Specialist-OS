@@ -18,7 +18,7 @@ IMAGE_FLAGS = IMAGE_FLAG_DRIVER
 
 entry:
     ld hl,message
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld hl,08800h
     ld de,055AAh
     ld b,0

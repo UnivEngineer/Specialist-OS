@@ -66,11 +66,11 @@ def main():
             if name in symbols_:
                 for page in pages:
                     points[page, symbols_[name]] = name
-    mark(k, 'mx_call mx_callRegs bankMxCall bankMxRegsRoute bankMxResult memPrintMain memPrintReturn', PAGES)
+    mark(k, 'mx_callPacket mx_callRegs bankMxCall bankMxRegsRoute bankMxResult memPrintMain memPrintReturn', PAGES)
     mark(t, 'bankQueueBefore bankCallPacket bankSwitch bankLanding bankServiceReturn bankResume', PAGES)
     mark(t, 'BANK_SELECT_GATE' if 'BANK_SELECT_GATE' in t else 'BANK_WINDOW', PAGES)
     mark(io, 'bbEntry bbScalarDone bbScalarFast', [0])
-    mark(b, 'sysPacketReady sysBiosRegs sysReturned upperCase sub_hl_de getCursorPos printChar printStringZ bios_textDispatch', [0])
+    mark(b, 'sysPacketReady sysBiosRegs sysReturned upperCase sub_hl_de getCursorPos printChar printStringZ bankText.printStringLim', [0])
     mark(dos, 'kernelDispatch kernelLocalDispatch kdScalarFind kdInvoke dosGetError kdFinish', [1])
     mark(k, 'bankFastDecode bankFastReady', PAGES)
     mark(t, 'bankFastPrepare bankFastLanding bankFastReturn bankFastRestore', PAGES)
@@ -123,7 +123,7 @@ def main():
         m.call('debug_break')
         m.call('bp_clear')
         page(6)
-        for addr, name in [(k['MEM_IMAGE_LOCAL_START'], 'LOCALBLOCK'), (k['mx_call'], 'CLIENT'), (t['BANK_LANDING'], 'TRANSPORT')]:
+        for addr, name in [(k['MEM_IMAGE_LOCAL_START'], 'LOCALBLOCK'), (k['mx_callPacket'], 'CLIENT'), (t['BANK_LANDING'], 'TRANSPORT')]:
             m.write(addr, (banked / (name + '.bin')).read_bytes())
         before = {}
         leaf_guards = {}
@@ -189,7 +189,7 @@ def main():
                 regs = dict(af=0x0102, hl=t['bankCallback'], bc=NEST, de=PACKET)
             else:
                 op = k['MXOS_'+operation]
-                code = b'\xcd'+WORD(k['mx_callRegs'] if inline else k['mx_call'])
+                code = b'\xcd'+WORD(k['mx_callRegs'] if inline else k['mx_callPacket'])
                 if inline:
                     code += WORD(op)
                 else:

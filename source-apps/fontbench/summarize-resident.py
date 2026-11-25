@@ -1,4 +1,4 @@
-"""Publish only complete, pixel-verified FontBen/PIT runs of one image."""
+"""Publish the archived 2026-11-13 FontBen/PIT runs of one image."""
 from pathlib import Path
 import json,hashlib
 R=Path(__file__).resolve().parents[2];O=R/'docs/bench/resident-vs-standalone'

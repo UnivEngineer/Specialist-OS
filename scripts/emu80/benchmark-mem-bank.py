@@ -19,7 +19,10 @@ STUB, PACKET, SP = 0x8100, 0x8200, 0x8650
 
 
 def symbols(path):
-    return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',path.read_text(encoding='utf-8'),re.M)}
+    result = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',path.read_text(encoding='utf-8'),re.M)}
+    if 'mx_call' in result:  # Имя F800h в архивных --bundle.
+        result.setdefault('mx_callPacket', result['mx_call'])
+    return result
 
 
 def shell(script):
@@ -54,8 +57,12 @@ def main():
     parser.add_argument('--runtime',type=Path,required=True)
     parser.add_argument('--port',type=int,choices=range(19781,19785),default=19781)
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--suite',choices=('copy','bios','legacy','user','remote-move','local-copy','text','all'),default='copy',help='all: copy + bios')
+    parser.add_argument('--suite',choices=('copy','bios','legacy','user','remote-move','local-copy','text','text-windows','text-main','all'),default='copy',help='all: copy + bios')
+    parser.add_argument('--text-lengths',type=int,nargs='+',default=(0,1,20,31,32,33,64,128),
+                        help='Длины строк для --suite text, от 0 до 511 байт')
     args=parser.parse_args()
+    if any(not 0 <= length <= 511 for length in args.text_lengths):
+        parser.error('Длина текста должна быть от 0 до 511 байт')
     out=args.out.resolve()
     out.mkdir(parents=True,exist_ok=True)
     bundle,runtime=args.bundle.resolve(),args.runtime.resolve()
@@ -278,32 +285,56 @@ def main():
         kernel=symbols(bundle/'bin/banked/KERNEL.sym')
         source,cursor=0x8400,b['bios_vars.cursorY']
         clean_video=bytes(0x3000)
-        for length in (0,1,20,31,32,33,64,128):
-            payload=(b'Abc123! ' * 16)[:length]
-            for mode,entry,id_suffix in (('z','bios_printStringZ','Z'),
-                                         ('raw-z','bios_printStringRawZ','RAW_Z'),
-                                         ('raw-lim','bios_printStringRawLim','RAW_LIM')):
+        modes=[('z','bios_printStringZ','Z'),
+               ('raw-z','bios_printStringRawZ','RAW_Z'),
+               ('raw-lim','bios_printStringRawLim','RAW_LIM')]
+        if 'MXOS_BIOS_PRINT_STRING_LIM' in k:
+            modes.append(('lim','bios_printStringLim','LIM'))
+        for length in args.text_lengths:
+            controls=[('lim-controls','bios_printStringLim','LIM')] if length==33 and 'MXOS_BIOS_PRINT_STRING_LIM' in k else []
+            for mode,entry,id_suffix in modes+controls:
+                payload=(b'Abc123! ' * ((length+7)//8))[:length]
+                if mode=='lim-controls':
+                    payload=b'A\0B\rC\n'+b'X'*25+b'\x1b)'
                 routes=[(0,'bios',b[entry],None)]
                 for caller in (1,6):
                     syscall=k['MXOS_BIOS_PRINT_STRING_'+id_suffix]
                     routes.append((caller,'regs',k['mx_callRegs'],syscall))
+                    routes.append((caller,'packet',k['mx_callPacket'],syscall))
                 if mode=='z':
                     routes.append((1,'dos-native',kernel['bankDosPrintString'],None))
                 expected=None
+                page(0)
+                inverse,esc=b['bios_vars.inverse'],b['bios_upper.escMode']
+                initial_inverse,initial_esc=m.read(inverse,2),m.read(esc,1)
+                if mode=='lim-controls':
+                    scalar=b''.join(b'\x0e'+bytes([ch])+b'\xcd'+WORD(b['bios_printChar']) for ch in payload)
+                    m.write(0x8300,scalar+b'\xc9')
+                    m.write(0x9000,clean_video)
+                    m.write(cursor,WORD(0x100a))
+                    run(0,0x8300,source)
+                    expected=(m.read(cursor,2),m.read(0x9000,0x3000),m.read(inverse,2),m.read(esc,1))
                 for caller,route,address,inline in routes:
                     page(0)
+                    m.write(inverse,initial_inverse)
+                    m.write(esc,initial_esc)
                     m.write(0x9000,clean_video)
                     m.write(cursor,WORD(0x100a))
                     page(caller)
                     m.write(source,payload+b'\0poison')
                     before=m.read(t['bankOwner'],7)
-                    elapsed,regs=run(caller,address,source,af=0x5a92,bc=length,
-                                     de=0x1234,inline=inline)
+                    if route=='packet':
+                        m.write(PACKET,struct.pack('<4H',source,0x1234,length,0x5a92))
+                        elapsed,regs=run(caller,address,source,af=0x5a92,bc=inline,de=PACKET)
+                        assert m.read(PACKET,8)==struct.pack('<4H',source+length,0x1234,length,0x5a92)
+                    else:
+                        elapsed,regs=run(caller,address,source,af=0x5a92,bc=length,
+                                         de=0x1234,inline=inline)
                     assert (regs['af'],regs['hl'],regs['bc'],regs['de'])==(0x5a92,source+length,length,0x1234),(caller,mode,length,regs)
                     assert m.read(t['bankOwner'],7)==before,(caller,route,mode,length)
                     assert m.read(source,length+7)==payload+b'\0poison'
                     page(0)
-                    state=(m.read(cursor,2),m.read(0x9000,0x3000))
+                    state=(m.read(cursor,2),m.read(0x9000,0x3000),m.read(inverse,2),m.read(esc,1))
                     if expected is None:
                         expected=state
                     else:
@@ -311,6 +342,170 @@ def main():
                     yield dict(operation=mode,caller=caller,route=route,length=length,
                                ticks=elapsed,result=regs)
         print('text PASS',flush=True)
+
+    def text_main_cases():
+        """Сверить MAIN-адрес, регистры и экран при вызове из MAIN, DOS и EXEC."""
+        page(0)
+        cursor, inverse, esc = b['bios_vars.cursorY'], b['bios_vars.inverse'], b['bios_upper.escMode']
+        inverse0, esc0 = m.read(inverse, 2), m.read(esc, 1)
+
+        def reset_screen():
+            page(0)
+            m.write(0x9000, bytes(0x3000))
+            m.write(cursor, WORD(0x100a))
+            m.write(inverse, inverse0)
+            m.write(esc, esc0)
+
+        def screen():
+            page(0)
+            return (m.read(0x9000, 0x3000), m.read(cursor, 2), m.read(inverse, 2), m.read(esc, 1))
+
+        dest = 0x8700  # В MAIN ниже memTop стенда, в DOS выше конца ядра.
+        for mode, vector in (('Z', 'bios_printStringZ'), ('RAW_Z', 'bios_printStringRawZ'),
+                             ('RAW_LIM', 'bios_printStringRawLim'), ('LIM', 'bios_printStringLim')):
+            op = k['MXOS_BIOS_PRINT_STRING_' + mode + '_MAIN']
+            for length in (0, 33, 1024):
+                data = bytearray((b'Abc123! ' * 128)[:length])
+                if length:
+                    data[30:33] = b'\x1b)A'
+                    if mode.endswith('LIM'):
+                        data[5] = 0
+                data += b'\0Poison'
+                reset_screen()
+                m.write(dest, data)
+                direct, _ = run(0, b[vector], dest, bc=length)
+                expected = screen()
+                yield dict(mode=mode, length=length, caller=0, route='direct', ticks=direct)
+                for caller in (0, 1, 6):
+                    for abi in ('regs', 'packet'):
+                        reset_screen()
+                        page(caller)
+                        # То же 16-битное значение в банке клиента указывает на другие байты.
+                        if caller:
+                            m.write(dest, b'BAD\0')
+                        registers = (dest, 0x3456, length, 0x5a92)
+                        result = (dest + length, *registers[1:])
+                        if abi == 'packet':
+                            m.write(PACKET, struct.pack('<4H', *registers))
+                            ticks, _ = run(caller, k['mx_callPacket'], 0, bc=op, de=PACKET)
+                            assert m.read(PACKET, 8) == struct.pack('<4H', *result), (caller, mode, abi)
+                        else:
+                            ticks, regs = run(caller, k['mx_callRegs'], dest, af=registers[3],
+                                              bc=length, de=registers[1], inline=op)
+                            assert tuple(regs[r] for r in ('hl', 'de', 'bc', 'af')) == result, (caller, mode, regs)
+                        assert screen() == expected, (caller, mode, length, abi)
+                        assert m.read(dest, len(data)) == data
+                        yield dict(mode=mode, length=length, caller=caller, route=abi, ticks=ticks)
+
+        # Тот же корпус и то же тело gridBankFar, что у выпускаемого FontBen.
+        grid = symbols(bundle/'bin/FONTGRID.sym')
+        app = symbols(bundle/'bin/FONTCOM.sym')
+        length = grid['GRID_TEXT_BYTES']
+        start = app['gridText']
+        corpus = (bundle/'bin/FONTCOM.i80').read_bytes()[start:start+length] + b'\0'
+        page(6)
+        module = (bundle/'bin/FONTGRID.i80').read_bytes()
+        m.write(grid['entry'], module[:grid['IMAGE_BODY_SIZE']])
+        source = grid['gridCorpus']
+        m.write(source, corpus)
+        for kind, (mode, vector) in enumerate((('Z', 'bios_printStringZ'), ('RAW_Z', 'bios_printStringRawZ'),
+                                              ('RAW_LIM', 'bios_printStringRawLim')), start=2):
+            copied = length + (mode != 'RAW_LIM')
+            reset_screen()
+            m.write(cursor, bytes(2))
+            m.write(dest, corpus)
+            direct, _ = run(0, b[vector], dest, bc=length)
+            expected = screen()
+            yield dict(mode=mode, length=length, caller=0, route='fontben-direct', ticks=direct)
+            reset_screen()
+            m.write(cursor, bytes(2))
+            op = k['MXOS_BIOS_PRINT_STRING_' + mode]
+            near, _ = run(6, k['mx_callRegs'], source, bc=length, inline=op)
+            assert screen() == expected, (mode, 'near')
+            yield dict(mode=mode, length=length, caller=6, route='fontben-near', ticks=near)
+            reset_screen()
+            m.write(cursor, bytes(2))
+            m.write(dest - 1, bytes([0xa5]) * (copied + 2))
+            page(6)
+            m.write(grid['gridKind'], bytes([kind]))
+            m.write(grid['gridFarCopy'], struct.pack('<BHBHH', 6, source, 0, dest, copied))
+            far, regs = run(6, grid['gridBankFar'], 0)
+            assert not regs['af'] & 1 and regs['hl'] == dest + length, regs
+            assert screen() == expected, (mode, 'far1024')
+            assert m.read(dest - 1, copied + 2) == b'\xa5' + corpus[:copied] + b'\xa5'
+            yield dict(mode=mode, length=length, caller=6, route='fontben-far1024', ticks=far)
+
+    def window_cost_cases():
+        """Сравнить непрерывную печать и те же порции на одном движке в MAIN."""
+        page(0)
+        source,cursor=0x8400,b['bios_vars.cursorY']
+        font=b['FONT_ENGINE_TEXT_LIM']
+        # Обе контрольные точки вызывают тот же счётный вход, что и банковый Z.
+        assert m.read(b['FONT_ENGINE_TEXT_EXT'],2)==WORD(font)
+        # В отдельном проходе считаем только вызовы одиночной отрисовки из Z/LIM.
+        rotate=symbols(bundle/'bin/fonts/Rotate.sym')
+        scalar_call=b'\xcd'+WORD(rotate['printCharBody'])
+        counter,probe=0x8300,0x8310
+        sites=[]
+        for vector,entry,fallback in ((b['FONT_ENGINE_Z'],'printStringZ','printStringChar'),
+                                      (font,'printStringLim','stringLimControl')):
+            assert m.read(vector,3)==b'\xc3'+WORD(rotate[entry]),'Нужен штатный Rotate'
+            start=rotate[fallback]
+            body=m.read(start,12)
+            assert body.count(scalar_call)==1
+            sites.append(start+body.index(scalar_call)+1)
+        # PUSH HL / LHLD / INX H / SHLD / POP HL / JMP сохраняют аргументы и флаги.
+        m.write(probe,b'\xe5\x2a'+WORD(counter)+b'\x23\x22'+WORD(counter)+b'\xe1\xc3'+scalar_call[1:])
+        for start_x in (16,0):
+            for length in (32,64,128,256):
+                payload=b'Abc123! '*(length//8)+b'\0'
+                expected=None
+                for route,entry,block in (
+                        ('main-z',b['bios_printStringZ'],length),
+                        ('main-lim',b['bios_printStringLim'],length),
+                        ('font-whole',font,length),
+                        ('font-32',font,32),
+                        ('bank-z',k['mx_callRegs'],length),
+                        ('bank-lim',k['mx_callRegs'],length)):
+                    page(0)
+                    m.write(0x9000,bytes(0x3000))
+                    m.write(cursor,bytes((10,start_x)))
+                    caller=6 if route.startswith('bank-') else 0
+                    page(caller)
+                    m.write(source,payload)
+                    op={'bank-z':'Z','bank-lim':'LIM'}.get(route)
+                    inline=k['MXOS_BIOS_PRINT_STRING_'+op] if op else None
+                    portions=[]
+                    for offset in range(0,length,block):
+                        elapsed,regs=run(caller,entry,source+offset,bc=block,inline=inline)
+                        assert regs['hl']==source+offset+block
+                        page(0)
+                        y,x=m.read(cursor,2)
+                        portions.append(dict(ticks=elapsed,x=x,y=y))
+                    state=(m.read(cursor,2),m.read(0x9000,0x3000))
+                    if expected is None:
+                        expected=state
+                    assert state==expected,(route,start_x,length)
+                    row=dict(route=route,start_x=start_x,length=length,portions=portions,
+                             ticks=sum(part['ticks'] for part in portions))
+                    if route in ('main-z','bank-z'):
+                        m.write(0x9000,bytes(0x3000))
+                        m.write(cursor,bytes((10,start_x)))
+                        m.write(counter,WORD(0))
+                        try:
+                            for site in sites:
+                                m.write(site,WORD(probe))
+                            counted,_=run(caller,entry,source,bc=length,inline=inline)
+                            page(0)
+                            scalar=int.from_bytes(m.read(counter,2),'little')
+                            assert counted-elapsed==68*scalar
+                            assert (m.read(cursor,2),m.read(0x9000,0x3000))==expected
+                            row['scalar_glyphs']=scalar
+                        finally:
+                            page(0)
+                            for site in sites:
+                                m.write(site,scalar_call[1:])
+                    yield row
 
     def legacy_cases():
         # Номера BIOS из MEM rev64, снятые с публичного ABI в rev65.
@@ -342,7 +537,7 @@ def main():
                     if mode=='inline':
                         ticks,result=run(caller,k['mx_callRegs'],inline=op,**args)
                     else:
-                        ticks,result=run(caller,k['mx_call'],args['hl'],af=args['af'],de=PACKET,bc=op)
+                        ticks,result=run(caller,k['mx_callPacket'],args['hl'],af=args['af'],de=PACKET,bc=op)
                     assert m.read(t['bankOwner'],7)==context
                     assert m.read(PACKET,len(packet))==packet
                     if not supported:
@@ -546,6 +741,12 @@ def main():
                     save(row)
             if args.suite=='text':
                 for row in text_cases():
+                    save(row)
+            if args.suite=='text-windows':
+                for row in window_cost_cases():
+                    save(row)
+            if args.suite=='text-main':
+                for row in text_main_cases():
                     save(row)
         names=('MEM.sys','BIOS.sys','DOS.sys','IO.sys','banked/CLIENT.bin','banked/LOCALBLOCK.bin',
                'banked/TRANSPORT.bin','banked/WINDOW.bin','banked/MAINBIOS.bin')

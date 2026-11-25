@@ -15,7 +15,7 @@ kernelReal:
     pop bc
     pop af
     ret
-; Эти адреса также служат тегами CASE; общий цикл делает один MXOS_CALL на поток.
+; Эти адреса также служат тегами CASE; общий цикл делает один MXOS_CALL_REGS на поток.
 kernelString:
     jp bios_printString
 kernelRealString:
@@ -63,7 +63,7 @@ kernelRealBatch:
     pop hl
     push af
     push hl
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_REAL_MAIN
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_REAL_MAIN
     pop hl
     push hl
     ld b,0

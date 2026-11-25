@@ -9,9 +9,9 @@ static mxos_u8 result(MXOS_REGS *r)
 {
     mxos_u8 error;
     if (r->entry < 0x1000) {
-        MXOS_CALL q;
+        MXOS_CALL_PACKET q;
         q.operation=r->entry; q.hl=r->hl; q.de=r->de; q.bc=r->bc; q.af=r->af;
-        mxos_call(&q);
+        mxos_call_packet(&q);
         r->hl=q.hl; r->de=q.de; r->bc=q.bc; r->af=q.af;
     } else mxos_bios_call(r);
     if (!(r->af & MXOS_CF)) return 0;
@@ -19,9 +19,9 @@ static mxos_u8 result(MXOS_REGS *r)
 }
 static mxos_u16 timer_request(mxos_u8 op)
 {
-    MXOS_CALL request = {MXOS_DOS_TIMER, 0, 0, 0, 0};
+    MXOS_CALL_PACKET request = {MXOS_DOS_TIMER, 0, 0, 0, 0};
     request.af = (mxos_u16)op << 8;
-    return mxos_call(&request);
+    return mxos_call_packet(&request);
 }
 
 mxos_u8 mxos_bank_key_begin(MXOS_KEY_STATE *state)
@@ -112,6 +112,12 @@ mxos_u16 mxos_checksum(const void *buffer, mxos_u16 bytes)
     mxos_bios_call(&r); return r.bc;
 }
 #ifndef __Z88DK
+const char *mxos_printStringLim(const char *text, mxos_u16 bytes)
+{
+    MXOS_CALL_PACKET request = {MXOS_BIOS_PRINT_STRING_LIM, (mxos_u16)text, 0, bytes, 0};
+    mxos_call_packet(&request);
+    return (const char *)request.hl;
+}
 /* Для sccz80 горячие однорегистровые вызовы находятся в коротком ASM-мосте. */
 mxos_u16 mxos_memtop(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_MEMTOP_GET); mxos_bios_call(&r); return r.hl; }
 void mxos_set_memtop(mxos_u16 top) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_MEMTOP_SET); r.hl=top; mxos_bios_call(&r); }
@@ -154,7 +160,7 @@ int mxos_equal_n(const char *a, const char *b, mxos_u8 bytes, int ignore_case)
 #endif
 mxos_u8 mxos_drive_select(mxos_u8 drive) { MXOS_REGS r; prepare(&r,MXOS_DOS_FILE_SELECT_DRIVE); r.af=(mxos_u16)drive<<8; return result(&r); }
 mxos_u8 mxos_volume_flush(void) { MXOS_REGS r; prepare(&r,MXOS_DOS_FLUSH_VOLUME); return result(&r); }
-mxos_u8 mxos_last_error(void) { MXOS_CALL q; q.operation=MXOS_DOS_GET_ERROR; q.hl=q.de=q.bc=q.af=0; mxos_call(&q); return (mxos_u8)(q.af>>8); }
+mxos_u8 mxos_last_error(void) { MXOS_CALL_PACKET q; q.operation=MXOS_DOS_GET_ERROR; q.hl=q.de=q.bc=q.af=0; mxos_call_packet(&q); return (mxos_u8)(q.af>>8); }
 const MXOS_DISK_INFO *mxos_disk_info(mxos_u16 *physical_blocks)
 {
     MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DISK_DRIVER); r.bc=0x0300; mxos_bios_call(&r);

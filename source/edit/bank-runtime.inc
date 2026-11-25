@@ -34,25 +34,25 @@ editorBankEntry:
     ret c
     ld hl,ebGfxPath
     ld a,MODULE_TARGET_MAIN
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,ebFreeWorkspace
     ld (ebGfxHandle),hl
     MXOS_KEY_BEGIN ebKeyState
     ld hl,(ebGfxHandle)
     ld de,ebController
-    MXOS_CALL MXOS_DOS_MODULE_SCOPE
+    MXOS_CALL_REGS MXOS_DOS_MODULE_SCOPE
     push af
     MXOS_KEY_END ebKeyState
     ld hl,(ebGfxHandle)
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop af
 ebFreeWorkspace:
     push af
     ld hl,EDIT_MAIN_PACKET
     ld b,0
     ld a,MEM_OP_FREE
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     pop af
     ret c
     ld a,(ebStatus)
@@ -757,7 +757,7 @@ ebSetHook:
     ret
 ebEncoding:
     ld (ebKeyState.koi7),a
-    MXOS_CALL MXOS_BIOS_SET_FONT_ENCODING
+    MXOS_CALL_REGS MXOS_BIOS_SET_FONT_ENCODING
     ret
 ebMemTop:
     ld hl,EDITOR_MEMORY_END-1

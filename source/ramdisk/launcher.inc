@@ -21,7 +21,7 @@ RamdiskLauncher:
     push hl
     ld c,MEM_RAMDISK_CHECK_LETTER
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     pop hl
     jp c,BankArgumentError
     call BankArguments
@@ -32,7 +32,7 @@ RamdiskLauncher:
     ld b,a
     ld c,MEM_RAMDISK_COMMIT
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret
 
 bankRequestedDrive: DB RAM_DRIVE

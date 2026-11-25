@@ -7,6 +7,12 @@
 
 BANK_WINDOW           = 0FFC0h
 BANK_TEXT_BYTES       = 32
+BANK_TEXT_STACK_MIN   = 29
+MEM_TEXT_RAW_Z        = 1
+MEM_TEXT_RAW_LIM      = 2
+MEM_TEXT_LIM          = 3
+MEM_TEXT_BATCH        = 7
+MEM_TEXT_RAW_PSEUDO   = 8
 MEM_WORD_RETURN       = 0F32Bh
 MEM_TOP_MAPPED        = 0F4D7h
 ;------------------------------------------------------------------------------
@@ -120,8 +126,9 @@ BANK_CALLEE_BYTES      = 8
 
 
 ; Метки 32-байтной локальной развёртки в полном профиле.
-MEM_LOCAL_FORWARD      = 0F925h
-MEM_FORWARD_BLOCK_END  = MEM_LOCAL_FORWARD+8+5+80
+MEM_LOCAL_FORWARD      = 0F928h
+MEM_FORWARD_BLOCK      = MEM_LOCAL_FORWARD+8+5
+MEM_FORWARD_BLOCK_END  = MEM_FORWARD_BLOCK+16*5
 MEM_FORWARD_RESTORE    = MEM_FORWARD_BLOCK_END+8
 MEM_SCREEN_RETURN      = 0F58Fh
 MEM_TEXT_RETURN        = 0F561h

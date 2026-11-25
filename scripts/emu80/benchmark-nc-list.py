@@ -28,11 +28,11 @@ entry:
     IF {context}
     ld a,7
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,finished
     ld de,0
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,finished
     ENDIF
     IF {listing}
@@ -42,7 +42,7 @@ listSkip:
 listCapacity:
     ld de,255
     ld a,DIR_OP_LIST
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ENDIF
 finished:
     push af

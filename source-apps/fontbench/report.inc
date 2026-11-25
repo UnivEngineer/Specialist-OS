@@ -45,23 +45,23 @@ reportBuilt:
     call bios_sub_hl_de
     ld (reportSize),hl
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (reportDrive),a
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld a,e
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,reportRestoreDrive
     ld a,DIR_OP_GET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,reportRestoreDrive
     ex de,hl
     ld (reportDirectory),hl
     ld de,0
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,reportRestoreDirectory
     call reportFopen
     jp c,reportRestoreDirectory
@@ -91,13 +91,13 @@ reportRestoreDirectory:
     ld hl,(reportDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp nc,reportRestoreDrive
     ld hl,reportFailedText
     ld (reportMessage),hl
 reportRestoreDrive:
     ld a,(reportDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret nc
     ld hl,reportFailedText
     ld (reportMessage),hl
@@ -129,7 +129,7 @@ reportFclose:
     ld a,FILE_OP_CLOSE
 reportFileCall:
     ld hl,reportHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret ; Эти обработчики сохраняют регистры так же, как экранные функции вывода.
 reportPuts:
     push af

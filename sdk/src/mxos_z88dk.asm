@@ -3,10 +3,11 @@
     SECTION code_clib
     INCLUDE "mxos_syscall_ids.inc"
     PUBLIC _mxos_bios_call
-    PUBLIC _mxos_call
+    PUBLIC _mxos_call_packet
     PUBLIC _mxos_queue_bind, _mxos_queue_flush
     PUBLIC _mxos_memmove_far, _mxos_puts_local
     PUBLIC _mxos_printString_bank, _mxos_printString_main
+    PUBLIC _mxos_printStringLim
     PUBLIC _mxos_memcpy_far
     PUBLIC _mxos_memtop, _mxos_set_memtop
     PUBLIC _mxos_getch, _mxos_getkey, _mxos_keyscan, _mxos_putch, _mxos_puts
@@ -17,7 +18,7 @@
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
-; Выполнить системный запрос через пакет MXOS_CALL.
+; Выполнить системный запрос через пакет MXOS_CALL_PACKET.
 ;
 ; вход:
 ;   hl = адрес пакета в странице вызывающего. Первое слово задаёт номер службы, далее
@@ -28,13 +29,13 @@
 ;   результаты в пакет согласно своему ABI.
 ;----------------------------------------------------------------------------
 
-_mxos_call:
+_mxos_call_packet:
     ld c,(hl)
     inc hl
     ld b,(hl)
     inc hl
     ex de,hl
-    call mx_call
+    call mx_callPacket
     push af
     pop hl
     ret
@@ -103,6 +104,23 @@ _mxos_puts_local:
 _mxos_printString_main:
     call mx_callRegs
     defw MXOS_BIOS_PRINT_STRING_MAIN
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+; Печать точного диапазона в странице вызывающего с обработкой управляющих кодов.
+; вход: стек sccz80 — адрес возврата, число байтов, указатель на текст.
+; выход: HL указывает за последним байтом. Аргументы снимает вызывающий.
+;----------------------------------------------------------------------------
+_mxos_printStringLim:
+    pop de
+    pop bc
+    pop hl
+    push hl
+    push bc
+    push de
+    call mx_callRegs
+    defw MXOS_BIOS_PRINT_STRING_LIM
     ret
 
 ;----------------------------------------------------------------------------

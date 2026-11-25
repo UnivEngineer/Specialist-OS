@@ -43,7 +43,7 @@ ncDeleteConfirm:
             jp nz,ncRefreshDirty
             ld          hl, state.panelA_drive
             call        readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             jp c,       deleteFileError
             call restorePanelDirectory
             jp c,       deleteFileError
@@ -51,7 +51,7 @@ ncDeleteConfirm:
             call readBytePanel
             ld (vars.copyRequest.sourceDrive),a
             ld a,DIR_OP_GET
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             ex de,hl
             ld (vars.copyRequest.sourceDirectory),hl
             call getSelectedFile
@@ -71,7 +71,7 @@ ncDeleteName:
             jp          ncRefreshDirty
 
 deleteFileError:
-            MXOS_CALL MXOS_DOS_GET_ERROR
+            MXOS_CALL_REGS MXOS_DOS_GET_ERROR
 deleteFileJobError:
             call dosErrorText
             jp copyFileShowError

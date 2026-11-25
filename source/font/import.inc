@@ -116,7 +116,7 @@ loadPath:
 restoreDrive:
     push af
     ld a,(oldDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     ret
 loadInitializer:

@@ -21,7 +21,7 @@ ncConfigLoad:
 ncConfigRead:
     push hl
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     push af
     pop bc
     pop hl
@@ -46,7 +46,7 @@ ncConfigLoaded:
     pop bc
     pop af
     push bc
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     ret
 ; Shared by the reader and state writer: HL=short filename -> MAX_PATH buffer.

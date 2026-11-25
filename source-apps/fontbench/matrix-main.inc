@@ -379,7 +379,7 @@ renderQuadScreen:
 renderSerialScreen:
     call reset_timing
     ld hl,bankImage
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_MAIN
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_MAIN
     jp timer_sample
     INCLUDE "stream.inc"
 matrixArgsBad:

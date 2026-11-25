@@ -73,7 +73,7 @@ chooseDrive:
     cp 8
     jp nc,askDrive
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
 scan:
     xor a
     ld (phase),a

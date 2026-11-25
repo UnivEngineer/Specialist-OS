@@ -7,17 +7,15 @@ scalarCommandLanding:
     cp 3
     jp c,bankLanding
     ex de,hl
-    rla                    ; CY=чтение; bit7=слово, иначе байт.
+    add a,a                  ; CF=чтение, S=слово. CP 3 уже сбросил CF.
     jp nc,scalarCommandWrite
     ld c,(hl)
-    or a
     jp p,scalarCommandDone
     inc hl
     ld b,(hl)
     jp scalarCommandDone
 scalarCommandWrite:
     ld (hl),c
-    or a
     jp p,scalarCommandDone
     inc hl
     ld (hl),b

@@ -132,7 +132,7 @@ editorLimitReady:
         LD HL,(v_textBeginLo)
         LD B,0
         LD A,MEM_OP_MAINREGISTER
-        MXOS_CALL MXOS_DOS_MEMORY
+        MXOS_CALL_REGS MXOS_DOS_MEMORY
         POP DE
         JP C,editorMemoryTooSmall
     ENDIF
@@ -148,7 +148,7 @@ editorLimitReady:
         EX    DE,HL
         LD    DE,fileDescName
         PUSH  HL
-        MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+        MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
         POP   HL
         JP    C,editorStart
         LD    DE,FILE_NAME_HISTORY
@@ -166,7 +166,7 @@ editorPathEnd:
         XOR   A
         LD    (DE),A
         LD    HL,fileDescName
-        MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+        MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
         JP    C,editorCheckStartupDirectory
         CALL  editorCheckFileSize
         JP    C,commandLineFileTooLarge
@@ -184,7 +184,7 @@ commandLineFileTooLarge:
 editorCheckStartupDirectory:
         LD HL,fileDescName
         LD BC,0
-        MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR
+        MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_ATTR
         JP C,editorStart
         AND 10h
         JP Z,editorStart

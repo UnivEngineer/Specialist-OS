@@ -43,7 +43,7 @@ start:
     ld (failed),a
     call bios_setFontEncoding
     ld a,FONT_RENDER_DISABLE
-    MXOS_CALL MXOS_BIOS_FONT_RENDER
+    MXOS_CALL_REGS MXOS_BIOS_FONT_RENDER
     ld hl,clearScreen
     call bios_printStringZ
     ld hl,title
@@ -278,7 +278,7 @@ save:
     ld (saveIO+FILE_PATH_IO.count),hl
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,saveFailed
     ld a,e
     add a,'A'
@@ -307,20 +307,20 @@ noMemory:
 ; DOS selection, root context and enumeration are deliberately not timed.
 loadH:
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (oldDrive),a
     ld a,7
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,loadDriveError
     ld a,DIR_OP_GET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,loadDriveError
     ex de,hl
     ld (oldDirectory),hl
     ld de,0
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,loadDirectoryError
     ld hl,raw.benchRaw
     ld bc,0
@@ -328,7 +328,7 @@ loadH:
     ld e,a
     ld d,0
     ld a,DIR_OP_LIST
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     push af
     ld a,d
     or a
@@ -342,10 +342,10 @@ loadRestore:
     ld hl,(oldDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ld a,(oldDrive)
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     ret
 loadDirectoryError:
@@ -355,7 +355,7 @@ loadDriveError:
     push af
     ld a,(oldDrive)
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     ret
 

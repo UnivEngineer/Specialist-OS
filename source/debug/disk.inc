@@ -23,7 +23,7 @@ Dir_DirDisk:
         LD    BC, 0                 ; начинаем с 0 файла
         LD    HL, v_fileInfo.name   ; адрес буфера
         LD    DE, DIR_BUFFER_SIZE   ; размер буфера в штуках
-        MXOS_CALL MXOS_DOS_FILE_LIST
+        MXOS_CALL_REGS MXOS_DOS_FILE_LIST
 DirDiskLoop:
         LD    A,(HL)            ; первый символ имени файла
         INC   A
@@ -148,7 +148,7 @@ Dir_V:  ; запоминаем первый параметр директивы 
         ; получение информации о файле
         PUSH  DE
         LD    HL,v_fileDescr.name
-        MXOS_CALL MXOS_DOS_FILE_LOAD_INFO ; размер файла
+        MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO ; размер файла
         LD    HL,(v_fileDescr.size)
         EX    DE,HL
 
@@ -191,7 +191,7 @@ Dir_Y:  PUSH  HL
         EX    (SP),HL
         LD    B,L
         POP   HL
-        MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR ; установка байта атрибутов файла
+        MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_ATTR ; установка байта атрибутов файла
         LD    HL,txtNoFile
         CALL  C,bios_printString    ; если файл не найден - вывести сообщение
         RET
@@ -203,7 +203,7 @@ Dir_Q:
         CALL  EnterFileName         ; ввод имени файла
         RET   C
         LD    C,02H                 ; режим для фаункции bios_fileGetSetAttr - чтение байта атрибутов файла
-        MXOS_CALL MXOS_DOS_FILE_GET_SET_ATTR ; чтение байта атрибутов файла
+        MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_ATTR ; чтение байта атрибутов файла
         PUSH  AF                    ; результат и флаг ошибки (cf) - в стек
         LD    HL,txtNoFile
         CALL  C,bios_printString    ; если файл не найден - вывести сообщение
@@ -224,7 +224,7 @@ EnterFileName:
         LD    DE,INPUT_BUF_END
         CALL  bios_input
         LD    DE,v_fileDescr.name   ; буфер для подготовленного имени файла
-        MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE ; подготавливаем имя файла
+        MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE ; подготавливаем имя файла
         EX    DE,HL                 ; HL = подготовленное имя файла
         RET
 

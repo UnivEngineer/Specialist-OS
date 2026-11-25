@@ -135,7 +135,7 @@ Install:
     pop af
     ret
 InstallBody:
-    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_FLUSH_VOLUME
     ret c
     ld a,(bios_upper.ramPageCount)
     or a

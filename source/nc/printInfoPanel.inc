@@ -20,13 +20,13 @@ pip_prepareInfo:
 pip_infoDrive:
             ld a,(hl)
             ld (ncInfoDrive),a
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             call pip_readMain
             ex de,hl
             ld (pipMainFree),hl
             ld a,MEM_OP_RAMDISK
             ld c,MEM_RAMDISK_STATUS
-            MXOS_CALL MXOS_DOS_MEMORY
+            MXOS_CALL_REGS MXOS_DOS_MEMORY
             ld a,b
             inc a ; DOS page plus the RAMDISK pool.
     IF NC_BANKED
@@ -265,7 +265,7 @@ pip_freeSpaceLast:
     IF NC_BANKED
             call ncBankFlush
     ENDIF
-            MXOS_CALL MXOS_DOS_GET_DRIVE_FREE_SPACE
+            MXOS_CALL_REGS MXOS_DOS_GET_DRIVE_FREE_SPACE
             ret c
             ld hl,(vars.diskInfoPtr)
             ld bc,DISK_INFO.clusterBytes
@@ -398,7 +398,7 @@ pip_nextInfoRow:
 pip_readMain:
             ld bc,MEM_RESIDENT_FONT
             ld a,MEM_OP_RESIDENT
-            MXOS_CALL MXOS_DOS_MEMORY
+            MXOS_CALL_REGS MXOS_DOS_MEMORY
             jp c,pip_readMainFallback
             ex de,hl
             ld (pipFontBytes),hl

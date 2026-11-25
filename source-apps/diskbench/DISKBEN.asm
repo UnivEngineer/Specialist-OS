@@ -116,7 +116,7 @@ drive_value:
 drive_selected:
     ld (v_drive),a
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     jp c,error
     ld b,3
     call raw_driver
@@ -254,7 +254,7 @@ fragment_selected:
 ; HL=строка десятичного размера; пустая строка = 8 КиБ.
 ; Выход A=1..24, CF=ошибка; AF/BC/DE/HL разрушены. Нет усечения/переполнения.
 parse_file_kib:
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     ld a,DEFAULT_FILE_KIB
     jp nc,parse_size_word
     or a
@@ -282,7 +282,7 @@ parse_size_digit:
     inc hl
     jp parse_size_digit
 parse_size_done:
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp nc,bad_geometry        ; Второе слово не является частью размера.
     ld a,c
     or a
@@ -338,7 +338,7 @@ menu_executor:
     ld hl,txtExecutor
     call puts
     call read_line
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     ld c,3                     ; Enter: MAIN DLL.
     jp c,argument_bank
     push hl
@@ -346,7 +346,7 @@ menu_executor:
     call argument_context
     pop hl
     jp c,menu_executor
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     ret c
     xor a
     ld (argBank),a
@@ -441,7 +441,7 @@ read_line:
 ; Выход A=символ/0, CF=1 при лишнем тексте; HL/BC/DE разрушаются.
 read_choice:
     call read_line
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp nc,choice_word
     xor a
     ret
@@ -451,7 +451,7 @@ choice_word:
     jp nz,choice_bad
     ld a,(de)
     ld c,a
-    MXOS_CALL MXOS_BIOS_ARG_NEXT
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp nc,choice_bad
     ld a,c
     or a

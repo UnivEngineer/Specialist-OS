@@ -28,7 +28,7 @@ driverBody:
     ld a,b
     ld (registration+DRIVER_INSTALL.drive),a
     ld hl,registration
-    MXOS_CALL MXOS_DOS_DRIVER_INSTALL
+    MXOS_CALL_REGS MXOS_DOS_DRIVER_INSTALL
     ret
     INCLUDE "../common/argNext.inc"
     INCLUDE "../common/driver-letter.inc"

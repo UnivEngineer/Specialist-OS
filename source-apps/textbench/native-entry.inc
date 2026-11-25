@@ -1,6 +1,6 @@
 ; Штатный BANK COM. Аргумент — четыре hex-цифры адреса согласованного
-; блока main: MX_REGS, ownArena:word, corpus:word, FAR-код:byte, резерв.
-; Для FontBen ownArena — свободный MAIN блок для Own/отчёта; TEXTBEN его не использует.
+; блока main: MX_REGS, scratch:word, corpus:word, FAR-код:byte, резерв.
+; Для FontBen scratch — свободный MAIN блок для Far1024 и отчёта.
 ; Загрузка/возврат FILE_EXEC_NATIVE остаются вне измеряемого интервала.
 nativeEntry:
     push de
@@ -95,7 +95,7 @@ nativeFailure:
     ret
 nativeUsage:
     ld hl,nativeUsageText
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_BANK
     ret
 nativeBank:     DB 0
 nativeControl:  DS 14,0

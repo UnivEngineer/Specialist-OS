@@ -29,8 +29,8 @@ mxos_u16 mxos_bank_getch(MXOS_KEY_STATE *state) MXOS_FASTCALL;
 /* Родной диспетчер: operation=(группа<<8)|номер; порядок пакета HL/DE/BC/AF. */
 typedef struct {
     mxos_u16 operation, hl, de, bc, af;
-} MXOS_CALL;
-mxos_u16 mxos_call(MXOS_CALL *request) MXOS_FASTCALL; /* AF результата, включая отказ диспетчера. */
+} MXOS_CALL_PACKET;
+mxos_u16 mxos_call_packet(MXOS_CALL_PACKET *request) MXOS_FASTCALL; /* AF результата, включая отказ диспетчера. */
 
 /* Соглашение C-порта: пять плотно расположенных 16-битных слов, sizeof=10. */
 typedef struct {
@@ -94,21 +94,11 @@ mxos_u16 mxos_enumerate(mxos_u8 operation,MXOS_ENUM_REQUEST *request);
 #define MXOS_DISK_TECH_MX_VV55_ROM     'Q'
 #define MXOS_RAW_PREPARE 6 /* RAW_IO B=6: unified entry HL (B=1/2/4/5), DE=0, shift B, drive C. */
 
-/* TEXT_PRINT: near request/source, explicit main buffer for method 2.
- * Z count is an upper bound including NUL; capacity+1 writable bytes required. */
-typedef struct {
-    mxos_u8 kind, method;
-    mxos_u16 source, count, buffer, capacity;
-} MXOS_TEXT_PRINT_REQUEST;
-#define MXOS_TEXT_PRINT_Z 0
-#define MXOS_TEXT_PRINT_RAW_Z 1
-#define MXOS_TEXT_PRINT_RAW_LIM 2
-#define MXOS_TEXT_PRINT_SHARED 1
-#define MXOS_TEXT_PRINT_MAIN_BUFFER 2
 #define MXOS_BIOS_ABI_PRINT_CHAR_RAW 0xC869
 #define MXOS_BIOS_ABI_PRINT_STRING_Z 0xC818
 #define MXOS_BIOS_ABI_PRINT_STRING_RAW_Z 0xC8ED
 #define MXOS_BIOS_ABI_PRINT_STRING_RAW_LIM 0xC8F0
+#define MXOS_BIOS_ABI_PRINT_STRING_LIM 0xC8F9
 #define MXOS_FONT_PRERENDER_BYTES 10240
 #define MXOS_FONT_RENDER_QUERY 0
 #define MXOS_FONT_RENDER_BUILD 1
@@ -269,6 +259,7 @@ mxos_u16 mxos_memmove_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 void mxos_puts_local(const char *text) MXOS_FASTCALL;
 /* Адрес main передаётся явно; банковый указатель не разыменовывается здесь. */
 void mxos_printString_bank(const char *text) MXOS_FASTCALL;
+const char *mxos_printStringLim(const char *text, mxos_u16 bytes);
 void mxos_printString_main(mxos_u16 address) MXOS_FASTCALL;
 /* AF результата; при ошибке realloc адрес не меняется. Дополнительно mxos_far.c. */
 mxos_u16 mxos_malloc_far(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out);

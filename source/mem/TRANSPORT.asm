@@ -5,7 +5,12 @@
 ; Тело копируется в каждый исполняемый банк и в основную память.
 ; Раскладки локальных стековых кадров: BANK_CALLER_* / BANK_CALLEE_* в abi.inc.
 ; До проверки kind и установки SP стек предыдущей страницы не трогаем.
-    DS 7,0
+bankTextCopyPartial:
+    push bc
+    call compact223Forward
+    pop bc
+    ret
+    DS 1,0
 bankLanding:
     dec a
     jp z,bankResume
@@ -240,10 +245,6 @@ bankLocalChecked:
     ld hl,(MEM_LOCAL_CHECKED)
     ex (sp),hl
     ret
-bankLocalBlockBad:
-    ld a,DOS_ERR_ARGUMENT
-    scf
-    ret
     INCLUDE "copy.inc"
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -255,6 +256,24 @@ bankLocalBlockBad:
 bankMoveToMain:
     ld (BANK_IO_MAIN),a
     jp bankCopyMoveRemote
+bankTextChecked:
+    ld b,BANK_TEXT_BYTES/4
+bankTextQuad:
+    DUP 4
+    ld a,(hl)
+    ld (de),a
+    or a
+    ret z
+    inc hl
+    inc e
+    EDUP
+    dec b
+    jp nz,bankTextQuad
+    ret
+bankLocalBlockBad:
+    ld a,DOS_ERR_ARGUMENT
+    scf
+    ret
     ASSERT $ <= MEM_DATA_START-3
     IF $ < MEM_DATA_START-3
     DS MEM_DATA_START-3-$,0
@@ -275,6 +294,9 @@ coldEnd:
     DS BANK_COMMAND_LANDING-$,0
     ENDIF
     INCLUDE "scalar-command.inc"
+; Приватный стек удалённого MOVE использует до 8 байт в полном профиле.
+bankCopyLocalParams:
+    DS 8,0
     ASSERT $ <= 0FF00h
     IF $ < 0FF00h
     DS 0FF00h-$,0

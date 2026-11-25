@@ -43,7 +43,7 @@ entry:
 retain:
     ld de,0524Ch
     ld a,RESIDENT_RETAIN
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret
     ENDIF
 activate:

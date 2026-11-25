@@ -210,7 +210,7 @@ foPollCancel:
     push bc
     push de
     push hl
-    MXOS_CALL MXOS_BIOS_KEY_SCAN
+    MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
     cp 01Bh
     pop hl
     pop de

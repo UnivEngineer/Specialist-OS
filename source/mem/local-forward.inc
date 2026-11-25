@@ -14,6 +14,7 @@ compact223Page:
         ld      c, 8
         jp      compact223Block
 compact223Block:
+        ASSERT $ == MEM_FORWARD_BLOCK
         DUP 16
         pop     de
         ld      (hl), e

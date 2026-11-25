@@ -25,7 +25,7 @@ ncRename:
             jp z,ncRefreshDirty
             ld hl,state.panelA_drive
             call readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             jp c,copyFileError
             call restorePanelDirectory
             ld hl,vars.input
@@ -44,12 +44,12 @@ ncRenameLeaf:
 ncRenameLeafReady:
             ld hl,vars.input
             ld de,vars.copyRequest.destination
-            MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+            MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
             jp c,copyFileError
             call getSelectedFile
             ld de,vars.copyRequest.destination
             ld a,CLI_OP_RENAME
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
             jp c,copyFileError
             jp ncRefreshDirty
 ncRenameText: DB 'Rename to',0

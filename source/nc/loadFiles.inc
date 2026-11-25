@@ -6,12 +6,12 @@
 loadFiles:
             ld      c, a
             ld      e, 1
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             push    bc
             call nc,restorePanelDirectory
             ld a,0
             jp nc,lf_SelectReady
-            MXOS_CALL MXOS_DOS_GET_ERROR
+            MXOS_CALL_REGS MXOS_DOS_GET_ERROR
 lf_SelectReady:
             ld hl,vars.panelA_diskError
             call writeBytePanel
@@ -51,7 +51,7 @@ lf_ListFirstReady:
             ld e,a
             ld d,0
             ld      a, DIR_OP_LIST
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             jp c,lf_ListFailed
             ld a,b
             or c
@@ -59,7 +59,7 @@ lf_ListFirstReady:
             dec de ; DOS total includes the skipped "." record.
             jp lf_ListReady
 lf_ListFailed:
-            MXOS_CALL MXOS_DOS_GET_ERROR
+            MXOS_CALL_REGS MXOS_DOS_GET_ERROR
             ld hl,vars.panelA_diskError
             call writeBytePanel
 lf_EmptyCatalog:

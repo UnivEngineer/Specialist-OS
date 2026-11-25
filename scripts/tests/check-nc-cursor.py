@@ -38,7 +38,7 @@ def main():
         # Кэш изолирован от диска; контекст каталога уже задан фикстурой.
         for entry in ['bios_fileSelectDrive', 'bios_directory']:
             m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')
-        # MXOS_CALL обходит исторические JMP; изолируем тот же файловый слой
+        # MXOS_CALL_REGS обходит исторические JMP; изолируем тот же файловый слой
         # в его локальных целях диспетчера, не подменяя графику BIOS.
         for entry in ['fileSelectDrive','directoryService','fileGetSetDrive']:
             m[ds[entry]:ds[entry]+2]=bytes.fromhex('AF C9')

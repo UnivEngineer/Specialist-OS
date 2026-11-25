@@ -193,9 +193,9 @@ tapeSaveFile:
 
             ld      hl, v_path
             ld      de, v_fileDescr
-            MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+            MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
             ld      hl, v_fileDescr
-            MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+            MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
             jp c,   tapeFileNotFound
 
             ; В каталоге хранится точная длина контейнера RKS.
@@ -329,7 +329,7 @@ chooseDriveAgain:
             pop     af
             sub     'A'
             ld      e, 1
-            MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
             ld      b, 3
             call    bios_diskDriver
             ld      a, d

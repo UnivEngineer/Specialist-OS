@@ -91,7 +91,7 @@ terminatePath:
     call parseOption
     jp c,usage
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (oldDrive),a
     ld hl,request
     FONT_STAMP 0
@@ -99,7 +99,7 @@ terminatePath:
     FONT_STAMP 2
     push af
     ld a,(oldDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     pop af
     jp c,error
     call validate
@@ -119,7 +119,7 @@ terminatePath:
     ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ld bc,0100h+MEM_RESIDENT_FONT
     ld a,MEM_OP_RESIDENT
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,error
     ld (lowerBase),hl
     FONT_STAMP 8
@@ -147,14 +147,14 @@ resourcesReady:
     FONT_STAMP 14
 committed:
     ld a,3
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     ld hl,request+FILE_PATH_IO.descriptor
     ld de,request+FILE_PATH_IO.descriptor+8
     ld bc,io_vars.fontName
     call bios_memcpy_bc_hl
     ld hl,resumeCommand
     xor a
-    MXOS_CALL MXOS_DOS_FONT_CONFIG
+    MXOS_CALL_REGS MXOS_DOS_FONT_CONFIG
     ld a,b
     or a
     jp nz,fontExportReady

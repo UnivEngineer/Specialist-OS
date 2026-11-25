@@ -345,7 +345,7 @@ residentShellRecord:
     ld hl,(residentShellHandle)
     xor a
     ld (kdBusy),a
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,residentShellStatusReady
     ld hl,6
     add hl,sp
@@ -363,7 +363,7 @@ residentShellStatusReady:
     pop hl
     push bc
     ld a,1
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop bc
     pop af
     ld (kdPage),a

@@ -1,4 +1,4 @@
-> Реализация перенесена в [source/include/ui.inc](../../include/ui.inc) и компилируется в NC или MAIN DLL. Прежние входы BIOS/MXOS_CALL удалены.
+> Реализация перенесена в [source/include/ui.inc](../../include/ui.inc) и компилируется в NC или MAIN DLL. Прежние входы BIOS/MXOS_CALL_REGS удалены.
 
 # Графический модуль DOS
 

@@ -63,14 +63,14 @@ for group in json.loads((ROOT/'source/bios/syscalls.json').read_text()):
         m=bytearray(base);at=S['sys'+group['name']+'Table']+svc['id']*2
         m[at:at+2]=W(0x3100);m[0x3100]=0xC9
         op='MXOS_'+group['name']+'_'+svc['name']
-        result,cycles=run(registers+' MXOS_CALL '+op,m)
+        result,cycles=run(registers+' MXOS_CALL_REGS '+op,m)
         assert result[0x3B00:0x3B06]==bytes.fromhex('34 12 78 56 BC 9A'),op
         assert result[0x3B07]==0xDE and result[0x3B06]&1,op
         rows.append(dict(case=op,cycles=cycles))
 
 # Retired file-data operation IDs are holes, not compatibility aliases.
 for op in (0x202,0x203,0x207,0x20b,0x20d,0x20e,0x20f,0x21f,0x220):
-    result,_=run(f' MXOS_CALL {op}')
+    result,_=run(f' MXOS_CALL_REGS {op}')
     assert result[0x3b07]==S['DOS_ERR_UNSUPPORTED'] and result[0x3b06]&1
 
 # Реальные функции: прямой вход и новый адаптер имеют одинаковые результаты.
@@ -79,7 +79,7 @@ for legacy,op,setup in [
     ('dosGetError','MXOS_DOS_GET_ERROR',registers),
 ]:
     direct,dc=run(setup+f'\n call 0{S[legacy]:04X}h')
-    native,nc=run(setup+'\n MXOS_CALL '+op)
+    native,nc=run(setup+'\n MXOS_CALL_REGS '+op)
     assert direct[0x3B00:0x3B08]==native[0x3B00:0x3B08],legacy
     rows.append(dict(case=legacy,directCycles=dc,nativeCycles=nc,overhead=nc-dc))
 
@@ -87,7 +87,7 @@ for legacy,op,setup in [
 m=bytearray(base);at=S['sysBIOSTable'];m[at:at+2]=W(0x3100)
 # Служба 0: MVI A,'a' / CALL mx_callRegs / DW uppercase / RET.
 m[0x3100:0x3109]=bytes([0x3E,0x61,0xCD])+W(S['mx_callRegs'])+W(S['MXOS_BIOS_UPPERCASE'])+b'\xC9\0'
-r,_=run(registers+' MXOS_CALL 0100h',m)
+r,_=run(registers+' MXOS_CALL_REGS 0100h',m)
 assert r[0x3B07]==0x41
 
 # Первый номер за таблицей, FFh и неизвестные группы через оба публичных входа.
@@ -96,19 +96,19 @@ rejected_ids = [0x100 + S['sysBIOSCount'], 0x1ff, 0x200 + S['sysDOSCount'], 0x2f
 for op in rejected_ids:
     m = bytearray(base)
     m[0x3000:0x3008] = bytes.fromhex('21 43 65 87 ba dc fe 19')
-    for call in (f' ld bc,{op}\n ld de,03000h\n call mx_call', f' call mx_callRegs\n dw {op}'):
+    for call in (f' ld bc,{op}\n ld de,03000h\n call mx_callPacket', f' call mx_callRegs\n dw {op}'):
         r,_=run(call,m)
         assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1, (op,call)
         assert r[0x3000:0x3008]==m[0x3000:0x3008], (op,call)
 
 m=bytearray(base);m[S['v_dosModuleReady']]=0
-r,_=run(registers+' MXOS_CALL MXOS_DOS_GET_ERROR',m)
+r,_=run(registers+' MXOS_CALL_REGS MXOS_DOS_GET_ERROR',m)
 assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
-r,_=run(' ld a,061h\n MXOS_CALL MXOS_BIOS_UPPERCASE',m)
+r,_=run(' ld a,061h\n MXOS_CALL_REGS MXOS_BIOS_UPPERCASE',m)
 assert r[0x3B07]==0x41,'BIOS не должен требовать DOS'
 
 # Преждевременный адаптер CP/M удалён: вход и группа зарезервированы.
-for call in (' ld bc,0A50Ch\n call mx_CallCPM', ' ld bc,0Ch\n call mx_call'):
+for call in (' ld bc,0A50Ch\n call mx_CallCPM', ' ld bc,0Ch\n call mx_callPacket'):
  r,_=run(call)
  assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
 (OUT/'result.json').write_text(json.dumps(dict(registerCases=rows,nested=True,bdosUnsupported=True),indent=2)+'\n')

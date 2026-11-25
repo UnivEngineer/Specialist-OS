@@ -19,7 +19,7 @@ IMAGE_FLAGS = IMAGE_FLAG_DRIVER
 entry:
     ld hl,modulePath
     ld a,MODULE_TARGET_DOS
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     push af
     pop de
     ld hl,05202h

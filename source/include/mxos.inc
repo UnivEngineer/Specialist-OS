@@ -22,8 +22,8 @@
 ;   EC80-ED7F - [  256 B] Служебный стек BIOS; начальный SP=ED80h
 ;   ED80-EE8F - [  272 B] Общий временный буфер A: / текста и UI
 ;   EE90-EF9F - [  272 B] BIOS_UPPER_VARIABLES, включая состояние текста MXOS
-;   EFA0-EFE7 - [   72 B] IO_VARIABLES — рабочие переменные IO.SYS и имя шрифта
-;   EFE0-EFFF - [   32 B] Резерв после удаления старого снимка окна
+;   EFA0-EFDB - [   60 B] IO_VARIABLES — рабочие переменные IO.SYS и имя шрифта
+;   EFDC-EFFF - [   36 B] Резерв
 ;   F000-F19F - [  416 B] IO.SYS (точный конец — bin/System.layout.json)
 ;   F1A0-F1BF - [   32 B] Свободно в MAIN перед MEM.SYS
 ;   F1C0-F33F - [  384 B] MEM.SYS: подготовка CPM32, серия I/O, мост A:, копировщик
@@ -121,11 +121,13 @@
 ;   0000-FDFF - [65024 B] FAR-данные; на RAM-диске здесь данные и метаданные тома
 ;   FE00-FE89 - [  138 B] Удалённый локальный MOVE, прямой и обратный ход
 ;   FE8A-FECF - [   70 B] Установка параметров CPM32, остаток и резерв
-;   FED0-FEF8 - [   41 B] MEM.SYS: регистровый обработчик COMMAND GET/PUT8/16
-;   FEF9-FEFF - [    7 B] Резерв перед копировщиком
+;   FED0-FEF6 - [   39 B] MEM.SYS: регистровый обработчик COMMAND GET/PUT8/16
+;   FEF7-FEFE - [    8 B] Приватный стек удалённого MOVE
+;   FEFF-FEFF - [    1 B] Резерв
 ;   FF00-FF03 - [    4 B] Сигнатура установленного хвоста MEM
-;   FF04-FFB6 - [  179 B] MEM.SYS: локальный движок CPM32
-;   FFB7-FFBE - [    8 B] Параметры CPM32: селекторы источника/приёмника/возврата, счётчик
+;   FF04-FFB9 - [  182 B] MEM.SYS: локальный движок CPM32 с селекторами в операндах
+;   FFBA-FFBB - [    2 B] Счётчик полных окон CPM32
+;   FFBC-FFBE - [    3 B] Резерв, FFBEh — тестовый байт ДОЗУ
 ;   FFBF-FFBF - [    1 B] Метка готовности EXEC; в DATA равна нулю
 ;   FFC0-FFDF - [   32 B] То же физическое общее окно COMMAND/COPY
 ;   FFE0-FFFF - [   32 B] Регистры оборудования, доступны из банка DATA
@@ -163,7 +165,7 @@ MXOS_GROUP_MEMORY     = 3
 ; Нулевая длина возвращает успех. Исключающий конец не выше FE00h. В одной странице допускается перекрытие.
 ; Пакет, код и стек инициатора не должны попадать в область назначения.
 MEM_ABI_VERSION      = 00104h  ; Публичный ABI MEM 1.4
-MEM_RUNTIME_REVISION = 70      ; Повысить при изменении транспорта или раскладки DOS
+MEM_RUNTIME_REVISION = 71      ; Повысить при изменении транспорта или раскладки DOS
 MEM_WINDOW_VERSION   = 2       ; Внутренний протокол физического окна
     IFNDEF DOS_IO_BATCH_SECTORS
 DOS_IO_BATCH_SECTORS = 32      ; 16/32/64 полных физических секторов за серию
@@ -284,20 +286,6 @@ destinationBank     DB 0
 destinationOffset   DW 0
 count               DW 0
     ENDS
-; TEXT_PRINT: один банковый запрос копирования и печати (HL=NEAR пакет).
-TEXT_PRINT_Z           = 0
-TEXT_PRINT_RAW_Z       = 1
-TEXT_PRINT_RAW_LIM     = 2
-TEXT_PRINT_SHARED      = 1
-TEXT_PRINT_MAIN_BUFFER = 2
-    STRUCT TEXT_PRINT_REQUEST
-kind            DB 0
-method          DB 0
-source          DW 0
-count           DW 0
-buffer          DW 0
-capacity        DW 0
-    ENDS
     INCLUDE "syscall-ids.inc"
 ; Пакет родных групп: порядок совпадает с PUSH AF/BC/DE/HL на 8080.
     STRUCT MX_REGS
@@ -307,10 +295,17 @@ bc DW 0
 af DW 0
     ENDS
 ; Вызов с регистрами исполнителя. Код операции расположен после CALL.
-    MACRO MXOS_CALL operation
+    MACRO MXOS_CALL_REGS operation
         ASSERT (operation >> 8) == MXOS_GROUP_BIOS || (operation >> 8) == MXOS_GROUP_DOS
         call mx_callRegs
         DW operation
+    ENDM
+; Вызов с адресом пакета MX_REGS в текущей странице.
+    MACRO MXOS_CALL_PACKET operation, packet
+        ASSERT (operation >> 8) == MXOS_GROUP_BIOS || (operation >> 8) == MXOS_GROUP_DOS
+        ld bc,operation
+        ld de,packet
+        call mx_callPacket
     ENDM
 
     MACRO MXOS_KEY_BEGIN state
@@ -318,7 +313,7 @@ af DW 0
         or a
         jp nz,.ready
         ld a,TIMER_CLOCK
-        MXOS_CALL MXOS_DOS_TIMER
+        MXOS_CALL_REGS MXOS_DOS_TIMER
         sbc a,a
         inc a
         ld (state+IO_KEY_STATE.timed),a
@@ -334,11 +329,11 @@ af DW 0
         xor a
         ld (state+IO_KEY_STATE.timed),a
         ld a,TIMER_RELEASE
-        MXOS_CALL MXOS_DOS_TIMER
+        MXOS_CALL_REGS MXOS_DOS_TIMER
 .done:
     ENDM
 ; Non-returning shell handoff. The explicit MX_REGS and return address live
-; on the system stack; mx_call never returns into MAIN code overwritten by
+; on the system stack; mx_callPacket never returns into MAIN code overwritten by
 ; the loaded program. returnAddress must reset SP (BIOS reboot/EXEC shell).
 ; Pass ordinary FILE_EXEC registers before this macro; no continuation follows.
     MACRO MXOS_EXEC returnAddress
@@ -352,7 +347,7 @@ af DW 0
         ld hl,returnAddress
         push hl
         ld bc,MXOS_DOS_FILE_EXEC
-        jp mx_call
+        jp mx_callPacket
     ENDM
     IFNDEF DISK_DRIVER_CHECKED
 DISK_DRIVER_CHECKED =  1       ; Встроенный ROM/RAM-драйвер: CF и проверка аргументов
@@ -470,16 +465,8 @@ bios_upper BIOS_UPPER_VARIABLES = 0EE90h
 ; Плотные рабочие переменные IO.SYS, отдельно от кода и общего буфера текста.
 ; Банк DOS не должен хранить NEAR-указатели на эти поля как свои локальные.
     STRUCT IO_VARIABLES
-bbBusy          DB     0
-bbFast          DB     0
 bbPage          DB     0
 bbFunction      DB     0
-                BLOCK  1      ; Прежний bbMode, сохраняет смещения IO_VARIABLES.
-bbPacketAddress DW     0
-bbSource        DW     0
-bbChunk         DW     0
-bbScanLeft      DW     0
-bbMore          DB     0
 bbRegs          BLOCK  8
 bbCopy          BLOCK  8
 mainIoRequest   BLOCK  5
@@ -511,7 +498,7 @@ bios_vars   BIOS_VARIABLES = 8FDFh
 ; Отмеченные [MXOS2] - новые в MXOS 2
 ;-----------------------------------------------------------------------
 
-; Локальная таблица DOS в её странице; приложения используют общий MXOS_CALL.
+; Локальная таблица DOS в её странице; приложения используют общий MXOS_CALL_REGS.
     IFDEF DOS_REFERENCE_BUILD
 DOS_ENTRY_BASE = 04000h ; Только линковка BIOS и CPU-стенды, не штатная DOS.
     ELSE
@@ -617,8 +604,8 @@ bios_blockIO              = 0C8EAh  ; A=диск, B=1/2, DE=физический
 bios_printStringRawZ      = 0C8EDh  ; HL=ASCIIZ; 01h-FFh рисуются как глифы
 bios_printStringReal      = 0C8EDh  ; HL=ASCIIZ main; AF/BC/DE сохранены, HL=нуль; 01h–FFh — глифы
 bios_printStringRawLim    = 0C8F0h  ; HL=байты, BC=длина; AF/BC/DE сохранены, HL=конец
-bios_textDispatch         = 0C8F3h  ; Внутренний адаптер MEM TEXT
 bios_printStringRawPseudo = 0C8F6h  ; HL=байты, BC=длина; RawLim с дорисовкой рамок KOI8-R
+bios_printStringLim       = 0C8F9h  ; HL=байты, BC=длина; управляющие коды, AF/BC/DE сохранены, HL=конец
 
 ;-----------------------------------------------------------------------
 ; Адрес таблицы переходов драйвера магнитофона
@@ -626,9 +613,12 @@ bios_printStringRawPseudo = 0C8F6h  ; HL=байты, BC=длина; RawLim с д
 
 TAPE_DRIVER_JUMPS = bios_tapeReadOld    ; старая таблица переходов магнитофона, сохранена для ABI
 
+;-----------------------------------------------------------------------
 ; Одинаковые публичные входы MEM в main и исполняемых банках.
-mx_call           = 0F800h  ; B=группа, C=номер, DE=параметр/пакет MX_REGS
-mx_CallCPM        = 0F803h  ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
+;-----------------------------------------------------------------------
+
+mx_callPacket     = 0F800h  ; B=группа, C=номер, DE=пакет MX_REGS
+mx_сallCPM        = 0F803h  ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
 mx_callRegs       = 0F806h  ; CALL + DW операции; регистры как у исполнителя
 mx_queueBind      = 0F809h  ; HL=local flush callback, 0 disables; AF destroyed
 mx_queueFlush     = 0F80Ch  ; explicit flush; all registers and flags preserved
@@ -723,7 +713,7 @@ RAMD_DRIVER_USER       = 4
 ;   B = 0FFh - физический BIOS/A: B=DISK_TECH_*, C=DISK_CAP_*, HL=0,
 ;              CF=0 при успехе; AF разрушается.
 ; Имена/описания не входят в физический ABI. Получение строк выбранного диска:
-;   LD B,0FFh / MXOS_CALL MXOS_DOS_RAW_IO -> CF=0, B=технология, C=возможности,
+;   LD B,0FFh / MXOS_CALL_REGS MXOS_DOS_RAW_IO -> CF=0, B=технология, C=возможности,
 ;   HL=NEAR-адрес двух ASCIIZ: имя,0,описание,0, вместе <= 64 байт.
 ; Источник — реестр DOS; межбанковому клиенту возвращается локальная копия.
 ; Указатель результата не является постоянным: строку нужно скопировать,
@@ -1258,7 +1248,7 @@ MEM_BIOS_RESULT           = MEM_EXTENSION_ENTRY+9
 MEM_MOVE_SELECT_ADDR      = MEM_EXTENSION_ENTRY+12
 MEM_SCALAR_RETURN_ENTRY   = MEM_EXTENSION_ENTRY+15  ; Возврат COMMAND GET/PUT без чужого стека
 MEM_LOCAL_CHECKED         = 0F62Eh                  ; MAIN: локальный проверяющий цикл BIOS
-MEM_CALL_ENTRY            = 0F630h
+MEM_CALL_PACKET_ENTRY     = 0F630h
 MEM_NATIVE_CALL           = 0F640h
 MEM_BANK_KIND             = 0F642h
 MEM_LOCAL_SYSTEM               = 0F643h
@@ -1433,7 +1423,7 @@ NC_STATE_ADDR          = 0FFB0h             ; 12 байт; FFBEh — детек�
     ASSERT SYSTEM_FLASH_ADDR + 0140h == SYSTEM_FLASH_END
     ASSERT SYSTEM_FLASH_END <= LOCAL_DRIVER_ADDR
     ASSERT LOCAL_DRIVER_END <= 0FC00h
-    ASSERT RAMD_RESIDENT_ADDR + 00C0h <= mx_call
+    ASSERT RAMD_RESIDENT_ADDR + 00C0h <= mx_callPacket
     ASSERT BIOS_BANK_IO_BUFFER+261 <= MAIN_COMMAND_ADDR
     ASSERT MAIN_DRIVER_INFO + 64 <= MAIN_RAW_LEASE
     ASSERT bios_upper + BIOS_UPPER_VARIABLES <= io_vars

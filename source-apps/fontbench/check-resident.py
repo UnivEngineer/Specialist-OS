@@ -1,10 +1,10 @@
 """Paired resident/standalone FontBen matrix, real local PIT in visible Emu80.
-Install with FONT via NC, then execute the existing 18-stage caller grid.
+Install with FONT via NC, then execute the caller grid with Far1024.
 Never patch the native BIOS case. Standalone hooks belong to FontBen itself.
 """
 from pathlib import Path
 import runpy,re,time,json,hashlib,sys,os
-R=Path(__file__).resolve().parents[2];O=R/os.environ.get('FONTBEN_REPORT_DIR','docs/bench/resident-vs-standalone');O.mkdir(parents=True,exist_ok=True)
+R=Path(__file__).resolve().parents[2];O=R/os.environ.get('FONTBEN_REPORT_DIR','docs/bench/resident-far1024');O.mkdir(parents=True,exist_ok=True)
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',p.read_text(),re.M)}
 s=sy(R/'bin/FONTCOM.sym');n=sy(R/'bin/NC.sym');f=sy(R/'bin/FONT.sym');t=sy(R/'bin/banked/TRANSPORT.sym')
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=O,RUNTIME=R/'.local/font-import-runtime')
@@ -81,7 +81,7 @@ try:
   if lower:assert m.read(prebase,lower)==predata,(tag,'corpus preparation damaged resident table')
   corpus=m.read(s['gridText'],s['GRID_TEXT_BYTES']);refs=[oracle(corpus,font,width,r) for r in (False,True)]
   (folder/'corpus.bin').write_bytes(corpus);results=[]
-  for stage in range(18):
+  for stage in range(s['GRID_FULL_STAGES']):
    kind=m.read(s['gridKind'],1)[0];route=m.read(s['gridRoute'],1)[0]
    expect,cursor=refs[kind in (1,3,4)];actual=m.read(0x9000,12288)
    diffs=[i for i in range(12288) if i%256<240 and actual[i]!=expect[i]]
@@ -92,7 +92,7 @@ try:
    (folder/'results.json').write_text(json.dumps(dict(module=module,engine=engine,results=results),indent=2))
    print(tag,stage+1,kind,route,results[-1]['ms'],flush=True)
    if stage==0:m.screenshot(folder/'first.png')
-   if stage<17:resume(s['gridMeasured'])
+   if stage+1<s['GRID_FULL_STAGES']:resume(s['gridMeasured'])
   resume(s['gridAdvanceEngine'])
   assert m.read(0xc800,0xf6)==baseline,(tag,'ABI restoration')
   if lower:assert m.read(prebase,lower)==predata,(tag,'resident table damaged')

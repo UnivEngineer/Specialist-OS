@@ -154,11 +154,3 @@ bankCopyBadRange:
     ret
 
 bankCopyRequest: DS 8,0
-
-; Ошибка стандартного PRINT_STRING: пакет не меняем, возвращаем код отказа.
-bankBiosStringError:
-    pop bc
-    ld a,DOS_ERR_ARGUMENT
-    ld (BANK_FRAME_STATUS),a
-    scf
-    jp MEM_BIOS_RESULT

@@ -34,7 +34,7 @@ file_write_case:
     call bench_cmp_hl_de
     jp nc,error
     ld hl,tmpDescriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp nc,file_exists
     ld a,(v_budget)
     ld l,a
@@ -517,7 +517,7 @@ raw_warmup:
     push de
     push hl
     ld b,RAW_OP_PREPARE
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     jp c,raw_prepare_done
     ld (raw_local_call+1),hl
     ld a,c
@@ -561,7 +561,7 @@ raw_driver:
     ld a,b
     cp 1
     jp z,raw_write
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret
 raw_write:
     push bc
@@ -570,7 +570,7 @@ raw_write:
     jp nz,raw_dispatch
     ld b,5
 raw_dispatch:
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     pop bc
     ret
 
@@ -637,7 +637,7 @@ file_cleanup:
     or a
     ret z
     ld hl,tmpDescriptor
-    MXOS_CALL MXOS_DOS_FILE_DELETE
+    MXOS_CALL_REGS MXOS_DOS_FILE_DELETE
     ret c
     xor a
     ld (v_fileOwned),a

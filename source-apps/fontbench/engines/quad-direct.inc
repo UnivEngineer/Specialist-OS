@@ -167,7 +167,7 @@ quadPrepareHalf:
     ld hl,03000h
     ld bc,0800h
     ELSE
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     ret c
     ENDIF
     ld a,l

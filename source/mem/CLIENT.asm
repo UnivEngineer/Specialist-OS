@@ -1,10 +1,10 @@
 ; Таблица JMP полного профиля MEM; включается в сборку LOCALBLOCK.
-; От mx_call: +00h пакетный вызов, +03h зарезервированный отказ CP/M,
+; От mx_callPacket: +00h пакетный вызов, +03h зарезервированный отказ CP/M,
 ; +06h вызов с DW операции, +09h привязка очереди, +0Ch сброс очереди,
 ; +0Fh FAR-копирование, +12h запрос MEM, +15h локальные операции памяти,
 ; +18h вызов DLL по текущему маршруту MODULE_SCOPE. Контракты в api.md.
-    ORG mx_call
-    jp MEM_CALL_ENTRY
+    ORG mx_callPacket
+    jp MEM_CALL_PACKET_ENTRY
     jp bankCpmCall
     jp bankMxCallRegs
     jp bankQueueBind
@@ -124,13 +124,15 @@ memBiosQueue:
     ld a,(hl)
     or a
     jp nz,memBiosGeneric
-    ld a,7
+    ld a,MEM_TEXT_BATCH
     jp memBiosText
     ASSERT $ <= MEM_TEXT_ENTRY
     DS MEM_TEXT_ENTRY-$,0
     INCLUDE "text.inc"
     ASSERT $ <= MEM_SCOPE_ENTRY
+    IF $ < MEM_SCOPE_ENTRY
     DS MEM_SCOPE_ENTRY-$,0
+    ENDIF
 ; BC=controller callback. Keep the enclosing route on this service stack.
 memScopeEnter:
     ld hl,(memRoute)

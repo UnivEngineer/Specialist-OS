@@ -114,7 +114,7 @@ ncEnterCopyExtension:
             ld (de),a
             ld hl,NC_SORT_KEYS
             ld a,CLI_OP_ASSOCIATION
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
             ret c
             ex de,hl
             ld (ncAssocTransfer+1),hl
@@ -220,7 +220,7 @@ EnterCmdLine:
             call ncSelectCommandDirectory
             ld hl,vars.cmdLine
             ld a,CLI_OP_QUERY
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
             jp c,ncCommandError
             ld a,b
             and 1
@@ -244,7 +244,7 @@ ncCommandRun:
             ld hl,vars.cmdLine
             ld de,ncOverwritePrompt
             ld a,CLI_OP_COMMAND
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
 ncCommandResult:
     IF NC_BANKED
             call ncBankSyncCursor
@@ -282,7 +282,7 @@ ncCommandSameContext:
 ; ncCommandContext=0/4 means unchanged/changed. Failed GET keeps CLI's flag.
 ncCommandUpdateContext:
             ld e,0
-            MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
             ld b,a
             ld hl,state.panelA_drive
             call readBytePanel
@@ -295,7 +295,7 @@ ncCommandDriveCompared:
             ld a,b
             call writeBytePanel
             ld a,DIR_OP_GET
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             jp c,ncCommandContextUnknown
             pop bc ; B=drive change flag; DE=new directory cluster.
             ld hl,state.panelA_dirLow
@@ -329,7 +329,7 @@ ncCommandRestoreScreen:
             call bios_printChar
             jp drawToolbar
 ncCommandError:
-            MXOS_CALL MXOS_DOS_GET_ERROR
+            MXOS_CALL_REGS MXOS_DOS_GET_ERROR
             push af
             ld a,(ncCommandScreen)
             or a
@@ -372,7 +372,7 @@ ncCommandErrorText:     DB 'Command error',0
 ncSelectCommandDirectory:
             ld hl,state.panelA_drive
             call readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             jp restorePanelDirectory
 EnterExec:
             call ncStopObserver
@@ -386,7 +386,7 @@ EnterExec:
             jp ncBankReturn
     ELSE
             ld a,MEM_OP_MAINRETIRE
-            MXOS_CALL MXOS_DOS_MEMORY
+            MXOS_CALL_REGS MXOS_DOS_MEMORY
             ld hl,vars.cmdLine
             ; COM внутри BAT может затереть NC и вернуться обычным RET.
             ; Возвращаться следует в BIOS, который загрузит оболочку заново.

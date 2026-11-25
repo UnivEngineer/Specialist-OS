@@ -24,7 +24,7 @@ DRIVER_ORIGIN = 0
 
 entry:
     ld hl,copyright
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld c,10
     call mx_printChar
     call appProgramDrive
@@ -34,21 +34,21 @@ entry:
     ld (registers+5),a
     ld de,NC_BANK_KEY
     ld a,RESIDENT_FIND
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ld a,h
     or l
     jp nz,selectCore
     ld hl,corePath
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,failed
     ld (coreHandle),hl
     ld de,registers
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     push af
     ld hl,(coreHandle)
     ld a,1 ; The core retains itself on successful registration.
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop af
     jp c,failed
     ld hl,(registers+6)
@@ -59,10 +59,10 @@ entry:
 selectCore:
     ld de,NC_BANK_KEY
     ld a,RESIDENT_SHELL_SET
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     jp c,failed
     xor a
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     jp c,failed
 launcherDone:
     xor a
@@ -70,14 +70,14 @@ launcherDone:
 failed:
     push af
     ld hl,message
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     pop af
     push af
     ld c,a
     call mx_printHexByte
     ld c,10
     call mx_printChar
-    MXOS_CALL MXOS_BIOS_GETCH
+    MXOS_CALL_REGS MXOS_BIOS_GETCH
     pop af
     ret
 copyright:      DB 'Commander 3.0 BANK (C) Omsk/SPb 1992-2026',0

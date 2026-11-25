@@ -52,7 +52,7 @@ def main():
         if 'target' in item:
             offset=item['address']-layout['bios']['start']
             assert binary[offset:offset+3]==b'\xC3'+bios[item['target']].to_bytes(2,'little')
-    spans=[(0,0x100,'vectors'),(dos['dosCoreStart'],dos['kernelEnd'],'image'),(work,end,'DOS variables'),(dos['MEM_IMAGE_LOCAL_START'],dos['mx_call'],'local-block')]
+    spans=[(0,0x100,'vectors'),(dos['dosCoreStart'],dos['kernelEnd'],'image'),(work,end,'DOS variables'),(dos['MEM_IMAGE_LOCAL_START'],dos['mx_callPacket'],'local-block')]
     for address,size,name in [('DOS_BANK_DATA_ADDR',dos['DOS_BANK_DATA_SIZE'],'exchange'),('DOS_BANK_OBJECT_ADDR',128,'object'),('MEM_ALLOC_TABLE',192,'allocations'),('MODULE_TABLE',128,'modules'),('DOS_IMAGE_CONTEXT_ADDR',83,'image-context'),('DOS_IMAGE_HEADER_ADDR',dos['IMAGE_RELOC_HEADER'],'image-header'),('DOS_FONT_STATE_ADDR',169,'font-state'),('DOS_MODULE_GUARD_ADDR',9,'module-release-guard'),('DOS_PARTIAL_RECORD',64,'partial-record'),('DOS_CLI_PATH1',128,'path1'),('DOS_CLI_PATH2',128,'path2'),('DOS_REQUEST_SCRATCH',42,'request-scratch'),
                               ('DOS_BANK_PATH_ADDR',128,'path'),('DOS_DRIVER_REGISTRY',640,'registry'),
                               ('DOS_DRIVER_IMAGE',576,'driver-image'),('DOS_BANK_CACHE_ADDR',8192,'cache'),
@@ -62,7 +62,7 @@ def main():
                               ('DOS_CACHE_BOOT_ADDR',512,'BPB'),
                               ('DOS_BANK_CMD_ADDR',130,'command'),('DOS_BANK_COMPAT_ADDR',33,'variables'),
                               ('DOS_ARENA_START',dos['DOS_BANK_MODULE_END']-dos['DOS_ARENA_START'],'DLL and installer arena'),('BAT_BUFFER',dos['BAT_BUFFER_SIZE'],'BAT'),
-                              ('IO_BANK_KEYS',layout['io']['bankBytes'],'local keyboard'),('DOS_BANK_STACK_BOTTOM',dos['DOS_BANK_STACK_TOP']-dos['DOS_BANK_STACK_BOTTOM'],'stack'),('mx_call',0x800,'tail')]:
+                              ('IO_BANK_KEYS',layout['io']['bankBytes'],'local keyboard'),('DOS_BANK_STACK_BOTTOM',dos['DOS_BANK_STACK_TOP']-dos['DOS_BANK_STACK_BOTTOM'],'stack'),('mx_callPacket',0x800,'tail')]:
         spans.append((dos[address],dos[address]+size,name))
     assert dos['DOS_BANK_DRIVER_END'] == dos['DOS_BANK_MODULE_END'] == dos['BAT_BUFFER']
     assert dos['BAT_INPUT'] == dos['BAT_HANDLE'] + dos['FILE_HANDLE']

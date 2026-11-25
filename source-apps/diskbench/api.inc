@@ -1,28 +1,28 @@
-; MAIN использует локальный BIOS; EXEC DLL — только публичный MXOS_CALL.
+; MAIN использует локальный BIOS; EXEC DLL — только публичный MXOS_CALL_REGS.
     IFDEF DISKBEN_BANK
 bench_getch:
-    MXOS_CALL MXOS_BIOS_GETCH
+    MXOS_CALL_REGS MXOS_BIOS_GETCH
     ret
 bench_getMemTop:
     call mx_getMemTop
     ret
 bench_input:
-    MXOS_CALL MXOS_BIOS_INPUT
+    MXOS_CALL_REGS MXOS_BIOS_INPUT
     ret
 bench_printChar:
     call mx_printChar
     ret
 bench_printDecWord:
-    MXOS_CALL MXOS_BIOS_PRINT_DEC_WORD
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_DEC_WORD
     ret
 bench_printHexWord:
     call mx_printHexWord
     ret
 bench_printString:
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ret
 bench_upperCase:
-    MXOS_CALL MXOS_BIOS_UPPERCASE
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     ret
 bench_cmp_hl_de:
     INCLUDE "../../source/common/cmp_hl_de.inc"
@@ -38,7 +38,7 @@ bench_upperCase    = bios_upperCase
 bench_cmp_hl_de    = bios_cmp_hl_de
     ENDIF
 
-; Арифметика всегда локальна, включая EXEC DLL: MXOS_CALL здесь только замедляет.
+; Арифметика всегда локальна, включая EXEC DLL: MXOS_CALL_REGS здесь только замедляет.
     MODULE benchMath
     DEFINE MATH_MUL
     DEFINE MATH_DIV2

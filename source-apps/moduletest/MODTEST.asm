@@ -25,56 +25,56 @@ entry:
     ld de,02000h
     ld b,0
     ld a,MEM_OP_ARENA
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,failed
     ld hl,bankPath
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,failed
     ld (handle),hl
     ld de,regs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,failed
     ld hl,(regs)
     ld de,01235h
     call bios_cmp_hl_de
     jp nz,failed
     ld hl,(handle)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,failed
     ld hl,mainPath
     ld a,MODULE_TARGET_MAIN
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,failed
     ld (handle),hl
     ld de,regs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,failed
     ld hl,(handle)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,failed
     ld hl,dosPath
     ld a,MODULE_TARGET_DOS
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,failed
     ld (handle),hl
     ld de,regs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,failed
     ld hl,(handle)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,failed
 passed:
     ld hl,055AAh
     ld (testResult),hl
     ld hl,ok
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     jp finish
 failed:
     ld hl,0DEADh
     ld (testResult),hl
     ld hl,error
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 finish:
     call bios_getch
     pop af

@@ -48,6 +48,8 @@ def generate(check=False):
     abi = (ROOT/'source/include/mxos.inc').read_text(encoding='utf-8')
     for name, addr in re.findall(r'^mx_(\w+)\s*=\s*0([0-9A-F]{4})h\b', abi, re.M):
         z80.append(f'defc mx_{name} = 0{addr}h')
+    vector = re.search(r'^bios_printStringLim\s*=\s*(\w+)', abi, re.M)[1]
+    z80.append(f'defc bios_printStringLim = {vector}')
     c.append('#endif')
     outputs = {
         ROOT/'source/include/syscall-ids.inc':asm,

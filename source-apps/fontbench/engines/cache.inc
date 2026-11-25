@@ -131,7 +131,7 @@ cachePrepare:
     ld de,03800h
     ld bc,0800h
     ELSE
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     jp c,cachePrepared
     ENDIF
     ld (cacheEpoch),a

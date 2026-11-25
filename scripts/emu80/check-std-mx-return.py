@@ -30,14 +30,14 @@ try:
   assert (first!=reference)==warn,(name,first.hex(),reference.hex())
   if warn:
    # Дополнительная проверка восстановления остальных кодовых сегментов MEM.
-   m.write(b['LOCAL_BLOCK_ENTRY'],b'\xa5'*12);m.write(b['mx_call'],b'\xa5'*12);m.write(0xfc00,b'\xa5'*12)
+   m.write(b['LOCAL_BLOCK_ENTRY'],b'\xa5'*12);m.write(b['mx_callPacket'],b'\xa5'*12);m.write(0xfc00,b'\xa5'*12)
    m.stop_at(b['biosMemWarning']);m.until(b['biosMemWarning'],120,page=0)
    assert m.read(0xfc00,len(code))==code
    expected=bytearray((R/'bin/banked/CLIENT.bin').read_bytes())
    if 'bankMxRegsRouteCall' in b:
-    at=b['bankMxRegsRouteCall']+1-b['mx_call']
+    at=b['bankMxRegsRouteCall']+1-b['mx_callPacket']
     expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
-   assert m.read(b['mx_call'],b['BANK_CLIENT_BYTES'])==expected
+   assert m.read(b['mx_callPacket'],b['BANK_CLIENT_BYTES'])==expected
    assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==(R/'bin/banked/LOCALBLOCK.bin').read_bytes()[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:b['MEM_NATIVE_CALL']-b['MEM_IMAGE_LOCAL_START']]
    m.stop_at(b['getch']);m.until(b['getch'],120,page=0);m.call('bp_clear');m.call('emu_run_for',ms=500)
    assert m.read(0,32)!= (R/'bin/NC.i80').read_bytes()[:32],'Warning did not wait'

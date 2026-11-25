@@ -42,10 +42,11 @@ sysBIOSTable:
     DW printStringRawZ
     DW printStringRawLim
     DW printStringRawLim
-    DW bankText.request
+    DW bios_printStringLim
     DW FONT_ENGINE_ENCODING
     DW BIOS_BANK_GATE_ADDR
     DW printStringRawPseudo
+    DW bios_printStringLim
 sysBIOSCount = ($-sysBIOSTable)/2
 sysDOSTable:
     DW dos_fileList

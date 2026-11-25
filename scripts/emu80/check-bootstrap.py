@@ -1,6 +1,57 @@
 """Штатный bootstrap: BIOS в main, DOS в банке 0; холодный и тёплый сброс."""
 from pathlib import Path
 import runpy, json, argparse
+
+
+def verify_mem_profiles(m,page,BIN,b,k,ls,s,symbols):
+ client=(BIN/'banked/CLIENT.bin').read_bytes()
+ local=(BIN/'banked/LOCALBLOCK.bin').read_bytes()
+ transport=(BIN/'banked/TRANSPORT.bin').read_bytes()
+ for bank,kind in ((0,1),(1,2)):
+  page(bank)
+  client_size=b['BANK_MAIN_CLIENT_BYTES'] if bank==0 else len(client)
+  actual=bytearray(m.read(b['mx_callPacket'],client_size))
+  expected=bytearray(client[:client_size])
+  if 'memTextRemaining' in ls:  # Сохранённые сборки с рабочими полями TEXT внутри CLIENT.
+   at=ls['memTextRemaining']-b['mx_callPacket']
+   expected[at:at+9]=actual[at:at+9]
+  if bank==0 and 'bankMxRegsRouteCall' in ls:
+   at=ls['bankMxRegsRouteCall']+1-b['mx_callPacket']
+   expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
+  if 'MEM_FORWARD_RESTORE' in ls:
+   at=ls['MEM_FORWARD_RESTORE']+1-b['mx_callPacket']
+   expected[at:at+2]=actual[at:at+2]  # SP последнего прямого MOVE.
+  assert actual==expected
+  assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
+  assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
+ data_size=symbols(BIN/'MEM.sym')['MEM_DATA_SIZE']
+ data_start=b['MEM_DATA_START']
+ assert data_start+data_size==b['BANK_WINDOW']
+ page(2)
+ actual=m.read(data_start,data_size)
+ expected=bytearray(transport[data_start-0xfc00:data_start-0xfc00+data_size])
+ ts=symbols(BIN/'banked/TRANSPORT.sym')
+ # После первого обращения изменяемы стек MOVE и параметры последнего CPM32.
+ variable = [(ts['bankCopyLocalParams'],8)]
+ variable += [(ts[name],2) for name in
+              ('bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount')]
+ for address,length in variable:
+  start=address-data_start
+  expected[start:start+length]=actual[start:start+length]
+ if 'mdDataForwardTemplate' in k:
+  offset=k['mdDataForwardTemplate']-k['DOS_CODE_START']
+  length=k['bankMoveDataBytes']
+  start=k['bankMoveDataEntry']-data_start
+  expected[start:start+length]=(BIN/'DOS.sys').read_bytes()[offset:offset+length]
+  start=k['bankMoveDirectOperand']-data_start
+  expected[start:start+2]=k['bankMoveDataEntry'].to_bytes(2,'little')
+  for address in (ts['bankMoveHome']+1,s['moveDataOverlayReturn']+1):
+   start=address-data_start
+   expected[start:start+2]=actual[start:start+2]
+ assert actual==expected
+ page(0)
+
+
 ROOT=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser();p.add_argument('--normal',action='store_true',help='Сохранён для прежних команд; сборка всегда штатная');p.add_argument('--report',type=Path,default=ROOT/'docs/banked/bootstrap-current')
 p.add_argument('--bundle',type=Path,help='Frozen directory with bin/, System.bin and FONT.PF')
@@ -42,47 +93,7 @@ try:
   assert m.read(b['FONT_ADDR'],len(font))==font
   state=nc();ticks['nc']=state['cpu_ticks'];assert m.read(b['v_memTop'],2)==bytes.fromhex('ff8b')
   # Общий код MEM и разные данные установки main/DOS; минимальный профиль данных.
-  client=(BIN/'banked/CLIENT.bin').read_bytes()
-  local=(BIN/'banked/LOCALBLOCK.bin').read_bytes()
-  transport=(BIN/'banked/TRANSPORT.bin').read_bytes()
-  for bank,kind in ((0,1),(1,2)):
-   page(bank)
-   client_size=b['BANK_MAIN_CLIENT_BYTES'] if bank==0 else len(client)
-   actual=bytearray(m.read(b['mx_call'],client_size))
-   # TEXT хранит здесь живые счётчики, адреса и состояние операции.
-   at=ls['memTextRemaining']-b['mx_call']
-   actual[at:at+9]=client[at:at+9]
-   expected=bytearray(client[:client_size])
-   if bank==0 and 'bankMxRegsRouteCall' in ls:
-    at=ls['bankMxRegsRouteCall']+1-b['mx_call']
-    expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
-   if 'MEM_FORWARD_RESTORE' in ls:
-    at=ls['MEM_FORWARD_RESTORE']+1-b['mx_call']
-    expected[at:at+2]=actual[at:at+2]  # SP последнего прямого MOVE.
-   assert actual==expected
-   assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
-   assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
-  data_size=h['symbols'](BIN/'MEM.sym')['MEM_DATA_SIZE']
-  data_start=b['MEM_DATA_START']
-  # Конец CPM32 содержит восемь байт параметров последнего обмена.
-  code_size=ls['bankCopyLocalParams']-data_start
-  assert data_start+data_size==b['BANK_WINDOW']
-  page(2)
-  actual=m.read(data_start,code_size)
-  expected=bytearray(transport[data_start-0xfc00:data_start-0xfc00+code_size])
-  if 'mdDataForwardTemplate' in k:
-   offset=k['mdDataForwardTemplate']-k['DOS_CODE_START']
-   length=k['bankMoveDataBytes']
-   start=k['bankMoveDataEntry']-data_start
-   expected[start:start+length]=(BIN/'DOS.sys').read_bytes()[offset:offset+length]
-   start=k['bankMoveDirectOperand']-data_start
-   expected[start:start+2]=k['bankMoveDataEntry'].to_bytes(2,'little')
-   ts=h['symbols'](BIN/'banked/TRANSPORT.sym')
-   for address in (ts['bankMoveHome']+1,s['moveDataOverlayReturn']+1):
-    start=address-data_start
-    expected[start:start+2]=actual[start:start+2]
-  assert actual==expected
-  page(0)
+  verify_mem_profiles(m,page,BIN,b,k,ls,s,h['symbols'])
 
   page(1);assert m.read(k['memoryRamPages'],1)==b'\x04';assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')
   page(2)

@@ -12,7 +12,7 @@ class UiCounters:
         m.call('bp_clear')
         m.call('bp_set', addr=target, type='exec')
         observed = {
-            'F800': (t['mx_call'], 'exec'),
+            'F800': (t['mx_callPacket'], 'exec'),
             'F806': (t['mx_callRegs'], 'exec'),
             'F818': (t['mx_routeCall'], 'exec'),
             'selectMAIN': (t['IO_PAGE_RAM'], 'write'),

@@ -52,7 +52,7 @@ charEnd:
     ld de,32
 stringLine:
     ld hl,text
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     call timer_sample
     dec de
     ld a,d

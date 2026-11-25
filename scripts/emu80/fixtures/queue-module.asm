@@ -27,7 +27,7 @@ batch:
     ld b,MEM_ALLOC_ANY
     ld hl,17
     ld a,MEM_OP_ALLOC
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret
 receivedBytes:  DW 0
 firstByte:      DB 0

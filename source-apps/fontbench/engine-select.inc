@@ -41,7 +41,7 @@ engineStandalone:
     ld hl,02000h
     ld de,05C00h
     ld a,MEM_OP_ARENA
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
 engineLoad:
     call engineRecord
@@ -63,13 +63,13 @@ engineCopyBasename:
     or a
     jp nz,engineCopyBasename
     ld hl,enginePath
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     ret c
     ld (engineHandle),hl
     ld a,(gridPre)
     ld (engineRegs+5),a
     ld de,engineRegs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     ret c
     ld a,(engineRegs+6)
     rra
@@ -169,7 +169,7 @@ engineClose:
     or l
     jp z,engineFree
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     ld hl,0
     ld (engineHandle),hl
 engineFree:
@@ -179,7 +179,7 @@ engineFree:
     ret z
     ld b,0
     ld a,MEM_OP_FREE
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ld hl,0
     ld (engineAllocation),hl
     ret

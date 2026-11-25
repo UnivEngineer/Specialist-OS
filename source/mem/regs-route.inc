@@ -6,21 +6,30 @@ bankMxRegsRoute:
     ld a,b
     cp MXOS_GROUP_DOS
     jp z,bankMxRegsDos
-    ; Очередь уже сброшена. Текст и короткая пачка идут прямо к банковому клиенту.
+    ; Очередь уже сброшена. Пачка проходит прежний пакетный маршрут.
     ld a,c
     cp MXOS_BIOS_COMMAND_BATCH & 255
     jp z,bankMxCall
-    cp MXOS_BIOS_PRINT_STRING_Z & 255
-    jp z,bankMxCall
-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 255
-    jp z,bankMxCall
-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 255
-    jp z,bankMxCall
-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
+    ; BIOS TEXT уже обработан. Для другой группы совпадение номера
+    ; сохраняет прежний пакетный отказ.
+    call memBiosTextMode
     jp z,bankMxCall
     xor a
     ld hl,BIOS_BANK_GATE_ADDR+3
     jp bankCallPacket
+; HL указывает на DW, в стеке исходные AF и HL. Меняется только HL результата.
+bankFastCheckText:
+    call memBiosTextMode
+    jp nz,bankFastFallback
+    ld (memOperation),a
+    inc hl
+    inc hl
+    pop af
+    ex (sp),hl
+    push af
+    call memPrintTyped
+    pop af
+    ret
 bankFastReady:
     ; Младший байт SP для BIOS_FAST_SLOT в MAIN. Старший постоянен.
     add a,BIOS_FAST_SLOT_BIAS
@@ -32,9 +41,3 @@ bankFastReady:
     pop af
     ex (sp),hl
     jp bankFastPrepare
-bankMxNativeRegs:
-    ld hl,(MEM_NATIVE_CALL)
-    inc hl
-    inc hl
-    inc hl
-    jp (hl)

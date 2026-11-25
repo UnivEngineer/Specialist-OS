@@ -234,11 +234,11 @@ flNameCopy:
     dec b
     jp nz,flNameCopy
     ld a,DIR_OP_RESOLVED
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ex de,hl
     ld (flHandle+FH_SEEK),hl
     ld de,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (flHandle+FH_DRIVE),a
     ld a,(flWrite)
     or a
@@ -288,7 +288,7 @@ flClearLoop:
     ret
 flCall:
     ld hl,flHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret
 flHandle: DS FILE_HANDLE,0
     IFNDEF FILE_IO_HANDLE_ONLY

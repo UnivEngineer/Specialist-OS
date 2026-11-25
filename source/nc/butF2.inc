@@ -177,7 +177,7 @@ initRightDrive:
 buildDriveList:
             ld      hl, vars.driveList
             ld      bc, 8
-            MXOS_CALL MXOS_DOS_FILE_GET_DRIVES
+            MXOS_CALL_REGS MXOS_DOS_FILE_GET_DRIVES
             ld      a, b
             ld      (vars.driveCount), a
             xor     a

@@ -138,7 +138,7 @@ keCheckEnd:
     pop de                  ; imageOpen entry and load address saved above
     pop hl
     ld hl,keMainShortText
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_BANK
     ld a,MEM_ERROR_NOMEM
     call dosSetError
     jp keLoadError
@@ -248,7 +248,7 @@ keBankStackReady:
     call keCommandCount
     ld a,MODULE_TARGET_BANK
     push bc                 ; Длина хранится отдельно на время вложенного запроса.
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     pop bc
     jp c,keLoadError
     push hl                 ; handle переживает любые вложенные вызовы.
@@ -291,7 +291,7 @@ keBankStackReady:
     ld b,(hl)
     ld h,b
     ld l,c
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     push af
     ld hl,10
     add hl,sp
@@ -300,7 +300,7 @@ keBankStackReady:
     ld d,(hl)
     ex de,hl
     ld a,1
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop af
     push af
     pop bc
@@ -316,7 +316,7 @@ keBankPrepareFailed:
     pop bc
     pop hl
     push bc
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop af
     jp keLoadError
 keBankFloor: DW DOS_BANK_STACK_BOTTOM+192
@@ -449,7 +449,7 @@ keCacheClaim:
     cp SYSTEM_PROGRAM_ADDR/256
     jp c,keCacheNoClaim
     ld a,1
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     ret c
     ex de,hl
     ld (keCacheToken),hl
@@ -462,7 +462,7 @@ keCacheRelease:
     or l
     ret z
     ld a,1
-    MXOS_CALL MXOS_BIOS_GLYPH_CACHE
+    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     ret
 
 ; Static MAIN interval is tracked separately from the application's heap.

@@ -4,15 +4,15 @@
 ; +0  FAR-список: A = банк источника, HL = адрес, BC = 1..256 байт.
 ; +3  Регистровый пакет: A = банк источника, C = номер функции BIOS.
 ;     Транспорт заранее помещает MX_REGS в BANK_FRAME_REGS. Поддерживаются
-;     скалярные функции таблицы bbModes (режим 1) и TEXT_PRINT (режим 5).
+;     скалярные функции таблицы bbModes (режим 1).
 ;     При выполнении AF/BC/DE/HL содержат результат, BANK_FRAME_STATUS = 0.
 ;     Для остальных режимов A = DOS_ERR_UNSUPPORTED, CF = 1.
-; +6  Завершение TEXT_PRINT: принимает результат в bbRegs, снимает bbBusy
-;     и возвращает AF/BC/DE/HL из пакета.
+; +6  Резерв до фиксированного входа +9.
 ; +9  Локальный список: HL = адрес в MAIN, BC = длина. Короткая пачка из
 ;     банка приходит на стеке MAIN через TEXT. Возвращает A = 0, CF = 0,
 ;     результаты записей не собираются.
 ; +0Ch/+10h Пары слов SP для UPPERCASE и SUB_HL_DE.
+; +14h Совместимый посимвольный PRINT_STRING_LIM.
 ;
 ; Вызывающий гарантирует границы пакетов, номера операций и доступный стек.
     INCLUDE "../include/mxos.inc"
@@ -24,8 +24,7 @@ bankBiosDispatch:
     jp biosCommandBatch
 bankBiosPacketDispatch:
     jp bbEntry
-bankBiosFinishDispatch:
-    jp bbFinish
+    DS 3,0
 bankBiosBatchLocal:
     jp bbBatchLocal
 ; Первое слово выбирает исторический вектор BIOS, второе возвращает управление
@@ -38,23 +37,33 @@ bbFastSlots:
     BIOS_FAST_SLOT MXOS_BIOS_UPPERCASE,bios_upperCase
     BIOS_FAST_SLOT MXOS_BIOS_SUB_HL_DE,bios_sub_hl_de
 bbFastSlotsEnd:
+    ASSERT $ == BIOS_BANK_GATE_ADDR+14h
+; При прежнем FNT или перехваченном C809h каждый код идёт в printChar.
+bbPrintStringLimLegacy:
+    push af
+    push bc
+bbPrintStringLimLoop:
+    ld a,b
+    or c
+    jp z,bbPrintStringLimDone
+    push bc
+    ld c,(hl)
+    call bios_printChar
+    pop bc
+    inc hl
+    dec bc
+    jp bbPrintStringLimLoop
+bbPrintStringLimDone:
+    pop bc
+    pop af
+    ret
 bbEntry:
-    ld (bbPage),a
     ld b,0
     ld hl,bbModes
     add hl,bc
     ld a,(hl)
     dec a
-    jp z,bbScalarFast
-    cp 4                        ; Только TEXT_PRINT использует форму запроса.
     jp nz,bbUnsupported
-    ld hl,BANK_FRAME_REGS
-    ld de,bbRegs
-    ld b,MX_REGS
-    call bankCopyBytes
-    ld a,1
-    ld (bbBusy),a
-    jp bios_textDispatch
 
 bbScalarFast:
     ld hl,bbScalarDone
@@ -68,22 +77,6 @@ bbScalarDone:
     push af
     xor a
     ld (BANK_FRAME_STATUS),a
-    pop af
-    ret
-
-bbFinish:
-bbReturnRegs:
-    xor a
-    ld (bbBusy),a
-    ld (BANK_FRAME_STATUS),a
-    ld hl,(bbRegs+6)
-    push hl
-    ld hl,(bbRegs+4)
-    ld b,h
-    ld c,l
-    ld hl,(bbRegs+2)
-    ex de,hl
-    ld hl,(bbRegs)
     pop af
     ret
 
@@ -107,7 +100,7 @@ bbUnsupported:
     ret
 
 ; 0 — нужен отдельный адаптер указателей/состояния; 1 — регистры;
-; 2 — ASCIIZ; 5 — запрос TEXT_PRINT.
+; 2 — ASCIIZ.
 ; Дисковые функции, memcpy/strcmp, установка драйверов/хуков и memtop
 ; нельзя исполнять над NEAR-адресами клиента в контексте main.
 ; Формат записи: номер функции, полный размер, маска регистров, слова
@@ -226,21 +219,15 @@ bbModes:
     DB 1    ; PRINT_STRING_RAW_Z_MAIN
     DB 0    ; PRINT_STRING_RAW_LIM
     DB 1    ; PRINT_STRING_RAW_LIM_MAIN
-    DB 5    ; TEXT_PRINT
+    DB 1    ; PRINT_STRING_LIM_MAIN
     DB 1    ; SET_FONT_ENCODING
     DB 1    ; COMMAND_BATCH
-    DB 0    ; PRINT_STRING_RAW_PSEUDO: intercepted by MEM
+    DB 0    ; PRINT_STRING_RAW_PSEUDO: перехватывает MEM
+    DB 0    ; PRINT_STRING_LIM: перехватывает MEM
 bbModesEnd:
-    ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-0100h+1
-bbBusy          = io_vars.bbBusy
-bbFast          = io_vars.bbFast
+    ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_LIM-0100h+1
 bbPage          = io_vars.bbPage
 bbFunction      = io_vars.bbFunction
-bbPacketAddress = io_vars.bbPacketAddress
-bbSource        = io_vars.bbSource
-bbChunk         = io_vars.bbChunk
-bbScanLeft      = io_vars.bbScanLeft
-bbMore          = io_vars.bbMore
 bbRegs          = io_vars.bbRegs
 bbCopy          = io_vars.bbCopy
 ; Общий временный буфер: UI и физический A: не вложены друг в друга.

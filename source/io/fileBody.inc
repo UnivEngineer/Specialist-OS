@@ -65,7 +65,7 @@ fbCopyDescriptor:
     dec b
     jp nz,fbCopyDescriptor
     ld de,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (fbHandle+FH_DRIVE),a
     ld a,FILE_MODE_READ
     ld (fbHandle+FH_MODE),a
@@ -175,7 +175,7 @@ fbShortRead:
     ret
 fbCall:
     ld hl,fbHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret
 fbHandle    = BIOS_TEMP_BUFFER+128
 fbReadCount = io_vars.fbCursor  ; Two bytes; remaining two bytes are reserved.

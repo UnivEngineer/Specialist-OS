@@ -1,4 +1,4 @@
-"""Native FontBen grid: NC keyboard launch, 36 framebuffer oracles, RAM report."""
+"""Native FontBen grid: NC keyboard launch, framebuffer oracles, RAM report."""
 from pathlib import Path
 import json,re,runpy,time,urllib.error,sys,hashlib
 R=Path(__file__).resolve().parents[2]
@@ -7,7 +7,6 @@ preOnly=sys.argv[sys.argv.index('--pre')+1].upper() if '--pre' in sys.argv else 
 inverse='--inverse' in sys.argv
 assert not inverse or engine=='BIOS'
 scalarOnly='--scalar' in sys.argv
-STAGES=(12 if preOnly=='BOTH' else 6) if scalarOnly else (36 if preOnly=='BOTH' else 18)
 O=R/(('docs/bench/native-grid-inverse' if inverse else 'docs/bench/native-grid') if engine=='BIOS' else 'docs/bench/engine-grid/'+engine.lower())
 if scalarOnly: O=R/('docs/bench/scalar-grid/'+engine.lower())
 if '--out' in sys.argv: O=Path(sys.argv[sys.argv.index('--out')+1]).resolve()
@@ -123,12 +122,15 @@ try:
     assert m.read(n['vars.cmdLine'],len(cmd)).upper()==cmd.upper().encode(),m.read(n['vars.cmdLine'],len(cmd))
     m.screenshot(O/'command.png');m.stop_at(s['gridPreNext']);m.tap('enter')
     m.until(s['gridPreNext'],120,page=0)
+    pre_first,pre_end=m.read(s['enginePreFirst'],2)
+    stages=(pre_end-pre_first)*s['GRID_SCALAR_STAGES' if scalarOnly else 'GRID_FULL_STAGES']
+    assert stages>0
     initial_blocks,initial_modules=resources()
     until(s['gridMeasured'])
     corpus=m.read(s['gridText'],s['GRID_TEXT_BYTES']+1)
     assert corpus[-1]==0 and all(corpus[i*s['GRID_STRIDE']+s['GRID_GLYPHS']:(i+1)*s['GRID_STRIDE']]==b'\r\n' for i in range(s['GRID_ROWS']))
     references=[oracle(corpus[:-1],raw) for raw in (False,True)]
-    for stage in range(STAGES):
+    for stage in range(stages):
         pre,kind,route=(m.read(s[k],1)[0] for k in ('gridPre','gridKind','gridRoute'))
         expected,cursor=references[kind in (1,3,4)]
         actual=m.read(0x9000,12288)
@@ -145,16 +147,16 @@ try:
         if ui_only:
             m.call('debug_step',mode='into');until(s['gridProgressDone'])
             m.screenshot(O/f'progress-{stage+1}.png')
-            if stage==9:
-                print('NATIVE GRID UI PASS: MAIN, BANK CMD/TEXT/Win32/Far256/Own',flush=True)
+            if stage==min(8,stages-1):
+                print('NATIVE GRID UI PASS',flush=True)
                 raise SystemExit(0)
-        elif stage in (0,9,18,35):m.screenshot(O/f'stage-{stage+1}.png')
-        if stage<STAGES-1:
+        elif stage in (0,8,15,stages-1):m.screenshot(O/f'stage-{stage+1}.png')
+        if stage<stages-1:
             m.call('debug_step',mode='into');until(s['gridMeasured'])
     m.call('bp_clear');until(s['gridNextKey'])
-    assert m.read(s['gridStage'],1)==bytes([STAGES])
+    assert m.read(s['gridStage'],1)==bytes([stages])
     assert m.read(0xC800,0xF6)==abi_before,'BIOS entry modified'
-    assert [m.read(a,2) for a in slotaddrs]==originalslots,'MXOS_CALL slots not restored'
+    assert [m.read(a,2) for a in slotaddrs]==originalslots,'MXOS_CALL_REGS slots not restored'
     assert m.read(s['FONT_ENGINE_HEADER']+12,2)==initial_pre,'prerender changed'
     blocks,modules=resources()
     assert blocks==initial_blocks and modules==initial_modules,('leaks',blocks^initial_blocks,modules^initial_modules)
@@ -168,6 +170,6 @@ try:
     m.call('bp_clear');m.call('emu_run_for',ms=250);m.stop_at(n['mainLoop']);m.tap('enter');m.until(n['mainLoop'],120,page=0)
     m.screenshot(O/'returned.png')
     assert read_report(size)==report,'RAM report readback'
-    (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',stages=STAGES,results=results,reportBytes=size,fileReadback='PASS',allocations='no leaks',modules='unloaded',prerenderBase=int.from_bytes(initial_pre,'little'),returnedToNC=True,cpuHz=2000000,pitHz=2000000,binarySha256={f:hashlib.sha256((R/f).read_bytes()).hexdigest() for f in ('bin/BIOS.sys','bin/IO.sys','bin/MEM.sys','bin/FONTCOM.i80','bin/FONTGRID.i80','images/C-Flash-512k-MMX-System-Emu80.bin')}),indent=2)+'\n')
+    (O/'results.json').write_text(json.dumps(dict(bitmap='PASS',stages=stages,results=results,reportBytes=size,fileReadback='PASS',allocations='no leaks',modules='unloaded',prerenderBase=int.from_bytes(initial_pre,'little'),returnedToNC=True,cpuHz=2000000,pitHz=2000000,binarySha256={f:hashlib.sha256((R/f).read_bytes()).hexdigest() for f in ('bin/BIOS.sys','bin/IO.sys','bin/MEM.sys','bin/FONTCOM.i80','bin/FONTGRID.i80','images/C-Flash-512k-MMX-System-Emu80.bin')}),indent=2)+'\n')
     print(engine,'GRID PASS',flush=True)
 finally:x.stop()

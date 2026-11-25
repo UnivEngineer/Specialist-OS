@@ -3,7 +3,7 @@
 restoreActiveDirectory:
             ld hl,state.panelA_drive
             call readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             ret c
 restorePanelDirectory:
             ld hl,state.panelA_dirLow
@@ -13,11 +13,11 @@ restorePanelDirectory:
             call readBytePanel
             ld d,a
             ld a,DIR_OP_SET
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             ret
 savePanelDirectory:
             ld a,DIR_OP_GET
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             ret c
             ld a,e
             ld hl,state.panelA_dirLow
@@ -38,7 +38,7 @@ enterDirectory:
             jp c,directoryFailure
             ld hl,vars.pathArg
             ld a,CLI_OP_CHDIR
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
             jp c,directoryFailure
             call savePanelDirectory
 directoryChanged:
@@ -256,7 +256,7 @@ panelPathMiss:
             call panelPathBase
             push hl
             ld a,DIR_OP_GETCWD
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             pop hl
             jp nc,panelPathStore
             cp DOS_ERR_NO_MEDIA

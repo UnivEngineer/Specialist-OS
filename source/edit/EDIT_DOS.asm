@@ -31,11 +31,11 @@ entry:
     ld (registers+5),a           ; B = drive containing the editor DLL
     ld hl,corePath
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,failed
     ld (coreHandle),hl
     ld de,registers
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,unload
     ld hl,(registers+6)
     push hl
@@ -44,21 +44,21 @@ unload:
     push af
     ld hl,(coreHandle)
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop af
     ret nc
 failed:
     push af
     ld hl,error
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     pop af
     push af
     ld c,a
     call mx_printHexByte
     ld hl,prompt
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 waitEnter:
-    MXOS_CALL MXOS_BIOS_GETCH
+    MXOS_CALL_REGS MXOS_BIOS_GETCH
     cp 13
     jp nz,waitEnter
     pop af

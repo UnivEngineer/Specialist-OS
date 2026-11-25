@@ -1,9 +1,12 @@
-"""Полный MXOS_CALL и этапы скалярного BIOS-маршрута, такты CPU Emu80."""
+"""Полный MXOS_CALL_REGS и этапы скалярного BIOS-маршрута, такты CPU Emu80."""
 from pathlib import Path
 import argparse,json,re,runpy,struct
 R=Path(__file__).resolve().parents[2]
 def symbols(path):
- return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',path.read_text('utf-8'),re.M)}
+ result={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',path.read_text('utf-8'),re.M)}
+ if 'mx_call' in result:  # profile-mxcall также читает архивные таблицы.
+  result.setdefault('mx_callPacket',result['mx_call'])
+ return result
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--label',required=True);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17');p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19785),default=19782);p.add_argument('--profile',choices=('command','copy'),default='command');a=p.parse_args()
  out=a.out.resolve();out.mkdir(parents=True,exist_ok=True)
@@ -18,10 +21,10 @@ def main():
  try:
   (out/a.label).mkdir(parents=True,exist_ok=True)
   fixture=dict(system=R/'images/C-Flash-512k-MMX-System-Emu80.bin')
-  x.start('MXOS_CALL '+a.label,**fixture);m.call('debug_break');m.call('bp_clear')
+  x.start('MXOS_CALL_REGS '+a.label,**fixture);m.call('debug_break');m.call('bp_clear')
   expected_font=m.read(s['FONT_ADDR'],s['FONT_BYTES'])
   page(6)
-  for address,name in ((cs['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(cs['mx_call'],'CLIENT'),(ts['BANK_LANDING'],'TRANSPORT')):m.write(address,(b/(name+'.bin')).read_bytes())
+  for address,name in ((cs['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(cs['mx_callPacket'],'CLIENT'),(ts['BANK_LANDING'],'TRANSPORT')):m.write(address,(b/(name+'.bin')).read_bytes())
   m.write(cs['MEM_BANK_KIND'],bytes((cs['MEM_BANK_EXEC'],)))
   for n in (0,1,6):
    page(n);m.write(ts['bankPage'],bytes((n,)));m.write(ts['bankOwner'],bytes((7+n,n)));m.write(ts['bankDepth'],b'\0')
@@ -29,7 +32,9 @@ def main():
    low=bs['BANK_BIOS_STACK_LOW']
    if n:top=cs['DOS_BANK_STACK_TOP'];low=cs['DOS_BANK_STACK_BOTTOM']
    m.write(ts['bankServiceSP'],word(top));m.write(ts['bankStackFloor'],word(low+64))
-  page(0);m.write(bs['bbBusy'],b'\0');m.write(0xffc0,(b/'WINDOW.bin').read_bytes())
+  page(0)
+  if 'bbBusy' in bs: m.write(bs['bbBusy'],b'\0')
+  m.write(0xffc0,(b/'WINDOW.bin').read_bytes())
   for n in (0,1,6):
    for inline in (False,True):
     for repeat in range(2):
@@ -38,7 +43,7 @@ def main():
       m.write(0x3100,b'\x06'+word(0x4000)+b'\0'+word(0x5000)+word(32))
       m.write(0x2000,b'\xcd'+word(cs['mx_memcpyFar'])+b'\xc3\x00\x70');m.stop_at(0x7000);m.call('regs_set',pc=0x2000,sp=0x7000,hl=0x3100);m.until(0x7000,10,page=n)
      m.write(0x3000,packet)
-     stub=b'\xcd'+word(cs['mx_callRegs'])+word(cs['MXOS_BIOS_UPPERCASE']) if inline else b'\xcd'+word(cs['mx_call'])
+     stub=b'\xcd'+word(cs['mx_callRegs'])+word(cs['MXOS_BIOS_UPPERCASE']) if inline else b'\xcd'+word(cs['mx_callPacket'])
      m.write(0x2000,stub+b'\xc3\x00\x70');m.call('bp_clear')
      regs=dict(hl=0x1234,de=0x2345,bc=0x3456,af=0x7103) if inline else dict(de=0x3000,bc=cs['MXOS_BIOS_UPPERCASE'])
      m.call('regs_set',pc=0x2000,sp=0x7000,**regs)
@@ -65,7 +70,7 @@ def main():
      if not inline:assert m.read(0x3000,8)==struct.pack('<4H',r['hl'],r['de'],r['bc'],r['af'])
      page(0);assert m.read(s['FONT_ADDR'],s['FONT_BYTES'])==expected_font;page(n)
      row=dict(profile=a.profile,page=n,inline=inline,repeat=repeat,ticks=last-start,stages=stages);rows.append(row)
-     print(a.label,n,'MXOS_CALL' if inline else 'MX_REGS',repeat,last-start,flush=True)
+     print(a.label,n,'MXOS_CALL_REGS' if inline else 'MX_REGS',repeat,last-start,flush=True)
   (out/(a.label+'.json')).write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
  finally:x.stop()
 if __name__=='__main__':main()

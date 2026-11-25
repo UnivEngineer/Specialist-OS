@@ -39,7 +39,7 @@ inputSwitchPanel:
             ld      (state.activePanel),a
             ld      hl,state.panelA_drive
             call    readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             jp      restorePanelDirectory
 
 inputForFile:

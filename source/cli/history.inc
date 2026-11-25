@@ -175,9 +175,9 @@ cliHistoryLoad:
     call cliHistoryDiskBegin
     jp c,cliHistoryDisable
     ld hl,cliHistoryDescriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp nc,cliHistoryLoadSize
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
     cp DOS_ERR_NOT_FOUND
     jp z,cliHistoryDiskEnd
     jp cliHistoryDisable
@@ -299,19 +299,19 @@ cliHistoryDisable:
 
 cliHistoryDiskBegin:
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (cliHistoryOldDrive),a
     xor a
     ld (cliHistoryDiskReady),a
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld a,e
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld a,DIR_OP_GET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ret c
     ex de,hl
     ld (cliHistoryOldDirectory),hl
@@ -319,7 +319,7 @@ cliHistoryDiskBegin:
     ld (cliHistoryDiskReady),a
     ld de,0
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ret
 cliHistoryDiskEnd:
     ld a,(cliHistoryDiskReady)
@@ -328,10 +328,10 @@ cliHistoryDiskEnd:
     ld hl,(cliHistoryOldDirectory)
     ex de,hl
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
 cliHistoryRestoreDrive:
     ld a,(cliHistoryOldDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret
 cliHistoryOldDrive:         DB 0
 cliHistoryDisabled:         DB 0

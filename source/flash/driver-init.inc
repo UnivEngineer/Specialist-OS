@@ -29,7 +29,7 @@ driverBody:
     ld a,b
     ld (registration+DRIVER_INSTALL.drive),a
     IF LOCAL_KIND == 0
-    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_FLUSH_VOLUME
     ret c
     call initRom.detect
     jp c,installNoMedia
@@ -46,7 +46,7 @@ driverBody:
     ENDIF
 installDriver:
     ld hl,registration
-    MXOS_CALL MXOS_DOS_DRIVER_INSTALL
+    MXOS_CALL_REGS MXOS_DOS_DRIVER_INSTALL
     ret
     INCLUDE "../common/argNext.inc"
     INCLUDE "../common/driver-letter.inc"

@@ -224,9 +224,9 @@ Format:
     ; При ошибке сброса предыдущего тома текущий диск не меняется.
     push    bc
     ld      e, 1
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld      e, 0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     pop     bc
     cp      b
     jp nz,  errIO
@@ -450,11 +450,11 @@ FormatFatWrite:
     jp c,errIO
 FormatFinish:
     ; Сбрасываем старый кэш через mount и выбираем корень нового тома.
-    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_MOUNT_VOLUME
     jp c,errIO
     ld de,0
     ld a,DIR_OP_SET
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ret
 
 ;----------------------------------------------------------------------------

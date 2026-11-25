@@ -3,11 +3,11 @@ copyFileInt:
             ld      hl, state.panelA_drive
             call    readBytePanel
             ld      (vars.copyRequest.sourceDrive), a
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             call nc,restorePanelDirectory
             jp c,   copyFileError
             ld      a,DIR_OP_GET
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.sourceDirectory),hl
             call    getSelectedFile
@@ -19,14 +19,14 @@ copyFileInt:
             ld      (state.activePanel),a
             ld      hl,state.panelA_drive
             call    readBytePanel
-            MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
             call    restorePanelDirectory
             ld      a,(state.activePanel)
             xor     1
             ld      (state.activePanel),a
             ld      hl, vars.input
             ld      de, vars.copyRequest.destination
-            MXOS_CALL MXOS_DOS_FILE_NAME_PREPARE
+            MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
             jp c,   copyFileError
             ld      a,(vars.copyRequest.destination)
             cp      ' '
@@ -53,11 +53,11 @@ ncCopyUseSourceName:
             call    ncCopyShortName
 ncCopyDestinationReady:
             ld      a,DIR_OP_RESOLVED
-            MXOS_CALL MXOS_DOS_DIRECTORY
+            MXOS_CALL_REGS MXOS_DOS_DIRECTORY
             ex      de,hl
             ld      (vars.copyRequest.destinationDirectory),hl
             ld      e, 0
-            MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+            MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
             ld      (vars.copyRequest.destinationDrive), a
             ld      hl, 0
             ld      (vars.copyRequest.buffer), hl
@@ -89,13 +89,13 @@ ncCopyShortNameByte:
             ret
 
 copyFileError:
-            MXOS_CALL MXOS_DOS_GET_ERROR
+            MXOS_CALL_REGS MXOS_DOS_GET_ERROR
 copyFileErrorCode:
             call dosErrorText
             jp      copyFileShowError
 
 copyFileExists:
-            MXOS_CALL MXOS_DOS_GET_ERROR
+            MXOS_CALL_REGS MXOS_DOS_GET_ERROR
             call dosErrorText
 
 copyFileShowError:

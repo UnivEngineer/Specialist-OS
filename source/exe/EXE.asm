@@ -959,7 +959,7 @@ openPath:
     push de
     push hl
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     pop hl
     pop de
     ld (hl),a
@@ -1059,7 +1059,7 @@ closeHandle:
 ;----------------------------------------------------------------------------
 
 fileHandle:
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret
 
 ;----------------------------------------------------------------------------

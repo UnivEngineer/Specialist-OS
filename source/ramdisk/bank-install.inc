@@ -20,19 +20,19 @@
     ; FORMAT загружается по 0000h и затрёт RAMDISK. На её код не возвращаемся:
     ; на стеке остаётся возврат загрузчика DOS, который продолжит AUTOEXEC.
     ld hl,bankFormatCommand
-    MXOS_CALL MXOS_DOS_FILE_EXEC
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC
     ret
 BankPrepare:
     ld a,(bios_upper.ramPageCount)
     cp 2
     jp c,InstallFailed
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (bankPreviousDrive),a
     call BankCheckVolume
     push af
     ld a,(bankPreviousDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE ; Ошибка исходного (возможно, неразмеченного B:) тома не заменяет
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE ; Ошибка исходного (возможно, неразмеченного B:) тома не заменяет
     ; результат проверки; физический выбор восстанавливается самим DOS.
     pop af
     ret
@@ -54,15 +54,15 @@ BankPrepare:
 
 BankCheckVolume:
     ld a,1
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,BankMountError
     ; Повторная проверка нужна и при исходном текущем B: — не доверяем кэшу BPB.
-    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_MOUNT_VOLUME
     jp c,BankMountError
     xor a
     ret
 BankMountError:
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
     cp DOS_ERR_UNSUPPORTED
     jp nz,BankReportError
     ; Неизвестная разметка: читаем boot отдельно. Ошибка чтения не означает,
@@ -178,7 +178,7 @@ BankPageDigits:
 BankPagesAvailable:
     ld b,c
     ld a,MEM_OP_RAMLIMIT
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret nc
 BankArgumentError:
     ld hl,bankArgumentText

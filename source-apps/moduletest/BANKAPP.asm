@@ -34,13 +34,13 @@ entry:
     cp MEM_BANK_EXEC
     jp nz,failed
     ld hl,message
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld hl,(arguments)
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld b,MEM_ALLOC_ANY
     ld hl,128
     ld a,MEM_OP_ALLOC
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld de,055AAh
     jp result

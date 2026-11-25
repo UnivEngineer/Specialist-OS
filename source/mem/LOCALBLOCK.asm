@@ -1,5 +1,5 @@
 ; Общая сборка LOCAL/CLIENT/TEXT с взаимными ссылками.
-; Сборщик разделяет бинарник по mx_call на два установочных сегмента.
+; Сборщик разделяет бинарник по mx_callPacket на два установочных сегмента.
     INCLUDE "../include/mxos.inc"
     INCLUDE "biosabi.inc"
     INCLUDE "abi.inc"
@@ -44,12 +44,12 @@ bankMxUnsupported:
     ASSERT $ <= LOCAL_BLOCK_ENTRY
     DS LOCAL_BLOCK_ENTRY-$,0
     INCLUDE "local-block.inc"
-    ASSERT $ <= MEM_CALL_ENTRY
-    DS MEM_CALL_ENTRY-$,0
+    ASSERT $ <= MEM_CALL_PACKET_ENTRY
+    DS MEM_CALL_PACKET_ENTRY-$,0
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
-; Выполнить пакетный системный вызов mx_call после сброса командной очереди.
+; Выполнить пакетный системный вызов mx_callPacket после сброса командной очереди.
 ;
 ; вход:
 ;   b = группа, c = номер функции, de = адрес изменяемого MX_REGS в текущем
@@ -60,7 +60,7 @@ bankMxUnsupported:
 ;   результат при выполненном вызове. При отказе транспорта до исполнения
 ;   cf = 1, пакет сохраняется. Стек и банк вызывающего восстанавливаются.
 ;----------------------------------------------------------------------------
-memCall:
+memCallPacket:
     call bankQueueBefore
     ld a,(bankPage)
     or a
@@ -127,7 +127,7 @@ bankFastDecode:
     jp z,bankFastReady
     cp MXOS_BIOS_SUB_HL_DE & 255
     jp z,bankFastReady
-    jp bankFastFallback
+    jp bankFastCheckText
 bankFastCheckDos:
     dec a
     jp nz,bankFastFallback
@@ -147,7 +147,7 @@ bankMxCall:
     push de
     jp memBiosRoute
 localBlockEnd:
-    ASSERT $ <= mx_call
-    DS mx_call-$,0
+    ASSERT $ <= mx_callPacket
+    DS mx_callPacket-$,0
     INCLUDE "CLIENT.asm"
     END

@@ -12,10 +12,10 @@ saveImported:
     ld (exportDrive),a
 exportProbe:
     ld a,(exportDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,exportNextDrive
     ld b,0FFh
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     jp c,exportNextDrive
     ld a,b
     cp DISK_TECH_RAM
@@ -43,14 +43,14 @@ exportNextDrive:
     cp 8
     jp c,exportProbe
     ld a,(oldDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ld hl,exportNoRam
     call bios_printStringZ
     xor a
     ret
 exportChosen:
     ld a,(oldDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE ; Replace a supplied extension, or append .fnt to a bare output prefix.
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE ; Replace a supplied extension, or append .fnt to a bare output prefix.
     ld hl,outputPath
     call exportLeaf
 exportStem:

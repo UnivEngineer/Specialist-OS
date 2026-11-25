@@ -23,7 +23,7 @@ moduleEntry:
     call mx_memcpyFar
     ret c
     ld hl,(bulkRequest+4)
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_MAIN
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_MAIN
     jp bankFinish
 bankSelectCall:
     ld a,(kind)
@@ -41,7 +41,7 @@ bankString:
     jp nz,bankLines
     ; Один штатный вызов на весь поток, включая CRLF.
     ld hl,02000h
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_BANK
     jp bankFinish
 bankCharacters:
     ld hl,02000h
@@ -80,7 +80,7 @@ bankLine:
     add hl,de
     ld (hl),0
     ld hl,(lineRequest+4)
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_MAIN
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_MAIN
     ld hl,(lineRequest+1)
     ld de,50
     add hl,de
@@ -124,7 +124,7 @@ glyph:
     inc hl
     jp glyph
 string:
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_BANK
 endRow:
     call moduleTimerSample
     ret c

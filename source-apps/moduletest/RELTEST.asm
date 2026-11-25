@@ -35,10 +35,10 @@ entry:
     call probe
     jp nz,failed
     ld hl,(handleB)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,failed
     ld hl,(handleA)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,failed
     ld hl,pathA
     call loadMain
@@ -51,7 +51,7 @@ entry:
     dec a
     jp nz,failed
     ld hl,(handleA)
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,failed
     ld hl,055AAh
     ld de,successText
@@ -62,7 +62,7 @@ failed:
 finish:
     ld (testResult),hl
     ex de,hl
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 testDone:
     call bios_getch
     pop af
@@ -75,7 +75,7 @@ testDone:
 ;----------------------------------------------------------------------------
 loadMain:
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     ret
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -87,7 +87,7 @@ probe:
     xor a
     ld (packet+7),a
     ld de,packet
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     pop de
     jp c,probeFailed
     ld hl,(packet)

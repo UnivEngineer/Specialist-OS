@@ -221,8 +221,8 @@
       },
       {
         "id": 42,
-        "name": "TEXT_PRINT",
-        "target": "bankText.request"
+        "name": "PRINT_STRING_LIM_MAIN",
+        "target": "bios_printStringLim"
       },
       {
         "id": 43,
@@ -242,6 +242,14 @@
           "PRINT_STRING_RAW_PSEUDO_BANK"
         ],
         "target": "printStringRawPseudo"
+      },
+      {
+        "id": 46,
+        "name": "PRINT_STRING_LIM",
+        "aliases": [
+          "PRINT_STRING_LIM_BANK"
+        ],
+        "target": "bios_printStringLim"
       }
     ],
     "commands": [

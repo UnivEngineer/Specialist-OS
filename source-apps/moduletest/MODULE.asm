@@ -43,23 +43,23 @@ entry:
 keepChild:
     ld hl,childPath
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     ret
 retain:
     ld de,04444h
     ld a,RESIDENT_RETAIN
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret
 driver:
     ld hl,driverPath
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     ret
 readSector:
     ; Только штатный RAW: диск выбирает инициатор, буфер локален DOS-DLL.
     ld b,2
     ld de,0
     ld hl,sectorBuffer
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret c
     ld a,(sectorBuffer+11)
     ld l,a
@@ -69,21 +69,21 @@ readSector:
 readFile:
     ld hl,rootPath
     ld a,DIR_OP_CHDIR
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ret c
     ld hl,readHandle
     ld a,FILE_OP_OPEN
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret c
     ld hl,readHandle
     ld a,FILE_OP_READ
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     push af
     ld hl,(readHandle+FH_COUNT)
     push hl
     ld hl,readHandle
     ld a,FILE_OP_CLOSE
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     pop hl
     pop af
     ret
@@ -113,36 +113,36 @@ registers:
     ret
 console:
     ld hl,message
-    MXOS_CALL MXOS_BIOS_PRINT_STRING_BANK
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_BANK
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ret
 allocate:
     ld b,MEM_ALLOC_ANY
     ld hl,128
     ld a,MEM_OP_ALLOC
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret
 activeUnload:
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     ret
 rejectedBios:
-    MXOS_CALL 001FFh
+    MXOS_CALL_REGS 001FFh
     ret
 rejectedBiosSlot:
-    MXOS_CALL 00102h ; Зарезервированный пустой слот внутри таблицы BIOS.
+    MXOS_CALL_REGS 00102h ; Зарезервированный пустой слот внутри таблицы BIOS.
     ret
 child:
     ld hl,childPath
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     ret c
     push hl
     ld de,childRegs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     pop hl
     ret c
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     ld hl,01234h
     ret
 shared:

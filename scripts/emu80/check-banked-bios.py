@@ -49,8 +49,8 @@ def main():
             m.write(low-16, b'guard-bios-stack')
             client = (base/'CLIENT.bin').read_bytes()
             if page == 0:
-                client = client[:cs['bankClientEnd']-cs['mx_call']]
-            m.write(cs['mx_call'], client)
+                client = client[:cs['bankClientEnd']-cs['mx_callPacket']]
+            m.write(cs['mx_callPacket'], client)
             m.write(cs['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
             if page == 0:
                 m.write(live['MEM_NATIVE_CALL'], word(live['sysCall']))
@@ -82,7 +82,7 @@ def main():
                 cpu = dict(hl=int.from_bytes(packet[:2], 'little'), de=int.from_bytes(packet[2:4], 'little'),
                            bc=int.from_bytes(packet[4:6], 'little'), af=int.from_bytes(packet[6:8], 'little'))
             else:
-                stub = b'\xcd'+word(cs['mx_call'])+b'\xc3'+word(0x7000)
+                stub = b'\xcd'+word(cs['mx_callPacket'])+b'\xc3'+word(0x7000)
                 cpu = dict(bc=operation, de=packet_at)
             m.write(0x2000, stub); m.stop_at(0x7000)
             m.call('regs_set', pc=0x2000, sp=0x7000, **cpu)
@@ -103,7 +103,8 @@ def main():
             assert m.read(live['FONT_ADDR'], live['FONT_BYTES']) == font_state, 'BIOS call damaged font'
             screen = m.read(0x9000, 0x3000)
             cursor = m.read(live['bios_vars.cursorY'], 2)
-            assert m.read(bs['bbBusy'], 1) == bytes([busy])
+            if 'bbBusy' in bs:
+                assert m.read(bs['bbBusy'], 1) == bytes([busy])
             for p in (0, 1, 3):
                 select(p)
                 low = bs['BANK_BIOS_STACK_LOW'] if p == 0 else cs['DOS_BANK_STACK_BOTTOM']
@@ -188,14 +189,15 @@ def main():
             assert af >> 8 == live['DOS_ERR_ARGUMENT'] and af & 1, result
             assert result['saved'] == packet.hex() and not any(screen)
             rows.append(dict(case='bad-pointer-or-list', function=fn))
-        select(0); m.write(bs['bbBusy'], b'\x01')
-        packet = regs(bc=ord('Q'))
-        result, _ = run(1, 0x102, packet, busy=1)
-        af = int.from_bytes(bytes.fromhex(result['registers'])[6:8], 'little')
-        assert af >> 8 == live['DOS_ERR_ACCESS'] and af & 1
-        assert result['saved'] == packet.hex()
-        select(0); m.write(bs['bbBusy'], b'\0')
-        rows.append(dict(case='reentry-retains-outer-busy'))
+        if 'bbBusy' in bs:  # Старый шлюз с признаком занятости.
+            select(0); m.write(bs['bbBusy'], b'\x01')
+            packet = regs(bc=ord('Q'))
+            result, _ = run(1, 0x102, packet, busy=1)
+            af = int.from_bytes(bytes.fromhex(result['registers'])[6:8], 'little')
+            assert af >> 8 == live['DOS_ERR_ACCESS'] and af & 1
+            assert result['saved'] == packet.hex()
+            select(0); m.write(bs['bbBusy'], b'\0')
+            rows.append(dict(case='reentry-retains-outer-busy'))
         # BIOS ожидает клавишу, пока активен вложенный служебный стек main.
         result, _ = run(3, 0x100, regs(), key='enter')
         af = int.from_bytes(bytes.fromhex(result['registers'])[6:8], 'little')

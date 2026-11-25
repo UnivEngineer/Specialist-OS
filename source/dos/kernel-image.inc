@@ -6,7 +6,7 @@ kiRange:
     ret c
     push hl
     add hl,bc
-    ld de,mx_call
+    ld de,mx_callPacket
     call cmp_hl_de
     pop hl
     jp c,kiRangeGood

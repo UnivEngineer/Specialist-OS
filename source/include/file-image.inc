@@ -14,11 +14,11 @@ fiCopyName:
     dec b
     jp nz,fiCopyName
     ld a,DIR_OP_RESOLVED
-    MXOS_CALL MXOS_DOS_DIRECTORY
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     ex de,hl
     ld (flHandle+FH_SEEK),hl
     ld de,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (flHandle+FH_DRIVE),a
     ld a,FILE_MODE_READ
     ld (flHandle+FH_MODE),a

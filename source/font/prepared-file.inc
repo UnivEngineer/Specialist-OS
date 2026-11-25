@@ -4,7 +4,7 @@ checkWorkspace:
     ld hl,0
     ld bc,FONT_INIT_END
     ld a,MEM_OP_MAINCLAIM
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld hl,FONT_INIT_END
     ld (workspaceEnd),hl

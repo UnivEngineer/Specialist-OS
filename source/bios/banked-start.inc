@@ -25,10 +25,10 @@ biosBootExec:
     ld c,0Ah
     call bios_printChar
     pop hl
-    MXOS_CALL MXOS_DOS_FILE_EXEC
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC
     ret nc
 biosBootCommandFailed:
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
     ld hl,biosBootError
     jp biosReportBootError
 biosNcResumeFailed:
@@ -109,7 +109,7 @@ biosBankWarm:
     ; Драйверы повторно устанавливает только явный сценарий пользователя.
     ld hl,0                     ; ROM512KS: описание по умолчанию из DOS
     ld a,SYSTEM_DRIVE
-    MXOS_CALL MXOS_DOS_DRIVER_REFRESH
+    MXOS_CALL_REGS MXOS_DOS_DRIVER_REFRESH
     ld hl,biosAutoexecPath
     call biosBootExec
     ld c,0
@@ -122,20 +122,20 @@ biosBankShell:
     jp nc,biosBankShell
     ; A failed preferred shell must never be retried without a prompt.
     ld a,3
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     xor 1
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     call biosRunShell
     jp nc,biosBankShell
     jp biosRecoveryStart
 biosRunShell:
     ld a,3
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     or a
     ld hl,biosCliPath
     jp nz,biosTryShell
     ld a,RESIDENT_SHELL_RESUME
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret nc
     or a
     scf
@@ -188,7 +188,7 @@ sysDiskDriver:
     jp sysRawBlock
 sysDiskRequest:
     pop af
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret
 sysDiskNative:
     pop af

@@ -11,7 +11,7 @@ but_F7:
             jp z,ncRefreshDirty
             ld hl,vars.input
             ld a,CLI_OP_MKDIR
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
             jp c,copyFileError
             jp ncRefreshDirty
 ncMkdirText: DB 'Make directory',0

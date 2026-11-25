@@ -2,24 +2,30 @@
 bankKeyboardSignature:
     DB 0FFh,0FFh,0FFh,0FFh
 bankCopyTail:
-    ld hl,(bankCopySourcePair)
+bankCopySourcePair = $+1
+    ld hl,0
     ld a,h
     ld h,0FFh
     ld (hl),a
     ld h,b
     ld l,c
     ld sp,hl
+; Чтение одной порции сохраняет Z. Для TEXT это признак возврата на локальный стек.
+bankCopyRead32:
+    ASSERT bankCopyRead32 == 0FF0Eh
 index = 0
     DUP 32/2
     pop hl
     ld (BANK_WINDOW+index*2),hl
 index = index+1
     EDUP
+    jp z,MEM_FORWARD_RESTORE
     ld hl,0
     add hl,sp
     ld b,h
     ld c,l
-    ld hl,(bankCopyDestPair)
+bankCopyDestPair = $+1
+    ld hl,0
     ld a,h
     ld h,0FFh
     ld (hl),a
@@ -40,15 +46,12 @@ index = index+1
     dec (hl)
     jp nz,bankCopyTail
 bankCopySelectHome:
-    ld hl,(bankCopyReturnPair)
+bankCopyReturnPair = $+1
+    ld hl,0
     ld a,h
     ld h,0FFh
     ld (hl),a
     jp bankCopyReturn
-bankCopyLocalParams:
-bankCopySourcePair:     DW 0
-bankCopyDestPair:       DW 0
-bankCopyReturnPair:     DW 0
-bankCopyCount:          DW 0
+bankCopyCount: DW 0
 bankCopyTailEnd:
     ASSERT $ <= BANK_WINDOW

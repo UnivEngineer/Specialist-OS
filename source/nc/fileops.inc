@@ -45,12 +45,12 @@ ncFileopsMode:
     ld (ncProgressKey),a
     ENDIF
     ld a,TIMER_CLOCK
-    MXOS_CALL MXOS_DOS_TIMER
+    MXOS_CALL_REGS MXOS_DOS_TIMER
     jp c,ncFileopsBegin
     call ncFileopsClockReady
     push af
     ld a,TIMER_RELEASE
-    MXOS_CALL MXOS_DOS_TIMER
+    MXOS_CALL_REGS MXOS_DOS_TIMER
     pop af
     ret
 ncFileopsClockReady:
@@ -137,7 +137,7 @@ ncFileopsCall:
     call ncBankFlush
     ENDIF
     ld hl,vars.fileJob
-    MXOS_CALL MXOS_DOS_FILEOPS
+    MXOS_CALL_REGS MXOS_DOS_FILEOPS
     ret
 ; Only newly pressed keys activate buttons; held Enter from the input is ignored.
 ;----------------------------------------------------------------------------

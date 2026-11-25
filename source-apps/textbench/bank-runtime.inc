@@ -28,7 +28,7 @@ bankCommandNumber:
     dec b
     jp nz,bankCommandDigit
     ld hl,bankPath
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     ret c
     ld a,(bankRegs+6)
     rra

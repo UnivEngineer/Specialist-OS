@@ -41,7 +41,8 @@ try:
     else:
         until(s['gridMeasured'])
         corpus=m.read(s['gridText'],s['GRID_TEXT_BYTES'])
-        for stage in range(36):
+        stages=2*s['GRID_FULL_STAGES']
+        for stage in range(stages):
             record=s['engineRecords']+m.read(s['engineId'],1)[0]*8
             name=int.from_bytes(m.read(record,2),'little')
             name=m.read(name,16).split(b'\0')[0].decode()
@@ -54,7 +55,7 @@ try:
             assert m.read(s['gridPre'],1)==b'\1'
             rows.append(dict(engine=name,kind=kind,route=m.read(s['gridRoute'],1)[0],ticks=int.from_bytes(m.read(s['v_elapsed'],4),'little')))
             print(stage+1,rows[-1],flush=True)
-            if stage<35:
+            if stage+1<stages:
                 m.call('debug_step',mode='into');until(s['gridMeasured'])
         m.call('bp_clear');until(s['bench_restore'])
         assert {r['engine'] for r in rows}=={'SCALAR12','4DUP'}

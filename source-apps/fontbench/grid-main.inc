@@ -3,6 +3,9 @@
     DEFINE FONT_NATIVE_GRID
     INCLUDE "grid-corpus.inc"
 GRID_MIN_MAIN_TOP = 035FFh ; Нижний предел memTop для буфера отчёта в MAIN.
+GRID_ROUTE_COUNT  = 5
+GRID_FULL_STAGES  = 15
+GRID_SCALAR_STAGES = 6
 IMAGE_FLAGS      = IMAGE_FLAG_MAIN
     ORG 0
 entry:
@@ -121,9 +124,9 @@ gridWidthAccepted:
     ld a,(enginePreFirst)
     sub b
     cp 0FEh
-    ld hl,03633h ; '36' little endian
+    ld hl,03033h ; '30' little endian
     jp z,gridTotalReady
-    ld hl,03831h ; '18'
+    ld hl,03531h ; '15'
 gridTotalReady:
     ld a,(gridScalarOnly)
     or a
@@ -254,7 +257,7 @@ gridProgressDone:
     jp nz,gridStringNext
     ld a,3
 gridStringNext:
-    cp 6
+    cp GRID_ROUTE_COUNT
     jp c,gridContinueRoute
     jp gridNextKind
 gridScalarNext:
@@ -385,7 +388,7 @@ gridMainRawLoop:
 gridInvoke:
     ld hl,gridBankPath
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     ret c
     push hl
     ld hl,gridText
@@ -395,7 +398,7 @@ gridInvoke:
     pop hl
     push hl
     ld de,gridControl
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,gridReleaseBank
     ld hl,(gridControl+6)
     push hl
@@ -404,14 +407,14 @@ gridReleaseBank:
     pop hl
     push af
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     jp c,gridReleaseError
     pop af
     ret
 gridReleaseError:
     pop hl
     ret
-; Address = results + ((pre*5+kind)*6+route)*4.
+; Адрес = gridResults + ((pre*5+kind)*5+route)*4.
 gridResultAddress:
     ld a,(gridPre)
     add a,a
@@ -422,8 +425,8 @@ gridResultAddress:
     ld b,a
     ld a,(gridKind)
     add a,b
-    add a,a
     ld b,a
+    add a,a
     add a,a
     add a,b
     ld b,a
@@ -559,7 +562,7 @@ gridCellDone:
     ld hl,gridRoute
     inc (hl)
     ld a,(hl)
-    cp 6
+    cp GRID_ROUTE_COUNT
     jp c,gridTableValue
 gridTableLineEnd:
     ld hl,gridCRLF
@@ -638,14 +641,14 @@ gridSave:
     xor a
     ld (gridCapture),a
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (gridDrive),a
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld a,e
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret c
     ld a,(engineFileAppend)
     or a
@@ -656,7 +659,7 @@ gridFileMode:
     ld (gridHandle+FH_MODE),a
     ld a,FILE_OP_OPEN
     ld hl,gridHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     jp c,gridRestoreDrive
     ld hl,(gridControl+8)
     ex de,hl
@@ -667,11 +670,11 @@ gridFileMode:
     ld (gridHandle+FH_BUFFER),hl
     ld hl,gridHandle
     ld a,FILE_OP_WRITE
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     push af
     ld hl,gridHandle
     ld a,FILE_OP_CLOSE
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     jp c,gridCloseFailed
     pop af
     jp c,gridRestoreDrive
@@ -684,7 +687,7 @@ gridCloseFailed:
     pop af
 gridRestoreDrive:
     ld a,(gridDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ret
 gridArgs:
     ld a,h
@@ -838,26 +841,25 @@ gridControl:        DW 0,0,0,08000h,0,gridText
     DB 0,0
 gridBankPath: DB 'C:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.dll',0
     DS MAX_PATH-($-gridBankPath),0
-gridResults: DS 264,0FFh
+gridResults: DS (2*5+1)*GRID_ROUTE_COUNT*4,0FFh
 gridResultsEnd:
 gridTitle:          DB 'FontBen: 924 bytes, '
 gridTitleWidth:     DB '6','x8, ms '
 gridInverseLabel:   DB 'N',13,10
-    DB 'P API              MAIN CMD  CMDZ NEAR F256 USER',13,10,0
+    DB 'P API              MAIN CMD  CMDZ NEAR Far1024',13,10,0
 gridProgress:           DB ' Stage ',0
-gridTotal:              DB '/36 '
+gridTotal:              DB '/30 '
 gridTotalWidth:         DB '6','x8 ',0
 gridNextText:           DB 'Press Enter to continue',13,10,0
 gridMs:                 DB ' ms',0
 gridCRLF:               DB 13,10,0
 gridDash:               DB '   -',0
-gridRouteNames:         DW gridRoute0,gridRoute1,gridRoute2,gridRoute3,gridRoute4,gridRoute5
+gridRouteNames:         DW gridRoute0,gridRoute1,gridRoute2,gridRoute3,gridRoute4
 gridRoute0:             DB 'MAIN ',0
 gridRoute1:             DB 'BANK CMD ',0
 gridRoute2:             DB 'BANK CMD+Z ',0
 gridRoute3:             DB 'BANK NEAR ',0
-gridRoute4:             DB 'BANK Far256 ',0
-gridRoute5:             DB 'BANK Own ',0
+gridRoute4:             DB 'BANK Far1024 ',0
 gridNames:              DW gridName0,gridName1,gridName2,gridName3,gridName4,gridName5
 gridName0:              DB 'Char             ',0
 gridName1:              DB 'CharRaw          ',0

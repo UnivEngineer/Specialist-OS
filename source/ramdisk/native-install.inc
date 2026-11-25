@@ -8,7 +8,7 @@
     ret z
     ; FORMAT работает в main; наш код C000h в DOS остаётся доступен для RET.
     ld hl,bankFormatCommand
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     ret
 
 BankPrepare:
@@ -17,12 +17,12 @@ BankPrepare:
     cp 2
     jp c,InstallFailed
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (bankPreviousDrive),a
     call BankCheckVolume
     push af
     ld a,(bankPreviousDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ; Ошибка исходного (возможно, неразмеченного B:) тома не заменяет
     ; результат проверки; физический выбор восстанавливается самим DOS.
     pop af
@@ -46,25 +46,25 @@ BankPrepare:
 BankCheckVolume:
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ld a,e
     add a,'A'
     ld (bankFormatLetter),a
     ld a,e
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     jp c,BankMountError
     ; Повторная проверка нужна и при исходном текущем B: — не доверяем кэшу BPB.
-    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_MOUNT_VOLUME
     jp c,BankMountError
     xor a
     ret
 BankMountError:
     ; Сохраняем исходную ошибку: STATUS — отдельный запрос DOS.
-    MXOS_CALL MXOS_DOS_GET_ERROR
+    MXOS_CALL_REGS MXOS_DOS_GET_ERROR
     push af
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ld a,d
     or a
     pop bc
@@ -77,7 +77,7 @@ BankMountError:
     ld b,2
     ld de,0
     ld hl,bankBootSector
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     jp c,BankIoError
     ld hl,(bankBootSector+3)
     ld de,'M'+('X' << 8)
@@ -103,7 +103,7 @@ BankMountError:
     jp z,BankSuspectVolume
 BankFormatFresh:
     ld hl,bankFormatText
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     ld a,1
     or a
     ret
@@ -115,7 +115,7 @@ BankSuspectVolume:
 BankReportError:
     push af
     ld hl,bankErrorText
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
     pop af
     push af
     ld c,a

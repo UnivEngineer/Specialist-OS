@@ -2,7 +2,7 @@
 ; MXOS
 ; Печатать NEAR-строку через 32-байтное окно. memPrint выбирает ASCIIZ,
 ; memPrintTyped берёт режим из memOperation.
-; вход: HL — источник, BC — длина для RAW_LIM, PSEUDO и короткой пачки.
+; вход: HL — источник, BC — длина для LIM, RAW_LIM, PSEUDO и короткой пачки.
 ; выход: HL на NUL или за массивом, BC/DE сохранены, CF=0.
 ;----------------------------------------------------------------------------
 memPrint:
@@ -12,50 +12,56 @@ memPrint:
     xor a
     ld (memOperation),a
 memPrintTyped:
-    push af
     push bc
     push de
     ld a,(memOperation)
     ld d,a
-    cp 2
-    jp nc,memPrintLoop
-    ld bc,0FFFFh
 memPrintLoop:
+    ld a,d
+    cp MEM_TEXT_RAW_LIM
+    jp c,memPrintFrame
     ld a,b
     or c
     jp z,memPrintHaveHL
+memPrintFrame:
     push bc
+    push hl
     push de
+    ld de,BANK_WINDOW
+    jp c,memPrintZ
     ld a,b
     or a
-    ld b,BANK_TEXT_BYTES
-    jp nz,memPrintSize
+    jp nz,memPrintStack
     ld a,c
-    cp b
-    jp nc,memPrintSize
-    ld b,c
-memPrintSize:
-    ld a,d
-    cp 2
-    ld c,0
-    jp nc,memPrintReady
-    inc c
-memPrintReady:
-    ld de,BANK_WINDOW
-    MEM_TEXT_FILL memPrintFill,memPrintFilled
-memPrintFilled:
-    ; CF отмечает прочитанный NUL. C — длина печати, B — расход источника.
-    ld a,e
-    sbc a,BANK_WINDOW & 0FFh
-    jp z,memPrintAtNul
-    ld c,a
-    ld a,e
-    sub BANK_WINDOW & 0FFh
+    cp BANK_TEXT_BYTES
+    jp nc,memPrintStack
+memPrintBytes:
+memPrintStackThreshold:
+    cp BANK_TEXT_STACK_MIN
+    jp nc,memPrintNear
+    cp 4
+    jp c,memPrintTail
+    rra
+    or a
+    rra
     ld b,a
+    call bankCopyQuads
+    ld a,c
+    and 3
+    jp z,memPrintFilled
+memPrintTail:
+    ld b,a
+    call bankCopyBytes
+    jp memPrintFilled
+memPrintZ:
+    call bankTextChecked
+    ld a,e
+    sub BANK_WINDOW & 255
+    ld c,a
+    jp z,memPrintZEmpty
+memPrintFilled:
     pop de
     push de
-    push hl
-    push bc
     ld hl,(bankServiceSP)
     push hl
     ld hl,0
@@ -76,4 +82,3 @@ memPrintMain = MAIN_PRINT_TARGET
     DS MEM_LOCAL_FORWARD-$,0
     ENDIF
     INCLUDE "local-forward.inc"
-memOperation:       DB 0

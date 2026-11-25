@@ -24,7 +24,7 @@ biosRecoveryStart:
     ld c,10
     call bios_printChar
     ld hl,CMD_LINE
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     jp c,biosRecoveryStart
     jp biosBankShell
 biosShellPrompt: DB 'Shell path: ',0
@@ -36,7 +36,7 @@ biosTryShell:
     ld c,10
     call bios_printChar
     pop hl
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     ret
 
 ; Restore a selected FONT profile only when a destructive launch/Reset marked
@@ -44,12 +44,12 @@ biosTryShell:
 biosRestoreFont:
     ld hl,MAIN_COMMAND_ADDR
     ld a,1
-    MXOS_CALL MXOS_DOS_FONT_CONFIG
+    MXOS_CALL_REGS MXOS_DOS_FONT_CONFIG
     ret c
     or a
     ret z
     ld hl,MAIN_COMMAND_ADDR
     call biosBootExec
     ld a,2
-    MXOS_CALL MXOS_DOS_FONT_CONFIG
+    MXOS_CALL_REGS MXOS_DOS_FONT_CONFIG
     ret

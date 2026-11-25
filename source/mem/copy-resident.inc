@@ -6,19 +6,20 @@ bankCopyClone:
     ld (hl),a
     ld sp,BANK_COPY_SETUP_SOURCE
     pop hl
-    pop de
-    pop bc
-    ld sp,bankCopyLocalParams+6
-    push bc
-    push de
-    push hl
-    ld hl,(BANK_COPY_SETUP_COUNT)
-    ld (bankCopyCount),hl
-    ld a,b
-    ld l,c
+    ld (bankCopySourcePair),hl
+    pop hl
+    ld (bankCopyDestPair),hl
+    pop hl
+    ld (bankCopyReturnPair),hl
+    ld a,h
     ld h,0FFh
-    ld (hl),a
-    ld hl,(BANK_COPY_SETUP_SP)
+    ex de,hl
+    pop hl
+    ld (bankCopyCount),hl
+    ld (de),a
+    ; После выбора инициатора общее окно находится под SP.
+    ASSERT BANK_COPY_SETUP_SP == BANK_COPY_SETUP_SOURCE+8
+    pop hl
     ld sp,hl
     ret
 

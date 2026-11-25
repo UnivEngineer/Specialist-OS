@@ -3,7 +3,7 @@
 ; Public Char/Raw preserve all registers; strings preserve AF/BC/DE and return
 ; the first unread HL. Scalar backends may clobber registers; batch backends
 ; take HL/C=bounded run and preserve BC/DE/HL. No duplicate saves in helpers.
-; Saving/restoring only public JMPs would miss COMMAND and *_MAIN MXOS_CALL slots.
+; Saving/restoring only public JMPs would miss COMMAND and *_MAIN MXOS_CALL_REGS slots.
 engineSave:
     ld hl,(0D816h)
     ld (savedModuleScalar),hl

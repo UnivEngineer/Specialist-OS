@@ -291,10 +291,10 @@ cqDeliver:
     or a
     ld a,(cqBank)
     jp nz,cqDeliverDos
-    MXOS_CALL MXOS_BIOS_COMMAND_BATCH
+    MXOS_CALL_REGS MXOS_BIOS_COMMAND_BATCH
     ret
 cqDeliverDos:
-    MXOS_CALL MXOS_DOS_COMMAND_BATCH
+    MXOS_CALL_REGS MXOS_DOS_COMMAND_BATCH
     ret
 cqDeliverDll:
     ld (cqPacket),hl

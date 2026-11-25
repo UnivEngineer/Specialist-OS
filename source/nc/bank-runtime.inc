@@ -46,17 +46,17 @@ ncBankEntryDriveReady:
     jp nz,ncBankRetained
     ld de,NC_BANK_KEY
     ld a,RESIDENT_RETAIN
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret c
     ld a,1
     ld (ncBankRegistered),a
 ncBankRetained:
     ld de,NC_BANK_KEY
     ld a,RESIDENT_SHELL_SET
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret c
     xor a
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     ret c
     ld a,(ncBankInitOnly)
     or a
@@ -70,7 +70,7 @@ ncBankEnterUI:
     ld de,NC_MAIN_END-NC_MAIN_PACKET
     ld b,0
     ld a,MEM_OP_MAINREGISTER
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret c
     ld hl,(ncGfxHandle)
     ld a,h
@@ -82,7 +82,7 @@ ncBankLoadGraphics:
     ; Зарегистрированный буфер учитывается при выборе базы DLL.
     ld hl,ncGfxPath
     ld a,MODULE_TARGET_MAIN
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,ncBankGraphicsFailed
     ld (ncGfxHandle),hl
     call ncGfxBind
@@ -97,7 +97,7 @@ ncBankGraphicsReady:
     MXOS_KEY_BEGIN ncInputState
     ld hl,(ncGfxHandle)
     ld de,ncBankController
-    MXOS_CALL MXOS_DOS_MODULE_SCOPE
+    MXOS_CALL_REGS MXOS_DOS_MODULE_SCOPE
     push af
     MXOS_KEY_END ncInputState
     call ncBankFreePacket
@@ -150,7 +150,7 @@ ncBankEdit:
     ld hl,ncEditorPath
     ld (ncEditorErrorContext),hl
     ld a,MODULE_TARGET_BANK
-    MXOS_CALL MXOS_DOS_MODULE_LOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,ncBankEditResult
     ld (ncEditorHandle),hl
     ld hl,ncEditorCallLabel
@@ -165,7 +165,7 @@ ncBankEdit:
     ld (ncEditorRegs+5),a
     ld hl,(ncEditorHandle)
     ld de,ncEditorRegs
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     jp c,ncBankEditUnload
     ld hl,(ncEditorRegs+6)
     push hl
@@ -174,7 +174,7 @@ ncBankEditUnload:
     push af
     ld hl,(ncEditorHandle)
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     pop af
 ncBankEditResult:
     jp c,ncBankEditStatus
@@ -187,9 +187,9 @@ ncBankEditStatus:
 ncBankFinishExit:
     call ncBankClose
     ld a,RESIDENT_RELEASE
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ld a,1
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     xor a
     ret
 ncBankController:
@@ -234,7 +234,7 @@ ncBankResume:
 ncBankResumeCommandReady:
     ld hl,ncDiskChanged
     ld a,CLI_OP_OBSERVER
-    MXOS_CALL MXOS_DOS_CLI
+    MXOS_CALL_REGS MXOS_DOS_CLI
     ld a,(ncEditorReturn)
     or a
     jp z,ncBankResumeClear
@@ -283,7 +283,7 @@ ncBankFreePacket:
     ld hl,NC_MAIN_PACKET
     ld b,0
     ld a,MEM_OP_FREE
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret
 ncBankReturn:
     call ncBankFlush
@@ -305,7 +305,7 @@ ncBankReleaseGraphics:
     or l
     ret z
     xor a
-    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
     ld hl,0
     ld (ncGfxHandle),hl
     ld (ncGfxResultPtr),hl
@@ -339,13 +339,13 @@ ncBankSaveEpoch:
     ld hl,ncBankEpoch
     ld b,RESIDENT_EPOCH_ALL
     ld a,RESIDENT_DIRECTORY_EPOCH
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret
 ncBankCheckEpoch:
     ld hl,ncBankNewEpoch
     ld b,RESIDENT_EPOCH_ALL
     ld a,RESIDENT_DIRECTORY_EPOCH
-    MXOS_CALL MXOS_DOS_RESIDENT
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ld hl,ncBankEpoch
     ld de,ncBankNewEpoch
     ld bc,0800h
@@ -434,7 +434,7 @@ ncGfxCall:
     ld (ncGfxRegisters+7),a
     ld hl,(ncGfxHandle)
     ld de,ncGfxRegisters
-    MXOS_CALL MXOS_DOS_MODULE_CALL
+    MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
     ret c
     ld hl,(ncGfxRegisters+6)
     push hl
@@ -922,7 +922,7 @@ ncBankInputCursor:
     pop bc
     ret
 ncBankEncoding:
-    MXOS_CALL MXOS_BIOS_SET_FONT_ENCODING
+    MXOS_CALL_REGS MXOS_BIOS_SET_FONT_ENCODING
     ret
 ncBankGetMemTop:
     call mx_getMemTop
@@ -940,7 +940,7 @@ ncBankSyncCursor:
     pop af
     ret
 ncBankDiskInfo:
-    MXOS_CALL MXOS_DOS_RAW_IO
+    MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret
 ncBankCompare EQU cqCompare
 ncBankSubtract:

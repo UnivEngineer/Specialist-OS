@@ -10,7 +10,7 @@ void mxos_route_call(mxos_u16 handle,const MXOS_MODULE_REGS *input,MXOS_REGS *re
 }
 static void send(void)
 {
-    MXOS_CALL r;
+    MXOS_CALL_PACKET r;
     mxos_u16 bytes,rounded;
     if (!active->used) return;
     bytes=active->used;
@@ -26,7 +26,7 @@ static void send(void)
         packet.hl=r.hl; packet.de=0; packet.bc=bytes; packet.af=r.af;
         mxos_route_call(active->handle,&packet,&call);
         if (call.af&MXOS_CF) active->error=call.af>>8;
-    } else if (mxos_call(&r)&MXOS_CF) active->error=r.af>>8;
+    } else if (mxos_call_packet(&r)&MXOS_CF) active->error=r.af>>8;
     active->used=0; active->next=active->buffer;
 }
 mxos_u8 mxos_command_open(MXOS_COMMAND_QUEUE *q,void *buffer,mxos_u16 capacity,mxos_u16 max_command)
@@ -51,9 +51,9 @@ mxos_u8 mxos_command_select(MXOS_COMMAND_QUEUE *q,mxos_u8 target,mxos_u16 handle
 }
 mxos_u8 mxos_module_scope(mxos_u16 handle,void (*controller)(void))
 {
-    MXOS_CALL r;
+    MXOS_CALL_PACKET r;
     r.operation=MXOS_DOS_MODULE_SCOPE; r.hl=handle; r.de=(mxos_u16)controller;
-    r.af=r.bc=0; return mxos_call(&r)&MXOS_CF ? r.af>>8 : 0;
+    r.af=r.bc=0; return mxos_call_packet(&r)&MXOS_CF ? r.af>>8 : 0;
 }
 mxos_u8 *mxos_command_reserve(MXOS_COMMAND_QUEUE *q,mxos_u16 bytes)
 {

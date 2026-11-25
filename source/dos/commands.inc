@@ -347,7 +347,7 @@ cliExit:
     IFDEF BANKED_DOS_BUILD
     call setShell
     ELSE
-    MXOS_CALL MXOS_DOS_SET_SHELL
+    MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     ENDIF
     jp cliSuccess
 ; Файловые команды не меняют выбранные пользователем диск и каталог.
@@ -1036,7 +1036,7 @@ cliCheckCancel:
     push bc
     push de
     push hl
-    MXOS_CALL MXOS_BIOS_KEY_SCAN
+    MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
     cp 01Bh
     jp z,cliCancelled
     cp 3

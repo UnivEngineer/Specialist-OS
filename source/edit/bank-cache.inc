@@ -36,7 +36,7 @@ ebSetStride:
     ld (ebCacheStride),a
     ld bc,MEM_RESIDENT_FONT
     ld a,MEM_OP_RESIDENT
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     jp c,ebWorkspaceOnly
     ld a,h
     or l
@@ -67,7 +67,7 @@ ebRegisterSlots:
     ld hl,EDIT_MAIN_PACKET
     ld b,0
     ld a,MEM_OP_MAINREGISTER
-    MXOS_CALL MXOS_DOS_MEMORY
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
     ret nc
     push af
     ld a,(ebCacheRows)

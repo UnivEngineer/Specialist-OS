@@ -36,7 +36,7 @@ FormatFloppy:
     ld a,(v_FormatRAMdisk)
     or a
     jp nz,errParams
-    MXOS_CALL MXOS_DOS_FLUSH_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_FLUSH_VOLUME
     jp c,errIO
 
     call ClearSector
@@ -90,7 +90,7 @@ FormatFloppy:
     jp FormatFinish
 FormatFloppyWriteError:
     ; При частичной записи прежние записи FAT и корня в кэше устарели.
-    MXOS_CALL MXOS_DOS_MOUNT_VOLUME
+    MXOS_CALL_REGS MXOS_DOS_MOUNT_VOLUME
     jp errIO
 
 floppyBoot:

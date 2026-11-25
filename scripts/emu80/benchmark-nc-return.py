@@ -21,9 +21,9 @@ def prepare(h):
     DB 'RETURNBENCH-{name}',0
 start:
     ld hl,message
-    MXOS_CALL MXOS_BIOS_PRINT_STRING
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 ready:
-    MXOS_CALL MXOS_BIOS_GETCH
+    MXOS_CALL_REGS MXOS_BIOS_GETCH
 finish:
     xor a
     ret

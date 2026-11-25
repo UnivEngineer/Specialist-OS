@@ -22,7 +22,7 @@ dosErrorText:
     push de
     ld (dosTextCode),a
     ld e,0
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (dosTextDrive),a
     ld a,(dosTextCode)
     cp DOS_ERROR_RECORDS
@@ -86,7 +86,7 @@ dosTextFallback:
 dosTextReturn:
     push hl
     ld a,(dosTextDrive)
-    MXOS_CALL MXOS_DOS_FILE_SELECT_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     pop hl
     pop de
     pop bc

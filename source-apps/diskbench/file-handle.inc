@@ -71,7 +71,7 @@ bhName:
     jp bhCall
 bhCall:
     ld hl,bhHandle
-    MXOS_CALL MXOS_DOS_FILEHANDLE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     ret
 ;----------------------------------------------------------------------------
 ; Закрыть тестовый файл и синхронизировать его дескриптор.

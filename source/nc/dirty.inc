@@ -45,7 +45,7 @@ ncChangedRightMatch:
 ncStopObserver:
     ld hl,0
     ld a,CLI_OP_OBSERVER
-    MXOS_CALL MXOS_DOS_CLI
+    MXOS_CALL_REGS MXOS_DOS_CLI
     ret
 ; После тихой команды панели обновляются по маске.
 ncRefreshDirty:

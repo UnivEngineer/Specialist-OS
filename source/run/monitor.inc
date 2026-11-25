@@ -7,7 +7,7 @@ monitorOpen:
     or a
     jp nz,argumentError
     ld hl,descriptor
-    MXOS_CALL MXOS_DOS_FILE_LOAD_INFO
+    MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
@@ -61,7 +61,7 @@ monitorCheckRF:
 monitorLoaded:
     ld a,(callerDrive)
     ld e,1
-    MXOS_CALL MXOS_DOS_FILE_GET_SET_DRIVE
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld hl,monitorBootImage
     ld de,monitorBootImage+monitorBootEnd-monitorBoot
     ld bc,RAMFOS_BRIDGE

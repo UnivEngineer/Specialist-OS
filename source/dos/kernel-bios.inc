@@ -13,9 +13,9 @@ printString:
     pop af
     ret
 bankDosPrintDecWord:
-    MXOS_CALL MXOS_BIOS_PRINT_DEC_WORD
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_DEC_WORD
     ret
 bankDosGetch:
 j_getch:
-    MXOS_CALL MXOS_BIOS_GETCH
+    MXOS_CALL_REGS MXOS_BIOS_GETCH
     ret

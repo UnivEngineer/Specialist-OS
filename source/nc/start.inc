@@ -23,10 +23,10 @@ ncStartupBannerReady:
     IF !NC_BANKED
             ld de,0
             ld a,RESIDENT_SHELL_SET
-            MXOS_CALL MXOS_DOS_RESIDENT
+            MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ENDIF
             xor a
-            MXOS_CALL MXOS_DOS_SET_SHELL
+            MXOS_CALL_REGS MXOS_DOS_SET_SHELL
             xor     a
             ld      (vars.path), a
             ld      (vars.scrollCursorKept), a
@@ -49,7 +49,7 @@ ncStartupBannerReady:
             ; Apply the state overlay before reading either panel's catalog.
             ld hl,ncDiskChanged
             ld a,CLI_OP_OBSERVER
-            MXOS_CALL MXOS_DOS_CLI
+            MXOS_CALL_REGS MXOS_DOS_CLI
             call    loadState
             call ncPreparePanels
             ld a,1

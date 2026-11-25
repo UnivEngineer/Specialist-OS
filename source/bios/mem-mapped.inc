@@ -49,12 +49,11 @@ biosMemPrintMain:
     ld d,a
     ld b,0
     ld hl,BANK_WINDOW
-    cp 7
+    cp MEM_TEXT_BATCH
     jp z,memPrintBatch
     call bankText.printWindow
-    pop bc
+    pop af                     ; A = селектор из сохранённого B, C — число байтов.
     pop de
-    ld a,b
     jp MEM_TEXT_RETURN
 
 ; Пачка допускает банковый вызов из отдельной команды. На локальном стеке
