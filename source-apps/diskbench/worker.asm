@@ -119,13 +119,13 @@ nextPass:
     ld a,(pass)
     add a,'0'
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     ld c,'/'
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     ld a,(config+2)
     add a,'0'
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     ld a,(config+9)
     or a
     ld hl,txtScattered
@@ -1178,6 +1178,6 @@ workerEnd = $
     IFDEF WORKER_DOS
     ASSERT workerEnd <= DOS_BANK_MODULE_END
     ELSE
-    ASSERT workerEnd <= DOS_SERVICE_END
+    ASSERT workerEnd <= DOS_BANK_STACK_BOTTOM
     ENDIF
     ENDIF

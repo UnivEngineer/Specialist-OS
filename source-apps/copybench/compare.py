@@ -160,7 +160,7 @@ def far(out, runtime, port, algorithms=None):
         else:
             sy = ts if name == 'MEM' else variants[name][1]
             entry = (ts['bankCopyPhysical'] if spage & 128 else ts['bankCopyFar']) if name == 'MEM' else sy['copy']
-            restore = ts['bankCommandWindow'] if name == 'MEM' else sy['restoreCommand']
+            restore = None if name == 'MEM' else sy['restoreCommand']
             for at in range(0, size, chunk):
                 # All per-request packet construction is inside the measured interval.
                 for offset, value in [(1, src+at), (4, dst+at), (6, chunk)]:
@@ -168,8 +168,8 @@ def far(out, runtime, port, algorithms=None):
                 for offset, value in [(0, spage), (3, dpage)]:
                     code += [f'    ld a,{value}', f'    ld (request+{offset}),a']
                 code += ['    ld hl,request', f'    call {entry}', '    jp c,01801h']
-                if mode == 'command256': code += [f'    call {restore}']
-            if mode != 'command256': code += [f'    call {restore}']
+                if restore is not None and mode == 'command256': code += [f'    call {restore}']
+            if restore is not None and mode != 'command256': code += [f'    call {restore}']
         code += ['    jp 01800h', 'request: DS 8,0']
         (out/'far-case.asm').write_text('\n'.join(code)+'\n')
         return assemble(out/'far-case.asm', out/'far-case')[0]
@@ -191,7 +191,7 @@ def far(out, runtime, port, algorithms=None):
                     src, dst = 0x2000+so, dst0+do
                     for size, mode in [(256, 'whole'), (8192, 'whole'),
                                        (8192, 'copy256'), (8192, 'command256')]:
-                        if name == 'CPM original' and mode == 'command256': continue
+                        if name in ('MEM', 'CPM original') and mode == 'command256': continue
                         if 'aligned256' in name and size > 256 and mode == 'whole': continue
                         if any(r['algorithm'] == name and r['caller'] == caller
                                and r['source'] == [spage, src] and r['destination'] == [dpage, dst]

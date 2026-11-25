@@ -107,6 +107,9 @@ sysInstall:
     ld (MAIN_RAW_LEASE+5),a
     ld hl,sysCall
     ld (MEM_NATIVE_CALL),hl
+    ; Привязать регистровый вызов MAIN к его диспетчеру.
+    ld hl,sysRegsEntry
+    ld (bankMxRegsRouteCall+1),hl
     ld hl,bios_memcpy_bc_hl
     ld (MEM_NEAR_COPY),hl
     ld hl,bios_blockIO
@@ -115,5 +118,7 @@ sysInstall:
     ld (MEM_LOCAL_CHECKED),hl
     ld a,MEM_BANK_EXEC
     ld (MEM_BANK_KIND),a
-    ret
+    ld a,MEM_EXEC_READY_VALUE
+    ld (MEM_EXEC_READY),a
+    jp biosMoveUseMem
 sysRawEnd:

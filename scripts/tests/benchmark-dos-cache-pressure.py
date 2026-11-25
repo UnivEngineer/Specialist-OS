@@ -146,7 +146,7 @@ drive: DB 0
   ss={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\dA-Fa-f]+)',sym.read_text(),re.M)}
   memory=bytearray(65536); data=kernel.read_bytes();memory[0x100:0x100+len(data)]=data
   if "dosWorkStart" in syms:  # Pre-BSS benchmark bundle.
-   initialize_dos_state(memory, syms)
+   initialize_dos_state(memory, syms, kernel.parent.parent)
   data=binary.read_bytes();memory[0x8000:0x8000+len(data)]=data
   requests=b''.join(bytes((d,))+struct.pack('<H',n) for d,n in seq);memory[0xC000:0xC000+len(requests)]=requests
   for phase,pc in [('warm',0x8200),('measured',ss['measure'])]:

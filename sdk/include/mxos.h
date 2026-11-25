@@ -127,6 +127,17 @@ typedef struct {
 } MXOS_IMAGE_HEADER;
 #define MXOS_IMAGE_HEADER_SIZE 32
 #define MXOS_IMAGE_VERSION 2
+/* V3 load and entry are offsets from the chosen base. The body starts
+ * at base+load. Its sorted fixups are little-endian offsets into the body. */
+typedef struct {
+    MXOS_IMAGE_HEADER image;
+    mxos_u8 reloc_kind, align_log2;
+    mxos_u16 reloc_count, table_checksum, reserved;
+} MXOS_RELOC_IMAGE_HEADER;
+#define MXOS_RELOC_IMAGE_HEADER_SIZE 40
+#define MXOS_RELOC_IMAGE_VERSION 3
+#define MXOS_RELOC_WORD16 0
+#define MXOS_RELOC_HIGH8 1
 #define MXOS_IMAGE_BSS_UNKNOWN 0xffff
 #define MXOS_IMAGE_POLICY_EXCLUSIVE 0
 #define MXOS_IMAGE_POLICY_PRESERVE 1
@@ -186,15 +197,16 @@ typedef struct { char bytes[MXOS_MAX_PATH]; } MXOS_PATH;
 /* Один мост позволяет обращаться и к остальным уже объявленным ABI. */
 void mxos_bios_call(MXOS_REGS *regs) MXOS_FASTCALL;
 
-#define MXOS_MEM_ABI_VERSION 0x0103
+#define MXOS_MEM_ABI_VERSION 0x0104
 #define MXOS_MEM_COPY_FAR 0xF80F
 #define MXOS_MEM_INFO 0xF812
 #define MXOS_MEM_CAP_COPY 1
-#define MXOS_MEM_CAP_LAZY_WINDOW 2
+#define MXOS_MEM_CAP_LAZY_WINDOW 2  /* Исторический бит MEM 1.3, в 1.4 не выдаётся. */
 #define MXOS_MEM_CAP_MEMORY_OPS 4
 #define MXOS_MEM_CAP_MODULES 8
 #define MXOS_MEM_CAP_ALLOCATOR 16
 #define MXOS_MEM_CAP_COMMAND_QUEUE 32
+#define MXOS_MEM_CAP_BIOS_REGISTERS 64
 /* FAR-код: 0=main, 1..16=банки ДОЗУ; packed для 8080, sizeof=8. */
 typedef struct {
     mxos_u8 source_bank;
@@ -202,8 +214,8 @@ typedef struct {
     mxos_u8 destination_bank;
     mxos_u16 destination_offset, bytes;
 } MXOS_FAR_COPY;
-/* Возврат AF: CF=ошибка, A=E0h (банк) или E2h (диапазон).
- * Профиль окна после копирования остаётся установленным. */
+/* Возврат AF: CF=ошибка, A=E0h (банк) или E2h (диапазон выше FE00h).
+ * Локальное перекрытие допустимо, включая DATA. Межбанковый перенос оставляет COPY. */
 mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 
 #define MXOS_MEM_SERVICE 0xF815
@@ -249,7 +261,10 @@ mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 #define MXOS_MEM_ERR_OWNER 0xE4
 #define MXOS_MEM_ERR_HANDLE 0xE5
 #define MXOS_MEM_ERR_ACTIVE 0xE6
+#define MXOS_MEM_ERR_UNSUPPORTED 0xE7
 typedef struct { mxos_u8 bank; mxos_u16 offset; } MXOS_FAR_ADDRESS;
+/* При перекрытии в одном банке требуется зарегистрированный локальный перенос. */
+/* Для MOVE внутри DATA возвращается MXOS_MEM_ERR_UNSUPPORTED. */
 mxos_u16 mxos_memmove_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 void mxos_puts_local(const char *text) MXOS_FASTCALL;
 /* Адрес main передаётся явно; банковый указатель не разыменовывается здесь. */

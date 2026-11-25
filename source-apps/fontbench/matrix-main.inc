@@ -360,17 +360,17 @@ streamScalarNext:
     jp z,timer_sample
     ld c,a
     push hl
-    ; PRINT_CHAR_REAL не разбирает CRLF: управляющие идут обычным API.
+    ; mx_printCharRaw не разбирает CRLF: управляющие идут через mx_printChar.
     cp 020h
     jp c,streamScalarNormal
     ld a,(streamReal)
     or a
     jp z,streamScalarNormal
     ld a,c
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR_REAL
+    call mx_printCharRaw
     jp streamScalarDone
 streamScalarNormal:
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
 streamScalarDone:
     pop hl
     inc hl

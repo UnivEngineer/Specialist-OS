@@ -54,6 +54,8 @@ def main():
             m.write(cs['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
             if page == 0:
                 m.write(live['MEM_NATIVE_CALL'], word(live['sysCall']))
+                if 'bankMxRegsRouteCall' in cs:
+                    m.write(cs['bankMxRegsRouteCall']+1, word(live['sysRegsEntry']))
                 m.write(live['MEM_LOCAL_SYSTEM'], word(live['bios_blockIO']))
                 m.write(live['MEM_LOCAL_CHECKED'], word(live['localBlockChecked']))
                 m.write(live['MEM_NEAR_COPY'], word(live['bios_memcpy_bc_hl']))
@@ -218,7 +220,7 @@ def main():
             assert m.read(ts['bankDepth'], 1) == b'\0'
             assert m.read(ts['bankOwner'], 2) == bytes([7+page, page])
         rows.append(dict(case='main-DOS-BIOS-DOS-main'))
-        reset_screen(); run(1, 0x107, regs(0x3200), b'BIOS 6.0 bank gateway\r\nText and graphics from bank 0\0')
+        reset_screen(); run(1, 0x107, regs(0x3200), b'BIOS bank gateway\r\nText and graphics from bank 0\0')
         select(0); m.screenshot(out/'bank-bios.png')
         report = dict(cases=rows, mainBridgeBytes=(base/'MAINBIOS.bin').stat().st_size,
                       bankClientBytes=(base/'CLIENT.bin').stat().st_size, emulator=True, cpuHz=2000000,

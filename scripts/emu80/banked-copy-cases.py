@@ -72,7 +72,7 @@ loop:
  ld hl,036EFh
  inc (hl)
  ld c,'.'
- MXOS_CALL MXOS_BIOS_PRINT_CHAR
+ call mx_printChar
  ld a,(036F1h)
  or a
  jp z,answer

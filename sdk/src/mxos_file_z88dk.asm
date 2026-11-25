@@ -25,7 +25,7 @@ _mxos_file_call:
     add hl,de
     ld a,(hl)
     pop hl
-    call 0F806h
+    call mx_callRegs
     defw MXOS_DOS_FILEHANDLE
     ld l,a
     ld h,0
@@ -45,7 +45,7 @@ _mxos_file_call:
 
 _mxos_current_drive:
     ld de,0
-    call 0F806h
+    call mx_callRegs
     defw MXOS_DOS_FILE_GET_SET_DRIVE
     ld l,a
     ld h,0

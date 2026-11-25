@@ -1,44 +1,70 @@
-; Общий исполнитель TEXT: окна MEM и одна команда copy+print.
+; Исполнитель TEXT в MAIN. Окно остаётся источником на всё время печати.
     MODULE bankText
-dispatch:
-    cp 8
-    jp z,pseudo
-    cp 7
-    jp z,commands
-    cp 5
-    jp z,fromBank
-; A=0 Z, 1 RawZ, 2 RawLim, 3 Char, 4 CharRaw; HL=буфер, C=байты окна.
 window:
     or a
     jp z,bios_printStringZ
-    dec a
-    jp z,bios_printStringRawZ
-    dec a
-    jp nz,one
+    jp bios_printStringRawZ
+;----------------------------------------------------------------------------
+; MXOS
+; Печать порции без копирования. До возврата движок не занимает окно.
+; вход: HL = BANK_WINDOW, BC = длина 1..32, A = D = режим 0, 1, 2 или 8.
+; Для Z и RAW_Z инициатор уже исключил завершающий NUL из длины.
+; выход: HL сразу за выведенными байтами. Остальные регистры рабочие.
+;----------------------------------------------------------------------------
+printWindow:
+    cp 2
+    jp z,bios_printStringRawLim
+    jp nc,bios_printStringRawPseudo
+    ; Оставляем старым перехватчикам Z их собственный способ рисования.
+    or a
+    ld hl,(bios_printStringZ+1)
+    ld de,FONT_ENGINE_Z+1
+    jp z,windowVector
+    ld hl,(bios_printStringRawZ+1)
+    ld de,FONT_ENGINE_RAWZ+1
+windowVector:
+    ld b,a
+    ld a,(de)
+    cp l
+    jp nz,windowLegacy
+    inc de
+    ld a,(de)
+    cp h
+    jp nz,windowLegacy
+    ld a,b
+    or a
     ld b,0
-    jp bios_printStringRawLim
-pseudo:
+    ld hl,BANK_WINDOW
+    jp nz,FONT_ENGINE_LIM
+    ld hl,(FONT_ENGINE_TEXT_EXT)
+    ld a,h
+    cp FONT_ENGINE_TEXT_LIM >> 8
+    jp nz,windowLegacy
+    ld a,l
+    cp FONT_ENGINE_TEXT_LIM & 0FFh
+    ld hl,BANK_WINDOW
+    jp z,FONT_ENGINE_TEXT_LIM
+windowLegacy:
+    ld d,b
     ld b,0
-    jp bios_printStringRawPseudo
-one:
-    ; DEC задаёт Z для Char, NZ для Raw; оба публичных вызова сохраняют
-    ; AF и HL. Поэтому вторая условная CALL видит тот же флаг, а окно
-    ; не требует ещё одной пары PUSH/POP указателя.
-    dec a
-    ld c,(hl)
+    ld hl,BANK_WINDOW
     ld a,c
-    call z,bios_printChar
-    call nz,bios_printCharRaw
+    cp BANK_TEXT_BYTES
+    ld a,d
+    jp nz,window
+    ; Прежний вектор принимает только ASCIIZ. Печатаем 31+1 через этот же
+    ; вектор. Последний код сохранён в E, после первого вызова HL = FFDFh.
+    ld a,(BANK_WINDOW+BANK_TEXT_BYTES-1)
+    ld e,a
+    xor a
+    ld (BANK_WINDOW+BANK_TEXT_BYTES-1),a
+    ld a,d
+    call window
+    dec hl
+    ld (hl),e
+    ld a,d
+    call window
     inc hl
-    ret
-commands:
-    push bc
-    ld b,0
-    call 0F000h+9
-    pop bc
-    ld b,0
-    ld hl,0FFC8h
-    add hl,bc
     ret
 ; Принимающий адаптер уже сохранил пакет и установил main-стек.
 fromBank:

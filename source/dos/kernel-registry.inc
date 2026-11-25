@@ -18,6 +18,9 @@ registryBoot:
     call moveBytesForward
     IFDEF MX_FLOPPY_BOOT
     ; Stage has installed the physical floppy service, independently of ROM C:.
+    ld hl,DOS_FLOPPY_ADDR
+    ld (diFloppyStart),hl
+    ld (diFloppyCall+1),hl
     ld hl,(bootFloppyEnd)
     ld (diFloppyEnd),hl
     ld hl,diskDriver
@@ -101,15 +104,18 @@ dosDriverRefresh:
     or l
     jp z,registryUseBuiltin
     ld de,KD_PATH
-    ld bc,64
-    call kdFetch
-    ret c
+    ld bc,(64 << 8)+1
+    call kdReadString
+    jp c,blockArgument
+    call kdReadString
+    jp c,blockArgument
+    ld a,e
+    sub KD_PATH & 0FFh
     ld hl,KD_PATH
-    jp registryValidateText
+    jp registryTextReady
 registryUseBuiltin:
     ld hl,registryRomName
-registryValidateText:
-    ld (registrySystemText),hl
+    push hl
     ld b,64
     ld c,2
 registryValidateByte:
@@ -122,10 +128,14 @@ registryValidateByte:
 registryValidateNext:
     dec b
     jp nz,registryValidateByte
+    pop hl
     jp blockArgument
 registryValidateReady:
     ld a,65
     sub b
+    pop hl
+registryTextReady:
+    ld (registrySystemText),hl
     ld (registryCopyLength+1),a
     ld b,3
     ld hl,0
@@ -193,7 +203,17 @@ dosDriverInstall:
     ret c
     ld a,(hl)
     cp DRIVER_INSTALL_VERSION
+    jp z,diVersionReady
+    cp DRIVER_FLOPPY_RELOC
     jp nz,blockArgument
+    inc hl
+    inc hl
+    ld a,(hl)
+    dec hl
+    dec hl
+    cp DRIVER_KIND_FLOPPY
+    jp nz,blockArgument
+diVersionReady:
     inc hl
     ld a,(hl)
     cp 8
@@ -262,7 +282,7 @@ diCheckShift:
     ld l,c
     ld de,LOCAL_DRIVER_END-LOCAL_DRIVER_ADDR
     jp nz,diSizeLimit
-    ld de,DOS_BANK_DRIVER_ADDR-DOS_FLOPPY_ADDR
+    ld de,DOS_BANK_DRIVER_END-DOS_ARENA_START
 diSizeLimit:
     call cmp_hl_de
     pop hl
@@ -389,14 +409,11 @@ diPublish:
     jp dosClearError
 
 diCopyFloppy:
-    ld hl,(diSize)
-    ld b,h
-    ld c,l
-    ld hl,(diImage)
-    ld de,DOS_FLOPPY_ADDR
-    call moveBytesForward
-    ld h,b
-    ld l,c
+    ld hl,(diNewBase)
+    ld (diFloppyStart),hl
+    ld hl,(diNewEntry)
+    ld (diFloppyCall+1),hl
+    ld hl,(diNewEnd)
     ld (diFloppyEnd),hl
     call diDrive
     ld (kernelFloppyDrive),a
@@ -414,24 +431,173 @@ diCopyFloppy:
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
-; Зарезервировать место для физического драйвера в арене DOS.
-; вход: diSize — проверенный размер тела. DOS выполняет установщик.
-; выход: cf/a — статус. При повторной установке проверяется только прирост.
-;   bc, de, hl рабочие. Старая служба остаётся действующей до diCopyFloppy.
+; Подготовить копию службы ВГ93 перед публикацией реестра.
+; вход: diDescriptor, diImage и diSize проверены по телу активного установщика.
+; выход: CF=0 — подготовлены diNewBase/End/Entry, CF=1/A — ошибка. Все регистры рабочие.
+; У v2 первые три слова задают размер тела, смещение входа и число WORD16-поправок.
 ;----------------------------------------------------------------------------
 diPrepareFloppy:
+    ld hl,(diDescriptor)
+    ld a,(hl)
+    cp DRIVER_INSTALL_VERSION
+    jp z,diFixedFloppy
     ld hl,(diSize)
-    ld de,DOS_FLOPPY_ADDR
-    add hl,de
+    ld de,6
+    call sub_hl_de
+    jp c,blockArgument
+    push hl                 ; Остаток пакета: тело и таблица.
+    ld hl,(diImage)
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    inc hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    push hl
+    ld h,d
+    ld l,e
+    ld (diNewEntry),hl
+    ld h,b
+    ld l,c
+    ld (diSize),hl
+    call cmp_hl_de
+    pop hl
+    jp c,diInvalidPacket
+    jp z,diInvalidPacket
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    inc hl
+    ld (diImage),hl         ; Теперь указывает на тело за заголовком.
     ex de,hl
-    ld hl,(diFloppyEnd)
+    ld (diFixCount),hl
+    add hl,hl
+    jp c,diInvalidPacket
+    add hl,bc
+    jp c,diInvalidPacket
+    pop de
+    call cmp_hl_de
+    jp nz,blockArgument
+    ld hl,0                 ; Встроенная служба WORD16 имеет байтовое выравнивание.
+    call relocDosHole
+    jp c,dosSetError
+    ld (diNewBase),hl
+    ld hl,(diNewEntry)
+    ex de,hl
+    ld hl,(diNewBase)
+    add hl,de
+    ld (diNewEntry),hl
+    call diFloppyBounds
+    call dosArenaImage
+    ret c
+    call diMoveService
+    ld hl,(diImage)
+    push hl
+    ld hl,(diSize)
+    ex de,hl
+    pop hl
+    add hl,de
+    ld de,0                 ; Нижняя допустимая позиция следующего слова.
+diFixNext:
+    push hl
+    ld hl,(diFixCount)
     ld a,h
     or l
-    jp nz,diGrowFloppy
-    ld hl,DOS_FLOPPY_ADDR
-diGrowFloppy:
+    jp z,diFixDone
+    dec hl
+    ld (diFixCount),hl
+    pop hl
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    inc hl
+    push hl
+    ld h,b
+    ld l,c
     call cmp_hl_de
-    jp c,dosArenaImage
+    jp c,diInvalidPacket
+    ld de,2
+    add hl,de
+    jp c,diInvalidPacket
+    ex de,hl                ; Конец текущей поправки.
+    ld hl,(diSize)
+    call cmp_hl_de
+    jp c,diInvalidPacket
+    ld hl,(diNewBase)
+    add hl,bc
+    ld c,(hl)
+    inc hl
+    ld b,(hl)
+    push de
+    ex de,hl
+    ld hl,(diNewBase)
+    add hl,bc
+    jp c,diFixOverflow
+    ld a,h
+    ld (de),a
+    dec de
+    ld a,l
+    ld (de),a
+    pop de
+    pop hl
+    jp diFixNext
+diFixOverflow:
+    pop de
+diInvalidPacket:
+    pop hl
+    jp blockArgument
+diFixDone:
+    pop hl
+    ret
+diFixedFloppy:
+    ld hl,DOS_FLOPPY_ADDR
+    ld (diNewBase),hl
+    ld (diNewEntry),hl
+    call diFloppyBounds
+    ld hl,DOS_BANK_DRIVER_ADDR
+    call cmp_hl_de
+    jp c,blockArgument
+    ; Для прежнего образа по тому же адресу проверяется только прирост.
+    ld hl,(diFloppyStart)
+    ld bc,DOS_FLOPPY_ADDR
+    ld a,h
+    cp b
+    jp nz,diFixedWhole
+    ld a,l
+    cp c
+    jp nz,diFixedWhole
+    ld hl,(diFloppyEnd)
+    call cmp_hl_de
+    jp nc,diMoveService
+    jp diFixedClaim
+diFixedWhole:
+    ld hl,(diNewBase)
+diFixedClaim:
+    call dosArenaImage
+    ret c
+diMoveService:
+    ld hl,(diSize)
+    ld c,l
+    ld b,h
+    ld hl,(diNewBase)
+    ex de,hl
+    ld hl,(diImage)
+    call moveBytesForward
+    or a
+    ret
+diFloppyBounds:
+    ld hl,(diNewBase)
+    push hl
+    ld hl,(diSize)
+    ex de,hl
+    pop hl
+    push hl
+    add hl,de
+    ld (diNewEnd),hl
+    ex de,hl
+    pop hl
     ret
 
 ; Вход: diDescriptor действителен. Выход: a=диск, hl=поле drive, bc/de сохранены.
@@ -440,8 +606,7 @@ diDrive:
     inc hl
     ld a,(hl)
     ret
-; Два резервных байта записи D: содержат исключающий конец службы в арене.
-; Return the installer kind in A. BC and DE are preserved, HL is scratch.
+; Вернуть тип службы установщика в A. BC и DE сохранены, HL рабочий.
 diKind:
     call diDrive
     inc hl
@@ -460,7 +625,7 @@ registryFlushH:
 ; HL/BC сохранены; AF/DE разрушены, CF/A=ошибка.
 diRange:
     push hl
-    ld hl,(diStart)
+    ld hl,(diBodyStart)
     ex de,hl
     pop hl
     call cmp_hl_de
@@ -469,7 +634,7 @@ diRange:
     add hl,bc
     jp c,diRangeBad
     ex de,hl
-    ld hl,(diEnd)
+    ld hl,(diBodyEnd)
     call cmp_hl_de
     pop hl
     jp c,blockArgument

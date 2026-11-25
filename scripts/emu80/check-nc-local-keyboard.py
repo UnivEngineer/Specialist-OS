@@ -160,7 +160,8 @@ def main():
                                 assert c.read(bank,editor['v_charStep'],1)==b'\x03'
                                 editor_key('f6')
                                 assert c.read(bank,editor['hexTextCol'],1)==b'\x2e'
-                            gfx = profile['symbols']('UI_GFX')
+                            handle = int.from_bytes(c.read(bank,editor['ebGfxHandle'],2),'little')
+                            gfx = profile['graphics_symbols'](lambda at,size:c.read(1,at,size),c.k,handle)
                             def page(arrow, clear=False, individual=False):
                                 entry = 'hexPageDown' if arrow == 'down' else 'hexPageUp'
                                 c.free()

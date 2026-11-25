@@ -7,7 +7,12 @@ KD_OBJECT = DOS_BANK_OBJECT_ADDR
     ELSE
     INCLUDE "../../bin/fileops-imports.inc"
     ENDIF
-    ORG DOS_FILEOPS_ADDR
+    IFNDEF OVERLAY_ORIGIN
+OVERLAY_ORIGIN = 0
+    ENDIF
+    ORG OVERLAY_ORIGIN
+    RELOCATE_START
+overlayBody:
     jp foEntry
     INCLUDE "../include/fileops-host.inc"
 
@@ -98,5 +103,12 @@ foCapacity:
     INCLUDE "prepare.inc"
     INCLUDE "delete.inc"
 fileopsEnd:
-    ASSERT $ <= DOS_SERVICE_END
+    RELOCATE_END
+IMAGE_BODY_SIZE  = $-overlayBody
+IMAGE_MEM_BEGIN  = 0
+IMAGE_MEM_END    = IMAGE_BODY_SIZE
+IMAGE_BSS_SIZE   = 0
+IMAGE_RELOC_KIND = 0
+IMAGE_ALIGN_LOG2 = 0
+    RELOCATE_TABLE overlayBody
     END

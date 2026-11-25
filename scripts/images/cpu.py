@@ -35,7 +35,8 @@ def format_cpu(load,entry=None,flags=0,monitor=None,fields=None):
 def fields_from_symbols(symbols):
     names={'IMAGE_BSS_SIZE':'BSS','IMAGE_MEM_BEGIN':'MEM_BEGIN','IMAGE_MEM_END':'MEM_END',
            'IMAGE_MIN_HEAP_SIZE':'MIN_HEAP','IMAGE_STACK_SIZE':'STACK','IMAGE_MEMORY_POLICY':'POLICY',
-           'IMAGE_API':'API','IMAGE_COMPAT_MODE':'MODE','IMAGE_CACHEABLE':'CACHEABLE'}
+           'IMAGE_API':'API','IMAGE_COMPAT_MODE':'MODE','IMAGE_CACHEABLE':'CACHEABLE',
+           'IMAGE_BODY_SIZE':'BODY_SIZE','IMAGE_RELOC_KIND':'RELOC_KIND','IMAGE_ALIGN_LOG2':'ALIGN_LOG2'}
     values={name:int(value,16) for name,value in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',symbols,re.M)}
     return {field:f'{values[name]:X}' for name,field in names.items() if name in values}
 

@@ -70,8 +70,8 @@ for capacity in (512,1024,2048):
   cases=[(capacity-1,0x4001,False),(capacity,0x4001,True),(0,0xFE00,False)]
   if entry=='dosSystemDriver':cases += [(0,0xFE01,True),(0,0xFFFF,True)]
   for sector,buffer,error in cases:
-   mem=bytearray(base);struct.pack_into('<H',mem,k['DOS_DRIVER_REGISTRY'],capacity)
-   mem[k['v_drive']]=0;mem[k['kdPage']]=1
+   mem=bytearray(base);struct.pack_into('<H',mem,k['DOS_DRIVER_REGISTRY']+k['SYSTEM_DRIVE']*k['DRIVER_RECORD_SIZE'],capacity)
+   mem[k['v_drive']]=k['SYSTEM_DRIVE'];mem[k['kdPage']]=1
    stub=b'\x31'+W(0xE000)+b'\x01'+W(0x0200)+b'\x11'+W(sector)+b'\x21'+W(buffer)+b'\xcd'+W(k[entry])
    stub+=b'\xf5\xe1\x22'+W(0x8300)+b'\xc3'+W(0x82ff)
    mem[0x8200:0x8200+len(stub)]=stub;(O/'in.bin').write_bytes(mem)

@@ -4,9 +4,11 @@
     INCLUDE "../include/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     IFNDEF DRIVER_ORIGIN
-DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
+DRIVER_ORIGIN = 0
     ENDIF
     ORG DRIVER_ORIGIN
+    RELOCATE_START
+driverBody:
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -31,17 +33,21 @@ DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
     INCLUDE "../common/argNext.inc"
     INCLUDE "../common/driver-letter.inc"
 registration:
-    DB DRIVER_INSTALL_VERSION,FLOPPY_DRIVE,DRIVER_KIND_FLOPPY,9
+    DB DRIVER_FLOPPY_RELOC,FLOPPY_DRIVE,DRIVER_KIND_FLOPPY,9
     DW 80*2*9,0
     DB DISK_CAP_READ+DISK_CAP_WRITE+DISK_CAP_VERIFY,DISK_TECH_FLOPPY
     DW serviceImage,serviceEnd-serviceImage,description
 description: DB "MX FDD",0,"VG93 720K DD",0
 
 serviceImage:
-    DISP DOS_FLOPPY_ADDR
-    INCLUDE "transfer.inc"
-    ENT
+    INCBIN "../../bin/FLOPPYSVC.bin"
 serviceEnd:
-    ASSERT DOS_FLOPPY_ADDR+serviceEnd-serviceImage <= DOS_BANK_DRIVER_ADDR
-    ASSERT $ <= DOS_BANK_DRIVER_END
+    RELOCATE_END
+IMAGE_BODY_SIZE  = $-driverBody
+IMAGE_MEM_BEGIN  = 0
+IMAGE_MEM_END    = IMAGE_BODY_SIZE
+IMAGE_BSS_SIZE   = 0
+IMAGE_RELOC_KIND = 0
+IMAGE_ALIGN_LOG2 = 0
+    RELOCATE_TABLE driverBody
     END

@@ -16,12 +16,6 @@
         "legacy": "bios_tapeRead"
       },
       {
-        "id": 2,
-        "name": "PRINT_CHAR",
-        "target": "printChar",
-        "legacy": "bios_printChar"
-      },
-      {
         "id": 3,
         "name": "TAPE_WRITE",
         "target": "t_tapeWrite",
@@ -40,12 +34,6 @@
         "legacy": "bios_keyCheck"
       },
       {
-        "id": 6,
-        "name": "PRINT_HEX_BYTE",
-        "target": "printHexByte",
-        "legacy": "bios_printHexByte"
-      },
-      {
         "id": 7,
         "name": "PRINT_STRING_Z",
         "target": "printStringZ",
@@ -61,18 +49,6 @@
         "name": "KEY_SCAN",
         "target": "j_keyScan",
         "legacy": "bios_keyScan"
-      },
-      {
-        "id": 9,
-        "name": "GET_CURSOR_POS",
-        "target": "getCursorPos",
-        "legacy": "bios_getCursorPos"
-      },
-      {
-        "id": 10,
-        "name": "SET_CURSOR_POS",
-        "target": "setCursorPos",
-        "legacy": "bios_setCursorPos"
       },
       {
         "id": 11,
@@ -93,24 +69,6 @@
         "legacy": "bios_calcCS"
       },
       {
-        "id": 14,
-        "name": "PRINT_HEX_WORD",
-        "target": "printHexWord",
-        "legacy": "bios_printHexWord"
-      },
-      {
-        "id": 15,
-        "name": "SET_MEM_TOP",
-        "target": "setMemTop",
-        "legacy": "bios_setMemTop"
-      },
-      {
-        "id": 16,
-        "name": "GET_MEM_TOP",
-        "target": "getMemTop",
-        "legacy": "bios_getMemTop"
-      },
-      {
         "id": 17,
         "name": "PRINTER",
         "target": "printer",
@@ -127,15 +85,6 @@
         "name": "DISK_DRIVER",
         "target": "sysDiskDriver",
         "legacy": "bios_diskDriver"
-      },
-      {
-        "id": 20,
-        "name": "PRINT_CHAR_RAW",
-        "target": "printCharRaw",
-        "legacy": "bios_printCharReal",
-        "aliases": [
-          "PRINT_CHAR_REAL"
-        ]
       },
       {
         "id": 21,
@@ -289,8 +238,44 @@
       {
         "id": 45,
         "name": "PRINT_STRING_RAW_PSEUDO",
-        "aliases": ["PRINT_STRING_RAW_PSEUDO_BANK"],
+        "aliases": [
+          "PRINT_STRING_RAW_PSEUDO_BANK"
+        ],
         "target": "printStringRawPseudo"
+      }
+    ],
+    "commands": [
+      {
+        "id": 2,
+        "name": "PRINT_CHAR"
+      },
+      {
+        "id": 6,
+        "name": "PRINT_HEX_BYTE"
+      },
+      {
+        "id": 9,
+        "name": "GET_CURSOR_POS"
+      },
+      {
+        "id": 10,
+        "name": "SET_CURSOR_POS"
+      },
+      {
+        "id": 14,
+        "name": "PRINT_HEX_WORD"
+      },
+      {
+        "id": 15,
+        "name": "SET_MEM_TOP"
+      },
+      {
+        "id": 16,
+        "name": "GET_MEM_TOP"
+      },
+      {
+        "id": 20,
+        "name": "PRINT_CHAR_RAW"
       }
     ]
   },

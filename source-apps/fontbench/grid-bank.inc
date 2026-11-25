@@ -13,7 +13,7 @@ gridBank:
     ld a,b
     or a
     jp nz,gridBankSeedText
-    MXOS_CALL MXOS_BIOS_GET_CURSOR_POS
+    call mx_getCursorPos
     jp gridBankStart
 gridBankSeedText:
     ld hl,gridEmpty
@@ -24,7 +24,7 @@ gridBankStringSetup:
     cp 2
     jp nz,gridBankStart
     ld b,0
-    ld hl,(nativeControl+8) ; caller selected scratch below resident memTop
+    ld hl,(GRID_BANK_SCRATCH) ; Буфер отчёта MAIN до memTop.
     ld de,00900h
     ld a,MEM_OP_ARENA
     MXOS_CALL MXOS_DOS_MEMORY
@@ -42,26 +42,26 @@ gridBankStart:
     jp nc,gridBankString
     or a
     jp nz,gridBankRawChar
-    ld hl,02000h
+    ld hl,GRID_BANK_CORPUS
     ld b,GRID_TEXT_BYTES/GRID_UNROLL
-; Отдельный MXOS_CALL на каждый байт, без накопления и пакетного рендера.
+; Каждый байт проходит через фиксированный регистровый вход своего обработчика.
 ; Развёртка лишь убирает лишние расходы управляющего цикла стенда.
 gridBankCharLoop:
     DUP GRID_UNROLL
     ld c,(hl)
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     inc hl
     EDUP
     dec b
     jp nz,gridBankCharLoop
     jp gridBankFinish
 gridBankRawChar:
-    ld hl,02000h
+    ld hl,GRID_BANK_CORPUS
     ld b,GRID_TEXT_BYTES/GRID_UNROLL
 gridBankRawLoop:
     DUP GRID_UNROLL
     ld a,(hl)
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR_RAW
+    call mx_printCharRaw
     inc hl
     EDUP
     dec b
@@ -71,7 +71,7 @@ gridBankString:
     ld a,(gridMethod)
     or a
     jp nz,gridBankFar
-    ld hl,02000h
+    ld hl,GRID_BANK_CORPUS
     ld bc,GRID_TEXT_BYTES
     ld a,(gridKind)
     sub 2
@@ -129,4 +129,4 @@ gridAllocation:     DW 0
 gridEmpty:          DS 21,0
 ; kind, transport, source, length, main destination, payload capacity.
 gridRequest:        DB 0,0
-    DW 02000h,GRID_TEXT_BYTES+1,0,2048
+    DW GRID_BANK_CORPUS,GRID_TEXT_BYTES+1,0,2048

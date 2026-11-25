@@ -1,9 +1,10 @@
-; One-shot DOS launcher for the banked editor.
+; Одноразовый загрузчик банкового редактора в свободном участке DOS.
     INCLUDE "../include/mxos.inc"
     IFNDEF DRIVER_ORIGIN
-DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
+DRIVER_ORIGIN = 0
     ENDIF
     ORG DRIVER_ORIGIN
+    RELOCATE_START
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -53,7 +54,7 @@ failed:
     pop af
     push af
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_HEX_BYTE
+    call mx_printHexByte
     ld hl,prompt
     MXOS_CALL MXOS_BIOS_PRINT_STRING
 waitEnter:
@@ -68,7 +69,12 @@ prompt:         DB 13,10,'Press Enter to return.',13,10,0
 coreHandle:     DW 0
 registers:      DS MX_REGS,0
     INCLUDE "../include/app-drive.inc"
+    RELOCATE_END
+IMAGE_BODY_SIZE     = $-entry
 IMAGE_BSS_SIZE      = 0
-IMAGE_MEM_END       = $
+IMAGE_MEM_END       = IMAGE_BODY_SIZE
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
 IMAGE_API           = 2
+IMAGE_RELOC_KIND    = IMAGE_RELOC_WORD16
+IMAGE_ALIGN_LOG2    = 0
+    RELOCATE_TABLE entry

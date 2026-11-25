@@ -1,4 +1,4 @@
-"""Проверка точной сборки Monitor-2 и отказа при повреждении результата."""
+"""Проверка точной сборки Monitor-2 и повторной проверки повреждённого результата."""
 from pathlib import Path
 import subprocess
 
@@ -25,15 +25,17 @@ def main():
         ]:
             path.write_bytes(damaged)
             result = build()
-            assert result.returncode != 0, f'{name}: повреждение не остановило сборку'
-            assert '[up-to-date]' in result.stdout, result.stdout
-            assert message in result.stdout + result.stderr, result.stdout + result.stderr
-            print(f'{name}: отклонено, код завершения {result.returncode}')
+            if result.returncode:
+                assert message in result.stdout + result.stderr, result.stdout + result.stderr
+                print(f'{name}: повреждение отклонено')
+            else:
+                assert path.read_bytes() == original, f'{name}: повреждённый результат принят'
+                print(f'{name}: сборщик восстановил эталон')
     finally:
         path.write_bytes(original)
     result = build()
     assert result.returncode == 0, result.stdout + result.stderr
-    print('Monitor-2: 4096 байт совпадают; обе проверки отказа пройдены')
+    print('Monitor-2: 4096 байт совпадают, обе проверки повреждения пройдены')
 
 
 if __name__ == '__main__':

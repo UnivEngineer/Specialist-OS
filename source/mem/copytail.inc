@@ -39,6 +39,7 @@ index = index+1
     inc hl
     dec (hl)
     jp nz,bankCopyTail
+bankCopySelectHome:
     ld hl,(bankCopyReturnPair)
     ld a,h
     ld h,0FFh

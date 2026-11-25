@@ -40,7 +40,7 @@ $qt = [IO.Path]::GetFullPath($QtDirectory)
 foreach ($dll in @('Qt5Core.dll','Qt5Gui.dll','Qt5Widgets.dll','Qt5Multimedia.dll','Qt5Network.dll')) {
     Copy-Item -LiteralPath (Join-Path $qt ('bin/' + $dll)) -Destination $destination
 }
-foreach ($plugin in @('platforms/qwindows.dll','audio/qtaudio_windows.dll')) {
+foreach ($plugin in @('platforms/qwindows.dll','platforms/qoffscreen.dll','audio/qtaudio_windows.dll')) {
     $target = Join-Path $destination ('_qtplugins/' + $plugin)
     New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $qt ('plugins/' + $plugin)) -Destination $target

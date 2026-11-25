@@ -108,7 +108,12 @@ if (-not $RunBuild) {
         }
         if ($flashDriver -or $ramDriver -or $floppyDriver) {
             $inputs += @('bin/banked/KERNEL.sym', 'scripts/build/build-driver.py', 'scripts/build/pack-dos.py',
-                'scripts/images/cpu.py')
+                'scripts/images/cpu.py', 'scripts/images/executable.py')
+        }
+        if ($floppyDriver) {
+            $cacheArgs += @('--asm', (Join-Path $buildDirectory 'service.asm'),
+                '--exclude', (Join-Path $outputDirectory 'FLOPPYSVC.bin'))
+            $outputs += 'bin/FLOPPYSVC.bin'
         }
         if ($SourceBase -eq 'UI_GFX') {
             $inputs += @('scripts/images/executable.py', 'scripts/images/cpu.py')
@@ -197,7 +202,15 @@ if ($Extension -eq 'cpu') {
     $symbolText = [IO.File]::ReadAllText($symbolPath)
     $flagsMatch = [regex]::Match($symbolText, '(?m)^IMAGE_FLAGS: EQU 0x([0-9A-Fa-f]+)')
     $imageFlags = if ($flagsMatch.Success) { [Convert]::ToInt32($flagsMatch.Groups[1].Value, 16) } else { 0 }
-    $cpuText = New-CpuDescriptor -Load $numericAddress -Flags $imageFlags -Fields (Get-CpuFieldsFromSymbols $symbolText)
+    $fields = Get-CpuFieldsFromSymbols $symbolText
+    $entry = $numericAddress
+    if ($fields.Contains('RELOC_KIND')) {
+        $loadMatch = [regex]::Match($symbolText, '(?m)^IMAGE_LOAD_OFFSET: EQU 0x([0-9A-Fa-f]+)')
+        $entryMatch = [regex]::Match($symbolText, '(?m)^IMAGE_ENTRY_OFFSET: EQU 0x([0-9A-Fa-f]+)')
+        $numericAddress = if ($loadMatch.Success) { [Convert]::ToInt32($loadMatch.Groups[1].Value,16) } else { 0 }
+        $entry = if ($entryMatch.Success) { [Convert]::ToInt32($entryMatch.Groups[1].Value,16) } else { $numericAddress }
+    }
+    $cpuText = New-CpuDescriptor -Load $numericAddress -Entry $entry -Flags $imageFlags -Fields $fields
     [IO.File]::WriteAllText($outputPath, $cpuText, [Text.Encoding]::ASCII)
     if ($SourceBase -eq 'UI_GFX') {
         & python (Join-Path $repositoryRoot 'scripts/images/executable.py') $outputPath (Join-Path $outputDirectory 'UI_GFX.dll') --format dll

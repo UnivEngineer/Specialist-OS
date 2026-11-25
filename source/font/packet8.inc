@@ -12,7 +12,7 @@ tryGroup:
     jp nz,empty
     ENDIF
     ld a,(realMode)
-    or a
+    add a,a
     jp nz,escReady
     ld a,(bios_upper.escMode)
     inc a
@@ -35,7 +35,7 @@ escReady:
     ld e,a ; columns remaining before the screen edge
     ld a,(realMode)
     cp 2
-    jp nz,quotaReady
+    jp c,quotaReady
     ld a,b
     or a
     jp nz,quotaReady
@@ -63,7 +63,7 @@ quotaReady:
     ld a,(realMode)
     cp 2
     jp z,unrestricted
-    or a
+    add a,a
     ld a,1
     jp nz,thresholdReady
     ld a,32

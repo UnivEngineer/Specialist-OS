@@ -65,6 +65,22 @@ realStringDone:
     ld (fast6.realMode),a
     jp printString_2
 
+    ; HL остаётся адресом продолжения, BC уменьшается на сдвиг HL от DE.
+    MACRO FONT_STRING_LIMIT_REMAINDER
+    ld a,l
+    sub e
+    ld e,a
+    ld a,h
+    sbc a,d
+    ld d,a
+    ld a,c
+    sub e
+    ld c,a
+    ld a,b
+    sbc a,d
+    ld b,a
+    ENDM
+
 ; HL=буфер, BC=16-битная длина; все байты — глифы, включая 00h.
 ; AF/BC/DE сохранены, HL=исключающий конец. Общий остаток живёт в BC,
 ; а не в RAM. tryGroup переводит остаток в границу экранных колонок
@@ -86,21 +102,7 @@ rawLimNext:
     pop de ; DE=начало пакета; POP не меняет CF от tryGroup.
     pop bc ; BC=остаток перед пакетом, HL=следующий непрочитанный байт.
     jp c,rawLimChar
-    ; DE = новый HL - прежний HL (фактически напечатанные байты).
-    ; Пакет может закончиться раньше квоты из-за границы/координат экрана.
-    ; Сам HL остаётся указателем текста, BC -= DE без временной RAM.
-    ld a,l
-    sub e
-    ld e,a
-    ld a,h
-    sbc a,d
-    ld d,a
-    ld a,c
-    sub e
-    ld c,a
-    ld a,b
-    sbc a,d
-    ld b,a
+    FONT_STRING_LIMIT_REMAINDER
     jp rawLimNext
 rawLimChar:
     ; Невыровненная голова, хвост 1–3 байта и альтернативный шрифт.

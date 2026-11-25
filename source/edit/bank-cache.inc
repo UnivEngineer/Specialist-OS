@@ -10,7 +10,7 @@ EDIT_PREFETCH_LEFT_LIMIT = 96
 ; Зарегистрировать графическую область и кэш строк EDITCORE в MAIN.
 ;
 ; вход:
-;   UI_GFX загружен в MAIN; ширина шрифта доступна по EDIT_MAIN_FONT_WIDTH.
+;   Ширина шрифта доступна по EDIT_MAIN_FONT_WIDTH.
 ;
 ; выход:
 ;   cf = 0 при успехе, ebCacheStride и ebCacheRows заданы. При нехватке места кэш может
@@ -61,10 +61,10 @@ ebRegisterSlots:
     ld a,b
     ld (ebCacheRows),a
     call ebGlyphOffset
-    ld de,EDIT_MAIN_END-GFX_PACKET
+    ld de,EDIT_MAIN_END-EDIT_MAIN_PACKET
     add hl,de
     ex de,hl
-    ld hl,GFX_PACKET
+    ld hl,EDIT_MAIN_PACKET
     ld b,0
     ld a,MEM_OP_MAINREGISTER
     MXOS_CALL MXOS_DOS_MEMORY

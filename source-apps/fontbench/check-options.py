@@ -12,7 +12,7 @@ def main():
     parser.add_argument('--out', type=Path, default=ROOT / 'docs/bench/font4-opt/options')
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    sym = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (ROOT/'bin/FONTCOM.sym').read_text(), re.M)}
+    sym = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (ROOT/'bin/FONTLAB.sym').read_text(), re.M)}
     cases = [x.split(',') for x in re.findall(r'^    CASE (.+)$', (ROOT/'source-apps/fontbench/matrix-data.inc').read_text(), re.M)]
     word=lambda x:x.to_bytes(2,'little')
     call=lambda name:b'\xcd'+word(sym[name])
@@ -20,7 +20,7 @@ def main():
     asm.write_text('    ORG 0C8B7h\n    INCLUDE "'+(ROOT/'source/common/argNext.inc').as_posix()+'"\n',encoding='utf-8')
     subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow','--raw='+str(args.out/'argNext.bin'),str(asm)],capture_output=True,check=True)
     base=bytearray(65536)
-    data=(ROOT/'bin/FONTCOM.i80').read_bytes();base[:len(data)]=data
+    data=(ROOT/'bin/FONTLAB.i80').read_bytes();base[:len(data)]=data
     data=(ROOT/'bin/BIOS.sys').read_bytes();base[0xc000:0xc000+len(data)]=data
     arg_code=(args.out/'argNext.bin').read_bytes();base[sym['bios_argNext']:sym['bios_argNext']+len(arg_code)]=arg_code
     checks=0
@@ -58,7 +58,7 @@ def main():
     run('');run('',null=True);run('   ');run('-? ',options=(7,7,3,63,0,0,1))
     run('-n -Q -f=4 -p=dup -b=main -c=serial',options=(4,4,1,2,1,1,0))
     run('-F=6 -F=8',options=(2,7,3,63,0,0,0))
-    for f,p,b,c in itertools.product([('4',4),('6',1),('8',2),('ALL',7)],[('RAW',1),('PACK',2),('DUP',4),('ALL',7)],[('MAIN',1),('DOS',2),('BOTH',3)],[('CHAR',1),('SERIAL',2),('WIN20',4),('WIN256',4),('FAR48',8),('FAR1152',16),('GROUP',32),('ALL',63)]):
+    for f,p,b,c in itertools.product([('4',4),('6',1),('8',2),('ALL',7)],[('RAW',1),('PACK',2),('DUP',4),('ALL',7)],[('MAIN',1),('DOS',2),('BOTH',3)],[('CHAR',1),('SERIAL',2),('WIN32',4),('WIN20',4),('WIN256',4),('FAR48',8),('FAR1152',16),('GROUP',32),('ALL',63)]):
         run(f'-F={f[0]} -P={p[0]} -B={b[0]} -C={c[0]}', options=(f[1],p[1],b[1],c[1],0,0,0))
     for text in ['-F=5','-F=4X','-P=PA','-B=','-C=far480','x','-N=0','-qX','--help','-F=4 -bad']:
         run(text,bad=True)

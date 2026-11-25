@@ -20,7 +20,7 @@ int main(void)
     MXOS_REGS result;
     if (mxos_command_open(&q,buffer,32,8)) return 1;
     for (i=0;i<7;++i) {
-        p=q.next; *p++=MXOS_BIOS_SET_CURSOR_POS&255; *p++=5; *p++=MXOS_COMMAND_REG_HL; *p++=10; *p++=i;
+        p=q.next; *p++=MXOS_COMMAND_BIOS_SET_CURSOR_POS; *p++=5; *p++=MXOS_COMMAND_REG_HL; *p++=10; *p++=i;
         mxos_command_commit(&q,p);
     }
     if (mxos_upper('a')!='A' || q.used) return 2;

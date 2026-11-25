@@ -6,7 +6,7 @@ biosRecoverCopyTail:
     ld hl,biosRecoveryWindow
     ld de,biosRecoveryWindowEnd
     ld bc,BANK_WINDOW
-    call memcpy_bc_hl
+    call moveBiosLow
     ; Эталон сигнатуры находится в DOS; инструкции копировщика идут после неё.
     ld hl,BANK_COPY_GUARD_ADDR
     ld b,4
@@ -36,12 +36,6 @@ biosRecoveryFlag:
     ld hl,BANK_LANDING
     ld de,BANK_TRANSPORT_BYTES
     call biosRecoverRange
-    ld hl,biosRecoveryCommand
-    ld de,biosRecoveryCommandEnd
-    ld bc,BANK_WINDOW
-    call memcpy_bc_hl
-    xor a
-    ld (BANK_PROFILE),a
     pop af
     ret
 ; HL=общий адрес main/DOS, DE=длина>0. Никаких стековых команд в банке DOS.
@@ -61,9 +55,6 @@ biosRecoveryWindow:
     ld (IO_PAGE_RAM),a
     ret
 biosRecoveryWindowEnd:
-biosRecoveryCommand:
-    INCBIN "../../bin/banked/WINDOW.bin",0,8
-biosRecoveryCommandEnd:
 ; Вход после восстановления локальных контекстов. Выход: AF/BC/HL разрушены.
 biosMemWarning:
     ld hl,biosMemWarningText
@@ -73,4 +64,3 @@ biosMemWarningText:
     DB 0Ah,"STD I/O WRITE IN MX MODE. PRESS ANY KEY",0Ah,0
     ASSERT BANK_TRANSPORT_BYTES-0300h <= 0C0h
     ASSERT biosRecoveryWindowEnd-biosRecoveryWindow <= 32
-    ASSERT biosRecoveryCommandEnd-biosRecoveryCommand == 8

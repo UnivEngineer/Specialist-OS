@@ -23,7 +23,7 @@ def symbols(path):
 
 class Bench(Machine):
     def until(self, pc, seconds=60, page=None):
-        page_address=symbols(ROOT/'bin/banked/TRANSPORT.sym')['bankPage'] if page is not None else None
+        page_address=symbols(ROOT/'bin/banked/KERNEL.sym')['bankPage'] if page is not None else None
         for _ in range(seconds):
             state = self.call('cpu_state')
             if state['registers']['pc']['dec'] == pc:

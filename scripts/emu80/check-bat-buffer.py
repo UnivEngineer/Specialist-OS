@@ -7,6 +7,8 @@ import subprocess
 import struct
 from pathlib import Path
 
+from dos_arena import free_intervals
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -51,6 +53,12 @@ def main():
         m.write(0xFFFC, b'\0')
         return result
 
+    def whole_window(size):
+        for start, end in reversed(free_intervals(s, dos_read)):
+            if end-start >= size:
+                return end-size, size
+        return s['BAT_INPUT'], s['BAT_READ_SIZE']
+
     def create(name, data):
         assert not invoke('MXOS_DOS_FILE_SELECT_DRIVE', af=0x100, de=1)['flags']['C']
         stem, ext = name.split('.')
@@ -81,7 +89,8 @@ def main():
         assert state['registers']['sp']['dec'] == 0x8FDF
         assert m.read(s['bankPage'], 1) == b'\0'
         assert dos_read(s['BAT_HANDLE']+s['FH_STATE'], 1) == b'\0'
-        assert dos_read(s['batWindowEnd'], 2) == word(0)
+        window_end = dos_read(s['batWindowEnd'], 2)
+        assert window_end == word(0), (name, window_end.hex(), reads)
         rows.append(dict(file=name, error=expected, executed=count, bankAndStackPreserved=True))
         print('PASS', name, flush=True)
 
@@ -91,6 +100,7 @@ def main():
         capture_output=True, check=True)
     pid = int(re.search(rb'\(PID (\d+)\)', launch.stdout).group(1))
     try:
+        runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))['set_benchmark_speed'](m, pid)
         core = h['symbols'](ROOT/'bin/NC_CORE.sym')
         cli = h['symbols'](ROOT/'bin/CLI.sym')
         poll = core['ncBankInputPoll']
@@ -192,7 +202,6 @@ def main():
         # Верхние 128 байтов образа DLL попадают в первое окно сценария.
         # LOAD.COM вызывает реальный MODULE_LOAD/UNLOAD. Покинутый сценарий
         # должен дочитать ровно оставшийся хвост даже после записи тела DLL.
-        top = s['DOS_BANK_MODULE_END']
         def make_dll(name, start, end):
             image = exe['Image'](b'\xC9', start, start, 1, bss=end-start-1)
             create(name, exe['encode'](image, 'dll'))
@@ -202,12 +211,15 @@ def main():
         loader = (b'\x3E'+bytes([s['MODULE_TARGET_DOS']])+b'\x21'+word(0x20)
                   +module_call('LOAD')+b'\xD8'+module_call('UNLOAD')+b'\xC9')
         create('LOAD.COM', exe['encode'](exe['Image'](loader.ljust(0x20,b'\0')+b'B:/TOP.DLL\0',0,0,4),'com'))
-        make_dll('TOP.DLL', top-128, top)
         content = b'B:/MARK.COM\r\nB:/LOAD.COM\r\n'+b'REM data\n'*35+b'B:/MARK.COM'
         create('EVICT.BAT', content)
+        expected_window = whole_window(len(content))
+        assert expected_window[1] == len(content)
+        top = sum(expected_window)
+        make_dll('TOP.DLL', top-128, top)
         reads = []
         execute('EVICT.BAT', count=2, reads=reads)
-        assert reads[0] == (top-len(content),len(content)), reads
+        assert reads[0] == expected_window, reads
         assert reads[1:] and all(r==(s['BAT_INPUT'],128) for r in reads[1:]), reads
         def load_dll(name):
             m.write(0x8500, name.encode()+b'\0')
@@ -216,24 +228,31 @@ def main():
             return result['registers']['hl']['dec']
         plain = b'REM '+b'x'*123+b'\r\n'+b'REM data\n'*35+b'B:/MARK.COM'
         create('PLAIN.BAT', plain)
-        for name, start, expected in [('TOP.DLL',top-128, (top-128-len(plain),len(plain))),
-                                       ('FULL.DLL',s['DOS_BANK_DRIVER_ADDR'], (s['BAT_INPUT'],128))]:
-            if name=='FULL.DLL':
-                make_dll(name,start,top)
-            handle = load_dll('B:/'+name)
-            reads = []
-            execute('PLAIN.BAT', count=1, reads=reads)
-            assert reads[0] == expected, reads
-            if name=='TOP.DLL':
-                assert reads == [expected], reads
+        handle = load_dll('B:/TOP.DLL')
+        expected_window = whole_window(len(plain))
+        reads = []
+        execute('PLAIN.BAT', count=1, reads=reads)
+        assert reads == [expected_window] and expected_window[1] == len(plain), reads
+        assert not invoke('MXOS_DOS_MODULE_UNLOAD',hl=handle)['flags']['C']
+        # Закрепляем каждый достаточно большой промежуток между настоящими службами.
+        handles = []
+        for index, (start, end) in enumerate(free_intervals(s, dos_read)):
+            if end-start >= len(plain):
+                name = f'FILL{index}.DLL'
+                make_dll(name, start, end)
+                handles.append(load_dll('B:/'+name))
+        reads = []
+        execute('PLAIN.BAT', count=1, reads=reads)
+        assert reads and all(r == (s['BAT_INPUT'],s['BAT_READ_SIZE']) for r in reads), reads
+        for handle in reversed(handles):
             assert not invoke('MXOS_DOS_MODULE_UNLOAD',hl=handle)['flags']['C']
-        # Штатный верхний установщик вытесняет окно BAT так же, как DLL.
+        # Релоцируемый установщик предпочитает свободный участок за пределами окна.
         install = b'B:/MARK.COM\r\nC:/DRIVERS/AT2MXF.COM\r\n'+b'REM pad\n'*20+b'B:/MARK.COM'
         create('DRVTEST.BAT', install)
+        expected_window = whole_window(len(install))
         reads = []
         execute('DRVTEST.BAT', count=2, reads=reads)
-        assert reads[0] == (top-len(install),len(install)), reads
-        assert reads[1:] and all(r==(s['BAT_INPUT'],128) for r in reads[1:]), reads
+        assert reads == [expected_window] and expected_window[1] == len(install), reads
         # COPY перезаписывает общую область команды. Соседние строки переживают это.
         create('CPTEST.BAT',b'COPY B:/PLAIN.BAT B:/CLONE.BAT\r\nB:/CLONE.BAT')
         execute('CPTEST.BAT',count=1)

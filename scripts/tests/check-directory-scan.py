@@ -8,7 +8,7 @@ k={n:int(v,16) for n,v in re.findall(r'^([\w.]+): EQU 0x([\dA-Fa-f]+)',(args.bun
 w=lambda n:struct.pack('<H',n&65535)
 base=bytearray(65536); b=(args.bundle/'banked/KERNEL.bin').read_bytes();base[256:256+len(b)]=b
 if "dosWorkStart" in k:  # Pre-BSS benchmark bundle.
- initialize_dos_state(base, k)
+ initialize_dos_state(base, k, args.bundle)
 # Cache hook returns a stable sector address; all iteration and comparisons are production code.
 base[k['fatCheckMounted']:k['fatCheckMounted']+2]=b'\xaf\xc9'
 base[k['getSectorAddressInCache']:k['getSectorAddressInCache']+3]=b'\xc3'+w(0xe400)

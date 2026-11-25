@@ -23,7 +23,10 @@ timer_asm.write_text('    INCLUDE "'+(R/'source/include/mxos.inc').as_posix()+'"
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'local-timer.bin'),'--sym='+str(O/'local-timer.sym'),str(timer_asm)],check=True,capture_output=True)
 timer_sy={k:int(v,16) for k,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(O/'local-timer.sym').read_text(),re.M)}
 W = lambda n: n.to_bytes(2, 'little')
-mx = lambda name: b'\xcd'+W(S['mx_callRegs'])+W(S['MXOS_BIOS_'+name])
+def mx(name):
+    if name == 'SET_CURSOR_POS':
+        return b'\xcd' + W(S['mx_setCursorPos'])
+    return b'\xcd' + W(S['mx_callRegs']) + W(S['MXOS_BIOS_'+name])
 
 def api(name, af=0, hl=0):
     m.stop_at(0x8E10)

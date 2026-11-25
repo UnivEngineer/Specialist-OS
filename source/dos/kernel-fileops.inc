@@ -45,7 +45,7 @@ fileopsControl:
     ld a,(fileopsOp)
     add a,4
 fileopsControlCall:
-    call DOS_FILEOPS_ADDR
+    call fileopsInvoke
     jp fileopsPublish
 fileopsBegin:
     ld a,0FFh
@@ -88,11 +88,11 @@ fileopsBeginValid:
     ld (fileopsPublic),a
     ld hl,KD_OBJECT
     ld a,4
-    call DOS_FILEOPS_ADDR
+    call fileopsInvoke
 fileopsPublish:
     ld hl,KD_OBJECT
     ld a,9
-    call DOS_FILEOPS_ADDR
+    call fileopsInvoke
     ld a,(fileopsOp)
     cp FILEOPS_CLOSE
     jp nz,fileopsStore
@@ -108,7 +108,7 @@ fileopsStore:
     jp z,fileopsNoPath
     push hl
     ld a,12
-    call DOS_FILEOPS_ADDR
+    call fileopsInvoke
     push hl
     ld hl,fileopsPathStamp
     cp (hl)
@@ -151,7 +151,7 @@ fileopsReleaseOwner:
     ret nz
     push bc
     ld a,8
-    call DOS_FILEOPS_ADDR
+    call fileopsInvoke
     xor a
     ld (fileopsPublic),a
     ld (fileopsActive),a

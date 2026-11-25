@@ -28,11 +28,15 @@ FONT_LOWER_BYTES = FONT_MODE*4096
     jp scalar
     jp service
     jp fontPseudoDraw
-    DS FONT_ENGINE_HEADER-$,0
+    ASSERT $ == FONT_ENGINE_TEXT_EXT
+    DW FONT_ENGINE_TEXT_LIM
+    ASSERT $ == FONT_ENGINE_HEADER
     DB "FNT1",FONT_ENGINE_VERSION,6,8,FONT_MODE
     DW imageEnd-FONT_ENGINE_BASE,FONT_ADDR
     DW FONT_LOWER_BYTES
     DW initializerName
+    ASSERT $ == FONT_ENGINE_TEXT_LIM
+    jp printStringLim
 initializerName: DB "Init6.dll",0
 printChar2     = bios_fontControl
 printCharBody  = bios_fontControl
@@ -48,6 +52,9 @@ printCharRawHelper:
     ret c
     jp fontLineEnd
     INCLUDE "string.inc"
+    IF FONT_MODE != 0
+    INCLUDE "string-lim.inc"
+    ENDIF
     INCLUDE "packet6.inc"
     IFDEF FONT_BENCH_STREAM
     INCLUDE "stream.inc"
@@ -78,6 +85,9 @@ fontData:
     INCBIN "../../bin/fonts/paged-font.bin"
     ENDIF
     FONT_PSEUDO_TAIL
+    IF FONT_MODE == 0
+    INCLUDE "string-lim.inc"
+    ENDIF
 imageEnd:
     ASSERT $ <= FONT_ENGINE_END
 

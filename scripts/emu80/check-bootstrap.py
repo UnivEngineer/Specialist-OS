@@ -52,15 +52,36 @@ try:
    # TEXT хранит здесь живые счётчики, адреса и состояние операции.
    at=ls['memTextRemaining']-b['mx_call']
    actual[at:at+9]=client[at:at+9]
-   assert actual==client[:client_size]
+   expected=bytearray(client[:client_size])
+   if bank==0 and 'bankMxRegsRouteCall' in ls:
+    at=ls['bankMxRegsRouteCall']+1-b['mx_call']
+    expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
+   if 'MEM_FORWARD_RESTORE' in ls:
+    at=ls['MEM_FORWARD_RESTORE']+1-b['mx_call']
+    expected[at:at+2]=actual[at:at+2]  # SP последнего прямого MOVE.
+   assert actual==expected
    assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
    assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
   data_size=h['symbols'](BIN/'MEM.sym')['MEM_DATA_SIZE']
   data_start=b['MEM_DATA_START']
   # Конец CPM32 содержит восемь байт параметров последнего обмена.
   code_size=ls['bankCopyLocalParams']-data_start
-  assert code_size+8==data_size
-  page(2);assert m.read(data_start,code_size)==transport[data_start-0xfc00:data_start-0xfc00+code_size]
+  assert data_start+data_size==b['BANK_WINDOW']
+  page(2)
+  actual=m.read(data_start,code_size)
+  expected=bytearray(transport[data_start-0xfc00:data_start-0xfc00+code_size])
+  if 'mdDataForwardTemplate' in k:
+   offset=k['mdDataForwardTemplate']-k['DOS_CODE_START']
+   length=k['bankMoveDataBytes']
+   start=k['bankMoveDataEntry']-data_start
+   expected[start:start+length]=(BIN/'DOS.sys').read_bytes()[offset:offset+length]
+   start=k['bankMoveDirectOperand']-data_start
+   expected[start:start+2]=k['bankMoveDataEntry'].to_bytes(2,'little')
+   ts=h['symbols'](BIN/'banked/TRANSPORT.sym')
+   for address in (ts['bankMoveHome']+1,s['moveDataOverlayReturn']+1):
+    start=address-data_start
+    expected[start:start+2]=actual[start:start+2]
+  assert actual==expected
   page(0)
 
   page(1);assert m.read(k['memoryRamPages'],1)==b'\x04';assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')

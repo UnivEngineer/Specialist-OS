@@ -21,7 +21,7 @@ engineSave:
     call gridCopy
     ld hl,hookSlots
     ld de,savedSlots
-    ld a,13
+    ld a,HOOK_SLOTS
     ld (hookLeft),a
 saveSlot:
     ld c,(hl)
@@ -69,7 +69,7 @@ engineRestore:
     ld de,savedSlots
     ld hl,hookSlots
 writeSlots:
-    ld a,13
+    ld a,HOOK_SLOTS
     ld (hookLeft),a
 writeSlot:
     ld c,(hl)
@@ -290,15 +290,18 @@ hookRemaining:  DW 0
     ENDIF
     ENDM
 hookSlots:
-    HOOK_SLOT bios_printChar,MXOS_BIOS_PRINT_CHAR,0
-    HOOK_SLOT bios_printCharRaw,MXOS_BIOS_PRINT_CHAR_RAW,0
+    DW bios_printChar+1,bios_printCharRaw+1
     HOOK_SLOT bios_printStringZ,MXOS_BIOS_PRINT_STRING_Z,MXOS_BIOS_PRINT_STRING_Z_MAIN
     HOOK_SLOT bios_printStringRawZ,MXOS_BIOS_PRINT_STRING_RAW_Z,MXOS_BIOS_PRINT_STRING_RAW_Z_MAIN
     HOOK_SLOT bios_printStringRawLim,MXOS_BIOS_PRINT_STRING_RAW_LIM,MXOS_BIOS_PRINT_STRING_RAW_LIM_MAIN
+HOOK_SLOTS = ($-hookSlots)/2
 hookTargets:
-    DW hookChar,hookChar,hookRaw,hookRaw
-    DW hookZ,hookZ,hookZ,hookRawZ,hookRawZ,hookRawZ,hookLim,hookLim,hookLim
-savedSlots: DS 26,0
+    DW hookChar,hookRaw
+hookStringZTargets:
+    DW hookZ,hookZ,hookZ
+    DW hookRawZ,hookRawZ,hookRawZ,hookLim,hookLim,hookLim
+    ASSERT $-hookTargets == 2*HOOK_SLOTS
+savedSlots: DS 2*HOOK_SLOTS,0
 bounds6:
     DB 48,48,48,48,48,48,48,48,48,48,48,48,48,44,44,44,40,40,40,36,36,36,32,32,32,28,28,28,24,24,24,20,20,20,16,16,16,12,12,12,8,8,8,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 bounds4:
@@ -320,9 +323,9 @@ directOpen:
     ld (directScalar),hl
     ex de,hl
     ld de,directTargets
-    ld c,2
+    ld c,1
     call directEntry
-    ld c,2
+    ld c,1
     call directEntry
     ld c,3
     call directEntry
@@ -354,7 +357,7 @@ directEntryCopy:
     dec c
     jp nz,directEntryCopy
     ret
-directTargets:      DS 26,0
+directTargets:      DS 2*HOOK_SLOTS,0
 directScalar:       DW 0
 directEncoding:     DW 0
 savedModuleScalar:  DW 0

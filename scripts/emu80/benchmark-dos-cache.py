@@ -17,7 +17,7 @@ def prepare_fixture(h, out):
         shutil.copyfile(ROOT/'bin/NC.sym',out/'NC.sym')
         shutil.copyfile(ROOT/'bin/NC.i80',out/'NC.i80')
         image=(ROOT/'images/C-Flash-512k-MMX-System-Emu80.bin').read_bytes()
-        if get_file(image,'NC_MN.COM')[1][32:] == (out/'NC.i80').read_bytes():
+        if get_file(image,'DOS/NC_MN.COM')[1][32:] == (out/'NC.i80').read_bytes():
             (out/'SystemRom.bin').write_bytes(image)
             break
     else:

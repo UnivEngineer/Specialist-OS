@@ -1,16 +1,13 @@
 ; Постоянный COMMAND-вход, в том числе в DATA. Чужой стек не используется.
-; KIND=3 GET16, 4 PUT16, 5 GET8, 6 PUT8. DE=адрес, BC=значение.
-; Обычные kind 0..2 передаются полному транспорту.
+; KIND: бит 7 — чтение, бит 6 — слово. DE=адрес, BC=значение.
+; KIND=0 передаёт запрос полному транспорту, KIND=1 возвращает результат.
 scalarCommandLanding:
-    ld a,(BANK_BUFFER_KIND)
-    or a
-    jp nz,BANK_LANDING
+    ld (hl),a                   ; Один и тот же PC в каждом установленном хвосте.
     ld a,(BANK_SCALAR_KIND)
     cp 3
-    jp c,BANK_LANDING
+    jp c,bankLanding
     ex de,hl
-    cp 5
-    rra                    ; CY=чтение; bit7=слово, иначе байт.
+    rla                    ; CY=чтение; bit7=слово, иначе байт.
     jp nc,scalarCommandWrite
     ld c,(hl)
     or a
@@ -28,6 +25,7 @@ scalarCommandDone:
     ld hl,(BANK_SCALAR_RETURN_PAIR)
     ld a,h
     ld h,0FFh
-    jp BANK_SCALAR_RETURN_GATE
+    ld (hl),a
+    jp MEM_SCALAR_RETURN_ENTRY
 scalarCommandEnd:
     ASSERT scalarCommandEnd <= 0FF00h

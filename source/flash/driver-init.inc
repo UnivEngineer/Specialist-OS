@@ -2,10 +2,11 @@
 ; можно затереть: реестр DOS владеет строками и копией подготовленной службы.
     INCLUDE "../../bin/banked/flash-imports.inc"
     IFNDEF DRIVER_ORIGIN
-DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
+DRIVER_ORIGIN = 0
     ENDIF
-DRIVER_LOAD_ADDR = DRIVER_ORIGIN
-    ORG DRIVER_LOAD_ADDR
+    ORG DRIVER_ORIGIN
+    RELOCATE_START
+driverBody:
     IFNDEF ROM_LEGACY
     DEFINE ROM_LEGACY 0
     ENDIF
@@ -227,4 +228,11 @@ PPI_MODE_READ  = 090h
     INCLUDE "../bootstrap/tests/flash-init.inc"
     ENDMODULE
     ENDIF
-    ASSERT $ <= DOS_BANK_DRIVER_END
+    RELOCATE_END
+IMAGE_BODY_SIZE  = $-driverBody
+IMAGE_MEM_BEGIN  = 0
+IMAGE_MEM_END    = IMAGE_BODY_SIZE
+IMAGE_BSS_SIZE   = 0
+IMAGE_RELOC_KIND = 0
+IMAGE_ALIGN_LOG2 = 0
+    RELOCATE_TABLE driverBody

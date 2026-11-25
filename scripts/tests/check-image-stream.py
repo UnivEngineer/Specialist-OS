@@ -1,4 +1,9 @@
-"""CPU 8080: РЅР°СЃС‚РѕСЏС‰РёР№ СЃРµРєС‚РѕСЂРЅС‹Р№ Р·Р°РіСЂСѓР·С‡РёРє DOS СЃ РјРѕРґРµР»СЊСЋ С„РёР·РёС‡РµСЃРєРѕРіРѕ С‡С‚РµРЅРёСЏ."""
+"""Историческая CPU-модель прямого чтения секторов, отказов и кэша DOS.
+
+Требуются монолитная DOS.sys с загрузкой C000h, соответствующие символы
+и код RUN с 16-байтным форматом COM/EXE. Текущую банковую сборку проверяет
+scripts/emu80/check-run-body.py через настоящий DOS и маппер Emu80.
+"""
 from pathlib import Path
 import json,re,runpy,struct,subprocess,sys
 root=Path(__file__).resolve().parents[2];out=root/'docs/compat/sector-load-001/cpu';out.mkdir(exist_ok=True)

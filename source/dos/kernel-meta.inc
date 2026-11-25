@@ -58,6 +58,7 @@ kmRenameArgs:
     ld hl,(kdRegs+2)
     ld (kmSecond),hl
     ld de,KD_PATH
+    ld bc,FILE_NAME_LENGTH+3
     call kdFetch
     jp c,kdBad
     ld hl,KD_OBJECT
@@ -76,21 +77,8 @@ kmRenameArgs:
 kmName:
     ld hl,(kdRegs)
     ld (kdClientObject),hl
-    ld de,KD_PATH
-    ld bc,MAX_PATH
-    call kdFetch
+    call kdFetchPath
     jp c,kdBad
-    ld hl,KD_PATH
-    ld b,MAX_PATH
-kmNameScan:
-    ld a,(hl)
-    or a
-    jp z,kmNameReady
-    inc hl
-    dec b
-    jp nz,kmNameScan
-    jp kdBad
-kmNameReady:
     ld hl,(kdRegs+2)
     ld (kmSecond),hl
     ld de,KD_OBJECT

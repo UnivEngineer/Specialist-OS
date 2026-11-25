@@ -33,9 +33,13 @@ K7_LOWER = 05000h
     jp scalar
     jp service
     jp printStringRawLim ; fixed KOI-7R has no pseudographic extension
-    DS FONT_ENGINE_HEADER-$,0
+    ASSERT $ == FONT_ENGINE_TEXT_EXT
+    DW FONT_ENGINE_TEXT_LIM
+    ASSERT $ == FONT_ENGINE_HEADER
     DB "FNT1",FONT_ENGINE_VERSION,6,8,FONT_FORMAT_KOI7+K7_MODE
     DW imageEnd-FONT_ENGINE_BASE,K7_RAW,0,initializerName
+    ASSERT $ == FONT_ENGINE_TEXT_LIM
+    jp printStringLim
 initializerName: DB 'Init7.dll',0
 
 printChar2     = bios_fontControl
@@ -52,6 +56,9 @@ printCharRawHelper:
     ret c
     jp fontLineEnd
     INCLUDE "string.inc"
+    IF K7_MODE != 2
+    INCLUDE "string-lim.inc"
+    ENDIF
     INCLUDE "packet6.inc"
 scalar:
     ld d,K7_RAW/256
@@ -88,6 +95,9 @@ codeEnd:
     ; The page-aligned tables leave a short tail for independent routines.
     INCLUDE "scalar-position.inc"
     INCLUDE "koi7-install.inc"
+    ENDIF
+    IF K7_MODE == 2
+    INCLUDE "string-lim.inc"
     ENDIF
 imageEnd:
     IFDEF FONT_BENCH_MAIN

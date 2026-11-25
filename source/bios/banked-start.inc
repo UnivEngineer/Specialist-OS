@@ -208,6 +208,7 @@ biosBankReturn:
     ld (IO_PAGE_RAM),a
     ld sp,STACK_ADDR
     ; The installed renderer and system-owned font resources survive app exit.
+    call biosMoveUseLow
     call biosRecoverCopyTail
     push af
     call sysInstall

@@ -8,6 +8,12 @@ appEnter:
     push bc
     push de
     push hl
+    call appHeapAddress
+    xor a
+    ld (hl),a
+    inc hl
+    ld (hl),a                ; Нулевой конец — у нового владельца ещё нет кучи.
+    ld a,(appDepth)
     call appFrame
     ld a,(moduleActor)
     ld (hl),a

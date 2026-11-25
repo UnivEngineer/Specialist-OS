@@ -2,6 +2,7 @@
 from pathlib import Path
 import re
 import subprocess
+from relocated_component import load_graphics
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '.local/nc-bank-graphics'
@@ -32,15 +33,15 @@ def run(memory, entry, a=0, bc=0, de=0, hl=0):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    main = symbols('NC'); core = symbols('NC_CORE'); gfx = symbols('UI_GFX')
+    main = symbols('NC'); core = symbols('NC_CORE')
     bios = symbols('BIOS')
 
-    def seed(image, origin, font):
+    def seed(image, origin, font, body=None):
         memory = bytearray(65536)
         for name, base in [(image, origin), ('BIOS', 0xc000), ('IO', 0xf000),
                            ('fonts/'+font, 0xd800)]:
             ext = '.sys' if name in ('BIOS', 'IO') else '.i80'
-            data = (ROOT / 'bin' / (name+ext)).read_bytes()
+            data = body if name == image and body is not None else (ROOT / 'bin' / (name+ext)).read_bytes()
             memory[base:base+len(data)] = data
         memory[bios['bios_vars']:bios['bios_vars']+bios['BIOS_VARIABLES']] = memory[bios['initVars']:bios['initVarsEnd']]
         memory[bios['bios_upper.charGen']:bios['bios_upper.charGen']+2] = W(bios['FONT_ADDR'])
@@ -53,7 +54,10 @@ def main():
         value_chars = (184-2*value_x)//width
         label_end = 26 if width == 8 else 28
         native = seed('NC', 0, font)
-        target = seed('UI_GFX', gfx['GFX_BASE'], font)
+        base = 0x19ed if width == 8 else 0x1af7
+        body, gfx = load_graphics(base)
+        target = seed('UI_GFX', base, font, body)
+        packet = 0x550d if width == 8 else core['NC_MAIN_PACKET']
         lower_base = 0x6400 if font == 'Fast12K' else 0x7c00
         if font in ('Fast12K', 'Packed6K'):
             # Place the lower tables above the graphics DLL, as FONT does.
@@ -63,9 +67,16 @@ def main():
 
         native = run(native, bios['FONT_ENGINE_INIT'], de=lower_base if font in ('Fast12K', 'Packed6K') else 0)
         target = run(target, bios['FONT_ENGINE_INIT'], de=lower_base if font in ('Fast12K', 'Packed6K') else 0)
-        target = run(target, gfx['ngBind'], bc=core['NC_GFX_QUEUE_BYTES'])
+        target = run(target, gfx['ngBind'], hl=packet, bc=core['NC_GFX_QUEUE_BYTES'])
+        dest = gfx['ngTransfer']+4
+        assert target[dest:dest+2] == W(packet)
+        limit = gfx['ngPacketLimit']
+        for at, length in [(base, 1), (base-1, 2), (0xffff, 2), (0x8bff, 2), (packet, 0), (packet, 3073)]:
+            rejected = run(target, gfx['ngBind'], hl=at, bc=length)
+            assert rejected[dest:dest+2] == W(packet)
+            assert rejected[limit:limit+2] == W(core['NC_GFX_QUEUE_BYTES'])
         target = run(target, gfx['ngPadding'], hl=ord('A'), bc=8)
-        assert target[gfx['GFX_RESULT']+15] == (ROOT / f'bin/fonts/{font}.i80').read_bytes()[39]
+        assert target[gfx['ngResult']+15] == (ROOT / f'bin/fonts/{font}.i80').read_bytes()[39]
         # The idle cursor is a graphics-only XOR. A second request erases it.
         cursor_args = dict(a=gfx['GFX_CURSOR'], hl=0x041b, bc=0x0870)
         shown = run(target, gfx['entry'], **cursor_args)
@@ -78,8 +89,8 @@ def main():
         bank[0x100:0x100+len(data)] = data
         bank[core['ncBankFontHeader']+5:core['ncBankFontHeader']+7] = bytes([width, 8])
         size = gfx['GFX_RESULT_BYTES']
-        bank[core['ncGfxResult']:core['ncGfxResult']+size] = target[gfx['GFX_RESULT']:gfx['GFX_RESULT']+size]
-        bank[core['ncBankFontHeader']+7] = target[gfx['GFX_RESULT']+15]
+        bank[core['ncGfxResult']:core['ncGfxResult']+size] = target[gfx['ngResult']:gfx['ngResult']+size]
+        bank[core['ncBankFontHeader']+7] = target[gfx['ngResult']+15]
         native = run(native, main['ncLayoutInit'])
         bank = run(bank, core['ncLayoutInit'])
         for entry in ('mx_queueBind', 'mx_queueFlush', 'mx_memInfo'):
@@ -165,7 +176,6 @@ def main():
                     right = run(right, core['ncDialogClose'])
                 length = int.from_bytes(right[core['cqUsed']:core['cqUsed']+2], 'little')
                 assert 0 < length < core['NC_GFX_QUEUE_BYTES'], (font, label, length)
-                packet = gfx['GFX_PACKET']
                 source = core['ncBankQueue']
                 if action in ('pip_printFont', 'pip_printDescription'):
                     if action == 'pip_printFont':
@@ -183,9 +193,9 @@ def main():
                         pos += size
                     assert pos == source+length
                 display[packet:packet+length] = right[source:source+length]
-                display[gfx['ngEnd']:gfx['ngEnd']+2] = W(packet+length)
-                # The live test covers the FAR copy. Replay the copied stream here.
-                display = run(display, gfx['ngRecord'], hl=packet)
+                # Пакет уже перенесён в зарегистрированный буфер MAIN.
+                display[gfx['mx_memcpyFar']:gfx['mx_memcpyFar']+2] = b'\xaf\xc9'
+                display = run(display, gfx['entry'], a=2, bc=length, hl=source)
                 if left[0x9000:0xc000] != display[0x9000:0xc000]:
                     at = next(index for index in range(0x9000, 0xc000) if left[index] != display[index])
                     raise AssertionError((font, panel, label, hex(at), left[at], display[at]))

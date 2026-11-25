@@ -44,13 +44,12 @@ crtCleared:
     pop de
     ex de,hl
     ld (_mxos_args),hl
-    call 0F812h
+    call mx_memInfo
     ld (_mxos_home_page),a
     or a
     ld hl,0EE00h
     jp nz,crtLimit
-    call 0F806h
-    defw MXOS_BIOS_GET_MEM_TOP
+    call mx_getMemTop
     inc hl
 crtLimit:
     defc crt_heap_start = (__BSS_END_tail+1)&0FFFEh
@@ -70,14 +69,14 @@ crtLimit:
     ex de,hl
     ld b,0
     ld a,9                   ; MEM_OP_ARENA
-    call 0F806h
+    call mx_callRegs
     defw MXOS_DOS_MEMORY
     jp c,crtHeapRefused
     pop hl
     push hl
     ld b,0
     ld a,6                   ; MEM_OP_ALLOC
-    call 0F806h
+    call mx_callRegs
     defw MXOS_DOS_MEMORY
     jp c,crtHeapRefused
     ex de,hl

@@ -134,9 +134,10 @@ packedCheck:
     ld h,0
     ld de,packedIndex
     add hl,de
-    ld a,(hl)
+    ; Генератор присваивает отсутствующим кодам индекс глифа 7Fh.
+    ld a,(packedIndex+127)
+    cp (hl)
     pop hl
-    or a
     jp z,packedScalar
 packedNext:
     inc hl

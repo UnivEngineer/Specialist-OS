@@ -613,9 +613,9 @@ cliDirShort:
     call cliPrintNamePart
 cliDirNoExt:
     ; Колонка 15 (с нуля): 15 символов по 6 пикселей, X хранится в полупикселях.
-    MXOS_CALL MXOS_BIOS_GET_CURSOR_POS
+    call mx_getCursorPos
     ld h,45
-    MXOS_CALL MXOS_BIOS_SET_CURSOR_POS
+    call mx_setCursorPos
     pop hl
     ld de,11
     add hl,de
@@ -883,8 +883,22 @@ cliResolveAssociation:
     jp nz,cliFindAssociation
 cliCheckNativeImage:
     ld hl,cliRequest.source
+    IFDEF BANKED_DOS_BUILD
+    call imageOpenModule
+    jp c,cliResolveFail
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
+    jp nz,cliFixedImage
+    ld a,(v_tmpFileDescr+5)
+    cp IMAGE_FLAG_DRIVER
+    jp z,cliAssociationAbsent
+    call imageError
+    jp cliResolveFail
+cliFixedImage:
+    ELSE
     call imageOpen
     jp c,cliResolveFail
+    ENDIF
     ld a,(v_tmpFileDescr+5)
     or a
     jp nz,cliAssociationAbsent

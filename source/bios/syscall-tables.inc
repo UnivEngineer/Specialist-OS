@@ -2,25 +2,25 @@
 sysBIOSTable:
     DW getch
     DW t_tapeRead
-    DW printChar
+    DW 0
     DW t_tapeWrite
     DW input
     DW j_keyScan
-    DW printHexByte
+    DW 0
     DW printStringZ
     DW j_keyScan
-    DW getCursorPos
-    DW setCursorPos
+    DW 0
+    DW 0
     DW t_tapeLoad
     DW t_tapeSave
     DW calcCS
-    DW printHexWord
-    DW setMemTop
-    DW getMemTop
+    DW 0
+    DW 0
+    DW 0
     DW printer
     DW installDriver
     DW sysDiskDriver
-    DW printCharRaw
+    DW 0
     DW printDecWord
     DW setRAMDDriver
     DW upperCase

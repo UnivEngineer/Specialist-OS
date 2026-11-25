@@ -154,8 +154,8 @@ mmcMayRelease:
     call mdCanRelease
     jp c,mmcGuardFailed
     ld a,(mmcPhase)
-    or a
-    call nz,mdReleaseChecked
+    dec a
+    call z,mdReleaseChecked
 mmcGuardFailed:
     pop hl
     pop bc
@@ -219,8 +219,8 @@ mmcNonApp:
     or a
     jp nz,mmcAllocationActive
     ld a,(mmcPhase)
-    or a
-    jp z,mmcAllocationPop
+    cp 1
+    jp nz,mmcAllocationPop
     pop bc
     pop hl
     ld (hl),0FFh
@@ -234,6 +234,8 @@ mmcAllocationNext:
     dec b
     jp nz,mmcAllocation
     ld a,(mmcPhase)
+    cp 2
+    jp nc,mmcProbeDone
     or a
     jp nz,mmcSuccess
     ld a,(mmcPolicy)
@@ -249,10 +251,15 @@ mmcSuccess:
     ld hl,(mmcStart)
     call mdReuseInvalidate
     call memoryPublishTop
+mmcProbeDone:
     xor a
 mmcDone:
     push af
+    ld a,(mmcPhase)
+    cp 2
+    jp nc,mmcProbeReturn
     call imageRestoreContext
+mmcProbeReturn:
     pop af
     pop hl
     pop de
@@ -297,9 +304,15 @@ mmcOverlap:
     jp z,mmcSeparate
     jp c,mmcSeparate
     ld hl,(mmcStart)
+    push de
     ld d,b
     ld e,c
-    jp cmp_hl_de
+    call cmp_hl_de
+    pop de
+    ret nc
+    ex de,hl
+    ld (arenaObstacle),hl
+    ret
 mmcSeparate:
     or a
     ret

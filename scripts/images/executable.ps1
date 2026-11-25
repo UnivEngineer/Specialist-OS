@@ -22,6 +22,12 @@ function Get-ExecutableChecksum {
     return ((($prefix + ($prefix -shr 8)) -band 0xFF) -shl 8) -bor ($sum -band 0xFF)
 }
 
+function Test-RelocatableTarget($Format, $Flags) {
+    if ($Format -ne 'dll' -and -not ($Format -in @('com','exe') -and $Flags -eq 1)) {
+        throw 'Relocatable image requires DLL or DRIVER COM/EXE'
+    }
+}
+
 function Convert-ExecutableFile {
     param(
         [string]$Path,
@@ -32,17 +38,28 @@ function Convert-ExecutableFile {
     try {
         $data=[IO.File]::ReadAllBytes($Path);$kind=[IO.Path]::GetExtension($Path).ToLowerInvariant()
         $load=$LoadAddress;$entry=$load;$flags=0;$offset=0;$size=$data.Length;$expected=$null
-        $fields=@{};$nativeHeader=$false;$oldFont=$false
+        $fields=@{};$relocKind=$null;$alignment=0;[byte[]]$table=@()
         if($kind -in @('.com','.exe','.dll','.fnt') -and $data.Length -ge 4 -and $data[2] -eq 0x4D -and $data[3] -eq 0x58) {
-            if($data.Length -lt 16 -or $data[0] -ne 0xCD -or $data[1] -ne 0x20 -or $data[4] -notin @(1,2)){throw 'Expected MXOS2 container header'}
-            $offset=if($data[4] -eq 1){16}else{32}
+            if($data.Length -lt 16 -or $data[0] -ne 0xCD -or $data[1] -ne 0x20 -or $data[4] -notin @(1,2,3)){throw 'Expected MXOS2 container header'}
+            $offset=@(16,32,40)[$data[4]-1]
             if($data.Length -lt $offset){throw 'Short image header'}
             $flags=$data[5];$load=[BitConverter]::ToUInt16($data,6);$entry=[BitConverter]::ToUInt16($data,8);$size=[BitConverter]::ToUInt16($data,10)
             $expected=[BitConverter]::ToUInt16($data,12)
-            if($data.Length -ne $offset+$size -or (Get-ExecutableChecksum $data ($offset-2)) -ne [BitConverter]::ToUInt16($data,$offset-2)){throw 'Invalid image size or checksum'}
-            $oldFont=$offset -eq 16 -and $Format -eq 'fnt'
-            if($offset -eq 32) {
-                if($data[27] -ne 32 -or $data[29]){throw 'Invalid image header size/reserve'}
+            if ($offset -eq 40) {
+                Test-RelocatableTarget $kind.Substring(1) $flags
+                $relocKind=$data[32];$alignment=$data[33];$count=[BitConverter]::ToUInt16($data,34)
+                if ($data.Length -ne 40+$size+2*$count -or [BitConverter]::ToUInt16($data,38)) {throw 'Invalid v3 size/reserve'}
+                $table=New-Object byte[] (2*$count)
+                [Array]::Copy($data,40+$size,$table,0,$table.Length)
+                if ((Get-ExecutableChecksum $table) -ne [BitConverter]::ToUInt16($data,36)) {throw 'Invalid relocation table checksum'}
+                $sum=[BitConverter]::ToUInt16($data,30)
+                Set-Word $data 30 0
+                if ((Get-ExecutableChecksum $data 40) -ne $sum) {throw 'Invalid v3 header checksum'}
+            } elseif ($data.Length -ne $offset+$size -or (Get-ExecutableChecksum $data ($offset-2)) -ne [BitConverter]::ToUInt16($data,$offset-2)) {
+                throw 'Invalid image size or checksum'
+            }
+            if($offset -ge 32) {
+                if($data[27] -ne $offset -or $data[29]){throw 'Invalid image header size/reserve'}
                 foreach($pair in @(@('BSS',14),@('MEM_BEGIN',16),@('MEM_END',18),@('MIN_HEAP',20),@('STACK',24))){$fields[$pair[0]]='{0:X}' -f [BitConverter]::ToUInt16($data,$pair[1])}
                 $fields.POLICY='{0:X}' -f $data[22];$fields.API='{0:X}' -f $data[23];$fields.MODE='{0:X}' -f $data[26];$fields.CACHEABLE='{0:X}' -f $data[28]
             }
@@ -56,6 +73,15 @@ function Convert-ExecutableFile {
             if([IO.File]::Exists($i80)) {
                 $descriptor=Read-CpuDescriptor $data;$load=$descriptor.Load;$entry=$descriptor.Entry;$flags=$descriptor.Flags;$fields=$descriptor.Fields
                 $data=[IO.File]::ReadAllBytes($i80);$size=$data.Length
+                if ($fields.ContainsKey('RELOC_KIND')) {
+                    if (-not $fields.ContainsKey('BODY_SIZE') -or -not $fields.ContainsKey('ALIGN_LOG2')) {throw 'Relocatable CPU requires BODY_SIZE and ALIGN_LOG2'}
+                    $size=[Convert]::ToInt32($fields.BODY_SIZE,16)
+                    $relocKind=[Convert]::ToInt32($fields.RELOC_KIND,16)
+                    $alignment=[Convert]::ToInt32($fields.ALIGN_LOG2,16)
+                    if ($size -le 0 -or $size -gt $data.Length -or ($data.Length-$size)%2) {throw 'Invalid CPU body/table length'}
+                    $table=New-Object byte[] ($data.Length-$size)
+                    [Array]::Copy($data,$size,$table,0,$table.Length)
+                } elseif ($fields.ContainsKey('BODY_SIZE') -or $fields.ContainsKey('ALIGN_LOG2')) {throw 'Missing CPU RELOC_KIND'}
             } else {$load=0;$entry=0}
         }
         if($flags -notin @(0,1,2,4)){throw 'Unknown COM/EXE flags'}
@@ -68,9 +94,9 @@ function Convert-ExecutableFile {
             if($fields.ContainsKey($Key)){return [Convert]::ToInt32($fields[$Key],16)}
             return $Default
         }
-        $nativeDefaults=$flags -or $Format -in @('dll','fnt')
+        $nativeDefaults=$flags -or $Format -in @('dll','fnt') -or $null -ne $relocKind
         $bss=Read-ImageNumber 'BSS' $(if($nativeDefaults){0}else{65535})
-        $begin=Read-ImageNumber 'MEM_BEGIN' $load
+        $begin=Read-ImageNumber 'MEM_BEGIN' $(if ($null -ne $relocKind) {0} else {$load})
         $end=Read-ImageNumber 'MEM_END' ($load+$size+$(if($bss -eq 65535){0}else{$bss}))
         $heap=Read-ImageNumber 'MIN_HEAP' 0;$stack=Read-ImageNumber 'STACK' 0
         $policy=if($fields.ContainsKey('POLICY') -and $fields.POLICY -in @('EXCLUSIVE','PRESERVE','MANAGED')){@{EXCLUSIVE=0;PRESERVE=1;MANAGED=2}[$fields.POLICY]}else{Read-ImageNumber 'POLICY' $(if($nativeDefaults){2}else{0})}
@@ -87,6 +113,19 @@ function Convert-ExecutableFile {
             }
         }
         $options=Read-ImageNumber 'CACHEABLE' 0
+        if ($null -ne $relocKind) {
+            Test-RelocatableTarget $Format $flags
+            if ($options -eq 3 -and $flags -notin @(0,4)) {throw 'REUSABLE requires MAIN-compatible placement'}
+            if ($relocKind -notin @(0,1) -or $alignment -lt 0 -or $alignment -gt 15 -or ($relocKind -eq 1 -and $alignment -lt 8)) {throw 'Invalid relocation kind/alignment'}
+            if ($begin -ne 0 -or $bss -eq 65535 -or $end+$heap -gt 65535 -or 40+$size+$table.Length -gt 65535) {throw 'Invalid relocatable interval or file size'}
+            $width=2-$relocKind
+            $nextOffset=0
+            for ($i=0; $i -lt $table.Length; $i+=2) {
+                $position=[BitConverter]::ToUInt16($table,$i)
+                if ($position -lt $nextOffset -or $position+$width -gt $size) {throw 'Unordered, overlapping or out-of-bounds relocation'}
+                $nextOffset=$position+$width
+            }
+        }
         if($Format -ne 'rks') {
             if($bss -lt 0 -or $bss -gt 65535 -or $begin -lt 0 -or $begin -gt $load -or $end -lt $load+$size -or $end -gt 65535 -or ($bss -ne 65535 -and $load+$size+$bss -gt $end)){throw 'Invalid image memory interval'}
             if($policy -notin @(0,1,2) -or ($bss -eq 65535 -and $policy -ne 0)){throw 'Invalid image memory policy'}
@@ -100,14 +139,21 @@ function Convert-ExecutableFile {
         } else {
             if($size -gt 65535){throw 'Image payload exceeds 65535 bytes'}
             $header=32;$version=2
-            $result=New-Object byte[] ($size+$header)
+            if ($null -ne $relocKind) {$header=40;$version=3}
+            $result=New-Object byte[] ($size+$header+$table.Length)
             $result[0]=0xCD;$result[1]=0x20;$result[2]=0x4D;$result[3]=0x58;$result[4]=$version;$result[5]=$flags
             Set-Word $result 6 $load;Set-Word $result 8 $entry;Set-Word $result 10 $size;Set-Word $result 12 $checksum
-            if($header -eq 32) {
-                Set-Word $result 14 $bss;Set-Word $result 16 $begin;Set-Word $result 18 $end;Set-Word $result 20 $heap
-                $result[22]=$policy;$result[23]=$api;Set-Word $result 24 $stack;$result[26]=$mode;$result[27]=32;$result[28]=$options
+            Set-Word $result 14 $bss;Set-Word $result 16 $begin;Set-Word $result 18 $end;Set-Word $result 20 $heap
+            $result[22]=$policy;$result[23]=$api;Set-Word $result 24 $stack;$result[26]=$mode;$result[27]=$header;$result[28]=$options
+            if ($header -eq 40) {
+                $result[32]=$relocKind;$result[33]=$alignment
+                Set-Word $result 34 ($table.Length/2)
+                Set-Word $result 36 (Get-ExecutableChecksum $table)
+                Set-Word $result 30 (Get-ExecutableChecksum $result 40)
+                [Array]::Copy($table,0,$result,$header+$size,$table.Length)
+            } else {
+                Set-Word $result 30 (Get-ExecutableChecksum $result 30)
             }
-            Set-Word $result ($header-2) (Get-ExecutableChecksum $result ($header-2))
             [Array]::Copy($payload,0,$result,$header,$size)
         }
         return ,$result

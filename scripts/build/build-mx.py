@@ -1,6 +1,7 @@
 """Build the standalone MX reset ROM and the reserved boot area of its diskette."""
 from pathlib import Path
 import runpy
+import struct
 import sys
 import zlib
 
@@ -14,6 +15,7 @@ ROM_FONT = BIN / 'fonts/Graph8x4.i80'
 ROM_BOOT_ORIGIN = 0x600
 PACK = runpy.run_path(str(ROOT / 'scripts/build/pack-dos.py'))
 CPU = runpy.run_path(str(ROOT / 'scripts/images/cpu.py'))
+EXE = runpy.run_path(str(ROOT / 'scripts/images/executable.py'))
 PROFILE = ['MX_FLOPPY_BOOT=1']
 APPS = ('NC', 'EDIT', 'CLI', 'FONT', 'RAMDISK')
 
@@ -66,14 +68,14 @@ def build():
     stage_base = 0x3000
     stage_limit = 0x8e00
     stage_sectors = (stage_limit - stage_base) // 512
-    floppy = PACK['symbols'](BIN / 'FLOPPY.sym')
-    floppy_body = (BIN / 'FLOPPY.i80').read_bytes()
-    origin = runpy.run_path(str(ROOT / 'scripts/images/cpu.py'))['parse_cpu']((BIN / 'FLOPPY.cpu').read_bytes())['load']
-    resident = floppy_body[floppy['serviceImage'] - origin:
-                           floppy['serviceEnd'] - origin]
-    if not resident or len(resident) != floppy['serviceEnd'] - floppy['serviceImage']:
-        raise ValueError('Invalid FLOPPY resident extent')
-    (OUT / 'fd-resident.bin').write_bytes(resident)
+    # ROM вызывает fdTransfer уже при первом обращении к загрузочной дискете.
+    service = (BIN / 'FLOPPYSVC.bin').read_bytes()
+    size, entry, count = struct.unpack_from('<3H', service)
+    if entry or len(service) != 6 + size + 2 * count:
+        raise ValueError('Invalid boot floppy service descriptor')
+    floppy = EXE['Image'](service[6:6+size], reloc_kind=EXE['WORD16'],
+                          relocations=EXE['relocation_table'](service[6+size:]))
+    (OUT / 'fd-resident.bin').write_bytes(EXE['relocated_body'](floppy, dos['DOS_FLOPPY_ADDR']))
     bios_bytes = (BIN / 'BIOS.sys').read_bytes()
     io_bytes = (BIN / 'IO.sys').read_bytes()
     mem_bytes = (OUT / 'MEM.sys').read_bytes()
@@ -187,7 +189,7 @@ if __name__ == '__main__':
         asm=['source/bootstrap/BOOTBANK.asm', 'source/bootstrap/MXSECTOR.asm', 'source/bootstrap/MXFLASH.asm', 'source/dos/DOS.asm',
              'source/bios/MXROM.asm', 'source/mem/LOCALBLOCK.asm', 'source/enumerate/ENUM.asm', 'source/fileops/FILEOPS.asm',
              *(f'source/{name.lower()}/{name}.asm' for name in APPS)],
-        inputs=['bin/banked/KERNEL.sym', 'bin/FLOPPY.sym', 'bin/FLOPPY.cpu', 'bin/FLOPPY.i80', 'bin/BIOS.sym', 'bin/BIOS.sys', 'bin/DOS.sys', 'bin/IO.sys', 'bin/MEM.sys', ROTATE, ROM_FONT,
+        inputs=['bin/banked/KERNEL.sym', 'bin/FLOPPYSVC.bin', 'bin/BIOS.sym', 'bin/BIOS.sys', 'bin/DOS.sys', 'bin/IO.sys', 'bin/MEM.sys', ROTATE, ROM_FONT,
                 'bin/MEM.sym', *(BIN / f'{name}.cpu' for name in APPS), 'scripts/build/build-overlays.py',
                 'scripts/build/pack-dos.py', 'scripts/images/executable.py', 'scripts/images/cpu.py',
                 'assets/system-rom/boot-system.bin', 'assets/system-rom/fonts/6x8/KOI8.pf', 'assets/system-rom/README.TXT',

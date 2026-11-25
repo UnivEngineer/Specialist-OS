@@ -1,5 +1,6 @@
 """Native EXE v2 converter through the actual NC keyboard and FILEHANDLE."""
 from pathlib import Path
+from dos_arena import free_intervals
 import argparse,runpy,re,struct,sys,subprocess
 R=Path(__file__).resolve().parents[2];O=R/'.local/image-v2-emu';O.mkdir(exist_ok=True)
 p=argparse.ArgumentParser();p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,default=19782);p.add_argument('--font-only',action='store_true');p.add_argument('--modules-only',action='store_true');p.add_argument('--modes-only',action='store_true');a=p.parse_args()
@@ -91,10 +92,11 @@ try:
   first=load('B:/CACHE.DLL',0);load('B:/KEEP.DLL',0,error=k['MEM_ERROR_ACTIVE']);second=load('B:/CACHE.DLL',0)
   raw_call(k['MXOS_DOS_MODULE_CALL'],hl=first,de=0x3600,error=k['MEM_ERROR_HANDLE']);unload(second);assert allocation_count()==baseline
   print('PASS MAIN: below-load workspace/BSS, pinned collision, PRESERVE and cache eviction',flush=True)
-  dos=encode(Image(b'\xc9',k['DOS_SERVICE_ADDR'],k['DOS_SERVICE_ADDR'],1,bss=0x80),'dll');save('B:/DOS.DLL',dos)
-  m.write(0xfffd,b'\0');m.write(k['DOS_SERVICE_ADDR']+1,b'\x69'*128);m.write(0xfffc,b'\0')
+  m.write(0xfffd,b'\0');dos_base=next(lo for lo,hi in free_intervals(k,m.read) if hi-lo>=0x81);m.write(0xfffc,b'\0')
+  dos=encode(Image(b'\xc9',dos_base,dos_base,1,bss=0x80),'dll');save('B:/DOS.DLL',dos)
+  m.write(0xfffd,b'\0');m.write(dos_base+1,b'\x69'*128);m.write(0xfffc,b'\0')
   handle=load('B:/DOS.DLL',2)
-  m.write(0xfffd,b'\0');assert m.read(k['DOS_SERVICE_ADDR']+1,128)==b'\x69'*128;m.write(0xfffc,b'\0')
+  m.write(0xfffd,b'\0');assert m.read(dos_base+1,128)==b'\x69'*128;m.write(0xfffc,b'\0')
   load('B:/DOS.DLL',2,error=k['MEM_ERROR_ACTIVE']);unload(handle);assert allocation_count()==baseline
   # The real test module makes nested BIOS/DOS calls, owns a FAR allocation
   # and loads/calls/unloads a child. None of this installs a private gateway.

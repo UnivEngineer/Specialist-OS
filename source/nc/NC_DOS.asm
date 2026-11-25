@@ -1,10 +1,11 @@
-; One-shot DOS launcher for the resident banked shell.
+; Одноразовый установщик банковой оболочки в свободном участке DOS.
     INCLUDE "../include/mxos.inc"
     INCLUDE "bank-api.inc"
     IFNDEF DRIVER_ORIGIN
-DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
+DRIVER_ORIGIN = 0
     ENDIF
     ORG DRIVER_ORIGIN
+    RELOCATE_START
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -25,7 +26,7 @@ entry:
     ld hl,copyright
     MXOS_CALL MXOS_BIOS_PRINT_STRING
     ld c,10
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     call appProgramDrive
     ld (corePath),a
     ld (registers+7),a
@@ -73,9 +74,9 @@ failed:
     pop af
     push af
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_HEX_BYTE
+    call mx_printHexByte
     ld c,10
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     MXOS_CALL MXOS_BIOS_GETCH
     pop af
     ret
@@ -85,4 +86,11 @@ message:        DB 'NC BANK: load/call error ',0
 coreHandle:     DW 0
 registers:      DS MX_REGS,0
     INCLUDE "../include/app-drive.inc"
+    RELOCATE_END
+IMAGE_BODY_SIZE  = $-entry
+IMAGE_MEM_END    = IMAGE_BODY_SIZE
+IMAGE_BSS_SIZE   = 0
+IMAGE_RELOC_KIND = IMAGE_RELOC_WORD16
+IMAGE_ALIGN_LOG2 = 0
+    RELOCATE_TABLE entry
     END

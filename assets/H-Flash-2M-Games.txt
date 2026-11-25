@@ -178,6 +178,7 @@ BENCH/DiskBen/DiskMain.dll    ../bin/DISKMAIN.cpu                      0
 BENCH/FontBen/FontBen.com     ../bin/FONTCOM.cpu                       0
 BENCH/FontBen/TextBen.com     ../bin/TEXTCOM.cpu                       0
 BENCH/FontBen/FontBank.com    ../bin/FONTBANK.cpu                      0x4000
+BENCH/FontBen/FontBank.dll    ../bin/FONTGRID.cpu                      0
 BENCH/FontBen/TextBank.com    ../bin/TEXTBANK.cpu                      0x4000
 BENCH/FontBen/Engine6.dll     ../bin/ENGINE6.cpu                       0x2000
 BENCH/FontBen/EngineP.dll     ../bin/ENGINEP.cpu                       0x2000

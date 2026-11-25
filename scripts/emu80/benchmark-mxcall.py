@@ -44,11 +44,15 @@ def main():
      m.call('regs_set',pc=0x2000,sp=0x7000,**regs)
      checkpoints=[]
      if inline:checkpoints.append((n,cs['bankMxCallRegs'],'inline-entry'))
-     if n:
+     fast = n and inline and 'bankFastPrepare' in ts
+     if fast:
+      landing = ts['bankFastLanding'] if 'bbFastSlots' in bs else bs['bbFastLeaf']
+      checkpoints += [(n,cs['bankFastDecode'],'decode'),(n,ts['bankFastPrepare'],'register-call'),(0,landing,'bios-landing'),(0,s['upperCase'],'handler'),(0,ts['bankFastReturn'],'transport-result'),(n,ts['bankFastRestore'],'caller-resume')]
+     elif n:
       checkpoints += [(n,cs['bankMxRegsRoute'] if inline else cs['bankMxCall'],'client'),(n,ts['bankCallPacket'],'transport-call'),(0,ts['bankLanding'],'main-landing'),(0,bs['bankBiosPacketDispatch'],'bios-adapter'),(0,bs['bbScalarFast'],'bios-invoke')]
-     checkpoints += [(0,s['sysBiosRegs'] if n or inline else s['sysCall'],'main-dispatch')]
+     if not fast:checkpoints += [(0,s['sysBiosRegs'] if n or inline else s['sysCall'],'main-dispatch')]
      if not n and not inline:checkpoints.append((0,s['sysReturned'],'main-result'))
-     if n:checkpoints += [(0,bs['bbScalarDone'],'bios-result'),(0,ts['bankServiceReturn'],'transport-result'),(n,ts['bankResume'],'caller-resume')]
+     if n and not fast:checkpoints += [(0,bs['bbScalarDone'],'bios-result'),(0,ts['bankServiceReturn'],'transport-result'),(n,ts['bankResume'],'caller-resume')]
      checkpoints.append((n,0x7000,'return'))
      start=last=state();previous='stub';stages=[]
      for target,address,name in checkpoints:

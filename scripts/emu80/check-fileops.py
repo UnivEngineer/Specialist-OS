@@ -48,9 +48,9 @@ try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
  k=sy(R/'bin/banked/KERNEL.sym');b=sy(R/'bin/BIOS.sym')
  n=sy(fixture['nc_symbols']);x.start('FILEOPS',**fixture);m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
- call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
+ h['main_bios'](m,k['mx_printChar'],bc=31)
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0)
- call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
+ h['main_bios'](m,k['mx_printChar'],bc=31)
  m.write(0x2500,b'\x3a\x00\x39\x3c\x32\x00\x39\xc9');m.write(0x3900,b'\0')
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0x2500)
  data=bytes(range(256))*35+bytes(range(77));save('SOURCE.BIN',data)
@@ -103,7 +103,14 @@ try:
  # Exact module ranges: disjoint DLLs coexist, and overlapping loads cannot
  # overwrite a pinned FILEOPS. Idle eviction is selective.
  e=runpy.run_path(str(R/'scripts/images/executable.py'))
- for name,origin in [('UPPER.DLL',0xB400),('OTHER.DLL',0xB300),('OVER.DLL',k['DOS_FILEOPS_ADDR'])]:
+ page(1)
+ origin=int.from_bytes(m.read(k['fileopsOverlay'],2),'little')
+ page(0)
+ from dos_arena import free_intervals
+ def dos_read(address,size):
+  page(1);data=m.read(address,size);page(0);return data
+ available=(address for start,limit in free_intervals(k,dos_read) for address in range(start,limit))
+ for name,origin in [('UPPER.DLL',next(available)),('OTHER.DLL',next(available)),('OVER.DLL',origin)]:
   save(name,e['encode'](e['Image'](b'\xc9',origin,origin,1),'com'))
  def load(name,error=False):
   m.write(0x3400,('B:\\'+name).encode()+b'\0'+bytes(110))
@@ -117,33 +124,52 @@ try:
  page(1);assert m.read(k['fileopsReady'],1)==b'\0';page(0)
  unload(load_handle)
  job('RELOAD');step(4)
- page(1);cached=m.read(k['DOS_FILEOPS_ADDR'],(R/'bin/FILEOPS.i80').stat().st_size);page(0)
+ page(1);assert m.read(k['fileopsReady'],1)==b'\1';origin=int.from_bytes(m.read(k['fileopsOverlay'],2),'little');limit=int.from_bytes(m.read(k['fileopsLoadedEnd'],2),'little');cached=m.read(origin,limit-origin);page(0)
+ print('PASS two disjoint DLLs, pinned overlap refusal, idle eviction, lazy FILEOPS reload',flush=True)
  m.write(0x3400,b'C:/DRIVERS/RAMDISK.COM\0'+bytes(100))
  call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
  page(1)
- if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
+ if m.read(k['fileopsReady'],1)==b'\1':assert m.read(origin,len(cached))==cached
  page(0)
  # Both flash variants and ROM install from different measured origins.
  for installer in ('AT2MXF.COM','ROM2MX.COM','AT2MX.COM'):
   m.write(0x3400,('C:/DRIVERS/'+installer).encode()+b'\0'+bytes(100))
   call(k['MXOS_DOS_FILE_EXEC_NATIVE'],hl=0x3400)
   page(1)
-  if m.read(k['fileopsReady'],1)==b'\1':assert m.read(k['DOS_FILEOPS_ADDR'],len(cached))==cached
+  if m.read(k['fileopsReady'],1)==b'\1':assert m.read(origin,len(cached))==cached
   page(0)
   if installer=='AT2MXF.COM':
-   probe=bytes((i*73+19)&255 for i in range(513));save('FOCHECK.BIN',probe,'H');assert read('FOCHECK.BIN',len(probe),'H')==probe
-  else:assert read('FOCHECK.BIN',513,'H')==probe
- cli('DEL H:/FOCHECK.BIN')
+   # Корень Games2M заполнен. Подкаталог допускает расширение.
+   probe_file='BLDRDASH/FOCHECK.BIN'
+   probe=bytes((i*73+19)&255 for i in range(513));save(probe_file,probe,'H');assert read(probe_file,len(probe),'H')==probe
+  else:assert read(probe_file,len(probe),'H')==probe
+ cli('DEL H:/'+probe_file)
  print('PASS relocated FLASH/FST/ROM installers, flash write/read, selective FILEOPS cache eviction',flush=True)
- print('PASS two disjoint DLLs, overlap refusal, selective eviction, lazy reload, installer respects cache intervals',flush=True)
- m.stop_at(n['mainLoop']);m.call('emu_reset');m.until(n['mainLoop'],120,page=0)
- page(1);assert m.read(k['fileopsPublic'],1)==b'\0';page(0) # AUTOEXEC installers may evict an overlapping idle cache.
  # Real NC editor/keyboard exercises the synchronous CLI frontend as well.
  def tap(key):
   z=m.call('kbd_send',keys=[key],action='tap',duration_ms=100)
   if not z.get('stoppedByBreakpoint'):m.call('emu_run_for',ms=120)
  def text(value):
-  for c in value:tap({' ':'space',':':'colon','.':'period','/':'slash','-':'minus'}.get(c,c.lower()))
+  for c in value:
+   if c=='_':
+    m.call('kbd_send',keys=['shift'],action='press')
+    try:tap('0')
+    finally:m.call('kbd_send',keys=['shift'],action='release')
+   else:tap({' ':'space',':':'colon','.':'period','/':'slash','-':'minus'}.get(c,c.lower()))
+ # AUTOEXEC запускает банковый NC. После настоящего Reset выбираем ту же MAIN-оболочку.
+ poll=sy(R/'bin/NC_CORE.sym')['ncBankInputPoll'];cli_sym=sy(R/'bin/CLI.sym')
+ m.stop_at(poll);m.call('emu_reset')
+ for _ in range(160):
+  m.until(poll,120)
+  if m.read(k['bankPage'],1)[0]>1:break
+  m.call('debug_step',mode='into')
+ else:raise AssertionError('Resident NC did not reach the keyboard after Reset')
+ x.console()
+ for value,target in [('FONT 6X8/ROTATE',cli_sym['cliInput']),('C:/DOS/NC_MN.COM',n['mainLoop'])]:
+  m.call('bp_clear');m.call('emu_run_for',ms=500);tap('esc');text(value)
+  assert m.read(cli_sym['CMD_LINE'],len(value)).upper()==value.encode()
+  m.stop_at(target);tap('enter');m.until(target,120,page=0)
+ page(1);assert m.read(k['fileopsPublic'],1)==b'\0';page(0)
  def command(value):
   m.call('bp_clear');m.call('emu_run_for',ms=500);tap('esc');text(value)
   assert m.read(n['vars.cmdLine'],len(value)).upper()==value.upper().encode()
@@ -155,7 +181,7 @@ try:
  command('COPY B:/TREE B:/TREE2')
  command('MOVE B:/TREE2 B:/TREE3')
  print('PASS NC command editor, recursive COPY and metadata MOVE',flush=True)
- # Select DOS.SYS by ordinary panel movement and copy through the actual F5 UI.
+ # Выбрать результат рекурсивного MOVE на панели и скопировать его настоящей F5.
  def selected():
   panel=m.read(n['state.activePanel'],1)[0]
   cur=m.read(n['state.panelA_curFile']+panel,1)[0]
@@ -164,25 +190,29 @@ try:
   base=int.from_bytes(m.read(n['ncCatalogBases']+slot*2,2),'little')
   return m.read(base+16*ix,11)
  if m.read(n['state.activePanel'],1)!=b'\0':tap('tab')
+ command('B:');command('CD B:/TREE3');tap('home')
  for _ in range(100):
-  if selected()==b'DOS     SYS':break
+  if selected().upper()==b'ONE     TXT':break
   tap('down')
- else:raise AssertionError(('cannot select DOS.SYS',selected()))
+ else:raise AssertionError(('cannot select moved file ONE.TXT',selected()))
  m.stop_at(n['input']);tap('f5');m.until(n['input'],90,page=0)
  m.call('bp_clear');m.call('emu_run_for',ms=250)
  original=m.read(n['vars.input'],128).split(b'\0')[0]
  for _ in original:tap('backspace')
- text('B:/DOS.SYS')
- assert m.read(n['vars.input'],10).upper().startswith(b'B:/DOS.SYS')
+ text('B:/F5.TXT')
+ assert m.read(n['vars.input'],9).upper()==b'B:/F5.TXT'
  m.screenshot(O/'nc-f5-input.png')
  m.stop_at(n['mainLoop_cursorReady']);tap('enter');m.until(n['mainLoop_cursorReady'],90,page=0)
  m.call('bp_clear');m.call('emu_run_for',ms=250)
- assert int.from_bytes(m.read(n['vars.fileJob.bytes'],4),'little')==Path(R/'bin/DOS.sys').stat().st_size
+ get_file=runpy.run_path(str(R/'scripts/emu80/check-copy.py'))['get_file']
+ expected=get_file(fixture['system'].read_bytes(),'README.TXT')[1]
+ assert int.from_bytes(m.read(n['vars.fileJob.bytes'],4),'little')==len(expected)
  assert m.read(n['vars.fileJob.error'],1)==b'\0'
  m.screenshot(O/'nc-f5-return.png')
  print('PASS F5 stepped frontend and return to NC',flush=True)
  m.screenshot(O/'nc-after-reset.png')
  print('PASS Reset and NC',flush=True)
+ assert read('F5.TXT',len(expected))==expected
 except Exception:
  if not x.pid:raise
  m.call('debug_break');m.screenshot(O/'failure.png');page(1)

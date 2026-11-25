@@ -32,7 +32,9 @@ FONT4_REVERSE_ADDR = FONT_ADDR-0400h
     jp scalar
     jp service
     jp fontPseudoDraw
-    DS FONT_ENGINE_HEADER-$,0
+    ASSERT $ == FONT_ENGINE_TEXT_EXT
+    DW FONT_ENGINE_TEXT_LIM
+    ASSERT $ == FONT_ENGINE_HEADER
     IFDEF FONT_GRAPHIC_X
     DB 'FNT1',FONT_ENGINE_VERSION,CELL_WIDTH,8,FONT_FORMAT_GRAPH8+GRAPH_PRE_MODE
     ELSE
@@ -51,6 +53,8 @@ FONT4_REVERSE_ADDR = FONT_ADDR-0400h
     ENDIF
     ENDIF
     DW imageEnd-FONT_ENGINE_BASE,FONT_ADDR,FONT_LOWER_BYTES,initializerName
+    ASSERT $ == FONT_ENGINE_TEXT_LIM
+    jp printStringLim
 initializerName: DB 'InitA.dll',0
 printChar2    = bios_fontControl
 printCharBody = bios_fontControl
@@ -207,6 +211,7 @@ printChar_real2 = printCharRawHelper
     ENDIF
     ENDIF
     INCLUDE "string.inc"
+    INCLUDE "string-lim.inc"
     INCLUDE "install.inc"
     INCLUDE "bench.inc"
 PSEUDO_STEP = CELL_WIDTH/2

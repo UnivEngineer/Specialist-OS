@@ -27,7 +27,7 @@ try:
  x.start('C-SDK',disk=R/'bin/nested-Games2M.bin',**fixture)
  m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
  call(k['MXOS_DOS_FILE_SELECT_DRIVE'],a=1)
- call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
+ h['main_bios'](m,k['mx_printChar'],bc=31)
  data=(R/'docs/file-api-001/stdlib/stdio_code_crt_init.bin').read_bytes()
  assert len(data)+0x2000<0x5e80
  saved={address:m.read(address,3) for address in (b['getch'],b['j_keyScan'])}

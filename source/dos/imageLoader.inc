@@ -1,8 +1,20 @@
-; Родной контейнер COM/EXE MXOS: HL=имя/дескриптор.
-; imageOpen: HL=вход, DE=загрузка, BC=тело, CF=ошибка.
-; imageLoad: DE=приёмник, HL=вход после чтения и проверки суммы.
-; Контекст внутренний и действителен до следующей файловой операции.
+;----------------------------------------------------------------------------
+; MXOS
+; Открыть нативный образ и проверить заголовок и размеры до размещения.
+; вход: HL = имя/дескриптор. imageOpen допускает v2, imageOpenModule также v3.
+; выход: CF=0, HL=вход, DE=загрузка, BC=длина тела (для v3 адреса относительные).
+; При CF=1 причину содержит v_dosError. AF изменён. Курсор жив до следующего
+; файлового запроса, imageSaveContext/imageRestoreContext сохраняют его.
+;----------------------------------------------------------------------------
 imageOpen:
+    IFDEF BANKED_DOS_BUILD
+    xor a
+    jp imageOpenKind
+imageOpenModule:
+    ld a,1
+imageOpenKind:
+    ld (relocAccepted),a
+    ENDIF
     call fileLoadInfo
     ret c
     ld hl,(v_tmpFileDescr+30)
@@ -20,8 +32,21 @@ imageOpen:
     call moveBytesForward
     call imageValidateHeader
     ret c
-    ld hl,(v_tmpFileDescr+10)
     ld de,IMAGE_HEADER_SIZE
+    IFDEF BANKED_DOS_BUILD
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
+    jp nz,imageFileSize
+    ld hl,(v_imageHeader+IMAGE_RELOC_COUNT)
+    add hl,hl
+    jp c,imageError
+    ld de,IMAGE_RELOC_HEADER
+    add hl,de
+    jp c,imageError
+    ex de,hl
+imageFileSize:
+    ENDIF
+    ld hl,(v_tmpFileDescr+10)
     jp imageLength
 imageLength:
     ld a,h
@@ -95,6 +120,7 @@ imageRequirements:
     pop hl
     add hl,de
     jp c,imageError
+imageResult:
     ld hl,(v_tmpFileDescr+6)
     ex de,hl
     ld hl,(v_tmpFileDescr+10)
@@ -123,8 +149,23 @@ imageReadPrefix:
     ld a,2
     call fatStream
     ret c
+    IFDEF BANKED_DOS_BUILD
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
+    jp nz,imagePrefixDone
+    ld a,(relocAccepted)
+    or a
+    jp z,imageError
+    ld bc,IMAGE_RELOC_HEADER-IMAGE_HEADER_SIZE
+    ld hl,v_imageHeader+IMAGE_HEADER_SIZE
+    ld a,2
+    call fatStream
+    ret c
+imagePrefixDone:
+    ENDIF
     call imageSaveCursor
     ld hl,v_imageHeader
+    or a
     ret
 imageSaveCursor:
     ex de,hl
@@ -132,6 +173,14 @@ imageSaveCursor:
     ld hl,(v_streamOffset)
     ld (v_tmpFileDescr+20),hl
     ret
+;----------------------------------------------------------------------------
+; MXOS
+; Прочитать тело нативного файла и применить таблицу v3 один раз.
+; вход: после открытия и размещения DE = локальный приёмник либо KD_DATA
+; при kdFarActive (kdPage:kdFarCurrent). Область целиком принадлежит клиенту.
+; выход: CF=0, HL=фактический вход. При CF=1 A=ошибка, содержимое приватного
+; резерва неопределено. AF/BC/DE изменены. Вызов точки входа выполняет клиент.
+;----------------------------------------------------------------------------
 imageLoad:
     ex de,hl
     ld (v_input_end),hl
@@ -147,20 +196,39 @@ imageLoad:
     ld a,2
     call fatStream
     ret c
+    IFDEF BANKED_DOS_BUILD
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
+    jp z,imageBodyDone
+    ENDIF
     call fatStreamFinish
     ret c
+imageBodyDone:
     push hl
     call imageSaveCursor
     pop hl
     IFDEF BANKED_DOS_BUILD
     ld a,(kdFarActive)
     or a
-    jp nz,kiLoadSum
+    jp z,imageLocalSum
+    call kiLoadSum
+    jp imageBodyChecked
+imageLocalSum:
     ENDIF
     dec hl
     ex de,hl
     ld hl,(v_input_end)
     call calcCS
+    IFDEF BANKED_DOS_BUILD
+    call imageCheckSum
+imageBodyChecked:
+    ret c
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
+    jp z,relocReadTable
+    or a
+    ret
+    ENDIF
 imageCheckSum:
     ld hl,(v_tmpFileDescr+12)
     ld d,b
@@ -179,7 +247,7 @@ imageMagic:
 imageValidateHeader:
     ld hl,v_imageHeader
     ld de,imageMagic
-    ld b,5
+    ld b,4
 imageMagicLoop:
     ld a,(de)
     cp (hl)
@@ -189,11 +257,29 @@ imageMagicLoop:
     dec b
     jp nz,imageMagicLoop
     ld a,(hl)
+    cp 2
+    IFDEF BANKED_DOS_BUILD
+    jp z,imageVersionReady
+    cp IMAGE_RELOC_VERSION
+    ENDIF
+    jp nz,imageError
+imageVersionReady:
+    inc hl
+    ld a,(hl)
     cp IMAGE_FLAG_MAIN
     jp z,imageFlagsReady
     cp IMAGE_FLAG_BANK+1
     jp nc,imageError
 imageFlagsReady:
+    IFDEF BANKED_DOS_BUILD
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
+    jp nz,imageFixedHeader
+    call relocCheckHeader
+    ret c
+    jp imageCommonHeader
+imageFixedHeader:
+    ENDIF
     ld hl,v_imageHeader
     ld de,v_imageHeader+IMAGE_HEADER_CHECKSUM-1
     call calcCS
@@ -205,6 +291,7 @@ imageFlagsReady:
     ld a,(v_imageHeader+IMAGE_HEADER_BYTES)
     cp IMAGE_HEADER_SIZE
     jp nz,imageError
+imageCommonHeader:
     ld a,(v_imageHeader+29)
     or a
     jp nz,imageError
@@ -237,6 +324,12 @@ imageApiReady:
 
 
 imageSaveContext:
+    IFDEF BANKED_DOS_BUILD
+    ld hl,v_imageHeader+IMAGE_HEADER_SIZE
+    ld de,relocSavedExtension
+    ld bc,IMAGE_RELOC_HEADER-IMAGE_HEADER_SIZE
+    call moveBytesForward
+    ENDIF
     ld a,(v_drive)
     ld (imageSavedDrive),a
     ld hl,(v_directory)
@@ -254,6 +347,12 @@ imageSaveContext:
     ld bc,IMAGE_HEADER_SIZE
     jp moveBytesForward
 imageRestoreContext:
+    IFDEF BANKED_DOS_BUILD
+    ld hl,relocSavedExtension
+    ld de,v_imageHeader+IMAGE_HEADER_SIZE
+    ld bc,IMAGE_RELOC_HEADER-IMAGE_HEADER_SIZE
+    call moveBytesForward
+    ENDIF
     ld a,(imageSavedDrive)
     call fileSelectDrive
     ld hl,(imageSavedDirectory)

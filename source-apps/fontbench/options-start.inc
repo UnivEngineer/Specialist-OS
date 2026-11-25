@@ -96,6 +96,7 @@ benchOptionTable:
     DB '-C=SERIAL',0,3,2
     DB '-C=WIN256',0,3,4
     DB '-C=WIN20',0,3,4
+    DB '-C=WIN32',0,3,4
     DB '-C=FAR48',0,3,8
     DB '-C=FAR1152',0,3,16
     DB '-C=GROUP',0,3,32
@@ -113,6 +114,6 @@ benchUsage:
     DB 'FONTBEN [-F=4|6|8|ALL] [-P=RAW|PACK|DUP|ALL]',13,10
     DB ' -B=MAIN|BANK|BOTH (DOS alias: BANK)',13,10
     DB ' -E=STANDALONE|KERNEL|PAGED|ALL (-K: KERNEL)',13,10
-    DB ' -C=CHAR|SERIAL|GROUP|WIN20|FAR48|FAR1152|ALL',13,10
+    DB ' -C=CHAR|SERIAL|GROUP|WIN32|FAR48|FAR1152|ALL',13,10
     DB ' -N: no file  -Q: auto return  -?: help',13,10,0
 benchInvalidText: DB 'Invalid arguments or no matching cases',13,10,0

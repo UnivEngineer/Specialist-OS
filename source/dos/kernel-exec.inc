@@ -3,21 +3,8 @@
 ; новые запросы DOS; состояние внешнего диспетчера лежит на стеке DOS.
 keRequest:
     ld hl,(kdRegs)
-    ld de,KD_PATH
-    ld bc,MAX_PATH
-    call kdFetch
+    call kdFetchLine
     jp c,kdBad
-    ld hl,KD_PATH
-    ld b,MAX_PATH
-keCheckCommand:
-    ld a,(hl)
-    cp 020h
-    jp c,keCommandReady
-    inc hl
-    dec b
-    jp nz,keCheckCommand
-    jp kdBad
-keCommandReady:
     ld a,(kdFunction)
     cp MXOS_DOS_FILE_EXEC_NATIVE & 0FFh
     ld hl,KD_PATH
@@ -51,6 +38,9 @@ keCopyCommand:
 keCommandCopied:
     xor a
     ld (de),a
+    ld a,MAX_PATH+2
+    sub b
+    ld (keCommandSize),a
     ld hl,CMD_LINE
     ld de,v_curFileDescr
     call fileNamePrepare
@@ -78,15 +68,23 @@ keNativeExtension:
     push hl
     ld hl,CMD_LINE
     ld de,MAIN_COMMAND_ADDR
-    ld bc,MAX_PATH+2
+    call keCommandCount
     xor a
     ld (kdPage),a
     call kdStore
     jp c,keLoadError
     ld hl,v_curFileDescr
-    call imageOpen
+    call imageOpenModule
     jp c,keLoadError
+    ld a,(v_imageHeader+4)
+    cp IMAGE_RELOC_VERSION
     ld a,(v_tmpFileDescr+5)
+    jp nz,keFixedImage
+    cp IMAGE_FLAG_DRIVER
+    jp z,keDriver
+    call imageError
+    jp keLoadError
+keFixedImage:
     cp IMAGE_FLAG_BANK
     jp z,keBank
     cp IMAGE_FLAG_DRIVER
@@ -247,8 +245,11 @@ keBankStackReady:
     xor a
     ld (kdBusy),a
     ld hl,CMD_LINE
+    call keCommandCount
     ld a,MODULE_TARGET_BANK
+    push bc                 ; Длина хранится отдельно на время вложенного запроса.
     MXOS_CALL MXOS_DOS_MODULE_LOAD
+    pop bc
     jp c,keLoadError
     push hl                 ; handle переживает любые вложенные вызовы.
     ld hl,(mdRecord)
@@ -258,7 +259,6 @@ keBankStackReady:
     ld (mdBankId),a
     ld hl,CMD_LINE
     ld de,DOS_BANK_STACK_BOTTOM
-    ld bc,MAX_PATH+2
     call mdInstallPart
     jp c,keBankPrepareFailed
     ; Строка лежит в нижней части стека, недоступной стековым кадрам.
@@ -321,6 +321,19 @@ keBankPrepareFailed:
     jp keLoadError
 keBankFloor: DW DOS_BANK_STACK_BOTTOM+192
 
+;----------------------------------------------------------------------------
+; MXOS
+; Прочитать размер локальной команды FILE_EXEC с двумя терминаторами.
+; вход: keCommandSize — длина, сохранённая keCopyCommand.
+; выход: BC = длина, A изменён, DE/HL и флаги сохранены.
+;----------------------------------------------------------------------------
+keCommandCount:
+    ld a,(keCommandSize)
+    ld c,a
+    ld b,0
+    ret
+keCommandSize: DB 0
+
 keDriver:
     ld hl,(v_imageHeader+IMAGE_BSS)
     inc hl
@@ -336,6 +349,12 @@ keDriverStackReady:
     ld a,(diActive)
     or a
     jp nz,keDriverBusy
+    call imagePlaceDos
+    jp c,keLoadError
+    ex de,hl
+    ld (diBodyStart),hl
+    add hl,bc
+    ld (diBodyEnd),hl
     ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
     ld (diStart),hl
     ld de,DOS_ARENA_START
@@ -350,7 +369,7 @@ keDriverStackReady:
 keDriverRangeOk:
     ex de,hl
     ld hl,(diStart)
-    call dosArenaImage
+    call imageClaimDos
     jp c,keDriverBusy
     ld hl,(v_tmpFileDescr+6)
     ex de,hl
@@ -503,6 +522,22 @@ keBindImage:
     ld (memoryMainOwner),a
     ld hl,(v_imageHeader+IMAGE_MEMORY_END)
     ld (memoryMainStart),hl
+    push hl
+    ld a,(appDepth)
+    dec a
+    call appHeapAddress
+    ex de,hl
+    pop hl
+    push hl
+    push hl
+    ld hl,(v_imageHeader+IMAGE_MIN_HEAP)
+    ld b,h
+    ld c,l
+    pop hl
+    add hl,bc
+    call appSaveWord
+    pop hl
+    call appSaveWord
     ld hl,(memorySystemEnd)
     ld (memoryMainEnd),hl
     ld hl,0
@@ -564,6 +599,13 @@ keRetireNext:
     jp nz,keRetireFind
     ret
 keRetireAll:
+    ld a,(appDepth)
+    dec a
+    call appHeapAddress
+    xor a
+    ld (hl),a
+    inc hl
+    ld (hl),a
     ld hl,MEM_ALLOC_TABLE
     ld b,MEM_ALLOC_RECORDS
     ld a,(appOwner)

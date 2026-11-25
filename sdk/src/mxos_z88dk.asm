@@ -34,7 +34,7 @@ _mxos_call:
     ld b,(hl)
     inc hl
     ex de,hl
-    call 0F800h
+    call mx_call
     push af
     pop hl
     ret
@@ -49,12 +49,12 @@ _mxos_call:
 ;
 ; выход:
 ;   h = байт результата a, бит 0 в l = CF службы MEM. При успехе назначение содержит
-;   перенесённые байты.
+;   перенесённые байты. Допустимо перекрытие внутри любой страницы, включая DATA.
 ;----------------------------------------------------------------------------
 
 _mxos_memmove_far:
     xor a
-    call 0F815h
+    call mx_memory
     push af
     pop hl
     ret
@@ -87,7 +87,7 @@ _mxos_printString_bank:
 
 _mxos_puts_local:
     ld a,5
-    jp 0F815h
+    jp mx_memory
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
@@ -101,7 +101,7 @@ _mxos_puts_local:
 ;----------------------------------------------------------------------------
 
 _mxos_printString_main:
-    call 0F806h
+    call mx_callRegs
     defw MXOS_BIOS_PRINT_STRING_MAIN
     ret
 
@@ -119,7 +119,7 @@ _mxos_printString_main:
 ;----------------------------------------------------------------------------
 
 _mxos_memcpy_far:
-    call 0F80Fh
+    call mx_memcpyFar
     push af
     pop hl
     ret
@@ -138,9 +138,7 @@ _mxos_memcpy_far:
 
 _mxos_putch:
     ld c,l
-    call 0F806h
-    defw MXOS_BIOS_PRINT_CHAR
-    ret
+    jp mx_printChar
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -155,7 +153,7 @@ _mxos_putch:
 ;----------------------------------------------------------------------------
 
 _mxos_puts:
-    call 0F806h
+    call mx_callRegs
     defw MXOS_BIOS_PRINT_STRING_BANK
     ret
 ; IO.SYS direct DOS/EXEC ABI. Preserve a valid key code 00h in the result.
@@ -282,7 +280,7 @@ bankKeyResult:
 ;----------------------------------------------------------------------------
 
 _mxos_getch:
-    call 0F806h
+    call mx_callRegs
     defw MXOS_BIOS_GETCH
     ld l,a
     ld h,0
@@ -301,7 +299,7 @@ _mxos_getch:
 ;----------------------------------------------------------------------------
 
 _mxos_getkey:
-    call 0F806h
+    call mx_callRegs
     defw MXOS_BIOS_GETCH
     push af
     pop hl
@@ -321,7 +319,7 @@ _mxos_getkey:
 ;----------------------------------------------------------------------------
 
 _mxos_keyscan:
-    call 0F806h
+    call mx_callRegs
     defw MXOS_BIOS_KEY_SCAN
     ld l,a
     ld h,0
@@ -344,14 +342,12 @@ _mxos_keyscan:
 
 _mxos_cls:
     ld c,31
-    call 0F806h
-    defw MXOS_BIOS_PRINT_CHAR
-    ret
+    jp mx_printChar
 
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
-; Прочитать верхнюю границу памяти программ через вход Монитора-2.
+; Прочитать верхнюю границу памяти программ через прямой вход MEM.
 ;
 ; вход:
 ;   Параметров нет.
@@ -361,12 +357,12 @@ _mxos_cls:
 ;----------------------------------------------------------------------------
 
 _mxos_memtop:
-    jp 0C833h
+    jp mx_getMemTop
 
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
-; Установить верхнюю границу памяти через вход Монитора-2.
+; Установить верхнюю границу памяти через прямой вход MEM.
 ;
 ; вход:
 ;   hl = новый адрес последнего доступного байта.
@@ -376,7 +372,7 @@ _mxos_memtop:
 ;----------------------------------------------------------------------------
 
 _mxos_set_memtop:
-    jp 0C830h
+    jp mx_setMemTop
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -391,9 +387,7 @@ _mxos_set_memtop:
 ;----------------------------------------------------------------------------
 
 _mxos_cursor_get:
-    call 0F806h
-    defw MXOS_BIOS_GET_CURSOR_POS
-    ret
+    jp mx_getCursorPos
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -408,9 +402,7 @@ _mxos_cursor_get:
 ;----------------------------------------------------------------------------
 
 _mxos_cursor_set:
-    call 0F806h
-    defw MXOS_BIOS_SET_CURSOR_POS
-    ret
+    jp mx_setCursorPos
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -426,7 +418,7 @@ _mxos_cursor_set:
 
 _mxos_upper:
     ld a,l
-    call 0F806h
+    call mx_callRegs
     defw MXOS_BIOS_UPPERCASE
     ld l,a
     ld h,0
@@ -524,7 +516,7 @@ bios_target:
 ;----------------------------------------------------------------------------
 
 _mxos_queue_bind:
-    jp 0F809h
+    jp mx_queueBind
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -539,4 +531,4 @@ _mxos_queue_bind:
 ;----------------------------------------------------------------------------
 
 _mxos_queue_flush:
-    jp 0F80Ch
+    jp mx_queueFlush

@@ -392,7 +392,7 @@
     {
       "name": "move8080",
       "files": [
-        "../common/move8080.inc"
+        "move-compact.inc", "mem-mapped.inc"
       ]
     },
     {

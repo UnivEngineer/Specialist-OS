@@ -24,7 +24,8 @@ diskDriver:
     call dosSystemDriver
     jp kernelDiskDone
 kernelFloppyIO:
-    call DOS_FLOPPY_ADDR
+diFloppyCall:
+    call DOS_FLOPPY_ADDR     ; Операнд публикует registryBoot/diCopyFloppy.
     jp kernelDiskDone
 kernelExternalIO:
     call fastDriver

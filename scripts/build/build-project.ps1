@@ -104,6 +104,7 @@ $components = @(
 
 $components += @(
     @{ Directory = 'source-apps/textbench'; Source = 'STANDALONE'; Output = 'TEXTCOM'; Extension = 'cpu'; Address = '0' },
+    @{ Directory = 'source-apps/fontbench'; Source = 'FONTGRID'; Extension = 'cpu'; Address = '0' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEM'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINEB'; Extension = 'cpu'; Address = '0x2000' },
     @{ Directory = 'source-apps/fontbench'; Source = 'ENGINE6'; Extension = 'cpu'; Address = '0x2000' },
@@ -147,7 +148,7 @@ $planTimer = [Diagnostics.Stopwatch]::StartNew()
 $jobs = @(
     # Этот этап пишет в разные файлы и каталоги. DOS ждёт его завершения.
     @{ cwd = $repositoryRoot; describe = @((Join-Path $PSScriptRoot 'build-font-engines.py')) + $forceArgs; serial = $false }
-    Get-ComponentJob @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = 'GFX_BASE' }
+    Get-ComponentJob @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = '0' }
     if ($Target -ne 'MX') {
         @{ cwd = (Get-Location).ProviderPath; describe = @((Join-Path $repositoryRoot 'source-apps/copybench/build.py')) + $forceArgs; serial = $false }
     }

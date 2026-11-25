@@ -1,19 +1,13 @@
     INCLUDE "../include/mxos.inc"
     INCLUDE "abi.inc"
+    INCLUDE "../../bin/banked/main-io-import.inc"
     ORG BANK_LANDING
 ; Тело копируется в каждый исполняемый банк и в основную память.
 ; Раскладки локальных стековых кадров: BANK_CALLER_* / BANK_CALLEE_* в abi.inc.
 ; До проверки kind и установки SP стек предыдущей страницы не трогаем.
+    DS 7,0
 bankLanding:
-    ld a,(BANK_BUFFER_KIND)
-    or a
-    jp z,bankFrameLanding
     dec a
-    jp z,MEM_BUFFER_MAIN_ENTRY
-    jp MEM_BUFFER_RETURN_ENTRY
-bankFrameLanding:
-    ld a,(BANK_FRAME_KIND)
-    cp 1
     jp z,bankResume
     ld hl,(bankServiceSP)
 bankEnter:
@@ -35,25 +29,8 @@ bankEnter:
     push hl
     ; Отмечаем занятую часть служебного стека ДО входа в программу:
     ; она может заменить SP своим стеком под экраном.
-    ld hl,0
-    add hl,sp
-    ld (bankServiceSP),hl
-    ld a,(BANK_FRAME_KIND)
-    cp 2
-    jp z,bankPacketEnter
-    ld hl,(BANK_FRAME_REGS+4)
-    ld b,h
-    ld c,l
-    ld hl,(BANK_FRAME_REGS+2)
-    ex de,hl
-    ld a,(BANK_FRAME_PAGE)
-    ld hl,(BANK_FRAME_REGS)
-    jp (hl)
-bankPacketEnter:
-    ld hl,(BANK_FRAME_OPERATION)
-    ld b,h
-    ld c,l
-    ld de,BANK_FRAME_REGS
+    call bankPublishSP
+    ; BC и DE уже содержат операцию и указатель в форме исполнителя.
     ld a,(BANK_FRAME_PAGE)
     ld hl,(BANK_FRAME_ENTRY)
     jp (hl)
@@ -80,26 +57,13 @@ bankPacketEnter:
 ;----------------------------------------------------------------------------
 
 bankCall:
-    call bankCommandWindow
     ld (BANK_FRAME_TARGET),a
-bankCallValid:
-    ; Кадр вызывающей стороны: 12 байт с адресом от CALL; BANK_CALLER_* в abi.inc.
-    push af
-    push bc
-    push de
-    push hl
-    ld hl,0
-    add hl,sp
-    ld (BANK_FRAME_SP),hl
-    ld de,BANK_FRAME_REGS
-    ld b,2
-    call bankCopyQuads
+    ; BC и DE доходят до процедуры в CPU. HL хранит адрес входа.
+    ld (BANK_FRAME_ENTRY),hl
     xor a
     ld (BANK_FRAME_KIND),a
 bankCallSaved:
     ld hl,(bankServiceSP)
-    ; Старый SP хранится отдельным словом ниже регистров; возвратный SP
-    ; указывает на это слово, а восстановление пропускает его перед POP.
     push hl
     ld hl,0
     add hl,sp
@@ -147,33 +111,25 @@ bankCallContext:
 ;----------------------------------------------------------------------------
 
 bankCallPacket:
-    ; Горячий COMMAND не вызывает подпрограмму установки профиля.
-    push af
-    ld a,(BANK_PROFILE)
-    or a
-    call nz,bankCommandWindow
-    xor a
-    ld (BANK_BUFFER_KIND),a
-    pop af
     ld (BANK_FRAME_TARGET),a
-    push af
     ld a,1
     ld (BANK_FRAME_STATUS),a
-    pop af
 bankPacketValid:
     ld (BANK_FRAME_ENTRY),hl
-    push af
-    push bc
-    push de
-    push hl
-    ld h,b
-    ld l,c
-    ld (BANK_FRAME_OPERATION),hl
+    ; От первого SPHL до восстановления SP нет CALL, PUSH или прерываний.
+    ld hl,0
+    add hl,sp
+    ld (bankPacketSP+1),hl
     ex de,hl
+    ld sp,hl
+    DUP 4, wordIndex
+        pop hl
+        ld (BANK_FRAME_REGS+2*wordIndex),hl
+    EDUP
+bankPacketSP:
+    ld sp,0
     ld de,BANK_FRAME_REGS
-    ld b,2
-    call bankCopyQuads
-    ld a,2
+    xor a
     ld (BANK_FRAME_KIND),a
     jp bankCallSaved
 
@@ -192,10 +148,11 @@ bankPacketValid:
 ;   через RET в транспорт. Его af, bc, de и hl составляют результат.
 ;----------------------------------------------------------------------------
 
+bankModuleCallback:
 bankCallback:
+    ld hl,bankModuleReturned
+    push hl
     push bc
-    xor a
-    ld (BANK_FRAME_STATUS),a
     ld hl,(BANK_FRAME_REGS+6)
     push hl
     ld hl,(BANK_FRAME_REGS+4)
@@ -209,22 +166,8 @@ bankCallback:
 
 ; Сохранение результатов до чтения/изменения служебного кадра.
 bankServiceReturn:
-    ; Горячий COMMAND не вызывает подпрограмму установки профиля.
-    push af
-    ld a,(BANK_PROFILE)
-    or a
-    call nz,bankCommandWindow
-    xor a
-    ld (BANK_BUFFER_KIND),a
-    pop af
-    ; После сохранения результата CPU-регистры уже не нужны: пишем слова
-    ; прямо в окно, без восьмибайтной копии со стека и обратных POP.
+    ; BC и DE проходят обратное переключение в регистрах.
     ld (BANK_FRAME_REGS),hl
-    ex de,hl
-    ld (BANK_FRAME_REGS+2),hl
-    ld h,b
-    ld l,c
-    ld (BANK_FRAME_REGS+4),hl
     push af
     pop hl
     ld (BANK_FRAME_REGS+6),hl
@@ -232,17 +175,13 @@ bankServiceReturn:
     ld (BANK_FRAME_SP),hl
     pop hl
     ld a,l
-    ld (BANK_FRAME_TARGET),a
     pop hl
     ld (bankOwner),hl
-    ld hl,0
-    add hl,sp
-    ld (bankServiceSP),hl
+    call bankPublishSP
     ld hl,bankDepth
     dec (hl)
-    ld a,1
-    ld (BANK_FRAME_KIND),a
-    ld a,(BANK_FRAME_TARGET)
+    ld hl,BANK_FRAME_KIND
+    ld (hl),1
     jp bankSwitch
 
 bankResume:
@@ -250,16 +189,10 @@ bankResume:
     ld sp,hl
     pop hl
     ld (bankServiceSP),hl
-    ld hl,0
-    add hl,sp
-    ex de,hl
-    ld hl,BANK_FRAME_REGS
-    ld b,2
-    call bankCopyQuads
-    pop hl
-    pop de
-    pop bc
+    ld hl,(BANK_FRAME_REGS+6)
+    push hl
     pop af
+    ld hl,(BANK_FRAME_REGS)
     ret
 
 bankSwitch:
@@ -286,13 +219,17 @@ bankTransportEnd:
     ASSERT bankTransportEnd <= 0FF00h
 ; Модуль вернулся обычным RET. Вложенный отказ BIOS/DOS не должен
 ; оставлять статус диспетчеризации внешнего moduleCall незавершённым.
-bankModuleCallback:
-    call bankCallback
 bankModuleReturned:
     push af
     xor a
     ld (BANK_FRAME_STATUS),a
     pop af
+    ret
+; SP исполнителя до CALL. Указатель переживает переход программы на свой стек.
+bankPublishSP:
+    ld hl,2
+    add hl,sp
+    ld (bankServiceSP),hl
     ret
 ; Локальная диспетчеризация B=5; не переключает страницу/профиль.
 bankLocalChecked:
@@ -307,20 +244,130 @@ bankLocalBlockBad:
     ld a,DOS_ERR_ARGUMENT
     scf
     ret
-; Ошибка строки: стек содержит сохранённые DE/BC/AF, затем возврат.
-bankTextRangeError:
-    pop de
-    pop bc
-    pop af
-    ld a,DOS_ERR_ARGUMENT
-    scf
-    ret
     INCLUDE "copy.inc"
-    INCLUDE "queue-hook.inc"
+;----------------------------------------------------------------------------
+; MXOS
+; Войти в листовую службу BIOS/DOS с регистровым ABI.
+; вход BIOS: AF/DE/HL — аргументы, на стеке продолжение за DW.
+; В DOS-входе HL указывает на DW, в стеке лежат AF и исходный HL.
+; выход: AF/HL службы, исходные BC/DE и SP.
+;----------------------------------------------------------------------------
+bankMoveToMain:
+    ld (BANK_IO_MAIN),a
+    jp bankCopyMoveRemote
+    ASSERT $ <= MEM_DATA_START-3
+    IF $ < MEM_DATA_START-3
+    DS MEM_DATA_START-3-$,0
+    ENDIF
+bankMoveToRam:
+    ld (BANK_IO_RAM),a
+    ASSERT $ == MEM_DATA_START
+    ASSERT $ <= MEM_DATA_START
+    IF $ < MEM_DATA_START
+    DS MEM_DATA_START-$,0
+    ENDIF
+    INCLUDE "remote-move.inc"
+    INCLUDE "local-move.inc"
+coldEnd:
+    INCLUDE "copy-resident.inc"
     ASSERT $ <= BANK_COMMAND_LANDING
+    IF $ < BANK_COMMAND_LANDING
     DS BANK_COMMAND_LANDING-$,0
+    ENDIF
     INCLUDE "scalar-command.inc"
     ASSERT $ <= 0FF00h
+    IF $ < 0FF00h
     DS 0FF00h-$,0
+    ENDIF
     INCLUDE "copytail.inc"
-    ASSERT $ <= BANK_WINDOW
+hotEnd:
+    ASSERT $ <= MEM_EXEC_READY
+    IF $ < MEM_EXEC_READY
+    DS MEM_EXEC_READY-$,0
+    ENDIF
+    DB 0
+bankDataTailEnd:
+    ASSERT $ == BANK_WINDOW
+
+    ORG 0F475h ; fileorg-ok
+bankFastPrepare:
+    push bc
+    push af
+    push hl
+    ld hl,4
+    add hl,sp
+    ld (bankFastRestore+1),hl
+    ld a,(bankPage)
+    dec a
+    ld b,a
+    pop hl
+    pop af
+bankFastBiosSP:
+    ld sp,BIOS_BANK_GATE_ADDR
+    ld (BANK_IO_MAIN),a
+bankFastLanding:
+    ret                         ; Первое слово — вектор BIOS, второе — bankFastReturn.
+bankFastDos:
+    inc hl
+    inc hl
+    pop af
+    ex (sp),hl
+    ld a,(bankPage)
+    dec a
+    jp z,DOS_FAST_ERROR_ENTRY   ; В DOS вызов уже на своём стеке.
+    push bc
+    ld b,a
+    push hl
+    ld hl,2
+    add hl,sp
+    ld (bankFastRestore+1),hl
+    pop hl
+    ld sp,bankFastReturnPC
+    xor a
+    ld (BANK_IO_RAM),a
+    jp DOS_FAST_ERROR_ENTRY
+bankFastReturn:
+    ld c,a
+    ld a,b
+    ld (BANK_IO_RAM),a
+    ld a,c
+bankFastRestore:
+    ld sp,0
+    pop bc
+    ret
+bankMxRegsDos:
+    ld a,(bankPage)
+    dec a                   ; DOS_BANK_PAGE = 1.
+    jp z,BANK_DOS_GATE+3
+    ld a,DOS_BANK_PAGE
+    ld hl,BANK_DOS_GATE
+    jp bankCallPacket
+; HL = адрес локального callback сброса очереди, HL=0 отключает его.
+; Обработчик должен вернуться через RET; вход сброса сохраняет регистры
+; и флаги вызывающего и временно закрывает шлюз на время callback.
+; Привязка меняет AF, сохраняет BC, DE, HL. Флаги статуса не возвращаются.
+bankQueueBind:
+    ld (MEM_QUEUE_HOOK),hl
+    ld a,h
+    or l
+    ld a,0C9h
+    jp z,bankQueueBound
+    ld a,0C3h
+bankQueueBound:
+    ld (bankQueueBefore),a
+    ret
+    ; MEMTOP после выбора MAIN: CF=1 читает, CF=0 записывает, знак и A задают возврат.
+    ASSERT $ <= MEM_TOP_MAPPED
+    IF $ < MEM_TOP_MAPPED
+    DS MEM_TOP_MAPPED-$,0
+    ENDIF
+    jp c,bankGetTopMapped
+    ld (MAIN_MEM_TOP_TARGET),hl
+    jp MEM_WORD_RETURN
+bankGetTopMapped:
+    ld hl,(MAIN_MEM_TOP_TARGET)
+    jp MEM_WORD_RETURN
+    INCLUDE "queue-hook.inc"
+bankFastReturnPC:
+    DW bankFastReturn
+movedEnd:

@@ -1,6 +1,6 @@
 ; Plan a whole aligned run before borrowing SP. Each pass writes one
 ; horizontal pixel row of the run. The scalar frontend handles partial cells.
-; HL = text. BC = remaining length for RawLim. AF/BC/DE/HL are volatile.
+; HL = text. BC = remaining length for Lim and RawLim. AF/BC/DE/HL are volatile.
 ; CF clear: HL points past the rendered run. CF set: HL is unchanged.
     MODULE rowStream
 tryGroup:
@@ -16,7 +16,7 @@ tryGroup:
     jp c,empty
     ENDIF
     ld a,(fast6.realMode)
-    or a
+    add a,a
     jp nz,streamCapacity
     ld a,(bios_upper.escMode)
     inc a
@@ -45,7 +45,7 @@ streamCapacity:
     jp z,empty
     ld a,(fast6.realMode)
     cp 2
-    jp z,streamLimited
+    jp nc,streamLimited
     or a
     ld b,1
     jp nz,streamScanReady
@@ -68,9 +68,16 @@ streamLimited:
     jp nz,streamUseCapacity
     ld a,c
     cp e
-    jp c,streamPlanned
+    jp c,streamCountReady
 streamUseCapacity:
     ld c,e
+streamCountReady:
+    ld a,(fast6.realMode)
+    add a,a
+    jp nz,streamPlanned
+    ld e,c
+    ld b,32
+    jp streamScanReady
 streamPlanned:
     ld a,c
     IFDEF CELL_WIDTH

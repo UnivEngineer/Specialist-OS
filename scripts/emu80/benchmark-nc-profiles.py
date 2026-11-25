@@ -12,6 +12,21 @@ def symbols(name):
 def graphics_name():
  # Historical snapshots contain the earlier separate NC graphics DLL.
  return 'UI_GFX' if (SNAP/'bin/UI_GFX.sym').is_file() else 'NC_GFX'
+
+def graphics_symbols(read_dos, kernel, handle):
+ gfx=symbols(graphics_name())
+ if 'IMAGE_RELOC_KIND' not in gfx:return gfx
+ stride=kernel['MODULE_RECORD_SIZE']
+ records=read_dos(kernel['MODULE_TABLE'],kernel['MODULE_MAX']*stride)
+ for i in range(0,len(records),stride):
+  if records[i:i+2]==W(handle) and records[i+3]==0:
+   base=int.from_bytes(records[i+10:i+12],'little')
+   # Доступны символы кода и данных DLL, внешние ABI и поля структур остаются абсолютными.
+   for key in gfx:
+    if key.startswith(('ng','ui','fl')) or key=='entry':
+     gfx[key]+=base
+   return gfx
+ raise ValueError(f'Нет загруженного UI_GFX handle={handle:04X}')
 def standard_names():
  return b'NC_MN   COM' in (SNAP/'A.bin').read_bytes()
 class Campaign:
@@ -114,7 +129,8 @@ class Campaign:
   try:
    stamps=[self.wait(self.b['loc_C311'],0)['cpu_ticks']]
    stamps.append(self.wait(self.n['ncBankGetch'],self.page)['cpu_ticks'])
-   gfx=symbols(graphics_name())
+   handle=int.from_bytes(self.read(self.page,self.n['ncGfxHandle'],2),'little')
+   gfx=graphics_symbols(lambda a,n:self.read(1,a,n),self.k,handle)
    stamps.append(self.wait(gfx['ngBatch'],0)['cpu_ticks'])
    stamps.append(self.wait(gfx['ngSaveCursor'],0)['cpu_ticks'])
    stamps.append(self.wait(self.b['getch2'],0)['cpu_ticks'])
@@ -227,7 +243,9 @@ def verify_snapshot():
  executables=[('NC_MN.COM','NC'),('NC.COM','NC_DOS')] if standard_names() else [('NC.COM','NC'),('NC_BANK.COM','NC_BANK')]
  executables += [('NC_CORE.DLL','NC_CORE'),(graphics_name()+'.DLL',graphics_name()),('CLI.COM','CLI')]
  for name,stem in executables:
-  assert payload(name)[symbols('NC')['IMAGE_HEADER_SIZE']:]==(SNAP/'bin'/(stem+'.i80')).read_bytes(),('stale application',name)
+  data=payload(name)
+  header_bytes=data[symbols('NC')['IMAGE_HEADER_BYTES']] if data[4] in (2,3) else 16
+  assert data[header_bytes:]==(SNAP/'bin'/(stem+'.i80')).read_bytes(),('stale application',name)
 
 def main():
  global RUNTIME,PORT

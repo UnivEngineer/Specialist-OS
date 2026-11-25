@@ -1,6 +1,7 @@
 """Единый реестр MXOS: номера ASM/C и таблицы диспетчера; без адресов реализаций в SDK."""
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,7 +22,7 @@ def generate(check=False):
         next_id = 0
         for service in group['services']:
             while next_id < service['id']:
-                tables.append('    DW dos_dosUnsupported' if group_id == 2 else '    DW sysUnsupported')
+                tables.append('    DW dos_dosUnsupported' if group_id == 2 else '    DW 0')
                 next_id += 1
             next_id += 1
             value = group_id*256+service['id']
@@ -36,6 +37,17 @@ def generate(check=False):
                 z80.append(f'defc {alias_name} = {name}')
             tables.append('    DW '+service['target'])
         tables.append(f"sys{group['name']}Count = ($-sys{group['name']}Table)/2")
+        # Байтовые команды очереди имеют отдельное пространство имён.
+        for command in group.get('commands', []):
+            name = f"MXOS_COMMAND_{group['name']}_{command['name']}"
+            value = command['id']
+            asm.append(f'{name} = 0{value:02X}h')
+            c.append(f'#define {name} 0x{value:02X}')
+            z80.append(f'defc {name} = 0{value:02X}h')
+    # Адреса регистровых входов определены в карте MEM вместе с таблицей JMP.
+    abi = (ROOT/'source/include/mxos.inc').read_text(encoding='utf-8')
+    for name, addr in re.findall(r'^mx_(\w+)\s*=\s*0([0-9A-F]{4})h\b', abi, re.M):
+        z80.append(f'defc mx_{name} = 0{addr}h')
     c.append('#endif')
     outputs = {
         ROOT/'source/include/syscall-ids.inc':asm,

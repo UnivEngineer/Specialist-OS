@@ -1,8 +1,9 @@
 ; Публичное FAR-копирование адресов; не malloc и не проверка владельца.
 ; HL -> {srcPage,srcOffset:word,dstPage,dstOffset:word,count:word}.
-; Пакет находится в текущей странице. Диапазоны заканчиваются до FF00h;
-; пересечение диапазонов одной страницы запрещено контрактом memcpy.
-; AF=статус, CF=ошибка; BC/DE/HL, банк и SP сохранены; профиль окна остаётся COPY.
+; Пакет находится в текущей странице. Исключающие концы не выше MEM_DATA_LIMIT.
+; Копирование внутри одной страницы допускает перекрытие и сохраняет окно.
+; Между страницами окно используется для данных. AF=статус, CF=ошибка.
+; BC/DE/HL, банк и SP сохранены.
 ; Нереентерабельная атомарная петля: без callback и с запрещёнными IRQ.
 
 ;----------------------------------------------------------------------------
@@ -13,7 +14,7 @@
 ; вход:
 ;   hl = локальный адрес восьми байт: страница источника, его смещение, страница
 ;   назначения, её смещение, длина. Смещения и длина — слова. Диапазоны ограничены
-;   FF00h, перекрытие внутри одной страницы запрещено.
+;   MEM_DATA_LIMIT. При совпадении страниц диапазоны могут перекрываться.
 ;
 ; выход:
 ;   cf = 0 при успехе, при отказе cf = 1 и a содержит ошибку MEM. Для нулевой длины
@@ -22,8 +23,6 @@
 
 bankCopyFar:
     call bankQueueBefore
-    xor a
-    ld (bankCopyMove),a
 bankCopyEnter:
     push bc
     push de
@@ -47,16 +46,13 @@ bankCopyEnter:
     ld hl,(bankCopyRequest+4)
     call bankCopyRange
     jp c,bankCopyError
-    ld a,(bankCopyMove)
-    or a
-    jp nz,MEM_MOVE_SELECT_ADDR
     jp MEM_COPY_SELECT_ADDR
 bankCopyPrepared:
     jp MEM_COPY_PREPARE_ENTRY
 
 ; Секторный внутренний вход: тот же пакет, ровно 256 байт.
-; Драйвер уже проверил страницы/буфер. Сохраняет регистры, SP и окно,
-; поэтому пригоден и для вложенных вызовов из DOS, и из main.
+; Драйвер уже проверил страницы/буфер. Регистры и SP сохраняются.
+; Вызывающий не держит в общем окне данные после передачи.
 bankCopySector:
 bankCopyPhysical:
     call bankQueueBefore
@@ -101,47 +97,28 @@ bankCopyRomPair:
     ld l,0FEh
     ret
 
- ; Параметры инициатора не находятся в аппаратном окне.
-bankCopySP    = MEM_COPY_STATE
-bankCopyPairs = MEM_COPY_STATE+2
-bankCopyRest  = MEM_COPY_STATE+8
+; SP и длина остатка остаются в странице инициатора.
+bankCopySP   = MEM_COPY_STATE
+bankCopyRest = MEM_COPY_STATE+2
 
-; Полные 32-байтные порции закончены. BC/DE — первые непереданные адреса.
+; BC/DE указывают на первые непереданные байты.
 bankCopyReturn:
-    ld hl,(bankCopySP)
-    ld sp,hl
     ld a,(bankCopyRest)
     or a
-    jp z,bankCopyBulkDone
-    push bc
-    push de
-    ld hl,bankCopyTinyTemplate
-    ld de,BANK_WINDOW
-    ld b,8
-    call bankCopyQuads
-    ld hl,(bankCopyPairs)
+    jp z,bankCopyRemoteDone
+    ld (BANK_COPY_TINY_COUNT),a
+    xor a
+    ld (bankCopyRest),a
+    ld hl,0
+    add hl,de
+    ld sp,hl
+    ld hl,(bankCopySourcePair)
     ld a,h
-    ld (BANK_WINDOW+4),a
     ld h,0FFh
-    ld (BANK_WINDOW+1),hl
-    ld hl,(bankCopyPairs+2)
-    ld a,h
-    ld (BANK_WINDOW+11),a
-    ld h,0FFh
-    ld (BANK_WINDOW+8),hl
-    ld hl,(bankCopyPairs+4)
-    ld a,h
-    ld (BANK_WINDOW+25),a
-    ld h,0FFh
-    ld (BANK_WINDOW+22),hl
-    ld a,(bankCopyRest)
-    ld (BANK_WINDOW+29),a
-    pop de
-    pop bc
-    jp BANK_WINDOW
-bankCopyBulkDone:
-    ld a,BANK_PROFILE_COPY
-    ld (BANK_PROFILE),a
+    jp bankCopyTinySwitch
+bankCopyRemoteDone:
+    ld hl,(bankCopySP)
+    ld sp,hl
 bankCopyOK:
     xor a
 bankCopyError:
@@ -164,9 +141,10 @@ bankCopyRange:
     ld hl,(bankCopyRequest+6)
     add hl,de
     jp c,bankCopyBadRange
-    ld a,0FFh
+    ld a,high MEM_DATA_LIMIT
     cp h
-    ret nz                     ; H<FFh, поэтому CF=0.
+    ld a,BANK_ERROR_RANGE
+    ret nz                     ; CF установлен, если старший байт конца выше границы.
     ld a,l
     or a
     ret z
@@ -174,36 +152,13 @@ bankCopyBadRange:
     ld a,BANK_ERROR_RANGE
     scf
     ret
-bankCopyValidRange:
-    or a
-    ret
 
-; Следующая команда или возврат из обработчика восстанавливает его окно.
-; AF/BC/DE/HL сохранены; стек уже должен принадлежать текущему банку.
-bankCommandWindow:
-    push af
-    ld a,(BANK_PROFILE)
-    or a
-    jp z,bankWindowReady
-    xor a
-    call MEM_SET_PROFILE_ENTRY
-bankWindowReady:
-    xor a
-    ld (BANK_BUFFER_KIND),a
-    pop af
-    ret
-
-bankCopyTinyTemplate = MEM_COPY_TINY_TEMPLATE
 bankCopyRequest: DS 8,0
-bankCopySavedWindow = MEM_COMMAND_SHADOW
 
 ; Ошибка стандартного PRINT_STRING: пакет не меняем, возвращаем код отказа.
 bankBiosStringError:
-    call bankCommandWindow
     pop bc
     ld a,DOS_ERR_ARGUMENT
     ld (BANK_FRAME_STATUS),a
     scf
     jp MEM_BIOS_RESULT
-
-bankCopyMove: DB 0

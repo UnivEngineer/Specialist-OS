@@ -12,7 +12,7 @@ tryGroup:
     and 3
     jp nz,empty
     ld a,(realMode)
-    or a
+    add a,a
     jp nz,escReady
     ld a,(bios_upper.escMode)
     inc a
@@ -27,7 +27,7 @@ escReady:
     ld e,a ; pairs remaining before the screen edge
     ld a,(realMode)
     cp 2
-    jp nz,quotaReady
+    jp c,quotaReady
     ld a,b
     or a
     jp nz,quotaReady
@@ -45,7 +45,8 @@ quotaReady:
     add a,90h
     ld d,a
     ld (startColumn+1),a
-    ; D advances once per full video byte. Only RawLim needs a column limit below C0h.
+    ; D продвигается на каждом байте экрана. Для Lim задаём границу
+    ; обычных петель, для RawLim — сырой. У RawZ граница всегда C0h.
     IFDEF FONT4_COMPACT
     ld a,d
     add a,e
@@ -54,7 +55,20 @@ quotaReady:
     ELSE
     ld a,(realMode)
     cp 2
+    jp z,rawBound
+    add a,a
     jp nz,limitReady
+    ld a,0C0h
+    jp nc,zBoundReady
+    ld a,d
+    add a,e
+zBoundReady:
+    ld (normalZLimit+1),a
+    ld (normalZReverseLimit+1),a
+    ld (inverseZLimit+1),a
+    ld (inverseZReverseLimit+1),a
+    jp limitReady
+rawBound:
     ld a,d
     add a,e
     ld (normalLimit+1),a
@@ -138,7 +152,7 @@ page: ld b,0
     PAIR_ROWS inverse,0
     inc d
     ld a,d
-    IF kind == 2
+    IF kind != 1
 limit: cp 0
     ELSE
     cp 0C0h
@@ -149,7 +163,7 @@ limit: cp 0
     PAIR_ROWS inverse,1
     inc d
     ld a,d
-    IF kind == 2
+    IF kind != 1
 reverseLimit: cp 0
     ELSE
     cp 0C0h
@@ -171,10 +185,10 @@ reverseLimit: cp 0
     ENDIF
     ld (de),a
     ENDM
-    PAIR_LOOP normalZ,32,0,unused,unused,normalZRightPage
+    PAIR_LOOP normalZ,32,0,normalZLimit,normalZReverseLimit,normalZRightPage
     PAIR_LOOP normalRawZ,1,0,unused,unused,normalRawZRightPage
     PAIR_LOOP normalLim,2,0,normalLimit,normalReverseLimit,normalLimRightPage
-    PAIR_LOOP inverseZ,32,1,unused,unused,inverseZRightPage
+    PAIR_LOOP inverseZ,32,1,inverseZLimit,inverseZReverseLimit,inverseZRightPage
     PAIR_LOOP inverseRawZ,1,1,unused,unused,inverseRawZRightPage
     PAIR_LOOP inverseLim,2,1,inverseLimit,inverseReverseLimit,inverseLimRightPage
     ENDIF

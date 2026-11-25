@@ -112,21 +112,8 @@ eqOpen:
     or l
     jp z,kdBad
     ld hl,(KD_OBJECT+ENUM_REQUEST.path)
-    ld de,KD_PATH
-    ld bc,MAX_PATH
-    call kdFetch
+    call kdFetchPath
     jp c,kdBad
-    ld hl,KD_PATH
-    ld b,MAX_PATH
-eqPathCheck:
-    ld a,(hl)
-    or a
-    jp z,eqPathReady
-    inc hl
-    dec b
-    jp nz,eqPathCheck
-    jp kdBad
-eqPathReady:
     ld a,(KD_OBJECT+ENUM_REQUEST.flags)
     ld c,a
     ld hl,KD_PATH

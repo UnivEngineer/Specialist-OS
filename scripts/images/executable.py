@@ -7,6 +7,8 @@ parse_cpu=runpy.run_path(str(Path(__file__).with_name("cpu.py")))["parse_cpu"]
 
 MAGIC = b'\xcd\x20MX\x02\x00'
 HEADER_SIZE = 32
+RELOC_HEADER_SIZE = 40
+WORD16, HIGH8 = range(2)
 POLICY_EXCLUSIVE, POLICY_PRESERVE, POLICY_MANAGED = range(3)
 
 
@@ -32,12 +34,16 @@ class Image:
     api: int | None = None
     mode: int = 0
     options: int = 0
+    reloc_kind: int | None = None
+    align_log2: int = 0
+    relocations: tuple[int, ...] = ()
 
     def memory(self):
-        bss=self.bss if self.bss is not None else (0 if self.flags else 0xffff)
-        policy=self.policy if self.policy is not None else (POLICY_MANAGED if self.flags else POLICY_EXCLUSIVE)
-        api=self.api if self.api is not None else (2 if self.flags else 0)
-        begin=self.load if self.memory_begin is None else self.memory_begin
+        native = self.flags or self.reloc_kind is not None
+        bss=self.bss if self.bss is not None else (0 if native else 0xffff)
+        policy=self.policy if self.policy is not None else (POLICY_MANAGED if native else POLICY_EXCLUSIVE)
+        api=self.api if self.api is not None else (2 if native else 0)
+        begin=(0 if self.reloc_kind is not None else self.load) if self.memory_begin is None else self.memory_begin
         end=self.load+len(self.data)+(0 if bss==0xffff else bss) if self.memory_end is None else self.memory_end
         if not (0<=bss<=65535 and 0<=begin<=self.load and self.load+len(self.data)<=end<=65535):
             raise ValueError('Invalid image memory interval')
@@ -56,27 +62,87 @@ class Image:
             raise ValueError('Entry is outside the image')
         if self.flags not in (0, 1, 2, 4):
             raise ValueError("Unknown COM/EXE flags")
+        if self.reloc_kind is not None:
+            if self.options == 3 and self.flags not in (0, 4):
+                raise ValueError('REUSABLE requires MAIN-compatible placement')
+            if self.reloc_kind not in (WORD16, HIGH8) or not 0 <= self.align_log2 <= 15:
+                raise ValueError('Invalid relocation kind or alignment')
+            if self.reloc_kind == HIGH8 and self.align_log2 < 8:
+                raise ValueError('HIGH8 requires a page-aligned base')
+            bss, begin, end, _, _ = self.memory()
+            if begin != 0 or bss == 0xffff or end + self.min_heap > 65535:
+                raise ValueError('Invalid relocatable memory interval')
+            if RELOC_HEADER_SIZE + len(self.data) + 2 * len(self.relocations) > 65535:
+                raise ValueError('Relocatable file exceeds 65535 bytes')
+            width = 2 if self.reloc_kind == WORD16 else 1
+            next_offset = 0
+            for offset in self.relocations:
+                if not next_offset <= offset <= len(self.data) - width:
+                    raise ValueError('Unordered, overlapping or out-of-bounds relocation')
+                next_offset = offset + width
+        elif self.relocations or self.align_log2:
+            raise ValueError('Missing relocation kind')
         return self
+
+
+def check_reloc_target(kind, flags):
+    if kind != 'dll' and not (kind in ('com', 'exe') and flags == 1):
+        raise ValueError('Relocatable image requires DLL or DRIVER COM/EXE')
+
+
+def relocation_table(data):
+    if len(data) % 2:
+        raise ValueError('Truncated relocation table')
+    return tuple(value for value, in struct.iter_unpack('<H', data))
+
+
+def relocated_body(image, base):
+    """Эталон содержимого тела после загрузки по указанной базе интервала."""
+    image.validate()
+    if image.reloc_kind is None or not 0 <= base <= 0xffff or base % (1 << image.align_log2):
+        raise ValueError('Invalid relocation base')
+    if base + image.memory()[2] + image.min_heap > 0xffff:
+        raise ValueError('Relocated interval exceeds address space')
+    data = bytearray(image.data)
+    for offset in image.relocations:
+        if image.reloc_kind == WORD16:
+            value = struct.unpack_from('<H', data, offset)[0]
+            struct.pack_into('<H', data, offset, (value + base) & 0xffff)
+        else:
+            data[offset] = (data[offset] + (base >> 8)) & 255
+    return bytes(data)
 
 
 def decode(data, kind, load=None, entry=None, path=None):
     kind = kind.lower().lstrip('.')
     if kind in ('com', 'exe', 'dll', 'fnt'):
-        if len(data)<16 or data[:4]!=MAGIC[:4] or data[4] not in (1,2):
+        if len(data)<16 or data[:4]!=MAGIC[:4] or data[4] not in (1,2,3):
             raise ValueError('Expected MXOS2 container header')
-        version=data[4];header=16 if version==1 else HEADER_SIZE
+        version=data[4];header={1:16, 2:HEADER_SIZE, 3:RELOC_HEADER_SIZE}[version]
         if len(data)<header: raise ValueError('Short image header')
         start,run,size,cs=struct.unpack_from('<4H',data,6)
-        hs=struct.unpack_from('<H',data,header-2)[0]
-        if len(data)!=header+size or checksum(data[:header-2])!=hs or checksum(data[header:])!=cs:
+        sum_at = 14 if version == 1 else 30
+        hs=struct.unpack_from('<H',data,sum_at)[0]
+        body = data[header:header+size]
+        table = data[header+size:]
+        header_sum = checksum(data[:30] + bytes(2) + data[32:header]) if version == 3 else checksum(data[:sum_at])
+        if len(body)!=size or header_sum!=hs or checksum(body)!=cs:
             raise ValueError('Invalid image size or checksum')
-        image=Image(data[header:],start,run,data[5])
-        if version==2:
+        if version != 3 and table:
+            raise ValueError('Unexpected bytes after fixed image')
+        image=Image(body,start,run,data[5])
+        if version>=2:
             bss,begin,end,heap=struct.unpack_from('<4H',data,14)
             stack=struct.unpack_from('<H',data,24)[0]
-            if data[27]!=32 or data[29]: raise ValueError('Invalid image header size/reserve')
-            image=Image(data[header:],start,run,data[5],bss,begin,end,heap,stack,data[22],data[23],data[26],data[28])
+            if data[27]!=header or data[29]: raise ValueError('Invalid image header size/reserve')
+            image=Image(body,start,run,data[5],bss,begin,end,heap,stack,data[22],data[23],data[26],data[28])
             image.memory()
+        if version == 3:
+            check_reloc_target(kind, image.flags)
+            mode, alignment, count, table_sum, reserved = struct.unpack_from('<BBHHH', data, 32)
+            if reserved or len(table) != 2 * count or checksum(table) != table_sum:
+                raise ValueError('Invalid relocation table size, checksum or reserve')
+            image = replace(image, reloc_kind=mode, align_log2=alignment, relocations=relocation_table(table))
         return image.validate()
     if kind == 'rks':
         if len(data) < 6:
@@ -93,6 +159,15 @@ def decode(data, kind, load=None, entry=None, path=None):
                     number('BSS'),number('MEM_BEGIN'),number('MEM_END'),number('MIN_HEAP',0),number('STACK',0),
                     choice('POLICY',{'EXCLUSIVE':0,'PRESERVE':1,'MANAGED':2}),number('API'),
                     choice('MODE',{'AUTO':0,'MX':1,'STD':2,'MON':3,'RF':4},0),number('CACHEABLE',0))
+        if 'RELOC_KIND' in fields:
+            size = number('BODY_SIZE')
+            alignment = number('ALIGN_LOG2')
+            if size is None or alignment is None or not 0 < size <= len(image.data):
+                raise ValueError('Relocatable CPU requires BODY_SIZE and ALIGN_LOG2')
+            image = replace(image, data=image.data[:size], reloc_kind=number('RELOC_KIND'),
+                            align_log2=alignment, relocations=relocation_table(image.data[size:]))
+        elif 'BODY_SIZE' in fields or 'ALIGN_LOG2' in fields:
+            raise ValueError('Missing CPU RELOC_KIND')
         return image.validate()
     if kind == 'cpu':
         return Image(data, 0, 0).validate()
@@ -104,19 +179,30 @@ def decode(data, kind, load=None, entry=None, path=None):
 def encode(image, kind):
     image.validate()
     kind = kind.lower().lstrip('.')
+    if image.reloc_kind is not None:
+        check_reloc_target(kind, image.flags)
     if kind in ('com','exe','dll','fnt'):
         if kind in ('dll','fnt'):
             image=replace(image,bss=0 if image.bss is None else image.bss,policy=POLICY_MANAGED if image.policy is None else image.policy,api=2 if image.api is None else image.api)
         if len(image.data)>65535: raise ValueError('Image payload exceeds 65535 bytes')
-        header=bytearray(HEADER_SIZE)
+        header=bytearray(RELOC_HEADER_SIZE if image.reloc_kind is not None else HEADER_SIZE)
         header[:5]=MAGIC[:5];header[5]=image.flags
         struct.pack_into('<4H',header,6,image.load,image.entry,len(image.data),checksum(image.data))
         bss,begin,end,policy,api=image.memory()
         struct.pack_into('<4H',header,14,bss,begin,end,image.min_heap)
         header[22:24]=bytes([policy,api]);struct.pack_into('<H',header,24,image.stack)
-        header[26:30]=bytes([image.mode,32,image.options,0])
-        struct.pack_into('<H',header,len(header)-2,checksum(header[:-2]))
-        return bytes(header)+image.data
+        header[26:30]=bytes([image.mode,len(header),image.options,0])
+        table = b''
+        if image.reloc_kind is not None:
+            header[4] = 3
+            table = b''.join(offset.to_bytes(2, 'little') for offset in image.relocations)
+            struct.pack_into('<BBHHH', header, 32, image.reloc_kind, image.align_log2,
+                             len(image.relocations), checksum(table), 0)
+            header_sum = checksum(header)
+        else:
+            header_sum = checksum(header[:30])
+        struct.pack_into('<H',header,30,header_sum)
+        return bytes(header)+image.data+table
     if kind == 'rks':
         if image.flags:
             raise ValueError('RKS cannot represent executable flags')

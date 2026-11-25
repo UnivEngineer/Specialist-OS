@@ -2,7 +2,11 @@
     INCLUDE "abi.inc"
     INCLUDE "../include/ui.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
-    ORG GFX_BASE
+    IFNDEF GFX_ORIGIN
+        DEFINE GFX_ORIGIN 0
+    ENDIF
+    ORG GFX_ORIGIN
+    RELOCATE_START
 entry:
     cp MODULE_ACTIVATE
     jp z,ngActivate
@@ -38,29 +42,70 @@ ngActivate:
     ld h,a
     ld l,a
     ld (ngBatches),hl
+    ld (ngPacketLimit),hl
     ret
-; BIND: BC = доступная длина буфера MAIN по GFX_PACKET (1..GFX_MAX_PACKET).
-; При успехе сбрасывает состояние справки, заполняет GFX_RESULT и возвращает
-; A=0, CF=0. Недопустимая длина возвращает A=MEM_ERROR_RANGE, CF=1.
+
+;----------------------------------------------------------------------------
+; MXOS
+; Привязать приёмный пакет клиента и получить состояние рисования.
+; вход:
+;   HL = начало зарегистрированного клиентом буфера MAIN, BC = ёмкость
+;   1..GFX_MAX_PACKET. Весь буфер принадлежит клиенту до конца MODULE_SCOPE.
+; выход:
+;   При успехе CF=0, A=0, HL = адрес результата в MAIN до выгрузки, DE = база DLL.
+;   Справка сброшена. При недопустимом интервале CF=1, A=MEM_ERROR_RANGE,
+;   прежняя привязка сохранена. BC и прочие флаги разрушаются.
+;----------------------------------------------------------------------------
 ngBind:
-    ld hl,GFX_MAX_PACKET
     ld a,b
     or c
     jp z,ngBad
-    ld d,b
-    ld e,c
+    ex de,hl
+    ld hl,GFX_MAX_PACKET
+    ld a,h
+    cp b
+    jp c,ngBad
+    jp nz,ngBindCapacityOK
+    ld a,l
+    cp c
+    jp c,ngBad
+ngBindCapacityOK:
+    ex de,hl
+    push hl
+    add hl,bc
+    jp c,ngBindBad
+    ld de,APP_MEMORY_END
+    call bios_cmp_hl_de
+    jp z,ngBindCheckDll
+    jp nc,ngBindBad
+ngBindCheckDll:
+    ld de,entry
+    call bios_cmp_hl_de
+    pop hl
+    jp c,ngBindReady
+    jp z,ngBindReady
+    ld de,ngFileEnd
     call bios_cmp_hl_de
     jp c,ngBad
-    ex de,hl
+ngBindReady:
+    ld (ngTransfer+4),hl
+    ld h,b
+    ld l,c
     ld (ngPacketLimit),hl
     call ngHelpReset
     ld a,(bios_upper.cursorCfg)
-    ld (GFX_RESULT+4),a
+    ld (ngResult+4),a
     ld hl,FONT_ENGINE_HEADER
     ld de,FONT_ENGINE_HEADER+8
-    ld bc,GFX_RESULT+8
+    ld bc,ngResult+8
     call bios_memcpy_bc_hl
-    jp ngSaveCursor
+    call ngSaveCursor
+    ld hl,ngResult
+    ld de,entry
+    ret
+ngBindBad:
+    pop hl
+    jp ngBad
 ngPadding:
     ; HL=first glyph, C=number. Returns D/E = free left/right pixel.
     ld a,(FONT_ENGINE_HEADER+5)
@@ -100,7 +145,7 @@ ngPaddingGlyph:
 ngPaddingReady:
     ld e,l
 ngStorePadding:
-    ld hl,GFX_RESULT+16
+    ld hl,ngResult+16
     ld (hl),d
     inc hl
     ld (hl),e
@@ -108,9 +153,9 @@ ngStorePadding:
     ret
 ngSaveCursor:
     ld hl,(bios_vars.cursorY)
-    ld (GFX_RESULT),hl
+    ld (ngResult),hl
     ld hl,(bios_vars.inverse)
-    ld (GFX_RESULT+2),hl
+    ld (ngResult+2),hl
     xor a
     ret
 ; CURSOR: HL = позиция BIOS, B = конфигурация курсора на один вывод,
@@ -146,8 +191,6 @@ ngBatchSizeOK:
     or l
     jp z,ngBad
     ld (ngTransfer+6),hl
-    ld hl,GFX_PACKET
-    ld (ngTransfer+4),hl
     ld hl,ngTransfer
     call mx_memcpyFar
     ret c
@@ -159,11 +202,11 @@ ngBatchSizeOK:
     ld hl,(ngPacketBytes)
     add hl,de
     ld (ngPacketBytes),hl
-    ex de,hl
-    ld de,GFX_PACKET
+    ld hl,(ngTransfer+4)
+    push hl
     add hl,de
     ld (ngEnd),hl
-    ex de,hl
+    pop hl
 ngRecord:
     ex de,hl
     ld hl,(ngEnd)
@@ -433,13 +476,18 @@ ngOperation:    DB 0
 ngTransfer: DB 0
     DW 0
     DB 0
-    DW GFX_PACKET,0
+    DW 0,0
 ngPacketLimit: DW 0
+ngResult:      DS GFX_RESULT_BYTES,0
 ngFileEnd:
-IMAGE_BSS_SIZE      = GFX_PACKET-ngFileEnd
+    RELOCATE_END
+IMAGE_BODY_SIZE     = ngFileEnd-entry
+IMAGE_RELOC_KIND    = 0
+IMAGE_ALIGN_LOG2    = 0
+IMAGE_MEM_BEGIN     = 0
+IMAGE_MEM_END       = IMAGE_BODY_SIZE
 IMAGE_CACHEABLE     = IMAGE_OPTION_CACHEABLE|IMAGE_OPTION_REUSABLE
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_MANAGED
-IMAGE_MEM_END       = GFX_PACKET
 IMAGE_API           = 2
-    ASSERT ngFileEnd <= GFX_RESULT
+    RELOCATE_TABLE entry
     END

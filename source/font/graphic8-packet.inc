@@ -19,7 +19,7 @@ graphicPacket:
     ld e,a
     ld a,(fast6.realMode)
     cp 2
-    jp z,graphLimited
+    jp nc,graphLimited
     or a
     ld b,1
     jp nz,graphScanStart
@@ -45,6 +45,13 @@ graphLimited:
 graphUseQuota:
     ld c,e
 graphCountReady:
+    ld a,(fast6.realMode)
+    add a,a
+    jp nz,graphRawCountReady
+    ld e,c
+    ld b,20h
+    jp graphScanStart
+graphRawCountReady:
     ld b,0
     add hl,bc
 graphPlanned:

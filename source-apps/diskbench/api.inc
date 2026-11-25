@@ -4,19 +4,19 @@ bench_getch:
     MXOS_CALL MXOS_BIOS_GETCH
     ret
 bench_getMemTop:
-    MXOS_CALL MXOS_BIOS_GET_MEM_TOP
+    call mx_getMemTop
     ret
 bench_input:
     MXOS_CALL MXOS_BIOS_INPUT
     ret
 bench_printChar:
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     ret
 bench_printDecWord:
     MXOS_CALL MXOS_BIOS_PRINT_DEC_WORD
     ret
 bench_printHexWord:
-    MXOS_CALL MXOS_BIOS_PRINT_HEX_WORD
+    call mx_printHexWord
     ret
 bench_printString:
     MXOS_CALL MXOS_BIOS_PRINT_STRING

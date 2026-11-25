@@ -107,13 +107,13 @@ for module,variant,width in cases:
             assert m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]==cursor,(module,variant,pre,api,'cursor')
             checks+=1
             m,_,_=run(m,s['engineRestore'])
-            for i in range(13):
+            for i in range(s['HOOK_SLOTS']):
                 slot=int.from_bytes(mem[s['hookSlots']+2*i:s['hookSlots']+2*i+2],'little')
                 assert m[slot:slot+2]==base[slot:slot+2], ('restore',i)
         # Packet heads/tails retain adjacent pixels. Exercise every allowed
-        # initial phase, empty count, and both sides of the 20-byte window.
+        # initial phase, empty count, and both sides of the 32-byte window.
         for x in ((0,1,2,3) if width==6 else (0,2) if width==4 else (0,)):
-            for count in (0,1,2,3,4,5,19,20,21):
+            for count in (0,1,2,3,4,5,19,20,21,31,32,33):
                 payload=bytes((c*37)&255 for c in range(count))
                 m=bytearray(mem);m[0x8600:0x8600+count]=payload
                 m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]=bytes([7,x])
@@ -131,5 +131,5 @@ for code in range(256):
     m,regs,_=run(m,s['bios_printCharRaw'],af=(code<<8)|0x97,bc=0x1357)
     assert regs[:6]==w((code<<8)|0x97)+w(0x1357)+w(0x8600) and regs[12:14]==w(0x2468),('native Raw ABI',code)
     checks+=1
-(O/'results.json').write_text(json.dumps(dict(checks=checks,bitmap='PASS',registers='PASS',slotsRestored=13,engines=len(cases)),indent=2)+'\n')
+(O/'results.json').write_text(json.dumps(dict(checks=checks,bitmap='PASS',registers='PASS',slotsRestored=s['HOOK_SLOTS'],engines=len(cases)),indent=2)+'\n')
 print('ENGINE GRID CPU PASS',checks)

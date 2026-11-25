@@ -38,6 +38,8 @@ entry:
     jp z,readSector
     dec a
     jp z,readFile
+    dec a
+    jp z,rejectedBiosSlot
 keepChild:
     ld hl,childPath
     ld a,MODULE_TARGET_BANK
@@ -127,6 +129,9 @@ activeUnload:
 rejectedBios:
     MXOS_CALL 001FFh
     ret
+rejectedBiosSlot:
+    MXOS_CALL 00102h ; Зарезервированный пустой слот внутри таблицы BIOS.
+    ret
 child:
     ld hl,childPath
     ld a,MODULE_TARGET_BANK
@@ -156,7 +161,7 @@ rootPath:       DB 'A'+SYSTEM_DRIVE,':',05Ch,0
 readHandle:
     DB 'README  TXT'
     DS FH_DRIVE-($-readHandle),0
-    DB 0,FILE_MODE_READ
+    DB SYSTEM_DRIVE,FILE_MODE_READ
     DS FH_BUFFER-($-readHandle),0
     DW sectorBuffer,37
     DS FILE_HANDLE-($-readHandle),0

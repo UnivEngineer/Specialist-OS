@@ -20,9 +20,13 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     jp scalar
     jp service
     jp fontPseudoDraw
-    DS FONT_ENGINE_HEADER-$,0
+    ASSERT $ == FONT_ENGINE_TEXT_EXT
+    DW FONT_ENGINE_TEXT_LIM
+    ASSERT $ == FONT_ENGINE_HEADER
     DB 'FNT1',FONT_ENGINE_VERSION,6,8,3
     DW imageEnd-FONT_ENGINE_BASE,fontData,0,initializerName
+    ASSERT $ == FONT_ENGINE_TEXT_LIM
+    jp printStringLim
 initializerName: DB 'InitKoi.dll',0
 printChar2     = bios_fontControl
 printCharBody  = bios_fontControl
@@ -98,6 +102,24 @@ limNext:
     inc hl
     dec bc
     jp limNext
+; Компактный движок использует тот же посимвольный путь, что и обычный Z.
+printStringLim:
+    push af
+    push bc
+    push de
+stringLimNext:
+    ld a,b
+    or c
+    jp z,stringDone
+    push bc
+    push hl
+    ld c,(hl)
+    call printCharBody
+    pop hl
+    pop bc
+    inc hl
+    dec bc
+    jp stringLimNext
 stringDone:
     pop de
     pop bc

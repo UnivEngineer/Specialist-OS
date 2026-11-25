@@ -14,7 +14,7 @@ base=bytearray(65536)
 for name,start in [('KERNEL',256),('LOCALBLOCK',k['MEM_IMAGE_LOCAL_START']),('TRANSPORT',0xfc00),('CLIENT',0xf800)]:
  b=(args.bundle/'banked'/f'{name}.bin').read_bytes();base[start:start+len(b)]=b
 if "dosWorkStart" in k:  # Historical benchmark bundles carry initialized data in the image.
- initialize_dos_state(base, k)
+ initialize_dos_state(base, k, args.bundle)
 # The only capacity-dependent instruction; otherwise the machine code is identical.
 start=k['streamBatchStart']; pattern=bytes([0x3e,k['DOS_IO_BATCH_SECTORS'],0x32])
 at=base.index(pattern,start,start+32);base[at+1]=args.batch_size
@@ -85,7 +85,8 @@ for original,hook in [('fatClusterToSector','clusterSector'),('fatCheckCluster',
 base[k['LOCAL_BLOCK_ENTRY']:k['LOCAL_BLOCK_ENTRY']+3]=b'\xc3'+W(h['io'])
 base[t['bankPage']]=1;base[t['bankPageCount']]=16
 base[k['MEM_NEAR_COPY']:k['MEM_NEAR_COPY']+2]=W(k['memcpy_bc_hl'])
-base[k['DOS_DRIVER_REGISTRY']+7*k['DRIVER_RECORD_SIZE']]=1
+base[k['kernelExternalDrive']]=k['EXTERNAL_DRIVE']
+base[k['DOS_DRIVER_REGISTRY']+k['EXTERNAL_DRIVE']*k['DRIVER_RECORD_SIZE']]=1
 base[k['klInstall']:k['klInstall']+2]=b'\xaf\xc9'
 base[k['v_drive']]=7;base[k['v_diskInfo.blockShift']]=8;base[k['v_diskInfo.sectorShift']]=8
 base[k['v_diskInfo.sectorSize']:k['v_diskInfo.sectorSize']+2]=W(256)
@@ -160,7 +161,7 @@ subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080',f'--raw={O/"runs.bin"}',st
 b=(O/'runs.bin').read_bytes();base[0xc100:0xc100+len(b)]=b
 base[k['klBlock']:k['klBlock']+3]=b'\xC3'+W(0xc100)
 runrows=[]
-for drive,op in ((0,2),(1,1),(1,2)):
+for drive,op in ((k['SYSTEM_DRIVE'],2),(k['RAM_DRIVE'],1),(k['RAM_DRIVE'],2)):
  for sectors in (list(range(100,132)),list(range(126,158)),list(range(250,254))+list(range(256,284)),[100+3*i for i in range(32)]):
   for fail in (0,2):
    mem=bytearray(base);mem[k['v_drive']]=drive;mem[k['kdPage']]=3
@@ -173,7 +174,7 @@ for drive,op in ((0,2),(1,1),(1,2)):
    out=(O/'out.bin').read_bytes();assert out[65542:65544]==W(0xc8ff)
    expected=[];done=0;error=False
    for sector in sectors:
-    if expected and expected[-1][0]+expected[-1][1]//256==sector and sector%(128 if drive==0 else 256):expected[-1]=(expected[-1][0],expected[-1][1]+256)
+    if expected and expected[-1][0]+expected[-1][1]//256==sector and sector%(128 if drive==k['SYSTEM_DRIVE'] else 256):expected[-1]=(expected[-1][0],expected[-1][1]+256)
     else:expected.append((sector,256))
    if fail and len(expected)>=fail:expected=expected[:fail];error=True
    done=sum(length//256 for _,length in (expected[:-1] if error else expected))

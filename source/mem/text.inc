@@ -1,126 +1,79 @@
-; Доставка строк и коротких пачек в форме inline профиля COMMAND.
+;----------------------------------------------------------------------------
+; MXOS
+; Печатать NEAR-строку через 32-байтное окно. memPrint выбирает ASCIIZ,
+; memPrintTyped берёт режим из memOperation.
+; вход: HL — источник, BC — длина для RAW_LIM, PSEUDO и короткой пачки.
+; выход: HL на NUL или за массивом, BC/DE сохранены, CF=0.
+;----------------------------------------------------------------------------
 memPrint:
+    ld a,(bankPage)
+    or a
+    jp z,bios_printStringZ
     xor a
     ld (memOperation),a
 memPrintTyped:
     push af
-    ld a,(bankPage)
-    or a
-    jp z,memPrintNative
     push bc
     push de
-    ld (memTextNext),hl
-    ld a,(memOperation)
-    cp 2
-    ld hl,0FFFFh
-    jp c,memPrintCount
-    ld h,b
-    ld l,c
-memPrintCount:
-    ld (memTextRemaining),hl
-memPrintLoop:
-    ld hl,(memTextRemaining)
-    ld a,h
-    or l
-    jp z,memPrintDone
-    ld b,20
-    ld a,h
-    or a
-    jp nz,memPrintSize
-    ld a,l
-    cp 20
-    jp nc,memPrintSize
-    ld b,l
-memPrintSize:
-    call bankCommandWindow
-    ld a,1
-    ld (BANK_BUFFER_KIND),a
-    ld hl,(memTextNext)
-    ld de,BANK_PACKET
-memPrintFill:
-    ld a,(hl)
-memPrintStore:
-    ld (de),a
-    inc de
-    inc hl
-    dec b
-    jp nz,memPrintFill
-memPrintFilled:
-    ld (memTextNext),hl
-    xor a
-    ld (de),a
-    ld a,e
-    sub BANK_PACKET & 0FFh
-    ld c,a
-    ld (memBack),a
-    ld hl,0
-    add hl,sp
-    ld (memSavedSP),hl
     ld a,(memOperation)
     ld d,a
-    ld a,(bankPage)
-    ld b,a
-    xor a
-    ld hl,BANK_IO_MAIN
-    jp BANK_WINDOW
-memPrintMain:
-    ld hl,(bankServiceSP)
-    ld sp,hl
-    push bc
-    ld a,d
-    ld hl,BANK_PACKET
-    call bios_textDispatch
-    ld de,-BANK_PACKET
-    add hl,de
-    ld a,l
-    pop bc
-    ld c,a
-    ld a,2
-    ld (BANK_BUFFER_KIND),a
-    ld a,b
-    dec a
-    ld hl,BANK_IO_RAM
-    jp BANK_WINDOW
-memPrintReturn:
-    ld hl,(memSavedSP)
-    ld sp,hl
-    ld a,(memBack)
-    sub c
-    jp nz,memPrintPartial
-    ld a,(memOperation)
     cp 2
-    jp c,memPrintLoop
-    ld hl,(memTextRemaining)
-    ld b,0
-    ld a,l
-    sub c
-    ld l,a
-    ld a,h
-    sbc a,b
-    ld h,a
-    ld (memTextRemaining),hl
-    jp memPrintLoop
-memPrintPartial:
-    ld hl,(memTextNext)
-memPrintBack:
-    dec hl
-    dec a
-    jp nz,memPrintBack
-    jp memPrintHaveHL
-memPrintDone:
-    ld hl,(memTextNext)
-memPrintHaveHL:
-    pop de
-    pop bc
-    pop af
+    jp nc,memPrintLoop
+    ld bc,0FFFFh
+memPrintLoop:
+    ld a,b
+    or c
+    jp z,memPrintHaveHL
+    push bc
+    push de
+    ld a,b
     or a
-    ret
-memPrintNative:
-    pop af
-    jp bios_printStringZ
-memTextRemaining:   DW 0
-memSavedSP:         DW 0
-memTextNext:        DW 0
+    ld b,BANK_TEXT_BYTES
+    jp nz,memPrintSize
+    ld a,c
+    cp b
+    jp nc,memPrintSize
+    ld b,c
+memPrintSize:
+    ld a,d
+    cp 2
+    ld c,0
+    jp nc,memPrintReady
+    inc c
+memPrintReady:
+    ld de,BANK_WINDOW
+    MEM_TEXT_FILL memPrintFill,memPrintFilled
+memPrintFilled:
+    ; CF отмечает прочитанный NUL. C — длина печати, B — расход источника.
+    ld a,e
+    sbc a,BANK_WINDOW & 0FFh
+    jp z,memPrintAtNul
+    ld c,a
+    ld a,e
+    sub BANK_WINDOW & 0FFh
+    ld b,a
+    pop de
+    push de
+    push hl
+    push bc
+    ld hl,(bankServiceSP)
+    push hl
+    ld hl,0
+    add hl,sp
+    ld a,(bankDepth)
+    or a
+    call nz,bankPublishSP
+    ld a,(bankPage)
+    dec a
+    ld b,a
+    ld (BANK_IO_MAIN),a
+    jp memPrintMain
+
+; MAIN читает текст из окна. Для пачки команд MAIN сохраняет список на стеке.
+memPrintMain = MAIN_PRINT_TARGET
+    ASSERT $ <= MEM_LOCAL_FORWARD
+    IF $ < MEM_LOCAL_FORWARD
+    DS MEM_LOCAL_FORWARD-$,0
+    ENDIF
+    INCLUDE "local-forward.inc"
 memOperation:       DB 0
-memSelect:          DB 0
-memBack:            DB 0

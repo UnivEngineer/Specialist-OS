@@ -1,7 +1,7 @@
 ; Только публичные API. Новые системные движки добавляются в эту группу.
 kernelCoreStart:
 kernelChar:
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     ret
 kernelReal:
     push af
@@ -9,7 +9,7 @@ kernelReal:
     push de
     push hl
     ld a,c
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR_REAL
+    call mx_printCharRaw
     pop hl
     pop de
     pop bc
@@ -79,7 +79,7 @@ apiCharBank:        DD 0
 labelApiReal:       DB 'API real chr:',0
 apiRealMain:        DD 0
 apiRealBank:        DD 0
-labelApiString:     DB 'API Win20 :  ',0
+labelApiString:     DB 'API Win32 :  ',0
 apiStringMain:      DD 0
 apiStringBank:      DD 0
 labelApiFar48:      DB 'API Far48:   ',0

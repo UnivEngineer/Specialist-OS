@@ -66,6 +66,12 @@ ncBankRetained:
 ncBankEnterUI:
     xor a
     call ncBankEncoding ; A legacy game may have left the font in KOI7.
+    ld hl,NC_MAIN_PACKET
+    ld de,NC_MAIN_END-NC_MAIN_PACKET
+    ld b,0
+    ld a,MEM_OP_MAINREGISTER
+    MXOS_CALL MXOS_DOS_MEMORY
+    ret c
     ld hl,(ncGfxHandle)
     ld a,h
     or l
@@ -73,22 +79,15 @@ ncBankEnterUI:
     call ncGfxBind
     jp nc,ncBankGraphicsReady
 ncBankLoadGraphics:
-    ; MODULE_LOAD claims the exact interval from the header. Claiming it
-    ; separately would discard a dormant copy before DOS can match it.
+    ; Зарегистрированный буфер учитывается при выборе базы DLL.
     ld hl,ncGfxPath
     ld a,MODULE_TARGET_MAIN
     MXOS_CALL MXOS_DOS_MODULE_LOAD
-    ret c
+    jp c,ncBankGraphicsFailed
     ld (ncGfxHandle),hl
     call ncGfxBind
     jp c,ncBankGraphicsFailed
 ncBankGraphicsReady:
-    ld hl,GFX_PACKET
-    ld de,NC_MAIN_END-GFX_PACKET
-    ld b,0
-    ld a,MEM_OP_MAINREGISTER
-    MXOS_CALL MXOS_DOS_MEMORY
-    jp c,ncBankGraphicsFailed
     ; The scope pins GFX. External programs and unload run only after RET.
     xor a
     ld (ncBankExitAction),a
@@ -101,10 +100,7 @@ ncBankGraphicsReady:
     MXOS_CALL MXOS_DOS_MODULE_SCOPE
     push af
     MXOS_KEY_END ncInputState
-    ld hl,GFX_PACKET
-    ld b,0
-    ld a,MEM_OP_FREE
-    MXOS_CALL MXOS_DOS_MEMORY
+    call ncBankFreePacket
     pop af
     ret c
     ld a,(ncBankScopeError)
@@ -280,7 +276,14 @@ ncBankEditErrorPath:
 ncBankGraphicsFailed:
     push af
     call ncBankReleaseGraphics
+    call ncBankFreePacket
     pop af
+    ret
+ncBankFreePacket:
+    ld hl,NC_MAIN_PACKET
+    ld b,0
+    ld a,MEM_OP_FREE
+    MXOS_CALL MXOS_DOS_MEMORY
     ret
 ncBankReturn:
     call ncBankFlush
@@ -305,6 +308,8 @@ ncBankReleaseGraphics:
     MXOS_CALL MXOS_DOS_MODULE_UNLOAD
     ld hl,0
     ld (ncGfxHandle),hl
+    ld (ncGfxResultPtr),hl
+    ld (ncGfxBase),hl
     xor a
     ret
 ;----------------------------------------------------------------------------
@@ -396,11 +401,17 @@ ncBankEpochNextDrive:
 ;----------------------------------------------------------------------------
 
 ncGfxBind:
+    ld hl,NC_MAIN_PACKET
+    ld (ncGfxRegisters),hl
     ld hl,NC_GFX_QUEUE_BYTES
     ld (ncGfxRegisters+4),hl
     ld a,GFX_BIND
     call ncGfxCall
     ret c
+    ld hl,(ncGfxRegisters)
+    ld (ncGfxResultPtr),hl
+    ld hl,(ncGfxRegisters+2)
+    ld (ncGfxBase),hl
     ld hl,'A'
     ld (ncGfxRegisters),hl
     ld hl,8
@@ -442,14 +453,14 @@ ncGfxReadBytes8:
 ; Скопировать результат непосредственного вызова UI_GFX из MAIN в EXEC.
 ;
 ; вход:
-;   ncBankNumber = страница NC. GFX_RESULT содержит GFX_RESULT_BYTES байт.
+;   ncBankNumber = страница NC. ncGfxResultPtr указывает на GFX_RESULT_BYTES байт.
 ;
 ; выход:
 ;   При cf = 0 данные скопированы в ncGfxResult; при cf = 1 в a код ошибки mx_memcpyFar.
 ;----------------------------------------------------------------------------
 
 ncGfxReadResult:
-    ld hl,GFX_RESULT
+    ld hl,(ncGfxResultPtr)
     ld (ncQTransfer+1),hl
     ld hl,ncGfxResult
     ld (ncQTransfer+4),hl
@@ -914,14 +925,14 @@ ncBankEncoding:
     MXOS_CALL MXOS_BIOS_SET_FONT_ENCODING
     ret
 ncBankGetMemTop:
-    MXOS_CALL MXOS_BIOS_GET_MEM_TOP
+    call mx_getMemTop
     ret
 ncBankSyncCursor:
     push af
     push bc
     push de
     push hl
-    MXOS_CALL MXOS_BIOS_GET_CURSOR_POS
+    call mx_getCursorPos
     ld (ncBankCursor),hl
     pop hl
     pop de
@@ -1002,6 +1013,8 @@ ncBankEpochDiff:        DB 0
 ncBankReturnSP:         DW 0
 ncBankExecSP:           DW 0
 ncGfxHandle:            DW 0
+ncGfxResultPtr:         DW 0
+ncGfxBase:              DW 0
 ncGfxRegisters:         DS MX_REGS,0
 ncGfxResult:            DS GFX_RESULT_BYTES,0
 ncEditorHandle:         DW 0

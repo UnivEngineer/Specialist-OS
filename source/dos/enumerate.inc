@@ -36,7 +36,7 @@ enumPrepared:
     pop bc
     pop hl
     ld a,(enumOperation)
-    call DOS_SERVICE_ADDR
+    call enumInvoke
     push af
     push hl
     ld hl,enumDirectories

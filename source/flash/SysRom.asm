@@ -3,9 +3,11 @@
     INCLUDE "../../bin/banked/transport-imports.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     IFNDEF DRIVER_ORIGIN
-DRIVER_ORIGIN = DOS_BANK_DRIVER_ADDR
+DRIVER_ORIGIN = 0
     ENDIF
     ORG DRIVER_ORIGIN
+    RELOCATE_START
+driverBody:
     ex de,hl
     ld c,EXTERNAL_DRIVE
     call driverLetter
@@ -68,6 +70,7 @@ probeRequest: DB 080h
 ; Executed in MAIN, DOS or EXEC. CPM32 switches the ROM and destination
 ; independently, returning to the caller's page. LBA bit 7 is address A15.
 serviceImage:
+    RELOCATE_END
     DISP LOCAL_DRIVER_ADDR
     ld a,b
     cp 4
@@ -104,7 +107,15 @@ request: DB 080h
     DW 0,256
     ASSERT $ <= LOCAL_DRIVER_END
     ENT
+    RELOCATE_START
 serviceEnd:
 boot: DS 256,0
-    ASSERT $ <= DOS_BANK_DRIVER_END
+    RELOCATE_END
+IMAGE_BODY_SIZE  = $-driverBody
+IMAGE_MEM_BEGIN  = 0
+IMAGE_MEM_END    = IMAGE_BODY_SIZE
+IMAGE_BSS_SIZE   = 0
+IMAGE_RELOC_KIND = 0
+IMAGE_ALIGN_LOG2 = 0
+    RELOCATE_TABLE driverBody
     END

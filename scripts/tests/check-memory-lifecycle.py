@@ -68,8 +68,8 @@ def main():
     ld a,c
     ld (08518h),a
     ; Неверный конец не должен записывать даже первый байт.
-    ld hl,0FEFEh
-    ld de,3
+    ld hl,MEM_DATA_LIMIT-1
+    ld de,2
     ld bc,00099h
     ld a,MEM_OP_FILL
     call dosMemoryService
@@ -132,7 +132,9 @@ def main():
     jp nz,fail
     ld a,d
     dec a
-    or e
+    jp nz,fail
+    ld a,e
+    cp RAM_DRIVE
     jp nz,fail
     ld c,MEM_RAMDISK_COMMIT
     ld a,MEM_OP_RAMDISK
@@ -188,9 +190,9 @@ fail:
 dosRecords:
     DW 1
     DB 0,DOS_BANK_PAGE
-    DW DOS_SERVICE_ADDR,0
+    DW DOS_ARENA_START,0
     DB 0,MODULE_OWNER_BASE
-    DW DOS_SERVICE_ADDR,DOS_SERVICE_ADDR+1
+    DW DOS_ARENA_START,DOS_ARENA_START+1
     DW 0
     DW 2
     DB 0,DOS_BANK_PAGE
@@ -224,6 +226,8 @@ dosRecords:
         result = (out / 'out.bin').read_bytes()
         assert result[0x8500:0x8502] == bytes.fromhex('aa55'), (result[0x8500:0x8502].hex(), int.from_bytes(result[0x851c:0x851e], 'little'))
         assert result[0x8400:0x8420] == bytes([0xA5]) * 32
+        boundary = kernel['MEM_DATA_LIMIT']
+        assert result[boundary-1:boundary+1] == memory[boundary-1:boundary+1]
         assert int.from_bytes(result[0x8514:0x8516], 'little') == 2048 - 32
         assert result[0x8514:0x8516] == result[0x8516:0x8518]
         assert result[0x8518] == 31

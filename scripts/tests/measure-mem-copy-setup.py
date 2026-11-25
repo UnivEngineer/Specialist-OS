@@ -9,20 +9,14 @@ def main():
  for i in range(image[5]):
   addr,size,offset=struct.unpack_from('<HHH',image,6+6*i);base[addr:addr+size]=image[offset:offset+size]
  base[s['bankPage']]=0;base[s['bankPageCount']]=16;base[s['MEM_NEAR_COPY']:s['MEM_NEAR_COPY']+2]=W(0)
- base[s['MEM_COMMAND_SHADOW']:s['MEM_COMMAND_SHADOW']+32]=base[0xffc0:0xffe0]
  rows=[]
- for profile in (0,1):
-  for count in (256,8192):
-   for entry in ('bankCopyFar','bankCopySector'):
-    memory=bytearray(base);memory[0xffdf]=profile
-    memory[0x8500:0x8508]=b'\2'+W(0x2001)+b'\3'+W(0x6001)+W(count)
-    stub=b'\x31'+W(0x8f00)+b'\x21'+W(0x8500)+b'\xcd'+W(s[entry])+b'\xc3'+W(0x88ff)
-    memory[0x8800:0x8800+len(stub)]=stub
-    rows.append(run(a.report,memory,s['bankCopyTail'],37,dict(profile=profile,bytes=count,entry=entry)))
-  memory=bytearray(base);memory[0xffdf]=profile
-  stub=b'\x31'+W(0x8f00)+b'\xcd'+W(s['bankCommandWindow'])+b'\xc3'+W(0x88ff)
-  memory[0x8800:0x8800+len(stub)]=stub
-  rows.append(run(a.report,memory,0x88ff,37,dict(profile=profile,entry='bankCommandWindow')))
+ for count in (77,256,8192):
+  for entry in ('bankCopyFar','bankCopySector'):
+   memory=bytearray(base)
+   memory[0x8500:0x8508]=b'\2'+W(0x2001)+b'\3'+W(0x6001)+W(count)
+   stub=b'\x31'+W(0x8f00)+b'\x21'+W(0x8500)+b'\xcd'+W(s[entry])+b'\xc3'+W(0x88ff)
+   memory[0x8800:0x8800+len(stub)]=stub
+   rows.append(run(a.report,memory,s['bankCopyTail'],37,dict(bytes=count,entry=entry)))
  (a.report/'result.json').write_text(json.dumps(rows,indent=2)+'\n')
  for row in rows:print(row)
 def run(out,memory,stop,setup,meta):

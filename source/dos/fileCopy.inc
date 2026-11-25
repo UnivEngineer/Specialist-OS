@@ -66,7 +66,7 @@ fileopsRunReady:
     inc a
     ld (fileopsActive),a
     ld a,b
-    call DOS_FILEOPS_ADDR
+    call fileopsInvoke
     push af
     xor a
     ld (fileopsActive),a

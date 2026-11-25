@@ -64,7 +64,7 @@ arenaModules:
     or l
     jp z,arenaModuleTable
     ex de,hl
-    ld hl,DOS_FLOPPY_ADDR
+    ld hl,(diFloppyStart)
     call arenaOverlap
     jp nz,arenaConflict
 arenaModuleTable:
@@ -118,8 +118,8 @@ arenaNext:
     call mdCanRelease
     jp c,arenaGuardFailed
     ld a,(arenaPhase)
-    or a
-    call nz,mdReleaseChecked
+    dec a
+    call z,mdReleaseChecked
 arenaGuardFailed:
     pop hl
     pop bc
@@ -148,7 +148,7 @@ arenaModulePinned:
 arenaFree:
     ld a,(arenaPhase)
     cp 2
-    jp z,arenaAvailable
+    jp nc,arenaAvailable
     ld hl,(batWindowEnd)
     ld a,h
     or l
@@ -168,7 +168,7 @@ arenaAvailable:
 arenaConflict:
     ld a,(arenaPhase)
     cp 2
-    jp nz,arenaReject
+    jp c,arenaReject
     pop hl
     pop de
     pop bc
@@ -214,8 +214,8 @@ arenaCached:
     scf
     ret z
     ld a,(arenaPhase)
-    or a
-    ret z
+    cp 1
+    jp nz,arenaApart
     dec hl
     ld (hl),0
     or a
@@ -239,3 +239,4 @@ arenaOverlap:
 arenaApart:
     xor a
     ret
+    INCLUDE "reloc-hole.inc"

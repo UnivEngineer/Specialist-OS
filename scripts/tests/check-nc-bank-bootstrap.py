@@ -16,11 +16,15 @@ def main():
     source = '''
     ORG 0E500h
 callStub:
-    ex (sp),hl
-    inc hl
-    inc hl
-    ex (sp),hl
     ld (0E601h),a
+    ex (sp),hl
+    ld a,(hl)
+    ld (0E602h),a
+    inc hl
+    ld a,(hl)
+    ld (0E603h),a
+    inc hl
+    ex (sp),hl
     push bc
     push hl
     ld hl,0E600h
@@ -30,6 +34,14 @@ callStub:
     ld hl,0E610h
     add hl,bc
     ld a,(0E601h)
+    ld (hl),a
+    ld hl,0E620h
+    add hl,bc
+    ld a,(0E602h)
+    ld (hl),a
+    ld hl,0E630h
+    add hl,bc
+    ld a,(0E603h)
     ld (hl),a
     pop hl
     pop bc
@@ -53,9 +65,20 @@ infoStub:
     memory[0xe500:0xe500+len(data)] = data
     memory[s['mx_callRegs']:s['mx_callRegs']+3] = b'\xc3'+W(0xe500)
     memory[s['mx_memInfo']:s['mx_memInfo']+3] = b'\xc3'+W(0xe550)
-    for a, bc, wanted in [(ord('H'), 0x100, [0, 3, 0]),
-                           (ord('A'), 0x100, [3, 0]), (2, 0, [5, 3])]:
-        memory[0xe600:0xe620] = bytes(32)
+    resident = s['MXOS_DOS_RESIDENT']
+    shell = s['MXOS_DOS_SET_SHELL']
+    retain = (resident, s['RESIDENT_RETAIN'])
+    select = (resident, s['RESIDENT_SHELL_SET'])
+    set_shell = (shell, 0)
+    epoch = (resident, s['RESIDENT_DIRECTORY_EPOCH'])
+    unload = (s['MXOS_DOS_MODULE_UNLOAD'], 0)
+    for a, bc, handle, wanted in [
+            (ord('H'), 0x100, 0, [retain, select, set_shell]),
+            (ord('A'), 0x100, 0, [select, set_shell]),
+            (2, 0, 0, [epoch]),
+            (2, 0, 0x1234, [epoch, unload])]:
+        memory[0xe600:0xe640] = bytes(64)
+        memory[s['ncGfxHandle']:s['ncGfxHandle']+2] = W(handle)
         code = b'\x31'+W(0xef70)+b'\x3e'+bytes([a])+b'\x01'+W(bc)
         code += b'\xcd'+W(0x100)+b'\xc3'+W(0xe400)
         memory[0xe000:0xe000+len(code)] = code
@@ -68,8 +91,10 @@ infoStub:
         assert result[65542:65544] == W(0xe400), 'entry did not return'
         assert result[65544:65546] == W(0xef70), 'entry stack'
         assert not result[65536]&1, 'entry CF'
-        assert result[0xe600] == len(wanted), list(result[0xe610:0xe620])
-        assert list(result[0xe610:0xe610+len(wanted)]) == wanted
+        actual = [(result[0xe620+i] | (result[0xe630+i] << 8), result[0xe610+i])
+                  for i in range(result[0xe600])]
+        assert actual == wanted, actual
+        assert result[s['ncGfxHandle']:s['ncGfxHandle']+2] == W(0)
         assert result[s['ncBankRegistered']] == 1
         assert result[s['ncBankNumber']] == 2
         assert result[s['ncBankInitialized']] == 0, 'UI entered before MAIN launcher returned'

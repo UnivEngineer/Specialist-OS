@@ -1,9 +1,19 @@
-; Shared, non-reentrant loader for matched system overlays.
-; Record: base,limit,name,host (words), hostBytes,ready,active (bytes),end (word).
-; Caller pins its descriptor while executing. Loader leaves filesystem context.
-OV_READY  = 9
-OV_ACTIVE = 10
-OV_END    = 11
+; Дескриптор оверлея содержит исполняемый JMP, чей операнд заполняет загрузчик.
+OV_JUMP   = 2
+OV_NAME   = OV_JUMP+3
+OV_HOST   = OV_NAME+2
+OV_BYTES  = OV_HOST+2
+OV_READY  = OV_BYTES+1
+OV_ACTIVE = OV_READY+1
+OV_END    = OV_ACTIVE+1
+
+;----------------------------------------------------------------------------
+; MXOS
+; Открыть согласованный с ядром оверлей, проверить привязку и опубликовать вход.
+; вход: HL — дескриптор ENUM/FILEOPS в DOS, обработчик не выполняется.
+; выход: CF=0 — готов к вызовам, CF=1/A — ошибка DOS. BC/DE/HL рабочие.
+; Диск и каталоги восстановлены, готовое тело доступно до вытеснения.
+;----------------------------------------------------------------------------
 overlayEnsure:
     ld (ovRecord),hl
     ld e,OV_READY
@@ -18,45 +28,47 @@ overlayEnsure:
     ld de,ovDirectories
     ld bc,16
     call moveBytesForward
-    ld e,4
+    ld e,OV_NAME
     call ovWord
     ld de,v_curFileDescr
     call fileNamePrepare
     jp c,ovLoadDone
     ld hl,v_curFileDescr
-    call imageOpen
+    call imageOpenModule
     jp c,ovLoadDone
     ld a,(v_tmpFileDescr+5)
     cp IMAGE_FLAG_DRIVER
     jp nz,ovBadImage
-    push hl                 ; Entry must equal this overlay's fixed origin.
-    push de
-    ld e,0
-    call ovWord
-    pop de
+    ; За JMP идёт таблица импортов, целиком внутри инициализированного тела.
+    push bc
+    ld e,OV_BYTES
+    call ovByte
+    add a,3
+    ld e,a
+    ld d,0
+    pop hl
     call cmp_hl_de
-    pop de
-    jp nz,ovBadImage
+    jp c,ovBadImage
+    call imagePlaceDos
+    jp c,ovLoadDone
     call cmp_hl_de
     jp nz,ovBadImage
     ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
     call cmp_hl_de
     jp nz,ovBadImage
-    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
-    ld (ovImageEnd),hl
-    push hl
-    ld e,2
-    call ovWord
-    pop de
+    ld de,DOS_ARENA_START
     call cmp_hl_de
     jp c,ovBadImage
-    ld e,0
-    call ovWord
-    push hl
-    ld hl,(ovImageEnd)
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
+    ld de,DOS_BANK_DRIVER_END
+    call cmp_hl_de
+    jp c,ovRangeReady
+    jp nz,ovBadImage
+ovRangeReady:
+    ld (ovImageEnd),hl
     ex de,hl
-    pop hl
-    call dosArenaImage
+    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
+    call imageClaimDos
     jp c,ovLoadDone
     ld hl,(ovRecord)
     ld de,OV_END
@@ -68,15 +80,25 @@ overlayEnsure:
     ld (hl),e
     inc hl
     ld (hl),d
-    ld e,0
-    call ovWord
+    ld hl,(v_tmpFileDescr+6)
     ex de,hl
     call imageLoad
     jp c,ovLoadDone
-    ld e,8
+    ; Пока ready=0, фасад не использует сохранённые адреса.
+    ex de,hl
+    ld hl,(ovRecord)
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    inc hl
+    inc hl                   ; Пропустить код операции JMP.
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    ld e,OV_BYTES
     call ovByte
     ld b,a
-    ld e,6
+    ld e,OV_HOST
     call ovWord
     push hl
     ld e,0

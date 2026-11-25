@@ -34,7 +34,7 @@ if not a.run_build:
         options.extend(('--output', str(out / product)))
     for name in ('source/bootstrap/splash.bin', 'scripts/build/build-boot-splash.py',
                  'scripts/images/executable.py', 'scripts/images/cpu.py', 'assets/C-Flash-512k-MMX-System.txt',
-                 'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/DOS.sys',
+                 'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/MEM.sys', 'bin/DOS.sys',
                  'bin/System.layout.json', 'bin/banked/TRANSPORT.sym', 'bin/banked/KERNEL.sym', 'bin/MEM.sym'):
         options.extend(('--input', str(ROOT / name)))
     options.extend(('--input', str(font_path.absolute())))
@@ -61,9 +61,26 @@ if int.from_bytes(font[44:46],'little'):
 if len(font)>0x1480:raise ValueError('Boot font exceeds resident slot')
 (out/'config.inc').write_text(f'DOS_BYTES = {(ROOT/"bin/BIOS.sys").stat().st_size}\nMODULE_SECTORS = {(len(module)+255)//256}\nBOOT_PROBE = {int(a.probe)}\n',encoding='utf-8')
 symbols=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M))
+ms=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/MEM.sym').read_text(),re.M))
+# Два POP H / SHLD в первом полном блоке CPM32 имеют один образец с rev65.
+# Эти восемь байт не содержат состояния и доступны во всех DATA-хвостах.
+ram_signature = 0xFF0E
+signature = bytes.fromhex('E1 22 C0 FF E1 22 C2 FF')
+data_delta = ram_signature - int(symbols['MEM_DATA_START'], 16)
+data_offset = int(ms['MEM_DATA_OFFSET'], 16)
+data_size = int(ms['MEM_DATA_SIZE'], 16)
+mem_image = (ROOT/'bin/MEM.sys').read_bytes()
+if (not 0 <= data_delta <= data_size - len(signature)
+        or mem_image[data_offset+data_delta:data_offset+data_delta+len(signature)] != signature):
+ raise ValueError('Изменился образец DATA по FF0Eh, необходимый для сохранения B: при Reset')
 with (out/'config.inc').open('a',encoding='utf-8') as f:
  f.write(f'BOOT_STAGE_BASE = 08000h\nBOOT_STAGE_LIMIT = 0{int(symbols["STACK_BOTTOM"],16):04X}h\nBOOT_MEM_ROM = 07000h\n')
  f.write(f'MEM_DATA_START = 0{int(symbols["MEM_DATA_START"],16):04X}h\n')
+ f.write(f'BOOT_RAM_PROBE = 0{int(symbols["RAMD_PAGE_END"],16):04X}h\n')
+ f.write(f'BOOT_MOVE_OPERAND = 0{int(symbols["bankMoveDirectOperand"],16):04X}h\n')
+ f.write(f'BOOT_DATA_FORWARD = 0{int(symbols["bankMoveDataEntry"],16):04X}h\n')
+ f.write(f'BOOT_DATA_FORWARD_BYTES = 0{int(symbols["bankMoveDataBytes"],16):04X}h\n')
+ f.write(f'BOOT_RAM_SIGNATURE = 0{ram_signature:04X}h\n')
  f.write(f'BOOT_COLOR_PORT = 0{int(symbols["IO_COLOR"],16):04X}h\n')
  f.write(f'BANK_MAIN_CLIENT_BYTES = {int(symbols["BANK_MAIN_CLIENT_BYTES"],16)}\n')
  f.write(f'BANK_MAIN_LOCAL_BYTES = {int(symbols["BANK_MAIN_LOCAL_BYTES"],16)}\n')
@@ -96,7 +113,6 @@ with (out/'config.inc').open('a',encoding='utf-8') as f:
  f.write(f'BOOT_MEM_REVISION_ADDR = 0{int(symbols["MEM_RUNTIME_REVISION_ADDR"],16):04X}h\n')
  f.write(f'BOOT_MEM_REVISION = {int(symbols["MEM_RUNTIME_REVISION"],16)}\n')
  f.write(f'MODULE_LOAD = 0{int(ks["DOS_BANK_CODE_ADDR"],16):04X}h\n')
-ms=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/MEM.sym').read_text(),re.M))
 with (out/'config.inc').open('a',encoding='utf-8') as f:
  for part in ('TRANSPORT','CLIENT','LOCAL','WINDOW','DATA'):
   for field in ('OFFSET','SIZE'):

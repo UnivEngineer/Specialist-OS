@@ -25,9 +25,9 @@ def main():
         base[origin:origin+len(code)] = code
     base[sy['bankPage']] = 0; base[sy['bankPageCount']] = 16
     rows = []
-    cases = [(n, so, do, 2, 0) for n in
-             [0, 1, 2, 3, 4, 15, 16, 17, 31, 32, 33, 63, 64, 127, 128, 129,
-              255, 256, 257, 511, 512, 513, 8191, 8192]
+    sizes = [*range(33), *range(64, 96), 33, 63, 127, 128, 129,
+             255, 256, 257, 511, 512, 513, 8191, 8192]
+    cases = [(n, so, do, 2, 0) for n in sizes
              for so, do in [(0, 0), (1, 1), (0xf0, 0xfc), (0xff, 1)]]
     cases += [(256, 1, 1, 17, 0xe0), (2, 0, 0, 2, 0xe2)]
     for n, so, do, page, error in cases:
@@ -36,12 +36,12 @@ def main():
         payload = bytes((j*73+(j>>8)+n)&255 for j in range(n))
         if not error: memory[src:src+n] = payload
         memory[dst-1:dst+n+1] = b'\xa5'+bytes(n)+b'\x5a'
-        window = bytes(range(31))+b'\0'; memory[0xffc0:0xffe0] = window
+        window = bytes(range(32)); memory[0xffc0:0xffe0] = window
         memory[0x8600:0x8608] = bytes([page])+W(src)+bytes([3])+W(dst)+W(n)
         stub = b'\x31'+W(0x8f00)+b'\x01'+W(0x1234)+b'\x11'+W(0x5678)
         stub += b'\x21'+W(0x8600)+b'\xcd'+W(sy['bankCopyFar'])
         stub += b'\x22'+W(0x8702)+b'\xeb\x22'+W(0x8704)+b'\x60\x69\x22'+W(0x8706)
-        stub += b'\xf5\xe1\x22'+W(0x8700)+b'\xcd'+W(sy['bankCommandWindow'])+b'\xc3'+W(0x88ff)
+        stub += b'\xf5\xe1\x22'+W(0x8700)+b'\xc3'+W(0x88ff)
         memory[0x8800:0x8800+len(stub)] = stub
         (args.out/'in.bin').write_bytes(memory)
         result = subprocess.run([
@@ -61,11 +61,17 @@ def main():
             assert actual[src:src+n] == payload
         assert actual[dst-1] == 0xa5 and actual[dst+n] == 0x5a
         assert struct.unpack_from('<HHH', actual, 0x8702) == (0x8600, 0x5678, 0x1234)
-        assert actual[0xffc0:0xffe0] == window
+        copy_window = actual[0xffc0:0xffe0]
+        if error or n == 0:
+            assert copy_window == window
+        else:
+            # Последняя полная порция или точный остаток остаются данными.
+            portion = n % 32 or 32
+            assert copy_window[:portion] == payload[n-portion:]
         rows.append(dict(bytes=n, source=src, destination=dst, error=error,
                          ticks=int((result.stdout+result.stderr).strip())))
     (args.out/'result.json').write_text(json.dumps(rows, indent=2)+'\n')
-    print('CPM32 CPU PASS', len(rows), 'cases; 0..8192, tails, guards, SP, registers, COMMAND, errors')
+    print('CPM32 CPU PASS', len(rows), 'cases; 0..8192, window, tails, guards, SP, registers, errors')
 
 
 if __name__ == '__main__': main()

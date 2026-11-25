@@ -31,9 +31,16 @@ memRouteChecked:
     ld a,(memRoute+4)
     ld hl,bankModuleCallback
     jp memRouteInvoke
+bankCpmCall:
+bankMxUnsupported:
+    ld a,DOS_ERR_UNSUPPORTED
+    scf
+    ret
     ASSERT $ <= MEM_EXTENSION_ENTRY
     DS MEM_EXTENSION_ENTRY-$,0
     INCLUDE "memory.inc"
+    INCLUDE "fixed-main.inc"
+    INCLUDE "fixed-top.inc"
     ASSERT $ <= LOCAL_BLOCK_ENTRY
     DS LOCAL_BLOCK_ENTRY-$,0
     INCLUDE "local-block.inc"
@@ -77,7 +84,7 @@ memLocalA:      DW 0
 ; выход:
 ;   hl = MEM_ABI_VERSION, de = маска MEM_CAP_*, a = FAR-код текущего банка,
 ;   b = число банков ДОЗУ, c = назначение текущего банка (MEM_BANK_*).
-;   cf = 0. DOS не вызывается, системная память и профиль окна сохраняются.
+;   cf = 0. DOS не вызывается, системная память и окно сохраняются.
 ;----------------------------------------------------------------------------
 memInfo:
     ld a,(bankPageCount)
@@ -85,29 +92,60 @@ memInfo:
     ld a,(MEM_BANK_KIND)
     ld c,a
     ld hl,MEM_ABI_VERSION
-    ld de,MEM_CAP_COPY | MEM_CAP_LAZY_WINDOW | MEM_CAP_MEMORY_OPS | MEM_CAP_MODULES | MEM_CAP_ALLOCATOR | MEM_CAP_COMMAND_QUEUE
+    ld de,MEM_CAP_COPY | MEM_CAP_MEMORY_OPS | MEM_CAP_MODULES | MEM_CAP_ALLOCATOR | MEM_CAP_COMMAND_QUEUE | MEM_CAP_BIOS_REGISTERS
     ld a,(bankPage)
     or a
     ret
     ASSERT $ == MEM_RUNTIME_REVISION_ADDR
 memRuntimeRevision: DW MEM_RUNTIME_REVISION
-    ASSERT $ == MEM_COMMAND_SHADOW
-    DS 32,0
+    INCLUDE "fixed-enter.inc"
+    ASSERT $ <= MEM_NEAR_COPY
+    DS MEM_NEAR_COPY-$,0
     ASSERT $ == MEM_NEAR_COPY
 memNearCopy: DW 0
     INCLUDE "regs-route.inc"
 mainLocalEnd:
     ASSERT $ <= MEM_IO_SYSTEM
     INCLUDE "local-io.inc"
-; Only the EXEC/DOS profile takes this branch. MAIN dispatches before it
-; and may use this region for its physical A: driver.
-bankMxRegsDos:
-    ld a,(bankPage)
-    cp DOS_BANK_PAGE
-    jp z,BANK_DOS_GATE+3
-    ld a,DOS_BANK_PAGE
-    ld hl,BANK_DOS_GATE
-    jp bankCallPacket
+;----------------------------------------------------------------------------
+; MXOS
+; Распознать регистровую BIOS-службу без вложенных вызовов.
+; вход: DOS/EXEC, стек содержит AF и адрес DW после CALL F806h; BC/DE/HL исходные.
+; выход: обычная ветвь восстанавливает кадр декодера; быстрая возвращает AF/BC/DE/HL за DW.
+;----------------------------------------------------------------------------
+bankFastDecode:
+    pop af
+    ex (sp),hl
+    push af
+    inc hl
+    ld a,(hl)
+    dec hl
+    dec a
+    jp nz,bankFastCheckDos
+    ld a,(hl)
+    cp MXOS_BIOS_UPPERCASE & 255
+    jp z,bankFastReady
+    cp MXOS_BIOS_SUB_HL_DE & 255
+    jp z,bankFastReady
+    jp bankFastFallback
+bankFastCheckDos:
+    dec a
+    jp nz,bankFastFallback
+    ld a,(hl)
+    cp MXOS_DOS_GET_ERROR & 255
+    jp z,bankFastDos
+bankFastFallback:
+    pop af
+    ex (sp),hl
+    push af
+    jp bankMxCallRegsSaved
+; В MAIN пакетный вызов обслуживает нативная таблица BIOS.
+bankMxCall:
+    ld a,b
+    dec a
+    jp nz,bankMxDos
+    push de
+    jp memBiosRoute
 localBlockEnd:
     ASSERT $ <= mx_call
     DS mx_call-$,0

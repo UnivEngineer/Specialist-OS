@@ -13,7 +13,7 @@ memoryFill:
     add hl,de
     jp c,memoryFillBad
     ld a,h
-    cp 0FFh
+    cp high MEM_DATA_LIMIT
     jp c,memoryFillRange
     jp nz,memoryFillBad
     ld a,l

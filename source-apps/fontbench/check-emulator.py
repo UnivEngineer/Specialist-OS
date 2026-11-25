@@ -234,7 +234,7 @@ try:
     assert all(case[-1].encode().startswith(b'label') for case in cases)
     result = dict(corpusBytes=1152, rows=24, columns=48, stages=expected_stages, engineFilter=engines, arguments=args.bench_args, options=list(options), cases=[c[-1] for c in cases], bitmap='PASS', continuousRun=True, firstFailedStage=m.read(s['bitmapFailedStage'], 1)[0],
                   ticks=ticks, ms={k: round(v * .128, 3) for k, v in ticks.items()}, misses=misses,
-                  reportBytes=size, file=None if options[4] else 'B:\\FONTBEN.TXT', publicMemoryABI=True, biosHooksRestored=True, mainStringCalls=1, bankWindowStringCalls=1, far48StringCalls=24, farBulkStringCalls=1, crlfInText=True, bankStringChunkBytes=256, timerLocal=True, nativeBankLaunch=True, modulesUnloaded=True, allocationLeaks=0, dosReserveUnchanged=True, executionBank=m.read(s['bankPageCode'], 1)[0] if options[2] & 2 else None, unsupportedBankCases=[c[-1] for c in cases if not bank_supported(c)])
+                  reportBytes=size, file=None if options[4] else 'B:\\FONTBEN.TXT', publicMemoryABI=True, biosHooksRestored=True, mainStringCalls=1, bankWindowStringCalls=1, far48StringCalls=24, farBulkStringCalls=1, crlfInText=True, bankStringChunkBytes=32, timerLocal=True, nativeBankLaunch=True, modulesUnloaded=True, allocationLeaks=0, dosReserveUnchanged=True, executionBank=m.read(s['bankPageCode'], 1)[0] if options[2] & 2 else None, unsupportedBankCases=[c[-1] for c in cases if not bank_supported(c)])
     (O / 'results.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print('FONTBEN', expected_stages, 'stages PASS; report bytes:', size, flush=True)
 

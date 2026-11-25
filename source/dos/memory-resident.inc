@@ -167,7 +167,7 @@ memoryPublishTop:
     call memoryMainCeiling
     dec hl
     xor a
-    MXOS_CALL MXOS_BIOS_SET_MEM_TOP
+    call mx_setMemTop
     ret
 ; HL=system ceiling -> conservative contiguous MAIN end below loaded DLLs.
 ; Explicit FAR arenas can still use free gaps, checked against allocations.

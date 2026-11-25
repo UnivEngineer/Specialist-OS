@@ -21,6 +21,99 @@ def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def ps(text):return "'"+str(text).replace("'","''")+"'"
 def shell(script):
     return subprocess.run(['powershell.exe','-NoProfile','-Command',script],capture_output=True,text=True,check=True).stdout.strip()
+
+def main_bios(machine, entry, **registers):
+    """Выполнить регистровый CALL в MAIN автономного стенда."""
+    machine.write(0xfffc, b'\0')
+    machine.write(0x2000, b'\xcd' + struct.pack('<H', entry))
+    machine.stop_at(0x2003)
+    machine.call('regs_set', pc=0x2000, sp=0x8fdf, **registers)
+    state = machine.until(0x2003, 90, page=0)
+    assert state['registers']['sp']['dec'] == 0x8fdf
+
+def set_benchmark_speed(machine, pid):
+    if os.environ.get('MXOS_EMU80_SPEED') != '32':
+        return
+    def speed():
+        cpu = machine.call('sys_info')['cpu']
+        return cpu['speed_factor'] == 32 and not cpu['full_throttle']
+    if speed():
+        return
+    if os.environ.get('QT_QPA_PLATFORM') == 'offscreen':
+        raise RuntimeError('Для скрытого замера нужен Emu80 с установленной скоростью 32×.')
+    # Горячие клавиши получает только окно принадлежащего тесту процесса.
+    script = r'''
+$ErrorActionPreference = 'Stop'
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class BenchWindow {
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr w, out uint p);
+    [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint source, uint target, bool attach);
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr w);
+    [DllImport("user32.dll")] public static extern void SwitchToThisWindow(IntPtr w, bool altTab);
+    [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+    public static uint ForegroundPid() {
+        uint pid;
+        GetWindowThreadProcessId(GetForegroundWindow(), out pid);
+        return pid;
+    }
+    public static void Activate(IntPtr window) {
+        uint ignored;
+        uint source = GetCurrentThreadId();
+        uint foreground = GetWindowThreadProcessId(GetForegroundWindow(), out ignored);
+        bool attached = foreground != 0 && foreground != source && AttachThreadInput(source, foreground, true);
+        try {
+            if (!SetForegroundWindow(window)) SwitchToThisWindow(window, true);
+        } finally {
+            if (attached) AttachThreadInput(source, foreground, false);
+        }
+    }
+}
+'@
+$lock = New-Object Threading.Mutex($false, 'Local\SpecialistOS.Emu80.SpeedKeys')
+$locked = $false
+try {
+    try { $locked = $lock.WaitOne(45000) }
+    catch [Threading.AbandonedMutexException] { $locked = $true }
+    if (-not $locked) { throw 'Emu80 keyboard is busy' }
+    $process = Get-Process -Id EMUPID
+    for ($i=0; $i -lt 50; $i++) {
+        $process.Refresh()
+        if ($process.HasExited) { throw 'Owned Emu80 process exited before speed setup' }
+        if ($process.MainWindowHandle -ne [IntPtr]::Zero) { break }
+        Start-Sleep -Milliseconds 100
+    }
+    if ($process.MainWindowHandle -eq [IntPtr]::Zero) { throw 'Owned Emu80 window did not appear' }
+    $ws = New-Object -ComObject WScript.Shell
+    foreach ($key in (@('%{HOME}') + (@('%{PGUP}') * 15))) {
+        for ($i=0; $i -lt 15 -and [BenchWindow]::ForegroundPid() -ne EMUPID; $i++) {
+            [void]$ws.AppActivate(EMUPID)
+            if ([BenchWindow]::ForegroundPid() -ne EMUPID) { [BenchWindow]::Activate($process.MainWindowHandle) }
+            Start-Sleep -Milliseconds 100
+        }
+        $foreground = [BenchWindow]::ForegroundPid()
+        if ($foreground -ne EMUPID) { throw "Cannot activate owned Emu80 PID EMUPID, foreground PID $foreground" }
+        $ws.SendKeys($key)
+        Start-Sleep -Milliseconds 100
+    }
+} finally {
+    if ($locked) { $lock.ReleaseMutex() }
+    $lock.Dispose()
+}
+'''
+    for _ in range(3):
+        try:
+            shell(script.replace('EMUPID', str(int(pid))))
+        except subprocess.CalledProcessError as error:
+            failure = RuntimeError(f'Cannot configure Emu80 speed: {error.stderr.strip()}')
+        else:
+            if speed():
+                return
+            failure = RuntimeError('Emu80 did not confirm fixed 32x speed')
+    raise failure
+
 def mcp_owner():
     return shell("$listener = Get-NetTCPConnection -State Listen -LocalPort 19781 -ErrorAction SilentlyContinue; if ($listener) { $listener[0].OwningProcess }; exit 0")
 def command(args):
@@ -80,7 +173,7 @@ class Matrix:
             self.appBinary = ROOT / 'bin/DISKBEN.i80'
             listing = ROOT / 'source-apps/diskbench/build/DISKBEN.sym'
         self.s = app_symbols(listing)
-        self.pageAddress=symbols(ROOT/'bin/banked/TRANSPORT.sym')['bankPage']
+        self.pageAddress=symbols(ROOT/'bin/banked/KERNEL.sym')['bankPage']
         self.report={'startedUtc':datetime.now(timezone.utc).isoformat(),'cpuHz':2000000,'pitHz':2000000,'fileBytes':SIZE,'passes':PASSES,'units':'KiB/s (1024 bytes); ms','rows':[],'inventory':{},'phases':{}}
     def save(self):
         (OUT/'raw.json').write_text(json.dumps(self.report,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
@@ -88,7 +181,7 @@ class Matrix:
         if self.pid:
             shell('$p=Get-Process -Id '+str(self.pid)+' -ErrorAction SilentlyContinue; if ($p -and $p.Path -eq '+ps(RUNTIME/'Emu80qt-mcp.exe')+') { Stop-Process -Id $p.Id; $p.WaitForExit() }')
             self.pid=None
-    def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False,nc_binary=None,nc_symbols=None,bios=None):
+    def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False,nc_binary=None,nc_symbols=None,bios=None,main_boot=False):
         self.stop()
         # Порт MCP фиксирован upstream. Не подключаемся к чужому эмулятору.
         owner=mcp_owner()
@@ -114,12 +207,13 @@ class Matrix:
                 self.m.call('debug_break');break
             except Exception:time.sleep(.2)
         else:raise RuntimeError('Owned test emulator did not acquire MCP port 19781')
+        set_benchmark_speed(self.m, self.pid)
         nc_binary=nc_binary or ROOT/'bin/NC.i80'
         nc_symbols=nc_symbols or ROOT/'bin/NC.sym'
         nc=symbols(nc_symbols)
         # Existing MAIN measurements explicitly select that profile on new images.
         image=(RUNTIME/'specialist-os'/('system-flash.bin' if flash else 'system.bin')).read_bytes()
-        selected_main=b'NC_MN   COM' in image
+        selected_main=not main_boot and b'NC_MN   COM' in image
         if selected_main:
             core_path=nc_symbols.with_name('NC_CORE.sym')
             core=symbols(core_path if core_path.exists() else ROOT/'bin/NC_CORE.sym')
@@ -158,7 +252,10 @@ class Matrix:
             # Быстрая загрузка может закончиться до подключения MCP: NC уже ждёт
             # клавишу внутри getch и сам до mainLoop не дойдёт. Escape возвращает
             # его в обычный цикл, сохраняя проверку кода и страницу breakpoint.
-            if self.m.read(0,32)==nc_binary.read_bytes()[:32]:
+            if main_boot:
+                # Ставим точку до Reset: на 32× NC уже может ждать клавишу после mainLoop.
+                self.m.call('emu_reset')
+            elif self.m.read(0,32)==nc_binary.read_bytes()[:32]:
                 self.m.tap('esc')
             if 'moduleLoadError' in nc:self.m.call('bp_set',addr=nc['moduleLoadError'],type='exec')
             diagnostic=symbols(dos.with_suffix('.sym') if dos else ROOT/'bin/DOS.sym')
@@ -202,8 +299,14 @@ class Matrix:
         cli=symbols(ROOT/'bin/CLI.sym')
         self.m.stop_at(cli['cliPrompt']);self.m.tap('f10');self.m.until(cli['cliPrompt'],120,page=0)
         self.m.call('bp_clear');self.m.call('emu_run_for',ms=500)
-        for key in ('esc','c','l','s'):self.m.tap(key)
-        assert self.m.read(cli['CMD_LINE'],3).upper()==b'CLS'
+        for _ in range(3):
+            self.m.tap('esc')
+            self.m.call('emu_run_for',ms=250)
+            for key in 'cls':self.m.tap(key)
+            length=self.m.read(cli['lineEditLength'],1)[0]
+            command=self.m.read(cli['CMD_LINE'],length) if length else b''
+            if command.upper()==b'CLS':break
+        else:raise AssertionError(('CLI did not receive CLS',command))
         self.m.stop_at(cli['cliPrompt']);self.m.tap('enter');self.m.until(cli['cliPrompt'],120,page=0)
         self.m.call('bp_clear')
         self.m.screenshot(OUT/'console-before-benchmark.png')

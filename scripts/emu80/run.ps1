@@ -30,6 +30,15 @@ if ($ProtectSystemFlash -and -not $Flash) { throw '-ProtectSystemFlash requires 
 $runtime = Resolve-Emu80Runtime -Directory $EmulatorDirectory -Flash:$Flash
 $exeName = if ($Mcp) { 'Emu80qt-mcp.exe' } else { 'Emu80qt.exe' }
 $executable = Join-Path $runtime $exeName
+if ($Hidden -and -not $PrepareOnly) {
+    $platforms = @('_qtplugins/platforms', 'platforms', 'plugins/platforms') |
+        ForEach-Object { Join-Path $runtime $_ } |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_ 'qoffscreen.dll') -PathType Leaf } |
+        Select-Object -First 1
+    if (-not $platforms) {
+        throw "Hidden Emu80 requires the matching Qt offscreen plugin in the runtime. Missing qoffscreen.dll in $runtime"
+    }
+}
 if ($Flash -and -not $PSBoundParameters.ContainsKey('SystemImage')) { $SystemImage = 'C-Flash-512k-MMX-System-Emu80.bin' }
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $systemSource = Join-Path $root ('images/' + $SystemImage)
@@ -181,8 +190,20 @@ $record = [ordered]@{
 [IO.File]::WriteAllText($deploymentFile, ($record | ConvertTo-Json -Depth 4) + "`n", (New-Object Text.UTF8Encoding($false)))
 Write-Host "Prepared MXOS profile: $deployment"
 if (-not $PrepareOnly) {
-    # Эмулятор — интерактивное приложение; скрытый запуск нужен только для диагностики.
     $windowStyle = if ($Hidden) { 'Hidden' } else { 'Normal' }
     $configName = 'specialist-os/launch.conf'
-    Start-Process -FilePath $executable -ArgumentList '--conf-file', $configName, '--platform', 'specialist-os' -WorkingDirectory $runtime -WindowStyle $windowStyle -PassThru:$PassThru
+    $previousPlatform = $env:QT_QPA_PLATFORM
+    $previousPlugins = $env:QT_QPA_PLATFORM_PLUGIN_PATH
+    try {
+        if ($Hidden) {
+            $env:QT_QPA_PLATFORM = 'offscreen'
+            $env:QT_QPA_PLATFORM_PLUGIN_PATH = $platforms
+        }
+        Start-Process -FilePath $executable -ArgumentList '--conf-file', $configName, '--platform', 'specialist-os' -WorkingDirectory $runtime -WindowStyle $windowStyle -PassThru:$PassThru
+    } finally {
+        if ($Hidden) {
+            $env:QT_QPA_PLATFORM = $previousPlatform
+            $env:QT_QPA_PLATFORM_PLUGIN_PATH = $previousPlugins
+        }
+    }
 }

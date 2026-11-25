@@ -6,12 +6,26 @@ KD_OBJECT = DOS_BANK_OBJECT_ADDR
 KD_PATH   = DOS_BANK_PATH_ADDR
 KD_DATA   = DOS_BANK_DATA_ADDR
 KD_CHUNK  = DOS_BANK_DATA_SIZE
+;----------------------------------------------------------------------------
+; MXOS
+; Прочитать ошибку DOS по прямому регистровому маршруту из EXEC.
+; вход: нет аргументов, B содержит селектор возврата. Обработчик не вызывает MEM.
+; выход: AF как у dosGetError; при занятом диспетчере CF=1, A=DOS_ERR_ACCESS.
+; BC, DE, HL, контекст исполнителя и кадр приостановленной службы сохранены.
+;----------------------------------------------------------------------------
+kdLeafGetError:
+    ld a,(kdBusy)
+    or a
+    jp z,dosGetError
+    ld a,DOS_ERR_ACCESS
+    scf
+    ret
+
 kernelDispatch:
     ; Межстраничный пакет находится в общем окне, даже для инициатора DOS.
     ld de,BANK_FRAME_REGS
     jp kdEntryCommon
 kernelLocalDispatch:
-    call bankCommandWindow
     ; DE уже указывает на локальный MX_REGS: транспорт/копировщик не нужны.
     ld a,DOS_IO_PAGE
     ld (BANK_FRAME_STATUS),a
@@ -101,55 +115,23 @@ kdPacketLoop:
     cp DOS_IO_PAGE
     jp z,kdLocal
     ld a,(kdFunction)
-    cp MXOS_DOS_SECTOR_IO & 0FFh
-    jp z,krSector
-    cp MXOS_DOS_RAW_IO & 0FFh
-    jp z,krRaw
-    cp MXOS_DOS_FILE_EXEC & 0FFh
-    jp z,keRequest
-    cp MXOS_DOS_FILE_COPY & 0FFh
-    jp z,kcCopy
-    cp MXOS_DOS_FILE_GET_DRIVES & 0FFh
-    jp z,kmDrives
-    cp MXOS_DOS_FILE_NAME_PREPARE & 0FFh
-    jp z,kmName
-    cp MXOS_DOS_FILE_LOAD_INFO & 0FFh
-    jp z,kmInfo
-    cp MXOS_DOS_FILE_GET_SET_ATTR & 0FFh
-    jp z,kmAttr
-    cp MXOS_DOS_FILE_DELETE & 0FFh
-    jp z,kmDelete
-    cp MXOS_DOS_FILE_RENAME & 0FFh
-    jp z,kmRename
-    cp MXOS_DOS_FILE_LIST & 0FFh
-    jp z,kdFileList
-    cp MXOS_DOS_FILEHANDLE & 0FFh
-    jp z,kdHandle
-    cp MXOS_DOS_DIRECTORY & 0FFh
-    jp z,kdDirectory
-    cp MXOS_DOS_CLI & 0FFh
-    jp z,kdCli
-    cp MXOS_DOS_FONT_CONFIG & 0FFh
-    jp z,kdFontConfig
-    ; Разрешены только функции, не возвращающие локальных указателей.
-    ld de,kdScalars
-kdScalarFind:
-    ld a,(de)
-    inc de
-    cp 0FFh
-    jp z,kdUnsupported
-    ld b,a
-    ld a,(kdFunction)
-    cp b
-    jp z,kdScalarFound
-    inc de
-    inc de
-    jp kdScalarFind
-kdScalarFound:
-    ld a,(de)
+    cp (kdExternalEnd-kdExternalTable)/2
+    jp nc,kdUnsupported
+    add a,a
     ld l,a
-    inc de
-    ld a,(de)
+    ld h,0
+    ld de,kdExternalTable
+    add hl,de
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ex de,hl
+    ld a,h
+    or a
+    jp m,kdExternalScalar
+    jp (hl)
+kdExternalScalar:
+    and 07Fh
     ld h,a
     jp kdInvokeScalar
 kdLocal:
@@ -196,22 +178,8 @@ kdDirectory:
 kdPath:
     ld hl,(kdRegs)
     ld (kdClientObject),hl
-    ld de,KD_PATH
-    ld bc,MAX_PATH
-    call kdFetch
+    call kdFetchPath
     jp c,kdBad
-    ; Проверяем завершение до вызова парсера пути.
-    ld hl,KD_PATH
-    ld b,MAX_PATH
-kdPathScan:
-    ld a,(hl)
-    or a
-    jp z,kdPathReady
-    inc hl
-    dec b
-    jp nz,kdPathScan
-    jp kdBad
-kdPathReady:
     ld hl,KD_PATH
     ld (kdRegs),hl
     call kdInvoke
@@ -225,13 +193,6 @@ kdCwd:
     jp c,kdBad
     ld hl,KD_PATH
     ld (kdRegs),hl
-    ld b,MAX_PATH
-    xor a
-kdCwdClear:
-    ld (hl),a
-    inc hl
-    dec b
-    jp nz,kdCwdClear
     call kdInvoke
     call kdCapture
     ld a,(kdRegs+6)
@@ -240,12 +201,15 @@ kdCwdClear:
     ld hl,(kdClientObject)
     ex de,hl
     ld hl,KD_PATH
-    ld bc,MAX_PATH
+    ld a,(cwdLength)
+    inc a
+    ld c,a
+    ld b,0
     call kdStore
     jp c,kdBad
     jp kdRestorePointer
 
-; Текстовые команды передаются как MAX_PATH. Наблюдатель вызывается в
+; Текстовые команды передаются до нуля. Наблюдатель вызывается в
 ; странице клиента; подтверждения COPY/MOVE требуют отдельного адаптера.
 kdCli:
     ld hl,cliService
@@ -310,32 +274,8 @@ kdHandle:
     jp nz,kdHandleSimple
     ld hl,(KD_OBJECT+FH_BUFFER)
     ld (kdOriginalBuffer),hl
-    ld de,KD_PATH
-    ld a,MAX_PATH
-kdHandlePathScan:
-    push af
-    push hl
-    push de
-    ld bc,1
-    call kdFetch
-    pop de
-    pop hl
-    jp c,kdHandlePathError
-    ld a,(de)
-    or a
-    jp z,kdHandlePathEnd
-    inc hl
-    inc de
-    pop af
-    dec a
-    jp nz,kdHandlePathScan
-    jp kdBad
-kdHandlePathError:
-    pop af
-    jp kdBad
-kdHandlePathEnd:
-    pop af
-kdHandlePathReady:
+    call kdFetchPath
+    jp c,kdBad
     ld hl,KD_PATH
     ld (KD_OBJECT+FH_BUFFER),hl
 kdHandleSimple:
@@ -460,7 +400,6 @@ kdRestorePointer:
     ld hl,(kdClientObject)
     ld (kdRegs),hl
 kdFinish:
-    call bankCommandWindow
     xor a
     ld (kdBusy),a
     ld (BANK_FRAME_STATUS),a
@@ -549,10 +488,130 @@ kdFileRange:
     jp c,kdRangeOk
     jp z,kdRangeOk
     jp kdRangeFail
+
+;----------------------------------------------------------------------------
+; MXOS
+; Получить путь ASCIIZ (kdFetchPath) или строку FILE_EXEC (kdFetchLine).
+; вход: HL = адрес в странице kdPage. Буфер назначения KD_PATH, до MAX_PATH.
+; выход: CF=0, если скопирован терминатор (соответственно 0 или байт <20h).
+; При CF=1 строка не завершена в допустимом диапазоне. AF/BC/DE/HL рабочие.
+;----------------------------------------------------------------------------
+kdFetchPath:
+    ld c,1
+    jp kdFetchString
+kdFetchLine:
+    ld c,020h
+kdFetchString:
+    ld de,KD_PATH
+    ld b,MAX_PATH
+;----------------------------------------------------------------------------
+; MXOS
+; Прочитать строку через общее окно, ограничив запрос доступной памятью.
+; вход: HL = адрес в странице kdPage, DE = локальный буфер, B = ёмкость
+; (до MAX_PATH), C = порог терминатора. Любой байт <C завершает строку.
+; выход: CF=0 при завершении, HL/DE после терминатора, B = остаток ёмкости.
+; CF=1 при выходе за границу или исчерпании ёмкости. AF/BC/DE/HL рабочие.
+;----------------------------------------------------------------------------
+kdReadString:
+    push de
+    ex de,hl
+    ld hl,0FC00h
+    ld a,(kdPage)
+    or a
+    jp z,kdReadLimit
+    ld h,0F8h
+kdReadLimit:
+    call sub_hl_de
+    jp c,kdRangeFail
+    ld a,h
+    or a
+    jp nz,kdReadBounded
+    ld a,l
+    cp b
+    jp nc,kdReadBounded
+    ld b,a
+kdReadBounded:
+    ex de,hl
+    pop de
+    ld a,b
+    or a
+    jp z,kdReadMissing
+;----------------------------------------------------------------------------
+; MXOS
+; Получить проверенный диапазон или строку порциями не более 32 байт.
+; вход: HL = адрес клиента, DE = локальный приёмник, B = длина 1..128,
+; C = 0 для двоичного диапазона или порог терминатора для строки.
+; выход: CF=0 при успехе, HL/DE = следующие адреса, B = остаток длины.
+; CF=1 при исчерпании длины строки без терминатора. AF/BC/DE/HL рабочие.
+;----------------------------------------------------------------------------
+kdReadChunks:
+    push bc
+    push de
+    ld a,b
+    cp 32
+    jp c,kdReadChunk
+    ld b,32
+kdReadChunk:
+    ld a,(kdPage)
+    call memDosReadChunk
+    ld a,e
+    pop de
+    push af
+    push hl
+    sub BANK_WINDOW & 0FFh
+    ld c,a
+    ld b,0
+    push bc
+    ld hl,BANK_WINDOW
+    call moveBytesForward
+    ld d,b
+    ld e,c
+    pop bc
+    pop hl
+    pop af
+    ld a,c
+    cpl
+    inc a
+    pop bc
+    jp c,kdReadTerminated
+    add a,b
+    ld b,a
+    jp nz,kdReadChunks
+    ld a,c
+    or a
+    ret z
+kdReadMissing:
+    scf
+    ret
+kdReadTerminated:
+    add a,b
+    ld b,a
+    or a
+    ret
+
 ; HL=источник клиента, DE=локальный приёмник, BC=длина.
 kdFetch:
     call kdRange
     ret c
+    ld a,(kdPage)
+    cp DOS_IO_PAGE
+    jp z,kdFetchFar
+    ld a,b
+    or a
+    jp nz,kdFetchFar
+    ld a,c
+    or a
+    ret z
+    ; Два полных блока выгоднее провести развёрткой CPM32.
+    cp 64
+    jp nc,kdFetchFar
+    push bc
+    ld b,c
+    ld c,0
+    call kdReadChunks
+    pop bc
+    ret
+kdFetchFar:
     ld (kdCopy+1),hl
     ex de,hl
     ld (kdCopy+4),hl
@@ -566,6 +625,25 @@ kdStore:
     ex de,hl
     call kdRange
     ret c
+    ld a,(kdPage)
+    cp DOS_IO_PAGE
+    jp z,kdStoreFar
+    ld a,b
+    or a
+    jp nz,kdStoreFar
+    ld a,c
+    or a
+    ret z
+    ; Два полных блока выгоднее провести развёрткой CPM32.
+    cp 64
+    jp nc,kdStoreFar
+    ex de,hl
+    push bc
+    ld b,c
+    call kdWriteChunks
+    pop bc
+    ret
+kdStoreFar:
     ld (kdCopy+4),hl
     ex de,hl
     ld (kdCopy+1),hl
@@ -580,26 +658,82 @@ kdCopyCount:
     ld hl,kdCopy
     jp bankCopyFar
 
-kdScalars:
-    DB MXOS_DOS_TIMER & 255
-    DW timerService
-    DB MXOS_DOS_DRIVER_REFRESH & 0FFh
-    DW dosDriverRefresh
-    DB MXOS_DOS_GET_DRIVE_FREE_SPACE & 0FFh
-    DW getDriveFreeSpace
-    DB MXOS_DOS_MOUNT_VOLUME & 0FFh
-    DW mountVolume
-    DB MXOS_DOS_FILE_GET_SET_DRIVE & 0FFh
-    DW fileGetSetDrive
-    DB MXOS_DOS_FILE_SELECT_DRIVE & 0FFh
-    DW fileChangeDrive
-    DB MXOS_DOS_GET_ERROR & 0FFh
-    DW dosGetError
-    DB MXOS_DOS_FLUSH_VOLUME & 0FFh
-    DW flushVolume
-    DB MXOS_DOS_SET_SHELL & 0FFh
-    DW setShell
-    DB 0FFh
+;----------------------------------------------------------------------------
+; MXOS
+; Передать двоичный диапазон порциями не более 32 байт.
+; вход: HL = локальный источник, DE = проверенный приёмник клиента,
+; B = длина 1..63, kdPage = страница клиента.
+; выход: CF=0, HL/DE = следующие адреса. AF/BC рабочие.
+;----------------------------------------------------------------------------
+kdWriteChunks:
+    push bc
+    push de
+    ld a,b
+    cp 32
+    jp c,kdWriteChunk
+    ld a,32
+kdWriteChunk:
+    ld c,a
+    ld b,0
+    ld de,BANK_WINDOW
+    call moveBytesForward
+    ld a,c
+    sub BANK_WINDOW & 0FFh
+    ld b,a
+    ld c,0
+    pop de
+    push hl
+    ld a,(kdPage)
+    call memDosWriteChunk
+    ld a,l
+    sub BANK_WINDOW & 0FFh
+    cpl
+    inc a
+    pop hl
+    pop bc
+    add a,b
+    ld b,a
+    jp nz,kdWriteChunks
+    xor a
+    ret
+
+; Внешний запрос может вызвать только адаптер NEAR или скалярную службу.
+; Бит 15 отмечает скалярный вход: kdInvokeScalar загружает MX_REGS
+; и завершает запрос через kdFinish. Пропуски возвращают UNSUPPORTED.
+    MACRO KD_EXTERNAL operation, handler, scalar
+        ASSERT handler < 08000h
+        DUP (operation & 0FFh)-(($-kdExternalTable)/2)
+            DW kdUnsupported
+        EDUP
+        DW handler+scalar*08000h
+    ENDM
+kdExternalTable:
+    KD_EXTERNAL MXOS_DOS_FILE_LIST,             kdFileList,         0
+    KD_EXTERNAL MXOS_DOS_FILE_GET_SET_DRIVE,    fileGetSetDrive,    1
+    KD_EXTERNAL MXOS_DOS_FILE_DELETE,           kmDelete,           0
+    KD_EXTERNAL MXOS_DOS_FILE_RENAME,           kmRename,           0
+    KD_EXTERNAL MXOS_DOS_FILE_LOAD_INFO,        kmInfo,             0
+    KD_EXTERNAL MXOS_DOS_FILE_GET_SET_ATTR,     kmAttr,             0
+    KD_EXTERNAL MXOS_DOS_FILE_NAME_PREPARE,     kmName,             0
+    KD_EXTERNAL MXOS_DOS_FILE_EXEC,             keRequest,          0
+    KD_EXTERNAL MXOS_DOS_GET_DRIVE_FREE_SPACE,  getDriveFreeSpace,  1
+    KD_EXTERNAL MXOS_DOS_MOUNT_VOLUME,          mountVolume,        1
+    KD_EXTERNAL MXOS_DOS_FLUSH_VOLUME,          flushVolume,        1
+    KD_EXTERNAL MXOS_DOS_FILE_SELECT_DRIVE,     fileChangeDrive,    1
+    KD_EXTERNAL MXOS_DOS_FILE_COPY,             kcCopy,             0
+    KD_EXTERNAL MXOS_DOS_FILE_GET_DRIVES,       kmDrives,           0
+    KD_EXTERNAL MXOS_DOS_GET_ERROR,             dosGetError,        1
+    KD_EXTERNAL MXOS_DOS_SECTOR_IO,             krSector,           0
+    KD_EXTERNAL MXOS_DOS_TIMER,                 timerService,       1
+    KD_EXTERNAL MXOS_DOS_FILEHANDLE,            kdHandle,           0
+    KD_EXTERNAL MXOS_DOS_DIRECTORY,             kdDirectory,        0
+    KD_EXTERNAL MXOS_DOS_CLI,                   kdCli,              0
+    KD_EXTERNAL MXOS_DOS_SET_SHELL,             setShell,           1
+    KD_EXTERNAL MXOS_DOS_RAW_IO,                krRaw,              0
+    KD_EXTERNAL MXOS_DOS_DRIVER_REFRESH,        dosDriverRefresh,   1
+    KD_EXTERNAL MXOS_DOS_FONT_CONFIG,           kdFontConfig,       0
+kdExternalEnd:
+    ASSERT (kdExternalEnd-kdExternalTable)/2 <= 128
 kdLocalTable:
     INCLUDE "../../bin/banked/kernel-services.inc"
 kdLocalEnd:
@@ -614,7 +748,7 @@ kdActual         = DOS_REQUEST_SCRATCH+20
 kdTotal          = DOS_REQUEST_SCRATCH+22
 kdResult         = DOS_REQUEST_SCRATCH+24
 kdCopy           = DOS_REQUEST_SCRATCH+26
-    ASSERT DOS_REQUEST_SCRATCH+34 <= DOS_SERVICE_ADDR
+    ASSERT DOS_REQUEST_SCRATCH+34 <= DOS_ARENA_START
 
 
 ; Caller submits one stream. Only the listed native operations share KD_DATA

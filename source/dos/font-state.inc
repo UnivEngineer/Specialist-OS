@@ -10,9 +10,7 @@ kdFontConfig:
     ld a,(kdRegs+7)
     or a
     jp nz,kfcNotRegister
-    ld de,KD_PATH
-    ld bc,MAX_PATH
-    call kdFetch
+    call kdFetchPath
     jp c,kdBad
 kfcNotRegister:
     ld a,(kdRegs+7)
@@ -22,13 +20,16 @@ kfcNotRegister:
     or a
     jp z,kfcDone
     push af
-    ld hl,KD_PATH
-    push hl
     ld hl,(kdClientObject)
     ex de,hl
-    pop hl
-    ld bc,MAX_PATH
+    ld hl,KD_PATH
+    ld a,(fontConfigSize)
+    ld c,a
+    ld b,0
     call kdStore
+    pop bc
+    jp c,kdBad
+    push bc
     pop af
 kfcDone:
     call kdCapture
@@ -60,9 +61,13 @@ fontConfigEnd:
     pop hl
     jp blockArgument
 fontConfigCommandReady:
+    ld a,MAX_PATH+1
+    sub b
+    ld (fontConfigSize),a
+    ld c,a
+    ld b,0
     pop hl
     ld de,fontConfigCommand
-    ld bc,MAX_PATH
     call moveBytesForward
     ld a,(v_drive)
     ld (fontConfigDrive),a
@@ -107,7 +112,9 @@ fontConfigPrepare:
     call moveBytesForward
     ld hl,fontConfigCommand
     ld de,KD_PATH
-    ld bc,MAX_PATH
+    ld a,(fontConfigSize)
+    ld c,a
+    ld b,0
     call moveBytesForward
     ld a,1
     ld (fontConfigRestoring),a
@@ -146,4 +153,5 @@ fontConfigReturnDrive       = fontConfigValid+22
 fontConfigReturnDirectory   = fontConfigValid+23
 fontConfigReturnDirectories = fontConfigValid+25
 fontConfigCommand           = fontConfigValid+41
-    ASSERT fontConfigCommand+MAX_PATH <= DOS_BANK_OBJECT_ADDR
+fontConfigSize              = fontConfigCommand+MAX_PATH
+    ASSERT fontConfigSize < DOS_BANK_OBJECT_ADDR

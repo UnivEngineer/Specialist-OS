@@ -102,7 +102,7 @@ bankFont8Ticks:         DD 0
 labelFont8Serial:       DB '8x8 serial:  ',0
 font8SerialTicks:       DD 0
 bankFont8SerialTicks:   DD 0
-labelWindow8:           DB 'Win20  8x8:   ',0
+labelWindow8:           DB 'Win32  8x8:   ',0
 window8Main:            DD 0
 window8Ticks:           DD 0
 labelFar48Font8:        DB 'Far48 8x8:   ',0
@@ -111,7 +111,7 @@ Far48Font8Ticks:        DD 0
 labelBulk8:             DB 'Far1152 8x8: ',0
 bulk8Main:              DD 0
 bulk8Ticks:             DD 0
-labelWindowOpt:         DB 'Win20  opt:   ',0
+labelWindowOpt:         DB 'Win32  opt:   ',0
 windowOptMain:          DD 0
 windowOptTicks:         DD 0
 labelBulkOpt:           DB 'Far1152 opt: ',0
@@ -134,11 +134,11 @@ labelQuadCold:          DB 'Quad cold:   ',0
 labelQuadWarm:          DB 'Quad warm:   ',0
 labelRaw:               DB 'Quad raw:    ',0
 labelHalf:              DB 'Quad rot4:   ',0
-labelWindowBIOS:        DB 'Win20  Mon:   ',0
-labelWindowFull:        DB 'Win20  full:  ',0
-labelWindowQuad:        DB 'Win20  quad:  ',0
-labelWindowCold:        DB 'Win20  cold:  ',0
-labelWindowWarm:        DB 'Win20  warm:  ',0
+labelWindowBIOS:        DB 'Win32  Mon:   ',0
+labelWindowFull:        DB 'Win32  full:  ',0
+labelWindowQuad:        DB 'Win32  quad:  ',0
+labelWindowCold:        DB 'Win32  cold:  ',0
+labelWindowWarm:        DB 'Win32  warm:  ',0
 labelBulkBIOS:          DB 'Far1152 Mon: ',0
 labelBulkFull:          DB 'Far1152 full:',0
 labelBulkQuad:          DB 'Far1152 quad:',0
@@ -218,23 +218,23 @@ bulkQuadTicks:          DD 0
 labelPacked:                DB 'Quad KOI4072:',0
 PackedMain:                 DD 0
 PackedTicks:                DD 0
-labelWin20Cold:             DB 'Win20  q cold:',0
+labelWin20Cold:             DB 'Win32  q cold:',0
 Win20ColdMain:              DD 0
 Win20ColdTicks:             DD 0
 Win20ColdMainMiss:          DW 0
 Win20ColdMisses:            DW 0
-labelWin20Warm:             DB 'Win20  q warm:',0
+labelWin20Warm:             DB 'Win32  q warm:',0
 Win20WarmMain:              DD 0
 Win20WarmTicks:             DD 0
 Win20WarmMainMiss:          DW 0
 Win20WarmMisses:            DW 0
-labelWin20Raw:              DB 'Win20  q raw:',0
+labelWin20Raw:              DB 'Win32  q raw:',0
 Win20RawMain:               DD 0
 Win20RawTicks:              DD 0
-labelWin20Half:             DB 'Win20  q rot4:',0
+labelWin20Half:             DB 'Win32  q rot4:',0
 Win20HalfMain:              DD 0
 Win20HalfTicks:             DD 0
-labelWin20Packed:           DB 'Win20  KOI4072:',0
+labelWin20Packed:           DB 'Win32  KOI4072:',0
 Win20PackedMain:            DD 0
 Win20PackedTicks:           DD 0
 labelFar1152Cold:           DB 'Far1152 q cold:',0
@@ -300,7 +300,7 @@ f4RawCharDOS:               DD 0
 label4RawSerial:            DB '4raw serial:',0
 f4RawSerialMain:            DD 0
 f4RawSerialDOS:             DD 0
-label4RawWin20:             DB '4raw Win20 :',0
+label4RawWin20:             DB '4raw Win32 :',0
 f4RawWin20Main:             DD 0
 f4RawWin20DOS:              DD 0
 label4RawFar48:             DB '4raw Far48:',0
@@ -315,7 +315,7 @@ f4PackedCharDOS:            DD 0
 label4PackedSerial:         DB '4pack serial:',0
 f4PackedSerialMain:         DD 0
 f4PackedSerialDOS:          DD 0
-label4PackedWin20:          DB '4pack Win20 :',0
+label4PackedWin20:          DB '4pack Win32 :',0
 f4PackedWin20Main:          DD 0
 f4PackedWin20DOS:           DD 0
 label4PackedFar48:          DB '4pack Far48:',0
@@ -330,7 +330,7 @@ f4RepeatCharDOS:            DD 0
 label4RepeatSerial:         DB '4dup serial:',0
 f4RepeatSerialMain:         DD 0
 f4RepeatSerialDOS:          DD 0
-label4RepeatWin20:          DB '4dup Win20 :',0
+label4RepeatWin20:          DB '4dup Win32 :',0
 f4RepeatWin20Main:          DD 0
 f4RepeatWin20DOS:           DD 0
 label4RepeatFar48:          DB '4dup Far48:',0
@@ -339,7 +339,7 @@ f4RepeatFar48DOS:           DD 0
 label4RepeatFar1152:        DB '4dup Far1152:',0
 f4RepeatFar1152Main:        DD 0
 f4RepeatFar1152DOS:         DD 0
-labelPageRawLine:           DB 'PageRaw Win20 :',0
+labelPageRawLine:           DB 'PageRaw Win32 :',0
 PageRawLineMain:            DD 0
 PageRawLineBank:            DD 0
 labelPageRawFar48:          DB 'PageRaw Far48:',0
@@ -348,7 +348,7 @@ PageRawFar48Bank:           DD 0
 labelPageRawFar1152:        DB 'PageRaw Far1152:',0
 PageRawFar1152Main:         DD 0
 PageRawFar1152Bank:         DD 0
-labelPagePreLine:           DB 'PagePre Win20 :',0
+labelPagePreLine:           DB 'PagePre Win32 :',0
 PagePreLineMain:            DD 0
 PagePreLineBank:            DD 0
 labelPagePreFar48:          DB 'PagePre Far48:',0
@@ -357,7 +357,7 @@ PagePreFar48Bank:           DD 0
 labelPagePreFar1152:        DB 'PagePre Far1152:',0
 PagePreFar1152Main:         DD 0
 PagePreFar1152Bank:         DD 0
-labelPage8Line:             DB 'Page8 Win20 :',0
+labelPage8Line:             DB 'Page8 Win32 :',0
 Page8LineMain:              DD 0
 Page8LineBank:              DD 0
 labelPage8Far48:            DB 'Page8 Far48:',0
@@ -366,7 +366,7 @@ Page8Far48Bank:             DD 0
 labelPage8Far1152:          DB 'Page8 Far1152:',0
 Page8Far1152Main:           DD 0
 Page8Far1152Bank:           DD 0
-labelApiRealWin20:          DB 'API real Win20 :',0
+labelApiRealWin20:          DB 'API real Win32 :',0
 ApiRealWin20Main:           DD 0
 ApiRealWin20Bank:           DD 0
 labelApiRealFar48:          DB 'API real Far48:',0

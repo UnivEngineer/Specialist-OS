@@ -10,14 +10,14 @@ from build_cache import main as cached_build
 
 ROOT = Path(__file__).absolute().parents[2]
 OVERLAYS = {
-    'ENUM': ('enumerate', 'DOS_SERVICE_ADDR', 'DOS_FILEOPS_ADDR'),
-    'FILEOPS': ('fileops', 'DOS_FILEOPS_ADDR', 'DOS_SERVICE_END'),
+    'ENUM': 'enumerate',
+    'FILEOPS': 'fileops',
 }
 KERNEL = ROOT / 'bin/banked/KERNEL.sym'
 
 
 def build(name, output_dir=ROOT / 'bin', kernel=KERNEL, defines=()):
-    component, origin_key, limit_key = OVERLAYS[name]
+    component = OVERLAYS[name]
     pack = runpy.run_path(str(ROOT / 'scripts/build/pack-dos.py'))
     cpu = runpy.run_path(str(ROOT / 'scripts/images/cpu.py'))
     symbols = pack['symbols'](kernel)
@@ -30,10 +30,9 @@ def build(name, output_dir=ROOT / 'bin', kernel=KERNEL, defines=()):
     pack['assemble'](ROOT / f'source/{component}/{name}.asm', output, defines)
     listing = output.with_suffix('.sym')
     meta = pack['symbols'](listing)
-    origin = symbols[origin_key]
-    end = meta.get('IMAGE_MEM_END', origin + output.stat().st_size + meta.get('IMAGE_BSS_SIZE', 0))
-    if end > symbols[limit_key]:
-        raise ValueError(f'{name} workspace overlaps the neighboring service')
+    origin = 0
+    if meta['IMAGE_MEM_END'] > symbols['DOS_BANK_DRIVER_END'] - symbols['DOS_ARENA_START']:
+        raise ValueError(f'{name} exceeds the DOS arena')
     fields = cpu['fields_from_symbols'](listing.read_text(encoding='utf-8'))
     output.with_suffix('.cpu').write_text(cpu['format_cpu'](origin, flags=1, fields=fields), encoding='ascii')
 
@@ -48,7 +47,7 @@ def main():
         return 0
 
     os.chdir(ROOT)
-    for name, (component, _, _) in OVERLAYS.items():
+    for name, component in OVERLAYS.items():
         imports = ROOT / f'bin/{component}-imports.inc'
         options = [name, '--input-content', '--asm', str(ROOT / f'source/{component}/{name}.asm'),
                    '--exclude', str(imports), '--exclude', str(ROOT / 'bin/mx'), '--output', str(imports)]

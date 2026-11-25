@@ -2,7 +2,7 @@
 bankDosPrintChar:
 j_printChar:
 printChar:
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     ret
 bankDosPrintString:
 j_printString:

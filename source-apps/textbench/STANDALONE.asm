@@ -34,7 +34,7 @@ charLoop:
     or a
     jp z,charEnd
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     inc hl
     jp charLoop
 charEnd:

@@ -68,7 +68,7 @@ fontLoaded:
     call moveCore
     ; Р”РµС‚РµРєС‚РѕСЂ СЂР°Р±РѕС‚Р°РµС‚ РґРѕ СѓСЃС‚Р°РЅРѕРІРєРё РѕР±С‰РµРіРѕ С€Р»СЋР·Р°.
     ld a,15
-    ld hl,0FFBEh
+    ld hl,BOOT_RAM_PROBE
     call BIOS_CHECK_RAMD
     jp z,bootFailed
     ; РђРґСЂРµСЃ РїРѕР»СЏ Р±РµСЂС‘С‚СЃСЏ РёР· СЃС‚СЂСѓРєС‚СѓСЂС‹ BIOS, РЅРµ РёР· РєРѕРЅС†Р° РѕР±Р»Р°СЃС‚Рё.
@@ -88,8 +88,9 @@ fontLoaded:
     ELSE
     ld a,1
     ld (0FFC0h+byteRead-byteWindow+1),a
-    ld hl,0FF04h
-    ld de,memImage+MEM_DATA_OFFSET+(0FF04h-MEM_DATA_START)
+    ; Проверяем неизменяемые пары развёртки CPM32. Код COMMAND меняется с ABI.
+    ld hl,BOOT_RAM_SIGNATURE
+    ld de,memImage+MEM_DATA_OFFSET+(BOOT_RAM_SIGNATURE-MEM_DATA_START)
     ld b,8
 checkRamTail:
     call 0FFC0h+byteRead-byteWindow
@@ -182,6 +183,18 @@ installPages:
     ld de,memImage+MEM_DATA_OFFSET
     ld hl,MEM_DATA_START
     ld bc,MEM_DATA_SIZE
+    call install
+    pop af
+    push af
+    ld de,dataForwardImage
+    ld hl,BOOT_DATA_FORWARD
+    ld bc,BOOT_DATA_FORWARD_BYTES
+    call install
+    pop af
+    push af
+    ld de,dataForwardWord
+    ld hl,BOOT_MOVE_OPERAND
+    ld bc,2
     call install
     pop af
     or a
@@ -331,6 +344,7 @@ romWindowEnd:
     INCLUDE "memcpy.inc"
 bootFontName:   DB BOOT_SELECTED_BASENAME
 pageCount:      DB 16
+dataForwardWord: DW BOOT_DATA_FORWARD
 ramFresh:       DB 1
 dosKind:        DB 2
     IFDEF ORIGINAL_MX
@@ -396,6 +410,13 @@ romSamePage:
 romTailStorageEnd:
 romTailImage = BOOT_STAGE_BASE+romTailStorage-stageImage
 romTailEnd   = romTailImage+romTailStorageEnd-romTailStorage
+dataForwardStorage:
+    DISP BOOT_DATA_FORWARD
+    INCLUDE "../mem/data-forward.inc"
+    ENT
+dataForwardStorageEnd:
+dataForwardImage = BOOT_STAGE_BASE+dataForwardStorage-stageImage
+    ASSERT dataForwardStorageEnd-dataForwardStorage == BOOT_DATA_FORWARD_BYTES
 stageEnd:
     ASSERT stageEnd <= 03000h
     ; РҐРѕР»РѕРґРЅС‹Р№ bootstrap РІСЂРµРјРµРЅРЅРѕ Р·Р°РЅРёРјР°РµС‚ С‚Р°РєР¶Рµ СЃРІРѕР±РѕРґРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ RUN.

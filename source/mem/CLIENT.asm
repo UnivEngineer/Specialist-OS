@@ -13,24 +13,24 @@
     jp MEM_LOCAL_INFO_ADDR
     jp MEM_EXTENSION_ENTRY
     jp memRouteCall
+    ASSERT $ == mx_printChar
+    jp memFixedPrint
+    jp memFixedGetCursor
+    jp memFixedSetCursor
+    jp memFixedRaw
+    jp memFixedHexByte
+    jp memFixedHexWord
+    DS mx_getMemTop-$,0
+    jp memFixedGetTop
+    jp memFixedSetTop
 
 ; B=группа, C=номер, DE=MX_REGS в исходной странице.
 ; AF/BC/DE/HL — результат исполнителя. SP и страница сохраняются.
 ; BIOS выполняется в main, файловые функции — в физическом банке ДОЗУ 0.
-bankMxCall:
-    ld a,b
-    cp MXOS_GROUP_BIOS
-    jp z,bankMxCheckPacket
-    cp MXOS_GROUP_DOS
-    jp nz,bankMxUnsupported
-bankMxCheckPacket:
-bankMxPacketReady:
-    push de
-    ld a,b
-    cp MXOS_GROUP_DOS
-    jp z,bankMxDos
-    jp MEM_BIOS_ROUTE
 bankMxDos:
+    dec a
+    jp nz,bankMxUnsupported
+    push de
     ld a,(bankPage)
     cp 1
     jp z,bankMxLocalDos
@@ -56,14 +56,8 @@ bankMxResult:
     ld d,(hl)
     ld hl,0
     add hl,sp
-    ld b,MX_REGS
-bankMxSave:
-    ld a,(hl)
-    ld (de),a
-    inc hl
-    inc de
-    dec b
-    jp nz,bankMxSave
+    ld b,MX_REGS/4
+    call bankCopyQuads
 bankMxReturned:
     pop hl
     pop de
@@ -72,12 +66,6 @@ bankMxReturned:
     inc sp
     inc sp
     ret
-bankCpmCall:
-bankMxUnsupported:
-    ld a,DOS_ERR_UNSUPPORTED
-    scf
-    ret
-
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
@@ -85,34 +73,36 @@ bankMxUnsupported:
 ;
 ; вход:
 ;   Сразу после CALL F806h следует DW операции (группа в старшем байте).
-;   AF, BC, DE и HL передаются операции через временный пакет на стеке.
+;   Листовые службы принимают аргументы в CPU, общий маршрут использует MX_REGS.
 ;
 ; выход:
 ;   AF, BC, DE и HL содержат результат, включая флаги операции. Возврат
 ;   происходит за DW. SP и банк вызывающего восстанавливаются.
 ;----------------------------------------------------------------------------
 bankMxCallRegs:
+    call bankQueueBefore
     push af
+    ld a,(bankPage)
+    or a
+    jp nz,bankFastDecode
+bankMxCallRegsSaved:
     push bc
     push de
     push hl
     ld hl,8
     add hl,sp
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ex de,hl
+    ld sp,hl
+    pop hl                  ; Адрес DW непосредственно из кадра CALL.
     ld c,(hl)
     inc hl
     ld b,(hl)
     inc hl
-    ex de,hl
-    ld (hl),d
-    dec hl
-    ld (hl),e
-    ld hl,0
+    push hl                 ; Адрес продолжения занимает прежнее место.
+    ld hl,-8
     add hl,sp
+    ld sp,hl
     ex de,hl
+bankMxRegsRouteCall:
     call bankMxRegsRoute
     inc sp
     inc sp
@@ -123,26 +113,12 @@ bankMxCallRegs:
     inc sp
     inc sp
     ret
-; HL = адрес локального callback сброса очереди, HL=0 отключает его.
-; Обработчик должен вернуться через RET; вход сброса сохраняет регистры
-; и флаги вызывающего и временно закрывает шлюз на время callback.
-; Привязка меняет AF, сохраняет BC, DE, HL. Флаги статуса не возвращаются.
-bankQueueBind:
-    ld (MEM_QUEUE_HOOK),hl
-    ld a,h
-    or l
-    ld a,0C9h
-    jp z,bankQueueBound
-    ld a,0C3h
-bankQueueBound:
-    ld (bankQueueBefore),a
-    ret
 memBiosQueue:
     ld hl,4
     add hl,de
     ld a,(hl)
     dec a
-    cp 20
+    cp BANK_TEXT_BYTES
     jp nc,memBiosGeneric
     inc hl
     ld a,(hl)

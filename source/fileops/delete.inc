@@ -121,8 +121,9 @@ foTreePrefix:
     ret c
     xor a
     ld (de),a
+    ld hl,foPathText
     ld a,e
-    sub foPathText & 0FFh
+    sub l                       ; Путь короче 256 байт; его база выбирается DOS.
     ld hl,(treeFrame)
     ld de,7
     add hl,de

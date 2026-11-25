@@ -5,7 +5,12 @@
     ELSE
     INCLUDE "../../bin/enumerate-imports.inc"
     ENDIF
-    ORG DOS_SERVICE_ADDR
+    IFNDEF OVERLAY_ORIGIN
+OVERLAY_ORIGIN = 0
+    ENDIF
+    ORG OVERLAY_ORIGIN
+    RELOCATE_START
+overlayBody:
     jp enumEntry
     INCLUDE "../include/enumerate-host.inc"
 
@@ -606,5 +611,12 @@ enPath:                 DS MAX_PATH,0
 enResult:               DS ENUM_ENTRY,0
 enFrames:               DS ENUM_MAX_DEPTH*16,0
 enumEnd:
-    ASSERT $ <= DOS_SERVICE_END
+    RELOCATE_END
+IMAGE_BODY_SIZE  = $-overlayBody
+IMAGE_MEM_BEGIN  = 0
+IMAGE_MEM_END    = IMAGE_BODY_SIZE
+IMAGE_BSS_SIZE   = 0
+IMAGE_RELOC_KIND = 0
+IMAGE_ALIGN_LOG2 = 0
+    RELOCATE_TABLE overlayBody
     END

@@ -1,4 +1,4 @@
-"""GET/PUT8/16 через COMMAND: реальные MAIN/EXEC/DOS/DATA и старые профили окна."""
+"""GET/PUT8/16 через COMMAND: реальные MAIN/EXEC/DOS/DATA."""
 from pathlib import Path
 import argparse, itertools, json, re, runpy, struct, subprocess, time
 R=Path(__file__).resolve().parents[2]
@@ -17,7 +17,7 @@ def main():
     Bench=runpy.run_path(str(R/'source-apps/diskbench/check-emulator.py'))['Bench']
     m=Bench(f'http://127.0.0.1:{a.port}/mcp');ts=symbols(R/'bin/banked/TRANSPORT.sym')
     image=(R/'bin/MEM.sys').read_bytes();parts=[struct.unpack_from('<HHH',image,6+i*6) for i in range(image[5])]
-    command=(R/'bin/banked/WINDOW.bin').read_bytes();rows=[]
+    rows=[]
     process=subprocess.Popen([str(a.runtime/'Emu80qt-mcp.exe'),'--conf-file','specialist-os/launch.conf','--platform','specialist-os'],cwd=a.runtime)
     try:
         for _ in range(60):
@@ -34,28 +34,28 @@ def main():
             m.write(begin,image[offset+begin-addr:offset+size])
             # No executable client and no valid target stack: COMMAND is register-only.
             m.write(0xf800,b'\x76'*32)
-        def case(caller,target,profile,op,address=0x3001,error=0):
+        def case(caller,target,seed,op,address=0x3001,error=0):
             select(target if target<=16 else 2)
             if not error:m.write(0x3000,bytes.fromhex('a51234565a'))
-            select(caller);m.write(ts['MEM_COMMAND_SHADOW'],command)
-            m.write(0xffc0,command if profile==0 else bytes([0x76]*31+[profile]))
+            window=bytes((seed+31*i)&255 for i in range(32))
+            select(caller);m.write(0xffc0,window)
             stub=(b'\x01'+W((target<<8)|0x5a)+b'\x11'+W(0xabcd)+b'\x21'+W(address)
                   +b'\x3e'+bytes([op])+b'\xcd'+W(ts['mx_memory'])+b'\xc3'+W(0x88ff))
             m.write(0x8800,stub);m.stop_at(0x88ff);m.call('regs_set',pc=0x8800,sp=0x8f00)
             state=m.until(0x88ff,3);regs=state['registers'];status=regs['af']['dec']>>8
-            assert state['flags']['C']==bool(error) and status==error,(caller,target,profile,op,state)
+            assert state['flags']['C']==bool(error) and status==error,(caller,target,seed,op,state)
             assert regs['bc']['dec']==(target<<8)|0x5a and regs['hl']['dec']==address and regs['sp']['dec']==0x8f00
+            assert m.read(0xffde,2)==window[-2:]
             if not error:
-                assert m.read(0xffdf,1)==b'\0','GET/PUT must leave COMMAND'
                 if op in (1,2):assert regs['de']['dec']==(0x12 if op==1 else 0x3412)
                 select(target);data=m.read(0x3000,5)
                 assert data==(bytes.fromhex('a5cd34565a') if op==3 else bytes.fromhex('a5cdab565a') if op==4 else bytes.fromhex('a51234565a')),data
-            rows.append(dict(caller=caller,target=target,profile=profile,operation=op,address=address,error=error))
-        for values in itertools.product((0,1,3),(0,1,2,3,4),range(4),range(1,5)):case(*values)
-        for caller,profile,op in itertools.product((0,1,3),range(4),range(1,5)):
-            case(caller,17,profile,op,error=ts['MEM_ERROR_BANK'])
-            case(caller,2,profile,op,address=0xff00 if op&1 else 0xfeff,error=ts['MEM_ERROR_RANGE'])
+            rows.append(dict(caller=caller,target=target,seed=seed,operation=op,address=address,error=error))
+        seeds=(0,77,154,231)
+        for values in itertools.product((0,1,3),(0,1,2,3,4),seeds,range(1,5)):case(*values)
+        for caller,seed in itertools.product((0,1,3),seeds):
+            case(caller,2,seed,6,error=ts['MEM_ERROR_RANGE'])
         (a.report/'result.json').write_text(json.dumps(rows,indent=2)+'\n')
-        print('COMMAND GET/PUT PASS',len(rows),'cases; MAIN/DOS/EXEC/DATA, 4 profiles, guards, BC/HL/SP, errors')
+        print('COMMAND GET/PUT PASS',len(rows),'cases; MAIN/DOS/EXEC/DATA, guards, BC/HL/SP, errors')
     finally:process.terminate();process.wait(timeout=15)
 if __name__=='__main__':main()

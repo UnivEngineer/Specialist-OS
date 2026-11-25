@@ -30,29 +30,29 @@ editorBankEntry:
     ld a,(ebArgBank)
     call ebFromBank
     ret c
+    call ebRegisterWorkspace
+    ret c
     ld hl,ebGfxPath
     ld a,MODULE_TARGET_MAIN
     MXOS_CALL MXOS_DOS_MODULE_LOAD
-    ret c
+    jp c,ebFreeWorkspace
     ld (ebGfxHandle),hl
-    call ebRegisterWorkspace
-    jp c,ebUnload
     MXOS_KEY_BEGIN ebKeyState
     ld hl,(ebGfxHandle)
     ld de,ebController
     MXOS_CALL MXOS_DOS_MODULE_SCOPE
     push af
     MXOS_KEY_END ebKeyState
-    ld hl,GFX_PACKET
-    ld b,0
-    ld a,MEM_OP_FREE
-    MXOS_CALL MXOS_DOS_MEMORY
-    pop af
-ebUnload:
-    push af
     ld hl,(ebGfxHandle)
     xor a
     MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    pop af
+ebFreeWorkspace:
+    push af
+    ld hl,EDIT_MAIN_PACKET
+    ld b,0
+    ld a,MEM_OP_FREE
+    MXOS_CALL MXOS_DOS_MEMORY
     pop af
     ret c
     ld a,(ebStatus)
@@ -73,12 +73,13 @@ ebController:
     ld a,MX_QUEUE_DLL
     call commandQueueSelect
     jp c,ebFailed
+    ld hl,EDIT_MAIN_PACKET
+    ld (ebGfxRegisters),hl
     ld hl,EDIT_QUEUE_BYTES
     ld (ebGfxRegisters+4),hl
     ld a,GFX_BIND
     call ebCall
     jp c,ebFailed
-    ld hl,GFX_RESULT
     ld de,ebCursor
     ld bc,16
     call ebFromMain

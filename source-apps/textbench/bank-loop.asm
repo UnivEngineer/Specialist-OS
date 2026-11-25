@@ -57,10 +57,10 @@ bankCharacter:
     cp 4
     jp nz,bankCharacterNormal
     ld a,c
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR_REAL
+    call mx_printCharRaw
     jp bankCharacterDone
 bankCharacterNormal:
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
 bankCharacterDone:
     pop hl
     inc hl
@@ -120,7 +120,7 @@ glyph:
     or a
     jp z,endRow
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     inc hl
     jp glyph
 string:
@@ -140,6 +140,8 @@ rowsLeft:       DW 0
 text:           DB '0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghij',13,10,0
     ENDIF
     IF FONT_TEST
+    DEFINE GRID_BANK_CORPUS 02000h
+    DEFINE GRID_BANK_SCRATCH nativeControl+8
     INCLUDE "../fontbench/grid-bank.inc"
     ENDIF
     INCLUDE "native-entry.inc"

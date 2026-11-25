@@ -119,7 +119,7 @@ try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
  k=sy(R/'bin/banked/KERNEL.sym');b=sy(R/'bin/BIOS.sym');n=sy(fixture['nc_symbols'])
  x.start('NC-PREPARE',**fixture);m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
- call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
+ h['main_bios'](m,k['mx_printChar'],bc=31)
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0)
  cli('MKDIR B:/TREE/SUB')
  for i in range(20):save('TREE/SUB/F'+str(i)+'.BIN',bytes([i])*1024)

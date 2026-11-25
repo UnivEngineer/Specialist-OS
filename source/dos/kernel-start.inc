@@ -17,6 +17,8 @@
 dosBoot:
     jp kernelCold
     jp kernelWarm
+    ASSERT $ == DOS_FAST_ERROR_ENTRY
+    jp kdLeafGetError
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
@@ -35,6 +37,7 @@ dosBoot:
 
 kernelCold:
     call dosInitVariables
+    call batDiscard             ; BAT_HANDLE находится вне блока переменных DOS.
     call resetAllSectorCaches
     ld a,1
     ld (v_bootAutoexec),a

@@ -84,15 +84,29 @@ mdContext: DB 0,16,0,0,0
 mdLocalContext: DW 0
     DB MEM_BANK_EXEC
     DW 0
+mdNearCopy: DW bankMemExecCopy
+mdExecReady: DB MEM_EXEC_READY_VALUE
 mdDataKind: DB MEM_BANK_DATA
 
 ; overlays
+;----------------------------------------------------------------------------
+; MXOS
+; Передать регистры в опубликованный оверлей FILEOPS или ENUM.
+; вход: ready=1, фасад удерживает оверлей, AF/BC/DE/HL — аргументы операции.
+; выход: регистры и флаги возвращает движок, стек вызывающего восстановлен.
+;----------------------------------------------------------------------------
 fileopsOverlay:
-    DW DOS_FILEOPS_ADDR,DOS_SERVICE_END,fileopsName,fileopsHost
+    DW 0
+fileopsInvoke:
+    jp 0                     ; Операнд задаёт overlayEnsure.
+    DW fileopsName,fileopsHost
     DB fileopsHostEnd-fileopsHost,0,0
     DW 0
 enumOverlay:
-    DW DOS_SERVICE_ADDR,DOS_SERVICE_END,enumName,enumHost
+    DW 0
+enumInvoke:
+    jp 0                     ; Операнд задаёт overlayEnsure.
+    DW enumName,enumHost
     DB enumHostEnd-enumHost,0,0
     DW 0
 
@@ -148,6 +162,11 @@ dosWorkNext = dosDefaultsEnd + MAX_PATH-7
 
 ; arena
     IFDEF BANKED_DOS_BUILD
+    DOS_FIELD relocHoleSpan, 2
+    DOS_FIELD relocHoleMask, 2
+    DOS_FIELD relocHoleMain, 1
+    DOS_FIELD relocHolePass, 1
+    DOS_FIELD appHeapBounds, APP_MAX_DEPTH*4
     DOS_FIELD arenaCacheRecord, 2
     DOS_FIELD arenaStart, 2
     DOS_FIELD arenaEnd, 2
@@ -362,6 +381,12 @@ dosWorkNext = dosWorkNext + DISK_INFO
     DOS_FIELD diStart, 2
     DOS_FIELD diActive, 1
     DOS_FIELD diEnd, 2
+    DOS_FIELD diBodyStart, 2
+    DOS_FIELD diBodyEnd, 2
+    DOS_FIELD diNewBase, 2
+    DOS_FIELD diNewEnd, 2
+    DOS_FIELD diNewEntry, 2
+    DOS_FIELD diFixCount, 2
     DOS_FIELD diDescriptor, 2
     DOS_FIELD diImage, 2
     DOS_FIELD diSize, 2
@@ -389,6 +414,7 @@ dosWorkNext = dosWorkNext + DISK_INFO
     DOS_FIELD ktRegs, MX_REGS
     DOS_FIELD krSectorSize, 2
     DOS_FIELD kernelHDriverKind, 1
+    DOS_FIELD diFloppyStart, 2
     DOS_FIELD diFloppyEnd, 2
     DOS_FIELD ramRequestedDrive, 1
 
@@ -470,10 +496,11 @@ dosWorkNext = dosWorkNext + DISK_INFO
     DOS_FIELD mdBankId, 1
     DOS_FIELD mdAddress, 2
     DOS_FIELD mdEntry, 2
-    DOS_FIELD mdBytes, 2
     DOS_FIELD mdMemoryStart, 2
     DOS_FIELD mdMemoryEnd, 2
     DOS_FIELD mdCallEntry, 2
+
+    INCLUDE "module-reloc-vars.inc"
 
 ; overlays
     DOS_FIELD ovRecord, 2

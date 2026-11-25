@@ -1,8 +1,8 @@
 ; Построчный 6x8: полные байты экрана, два указателя на столбец.
 ; Внутренний вход нерекурсивный, аппаратные IRQ выключены.
     MODULE fast6
-; HL=следующий байт текста. realMode: 0=Z с управлением, 1=RawZ,
-; 2=RawLim; только в режиме 2 входной BC задаёт доступное число байтов.
+; HL=следующий байт текста. realMode: 0=Z, 1=RawZ, 2=RawLim, 80h=Lim.
+; В режимах RawLim и Lim BC задаёт доступное число байтов.
 ; Все регистры разрушены. На выходе HL указывает на непрочитанный остаток:
 ; CF=1 — не нарисовано ничего, CF=0 — нарисована хотя бы одна четверка.
 ; Квота ограничивает чтение RawLim. Адрес экрана считается один раз,
@@ -15,8 +15,9 @@ tryGroup:
     ld a,20h
     ld (scanLow+1),a
     ld a,(realMode)
-    or a
+    add a,a                    ; 0 и 80h обрабатывают ESC.
     jp z,checkEsc
+    rrca
     dec a
     jp nz,limitedMode
     ld a,1
@@ -64,7 +65,7 @@ routeReady:
     ld a,(realMode)
     cp 2
     ld a,0BEh
-    jp nz,endReady
+    jp c,endReady
     ld a,b
     or a
     ld a,0BEh

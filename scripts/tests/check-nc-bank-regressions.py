@@ -1,5 +1,6 @@
 """8080 regressions: disposable MAIN handoff, banked KEY and skipped bytes."""
 from pathlib import Path
+from relocated_component import load_at
 import re, subprocess
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'.local/nc-bank-regressions'
@@ -223,8 +224,10 @@ failed:
  print('Panel directory Enter PASS: MAIN/EXEC, both panels, stale other-drive CWD')
  # Skipped 32-bit payloads add with carry and count exactly once; sync calls
  # leave progress unchanged. Exercise actual FILEOPS object code.
+ origin=f['DOS_ARENA_START']
+ binary,f=load_at(ROOT/'source/fileops/FILEOPS.asm','FILEOPS','OVERLAY_ORIGIN',origin)
  for async_mode in [0,1]:
-  mem=bytearray(65536);binary=(ROOT/'bin/FILEOPS.i80').read_bytes(); origin=f['DOS_FILEOPS_ADDR'];mem[origin:origin+len(binary)]=binary
+  mem=bytearray(65536);mem[origin:origin+len(binary)]=binary
   req=0x3000;mem[f['v_copyRequest']:f['v_copyRequest']+2]=W(req)
   mem[req+f['FILE_COPY_REQUEST.source']+f['FILE_DESCRIPTOR.size']:req+f['FILE_COPY_REQUEST.source']+f['FILE_DESCRIPTOR.size']+4]=(0x20123).to_bytes(4,'little')
   mem[f['foAsync']]=async_mode

@@ -119,9 +119,9 @@ BankReportError:
     pop af
     push af
     ld c,a
-    MXOS_CALL MXOS_BIOS_PRINT_HEX_BYTE
+    call mx_printHexByte
     ld c,0Ah
-    MXOS_CALL MXOS_BIOS_PRINT_CHAR
+    call mx_printChar
     pop af
     scf
     ret

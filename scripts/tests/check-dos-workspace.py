@@ -1,6 +1,6 @@
 """8080: exact DOS module intervals, cached eviction and pinned code."""
 from pathlib import Path
-from dos_state import initialize_dos_state
+from dos_state import initialize_dos_state, install_dos_mem
 import re,struct,subprocess,tempfile
 R=Path(__file__).resolve().parents[2]
 s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/banked/KERNEL.sym').read_text('utf-8'),re.M)}
@@ -11,6 +11,7 @@ with tempfile.TemporaryDirectory(prefix='mxos-intervals-') as d:
  # Bootstrap installs the image over arbitrary RAM. Its RAM-disk flag and
  # both guards must survive the same cold initializer the bank executes.
  memory=bytearray([0xA5])*65536
+ install_dos_mem(memory, R/'bin')
  memory[0x100:0x100+len(base)]=base
  start=s['dosWorkStart'];defaults=s['dosDefaultsEnd'];end=s['dosWorkEnd']
  initial=bytes(memory[s['dosColdDefaults']:s['dosColdDefaults']+defaults-start])
@@ -22,17 +23,18 @@ with tempfile.TemporaryDirectory(prefix='mxos-intervals-') as d:
  assert int.from_bytes(result[65542:65544],'little')==0xE000
  assert result[start:defaults]==initial and result[defaults:end-1]==bytes(end-1-defaults)
  assert result[start-1]==result[s['memoryRamFresh']]==result[end]==0xA5
- assert result[s['v_cliPath']:s['v_cliPath']+128]==b'A:'+bytes((92,))+bytes(125)
- assert result[s['v_drives']:s['v_drives']+4]==word(s['diskDriver'])*2
+ path = bytes([s['BOOT_VOLUME_LETTER']]) + b':\\DOS'
+ assert result[s['v_cliPath']:s['v_cliPath']+128] == path.ljust(128, b'\0')
+ assert result[s['v_drives']:s['v_drives']+4]==word(s['diskDriverDummy'])+word(s['diskDriver'])
  def test(start,end,ranges=(),cached=None,pinned=False,driver=None,floppy=None,conflict=False,evicted=False):
   m=bytearray(65536);m[0x100:0x100+len(base)]=base
   initialize_dos_state(m, s)
   for i,(lo,hi) in enumerate(ranges):
    p=s['MODULE_TABLE']+i*s['MODULE_RECORD_SIZE'];m[p:p+14]=struct.pack('<HBBHHBBHH',i+1,0,s['DOS_IO_PAGE'],lo,0,0,0x80+i,lo,hi)
   if cached:
-   m[s['fileopsReady']]=1;m[s['fileopsActive']]=int(pinned);struct.pack_into('<H',m,s['fileopsLoadedEnd'],cached)
+   struct.pack_into('<H',m,s['fileopsOverlay'],base_addr);m[s['fileopsReady']]=1;m[s['fileopsActive']]=int(pinned);struct.pack_into('<H',m,s['fileopsLoadedEnd'],cached)
   if floppy:
-   struct.pack_into('<H',m,s['diFloppyEnd'],floppy)
+   struct.pack_into('<H',m,s['diFloppyStart'],s['DOS_FLOPPY_ADDR']);struct.pack_into('<H',m,s['diFloppyEnd'],floppy)
   if driver:
    m[s['diActive']]=1;struct.pack_into('<H',m,s['diStart'],driver[0]);struct.pack_into('<H',m,s['diEnd'],driver[1])
   m[s['v_imageHeader']+s['IMAGE_POLICY']]=s['IMAGE_POLICY_MANAGED']
@@ -52,7 +54,7 @@ with tempfile.TemporaryDirectory(prefix='mxos-intervals-') as d:
   test(lo,hi,[(0x9000,0x9100)],conflict=True)
  test(0xA000,0xB500,[(0x9000,0x9100),(0x9100,0x9200)])
  test(0xB4FF,0xB500,[(0x9000,0x9100),(0xB400,0xB500)],conflict=True)
- base_addr=s['DOS_FILEOPS_ADDR']; cached_end=base_addr+0x80
+ base_addr=s['DOS_ARENA_START']+0x459; cached_end=base_addr+0x80
  test(cached_end,cached_end+2,cached=cached_end,pinned=True)
  test(cached_end-1,cached_end+1,cached=cached_end,pinned=True,conflict=True)
  test(cached_end-1,cached_end+1,cached=cached_end,evicted=True)

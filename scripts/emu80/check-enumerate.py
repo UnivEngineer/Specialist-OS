@@ -76,9 +76,9 @@ try:
  fixture=runpy.run_path(str(R/'scripts/emu80/benchmark-dos-cache.py'))['prepare_fixture'](h,O)
  k=sy(R/'bin/banked/KERNEL.sym');b=sy(R/'bin/BIOS.sym');n=sy(fixture['nc_symbols'])
  x.start('ENUMERATE',**fixture);m.call('debug_break');m.call('bp_clear');font=m.read(b['FONT_ADDR'],b['FONT_BYTES'])
- call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
+ h['main_bios'](m,k['mx_printChar'],bc=31)
  call(k['MXOS_DOS_CLI'],a=k['CLI_OP_OBSERVER'],hl=0)
- call(k['MXOS_BIOS_PRINT_CHAR'],bc=31)
+ h['main_bios'](m,k['mx_printChar'],bc=31)
  if not args.ui_only:
   for value in ['MD B:/ROOT','MD B:/ROOT/SUB','MD B:/ROOT/OTHER','MD B:/ROOT/SUB/DEEP']:cli(value)
   for name in ['ROOT/ALPHA.TXT','ROOT/BETA.BAT','ROOT/NOEXT','ROOT/SUB/TWO.TXT','ROOT/SUB/DEEP/THREE.TXT','ROOT/OTHER/X.BAT']:save(name,b'hello\n')
@@ -109,7 +109,8 @@ try:
   request(2,handle=handle)
   # A cached enumerator may be replaced only after the active cursor closes.
   e=runpy.run_path(str(R/'scripts/images/executable.py'))
-  save('ENUMOVER.DLL',e['encode'](e['Image'](b'\xc9',k['DOS_SERVICE_ADDR'],k['DOS_SERVICE_ADDR'],1),'com'))
+  page(1);origin=int.from_bytes(m.read(k['enumOverlay'],2),'little');page(0)
+  save('ENUMOVER.DLL',e['encode'](e['Image'](b'\xc9',origin,origin,1),'com'))
   q=request(0,pattern='B:/ROOT/*');handle=q[0]
   m.write(0x3400,b'B:/ENUMOVER.DLL\0'+bytes(110))
   call(k['MXOS_DOS_MODULE_LOAD'],hl=0x3400,a=2,error=True)
@@ -147,14 +148,29 @@ try:
   print('PASS DEL/ERASE files and complete directory trees',flush=True)
   print('PASS shared wildcard COPY/MOVE and simultaneous ENUM/FILEOPS cache',flush=True)
   print('PASS FILEOPS/ENUM coexistence, DIR masks and nested streaming BAT',flush=True)
- m.stop_at(n['mainLoop']);m.call('emu_reset');m.until(n['mainLoop'],120,page=0)
- m.screenshot(O/'nc-after-reset.png')
  # Real keyboard tests: NC F7 and standalone CLI share the resident parser.
  def tap(key):
   z=m.call('kbd_send',keys=[key],action='tap',duration_ms=100)
   if not z.get('stoppedByBreakpoint'):m.call('emu_run_for',ms=120)
  def text(value):
-  for c in value:tap({' ':'space',':':'colon','.':'period','/':'slash','-':'minus','*':'asterisk'}.get(c,c.lower()))
+  for c in value:
+   if c=='_':
+    m.call('kbd_send',keys=['shift'],action='press')
+    try:tap('0')
+    finally:m.call('kbd_send',keys=['shift'],action='release')
+   else:tap({' ':'space',':':'colon','.':'period','/':'slash','-':'minus','*':'asterisk'}.get(c,c.lower()))
+ # AUTOEXEC загружает банковый NC. Панели ниже проверяются по символам NC_MN.
+ core=sy(R/'bin/NC_CORE.sym');poll=core['ncBankInputPoll']
+ m.stop_at(poll);m.call('emu_reset')
+ for _ in range(160):
+  m.until(poll,120)
+  if m.read(k['bankPage'],1)[0]>1:break
+  m.call('debug_step',mode='into')
+ else:raise RuntimeError('После Reset банковый NC не достиг опроса клавиатуры')
+ m.call('bp_clear');m.call('emu_run_for',ms=500);tap('esc');text('C:/DOS/NC_MN.COM')
+ assert m.read(core['vars.cmdLine'],16).upper()==b'C:/DOS/NC_MN.COM'
+ m.stop_at(n['mainLoop']);tap('enter');m.until(n['mainLoop'],120,page=0)
+ m.screenshot(O/'nc-after-reset.png')
  m.call('bp_clear');m.call('emu_run_for',ms=500)
  # A quiet write to B: must neither reread nor redraw the A:/H: panels.
  for quiet in ['MKDIR B:/QUIET/DEEP','MKDIR B:/QUIET/DEEP']:
@@ -168,14 +184,16 @@ try:
    st=m.call('cpu_state');pc=st['registers']['pc']['dec']
    bank=m.read(k['bankPage'],1)[0]
    if pc==n['mainLoop_cursorReady'] and bank==0:break
-   if bank==0:draws.append((pc,st['registers']['bc']['dec']&255))
+   if bank==0 and pc in (n['loadAndPrintPanel'],n['lf_ReadCatalog']):draws.append((pc,st['registers']['bc']['dec']&255))
    m.call('emu_run_for',ms=500)
   else:raise AssertionError(('quiet timeout',st))
   assert not draws,('quiet command redraws unrelated panels',quiet,draws)
   assert before==b''.join(m.read(0x9000+col*256,230) for col in range(48)),('quiet bitmap changed',quiet)
   m.call('bp_clear');m.call('emu_run_for',ms=250)
  print('PASS quiet MKDIR does not redraw A:/H: or reread their catalogs',flush=True)
- tap('f7');text('B:/UITREE/Almaz-2/MXOS')
+ m.stop_at(n['lineEditLoop']);tap('f7');m.until(n['lineEditLoop'],30,page=0)
+ assert m.read(n['lineEditBuffer'],2)==word(n['vars.input'])
+ m.call('bp_clear');m.call('emu_run_for',ms=200);text('B:/UITREE/Almaz-2/MXOS')
  assert m.read(n['vars.input'],22).upper()==b'B:/UITREE/ALMAZ-2/MXOS'
  m.screenshot(O/'nc-mkdir-tree-input.png')
  m.stop_at(n['mainLoop_cursorReady']);tap('enter');m.until(n['mainLoop_cursorReady'],60,page=0)
@@ -198,8 +216,10 @@ except Exception:
  if x.pid:
   m.call('debug_break');m.screenshot(O/'failure.png')
   page(1);es=sy(R/'bin/ENUM.sym')
-  for v in ['enMask','enPath','enFrames','enResult']:
-   print(v,m.read(es[v],48).hex(),flush=True)
+  if m.read(k['enumReady'],1)==b'\1':
+   base=int.from_bytes(m.read(k['enumOverlay'],2),'little')
+   for v in ['enMask','enPath','enFrames','enResult']:
+    print(v,m.read(base+es[v],48).hex(),flush=True)
   page(0)
  raise
 finally:x.stop()

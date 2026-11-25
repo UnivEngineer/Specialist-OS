@@ -97,6 +97,7 @@ def main():
     (out/'bios-copy-imports.inc').write_text(
         '; Generated internal BIOS copy entry; not a fixed public ABI.\n'
         f'bios_copyForward = 0{sy["moveBytesForward"]:04X}h\n', encoding='utf-8')
+    (out/'bios-move-switch.inc').write_text(f'biosMoveUseLow = 0{sy["biosMoveUseLow"]:04X}h\n', encoding='utf-8')
     for stem in ('DOS','BIOS','IO'):
         (out/f'{stem}.sym').write_bytes((out/'System.linked.sym').read_bytes())
         (out/f'{stem}.lst').write_bytes((out/'System.linked.lst').read_bytes())

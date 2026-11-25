@@ -14,6 +14,7 @@
 ; До запуска приложения 8C00h также служит временным ID-кодом FLASHSYS.
     INCLUDE "../include/mxos.inc"
     INCLUDE "../include/ramfos.inc"
+    INCLUDE "../../bin/bios-move-switch.inc"
 IMAGE_FLAGS      = IMAGE_FLAG_MAIN
 RUN_BODY_REQUEST = RAMFOS_CONTEXT
 RUN_LOAD_STAGE   = RAMFOS_CONTEXT+48
@@ -1027,6 +1028,7 @@ bridgeReloc9:
     jp z,bridgeStart
     ld a,0FFh
     call bios_setFontEncoding
+    call biosMoveUseLow
 bridgeSTD:
     ld a,0B6h
     ld (IO_TIMER_MODE),a

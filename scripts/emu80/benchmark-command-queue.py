@@ -4,7 +4,7 @@ import argparse,json,re,runpy,struct,subprocess,os
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser();p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19785),default=19782);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17/queue');a=p.parse_args();O=a.out.resolve();O.mkdir(parents=True,exist_ok=True)
 sy=lambda f:{n:int(v,16) for n,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',Path(f).read_text('utf-8'),re.M)}
-k=sy(R/'bin/banked/LOCALBLOCK.sym');t=sy(R/'bin/banked/TRANSPORT.sym');b=sy(R/'bin/BIOS.sym')
+k=sy(R/'bin/banked/LOCALBLOCK.sym');t=sy(R/'bin/banked/TRANSPORT.sym');b=sy(R/'bin/BIOS.sym');dos=sy(R/'bin/banked/KERNEL.sym')
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__;g.update(OUT=O,RUNTIME=a.runtime.resolve());g['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue;if($p){{$p[0].OwningProcess}};exit 0')
 x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp';W=lambda n:struct.pack('<H',n)
 def page(n):m.write(0xfffd if n else 0xfffc,bytes([n-1 if n else 0]))
@@ -17,9 +17,9 @@ def asm(n,custom=False):
  section('init',' ld hl,04000h\n ld bc,'+('1024' if custom else '256')+'\n ld de,32\n call commandQueueInit')
  section('small',' ld hl,04000h\n ld bc,32\n ld de,8\n call commandQueueInit')
  section('off',' ld hl,0\n call mx_queueBind')
- section('direct','\n'.join(f' ld hl,{0x100a+i*256}\n MXOS_CALL MXOS_BIOS_SET_CURSOR_POS' for i in range(n)))
+ section('direct','\n'.join(f' ld hl,{0x100a+i*256}\n call mx_setCursorPos' for i in range(n)))
  def emit(i):
-  return f' ld hl,(cqNext)\n ld (hl),MXOS_BIOS_SET_CURSOR_POS & 255\n inc hl\n ld (hl),5\n inc hl\n ld (hl),1\n inc hl\n ld (hl),10\n inc hl\n ld (hl),{16+i}\n inc hl\n call commandQueueCommit'
+  return f' ld hl,(cqNext)\n ld (hl),MXOS_COMMAND_BIOS_SET_CURSOR_POS\n inc hl\n ld (hl),5\n inc hl\n ld (hl),1\n inc hl\n ld (hl),10\n inc hl\n ld (hl),{16+i}\n inc hl\n call commandQueueCommit'
  section('enqueue','\n'.join(emit(i) for i in range(n)))
  section('flush',' call mx_queueFlush')
  section('queued',' call enqueueBody\n call mx_queueFlush')
@@ -41,6 +41,12 @@ def asm(n,custom=False):
   text+=label+':\n'+(' ld hl,(handle)\n ld de,inputRegs\n '+op+'\n')*16+' ret\n'
  section('expired',' ld hl,(handle)\n ld de,inputRegs\n call mx_routeCall')
  section('unload',' ld hl,(handle)\n xor a\n MXOS_CALL MXOS_DOS_MODULE_UNLOAD')
+ for symbol,legacy in [('UPPERCASE','upperCase'),('GET_CURSOR_POS','getCursorPos'),
+                       ('SET_CURSOR_POS','setCursorPos'),('SUB_HL_DE','sub_hl_de')]:
+  section(symbol,' call mx_'+legacy if symbol.endswith('_CURSOR_POS') else ' MXOS_CALL MXOS_BIOS_'+symbol)
+  section('legacy_'+symbol,f' call 0{b["bios_"+legacy]:04x}h')
+ section('getError',' MXOS_CALL MXOS_DOS_GET_ERROR')
+ section('legacy_getError',f' call 0{dos["dosGetError"]:04x}h')
  text+='''controller:
  ld hl,(handle)
  ld de,inputRegs
@@ -79,7 +85,7 @@ inputRegs: DW 01234h,0,0,0
 dllPath: DB "B:/QROUTE.DLL",0
 '''
  section('get',' ld hl,06000h\n ld b,0\n ld a,MEM_OP_GET8\n call mx_memory')
- section('clear',' ld bc,01Fh\n MXOS_CALL MXOS_BIOS_PRINT_CHAR')
+ section('clear',' ld bc,01Fh\n call mx_printChar')
  section('text',' ld bc,1+textEnd-textBytes+2\n call commandQueueReserve\n ld (hl),MXOS_BIOS_PRINT_STRING_Z & 255\n inc hl\n ld (hl),1+textEnd-textBytes+2\n inc hl\n ld (hl),16\n inc hl\n ex de,hl\n ld hl,textBytes\n ld bc,textEnd-textBytes\n call copyLocal\n ex de,hl\n call commandQueueCommit\n call mx_queueFlush')
  text+='copyLocal:\n ld a,(hl)\n ld (de),a\n inc hl\n inc de\n dec bc\n ld a,b\n or c\n jp nz,copyLocal\n ret\n'
  for i in range(n):text+=f'packet{i}: DB 1\n DW {0x100a+i*256}\n'
@@ -95,15 +101,72 @@ def run(s,label,bank=6,**regs):
 def cursor():
  page(0);v=int.from_bytes(m.read(b['bios_vars.cursorY'],2),'little');page(6);return v
 rows=[]
+leaf_results=[]
 try:
  x.start('command queue',system=R/'images/C-Flash-512k-MMX-System-Emu80.bin');m.call('debug_break');m.call('bp_clear')
- cli=sy(R/'bin/CLI.sym');m.stop_at(cli['cliPrompt']);m.tap('f10');m.until(cli['cliPrompt'],90,page=0);m.call('bp_clear')
+ cli=sy(R/'bin/CLI.sym');m.stop_at(cli['cliPrompt'])
+ for attempt in range(5):
+  m.tap('f10')
+  try:
+   m.until(cli['cliPrompt'],8,page=0)
+   break
+  except RuntimeError:
+   if attempt==4:raise
+ m.call('bp_clear')
  page(6)
  for addr,name in ((k['MEM_IMAGE_LOCAL_START'],'LOCALBLOCK'),(k['mx_call'],'CLIENT'),(t['BANK_LANDING'],'TRANSPORT')):m.write(addr,(R/f'bin/banked/{name}.bin').read_bytes())
  m.write(k['MEM_BANK_KIND'],bytes([k['MEM_BANK_EXEC']]))
  for bank in (0,6):
   page(bank);m.write(t['bankPage'],bytes([bank]));m.write(t['bankOwner'],bytes([7+bank,bank]));m.write(t['bankDepth'],b'\0');m.write(t['bankServiceSP'],W(k['DOS_BANK_STACK_TOP'] if bank else b['BIOS_BANK_STACK_TOP']));m.write(t['bankStackFloor'],W((k['DOS_BANK_STACK_BOTTOM'] if bank else b['BIOS_BANK_STACK_BOTTOM'])+64))
  page(0);m.write(0xffc0,(R/'bin/banked/WINDOW.bin').read_bytes())
+ s,body=asm(1)
+ for bank in (0,6):
+  page(bank);m.write(0x2000,body)
+ def context(bank):
+  page(bank);return m.read(t['bankOwner'],7)
+ def leaf_call(label,bank,regs):
+  return run(s,label,bank=bank,**regs)[1]
+ contexts={bank:context(bank) for bank in (0,1,6)}
+ guards={0:(b['BIOS_BANK_STACK_BOTTOM'], b['BIOS_BANK_STACK_BOTTOM']+16),
+         1:(k['DOS_BANK_STACK_BOTTOM'], k['DOS_BANK_STACK_BOTTOM']+16),
+         6:(0x6f00,0x6f10)}
+ for bank,(start,end) in guards.items():
+  page(bank);m.write(start,bytes(range(end-start)))
+ page(0);command=m.read(0xffc0,32)
+ cases=[('UPPERCASE',0x61d7,0x1234,0x5678),('UPPERCASE',0x3957,0x1234,0x5678),
+        ('SET_CURSOR_POS',0xa5d7,0x100a,0x5678),('GET_CURSOR_POS',0xa547,0x1234,0x5678),
+        ('SUB_HL_DE',0x50d7,0x0000,0x0001),('SUB_HL_DE',0x0056,0xa501,0xa501)]
+ for label,af,hl,de in cases:
+  regs=dict(af=af,hl=hl,de=de,bc=0x3456)
+  expected=leaf_call('legacy_'+label,0,regs);actual=leaf_call(label,6,regs)
+  for reg in ('af','bc','de','hl','sp'):
+   assert actual[reg]==expected[reg],(label,reg,actual,expected)
+  leaf_results.append(dict(operation=label,bank=6,input=regs,result=actual))
+ page(1);error_byte=m.read(dos['v_dosError'],1);busy_byte=m.read(dos['kdBusy'],1)
+ entry=s['getError'];end=s['legacy_getError']+6
+ dos_fixture=m.read(entry,end-entry);dos_test_stack=m.read(0x6fe0,32)
+ try:
+  m.write(entry,body[entry-0x2000:end-0x2000])
+  for error,busy in ((0,0),(0xa5,0),(0xa5,1)):
+   page(1);m.write(dos['v_dosError'],bytes([error]));m.write(dos['kdBusy'],bytes([busy]))
+   regs=dict(af=0x5757,hl=0x1234,de=0x5678,bc=0x3456)
+   expected=leaf_call('legacy_getError',1,regs) if not busy else None
+   for bank in (1,6):
+    actual=leaf_call('getError',bank,regs)
+    assert actual['af']>>8==(k['DOS_ERR_ACCESS'] if busy else error),actual
+    assert bool(actual['af']&1)==bool(error or busy) and bool(actual['af']&0x40)==(not (error or busy)),actual
+    assert all(actual[r]==regs[r] for r in ('bc','de','hl')),actual
+    if expected:assert actual['af']==expected['af'],(bank,actual,expected)
+    leaf_results.append(dict(operation='GET_ERROR',bank=bank,busy=bool(busy),input=regs,result=actual))
+   page(1);assert m.read(dos['v_dosError'],1)==bytes([error]) and m.read(dos['kdBusy'],1)==bytes([busy])
+ finally:
+  page(1);m.write(dos['v_dosError'],error_byte);m.write(dos['kdBusy'],busy_byte)
+  m.write(entry,dos_fixture);m.write(0x6fe0,dos_test_stack)
+ for bank,saved in contexts.items():
+  assert context(bank)==saved,(bank,context(bank),saved)
+  start,end=guards[bank];assert m.read(start,end-start)==bytes(range(end-start))
+ page(0);assert m.read(0xffc0,32)==command
+ print('PASS direct leaf AF/BC/DE/HL, DOS busy refusal, owner/home/SP and guards',flush=True)
  for n in (1,4,16,64):
   s,body=asm(n);page(6);m.write(0x2000,body);run(s,'off');direct,_=run(s,'direct');assert cursor()==0x100a+(n-1)*256
   run(s,'init');queued,_=run(s,'queued');assert cursor()==0x100a+(n-1)*256
@@ -140,7 +203,6 @@ try:
  subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'leaf.bin'),'--sym='+str(O/'leaf.sym'),str(module_src)],check=True,capture_output=True)
  leaf=sy(O/'leaf.sym')
  image=imageapi['encode'](imageapi['Image']((O/'leaf.bin').read_bytes(),0x6000,0x6000,4),'dll')
- dos=sy(R/'bin/banked/KERNEL.sym')
  def allocated():
   page(1)
   table=m.read(dos['MEM_ALLOC_TABLE'],6*dos['MEM_ALLOC_RECORDS'])
@@ -150,12 +212,18 @@ try:
  m.write(0x3200,W(0x3000)+W(0x4800)+W(len(image))+bytes(34))
  fileapi['path_io'](m,lambda op,hl=0,a=0:fileapi['main_call'](m,k,op,hl,a),k,0x3200,True)
  s,body=asm(4);page(6);m.write(0x2000,body);run(s,'wide')
- for step in ('loadDll','scope'):
-  _,r=run(s,step);assert not r['af']&1,(step,r)
+ _,r=run(s,'loadDll');assert not r['af']&1,r
+ contexts={bank:context(bank) for bank in (0,1,6)}
+ _,r=run(s,'scope');assert not r['af']&1,r
+ for bank,saved in contexts.items():
+  assert context(bank)==saved,(bank,context(bank),saved)
+  start,end=guards[bank];assert m.read(start,end-start)==bytes(range(end-start))
  assert m.read(s['scalarResult'],2)==W(0x1235)
  assert m.read(s['pinnedError'],1)==bytes([k['MEM_ERROR_ACTIVE']])
  assert m.read(s['cqError'],1)==bytes(1)
- page(0);assert m.read(leaf['receivedBytes'],3)==W(320)+bytes([77]);page(6)
+ page(0);assert m.read(leaf['receivedBytes'],3)==W(320)+bytes([77])
+ assert b['BIOS_BANK_STACK_BOTTOM']<int.from_bytes(m.read(leaf['moduleSP'],2),'little')<b['BIOS_BANK_STACK_TOP']
+ page(6)
  regular,r=run(s,'legacyPerf');assert not r['af']&1
  scoped,r=run(s,'scopePerf');assert not r['af']&1
  route_perf=dict(calls=16,module_call=regular,module_scope=scoped,speedup=regular/scoped)
@@ -214,9 +282,11 @@ try:
  # A Reset abandons a bound controller. Count any accidental call into its old code.
  page(1);m.write(0xeb,b'\x00');m.write(0xed,b'\x21\xeb\x00\x34\xc9')
  m.write(k['MEM_QUEUE_HOOK'],W(0xed));m.write(t['bankQueueBefore'],b'\xc3')
- page(0);m.call('bp_clear');m.stop_at(b['biosTryShell']);m.call('emu_reset');m.until(b['biosTryShell'],120,page=0)
+ page(0);m.call('bp_clear');m.stop_at(b['biosBankShell']);m.call('emu_reset');m.until(b['biosBankShell'],120,page=0)
+ assert m.read(b['biosBootWarm'],1)==b'\x01','Reset must retain the resident DOS'
  page(1);assert m.read(0xeb,1)==b'\x00' and m.read(k['MEM_QUEUE_HOOK'],2)==W(0)
  page(0);assert m.read(k['MEM_QUEUE_HOOK'],2)==W(0)
  print('PASS warm Reset discards bound queues without dispatching them',flush=True)
  (O/'result.json').write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
+ (O/'leaf-results.json').write_text(json.dumps(leaf_results,indent=2)+'\n',encoding='utf-8')
 finally:x.stop()

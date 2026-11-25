@@ -8,6 +8,8 @@
 memoryInit:
     ld hl,memcpy_bc_hl
     ld (MEM_NEAR_COPY),hl
+    ld a,MEM_EXEC_READY_VALUE
+    ld (MEM_EXEC_READY),a
     ld hl,MEM_ALLOC_TABLE
     ld b,MEM_ALLOC_RECORDS
 memoryInitLoop:

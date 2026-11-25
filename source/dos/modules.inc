@@ -1,4 +1,4 @@
-; Модули: фиксированный контейнер COM/EXE, записи принадлежат DOS.
+; Модули v2/v3. Фактические адреса и владение хранит DOS.
 ; Публичный вызов через MXOS_CALL; все NEAR-параметры находятся у kdPage.
 ; Запись: handle:word, active:byte, bank:byte, entry:word,
 ; allocation:word, owner:byte, allocationOwner:byte, start:word, end:word,
@@ -88,12 +88,30 @@ memoryOwnerCurrent:
 ; Освобождаем и активные записи, но не обнуляем счётчик поколений handle.
 ; FILEOPS code stays cached; a lost caller cannot resume its old job/stack.
 moduleWarm:
+    ld a,MEM_EXEC_READY_VALUE
+    ld (MEM_EXEC_READY),a
     xor a
     ld (timerOwner),a
     ld (fileopsActive),a
     ld (enumActive),a
     ld (fileopsPublic),a
     ld (moduleActor),a
+    ld (kiSumActive),a
+    ; Reset во время установки EXEC теряет стек и неопубликованный handle.
+    ; Сначала возвращаем профиль DATA, потом обычный проход освободит резерв.
+    ld a,(mdLoadingBank)
+    or a
+    jp z,mdWarmRoutes
+    ld hl,(mdRecord)
+    ld a,(hl)
+    inc hl
+    or (hl)
+    ld a,(mdLoadingBank)
+    call z,mdRestoreData
+    xor a
+    ld (mdLoadingBank),a
+mdWarmRoutes:
+    xor a
     call mdForgetRoute
     ld a,DOS_BANK_PAGE
     call mdForgetRoute
@@ -112,7 +130,7 @@ mdResetActive:
     inc hl
     ld a,(hl)
     cp 2
-    call nc,mdForgetRoute
+    call nc,mdRefreshExec
 mdResetRouteDone:
     pop hl
     pop bc
@@ -238,6 +256,14 @@ mdAllocationDone:
     pop bc
     ret
 
+;----------------------------------------------------------------------------
+; MXOS
+; Загрузить модуль в выбранную область и выдать handle после проверки образа.
+; вход: kdRegs.HL = путь в kdPage, kdRegs.A = MAIN/BANK/DOS. Таблицы DOS
+; инициализированы, страница и владелец определяют контекст клиента.
+; выход: CF=0, HL=handle. CF=1, A=ошибка; частный резерв снят, управление
+; возвращено на страницу клиента. BC/DE рабочие. База живёт до выгрузки.
+;----------------------------------------------------------------------------
 moduleLoad:
     xor a
     call dosClearError
@@ -263,36 +289,15 @@ mdResidentPlacementReady:
     or l
     jp z,mdNoMemory
     ld hl,(kdRegs)
-    ld de,KD_PATH
-    ld bc,MAX_PATH
-    call kdFetch
+    call kdFetchPath
     jp c,kdBad
-    ld hl,KD_PATH
-    ld b,MAX_PATH
-mdPath:
-    ld a,(hl)
-    or a
-    jp z,mdOpen
-    inc hl
-    dec b
-    jp nz,mdPath
-    jp kdBad
-mdOpen:
     ld hl,KD_PATH
     ld de,v_curFileDescr
     call fileNamePrepare
     jp c,mdFileError
     ld hl,v_curFileDescr
-    call imageOpen
+    call imageOpenModule
     jp c,mdFileError
-    ld (mdEntry),hl
-    ex de,hl
-    ld (mdAddress),hl
-    MD_PUT_BC mdBytes
-    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
-    ld (mdMemoryStart),hl
-    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
-    ld (mdMemoryEnd),hl
     ld hl,(v_imageHeader+IMAGE_STACK)
     ld de,DOS_BANK_STACK_TOP-DOS_BANK_STACK_BOTTOM-64
     ld a,(mdPlacement)
@@ -304,7 +309,6 @@ mdStackLimit:
     jp c,mdStackReady
     jp nz,mdRange
 mdStackReady:
-    ld hl,(mdAddress)
     ld a,(mdPlacement)
     cp MODULE_TARGET_DOS
     jp z,mdDosImage
@@ -338,6 +342,19 @@ mdPlacementDispatch:
     call mdReuseSelect
     jp c,mdNoMemory
     ld (mdRecord),hl
+    push bc
+    ld a,(mdPlacement)
+    call imagePlace
+    pop bc
+    jp c,mdError
+    ld (mdEntry),hl
+    ex de,hl
+    ld (mdAddress),hl
+    ld hl,(v_imageHeader+IMAGE_MEMORY_BEGIN)
+    ld (mdMemoryStart),hl
+    ld hl,(v_imageHeader+IMAGE_MEMORY_END)
+    ld (mdMemoryEnd),hl
+    ld hl,(mdRecord)
     ld de,6
     add hl,de
     xor a
@@ -390,7 +407,7 @@ mdDosEndReady:
     call cmp_hl_de
     jp c,mdRange
     MD_GET_DE mdMemoryEnd
-    call dosArenaImage
+    call imageClaimDos
     jp c,mdArenaBusy
     ld hl,0
     ld (memorySlotPtr),hl
@@ -400,6 +417,8 @@ mdArenaBusy:
     ld a,MEM_ERROR_ACTIVE
     jp mdError
 mdMain:
+    call memoryFindFreeSlot
+    jp c,mdError
     ld hl,(mdMemoryStart)
     MD_GET_DE mdMemoryEnd
     ld bc,APP_MEMORY_END
@@ -467,7 +486,9 @@ mdReservedRecord:
     cp DOS_IO_PAGE
     jp z,mdContextReady
     or a
-    call nz,mdInstall
+    jp z,mdContextReady
+    ld (mdLoadingBank),a
+    call mdInstall
     jp c,mdRollback
 mdContextReady:
     ld a,(mdReuseHit)
@@ -501,15 +522,18 @@ mdReadImage:
 mdLoadReady:
     ld a,(mdCaller)
     ld (kdPage),a
+    ld hl,(mdNext)
+    ld (kdRegs),hl
+    ld d,h
+    ld e,l
+    inc hl
+    ld (mdNext),hl
     ld hl,(mdRecord)
-    MD_GET_DE mdNext
     ld (hl),e
     inc hl
     ld (hl),d
-    ex de,hl
-    ld (kdRegs),hl
-    inc hl
-    ld (mdNext),hl
+    xor a
+    ld (mdLoadingBank),a
     call mdReuseTrack
     call memoryPublishTop
     xor a
@@ -519,7 +543,10 @@ mdRollback:
     ld a,(mdCaller)
     ld (kdPage),a
     ld hl,(mdRecord)
-    call mdRelease
+    ; Handle ещё не выдан. У этой записи нет потомков или захваченных служб.
+    call mdDiscardImage
+    xor a
+    ld (mdLoadingBank),a
     pop af
     jp mdError
 mdFileError:
@@ -545,6 +572,14 @@ mdForgetRoute:
     ld de,MEM_ROUTE_STATE
     ld bc,bankQueueBefore-MEM_ROUTE_STATE+1
     jp mdInstallPart
+mdRefreshExec:
+    call mdForgetRoute
+    ret c
+mdMarkExec:
+    ld hl,mdExecReady
+    ld de,MEM_EXEC_READY
+    ld bc,1
+    jp mdInstallPart
 mdInstall:
     ld hl,IO_BANK_KEYS
     ld de,IO_BANK_KEYS
@@ -558,7 +593,20 @@ mdInstall:
     ret c
     ld hl,BANK_LANDING
     ld de,BANK_LANDING
-    ld bc,BANK_TRANSPORT_BYTES
+    ; Хвост DATA уже установлен загрузчиком. Его счётчик и селекторы
+    ; обслуживают этот самый перенос и должны дожить до возврата в DOS.
+    ld bc,MEM_DATA_START-BANK_LANDING
+    call mdInstallPart
+    ret c
+    ; Сначала вернуть подготовку прямого MOVE, затем открыть её вход.
+    ld hl,bankMoveDataEntry
+    ld de,bankMoveDataEntry
+    ld bc,bankMoveDataBytes
+    call mdInstallPart
+    ret c
+    ld hl,bankMoveDirectOperand
+    ld de,bankMoveDirectOperand
+    ld bc,2
     call mdInstallPart
     ret c
     ld a,(mdBankId)
@@ -577,9 +625,12 @@ mdInstall:
     ld bc,5
     call mdInstallPart
     ret c
-    ld hl,mdLocalContext
+    ld hl,mdNearCopy
     ld de,MEM_NEAR_COPY
     ld bc,2
+    call mdInstallPart
+    ret c
+    jp mdMarkExec
 mdInstallPart:
     ld (mdCopy+1),hl
     MD_PUT_DE mdCopy+4
@@ -878,6 +929,7 @@ mdOwnedNext:
     ld (memoryMainEnd),hl
 mdFreeImage:
     pop hl
+mdDiscardImage:
     push hl
     ld de,6
     add hl,de
@@ -901,11 +953,34 @@ mdFreeRecord:
     jp nz,mdFreeExec
     jp mdFreeRecordMain
 mdFreeExec:
+    call mdRestoreData
+    jp mdFreeRecordMain
+
+;----------------------------------------------------------------------------
+; MXOS
+; Вернуть хвост освобождаемой страницы из EXEC в DATA, в том числе после Reset.
+; вход: A=выделенная физическая FAR-страница, транспорт DOS уже работает.
+; выход: профиль DATA установлен, AF/BC/DE/HL рабочие, mdBankId изменён.
+;----------------------------------------------------------------------------
+mdRestoreData:
     ld (mdBankId),a
+    ; Вход DATA включается после записи всего тела прямого MOVE.
+    ld hl,mdDataForwardTemplate
+    ld de,bankMoveDataEntry
+    ld bc,bankMoveDataBytes
+    call mdInstallPart
+    ld hl,mdDataForwardWord
+    ld de,bankMoveDirectOperand
+    ld bc,2
+    call mdInstallPart
+    ld hl,mdDataKind
+    ld de,MEM_EXEC_READY
+    ld bc,1
+    call mdInstallPart
     ld hl,mdDataKind
     ld de,MEM_BANK_KIND
     ld bc,1
-    call mdInstallPart
+    jp mdInstallPart
 mdFreeRecordMain:
     pop hl
     xor a
@@ -1087,5 +1162,13 @@ mdCallDone:
 
     INCLUDE "module-main-claim.inc"
     INCLUDE "module-reuse.inc"
+    INCLUDE "module-relocate.inc"
 
     INCLUDE "lifecycle.inc"
+
+mdDataForwardWord: DW bankMoveDataEntry
+mdDataForwardTemplate:
+    DISP bankMoveDataEntry
+    INCLUDE "../mem/data-forward.inc"
+    ENT
+    ASSERT $-mdDataForwardTemplate == bankMoveDataBytes

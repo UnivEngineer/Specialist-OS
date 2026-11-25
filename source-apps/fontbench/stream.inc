@@ -27,7 +27,6 @@ streamSaveEntries:
 streamInstallChar:
     ld hl,streamChar
     ld (bios_printChar+1),hl
-    ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_CHAR-0100h)),hl
 streamInstallString:
     ld hl,streamString
     ld (bios_printString+1),hl
@@ -37,7 +36,6 @@ streamInstallString:
 streamRestore:
     ld hl,(streamOriginalChar+1)
     ld (bios_printChar+1),hl
-    ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_CHAR-0100h)),hl
     ld hl,(streamOriginalString+1)
     ld (bios_printString+1),hl
     ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_STRING_BANK-0100h)),hl

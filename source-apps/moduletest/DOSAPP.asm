@@ -12,14 +12,14 @@ IMAGE_FLAGS = IMAGE_FLAG_DRIVER
 ;   Доступны консоль BIOS и MEM_OP_PUT16. Регистровых аргументов нет.
 ;
 ; выход:
-;   После печати в MAIN по 5200h записывается 55AAh. Возвращается статус вызова
+;   После печати в MAIN по 8800h записывается 55AAh. Возвращается статус вызова
 ;   mx_memory.
 ;----------------------------------------------------------------------------
 
 entry:
     ld hl,message
     MXOS_CALL MXOS_BIOS_PRINT_STRING
-    ld hl,05200h
+    ld hl,08800h
     ld de,055AAh
     ld b,0
     ld a,MEM_OP_PUT16

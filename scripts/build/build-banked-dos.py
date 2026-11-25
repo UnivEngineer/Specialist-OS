@@ -18,7 +18,7 @@ def main():
                 lines.append(h['include'](ROOT/'source/dos/kernel-start.inc'))
             else:
                 lines.append(h['include'](ROOT/'source/dos'/filename))
-    for name in ('cmp_hl_de','math','strcmp','move8080','memcpy_bc_hl','memmove_bc_hl',
+    for name in ('cmp_hl_de','math','strcmp','move-external','memcpy_bc_hl','memmove_bc_hl',
                  'memset_de_20_b','argNext','calcCS','installDriver'):
         lines.append(h['include'](ROOT/f'source/common/{name}.inc'))
     (out/'kernel-layout.inc').write_text('\n'.join(lines)+'\n', encoding='utf-8')

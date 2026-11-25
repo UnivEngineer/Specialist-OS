@@ -3,6 +3,8 @@ from pathlib import Path
 import runpy,re,struct,json
 R=Path(__file__).resolve().parents[2];O=R/'docs/banked/memory-054/banks';O.mkdir(parents=True,exist_ok=True)
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=O,RUNTIME=R/'.local/monitor2-001');x=h['Matrix']();m=x.m;rows=[]
+api={key:int(value,16) for key,value in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
+     (R/'bin/banked/TRANSPORT.sym').read_text(),re.M)}
 def page(n):m.write(0xfffd if n else 0xfffc,bytes([n-1 if n else 0]))
 def invoke(entry,**regs):
  m.write(0x8000,b'\xcd'+struct.pack('<H',entry)+b'\xc3\x00\x70');m.stop_at(0x7000);m.call('regs_set',pc=0x8000,sp=0x8fdf,**regs);before=m.call('cpu_state')['cpu_ticks'];z=m.until(0x7000,10);assert z['registers']['sp']['dec']==0x8fdf
@@ -20,38 +22,35 @@ try:
  m.write(0x6000,struct.pack('<BHBHH',3,0x4000,3,0x4001,257));r,t=invoke(0xf815,af=2,bc=0x1234,de=0x5678,hl=0x6000);assert not r['af']&1
  page(3);expected=bytearray(initial);expected[1:258]=initial[:257];assert m.read(0x4000,512)==expected;page(0);rows.append(dict(case='remote-overlap',ticks=t))
  page(1);m.write(0xa000,initial[:256]);m.write(0x800,struct.pack('<BHBHH',1,0xa000,1,0xa200,256));r,t=invoke(0xf80f,hl=0x800,bc=0x1234,de=0x5678);assert not r['af']&1 and m.read(0xa200,256)==initial[:256];page(0);rows.append(dict(case='DOS-near-copy',ticks=t))
- # COPY -> TEXT -> COPY и повторные операции без промежуточного COMMAND.
+ # COPY -> TEXT -> COPY и повторные операции на одном окне.
  # Вызовы ABI тестовые; самостоятельное банковое приложение не запускается.
  for length in (0,1,19,20,21,40,41,256):
   payload=b'X'*length+b'\0'
   page(1);m.write(0xa600,payload)
   m.write(0xa400,struct.pack('<BHBHH',1,0xa600,0,0x6000,len(payload)))
   r,t=invoke(0xf80f,hl=0xa400,bc=0x1234,de=0x5678);assert not r['af']&1
-  assert m.read(0xffdf,1)==b'\x01'
+  portion=len(payload)%32 or 32
+  assert m.read(0xffc0,portion)==payload[-portion:]
   for repeat in range(2):
    r,t=invoke(0xf815,af=0x502,hl=0xa600,bc=0x1234,de=0x5678)
    assert r['hl']==0xa600+length and r['bc']==0x1234 and r['de']==0x5678 and not r['af']&1,r
-   assert m.read(0xffdf,1)==b'\x02'
   r,t=invoke(0xf80f,hl=0xa400);assert not r['af']&1
-  assert m.read(0xffdf,1)==b'\x01'
-  # Вызов BIOS после COPY восстанавливает COMMAND и печатает main-адрес.
+  assert m.read(0xffc0,portion)==payload[-portion:]
+  # Вызов BIOS после COPY печатает строку по адресу MAIN.
   m.write(0xa500,struct.pack('<HHHH',0x6000,0x4567,0x89ab,0x5502))
-  r,t=invoke(0xf800,bc=0x129,de=0xa500)
+  r,t=invoke(api['mx_call'],bc=api['MXOS_BIOS_PRINT_STRING_Z_MAIN'],de=0xa500)
   assert r['hl']==0x6000+length and r['de']==0x4567 and r['bc']==0x89ab,r
-  assert m.read(0xffdf,1)==b'\0'
   page(0);assert m.read(0x6000,len(payload))==payload
   rows.append(dict(case='COPY-TEXT-TEXT-COPY-BIOS',bytes=length))
- # Повторный SCALAR сохраняет установленный профиль без возврата COMMAND.
+ # Повторный SCALAR обрабатывает новое значение без подготовки окна.
  for value in (0x1234,0xabcd):
   r,t=invoke(0xf815,af=0x402,bc=0x300,hl=0x4200,de=value);assert not r['af']&1
-  assert m.read(0xffdf,1)==b'\x03'
   r,t=invoke(0xf815,af=0x202,bc=0x300,hl=0x4200);assert r['de']==value and not r['af']&1
-  assert m.read(0xffdf,1)==b'\x03'
  rows.append(dict(case='SCALAR-repeat',count=4))
  # Изолированный стенд удаляет разметку только собственного B: для разделения пула.
  page(2);m.write(0,bytes(256));page(0)
  def dos(op,bank=0,address=0,value=0):
-  m.write(0x3000,struct.pack('<HHHH',address,value,bank*256,op*256+2));return invoke(0xf800,bc=0x226,de=0x3000)
+  m.write(0x3000,struct.pack('<HHHH',address,value,bank*256,op*256+2));return invoke(api['mx_call'],bc=api['MXOS_DOS_MEMORY'],de=0x3000)
  r,t=dos(10,4);assert not r['af']&1,r
  r,t=dos(6,255,128);assert not r['af']&1 and r['bc']>>8==6 and r['hl']==0,r;rows.append(dict(case='allocate-bank',bank=6,ticks=t))
  page(6);m.write(0,initial[:128]);page(0)

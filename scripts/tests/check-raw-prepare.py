@@ -56,8 +56,8 @@ for drive,page,shift,flushError,installError in cases:
  mem=bytearray(base);mem[s['v_drive']]=drive;mem[s['kdPage']]=page;mem[s['v_diskInfo.blockShift']]=shift
  mem[s['kernelRamDrive']]=ram
  mem[s['kernelExternalDrive']]=external
- # Проверяем и H: ёмкостью только 32 КиБ (ненулевой младший байт).
- struct.pack_into('<H',mem,s['DOS_DRIVER_REGISTRY']+7*s['DRIVER_RECORD_SIZE'],128)
+ for mounted in (system,ram,external):
+  struct.pack_into('<H',mem,s['DOS_DRIVER_REGISTRY']+mounted*s['DRIVER_RECORD_SIZE'],128)
  mem[0x8702:0x8704]=bytes([flushError,installError]);(O/'in.bin').write_bytes(mem)
  subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8200','-end','82ff','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True)
  out=(O/'out.bin').read_bytes();assert int.from_bytes(out[65542:65544],'little')==0x82ff

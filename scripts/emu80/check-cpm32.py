@@ -36,10 +36,18 @@ def main():
       select(caller);m.write(0x8500,bytes([srcpage])+W(src)+bytes([dstpage])+W(dst)+W(count));m.write(0xffc0,image[parts[-1][2]:parts[-1][2]+32])
       stub=b'\x01'+W(0x1234)+b'\x11'+W(0x5678)+b'\x21'+W(0x8500)+b'\xcd'+W(ts['bankCopySector'] if srcpage&128 else ts['bankCopyFar'])+b'\xc3'+W(0x88ff)
       m.write(0x8800,stub);m.stop_at(0x88ff);m.call('regs_set',pc=0x8800,sp=0x8f00)
+      if variant=='CPM32':
+       m.call('bp_set',addr=0xffc0,type='exec',skipCount=1_000_000)
       start=m.call('cpu_state')['cpu_ticks'];state=m.until(0x88ff,10);ticks=state['cpu_ticks']-start
       assert not state['flags']['C'],(variant,caller,count,phase,state)
       assert state['registers']['sp']['dec']==0x8f00
       assert state['registers']['bc']['dec']==0x1234 and state['registers']['de']['dec']==0x5678 and state['registers']['hl']['dec']==0x8500
+      if variant=='CPM32':
+       entry,= [bp for bp in m.call('bp_list')['breakpoints'] if bp['addr']=='FFC0' and bp['type']=='exec']
+       assert not entry['hitCount'],(caller,srcpage,count,phase,'executed common window')
+       window=m.read(0xffc0,32)
+       portion=count%32 or 32
+       assert window[:portion]==payload[count-portion:]
       select(dstpage);actual=m.read(dst-1,count+2);assert actual==b'\xa5'+payload+b'\x5a',(variant,caller,srcpage,count,phase,'data')
       rows.append(dict(engine=variant,caller=caller,sourcePage=srcpage,destinationPage=dstpage,bytes=count,phase=phase,ticks=ticks,KiB_s=count*2000000/ticks/1024))
    print(variant,'PASS',sum(r['engine']==variant for r in rows),flush=True)

@@ -410,8 +410,12 @@ pip_readMain:
             ; The scope pins GFX while NC draws. FILE_EXEC can evict it.
             ; This is the upper limit with FONT retained, from address 0.
             push hl
-            ld hl,GFX_BASE
+            ld hl,(ncGfxBase)
             call bios_cmp_hl_de
+            jp z,pip_shellMainLimit
+            ld hl,NC_MAIN_PACKET
+            call bios_cmp_hl_de
+pip_shellMainLimit:
             pop hl
             ret nz
             ld a,h

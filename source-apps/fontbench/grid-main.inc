@@ -372,38 +372,44 @@ gridMainRawLoop:
     jp nz,gridMainRawLoop
     ret
     INCLUDE "grid-phase.inc"
-; One separately loaded native bank; loading and corpus copy are not timed.
+;----------------------------------------------------------------------------
+; MXOS
+; Загрузить исполнителя в отдельный EXEC, вызвать его и освободить банк.
+; вход:
+;   gridControl+4/+5 = вид API и способ вызова, gridControl+8 = буфер MAIN,
+;   gridText содержит GRID_TEXT_BYTES и завершающий нуль.
+; выход:
+;   CF=0, gridControl+0/+2 = младшее/старшее слово времени. При отказе CF=1,
+;   A = код ошибки DOS либо DLL. BC, DE, HL и прочие флаги разрушаются.
+;----------------------------------------------------------------------------
 gridInvoke:
-    ld a,080h
-    ld (gridControl+7),a
-    ld hl,gridControl
-    ld de,gridArgument
-    ld b,4
-gridHex:
-    ld a,h
-    rrca
-    rrca
-    rrca
-    rrca
-    and 15
-    cp 10
-    jp c,gridHexDigit
-    add a,7
-gridHexDigit:
-    add a,'0'
-    ld (de),a
-    inc de
-    add hl,hl
-    add hl,hl
-    add hl,hl
-    add hl,hl
-    dec b
-    jp nz,gridHex
     ld hl,gridBankPath
-    MXOS_CALL MXOS_DOS_FILE_EXEC_NATIVE
+    ld a,MODULE_TARGET_BANK
+    MXOS_CALL MXOS_DOS_MODULE_LOAD
     ret c
-    ld a,(gridControl+6)
-    rra
+    push hl
+    ld hl,gridText
+    ld (gridControl),hl
+    ld hl,(gridControl+8)
+    ld (gridControl+2),hl
+    pop hl
+    push hl
+    ld de,gridControl
+    MXOS_CALL MXOS_DOS_MODULE_CALL
+    jp c,gridReleaseBank
+    ld hl,(gridControl+6)
+    push hl
+    pop af
+gridReleaseBank:
+    pop hl
+    push af
+    xor a
+    MXOS_CALL MXOS_DOS_MODULE_UNLOAD
+    jp c,gridReleaseError
+    pop af
+    ret
+gridReleaseError:
+    pop hl
     ret
 ; Address = results + ((pre*5+kind)*6+route)*4.
 gridResultAddress:
@@ -830,8 +836,7 @@ gridFileFailed:     DB 'Cannot save FONTBEN.TXT on RAM disk',13,10,0
 gridFileSaved:      DB 'Saved FONTBEN.TXT on RAM disk',13,10,0
 gridControl:        DW 0,0,0,08000h,0,gridText
     DB 0,0
-gridBankPath: DB 'C:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.com '
-gridArgument: DB '0000',0
+gridBankPath: DB 'C:',05Ch,'Bench',05Ch,'FontBen',05Ch,'FontBank.dll',0
     DS MAX_PATH-($-gridBankPath),0
 gridResults: DS 264,0FFh
 gridResultsEnd:

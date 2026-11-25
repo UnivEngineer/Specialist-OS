@@ -10,6 +10,8 @@ symbols = lambda p: {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A
 k = symbols(R/'bin/banked/KERNEL.sym')
 n = symbols(R/'bin/NC.sym')
 r = symbols(R/'bin/RUN.sym')
+core = symbols(R/'bin/NC_CORE.sym')
+cli = symbols(R/'bin/CLI.sym')
 helpers = runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'))
 helpers['Matrix'].__init__.__globals__.update(OUT=O, RUNTIME=R/'.local/monitor2-001')
 x = helpers['Matrix']()
@@ -30,16 +32,73 @@ def save(name, data):
     callback=lambda op,hl=0,a=0:api['main_call'](m,k,op,hl,a)
     api['path_io'](m,callback,k,0x3200,True)
 
-def enter(command, menu=False, direct=False):
-    page(0)
-    m.write(0x5200, word(0))
+def type_line(command, address):
     m.call('bp_clear')
     m.call('emu_run_for', ms=500)
     m.tap('esc')
     m.call('emu_run_for', ms=250)
     for c in command:
-        m.tap({' ':'space', ':':'colon', '/':'slash', '.':'period', '-':'minus'}.get(c,c.lower()))
-    assert m.read(n['vars.cmdLine'], len(command)).upper() == command.upper().encode()
+        if c == '_':
+            m.call('kbd_send', keys=['shift'], action='press')
+            try:
+                m.tap('0')
+            finally:
+                m.call('kbd_send', keys=['shift'], action='release')
+        else:
+            m.tap({' ':'space', ':':'colon', '/':'slash', '.':'period', '-':'minus'}.get(c,c.lower()))
+    typed = m.read(address, len(command))
+    assert typed.upper() == command.upper().encode(), (command, typed)
+
+def ready_main():
+    poll = core['ncBankInputPoll']
+    main_loop = n['mainLoop']
+    main_code = (R/'bin/NC.i80').read_bytes()[:32]
+    core_code = (R/'bin/NC_CORE.i80').read_bytes()[poll-0x100:poll-0x100+3]
+    m.stop_at(main_loop)
+    m.call('bp_set', addr=poll, type='exec')
+    for _ in range(120):
+        state = m.call('cpu_state')
+        pc = state['registers']['pc']['dec']
+        bank = m.read(x.pageAddress, 1)[0]
+        if pc == main_loop and bank == 0 and m.read(0, 32) == main_code:
+            return
+        if pc == poll and bank > 1 and m.read(poll, 3) == core_code:
+            m.call('bp_clear')
+            m.call('emu_run_for', ms=500)
+            x.console()
+            type_line('C:/DOS/NC_MN.COM', cli['CMD_LINE'])
+            m.stop_at(main_loop)
+            m.tap('enter')
+            m.until(main_loop, 120, page=0)
+            assert m.read(0, 32) == main_code
+            return
+        if state['breaked']:
+            m.call('debug_step', mode='into')
+        m.call('emu_run_for', ms=1000)
+    raise AssertionError(('NC did not enter MAIN', m.call('cpu_state')))
+
+def resources():
+    page(1)
+    shell_owner = m.read(k['appOwner'], 1)[0]
+    allocations = m.read(k['MEM_ALLOC_TABLE'], k['MEM_ALLOC_RECORDS'] * 6)
+    size = k['MODULE_RECORD_SIZE']
+    modules = m.read(k['MODULE_TABLE'], k['MODULE_MAX'] * size)
+    page(0)
+    # При тёплом старте NC может вернуться на другую глубину FILE_EXEC.
+    # Сверяем банк, адрес и длину его областей и точных владельцев остальных записей.
+    blocks = set()
+    for i in range(0, len(allocations), 6):
+        if allocations[i] != 255:
+            owner = allocations[i+5]
+            blocks.add((allocations[i:i+5], None if owner == shell_owner else owner))
+    return (blocks,
+            {modules[i:i+2] for i in range(0, len(modules), size) if modules[i:i+2] != bytes(2)})
+
+def enter(command, menu=False, direct=False):
+    page(0)
+    m.write(0x8800, word(0))
+    prior_allocations, prior_modules = resources()
+    type_line(command, n['vars.cmdLine'])
     stem = str(len(rows)+1)
     m.screenshot(O/(stem+'-command.png'))
     returned = n['mainLoop'] if direct else 0xc000
@@ -52,17 +111,13 @@ def enter(command, menu=False, direct=False):
         m.call('emu_run_for', ms=500) # Дать getch завершить отпускание Enter.
         m.tap('1')  # MX
     m.until(returned, 120, page=0)
-    assert m.read(0x5200, 2) == word(0x55aa), (command, m.read(0x5200,2).hex())
+    assert m.read(0x8800, 2) == word(0x55aa), (command, m.read(0x8800,2).hex())
     m.screenshot(O/(stem+'-result.png'))
-    page(1)
-    allocations=m.read(k['MEM_ALLOC_TABLE'], 32*6)
-    modules=m.read(k['MODULE_TABLE'], k['MODULE_MAX']*k['MODULE_RECORD_SIZE'])
-    assert all(allocations[i]==255 for i in range(0,len(allocations),6)), command
-    assert all(modules[i:i+2]==bytes(2) for i in range(0,len(modules),k['MODULE_RECORD_SIZE'])), command
-    page(0)
     if not direct:
-        m.stop_at(n['mainLoop'])
-        m.until(n['mainLoop'], 120, page=0)
+        ready_main()
+    allocations, modules = resources()
+    assert allocations == prior_allocations, (command, allocations^prior_allocations)
+    assert modules == prior_modules, (command, modules^prior_modules)
     rows.append(dict(command=command, menu=menu, returned=True, resourcesReleased=True))
     print('PASS', command, 'menu' if menu else 'native', flush=True)
 
@@ -84,7 +139,7 @@ try:
     page(0)
     m.stop_at(n['mainLoop'])
     m.call('emu_reset')
-    m.until(n['mainLoop'], 120, page=0)
+    ready_main()
     if '--std-only' in sys.argv:
         enter('RUN B:/UNKNOWN.COM -STD Test')
     else:

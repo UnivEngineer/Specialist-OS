@@ -1,8 +1,9 @@
 ; DE указывает на экран. Выбираем порог Z/RawZ/RawLim и полярность на пакет.
     ld a,(realMode)
     ld b,32
-    or a
+    add a,a
     jp z,compactThresholdReady
+    rrca
     dec a
     ld b,1
     jp z,compactThresholdReady

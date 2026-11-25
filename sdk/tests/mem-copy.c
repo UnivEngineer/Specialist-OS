@@ -14,5 +14,24 @@ int main(void) {
     if(!(af & MXOS_CF) || (af >> 8)!=0xe0) return 3;
     request.bytes=0;
     af=mxos_memcpy_far(&request);
-    return (af & MXOS_CF) || (af >> 8) ? 4 : 0;
+    if((af & MXOS_CF) || (af >> 8)) return 4;
+
+    request.source_offset=0x4000;
+    request.destination_bank=0;
+    request.destination_offset=0x4001;
+    request.bytes=256;
+    af=mxos_memcpy_far(&request);
+    if((af & MXOS_CF) || (af >> 8)) return 6;
+    for(i=0;i<256;i++) if(source[i]!=target[i+1]) return 7;
+
+    request.source_offset=0x4001;
+    request.destination_offset=0x4000;
+    af=mxos_memmove_far(&request);
+    if((af & MXOS_CF) || (af >> 8)) return 8;
+    for(i=0;i<256;i++) if(source[i]!=target[i]) return 9;
+
+    request.source_offset=0xFDFF;
+    request.bytes=2;
+    af=mxos_memcpy_far(&request);
+    return (af & MXOS_CF) && (af >> 8)==MXOS_MEM_ERR_RANGE ? 0 : 10;
 }

@@ -1,12 +1,9 @@
-; MAIN graphics executor. The caller registers its packet and bitmap buffers.
-GFX_BASE = 01B00h
-; Result: cursor DW, inverse DW, cursor config, three reserved bytes,
-; FNT1 header (8 bytes), left/right glyph padding.
-GFX_RESULT       = 03360h
+; GFX_BIND: HL = начало зарегистрированного приёмника в MAIN, BC = ёмкость.
+; Ответ: HL = результат в MAIN (действителен до выгрузки), DE = база DLL.
+; Курсор DW, инверсия DW, конфигурация курсора, три резервных байта,
+; заголовок FNT1 (8 байт), два байта отступов глифа.
 GFX_RESULT_BYTES = 18
-GFX_PACKET       = 03380h
 GFX_MAX_PACKET   = 3072
-; BIND takes BC=capacity at GFX_PACKET.
 GFX_BIND          = 0F1h
 GFX_CURSOR        = 0F2h
 GFX_GLYPH_PADDING = 081h  ; L=first glyph, C=count. Updates padding in result.

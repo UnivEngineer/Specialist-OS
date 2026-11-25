@@ -7,10 +7,12 @@
 ;     скалярные функции таблицы bbModes (режим 1) и TEXT_PRINT (режим 5).
 ;     При выполнении AF/BC/DE/HL содержат результат, BANK_FRAME_STATUS = 0.
 ;     Для остальных режимов A = DOS_ERR_UNSUPPORTED, CF = 1.
-; +6  Завершение TEXT_PRINT: принимает результат в bbRegs, открывает командное
-;     окно, снимает bbBusy и возвращает AF/BC/DE/HL из пакета.
-; +9  Локальный список: HL = адрес в MAIN, BC = длина. Возвращает A = 0,
-;     CF = 0 и открывает командное окно, результаты записей не собираются.
+; +6  Завершение TEXT_PRINT: принимает результат в bbRegs, снимает bbBusy
+;     и возвращает AF/BC/DE/HL из пакета.
+; +9  Локальный список: HL = адрес в MAIN, BC = длина. Короткая пачка из
+;     банка приходит на стеке MAIN через TEXT. Возвращает A = 0, CF = 0,
+;     результаты записей не собираются.
+; +0Ch/+10h Пары слов SP для UPPERCASE и SUB_HL_DE.
 ;
 ; Вызывающий гарантирует границы пакетов, номера операций и доступный стек.
     INCLUDE "../include/mxos.inc"
@@ -26,51 +28,44 @@ bankBiosFinishDispatch:
     jp bbFinish
 bankBiosBatchLocal:
     jp bbBatchLocal
+; Первое слово выбирает исторический вектор BIOS, второе возвращает управление
+; в MEM. Допущенные обработчики не пишут в стек и завершаются через RET.
+    MACRO BIOS_FAST_SLOT operation, vector
+        ASSERT $ == BANK_BIOS_GATE + ((((operation & 255) + BIOS_FAST_SLOT_BIAS) >> 1) & BIOS_FAST_SLOT_MASK)
+        DW vector,bankFastReturn
+    ENDM
+bbFastSlots:
+    BIOS_FAST_SLOT MXOS_BIOS_UPPERCASE,bios_upperCase
+    BIOS_FAST_SLOT MXOS_BIOS_SUB_HL_DE,bios_sub_hl_de
+bbFastSlotsEnd:
 bbEntry:
     ld (bbPage),a
-    ld a,c
-    ld (bbFunction),a
-    push de
-    ld e,a
-    ld d,0
+    ld b,0
     ld hl,bbModes
-    add hl,de
+    add hl,bc
     ld a,(hl)
-    pop de
-    or a
-    jp z,bbUnsupported
-    ld (bbMode),a
-bbFastFetch:
     dec a
     jp z,bbScalarFast
+    cp 4                        ; Только TEXT_PRINT использует форму запроса.
+    jp nz,bbUnsupported
     ld hl,BANK_FRAME_REGS
     ld de,bbRegs
     ld b,MX_REGS
     call bankCopyBytes
     ld a,1
     ld (bbBusy),a
-bbRegsReady:
-    ld a,(bbMode)
-    cp 5
-    ld a,5
-    jp z,bios_textDispatch
-    jp bbUnsupported
+    jp bios_textDispatch
 
 bbScalarFast:
-    ld de,BANK_FRAME_REGS
     ld hl,bbScalarDone
     push hl
     ld hl,(MEM_NATIVE_CALL)
-    ld bc,6
-    add hl,bc
-    ld a,(bbFunction)
-    ld c,a
+    ld de,6
+    add hl,de
+    ld de,BANK_FRAME_REGS
     jp (hl)
 bbScalarDone:
     push af
-    ld a,(BANK_PROFILE)
-    or a
-    call nz,bankCommandWindow
     xor a
     ld (BANK_FRAME_STATUS),a
     pop af
@@ -78,7 +73,6 @@ bbScalarDone:
 
 bbFinish:
 bbReturnRegs:
-    call bankCommandWindow
     xor a
     ld (bbBusy),a
     ld (BANK_FRAME_STATUS),a
@@ -134,10 +128,9 @@ biosCommandBatch:
     pop bc
     ld hl,bbBuffer
 bbBatchLocal:
-    push hl
+    push hl                 ; Конец пачки хранится в кадре вызова.
     add hl,bc
-    ld (bbPacketAddress),hl
-    pop hl
+    ex (sp),hl
 bbBatchRecord:
     ld a,(hl)
     or a
@@ -151,29 +144,31 @@ bbBatchRecord:
     ld e,a
     ld d,0
     add hl,de
-    ld (bbSource),hl
-    pop hl
+    ex (sp),hl              ; Следующая запись лежит под адресом bbBatchNext.
     DEFINE BATCH_REGS bbRegs
     INCLUDE "../common/batch-args.inc"
     UNDEFINE BATCH_REGS
     ld a,(bbFunction)
     ld c,a
-    ld de,bbRegs
     ld hl,bbBatchNext
     push hl
+    ld b,0
+    ld hl,bbModes
+    add hl,bc
+    ld a,(hl)
     ld hl,(MEM_NATIVE_CALL)
-    DUP 6
-        inc hl
-    EDUP
+    ld de,9
+    add hl,de
+    ld de,bbRegs
     jp (hl)
 bbBatchNext:
-    ld hl,(bbPacketAddress)
-    ex de,hl
-    ld hl,(bbSource)
+    pop hl
+    pop de
+    push de
     call bios_cmp_hl_de
     jp c,bbBatchRecord
 bbBatchDone:
-    call bankCommandWindow
+    pop hl
     xor a
     ret
 
@@ -184,27 +179,32 @@ bbBatchTooLarge:
     ret
 
 bbModes:
+    MACRO BB_FIXED_COMMAND command, vector
+        ASSERT $-bbModes == command
+        ASSERT (vector & 0FF80h) == (bios_printChar & 0FF80h)
+        DB 080h | (vector & 07Fh)
+    ENDM
     DB 1    ; GETCH
     DB 0    ; TAPE_READ
-    DB 1    ; PRINT_CHAR
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_CHAR,bios_printChar
     DB 0    ; TAPE_WRITE
     DB 0    ; INPUT
     DB 1    ; KEY_CHECK
-    DB 1    ; PRINT_HEX_BYTE
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_HEX_BYTE,bios_printHexByte
     DB 2    ; PRINT_STRING_Z
     DB 1    ; KEY_SCAN
-    DB 1    ; GET_CURSOR_POS
-    DB 1    ; SET_CURSOR_POS
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_GET_CURSOR_POS,bios_getCursorPos
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_SET_CURSOR_POS,bios_setCursorPos
     DB 0    ; TAPE_LOAD
     DB 0    ; TAPE_SAVE
     DB 0    ; CALC_CS
-    DB 1    ; PRINT_HEX_WORD
-    DB 1    ; SET_MEM_TOP: scalar HL, used by persistent MEM reservations
-    DB 1    ; GET_MEM_TOP: scalar HL result
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_HEX_WORD,bios_printHexWord
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_SET_MEM_TOP,bios_setMemTop
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_GET_MEM_TOP,bios_getMemTop
     DB 1    ; PRINTER
     DB 0    ; INSTALL_DRIVER
     DB 0    ; DISK_DRIVER
-    DB 1    ; PRINT_CHAR_RAW
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_CHAR_RAW,bios_printCharRaw
     DB 1    ; PRINT_DEC_WORD
     DB 0    ; SET_RAMD_DRIVER
     DB 1    ; UPPERCASE
@@ -236,7 +236,6 @@ bbBusy          = io_vars.bbBusy
 bbFast          = io_vars.bbFast
 bbPage          = io_vars.bbPage
 bbFunction      = io_vars.bbFunction
-bbMode          = io_vars.bbMode
 bbPacketAddress = io_vars.bbPacketAddress
 bbSource        = io_vars.bbSource
 bbChunk         = io_vars.bbChunk

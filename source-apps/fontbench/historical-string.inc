@@ -22,9 +22,9 @@ historicalStringSelect:
     jp z,historicalSelected
     ld hl,historicalWindowZ
 historicalSelected:
-    ld (hookTargets+8),hl
-    ld (hookTargets+10),hl
-    ld (hookTargets+12),hl
+    ld (hookStringZTargets),hl
+    ld (hookStringZTargets+2),hl
+    ld (hookStringZTargets+4),hl
     ret
 
 ; Copy of MXOS-1 printString: save BC/AF once, public char for each byte.

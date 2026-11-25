@@ -1,13 +1,16 @@
 """8080 code: wildcard matching, including star retries and DOS *.*."""
 from pathlib import Path
 from dos_state import initialize_dos_state
+from relocated_component import load_at
 import fnmatch,re,struct,subprocess,tempfile
 R=Path(__file__).resolve().parents[2]
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text('utf-8'),re.M)}
-s=sy(R/'bin/banked/KERNEL.sym');e=sy(R/'bin/ENUM.sym')
+s=sy(R/'bin/banked/KERNEL.sym')
 base=bytearray(65536);a=(R/'bin/banked/KERNEL.bin').read_bytes();base[256:256+len(a)]=a
 initialize_dos_state(base, s)
-a=(R/'bin/ENUM.i80').read_bytes();base[s['DOS_SERVICE_ADDR']:s['DOS_SERVICE_ADDR']+len(a)]=a
+origin=s['DOS_ARENA_START']
+a,e=load_at(R/'source/enumerate/ENUM.asm','ENUM','OVERLAY_ORIGIN',origin)
+base[origin:origin+len(a)]=a
 word=lambda n:struct.pack('<H',n)
 names=['','A','ABC','A.TXT','ALPHA.TXT','BETA.BAT','NOEXT','AAB','ABAB','FOO.BAR','SHORT.X']
 patterns=['*','*.*','*.TXT','*.txt','????.BAT','A*','*A*','*A*B','A?B','?','*?','*.*X','*A?','*B?','A**B','Z*']

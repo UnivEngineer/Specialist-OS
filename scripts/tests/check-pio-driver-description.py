@@ -1,5 +1,6 @@
 """8080: PIO installer ID probing, detected geometry and DOS-owned descriptions."""
 from pathlib import Path
+from relocated_component import load_at
 import re,struct,subprocess
 R=Path(__file__).resolve().parents[2];O=R/'docs/flash/description-2026-11-18';O.mkdir(parents=True,exist_ok=True)
 w=lambda n:struct.pack('<H',n)
@@ -34,7 +35,8 @@ install:
 (O/'hooks.asm').write_text(asm);subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080',f'--raw={O/"hooks.bin"}',f'--sym={O/"hooks.sym"}',str(O/'hooks.asm')],capture_output=True,check=True)
 h=sy(O/'hooks.sym');hooks=(O/'hooks.bin').read_bytes();cases=0
 for binary,name,feature in [('Flash','AT2MX','SEQUENTIAL'),('FlashFst','AT2MXF','PIPELINE')]:
- s=sy(R/f'bin/{binary}.sym');origin=s['DRIVER_LOAD_ADDR'];code=(R/f'bin/{binary}.i80').read_bytes()
+ origin=sy(R/f'bin/{binary}.sym')['DOS_BANK_DRIVER_ADDR']+31
+ code,s=load_at(R/f'source/flash/{binary}.asm',binary,'DRIVER_ORIGIN',origin,'com')
  for mask,bad in [(m,None) for m in range(16)]+[(15,'manufacturer'),(15,'device')]:
   m=bytearray(65536);m[origin:origin+len(code)]=code;m[0xe000:0xe000+len(hooks)]=hooks
   for label,hook in [('initProbe.ParallelProbe','probe'),('mx_callRegs','install')]:m[s[label]:s[label]+3]=b'\xc3'+w(h[hook])
@@ -42,16 +44,20 @@ for binary,name,feature in [('Flash','AT2MX','SEQUENTIAL'),('FlashFst','AT2MXF',
   if bad=='manufacturer':m[0xe100]=0x20
   if bad=='device':m[0xe110]=0xa7
   m[0xf9c0:0xfc00]=bytes([0xa5])*576
-  stub=b'\x31'+w(0xe800)+b'\xcd'+w(origin)+b'\xf5\xe1\x22'+w(0xe122)+b'\xc3'+w(0xe2ff);m[0xe200:0xe200+len(stub)]=stub;(O/'in.bin').write_bytes(m)
+  stub=b'\x31'+w(0xe800)+b'\x11'+w(0xe300)+b'\xcd'+w(origin)+b'\xf5\xe1\x22'+w(0xe122)+b'\xc3'+w(0xe2ff);m[0xe200:0xe200+len(stub)]=stub;(O/'in.bin').write_bytes(m)
   subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','e200','-end','e2ff','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,check=True)
   out=(O/'out.bin').read_bytes();assert out[65542:65544]==w(0xe2ff)
   success=bool(mask) and bad is None
-  assert bool(out[0xe122]&1)!=success and out[0xe120]==int(success)
+  assert not out[0xe122]&1 and out[0xe120]==1
   if success:
    count=mask.bit_count();desc=out[s['description']:s['description']+64].split(b'\0')[:2]
    assert desc==[name.encode(),f'{count}X512K {feature}'.encode()],desc
    at=s['registration']+s['DRIVER_INSTALL.blocks'];assert out[at:at+2]==w(count*2048)
    mapping=s['initProbe.v_chipMap'];assert out[mapping:mapping+count]==bytes(i*8 for i in range(4) if mask&(1<<i))
-  else:assert out[0xf9c0:0xfc00]==bytes([0xa5])*576
+  else:
+   at=s['registration']
+   assert out[at+s['DRIVER_INSTALL.blocks']:at+s['DRIVER_INSTALL.blocks']+4]==bytes(4)
+   assert out[at+s['DRIVER_INSTALL.image']:at+s['DRIVER_INSTALL.image']+4]==w(s['noMediaService'])+w(s['noMediaServiceEnd']-s['noMediaService'])
+  assert out[0xf9c0:0xfc00]==bytes([0xa5])*576
   cases+=1
-print('PIO DRIVER DESCRIPTION / GEOMETRY PASS',cases,'cases; 1-4 chips, gaps, unsupported IDs, refusal before install')
+print('PIO DRIVER DESCRIPTION / GEOMETRY PASS',cases,'cases; 1-4 chips, gaps, unsupported IDs, zero-capacity registration without media')

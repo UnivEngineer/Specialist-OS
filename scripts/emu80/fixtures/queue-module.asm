@@ -9,6 +9,11 @@
     ret
 batch:
     push hl
+    ld hl,0
+    add hl,sp
+    ld (moduleSP),hl
+    pop hl
+    push hl
     ld h,b
     ld l,c
     ld (receivedBytes),hl
@@ -26,3 +31,4 @@ batch:
     ret
 receivedBytes:  DW 0
 firstByte:      DB 0
+moduleSP:       DW 0

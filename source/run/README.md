@@ -65,4 +65,4 @@ MON — сырой образ ядра без исполняемого конт�
 
 ## Проверки
 
-`python scripts/tests/check-executable-v2.py` проверяет контейнеры на хосте. Его режим `--runtime` — отдельная проверка ABI с управлением отладчиком, не проверка интерфейса. Пользовательские команды и выбор пунктов проверяются через MCP `kbd_send`, без фокуса Windows и без записи команд в память. CPU-проверки: `scripts/tests/check-image-stream.py`, `check-run-bridge.py`, `check-file-body.py`, `check-checksum.py`. Материалы секторной загрузки — в локальном `docs/compat/sector-load-001/`.
+`python scripts/tests/check-executable-v2.py` проверяет контейнеры на хосте. Его режим `--runtime` вызывает ABI через отладчик. Проверка секторной загрузки в банковой DOS выполняется через `scripts/emu80/check-banked-kernel.py --images-only`: сценарий вводит команды NC через MCP `kbd_send`, сверяет загруженные COM/EXE/RKS и проверяет возврат в оболочку. Режимы и варианты загрузки задаются в `scripts/emu80/check-run-body.py`. `scripts/emu80/check-run-native.py` проверяет запуск нативных COM/EXE через RUN и FILE_EXEC. Исторический плоский стенд `scripts/tests/check-image-stream.py` относится к монолитной DOS.

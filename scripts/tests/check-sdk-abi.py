@@ -1,7 +1,10 @@
 """C SDK: адреса публичных служб совпадают с собранным ABI mxos.inc."""
 from pathlib import Path
+import os
 import re
 import runpy
+import subprocess
+import tempfile
 R=Path(__file__).resolve().parents[2]
 s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/DOS.sym').read_text(encoding='utf-8'),re.M)}
 header=(R/'sdk/include/mxos.h').read_text(encoding='utf-8')
@@ -25,7 +28,21 @@ assert macros.keys()==mapping.keys(),(macros.keys()-mapping.keys(),mapping.keys(
 for name,value in macros.items():assert value==s['bios_'+mapping[name]],(name,value,s['bios_'+mapping[name]])
 for name,value in dict(FILE_HANDLE=64,FILE_DESCR_SIZE=32,FILE_INFO=16,DISK_INFO=48,FILE_COPY_REQUEST=86,FILE_PATH_IO=40).items():assert s[name]==value,(name,s[name],value)
 runpy.run_path(str(R/'scripts/build/build-syscalls.py'))['generate'](check=True)
-for name,value in dict(mx_call=0xF800,mx_cpmCall=0xF803,mx_callRegs=0xF806).items():assert s[name]==value
+for name,value in dict(mx_call=0xF800,mx_CallCPM=0xF803,mx_callRegs=0xF806).items():assert s[name]==value
+sdk_asm=(R/'sdk/src/mxos_syscall_ids.inc').read_text(encoding='utf-8')
+direct={name:int(value,16) for name,value in re.findall(r'^defc (mx_\w+)\s*= 0([0-9A-F]{4})h$',sdk_asm,re.M)}
+for name,value in direct.items():
+ assert s[name]==value,(name,value)
+fast_entries=dict(mx_printChar=0xF81B,mx_getCursorPos=0xF81E,mx_setCursorPos=0xF821,
+                  mx_printCharRaw=0xF824,mx_printHexByte=0xF827,mx_printHexWord=0xF82A,
+                  mx_getMemTop=0xF830,mx_setMemTop=0xF833)
+for name,value in fast_entries.items():
+ assert direct[name]==value,(name,direct[name],value)
+ids_header=(R/'sdk/include/mxos_syscall_ids.h').read_text(encoding='utf-8')
+for name in ('PRINT_CHAR','PRINT_HEX_BYTE','GET_CURSOR_POS','SET_CURSOR_POS',
+             'PRINT_HEX_WORD','SET_MEM_TOP','GET_MEM_TOP','PRINT_CHAR_RAW','PRINT_CHAR_REAL'):
+ old_name='MXOS_BIOS_'+name
+ assert old_name not in s and not re.search(r'\b'+old_name+r'\b',ids_header+'\n'+sdk_asm),old_name
 errors=re.findall(r'^#define MXOS_ERR_(\w+) (\d+)',(R/'sdk/include/mxos_file.h').read_text(encoding='utf-8'),re.M)
 for name,value in errors:assert int(value)==s['DOS_ERR_'+name]
 print('C SDK ABI PASS',len(macros),'addresses;',len(errors),'error codes')
@@ -39,18 +56,24 @@ for name in ('KEY_MOD_SHIFT','KEY_MOD_CTRL'):
     assert int(re.search(rf'^#define MXOS_{name}\s+(\d+)$',header,re.M)[1]) == s['IO_'+name]
 
 assert s['MEM_COPY_REQUEST']==8
-assert s['mx_memcpyFar']==0xF80F and s['mx_memInfo']==0xF812
+assert direct['mx_memcpyFar']==s['mx_memcpyFar']==0xF80F and s['mx_memInfo']==0xF812
 assert s['MEM_ABI_VERSION']==int(re.search(r'^#define MXOS_MEM_ABI_VERSION (0x[0-9A-Fa-f]+)',(R/'sdk/include/mxos.h').read_text(encoding='utf-8'),re.M).group(1),16)
-assert 'call 0F80Fh' in (R/'sdk/src/mxos_z88dk.asm').read_text(encoding='utf-8')
+assert re.search(r'^_mxos_memcpy_far:\s+call mx_memcpyFar$',keyboard_wrappers,re.M)
+assert re.search(r'^_mxos_memmove_far:\s+xor a\s+call mx_memory$',keyboard_wrappers,re.M)
+for wrapper,entry in dict(putch='mx_printChar',cls='mx_printChar',memtop='mx_getMemTop',
+                          set_memtop='mx_setMemTop',cursor_get='mx_getCursorPos',
+                          cursor_set='mx_setCursorPos').items():
+ assert re.search(rf'^_mxos_{wrapper}:\s+(?:ld c,\w+\s+)?jp {entry}$',keyboard_wrappers,re.M),wrapper
+print('Direct register entries PASS:',len(fast_entries),'entry addresses, 6 C wrappers')
 print('MEM ABI PASS: FAR copy packet and common entry points')
 
 # Единый контракт операций памяти ASM/C, включая ошибки и возможности.
 cm={k:int(v,0) for k,v in re.findall(r'^#define (MXOS_(?:MEM_\w+|ALLOC_\w+)) (0x[0-9A-Fa-f]+|\d+)\s*$',header,re.M)}
 for name in ('MOVE','GET8','GET16','PUT8','PUT16','PRINT','ALLOC','FREE','REALLOC','ARENA','RAMLIMIT','FILL','QUERY','DISKCLAIM','RAMDISK','RESIDENT','MAINCLAIM','MAINREGISTER'):
  assert cm['MXOS_MEM_OP_'+name]==s['MEM_OP_'+name],name
-for name in ('BANK','STACK','RANGE','NOMEM','OWNER','HANDLE','ACTIVE'):
+for name in ('BANK','STACK','RANGE','NOMEM','OWNER','HANDLE','ACTIVE','UNSUPPORTED'):
  assert cm['MXOS_MEM_ERR_'+name]==s['MEM_ERROR_'+name],name
-for name in ('COPY','LAZY_WINDOW','MEMORY_OPS','MODULES','ALLOCATOR'):
+for name in ('COPY','MEMORY_OPS','MODULES','ALLOCATOR','COMMAND_QUEUE','BIOS_REGISTERS'):
  assert cm['MXOS_MEM_CAP_'+name]==s['MEM_CAP_'+name],name
 assert cm['MXOS_MEM_SERVICE']==s['mx_memory']==0xF815
 assert s['MXOS_BIOS_PRINT_STRING_BANK']==s['MXOS_BIOS_PRINT_STRING']==0x107
@@ -106,7 +129,39 @@ assert '#define MXOS_IMAGE_HEADER_SIZE 32' in header
 assert s['MXOS_DOS_FONT_CONFIG']==0x22d
 for name,value in dict(EXCLUSIVE=0,PRESERVE=1,MANAGED=2).items():assert f'#define MXOS_IMAGE_POLICY_{name} {value}' in header
 for name,value in dict(AUTO=0,MX=1,STD=2,MON=3,RF=4).items():assert f'#define MXOS_IMAGE_MODE_{name} {value}' in header
-print('EXE v2, module record and FONT restoration ABI PASS')
+for macro,symbol in [('MXOS_RELOC_IMAGE_HEADER_SIZE','IMAGE_RELOC_HEADER'),
+                     ('MXOS_RELOC_IMAGE_VERSION','IMAGE_RELOC_VERSION'),
+                     ('MXOS_RELOC_WORD16','IMAGE_RELOC_WORD16'),('MXOS_RELOC_HIGH8','IMAGE_RELOC_HIGH8')]:
+ assert int(re.search(rf'^#define {macro} (\d+)$',header,re.M)[1])==s[symbol]
+
+# Размер и смещения вычисляет целевой C-компилятор с реальным заголовком SDK.
+checks={'sizeof(MXOS_IMAGE_HEADER)':s['IMAGE_HEADER_SIZE'],
+        'sizeof(MXOS_RELOC_IMAGE_HEADER)':s['IMAGE_RELOC_HEADER']}
+for field,symbol in [('reloc_kind','MODE'),('align_log2','ALIGN'),('reloc_count','COUNT'),
+                     ('table_checksum','CHECKSUM'),('reserved','RESERVED')]:
+ checks[f'((char *)&hdr.{field} - (char *)&hdr)']=s['IMAGE_RELOC_'+symbol]
+with tempfile.TemporaryDirectory() as temp:
+ directory=Path(temp)
+ source=directory/'layout.c'
+ source.write_text('#include "mxos.h"\nint main(void) { MXOS_RELOC_IMAGE_HEADER hdr;\n'+''.join(
+     f'  if ({expr} != {value}) return {i};\n'
+     for i,(expr,value) in enumerate(checks.items(),1))+'  return 0;\n}\n',encoding='ascii')
+ z88dk=runpy.run_path(str(R/'scripts/build/build_cache.py'))['z88dk_directory']()
+ environment={**os.environ,'ZCCCFG':str(z88dk/'lib/config'),
+              'PATH':str(z88dk/'bin')+os.pathsep+os.environ['PATH']}
+ subprocess.run([str(z88dk/'bin/zcc.exe'),'+cpm','-clib=8080','-compiler=sccz80',
+                 '-I'+str(R/'sdk/include'),'-crt0='+str(R/'sdk/tests/file-crt'),'-zorg=8192',
+                 str(source),'-o','layout.bin'],cwd=directory,env=environment,check=True)
+ body=(directory/'layout_code_crt_init.bin').read_bytes()
+ memory=bytearray(65536)
+ memory[0x2000:0x2000+len(body)]=body
+ memory[0x5e80:0x5e82]=b'\xff\xff'
+ (directory/'input.bin').write_bytes(memory)
+ subprocess.run([str(z88dk/'bin/z88dk-ticks.exe'),'-m8080','-pc','2000','-end','6100',
+                 '-counter','100000','-output','result.bin','input.bin'],cwd=directory,check=True,capture_output=True)
+ result=(directory/'result.bin').read_bytes()
+ assert result[65542:65544]==b'\x00\x61' and result[0x5e80:0x5e82]==b'\0\0','v3 C layout'
+print('EXE v2/v3, target C header layout, module record and FONT restoration ABI PASS')
 
 assert s['mx_queueBind']==0xf809 and s['mx_queueFlush']==0xf80c
 assert s['MXOS_BIOS_COMMAND_BATCH']==0x12c

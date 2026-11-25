@@ -5,26 +5,31 @@
 ; На неверной группе/номере: CF=1, A=DOS_ERR_UNSUPPORTED, пакет не трогаем.
 ; Контекст вызова хранится на стеке; сам диспетчер допускает вложенность.
 ; Реентерабельность файловой системы этим не обеспечивается.
-; Internal three-JMP table: packet, register call, trusted BIOS scalar.
+; Пакет, регистры, BIOS по номеру и внутренний загрузчик регистров очереди.
 sysCall:
     jp sysPacketReady
     jp sysRegsEntry
     jp sysBiosRegs
+    jp sysBiosBatch
 sysRegsEntry:
     ld a,b
     cp MXOS_GROUP_BIOS
     jp z,sysBiosRegs
     ; Keep the prepared local RAW route and DOS adapters.
     jp sysPacketReady
+; Очередь передаёт C=команду, A=режим bbModes, DE=MX_REGS текущей записи.
+; У выделенных команд bit 7 установлен, младшие 7 бит выбирают JMP в C800h.
+sysBiosBatch:
+    or a
+    jp p,sysBiosRegs
+    and 07Fh
+    ld l,a
+    ld h,bios_printChar >> 8
+    push hl
+    jp sysLoadRegs
 sysBiosRegs:
-    ld hl,sysBIOSTable
-    ld b,0
-    add hl,bc
-    add hl,bc
-    ld c,(hl)
-    inc hl
-    ld h,(hl)
-    ld l,c
+    call sysBios
+    ret c
     push hl
     jp sysLoadRegs
 sysPacketReady:
@@ -53,12 +58,14 @@ sysFindTarget:
     or a
     jp z,sysUnsupported
     ld hl,sysDOSTable
-    ld a,sysDOSCount
+    ld a,sysDOSCount-1
     jp sysSelect
 sysBios:
     ld hl,sysBIOSTable
-    ld a,sysBIOSCount
+    ld a,sysBIOSCount-1
 sysSelect:
+    cp c                        ; A — последний допустимый индекс таблицы.
+    jp c,sysUnsupported
     ld b,0
     add hl,bc
     add hl,bc
@@ -66,8 +73,10 @@ sysSelect:
     inc hl
     ld h,(hl)
     ld l,c
+    ld a,h
     or a
-    ret
+    ret nz
+    jp sysUnsupported
 sysLoadRegs:
     ; На стеке: адрес исполнителя, продолжение, адрес пакета.
     ld hl,6

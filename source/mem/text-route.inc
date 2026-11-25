@@ -1,4 +1,4 @@
-; Стандартный BIOS PRINT_STRING получает тот же быстрый Window20.
+; Стандартный BIOS PRINT_STRING получает то же 32-байтное окно.
 ; Вход уже проверен CLIENT; исходный пакет остаётся на стеке для bankMxResult.
 memBiosRoute:
     ld a,c

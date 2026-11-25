@@ -8,30 +8,44 @@ p.add_argument('--port',type=int,default=19781,choices=range(19781,19785))
 p.add_argument('--profiles',nargs='+',choices=['EDIT_MN','EDIT'],default=['EDIT_MN','EDIT'])
 p.add_argument('--font',default='Rotate',choices=['Rotate','Packed6K','Fast12K'])
 p.add_argument('--cache-only',action='store_true',help='Check cache capacity, idle prefetch and LRU')
+p.add_argument('--prefetch-only',action='store_true',help='Measure EXEC idle prefetch without navigating past the cached window')
 p.add_argument('--bars-only',action='store_true',help='Check document scrollbar visibility and movement')
 p.add_argument('--modal-only',action='store_true',help='Check modal restore, cache ownership and Tab invalidation')
 p.add_argument('--interaction-only',action='store_true',help='Keyboard-only character selection and KOI8/Ctrl-Z checks')
 p.add_argument('--short',action='store_true',help='Identical complete-line Elite prefix fitting both editors')
 p.add_argument('--navigation-only',action='store_true',help='Fixed 8 KiB Elite prefix; open, page and scroll at viewport edges')
+p.add_argument('--ui-timings',action='store_true',help='Measure movement, scrolling, dialog, input and return with the short fixture')
+p.add_argument('--counters',action='store_true',help='Collect system call counters in a separate UI scenario run')
+p.add_argument('--held-down',choices=['timing','wait-trace'],help='Measure or trace eight held Down events inside one viewport')
 p.add_argument('--hex-view',action='store_true',help='Exercise byte view with real keyboard input in both profiles')
 p.add_argument('--byte-roundtrip',action='store_true',help='Save, reload and append a mixed binary document through the editor UI')
 p.add_argument('--undo-only',action='store_true',help='Time Ctrl+Z after two insertions and after Delete')
 p.add_argument('--max-document',action='store_true',help='Load and navigate an H: file at each profile capacity')
 p.add_argument('--report',type=Path,default=R/'docs/editor/banks-2026-11-17')
 a=p.parse_args()
-if a.bars_only or a.navigation_only or a.byte_roundtrip or a.hex_view:a.short=True
+if a.prefetch_only and a.ui_timings:p.error('Choose one UI timing scenario')
+if a.held_down and (a.ui_timings or a.prefetch_only or a.counters):p.error('Choose a separate held-key run')
+if a.counters and (not (a.ui_timings or a.prefetch_only) or a.navigation_only):p.error('--counters requires --ui-timings or --prefetch-only')
+if a.prefetch_only:
+ a.short=a.cache_only=True
+ a.profiles=['EDIT']
+if a.bars_only or a.navigation_only or a.ui_timings or a.held_down or a.byte_roundtrip or a.hex_view:a.short=True
 if a.max_document and (a.short or a.cache_only or a.bars_only or a.modal_only or a.interaction_only):
  p.error('--max-document runs its own load and navigation sequence')
+if (a.ui_timings or a.prefetch_only or a.held_down) and a.font!='Rotate':p.error('Returning to NC MAIN requires Rotate for this scenario')
 if a.max_document and a.font=='Packed6K':
  p.error('--max-document currently covers Rotate and Fast12K')
 if 'EDIT_MN' in a.profiles and not (a.short or a.max_document):p.error('Use --short for MAIN because the full Elite fixture exceeds its document region')
 O=a.report;O.mkdir(parents=True,exist_ok=True)
 sy=lambda f:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin'/f).read_text(),re.M)}
 n=sy('NC.sym');c=sy('CLI.sym');k=sy('DOS.sym');g=sy('UI_GFX.sym');t=sy('banked/TRANSPORT.sym')
+profile_tools=runpy.run_path(str(R/'scripts/emu80/benchmark-nc-profiles.py'))
+profile_tools['symbols'].__globals__.update(SNAP=R)
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'))
 gl=h['Matrix'].__init__.__globals__;gl.update(OUT=O,RUNTIME=a.runtime.resolve())
 gl['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
 x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp'
+probe=runpy.run_path(str(R/'scripts/emu80/ui-counters.py'))['UiCounters'](m,t,sy('banked/KERNEL.sym')) if a.counters else None
 rows=[];elite=(R/'assets/games/families/elite/manuals/Elite.txt').read_bytes()
 shellend=n['mainLoop'];shellenter=n['but_Enter']
 short=elite[:0x6400-sy('EDIT.sym')['EDITOR_TEXT_BEGIN']-129].rsplit(b'\r',1)[0]+b'\r'
@@ -120,13 +134,18 @@ def help_file_position():
 def doc():
  lo=val('v_gapLo');hi=val('v_gapHi');end=val('v_textEnd');begin=val('v_textBeginLo')
  return get(begin,lo-begin,banked)+get(hi,end-lo,banked)
-def endwait(modal=False):
+def graphics_counters():
+ return struct.unpack('<3H',main_memory(g['ngBatches'],6))
+def endwait(modal=False,trace=False):
+ target=s['ebWaitReady'] if banked else s['bios_getch'] if modal else s['keyInput']
+ if trace and probe:
+  state,counts=probe.until(target,corepage,graphics_submit=s['cqDeliverDll'] if banked else None)
+  state['counters']=counts
+ else:
+  m.stop_at(target);state=m.until(target,120,page=corepage)
  if banked:
-  target=s['ebWaitReady']
-  m.stop_at(target);state=m.until(target,120,page=corepage);capture()
-  return state
- target=s['bios_getch'] if modal else s['keyInput']
- m.stop_at(target);return m.until(target,120,page=0)
+  capture()
+ return state
 def dismiss_catalog_warning():
  ready()
  if ('ncCatalogWarningModal' in n and
@@ -134,84 +153,110 @@ def dismiss_catalog_warning():
      m.read(n['ncDialogActive'],1)==b'\x01'):
   tap('enter');ready()
 def launch(name,path):
- dismiss_catalog_warning();tap('esc');text('A:'+name+' '+path)
+ global g
+ command = 'C:/DOS/'+name+'.COM '+path
+ dismiss_catalog_warning();tap('esc');text(command)
  source=c['CMD_LINE'] if shellend==c['cliPrompt'] else n['vars.cmdLine']
- assert m.read(source,len('A:'+name+' '+path)).upper()==('A:'+name+' '+path).upper().encode()
+ assert m.read(source,len(command)).upper()==command.upper().encode()
  m.screenshot(O/(name+'-command.png'))
  # Start before NC's Enter dispatcher: includes container loading/checksum,
  # arena registration, module loading, file read, row counting and full UI.
  m.stop_at(shellenter);tap('enter');start=m.until(shellenter,30,page=0)['cpu_ticks']
- launch_page=0
- if banked:
-  m.stop_at(s['editorBankEntry']);m.until(s['editorBankEntry'],60)
-  launch_page=m.read(t['bankPage'],1)[0]
-  assert launch_page and m.read(origin,3)==body[:3]
-  print('CORE ENTRY',m.call('cpu_state'),flush=True)
- # A command-line launch reads the file before painting the first page.
- m.stop_at(s['loadTextFile'])
- read_start=m.until(s['loadTextFile'],90,page=launch_page)['cpu_ticks']
- assert m.read(s['editorInterfaceReady'],1)==b'\0'
- assert m.read(s['editorProgressVisible'],1)==b'\0'
- m.stop_at(s['editorPaintDocument'])
- m.until(s['editorPaintDocument'],120,page=launch_page)
- assert m.read(s['editorInterfaceReady'],1)==b'\0'
- m.stop_at(s['editorStatusLoop'])
- if banked:m.call('bp_set',addr=s['ebFailed'],type='exec')
- for _ in range(90):
-  state=m.call('cpu_state');pc=state['registers']['pc']['dec']
-  if pc==s['editorStatusLoop']:break
-  if banked and pc==s['ebFailed']:raise AssertionError(('CORE FAILED',state))
-  m.call('emu_run_for',ms=1000)
- else:raise AssertionError(('EDITOR START TIMEOUT',state))
  global corepage
- corepage=m.read(t['bankPage'],1)[0]
- assert bool(corepage)==banked,(name,corepage,state)
- assert m.read(s['keyInput'],3)==body[s['keyInput']-origin:s['keyInput']-origin+3]
- state=endwait();elapsed=state['cpu_ticks']-start
+ if probe:
+  def is_editor(page):
+   input_pc=s['keyInput']
+   return (page>1 if banked else page==0) and m.read(input_pc,3)==body[input_pc-origin:input_pc-origin+3]
+  state,counts=probe.until(s['ebWaitReady'] if banked else s['keyInput'],None,
+                           target_test=is_editor,graphics_submit=s['cqDeliverDll'] if banked else None)
+  corepage=m.read(t['bankPage'],1)[0]
+  if banked:capture()
+ else:
+  launch_page=0
+  if banked:
+   m.stop_at(s['editorBankEntry']);m.until(s['editorBankEntry'],60)
+   launch_page=m.read(t['bankPage'],1)[0]
+   assert launch_page and m.read(origin,3)==body[:3]
+   print('CORE ENTRY',m.call('cpu_state'),flush=True)
+  # A command-line launch reads the file before painting the first page.
+  if not banked:
+   m.stop_at(s['openCommandLineFile']);m.until(s['openCommandLineFile'],240,page=0)
+   assert m.read(0,10)==body[:10]
+  m.stop_at(s['loadTextFile'])
+  read_start=m.until(s['loadTextFile'],90,page=launch_page)['cpu_ticks']
+  assert m.read(s['editorInterfaceReady'],1)==b'\0'
+  assert m.read(s['editorProgressVisible'],1)==b'\0'
+  m.stop_at(s['editorPaintDocument'])
+  m.until(s['editorPaintDocument'],120,page=launch_page)
+  assert m.read(s['editorInterfaceReady'],1)==b'\0'
+  m.stop_at(s['editorStatusLoop'])
+  if banked:m.call('bp_set',addr=s['ebFailed'],type='exec')
+  for _ in range(90):
+   state=m.call('cpu_state');pc=state['registers']['pc']['dec']
+   if pc==s['editorStatusLoop']:break
+   if banked and pc==s['ebFailed']:raise AssertionError(('CORE FAILED',state))
+   m.call('emu_run_for',ms=1000)
+  else:raise AssertionError(('EDITOR START TIMEOUT',state))
+  corepage=m.read(t['bankPage'],1)[0]
+  assert bool(corepage)==banked,(name,corepage,state)
+  assert m.read(s['keyInput'],3)==body[s['keyInput']-origin:s['keyInput']-origin+3]
+  state=endwait()
+ elapsed=state['cpu_ticks']-start
  rows.append(dict(profile=name,font=a.font,operation='launch_document',cycles=elapsed,ms=elapsed/2000,fileBytes=len(payload)))
+ if probe:rows[-1]['counters']=counts
  if a.navigation_only:rows[-1]['readToReadyCycles']=state['cpu_ticks']-read_start
+ if banked:
+  handle=val('ebGfxHandle')
+  def read_dos(at,size):
+   previous=m.read(t['bankPage'],1)[0]
+   try:
+    select(1)
+    return m.read(at,size)
+   finally:select(previous)
+  g=profile_tools['graphics_symbols'](read_dos,k,handle)
  if banked and 'ngStoredTexts' in g:
-  batches,reads=struct.unpack('<HH',main_memory(g['ngBatches'],4))
-  rows[-1].update(graphicsBatches=batches,rowReads=reads)
+  batches,reads,packet_bytes=graphics_counters()
+  rows[-1].update(graphicsBatches=batches,rowReads=reads,graphicsBytes=packet_bytes)
  assert doc()==payload,(name,len(doc()),len(payload))
  allocated=allocations()
  if banked:
   assert any(r['bank']==corepage and r['base']<=origin and r['base']+r['size']>=s['EDITOR_MEMORY_END'] for r in allocated),allocated
-  assert any(r['bank']==0 and r['base']==g['GFX_BASE'] and r['size']==g['IMAGE_MEM_END']-g['GFX_BASE'] for r in allocated),allocated
+  assert any(r['bank']==0 and r['base']==g['entry'] and r['size']==g['IMAGE_MEM_END'] for r in allocated),allocated
   slots=get(s['ebCacheRows'],1,True)[0]
   stride=get(s['ebCacheStride'],1,True)[0]
-  assert any(r['bank']==0 and r['base']==g['GFX_PACKET'] and r['size']==s['EDIT_MAIN_END']-g['GFX_PACKET']+slots*stride for r in allocated),allocated
+  assert any(r['bank']==0 and r['base']==s['EDIT_MAIN_PACKET'] and r['size']==s['EDIT_MAIN_END']-s['EDIT_MAIN_PACKET']+slots*stride for r in allocated),allocated
   rows[-1].update(cacheRows=slots,cacheStride=stride)
  else:
   assert any(r['bank']==0 and r['base']==val('v_textBeginLo') and r['size']==val('v_textLimitLo')-val('v_textBeginLo') for r in allocated),allocated
  (O/(name+'-'+a.font+'-allocations.json')).write_text(json.dumps(allocated,indent=2))
- m.screenshot(O/(name+'-loaded.png'));print('LOADED',name,rows[-1],flush=True)
+ m.screenshot(O/(name+'-loaded.png'));print('LOADED',name,{k:v for k,v in rows[-1].items() if k!='counters'},flush=True)
  if not (banked and a.cache_only):ready()
 def edit(key,entry,modifier=None):
- counters=lambda:struct.unpack('<HH',main_memory(g['ngBatches'],4))
  measured=banked and 'ngStoredTexts' in g
- if measured:batches_before,reads_before=counters()
+ if measured:batches_before,reads_before,bytes_before=graphics_counters()
  ready();m.stop_at(s[entry])
  if modifier:m.call('kbd_send',keys=[modifier],action='press')
  tap(key)
  if modifier:m.call('kbd_send',keys=[modifier],action='release')
  state=m.until(s[entry],60,page=corepage);start=state['cpu_ticks']
  assert m.read(t['bankPage'],1)[0]==corepage
- end=endwait();elapsed=end['cpu_ticks']-start
+ end=endwait(trace=True);elapsed=end['cpu_ticks']-start
  row=dict(profile=name,font=a.font,operation=entry,cycles=elapsed,ms=elapsed/2000,line=val('v_lineNumber'),column=val('v_column'))
+ if 'counters' in end:row['counters']=end['counters']
  if measured:
-  batches,reads=counters()
+  batches,reads,packet_bytes=graphics_counters()
   row['rowReads']=(reads-reads_before)&65535
   if entry=='editorPageUp' and not a.cache_only:assert row['rowReads']==0,row
   row['graphicsBatches']=(batches-batches_before)&65535
+  row['graphicsBytes']=(packet_bytes-bytes_before)&65535
  if not a.max_document and entry in ('editorPageDown','editorPageUp'):
   bitmap=main_memory(0x9000,0x3000)
   suffix=f"-{row['line']}" if a.cache_only else ''
   reference=O/(entry+suffix+'.vram')
   if not banked:reference.write_bytes(bitmap)
   elif reference.exists():assert bitmap==reference.read_bytes(),(entry,'MAIN/BANK viewport mismatch')
- rows.append(row);print(row,flush=True);ready()
-def action(key,target='keyInput',wait_ready=True,shift=False):
+ rows.append(row);print({k:v for k,v in row.items() if k!='counters'},flush=True);ready()
+def action(key,target='keyInput',wait_ready=True,shift=False,operation=None):
  ready()
  # The absolute overlay PC can also execute in MAIN inside the font engine.
  # Stop after the bank queue flush, where the entire HEX frame is observable.
@@ -219,16 +264,81 @@ def action(key,target='keyInput',wait_ready=True,shift=False):
  if shift:
   m.call('kbd_send',keys=['shift'],action='press')
   m.call('emu_run_for',ms=500)  # let the Shift toolbar finish before tapping the key
- m.stop_at(s[destination]);tap(key);m.until(s[destination],90,page=corepage)
+ m.stop_at(s[destination]);tap(key);start=m.until(s[destination],90,page=corepage)
  if shift:m.call('kbd_send',keys=['shift'],action='release')
  if banked:
-  endwait()
+  stop=endwait(trace=operation is not None)
   if target=='hexWait':assert get(s['hexActive'],1,True)==bytes([1])
  else:
-  m.stop_at(s['bios_getch']);m.until(s['bios_getch'],90,page=0)
+  stop=endwait(modal=True,trace=operation is not None)
+ if operation:
+  elapsed=stop['cpu_ticks']-start['cpu_ticks']
+  rows.append(dict(profile=name,font=a.font,operation=operation,cycles=elapsed,ms=elapsed/2000))
+  if 'counters' in stop:rows[-1]['counters']=stop['counters']
  if wait_ready:ready()
+
+def held_down():
+ bios=sy('BIOS.sym')
+ poll_name='ebPollKey' if banked else 'loc_C23C'
+ decode_name='ebInputReady' if banked else 'loc_C311'
+ render_name='ebWaitReady' if banked else 'keyInput'
+ decoder=s if banked else bios
+ wait_trace=a.held_down=='wait-trace'
+
+ def repeat_configuration():
+  if banked:
+   return {field:get(s['ebKeyState.'+field],1,True)[0] for field in ('repeatCount','repeatStart','timed')}
+  return {field:m.read(bios['bios_upper.'+field],1)[0] for field in ('antiBsDelay','cursorDelay')}
+
+ def until(target,trace=False):
+  m.stop_at(target)
+  if trace:
+   m.call('bp_set',addr=t['mx_callRegs'],type='exec',skipCount=1_000_000,comment='F806')
+  state=m.until(target,90,page=corepage)
+  calls=None
+  if trace:
+   calls=next(bp['hitCount'] for bp in m.call('bp_list')['breakpoints'] if bp['comment']=='F806')
+  return state,calls
+
+ ready()
+ before,_=until(decoder[poll_name]);capture()
+ first_line,top=val('v_lineNumber'),val('v_topLine')
+ assert first_line==1 and top==val('v_textBeginLo') and s['EDITOR_ROWS']>9
+ initial_repeat=repeat_configuration()
+ samples=[]
+ m.call('kbd_send',keys=['down'],action='press')
+ try:
+  for index in range(8):
+   decoded,poll_calls=until(decoder[decode_name],wait_trace)
+   assert decoded['registers']['af']['dec']>>8==0x1a,decoded
+   accepted,_=until(s['keyHandler_Down'])
+   rendered=endwait()
+   line,new_top=val('v_lineNumber'),val('v_topLine')
+   assert line==first_line+index+1 and new_top==top,(name,index,line,new_top,top)
+   configuration=repeat_configuration()
+   if banked:
+    assert configuration['repeatCount']==s['KEY_REPEAT_FIRST' if index==0 else 'KEY_REPEAT_NEXT']
+   else:
+    assert configuration==initial_repeat
+   polling,setup_calls=until(decoder[poll_name],wait_trace)
+   samples.append(dict(decoded=decoded['cpu_ticks'],accepted=accepted['cpu_ticks'],
+                       rendered=rendered['cpu_ticks'],pollReady=polling['cpu_ticks'],
+                       line=line,top=new_top,pollF806=poll_calls,postRenderF806=setup_calls,
+                       repeatConfiguration=configuration))
+ finally:
+  m.call('kbd_send',keys=['down'],action='release')
+
+ assert doc()==payload
+ rows.append(dict(profile=name,font=a.font,operation='held_down',initialLine=first_line,
+                  initialTop=top,press=before['cpu_ticks'],decodedAt=decode_name,
+                  acceptedAt='keyHandler_Down',renderedAt=render_name,pollingAt=poll_name,
+                  initialRepeatConfiguration=initial_repeat,samples=samples))
+ print(name,'HELD DOWN',[b['decoded']-a['decoded'] for a,b in zip(samples,samples[1:])],flush=True)
+
 try:
  x.start('editor-banks',disk=make_capacity_disk() if a.max_document else None)
+ if a.ui_timings or a.prefetch_only or a.held_down:
+  speed=m.call('sys_info')['cpu']
  if a.modal_only:
   dismiss_catalog_warning();m.stop_at(n['uiHelpRead']);tap('f9');m.until(n['uiHelpRead'],90,page=0)
   assert int.from_bytes(m.read(n['uiHelpScroll.total'],2),'little')>=20
@@ -264,6 +374,41 @@ try:
   else:
    payload=short if a.short else elite;path='B:/COMMON.TXT' if a.short else 'H:/ELITE.TXT'
   launch(name,path)
+  if a.held_down:
+   held_down()
+   ready();m.stop_at(shellend);tap('f10');m.until(shellend,120,page=0)
+   assert m.read(0,4)==(R/'bin/NC.i80').read_bytes()[:4]
+   assert not banked or not any(r['bank']==corepage for r in allocations())
+   continue
+  if a.ui_timings:
+   edit('right','keyHandler_Right');edit('left','keyHandler_Left')
+   edit('down','editorPageDown','rpt');edit('up','editorPageUp','rpt')
+   edit('down','editorPageDown','rpt')
+   top=val('v_topLine');edit('up','keyHandler_Up')
+   assert val('v_topLine')<top
+   for _ in range(s['EDITOR_ROWS']-1):action('down')
+   top=val('v_topLine');edit('down','keyHandler_Down')
+   assert val('v_topLine')>top
+   edit('home','keyHandler_DocumentHome','rpt')
+   action('f3','editorFind',operation='open_search_dialog')
+   action('esc')
+   edit('x','keyHandler_Space');edit('y','keyHandler_Space')
+   assert doc()==b'XY'+payload or doc()==b'xy'+payload
+   action('f10','editorSaveWait')
+   m.stop_at(s['editorDiscardFile']);tap('d')
+   start=m.until(s['editorDiscardFile'],120,page=corepage)['cpu_ticks']
+   if probe:
+    state,counts=probe.until(shellend,0,graphics_submit=s['cqDeliverDll'] if banked else None,
+                             graphics_page=corepage)
+    stop=state['cpu_ticks']
+   else:
+    m.stop_at(shellend);stop=m.until(shellend,120,page=0)['cpu_ticks']
+   assert m.read(0,4)==(R/'bin/NC.i80').read_bytes()[:4]
+   assert not banked or not any(r['bank']==corepage for r in allocations())
+   ready()
+   rows.append(dict(profile=name,font=a.font,operation='return_nc',verified=True,cycles=stop-start,ms=(stop-start)/2000))
+   if probe:rows[-1]['counters']=counts
+   continue
   if a.hex_view:
    edit('x','keyHandler_Space')
    edited=b'x'+payload
@@ -375,17 +520,35 @@ try:
     stride=get(s['ebCacheStride'],1,True)[0]
     assert slots=={'Rotate':255,'Packed6K':200,'Fast12K':104}[a.font] and stride==64
     assert val('ebPrefetched')==0
-    m.stop_at(s['ebPrefetchCopy']);m.until(s['ebPrefetchCopy'],90,page=corepage)
+    m.stop_at(s['ebPrefetchCopy']);copy_start=m.until(s['ebPrefetchCopy'],90,page=corepage)['cpu_ticks']
+    prefetched_at_copy=int.from_bytes(m.read(s['ebPrefetched'],2),'little')
     before=main_memory(0x9000,0x3000)
-    m.stop_at(s['ebPollKey']);m.until(s['ebPollKey'],90,page=corepage)
+    if probe:
+     copied,copy_counts=probe.until(s['ebPollKey'],corepage)
+     copy_stop=copied['cpu_ticks']
+    else:
+     m.stop_at(s['ebPollKey']);copy_stop=m.until(s['ebPollKey'],90,page=corepage)['cpu_ticks']
+    copy_rows=int.from_bytes(m.read(s['ebPrefetched'],2),'little')-prefetched_at_copy
+    assert copy_rows>0
     assert main_memory(0x9000,0x3000)==before,'Prefetch changed the screen'
     m.stop_at(s['ebPrefetch']);start=m.until(s['ebPrefetch'],90,page=corepage)['cpu_ticks']
+    before_count=int.from_bytes(m.read(s['ebPrefetched'],2),'little')
     m.stop_at(s['ebPollKey']);stop=m.until(s['ebPollKey'],90,page=corepage)['cpu_ticks']
+    after_count=int.from_bytes(m.read(s['ebPrefetched'],2),'little')
     assert stop-start<65536,(start,stop)
     ready();m.call('emu_run_for',ms=1200)
     m.stop_at(s['ebPollKey']);m.until(s['ebPollKey'],90,page=corepage);capture()
     assert val('ebPrefetched')>=s['EDITOR_PAGE_STEP'],val('ebPrefetched')
+    rows.append(dict(profile=name,font=a.font,operation='idle_prefetch',cycles=stop-start,
+                     sliceRows=after_count-before_count,copyToPollCycles=copy_stop-copy_start,
+                     copyRows=copy_rows,cachedRows=val('ebPrefetched'),cacheRows=slots,cacheStride=stride))
+    if probe:rows[-1]['counters']=copy_counts
     print('PREFETCH',slots,stride,val('ebPrefetched'),stop-start,flush=True)
+    if a.prefetch_only:
+     m.stop_at(shellend);tap('f10');m.until(shellend,120,page=0)
+     assert m.read(0,4)==(R/'bin/NC.i80').read_bytes()[:4]
+     assert not any(r['bank']==corepage or r['bank']==0 and r['base']==s['EDIT_MAIN_PACKET'] for r in allocations())
+     continue
    def page(key):
     edit(key,'editorPageDown' if key=='down' else 'editorPageUp','rpt')
     return val('v_topLine')
@@ -415,7 +578,7 @@ try:
     page('up')
     assert rows[-1]['rowReads']==0,rows[-1]
    m.stop_at(shellend);tap('f10');m.until(shellend,120,page=0);ready()
-   assert not banked or not any(r['bank']==corepage or r['bank']==0 and r['base']==g['GFX_PACKET'] for r in allocations())
+   assert not banked or not any(r['bank']==corepage or r['bank']==0 and r['base']==s['EDIT_MAIN_PACKET'] for r in allocations())
    print('DYNAMIC CACHE AND PREFETCH PASS',name,flush=True);continue
   if a.modal_only:
    for _ in range(4):action('down')
@@ -581,7 +744,10 @@ try:
                    for profile,(path,data) in capacity_cases.items()}
  else:
   report.update(fileBytes=len(payload),payloadSha256=hashlib.sha256(payload).hexdigest())
- (O/(a.font+'-'+'-'.join(a.profiles)+'-results.json')).write_text(json.dumps(report,indent=2))
+ if a.ui_timings or a.prefetch_only or a.held_down:report['cpu']=speed
+ suffix='-counters.json' if a.counters else '-results.json'
+ if a.held_down:suffix=f'-held-down-{a.held_down}.json'
+ (O/(a.font+'-'+'-'.join(a.profiles)+suffix)).write_text(json.dumps(report,indent=2))
  print('EDITOR BANK BENCH PASS',flush=True)
 except Exception:
  if x.pid and gl['mcp_owner']()==str(x.pid):
