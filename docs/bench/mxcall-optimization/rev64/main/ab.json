@@ -1,0 +1,178 @@
+[
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 856,
+    "bound": 856,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "control": 1099,
+    "bound": 1099,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 666,
+    "bound": 593,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "control": 909,
+    "bound": 836,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_GET_CURSOR_POS",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 836,
+    "bound": 836,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_GET_CURSOR_POS",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 646,
+    "bound": 573,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_SUB_HL_DE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 848,
+    "bound": 848,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_SUB_HL_DE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 658,
+    "bound": 585,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_CHAR",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 1803,
+    "bound": 1803,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_CHAR",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 1613,
+    "bound": 1540,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 2559,
+    "bound": 2559,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "control": 2802,
+    "bound": 2802,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 2369,
+    "bound": 2296,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "control": 2612,
+    "bound": 2539,
+    "saved": 73
+  },
+  {
+    "page": 0,
+    "operation": "DOS_GET_ERROR",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 3561,
+    "bound": 3561,
+    "saved": 0
+  },
+  {
+    "page": 0,
+    "operation": "DOS_GET_ERROR",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "control": 3845,
+    "bound": 3772,
+    "saved": 73
+  }
+]

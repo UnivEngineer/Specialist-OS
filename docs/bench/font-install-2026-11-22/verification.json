@@ -1,0 +1,36 @@
+{
+  "image_sha256": "b81ad05e0df5a769caa193b9f60b5bef120db06c1d694f2e5bbf4f32c95af54c",
+  "tick_ms": 0.128,
+  "rows": [
+    {
+      "engine": "4x8/Fast",
+      "method": "generate",
+      "verified": true,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "verified": true,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "generate",
+      "verified": true,
+      "repeat": 1
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "generate",
+      "verified": true,
+      "repeat": 1
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "generate",
+      "verified": true,
+      "repeat": 1
+    }
+  ]
+}

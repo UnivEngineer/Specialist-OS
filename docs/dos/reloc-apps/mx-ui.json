@@ -1,0 +1,13 @@
+{
+  "edit_main": {
+    "page": 0,
+    "nc_return_page": 0,
+    "typed": "x",
+    "bytes_opened": 73
+  },
+  "cli_commands": [
+    "PWD",
+    "EXIT"
+  ],
+  "main_page": 0
+}

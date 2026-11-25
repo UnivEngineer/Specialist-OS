@@ -1,0 +1,115 @@
+{
+  "engine": "BIOS",
+  "corpus_bytes": 924,
+  "corpus_sha256": "d27cc797d5192e0d048788f1be19f5f5bff10d5f32f67583408f9ba405fb82c4",
+  "rows": [
+    {
+      "kind": 0,
+      "route": 0,
+      "ticks": 4116,
+      "ms": 526.848
+    },
+    {
+      "kind": 0,
+      "route": 1,
+      "ticks": 15228,
+      "ms": 1949.184
+    },
+    {
+      "kind": 0,
+      "route": 2,
+      "ticks": 15229,
+      "ms": 1949.312
+    },
+    {
+      "kind": 1,
+      "route": 0,
+      "ticks": 3970,
+      "ms": 508.16
+    },
+    {
+      "kind": 1,
+      "route": 1,
+      "ticks": 15082,
+      "ms": 1930.496
+    },
+    {
+      "kind": 1,
+      "route": 2,
+      "ticks": 15083,
+      "ms": 1930.624
+    },
+    {
+      "kind": 2,
+      "route": 0,
+      "ticks": 2115,
+      "ms": 270.72
+    },
+    {
+      "kind": 2,
+      "route": 3,
+      "ticks": 2546,
+      "ms": 325.888
+    },
+    {
+      "kind": 2,
+      "route": 4,
+      "ticks": 2356,
+      "ms": 301.568
+    },
+    {
+      "kind": 2,
+      "route": 5,
+      "ticks": 2298,
+      "ms": 294.144
+    },
+    {
+      "kind": 3,
+      "route": 0,
+      "ticks": 1866,
+      "ms": 238.848
+    },
+    {
+      "kind": 3,
+      "route": 3,
+      "ticks": 2333,
+      "ms": 298.624
+    },
+    {
+      "kind": 3,
+      "route": 4,
+      "ticks": 2100,
+      "ms": 268.8
+    },
+    {
+      "kind": 3,
+      "route": 5,
+      "ticks": 2049,
+      "ms": 262.272
+    },
+    {
+      "kind": 4,
+      "route": 0,
+      "ticks": 1736,
+      "ms": 222.208
+    },
+    {
+      "kind": 4,
+      "route": 3,
+      "ticks": 2244,
+      "ms": 287.232
+    },
+    {
+      "kind": 4,
+      "route": 4,
+      "ticks": 1969,
+      "ms": 252.032
+    },
+    {
+      "kind": 4,
+      "route": 5,
+      "ticks": 1918,
+      "ms": 245.504
+    }
+  ]
+}

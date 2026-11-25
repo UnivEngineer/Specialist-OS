@@ -1,0 +1,120 @@
+{
+  "image_sha256": "55105cc433564ac0dd03d8377e26f371f9e14ad71940376d8f08375f55de5801",
+  "tick_ms": 0.128,
+  "rows": [
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "total_ticks": 5448,
+      "prepare_ticks": 669,
+      "read_ticks": null,
+      "intervals": [
+        1929,
+        1168,
+        1230,
+        69,
+        669,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "file",
+      "total_ticks": 6001,
+      "prepare_ticks": 1529,
+      "read_ticks": 1520,
+      "intervals": [
+        1744,
+        1168,
+        1108,
+        69,
+        1529,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "file",
+      "total_ticks": 6000,
+      "prepare_ticks": 1530,
+      "read_ticks": 1521,
+      "intervals": [
+        1742,
+        1168,
+        1108,
+        69,
+        1530,
+        378,
+        5
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 2
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "total_ticks": 5141,
+      "prepare_ticks": 669,
+      "read_ticks": null,
+      "intervals": [
+        1744,
+        1168,
+        1108,
+        69,
+        669,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 2
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "total_ticks": 5141,
+      "prepare_ticks": 669,
+      "read_ticks": null,
+      "intervals": [
+        1741,
+        1168,
+        1111,
+        69,
+        669,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 3
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "file",
+      "total_ticks": 6000,
+      "prepare_ticks": 1530,
+      "read_ticks": 1521,
+      "intervals": [
+        1742,
+        1169,
+        1107,
+        69,
+        1530,
+        378,
+        5
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 3
+    }
+  ]
+}

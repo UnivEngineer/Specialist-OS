@@ -1,0 +1,147 @@
+[
+  {
+    "source": 2,
+    "destination": 3,
+    "caller": 0,
+    "previous": [
+      5,
+      3,
+      0
+    ],
+    "preparation": 2556,
+    "inner": 2090,
+    "three_pairs": 277,
+    "calls_and_handlers": 190,
+    "cold_pair": [
+      true,
+      false,
+      false
+    ],
+    "ideal_preseed": 2305,
+    "guarded_same": 2425,
+    "guarded_change": 2710,
+    "observed": [
+      "fd01fd02fc00",
+      "fd01fd02fc00",
+      "00",
+      "3e0232fdff31bdffc5d5e521080122bdff3e0032fcff31f68ec9000000000001",
+      "00010120000104fff88e"
+    ]
+  },
+  {
+    "source": 0,
+    "destination": 3,
+    "caller": 0,
+    "previous": [
+      2,
+      3,
+      0
+    ],
+    "preparation": 2528,
+    "inner": 2062,
+    "three_pairs": 263,
+    "calls_and_handlers": 176,
+    "cold_pair": [
+      true,
+      false,
+      false
+    ],
+    "ideal_preseed": 2291,
+    "guarded_same": 2411,
+    "guarded_change": 2682,
+    "observed": [
+      "fc00fd02fc00",
+      "fc00fd02fc00",
+      "00",
+      "3e0232fdff31bdffc5d5e521080122bdff3e0032fcff31f68ec9000000000001",
+      "00010120000104fff88e"
+    ]
+  },
+  {
+    "source": 2,
+    "destination": 0,
+    "caller": 0,
+    "previous": [
+      2,
+      3,
+      0
+    ],
+    "preparation": 2528,
+    "inner": 2062,
+    "three_pairs": 263,
+    "calls_and_handlers": 176,
+    "cold_pair": [
+      false,
+      true,
+      false
+    ],
+    "ideal_preseed": 2291,
+    "guarded_same": 2411,
+    "guarded_change": 2717,
+    "observed": [
+      "fd01fc00fc00",
+      "fd01fc00fc00",
+      "00",
+      "3e0032fcff31bdffc5d5e521080122bdff3e0032fcff31f68ec9000000000001",
+      "00010120000104fff88e"
+    ]
+  },
+  {
+    "source": 2,
+    "destination": 3,
+    "caller": 6,
+    "previous": [
+      2,
+      3,
+      0
+    ],
+    "preparation": 2570,
+    "inner": 2104,
+    "three_pairs": 291,
+    "calls_and_handlers": 204,
+    "cold_pair": [
+      false,
+      false,
+      true
+    ],
+    "ideal_preseed": 2305,
+    "guarded_same": 2425,
+    "guarded_change": 2794,
+    "observed": [
+      "fd01fd02fd05",
+      "fd01fd02fd05",
+      "00",
+      "3e0232fdff31bdffc5d5e521080122bdff3e0532fdff31f68ec9000000000001",
+      "00010120000104fff88e"
+    ]
+  },
+  {
+    "source": 130,
+    "destination": 3,
+    "caller": 0,
+    "previous": [
+      2,
+      3,
+      0
+    ],
+    "preparation": 2540,
+    "inner": 2074,
+    "three_pairs": 269,
+    "calls_and_handlers": 182,
+    "cold_pair": [
+      true,
+      false,
+      false
+    ],
+    "ideal_preseed": 2297,
+    "guarded_same": 2417,
+    "guarded_change": 2694,
+    "observed": [
+      "fe02fd02fc00",
+      "fe02fd02fc00",
+      "00",
+      "3e0232fdff31bdffc5d5e521080122bdff3e0032fcff31f68ec9000000000001",
+      "00010120000104fff88e"
+    ]
+  }
+]

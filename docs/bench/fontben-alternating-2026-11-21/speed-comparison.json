@@ -1,0 +1,170 @@
+{
+  "normal_engine": "4x8/Packed",
+  "full_start": "PIT timer unavailable",
+  "full_after_init_ticks": 0,
+  "max_delta_ticks": 1,
+  "pairs": [
+    {
+      "kind": 0,
+      "route": 0,
+      "normal_ticks": 3372,
+      "four_x_ticks": 3372,
+      "delta_ticks": 0,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 0,
+      "route": 1,
+      "normal_ticks": 14485,
+      "four_x_ticks": 14484,
+      "delta_ticks": -1,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 0,
+      "route": 2,
+      "normal_ticks": 14485,
+      "four_x_ticks": 14484,
+      "delta_ticks": -1,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 1,
+      "route": 0,
+      "normal_ticks": 3139,
+      "four_x_ticks": 3139,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 1,
+      "route": 1,
+      "normal_ticks": 14251,
+      "four_x_ticks": 14251,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 1,
+      "route": 2,
+      "normal_ticks": 14252,
+      "four_x_ticks": 14252,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 2,
+      "route": 0,
+      "normal_ticks": 1044,
+      "four_x_ticks": 1045,
+      "delta_ticks": 1,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 2,
+      "route": 3,
+      "normal_ticks": 1500,
+      "four_x_ticks": 1500,
+      "delta_ticks": 0,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 2,
+      "route": 4,
+      "normal_ticks": 1287,
+      "four_x_ticks": 1287,
+      "delta_ticks": 0,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 2,
+      "route": 5,
+      "normal_ticks": 1228,
+      "four_x_ticks": 1227,
+      "delta_ticks": -1,
+      "frame": "e73617b03cbf91d7a0fa9874145570996b48c786a42f72a910ba6b7fbc0563fd",
+      "cursor": "d900"
+    },
+    {
+      "kind": 3,
+      "route": 0,
+      "normal_ticks": 892,
+      "four_x_ticks": 892,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 3,
+      "route": 3,
+      "normal_ticks": 1362,
+      "four_x_ticks": 1362,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 3,
+      "route": 4,
+      "normal_ticks": 1132,
+      "four_x_ticks": 1132,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 3,
+      "route": 5,
+      "normal_ticks": 1075,
+      "four_x_ticks": 1076,
+      "delta_ticks": 1,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 4,
+      "route": 0,
+      "normal_ticks": 819,
+      "four_x_ticks": 819,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 4,
+      "route": 3,
+      "normal_ticks": 1336,
+      "four_x_ticks": 1335,
+      "delta_ticks": -1,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 4,
+      "route": 4,
+      "normal_ticks": 1060,
+      "four_x_ticks": 1060,
+      "delta_ticks": 0,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    },
+    {
+      "kind": 4,
+      "route": 5,
+      "normal_ticks": 1002,
+      "four_x_ticks": 1001,
+      "delta_ticks": -1,
+      "frame": "679525f5aa6bf5f3ea150a069a612908166dc24fbe5dcef4dd10269db10f546f",
+      "cursor": "6178"
+    }
+  ]
+}

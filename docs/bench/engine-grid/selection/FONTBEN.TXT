@@ -1,0 +1,16 @@
+SCALAR12
+FontBen: 924 bytes, 6x8, ms N
+P API              MAIN CMD  CMDZ NEAR F256 USER
+1 Char              470  732  732    -    -    - 
+1 CharRaw           458  720  720    -    -    - 
+1 StringZ           392    -    -  480  418  413 
+1 StringRawZ        392    -    -  477  417  412 
+1 StringRawLim      370    -    -  457  395  390 
+4DUP
+FontBen: 924 bytes, 4x8, ms N
+P API              MAIN CMD  CMDZ NEAR F256 USER
+1 Char              503  766  765    -    -    - 
+1 CharRaw           492  753  754    -    -    - 
+1 StringZ           151    -    -  249  178  172 
+1 StringRawZ        145    -    -  238  171  166 
+1 StringRawLim      123    -    -  218  149  143 

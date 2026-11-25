@@ -1,0 +1,90 @@
+{
+  "F-ALL": {
+    "MAIN": {
+      "raw_write": 1172,
+      "raw_read": 577,
+      "file_write": 3186,
+      "file_read": 1580,
+      "raw_verify": 1444,
+      "file_verify": 2324,
+      "raw_write_high": 0,
+      "raw_read_high": 0,
+      "raw_verify_high": 0,
+      "file_write_high": 0,
+      "file_read_high": 0,
+      "file_verify_high": 0
+    },
+    "DOS": {
+      "raw_write": 1172,
+      "raw_read": 576,
+      "file_write": 2925,
+      "file_read": 1429,
+      "raw_verify": 1444,
+      "file_verify": 2171,
+      "raw_write_high": 0,
+      "raw_read_high": 0,
+      "raw_verify_high": 0,
+      "file_write_high": 0,
+      "file_read_high": 0,
+      "file_verify_high": 0
+    },
+    "BANK": {
+      "raw_write": 1172,
+      "raw_read": 577,
+      "file_write": 3216,
+      "file_read": 1644,
+      "raw_verify": 1444,
+      "file_verify": 2388,
+      "raw_write_high": 0,
+      "raw_read_high": 0,
+      "raw_verify_high": 0,
+      "file_write_high": 0,
+      "file_read_high": 0,
+      "file_verify_high": 0
+    }
+  },
+  "C-ALL": {
+    "MAIN": {
+      "raw_write": 1957,
+      "raw_read": 680,
+      "file_write": 2569,
+      "file_read": 1016,
+      "raw_verify": 1547,
+      "file_verify": 1756,
+      "raw_write_high": 1647,
+      "raw_read_high": 370,
+      "raw_verify_high": 1238,
+      "file_write_high": 2262,
+      "file_read_high": 883,
+      "file_verify_high": 1622
+    },
+    "DOS": {
+      "raw_write": 2912,
+      "raw_read": 715,
+      "file_write": 3219,
+      "file_read": 825,
+      "raw_verify": 1585,
+      "file_verify": 1564,
+      "raw_write_high": 0,
+      "raw_read_high": 0,
+      "raw_verify_high": 0,
+      "file_write_high": 0,
+      "file_read_high": 0,
+      "file_verify_high": 0
+    },
+    "BANK": {
+      "raw_write": 2912,
+      "raw_read": 714,
+      "file_write": 3515,
+      "file_read": 1009,
+      "raw_verify": 1585,
+      "file_verify": 1748,
+      "raw_write_high": 0,
+      "raw_read_high": 0,
+      "raw_verify_high": 0,
+      "file_write_high": 0,
+      "file_read_high": 0,
+      "file_verify_high": 0
+    }
+  }
+}

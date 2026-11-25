@@ -1,0 +1,1051 @@
+[
+  {
+    "page": 6,
+    "operation": "BIOS_UPPERCASE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 3033,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 81,
+        "sp": 34302
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 335,
+        "sp": 34298
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 857,
+        "sp": 34296
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 881,
+        "sp": 34296
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 955,
+        "sp": 34296
+      },
+      {
+        "at": "bbEntry",
+        "page": 0,
+        "t": 1342,
+        "sp": 60792
+      },
+      {
+        "at": "bbScalarFast",
+        "page": 0,
+        "t": 1475,
+        "sp": 60792
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 1575,
+        "sp": 60790
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 1809,
+        "sp": 60790
+      },
+      {
+        "at": "bbScalarDone",
+        "page": 0,
+        "t": 1855,
+        "sp": 60792
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 0,
+        "t": 1931,
+        "sp": 60794
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 2229,
+        "sp": 60800
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 2273,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 2347,
+        "sp": 60800
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 2404,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 2524,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 14,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 16,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_UPPERCASE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 3276,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 207,
+        "sp": 34288
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 324,
+        "sp": 34302
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 578,
+        "sp": 34298
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 1100,
+        "sp": 34296
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1124,
+        "sp": 34296
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1198,
+        "sp": 34296
+      },
+      {
+        "at": "bbEntry",
+        "page": 0,
+        "t": 1585,
+        "sp": 60792
+      },
+      {
+        "at": "bbScalarFast",
+        "page": 0,
+        "t": 1718,
+        "sp": 60792
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 1818,
+        "sp": 60790
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 2052,
+        "sp": 60790
+      },
+      {
+        "at": "bbScalarDone",
+        "page": 0,
+        "t": 2098,
+        "sp": 60792
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 0,
+        "t": 2174,
+        "sp": 60794
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 2472,
+        "sp": 60800
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 2516,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 2590,
+        "sp": 60800
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 2647,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 2767,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 14,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 16,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2621,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 392,
+        "sp": 34292
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 914,
+        "sp": 34290
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 938,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1012,
+        "sp": 34290
+      },
+      {
+        "at": "bbEntry",
+        "page": 0,
+        "t": 1399,
+        "sp": 60792
+      },
+      {
+        "at": "bbScalarFast",
+        "page": 0,
+        "t": 1532,
+        "sp": 60792
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 1632,
+        "sp": 60790
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 1866,
+        "sp": 60790
+      },
+      {
+        "at": "bbScalarDone",
+        "page": 0,
+        "t": 1912,
+        "sp": 60792
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 0,
+        "t": 1988,
+        "sp": 60794
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 2286,
+        "sp": 60800
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 2330,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 2404,
+        "sp": 60800
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 2461,
+        "sp": 60800
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 14,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 16,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2864,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 382,
+        "sp": 34278
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 635,
+        "sp": 34292
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 1157,
+        "sp": 34290
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1181,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1255,
+        "sp": 34290
+      },
+      {
+        "at": "bbEntry",
+        "page": 0,
+        "t": 1642,
+        "sp": 60792
+      },
+      {
+        "at": "bbScalarFast",
+        "page": 0,
+        "t": 1775,
+        "sp": 60792
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 1875,
+        "sp": 60790
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 2109,
+        "sp": 60790
+      },
+      {
+        "at": "bbScalarDone",
+        "page": 0,
+        "t": 2155,
+        "sp": 60792
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 0,
+        "t": 2231,
+        "sp": 60794
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 2529,
+        "sp": 60800
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 2573,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 2647,
+        "sp": 60800
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 2704,
+        "sp": 60800
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 14,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 16,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 6,
+    "operation": "DOS_GET_ERROR",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 4559,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 81,
+        "sp": 34302
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 217,
+        "sp": 34298
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 739,
+        "sp": 34296
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 783,
+        "sp": 34296
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 857,
+        "sp": 34296
+      },
+      {
+        "at": "kernelDispatch",
+        "page": 1,
+        "t": 1244,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2297,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2378,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2459,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2540,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2621,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2702,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2783,
+        "sp": 61496
+      },
+      {
+        "at": "kdInvoke",
+        "page": 1,
+        "t": 2916,
+        "sp": 61494
+      },
+      {
+        "at": "dosGetError",
+        "page": 1,
+        "t": 3052,
+        "sp": 61494
+      },
+      {
+        "at": "kdFinish",
+        "page": 1,
+        "t": 3216,
+        "sp": 61496
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 1,
+        "t": 3457,
+        "sp": 61498
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 3755,
+        "sp": 61504
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 3799,
+        "sp": 61504
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 3873,
+        "sp": 61504
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 3930,
+        "sp": 61504
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 4050,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 70
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 14,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 16,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "DOS_GET_ERROR",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 4208,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 335,
+        "sp": 34292
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 857,
+        "sp": 34290
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 901,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 975,
+        "sp": 34290
+      },
+      {
+        "at": "kernelDispatch",
+        "page": 1,
+        "t": 1362,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2415,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2496,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2577,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2658,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2739,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2820,
+        "sp": 61496
+      },
+      {
+        "at": "kdScalarFind",
+        "page": 1,
+        "t": 2901,
+        "sp": 61496
+      },
+      {
+        "at": "kdInvoke",
+        "page": 1,
+        "t": 3034,
+        "sp": 61494
+      },
+      {
+        "at": "dosGetError",
+        "page": 1,
+        "t": 3170,
+        "sp": 61494
+      },
+      {
+        "at": "kdFinish",
+        "page": 1,
+        "t": 3334,
+        "sp": 61496
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 1,
+        "t": 3575,
+        "sp": 61498
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 3873,
+        "sp": 61504
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 3917,
+        "sp": 61504
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 3991,
+        "sp": 61504
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 4048,
+        "sp": 61504
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 70
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 14,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 16,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "NESTED",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 4428,
+    "events": [
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 539,
+        "sp": 34300
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 583,
+        "sp": 34300
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 657,
+        "sp": 34300
+      },
+      {
+        "at": "mx_callRegs",
+        "page": 1,
+        "t": 1188,
+        "sp": 61494
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 1,
+        "t": 1373,
+        "sp": 61484
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 1,
+        "t": 1563,
+        "sp": 61484
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 2128,
+        "sp": 61482
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 2152,
+        "sp": 61482
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 2226,
+        "sp": 61482
+      },
+      {
+        "at": "bbEntry",
+        "page": 0,
+        "t": 2613,
+        "sp": 60792
+      },
+      {
+        "at": "bbScalarFast",
+        "page": 0,
+        "t": 2746,
+        "sp": 60792
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 2846,
+        "sp": 60790
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 3080,
+        "sp": 60790
+      },
+      {
+        "at": "bbScalarDone",
+        "page": 0,
+        "t": 3126,
+        "sp": 60792
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 0,
+        "t": 3202,
+        "sp": 60794
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 3500,
+        "sp": 60800
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 3544,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 3618,
+        "sp": 60800
+      },
+      {
+        "at": "bankResume",
+        "page": 1,
+        "t": 3675,
+        "sp": 60800
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 1,
+        "t": 3845,
+        "sp": 61498
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 4143,
+        "sp": 61504
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 4187,
+        "sp": 61504
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 4261,
+        "sp": 61504
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 4318,
+        "sp": 61504
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 14,
+      "1": 22,
+      "6": 0
+    },
+    "bankSwitches": 4,
+    "profileChanges": 0,
+    "windowRegisterBytes": 32,
+    "shadowBytes": 0,
+    "callbacks": 0
+  }
+]

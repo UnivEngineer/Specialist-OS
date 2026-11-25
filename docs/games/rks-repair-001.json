@@ -1,0 +1,69 @@
+{
+  "experiment": "rks-repair-001",
+  "date": "2026-10-31",
+  "scope": "container checksum tails only; no code or load address repair",
+  "all_rks_valid": 151,
+  "files": [
+    {
+      "file": "assets/games/rks/Jet-set.rks",
+      "backup": "assets/games/originals/rks-checksums/Jet-set.rks.bin",
+      "start": 0,
+      "end": 36351,
+      "payload_bytes": 36352,
+      "original_bytes": 36358,
+      "fixed_bytes": 36358,
+      "original_sha256": "b45d38c759f747360e7152e57a5398643f45e5df2536030462ffba1d5583ba4c",
+      "fixed_sha256": "9c6ab47107bbb1d91528dbeba01375dd80160b9e34360a2b5c6e04df1d21035a",
+      "old_tail_hex": "b686",
+      "new_tail_hex": "6978",
+      "header_unchanged": true,
+      "payload_unchanged": true
+    },
+    {
+      "file": "assets/games/rks/KOM13_1.rks",
+      "backup": "assets/games/originals/rks-checksums/KOM13_1.rks.bin",
+      "start": 15360,
+      "end": 36607,
+      "payload_bytes": 21248,
+      "original_bytes": 21254,
+      "fixed_bytes": 21254,
+      "original_sha256": "07dfeb8eb64bcf17eb81289c5b9ba31d5a44105db0b8c363258b98c2b391207d",
+      "fixed_sha256": "9c77308fd4d1eaeb3765efd7f86c76baad290d95ae8248211e33160ffc2d57df",
+      "old_tail_hex": "f617",
+      "new_tail_hex": "0aa4",
+      "header_unchanged": true,
+      "payload_unchanged": true
+    },
+    {
+      "file": "assets/games/mxos/StarWars/legacy/StarWars2-mx.rks",
+      "backup": "assets/games/originals/rks-checksums/StarW2.rks.bin",
+      "start": 0,
+      "end": 9215,
+      "payload_bytes": 9216,
+      "original_bytes": 9222,
+      "fixed_bytes": 9222,
+      "original_sha256": "999775c6ef2bfc73922822131b1a8e83563bad16af1dbc3b376b6ec655909bce",
+      "fixed_sha256": "642326f85a1b6009a80a08d47b7c62a7fc0042e6c2f6c8f9076704ce4bf43b15",
+      "old_tail_hex": "0000",
+      "new_tail_hex": "e313",
+      "header_unchanged": true,
+      "payload_unchanged": true
+    },
+    {
+      "file": "assets/games/rks/Lines.rks",
+      "backup": "assets/games/originals/rks-checksums/Lines.rks.bin",
+      "start": 4,
+      "end": 18432,
+      "payload_bytes": 18429,
+      "original_bytes": 18434,
+      "fixed_bytes": 18435,
+      "original_sha256": "06892a22e898f319cc9dafed1ea7e3f2fe4ec8810955c8c7e2fa1d8114d39bd8",
+      "fixed_sha256": "78cba473bb03e300f43b588031ab05cb0872cf4368ed377518d91d226ad5ee9f",
+      "old_tail_hex": "ff",
+      "new_tail_hex": "35bd",
+      "header_unchanged": true,
+      "payload_unchanged": true,
+      "author_reference_path": "D:/Projects/RetroPC/Specialist/Soft/lines/lines.rks"
+    }
+  ]
+}

@@ -1,0 +1,360 @@
+{
+  "cases": [
+    {
+      "case": "char",
+      "page": 1,
+      "inline": false,
+      "directTicks": 1481,
+      "bankTicks": 5392
+    },
+    {
+      "case": "char",
+      "page": 1,
+      "inline": true,
+      "directTicks": 1481,
+      "bankTicks": 5617
+    },
+    {
+      "case": "char",
+      "page": 3,
+      "inline": false,
+      "directTicks": 1481,
+      "bankTicks": 5392
+    },
+    {
+      "case": "char",
+      "page": 3,
+      "inline": true,
+      "directTicks": 1481,
+      "bankTicks": 5617
+    },
+    {
+      "case": "set-cursor",
+      "page": 1,
+      "inline": false,
+      "directTicks": 957,
+      "bankTicks": 4868
+    },
+    {
+      "case": "set-cursor",
+      "page": 1,
+      "inline": true,
+      "directTicks": 957,
+      "bankTicks": 5093
+    },
+    {
+      "case": "set-cursor",
+      "page": 3,
+      "inline": false,
+      "directTicks": 957,
+      "bankTicks": 4868
+    },
+    {
+      "case": "set-cursor",
+      "page": 3,
+      "inline": true,
+      "directTicks": 957,
+      "bankTicks": 5093
+    },
+    {
+      "case": "decimal",
+      "page": 1,
+      "inline": false,
+      "directTicks": 9871,
+      "bankTicks": 13782
+    },
+    {
+      "case": "decimal",
+      "page": 1,
+      "inline": true,
+      "directTicks": 9871,
+      "bankTicks": 14007
+    },
+    {
+      "case": "decimal",
+      "page": 3,
+      "inline": false,
+      "directTicks": 9871,
+      "bankTicks": 13782
+    },
+    {
+      "case": "decimal",
+      "page": 3,
+      "inline": true,
+      "directTicks": 9871,
+      "bankTicks": 14007
+    },
+    {
+      "case": "uppercase",
+      "page": 1,
+      "inline": false,
+      "directTicks": 961,
+      "bankTicks": 4872
+    },
+    {
+      "case": "uppercase",
+      "page": 1,
+      "inline": true,
+      "directTicks": 961,
+      "bankTicks": 5097
+    },
+    {
+      "case": "uppercase",
+      "page": 3,
+      "inline": false,
+      "directTicks": 961,
+      "bankTicks": 4872
+    },
+    {
+      "case": "uppercase",
+      "page": 3,
+      "inline": true,
+      "directTicks": 961,
+      "bankTicks": 5097
+    },
+    {
+      "case": "subtract",
+      "page": 1,
+      "inline": false,
+      "directTicks": 953,
+      "bankTicks": 4864
+    },
+    {
+      "case": "subtract",
+      "page": 1,
+      "inline": true,
+      "directTicks": 953,
+      "bankTicks": 5089
+    },
+    {
+      "case": "subtract",
+      "page": 3,
+      "inline": false,
+      "directTicks": 953,
+      "bankTicks": 4864
+    },
+    {
+      "case": "subtract",
+      "page": 3,
+      "inline": true,
+      "directTicks": 953,
+      "bankTicks": 5089
+    },
+    {
+      "case": "divide-two",
+      "page": 1,
+      "inline": false,
+      "directTicks": 957,
+      "bankTicks": 4868
+    },
+    {
+      "case": "divide-two",
+      "page": 1,
+      "inline": true,
+      "directTicks": 957,
+      "bankTicks": 5093
+    },
+    {
+      "case": "divide-two",
+      "page": 3,
+      "inline": false,
+      "directTicks": 957,
+      "bankTicks": 4868
+    },
+    {
+      "case": "divide-two",
+      "page": 3,
+      "inline": true,
+      "directTicks": 957,
+      "bankTicks": 5093
+    },
+    {
+      "case": "multiply",
+      "page": 1,
+      "inline": false,
+      "directTicks": 2076,
+      "bankTicks": 5987
+    },
+    {
+      "case": "multiply",
+      "page": 1,
+      "inline": true,
+      "directTicks": 2076,
+      "bankTicks": 6212
+    },
+    {
+      "case": "multiply",
+      "page": 3,
+      "inline": false,
+      "directTicks": 2076,
+      "bankTicks": 5987
+    },
+    {
+      "case": "multiply",
+      "page": 3,
+      "inline": true,
+      "directTicks": 2076,
+      "bankTicks": 6212
+    },
+    {
+      "case": "divide",
+      "page": 1,
+      "inline": false,
+      "directTicks": 2391,
+      "bankTicks": 6302
+    },
+    {
+      "case": "divide",
+      "page": 1,
+      "inline": true,
+      "directTicks": 2391,
+      "bankTicks": 6527
+    },
+    {
+      "case": "divide",
+      "page": 3,
+      "inline": false,
+      "directTicks": 2391,
+      "bankTicks": 6302
+    },
+    {
+      "case": "divide",
+      "page": 3,
+      "inline": true,
+      "directTicks": 2391,
+      "bankTicks": 6527
+    },
+    {
+      "case": "string",
+      "bytes": 20,
+      "directTicks": 29997,
+      "bankTicks": 53579
+    },
+    {
+      "case": "string",
+      "bytes": 255,
+      "directTicks": 419915,
+      "bankTicks": 456422
+    },
+    {
+      "case": "string",
+      "bytes": 256,
+      "directTicks": 421180,
+      "bankTicks": 476999
+    },
+    {
+      "case": "string",
+      "bytes": 521,
+      "directTicks": 856251,
+      "bankTicks": 945902
+    },
+    {
+      "case": "string-at-boundary"
+    },
+    {
+      "case": "geometry",
+      "directTicks": 39138,
+      "bankTicks": 65653
+    },
+    {
+      "case": "toolbar",
+      "directTicks": 50428,
+      "bankTicks": 77858
+    },
+    {
+      "case": "inverse",
+      "directTicks": 3567,
+      "bankTicks": 7703
+    },
+    {
+      "case": "copy-rectangle",
+      "directTicks": 4825,
+      "bankTicks": 8961
+    },
+    {
+      "case": "unsupported",
+      "function": 4
+    },
+    {
+      "case": "unsupported",
+      "function": 13
+    },
+    {
+      "case": "unsupported",
+      "function": 15
+    },
+    {
+      "case": "unsupported",
+      "function": 16
+    },
+    {
+      "case": "unsupported",
+      "function": 18
+    },
+    {
+      "case": "unsupported",
+      "function": 24
+    },
+    {
+      "case": "unsupported",
+      "function": 25
+    },
+    {
+      "case": "unsupported",
+      "function": 38
+    },
+    {
+      "case": "unsupported",
+      "function": 39
+    },
+    {
+      "case": "unsupported",
+      "function": 42
+    },
+    {
+      "case": "unsupported",
+      "function": 43
+    },
+    {
+      "case": "unsupported",
+      "function": 44
+    },
+    {
+      "case": "unsupported",
+      "function": 255
+    },
+    {
+      "case": "bad-pointer-or-list",
+      "function": 7
+    },
+    {
+      "case": "bad-pointer-or-list",
+      "function": 34
+    },
+    {
+      "case": "bad-pointer-or-list",
+      "function": 36
+    },
+    {
+      "case": "reentry-retains-outer-busy"
+    },
+    {
+      "case": "getch-from-bank",
+      "key": 13
+    },
+    {
+      "case": "main-DOS-BIOS-DOS-main"
+    }
+  ],
+  "mainBridgeBytes": 861,
+  "bankClientBytes": 152,
+  "emulator": true,
+  "cpuHz": 2000000,
+  "sha256": {
+    "TRANSPORT": "f543240f973e8c37915dc380a2e5b3ab99e9e2f3011f6bb9e5b229ec631f798f",
+    "WINDOW": "bdb90cb57cb9bc404ac50c8b603367257bc2b612e60952899ca011d7400971f4",
+    "CLIENT": "034c740b48480f9a7b29a03bf3c4377ef526a7839bc5d0f5256cad0dbad05281",
+    "MAINBIOS": "dd95f1d70e571c7552cd351a8dddb07da31467206a43179273f43a15efcc408f"
+  },
+  "biosSha256": "1eed910bad3ce4c20a7a59c05bfcbcd24fd313274a330fb610f70d6c2a5e9dae"
+}

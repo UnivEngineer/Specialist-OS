@@ -1,0 +1,418 @@
+[
+  {
+    "bank": 0,
+    "function": 24,
+    "attempt": 0,
+    "ticks": 3618,
+    "result": {
+      "af": 42375,
+      "bc": 30874,
+      "de": 13398,
+      "hl": 4660,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a7887a5",
+    "dosError": 165
+  },
+  {
+    "bank": 0,
+    "function": 24,
+    "attempt": 1,
+    "ticks": 3618,
+    "result": {
+      "af": 42375,
+      "bc": 30874,
+      "de": 13398,
+      "hl": 4660,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a7887a5",
+    "dosError": 165
+  },
+  {
+    "bank": 0,
+    "function": 26,
+    "attempt": 0,
+    "ticks": 3708,
+    "result": {
+      "af": 70,
+      "bc": 802,
+      "de": 13398,
+      "hl": 31335,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "677a563422034600",
+    "dosError": 165
+  },
+  {
+    "bank": 0,
+    "function": 26,
+    "attempt": 1,
+    "ticks": 3708,
+    "result": {
+      "af": 70,
+      "bc": 802,
+      "de": 13398,
+      "hl": 31335,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "677a563422034600",
+    "dosError": 165
+  },
+  {
+    "bank": 0,
+    "function": 48,
+    "attempt": 0,
+    "ticks": 2662,
+    "result": {
+      "af": 2631,
+      "bc": 48,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 0,
+    "function": 48,
+    "attempt": 1,
+    "ticks": 2662,
+    "result": {
+      "af": 2631,
+      "bc": 48,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 0,
+    "function": 255,
+    "attempt": 0,
+    "ticks": 2662,
+    "result": {
+      "af": 2631,
+      "bc": 255,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 0,
+    "function": 255,
+    "attempt": 1,
+    "ticks": 2662,
+    "result": {
+      "af": 2631,
+      "bc": 255,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 1,
+    "function": 24,
+    "attempt": 0,
+    "ticks": 2231,
+    "result": {
+      "af": 42375,
+      "bc": 30874,
+      "de": 13398,
+      "hl": 4660,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a7887a5",
+    "dosError": 165
+  },
+  {
+    "bank": 1,
+    "function": 24,
+    "attempt": 1,
+    "ticks": 2231,
+    "result": {
+      "af": 42375,
+      "bc": 30874,
+      "de": 13398,
+      "hl": 4660,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a7887a5",
+    "dosError": 165
+  },
+  {
+    "bank": 1,
+    "function": 26,
+    "attempt": 0,
+    "ticks": 2331,
+    "result": {
+      "af": 70,
+      "bc": 802,
+      "de": 13398,
+      "hl": 31335,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "677a563422034600",
+    "dosError": 165
+  },
+  {
+    "bank": 1,
+    "function": 26,
+    "attempt": 1,
+    "ticks": 2331,
+    "result": {
+      "af": 70,
+      "bc": 802,
+      "de": 13398,
+      "hl": 31335,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "677a563422034600",
+    "dosError": 165
+  },
+  {
+    "bank": 1,
+    "function": 48,
+    "attempt": 0,
+    "ticks": 1283,
+    "result": {
+      "af": 2631,
+      "bc": 48,
+      "de": 39624,
+      "hl": 32840,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 1,
+    "function": 48,
+    "attempt": 1,
+    "ticks": 1283,
+    "result": {
+      "af": 2631,
+      "bc": 48,
+      "de": 39624,
+      "hl": 32840,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 1,
+    "function": 255,
+    "attempt": 0,
+    "ticks": 1283,
+    "result": {
+      "af": 2631,
+      "bc": 255,
+      "de": 39624,
+      "hl": 32840,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 1,
+    "function": 255,
+    "attempt": 1,
+    "ticks": 1283,
+    "result": {
+      "af": 2631,
+      "bc": 255,
+      "de": 39624,
+      "hl": 32840,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 6,
+    "function": 24,
+    "attempt": 0,
+    "ticks": 3591,
+    "result": {
+      "af": 42375,
+      "bc": 30874,
+      "de": 13398,
+      "hl": 4660,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a7887a5",
+    "dosError": 165
+  },
+  {
+    "bank": 6,
+    "function": 24,
+    "attempt": 1,
+    "ticks": 3591,
+    "result": {
+      "af": 42375,
+      "bc": 30874,
+      "de": 13398,
+      "hl": 4660,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a7887a5",
+    "dosError": 165
+  },
+  {
+    "bank": 6,
+    "function": 26,
+    "attempt": 0,
+    "ticks": 3691,
+    "result": {
+      "af": 70,
+      "bc": 802,
+      "de": 13398,
+      "hl": 31335,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "677a563422034600",
+    "dosError": 165
+  },
+  {
+    "bank": 6,
+    "function": 26,
+    "attempt": 1,
+    "ticks": 3691,
+    "result": {
+      "af": 70,
+      "bc": 802,
+      "de": 13398,
+      "hl": 31335,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "677a563422034600",
+    "dosError": 165
+  },
+  {
+    "bank": 6,
+    "function": 48,
+    "attempt": 0,
+    "ticks": 2602,
+    "result": {
+      "af": 2631,
+      "bc": 48,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 6,
+    "function": 48,
+    "attempt": 1,
+    "ticks": 2602,
+    "result": {
+      "af": 2631,
+      "bc": 48,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 6,
+    "function": 255,
+    "attempt": 0,
+    "ticks": 2602,
+    "result": {
+      "af": 2631,
+      "bc": 255,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 6,
+    "function": 255,
+    "attempt": 1,
+    "ticks": 2602,
+    "result": {
+      "af": 2631,
+      "bc": 255,
+      "de": 39624,
+      "hl": 65488,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 6,
+    "function": 18,
+    "attempt": 0,
+    "ticks": 2685,
+    "result": {
+      "af": 2631,
+      "bc": 18,
+      "de": 17430,
+      "hl": 17212,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  },
+  {
+    "bank": 6,
+    "function": 18,
+    "attempt": 1,
+    "ticks": 2685,
+    "result": {
+      "af": 2631,
+      "bc": 18,
+      "de": 17430,
+      "hl": 17212,
+      "pc": 32771,
+      "sp": 34304
+    },
+    "packet": "341256349a784603",
+    "dosError": 10
+  }
+]

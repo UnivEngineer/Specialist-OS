@@ -1,0 +1,314 @@
+{
+  "registerCases": [
+    {
+      "case": "MXOS_BIOS_GETCH",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_TAPE_READ",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_TAPE_WRITE",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_INPUT",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_KEY_CHECK",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_Z",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_KEY_SCAN",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_TAPE_LOAD",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_TAPE_SAVE",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_CALC_CS",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINTER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_INSTALL_DRIVER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_DISK_DRIVER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_DEC_WORD",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_SET_RAMD_DRIVER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_UPPERCASE",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_STRCMP",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_STRICMP",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_SUB_HL_DE",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_BEEP_TIMER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_DISK_WRITE_CHECKED",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_ARG_NEXT",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_INSTALL_BLOCK_DRIVER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_SET_INPUT_HOOK",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_BLOCK_IO",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_MEMCPY",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_FILE_BODY",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_GLYPH_CACHE",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_Z_MAIN",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_FONT_RENDER",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_RAW_Z",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_RAW_Z_MAIN",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_RAW_LIM",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_RAW_LIM_MAIN",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_TEXT_PRINT",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_SET_FONT_ENCODING",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_COMMAND_BATCH",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_BIOS_PRINT_STRING_RAW_PSEUDO",
+      "cycles": 1110
+    },
+    {
+      "case": "MXOS_DOS_FILE_LIST",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_GET_SET_DRIVE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_DELETE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_RENAME",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_LOAD_INFO",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_GET_SET_ATTR",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_NAME_PREPARE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_EXEC",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_GET_DRIVE_FREE_SPACE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_MOUNT_VOLUME",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FLUSH_VOLUME",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_ASSOCIATION",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_SELECT_DRIVE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_COPY",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_GET_DRIVES",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_GET_ERROR",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_SECTOR_IO",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_TIMER",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILEHANDLE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_DIRECTORY",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_CLI",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_SET_SHELL",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_RAW_IO",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_DRIVER_INSTALL",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_DRIVER_REFRESH",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_MEMORY",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_MODULE_LOAD",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_MODULE_CALL",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_MODULE_UNLOAD",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILE_EXEC_NATIVE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_RESIDENT",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FILEOPS",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_ENUMERATE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_FONT_CONFIG",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_MODULE_SCOPE",
+      "cycles": 1622
+    },
+    {
+      "case": "MXOS_DOS_COMMAND_BATCH",
+      "cycles": 1622
+    },
+    {
+      "case": "bios_upperCase",
+      "directCycles": 529,
+      "nativeCycles": 1112,
+      "overhead": 583
+    },
+    {
+      "case": "dosGetError",
+      "directCycles": 535,
+      "nativeCycles": 1650,
+      "overhead": 1115
+    }
+  ],
+  "nested": true,
+  "bdosUnsupported": true
+}

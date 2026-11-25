@@ -1,0 +1,797 @@
+{
+  "runtime_sha256": "7d9f95cb3e938e20d17ac14e8212a7854222b448f5930e7aec6a9504034938af",
+  "system_sha256": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "emu80": {
+    "name": "Emu80",
+    "port": 19781,
+    "protocol": "2024-11-05",
+    "version": "4.0.575"
+  },
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "qpa": "offscreen",
+  "port": 19781,
+  "physical_markers": {
+    "0": "a500ff5a",
+    "2": "a502fd5a",
+    "6": "a506f95a",
+    "16": "a510ef5a"
+  },
+  "local_move": {
+    "ticks": 15703,
+    "profile": 2,
+    "result": {
+      "af": 70,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 33024,
+      "sp": 34384
+    },
+    "bytes": 257
+  },
+  "rows": [
+    {
+      "case": "direct",
+      "test_bank": 2,
+      "caller": 0,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 53,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 224,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 108,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 97,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 2,
+      "caller": 0,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 53,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 224,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 108,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 97,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 2,
+      "caller": 0,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 53,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 224,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 108,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 2,
+      "caller": 2,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 97,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 6,
+      "caller": 0,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 53,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 224,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 108,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 97,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 6,
+      "caller": 0,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 53,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 224,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 108,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 97,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 6,
+      "caller": 0,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 53,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 224,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 108,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 6,
+      "caller": 6,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 97,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 16,
+      "caller": 0,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 53,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 224,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 108,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "ticks": 97,
+      "result": {
+        "af": 29075,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 16,
+      "caller": 0,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 53,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 224,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 108,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "ticks": 97,
+      "result": {
+        "af": 21830,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 291,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "direct",
+      "test_bank": 16,
+      "caller": 0,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 53,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        0,
+        0
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "replica",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 224,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 108,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    },
+    {
+      "case": "read_bound",
+      "test_bank": 16,
+      "caller": 16,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "ticks": 97,
+      "result": {
+        "af": 42455,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 17767,
+        "sp": 34384
+      },
+      "mapper": [
+        1,
+        1
+      ],
+      "window_accesses": 0
+    }
+  ]
+}

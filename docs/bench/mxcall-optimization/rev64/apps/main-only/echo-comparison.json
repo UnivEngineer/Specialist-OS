@@ -1,0 +1,34 @@
+{
+  "nc-empty.png": {
+    "equal": true,
+    "changedBytes": 0,
+    "rev63": "5dea352a57b084d3da22b4132ecd856f497f7574be80fe2bbb143620efe3eb83",
+    "rev64": "5dea352a57b084d3da22b4132ecd856f497f7574be80fe2bbb143620efe3eb83"
+  },
+  "nc-command.png": {
+    "equal": true,
+    "changedBytes": 0,
+    "rev63": "5dea352a57b084d3da22b4132ecd856f497f7574be80fe2bbb143620efe3eb83",
+    "rev64": "5dea352a57b084d3da22b4132ecd856f497f7574be80fe2bbb143620efe3eb83"
+  },
+  "nc-empty.vram": {
+    "equal": true,
+    "changedBytes": 0,
+    "rev63": "c47e4a0505c4402caf88a00d080920c5fa2189d0e4e57624e4a56d92b9bde37f",
+    "rev64": "c47e4a0505c4402caf88a00d080920c5fa2189d0e4e57624e4a56d92b9bde37f"
+  },
+  "nc-command.vram": {
+    "equal": true,
+    "changedBytes": 0,
+    "rev63": "037b1c2aad2fd4b9c66fc530fce24307cb755a22c9e584d81c147c24249a60a8",
+    "rev64": "037b1c2aad2fd4b9c66fc530fce24307cb755a22c9e584d81c147c24249a60a8"
+  },
+  "rev63": {
+    "vramBytesChangedOnInput": 146,
+    "pngUnchangedOnInput": true
+  },
+  "rev64": {
+    "vramBytesChangedOnInput": 146,
+    "pngUnchangedOnInput": true
+  }
+}

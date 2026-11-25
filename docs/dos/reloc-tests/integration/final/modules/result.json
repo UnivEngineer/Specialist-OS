@@ -1,0 +1,60 @@
+[
+  {
+    "target": "MAIN",
+    "activation": "cold",
+    "loadTicks": 130121,
+    "base": 30251,
+    "end": 30335,
+    "bank": 0,
+    "callTicks": 9283
+  },
+  {
+    "target": "MAIN",
+    "activation": "warm",
+    "loadTicks": 81201,
+    "base": 30251,
+    "end": 30335,
+    "bank": 0,
+    "callTicks": 9283
+  },
+  {
+    "target": "DOS",
+    "loadNumber": 1,
+    "loadTicks": 88209,
+    "repeatCallTicks": 9387,
+    "base": 51572,
+    "end": 51672,
+    "bank": 1,
+    "callTicks": 9387
+  },
+  {
+    "target": "DOS",
+    "loadNumber": 2,
+    "loadTicks": 77347,
+    "repeatCallTicks": 9387,
+    "base": 51572,
+    "end": 51672,
+    "bank": 1,
+    "callTicks": 9387
+  },
+  {
+    "target": "EXEC",
+    "loadNumber": 1,
+    "loadTicks": 225094,
+    "repeatCallTicks": 9377,
+    "base": 60672,
+    "end": 60758,
+    "bank": 7,
+    "callTicks": 9377
+  },
+  {
+    "target": "EXEC",
+    "loadNumber": 2,
+    "loadTicks": 214232,
+    "repeatCallTicks": 9377,
+    "base": 60672,
+    "end": 60758,
+    "bank": 7,
+    "callTicks": 9377
+  }
+]

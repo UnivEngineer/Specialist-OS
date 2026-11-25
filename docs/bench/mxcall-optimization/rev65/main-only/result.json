@@ -1,0 +1,30 @@
+{
+  "release_sha256": "cbcbecf413c63c7f25c6f8a6951e6c57b0d13b46b4ac1eef03ccd76f86062302",
+  "test_sha256": "afd501b2e253e4dcbbf09bf37508e965c33753d619ab1466a65d38ca5eb18a32",
+  "port": 19781,
+  "detected_pages": 1,
+  "dos_page_count": 1,
+  "free_exec_pages": 0,
+  "hidden": true,
+  "muted": true,
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "entry": "C:/DOS/NC_MN.COM",
+  "command": "C:/DOS/EDIT_MN.COM C:/AUTOEXEC.BAT",
+  "document_bytes": 169,
+  "edited_bytes": 170,
+  "inserted": "x",
+  "exit": "F10, discard changes, NC MAIN",
+  "boot_breakpoints": [
+    [
+      "0x114",
+      0
+    ]
+  ]
+}

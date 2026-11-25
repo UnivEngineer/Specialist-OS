@@ -1,0 +1,1365 @@
+[
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 856,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 112,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 465,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 511,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 1099,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 207,
+        "sp": 34288,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 355,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 708,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 754,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 593,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 263,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 497,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 836,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 207,
+        "sp": 34288,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 506,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 740,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_GET_CURSOR_POS",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 836,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 112,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "getCursorPos",
+        "page": 0,
+        "t": 465,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 491,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4106,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_GET_CURSOR_POS",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 573,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 263,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "getCursorPos",
+        "page": 0,
+        "t": 497,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4106,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_SUB_HL_DE",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 848,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 112,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "sub_hl_de",
+        "page": 0,
+        "t": 465,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 503,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 61167,
+      "de": 9029,
+      "bc": 13393,
+      "af": 61063
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_SUB_HL_DE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 585,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 263,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "sub_hl_de",
+        "page": 0,
+        "t": 497,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 61167,
+      "de": 9029,
+      "bc": 13393,
+      "af": 61063
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_CHAR",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 1803,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 112,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "printChar",
+        "page": 0,
+        "t": 465,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 1458,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_CHAR",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 1540,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 263,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "printChar",
+        "page": 0,
+        "t": 497,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2559,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 112,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "printStringZ",
+        "page": 0,
+        "t": 465,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 2214,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2802,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 207,
+        "sp": 34288,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 355,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "printStringZ",
+        "page": 0,
+        "t": 708,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 2457,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2296,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 263,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "printStringZ",
+        "page": 0,
+        "t": 497,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2539,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 207,
+        "sp": 34288,
+        "profile": 0
+      },
+      {
+        "at": "sysBiosRegs",
+        "page": 0,
+        "t": 506,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "printStringZ",
+        "page": 0,
+        "t": 740,
+        "sp": 34292,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 0,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 0
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 0,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 0,
+    "operation": "DOS_GET_ERROR",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 3561,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 112,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 0,
+        "t": 305,
+        "sp": 34298,
+        "profile": 0
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 787,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 831,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 905,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "kernelDispatch",
+        "page": 1,
+        "t": 1184,
+        "sp": 61496,
+        "profile": 0
+      },
+      {
+        "at": "kdInvoke",
+        "page": 1,
+        "t": 2122,
+        "sp": 61494,
+        "profile": 0
+      },
+      {
+        "at": "dosGetError",
+        "page": 1,
+        "t": 2258,
+        "sp": 61494,
+        "profile": 0
+      },
+      {
+        "at": "kdFinish",
+        "page": 1,
+        "t": 2422,
+        "sp": 61496,
+        "profile": 0
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 1,
+        "t": 2663,
+        "sp": 61498,
+        "profile": 0
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 2935,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 2959,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 3033,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "bankResume",
+        "page": 0,
+        "t": 3048,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 3216,
+        "sp": 34300,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 70
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 14,
+      "6": 0
+    },
+    "mapperWrites": 2,
+    "mapperWritesByAddress": {
+      "FFFC": 1,
+      "FFFD": 1
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 12,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 0,
+    "operation": "DOS_GET_ERROR",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 3772,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 0,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 0,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "sysPacketReady",
+        "page": 0,
+        "t": 273,
+        "sp": 34292,
+        "profile": 0
+      },
+      {
+        "at": "bankCallPacket",
+        "page": 0,
+        "t": 466,
+        "sp": 34288,
+        "profile": 0
+      },
+      {
+        "at": "bankSwitch",
+        "page": 0,
+        "t": 948,
+        "sp": 34286,
+        "profile": 0
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 992,
+        "sp": 34286,
+        "profile": 0
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 1066,
+        "sp": 34286,
+        "profile": 0
+      },
+      {
+        "at": "kernelDispatch",
+        "page": 1,
+        "t": 1345,
+        "sp": 61496,
+        "profile": 0
+      },
+      {
+        "at": "kdInvoke",
+        "page": 1,
+        "t": 2283,
+        "sp": 61494,
+        "profile": 0
+      },
+      {
+        "at": "dosGetError",
+        "page": 1,
+        "t": 2419,
+        "sp": 61494,
+        "profile": 0
+      },
+      {
+        "at": "kdFinish",
+        "page": 1,
+        "t": 2583,
+        "sp": 61496,
+        "profile": 0
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 1,
+        "t": 2824,
+        "sp": 61498,
+        "profile": 0
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 3096,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 3120,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 3194,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "bankResume",
+        "page": 0,
+        "t": 3209,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "sysReturned",
+        "page": 0,
+        "t": 3377,
+        "sp": 34290,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 70
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 14,
+      "6": 0
+    },
+    "mapperWrites": 2,
+    "mapperWritesByAddress": {
+      "FFFC": 1,
+      "FFFD": 1
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "leafReturnPages": [],
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 12,
+    "shadowBytes": 0,
+    "callbacks": 0
+  }
+]

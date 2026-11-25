@@ -1,0 +1,968 @@
+{
+  "sha256": {
+    "rev63": {
+      "bin/NC.i80": "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002",
+      "bin/NC_CORE.i80": "86f9c10c8fcb96e2cf1130cd5e93dbc990ccd27004bef137cc4b7a904a3f0bae",
+      "bin/UI_GFX.i80": "c9f50506c8e53b315bb0a6e2acf602ab7a7971d5655f7f732119df2f1c0454e2",
+      "bin/BIOS.sys": "79c7fc1a99112dc92cc7340d942e0718d4fc5c149944d7968f7b3061ab028f0e",
+      "bin/DOS.sys": "8abee3713f4b91d79a1c374b873c010067b78c9267fd838508cf9039c658ac99",
+      "bin/MEM.sys": "f1d1fb70b8160cbcd8884b5a236e05803a867ecac20ea5b4ee631a51873880ba",
+      "images/C-Flash-512k-MMX-System-Emu80.bin": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+      "H:": "58c4bb9a065166020d302452ff1307f88b20d03ad138c920c90086216d2baccb"
+    },
+    "rev64": {
+      "bin/NC.i80": "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002",
+      "bin/NC_CORE.i80": "86f9c10c8fcb96e2cf1130cd5e93dbc990ccd27004bef137cc4b7a904a3f0bae",
+      "bin/UI_GFX.i80": "c9f50506c8e53b315bb0a6e2acf602ab7a7971d5655f7f732119df2f1c0454e2",
+      "bin/BIOS.sys": "20946387fd031c7298bd8f6d672d3e376dc9335211121655d7a98fcd536aa93a",
+      "bin/DOS.sys": "e79ea4e784a6e587809785eda6631a44f0a4bb3724c5099bdccb5b2184df5313",
+      "bin/MEM.sys": "606cf80fb3ece5f656dfc5a9a8d312c57afa0157282d6b8577fe15340764fb45",
+      "images/C-Flash-512k-MMX-System-Emu80.bin": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+      "H:": "58c4bb9a065166020d302452ff1307f88b20d03ad138c920c90086216d2baccb"
+    }
+  },
+  "results": {
+    "NC": {
+      "rev63": {
+        "MAIN": {
+          "first": 100554,
+          "firstRepeat": 1014040,
+          "steady": {
+            "ticks": [
+              72467,
+              72499,
+              72579,
+              72611,
+              73673,
+              74621,
+              74861,
+              75151
+            ],
+            "median": 73142.0,
+            "minimum": 72467,
+            "maximum": 75151
+          },
+          "render": {
+            "ticks": [
+              29860,
+              29940,
+              29972,
+              31034,
+              31854,
+              32094,
+              32384,
+              32219
+            ],
+            "median": 31444.0,
+            "minimum": 29860,
+            "maximum": 32384
+          },
+          "afterRender": {
+            "ticks": [
+              42639,
+              42639,
+              42639,
+              42639,
+              42639,
+              42767,
+              42767,
+              42767
+            ],
+            "median": 42639.0,
+            "minimum": 42639,
+            "maximum": 42767
+          },
+          "waitF806": 0,
+          "repeat": {
+            "driver": "BIOS GETCH",
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          },
+          "repeatConfiguration": [
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            }
+          ],
+          "pressToFirstFrame": 130407,
+          "firstFrameRepeat": 1014015,
+          "steadyFrameIntervals": [
+            72499,
+            72579,
+            72611,
+            73673,
+            74493,
+            74861,
+            75151,
+            74986
+          ],
+          "medianFrameTicks": 74083.0,
+          "medianFrameMs": 37.0415,
+          "stepsPerSecond": 26.996746891999514
+        },
+        "EXEC": {
+          "first": 7238,
+          "firstRepeat": 758233,
+          "steady": {
+            "ticks": [
+              131242,
+              131826,
+              130614,
+              130646,
+              131708,
+              130792,
+              131032,
+              131322
+            ],
+            "median": 131137.0,
+            "minimum": 130614,
+            "maximum": 131826
+          },
+          "render": {
+            "ticks": [
+              54549,
+              54629,
+              54661,
+              55723,
+              56543,
+              56783,
+              57073,
+              56908
+            ],
+            "median": 56133.0,
+            "minimum": 54549,
+            "maximum": 57073
+          },
+          "afterRender": {
+            "ticks": [
+              73401,
+              77277,
+              75985,
+              75985,
+              75985,
+              74249,
+              74249,
+              74249
+            ],
+            "median": 75117.0,
+            "minimum": 73401,
+            "maximum": 77277
+          },
+          "waitF806": 0,
+          "repeat": {
+            "driver": "KEYBANK",
+            "mode": "standard",
+            "firstNext": [
+              12,
+              2
+            ],
+            "patched": [
+              {
+                "address": 19428,
+                "before": 8,
+                "after": 12
+              },
+              {
+                "address": 19433,
+                "before": 1,
+                "after": 2
+              }
+            ]
+          },
+          "repeatConfiguration": [
+            {
+              "repeatCount": 12,
+              "repeatStart": 137,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 149,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 151,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 153,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 155,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 157,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 159,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 161,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 163,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 165,
+              "timed": 1
+            }
+          ],
+          "pressToFirstFrame": 61773,
+          "firstFrameRepeat": 761539,
+          "steadyFrameIntervals": [
+            127950,
+            131906,
+            130646,
+            131708,
+            132528,
+            131032,
+            131322,
+            131157
+          ],
+          "medianFrameTicks": 131239.5,
+          "medianFrameMs": 65.61975,
+          "stepsPerSecond": 15.239314383245897
+        }
+      },
+      "rev64": {
+        "MAIN": {
+          "first": 100554,
+          "firstRepeat": 1014040,
+          "steady": {
+            "ticks": [
+              72467,
+              72499,
+              72579,
+              72611,
+              73673,
+              74621,
+              74861,
+              75151
+            ],
+            "median": 73142.0,
+            "minimum": 72467,
+            "maximum": 75151
+          },
+          "render": {
+            "ticks": [
+              29860,
+              29940,
+              29972,
+              31034,
+              31854,
+              32094,
+              32384,
+              32219
+            ],
+            "median": 31444.0,
+            "minimum": 29860,
+            "maximum": 32384
+          },
+          "afterRender": {
+            "ticks": [
+              42639,
+              42639,
+              42639,
+              42639,
+              42639,
+              42767,
+              42767,
+              42767
+            ],
+            "median": 42639.0,
+            "minimum": 42639,
+            "maximum": 42767
+          },
+          "waitF806": 0,
+          "repeat": {
+            "driver": "BIOS GETCH",
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          },
+          "repeatConfiguration": [
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            }
+          ],
+          "pressToFirstFrame": 130407,
+          "firstFrameRepeat": 1014015,
+          "steadyFrameIntervals": [
+            72499,
+            72579,
+            72611,
+            73673,
+            74493,
+            74861,
+            75151,
+            74986
+          ],
+          "medianFrameTicks": 74083.0,
+          "medianFrameMs": 37.0415,
+          "stepsPerSecond": 26.996746891999514
+        },
+        "EXEC": {
+          "first": 7238,
+          "firstRepeat": 791077,
+          "steady": {
+            "ticks": [
+              130494,
+              131078,
+              131158,
+              131190,
+              130960,
+              131464,
+              130284,
+              131994
+            ],
+            "median": 131118.0,
+            "minimum": 130284,
+            "maximum": 131994
+          },
+          "render": {
+            "ticks": [
+              53801,
+              53881,
+              53913,
+              54975,
+              55795,
+              56035,
+              56325,
+              56160
+            ],
+            "median": 55385.0,
+            "minimum": 53801,
+            "maximum": 56325
+          },
+          "afterRender": {
+            "ticks": [
+              73401,
+              77277,
+              77277,
+              77277,
+              75985,
+              75669,
+              74249,
+              75669
+            ],
+            "median": 75827.0,
+            "minimum": 73401,
+            "maximum": 77277
+          },
+          "waitF806": 0,
+          "repeat": {
+            "driver": "KEYBANK",
+            "mode": "standard",
+            "firstNext": [
+              12,
+              2
+            ],
+            "patched": [
+              {
+                "address": 19428,
+                "before": 8,
+                "after": 12
+              },
+              {
+                "address": 19433,
+                "before": 1,
+                "after": 2
+              }
+            ]
+          },
+          "repeatConfiguration": [
+            {
+              "repeatCount": 12,
+              "repeatStart": 137,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 149,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 151,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 153,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 155,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 157,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 159,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 161,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 163,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 165,
+              "timed": 1
+            }
+          ],
+          "pressToFirstFrame": 61025,
+          "firstFrameRepeat": 794383,
+          "steadyFrameIntervals": [
+            127202,
+            131158,
+            131190,
+            132252,
+            131780,
+            131704,
+            130574,
+            131829
+          ],
+          "medianFrameTicks": 131447.0,
+          "medianFrameMs": 65.7235,
+          "stepsPerSecond": 15.215257860582593
+        }
+      }
+    },
+    "EDIT": {
+      "rev63": {
+        "EDIT_MN": {
+          "first": 100183,
+          "firstRepeat": 1004076,
+          "steady": {
+            "ticks": [
+              61438,
+              63507,
+              63782,
+              64053,
+              64324,
+              64595
+            ],
+            "median": 63917.5,
+            "minimum": 61438,
+            "maximum": 64595
+          },
+          "render": {
+            "ticks": [
+              17707,
+              19776,
+              20051,
+              20322,
+              20593,
+              20864
+            ],
+            "median": 20186.5,
+            "minimum": 17707,
+            "maximum": 20864
+          },
+          "afterRender": {
+            "ticks": [
+              43285,
+              43285,
+              43285,
+              43285,
+              43285,
+              43285
+            ],
+            "median": 43285.0,
+            "minimum": 43285,
+            "maximum": 43285
+          },
+          "inPoll": {
+            "ticks": [
+              5053,
+              5053,
+              5053,
+              5053,
+              5053,
+              5053
+            ],
+            "median": 5053.0,
+            "minimum": 5053,
+            "maximum": 5053
+          },
+          "waitF806": 0,
+          "repeatConfiguration": [
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            }
+          ],
+          "pressToFirstFrame": 119426,
+          "firstFrameRepeat": 1002986,
+          "steadyFrameIntervals": [
+            63507,
+            63782,
+            64053,
+            64324,
+            64595,
+            63358
+          ],
+          "medianFrameTicks": 63917.5,
+          "medianFrameMs": 31.95875,
+          "stepsPerSecond": 31.290335197715805
+        },
+        "EDIT": {
+          "first": 7110,
+          "firstRepeat": 733440,
+          "steady": {
+            "ticks": [
+              131123,
+              130560,
+              130825,
+              132397,
+              130036,
+              131608
+            ],
+            "median": 130974.0,
+            "minimum": 130036,
+            "maximum": 132397
+          },
+          "render": {
+            "ticks": [
+              34824,
+              36883,
+              37148,
+              37409,
+              37670,
+              37931
+            ],
+            "median": 37278.5,
+            "minimum": 34824,
+            "maximum": 37931
+          },
+          "afterRender": {
+            "ticks": [
+              92399,
+              89777,
+              89777,
+              91088,
+              88466,
+              89777
+            ],
+            "median": 89777.0,
+            "minimum": 88466,
+            "maximum": 92399
+          },
+          "inPoll": {
+            "ticks": [
+              88663,
+              86041,
+              86041,
+              87352,
+              84730,
+              86041
+            ],
+            "median": 86041.0,
+            "minimum": 84730,
+            "maximum": 88663
+          },
+          "waitF806": 0,
+          "repeatConfiguration": [
+            {
+              "repeatCount": 12,
+              "repeatStart": 79,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 91,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 93,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 95,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 97,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 99,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 101,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 103,
+              "timed": 1
+            }
+          ],
+          "pressToFirstFrame": 46924,
+          "firstFrameRepeat": 732350,
+          "steadyFrameIntervals": [
+            133182,
+            130825,
+            131086,
+            132658,
+            130297,
+            130361
+          ],
+          "medianFrameTicks": 130955.5,
+          "medianFrameMs": 65.47775,
+          "stepsPerSecond": 15.272363512796332
+        }
+      },
+      "rev64": {
+        "EDIT_MN": {
+          "first": 100183,
+          "firstRepeat": 1004076,
+          "steady": {
+            "ticks": [
+              61438,
+              63507,
+              63782,
+              64053,
+              64324,
+              64595
+            ],
+            "median": 63917.5,
+            "minimum": 61438,
+            "maximum": 64595
+          },
+          "render": {
+            "ticks": [
+              17707,
+              19776,
+              20051,
+              20322,
+              20593,
+              20864
+            ],
+            "median": 20186.5,
+            "minimum": 17707,
+            "maximum": 20864
+          },
+          "afterRender": {
+            "ticks": [
+              43285,
+              43285,
+              43285,
+              43285,
+              43285,
+              43285
+            ],
+            "median": 43285.0,
+            "minimum": 43285,
+            "maximum": 43285
+          },
+          "inPoll": {
+            "ticks": [
+              5053,
+              5053,
+              5053,
+              5053,
+              5053,
+              5053
+            ],
+            "median": 5053.0,
+            "minimum": 5053,
+            "maximum": 5053
+          },
+          "waitF806": 0,
+          "repeatConfiguration": [
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            },
+            {
+              "antiBsDelay": 224,
+              "cursorDelay": 32
+            }
+          ],
+          "pressToFirstFrame": 119426,
+          "firstFrameRepeat": 1002986,
+          "steadyFrameIntervals": [
+            63507,
+            63782,
+            64053,
+            64324,
+            64595,
+            63358
+          ],
+          "medianFrameTicks": 63917.5,
+          "medianFrameMs": 31.95875,
+          "stepsPerSecond": 31.290335197715805
+        },
+        "EDIT": {
+          "first": 7110,
+          "firstRepeat": 754979,
+          "steady": {
+            "ticks": [
+              130375,
+              131123,
+              131388,
+              130338,
+              131910,
+              130860
+            ],
+            "median": 130991.5,
+            "minimum": 130338,
+            "maximum": 131910
+          },
+          "render": {
+            "ticks": [
+              34076,
+              36135,
+              36400,
+              36661,
+              36922,
+              37183
+            ],
+            "median": 36530.5,
+            "minimum": 34076,
+            "maximum": 37183
+          },
+          "afterRender": {
+            "ticks": [
+              92399,
+              91088,
+              91088,
+              89777,
+              91088,
+              89777
+            ],
+            "median": 91088.0,
+            "minimum": 89777,
+            "maximum": 92399
+          },
+          "inPoll": {
+            "ticks": [
+              88663,
+              87352,
+              87352,
+              86041,
+              87352,
+              86041
+            ],
+            "median": 87352.0,
+            "minimum": 86041,
+            "maximum": 88663
+          },
+          "waitF806": 0,
+          "repeatConfiguration": [
+            {
+              "repeatCount": 12,
+              "repeatStart": 79,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 91,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 93,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 95,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 97,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 99,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 101,
+              "timed": 1
+            },
+            {
+              "repeatCount": 2,
+              "repeatStart": 103,
+              "timed": 1
+            }
+          ],
+          "pressToFirstFrame": 46176,
+          "firstFrameRepeat": 753889,
+          "steadyFrameIntervals": [
+            132434,
+            131388,
+            131649,
+            130599,
+            132171,
+            129613
+          ],
+          "medianFrameTicks": 131518.5,
+          "medianFrameMs": 65.75925,
+          "stepsPerSecond": 15.206986089409474
+        }
+      }
+    }
+  }
+}

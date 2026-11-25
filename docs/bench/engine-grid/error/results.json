@@ -1,0 +1,7 @@
+{
+  "bitmap": "PASS",
+  "restore": "PASS",
+  "memory": "PASS",
+  "injectedFailure": true,
+  "rows": []
+}

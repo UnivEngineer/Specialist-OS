@@ -1,0 +1,43 @@
+{
+  "engine": "Packed",
+  "corpus_bytes": 924,
+  "corpus_sha256": "d27cc797d5192e0d048788f1be19f5f5bff10d5f32f67583408f9ba405fb82c4",
+  "rows": [
+    {
+      "kind": 0,
+      "route": 0,
+      "ticks": 3993,
+      "ms": 511.104
+    },
+    {
+      "kind": 0,
+      "route": 1,
+      "ticks": 15106,
+      "ms": 1933.568
+    },
+    {
+      "kind": 0,
+      "route": 2,
+      "ticks": 15105,
+      "ms": 1933.44
+    },
+    {
+      "kind": 1,
+      "route": 0,
+      "ticks": 3850,
+      "ms": 492.8
+    },
+    {
+      "kind": 1,
+      "route": 1,
+      "ticks": 14963,
+      "ms": 1915.264
+    },
+    {
+      "kind": 1,
+      "route": 2,
+      "ticks": 14963,
+      "ms": 1915.264
+    }
+  ]
+}

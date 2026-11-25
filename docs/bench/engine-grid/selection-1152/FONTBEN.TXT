@@ -1,0 +1,16 @@
+FULL
+FontBen: 1152 bytes, 6x8, ms
+P API              MAIN CMD  TEXT W20  F256 USER
+1 Char              589 3501 2194    -    -    - 
+1 CharRaw           571 3484 2199    -    -    - 
+1 StringZ           489    -    -  579  526  518 
+1 StringRawZ        490    -    -  573  525  519 
+1 StringRawLim      462    -    -  551  497  491 
+4DUP
+FontBen: 1152 bytes, 4x8, ms
+P API              MAIN CMD  TEXT W20  F256 USER
+1 Char              676 3588 2281    -    -    - 
+1 CharRaw           661 3573 2289    -    -    - 
+1 StringZ           191    -    -  292  227  220 
+1 StringRawZ        184    -    -  278  220  213 
+1 StringRawLim      156    -    -  255  193  185 

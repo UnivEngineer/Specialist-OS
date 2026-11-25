@@ -1,0 +1,18 @@
+{
+  "images/SystemRom_emu80_writable.bin": "40f6690bac689758438c58ec5e22f646bf657603e7c938b595b2de48901d7fdc",
+  "images/FlashDisk_emu80_seed.bin": "9b416fe671a6770cd474e2a7316b0d9d19637f8226323708c4f2aebe1c5a181b",
+  "bin/FONTCOM.i80": "5db9a3e1ab910127b1dc01cea180ed10abef9a7af79f5aeb1e969049098d7c99",
+  "bin/FONTBANK.i80": "6630ff4728d4192e98d7f83ed0a7091965abe95e931a2f59618c1fdf04baeb65",
+  "bin/fonts/Rotate.i80": "464a881adb58ee221687f59cd5b8860f734ae0c60efef2929de713c8e857026e",
+  "bin/fonts/Packed6K.i80": "877d491a3c62cd9dd04fb344a017ea82bcccfb38df9b2e77f927e3a22aef96ed",
+  "bin/fonts/Fast12K.i80": "7210b39b6d37beb85218309ec109e3fddf083500ac8f2905c545bf34d29e616d",
+  "bin/fonts/MapR8.i80": "debf72943329dd567a71eee5e9cfea00869382316f09e41f36103b7b4b516f87",
+  "bin/fonts/MapRB.i80": "cbfc5b7b5a5ac3c29492720f940ce348788c1a7b60c67f067141da569d519e5d",
+  "bin/fonts/MapP8.i80": "586781d0dec3117fbee7e5273d142bedf218c996715168b695aa902d33ceb317",
+  "bin/fonts/MapPB.i80": "3228d0b47a2217b79dce3d914b1ffed87553a5ed9ffb10c496c196cc5af8af3c",
+  "bin/fonts/MapF8.i80": "0843e0f47fb72bd1b329f6675257226d4a2d0bd6e079e4bbc9d1254158504c49",
+  "bin/fonts/MapFB.i80": "85238a2c9faaa83b73e56bf86d11a708d4c0711e4e4240f2f148967180e99898",
+  "bin/fonts/Packed6K.pre": "d40f0aa4c6fb38ef75cd4cd5ff649f5592b306655880b549ebcbb7f0f6f3f96b",
+  "bin/fonts/Fast12K.pre": "953308881678c987850c88f089bc954a2a8e0d78bbec8b89d57441072e45e3eb",
+  "corpus": "fadb99a07250a56dbb552a95418e0aa18cd66359861e9b6a46d295539ab1df93"
+}

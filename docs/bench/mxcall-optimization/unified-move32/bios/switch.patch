@@ -1,0 +1,119 @@
+--- a/scripts/build/build-bios-dos.py
++++ b/scripts/build/build-bios-dos.py
+@@ -97,6 +97,7 @@
+     (out/'bios-copy-imports.inc').write_text(
+         '; Generated internal BIOS copy entry; not a fixed public ABI.\n'
+         f'bios_copyForward = 0{sy["moveBytesForward"]:04X}h\n', encoding='utf-8')
++    (out/'bios-move-switch.inc').write_text(f'biosMoveUseLow = 0{sy["biosMoveUseLow"]:04X}h\n', encoding='utf-8')
+     for stem in ('DOS','BIOS','IO'):
+         (out/f'{stem}.sym').write_bytes((out/'System.linked.sym').read_bytes())
+         (out/f'{stem}.lst').write_bytes((out/'System.linked.lst').read_bytes())
+--- a/source/bios/banked-start.inc
++++ b/source/bios/banked-start.inc
+@@ -208,6 +208,7 @@
+     ld (IO_PAGE_RAM),a
+     ld sp,STACK_ADDR
+     ; The installed renderer and system-owned font resources survive app exit.
++    call biosMoveUseLow
+     call biosRecoverCopyTail
+     push af
+     call sysInstall
+--- a/source/bios/move-compact.inc
++++ b/source/bios/move-compact.inc
+@@ -2,7 +2,41 @@
+ ; moveCore: HL=источник, DE=исключающий конец, BC=назначение.
+ ; moveBytesForward: HL=источник, DE=назначение, BC=длина без перекрытия.
+ ; HL/BC возвращают исключающие концы. AF/DE изменяются, SP сохраняется.
++    INCLUDE "../common/move-mem-entries.inc"
++
+ moveCore:
++    jp moveBiosLow
++
++; RUN перед STD и возврат BIOS до проверки MEM оставляют видимый низкий путь.
++biosMoveUseLow:
++    push hl
++    ld hl,moveBiosLow
++    ld (moveCore+1),hl
++    pop hl
++    ret
++
++; Проверить совместимость полного MEM после bootstrap или его восстановления.
++biosMoveUseMem:
++    push af
++    push hl
++    ld hl,(MEM_RUNTIME_REVISION_ADDR)
++    ld a,l
++    cp moveMemRevision & 255
++    jp nz,biosMoveKeepLow
++    ld a,h
++    cp moveMemRevision >> 8
++    jp nz,biosMoveKeepLow
++    ld hl,moveMemCore
++    ld (moveCore+1),hl
++    pop hl
++    pop af
++    ret
++biosMoveKeepLow:
++    pop hl
++    pop af
++    jp biosMoveUseLow
++
++moveBiosLow:
+     push bc
+     ld a,e
+     sub l
+--- a/source/bios/recover-copy.inc
++++ b/source/bios/recover-copy.inc
+@@ -6,7 +6,7 @@
+     ld hl,biosRecoveryWindow
+     ld de,biosRecoveryWindowEnd
+     ld bc,BANK_WINDOW
+-    call memcpy_bc_hl
++    call moveBiosLow
+     ; Эталон сигнатуры находится в DOS; инструкции копировщика идут после неё.
+     ld hl,BANK_COPY_GUARD_ADDR
+     ld b,4
+--- a/source/common/move-external.inc
++++ b/source/common/move-external.inc
+@@ -1,3 +1,4 @@
+-; ?????? ??????????? ???? ????????????, ?????????? ? E000h.
+-moveCore = 0E00Eh
+-moveBytesForward = 0E05Bh
++; Входы из TRANSPORT экспериментальной сборки MEM.
++    INCLUDE "move-mem-entries.inc"
++moveCore = moveMemCore
++moveBytesForward = moveMemForward
+--- a/source/io/raw-local.inc
++++ b/source/io/raw-local.inc
+@@ -120,5 +120,5 @@
+     ld (MEM_BANK_KIND),a
+     ld a,MEM_EXEC_READY_VALUE
+     ld (MEM_EXEC_READY),a
+-    ret
++    jp biosMoveUseMem
+ sysRawEnd:
+--- a/source/run/RUN.asm
++++ b/source/run/RUN.asm
+@@ -14,6 +14,7 @@
+ ; До запуска приложения 8C00h также служит временным ID-кодом FLASHSYS.
+     INCLUDE "../include/mxos.inc"
+     INCLUDE "../include/ramfos.inc"
++    INCLUDE "../../bin/bios-move-switch.inc"
+ IMAGE_FLAGS      = IMAGE_FLAG_MAIN
+ RUN_BODY_REQUEST = RAMFOS_CONTEXT
+ RUN_LOAD_STAGE   = RAMFOS_CONTEXT+48
+@@ -1027,6 +1028,7 @@
+     jp z,bridgeStart
+     ld a,0FFh
+     call bios_setFontEncoding
++    call biosMoveUseLow
+ bridgeSTD:
+     ld a,0B6h
+     ld (IO_TIMER_MODE),a
+--- /dev/null
++++ b/source/common/move-mem-entries.inc
+@@ -0,0 +1,4 @@
++; Экспорт входов из экспериментального TRANSPORT.
++moveMemRevision = 66
++moveMemCore     = 0FE16h
++moveMemForward  = 0FE47h

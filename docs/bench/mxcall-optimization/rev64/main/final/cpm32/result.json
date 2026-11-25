@@ -1,0 +1,688 @@
+[
+  {
+    "bytes": 0,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 680
+  },
+  {
+    "bytes": 0,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 680
+  },
+  {
+    "bytes": 0,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 680
+  },
+  {
+    "bytes": 0,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 680
+  },
+  {
+    "bytes": 1,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 4420
+  },
+  {
+    "bytes": 1,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4420
+  },
+  {
+    "bytes": 1,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 4420
+  },
+  {
+    "bytes": 1,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4420
+  },
+  {
+    "bytes": 2,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 4514
+  },
+  {
+    "bytes": 2,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4514
+  },
+  {
+    "bytes": 2,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 4514
+  },
+  {
+    "bytes": 2,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4514
+  },
+  {
+    "bytes": 3,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 4608
+  },
+  {
+    "bytes": 3,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4608
+  },
+  {
+    "bytes": 3,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 4608
+  },
+  {
+    "bytes": 3,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4608
+  },
+  {
+    "bytes": 4,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 4702
+  },
+  {
+    "bytes": 4,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4702
+  },
+  {
+    "bytes": 4,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 4702
+  },
+  {
+    "bytes": 4,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 4702
+  },
+  {
+    "bytes": 15,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 5736
+  },
+  {
+    "bytes": 15,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 5736
+  },
+  {
+    "bytes": 15,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 5736
+  },
+  {
+    "bytes": 15,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 5736
+  },
+  {
+    "bytes": 16,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 5830
+  },
+  {
+    "bytes": 16,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 5830
+  },
+  {
+    "bytes": 16,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 5830
+  },
+  {
+    "bytes": 16,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 5830
+  },
+  {
+    "bytes": 17,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 5924
+  },
+  {
+    "bytes": 17,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 5924
+  },
+  {
+    "bytes": 17,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 5924
+  },
+  {
+    "bytes": 17,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 5924
+  },
+  {
+    "bytes": 31,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 7240
+  },
+  {
+    "bytes": 31,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 7240
+  },
+  {
+    "bytes": 31,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 7240
+  },
+  {
+    "bytes": 31,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 7240
+  },
+  {
+    "bytes": 32,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 6600
+  },
+  {
+    "bytes": 32,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 6600
+  },
+  {
+    "bytes": 32,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 6600
+  },
+  {
+    "bytes": 32,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 6600
+  },
+  {
+    "bytes": 33,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 7147
+  },
+  {
+    "bytes": 33,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 7147
+  },
+  {
+    "bytes": 33,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 7147
+  },
+  {
+    "bytes": 33,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 7147
+  },
+  {
+    "bytes": 63,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 9967
+  },
+  {
+    "bytes": 63,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 9967
+  },
+  {
+    "bytes": 63,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 9967
+  },
+  {
+    "bytes": 63,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 9967
+  },
+  {
+    "bytes": 64,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 7622
+  },
+  {
+    "bytes": 64,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 7622
+  },
+  {
+    "bytes": 64,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 7622
+  },
+  {
+    "bytes": 64,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 7622
+  },
+  {
+    "bytes": 127,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 12011
+  },
+  {
+    "bytes": 127,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 12011
+  },
+  {
+    "bytes": 127,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 12011
+  },
+  {
+    "bytes": 127,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 12011
+  },
+  {
+    "bytes": 128,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 9666
+  },
+  {
+    "bytes": 128,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 9666
+  },
+  {
+    "bytes": 128,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 9666
+  },
+  {
+    "bytes": 128,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 9666
+  },
+  {
+    "bytes": 129,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 10213
+  },
+  {
+    "bytes": 129,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 10213
+  },
+  {
+    "bytes": 129,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 10213
+  },
+  {
+    "bytes": 129,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 10213
+  },
+  {
+    "bytes": 255,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 16099
+  },
+  {
+    "bytes": 255,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 16099
+  },
+  {
+    "bytes": 255,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 16099
+  },
+  {
+    "bytes": 255,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 16099
+  },
+  {
+    "bytes": 256,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 13431
+  },
+  {
+    "bytes": 256,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 13431
+  },
+  {
+    "bytes": 256,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 13431
+  },
+  {
+    "bytes": 256,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 13431
+  },
+  {
+    "bytes": 257,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 14279
+  },
+  {
+    "bytes": 257,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 14279
+  },
+  {
+    "bytes": 257,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 14279
+  },
+  {
+    "bytes": 257,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 14279
+  },
+  {
+    "bytes": 511,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 24253
+  },
+  {
+    "bytes": 511,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 24253
+  },
+  {
+    "bytes": 511,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 24253
+  },
+  {
+    "bytes": 511,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 24253
+  },
+  {
+    "bytes": 512,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 21908
+  },
+  {
+    "bytes": 512,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 21908
+  },
+  {
+    "bytes": 512,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 21908
+  },
+  {
+    "bytes": 512,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 21908
+  },
+  {
+    "bytes": 513,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 22455
+  },
+  {
+    "bytes": 513,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 22455
+  },
+  {
+    "bytes": 513,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 22455
+  },
+  {
+    "bytes": 513,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 22455
+  },
+  {
+    "bytes": 8191,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 269533
+  },
+  {
+    "bytes": 8191,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 269533
+  },
+  {
+    "bytes": 8191,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 269533
+  },
+  {
+    "bytes": 8191,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 269533
+  },
+  {
+    "bytes": 8192,
+    "source": 8192,
+    "destination": 20480,
+    "error": 0,
+    "ticks": 267183
+  },
+  {
+    "bytes": 8192,
+    "source": 8193,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 267183
+  },
+  {
+    "bytes": 8192,
+    "source": 8432,
+    "destination": 20732,
+    "error": 0,
+    "ticks": 267183
+  },
+  {
+    "bytes": 8192,
+    "source": 8447,
+    "destination": 20481,
+    "error": 0,
+    "ticks": 267183
+  },
+  {
+    "bytes": 256,
+    "source": 8193,
+    "destination": 20481,
+    "error": 224,
+    "ticks": 764
+  },
+  {
+    "bytes": 2,
+    "source": 65279,
+    "destination": 20480,
+    "error": 226,
+    "ticks": 956
+  }
+]

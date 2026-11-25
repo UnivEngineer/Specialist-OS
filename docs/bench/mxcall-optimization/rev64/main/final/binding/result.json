@@ -1,0 +1,450 @@
+{
+  "image_sha": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "rows": [
+    {
+      "stage": "cold",
+      "bindings": [
+        "cd7cf6",
+        "cd33d1"
+      ],
+      "bios": {
+        "af": 22546,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "dos": {
+        "af": 70,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "invalid": {
+        "af": 2579,
+        "bc": 2308,
+        "de": 34374,
+        "hl": 22136,
+        "sp": 34384
+      }
+    },
+    {
+      "stage": "warm",
+      "bindings": [
+        "cd7cf6",
+        "cd33d1"
+      ],
+      "bios": {
+        "af": 22546,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "dos": {
+        "af": 70,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "invalid": {
+        "af": 2579,
+        "bc": 2308,
+        "de": 34374,
+        "hl": 22136,
+        "sp": 34384
+      }
+    },
+    {
+      "stage": "software-return",
+      "bindings": [
+        "cd7cf6",
+        "cd33d1"
+      ],
+      "bios": {
+        "af": 22546,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "dos": {
+        "af": 70,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "invalid": {
+        "af": 2579,
+        "bc": 2308,
+        "de": 34374,
+        "hl": 22136,
+        "sp": 34384
+      }
+    }
+  ],
+  "edges": [
+    {
+      "case": "BIOS_SUB_HL_DE",
+      "bank": 0,
+      "input": {
+        "af": 37079,
+        "bc": 13398,
+        "de": 1,
+        "hl": 256
+      },
+      "result": {
+        "af": 86,
+        "bc": 13398,
+        "de": 1,
+        "hl": 255,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SUB_HL_DE",
+      "bank": 1,
+      "input": {
+        "af": 37079,
+        "bc": 13398,
+        "de": 1,
+        "hl": 256
+      },
+      "result": {
+        "af": 86,
+        "bc": 13398,
+        "de": 1,
+        "hl": 255,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SUB_HL_DE",
+      "bank": 6,
+      "input": {
+        "af": 37079,
+        "bc": 13398,
+        "de": 1,
+        "hl": 256
+      },
+      "result": {
+        "af": 86,
+        "bc": 13398,
+        "de": 1,
+        "hl": 255,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SUB_HL_DE",
+      "bank": 0,
+      "input": {
+        "af": 8278,
+        "bc": 13398,
+        "de": 1,
+        "hl": 0
+      },
+      "result": {
+        "af": 65415,
+        "bc": 13398,
+        "de": 1,
+        "hl": 65535,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SUB_HL_DE",
+      "bank": 1,
+      "input": {
+        "af": 8278,
+        "bc": 13398,
+        "de": 1,
+        "hl": 0
+      },
+      "result": {
+        "af": 65415,
+        "bc": 13398,
+        "de": 1,
+        "hl": 65535,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SUB_HL_DE",
+      "bank": 6,
+      "input": {
+        "af": 8278,
+        "bc": 13398,
+        "de": 1,
+        "hl": 0
+      },
+      "result": {
+        "af": 65415,
+        "bc": 13398,
+        "de": 1,
+        "hl": 65535,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SET_CURSOR_POS",
+      "bank": 0,
+      "input": {
+        "af": 21975,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623
+      },
+      "result": {
+        "af": 21975,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SET_CURSOR_POS",
+      "bank": 1,
+      "input": {
+        "af": 21975,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623
+      },
+      "result": {
+        "af": 21975,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_SET_CURSOR_POS",
+      "bank": 6,
+      "input": {
+        "af": 21975,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623
+      },
+      "result": {
+        "af": 21975,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_GET_CURSOR_POS",
+      "bank": 0,
+      "input": {
+        "af": 42327,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660
+      },
+      "result": {
+        "af": 42327,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_GET_CURSOR_POS",
+      "bank": 1,
+      "input": {
+        "af": 42327,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660
+      },
+      "result": {
+        "af": 42327,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_GET_CURSOR_POS",
+      "bank": 6,
+      "input": {
+        "af": 42327,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660
+      },
+      "result": {
+        "af": 42327,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4623,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_UPPERCASE",
+      "bank": 0,
+      "input": {
+        "af": 30935,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660
+      },
+      "result": {
+        "af": 22546,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_UPPERCASE",
+      "bank": 1,
+      "input": {
+        "af": 30935,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660
+      },
+      "result": {
+        "af": 22546,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "BIOS_UPPERCASE",
+      "bank": 6,
+      "input": {
+        "af": 30935,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660
+      },
+      "result": {
+        "af": 22546,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 0,
+      "error": 0,
+      "busy": 0,
+      "result": {
+        "af": 70,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 1,
+      "error": 0,
+      "busy": 0,
+      "result": {
+        "af": 70,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 6,
+      "error": 0,
+      "busy": 0,
+      "result": {
+        "af": 70,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 0,
+      "error": 165,
+      "busy": 0,
+      "result": {
+        "af": 42375,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 1,
+      "error": 165,
+      "busy": 0,
+      "result": {
+        "af": 42375,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 6,
+      "error": 165,
+      "busy": 0,
+      "result": {
+        "af": 42375,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 1,
+      "error": 165,
+      "busy": 1,
+      "result": {
+        "af": 1539,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "case": "DOS_GET_ERROR",
+      "bank": 6,
+      "error": 165,
+      "busy": 1,
+      "result": {
+        "af": 1539,
+        "bc": 13398,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    }
+  ]
+}

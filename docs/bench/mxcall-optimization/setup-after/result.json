@@ -1,0 +1,80 @@
+[
+  {
+    "profile": 0,
+    "bytes": 256,
+    "entry": "bankCopyFar",
+    "cycles": 3823,
+    "ms": 1.9115,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 0,
+    "bytes": 256,
+    "entry": "bankCopySector",
+    "cycles": 3333,
+    "ms": 1.6665,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 0,
+    "bytes": 8192,
+    "entry": "bankCopyFar",
+    "cycles": 4119,
+    "ms": 2.0595,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 0,
+    "bytes": 8192,
+    "entry": "bankCopySector",
+    "cycles": 3629,
+    "ms": 1.8145,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 0,
+    "entry": "bankCommandWindow",
+    "cycles": 75,
+    "ms": 0.0375,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 1,
+    "bytes": 256,
+    "entry": "bankCopyFar",
+    "cycles": 3046,
+    "ms": 1.523,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 1,
+    "bytes": 256,
+    "entry": "bankCopySector",
+    "cycles": 2556,
+    "ms": 1.278,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 1,
+    "bytes": 8192,
+    "entry": "bankCopyFar",
+    "cycles": 3342,
+    "ms": 1.671,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 1,
+    "bytes": 8192,
+    "entry": "bankCopySector",
+    "cycles": 2852,
+    "ms": 1.426,
+    "excludedCallerSetupCycles": 37
+  },
+  {
+    "profile": 1,
+    "entry": "bankCommandWindow",
+    "cycles": 1067,
+    "ms": 0.5335,
+    "excludedCallerSetupCycles": 37
+  }
+]

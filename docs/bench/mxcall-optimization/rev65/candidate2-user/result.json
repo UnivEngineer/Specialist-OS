@@ -1,0 +1,33 @@
+{
+  "revision": 65,
+  "image_sha256": "bf0a785be94c7465e1bf22f24d9ebe9281010fe59e2d7b9b2a60ed67d5a5f46c",
+  "emu_sha256": "7d9f95cb3e938e20d17ac14e8212a7854222b448f5930e7aec6a9504034938af",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6127,
+    "DOS.sys": 30015,
+    "IO.sys": 823,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 353
+  },
+  "rows": [
+    {
+      "operation": "keyboard",
+      "exec_page": 6,
+      "command": "C:/DOS/NC_MN.COM",
+      "main_page": 0
+    }
+  ]
+}

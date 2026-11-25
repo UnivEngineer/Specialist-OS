@@ -1,0 +1,68 @@
+{
+  "BIOS_UPPERCASE": {
+    "vector": "bios_upperCase",
+    "address": 51317,
+    "ticks": 73,
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    }
+  },
+  "BIOS_SUB_HL_DE": {
+    "vector": "bios_sub_hl_de",
+    "address": 51326,
+    "ticks": 65,
+    "registers": {
+      "hl": 61167,
+      "de": 9029,
+      "bc": 13393,
+      "af": 61063
+    }
+  },
+  "BIOS_GET_CURSOR_POS": {
+    "vector": "bios_getCursorPos",
+    "address": 51230,
+    "ticks": 53,
+    "registers": {
+      "hl": 4106,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    }
+  },
+  "BIOS_SET_CURSOR_POS": {
+    "vector": "bios_setCursorPos",
+    "address": 51233,
+    "ticks": 69,
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    }
+  },
+  "BIOS_PRINT_CHAR": {
+    "vector": "bios_printChar",
+    "address": 51209,
+    "ticks": 1010,
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    }
+  },
+  "BIOS_PRINT_STRING_Z": {
+    "vector": "bios_printStringZ",
+    "address": 51224,
+    "ticks": 1766,
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    }
+  }
+}

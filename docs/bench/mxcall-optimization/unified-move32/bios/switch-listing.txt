@@ -1,0 +1,274 @@
+[BIOS/System.linked.lst]
+ 163++C103 00 00        keyColumn:          DW 0
+ 164++C105 00           keyRow:             DB 0
+ 165++C106 00           bankCaretVisible:   DB 0
+ 166++C107
+# file closed: getch3.inc
+ 150+ C107              dos_piece_getch3_0_end:
+ 151+ C107                  ASSERT dos_piece_getch3_0_end - dos_piece_getch3_0_start == 205
+ 152+ C107                  ASSERT $ == 0C107h
+ 153+ C107                  ORG_PAD 0C107h
+ 153+ C107             >         IF $ > 0C107h
+ 153+ C107 ~           >           ; вывод сообщения об ошибке
+ 153+ C107 ~           >           ASSERT 0
+ 153+ C107 ~           >           DISPLAY /l, "Error! ORG_PAD failed! ", $, " is more than ", adr
+ 153+ C107             >         ELSE
+ 153+ C107             >           ; заполнение памяти
+mxos.inc(1455): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(153): ^ emitted from here
+ 153+ C107             >           BLOCK 0C107h-$, 0FFh
+ 153+ C107             >         ENDIF
+ 153+ C107             >         ORG 0C107h
+ 154+ C107              dos_piece_move8080_0_start:
+ 155+ C107                  INCLUDE "C:/Users/Vovan/AppData/Local/Specialist-OS/workspaces/72aef225fe3745eab392a66b88a42371/source/bios/move-compact.inc"
+# file opened: move-compact.inc
+   1++C107              ; Перенос BIOS для STD, загрузки, восстановления MEM и отображённого ROM.
+   2++C107              ; moveCore: HL=источник, DE=исключающий конец, BC=назначение.
+   3++C107              ; moveBytesForward: HL=источник, DE=назначение, BC=длина без перекрытия.
+   4++C107              ; HL/BC возвращают исключающие концы. AF/DE изменяются, SP сохраняется.
+   5++C107                  INCLUDE "../common/move-mem-entries.inc"
+# file opened: move-mem-entries.inc
+   1++C107              ; Экспорт входов из экспериментального TRANSPORT.
+   2++C107              moveMemRevision = 66
+   3++C107              moveMemCore     = 0FE16h
+   4++C107              moveMemForward  = 0FE47h
+   5++C107
+# file closed: move-mem-entries.inc
+   6++C107
+   7++C107              moveCore:
+   8++C107 C3 32 C1         jp moveBiosLow
+   9++C10A
+  10++C10A              ; RUN перед STD и возврат BIOS до проверки MEM оставляют видимый низкий путь.
+  11++C10A              biosMoveUseLow:
+  12++C10A E5               push hl
+  13++C10B 21 32 C1         ld hl,moveBiosLow
+  14++C10E 22 08 C1         ld (moveCore+1),hl
+  15++C111 E1               pop hl
+  16++C112 C9               ret
+  17++C113
+  18++C113              ; Проверить совместимость полного MEM после bootstrap или его восстановления.
+  19++C113              biosMoveUseMem:
+  20++C113 F5               push af
+  21++C114 E5               push hl
+  22++C115 2A 58 F6         ld hl,(MEM_RUNTIME_REVISION_ADDR)
+  23++C118 7D               ld a,l
+  24++C119 FE 42            cp moveMemRevision & 255
+  25++C11B C2 2D C1         jp nz,biosMoveKeepLow
+  26++C11E 7C               ld a,h
+  27++C11F FE 00            cp moveMemRevision >> 8
+  28++C121 C2 2D C1         jp nz,biosMoveKeepLow
+  29++C124 21 16 FE         ld hl,moveMemCore
+  30++C127 22 08 C1         ld (moveCore+1),hl
+  31++C12A E1               pop hl
+  32++C12B F1               pop af
+  33++C12C C9               ret
+  34++C12D              biosMoveKeepLow:
+  35++C12D E1               pop hl
+  36++C12E F1               pop af
+  37++C12F C3 0A C1         jp biosMoveUseLow
+  38++C132
+  39++C132              moveBiosLow:
+  40++C132 C5               push bc
+  41++C133 7B               ld a,e
+  42++C134 95               sub l
+  43++C135 4F               ld c,a
+  44++C136 7A               ld a,d
+  45++C137 9C               sbc a,h
+  46++C138 47               ld b,a
+  47++C139 D1               pop de
+  48++C13A B1               or c
+  49++C13B CA 6D C1         jp z,moveBiosForwardDone
+  50++C13E 7A               ld a,d
+  51++C13F BC               cp h
+  52++C140 DA 63 C1         jp c,moveBiosForward
+  53++C143 C2 4B C1         jp nz,moveBiosBack
+  54++C146 7B               ld a,e
+  55++C147 BD               cp l
+  56++C148 DA 63 C1         jp c,moveBiosForward
+  57++C14B              moveBiosBack:
+  58++C14B 09               add hl,bc
+  59++C14C E5               push hl
+  60++C14D EB               ex de,hl
+  61++C14E 09               add hl,bc
+  62++C14F E5               push hl
+  63++C150 EB               ex de,hl
+  64++C151              moveBiosBackByte:
+  65++C151 2B               dec hl
+  66++C152 1B               dec de
+  67++C153 7E               ld a,(hl)
+  68++C154 12               ld (de),a
+  69++C155 0B               dec bc
+  70++C156 78               ld a,b
+  71++C157 B1               or c
+  72++C158 C2 51 C1         jp nz,moveBiosBackByte
+  73++C15B C1               pop bc
+  74++C15C E1               pop hl
+  75++C15D C9               ret
+  76++C15E              moveBytesForward:
+  77++C15E 78               ld a,b
+  78++C15F B1               or c
+  79++C160 CA 6D C1         jp z,moveBiosForwardDone
+  80++C163              moveBiosForward:
+  81++C163 7E               ld a,(hl)
+  82++C164 12               ld (de),a
+  83++C165 23               inc hl
+  84++C166 13               inc de
+  85++C167 0B               dec bc
+  86++C168 78               ld a,b
+  87++C169 B1               or c
+  88++C16A C2 63 C1         jp nz,moveBiosForward
+  89++C16D              moveBiosForwardDone:
+  90++C16D 42               ld b,d
+  91++C16E 4B               ld c,e
+  92++C16F C9               ret
+  93++C170              moveCoreEnd:
+  94++C170
+# file closed: move-compact.inc
+ 156+ C170              dos_piece_move8080_0_end:
+ 157+ C170                  ASSERT dos_piece_move8080_0_end - dos_piece_move8080_0_start == 105
+ 158+ C170                  ASSERT $ == 0C170h
+ 159+ C170                  ORG_PAD 0C170h
+ 159+ C170             >         IF $ > 0C170h
+ 159+ C170 ~           >           ; вывод сообщения об ошибке
+ 159+ C170 ~           >           ASSERT 0
+ 159+ C170 ~           >           DISPLAY /l, "Error! ORG_PAD failed! ", $, " is more than ", adr
+ 159+ C170             >         ELSE
+ 159+ C170             >           ; заполнение памяти
+mxos.inc(1455): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(159): ^ emitted from here
+ 159+ C170             >           BLOCK 0C170h-$, 0FFh
+ 159+ C170             >         ENDIF
+ 159+ C170             >         ORG 0C170h
+ 160+ C170                  ASSERT $ == 0C170h
+ 161+ C170                  ASSERT bios_beep_Old == 0C170h
+ 162+ C170                  DOS_ABI_GATE 0C170h, beep
+ 162+ C170             >        ASSERT $ == 0C170h
+ 162+ C170 C3 7B C9    >        jp beep
+ 162+ C173             >        ASSERT $ == 0C170h + 3
+ 162+ C173             >        ASSERT beep != 0C170h
+ 162+ C173             >        ASSERT (beep >= DOS_CODE_START && beep < DOS_CODE_END_MAX) || (beep >= 0C000h && beep < DOS_END_MAX)
+ 163+ C173                  ASSERT $ == 0C173h
+ 261+ C42A             >         ELSE
+ 261+ C42A             >           ; заполнение памяти
+ 261+ C42A FF FF FF    >           BLOCK 0C42Dh-$, 0FFh
+ 261+ C42D             >         ENDIF
+ 261+ C42D             >         ORG 0C42Dh
+ 262+ C42D                  ASSERT $ == 0C42Dh
+ 263+ C42D                  ASSERT bios_memcpy_bc_hl == 0C42Dh
+ 264+ C42D                  DOS_ABI_GATE 0C42Dh, memcpy_bc_hl
+ 264+ C42D             >        ASSERT $ == 0C42Dh
+ 264+ C42D C3 90 C8    >        jp memcpy_bc_hl
+ 264+ C430             >        ASSERT $ == 0C42Dh + 3
+ 264+ C430             >        ASSERT memcpy_bc_hl != 0C42Dh
+ 264+ C430             >        ASSERT (memcpy_bc_hl >= DOS_CODE_START && memcpy_bc_hl < DOS_CODE_END_MAX) || (memcpy_bc_hl >= 0C000h && memcpy_bc_hl < DOS_END_MAX)
+ 265+ C430                  ASSERT $ == 0C430h
+ 120++C6B3 32 42 F6         ld (MEM_BANK_KIND),a
+ 121++C6B6 3E A7            ld a,MEM_EXEC_READY_VALUE
+ 122++C6B8 32 BF FF         ld (MEM_EXEC_READY),a
+ 123++C6BB C3 13 C1         jp biosMoveUseMem
+ 124++C6BE              sysRawEnd:
+ 125++C6BE
+# file closed: raw-local.inc
+ 324+ C6BE              dos_piece_rawLocalAdapter_0_end:
+  92++D16F F1               pop af
+  93++D170 37               scf
+  94++D171 C9               ret
+  95++D172
+# file closed: blockIO.inc
+ 537+ D172              dos_piece_blockIO_0_end:
+ 538+ D172                  ASSERT dos_piece_blockIO_0_end - dos_piece_blockIO_0_start == 115
+ 539+ D172                  ASSERT $ == 0D172h
+ 540+ D172                  ORG_PAD 0D172h
+ 540+ D172             >         IF $ > 0D172h
+ 540+ D172 ~           >           ; вывод сообщения об ошибке
+ 540+ D172 ~           >           ASSERT 0
+ 540+ D172 ~           >           DISPLAY /l, "Error! ORG_PAD failed! ", $, " is more than ", adr
+ 540+ D172             >         ELSE
+ 540+ D172             >           ; заполнение памяти
+mxos.inc(1455): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(540): ^ emitted from here
+ 540+ D172             >           BLOCK 0D172h-$, 0FFh
+ 540+ D172             >         ENDIF
+ 540+ D172             >         ORG 0D172h
+ 541+ D172              dos_piece_copyRecovery_0_start:
+ 542+ D172                  INCLUDE "C:/Users/Vovan/AppData/Local/Specialist-OS/workspaces/72aef225fe3745eab392a66b88a42371/source/bios/recover-copy.inc"
+# file opened: recover-copy.inc
+   1++D172              ; Восстановление общего кода MEM после классической программы.
+   2++D172              ; Вход: main/MX, DI, исправная DOS в банке 0, установленный стек BIOS.
+   3++D172              ; Выход: A=1 при повреждении сигнатуры FF00h–FF03h, иначе 0; BC/DE/HL/флаги разрушены.
+   4++D172              ; До восстановления не вызываем ни транспорт, ни FAR-копировщик.
+   5++D172              biosRecoverCopyTail:
+   6++D172 21 C7 D1         ld hl,biosRecoveryWindow
+   7++D175 11 D0 D1         ld de,biosRecoveryWindowEnd
+   8++D178 01 C0 FF         ld bc,BANK_WINDOW
+   9++D17B CD 32 C1         call moveBiosLow
+  10++D17E                  ; Эталон сигнатуры находится в DOS; инструкции копировщика идут после неё.
+  11++D17E 21 00 FF         ld hl,BANK_COPY_GUARD_ADDR
+  12++D181 06 04            ld b,4
+  13++D183              biosRecoveryCheck:
+ 208++D5F7 32 FC FF         ld (IO_PAGE_RAM),a
+ 209++D5FA 31 DF 8F         ld sp,STACK_ADDR
+ 210++D5FD                  ; The installed renderer and system-owned font resources survive app exit.
+ 211++D5FD CD 0A C1         call biosMoveUseLow
+ 212++D600 CD 72 D1         call biosRecoverCopyTail
+ 213++D603 F5               push af
+ 214++D604 CD 89 C6         call sysInstall
+ 215++D607 3E 02            ld a,2
+
+[RUN/RUN.lst]
+ 106+ 8C36 3E 0A            ld a,00Ah
+ 107+ 8C38 32 E3 FF         ld (IO_KEYB_MODE),a
+ 108+ 8C3B 3E 03            ld a,3
+ 109+ 8C3D 32 FF FF         ld (IO_PAGE_STD),a
+ 110+ 8C40 32 FA F7         ld (IO_COLOR-07FEh),a
+ 111+ 8C43 3E 82            ld a,082h
+ 112+ 8C45 32 03 F8         ld (0F803h),a
+ 113+ 8C48 AF               xor a
+1022  08AC CD 3A 09         call bridgeMove
+1023  08AF              bridgeReloc8:
+1024  08AF C3 FC 08         jp bridgeEntry
+1025  08B2              bridgeNative:
+1026  08B2 B7               or a
+1027  08B3              bridgeReloc9:
+1028  08B3 CA F5 08         jp z,bridgeStart
+1029  08B6 3E FF            ld a,0FFh
+1030  08B8 CD A2 C8         call bios_setFontEncoding
+1031  08BB CD 0A C1         call biosMoveUseLow
+1032  08BE              bridgeSTD:
+1033  08BE 3E B6            ld a,0B6h
+1034  08C0 32 EF FF         ld (IO_TIMER_MODE),a
+1035  08C3 3E 76            ld a,076h
+1039  08CD 3E 0A            ld a,00Ah
+1040  08CF 32 E3 FF         ld (IO_KEYB_MODE),a
+1041  08D2 3E 03            ld a,3
+1042  08D4 32 FF FF         ld (IO_PAGE_STD),a
+1043  08D7 32 FA F7         ld (IO_COLOR-07FEh),a
+1044  08DA 3E 82            ld a,082h
+1045  08DC 32 03 F8         ld (0F803h),a
+1046  08DF AF               xor a
+
+[MEM/TRANSPORT.lst]
+  25+ FE16 ~
+  26+ FE16 ~            ; HL = источник, DE = конец источника, BC = назначение.
+  27+ FE16 ~            ; Возвращает HL = конец источника, BC = конец назначения.
+  28+ FE16 ~            moveCore:
+  29+ FE16 ~                    ld      a, e
+  30+ FE16 ~                    sub     l
+  31+ FE16 ~                    ld      e, a
+  32+ FE16 ~                    ld      a, d
+ 279  FE16             >
+ 279  FE16             >; HL = источник, DE = конец источника, BC = назначение.
+ 279  FE16             >; Возвращает HL = конец источника, BC = конец назначения.
+ 279  FE16             >moveCore:
+ 279  FE16 7B          >        ld      a, e
+ 279  FE17 95          >        sub     l
+ 279  FE18 5F          >        ld      e, a
+ 279  FE19 7A          >        ld      a, d
+ 279  FE46 C9          >        ret
+ 279  FE47             >
+ 279  FE47             >; HL = источник, DE = назначение, BC = длина. Выход как у moveCore.
+ 279  FE47             >moveBytesForward:
+ 279  FE47 E5          >        push    hl
+ 279  FE48 09          >        add     hl, bc
+ 279  FE49 E3          >        ex      (sp), hl
+ 279  FE4A CD 51 FE    >        call    compact223Forward

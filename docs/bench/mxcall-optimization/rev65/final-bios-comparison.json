@@ -1,0 +1,95 @@
+{
+  "old_image": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "new_image": "864d1030c68cbf0610e40ef33578cd95cd981ef468930d9d4fab6e8571273047",
+  "emulator": "7d9f95cb3e938e20d17ac14e8212a7854222b448f5930e7aec6a9504034938af",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "results": [
+    {
+      "entry": "mx_printChar",
+      "old_id": 258,
+      "old_main": 1540,
+      "old_exec": 3480,
+      "direct": 1010,
+      "new_main": 1184,
+      "new_dos": 1580,
+      "new_exec": 1580
+    },
+    {
+      "entry": "mx_getCursorPos",
+      "old_id": 265,
+      "old_main": 573,
+      "old_exec": 539,
+      "direct": 53,
+      "new_main": 149,
+      "new_dos": 175,
+      "new_exec": 175
+    },
+    {
+      "entry": "mx_setCursorPos",
+      "old_id": 266,
+      "old_main": 589,
+      "old_exec": 572,
+      "direct": 69,
+      "new_main": 149,
+      "new_dos": 175,
+      "new_exec": 175
+    },
+    {
+      "entry": "mx_printCharRaw",
+      "old_id": 276,
+      "old_main": 1464,
+      "old_exec": 3404,
+      "direct": 934,
+      "new_main": 1108,
+      "new_dos": 1504,
+      "new_exec": 1504
+    },
+    {
+      "entry": "mx_printHexByte",
+      "old_id": 262,
+      "old_main": 3130,
+      "old_exec": 5070,
+      "direct": 2610,
+      "new_main": 2784,
+      "new_dos": 3180,
+      "new_exec": 3180
+    },
+    {
+      "entry": "mx_printHexWord",
+      "old_id": 270,
+      "old_main": 5612,
+      "old_exec": 7552,
+      "direct": 5092,
+      "new_main": 5266,
+      "new_dos": 5662,
+      "new_exec": 5662
+    },
+    {
+      "entry": "mx_getMemTop",
+      "old_id": 272,
+      "old_main": 573,
+      "old_exec": 2513,
+      "direct": 53,
+      "new_main": 163,
+      "new_dos": 199,
+      "new_exec": 199
+    },
+    {
+      "entry": "mx_setMemTop",
+      "old_id": 271,
+      "old_main": 573,
+      "old_exec": 2513,
+      "direct": 53,
+      "new_main": 173,
+      "new_dos": 209,
+      "new_exec": 209
+    }
+  ]
+}

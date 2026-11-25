@@ -1,0 +1,26 @@
+[
+  {
+    "commands": 1,
+    "direct": 195,
+    "queued": 5605,
+    "speedup": 0.03479036574487065
+  },
+  {
+    "commands": 4,
+    "direct": 750,
+    "queued": 10331,
+    "speedup": 0.07259703804084794
+  },
+  {
+    "commands": 16,
+    "direct": 2970,
+    "queued": 30780,
+    "speedup": 0.09649122807017543
+  },
+  {
+    "commands": 64,
+    "direct": 11850,
+    "queued": 107525,
+    "speedup": 0.11020692862125087
+  }
+]

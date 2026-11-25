@@ -1,0 +1,22 @@
+{
+  "graphics_base": 30335,
+  "exec_page": 6,
+  "nc_command": "C:",
+  "main_command": "C:/DOS/NC_MN.COM",
+  "main_page": 0,
+  "main_loop": 276,
+  "exec_poll": 19371,
+  "edit_exec": {
+    "page": 7,
+    "nc_return_page": 6,
+    "typed": "x",
+    "bytes_opened": 169
+  },
+  "edit_main": {
+    "page": 0,
+    "nc_return_page": 0,
+    "typed": "x",
+    "bytes_opened": 169
+  },
+  "cli_command": "PWD"
+}

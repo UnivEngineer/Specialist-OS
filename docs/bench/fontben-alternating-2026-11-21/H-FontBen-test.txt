@@ -1,0 +1,30 @@
+@label FONTBEN
+BENCH/FontBen/FontBen.com      ../bin/FONTCOM.cpu                       0
+BENCH/FontBen/TextBen.com      ../bin/TEXTCOM.cpu                       0
+BENCH/FontBen/FontBank.com     ../bin/FONTBANK.cpu                      0x4000
+BENCH/FontBen/TextBank.com     ../bin/TEXTBANK.cpu                      0x4000
+BENCH/FontBen/Engine6.dll      ../bin/ENGINE6.cpu 0x2000
+BENCH/FontBen/EngineP.dll      ../bin/ENGINEP.cpu 0x2000
+BENCH/FontBen/EngineW.dll      ../bin/ENGINEW.cpu 0x2000
+BENCH/FontBen/EngineQ.dll      ../bin/ENGINEQ.cpu 0x2000
+BENCH/FontBen/Engine4.dll      ../bin/ENGINE4.cpu 0x2000
+BENCH/FontBen/EngineM.dll      ../bin/ENGINEM.cpu 0x2000
+BENCH/FontBen/EngineB.dll      ../bin/ENGINEB.cpu 0x2000
+BENCH/FontBen/EngineS.dll      ../bin/ENGINES.cpu 0x2000
+BENCH/FontBen/README.TXT       benchmarks/fontben/Readme.txt
+BENCH/FontBen/FontRot.dll    ../bin/fonts/FontRot.cpu    0x2000
+BENCH/FontBen/RotRows.dll    ../bin/fonts/RotRows.cpu    0x2000
+BENCH/FontBen/Rot8Quad.dll   ../bin/fonts/Rot8Quad.cpu   0x2000
+BENCH/FontBen/Rot8Strm.dll   ../bin/fonts/Rot8Strm.cpu   0x2000
+BENCH/FontBen/FontPack.dll    ../bin/fonts/FontPack.cpu    0x2000
+BENCH/FontBen/FontFull.dll    ../bin/fonts/FontFull.cpu    0x2000
+BENCH/FontBen/FontKoi.dll    ../bin/fonts/FontKoi.cpu    0x2000
+BENCH/FontBen/Font8.dll    ../bin/fonts/Font8.cpu    0x2000
+BENCH/FontBen/Font4.dll    ../bin/fonts/Font4.cpu    0x2000
+BENCH/FontBen/Font4Fst.dll ../bin/fonts/Font4Fst.cpu 0x2000
+BENCH/FontBen/Cmp6.fnt ../bin/fonts/Compact.cpu 0xD800
+BENCH/FontBen/InitKoi.dll ../bin/fonts/InitKoi.cpu 0x5000
+BENCH/FontBen/Fast8.fnt ../bin/fonts/Fast8.cpu 0xD800
+BENCH/FontBen/Fast8Row.fnt ../bin/fonts/Fast8Row.cpu 0xD800
+BENCH/FontBen/InitA.dll ../bin/fonts/InitA.cpu 0x5000
+

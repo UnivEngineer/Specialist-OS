@@ -1,0 +1,26 @@
+{
+  "MapR8": {
+    "bios_printCharRaw": 100,
+    "bios_printStringRawLim": 319
+  },
+  "MapRB": {
+    "bios_printCharRaw": 60,
+    "bios_printStringRawLim": 159
+  },
+  "MapP8": {
+    "bios_printCharRaw": 100,
+    "bios_printStringRawLim": 319
+  },
+  "MapPB": {
+    "bios_printCharRaw": 60,
+    "bios_printStringRawLim": 159
+  },
+  "MapF8": {
+    "bios_printCharRaw": 100,
+    "bios_printStringRawLim": 319
+  },
+  "MapFB": {
+    "bios_printCharRaw": 60,
+    "bios_printStringRawLim": 159
+  }
+}

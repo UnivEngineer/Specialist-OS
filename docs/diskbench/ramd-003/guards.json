@@ -1,0 +1,110 @@
+{
+  "Regs2": {
+    "guarded_read_write": [
+      {
+        "sector": 256,
+        "buffer": 16385,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 256,
+        "buffer": 16637,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 256,
+        "buffer": 65024,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 16385,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 16637,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 65024,
+        "prefix_suffix_intact": true
+      }
+    ],
+    "invalid_parameters_rejected": true,
+    "boot_fat_root_unchanged": true
+  },
+  "Regs4": {
+    "guarded_read_write": [
+      {
+        "sector": 256,
+        "buffer": 16385,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 256,
+        "buffer": 16637,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 256,
+        "buffer": 65024,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 16385,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 16637,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 65024,
+        "prefix_suffix_intact": true
+      }
+    ],
+    "invalid_parameters_rejected": true,
+    "boot_fat_root_unchanged": true
+  },
+  "Regs6": {
+    "guarded_read_write": [
+      {
+        "sector": 256,
+        "buffer": 16385,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 256,
+        "buffer": 16637,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 256,
+        "buffer": 65024,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 16385,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 16637,
+        "prefix_suffix_intact": true
+      },
+      {
+        "sector": 4094,
+        "buffer": 65024,
+        "prefix_suffix_intact": true
+      }
+    ],
+    "invalid_parameters_rejected": true,
+    "boot_fat_root_unchanged": true
+  }
+}

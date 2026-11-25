@@ -1,0 +1,157 @@
+[build] Build all started
+[build] Components (All) started
+[checking] System call registry
+[up-to-date] System call registry
+[prepare] Component build plan
+[time] Component build plan: 0,410 s
+[checking] UI_GFX
+[checking] Almaz
+[checking] Almaz-2 (All)
+[up-to-date] Almaz (0.022 s)
+[up-to-date] UI_GFX (0.029 s)
+[up-to-date] Almaz-2 (All) (0.037 s)
+[checking] Font engines
+[checking] COPYBEN variants
+[up-to-date] COPYBEN variants (0.008 s)
+[up-to-date] Font engines (0.025 s)
+[checking] DOS
+[up-to-date] DOS (0.076 s)
+[checking] Benchmark support
+[up-to-date] Benchmark support (0.014 s)
+[checking] EXE
+[checking] COPYBEN
+[checking] FONT
+[checking] CHKDSK
+[checking] FLOPPY
+[checking] TESTMX
+[checking] tape
+[checking] test-scr
+[checking] FlashFst
+[checking] Flash
+[checking] FlashSys
+[checking] Rom
+[checking] RAMDISK
+[checking] Rom64
+[checking] Debug
+[checking] Monitor2
+[checking] MONWIN
+[checking] RUN
+[checking] RAMFOS
+[checking] FORMAT
+[up-to-date] EXE (0.041 s)
+[checking] CLI
+[checking] NC
+[checking] EDIT
+[checking] ENGINEM
+[checking] TEXTCOM
+[checking] ENGINEB
+[up-to-date] test-scr (0.064 s)
+[checking] ENGINE6
+[checking] ENGINEP
+[up-to-date] CHKDSK (0.066 s)
+[checking] ENGINEW
+[up-to-date] TESTMX (0.078 s)
+[checking] ENGINEQ
+[checking] ORIONM1
+[checking] ENGINES
+[checking] FONTCOM
+[checking] ENGINE4
+[up-to-date] MONWIN (0.064 s)
+[checking] FONTBLK
+[up-to-date] FONT (0.103 s)
+[checking] FONTLAB
+[checking] FONTRMP
+[up-to-date] Monitor2 (0.086 s)
+[up-to-date] FLOPPY (0.091 s)
+[up-to-date] FlashSys (0.115 s)
+[checking] RFTEST
+[up-to-date] RUN (0.096 s)
+[checking] RFTESTHI
+[up-to-date] ENGINEW (0.064 s)
+[up-to-date] Rom64 (0.119 s)
+[up-to-date] FORMAT (0.092 s)
+[up-to-date] tape (0.140 s)
+[up-to-date] ORIONM1 (0.068 s)
+[up-to-date] Flash (0.139 s)
+[up-to-date] Rom (0.127 s)
+[up-to-date] CLI (0.102 s)
+[up-to-date] FlashFst (0.145 s)
+[up-to-date] RFTEST (0.040 s)
+[up-to-date] RFTESTHI (0.030 s)
+[up-to-date] ENGINEQ (0.085 s)
+[up-to-date] ENGINEP (0.092 s)
+[up-to-date] ENGINEM (0.105 s)
+[up-to-date] ENGINE4 (0.075 s)
+[up-to-date] ENGINEB (0.106 s)
+[up-to-date] ENGINES (0.082 s)
+[up-to-date] RAMDISK (0.156 s)
+[up-to-date] TEXTCOM (0.117 s)
+[up-to-date] Debug (0.155 s)
+[build] ENGINE6 (checked in 0.127 s)
+[up-to-date] COPYBEN (0.199 s)
+[up-to-date] FONTCOM (0.181 s)
+[up-to-date] EDIT (0.234 s)
+[up-to-date] FONTBLK (0.184 s)
+[up-to-date] FONTRMP (0.163 s)
+[up-to-date] FONTLAB (0.184 s)
+[up-to-date] RAMFOS (0.248 s)
+[up-to-date] NC (0.233 s)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINE6.asm
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=FONTKOI.packed.bin (4072 bytes) Offset=0  Len=32
+include data: name=FONTKOI.packed.index.bin (256 bytes) Offset=0  Len=256
+include data: name=FONTKOI.packed.codes.bin (147 bytes) Offset=0  Len=147
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 5614 lines, work time: 0.047 seconds
+[time] ENGINE6: 0.423 s
+[checking] ENUM
+[up-to-date] ENUM (0.010 s)
+[checking] FILEOPS
+[up-to-date] FILEOPS (0.011 s)
+[checking] DISKBEN (2000000 Hz)
+[up-to-date] DISKBEN (2000000 Hz) (0.015 s)
+[checking] SORTBEN
+[up-to-date] SORTBEN (0.013 s)
+[build] Profile 'MMX Flash + floppy' started
+[checking] Bootstrap
+[up-to-date] Bootstrap (0.006 s)
+[checking] image: SystemHardware
+[up-to-date] image: SystemHardware (0.019 s)
+[checking] Bootstrap
+[up-to-date] Bootstrap (0.007 s)
+[checking] image: SystemEmuWritable
+[up-to-date] image: SystemEmuWritable (0.019 s)
+[checking] image: Games2M
+[build] image: Games2M (checked in 0.010 s)
+Nested FAT image: 14 directories, 160 files
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip1.bin
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip2.bin
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip3.bin
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip4.bin
+[time] image: Games2M: 1.749 s
+[checking] image: Floppy720
+[up-to-date] image: Floppy720 (0.001 s)
+[time] Profile MMX Flash + floppy: 2,806 s
+[build] Profile 'MX ROM + floppy' started
+[build] Components (MX) started
+[checking] Bootstrap
+[up-to-date] Bootstrap (0.007 s)
+[checking] Original MX bootstrap
+[up-to-date] Original MX bootstrap (0.110 s)
+[checking] image: MxFloppy
+[up-to-date] image: MxFloppy (0.008 s)
+[checking] image: MxRom32
+[up-to-date] image: MxRom32 (0.007 s)
+[checking] image: MxRom48
+[up-to-date] image: MxRom48 (0.007 s)
+[checking] image: Games64k
+[up-to-date] image: Games64k (0.001 s)
+[time] Profile MX ROM + floppy: 1,000 s
+[build] Profile 'RAMFOS' started
+[checking] image: MxRamfos32
+[up-to-date] image: MxRamfos32 (0.021 s)
+[time] Profile RAMFOS: 0,155 s
+Done.
+[time] Build all: 5,969 s

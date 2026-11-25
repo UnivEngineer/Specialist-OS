@@ -1,0 +1,587 @@
+{
+  "cpuHz": 2000000,
+  "measurements": {
+    "before": {
+      "EDIT_MN": {
+        "pressToDecode": 100183,
+        "pressToAccept": 100629,
+        "firstRepeatDecode": 1004076,
+        "firstRepeatAccept": 1004076,
+        "decodedSteady": {
+          "cycles": [
+            61438,
+            63507,
+            63782,
+            64053,
+            64324,
+            64595
+          ],
+          "minimum": 61438,
+          "maximum": 64595,
+          "median": 63917.5,
+          "medianMs": 31.95875
+        },
+        "acceptedSteady": {
+          "cycles": [
+            61438,
+            63507,
+            63782,
+            64053,
+            64324,
+            64595
+          ],
+          "minimum": 61438,
+          "maximum": 64595,
+          "median": 63917.5,
+          "medianMs": 31.95875
+        },
+        "render": {
+          "cycles": [
+            17707,
+            19776,
+            20051,
+            20322,
+            20593,
+            20864
+          ],
+          "minimum": 17707,
+          "maximum": 20864,
+          "median": 20186.5,
+          "medianMs": 10.09325
+        },
+        "afterRender": {
+          "cycles": [
+            43285,
+            43285,
+            43285,
+            43285,
+            43285,
+            43285
+          ],
+          "minimum": 43285,
+          "maximum": 43285,
+          "median": 43285.0,
+          "medianMs": 21.6425
+        },
+        "pollSetup": {
+          "cycles": [
+            38232,
+            38232,
+            38232,
+            38232,
+            38232,
+            38232
+          ],
+          "minimum": 38232,
+          "maximum": 38232,
+          "median": 38232.0,
+          "medianMs": 19.116
+        },
+        "inPoll": {
+          "cycles": [
+            5053,
+            5053,
+            5053,
+            5053,
+            5053,
+            5053
+          ],
+          "minimum": 5053,
+          "maximum": 5053,
+          "median": 5053.0,
+          "medianMs": 2.5265
+        },
+        "dispatch": {
+          "cycles": [
+            446,
+            446,
+            446,
+            446,
+            446,
+            446
+          ],
+          "minimum": 446,
+          "maximum": 446,
+          "median": 446.0,
+          "medianMs": 0.223
+        },
+        "rowNumbers": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "top": 21248,
+        "points": {
+          "decodedAt": "loc_C311",
+          "acceptedAt": "keyHandler_Down",
+          "renderedAt": "keyInput",
+          "pollingAt": "loc_C23C"
+        }
+      },
+      "EDIT": {
+        "pressToDecode": 7949,
+        "pressToAccept": 12543,
+        "firstRepeatDecode": 781092,
+        "firstRepeatAccept": 781092,
+        "decodedSteady": {
+          "cycles": [
+            130403,
+            131151,
+            131416,
+            130366,
+            131938,
+            130888
+          ],
+          "minimum": 130366,
+          "maximum": 131938,
+          "median": 131019.5,
+          "medianMs": 65.50975
+        },
+        "acceptedSteady": {
+          "cycles": [
+            130403,
+            131151,
+            131416,
+            130366,
+            131938,
+            130888
+          ],
+          "minimum": 130366,
+          "maximum": 131938,
+          "median": 131019.5,
+          "medianMs": 65.50975
+        },
+        "render": {
+          "cycles": [
+            35810,
+            37869,
+            38134,
+            38395,
+            38656,
+            38917
+          ],
+          "minimum": 35810,
+          "maximum": 38917,
+          "median": 38264.5,
+          "medianMs": 19.13225
+        },
+        "afterRender": {
+          "cycles": [
+            89999,
+            88688,
+            88688,
+            87377,
+            88688,
+            87377
+          ],
+          "minimum": 87377,
+          "maximum": 89999,
+          "median": 88688.0,
+          "medianMs": 44.344
+        },
+        "pollSetup": {
+          "cycles": [
+            4430,
+            4430,
+            4430,
+            4430,
+            4430,
+            4430
+          ],
+          "minimum": 4430,
+          "maximum": 4430,
+          "median": 4430.0,
+          "medianMs": 2.215
+        },
+        "inPoll": {
+          "cycles": [
+            85569,
+            84258,
+            84258,
+            82947,
+            84258,
+            82947
+          ],
+          "minimum": 82947,
+          "maximum": 85569,
+          "median": 84258.0,
+          "medianMs": 42.129
+        },
+        "dispatch": {
+          "cycles": [
+            4594,
+            4594,
+            4594,
+            4594,
+            4594,
+            4594
+          ],
+          "minimum": 4594,
+          "maximum": 4594,
+          "median": 4594.0,
+          "medianMs": 2.297
+        },
+        "rowNumbers": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "top": 17152,
+        "points": {
+          "decodedAt": "ebInputReady",
+          "acceptedAt": "keyHandler_Down",
+          "renderedAt": "ebWaitReady",
+          "pollingAt": "ebPollKey"
+        }
+      }
+    },
+    "after": {
+      "EDIT_MN": {
+        "pressToDecode": 100183,
+        "pressToAccept": 100629,
+        "firstRepeatDecode": 1004076,
+        "firstRepeatAccept": 1004076,
+        "decodedSteady": {
+          "cycles": [
+            61438,
+            63507,
+            63782,
+            64053,
+            64324,
+            64595
+          ],
+          "minimum": 61438,
+          "maximum": 64595,
+          "median": 63917.5,
+          "medianMs": 31.95875
+        },
+        "acceptedSteady": {
+          "cycles": [
+            61438,
+            63507,
+            63782,
+            64053,
+            64324,
+            64595
+          ],
+          "minimum": 61438,
+          "maximum": 64595,
+          "median": 63917.5,
+          "medianMs": 31.95875
+        },
+        "render": {
+          "cycles": [
+            17707,
+            19776,
+            20051,
+            20322,
+            20593,
+            20864
+          ],
+          "minimum": 17707,
+          "maximum": 20864,
+          "median": 20186.5,
+          "medianMs": 10.09325
+        },
+        "afterRender": {
+          "cycles": [
+            43285,
+            43285,
+            43285,
+            43285,
+            43285,
+            43285
+          ],
+          "minimum": 43285,
+          "maximum": 43285,
+          "median": 43285.0,
+          "medianMs": 21.6425
+        },
+        "pollSetup": {
+          "cycles": [
+            38232,
+            38232,
+            38232,
+            38232,
+            38232,
+            38232
+          ],
+          "minimum": 38232,
+          "maximum": 38232,
+          "median": 38232.0,
+          "medianMs": 19.116
+        },
+        "inPoll": {
+          "cycles": [
+            5053,
+            5053,
+            5053,
+            5053,
+            5053,
+            5053
+          ],
+          "minimum": 5053,
+          "maximum": 5053,
+          "median": 5053.0,
+          "medianMs": 2.5265
+        },
+        "dispatch": {
+          "cycles": [
+            446,
+            446,
+            446,
+            446,
+            446,
+            446
+          ],
+          "minimum": 446,
+          "maximum": 446,
+          "median": 446.0,
+          "medianMs": 0.223
+        },
+        "rowNumbers": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "top": 21248,
+        "points": {
+          "decodedAt": "loc_C311",
+          "acceptedAt": "keyHandler_Down",
+          "renderedAt": "keyInput",
+          "pollingAt": "loc_C23C"
+        }
+      },
+      "EDIT": {
+        "pressToDecode": 7110,
+        "pressToAccept": 11010,
+        "firstRepeatDecode": 734751,
+        "firstRepeatAccept": 734751,
+        "decodedSteady": {
+          "cycles": [
+            129812,
+            131871,
+            130825,
+            131086,
+            131347,
+            130297
+          ],
+          "minimum": 129812,
+          "maximum": 131871,
+          "median": 130955.5,
+          "medianMs": 65.47775
+        },
+        "acceptedSteady": {
+          "cycles": [
+            129812,
+            131871,
+            130825,
+            131086,
+            131347,
+            130297
+          ],
+          "minimum": 129812,
+          "maximum": 131871,
+          "median": 130955.5,
+          "medianMs": 65.47775
+        },
+        "render": {
+          "cycles": [
+            34824,
+            36883,
+            37148,
+            37409,
+            37670,
+            37931
+          ],
+          "minimum": 34824,
+          "maximum": 37931,
+          "median": 37278.5,
+          "medianMs": 18.63925
+        },
+        "afterRender": {
+          "cycles": [
+            91088,
+            91088,
+            89777,
+            89777,
+            89777,
+            88466
+          ],
+          "minimum": 88466,
+          "maximum": 91088,
+          "median": 89777.0,
+          "medianMs": 44.8885
+        },
+        "pollSetup": {
+          "cycles": [
+            3736,
+            3736,
+            3736,
+            3736,
+            3736,
+            3736
+          ],
+          "minimum": 3736,
+          "maximum": 3736,
+          "median": 3736.0,
+          "medianMs": 1.868
+        },
+        "inPoll": {
+          "cycles": [
+            87352,
+            87352,
+            86041,
+            86041,
+            86041,
+            84730
+          ],
+          "minimum": 84730,
+          "maximum": 87352,
+          "median": 86041.0,
+          "medianMs": 43.0205
+        },
+        "dispatch": {
+          "cycles": [
+            3900,
+            3900,
+            3900,
+            3900,
+            3900,
+            3900
+          ],
+          "minimum": 3900,
+          "maximum": 3900,
+          "median": 3900.0,
+          "medianMs": 1.95
+        },
+        "rowNumbers": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "top": 17152,
+        "points": {
+          "decodedAt": "ebInputReady",
+          "acceptedAt": "keyHandler_Down",
+          "renderedAt": "ebWaitReady",
+          "pollingAt": "ebPollKey"
+        }
+      }
+    }
+  },
+  "waitF806": {
+    "before": {
+      "EDIT_MN": {
+        "postRenderF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pollF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "EDIT": {
+        "postRenderF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pollF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "after": {
+      "EDIT_MN": {
+        "postRenderF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pollF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "EDIT": {
+        "postRenderF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "pollF806": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  }
+}

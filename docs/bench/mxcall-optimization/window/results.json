@@ -1,0 +1,521 @@
+{
+  "system": {
+    "cpu": {
+      "breaked": true,
+      "frequency_hz": 2000000,
+      "full_throttle": false,
+      "paused": false,
+      "speed_factor": 32.0,
+      "type": "8080"
+    },
+    "server": {
+      "name": "Emu80",
+      "port": 19782,
+      "protocol": "2024-11-05",
+      "version": "4.0.575"
+    },
+    "pid": 31336,
+    "system_sha256": "f1567939e5e3758d05ac8d566b2721cb565917a03fe28f9a474cd47125b01a26",
+    "baseline_mem_sha256": "ee5286f884540152b832e336c282c2b89e79f391ab4ec2b55350fc9aea047ad7"
+  },
+  "profiles": {
+    "COMMAND_to_COMMAND": 92,
+    "COPY_to_COMMAND": 1228
+  },
+  "copies": [
+    {
+      "engine": "MEM32",
+      "sectors": 1,
+      "mode": "batch",
+      "ticks": [
+        13660,
+        13660,
+        13660
+      ],
+      "ms": 6.83,
+      "kib_s": 36.603221083455345
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 1,
+      "mode": "series",
+      "ticks": [
+        13170,
+        13170,
+        13170
+      ],
+      "ms": 6.585,
+      "kib_s": 37.96507213363705
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 1,
+      "mode": "alternating",
+      "ticks": [
+        13394,
+        13394,
+        13394
+      ],
+      "ms": 6.697,
+      "kib_s": 37.330147827385396
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 16,
+      "mode": "batch",
+      "ticks": [
+        136601,
+        136601,
+        136601
+      ],
+      "ms": 68.3005,
+      "kib_s": 58.56472500201316
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 16,
+      "mode": "series",
+      "ticks": [
+        178275,
+        178275,
+        178275
+      ],
+      "ms": 89.1375,
+      "kib_s": 44.87449165614921
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 16,
+      "mode": "alternating",
+      "ticks": [
+        214154,
+        214154,
+        214154
+      ],
+      "ms": 107.077,
+      "kib_s": 37.35629500266164
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 32,
+      "mode": "batch",
+      "ticks": [
+        267412,
+        267412,
+        267412
+      ],
+      "ms": 133.706,
+      "kib_s": 59.83276741507487
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 32,
+      "mode": "series",
+      "ticks": [
+        354387,
+        354387,
+        354387
+      ],
+      "ms": 177.1935,
+      "kib_s": 45.148382982445746
+    },
+    {
+      "engine": "MEM32",
+      "sectors": 32,
+      "mode": "alternating",
+      "ticks": [
+        428298,
+        428298,
+        428298
+      ],
+      "ms": 214.149,
+      "kib_s": 37.35716720601077
+    },
+    {
+      "engine": 16,
+      "sectors": 1,
+      "mode": "batch",
+      "ticks": [
+        10029,
+        10029,
+        10029
+      ],
+      "ms": 5.0145,
+      "kib_s": 49.85541928407618
+    },
+    {
+      "engine": 16,
+      "sectors": 1,
+      "mode": "series",
+      "ticks": [
+        10029,
+        10029,
+        10029
+      ],
+      "ms": 5.0145,
+      "kib_s": 49.85541928407618
+    },
+    {
+      "engine": 16,
+      "sectors": 1,
+      "mode": "alternating",
+      "ticks": [
+        10253,
+        10253,
+        10253
+      ],
+      "ms": 5.1265,
+      "kib_s": 48.76621476640983
+    },
+    {
+      "engine": 16,
+      "sectors": 16,
+      "mode": "batch",
+      "ticks": [
+        153549,
+        153549,
+        153549
+      ],
+      "ms": 76.7745,
+      "kib_s": 52.100632371425405
+    },
+    {
+      "engine": 16,
+      "sectors": 16,
+      "mode": "series",
+      "ticks": [
+        160314,
+        160314,
+        160314
+      ],
+      "ms": 80.157,
+      "kib_s": 49.902067193133476
+    },
+    {
+      "engine": 16,
+      "sectors": 16,
+      "mode": "alternating",
+      "ticks": [
+        163898,
+        163898,
+        163898
+      ],
+      "ms": 81.949,
+      "kib_s": 48.810845769930076
+    },
+    {
+      "engine": 16,
+      "sectors": 32,
+      "mode": "batch",
+      "ticks": [
+        306662,
+        306662,
+        306662
+      ],
+      "ms": 153.331,
+      "kib_s": 52.17470700641097
+    },
+    {
+      "engine": 16,
+      "sectors": 32,
+      "mode": "series",
+      "ticks": [
+        320618,
+        320618,
+        320618
+      ],
+      "ms": 160.309,
+      "kib_s": 49.903623626870605
+    },
+    {
+      "engine": 16,
+      "sectors": 32,
+      "mode": "alternating",
+      "ticks": [
+        327786,
+        327786,
+        327786
+      ],
+      "ms": 163.893,
+      "kib_s": 48.812334877023424
+    },
+    {
+      "engine": 20,
+      "sectors": 1,
+      "mode": "batch",
+      "ticks": [
+        9477,
+        9477,
+        9477
+      ],
+      "ms": 4.7385,
+      "kib_s": 52.75931201857128
+    },
+    {
+      "engine": 20,
+      "sectors": 1,
+      "mode": "series",
+      "ticks": [
+        9477,
+        9477,
+        9477
+      ],
+      "ms": 4.7385,
+      "kib_s": 52.75931201857128
+    },
+    {
+      "engine": 20,
+      "sectors": 1,
+      "mode": "alternating",
+      "ticks": [
+        9701,
+        9701,
+        9701
+      ],
+      "ms": 4.8505,
+      "kib_s": 51.541078239356764
+    },
+    {
+      "engine": 20,
+      "sectors": 16,
+      "mode": "batch",
+      "ticks": [
+        144645,
+        144645,
+        144645
+      ],
+      "ms": 72.3225,
+      "kib_s": 55.30782260015901
+    },
+    {
+      "engine": 20,
+      "sectors": 16,
+      "mode": "series",
+      "ticks": [
+        151482,
+        151482,
+        151482
+      ],
+      "ms": 75.741,
+      "kib_s": 52.811555168270814
+    },
+    {
+      "engine": 20,
+      "sectors": 16,
+      "mode": "alternating",
+      "ticks": [
+        155066,
+        155066,
+        155066
+      ],
+      "ms": 77.533,
+      "kib_s": 51.590935472637454
+    },
+    {
+      "engine": 20,
+      "sectors": 32,
+      "mode": "batch",
+      "ticks": [
+        288884,
+        288884,
+        288884
+      ],
+      "ms": 144.442,
+      "kib_s": 55.38555267858379
+    },
+    {
+      "engine": 20,
+      "sectors": 32,
+      "mode": "series",
+      "ticks": [
+        302954,
+        302954,
+        302954
+      ],
+      "ms": 151.477,
+      "kib_s": 52.813298388534236
+    },
+    {
+      "engine": 20,
+      "sectors": 32,
+      "mode": "alternating",
+      "ticks": [
+        310122,
+        310122,
+        310122
+      ],
+      "ms": 155.061,
+      "kib_s": 51.59259904166747
+    }
+  ],
+  "leaf": [
+    {
+      "shared": true,
+      "depth": 0,
+      "sp": "0xffc2",
+      "entry_instruction": "CALL",
+      "ticks": 191,
+      "writes": {
+        "0": [],
+        "1": []
+      },
+      "sp_at_leaf": "0xffc0",
+      "common_return_written": true
+    },
+    {
+      "shared": true,
+      "depth": 1,
+      "sp": "0xffc2",
+      "entry_instruction": "CALL",
+      "ticks": 253,
+      "writes": {
+        "0": [
+          "0xffbc",
+          "0xffbd",
+          "0xffbe",
+          "0xffbf"
+        ],
+        "1": []
+      },
+      "sp_at_leaf": "0xffc0",
+      "common_return_written": true
+    },
+    {
+      "shared": true,
+      "depth": 2,
+      "sp": "0xffc2",
+      "entry_instruction": "CALL",
+      "ticks": 295,
+      "writes": {
+        "0": [
+          "0xffb8",
+          "0xffb9",
+          "0xffba",
+          "0xffbb",
+          "0xffbc",
+          "0xffbd",
+          "0xffbe",
+          "0xffbf"
+        ],
+        "1": []
+      },
+      "sp_at_leaf": "0xffc0",
+      "common_return_written": true
+    },
+    {
+      "shared": false,
+      "depth": 0,
+      "sp": "0xffbe",
+      "entry_instruction": "CALL",
+      "ticks": 191,
+      "writes": {
+        "0": [],
+        "1": [
+          "0xffbc",
+          "0xffbd"
+        ]
+      },
+      "sp_at_leaf": "0xffbc",
+      "common_return_written": false
+    },
+    {
+      "shared": false,
+      "depth": 1,
+      "sp": "0xffbe",
+      "entry_instruction": "CALL",
+      "ticks": 253,
+      "writes": {
+        "0": [
+          "0xffb8",
+          "0xffb9",
+          "0xffba",
+          "0xffbb"
+        ],
+        "1": [
+          "0xffbc",
+          "0xffbd"
+        ]
+      },
+      "sp_at_leaf": "0xffbc",
+      "common_return_written": false
+    },
+    {
+      "shared": false,
+      "depth": 2,
+      "sp": "0xffbe",
+      "entry_instruction": "CALL",
+      "ticks": 295,
+      "writes": {
+        "0": [
+          "0xffb4",
+          "0xffb5",
+          "0xffb6",
+          "0xffb7",
+          "0xffb8",
+          "0xffb9",
+          "0xffba",
+          "0xffbb"
+        ],
+        "1": [
+          "0xffbc",
+          "0xffbd"
+        ]
+      },
+      "sp_at_leaf": "0xffbc",
+      "common_return_written": false
+    },
+    {
+      "shared": false,
+      "depth": 0,
+      "sp": "0xffbc",
+      "entry_instruction": "JP",
+      "ticks": 184,
+      "writes": {
+        "0": [],
+        "1": []
+      },
+      "sp_at_leaf": "0xffbc",
+      "common_return_written": false
+    },
+    {
+      "shared": false,
+      "depth": 1,
+      "sp": "0xffbc",
+      "entry_instruction": "JP",
+      "ticks": 246,
+      "writes": {
+        "0": [
+          "0xffb8",
+          "0xffb9",
+          "0xffba",
+          "0xffbb"
+        ],
+        "1": []
+      },
+      "sp_at_leaf": "0xffbc",
+      "common_return_written": false
+    },
+    {
+      "shared": false,
+      "depth": 2,
+      "sp": "0xffbc",
+      "entry_instruction": "JP",
+      "ticks": 288,
+      "writes": {
+        "0": [
+          "0xffb4",
+          "0xffb5",
+          "0xffb6",
+          "0xffb7",
+          "0xffb8",
+          "0xffb9",
+          "0xffba",
+          "0xffbb"
+        ],
+        "1": []
+      },
+      "sp_at_leaf": "0xffbc",
+      "common_return_written": false
+    }
+  ]
+}

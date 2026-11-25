@@ -1,0 +1,149 @@
+{
+  "bitmap": "PASS",
+  "stages": 18,
+  "results": [
+    {
+      "pre": 1,
+      "kind": 0,
+      "route": 0,
+      "ticks": 30108,
+      "ms": 3853.824
+    },
+    {
+      "pre": 1,
+      "kind": 0,
+      "route": 1,
+      "ticks": 52861,
+      "ms": 6766.208
+    },
+    {
+      "pre": 1,
+      "kind": 0,
+      "route": 2,
+      "ticks": 42650,
+      "ms": 5459.2
+    },
+    {
+      "pre": 1,
+      "kind": 1,
+      "route": 0,
+      "ticks": 31179,
+      "ms": 3990.912
+    },
+    {
+      "pre": 1,
+      "kind": 1,
+      "route": 1,
+      "ticks": 53931,
+      "ms": 6903.168
+    },
+    {
+      "pre": 1,
+      "kind": 1,
+      "route": 2,
+      "ticks": 43896,
+      "ms": 5618.688
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 0,
+      "ticks": 30180,
+      "ms": 3863.04
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 3,
+      "ticks": 30681,
+      "ms": 3927.168
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 4,
+      "ticks": 30450,
+      "ms": 3897.6
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 5,
+      "ticks": 30406,
+      "ms": 3891.968
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 0,
+      "ticks": 30997,
+      "ms": 3967.616
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 3,
+      "ticks": 31607,
+      "ms": 4045.696
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 4,
+      "ticks": 31268,
+      "ms": 4002.304
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 5,
+      "ticks": 31222,
+      "ms": 3996.416
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 0,
+      "ticks": 30783,
+      "ms": 3940.224
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 3,
+      "ticks": 31429,
+      "ms": 4022.912
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 4,
+      "ticks": 31056,
+      "ms": 3975.168
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 5,
+      "ticks": 31007,
+      "ms": 3968.896
+    }
+  ],
+  "reportBytes": 343,
+  "fileReadback": "PASS",
+  "allocations": "no leaks",
+  "modules": "unloaded",
+  "prerender": "disabled",
+  "dwordMainDriver": "PASS",
+  "returnedToNC": true,
+  "cpuHz": 2000000,
+  "pitHz": 2000000,
+  "binarySha256": {
+    "bin/BIOS.sys": "be14b7a1db6838ff6d53b82a8ac5efd8e48f5b0505a4d2b14aa9c8bc07942ab8",
+    "bin/IO.sys": "3eb41198fffca8295317e45ceb680256122b173cff0e06b5e105ecb03df69e6f",
+    "bin/MEM.sys": "a8e0a8414cb6eaccd4cc2e61828601bdf6c97c9bf453292a6e6ab1b9180d02b5",
+    "bin/FONTCOM.i80": "1ac3a7f59f6b56e169268b86301b19ee8a247666e715e9fe430fae104304bcc5",
+    "bin/FONTBANK.i80": "519d7acfd78e542d2efc35e20399b3ac397b3dae74b65e63d6feef2df200053a",
+    "images/SystemRom_emu80_writable.bin": "f0a4b424d6d19589070e9d0b5a823cdfc94b7d467990803bf45696c3371c8df1"
+  }
+}

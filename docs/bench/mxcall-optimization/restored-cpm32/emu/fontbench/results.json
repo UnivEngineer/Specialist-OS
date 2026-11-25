@@ -1,0 +1,148 @@
+{
+  "bitmap": "PASS",
+  "stages": 18,
+  "results": [
+    {
+      "pre": 0,
+      "kind": 0,
+      "route": 0,
+      "ticks": 5510,
+      "ms": 705.28
+    },
+    {
+      "pre": 0,
+      "kind": 0,
+      "route": 1,
+      "ticks": 7558,
+      "ms": 967.424
+    },
+    {
+      "pre": 0,
+      "kind": 0,
+      "route": 2,
+      "ticks": 7557,
+      "ms": 967.296
+    },
+    {
+      "pre": 0,
+      "kind": 1,
+      "route": 0,
+      "ticks": 5490,
+      "ms": 702.72
+    },
+    {
+      "pre": 0,
+      "kind": 1,
+      "route": 1,
+      "ticks": 7537,
+      "ms": 964.736
+    },
+    {
+      "pre": 0,
+      "kind": 1,
+      "route": 2,
+      "ticks": 7537,
+      "ms": 964.736
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 0,
+      "ticks": 5193,
+      "ms": 664.704
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 3,
+      "ticks": 5718,
+      "ms": 731.904
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 4,
+      "ticks": 5380,
+      "ms": 688.64
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 5,
+      "ticks": 5349,
+      "ms": 684.672
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 0,
+      "ticks": 4974,
+      "ms": 636.672
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 3,
+      "ticks": 5630,
+      "ms": 720.64
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 4,
+      "ticks": 5166,
+      "ms": 661.248
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 5,
+      "ticks": 5131,
+      "ms": 656.768
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 0,
+      "ticks": 4802,
+      "ms": 614.656
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 3,
+      "ticks": 5479,
+      "ms": 701.312
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 4,
+      "ticks": 4995,
+      "ms": 639.36
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 5,
+      "ticks": 4958,
+      "ms": 634.624
+    }
+  ],
+  "reportBytes": 343,
+  "fileReadback": "PASS",
+  "allocations": "no leaks",
+  "modules": "unloaded",
+  "prerender": "disabled",
+  "returnedToNC": true,
+  "cpuHz": 2000000,
+  "pitHz": 2000000,
+  "binarySha256": {
+    "bin/BIOS.sys": "88391465faaed8d855ced0049ba162e0674c9466c379dc561818586dc4962cf4",
+    "bin/IO.sys": "c527f20c36710bfbaf91105dd26d055540abb2bb007795e4050da28d2b10fa5a",
+    "bin/MEM.sys": "91d14ecf824b3a3c328364152e3ecd7ba7e49002aae582e8f8eaf3a448ab8c6b",
+    "bin/FONTCOM.i80": "ceeb23d2f9de8dded6c275397936a3ad6291374b7161f22d7f387d32789b27e0",
+    "bin/FONTBANK.i80": "51e06645b82cb1a04cacd6e98ef02f4001cfc72621984ffc9c74577a66704694",
+    "images/C-Flash-512k-MMX-System-Emu80.bin": "8fe06d83ac003eedc21396d1747231d4b6d1600e88b83d3899df03dee118928d"
+  }
+}

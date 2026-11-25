@@ -1,0 +1,470 @@
+{
+  "cpu_hz": 2000000,
+  "profiles": {
+    "MAIN": {
+      "repeat_config": {
+        "driver": "BIOS GETCH",
+        "antiBsDelay": 224,
+        "cursorDelay": 32
+      },
+      "page": 0,
+      "panel": 1,
+      "files": 103,
+      "visible": 38,
+      "initial_cursor": 0,
+      "initial_top": 0,
+      "initialRepeatConfiguration": {
+        "antiBsDelay": 224,
+        "cursorDelay": 32
+      },
+      "press_tick": 230392290,
+      "release_tick": 232127565,
+      "hold_ms_guest": 867.6375,
+      "hold_ms_host": 2753.2142,
+      "press_to_first": {
+        "ticks": 100554,
+        "ms": 50.277,
+        "steps_per_second": 19.88981045010641
+      },
+      "first_repeat": {
+        "ticks": 1014040,
+        "ms": 507.02,
+        "steps_per_second": 1.972308784663327
+      },
+      "steady_decode_interval": {
+        "ticks": 73142.0,
+        "ms": 36.571,
+        "steps_per_second": 27.34407043832545
+      },
+      "steady_wait": {
+        "ticks": 42639.0,
+        "ms": 21.3195,
+        "steps_per_second": 46.905415230188325
+      },
+      "steady_handler": {
+        "ticks": 31444.0,
+        "ms": 15.722,
+        "steps_per_second": 63.60513929525506
+      },
+      "F806_wait_total": 0,
+      "F806_handler_total": 0,
+      "samples": [
+        {
+          "step": 1,
+          "cursor": 1,
+          "top": 0,
+          "decode_tick": 230492844,
+          "ready_tick": 230522697,
+          "decode_interval_ticks": 100554,
+          "waiting_ticks": 100554,
+          "handler_ticks": 29853,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 2,
+          "cursor": 2,
+          "top": 0,
+          "decode_tick": 231506884,
+          "ready_tick": 231536712,
+          "decode_interval_ticks": 1014040,
+          "waiting_ticks": 984187,
+          "handler_ticks": 29828,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 3,
+          "cursor": 3,
+          "top": 0,
+          "decode_tick": 231579351,
+          "ready_tick": 231609211,
+          "decode_interval_ticks": 72467,
+          "waiting_ticks": 42639,
+          "handler_ticks": 29860,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 4,
+          "cursor": 4,
+          "top": 0,
+          "decode_tick": 231651850,
+          "ready_tick": 231681790,
+          "decode_interval_ticks": 72499,
+          "waiting_ticks": 42639,
+          "handler_ticks": 29940,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 5,
+          "cursor": 5,
+          "top": 0,
+          "decode_tick": 231724429,
+          "ready_tick": 231754401,
+          "decode_interval_ticks": 72579,
+          "waiting_ticks": 42639,
+          "handler_ticks": 29972,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 6,
+          "cursor": 6,
+          "top": 0,
+          "decode_tick": 231797040,
+          "ready_tick": 231828074,
+          "decode_interval_ticks": 72611,
+          "waiting_ticks": 42639,
+          "handler_ticks": 31034,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 7,
+          "cursor": 7,
+          "top": 0,
+          "decode_tick": 231870713,
+          "ready_tick": 231902567,
+          "decode_interval_ticks": 73673,
+          "waiting_ticks": 42639,
+          "handler_ticks": 31854,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 8,
+          "cursor": 8,
+          "top": 0,
+          "decode_tick": 231945334,
+          "ready_tick": 231977428,
+          "decode_interval_ticks": 74621,
+          "waiting_ticks": 42767,
+          "handler_ticks": 32094,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 9,
+          "cursor": 9,
+          "top": 0,
+          "decode_tick": 232020195,
+          "ready_tick": 232052579,
+          "decode_interval_ticks": 74861,
+          "waiting_ticks": 42767,
+          "handler_ticks": 32384,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "step": 10,
+          "cursor": 10,
+          "top": 0,
+          "decode_tick": 232095346,
+          "ready_tick": 232127565,
+          "decode_interval_ticks": 75151,
+          "waiting_ticks": 42767,
+          "handler_ticks": 32219,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        }
+      ]
+    },
+    "EXEC": {
+      "launch_ticks": 3034974,
+      "repeat_config": {
+        "driver": "KEYBANK",
+        "mode": "standard",
+        "firstNext": [
+          12,
+          2
+        ],
+        "patched": [
+          {
+            "address": 19428,
+            "before": 8,
+            "after": 12
+          },
+          {
+            "address": 19433,
+            "before": 1,
+            "after": 2
+          }
+        ]
+      },
+      "page": 6,
+      "panel": 1,
+      "files": 103,
+      "visible": 38,
+      "initial_cursor": 0,
+      "initial_top": 0,
+      "initialRepeatConfiguration": {
+        "repeatCount": 12,
+        "repeatStart": 28,
+        "timed": 1
+      },
+      "press_tick": 247722627,
+      "release_tick": 249562654,
+      "hold_ms_guest": 920.0135,
+      "hold_ms_host": 3058.1232,
+      "press_to_first": {
+        "ticks": 7270,
+        "ms": 3.635,
+        "steps_per_second": 275.1031636863824
+      },
+      "first_repeat": {
+        "ticks": 731049,
+        "ms": 365.5245,
+        "steps_per_second": 2.73579472784998
+      },
+      "steady_decode_interval": {
+        "ticks": 130869.5,
+        "ms": 65.43475,
+        "steps_per_second": 15.282399642391848
+      },
+      "steady_wait": {
+        "ticks": 77925.0,
+        "ms": 38.9625,
+        "steps_per_second": 25.665704202759063
+      },
+      "steady_handler": {
+        "ticks": 52840.5,
+        "ms": 26.42025,
+        "steps_per_second": 37.849755395955754
+      },
+      "F806_wait_total": 0,
+      "F806_handler_total": 0,
+      "samples": [
+        {
+          "step": 1,
+          "cursor": 1,
+          "top": 0,
+          "decode_tick": 247729897,
+          "ready_tick": 247780427,
+          "decode_interval_ticks": 7270,
+          "waiting_ticks": 7270,
+          "handler_ticks": 50530,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 12,
+            "repeatStart": 50,
+            "timed": 1
+          }
+        },
+        {
+          "step": 2,
+          "cursor": 2,
+          "top": 0,
+          "decode_tick": 248460946,
+          "ready_tick": 248514827,
+          "decode_interval_ticks": 731049,
+          "waiting_ticks": 680519,
+          "handler_ticks": 53881,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 62,
+            "timed": 1
+          }
+        },
+        {
+          "step": 3,
+          "cursor": 3,
+          "top": 0,
+          "decode_tick": 248592136,
+          "ready_tick": 248642680,
+          "decode_interval_ticks": 131190,
+          "waiting_ticks": 77309,
+          "handler_ticks": 50544,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 64,
+            "timed": 1
+          }
+        },
+        {
+          "step": 4,
+          "cursor": 4,
+          "top": 0,
+          "decode_tick": 248727587,
+          "ready_tick": 248781580,
+          "decode_interval_ticks": 135451,
+          "waiting_ticks": 84907,
+          "handler_ticks": 53993,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 66,
+            "timed": 1
+          }
+        },
+        {
+          "step": 5,
+          "cursor": 5,
+          "top": 0,
+          "decode_tick": 248855013,
+          "ready_tick": 248905669,
+          "decode_interval_ticks": 127426,
+          "waiting_ticks": 73433,
+          "handler_ticks": 50656,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 68,
+            "timed": 1
+          }
+        },
+        {
+          "step": 6,
+          "cursor": 6,
+          "top": 0,
+          "decode_tick": 248985562,
+          "ready_tick": 249037280,
+          "decode_interval_ticks": 130549,
+          "waiting_ticks": 79893,
+          "handler_ticks": 51718,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 70,
+            "timed": 1
+          }
+        },
+        {
+          "step": 7,
+          "cursor": 7,
+          "top": 0,
+          "decode_tick": 249120895,
+          "ready_tick": 249176802,
+          "decode_interval_ticks": 135333,
+          "waiting_ticks": 83615,
+          "handler_ticks": 55907,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 72,
+            "timed": 1
+          }
+        },
+        {
+          "step": 8,
+          "cursor": 8,
+          "top": 0,
+          "decode_tick": 249248243,
+          "ready_tick": 249301021,
+          "decode_interval_ticks": 127348,
+          "waiting_ticks": 71441,
+          "handler_ticks": 52778,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 74,
+            "timed": 1
+          }
+        },
+        {
+          "step": 9,
+          "cursor": 9,
+          "top": 0,
+          "decode_tick": 249379562,
+          "ready_tick": 249432630,
+          "decode_interval_ticks": 131319,
+          "waiting_ticks": 78541,
+          "handler_ticks": 53068,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 76,
+            "timed": 1
+          }
+        },
+        {
+          "step": 10,
+          "cursor": 10,
+          "top": 0,
+          "decode_tick": 249509751,
+          "ready_tick": 249562654,
+          "decode_interval_ticks": 130189,
+          "waiting_ticks": 77121,
+          "handler_ticks": 52903,
+          "F806_wait": 0,
+          "F806_handler": 0,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 78,
+            "timed": 1
+          }
+        }
+      ]
+    }
+  },
+  "sha256": {
+    "bin/NC.i80": "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002",
+    "bin/NC_CORE.i80": "024219c111a8b8bd67f1e376595d1ba0602adc53d88a0b5208caeadb8414c826",
+    "bin/UI_GFX.i80": "c9f50506c8e53b315bb0a6e2acf602ab7a7971d5655f7f732119df2f1c0454e2",
+    "bin/BIOS.sys": "88391465faaed8d855ced0049ba162e0674c9466c379dc561818586dc4962cf4",
+    "bin/DOS.sys": "00123f41d73f590b4785f4053ff40f52704b0df2a127e564adc050fbac373cdc",
+    "bin/MEM.sys": "91d14ecf824b3a3c328364152e3ecd7ba7e49002aae582e8f8eaf3a448ab8c6b",
+    "images/C-Flash-512k-MMX-System-Emu80.bin": "8fe06d83ac003eedc21396d1747231d4b6d1600e88b83d3899df03dee118928d",
+    "H:": "1da62a30c1d164f59d7059fbf8ec5001a64e05faa4367bf1e1b5fbc50c7fcfec"
+  },
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  }
+}

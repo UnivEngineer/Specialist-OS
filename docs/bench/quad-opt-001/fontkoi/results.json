@@ -1,0 +1,28 @@
+{
+  "fontBytes": 1328,
+  "fontSha256": "221659779605184c6eb956d584e55a0a169f4a0b7c33d8eb1d35ff6b18de6301",
+  "codes": 162,
+  "uniqueGlyphs": 147,
+  "ranges": [
+    "20-3F",
+    "40-5F",
+    "60-7F",
+    "C0-DF",
+    "E0-FF"
+  ],
+  "extraCodes": [
+    "A3",
+    "B3"
+  ],
+  "expandedShiftBytes": 6480,
+  "deduplicatedExpandedShiftBytes": 5880,
+  "expandedWithPointerTableAndHeader": 6424,
+  "packedShiftBytes": 3528,
+  "byteIndexLayout": 3784,
+  "pointerLayout": 4040,
+  "packedWithHeader": 4072,
+  "freeBytes": 24,
+  "sourceFontOutsideArena": true,
+  "requiresMasksForSplitPhases": true,
+  "reconstructionChecks": 2048
+}

@@ -1,0 +1,64 @@
+[
+  {
+    "file": "UCOM.COM",
+    "mode": "MX",
+    "payloadBytes": 4097,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "MAIN"
+  },
+  {
+    "file": "UEXE.EXE",
+    "mode": "MX",
+    "payloadBytes": 4097,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "MAIN"
+  },
+  {
+    "file": "UEXE.EXE",
+    "mode": "STD",
+    "payloadBytes": 4097,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "MAIN"
+  },
+  {
+    "file": "URKS.RKS",
+    "mode": "MX",
+    "payloadBytes": 4097,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "MAIN"
+  },
+  {
+    "file": "URKS.RKS",
+    "mode": "MON",
+    "payloadBytes": 4097,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "EXEC"
+  },
+  {
+    "file": "UEXE.EXE",
+    "mode": "RF",
+    "payloadBytes": 4097,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "EXEC"
+  },
+  {
+    "file": "UHIGH.EXE",
+    "mode": "MX",
+    "payloadBytes": 640,
+    "entryReached": true,
+    "returnedNC": true,
+    "returnProfile": "MAIN"
+  },
+  {
+    "file": "UBAD.RKS",
+    "badChecksumRejected": true,
+    "returnedNC": true,
+    "returnProfile": "EXEC"
+  }
+]

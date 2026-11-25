@@ -1,0 +1,507 @@
+{
+  "revision": 68,
+  "image_sha256": "8fe06d83ac003eedc21396d1747231d4b6d1600e88b83d3899df03dee118928d",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6064,
+    "DOS.sys": 29828,
+    "IO.sys": 811,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 341
+  },
+  "rows": [
+    {
+      "operation": "PRINT_CHAR",
+      "number": 258,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR",
+      "number": 258,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR",
+      "number": 258,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2711,
+        "bc": 2,
+        "de": 65480,
+        "hl": 61737,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR",
+      "number": 258,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2711,
+        "bc": 2,
+        "de": 65480,
+        "hl": 61737,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_CURSOR_POS",
+      "number": 265,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_CURSOR_POS",
+      "number": 265,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_CURSOR_POS",
+      "number": 265,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2711,
+        "bc": 9,
+        "de": 65480,
+        "hl": 61744,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_CURSOR_POS",
+      "number": 265,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2711,
+        "bc": 9,
+        "de": 65480,
+        "hl": 61744,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_CURSOR_POS",
+      "number": 266,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_CURSOR_POS",
+      "number": 266,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_CURSOR_POS",
+      "number": 266,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2695,
+        "bc": 10,
+        "de": 65480,
+        "hl": 61745,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_CURSOR_POS",
+      "number": 266,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2695,
+        "bc": 10,
+        "de": 65480,
+        "hl": 61745,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR_RAW",
+      "number": 276,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR_RAW",
+      "number": 276,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR_RAW",
+      "number": 276,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2711,
+        "bc": 20,
+        "de": 65480,
+        "hl": 61755,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR_RAW",
+      "number": 276,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2711,
+        "bc": 20,
+        "de": 65480,
+        "hl": 61755,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_BYTE",
+      "number": 262,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_BYTE",
+      "number": 262,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_BYTE",
+      "number": 262,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2711,
+        "bc": 6,
+        "de": 65480,
+        "hl": 61741,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_BYTE",
+      "number": 262,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2711,
+        "bc": 6,
+        "de": 65480,
+        "hl": 61741,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_WORD",
+      "number": 270,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_WORD",
+      "number": 270,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_WORD",
+      "number": 270,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2707,
+        "bc": 14,
+        "de": 65480,
+        "hl": 61749,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_WORD",
+      "number": 270,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2707,
+        "bc": 14,
+        "de": 65480,
+        "hl": 61749,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_MEM_TOP",
+      "number": 272,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_MEM_TOP",
+      "number": 272,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_MEM_TOP",
+      "number": 272,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2691,
+        "bc": 16,
+        "de": 65480,
+        "hl": 61751,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_MEM_TOP",
+      "number": 272,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2691,
+        "bc": 16,
+        "de": 65480,
+        "hl": 61751,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_MEM_TOP",
+      "number": 271,
+      "caller": 0,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 290,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 33280,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_MEM_TOP",
+      "number": 271,
+      "caller": 0,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 447,
+      "result": {
+        "af": 2631,
+        "bc": 0,
+        "de": 34374,
+        "hl": 0,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_MEM_TOP",
+      "number": 271,
+      "caller": 6,
+      "mode": "packet",
+      "supported": false,
+      "ticks": 1974,
+      "result": {
+        "af": 2707,
+        "bc": 15,
+        "de": 65480,
+        "hl": 61750,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_MEM_TOP",
+      "number": 271,
+      "caller": 6,
+      "mode": "inline",
+      "supported": false,
+      "ticks": 2157,
+      "result": {
+        "af": 2707,
+        "bc": 15,
+        "de": 65480,
+        "hl": 61750,
+        "sp": 34384
+      }
+    }
+  ]
+}

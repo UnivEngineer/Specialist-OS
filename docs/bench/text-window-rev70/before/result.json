@@ -1,0 +1,1147 @@
+{
+  "revision": 69,
+  "image_sha256": "66f3afea023941cef7918da8e19a8f52aafa95b8e360ee3ab464a75eb39b6d00",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6090,
+    "DOS.sys": 29931,
+    "IO.sys": 811,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 341
+  },
+  "rows": [
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 121,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 2637,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 2637,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 0,
+      "ticks": 1537,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 168,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 2745,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 2745,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 166,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 1517,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 1517,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1766,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 4335,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 4335,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 1,
+      "ticks": 3235,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1739,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 4369,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 4369,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1612,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 4349,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 4349,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 20,
+      "ticks": 10911,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 20,
+      "ticks": 14987,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 20,
+      "ticks": 14987,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 20,
+      "ticks": 13887,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 20,
+      "ticks": 10975,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 20,
+      "ticks": 15112,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 20,
+      "ticks": 15112,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 20,
+      "ticks": 10326,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 20,
+      "ticks": 14520,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 20,
+      "ticks": 14520,
+      "result": {
+        "af": 23186,
+        "bc": 20,
+        "de": 4660,
+        "hl": 33812,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 19984,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 24893,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 24893,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 31,
+      "ticks": 23793,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 19826,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 24796,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 24796,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 18535,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 23612,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 23612,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 16962,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 23146,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 23146,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 32,
+      "ticks": 22046,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 17026,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 23333,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 23333,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 15921,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 21046,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 21046,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 18670,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 24844,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 24844,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 33,
+      "ticks": 23744,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 18660,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 24957,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 24957,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 17367,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 23878,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 23878,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 40941,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 51498,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 51498,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 64,
+      "ticks": 50398,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 40413,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 51172,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 51172,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 38588,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 48393,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 48393,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 74785,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 101213,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 101213,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 128,
+      "ticks": 100113,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 74291,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 100470,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 100470,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 70157,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 95762,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 95762,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    }
+  ]
+}

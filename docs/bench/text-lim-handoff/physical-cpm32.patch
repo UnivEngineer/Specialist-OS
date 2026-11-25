@@ -1,0 +1,414 @@
+diff --git a/scripts/build/build-banked-transport.py b/scripts/build/build-banked-transport.py
+index 20def80..b83c886 100644
+--- a/scripts/build/build-banked-transport.py
++++ b/scripts/build/build-banked-transport.py
+@@ -30,6 +30,7 @@ def main():
+     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
+         f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
+     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
++        stream.write(f'bankTextCopy32 = 0{sy["bankTextCopy32"]:04X}h\n')
+         stream.write(f'bankNearForward = 0{sy["compact223Forward"]:04X}h\n')
+         stream.write(f'bankLocalForward = 0{sy["MEM_LOCAL_FORWARD"]:04X}h\n')
+         stream.write(f'bankMoveRevision = {sy["MEM_RUNTIME_REVISION"]}\n')
+diff --git a/source/bios/bankText.inc b/source/bios/bankText.inc
+index a833231..1c5e9c3 100644
+--- a/source/bios/bankText.inc
++++ b/source/bios/bankText.inc
+@@ -7,15 +7,37 @@ window:
+ ;----------------------------------------------------------------------------
+ ; MXOS
+ ; Печать порции без копирования. До возврата движок не занимает окно.
+-; вход: HL = BANK_WINDOW, BC = длина 1..32, A = D = режим 0, 1, 2 или 8.
+-; Для Z и RAW_Z инициатор уже исключил завершающий NUL из длины.
+-; выход: HL сразу за выведенными байтами. Остальные регистры рабочие.
++; вход: HL = BANK_WINDOW, BC = длина до 32, A = D = режим 0, 1, 2 или 8.
++; Для Z и RAW_Z BC — верхняя граница. При BC<32 в окне есть NUL
++; не дальше позиции BC. При BC=32 терминатора может не быть.
++; выход: C = число обработанных байтов. RAW_LIM/PSEUDO возвращают исходный C.
+ ;----------------------------------------------------------------------------
++; При Z функция печати определяет фактическую длину прямо в общем окне.
+ printWindow:
+     cp 2
+     jp z,bios_printStringRawLim
+     jp nc,bios_printStringRawPseudo
+-    ; Оставляем старым перехватчикам Z их собственный способ рисования.
++    xor a
++    ld b,BANK_TEXT_BYTES/4
++    call scanWindow
++    ld a,l
++    sub BANK_WINDOW & 0FFh
++    ld c,a
++    push bc
++    ld a,d
++    call printKnown
++    pop bc
++    ret
++scanWindow:
++    DUP 4
++    cp (hl)
++    ret z
++    inc l
++    EDUP
++    dec b
++    jp nz,scanWindow
++    ret
++printKnown:
+     or a
+     ld hl,(bios_printStringZ+1)
+     ld de,FONT_ENGINE_Z+1
+@@ -52,8 +74,6 @@ windowLegacy:
+     cp BANK_TEXT_BYTES
+     ld a,d
+     jp nz,window
+-    ; Прежний вектор принимает только ASCIIZ. Печатаем 31+1 через этот же
+-    ; вектор. Последний код сохранён в E, после первого вызова HL = FFDFh.
+     ld a,(BANK_WINDOW+BANK_TEXT_BYTES-1)
+     ld e,a
+     xor a
+@@ -61,11 +81,15 @@ windowLegacy:
+     ld a,d
+     call window
+     dec hl
++    ld b,(hl)
+     ld (hl),e
+     ld a,d
+     call window
+-    inc hl
++    ld (hl),e
++    dec hl
++    ld (hl),b
+     ret
++
+ ; Принимающий адаптер уже сохранил пакет и установил main-стек.
+ fromBank:
+     ld a,(io_vars.bbPage)
+diff --git a/source/bios/mem-mapped.inc b/source/bios/mem-mapped.inc
+index 5993a96..ecdb62e 100644
+--- a/source/bios/mem-mapped.inc
++++ b/source/bios/mem-mapped.inc
+@@ -52,9 +52,8 @@ biosMemPrintMain:
+     cp 7
+     jp z,memPrintBatch
+     call bankText.printWindow
+-    pop bc
++    pop af                     ; A = селектор из сохранённого B, C — число байтов.
+     pop de
+-    ld a,b
+     jp MEM_TEXT_RETURN
+ 
+ ; Пачка допускает банковый вызов из отдельной команды. На локальном стеке
+diff --git a/source/include/mxos.inc b/source/include/mxos.inc
+index 2d20b62..5faf4c8 100644
+--- a/source/include/mxos.inc
++++ b/source/include/mxos.inc
+@@ -163,7 +163,7 @@ MXOS_GROUP_MEMORY     = 3
+ ; Нулевая длина возвращает успех. Исключающий конец не выше FE00h. В одной странице допускается перекрытие.
+ ; Пакет, код и стек инициатора не должны попадать в область назначения.
+ MEM_ABI_VERSION      = 00104h  ; Публичный ABI MEM 1.4
+-MEM_RUNTIME_REVISION = 70      ; Повысить при изменении транспорта или раскладки DOS
++MEM_RUNTIME_REVISION = 71      ; Повысить при изменении транспорта или раскладки DOS
+ MEM_WINDOW_VERSION   = 2       ; Внутренний протокол физического окна
+     IFNDEF DOS_IO_BATCH_SECTORS
+ DOS_IO_BATCH_SECTORS = 32      ; 16/32/64 полных физических секторов за серию
+diff --git a/source/mem/LOCALBLOCK.asm b/source/mem/LOCALBLOCK.asm
+index ebe7d65..f28f898 100644
+--- a/source/mem/LOCALBLOCK.asm
++++ b/source/mem/LOCALBLOCK.asm
+@@ -127,7 +127,7 @@ bankFastDecode:
+     jp z,bankFastReady
+     cp MXOS_BIOS_SUB_HL_DE & 255
+     jp z,bankFastReady
+-    jp bankFastFallback
++    jp bankFastCheckText
+ bankFastCheckDos:
+     dec a
+     jp nz,bankFastFallback
+diff --git a/source/mem/TRANSPORT.asm b/source/mem/TRANSPORT.asm
+index 4e34364..2b36eb4 100644
+--- a/source/mem/TRANSPORT.asm
++++ b/source/mem/TRANSPORT.asm
+@@ -255,6 +255,18 @@ bankLocalBlockBad:
+ bankMoveToMain:
+     ld (BANK_IO_MAIN),a
+     jp bankCopyMoveRemote
++; HL = источник. Один полный блок в окно через развёртку локального memcpy.
++; До восстановления SP не выполняются CALL, PUSH и переключение банка.
++bankTextCopy32:
++    ex de,hl
++    ld hl,0
++    add hl,sp
++    ld (MEM_FORWARD_RESTORE+1),hl
++    ex de,hl
++    ld sp,hl
++    ld hl,BANK_WINDOW
++    ld bc,0101h
++    jp MEM_FORWARD_BLOCK
+     ASSERT $ <= MEM_DATA_START-3
+     IF $ < MEM_DATA_START-3
+     DS MEM_DATA_START-3-$,0
+diff --git a/source/mem/abi.inc b/source/mem/abi.inc
+index f2d0434..cfd3f36 100644
+--- a/source/mem/abi.inc
++++ b/source/mem/abi.inc
+@@ -121,7 +121,8 @@ BANK_CALLEE_BYTES      = 8
+ 
+ ; Метки 32-байтной локальной развёртки в полном профиле.
+ MEM_LOCAL_FORWARD      = 0F925h
+-MEM_FORWARD_BLOCK_END  = MEM_LOCAL_FORWARD+8+5+80
++MEM_FORWARD_BLOCK      = MEM_LOCAL_FORWARD+8+5
++MEM_FORWARD_BLOCK_END  = MEM_FORWARD_BLOCK+16*5
+ MEM_FORWARD_RESTORE    = MEM_FORWARD_BLOCK_END+8
+ MEM_SCREEN_RETURN      = 0F58Fh
+ MEM_TEXT_RETURN        = 0F561h
+diff --git a/source/mem/api.md b/source/mem/api.md
+index dc122f7..0ee1e01 100644
+--- a/source/mem/api.md
++++ b/source/mem/api.md
+@@ -104,7 +104,7 @@ ALLOC в main разрешён только после ARENA: начало не
+ 
+ Во всех случаях HL возвращается на завершающем нуле, BC/DE сохранены. BIOS PRINT_STRING/PRINT_STRING_MAIN сохраняют AF при успешной печати. Прямой F815h PRINT возвращает CF=0, остальные флаги не сохраняет. Строка может содержать управляющие коды, как в обычном bios_printString. TEXT принимает NEAR-адрес в банке инициатора, PRINT_STRING_MAIN — явный адрес в MAIN. За размещение строки, наличие завершающего нуля и срок жизни буфера отвечает программа.
+ 
+-MEM передаёт до 32 байт за переход. Для ASCIIZ отправитель ищет NUL при заполнении окна и передаёт в MAIN точную длину без терминатора. При пустом хвосте MAIN не вызывается. RAW_LIM печатает все байты заданного диапазона, включая 00h. Рендер читает прямо из общего окна и сохраняет его до возврата. Движок может выполнять локальные экранные операции. Занимать окно или обращаться через банк к DOS или MEM до возврата запрещено. Одиночные символы принимают выделенные регистровые входы F81Bh и F824h. Внутренний выбор вектора описан в [протоколе транспорта](transport.md#вызовы-bios-из-банка).
++MEM передаёт до 32 байт за переход. Для ASCIIZ вывод заканчивается перед первым NUL, а HL возвращается на этот байт в исходном банке. При заполнении окна MEM может прочитать байты после NUL в пределах той же порции. Чтение ограничено сверху адресом FFDFh. Пустой остаток завершается в банке клиента. RAW_LIM читает и печатает ровно BC байт, включая 00h. Движок читает текст прямо из общего окна и может выполнять локальные экранные операции. До возврата запрещено занимать окно или обращаться через банк к DOS или MEM. Для одиночных символов предусмотрены входы F81Bh и F824h. [Подробности банкового переноса](transport.md#вызовы-bios-из-банка)
+ 
+ ```asm
+     ld hl,localText
+diff --git a/source/mem/fixed-main.inc b/source/mem/fixed-main.inc
+index e4e2e6c..481b4de 100644
+--- a/source/mem/fixed-main.inc
++++ b/source/mem/fixed-main.inc
+@@ -13,10 +13,11 @@ memPrintReturn:
+     ld (bankServiceSP),hl
+     pop de
+     pop hl
++    ld b,0
++    add hl,bc
+     ld a,d
+-    sub c
+-    jp nz,memPrintAtNul
+-    pop de
++    cp 2
++    jp c,memPrintZResult
+     ex (sp),hl
+     ld a,l
+     sub c
+@@ -26,10 +27,11 @@ memPrintReturn:
+     ld b,a
+     pop hl
+     jp memPrintLoop
+-memPrintAtNul:
+-    dec hl
+-    pop de
+-    pop de
++memPrintZResult:
++    ld a,c
++    pop bc
++    cp BANK_TEXT_BYTES
++    jp z,memPrintLoop
+ memPrintHaveHL:
+     pop de
+     pop bc
+diff --git a/source/mem/local-forward.inc b/source/mem/local-forward.inc
+index b37279c..e0b9af7 100644
+--- a/source/mem/local-forward.inc
++++ b/source/mem/local-forward.inc
+@@ -14,6 +14,7 @@ compact223Page:
+         ld      c, 8
+         jp      compact223Block
+ compact223Block:
++        ASSERT $ == MEM_FORWARD_BLOCK
+         DUP 16
+         pop     de
+         ld      (hl), e
+diff --git a/source/mem/regs-route.inc b/source/mem/regs-route.inc
+index 50e227f..9237b76 100644
+--- a/source/mem/regs-route.inc
++++ b/source/mem/regs-route.inc
+@@ -6,21 +6,30 @@ bankMxRegsRoute:
+     ld a,b
+     cp MXOS_GROUP_DOS
+     jp z,bankMxRegsDos
+-    ; Очередь уже сброшена. Текст и короткая пачка идут прямо к банковому клиенту.
++    ; Очередь уже сброшена. Пачка проходит прежний пакетный маршрут.
+     ld a,c
+     cp MXOS_BIOS_COMMAND_BATCH & 255
+     jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_Z & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
++    ; BIOS TEXT уже обработан. Для другой группы совпадение номера
++    ; сохраняет прежний пакетный отказ.
++    call memBiosTextMode
+     jp z,bankMxCall
+     xor a
+     ld hl,BIOS_BANK_GATE_ADDR+3
+     jp bankCallPacket
++; HL указывает на DW, в стеке исходные AF и HL. Меняется только HL результата.
++bankFastCheckText:
++    call memBiosTextMode
++    jp nz,bankFastFallback
++    ld (memOperation),a
++    inc hl
++    inc hl
++    pop af
++    ex (sp),hl
++    push af
++    call memPrintTyped
++    pop af
++    ret
+ bankFastReady:
+     ; Младший байт SP для BIOS_FAST_SLOT в MAIN. Старший постоянен.
+     add a,BIOS_FAST_SLOT_BIAS
+@@ -32,9 +41,3 @@ bankFastReady:
+     pop af
+     ex (sp),hl
+     jp bankFastPrepare
+-bankMxNativeRegs:
+-    ld hl,(MEM_NATIVE_CALL)
+-    inc hl
+-    inc hl
+-    inc hl
+-    jp (hl)
+diff --git a/source/mem/text-route.inc b/source/mem/text-route.inc
+index 874652a..8090032 100644
+--- a/source/mem/text-route.inc
++++ b/source/mem/text-route.inc
+@@ -4,26 +4,27 @@ memBiosRoute:
+     ld a,c
+     cp MXOS_BIOS_COMMAND_BATCH & 255
+     jp z,memBiosQueue
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_Z & 0FFh
+-    ld a,0
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 0FFh
+-    ld a,1
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 0FFh
+-    ld a,2
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
+-    ld a,8
++    call memBiosTextMode
+     jp z,memBiosText
+ memBiosGeneric:
+     xor a
+     ld hl,BIOS_BANK_GATE_ADDR+3
+     jp bankMxInvoke
++; A содержит младший байт BIOS ID. При совпадении Z=1, A содержит режим.
++memBiosTextMode:
++    sub MXOS_BIOS_PRINT_STRING_Z & 255
++    ret z
++    sub MXOS_BIOS_PRINT_STRING_RAW_Z-MXOS_BIOS_PRINT_STRING_Z
++    jp z,memBiosTextModeRawZ
++    ASSERT MXOS_BIOS_PRINT_STRING_RAW_LIM-MXOS_BIOS_PRINT_STRING_RAW_Z == TEXT_PRINT_RAW_LIM
++    cp TEXT_PRINT_RAW_LIM
++    ret z
++    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-MXOS_BIOS_PRINT_STRING_RAW_Z
++    ld a,8
++    ret
++memBiosTextModeRawZ:
++    ld a,TEXT_PRINT_RAW_Z
++    ret
+ memBiosText:
+     ld (memOperation),a
+ memBiosString:
+@@ -53,3 +54,10 @@ memBiosString:
+     ld (BANK_FRAME_STATUS),a
+     pop af
+     jp bankMxResult
++
++bankMxNativeRegs:
++    ld hl,(MEM_NATIVE_CALL)
++    inc hl
++    inc hl
++    inc hl
++    jp (hl)
+diff --git a/source/mem/text.inc b/source/mem/text.inc
+index 30e4b0b..073e221 100644
+--- a/source/mem/text.inc
++++ b/source/mem/text.inc
+@@ -17,45 +17,50 @@ memPrintTyped:
+     push de
+     ld a,(memOperation)
+     ld d,a
+-    cp 2
+-    jp nc,memPrintLoop
+-    ld bc,0FFFFh
+ memPrintLoop:
++    ld a,d
++    cp 2
++    jp nc,memPrintCounted
++    ; Пустой остаток после полного блока обнаруживается ещё в банке клиента.
++    ld a,(hl)
++    or a
++    jp z,memPrintHaveHL
++    ld bc,BANK_TEXT_BYTES
++memPrintCounted:
+     ld a,b
+     or c
+     jp z,memPrintHaveHL
+     push bc
++    push hl
+     push de
++    ld de,BANK_WINDOW
+     ld a,b
+     or a
+-    ld b,BANK_TEXT_BYTES
+-    jp nz,memPrintSize
++    jp nz,memPrintFull
+     ld a,c
+-    cp b
+-    jp nc,memPrintSize
++    cp BANK_TEXT_BYTES
++    jp c,memPrintBytes
++memPrintFull:
++    ; FFC1h..FFDFh: последний блок перед регистрами короче 32 байт.
++    ld a,h
++    inc a
++    jp nz,memPrintStack
++    ld a,l
++    cp (BANK_WINDOW & 0FFh)+1
++    jp c,memPrintStack
++    ld a,(BANK_WINDOW+BANK_TEXT_BYTES) & 0FFh
++    sub l
++    ld c,a
++memPrintBytes:
+     ld b,c
+-memPrintSize:
+-    ld a,d
+-    cp 2
+-    ld c,0
+-    jp nc,memPrintReady
+-    inc c
+-memPrintReady:
+-    ld de,BANK_WINDOW
+-    MEM_TEXT_FILL memPrintFill,memPrintFilled
++    call bankCopyBytes
++    jp memPrintFilled
++memPrintStack:
++    call bankTextCopy32
++    ld c,BANK_TEXT_BYTES
+ memPrintFilled:
+-    ; CF отмечает прочитанный NUL. C — длина печати, B — расход источника.
+-    ld a,e
+-    sbc a,BANK_WINDOW & 0FFh
+-    jp z,memPrintAtNul
+-    ld c,a
+-    ld a,e
+-    sub BANK_WINDOW & 0FFh
+-    ld b,a
+     pop de
+     push de
+-    push hl
+-    push bc
+     ld hl,(bankServiceSP)
+     push hl
+     ld hl,0

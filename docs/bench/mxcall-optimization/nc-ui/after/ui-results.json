@@ -1,0 +1,668 @@
+{
+  "cpu_hz": 2000000,
+  "profiles": {
+    "MAIN": {
+      "events": [
+        {
+          "anchor": "home",
+          "arrow": "down",
+          "samples": [
+            {
+              "event": 54392836,
+              "ready": 54422689,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55406876,
+              "ready": 55436704,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55479343,
+              "ready": 55509203,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55551842,
+              "ready": 55581782,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55624421,
+              "ready": 55654393,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55697032,
+              "ready": 55728066,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55770705,
+              "ready": 55802559,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55845326,
+              "ready": 55877420,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 55920187,
+              "ready": 55952571,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "anchor": "scroll",
+          "arrow": "down",
+          "samples": [
+            {
+              "event": 75773151,
+              "ready": 75902835,
+              "scroll": 1,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 76887022,
+              "ready": 77016856,
+              "scroll": 2,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 77059495,
+              "ready": 77188894,
+              "scroll": 3,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 77231533,
+              "ready": 77361042,
+              "scroll": 4,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 77403681,
+              "ready": 77533213,
+              "scroll": 5,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 77575852,
+              "ready": 77704142,
+              "scroll": 6,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 77746781,
+              "ready": 77872468,
+              "scroll": 7,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 77915107,
+              "ready": 78040717,
+              "scroll": 8,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 78083356,
+              "ready": 78208766,
+              "scroll": 9,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "anchor": "home",
+          "arrow": "right",
+          "samples": [
+            {
+              "event": 81748884,
+              "ready": 81780145,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 82764332,
+              "ready": 82902688,
+              "scroll": 1,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 82945327,
+              "ready": 83212468,
+              "scroll": 20,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "anchor": "end",
+          "arrow": "left",
+          "samples": [
+            {
+              "event": 86752524,
+              "ready": 86784072,
+              "scroll": 20,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 87768259,
+              "ready": 87903937,
+              "scroll": 19,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 87946576,
+              "ready": 88209034,
+              "scroll": 0,
+              "packets": [],
+              "commands": [],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "operation": "switch_panel",
+          "cycles": 127908,
+          "packets": [],
+          "commands": []
+        },
+        {
+          "operation": "switch_back",
+          "cycles": 119170,
+          "packets": [],
+          "commands": []
+        },
+        {
+          "operation": "volume_info",
+          "cycles": 2451745,
+          "packets": [],
+          "commands": []
+        },
+        {
+          "operation": "restore_panel",
+          "cycles": 356122,
+          "packets": [],
+          "commands": []
+        },
+        {
+          "operation": "mkdir_dialog",
+          "cycles": 582253,
+          "packets": [],
+          "commands": []
+        },
+        {
+          "operation": "dismiss_dialog",
+          "cycles": 189238,
+          "packets": [],
+          "commands": []
+        }
+      ]
+    },
+    "EXEC": {
+      "launch_ticks": 3169831,
+      "events": [
+        {
+          "anchor": "home",
+          "arrow": "down",
+          "samples": [
+            {
+              "event": 116569376,
+              "ready": 116627235,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117069949,
+              "ready": 117127790,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117135299,
+              "ready": 117189848,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117201233,
+              "ready": 117255862,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117265955,
+              "ready": 117320616,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117332001,
+              "ready": 117387724,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117397817,
+              "ready": 117454360,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117463289,
+              "ready": 117520072,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            },
+            {
+              "event": 117529001,
+              "ready": 117586074,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": 10675
+            }
+          ]
+        },
+        {
+          "anchor": "scroll",
+          "arrow": "down",
+          "samples": [
+            {
+              "event": 137313595,
+              "ready": 137488386,
+              "scroll": 1,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 137799316,
+              "ready": 137977588,
+              "scroll": 2,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 137985097,
+              "ready": 138159610,
+              "scroll": 3,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 138167119,
+              "ready": 138341742,
+              "scroll": 4,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 138349251,
+              "ready": 138523897,
+              "scroll": 5,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 138531406,
+              "ready": 138704810,
+              "scroll": 6,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 138712319,
+              "ready": 138883120,
+              "scroll": 7,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 138890629,
+              "ready": 139061353,
+              "scroll": 8,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 139068862,
+              "ready": 139239386,
+              "scroll": 9,
+              "packets": [
+                176
+              ],
+              "commands": [
+                5
+              ],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "anchor": "home",
+          "arrow": "right",
+          "samples": [
+            {
+              "event": 142687237,
+              "ready": 142746504,
+              "scroll": 0,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 143173714,
+              "ready": 143365764,
+              "scroll": 1,
+              "packets": [
+                208
+              ],
+              "commands": [
+                7
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 143373273,
+              "ready": 143777210,
+              "scroll": 20,
+              "packets": [
+                650
+              ],
+              "commands": [
+                23
+              ],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "anchor": "end",
+          "arrow": "left",
+          "samples": [
+            {
+              "event": 147224588,
+              "ready": 147280799,
+              "scroll": 20,
+              "packets": [
+                77
+              ],
+              "commands": [
+                3
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 147696381,
+              "ready": 147885572,
+              "scroll": 19,
+              "packets": [
+                208
+              ],
+              "commands": [
+                7
+              ],
+              "route_and_copy_ticks": null
+            },
+            {
+              "event": 147893081,
+              "ready": 148290697,
+              "scroll": 0,
+              "packets": [
+                650
+              ],
+              "commands": [
+                23
+              ],
+              "route_and_copy_ticks": null
+            }
+          ]
+        },
+        {
+          "operation": "switch_panel",
+          "cycles": 184669,
+          "packets": [
+            16,
+            155
+          ],
+          "commands": [
+            1,
+            4
+          ]
+        },
+        {
+          "operation": "switch_back",
+          "cycles": 175931,
+          "packets": [
+            16,
+            155
+          ],
+          "commands": [
+            1,
+            4
+          ]
+        },
+        {
+          "operation": "volume_info",
+          "cycles": 2683603,
+          "packets": [
+            932,
+            51,
+            40
+          ],
+          "commands": [
+            38,
+            2,
+            2
+          ]
+        },
+        {
+          "operation": "restore_panel",
+          "cycles": 441619,
+          "packets": [
+            153,
+            187
+          ],
+          "commands": [
+            6,
+            7
+          ]
+        },
+        {
+          "operation": "mkdir_dialog",
+          "cycles": 697797,
+          "packets": [
+            818
+          ],
+          "commands": [
+            16
+          ]
+        },
+        {
+          "operation": "dismiss_dialog",
+          "cycles": 237597,
+          "packets": [
+            28,
+            110
+          ],
+          "commands": [
+            1,
+            3
+          ]
+        }
+      ]
+    }
+  },
+  "sha256": {
+    "bin/NC.i80": "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002",
+    "bin/NC_CORE.i80": "86f9c10c8fcb96e2cf1130cd5e93dbc990ccd27004bef137cc4b7a904a3f0bae",
+    "bin/UI_GFX.i80": "c9f50506c8e53b315bb0a6e2acf602ab7a7971d5655f7f732119df2f1c0454e2",
+    "bin/BIOS.sys": "79c7fc1a99112dc92cc7340d942e0718d4fc5c149944d7968f7b3061ab028f0e",
+    "bin/DOS.sys": "8abee3713f4b91d79a1c374b873c010067b78c9267fd838508cf9039c658ac99",
+    "bin/MEM.sys": "f1d1fb70b8160cbcd8884b5a236e05803a867ecac20ea5b4ee631a51873880ba",
+    "images/C-Flash-512k-MMX-System-Emu80.bin": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+    "H:": "58c4bb9a065166020d302452ff1307f88b20d03ad138c920c90086216d2baccb"
+  },
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  }
+}

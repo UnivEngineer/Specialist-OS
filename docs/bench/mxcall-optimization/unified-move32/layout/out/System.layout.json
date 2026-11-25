@@ -1,0 +1,586 @@
+{
+  "bios": {
+    "start": 49152,
+    "end": 55099,
+    "bytes": 5947
+  },
+  "fontEngine": {
+    "start": 55296,
+    "end": 60544
+  },
+  "io": {
+    "start": 61440,
+    "end": 61871,
+    "bytes": 431,
+    "bankAddress": 61504,
+    "bankBytes": 380
+  },
+  "diskBuffer": {
+    "start": 60800,
+    "end": 61056
+  },
+  "temporaryBuffer": {
+    "start": 60800,
+    "end": 61072
+  },
+  "upperReserve": {
+    "start": 60416,
+    "end": 60544
+  },
+  "glyphCache": {
+    "start": 60416,
+    "end": 60544
+  },
+  "dos": {
+    "start": 256,
+    "end": 29970,
+    "bytes": 29714,
+    "page": 1,
+    "coreEnd": 19914,
+    "extensionStart": 19914,
+    "variablesStart": 30336,
+    "variablesEnd": 31628,
+    "dataStart": 31744
+  },
+  "units": {
+    "bios": [
+      "clearScreen",
+      "printChar3",
+      "beep",
+      "scroll",
+      "keyScan",
+      "getch2",
+      "calcCursorAddr",
+      "calcCursorAddr2",
+      "drawCursor",
+      "drawCursor2",
+      "sbb_de_hl_to_hl",
+      "memmove_bc_hl",
+      "memset_de_20_b",
+      "romMappedRead",
+      "strToHex",
+      "cmp_hl_de",
+      "memcpy_bc_hl",
+      "printChar6",
+      "driverInfo",
+      "initVars",
+      "printer",
+      "fontControl",
+      "printString",
+      "getch3",
+      "scrollDown",
+      "scrollUp2",
+      "checkRAMD",
+      "setGetCursorPos",
+      "setGetMemTop",
+      "printHex",
+      "input",
+      "calcCS",
+      "beepTimer",
+      "driverFFC0",
+      "driverSelect",
+      "diskWriteChecked",
+      "installDriver",
+      "strcmp",
+      "printDecWord",
+      "math",
+      "move8080",
+      "argNext",
+      "biosState",
+      "biosDriverNames",
+      "startup",
+      "blockIO",
+      "syscall",
+      "copyRecovery",
+      "fileBodyAdapter",
+      "rawLocalAdapter",
+      "glyphCacheAdapter",
+      "mainBlockIO",
+      "mainIoAddress",
+      "mainIoQuery",
+      "mainIoRead"
+    ],
+    "dos": [
+      "entries",
+      "reboot3",
+      "fileExecBat",
+      "fileExec",
+      "fileGetSetDrive",
+      "volume",
+      "fatCache",
+      "fatFindCluster",
+      "fatReadWriteCluster",
+      "fatGetFreeSpace",
+      "fatReadBootSector",
+      "fileCreate",
+      "fileFind",
+      "fileStat",
+      "fileDelete",
+      "fileRename",
+      "fileGetSetAttr",
+      "fileGetInfoAddr",
+      "fileList",
+      "fileNamePrepare",
+      "copyDescriptor",
+      "driverNames",
+      "state",
+      "imageLoader",
+      "fileOperations",
+      "errors",
+      "directory",
+      "cmpFileExt",
+      "logicalSectors",
+      "fileStream",
+      "services",
+      "cli",
+      "advanced",
+      "localMath"
+    ]
+  },
+  "windows": [
+    {
+      "address": 49152,
+      "size": 15,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c000.inc"
+      ]
+    },
+    {
+      "address": 49168,
+      "size": 3,
+      "target": "clearScreen",
+      "abi": "bios_clearScreenOld"
+    },
+    {
+      "address": 49207,
+      "size": 3,
+      "target": "FONT_ENGINE_CHAR",
+      "abi": "bios_printCharOld"
+    },
+    {
+      "address": 49520,
+      "size": 3,
+      "target": "beep",
+      "abi": "bios_beep_Old"
+    },
+    {
+      "address": 49551,
+      "size": 6,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\delay_l.inc"
+      ]
+    },
+    {
+      "address": 49748,
+      "size": 12,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\keybModes.inc"
+      ],
+      "abi": "bios_setKeybMode82"
+    },
+    {
+      "address": 49975,
+      "size": 3,
+      "target": "getch",
+      "abi": "bios_getchOld"
+    },
+    {
+      "address": 50039,
+      "size": 18,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\tape.inc"
+      ],
+      "abi": "bios_tapeReadOld"
+    },
+    {
+      "address": 50128,
+      "size": 3,
+      "target": "t_tapeWrite",
+      "abi": "bios_tapeWriteOld"
+    },
+    {
+      "address": 50215,
+      "size": 3,
+      "target": "cmp_hl_de",
+      "abi": "bios_cmp_hl_de"
+    },
+    {
+      "address": 50221,
+      "size": 3,
+      "target": "memcpy_bc_hl",
+      "abi": "bios_memcpy_bc_hl"
+    },
+    {
+      "address": 50232,
+      "size": 3,
+      "target": "FONT_ENGINE_Z",
+      "abi": "bios_printStringOld"
+    },
+    {
+      "address": 50296,
+      "size": 3,
+      "target": "t_tapeReadError"
+    },
+    {
+      "address": 50326,
+      "size": 10,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\cli-exec-return.inc"
+      ],
+      "abi": "bios_cliExecDone"
+    },
+    {
+      "address": 50336,
+      "size": 96,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\keyTable.inc"
+      ],
+      "abi": "bios_keybTable"
+    },
+    {
+      "address": 51200,
+      "size": 63,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c800.inc"
+      ],
+      "abi": "bios_reboot"
+    },
+    {
+      "address": 51296,
+      "size": 42,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c860.inc"
+      ]
+    },
+    {
+      "address": 51356,
+      "size": 9,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c89c.inc"
+      ]
+    },
+    {
+      "address": 51383,
+      "size": 3,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c8b7.inc"
+      ]
+    },
+    {
+      "address": 51404,
+      "size": 3,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c8cc.inc"
+      ]
+    },
+    {
+      "address": 51431,
+      "size": 18,
+      "files": [
+        "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\workspaces\\72aef225fe3745eab392a66b88a42371\\source\\bios\\jmps_c8e7.inc"
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "name": "drawCursor2",
+      "address": 49171,
+      "size": 36
+    },
+    {
+      "name": "getch3",
+      "address": 49210,
+      "size": 205
+    },
+    {
+      "name": "move8080",
+      "address": 49415,
+      "size": 105
+    },
+    {
+      "name": "driverInfo",
+      "address": 49523,
+      "size": 27
+    },
+    {
+      "name": "strToHex",
+      "address": 49557,
+      "size": 69
+    },
+    {
+      "name": "printDecWord",
+      "address": 49626,
+      "size": 68
+    },
+    {
+      "name": "calcCS",
+      "address": 49694,
+      "size": 54
+    },
+    {
+      "name": "input",
+      "address": 49760,
+      "size": 169
+    },
+    {
+      "name": "beepTimer",
+      "address": 49929,
+      "size": 46
+    },
+    {
+      "name": "checkRAMD",
+      "address": 49978,
+      "size": 39
+    },
+    {
+      "name": "fontControl",
+      "address": 50017,
+      "size": 22
+    },
+    {
+      "name": "biosState",
+      "address": 50057,
+      "size": 71
+    },
+    {
+      "name": "initVars",
+      "address": 50131,
+      "size": 42
+    },
+    {
+      "name": "mainIoRead",
+      "address": 50173,
+      "size": 42
+    },
+    {
+      "name": "setGetMemTop",
+      "address": 50224,
+      "size": 8
+    },
+    {
+      "name": "printer",
+      "address": 50235,
+      "size": 38
+    },
+    {
+      "name": "calcCursorAddr2",
+      "address": 50273,
+      "size": 14
+    },
+    {
+      "name": "memset_de_20_b",
+      "address": 50287,
+      "size": 9
+    },
+    {
+      "name": "argNext",
+      "address": 50299,
+      "size": 27
+    },
+    {
+      "name": "syscall",
+      "address": 50432,
+      "size": 238
+    },
+    {
+      "name": "mainBlockIO",
+      "address": 50878,
+      "size": 186
+    },
+    {
+      "name": "driverFFC0",
+      "address": 51064,
+      "size": 136
+    },
+    {
+      "name": "mainIoAddress",
+      "address": 51263,
+      "size": 26
+    },
+    {
+      "name": "setGetCursorPos",
+      "address": 51289,
+      "size": 7
+    },
+    {
+      "name": "cmp_hl_de",
+      "address": 51338,
+      "size": 6
+    },
+    {
+      "name": "memcpy_bc_hl",
+      "address": 51344,
+      "size": 6
+    },
+    {
+      "name": "printChar6",
+      "address": 51350,
+      "size": 6
+    },
+    {
+      "name": "mainIoQuery",
+      "address": 51365,
+      "size": 10
+    },
+    {
+      "name": "math",
+      "address": 51375,
+      "size": 7
+    },
+    {
+      "name": "memmove_bc_hl",
+      "address": 51386,
+      "size": 10
+    },
+    {
+      "name": "sbb_de_hl_to_hl",
+      "address": 51396,
+      "size": 7
+    },
+    {
+      "name": "calcCursorAddr",
+      "address": 51407,
+      "size": 24
+    },
+    {
+      "name": "clearScreen",
+      "address": 51449,
+      "size": 39
+    },
+    {
+      "name": "printChar3",
+      "address": 51488,
+      "size": 91
+    },
+    {
+      "name": "beep",
+      "address": 51579,
+      "size": 31
+    },
+    {
+      "name": "scroll",
+      "address": 51610,
+      "size": 26
+    },
+    {
+      "name": "keyScan",
+      "address": 51636,
+      "size": 98
+    },
+    {
+      "name": "getch2",
+      "address": 51734,
+      "size": 202
+    },
+    {
+      "name": "drawCursor",
+      "address": 51936,
+      "size": 74
+    },
+    {
+      "name": "romMappedRead",
+      "address": 52010,
+      "size": 60
+    },
+    {
+      "name": "printString",
+      "address": 52070,
+      "size": 361
+    },
+    {
+      "name": "scrollDown",
+      "address": 52431,
+      "size": 314
+    },
+    {
+      "name": "scrollUp2",
+      "address": 52745,
+      "size": 74
+    },
+    {
+      "name": "printHex",
+      "address": 52819,
+      "size": 43
+    },
+    {
+      "name": "driverSelect",
+      "address": 52862,
+      "size": 253
+    },
+    {
+      "name": "diskWriteChecked",
+      "address": 53115,
+      "size": 85
+    },
+    {
+      "name": "installDriver",
+      "address": 53200,
+      "size": 103
+    },
+    {
+      "name": "strcmp",
+      "address": 53303,
+      "size": 60
+    },
+    {
+      "name": "startup",
+      "address": 53363,
+      "size": 140
+    },
+    {
+      "name": "blockIO",
+      "address": 53503,
+      "size": 115
+    },
+    {
+      "name": "copyRecovery",
+      "address": 53618,
+      "size": 145
+    },
+    {
+      "name": "bankBiosGateway",
+      "address": 61440,
+      "size": 431
+    },
+    {
+      "name": "bankDiskBridge",
+      "address": 62016,
+      "size": 3
+    },
+    {
+      "name": "fileBodyLoader",
+      "address": 53763,
+      "size": 386
+    },
+    {
+      "name": "bankedBoot",
+      "address": 54284,
+      "size": 627
+    },
+    {
+      "name": "rawMain",
+      "address": 50670,
+      "size": 208
+    },
+    {
+      "name": "glyphCache",
+      "address": 54149,
+      "size": 122
+    },
+    {
+      "name": "ioInitialize",
+      "address": 54271,
+      "size": 13
+    },
+    {
+      "name": "syscallTables",
+      "address": 54911,
+      "size": 188
+    }
+  ],
+  "nativeDosReference": {
+    "start": 16384,
+    "end": 32212,
+    "bytes": 15828
+  }
+}

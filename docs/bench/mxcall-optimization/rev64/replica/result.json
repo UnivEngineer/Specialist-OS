@@ -1,0 +1,100 @@
+{
+  "model": "z88dk-ticks 8080 flat",
+  "bios_sha256": "20946387fd031c7298bd8f6d672d3e376dc9335211121655d7a98fcd536aa93a",
+  "replica_bytes": 30,
+  "read_bytes": 16,
+  "read_bound_bytes": 14,
+  "replica_hex": "d5f521000039eb3a1ffd3d32fcff2a24fdf9cd1ec832fdffebf9ebf1d1c9f53a1ffd3d32fcff2afc8f32fdfff1c9f53e0032fcff2afc8f32fdfff1c9",
+  "rows": [
+    {
+      "page": 2,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 2,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 2,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 6,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 6,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 6,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 16,
+      "af": 29075,
+      "cursor": 4660,
+      "main_sp": 60800,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 16,
+      "af": 21830,
+      "cursor": 291,
+      "main_sp": 60736,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    },
+    {
+      "page": 16,
+      "af": 42455,
+      "cursor": 17767,
+      "main_sp": 60768,
+      "direct": 53,
+      "replica": 224,
+      "read": 108,
+      "read_bound": 97
+    }
+  ]
+}

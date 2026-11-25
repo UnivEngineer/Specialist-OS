@@ -1,0 +1,1330 @@
+{
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "system_sha": "82fc4a319b22656aa9c393f3edd7a65a02021578474fad05afcf549ff5cf79fa",
+  "mem_sha": "57b75b3cfdf3aa041d7705220e195e4beaff868544809671b53c5680436b5c50",
+  "rows": [
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 0,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 449,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 0,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 1,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3197,
+      "mapper_writes": {
+        "FFFC": 1,
+        "FFFD": 2,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 2,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3291,
+      "mapper_writes": {
+        "FFFC": 2,
+        "FFFD": 3,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 3,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3385,
+      "mapper_writes": {
+        "FFFC": 3,
+        "FFFD": 4,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 4,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3479,
+      "mapper_writes": {
+        "FFFC": 4,
+        "FFFD": 5,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 5,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3573,
+      "mapper_writes": {
+        "FFFC": 5,
+        "FFFD": 6,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 6,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3667,
+      "mapper_writes": {
+        "FFFC": 6,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 7,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3761,
+      "mapper_writes": {
+        "FFFC": 7,
+        "FFFD": 8,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 8,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3855,
+      "mapper_writes": {
+        "FFFC": 8,
+        "FFFD": 9,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 9,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3949,
+      "mapper_writes": {
+        "FFFC": 9,
+        "FFFD": 10,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 10,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4043,
+      "mapper_writes": {
+        "FFFC": 10,
+        "FFFD": 11,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 11,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4137,
+      "mapper_writes": {
+        "FFFC": 11,
+        "FFFD": 12,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 12,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4231,
+      "mapper_writes": {
+        "FFFC": 12,
+        "FFFD": 13,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 13,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4325,
+      "mapper_writes": {
+        "FFFC": 13,
+        "FFFD": 14,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 14,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4419,
+      "mapper_writes": {
+        "FFFC": 14,
+        "FFFD": 15,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 15,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4513,
+      "mapper_writes": {
+        "FFFC": 15,
+        "FFFD": 16,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 16,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4607,
+      "mapper_writes": {
+        "FFFC": 16,
+        "FFFD": 17,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 17,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4701,
+      "mapper_writes": {
+        "FFFC": 17,
+        "FFFD": 18,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 18,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4795,
+      "mapper_writes": {
+        "FFFC": 18,
+        "FFFD": 19,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 19,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4889,
+      "mapper_writes": {
+        "FFFC": 19,
+        "FFFD": 20,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 20,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4983,
+      "mapper_writes": {
+        "FFFC": 20,
+        "FFFD": 21,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 21,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5077,
+      "mapper_writes": {
+        "FFFC": 21,
+        "FFFD": 22,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 22,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5171,
+      "mapper_writes": {
+        "FFFC": 22,
+        "FFFD": 23,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 23,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5265,
+      "mapper_writes": {
+        "FFFC": 23,
+        "FFFD": 24,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 24,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5359,
+      "mapper_writes": {
+        "FFFC": 24,
+        "FFFD": 25,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 25,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5453,
+      "mapper_writes": {
+        "FFFC": 25,
+        "FFFD": 26,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 26,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5547,
+      "mapper_writes": {
+        "FFFC": 26,
+        "FFFD": 27,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 27,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5641,
+      "mapper_writes": {
+        "FFFC": 27,
+        "FFFD": 28,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 28,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5735,
+      "mapper_writes": {
+        "FFFC": 28,
+        "FFFD": 29,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 29,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5829,
+      "mapper_writes": {
+        "FFFC": 29,
+        "FFFD": 30,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 30,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5923,
+      "mapper_writes": {
+        "FFFC": 30,
+        "FFFD": 31,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6017,
+      "mapper_writes": {
+        "FFFC": 31,
+        "FFFD": 32,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 64,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6385,
+      "mapper_writes": {
+        "FFFC": 3,
+        "FFFD": 6,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 65,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6932,
+      "mapper_writes": {
+        "FFFC": 4,
+        "FFFD": 8,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 66,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7026,
+      "mapper_writes": {
+        "FFFC": 5,
+        "FFFD": 9,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 67,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7120,
+      "mapper_writes": {
+        "FFFC": 6,
+        "FFFD": 10,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 68,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7214,
+      "mapper_writes": {
+        "FFFC": 7,
+        "FFFD": 11,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 69,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7308,
+      "mapper_writes": {
+        "FFFC": 8,
+        "FFFD": 12,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 70,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7402,
+      "mapper_writes": {
+        "FFFC": 9,
+        "FFFD": 13,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 71,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7496,
+      "mapper_writes": {
+        "FFFC": 10,
+        "FFFD": 14,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 72,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7590,
+      "mapper_writes": {
+        "FFFC": 11,
+        "FFFD": 15,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 73,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7684,
+      "mapper_writes": {
+        "FFFC": 12,
+        "FFFD": 16,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 74,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7778,
+      "mapper_writes": {
+        "FFFC": 13,
+        "FFFD": 17,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 75,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7872,
+      "mapper_writes": {
+        "FFFC": 14,
+        "FFFD": 18,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 76,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7966,
+      "mapper_writes": {
+        "FFFC": 15,
+        "FFFD": 19,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8060,
+      "mapper_writes": {
+        "FFFC": 16,
+        "FFFD": 20,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 78,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8154,
+      "mapper_writes": {
+        "FFFC": 17,
+        "FFFD": 21,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 79,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8248,
+      "mapper_writes": {
+        "FFFC": 18,
+        "FFFD": 22,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 80,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8342,
+      "mapper_writes": {
+        "FFFC": 19,
+        "FFFD": 23,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 81,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8436,
+      "mapper_writes": {
+        "FFFC": 20,
+        "FFFD": 24,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 82,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8530,
+      "mapper_writes": {
+        "FFFC": 21,
+        "FFFD": 25,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 83,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8624,
+      "mapper_writes": {
+        "FFFC": 22,
+        "FFFD": 26,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 84,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8718,
+      "mapper_writes": {
+        "FFFC": 23,
+        "FFFD": 27,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 85,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8812,
+      "mapper_writes": {
+        "FFFC": 24,
+        "FFFD": 28,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 86,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8906,
+      "mapper_writes": {
+        "FFFC": 25,
+        "FFFD": 29,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 87,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9000,
+      "mapper_writes": {
+        "FFFC": 26,
+        "FFFD": 30,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 88,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9094,
+      "mapper_writes": {
+        "FFFC": 27,
+        "FFFD": 31,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 89,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9188,
+      "mapper_writes": {
+        "FFFC": 28,
+        "FFFD": 32,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 90,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9282,
+      "mapper_writes": {
+        "FFFC": 29,
+        "FFFD": 33,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 91,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9376,
+      "mapper_writes": {
+        "FFFC": 30,
+        "FFFD": 34,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 92,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9470,
+      "mapper_writes": {
+        "FFFC": 31,
+        "FFFD": 35,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 93,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9564,
+      "mapper_writes": {
+        "FFFC": 32,
+        "FFFD": 36,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 94,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9658,
+      "mapper_writes": {
+        "FFFC": 33,
+        "FFFD": 37,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 95,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9752,
+      "mapper_writes": {
+        "FFFC": 34,
+        "FFFD": 38,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5363,
+      "mapper_writes": {
+        "FFFC": 2,
+        "FFFD": 5,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 33,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5910,
+      "mapper_writes": {
+        "FFFC": 3,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 96,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7407,
+      "mapper_writes": {
+        "FFFC": 4,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 255,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 14862,
+      "mapper_writes": {
+        "FFFC": 39,
+        "FFFD": 43,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 256,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 12194,
+      "mapper_writes": {
+        "FFFC": 9,
+        "FFFD": 12,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 257,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 13042,
+      "mapper_writes": {
+        "FFFC": 10,
+        "FFFD": 14,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 511,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 23016,
+      "mapper_writes": {
+        "FFFC": 47,
+        "FFFD": 51,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 512,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 20671,
+      "mapper_writes": {
+        "FFFC": 17,
+        "FFFD": 20,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 513,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 21218,
+      "mapper_writes": {
+        "FFFC": 18,
+        "FFFD": 22,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 1,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3183,
+      "mapper_writes": {
+        "FFFC": 2,
+        "FFFD": 1,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6003,
+      "mapper_writes": {
+        "FFFC": 32,
+        "FFFD": 31,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5349,
+      "mapper_writes": {
+        "FFFC": 5,
+        "FFFD": 2,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8046,
+      "mapper_writes": {
+        "FFFC": 20,
+        "FFFD": 16,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 128,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8415,
+      "mapper_writes": {
+        "FFFC": 8,
+        "FFFD": 5,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 7,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3775,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 15,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6031,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 63,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5391,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8088,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 36,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 128,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8457,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 13,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 1,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 2703,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 2,
+        "FFFE": 1
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 13,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3831,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 14,
+        "FFFE": 13
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5523,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 32,
+        "FFFE": 31
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4875,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 5,
+        "FFFE": 2
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7572,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 20,
+        "FFFE": 16
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 128,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7941,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 8,
+        "FFFE": 5
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 1,
+      "src": 65279,
+      "dst": 65279,
+      "ticks": 3239,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 3,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 13,
+      "src": 65267,
+      "dst": 65267,
+      "ticks": 4367,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 27,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 31,
+      "src": 65249,
+      "dst": 65249,
+      "ticks": 6059,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 63,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 32,
+      "src": 65248,
+      "dst": 65248,
+      "ticks": 5419,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 77,
+      "src": 65203,
+      "dst": 65203,
+      "ticks": 8116,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 36,
+        "FFFE": 0
+      }
+    }
+  ]
+}

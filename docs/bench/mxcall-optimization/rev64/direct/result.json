@@ -1,0 +1,342 @@
+{
+  "system_sha256": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "font": "6X8/ROTATE",
+  "rows": [
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "q",
+      "entry": 51317,
+      "input": {
+        "af": 29075,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 20754,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 73,
+      "inline": 593
+    },
+    {
+      "group": "BIOS",
+      "op": "SUB_HL_DE",
+      "label": "profile",
+      "entry": 51326,
+      "input": {
+        "af": 29075,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 61063,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 61167,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 65,
+      "inline": 585
+    },
+    {
+      "group": "BIOS",
+      "op": "GET_CURSOR_POS",
+      "label": "profile",
+      "entry": 51230,
+      "input": {
+        "af": 29075,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4106,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 53,
+      "inline": 573
+    },
+    {
+      "group": "BIOS",
+      "op": "SET_CURSOR_POS",
+      "label": "xy=100a",
+      "entry": 51233,
+      "input": {
+        "af": 42455,
+        "hl": 4106,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 42455,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4106,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 69,
+      "inline": 589
+    },
+    {
+      "group": "BIOS",
+      "op": "PRINT_CHAR",
+      "label": "Q",
+      "entry": 51209,
+      "input": {
+        "af": 29075,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a13",
+      "direct": 1010,
+      "inline": 1540
+    },
+    {
+      "group": "BIOS",
+      "op": "PRINT_STRING_Z",
+      "label": "X+NUL",
+      "entry": 51224,
+      "input": {
+        "af": 29075,
+        "hl": 32864,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 32865,
+        "sp": 34384
+      },
+      "cursor_out": "0a13",
+      "direct": 1766,
+      "inline": 2296
+    },
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "39",
+      "entry": 51317,
+      "input": {
+        "af": 14739,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 14743,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 45,
+      "inline": 565
+    },
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "41",
+      "entry": 51317,
+      "input": {
+        "af": 16787,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 16787,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 45,
+      "inline": 565
+    },
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "a3",
+      "entry": 51317,
+      "input": {
+        "af": 41875,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 41875,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 91,
+      "inline": 611
+    },
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "a4",
+      "entry": 51317,
+      "input": {
+        "af": 42131,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 42135,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 91,
+      "inline": 611
+    },
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "c0",
+      "entry": 51317,
+      "input": {
+        "af": 49299,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 57474,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 114,
+      "inline": 634
+    },
+    {
+      "group": "BIOS",
+      "op": "UPPERCASE",
+      "label": "e0",
+      "entry": 51317,
+      "input": {
+        "af": 57491,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 57430,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 103,
+      "inline": 623
+    },
+    {
+      "group": "BIOS",
+      "op": "SUB_HL_DE",
+      "label": "no-borrow",
+      "entry": 51326,
+      "input": {
+        "af": 29075,
+        "hl": 9029,
+        "de": 4660,
+        "bc": 13393
+      },
+      "result": {
+        "af": 4374,
+        "bc": 13393,
+        "de": 4660,
+        "hl": 4369,
+        "sp": 34384
+      },
+      "cursor_out": "0a10",
+      "direct": 65,
+      "inline": 585
+    },
+    {
+      "group": "DOS",
+      "op": "GET_ERROR",
+      "label": "00",
+      "entry": 5859,
+      "input": {
+        "af": 29075,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 70,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "direct": 45,
+      "inline": 333
+    },
+    {
+      "group": "DOS",
+      "op": "GET_ERROR",
+      "label": "a5",
+      "entry": 5859,
+      "input": {
+        "af": 29075,
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393
+      },
+      "result": {
+        "af": 42375,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384
+      },
+      "direct": 53,
+      "inline": 341
+    }
+  ]
+}

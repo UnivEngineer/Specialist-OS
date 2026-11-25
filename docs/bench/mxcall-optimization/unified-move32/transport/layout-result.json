@@ -1,0 +1,557 @@
+{
+  "verified": 711,
+  "baseline_sha256": "049b9492427d536ce15d0f244459d28643a678bd9a92a247a339c3b62a095160",
+  "unified_sha256": "ec48de50c33a9df40b8ac2f1cfa1e6ad9088fe80aaff0f7e02347794ed9f1e18",
+  "timings": [
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 31,
+      "old": 4873,
+      "new": 4011,
+      "delta": -862
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 32,
+      "old": 3467,
+      "new": 4072,
+      "delta": 605
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 33,
+      "old": 3886,
+      "new": 4969,
+      "delta": 1083
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 256,
+      "old": 10261,
+      "new": 15241,
+      "delta": 4980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 1024,
+      "old": 35090,
+      "new": 55070,
+      "delta": 19980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 31,
+      "old": 4873,
+      "new": 4011,
+      "delta": -862
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 32,
+      "old": 3467,
+      "new": 4072,
+      "delta": 605
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 33,
+      "old": 3886,
+      "new": 4969,
+      "delta": 1083
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 256,
+      "old": 10261,
+      "new": 15241,
+      "delta": 4980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 1024,
+      "old": 35090,
+      "new": 55070,
+      "delta": 19980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 31,
+      "old": 4873,
+      "new": 4011,
+      "delta": -862
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 32,
+      "old": 3467,
+      "new": 4072,
+      "delta": 605
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 33,
+      "old": 3886,
+      "new": 4969,
+      "delta": 1083
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 256,
+      "old": 10261,
+      "new": 15241,
+      "delta": 4980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 1024,
+      "old": 35090,
+      "new": 55070,
+      "delta": 19980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 31,
+      "old": 4887,
+      "new": 4025,
+      "delta": -862
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 32,
+      "old": 3481,
+      "new": 4086,
+      "delta": 605
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 33,
+      "old": 3900,
+      "new": 4983,
+      "delta": 1083
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 256,
+      "old": 10275,
+      "new": 15255,
+      "delta": 4980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 1024,
+      "old": 35104,
+      "new": 55084,
+      "delta": 19980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 31,
+      "old": 4887,
+      "new": 4025,
+      "delta": -862
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 32,
+      "old": 3481,
+      "new": 4086,
+      "delta": 605
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 33,
+      "old": 3900,
+      "new": 4983,
+      "delta": 1083
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 256,
+      "old": 10275,
+      "new": 15255,
+      "delta": 4980
+    },
+    {
+      "entry": "mx_memcpyFar",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 1024,
+      "old": 35104,
+      "new": 55084,
+      "delta": 19980
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 31,
+      "old": 4373,
+      "new": 3541,
+      "delta": -832
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 32,
+      "old": 2967,
+      "new": 3602,
+      "delta": 635
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 33,
+      "old": 3386,
+      "new": 4499,
+      "delta": 1113
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 256,
+      "old": 9761,
+      "new": 14771,
+      "delta": 5010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 0,
+      "source": 2,
+      "dest": 4,
+      "count": 1024,
+      "old": 34590,
+      "new": 54600,
+      "delta": 20010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 31,
+      "old": 4373,
+      "new": 3541,
+      "delta": -832
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 32,
+      "old": 2967,
+      "new": 3602,
+      "delta": 635
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 33,
+      "old": 3386,
+      "new": 4499,
+      "delta": 1113
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 256,
+      "old": 9761,
+      "new": 14771,
+      "delta": 5010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 4,
+      "dest": 0,
+      "count": 1024,
+      "old": 34590,
+      "new": 54600,
+      "delta": 20010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 31,
+      "old": 4373,
+      "new": 3541,
+      "delta": -832
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 32,
+      "old": 2967,
+      "new": 3602,
+      "delta": 635
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 33,
+      "old": 3386,
+      "new": 4499,
+      "delta": 1113
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 256,
+      "old": 9761,
+      "new": 14771,
+      "delta": 5010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 0,
+      "dest": 2,
+      "count": 1024,
+      "old": 34590,
+      "new": 54600,
+      "delta": 20010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 31,
+      "old": 4387,
+      "new": 3555,
+      "delta": -832
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 32,
+      "old": 2981,
+      "new": 3616,
+      "delta": 635
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 33,
+      "old": 3400,
+      "new": 4513,
+      "delta": 1113
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 256,
+      "old": 9775,
+      "new": 14785,
+      "delta": 5010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 2,
+      "dest": 1,
+      "count": 1024,
+      "old": 34604,
+      "new": 54614,
+      "delta": 20010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 31,
+      "old": 4387,
+      "new": 3555,
+      "delta": -832
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 32,
+      "old": 2981,
+      "new": 3616,
+      "delta": 635
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 33,
+      "old": 3400,
+      "new": 4513,
+      "delta": 1113
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 256,
+      "old": 9775,
+      "new": 14785,
+      "delta": 5010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 3,
+      "source": 1,
+      "dest": 3,
+      "count": 1024,
+      "old": 34604,
+      "new": 54614,
+      "delta": 20010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 143,
+      "dest": 2,
+      "count": 31,
+      "old": 4379,
+      "new": 3547,
+      "delta": -832
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 143,
+      "dest": 2,
+      "count": 32,
+      "old": 2973,
+      "new": 3608,
+      "delta": 635
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 143,
+      "dest": 2,
+      "count": 33,
+      "old": 3392,
+      "new": 4505,
+      "delta": 1113
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 143,
+      "dest": 2,
+      "count": 256,
+      "old": 9767,
+      "new": 14777,
+      "delta": 5010
+    },
+    {
+      "entry": "bankCopyPhysical",
+      "caller": 1,
+      "source": 143,
+      "dest": 2,
+      "count": 1024,
+      "old": 34596,
+      "new": 54606,
+      "delta": 20010
+    }
+  ]
+}

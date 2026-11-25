@@ -1,0 +1,20 @@
+{
+  "overwrite-no": {
+    "ticks": 1895889,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XRKS.RKS H:XOLD.COM",
+    "output": null
+  },
+  "overwrite-yes": {
+    "ticks": 5306275,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XRKS.RKS H:XOLD.COM",
+    "output": "9e77b74909bb3babdc44b7f12e98d79989d5a2c4c74b5db99aa8b9bb4ad3c909"
+  },
+  "overwrite-force": {
+    "ticks": 1966560,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XONE.BIN H:XOLD.COM -Y",
+    "output": "24fae85012873153b0d38ac55380e91289619aec9c750a68e9a8afce71d63fe0"
+  }
+}

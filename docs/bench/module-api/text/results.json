@@ -1,0 +1,12 @@
+{
+  "ms": {
+    "mainChar": 3219.968,
+    "mainString": 2253.568,
+    "bankChar": 6697.728,
+    "bankString": 2478.208
+  },
+  "returnedToNC": true,
+  "publicModuleABI": true,
+  "modulesUnloaded": true,
+  "allocationLeaks": 0
+}

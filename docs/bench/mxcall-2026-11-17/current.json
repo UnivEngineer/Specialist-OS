@@ -1,0 +1,554 @@
+[
+  {
+    "page": 0,
+    "inline": false,
+    "repeat": 0,
+    "ticks": 894,
+    "stages": [
+      {
+        "stage": "stub -> main-dispatch",
+        "ticks": 75
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> return",
+        "ticks": 355
+      }
+    ]
+  },
+  {
+    "page": 0,
+    "inline": false,
+    "repeat": 1,
+    "ticks": 894,
+    "stages": [
+      {
+        "stage": "stub -> main-dispatch",
+        "ticks": 75
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> return",
+        "ticks": 355
+      }
+    ]
+  },
+  {
+    "page": 0,
+    "inline": true,
+    "repeat": 0,
+    "ticks": 1129,
+    "stages": [
+      {
+        "stage": "stub -> inline-entry",
+        "ticks": 27
+      },
+      {
+        "stage": "inline-entry -> main-dispatch",
+        "ticks": 233
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> return",
+        "ticks": 405
+      }
+    ]
+  },
+  {
+    "page": 0,
+    "inline": true,
+    "repeat": 1,
+    "ticks": 1129,
+    "stages": [
+      {
+        "stage": "stub -> inline-entry",
+        "ticks": 27
+      },
+      {
+        "stage": "inline-entry -> main-dispatch",
+        "ticks": 233
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> return",
+        "ticks": 405
+      }
+    ]
+  },
+  {
+    "page": 1,
+    "inline": false,
+    "repeat": 0,
+    "ticks": 4741,
+    "stages": [
+      {
+        "stage": "stub -> client",
+        "ticks": 54
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 519
+      }
+    ]
+  },
+  {
+    "page": 1,
+    "inline": false,
+    "repeat": 1,
+    "ticks": 4741,
+    "stages": [
+      {
+        "stage": "stub -> client",
+        "ticks": 54
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 519
+      }
+    ]
+  },
+  {
+    "page": 1,
+    "inline": true,
+    "repeat": 0,
+    "ticks": 4976,
+    "stages": [
+      {
+        "stage": "stub -> inline-entry",
+        "ticks": 27
+      },
+      {
+        "stage": "inline-entry -> client",
+        "ticks": 212
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 569
+      }
+    ]
+  },
+  {
+    "page": 1,
+    "inline": true,
+    "repeat": 1,
+    "ticks": 4976,
+    "stages": [
+      {
+        "stage": "stub -> inline-entry",
+        "ticks": 27
+      },
+      {
+        "stage": "inline-entry -> client",
+        "ticks": 212
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 569
+      }
+    ]
+  },
+  {
+    "page": 6,
+    "inline": false,
+    "repeat": 0,
+    "ticks": 4741,
+    "stages": [
+      {
+        "stage": "stub -> client",
+        "ticks": 54
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 519
+      }
+    ]
+  },
+  {
+    "page": 6,
+    "inline": false,
+    "repeat": 1,
+    "ticks": 4741,
+    "stages": [
+      {
+        "stage": "stub -> client",
+        "ticks": 54
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 519
+      }
+    ]
+  },
+  {
+    "page": 6,
+    "inline": true,
+    "repeat": 0,
+    "ticks": 4976,
+    "stages": [
+      {
+        "stage": "stub -> inline-entry",
+        "ticks": 27
+      },
+      {
+        "stage": "inline-entry -> client",
+        "ticks": 212
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 569
+      }
+    ]
+  },
+  {
+    "page": 6,
+    "inline": true,
+    "repeat": 1,
+    "ticks": 4976,
+    "stages": [
+      {
+        "stage": "stub -> inline-entry",
+        "ticks": 27
+      },
+      {
+        "stage": "inline-entry -> client",
+        "ticks": 212
+      },
+      {
+        "stage": "client -> transport-call",
+        "ticks": 316
+      },
+      {
+        "stage": "transport-call -> main-landing",
+        "ticks": 774
+      },
+      {
+        "stage": "main-landing -> bios-adapter",
+        "ticks": 435
+      },
+      {
+        "stage": "bios-adapter -> bios-invoke",
+        "ticks": 713
+      },
+      {
+        "stage": "bios-invoke -> main-dispatch",
+        "ticks": 110
+      },
+      {
+        "stage": "main-dispatch -> main-result",
+        "ticks": 464
+      },
+      {
+        "stage": "main-result -> bios-result",
+        "ticks": 345
+      },
+      {
+        "stage": "bios-result -> transport-result",
+        "ticks": 166
+      },
+      {
+        "stage": "transport-result -> caller-resume",
+        "ticks": 448
+      },
+      {
+        "stage": "caller-resume -> client-result",
+        "ticks": 397
+      },
+      {
+        "stage": "client-result -> return",
+        "ticks": 569
+      }
+    ]
+  }
+]

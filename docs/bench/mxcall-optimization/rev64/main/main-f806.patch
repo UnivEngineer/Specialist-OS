@@ -1,0 +1,62 @@
+--- a/scripts/build/build-banked-transport.py
++++ b/scripts/build/build-banked-transport.py
+@@ -38,6 +38,7 @@
+     (OUT/'CLIENT.sym').write_text((OUT/'LOCALBLOCK.sym').read_text(),encoding='utf-8')
+     (OUT/'CLIENT.lst').write_bytes((OUT/'LOCALBLOCK.lst').read_bytes())
+     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
++        stream.write(f"bankMxRegsRouteCall = 0{int(cs['bankMxRegsRouteCall'],16):04X}h\n")
+         stream.write(f'BANK_CLIENT_BYTES = {(OUT/"CLIENT.bin").stat().st_size}\n')
+         stream.write(f'BANK_MAIN_CLIENT_BYTES = {int(cs["bankClientEnd"],16)-int(cs["mx_call"],16)}\n')
+         stream.write(f'BANK_LOCAL_BYTES = {(OUT/"LOCALBLOCK.bin").stat().st_size}\n')
+--- a/scripts/emu80/check-bootstrap.py
++++ b/scripts/emu80/check-bootstrap.py
+@@ -52,7 +52,11 @@
+    # TEXT хранит здесь живые счётчики, адреса и состояние операции.
+    at=ls['memTextRemaining']-b['mx_call']
+    actual[at:at+9]=client[at:at+9]
+-   assert actual==client[:client_size]
++   expected=bytearray(client[:client_size])
++   if bank==0 and 'bankMxRegsRouteCall' in ls:
++    at=ls['bankMxRegsRouteCall']+1-b['mx_call']
++    expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
++   assert actual==expected
+    assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
+    assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
+   data_size=h['symbols'](BIN/'MEM.sym')['MEM_DATA_SIZE']
+--- a/scripts/emu80/check-std-mx-return.py
++++ b/scripts/emu80/check-std-mx-return.py
+@@ -33,7 +33,11 @@
+    m.write(b['LOCAL_BLOCK_ENTRY'],b'\xa5'*12);m.write(b['mx_call'],b'\xa5'*12);m.write(0xfc00,b'\xa5'*12)
+    m.stop_at(b['biosMemWarning']);m.until(b['biosMemWarning'],120,page=0)
+    assert m.read(0xfc00,len(code))==code
+-   assert m.read(b['mx_call'],b['BANK_CLIENT_BYTES'])==(R/'bin/banked/CLIENT.bin').read_bytes()
++   expected=bytearray((R/'bin/banked/CLIENT.bin').read_bytes())
++   if 'bankMxRegsRouteCall' in b:
++    at=b['bankMxRegsRouteCall']+1-b['mx_call']
++    expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
++   assert m.read(b['mx_call'],b['BANK_CLIENT_BYTES'])==expected
+    assert m.read(b['LOCAL_BLOCK_ENTRY'],b['MEM_NATIVE_CALL']-b['LOCAL_BLOCK_ENTRY'])==(R/'bin/banked/LOCALBLOCK.bin').read_bytes()[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:b['MEM_NATIVE_CALL']-b['MEM_IMAGE_LOCAL_START']]
+    m.stop_at(b['getch']);m.until(b['getch'],120,page=0);m.call('bp_clear');m.call('emu_run_for',ms=500)
+    assert m.read(0,32)!= (R/'bin/NC.i80').read_bytes()[:32],'Warning did not wait'
+--- a/source/io/raw-local.inc
++++ b/source/io/raw-local.inc
+@@ -107,6 +107,9 @@
+     ld (MAIN_RAW_LEASE+5),a
+     ld hl,sysCall
+     ld (MEM_NATIVE_CALL),hl
++    ; Привязать регистровый вызов MAIN к его диспетчеру.
++    ld hl,sysRegsEntry
++    ld (bankMxRegsRouteCall+1),hl
+     ld hl,bios_memcpy_bc_hl
+     ld (MEM_NEAR_COPY),hl
+     ld hl,bios_blockIO
+--- a/source/mem/CLIENT.asm
++++ b/source/mem/CLIENT.asm
+@@ -104,6 +104,7 @@
+     add hl,sp
+     ld sp,hl
+     ex de,hl
++bankMxRegsRouteCall:
+     call bankMxRegsRoute
+     inc sp
+     inc sp

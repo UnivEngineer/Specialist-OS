@@ -1,0 +1,275 @@
+{
+  "bitmap": "PASS",
+  "stages": 36,
+  "results": [
+    {
+      "pre": 0,
+      "kind": 0,
+      "route": 0,
+      "ticks": 5688,
+      "ms": 728.064
+    },
+    {
+      "pre": 0,
+      "kind": 0,
+      "route": 1,
+      "ticks": 28440,
+      "ms": 3640.32
+    },
+    {
+      "pre": 0,
+      "kind": 0,
+      "route": 2,
+      "ticks": 18230,
+      "ms": 2333.44
+    },
+    {
+      "pre": 0,
+      "kind": 1,
+      "route": 0,
+      "ticks": 5607,
+      "ms": 717.696
+    },
+    {
+      "pre": 0,
+      "kind": 1,
+      "route": 1,
+      "ticks": 28359,
+      "ms": 3629.952
+    },
+    {
+      "pre": 0,
+      "kind": 1,
+      "route": 2,
+      "ticks": 18324,
+      "ms": 2345.472
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 0,
+      "ticks": 3177,
+      "ms": 406.656
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 3,
+      "ticks": 3814,
+      "ms": 488.192
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 4,
+      "ticks": 3456,
+      "ms": 442.368
+    },
+    {
+      "pre": 0,
+      "kind": 2,
+      "route": 5,
+      "ticks": 3403,
+      "ms": 435.584
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 0,
+      "ticks": 2883,
+      "ms": 369.024
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 3,
+      "ticks": 3557,
+      "ms": 455.296
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 4,
+      "ticks": 3154,
+      "ms": 403.712
+    },
+    {
+      "pre": 0,
+      "kind": 3,
+      "route": 5,
+      "ticks": 3109,
+      "ms": 397.952
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 0,
+      "ticks": 2761,
+      "ms": 353.408
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 3,
+      "ticks": 3476,
+      "ms": 444.928
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 4,
+      "ticks": 3031,
+      "ms": 387.968
+    },
+    {
+      "pre": 0,
+      "kind": 4,
+      "route": 5,
+      "ticks": 2986,
+      "ms": 382.208
+    },
+    {
+      "pre": 1,
+      "kind": 0,
+      "route": 0,
+      "ticks": 4840,
+      "ms": 619.52
+    },
+    {
+      "pre": 1,
+      "kind": 0,
+      "route": 1,
+      "ticks": 27591,
+      "ms": 3531.648
+    },
+    {
+      "pre": 1,
+      "kind": 0,
+      "route": 2,
+      "ticks": 17381,
+      "ms": 2224.768
+    },
+    {
+      "pre": 1,
+      "kind": 1,
+      "route": 0,
+      "ticks": 4732,
+      "ms": 605.696
+    },
+    {
+      "pre": 1,
+      "kind": 1,
+      "route": 1,
+      "ticks": 27483,
+      "ms": 3517.824
+    },
+    {
+      "pre": 1,
+      "kind": 1,
+      "route": 2,
+      "ticks": 17447,
+      "ms": 2233.216
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 0,
+      "ticks": 2036,
+      "ms": 260.608
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 3,
+      "ticks": 2729,
+      "ms": 349.312
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 4,
+      "ticks": 2318,
+      "ms": 296.704
+    },
+    {
+      "pre": 1,
+      "kind": 2,
+      "route": 5,
+      "ticks": 2262,
+      "ms": 289.536
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 0,
+      "ticks": 1615,
+      "ms": 206.72
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 3,
+      "ticks": 2353,
+      "ms": 301.184
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 4,
+      "ticks": 1886,
+      "ms": 241.408
+    },
+    {
+      "pre": 1,
+      "kind": 3,
+      "route": 5,
+      "ticks": 1841,
+      "ms": 235.648
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 0,
+      "ticks": 1492,
+      "ms": 190.976
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 3,
+      "ticks": 2271,
+      "ms": 290.688
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 4,
+      "ticks": 1763,
+      "ms": 225.664
+    },
+    {
+      "pre": 1,
+      "kind": 4,
+      "route": 5,
+      "ticks": 1717,
+      "ms": 219.776
+    }
+  ],
+  "reportBytes": 598,
+  "fileReadback": "PASS",
+  "allocations": "no leaks",
+  "modules": "unloaded",
+  "prerender": "disabled",
+  "dwordMainDriver": "PASS",
+  "returnedToNC": true,
+  "cpuHz": 2000000,
+  "pitHz": 2000000,
+  "binarySha256": {
+    "bin/BIOS.sys": "372666f1b572517fe9387ebf14c5e3bb3d8cef6c6c5db1d7ac3f835c06d8ae01",
+    "bin/IO.sys": "4e962ba2d8936c8357fdeb9532f65955b1d7da2aff387ee6cb51b7735f0a5965",
+    "bin/MEM.sys": "8b92b5bfa4ac18839a9bc6b1b85370daf0c7269101f035d0b9113b1995cff7d8",
+    "bin/FONTCOM.i80": "d60d147d0ce16034bdb02b895501be3dcb43ad2b4e12582c2613911aa83e9c36",
+    "bin/FONTBANK.i80": "ba9aeff76ea64cbf5991590ab3004bc7fb3ddccb99f8d1cd42102e5406943c75",
+    "images/SystemRom_emu80_writable.bin": "8678b29f762f1ad22ee0d1c7936373eda013c874b7fa4bb9c4bc70ec7b9aa9d6"
+  }
+}

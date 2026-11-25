@@ -1,0 +1,106 @@
+{
+  "baseline_revision": "2791c88ae940d63df2db01f0df7a616fbf0cd18d",
+  "mem_sha256": "f1d1fb70b8160cbcd8884b5a236e05803a867ecac20ea5b4ee631a51873880ba",
+  "system_image_sha256": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+  "emulator": {
+    "version": "4.0.575",
+    "slot": 19781,
+    "cpu_hz": 2000000,
+    "pit_hz": 2000000,
+    "visible": true,
+    "muted": true,
+    "speed_factor": 32,
+    "full_throttle": false
+  },
+  "cpu": {
+    "mem_cases": 13,
+    "cpm32_cases": 98,
+    "character_cases": 16,
+    "mem_api_cases": 6,
+    "sdk_copy_bytes": 678,
+    "local_checked": "pass",
+    "memcpy_tail_cases": 2620,
+    "nested_image": {
+      "files": 160,
+      "directories": 14
+    },
+    "bios_dos_layout": "pass",
+    "bios_dos_split": "pass"
+  },
+  "transport": {
+    "artifact": "regression-transport-final/result.json",
+    "cases": 54
+  },
+  "queue": {
+    "before": [
+      {
+        "commands": 1,
+        "direct": 3115,
+        "queued": 4905,
+        "speedup": 0.6350662589194699
+      },
+      {
+        "commands": 4,
+        "direct": 12430,
+        "queued": 9442,
+        "speedup": 1.3164583774624021
+      },
+      {
+        "commands": 16,
+        "direct": 49690,
+        "queued": 34728,
+        "speedup": 1.4308339092375029
+      },
+      {
+        "commands": 64,
+        "direct": 198730,
+        "queued": 116521,
+        "speedup": 1.7055294753735377
+      }
+    ],
+    "after": [
+      {
+        "commands": 1,
+        "direct": 712,
+        "queued": 4907,
+        "speedup": 0.14509883839413085
+      },
+      {
+        "commands": 4,
+        "direct": 2818,
+        "queued": 9444,
+        "speedup": 0.2983905124947056
+      },
+      {
+        "commands": 16,
+        "direct": 11242,
+        "queued": 33709,
+        "speedup": 0.33350143878489424
+      },
+      {
+        "commands": 64,
+        "direct": 44938,
+        "queued": 114483,
+        "speedup": 0.3925298952682931
+      }
+    ],
+    "dll_before": {
+      "calls": 16,
+      "module_call": 321701,
+      "module_scope": 56406,
+      "speedup": 5.703311704428607
+    },
+    "dll_after": {
+      "calls": 16,
+      "module_call": 292853,
+      "module_scope": 44083,
+      "speedup": 6.643218474241771
+    },
+    "warm_reset": "pass",
+    "leaf_cases": 12,
+    "leaf_results": "regression-queue-final/leaf-results.json"
+  },
+  "runtime_revision": 63,
+  "dos_sha256": "8abee3713f4b91d79a1c374b873c010067b78c9267fd838508cf9039c658ac99",
+  "dos_route_experiment": "dos-route-summary.json"
+}

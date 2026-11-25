@@ -1,0 +1,20 @@
+{
+  "image_sha256": "8fe06d83ac003eedc21396d1747231d4b6d1600e88b83d3899df03dee118928d",
+  "exe_sha256": "52972c39f3eb81040614c315f7e2b16f19e8e1d92ba63645908704b6484df17d",
+  "port": 19783,
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "boot_nc_page": 6,
+  "caller_page": 0,
+  "code_bytes": 7605,
+  "exit_code": 0,
+  "hidden": true,
+  "qpa": "offscreen",
+  "window_handle": 0
+}

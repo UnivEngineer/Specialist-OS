@@ -1,0 +1,1298 @@
+[
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21489,
+    "native": 17245,
+    "delta": -4244
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21324,
+    "native": 17262,
+    "delta": -4062
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21237,
+    "native": 21482,
+    "delta": 245
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21072,
+    "native": 21163,
+    "delta": 91
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21489,
+    "native": 17245,
+    "delta": -4244
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21324,
+    "native": 17262,
+    "delta": -4062
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20236,
+    "native": 21002,
+    "delta": 766
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20088,
+    "native": 20767,
+    "delta": 679
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 1,
+    "mode": 0,
+    "legacy": 19487,
+    "native": 19808,
+    "delta": 321
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 1,
+    "mode": 1,
+    "legacy": 19339,
+    "native": 19573,
+    "delta": 234
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20236,
+    "native": 21002,
+    "delta": 766
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20088,
+    "native": 20767,
+    "delta": 679
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12177,
+    "native": 12934,
+    "delta": 757
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12029,
+    "native": 12699,
+    "delta": 670
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 2,
+    "mode": 0,
+    "legacy": 11428,
+    "native": 12185,
+    "delta": 757
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 2,
+    "mode": 1,
+    "legacy": 11280,
+    "native": 11950,
+    "delta": 670
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12177,
+    "native": 12934,
+    "delta": 757
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12029,
+    "native": 12699,
+    "delta": 670
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 3,
+    "mode": 0,
+    "legacy": 24557,
+    "native": 25798,
+    "delta": 1241
+  },
+  {
+    "font": "Rotate",
+    "x": 0,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21324,
+    "native": 17262,
+    "delta": -4062
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 3,
+    "mode": 0,
+    "legacy": 28220,
+    "native": 25584,
+    "delta": -2636
+  },
+  {
+    "font": "Rotate",
+    "x": 2,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21072,
+    "native": 21163,
+    "delta": 91
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 3,
+    "mode": 0,
+    "legacy": 24557,
+    "native": 25798,
+    "delta": 1241
+  },
+  {
+    "font": "Rotate",
+    "x": 4,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21324,
+    "native": 17262,
+    "delta": -4062
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 0,
+    "mode": 0,
+    "legacy": 18634,
+    "native": 14133,
+    "delta": -4501
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 0,
+    "mode": 1,
+    "legacy": 18469,
+    "native": 14150,
+    "delta": -4319
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 0,
+    "mode": 0,
+    "legacy": 18382,
+    "native": 18627,
+    "delta": 245
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 0,
+    "mode": 1,
+    "legacy": 18217,
+    "native": 18308,
+    "delta": 91
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 0,
+    "mode": 0,
+    "legacy": 18634,
+    "native": 14133,
+    "delta": -4501
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 0,
+    "mode": 1,
+    "legacy": 18469,
+    "native": 14150,
+    "delta": -4319
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 1,
+    "mode": 0,
+    "legacy": 17376,
+    "native": 18142,
+    "delta": 766
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 1,
+    "mode": 1,
+    "legacy": 17228,
+    "native": 17907,
+    "delta": 679
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 1,
+    "mode": 0,
+    "legacy": 16681,
+    "native": 17002,
+    "delta": 321
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 1,
+    "mode": 1,
+    "legacy": 16533,
+    "native": 16767,
+    "delta": 234
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 1,
+    "mode": 0,
+    "legacy": 17376,
+    "native": 18142,
+    "delta": 766
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 1,
+    "mode": 1,
+    "legacy": 17228,
+    "native": 17907,
+    "delta": 679
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 2,
+    "mode": 0,
+    "legacy": 10873,
+    "native": 11630,
+    "delta": 757
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 2,
+    "mode": 1,
+    "legacy": 10725,
+    "native": 11395,
+    "delta": 670
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 2,
+    "mode": 0,
+    "legacy": 10178,
+    "native": 10935,
+    "delta": 757
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 2,
+    "mode": 1,
+    "legacy": 10030,
+    "native": 10700,
+    "delta": 670
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 2,
+    "mode": 0,
+    "legacy": 10873,
+    "native": 11630,
+    "delta": 757
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 2,
+    "mode": 1,
+    "legacy": 10725,
+    "native": 11395,
+    "delta": 670
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 3,
+    "mode": 0,
+    "legacy": 21914,
+    "native": 23155,
+    "delta": 1241
+  },
+  {
+    "font": "Packed6K",
+    "x": 0,
+    "case": 3,
+    "mode": 1,
+    "legacy": 18469,
+    "native": 14150,
+    "delta": -4319
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 3,
+    "mode": 0,
+    "legacy": 26056,
+    "native": 23163,
+    "delta": -2893
+  },
+  {
+    "font": "Packed6K",
+    "x": 2,
+    "case": 3,
+    "mode": 1,
+    "legacy": 18217,
+    "native": 18308,
+    "delta": 91
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 3,
+    "mode": 0,
+    "legacy": 21914,
+    "native": 23155,
+    "delta": 1241
+  },
+  {
+    "font": "Packed6K",
+    "x": 4,
+    "case": 3,
+    "mode": 1,
+    "legacy": 18469,
+    "native": 14150,
+    "delta": -4319
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 0,
+    "mode": 0,
+    "legacy": 15791,
+    "native": 11445,
+    "delta": -4346
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 0,
+    "mode": 1,
+    "legacy": 15626,
+    "native": 11462,
+    "delta": -4164
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 0,
+    "mode": 0,
+    "legacy": 15539,
+    "native": 15784,
+    "delta": 245
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 0,
+    "mode": 1,
+    "legacy": 15374,
+    "native": 15465,
+    "delta": 91
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 0,
+    "mode": 0,
+    "legacy": 15791,
+    "native": 11445,
+    "delta": -4346
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 0,
+    "mode": 1,
+    "legacy": 15626,
+    "native": 11462,
+    "delta": -4164
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 1,
+    "mode": 0,
+    "legacy": 14653,
+    "native": 15419,
+    "delta": 766
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 1,
+    "mode": 1,
+    "legacy": 14505,
+    "native": 15184,
+    "delta": 679
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 1,
+    "mode": 0,
+    "legacy": 13976,
+    "native": 14297,
+    "delta": 321
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 1,
+    "mode": 1,
+    "legacy": 13828,
+    "native": 14062,
+    "delta": 234
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 1,
+    "mode": 0,
+    "legacy": 14653,
+    "native": 15419,
+    "delta": 766
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 1,
+    "mode": 1,
+    "legacy": 14505,
+    "native": 15184,
+    "delta": 679
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 2,
+    "mode": 0,
+    "legacy": 9494,
+    "native": 10251,
+    "delta": 757
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 2,
+    "mode": 1,
+    "legacy": 9346,
+    "native": 10016,
+    "delta": 670
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 2,
+    "mode": 0,
+    "legacy": 8817,
+    "native": 9574,
+    "delta": 757
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 2,
+    "mode": 1,
+    "legacy": 8669,
+    "native": 9339,
+    "delta": 670
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 2,
+    "mode": 0,
+    "legacy": 9494,
+    "native": 10251,
+    "delta": 757
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 2,
+    "mode": 1,
+    "legacy": 9346,
+    "native": 10016,
+    "delta": 670
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 3,
+    "mode": 0,
+    "legacy": 19184,
+    "native": 20425,
+    "delta": 1241
+  },
+  {
+    "font": "Fast12K",
+    "x": 0,
+    "case": 3,
+    "mode": 1,
+    "legacy": 15626,
+    "native": 11462,
+    "delta": -4164
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 3,
+    "mode": 0,
+    "legacy": 23126,
+    "native": 20388,
+    "delta": -2738
+  },
+  {
+    "font": "Fast12K",
+    "x": 2,
+    "case": 3,
+    "mode": 1,
+    "legacy": 15374,
+    "native": 15465,
+    "delta": 91
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 3,
+    "mode": 0,
+    "legacy": 19184,
+    "native": 20425,
+    "delta": 1241
+  },
+  {
+    "font": "Fast12K",
+    "x": 4,
+    "case": 3,
+    "mode": 1,
+    "legacy": 15626,
+    "native": 11462,
+    "delta": -4164
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 0,
+    "mode": 0,
+    "legacy": 22411,
+    "native": 17925,
+    "delta": -4486
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 0,
+    "mode": 1,
+    "legacy": 22182,
+    "native": 17942,
+    "delta": -4240
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 0,
+    "mode": 0,
+    "legacy": 22131,
+    "native": 22362,
+    "delta": 231
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21902,
+    "native": 21979,
+    "delta": 77
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 0,
+    "mode": 0,
+    "legacy": 22411,
+    "native": 17925,
+    "delta": -4486
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 0,
+    "mode": 1,
+    "legacy": 22182,
+    "native": 17942,
+    "delta": -4240
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 1,
+    "mode": 0,
+    "legacy": 21085,
+    "native": 21851,
+    "delta": 766
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20889,
+    "native": 21568,
+    "delta": 679
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20303,
+    "native": 20610,
+    "delta": 307
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20107,
+    "native": 20327,
+    "delta": 220
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 1,
+    "mode": 0,
+    "legacy": 21085,
+    "native": 21851,
+    "delta": 766
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20889,
+    "native": 21568,
+    "delta": 679
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12686,
+    "native": 13443,
+    "delta": 757
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12490,
+    "native": 13160,
+    "delta": 670
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 2,
+    "mode": 0,
+    "legacy": 11904,
+    "native": 12661,
+    "delta": 757
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 2,
+    "mode": 1,
+    "legacy": 11708,
+    "native": 12378,
+    "delta": 670
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12686,
+    "native": 13443,
+    "delta": 757
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12490,
+    "native": 13160,
+    "delta": 670
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 3,
+    "mode": 0,
+    "legacy": 25534,
+    "native": 26761,
+    "delta": 1227
+  },
+  {
+    "font": "K7Rotate",
+    "x": 0,
+    "case": 3,
+    "mode": 1,
+    "legacy": 22182,
+    "native": 17942,
+    "delta": -4240
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 3,
+    "mode": 0,
+    "legacy": 29453,
+    "native": 26541,
+    "delta": -2912
+  },
+  {
+    "font": "K7Rotate",
+    "x": 2,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21902,
+    "native": 21979,
+    "delta": 77
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 3,
+    "mode": 0,
+    "legacy": 25534,
+    "native": 26761,
+    "delta": 1227
+  },
+  {
+    "font": "K7Rotate",
+    "x": 4,
+    "case": 3,
+    "mode": 1,
+    "legacy": 22182,
+    "native": 17942,
+    "delta": -4240
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21792,
+    "native": 17309,
+    "delta": -4483
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21563,
+    "native": 17326,
+    "delta": -4237
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21512,
+    "native": 21743,
+    "delta": 231
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21283,
+    "native": 21360,
+    "delta": 77
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21792,
+    "native": 17309,
+    "delta": -4483
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21563,
+    "native": 17326,
+    "delta": -4237
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20475,
+    "native": 21241,
+    "delta": 766
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20279,
+    "native": 20958,
+    "delta": 679
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 1,
+    "mode": 0,
+    "legacy": 19715,
+    "native": 20022,
+    "delta": 307
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 1,
+    "mode": 1,
+    "legacy": 19519,
+    "native": 19739,
+    "delta": 220
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20475,
+    "native": 21241,
+    "delta": 766
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20279,
+    "native": 20958,
+    "delta": 679
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12384,
+    "native": 13141,
+    "delta": 757
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12188,
+    "native": 12858,
+    "delta": 670
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 2,
+    "mode": 0,
+    "legacy": 11624,
+    "native": 12381,
+    "delta": 757
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 2,
+    "mode": 1,
+    "legacy": 11428,
+    "native": 12098,
+    "delta": 670
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12384,
+    "native": 13141,
+    "delta": 757
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12188,
+    "native": 12858,
+    "delta": 670
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 3,
+    "mode": 0,
+    "legacy": 24888,
+    "native": 26115,
+    "delta": 1227
+  },
+  {
+    "font": "K7Packed",
+    "x": 0,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21563,
+    "native": 17326,
+    "delta": -4237
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 3,
+    "mode": 0,
+    "legacy": 28932,
+    "native": 26023,
+    "delta": -2909
+  },
+  {
+    "font": "K7Packed",
+    "x": 2,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21283,
+    "native": 21360,
+    "delta": 77
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 3,
+    "mode": 0,
+    "legacy": 24888,
+    "native": 26115,
+    "delta": 1227
+  },
+  {
+    "font": "K7Packed",
+    "x": 4,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21563,
+    "native": 17326,
+    "delta": -4237
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21939,
+    "native": 17405,
+    "delta": -4534
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21710,
+    "native": 17422,
+    "delta": -4288
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21659,
+    "native": 21890,
+    "delta": 231
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21430,
+    "native": 21507,
+    "delta": 77
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 0,
+    "mode": 0,
+    "legacy": 21939,
+    "native": 17405,
+    "delta": -4534
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 0,
+    "mode": 1,
+    "legacy": 21710,
+    "native": 17422,
+    "delta": -4288
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20613,
+    "native": 21379,
+    "delta": 766
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20417,
+    "native": 21096,
+    "delta": 679
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 1,
+    "mode": 0,
+    "legacy": 19831,
+    "native": 20138,
+    "delta": 307
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 1,
+    "mode": 1,
+    "legacy": 19635,
+    "native": 19855,
+    "delta": 220
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 1,
+    "mode": 0,
+    "legacy": 20613,
+    "native": 21379,
+    "delta": 766
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 1,
+    "mode": 1,
+    "legacy": 20417,
+    "native": 21096,
+    "delta": 679
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12474,
+    "native": 13231,
+    "delta": 757
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12278,
+    "native": 12948,
+    "delta": 670
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 2,
+    "mode": 0,
+    "legacy": 11692,
+    "native": 12449,
+    "delta": 757
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 2,
+    "mode": 1,
+    "legacy": 11496,
+    "native": 12166,
+    "delta": 670
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 2,
+    "mode": 0,
+    "legacy": 12474,
+    "native": 13231,
+    "delta": 757
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 2,
+    "mode": 1,
+    "legacy": 12278,
+    "native": 12948,
+    "delta": 670
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 3,
+    "mode": 0,
+    "legacy": 25144,
+    "native": 26371,
+    "delta": 1227
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 0,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21710,
+    "native": 17422,
+    "delta": -4288
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 3,
+    "mode": 0,
+    "legacy": 29111,
+    "native": 26117,
+    "delta": -2994
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 2,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21430,
+    "native": 21507,
+    "delta": 77
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 3,
+    "mode": 0,
+    "legacy": 25144,
+    "native": 26371,
+    "delta": 1227
+  },
+  {
+    "font": "K7Hybrid",
+    "x": 4,
+    "case": 3,
+    "mode": 1,
+    "legacy": 21710,
+    "native": 17422,
+    "delta": -4288
+  }
+]

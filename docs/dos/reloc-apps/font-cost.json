@@ -1,0 +1,22 @@
+[
+  {
+    "base": 59136,
+    "bank": 7,
+    "span": 1693,
+    "rounding": 99,
+    "load": 673626,
+    "call": 1621503,
+    "kind": 0,
+    "route": 1
+  },
+  {
+    "base": 59136,
+    "bank": 7,
+    "span": 1693,
+    "rounding": 99,
+    "load": 636164,
+    "call": 1624027,
+    "kind": 0,
+    "route": 2
+  }
+]

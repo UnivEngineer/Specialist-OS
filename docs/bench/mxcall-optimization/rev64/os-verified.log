@@ -1,0 +1,566 @@
+[build] Components (OS) started
+[checking] System call registry
+[up-to-date] System call registry
+[prepare] Component build plan
+[time] Component build plan: 0,403 s
+[checking] UI_GFX
+[up-to-date] UI_GFX (0.009 s)
+[checking] COPYBEN variants
+[checking] Font engines
+[up-to-date] COPYBEN variants (0.011 s)
+[up-to-date] Font engines (0.020 s)
+[checking] DOS
+[build] DOS (checked in 0.074 s)
+Compact: 162 glyphs derived from KOI8.pf; DEL placeholder retained
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+WINDOW.asm(11): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 1, compiled: 1662 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+queue-hook.inc(4): warning[shortblock]: init data for block truncated to length: 0
+TRANSPORT.asm(332): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 2, compiled: 2437 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2062 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2228 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2494 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1952 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2020 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+copy-prepare.inc(70): warning[shortblock]: init data for block truncated to length: 0
+copy-prepare.inc(206): warning[shortblock]: init data for block truncated to length: 0
+LOCALBLOCK.asm(35): warning[shortblock]: init data for block truncated to length: 0
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+local-block.inc(4): ^ emitted from here
+LOCALBLOCK.asm(41): warning[shortblock]: init data for block truncated to length: 0
+local-io.inc(3): warning[shortblock]: init data for block truncated to length: 0
+CLIENT.asm(149): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 7, compiled: 3186 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1974 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2152 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2282 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=LOCALBLOCK.bin (1600 bytes) Offset=0  Len=1600
+include data: name=CLIENT.bin (448 bytes) Offset=0  Len=448
+include data: name=TRANSPORT.bin (959 bytes) Offset=0  Len=959
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=32
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1654 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+System.measure.asm(150): warning[fileorg]: ORG does not pad output file to reach target address, bytes skipped: 16936
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.measure.asm(151): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.measure.asm(218): ^ emitted from here
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=8
+Pass 3 complete
+Errors: 0, warnings: 3, compiled: 18757 lines, work time: 0.172 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(127): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(136): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(142): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(147): ^ emitted from here
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=8
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(153): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(159): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(165): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(170): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(180): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(188): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(194): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(200): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(205): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(211): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(217): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(222): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(228): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(234): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(239): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(245): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(250): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(256): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(262): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(272): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(278): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(283): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(289): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(295): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(301): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(305): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(311): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(316): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(321): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(331): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(337): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(343): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(348): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(354): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(360): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(364): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(370): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(376): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(382): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(386): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(392): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(402): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(408): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(418): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(424): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(428): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(434): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(440): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(446): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(456): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(462): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(468): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(474): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(480): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(486): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(492): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(498): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(504): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(510): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(516): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(522): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(528): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(534): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(540): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(546): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(552): ^ emitted from here
+include data: name=MAINBIOS.bin (353 bytes) Offset=0  Len=353
+Pass 3 complete
+Errors: 0, warnings: 70, compiled: 19312 lines, work time: 0.156 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(127): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(136): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(142): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(147): ^ emitted from here
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=8
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(153): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(159): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(165): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(170): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(180): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(188): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(194): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(200): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(205): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(211): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(217): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(222): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(228): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(234): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(239): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(245): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(250): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(256): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(262): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(272): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(278): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(283): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(289): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(295): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(301): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(305): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(311): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(316): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(321): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(331): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(337): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(343): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(348): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(354): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(360): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(364): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(370): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(376): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(382): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(386): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(392): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(402): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(408): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(418): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(424): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(428): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(434): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(440): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(446): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(456): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(462): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(468): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(474): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(480): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(486): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(492): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(498): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(504): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(510): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(516): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(522): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(528): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(534): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(540): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(546): ^ emitted from here
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(552): ^ emitted from here
+include data: name=MAINBIOS.bin (353 bytes) Offset=0  Len=353
+Pass 3 complete
+Errors: 0, warnings: 70, compiled: 19312 lines, work time: 0.157 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1925 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+WINDOW.asm(11): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 1, compiled: 1662 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+queue-hook.inc(4): warning[shortblock]: init data for block truncated to length: 0
+TRANSPORT.asm(332): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 2, compiled: 2437 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2062 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2228 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2494 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1952 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2020 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+copy-prepare.inc(70): warning[shortblock]: init data for block truncated to length: 0
+copy-prepare.inc(206): warning[shortblock]: init data for block truncated to length: 0
+LOCALBLOCK.asm(35): warning[shortblock]: init data for block truncated to length: 0
+mxos.inc(1445): warning[shortblock]: init data for block truncated to length: 0
+local-block.inc(4): ^ emitted from here
+LOCALBLOCK.asm(41): warning[shortblock]: init data for block truncated to length: 0
+local-io.inc(3): warning[shortblock]: init data for block truncated to length: 0
+CLIENT.asm(149): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 7, compiled: 3186 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1974 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2152 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2282 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=LOCALBLOCK.bin (1600 bytes) Offset=0  Len=1600
+include data: name=CLIENT.bin (448 bytes) Offset=0  Len=448
+include data: name=TRANSPORT.bin (959 bytes) Offset=0  Len=959
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=32
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1654 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 23408 lines, work time: 0.187 seconds
+Bank DOS: 29975 bytes, end 7617h
+BIOS: 6139 bytes; IO: 443 bytes; bank DOS: 29975 bytes, end 7617h
+[time] DOS: 2.274 s
+[checking] Benchmark support
+[up-to-date] Benchmark support (0.013 s)
+[checking] test-scr
+[checking] FONT
+[checking] EXE
+[checking] TESTMX
+[checking] COPYBEN
+[checking] CHKDSK
+[checking] FLOPPY
+[checking] tape
+[checking] Flash
+[checking] FlashFst
+[checking] FlashSys
+[checking] RAMDISK
+[checking] Rom
+[checking] Rom64
+[checking] Debug
+[checking] Monitor2
+[up-to-date] test-scr (0.034 s)
+[up-to-date] EXE (0.033 s)
+[checking] MONWIN
+[checking] RUN
+[checking] RAMFOS
+[checking] FORMAT
+[up-to-date] TESTMX (0.048 s)
+[checking] EDIT
+[up-to-date] CHKDSK (0.046 s)
+[checking] CLI
+[checking] TEXTCOM
+[checking] NC
+[checking] ENGINEB
+[checking] ENGINEP
+[checking] ENGINE6
+[checking] ORIONM1
+[checking] ENGINEQ
+[checking] ENGINEM
+[checking] FONTCOM
+[checking] ENGINEW
+[checking] ENGINE4
+[checking] ENGINES
+[checking] FONTLAB
+[up-to-date] MONWIN (0.063 s)
+[up-to-date] FLOPPY (0.094 s)
+[checking] FONTBLK
+[checking] FONTRMP
+[up-to-date] FlashSys (0.092 s)
+[up-to-date] FONT (0.101 s)
+[up-to-date] tape (0.128 s)
+[up-to-date] ORIONM1 (0.065 s)
+[up-to-date] FORMAT (0.097 s)
+[up-to-date] Monitor2 (0.110 s)
+[up-to-date] RUN (0.109 s)
+[up-to-date] Flash (0.136 s)
+[up-to-date] ENGINEW (0.077 s)
+[up-to-date] Rom (0.129 s)
+[up-to-date] FlashFst (0.143 s)
+[up-to-date] Rom64 (0.131 s)
+[up-to-date] ENGINE4 (0.071 s)
+[up-to-date] ENGINEP (0.099 s)
+[up-to-date] ENGINEQ (0.087 s)
+[up-to-date] CLI (0.117 s)
+[up-to-date] ENGINEB (0.110 s)
+[up-to-date] RAMDISK (0.148 s)
+[up-to-date] ENGINEM (0.104 s)
+[up-to-date] Debug (0.140 s)
+[up-to-date] TEXTCOM (0.114 s)
+[up-to-date] ENGINES (0.086 s)
+[up-to-date] ENGINE6 (0.119 s)
+[up-to-date] COPYBEN (0.205 s)
+[up-to-date] FONTBLK (0.179 s)
+[up-to-date] EDIT (0.227 s)
+[up-to-date] FONTRMP (0.165 s)
+[up-to-date] FONTLAB (0.186 s)
+[up-to-date] FONTCOM (0.191 s)
+[up-to-date] RAMFOS (0.247 s)
+[up-to-date] NC (0.231 s)
+[checking] ENUM
+[up-to-date] ENUM (0.010 s)
+[checking] FILEOPS
+[up-to-date] FILEOPS (0.012 s)
+[checking] DISKBEN (2000000 Hz)
+[up-to-date] DISKBEN (2000000 Hz) (0.011 s)
+[checking] SORTBEN
+[up-to-date] SORTBEN (0.007 s)

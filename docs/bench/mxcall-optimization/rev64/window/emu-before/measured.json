@@ -1,0 +1,1330 @@
+{
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "system_sha": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+  "mem_sha": "f1d1fb70b8160cbcd8884b5a236e05803a867ecac20ea5b4ee631a51873880ba",
+  "rows": [
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 0,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 449,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 0,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 1,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3945,
+      "mapper_writes": {
+        "FFFC": 1,
+        "FFFD": 2,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 2,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4039,
+      "mapper_writes": {
+        "FFFC": 2,
+        "FFFD": 3,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 3,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4133,
+      "mapper_writes": {
+        "FFFC": 3,
+        "FFFD": 4,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 4,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4227,
+      "mapper_writes": {
+        "FFFC": 4,
+        "FFFD": 5,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 5,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4321,
+      "mapper_writes": {
+        "FFFC": 5,
+        "FFFD": 6,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 6,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4415,
+      "mapper_writes": {
+        "FFFC": 6,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 7,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4509,
+      "mapper_writes": {
+        "FFFC": 7,
+        "FFFD": 8,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 8,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4603,
+      "mapper_writes": {
+        "FFFC": 8,
+        "FFFD": 9,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 9,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4697,
+      "mapper_writes": {
+        "FFFC": 9,
+        "FFFD": 10,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 10,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4791,
+      "mapper_writes": {
+        "FFFC": 10,
+        "FFFD": 11,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 11,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4885,
+      "mapper_writes": {
+        "FFFC": 11,
+        "FFFD": 12,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 12,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4979,
+      "mapper_writes": {
+        "FFFC": 12,
+        "FFFD": 13,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 13,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5073,
+      "mapper_writes": {
+        "FFFC": 13,
+        "FFFD": 14,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 14,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5167,
+      "mapper_writes": {
+        "FFFC": 14,
+        "FFFD": 15,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 15,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5261,
+      "mapper_writes": {
+        "FFFC": 15,
+        "FFFD": 16,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 16,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5355,
+      "mapper_writes": {
+        "FFFC": 16,
+        "FFFD": 17,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 17,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5449,
+      "mapper_writes": {
+        "FFFC": 17,
+        "FFFD": 18,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 18,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5543,
+      "mapper_writes": {
+        "FFFC": 18,
+        "FFFD": 19,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 19,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5637,
+      "mapper_writes": {
+        "FFFC": 19,
+        "FFFD": 20,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 20,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5731,
+      "mapper_writes": {
+        "FFFC": 20,
+        "FFFD": 21,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 21,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5825,
+      "mapper_writes": {
+        "FFFC": 21,
+        "FFFD": 22,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 22,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5919,
+      "mapper_writes": {
+        "FFFC": 22,
+        "FFFD": 23,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 23,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6013,
+      "mapper_writes": {
+        "FFFC": 23,
+        "FFFD": 24,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 24,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6107,
+      "mapper_writes": {
+        "FFFC": 24,
+        "FFFD": 25,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 25,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6201,
+      "mapper_writes": {
+        "FFFC": 25,
+        "FFFD": 26,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 26,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6295,
+      "mapper_writes": {
+        "FFFC": 26,
+        "FFFD": 27,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 27,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6389,
+      "mapper_writes": {
+        "FFFC": 27,
+        "FFFD": 28,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 28,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6483,
+      "mapper_writes": {
+        "FFFC": 28,
+        "FFFD": 29,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 29,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6577,
+      "mapper_writes": {
+        "FFFC": 29,
+        "FFFD": 30,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 30,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6671,
+      "mapper_writes": {
+        "FFFC": 30,
+        "FFFD": 31,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6765,
+      "mapper_writes": {
+        "FFFC": 31,
+        "FFFD": 32,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 64,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6385,
+      "mapper_writes": {
+        "FFFC": 3,
+        "FFFD": 6,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 65,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7680,
+      "mapper_writes": {
+        "FFFC": 4,
+        "FFFD": 8,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 66,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7774,
+      "mapper_writes": {
+        "FFFC": 5,
+        "FFFD": 9,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 67,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7868,
+      "mapper_writes": {
+        "FFFC": 6,
+        "FFFD": 10,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 68,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7962,
+      "mapper_writes": {
+        "FFFC": 7,
+        "FFFD": 11,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 69,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8056,
+      "mapper_writes": {
+        "FFFC": 8,
+        "FFFD": 12,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 70,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8150,
+      "mapper_writes": {
+        "FFFC": 9,
+        "FFFD": 13,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 71,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8244,
+      "mapper_writes": {
+        "FFFC": 10,
+        "FFFD": 14,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 72,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8338,
+      "mapper_writes": {
+        "FFFC": 11,
+        "FFFD": 15,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 73,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8432,
+      "mapper_writes": {
+        "FFFC": 12,
+        "FFFD": 16,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 74,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8526,
+      "mapper_writes": {
+        "FFFC": 13,
+        "FFFD": 17,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 75,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8620,
+      "mapper_writes": {
+        "FFFC": 14,
+        "FFFD": 18,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 76,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8714,
+      "mapper_writes": {
+        "FFFC": 15,
+        "FFFD": 19,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8808,
+      "mapper_writes": {
+        "FFFC": 16,
+        "FFFD": 20,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 78,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8902,
+      "mapper_writes": {
+        "FFFC": 17,
+        "FFFD": 21,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 79,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8996,
+      "mapper_writes": {
+        "FFFC": 18,
+        "FFFD": 22,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 80,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9090,
+      "mapper_writes": {
+        "FFFC": 19,
+        "FFFD": 23,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 81,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9184,
+      "mapper_writes": {
+        "FFFC": 20,
+        "FFFD": 24,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 82,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9278,
+      "mapper_writes": {
+        "FFFC": 21,
+        "FFFD": 25,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 83,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9372,
+      "mapper_writes": {
+        "FFFC": 22,
+        "FFFD": 26,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 84,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9466,
+      "mapper_writes": {
+        "FFFC": 23,
+        "FFFD": 27,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 85,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9560,
+      "mapper_writes": {
+        "FFFC": 24,
+        "FFFD": 28,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 86,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9654,
+      "mapper_writes": {
+        "FFFC": 25,
+        "FFFD": 29,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 87,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9748,
+      "mapper_writes": {
+        "FFFC": 26,
+        "FFFD": 30,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 88,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9842,
+      "mapper_writes": {
+        "FFFC": 27,
+        "FFFD": 31,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 89,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 9936,
+      "mapper_writes": {
+        "FFFC": 28,
+        "FFFD": 32,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 90,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 10030,
+      "mapper_writes": {
+        "FFFC": 29,
+        "FFFD": 33,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 91,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 10124,
+      "mapper_writes": {
+        "FFFC": 30,
+        "FFFD": 34,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 92,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 10218,
+      "mapper_writes": {
+        "FFFC": 31,
+        "FFFD": 35,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 93,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 10312,
+      "mapper_writes": {
+        "FFFC": 32,
+        "FFFD": 36,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 94,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 10406,
+      "mapper_writes": {
+        "FFFC": 33,
+        "FFFD": 37,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 95,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 10500,
+      "mapper_writes": {
+        "FFFC": 34,
+        "FFFD": 38,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5363,
+      "mapper_writes": {
+        "FFFC": 2,
+        "FFFD": 5,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 33,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6658,
+      "mapper_writes": {
+        "FFFC": 3,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 96,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7407,
+      "mapper_writes": {
+        "FFFC": 4,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 255,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 15610,
+      "mapper_writes": {
+        "FFFC": 39,
+        "FFFD": 43,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 256,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 12194,
+      "mapper_writes": {
+        "FFFC": 9,
+        "FFFD": 12,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 257,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 13790,
+      "mapper_writes": {
+        "FFFC": 10,
+        "FFFD": 14,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 511,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 23764,
+      "mapper_writes": {
+        "FFFC": 47,
+        "FFFD": 51,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 512,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 20671,
+      "mapper_writes": {
+        "FFFC": 17,
+        "FFFD": 20,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 6,
+      "src_bank": 6,
+      "dst_bank": 0,
+      "count": 513,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 21966,
+      "mapper_writes": {
+        "FFFC": 18,
+        "FFFD": 22,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 1,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3931,
+      "mapper_writes": {
+        "FFFC": 2,
+        "FFFD": 1,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6751,
+      "mapper_writes": {
+        "FFFC": 32,
+        "FFFD": 31,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5349,
+      "mapper_writes": {
+        "FFFC": 5,
+        "FFFD": 2,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8794,
+      "mapper_writes": {
+        "FFFC": 20,
+        "FFFD": 16,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 0,
+      "src_bank": 3,
+      "dst_bank": 0,
+      "count": 128,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8415,
+      "mapper_writes": {
+        "FFFC": 8,
+        "FFFD": 5,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 7,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4523,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 15,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6779,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 63,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 5391,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8836,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 36,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 128,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8457,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 13,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 1,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 3451,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 2,
+        "FFFE": 1
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 13,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4579,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 14,
+        "FFFE": 13
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 31,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 6271,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 32,
+        "FFFE": 31
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 32,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 4875,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 5,
+        "FFFE": 2
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 77,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 8320,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 20,
+        "FFFE": 16
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 128,
+      "dst_bank": 2,
+      "count": 128,
+      "src": 8195,
+      "dst": 16391,
+      "ticks": 7941,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 8,
+        "FFFE": 5
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 1,
+      "src": 65279,
+      "dst": 65279,
+      "ticks": 3987,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 3,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 13,
+      "src": 65267,
+      "dst": 65267,
+      "ticks": 5115,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 27,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 31,
+      "src": 65249,
+      "dst": 65249,
+      "ticks": 6807,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 63,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 32,
+      "src": 65248,
+      "dst": 65248,
+      "ticks": 5419,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 7,
+        "FFFE": 0
+      }
+    },
+    {
+      "caller": 1,
+      "src_bank": 3,
+      "dst_bank": 2,
+      "count": 77,
+      "src": 65203,
+      "dst": 65203,
+      "ticks": 8864,
+      "mapper_writes": {
+        "FFFC": 0,
+        "FFFD": 36,
+        "FFFE": 0
+      }
+    }
+  ]
+}

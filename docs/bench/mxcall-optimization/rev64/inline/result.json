@@ -1,0 +1,106 @@
+[
+  {
+    "operation": "upper",
+    "input": "q",
+    "inlineBytes": 37,
+    "comparedInputs": 256,
+    "direct": 73,
+    "inline": 41
+  },
+  {
+    "operation": "upper",
+    "input": "A",
+    "inlineBytes": 37,
+    "comparedInputs": 256,
+    "direct": 45,
+    "inline": 17
+  },
+  {
+    "operation": "upper",
+    "input": "A0h",
+    "inlineBytes": 37,
+    "comparedInputs": 256,
+    "direct": 90,
+    "inline": 68
+  },
+  {
+    "operation": "upper",
+    "input": "C0h",
+    "inlineBytes": 37,
+    "comparedInputs": 256,
+    "direct": 114,
+    "inline": 102
+  },
+  {
+    "operation": "upper",
+    "input": "E0h",
+    "inlineBytes": 37,
+    "comparedInputs": 256,
+    "direct": 103,
+    "inline": 85
+  },
+  {
+    "operation": "cmp",
+    "input": "1234h/2345h",
+    "inlineBytes": 7,
+    "comparedInputs": 64,
+    "direct": 47,
+    "inline": 19
+  },
+  {
+    "operation": "cmp",
+    "input": "1234h/1235h",
+    "inlineBytes": 7,
+    "comparedInputs": 64,
+    "direct": 60,
+    "inline": 28
+  },
+  {
+    "operation": "cmp",
+    "input": "1234h/1234h",
+    "inlineBytes": 7,
+    "comparedInputs": 64,
+    "direct": 60,
+    "inline": 28
+  },
+  {
+    "operation": "cmp",
+    "input": "2345h/1234h",
+    "inlineBytes": 7,
+    "comparedInputs": 64,
+    "direct": 47,
+    "inline": 19
+  },
+  {
+    "operation": "sub",
+    "input": "1234h/2345h",
+    "inlineBytes": 6,
+    "comparedInputs": 64,
+    "direct": 65,
+    "inline": 28
+  },
+  {
+    "operation": "sub",
+    "input": "1234h/1235h",
+    "inlineBytes": 6,
+    "comparedInputs": 64,
+    "direct": 65,
+    "inline": 28
+  },
+  {
+    "operation": "sub",
+    "input": "1234h/1234h",
+    "inlineBytes": 6,
+    "comparedInputs": 64,
+    "direct": 65,
+    "inline": 28
+  },
+  {
+    "operation": "sub",
+    "input": "2345h/1234h",
+    "inlineBytes": 6,
+    "comparedInputs": 64,
+    "direct": 65,
+    "inline": 28
+  }
+]

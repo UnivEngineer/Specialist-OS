@@ -1,0 +1,323 @@
+{
+  "date": "2026-10-31",
+  "status": "emulator-only",
+  "cpu_hz": 2000000,
+  "pit_hz": 2000000,
+  "read_passes": 1,
+  "write_passes_per_case": 1,
+  "bench_sha256": "8996a20308c12cceab41b68dec197cc61f4fbd3615d55d091e3df67c2d1426f2",
+  "variants": {
+    "Regs2": {
+      "dos_bytes": 6195,
+      "dos_sha256": "8faa2379d6711589126ce58b0c467adc8e2ee52199c9f9ca2bce44002327856f",
+      "tail_bytes": 160,
+      "cycles": {
+        "1:4001": 13112,
+        "2:4001": 13141,
+        "1:FE00": 13128,
+        "2:FE00": 13157
+      },
+      "checks": [
+        "all 16 replicas unchanged after read/write",
+        "page 0/1/15, sector FEh",
+        "unaligned 4001h and boundary FE00h buffers",
+        "256-byte readback, A/BC/DE/HL/SP preserved",
+        "boot/FAT/root unchanged"
+      ],
+      "runs": [
+        {
+          "read_seq": {
+            "ticks": 1667,
+            "operations": 32,
+            "kib_s": 37.49250149970006,
+            "pit_minus_nominal_cycles": -96
+          },
+          "read_random": {
+            "ticks": 1666,
+            "operations": 32,
+            "kib_s": 37.51500600240096,
+            "pit_minus_nominal_cycles": -352
+          },
+          "write_seq": {
+            "ticks": 1665,
+            "operations": 32,
+            "kib_s": 37.53753753753754,
+            "pit_minus_nominal_cycles": 320
+          },
+          "write_random": {
+            "ticks": 1664,
+            "operations": 32,
+            "kib_s": 37.56009615384615,
+            "pit_minus_nominal_cycles": 64
+          }
+        },
+        {
+          "read_seq": {
+            "ticks": 1666,
+            "operations": 32,
+            "kib_s": 37.51500600240096,
+            "pit_minus_nominal_cycles": -352
+          },
+          "read_random": {
+            "ticks": 1666,
+            "operations": 32,
+            "kib_s": 37.51500600240096,
+            "pit_minus_nominal_cycles": -352
+          },
+          "write_seq": {
+            "ticks": 1665,
+            "operations": 32,
+            "kib_s": 37.53753753753754,
+            "pit_minus_nominal_cycles": 320
+          },
+          "write_random": {
+            "ticks": 1664,
+            "operations": 32,
+            "kib_s": 37.56009615384615,
+            "pit_minus_nominal_cycles": 64
+          }
+        },
+        {
+          "read_seq": {
+            "ticks": 1667,
+            "operations": 32,
+            "kib_s": 37.49250149970006,
+            "pit_minus_nominal_cycles": -96
+          },
+          "read_random": {
+            "ticks": 1666,
+            "operations": 32,
+            "kib_s": 37.51500600240096,
+            "pit_minus_nominal_cycles": -352
+          },
+          "write_seq": {
+            "ticks": 1666,
+            "operations": 32,
+            "kib_s": 37.51500600240096,
+            "pit_minus_nominal_cycles": 576
+          },
+          "write_random": {
+            "ticks": 1664,
+            "operations": 32,
+            "kib_s": 37.56009615384615,
+            "pit_minus_nominal_cycles": 64
+          }
+        }
+      ],
+      "median": {
+        "read_seq": 37.49250149970006,
+        "read_random": 37.51500600240096,
+        "write_seq": 37.53753753753754,
+        "write_random": 37.56009615384615
+      }
+    },
+    "Regs4": {
+      "dos_bytes": 6163,
+      "dos_sha256": "81aee5d31702a1151f623d0383016a72a7f39d2c34631906bf39e1386194d0a0",
+      "tail_bytes": 77,
+      "cycles": {
+        "1:4001": 11625,
+        "2:4001": 10982,
+        "1:FE00": 11641,
+        "2:FE00": 10998
+      },
+      "checks": [
+        "all 16 replicas unchanged after read/write",
+        "page 0/1/15, sector FEh",
+        "unaligned 4001h and boundary FE00h buffers",
+        "256-byte readback, A/BC/DE/HL/SP preserved",
+        "boot/FAT/root unchanged"
+      ],
+      "runs": [
+        {
+          "read_seq": {
+            "ticks": 1400,
+            "operations": 32,
+            "kib_s": 44.642857142857146,
+            "pit_minus_nominal_cycles": 640
+          },
+          "read_random": {
+            "ticks": 1400,
+            "operations": 32,
+            "kib_s": 44.642857142857146,
+            "pit_minus_nominal_cycles": 640
+          },
+          "write_seq": {
+            "ticks": 1479,
+            "operations": 32,
+            "kib_s": 42.25828262339419,
+            "pit_minus_nominal_cycles": 288
+          },
+          "write_random": {
+            "ticks": 1481,
+            "operations": 32,
+            "kib_s": 42.20121539500338,
+            "pit_minus_nominal_cycles": 800
+          }
+        },
+        {
+          "read_seq": {
+            "ticks": 1399,
+            "operations": 32,
+            "kib_s": 44.67476769120801,
+            "pit_minus_nominal_cycles": 384
+          },
+          "read_random": {
+            "ticks": 1397,
+            "operations": 32,
+            "kib_s": 44.73872584108805,
+            "pit_minus_nominal_cycles": -128
+          },
+          "write_seq": {
+            "ticks": 1478,
+            "operations": 32,
+            "kib_s": 42.28687415426252,
+            "pit_minus_nominal_cycles": 32
+          },
+          "write_random": {
+            "ticks": 1477,
+            "operations": 32,
+            "kib_s": 42.31550440081246,
+            "pit_minus_nominal_cycles": -224
+          }
+        },
+        {
+          "read_seq": {
+            "ticks": 1397,
+            "operations": 32,
+            "kib_s": 44.73872584108805,
+            "pit_minus_nominal_cycles": -128
+          },
+          "read_random": {
+            "ticks": 1397,
+            "operations": 32,
+            "kib_s": 44.73872584108805,
+            "pit_minus_nominal_cycles": -128
+          },
+          "write_seq": {
+            "ticks": 1477,
+            "operations": 32,
+            "kib_s": 42.31550440081246,
+            "pit_minus_nominal_cycles": -224
+          },
+          "write_random": {
+            "ticks": 1476,
+            "operations": 32,
+            "kib_s": 42.34417344173442,
+            "pit_minus_nominal_cycles": -480
+          }
+        }
+      ],
+      "median": {
+        "read_seq": 44.67476769120801,
+        "read_random": 44.73872584108805,
+        "write_seq": 42.28687415426252,
+        "write_random": 42.31550440081246
+      }
+    },
+    "Regs6": {
+      "dos_bytes": 6169,
+      "dos_sha256": "75b967f84e1b477ad89a961940cede8bb74267d7f3a7ecdc46babda118f737a8",
+      "tail_bytes": 28,
+      "cycles": {
+        "1:4001": 13513,
+        "2:4001": 13552,
+        "1:FE00": 13529,
+        "2:FE00": 13568
+      },
+      "checks": [
+        "all 16 replicas unchanged after read/write",
+        "page 0/1/15, sector FEh",
+        "unaligned 4001h and boundary FE00h buffers",
+        "256-byte readback, A/BC/DE/HL/SP preserved",
+        "boot/FAT/root unchanged"
+      ],
+      "runs": [
+        {
+          "read_seq": {
+            "ticks": 1720,
+            "operations": 32,
+            "kib_s": 36.33720930232558,
+            "pit_minus_nominal_cycles": 320
+          },
+          "read_random": {
+            "ticks": 1719,
+            "operations": 32,
+            "kib_s": 36.35834787667249,
+            "pit_minus_nominal_cycles": 64
+          },
+          "write_seq": {
+            "ticks": 1711,
+            "operations": 32,
+            "kib_s": 36.52834599649328,
+            "pit_minus_nominal_cycles": -736
+          },
+          "write_random": {
+            "ticks": 1715,
+            "operations": 32,
+            "kib_s": 36.44314868804665,
+            "pit_minus_nominal_cycles": 288
+          }
+        },
+        {
+          "read_seq": {
+            "ticks": 1719,
+            "operations": 32,
+            "kib_s": 36.35834787667249,
+            "pit_minus_nominal_cycles": 64
+          },
+          "read_random": {
+            "ticks": 1717,
+            "operations": 32,
+            "kib_s": 36.400698893418756,
+            "pit_minus_nominal_cycles": -448
+          },
+          "write_seq": {
+            "ticks": 1715,
+            "operations": 32,
+            "kib_s": 36.44314868804665,
+            "pit_minus_nominal_cycles": 288
+          },
+          "write_random": {
+            "ticks": 1712,
+            "operations": 32,
+            "kib_s": 36.507009345794394,
+            "pit_minus_nominal_cycles": -480
+          }
+        },
+        {
+          "read_seq": {
+            "ticks": 1720,
+            "operations": 32,
+            "kib_s": 36.33720930232558,
+            "pit_minus_nominal_cycles": 320
+          },
+          "read_random": {
+            "ticks": 1719,
+            "operations": 32,
+            "kib_s": 36.35834787667249,
+            "pit_minus_nominal_cycles": 64
+          },
+          "write_seq": {
+            "ticks": 1711,
+            "operations": 32,
+            "kib_s": 36.52834599649328,
+            "pit_minus_nominal_cycles": -736
+          },
+          "write_random": {
+            "ticks": 1718,
+            "operations": 32,
+            "kib_s": 36.37951105937137,
+            "pit_minus_nominal_cycles": 1056
+          }
+        }
+      ],
+      "median": {
+        "read_seq": 36.33720930232558,
+        "read_random": 36.35834787667249,
+        "write_seq": 36.52834599649328,
+        "write_random": 36.44314868804665
+      }
+    }
+  }
+}

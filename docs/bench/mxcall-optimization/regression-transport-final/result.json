@@ -1,0 +1,625 @@
+{
+  "runtimeBytes": 959,
+  "windowBytes": 32,
+  "cases": [
+    {
+      "case": "main -> DOS -> BIOS -> bank 2 -> DOS -> unwind",
+      "result": "bc9a475534127856"
+    },
+    {
+      "target": 16,
+      "a": 85,
+      "carry": true
+    },
+    {
+      "target": 0,
+      "a": 85,
+      "carry": true
+    },
+    {
+      "target": 1,
+      "a": 0,
+      "carry": false
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        8192
+      ],
+      "error": 0,
+      "ticks": 265960,
+      "ms": 132.98
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        1,
+        2,
+        0,
+        259
+      ],
+      "error": 0,
+      "ticks": 13978,
+      "ms": 6.989
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        2,
+        0,
+        16,
+        256
+      ],
+      "error": 0,
+      "ticks": 12194,
+      "ms": 6.097
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        16,
+        1,
+        1
+      ],
+      "error": 0,
+      "ticks": 3945,
+      "ms": 1.9725
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        16,
+        1,
+        2
+      ],
+      "error": 0,
+      "ticks": 4039,
+      "ms": 2.0195
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        16,
+        1,
+        3
+      ],
+      "error": 0,
+      "ticks": 4133,
+      "ms": 2.0665
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        1,
+        5
+      ],
+      "error": 0,
+      "ticks": 4348,
+      "ms": 2.174
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        5
+      ],
+      "error": 226,
+      "ticks": 725,
+      "ms": 0.3625
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        32
+      ],
+      "error": 226,
+      "ticks": 695,
+      "ms": 0.3475
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        17,
+        2,
+        4
+      ],
+      "error": 224,
+      "ticks": 533,
+      "ms": 0.2665
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        17,
+        17,
+        0
+      ],
+      "error": 0,
+      "ticks": 449,
+      "ms": 0.2245
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "error": 0,
+      "ticks": 4227,
+      "ms": 2.1135
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "error": 0,
+      "ticks": 4227,
+      "ms": 2.1135
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "error": 0,
+      "ticks": 4227,
+      "ms": 2.1135
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        252
+      ],
+      "error": 0,
+      "ticks": 15342,
+      "ms": 7.671
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        252
+      ],
+      "error": 0,
+      "ticks": 15342,
+      "ms": 7.671
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        252
+      ],
+      "error": 0,
+      "ticks": 15342,
+      "ms": 7.671
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        255
+      ],
+      "error": 0,
+      "ticks": 15624,
+      "ms": 7.812
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        255
+      ],
+      "error": 0,
+      "ticks": 15624,
+      "ms": 7.812
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        255
+      ],
+      "error": 0,
+      "ticks": 15624,
+      "ms": 7.812
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        256
+      ],
+      "error": 0,
+      "ticks": 12208,
+      "ms": 6.104
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        256
+      ],
+      "error": 0,
+      "ticks": 12208,
+      "ms": 6.104
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        256
+      ],
+      "error": 0,
+      "ticks": 12208,
+      "ms": 6.104
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        257
+      ],
+      "error": 0,
+      "ticks": 13804,
+      "ms": 6.902
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        257
+      ],
+      "error": 0,
+      "ticks": 13804,
+      "ms": 6.902
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        257
+      ],
+      "error": 0,
+      "ticks": 13804,
+      "ms": 6.902
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        258
+      ],
+      "error": 0,
+      "ticks": 13898,
+      "ms": 6.949
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        258
+      ],
+      "error": 0,
+      "ticks": 13898,
+      "ms": 6.949
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        258
+      ],
+      "error": 0,
+      "ticks": 13898,
+      "ms": 6.949
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        259
+      ],
+      "error": 0,
+      "ticks": 13992,
+      "ms": 6.996
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        259
+      ],
+      "error": 0,
+      "ticks": 13992,
+      "ms": 6.996
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        259
+      ],
+      "error": 0,
+      "ticks": 13992,
+      "ms": 6.996
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        511
+      ],
+      "error": 0,
+      "ticks": 23778,
+      "ms": 11.889
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        511
+      ],
+      "error": 0,
+      "ticks": 23778,
+      "ms": 11.889
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        511
+      ],
+      "error": 0,
+      "ticks": 23778,
+      "ms": 11.889
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        512
+      ],
+      "error": 0,
+      "ticks": 20685,
+      "ms": 10.3425
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        512
+      ],
+      "error": 0,
+      "ticks": 20685,
+      "ms": 10.3425
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        512
+      ],
+      "error": 0,
+      "ticks": 20685,
+      "ms": 10.3425
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        513
+      ],
+      "error": 0,
+      "ticks": 21980,
+      "ms": 10.99
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        513
+      ],
+      "error": 0,
+      "ticks": 21980,
+      "ms": 10.99
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        513
+      ],
+      "error": 0,
+      "ticks": 21980,
+      "ms": 10.99
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        8192
+      ],
+      "error": 0,
+      "ticks": 265960,
+      "ms": 132.98
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        8192
+      ],
+      "error": 0,
+      "ticks": 265960,
+      "ms": 132.98
+    },
+    {
+      "entry": "bankCopyFar",
+      "copy": [
+        0,
+        1,
+        2,
+        8192
+      ],
+      "error": 0,
+      "ticks": 265960,
+      "ms": 132.98
+    },
+    {
+      "entry": "bankCopySector",
+      "copy": [
+        0,
+        0,
+        2,
+        256
+      ],
+      "error": 0,
+      "ticks": 11690,
+      "ms": 5.845
+    },
+    {
+      "entry": "bankCopySector",
+      "copy": [
+        0,
+        2,
+        0,
+        256
+      ],
+      "error": 0,
+      "ticks": 11690,
+      "ms": 5.845
+    },
+    {
+      "entry": "bankCopySector",
+      "copy": [
+        1,
+        1,
+        2,
+        256
+      ],
+      "error": 0,
+      "ticks": 11732,
+      "ms": 5.866
+    },
+    {
+      "entry": "bankCopySector",
+      "copy": [
+        1,
+        2,
+        1,
+        256
+      ],
+      "error": 0,
+      "ticks": 11732,
+      "ms": 5.866
+    },
+    {
+      "entry": "bankCopySector",
+      "copy": [
+        2,
+        0,
+        1,
+        256
+      ],
+      "error": 0,
+      "ticks": 11704,
+      "ms": 5.852
+    },
+    {
+      "entry": "bankCopySector",
+      "copy": [
+        0,
+        1,
+        1,
+        256
+      ],
+      "error": 0,
+      "ticks": 11718,
+      "ms": 5.859
+    }
+  ]
+}

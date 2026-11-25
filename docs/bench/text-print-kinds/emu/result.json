@@ -1,0 +1,1017 @@
+{
+  "revision": 71,
+  "image_sha256": "1d57eafa9d3ba3b4ca529d54150ba9e772213814fabdf5229925ec6bdf853f60",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6142,
+    "DOS.sys": 31471,
+    "IO.sys": 818,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 348
+  },
+  "rows": [
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2662
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 2882
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2833
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 3053
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 167217
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 167437
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 245353
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 245573
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 171220
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 171193
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 279298
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 279271
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 171220
+    },
+    {
+      "kind": 0,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 171193
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 279298
+    },
+    {
+      "kind": 0,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 279271
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2662
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 2882
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2833
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 3053
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 164096
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 164316
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 240323
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 240543
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 168099
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 168072
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 274268
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 274241
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 168099
+    },
+    {
+      "kind": 1,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 168072
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 274268
+    },
+    {
+      "kind": 1,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 274241
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2662
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 2882
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2833
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 3053
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 155199
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 155419
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 231991
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 232211
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 159182
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 159155
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 265882
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 265855
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 159182
+    },
+    {
+      "kind": 2,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 159155
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 265882
+    },
+    {
+      "kind": 2,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 265855
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2662
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 2882
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2833
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 3053
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 176396
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 176616
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 250521
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 250741
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 180379
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 180352
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 284412
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 284385
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 180379
+    },
+    {
+      "kind": 3,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 180352
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 284412
+    },
+    {
+      "kind": 3,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 284385
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2662
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 2882
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 2833
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 0,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 3053
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 0,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6289
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6262
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 6460
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 0,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 6433
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 276186
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 276406
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "regs",
+      "ticks": 431875
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 261,
+      "caller": 0,
+      "abi": "packet",
+      "ticks": 432095
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 280169
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 280142
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "regs",
+      "ticks": 465766
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 261,
+      "caller": 1,
+      "abi": "packet",
+      "ticks": 465739
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 280169
+    },
+    {
+      "kind": 4,
+      "method": 1,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 280142
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "regs",
+      "ticks": 465766
+    },
+    {
+      "kind": 4,
+      "method": 2,
+      "length": 261,
+      "caller": 6,
+      "abi": "packet",
+      "ticks": 465739
+    },
+    {
+      "kind": 5,
+      "caller": 0,
+      "error": 7
+    },
+    {
+      "kind": 5,
+      "caller": 1,
+      "error": 7
+    },
+    {
+      "kind": 5,
+      "caller": 6,
+      "error": 7
+    },
+    {
+      "kind": 255,
+      "caller": 0,
+      "error": 7
+    },
+    {
+      "kind": 255,
+      "caller": 1,
+      "error": 7
+    },
+    {
+      "kind": 255,
+      "caller": 6,
+      "error": 7
+    }
+  ]
+}

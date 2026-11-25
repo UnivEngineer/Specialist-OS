@@ -1,0 +1,267 @@
+{
+  "revision": 64,
+  "image_sha256": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "emu_sha256": "7d9f95cb3e938e20d17ac14e8212a7854222b448f5930e7aec6a9504034938af",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3069,
+    "BIOS.sys": 6139,
+    "DOS.sys": 29975,
+    "IO.sys": 823,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 959,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 353
+  },
+  "rows": [
+    {
+      "operation": "PRINT_CHAR",
+      "number": 258,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 1540,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR",
+      "number": 258,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 3480,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_CURSOR_POS",
+      "number": 265,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 573,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_CURSOR_POS",
+      "number": 265,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 539,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_CURSOR_POS",
+      "number": 266,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 589,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_CURSOR_POS",
+      "number": 266,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 572,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR_RAW",
+      "number": 276,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 1464,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_CHAR_RAW",
+      "number": 276,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 3404,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_BYTE",
+      "number": 262,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 3130,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_BYTE",
+      "number": 262,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 5070,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_WORD",
+      "number": 270,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 5612,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "PRINT_HEX_WORD",
+      "number": 270,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 7552,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_MEM_TOP",
+      "number": 272,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 573,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "GET_MEM_TOP",
+      "number": 272,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 2513,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_MEM_TOP",
+      "number": 271,
+      "caller": 0,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 573,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "SET_MEM_TOP",
+      "number": 271,
+      "caller": 6,
+      "mode": "inline",
+      "supported": true,
+      "ticks": 2513,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    }
+  ]
+}

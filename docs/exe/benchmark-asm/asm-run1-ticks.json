@@ -1,0 +1,122 @@
+{
+  "raw-1": {
+    "ticks": 1725973,
+    "scan_ticks": 82539,
+    "command": "H:EXETEST.COM H:XONE.BIN H:XONE.COM -L:1000",
+    "output": "04ce149d9e7aba726f30277c9d6dafaa76e15bb4a9b1d5320379e0844d416cf5"
+  },
+  "raw-257": {
+    "ticks": 1872917,
+    "scan_ticks": 125440,
+    "command": "H:EXETEST.COM H:XSHORT.BIN H:XSHORT.COM -L:1234",
+    "output": "0e55fde1332d4001c94c2c99cd7ac68191399e03a43066126cec3ac8a521ae37"
+  },
+  "rks-4097": {
+    "ticks": 4545581,
+    "scan_ticks": 810918,
+    "command": "H:EXETEST.COM H:XRKS.RKS H:XRKS.EXE",
+    "output": "9e77b74909bb3babdc44b7f12e98d79989d5a2c4c74b5db99aa8b9bb4ad3c909"
+  },
+  "v2-16385": {
+    "ticks": 11348276,
+    "scan_ticks": 3000182,
+    "command": "H:EXETEST.COM H:XV2.COM H:XV2.RKS",
+    "output": "1bc1c89811ea0542c2f8692bbc46a9c3666b08780a19295924c69ef57c0be34f"
+  },
+  "v1-1024": {
+    "ticks": 2236012,
+    "scan_ticks": 215410,
+    "command": "H:EXETEST.COM H:XV1.EXE H:XV1.DLL -MODE:RF",
+    "output": "53ca81e509a7749530dbb1b19afcd2c6ef495c2a009e5f1d3aab8879888007d9"
+  },
+  "v2-metadata": {
+    "ticks": 11316695,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XV2.COM H:XKEEP.FNT -MODE:MON",
+    "output": "7bd11199ba33f3109df376ad23543ebb4772b7b79096f0b4c07cb6884ef0ce5e"
+  },
+  "options": {
+    "ticks": 1953310,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XSHORT.BIN H:XOPTS.COM -F:BANK -L:1000 -E:1001 -BEGIN:0FF0 -B:8 -END:1200 -P:PRESERVE",
+    "output": "afb40148b5883a83a42b1254ce5ff62e7c3611249acf8e7177e6b731a774cc82"
+  },
+  "extra-options": {
+    "ticks": 1926742,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XOPTS.COM H:XMORE.COM -HEAP:8 -STACK:F -MODE:MX -CACHE:1",
+    "output": "d327e1654ac18889aee9f733edb9f8e297c459ecc9e1528d6dd71302d9b73f94"
+  },
+  "raw-override": {
+    "ticks": 1755749,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XODD.RKS H:XRAW.COM -RAW",
+    "output": "6c07188eb689ae4a6be5e0281998980c7a57509587153facc5eeedb42a667a35"
+  },
+  "raw-65535": {
+    "ticks": 33960311,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XMAX.BIN H:XMAX.RKS -RAW",
+    "output": "f1b465111679cec8e176b085482427a2d07956d93308f5aeb106ab4eaf4efa61"
+  },
+  "bad-header": {
+    "ticks": 224040,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XBHEAD.COM H:XOLD.COM -Y",
+    "output": null
+  },
+  "bad-body": {
+    "ticks": 3210975,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XBBODY.COM H:XOLD.COM -Y",
+    "output": null
+  },
+  "bad-rks": {
+    "ticks": 1169458,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XBAD.RKS H:XOLD.COM -Y",
+    "output": null
+  },
+  "bad-cache": {
+    "ticks": 353316,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XSHORT.BIN H:XOLD.COM -CACHE:100 -Y",
+    "output": null
+  },
+  "bad-hex": {
+    "ticks": 349653,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XSHORT.BIN H:XOLD.COM -L:10000 -Y",
+    "output": null
+  },
+  "bad-range": {
+    "ticks": 351220,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XSHORT.BIN H:XOLD.COM -L:FF00 -Y",
+    "output": null
+  },
+  "bad-entry": {
+    "ticks": 426793,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XV1.EXE H:XOLD.RKS",
+    "output": null
+  },
+  "too-large": {
+    "ticks": 168208,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XHUGE.BIN H:XOLD.COM -Y",
+    "output": null
+  },
+  "empty": {
+    "ticks": 175246,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XEMPTY.BIN H:XOLD.COM -Y",
+    "output": null
+  },
+  "same-alias": {
+    "ticks": 3314848,
+    "scan_ticks": null,
+    "command": "H:EXETEST.COM H:XV2.COM H:/XV2.COM -Y",
+    "output": null
+  }
+}

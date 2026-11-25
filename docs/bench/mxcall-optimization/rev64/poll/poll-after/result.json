@@ -1,0 +1,146 @@
+{
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "raw": {
+    "release": {
+      "F806_KEY_CHECK": [
+        {
+          "ticks": 2582,
+          "a": 255
+        },
+        {
+          "ticks": 2582,
+          "a": 255
+        },
+        {
+          "ticks": 2582,
+          "a": 255
+        }
+      ],
+      "F806_KEY_SCAN": [
+        {
+          "ticks": 2582,
+          "a": 255
+        },
+        {
+          "ticks": 2582,
+          "a": 255
+        },
+        {
+          "ticks": 2582,
+          "a": 255
+        }
+      ],
+      "MAIN_keyScan": [
+        {
+          "ticks": 122,
+          "a": 255
+        },
+        {
+          "ticks": 122,
+          "a": 255
+        },
+        {
+          "ticks": 122,
+          "a": 255
+        }
+      ],
+      "EXEC_io_bankKeyScan": [
+        {
+          "ticks": 140,
+          "a": 255
+        },
+        {
+          "ticks": 140,
+          "a": 255
+        },
+        {
+          "ticks": 140,
+          "a": 255
+        }
+      ]
+    },
+    "press": {
+      "F806_KEY_CHECK": [
+        {
+          "ticks": 6648,
+          "a": 26
+        },
+        {
+          "ticks": 6648,
+          "a": 26
+        },
+        {
+          "ticks": 6648,
+          "a": 26
+        }
+      ],
+      "F806_KEY_SCAN": [
+        {
+          "ticks": 6648,
+          "a": 26
+        },
+        {
+          "ticks": 6648,
+          "a": 26
+        },
+        {
+          "ticks": 6648,
+          "a": 26
+        }
+      ],
+      "MAIN_keyScan": [
+        {
+          "ticks": 4188,
+          "a": 26
+        },
+        {
+          "ticks": 4188,
+          "a": 26
+        },
+        {
+          "ticks": 4188,
+          "a": 26
+        }
+      ],
+      "EXEC_io_bankKeyScan": [
+        {
+          "ticks": 5711,
+          "a": 26
+        },
+        {
+          "ticks": 5711,
+          "a": 26
+        },
+        {
+          "ticks": 5711,
+          "a": 26
+        }
+      ]
+    }
+  },
+  "getch": {
+    "EXEC_F806_GETCH": [
+      100439,
+      986579,
+      45031,
+      45031,
+      45031,
+      45031
+    ],
+    "MAIN_GETCH": [
+      99798,
+      984119,
+      42571,
+      42571,
+      42571,
+      42571
+    ]
+  }
+}

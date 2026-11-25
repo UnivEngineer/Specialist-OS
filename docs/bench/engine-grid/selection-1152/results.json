@@ -1,0 +1,224 @@
+{
+  "bitmap": "PASS",
+  "restore": "PASS",
+  "memory": "PASS",
+  "injectedFailure": false,
+  "rows": [
+    {
+      "engine": "FULL",
+      "kind": 0,
+      "route": 0,
+      "ticks": 4604
+    },
+    {
+      "engine": "FULL",
+      "kind": 0,
+      "route": 1,
+      "ticks": 27355
+    },
+    {
+      "engine": "FULL",
+      "kind": 0,
+      "route": 2,
+      "ticks": 17145
+    },
+    {
+      "engine": "FULL",
+      "kind": 1,
+      "route": 0,
+      "ticks": 4467
+    },
+    {
+      "engine": "FULL",
+      "kind": 1,
+      "route": 1,
+      "ticks": 27219
+    },
+    {
+      "engine": "FULL",
+      "kind": 1,
+      "route": 2,
+      "ticks": 17184
+    },
+    {
+      "engine": "FULL",
+      "kind": 2,
+      "route": 0,
+      "ticks": 3826
+    },
+    {
+      "engine": "FULL",
+      "kind": 2,
+      "route": 3,
+      "ticks": 4531
+    },
+    {
+      "engine": "FULL",
+      "kind": 2,
+      "route": 4,
+      "ticks": 4110
+    },
+    {
+      "engine": "FULL",
+      "kind": 2,
+      "route": 5,
+      "ticks": 4052
+    },
+    {
+      "engine": "FULL",
+      "kind": 3,
+      "route": 0,
+      "ticks": 3830
+    },
+    {
+      "engine": "FULL",
+      "kind": 3,
+      "route": 3,
+      "ticks": 4484
+    },
+    {
+      "engine": "FULL",
+      "kind": 3,
+      "route": 4,
+      "ticks": 4102
+    },
+    {
+      "engine": "FULL",
+      "kind": 3,
+      "route": 5,
+      "ticks": 4056
+    },
+    {
+      "engine": "FULL",
+      "kind": 4,
+      "route": 0,
+      "ticks": 3616
+    },
+    {
+      "engine": "FULL",
+      "kind": 4,
+      "route": 3,
+      "ticks": 4306
+    },
+    {
+      "engine": "FULL",
+      "kind": 4,
+      "route": 4,
+      "ticks": 3889
+    },
+    {
+      "engine": "FULL",
+      "kind": 4,
+      "route": 5,
+      "ticks": 3841
+    },
+    {
+      "engine": "4DUP",
+      "kind": 0,
+      "route": 0,
+      "ticks": 5287
+    },
+    {
+      "engine": "4DUP",
+      "kind": 0,
+      "route": 1,
+      "ticks": 28038
+    },
+    {
+      "engine": "4DUP",
+      "kind": 0,
+      "route": 2,
+      "ticks": 17828
+    },
+    {
+      "engine": "4DUP",
+      "kind": 1,
+      "route": 0,
+      "ticks": 5169
+    },
+    {
+      "engine": "4DUP",
+      "kind": 1,
+      "route": 1,
+      "ticks": 27920
+    },
+    {
+      "engine": "4DUP",
+      "kind": 1,
+      "route": 2,
+      "ticks": 17886
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 0,
+      "ticks": 1494
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 3,
+      "ticks": 2287
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 4,
+      "ticks": 1780
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 5,
+      "ticks": 1719
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 0,
+      "ticks": 1440
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 3,
+      "ticks": 2174
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 4,
+      "ticks": 1726
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 5,
+      "ticks": 1665
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 0,
+      "ticks": 1224
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 3,
+      "ticks": 1994
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 4,
+      "ticks": 1511
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 5,
+      "ticks": 1448
+    }
+  ]
+}

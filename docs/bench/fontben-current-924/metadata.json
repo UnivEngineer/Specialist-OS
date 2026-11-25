@@ -1,0 +1,22 @@
+{
+  "images/SystemRom_emu80_writable.bin": "e611f5947da2232b719293d5e376651b1a29b6707f55e44ff86620208bbb2d09",
+  "images/FlashDisk_emu80_seed.bin": "c23af17ed3ad3cc6976935fdb7444aaf40efd8eeb5cdaa19499ff2cf4cffcbf0",
+  "bin/FONTCOM.i80": "5db9a3e1ab910127b1dc01cea180ed10abef9a7af79f5aeb1e969049098d7c99",
+  "bin/FONTBANK.i80": "6630ff4728d4192e98d7f83ed0a7091965abe95e931a2f59618c1fdf04baeb65",
+  "bin/fonts/Rotate.i80": "2e953b2def4232b64e8494c64250be910dcb0c26d11457e9ff72598bad42f60d",
+  "bin/fonts/Compact.i80": "448bfa77e2467ad0da1455b8ce42b7b8b0fb5f3e052ca1ca19ef19d59af04d36",
+  "bin/fonts/Packed6K.i80": "e9d25bea233b24ddb68a1e768a5824b831c1961ddbe30a8feefa101a53396a4e",
+  "bin/fonts/Fast12K.i80": "f2c142ae08c5e154b0d9410a6f4b9903b1e52f5ae9e7f9646d8fd5ff74e2ec5e",
+  "bin/fonts/Fast8.i80": "b46dd6dc7100ebb83b4ad4b00dd2372b248cd7565aa3f648d148c00c9b23e187",
+  "bin/fonts/Fast8Row.i80": "bccf0c56b363d10770645cc5636caedf292da695ae143b7426538b860b4cb7f7",
+  "bin/fonts/Graph8x4.i80": "1f04f17b30b4231d2e1975f228e513f23e5dd22c9c919b59da2fe00d3d54f751",
+  "bin/fonts/GraphP8K.i80": "b475e6578be28d35eb82adbec24329e6699111039c3eb8ab73525f373198b330",
+  "bin/fonts/Graph14K.i80": "13bbba4da603bdda45be99f88f0852c9475278341518a10e47361204f166ee58",
+  "bin/fonts/Cpm4.i80": "928e18bdd86b338d72623fdeadeae3711ac8b3ec103c4be2363f60e2194de432",
+  "bin/fonts/Cpm4Compact.i80": "3b34134765e593b9cd1ced365a7f0aabc2db488b24d9fc2768121397ac66aac9",
+  "bin/fonts/Cpm4Fast.i80": "43548e1b3fee58d9cc48cde30c331badc46165051e9b36c82a16299380080dea",
+  "bin/fonts/Font4Fst.i80": "ac01889d2d25449715bcba6d3a74c660d77186a03a5a306b63611fc550812a17",
+  "ordinary": "fadb99a07250a56dbb552a95418e0aa18cd66359861e9b6a46d295539ab1df93",
+  "phase": "cd1fc258a19f939812e15b6c5cef16cbe4a711e0a1c84cc024062115cc835693",
+  "pseudo": "f0fa63f10286de61298aee1f70e4169d5bfae532aa4ab55dfbccc63b2b094730"
+}

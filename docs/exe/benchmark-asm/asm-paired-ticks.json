@@ -1,0 +1,32 @@
+{
+  "raw-1": {
+    "ticks": 1739757,
+    "scan_ticks": 82702,
+    "command": "H:EXETEST.COM H:XONE.BIN H:XONE.COM -L:1000",
+    "output": "04ce149d9e7aba726f30277c9d6dafaa76e15bb4a9b1d5320379e0844d416cf5"
+  },
+  "raw-257": {
+    "ticks": 1929477,
+    "scan_ticks": 125795,
+    "command": "H:EXETEST.COM H:XSHORT.BIN H:XSHORT.COM -L:1234",
+    "output": "0e55fde1332d4001c94c2c99cd7ac68191399e03a43066126cec3ac8a521ae37"
+  },
+  "rks-4097": {
+    "ticks": 4387372,
+    "scan_ticks": 809502,
+    "command": "H:EXETEST.COM H:XRKS.RKS H:XRKS.EXE",
+    "output": "9e77b74909bb3babdc44b7f12e98d79989d5a2c4c74b5db99aa8b9bb4ad3c909"
+  },
+  "v2-16385": {
+    "ticks": 11370163,
+    "scan_ticks": 2997468,
+    "command": "H:EXETEST.COM H:XV2.COM H:XV2.RKS",
+    "output": "1bc1c89811ea0542c2f8692bbc46a9c3666b08780a19295924c69ef57c0be34f"
+  },
+  "v1-1024": {
+    "ticks": 2282772,
+    "scan_ticks": 215351,
+    "command": "H:EXETEST.COM H:XV1.EXE H:XV1.DLL -MODE:RF",
+    "output": "53ca81e509a7749530dbb1b19afcd2c6ef495c2a009e5f1d3aab8879888007d9"
+  }
+}

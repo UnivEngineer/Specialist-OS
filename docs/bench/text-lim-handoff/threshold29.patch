@@ -1,0 +1,976 @@
+diff --git a/scripts/build/build-banked-transport.py b/scripts/build/build-banked-transport.py
+index 20def80..dac527f 100644
+--- a/scripts/build/build-banked-transport.py
++++ b/scripts/build/build-banked-transport.py
+@@ -28,8 +28,10 @@ def main():
+     (OUT/'fast.bin').write_bytes(payload[length:])
+     transport.write_bytes(payload[:length])
+     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
+-        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
++        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
+     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
++        for name in ('bankTextCopy32','bankTextChecked','bankTextCopyPartial'):
++            stream.write(f'{name} = 0{sy[name]:04X}h\n')
+         stream.write(f'bankNearForward = 0{sy["compact223Forward"]:04X}h\n')
+         stream.write(f'bankLocalForward = 0{sy["MEM_LOCAL_FORWARD"]:04X}h\n')
+         stream.write(f'bankMoveRevision = {sy["MEM_RUNTIME_REVISION"]}\n')
+diff --git a/scripts/emu80/benchmark-mem-bank.py b/scripts/emu80/benchmark-mem-bank.py
+index 32a2043..72405ed 100644
+--- a/scripts/emu80/benchmark-mem-bank.py
++++ b/scripts/emu80/benchmark-mem-bank.py
+@@ -55,7 +55,11 @@ def main():
+     parser.add_argument('--port',type=int,choices=range(19781,19785),default=19781)
+     parser.add_argument('--out',type=Path,required=True)
+     parser.add_argument('--suite',choices=('copy','bios','legacy','user','remote-move','local-copy','text','all'),default='copy',help='all: copy + bios')
++    parser.add_argument('--text-lengths',type=int,nargs='+',default=(0,1,20,31,32,33,64,128),
++                        help='Длины строк для --suite text, от 0 до 511 байт')
+     args=parser.parse_args()
++    if any(not 0 <= length <= 511 for length in args.text_lengths):
++        parser.error('Длина текста должна быть от 0 до 511 байт')
+     out=args.out.resolve()
+     out.mkdir(parents=True,exist_ok=True)
+     bundle,runtime=args.bundle.resolve(),args.runtime.resolve()
+@@ -278,8 +282,8 @@ def main():
+         kernel=symbols(bundle/'bin/banked/KERNEL.sym')
+         source,cursor=0x8400,b['bios_vars.cursorY']
+         clean_video=bytes(0x3000)
+-        for length in (0,1,20,31,32,33,64,128):
+-            payload=(b'Abc123! ' * 16)[:length]
++        for length in args.text_lengths:
++            payload=(b'Abc123! ' * ((length+7)//8))[:length]
+             for mode,entry,id_suffix in (('z','bios_printStringZ','Z'),
+                                          ('raw-z','bios_printStringRawZ','RAW_Z'),
+                                          ('raw-lim','bios_printStringRawLim','RAW_LIM')):
+diff --git a/scripts/tests/check-font-text-lim.py b/scripts/tests/check-font-text-lim.py
+index 2f4ba7c..8bd7e0f 100644
+--- a/scripts/tests/check-font-text-lim.py
++++ b/scripts/tests/check-font-text-lim.py
+@@ -13,6 +13,7 @@ ENGINES = (
+     'Fast8', 'Fast8Row', 'Graph8', 'Graph8x2', 'Graph8x4', 'GraphP8K', 'Graph14K',
+     'K7Rotate', 'K7Packed', 'K7Hybrid',
+ )
++WINDOW_ENGINES = ('Rotate', 'Packed6K', 'Fast12K', 'K7Rotate', 'K7Packed', 'K7Hybrid')
+ AF, DE, SP = 0x5a97, 0x2468, 0x8fe0
+ STUB, REFERENCE, DONE = 0x0100, 0x1000, 0x2000
+ REGISTER_LINE = re.compile(
+@@ -131,7 +132,12 @@ def main():
+             installed, registers, _ = call(seed, bios['FONT_ENGINE_INIT'], de=lower_base)
+             assert not registers[0] & 1, (name, 'init')
+             feature = sym['FONT_ENGINE_TEXT_EXT']
+-            assert installed[feature:feature + 2] == word(sym['FONT_ENGINE_TEXT_LIM']), (name, 'capability')
++            window = name in WINDOW_ENGINES
++            capability = sym['FONT_ENGINE_TEXT_WINDOW_CAP' if window else 'FONT_ENGINE_TEXT_LIM']
++            assert installed[feature:feature + 2] == word(capability), (name, 'capability')
++            if window:
++                assert installed[capability:capability + 3] == b'\xc3' + word(sym['printStringLim'])
++                assert sym['FONT_ENGINE_TEXT_WINDOW'] == sym['printStringWindow']
+ 
+             for api, vector, raw in (('printStringLim', 'FONT_ENGINE_TEXT_LIM', False),
+                                      ('printStringRawLim', 'FONT_ENGINE_LIM', True)):
+@@ -168,6 +174,38 @@ def main():
+                     assert visited == expected_reads, (key, 'reads', visited ^ expected_reads)
+                     assert actual[first:last] == guarded, (key, 'source')
+                     checked += 1
++
++            if not window:
++                continue
++            source, end = 0xffc0, 0xffe0
++            for mode in (0, 1):
++                for offset in range(33):
++                    memory = bytearray(installed)
++                    # Чередуем длинный печатный пакет и байты с управлением.
++                    payload = bytearray(text[:32] if offset % 2 else text[20:52])
++                    if offset < 32:
++                        payload[offset] = 0
++                    guard = b'\x5a' * 8
++                    first, last = source - len(guard), end + len(guard)
++                    put(memory, first, guard + payload + guard)
++                    put(memory, 0x9000, video)
++                    put(memory, cursor, bytes([7, (0, 2, 4, 174)[offset % 4]]))
++                    put(memory, inverse, bytes([255 * (offset % 2)]) * 2)
++                    put(memory, REFERENCE, scalar_code(payload[:offset], mode == 1, bios))
++                    af = (mode << 8) | (AF & 255)
++                    actual, regs, trace = call(memory, sym['FONT_ENGINE_TEXT_WINDOW'], source, 32, af=af, trace=True)
++                    expected, _, _ = call(memory, REFERENCE)
++                    key = (name, mode, offset)
++                    assert regs[:6] == word(af) + word(32) + word(source + offset), (key, regs.hex())
++                    assert regs[12:14] == word(DE), (key, regs.hex())
++                    assert actual[0x9000:0xc000] == expected[0x9000:0xc000], (key, 'pixels')
++                    assert actual[cursor:cursor + 2] == expected[cursor:cursor + 2], (key, 'cursor')
++                    assert (actual[esc], actual[koi], actual[inverse:inverse + 2]) == (
++                        expected[esc], expected[koi], expected[inverse:inverse + 2]), (key, 'font state')
++                    visited = {address for _, address in watched_reads(trace, memory, first, last)}
++                    assert visited == set(range(source, min(end, source + offset + 1))), (key, 'reads', visited)
++                    assert actual[first:last] == guard + payload + guard, (key, 'source')
++                    checked += 1
+             print(name, 'PASS', flush=True)
+     print('FONT TEXT LIM PASS', checked, 'cases')
+ 
+diff --git a/scripts/tests/check-mem-inline-nested.py b/scripts/tests/check-mem-inline-nested.py
+index 3ef6761..ec81d8e 100644
+--- a/scripts/tests/check-mem-inline-nested.py
++++ b/scripts/tests/check-mem-inline-nested.py
+@@ -1,4 +1,4 @@
+-"""8080: прямой TEXT из общего окна и вложенные пачки COMMAND."""
++"""8080: стековый TEXT, границы чтения и вложенные пачки COMMAND."""
+ import argparse
+ from pathlib import Path
+ import re
+@@ -30,15 +30,18 @@ def trace_registers(trace):
+         yield tuple(int(value, 16) for value in registers.groups())
+ 
+ 
+-def source_reads(trace, first, last):
++def source_reads(trace, memory, first, last):
+     reads = []
+     for pc, opcode, bc, de, hl, sp in trace:
+-        if (opcode & 0xc7) in (0x46, 0x86) or opcode in (0x34, 0x35):
++        if opcode != 0x76 and ((opcode & 0xc7) in (0x46, 0x86) or opcode in (0x34, 0x35)):
+             addresses = (hl,)
+         elif opcode in (0x0a, 0x1a):
+             addresses = (bc if opcode == 0x0a else de,)
+         elif opcode in (0xc1, 0xd1, 0xe1, 0xf1, 0xe3):
+             addresses = (sp, (sp + 1) & 0xffff)
++        elif opcode in (0x2a, 0x3a):
++            address = int.from_bytes(memory[pc + 1:pc + 3], 'little')
++            addresses = (address, (address + 1) & 0xffff) if opcode == 0x2a else (address,)
+         else:
+             continue
+         reads.extend((pc, address) for address in addresses if first <= address < last)
+@@ -60,14 +63,17 @@ def main():
+     put(image, mem['bankMxRegsRouteCall'] + 1, word(mem['bankMxRegsRoute']))
+     image[mem['bankPage']] = 1
+     image[mem['bankPageCount']] = 16
++    image[mem['bankOwner']] = 13
++    image[mem['bankHome']] = 1
+     put(image, mem['bankServiceSP'], word(0xe000))
+ 
+-    source, output, cursor = 0x60ef, 0x6200, 0x6500
++    source, output, cursor = 0x60ef, 0x6250, 0x6500
+     write_char, overwrite, print_z, print_char = 0x8000, 0x8020, 0x8060, 0x8080
+     inner, copy_request = 0x80a0, 0x80b0
+     print_raw_z, print_raw_lim, print_pseudo = 0x80c0, 0x80e0, 0x8100
+     print_text_lim = 0x8120
+     alternate_z, alternate_raw_z = 0x8160, 0x8180
++    window_vector, window_z, window_raw_z = 0x81a0, 0x81c0, 0x81e0
+     copy_source, copy_destination = 0x6700, 0x6800
+     result, entry, done = 0x7500, 0x8800, 0x88ff
+     window = mem['BANK_WINDOW']
+@@ -100,45 +106,63 @@ def main():
+     put(image, copy_source, b'\xe7' * 32)
+     put(image, copy_request, struct.pack('<BHBHH', 2, copy_source, 0, copy_destination, 32))
+     # Отдельная точка входа отличает очередной фрагмент от оборота цикла.
+-    # Строковый движок оставляет общее окно доступным для чтения до возврата.
++    # Строковый движок сохраняет AF/BC/DE и останавливается на NUL или счётчике.
+     def print_loop(address, *, limited=False, terminated=False):
+-        loop = address + 3
+-        code = b'\xc3' + word(loop)
++        loop = address + 5
++        code = b'\xc3' + word(address + 3) + b'\xf5\xc5'
++        exits = []
+         if limited:
+-            code += b'\x78\xb1\xc8'
++            code += b'\x78\xb1\xca'
++            exits.append(len(code))
++            code += b'\0\0'
+         code += b'\x7e'
+         if terminated:
+-            code += b'\xb7\xc8'
++            code += b'\xb7\xca'
++            exits.append(len(code))
++            code += b'\0\0'
+         code += b'\xcd' + word(write_char) + b'\x23'
+         if limited:
+             code += b'\x0b'
+-        put(image, address, code + b'\xc3' + word(loop))
++        code = bytearray(code + b'\xc3' + word(loop))
++        for offset in exits:
++            put(code, offset, word(address + len(code)))
++        put(image, address, code + b'\xc1\xf1\xc9')
+ 
+     for address in (print_z, print_raw_z, alternate_z, alternate_raw_z):
+         print_loop(address, terminated=True)
+     for address in (print_raw_lim, print_pseudo, print_text_lim):
+         print_loop(address, limited=True)
++    for address in (window_z, window_raw_z):
++        print_loop(address, limited=True, terminated=True)
++    put(image, window_vector, b'\xf5\xfe\x01\xca' + word(window_vector + 11)
++        + b'\xb7\xca' + word(window_vector + 15) + b'\x76'
++        + b'\xf1\xc3' + word(window_raw_z) + b'\xf1\xc3' + word(window_z))
++    bounded = 'FONT_ENGINE_TEXT_WINDOW_CAP' in bios
++    if bounded:
++        vector('FONT_ENGINE_TEXT_WINDOW_CAP', print_text_lim)
++        vector('FONT_ENGINE_TEXT_WINDOW', window_vector)
+     # Первая внешняя запись запускает вторую пачку из локальной памяти MAIN.
+     put(image, print_char, b'\x79\xcd' + word(write_char) + b'\xfeA\xf5\xcd'
+         + word(overwrite) + b'\xf1\xc0\x21' + word(inner) + b'\x01\x05\0\xc3'
+         + word(io['bbBatchLocal']))
+     record = lambda char: b'\x02\x05\x04' + bytes([char, 0])
+     put(image, inner, record(ord('!')))
+-    save = b'\x22' + word(result) + b'\x21\0\0\x39\x22' + word(result + 2)
++    save = b'\x22' + word(result) + b'\xf5\xe1\x22' + word(result + 8)
++    save += b'\x21\0\0\x39\x22' + word(result + 2)
+     save += b'\x60\x69\x22' + word(result + 4) + b'\xeb\x22' + word(result + 6)
+     save += b'\xc3' + word(done)
+ 
+-    def run_case(folder, payload, call, expected, expected_hl=None, *, read_count=None,
+-                 expected_bc=0x5a24, profile=None, printer=None):
++    def run_case(folder, payload, call, expected, *, source=source, read_count,
++                 terminated=False, expected_bc=0x5a24, expected_af=None,
++                 profile=None, printers=(), required_printer=None, batch=False):
+         ram = (profile if profile is not None else image).copy()
+         put(ram, source, payload)
+-        put(ram, entry, b'\x31\0\x70\x01\x24\x5a\x11\x34\x12\x21' + word(source) + call + save)
++        start = b'\x31\0\x70\x21\x96\x01\xe5\xf1\x01\x24\x5a\x11\x34\x12\x21'
++        put(ram, entry, start + word(source) + call + save)
+         initial, final = folder / 'in.bin', folder / 'out.bin'
+         initial.write_bytes(ram)
+         command = [str(args.ticks), '-m8080', '-pc', f'{entry:x}',
+-                   '-end', f'{done:x}', '-counter', '3000000', '-output', str(final)]
+-        if read_count is not None:
+-            command.append('-trace')
++                   '-end', f'{done:x}', '-counter', '3000000', '-output', str(final), '-trace']
+         run = subprocess.run(command + [str(initial)], check=True, capture_output=True, timeout=15)
+         actual = final.read_bytes()
+         assert struct.unpack_from('<H', actual, 65542)[0] == done, (
+@@ -146,37 +170,74 @@ def main():
+         end = struct.unpack_from('<H', actual, cursor)[0]
+         assert end == output + len(expected), (expected, actual[output:end])
+         assert actual[output:output + len(expected)] == expected
+-        if read_count is None:
++        if batch:
+             assert actual[copy_destination:copy_destination + 32] == b'\xe7' * 32
+         else:
+             assert actual[copy_destination:copy_destination + 32] == ram[copy_destination:copy_destination + 32]
+-            assert not actual[65536] & 1, (call.hex(), actual[65536:65538].hex())
+-        hl, sp, bc, de = struct.unpack_from('<HHHH', actual, result)
+-        assert sp == 0x7000 and (expected_hl is None or hl == expected_hl), (hl, sp)
+-        assert (actual[mem['bankPage']], actual[mem['bankDepth']]) == (1, 0)
+-        assert struct.unpack_from('<H', actual, mem['bankServiceSP'])[0] == 0xe000
+-        if read_count is not None:
+-            assert (bc, de) == (expected_bc, 0x1234), (call.hex(), bc, de)
+-            trace = list(trace_registers(run.stdout))
+-            reads = source_reads(trace, source, source + len(payload))
+-            assert [address for _, address in reads] == list(range(source, source + read_count)), (
+-                call.hex(), read_count, reads)
+-            printers = {print_z, print_raw_z, print_raw_lim, print_pseudo, print_text_lim,
+-                        alternate_z, alternate_raw_z}
+-            calls = [(pc, bc, hl, sp) for pc, _, bc, _, hl, sp in trace if pc in printers]
+-            if expected:
+-                assert calls, (call.hex(), 'печатный вектор не вызван')
+-            assert all(pc == printer for pc, _, _, _ in calls), (call.hex(), calls)
+-            expected_counts = [min(32, len(expected) - i) for i in range(0, len(expected), 32)]
+-            if printer in (print_text_lim, print_raw_lim, print_pseudo):
+-                assert [count for _, count, _, _ in calls] == expected_counts, (calls, expected_counts)
+-                starts = [window] * len(expected_counts)
++        hl, sp, bc, de, af = struct.unpack_from('<HHHHH', actual, result)
++        assert sp == 0x7000, (call.hex(), sp)
++        context = mem['bankPage']
++        assert actual[context:context + 7] == ram[context:context + 7], (call.hex(), 'контекст банка')
++        if source < window:
++            assert actual[source:source + len(payload)] == payload, (call.hex(), 'источник изменён')
++        trace = list(trace_registers(run.stdout))
++        hardware = bios['IO_KEYB_A']
++        # Плоская память совпадает по адресам с окном MAIN для источника на хвосте DOS.
++        # Сам движок находится в коде стенда и его чтения проверяются отдельно по портам.
++        transport = (state for state in trace if not 0x8000 <= state[0] < 0x8200)
++        # В плоском окне кадр маршрута может читаться прямо перед источником.
++        guard_start = source if source >= window else source - 8
++        reads = source_reads(transport, ram, guard_start, min(hardware, source + len(payload)))
++        addresses = [address for _, address in reads]
++        assert not source_reads(trace, ram, hardware, 0x10000), (call.hex(), 'чтение порта')
++        required = range(source, source + read_count)
++        if terminated:
++            # Чтение всей последней порции разрешено, включая байты за NUL.
++            ceiling = min(hardware, source + ((read_count + 31) // 32) * 32)
++            assert set(required) <= set(addresses) <= set(range(source, ceiling)), (call.hex(), reads)
++        else:
++            assert addresses == list(required), (call.hex(), read_count, reads)
++        if batch:
++            return
++        assert (hl, bc, de) == (source + len(expected), expected_bc, 0x1234), (call.hex(), hl, bc, de)
++        if expected_af is not None:
++            assert af == expected_af, (call.hex(), hex(af))
++        else:
++            assert not af & 1, (call.hex(), hex(af))
++
++        entries = {print_z, print_raw_z, print_raw_lim, print_pseudo, print_text_lim,
++                   alternate_z, alternate_raw_z, window_z, window_raw_z}
++        calls = [(pc, bc, hl, sp) for pc, _, bc, _, hl, sp in trace if pc in entries]
++        if expected:
++            assert calls, (call.hex(), 'печатный вектор не вызван')
++        assert all(pc in printers for pc, _, _, _ in calls), (call.hex(), calls, printers)
++        if required_printer is not None:
++            assert calls and calls[0][0] == required_printer, (call.hex(), calls, required_printer)
++        assert all(window <= hl < hardware and 0xdf00 <= sp < 0xe000 for _, _, hl, sp in calls), (
++            call.hex(), calls, 'буфер и стек MAIN')
++        fragments = []
++        for pc, _, bc, _, _, _ in trace:
++            if pc in entries:
++                fragments.append([pc, bc, 0])
++            elif pc == write_char:
++                assert fragments, (call.hex(), 'вывод в обход печатного вектора')
++                fragments[-1][2] += 1
++        limited = {print_text_lim, print_raw_lim, print_pseudo}
++        counts = []
++        for pc, count, printed in fragments:
++            if pc in limited:
++                assert printed == count, (call.hex(), fragments)
++            if pc in (window_z, window_raw_z):
++                assert count == 32 and printed <= count, (call.hex(), fragments)
++            if printed:
++                counts.append(printed)
++        expected_counts = [min(32, len(expected) - i) for i in range(0, len(expected), 32)]
++        for count in expected_counts:
++            if terminated and count == 32 and counts[:2] == [31, 1]:
++                del counts[:2]
+             else:
+-                # Старый ASCIIZ-вектор получает полную порцию как 31+1 из того же окна.
+-                starts = [start for count in expected_counts
+-                          for start in ([window, window + 30] if count == 32 else [window])]
+-            assert [hl for _, _, hl, _ in calls] == starts, (call.hex(), calls, starts)
+-            return calls
++                assert counts and counts.pop(0) == count, (call.hex(), fragments, expected_counts)
++        assert not counts, (call.hex(), fragments, expected_counts)
+ 
+     with tempfile.TemporaryDirectory() as temporary:
+         folder = Path(temporary)
+@@ -187,39 +248,63 @@ def main():
+             return (b'\x01' + word(count) + b'\x3e\x01\xcd' + word(mem['mx_callRegs'])
+                     + word(mem['MXOS_BIOS_PRINT_STRING_' + kind]))
+ 
++        def z_case(line, call, printers, *, profile=None, bc=0x5a24, af=None):
++            # Ненулевой хвост выявляет печать за NUL и чтение лишней порции.
++            payload = line + b'\0' + b'P' * 40
++            required = printers[0] if len(line) >= 32 and printers[0] in (window_z, window_raw_z) else None
++            run_case(folder, payload, call, line, read_count=len(line) + 1,
++                     terminated=True, expected_bc=bc, expected_af=af, profile=profile,
++                     printers=printers, required_printer=required)
++
++        def line_bytes(count):
++            return bytes(0x21 + (index * 37) % 94 for index in range(count))
++
+         for count in lengths:
+-            line = (b'Abc123! ' * 33)[:count]
+-            run_case(folder, line + b'\0poison', print_command, line, source + count,
+-                     read_count=count + 1, printer=print_text_lim)
+-            for suffix, printer in (('RAW_Z', print_raw_lim), ('RAW_LIM', print_raw_lim),
+-                                    ('RAW_PSEUDO', print_pseudo)):
+-                terminated = suffix == 'RAW_Z'
+-                raw = line if terminated else bytes(index & 0xff for index in range(count))
+-                run_case(folder, raw + b'\0poison', print_bios(suffix, count), raw, source + count,
+-                         read_count=count + int(terminated), expected_bc=count,
+-                         printer=printer)
++            line = line_bytes(count)
++            z_case(line, print_command, (print_text_lim, print_z))
++            z_case(line, print_bios('RAW_Z', count), (print_raw_lim, print_raw_z), bc=count, af=0x0196)
++            for suffix, printer in (('RAW_LIM', print_raw_lim), ('RAW_PSEUDO', print_pseudo)):
++                raw = bytes(index & 0xff for index in range(count))
++                run_case(folder, raw + b'poison', print_bios(suffix, count), raw,
++                         read_count=count, expected_bc=count, expected_af=0x0196, printers=(printer,))
+ 
+         no_exports = image.copy()
+         put(no_exports, bios['FONT_ENGINE_TEXT_EXT'], b'\0\0')
+         other_vectors = image.copy()
++        profiles = [(no_exports, (print_z,), (print_raw_lim, print_raw_z))]
++        if bounded:
++            capability = word(bios['FONT_ENGINE_TEXT_WINDOW_CAP'])
++            put(other_vectors, bios['FONT_ENGINE_TEXT_EXT'], capability)
++            bounded_profile = image.copy()
++            put(bounded_profile, bios['FONT_ENGINE_TEXT_EXT'], capability)
++            profiles.append((bounded_profile, (window_z, print_z, print_text_lim),
++                             (window_raw_z, print_raw_z, print_raw_lim)))
+         put(other_vectors, bios['bios_printStringZ'], b'\xc3' + word(alternate_z))
+         put(other_vectors, bios['bios_printStringRawZ'], b'\xc3' + word(alternate_raw_z))
+-        for profile, z, raw_z in ((no_exports, print_z, print_raw_lim),
+-                                  (other_vectors, alternate_z, alternate_raw_z)):
+-            for count in (0, 31, 32, 33, 64, 65):
+-                line = b'Q' * count
+-                run_case(folder, line + b'\0poison', print_command, line, source + count,
+-                         read_count=count + 1, profile=profile, printer=z)
+-                run_case(folder, line + b'\0poison', print_bios('RAW_Z', count), line, source + count,
+-                         read_count=count + 1, expected_bc=count, profile=profile, printer=raw_z)
++        profiles.append((other_vectors, (alternate_z,), (alternate_raw_z,)))
++        for profile, z, raw_z in profiles:
++            for count in (*range(32), 32, 33, 64, 65):
++                line = line_bytes(count)
++                z_case(line, print_command, z, profile=profile)
++                z_case(line, print_bios('RAW_Z', count), raw_z, profile=profile, bc=count, af=0x0196)
++        limit = bios['IO_KEYB_A']
++        for count in range(32):
++            line = line_bytes(count)
++            for at, payload in ((source, line + b'\0' + b'P' * 40),
++                                (window, line + b'\0' + b'P' * (31 - count)),
++                                (limit - count - 1, line + b'\0')):
++                for kind, printers in (('Z', (print_text_lim, print_z)), ('RAW_Z', (print_raw_lim, print_raw_z))):
++                    run_case(folder, payload, print_bios(kind, count), line,
++                             source=at, read_count=count + 1, terminated=True,
++                             expected_bc=count, expected_af=0x0196, printers=printers)
+         for size in (10, 19, 20, 21, 30, 31, 32, 33):
+             tail = size // 5 - 1
+             batch = record(ord('A')) + record(ord('B')) * tail
+             batch += bytes(size - len(batch))
+-            run_case(folder, batch, b'\x01' + word(size) + b'\x3e\x01\xcd'
++            run_case(folder, batch + b'poison', b'\x01' + word(size) + b'\x3e\x01\xcd'
+                      + word(mem['mx_callRegs']) + word(mem['MXOS_BIOS_COMMAND_BATCH']),
+-                     b'A!' + b'B' * tail)
+-    print('MEM INLINE NESTED PASS: TEXT из FFC0h, совместимость Z, границы чтения, '
++                     b'A!' + b'B' * tail, batch=True, read_count=size)
++    print('MEM INLINE NESTED PASS: TEXT из FFC0h, NUL во всех позициях, граница FFE0h, '
+           'вложенные пачки 10–33 байта, регистры и SP')
+ 
+ 
+diff --git a/source/bios/bankText.inc b/source/bios/bankText.inc
+index a833231..564b7ad 100644
+--- a/source/bios/bankText.inc
++++ b/source/bios/bankText.inc
+@@ -7,29 +7,35 @@ window:
+ ;----------------------------------------------------------------------------
+ ; MXOS
+ ; Печать порции без копирования. До возврата движок не занимает окно.
+-; вход: HL = BANK_WINDOW, BC = длина 1..32, A = D = режим 0, 1, 2 или 8.
+-; Для Z и RAW_Z инициатор уже исключил завершающий NUL из длины.
+-; выход: HL сразу за выведенными байтами. Остальные регистры рабочие.
++; вход: HL = BANK_WINDOW, BC = длина до 32, A = D = режим 0, 1, 2 или 8.
++; Для всех режимов BC — точное число байтов. Отправитель Z и RAW_Z
++; уже остановился на NUL и исключил его из длины.
++; выход: C сохраняется.
+ ;----------------------------------------------------------------------------
+ printWindow:
+     cp 2
+     jp z,bios_printStringRawLim
+     jp nc,bios_printStringRawPseudo
+-    ; Оставляем старым перехватчикам Z их собственный способ рисования.
++printKnown:
+     or a
+-    ld hl,(bios_printStringZ+1)
++    ld hl,bios_printStringZ
+     ld de,FONT_ENGINE_Z+1
+     jp z,windowVector
+-    ld hl,(bios_printStringRawZ+1)
++    ld hl,bios_printStringRawZ
+     ld de,FONT_ENGINE_RAWZ+1
+ windowVector:
+     ld b,a
++    ld a,(hl)
++    cp 0C3h
++    jp nz,windowLegacy
++    inc hl
+     ld a,(de)
+-    cp l
++    cp (hl)
+     jp nz,windowLegacy
+     inc de
++    inc hl
+     ld a,(de)
+-    cp h
++    cp (hl)
+     jp nz,windowLegacy
+     ld a,b
+     or a
+@@ -37,23 +43,19 @@ windowVector:
+     ld hl,BANK_WINDOW
+     jp nz,FONT_ENGINE_LIM
+     ld hl,(FONT_ENGINE_TEXT_EXT)
++    ld de,-FONT_ENGINE_TEXT_LIM
++    add hl,de
+     ld a,h
+-    cp FONT_ENGINE_TEXT_LIM >> 8
+-    jp nz,windowLegacy
+-    ld a,l
+-    cp FONT_ENGINE_TEXT_LIM & 0FFh
++    or l
+     ld hl,BANK_WINDOW
+     jp z,FONT_ENGINE_TEXT_LIM
+ windowLegacy:
+     ld d,b
+-    ld b,0
+     ld hl,BANK_WINDOW
+     ld a,c
+     cp BANK_TEXT_BYTES
+     ld a,d
+     jp nz,window
+-    ; Прежний вектор принимает только ASCIIZ. Печатаем 31+1 через этот же
+-    ; вектор. Последний код сохранён в E, после первого вызова HL = FFDFh.
+     ld a,(BANK_WINDOW+BANK_TEXT_BYTES-1)
+     ld e,a
+     xor a
+@@ -61,11 +63,15 @@ windowLegacy:
+     ld a,d
+     call window
+     dec hl
++    ld b,(hl)
+     ld (hl),e
+     ld a,d
+     call window
+-    inc hl
++    ld (hl),e
++    dec hl
++    ld (hl),b
+     ret
++
+ ; Принимающий адаптер уже сохранил пакет и установил main-стек.
+ fromBank:
+     ld a,(io_vars.bbPage)
+diff --git a/source/bios/mem-mapped.inc b/source/bios/mem-mapped.inc
+index 5993a96..ecdb62e 100644
+--- a/source/bios/mem-mapped.inc
++++ b/source/bios/mem-mapped.inc
+@@ -52,9 +52,8 @@ biosMemPrintMain:
+     cp 7
+     jp z,memPrintBatch
+     call bankText.printWindow
+-    pop bc
++    pop af                     ; A = селектор из сохранённого B, C — число байтов.
+     pop de
+-    ld a,b
+     jp MEM_TEXT_RETURN
+ 
+ ; Пачка допускает банковый вызов из отдельной команды. На локальном стеке
+diff --git a/source/include/mxos.inc b/source/include/mxos.inc
+index 2d20b62..5faf4c8 100644
+--- a/source/include/mxos.inc
++++ b/source/include/mxos.inc
+@@ -163,7 +163,7 @@ MXOS_GROUP_MEMORY     = 3
+ ; Нулевая длина возвращает успех. Исключающий конец не выше FE00h. В одной странице допускается перекрытие.
+ ; Пакет, код и стек инициатора не должны попадать в область назначения.
+ MEM_ABI_VERSION      = 00104h  ; Публичный ABI MEM 1.4
+-MEM_RUNTIME_REVISION = 70      ; Повысить при изменении транспорта или раскладки DOS
++MEM_RUNTIME_REVISION = 71      ; Повысить при изменении транспорта или раскладки DOS
+ MEM_WINDOW_VERSION   = 2       ; Внутренний протокол физического окна
+     IFNDEF DOS_IO_BATCH_SECTORS
+ DOS_IO_BATCH_SECTORS = 32      ; 16/32/64 полных физических секторов за серию
+diff --git a/source/mem/LOCALBLOCK.asm b/source/mem/LOCALBLOCK.asm
+index ebe7d65..f28f898 100644
+--- a/source/mem/LOCALBLOCK.asm
++++ b/source/mem/LOCALBLOCK.asm
+@@ -127,7 +127,7 @@ bankFastDecode:
+     jp z,bankFastReady
+     cp MXOS_BIOS_SUB_HL_DE & 255
+     jp z,bankFastReady
+-    jp bankFastFallback
++    jp bankFastCheckText
+ bankFastCheckDos:
+     dec a
+     jp nz,bankFastFallback
+diff --git a/source/mem/TRANSPORT.asm b/source/mem/TRANSPORT.asm
+index 4e34364..37e1b5f 100644
+--- a/source/mem/TRANSPORT.asm
++++ b/source/mem/TRANSPORT.asm
+@@ -5,7 +5,12 @@
+ ; Тело копируется в каждый исполняемый банк и в основную память.
+ ; Раскладки локальных стековых кадров: BANK_CALLER_* / BANK_CALLEE_* в abi.inc.
+ ; До проверки kind и установки SP стек предыдущей страницы не трогаем.
+-    DS 7,0
++bankTextCopyPartial:
++    push bc
++    call compact223Forward
++    pop bc
++    ret
++    DS 1,0
+ bankLanding:
+     dec a
+     jp z,bankResume
+@@ -240,10 +245,6 @@ bankLocalChecked:
+     ld hl,(MEM_LOCAL_CHECKED)
+     ex (sp),hl
+     ret
+-bankLocalBlockBad:
+-    ld a,DOS_ERR_ARGUMENT
+-    scf
+-    ret
+     INCLUDE "copy.inc"
+ ;----------------------------------------------------------------------------
+ ; MXOS
+@@ -255,6 +256,24 @@ bankLocalBlockBad:
+ bankMoveToMain:
+     ld (BANK_IO_MAIN),a
+     jp bankCopyMoveRemote
++; Ровно одна порция, остановка в той же странице, что и источник.
++bankTextCopy32:
++    ld bc,0101h
++    jp bankTextLoad32
++bankTextChecked:
++    ld b,BANK_TEXT_BYTES/4
++bankTextQuad:
++    DUP 4
++    ld a,(hl)
++    ld (de),a
++    or a
++    ret z
++    inc hl
++    inc e
++    EDUP
++    dec b
++    jp nz,bankTextQuad
++    ret
+     ASSERT $ <= MEM_DATA_START-3
+     IF $ < MEM_DATA_START-3
+     DS MEM_DATA_START-3-$,0
+@@ -275,6 +294,10 @@ coldEnd:
+     DS BANK_COMMAND_LANDING-$,0
+     ENDIF
+     INCLUDE "scalar-command.inc"
++bankLocalBlockBad:
++    ld a,DOS_ERR_ARGUMENT
++    scf
++    ret
+     ASSERT $ <= 0FF00h
+     IF $ < 0FF00h
+     DS 0FF00h-$,0
+diff --git a/source/mem/abi.inc b/source/mem/abi.inc
+index f2d0434..05ff8f0 100644
+--- a/source/mem/abi.inc
++++ b/source/mem/abi.inc
+@@ -7,6 +7,7 @@
+ 
+ BANK_WINDOW           = 0FFC0h
+ BANK_TEXT_BYTES       = 32
++BANK_TEXT_STACK_MIN   = 29
+ MEM_WORD_RETURN       = 0F32Bh
+ MEM_TOP_MAPPED        = 0F4D7h
+ ;------------------------------------------------------------------------------
+@@ -120,8 +121,9 @@ BANK_CALLEE_BYTES      = 8
+ 
+ 
+ ; Метки 32-байтной локальной развёртки в полном профиле.
+-MEM_LOCAL_FORWARD      = 0F925h
+-MEM_FORWARD_BLOCK_END  = MEM_LOCAL_FORWARD+8+5+80
++MEM_LOCAL_FORWARD      = 0F928h
++MEM_FORWARD_BLOCK      = MEM_LOCAL_FORWARD+8+5
++MEM_FORWARD_BLOCK_END  = MEM_FORWARD_BLOCK+16*5
+ MEM_FORWARD_RESTORE    = MEM_FORWARD_BLOCK_END+8
+ MEM_SCREEN_RETURN      = 0F58Fh
+ MEM_TEXT_RETURN        = 0F561h
+diff --git a/source/mem/copy-prepare.inc b/source/mem/copy-prepare.inc
+index c47aa69..1a21e9b 100644
+--- a/source/mem/copy-prepare.inc
++++ b/source/mem/copy-prepare.inc
+@@ -56,6 +56,11 @@ memRouteInvoke:
+     ret
+     MEM_CURSOR_GATE memFixedSetCursor,0
+     ASSERT $ <= MEM_MAIN_IO_BRIDGE
++memPrintZEmpty:
++    pop de
++    pop hl
++    pop bc
++    jp memPrintHaveHL
+     DS MEM_MAIN_IO_BRIDGE-$,0
+ memMainIoBridge:
+     jp MAIN_BLOCK_IO_TARGET      ; Генерируется после размещения BIOS.
+@@ -169,6 +174,7 @@ memBatchFailedCopy:
+     INCLUDE "queue-work.inc"
+     INCLUDE "fixed-word-return.inc"
+     ASSERT $ <= MEM_COPY_BYTES_ENTRY
++memOperation: DB 0
+     DS MEM_COPY_BYTES_ENTRY-$,0
+     DEFINE COPY_HELPER_BYTES
+     INCLUDE "copy-helpers.inc"
+diff --git a/source/mem/copy.inc b/source/mem/copy.inc
+index fd1c8c5..406142f 100644
+--- a/source/mem/copy.inc
++++ b/source/mem/copy.inc
+@@ -154,11 +154,3 @@ bankCopyBadRange:
+     ret
+ 
+ bankCopyRequest: DS 8,0
+-
+-; Ошибка стандартного PRINT_STRING: пакет не меняем, возвращаем код отказа.
+-bankBiosStringError:
+-    pop bc
+-    ld a,DOS_ERR_ARGUMENT
+-    ld (BANK_FRAME_STATUS),a
+-    scf
+-    jp MEM_BIOS_RESULT
+diff --git a/source/mem/fixed-main.inc b/source/mem/fixed-main.inc
+index e4e2e6c..28933dc 100644
+--- a/source/mem/fixed-main.inc
++++ b/source/mem/fixed-main.inc
+@@ -1,4 +1,7 @@
+ memFixedMain = MAIN_FIXED_TARGET
++memPrintNear:
++    call bankTextCopyPartial
++    jp memPrintFilled
+ ; Возврат TEXT начинает запись в маппер, затем использует стек клиента.
+ ; Вход: A — обратный селектор, DE — SP клиента, C — выведено байтов.
+     ASSERT $ <= MEM_TEXT_RETURN
+@@ -13,10 +16,11 @@ memPrintReturn:
+     ld (bankServiceSP),hl
+     pop de
+     pop hl
+-    ld a,d
+-    sub c
+-    jp nz,memPrintAtNul
+-    pop de
++    ld b,0
++    add hl,bc
++    ld a,c
++    cp BANK_TEXT_BYTES
++    jp nz,memPrintShort
+     ex (sp),hl
+     ld a,l
+     sub c
+@@ -26,16 +30,17 @@ memPrintReturn:
+     ld b,a
+     pop hl
+     jp memPrintLoop
+-memPrintAtNul:
+-    dec hl
+-    pop de
+-    pop de
++memPrintShort:
++    pop bc
+ memPrintHaveHL:
+     pop de
+     pop bc
+-    pop af
+-    or a
++    xor a
+     ret
++memPrintStack:
++    call bankTextCopy32
++    ld c,BANK_TEXT_BYTES
++    jp memPrintFilled
+     ASSERT $ <= MEM_SCREEN_RETURN
+     DS MEM_SCREEN_RETURN-$,0
+     ld (BANK_IO_RAM),a
+diff --git a/source/mem/local-forward.inc b/source/mem/local-forward.inc
+index b37279c..e0b9af7 100644
+--- a/source/mem/local-forward.inc
++++ b/source/mem/local-forward.inc
+@@ -14,6 +14,7 @@ compact223Page:
+         ld      c, 8
+         jp      compact223Block
+ compact223Block:
++        ASSERT $ == MEM_FORWARD_BLOCK
+         DUP 16
+         pop     de
+         ld      (hl), e
+diff --git a/source/mem/local-move.inc b/source/mem/local-move.inc
+index 2adcef7..5bb6be9 100644
+--- a/source/mem/local-move.inc
++++ b/source/mem/local-move.inc
+@@ -90,5 +90,13 @@ compact223Partial:
+ ; При установке DATA этот участок заменяется локальным циклом.
+ ; Полный профиль использует собственную подготовку и место до FE8Ah.
+ moveDataForward = compact223Forward
+-    DS 16,0
++bankTextLoad32:
++    ex de,hl
++    ld hl,0
++    add hl,sp
++    ld (MEM_FORWARD_RESTORE+1),hl
++    ex de,hl
++    ld sp,hl
++    ld hl,BANK_WINDOW
++    jp MEM_FORWARD_BLOCK
+ moveDataForwardEnd:
+diff --git a/source/mem/regs-route.inc b/source/mem/regs-route.inc
+index 50e227f..9237b76 100644
+--- a/source/mem/regs-route.inc
++++ b/source/mem/regs-route.inc
+@@ -6,21 +6,30 @@ bankMxRegsRoute:
+     ld a,b
+     cp MXOS_GROUP_DOS
+     jp z,bankMxRegsDos
+-    ; Очередь уже сброшена. Текст и короткая пачка идут прямо к банковому клиенту.
++    ; Очередь уже сброшена. Пачка проходит прежний пакетный маршрут.
+     ld a,c
+     cp MXOS_BIOS_COMMAND_BATCH & 255
+     jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_Z & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
++    ; BIOS TEXT уже обработан. Для другой группы совпадение номера
++    ; сохраняет прежний пакетный отказ.
++    call memBiosTextMode
+     jp z,bankMxCall
+     xor a
+     ld hl,BIOS_BANK_GATE_ADDR+3
+     jp bankCallPacket
++; HL указывает на DW, в стеке исходные AF и HL. Меняется только HL результата.
++bankFastCheckText:
++    call memBiosTextMode
++    jp nz,bankFastFallback
++    ld (memOperation),a
++    inc hl
++    inc hl
++    pop af
++    ex (sp),hl
++    push af
++    call memPrintTyped
++    pop af
++    ret
+ bankFastReady:
+     ; Младший байт SP для BIOS_FAST_SLOT в MAIN. Старший постоянен.
+     add a,BIOS_FAST_SLOT_BIAS
+@@ -32,9 +41,3 @@ bankFastReady:
+     pop af
+     ex (sp),hl
+     jp bankFastPrepare
+-bankMxNativeRegs:
+-    ld hl,(MEM_NATIVE_CALL)
+-    inc hl
+-    inc hl
+-    inc hl
+-    jp (hl)
+diff --git a/source/mem/text-route.inc b/source/mem/text-route.inc
+index 874652a..a2e479c 100644
+--- a/source/mem/text-route.inc
++++ b/source/mem/text-route.inc
+@@ -4,26 +4,27 @@ memBiosRoute:
+     ld a,c
+     cp MXOS_BIOS_COMMAND_BATCH & 255
+     jp z,memBiosQueue
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_Z & 0FFh
+-    ld a,0
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 0FFh
+-    ld a,1
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 0FFh
+-    ld a,2
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
+-    ld a,8
++    call memBiosTextMode
+     jp z,memBiosText
+ memBiosGeneric:
+     xor a
+     ld hl,BIOS_BANK_GATE_ADDR+3
+     jp bankMxInvoke
++; A содержит младший байт BIOS ID. При совпадении Z=1, A содержит режим.
++memBiosTextMode:
++    sub MXOS_BIOS_PRINT_STRING_Z & 255
++    ret z
++    sub MXOS_BIOS_PRINT_STRING_RAW_Z-MXOS_BIOS_PRINT_STRING_Z
++    jp z,memBiosTextModeRawZ
++    ASSERT MXOS_BIOS_PRINT_STRING_RAW_LIM-MXOS_BIOS_PRINT_STRING_RAW_Z == TEXT_PRINT_RAW_LIM
++    cp TEXT_PRINT_RAW_LIM
++    ret z
++    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-MXOS_BIOS_PRINT_STRING_RAW_Z
++    ld a,8
++    ret
++memBiosTextModeRawZ:
++    ld a,TEXT_PRINT_RAW_Z
++    ret
+ memBiosText:
+     ld (memOperation),a
+ memBiosString:
+@@ -48,8 +49,14 @@ memBiosString:
+     ld l,a
+     ex (sp),hl
+     call memPrintTyped
+-    jp c,bankBiosStringError
+     xor a
+     ld (BANK_FRAME_STATUS),a
+     pop af
+     jp bankMxResult
++
++bankMxNativeRegs:
++    ld hl,(MEM_NATIVE_CALL)
++    inc hl
++    inc hl
++    inc hl
++    jp (hl)
+diff --git a/source/mem/text.inc b/source/mem/text.inc
+index 30e4b0b..c9d40fe 100644
+--- a/source/mem/text.inc
++++ b/source/mem/text.inc
+@@ -12,50 +12,56 @@ memPrint:
+     xor a
+     ld (memOperation),a
+ memPrintTyped:
+-    push af
+     push bc
+     push de
+     ld a,(memOperation)
+     ld d,a
+-    cp 2
+-    jp nc,memPrintLoop
+-    ld bc,0FFFFh
+ memPrintLoop:
++    ld a,d
++    cp 2
++    jp c,memPrintFrame
+     ld a,b
+     or c
+     jp z,memPrintHaveHL
++memPrintFrame:
+     push bc
++    push hl
+     push de
++    ld de,BANK_WINDOW
++    jp c,memPrintZ
+     ld a,b
+     or a
+-    ld b,BANK_TEXT_BYTES
+-    jp nz,memPrintSize
++    jp nz,memPrintStack
+     ld a,c
+-    cp b
+-    jp nc,memPrintSize
+-    ld b,c
+-memPrintSize:
+-    ld a,d
+-    cp 2
+-    ld c,0
+-    jp nc,memPrintReady
+-    inc c
+-memPrintReady:
+-    ld de,BANK_WINDOW
+-    MEM_TEXT_FILL memPrintFill,memPrintFilled
+-memPrintFilled:
+-    ; CF отмечает прочитанный NUL. C — длина печати, B — расход источника.
++    cp BANK_TEXT_BYTES
++    jp nc,memPrintStack
++memPrintBytes:
++memPrintStackThreshold:
++    cp BANK_TEXT_STACK_MIN
++    jp nc,memPrintNear
++    cp 4
++    jp c,memPrintTail
++    rra
++    or a
++    rra
++    ld b,a
++    call bankCopyQuads
++    ld a,c
++    and 3
++    jp z,memPrintFilled
++memPrintTail:
++    ld b,a
++    call bankCopyBytes
++    jp memPrintFilled
++memPrintZ:
++    call bankTextChecked
+     ld a,e
+-    sbc a,BANK_WINDOW & 0FFh
+-    jp z,memPrintAtNul
++    sub BANK_WINDOW & 255
+     ld c,a
+-    ld a,e
+-    sub BANK_WINDOW & 0FFh
+-    ld b,a
++    jp z,memPrintZEmpty
++memPrintFilled:
+     pop de
+     push de
+-    push hl
+-    push bc
+     ld hl,(bankServiceSP)
+     push hl
+     ld hl,0
+@@ -76,4 +82,3 @@ memPrintMain = MAIN_PRINT_TARGET
+     DS MEM_LOCAL_FORWARD-$,0
+     ENDIF
+     INCLUDE "local-forward.inc"
+-memOperation:       DB 0

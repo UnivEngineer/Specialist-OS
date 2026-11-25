@@ -1,0 +1,1503 @@
+{
+  "revision": 68,
+  "image_sha256": "8fe06d83ac003eedc21396d1747231d4b6d1600e88b83d3899df03dee118928d",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6064,
+    "DOS.sys": 29828,
+    "IO.sys": 811,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 341
+  },
+  "rows": [
+    {
+      "operation": "mx_printChar",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 1184,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 1555,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 1184,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 1555,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 1577,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 1974,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 1577,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 1974,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 1577,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 1974,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 1577,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printChar",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 1974,
+      "direct": 1010,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 149,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 520,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 149,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 520,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 175,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 572,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 175,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 572,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 175,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 572,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 175,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getCursorPos",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 572,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4106,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 149,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 520,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 149,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 520,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 175,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 572,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 175,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 572,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 175,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 572,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 175,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setCursorPos",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 572,
+      "direct": 69,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 1108,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 1479,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 1108,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 1479,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 1501,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 1898,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 1501,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 1898,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 1501,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 1898,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 1501,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printCharRaw",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 1898,
+      "direct": 934,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 163,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 534,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 163,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 534,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 199,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 596,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 199,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 596,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 199,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 596,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 199,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_getMemTop",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 596,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 35839,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 173,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 544,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 173,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 544,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 209,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 606,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 209,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 606,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 209,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 606,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 209,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_setMemTop",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 606,
+      "direct": 53,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 34687,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 2784,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 3155,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 2784,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 3155,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 3177,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 3574,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 3177,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 3574,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 3177,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 3574,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 3177,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexByte",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 3574,
+      "direct": 2610,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 0,
+      "profile": 0,
+      "queued": false,
+      "ticks": 5266,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 0,
+      "profile": 0,
+      "queued": true,
+      "ticks": 5637,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 0,
+      "profile": 1,
+      "queued": false,
+      "ticks": 5266,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 0,
+      "profile": 1,
+      "queued": true,
+      "ticks": 5637,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 1,
+      "profile": 0,
+      "queued": false,
+      "ticks": 5659,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 1,
+      "profile": 0,
+      "queued": true,
+      "ticks": 6056,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 1,
+      "profile": 1,
+      "queued": false,
+      "ticks": 5659,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 1,
+      "profile": 1,
+      "queued": true,
+      "ticks": 6056,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 6,
+      "profile": 0,
+      "queued": false,
+      "ticks": 5659,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 6,
+      "profile": 0,
+      "queued": true,
+      "ticks": 6056,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 6,
+      "profile": 1,
+      "queued": false,
+      "ticks": 5659,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "mx_printHexWord",
+      "caller": 6,
+      "profile": 1,
+      "queued": true,
+      "ticks": 6056,
+      "direct": 5092,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4618,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "nested-print",
+      "caller": 0,
+      "ticks": 2974,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "nested-print",
+      "caller": 1,
+      "ticks": 3760,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "nested-print",
+      "caller": 6,
+      "ticks": 3760,
+      "result": {
+        "af": 22675,
+        "bc": 13393,
+        "de": 22136,
+        "hl": 4660,
+        "sp": 34384
+      }
+    }
+  ]
+}

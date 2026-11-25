@@ -1,0 +1,326 @@
+[
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 1,
+    "open_path_before": 2915,
+    "full_path_before": 6862,
+    "after": 942
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 4,
+    "open_path_before": 11654,
+    "full_path_before": 6985,
+    "after": 1145
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 12,
+    "open_path_before": 34958,
+    "full_path_before": 7313,
+    "after": 1705
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 21,
+    "open_path_before": 61175,
+    "full_path_before": 7682,
+    "after": 2342
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 32,
+    "open_path_before": 93218,
+    "full_path_before": 8133,
+    "after": 3120
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 33,
+    "open_path_before": 96131,
+    "full_path_before": 8174,
+    "after": 3870
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 64,
+    "open_path_before": 186434,
+    "full_path_before": 9445,
+    "after": 6048
+  },
+  {
+    "profile": "MAIN",
+    "operation": "path",
+    "size": 128,
+    "open_path_before": 372866,
+    "full_path_before": 12069,
+    "after": 11904
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 11,
+    "before": 3547,
+    "after": 1739
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 11,
+    "before": 3541,
+    "after": 1691
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 16,
+    "before": 3937,
+    "after": 2082
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 16,
+    "before": 3931,
+    "after": 2034
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 32,
+    "before": 3701,
+    "after": 3224
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 32,
+    "before": 3695,
+    "after": 3176
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 33,
+    "before": 4120,
+    "after": 3967
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 33,
+    "before": 4114,
+    "after": 3876
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 48,
+    "before": 5290,
+    "after": 5010
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 48,
+    "before": 5284,
+    "after": 4919
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 63,
+    "before": 6460,
+    "after": 6067
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 63,
+    "before": 6454,
+    "after": 5976
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdFetch",
+    "size": 64,
+    "before": 4723,
+    "after": 4803
+  },
+  {
+    "profile": "MAIN",
+    "operation": "kdStore",
+    "size": 64,
+    "before": 4717,
+    "after": 4797
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 1,
+    "open_path_before": 2919,
+    "full_path_before": 6866,
+    "after": 959
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 4,
+    "open_path_before": 11670,
+    "full_path_before": 6989,
+    "after": 1162
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 12,
+    "open_path_before": 35006,
+    "full_path_before": 7317,
+    "after": 1722
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 21,
+    "open_path_before": 61259,
+    "full_path_before": 7686,
+    "after": 2359
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 32,
+    "open_path_before": 93346,
+    "full_path_before": 8137,
+    "after": 3137
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 33,
+    "open_path_before": 96263,
+    "full_path_before": 8178,
+    "after": 3897
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 64,
+    "open_path_before": 186690,
+    "full_path_before": 9449,
+    "after": 6075
+  },
+  {
+    "profile": "EXEC",
+    "operation": "path",
+    "size": 128,
+    "open_path_before": 373378,
+    "full_path_before": 12073,
+    "after": 11951
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 11,
+    "before": 3551,
+    "after": 1739
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 11,
+    "before": 3545,
+    "after": 1691
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 16,
+    "before": 3941,
+    "after": 2082
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 16,
+    "before": 3935,
+    "after": 2034
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 32,
+    "before": 3705,
+    "after": 3224
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 32,
+    "before": 3699,
+    "after": 3176
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 33,
+    "before": 4124,
+    "after": 3977
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 33,
+    "before": 4118,
+    "after": 3886
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 48,
+    "before": 5294,
+    "after": 5020
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 48,
+    "before": 5288,
+    "after": 4929
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 63,
+    "before": 6464,
+    "after": 6077
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 63,
+    "before": 6458,
+    "after": 5986
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdFetch",
+    "size": 64,
+    "before": 4727,
+    "after": 4807
+  },
+  {
+    "profile": "EXEC",
+    "operation": "kdStore",
+    "size": 64,
+    "before": 4721,
+    "after": 4801
+  }
+]

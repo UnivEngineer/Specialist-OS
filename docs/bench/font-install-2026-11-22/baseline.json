@@ -1,0 +1,576 @@
+{
+  "image_sha256": "8b95f579aabfd5a3c29c933f9945bbbbb854fe97472fdb8a607556e98115d842",
+  "tick_ms": 0.128,
+  "rows": [
+    {
+      "engine": "4x8/Fast",
+      "method": "generate",
+      "total_ticks": 5074,
+      "prepare_ticks": 515,
+      "read_ticks": null,
+      "intervals": [
+        1865,
+        1169,
+        1075,
+        69,
+        515,
+        378,
+        3
+      ],
+      "pre_bytes": 2048,
+      "base": 33792,
+      "repeat": 1
+    },
+    {
+      "engine": "4x8/Fast",
+      "method": "file",
+      "total_ticks": 5458,
+      "prepare_ticks": 1061,
+      "read_ticks": 1052,
+      "intervals": [
+        1703,
+        1168,
+        1076,
+        69,
+        1061,
+        379,
+        2
+      ],
+      "pre_bytes": 2048,
+      "base": 33792,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "total_ticks": 6788,
+      "prepare_ticks": 2140,
+      "read_ticks": null,
+      "intervals": [
+        1806,
+        1168,
+        1222,
+        69,
+        2140,
+        378,
+        5
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "file",
+      "total_ticks": 5996,
+      "prepare_ticks": 1534,
+      "read_ticks": 1525,
+      "intervals": [
+        1744,
+        1168,
+        1098,
+        69,
+        1534,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "generate",
+      "total_ticks": 6274,
+      "prepare_ticks": 1856,
+      "read_ticks": null,
+      "intervals": [
+        1701,
+        1169,
+        1097,
+        69,
+        1856,
+        378,
+        4
+      ],
+      "pre_bytes": 10240,
+      "base": 25600,
+      "repeat": 1
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "file",
+      "total_ticks": 6850,
+      "prepare_ticks": 2430,
+      "read_ticks": 2421,
+      "intervals": [
+        1700,
+        1168,
+        1100,
+        69,
+        2430,
+        379,
+        4
+      ],
+      "pre_bytes": 10240,
+      "base": 25600,
+      "repeat": 1
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "generate",
+      "total_ticks": 5705,
+      "prepare_ticks": 1077,
+      "read_ticks": null,
+      "intervals": [
+        1867,
+        1187,
+        1119,
+        69,
+        1077,
+        383,
+        3
+      ],
+      "pre_bytes": 6144,
+      "base": 29696,
+      "repeat": 1
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "file",
+      "total_ticks": 6322,
+      "prepare_ticks": 1784,
+      "read_ticks": 1775,
+      "intervals": [
+        1775,
+        1188,
+        1120,
+        69,
+        1784,
+        383,
+        3
+      ],
+      "pre_bytes": 6144,
+      "base": 29696,
+      "repeat": 1
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "generate",
+      "total_ticks": 6508,
+      "prepare_ticks": 2062,
+      "read_ticks": null,
+      "intervals": [
+        1727,
+        1188,
+        1076,
+        69,
+        2062,
+        383,
+        3
+      ],
+      "pre_bytes": 12288,
+      "base": 23552,
+      "repeat": 1
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "file",
+      "total_ticks": 7202,
+      "prepare_ticks": 2754,
+      "read_ticks": 2746,
+      "intervals": [
+        1728,
+        1188,
+        1077,
+        69,
+        2754,
+        383,
+        3
+      ],
+      "pre_bytes": 12288,
+      "base": 23552,
+      "repeat": 1
+    },
+    {
+      "engine": "4x8/Fast",
+      "method": "file",
+      "total_ticks": 5454,
+      "prepare_ticks": 1061,
+      "read_ticks": 1052,
+      "intervals": [
+        1701,
+        1168,
+        1074,
+        69,
+        1061,
+        379,
+        2
+      ],
+      "pre_bytes": 2048,
+      "base": 33792,
+      "repeat": 2
+    },
+    {
+      "engine": "4x8/Fast",
+      "method": "generate",
+      "total_ticks": 4910,
+      "prepare_ticks": 515,
+      "read_ticks": null,
+      "intervals": [
+        1702,
+        1168,
+        1075,
+        69,
+        515,
+        378,
+        3
+      ],
+      "pre_bytes": 2048,
+      "base": 33792,
+      "repeat": 2
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "file",
+      "total_ticks": 5997,
+      "prepare_ticks": 1534,
+      "read_ticks": 1524,
+      "intervals": [
+        1745,
+        1168,
+        1098,
+        69,
+        1534,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 2
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "total_ticks": 6604,
+      "prepare_ticks": 2139,
+      "read_ticks": null,
+      "intervals": [
+        1743,
+        1169,
+        1101,
+        69,
+        2139,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 2
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "file",
+      "total_ticks": 6848,
+      "prepare_ticks": 2431,
+      "read_ticks": 2422,
+      "intervals": [
+        1701,
+        1168,
+        1098,
+        68,
+        2431,
+        378,
+        4
+      ],
+      "pre_bytes": 10240,
+      "base": 25600,
+      "repeat": 2
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "generate",
+      "total_ticks": 6274,
+      "prepare_ticks": 1856,
+      "read_ticks": null,
+      "intervals": [
+        1701,
+        1168,
+        1098,
+        68,
+        1856,
+        378,
+        5
+      ],
+      "pre_bytes": 10240,
+      "base": 25600,
+      "repeat": 2
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "file",
+      "total_ticks": 6324,
+      "prepare_ticks": 1785,
+      "read_ticks": 1775,
+      "intervals": [
+        1777,
+        1187,
+        1122,
+        68,
+        1785,
+        383,
+        2
+      ],
+      "pre_bytes": 6144,
+      "base": 29696,
+      "repeat": 2
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "generate",
+      "total_ticks": 5612,
+      "prepare_ticks": 1077,
+      "read_ticks": null,
+      "intervals": [
+        1775,
+        1188,
+        1117,
+        69,
+        1077,
+        383,
+        3
+      ],
+      "pre_bytes": 6144,
+      "base": 29696,
+      "repeat": 2
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "file",
+      "total_ticks": 7198,
+      "prepare_ticks": 2755,
+      "read_ticks": 2746,
+      "intervals": [
+        1726,
+        1188,
+        1075,
+        69,
+        2755,
+        383,
+        2
+      ],
+      "pre_bytes": 12288,
+      "base": 23552,
+      "repeat": 2
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "generate",
+      "total_ticks": 6506,
+      "prepare_ticks": 2062,
+      "read_ticks": null,
+      "intervals": [
+        1726,
+        1188,
+        1076,
+        69,
+        2062,
+        383,
+        2
+      ],
+      "pre_bytes": 12288,
+      "base": 23552,
+      "repeat": 2
+    },
+    {
+      "engine": "4x8/Fast",
+      "method": "generate",
+      "total_ticks": 4911,
+      "prepare_ticks": 515,
+      "read_ticks": null,
+      "intervals": [
+        1702,
+        1169,
+        1075,
+        69,
+        515,
+        378,
+        3
+      ],
+      "pre_bytes": 2048,
+      "base": 33792,
+      "repeat": 3
+    },
+    {
+      "engine": "4x8/Fast",
+      "method": "file",
+      "total_ticks": 5458,
+      "prepare_ticks": 1061,
+      "read_ticks": 1052,
+      "intervals": [
+        1703,
+        1168,
+        1076,
+        69,
+        1061,
+        379,
+        2
+      ],
+      "pre_bytes": 2048,
+      "base": 33792,
+      "repeat": 3
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "generate",
+      "total_ticks": 6604,
+      "prepare_ticks": 2140,
+      "read_ticks": null,
+      "intervals": [
+        1743,
+        1168,
+        1101,
+        69,
+        2140,
+        378,
+        5
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 3
+    },
+    {
+      "engine": "6x8/Packed",
+      "method": "file",
+      "total_ticks": 5996,
+      "prepare_ticks": 1534,
+      "read_ticks": 1525,
+      "intervals": [
+        1744,
+        1168,
+        1098,
+        69,
+        1534,
+        379,
+        4
+      ],
+      "pre_bytes": 4096,
+      "base": 31744,
+      "repeat": 3
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "generate",
+      "total_ticks": 6274,
+      "prepare_ticks": 1856,
+      "read_ticks": null,
+      "intervals": [
+        1701,
+        1169,
+        1097,
+        69,
+        1856,
+        378,
+        4
+      ],
+      "pre_bytes": 10240,
+      "base": 25600,
+      "repeat": 3
+    },
+    {
+      "engine": "6x8/Fast",
+      "method": "file",
+      "total_ticks": 6850,
+      "prepare_ticks": 2430,
+      "read_ticks": 2421,
+      "intervals": [
+        1700,
+        1168,
+        1100,
+        69,
+        2430,
+        379,
+        4
+      ],
+      "pre_bytes": 10240,
+      "base": 25600,
+      "repeat": 3
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "generate",
+      "total_ticks": 5614,
+      "prepare_ticks": 1077,
+      "read_ticks": null,
+      "intervals": [
+        1776,
+        1187,
+        1119,
+        69,
+        1077,
+        383,
+        3
+      ],
+      "pre_bytes": 6144,
+      "base": 29696,
+      "repeat": 3
+    },
+    {
+      "engine": "8x8/Packed",
+      "method": "file",
+      "total_ticks": 6322,
+      "prepare_ticks": 1785,
+      "read_ticks": 1775,
+      "intervals": [
+        1776,
+        1188,
+        1120,
+        68,
+        1785,
+        383,
+        2
+      ],
+      "pre_bytes": 6144,
+      "base": 29696,
+      "repeat": 3
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "generate",
+      "total_ticks": 6508,
+      "prepare_ticks": 2062,
+      "read_ticks": null,
+      "intervals": [
+        1727,
+        1188,
+        1076,
+        69,
+        2062,
+        383,
+        3
+      ],
+      "pre_bytes": 12288,
+      "base": 23552,
+      "repeat": 3
+    },
+    {
+      "engine": "8x8/Fast",
+      "method": "file",
+      "total_ticks": 7202,
+      "prepare_ticks": 2755,
+      "read_ticks": 2746,
+      "intervals": [
+        1728,
+        1188,
+        1077,
+        69,
+        2755,
+        383,
+        2
+      ],
+      "pre_bytes": 12288,
+      "base": 23552,
+      "repeat": 3
+    }
+  ]
+}

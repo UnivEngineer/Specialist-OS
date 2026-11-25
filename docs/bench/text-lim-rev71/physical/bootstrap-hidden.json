@@ -1,0 +1,68 @@
+{
+  "image_sha256": "b87ba3033b0dbc6cdd4fce4d0ecb9317c0e1d12f986190ec64f70c550c25dcee",
+  "port": 19781,
+  "pid": 8672,
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "qpa": "offscreen",
+  "hidden": true,
+  "rows": [
+    {
+      "mode": "cold",
+      "ticks": {
+        "stage": 179048,
+        "biosLoaded": 366596,
+        "dosLoaded": 1978421,
+        "bootDone": 4706832,
+        "biosBootExec": 4920428
+      },
+      "dos_reloaded": true,
+      "nc_page": 6,
+      "mem_profiles": [
+        "MAIN",
+        "DOS",
+        "DATA"
+      ]
+    },
+    {
+      "mode": "warm",
+      "ticks": {
+        "stage": 179048,
+        "biosLoaded": 366596,
+        "dosLoaded": 481572,
+        "bootDone": 3209632,
+        "biosBootExec": 3279256
+      },
+      "dos_reloaded": false,
+      "nc_page": 6,
+      "mem_profiles": [
+        "MAIN",
+        "DOS",
+        "DATA"
+      ]
+    },
+    {
+      "mode": "incompatible",
+      "ticks": {
+        "stage": 179048,
+        "biosLoaded": 366596,
+        "dosLoaded": 1978520,
+        "bootDone": 4706931,
+        "biosBootExec": 4920527
+      },
+      "dos_reloaded": true,
+      "nc_page": 6,
+      "mem_profiles": [
+        "MAIN",
+        "DOS",
+        "DATA"
+      ]
+    }
+  ]
+}

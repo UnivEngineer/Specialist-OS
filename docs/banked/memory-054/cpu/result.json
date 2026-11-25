@@ -1,0 +1,142 @@
+[
+  {
+    "case": "move-3000-3001-257",
+    "cycles": 11298
+  },
+  {
+    "case": "move-3001-3000-257",
+    "cycles": 6150
+  },
+  {
+    "case": "move-3000-3000-256",
+    "cycles": 11279
+  },
+  {
+    "case": "move-3000-3400-1",
+    "cycles": 1442
+  },
+  {
+    "case": "move-3000-3400-0",
+    "cycles": 592
+  },
+  {
+    "case": "exec-move-0-1-1",
+    "cycles": 1462
+  },
+  {
+    "case": "exec-move-0-1-2",
+    "cycles": 1520
+  },
+  {
+    "case": "exec-move-0-1-3",
+    "cycles": 1539
+  },
+  {
+    "case": "exec-move-0-1-15",
+    "cycles": 2001
+  },
+  {
+    "case": "exec-move-0-1-16",
+    "cycles": 2059
+  },
+  {
+    "case": "exec-move-0-1-17",
+    "cycles": 2078
+  },
+  {
+    "case": "exec-move-0-1-255",
+    "cycles": 11241
+  },
+  {
+    "case": "exec-move-0-1-256",
+    "cycles": 11299
+  },
+  {
+    "case": "exec-move-0-1-257",
+    "cycles": 11318
+  },
+  {
+    "case": "exec-move-0-1-1019",
+    "cycles": 40655
+  },
+  {
+    "case": "exec-move-1-0-1",
+    "cycles": 1666
+  },
+  {
+    "case": "exec-move-1-0-2",
+    "cycles": 1676
+  },
+  {
+    "case": "exec-move-1-0-3",
+    "cycles": 1700
+  },
+  {
+    "case": "exec-move-1-0-15",
+    "cycles": 1904
+  },
+  {
+    "case": "exec-move-1-0-16",
+    "cycles": 1914
+  },
+  {
+    "case": "exec-move-1-0-17",
+    "cycles": 1938
+  },
+  {
+    "case": "exec-move-1-0-255",
+    "cycles": 6089
+  },
+  {
+    "case": "exec-move-1-0-256",
+    "cycles": 6146
+  },
+  {
+    "case": "exec-move-1-0-257",
+    "cycles": 6170
+  },
+  {
+    "case": "exec-move-1-0-1019",
+    "cycles": 19533
+  },
+  {
+    "case": "far-overlap-0",
+    "cycles": 581
+  },
+  {
+    "case": "far-overlap-17",
+    "cycles": 2047
+  },
+  {
+    "case": "GET8",
+    "cycles": 803
+  },
+  {
+    "case": "GET16",
+    "cycles": 818
+  },
+  {
+    "case": "PUT8",
+    "cycles": 796
+  },
+  {
+    "case": "PUT16",
+    "cycles": 808
+  },
+  {
+    "case": "move-invalid-17-3000-3400-1",
+    "cycles": 676
+  },
+  {
+    "case": "move-invalid-0-feff-3400-2",
+    "cycles": 846
+  },
+  {
+    "case": "move-invalid-0-3000-feff-2",
+    "cycles": 958
+  },
+  {
+    "case": "move-invalid-0-fff0-3400-32",
+    "cycles": 838
+  }
+]

@@ -1,0 +1,562 @@
+{
+  "image_sha256": "864d1030c68cbf0610e40ef33578cd95cd981ef468930d9d4fab6e8571273047",
+  "mem_revision": 65,
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "transfers": [
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 0,
+      "phase": 0,
+      "src_addr": 16383,
+      "dst_addr": 25087,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        0,
+        0,
+        0
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 449
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 1,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        0,
+        0,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 2550
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 31,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        0,
+        0,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 4890
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 32,
+      "phase": 0,
+      "src_addr": 16383,
+      "dst_addr": 25087,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        1,
+        1,
+        0
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 3484
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 33,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        1,
+        1,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 3903
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 63,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        1,
+        1,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 6243
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 64,
+      "phase": 0,
+      "src_addr": 16383,
+      "dst_addr": 25087,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        2,
+        2,
+        0
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 4506
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 65,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        2,
+        2,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 4925
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 255,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        7,
+        7,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 12375
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 256,
+      "phase": 0,
+      "src_addr": 16383,
+      "dst_addr": 25087,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        8,
+        8,
+        0
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 10278
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 257,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        8,
+        8,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 10998
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 8191,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        255,
+        255,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 265772
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 8192,
+      "phase": 0,
+      "src_addr": 16383,
+      "dst_addr": 25087,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        256,
+        256,
+        0
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 264030
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 8193,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": [
+        256,
+        256,
+        1
+      ],
+      "move_local_and_remote_hits": null,
+      "mid_copy": null,
+      "kept_window": false,
+      "ticks": 264449
+    },
+    {
+      "entry": "F80F",
+      "caller": 0,
+      "src_page": 12,
+      "dst_page": 13,
+      "bytes": 65,
+      "phase": 1,
+      "src_addr": 16384,
+      "dst_addr": 25088,
+      "error": 0,
+      "overlap": 0,
+      "pop_shld_lhld_push_and_tail_hits": null,
+      "move_local_and_remote_hits": null,
+      "mid_copy": {
+        "read_pc": 65326,
+        "write_pc": 65409,
+        "read_sp": 16400,
+        "write_sp": 25104,
+        "source_half_in_window": "547faad5002b5681acd7022d5883aed9",
+        "destination_written_half": "042f5a85b0db06315c87b2dd08335e89",
+        "read_ticks": 2538,
+        "write_ticks": 3056,
+        "full_window_ticks": 1022
+      },
+      "kept_window": false,
+      "ticks": 4925
+    }
+  ],
+  "near": [
+    {
+      "bytes": 0,
+      "offset": -4096,
+      "ticks": 148
+    },
+    {
+      "bytes": 0,
+      "offset": -1,
+      "ticks": 148
+    },
+    {
+      "bytes": 0,
+      "offset": 0,
+      "ticks": 148
+    },
+    {
+      "bytes": 0,
+      "offset": 1,
+      "ticks": 148
+    },
+    {
+      "bytes": 0,
+      "offset": 4096,
+      "ticks": 148
+    },
+    {
+      "bytes": 1,
+      "offset": -4096,
+      "ticks": 308
+    },
+    {
+      "bytes": 1,
+      "offset": -1,
+      "ticks": 308
+    },
+    {
+      "bytes": 1,
+      "offset": 0,
+      "ticks": 372
+    },
+    {
+      "bytes": 1,
+      "offset": 1,
+      "ticks": 372
+    },
+    {
+      "bytes": 1,
+      "offset": 4096,
+      "ticks": 353
+    },
+    {
+      "bytes": 31,
+      "offset": -4096,
+      "ticks": 1188
+    },
+    {
+      "bytes": 31,
+      "offset": -1,
+      "ticks": 1188
+    },
+    {
+      "bytes": 31,
+      "offset": 0,
+      "ticks": 1257
+    },
+    {
+      "bytes": 31,
+      "offset": 1,
+      "ticks": 1257
+    },
+    {
+      "bytes": 31,
+      "offset": 4096,
+      "ticks": 1238
+    },
+    {
+      "bytes": 32,
+      "offset": -4096,
+      "ticks": 1068
+    },
+    {
+      "bytes": 32,
+      "offset": -1,
+      "ticks": 1068
+    },
+    {
+      "bytes": 32,
+      "offset": 0,
+      "ticks": 1138
+    },
+    {
+      "bytes": 32,
+      "offset": 1,
+      "ticks": 1138
+    },
+    {
+      "bytes": 32,
+      "offset": 4096,
+      "ticks": 1119
+    },
+    {
+      "bytes": 33,
+      "offset": -4096,
+      "ticks": 1097
+    },
+    {
+      "bytes": 33,
+      "offset": -1,
+      "ticks": 1097
+    },
+    {
+      "bytes": 33,
+      "offset": 0,
+      "ticks": 1167
+    },
+    {
+      "bytes": 33,
+      "offset": 1,
+      "ticks": 1167
+    },
+    {
+      "bytes": 33,
+      "offset": 4096,
+      "ticks": 1148
+    },
+    {
+      "bytes": 65,
+      "offset": -4096,
+      "ticks": 1671
+    },
+    {
+      "bytes": 65,
+      "offset": -1,
+      "ticks": 1671
+    },
+    {
+      "bytes": 65,
+      "offset": 0,
+      "ticks": 1757
+    },
+    {
+      "bytes": 65,
+      "offset": 1,
+      "ticks": 1757
+    },
+    {
+      "bytes": 65,
+      "offset": 4096,
+      "ticks": 1738
+    },
+    {
+      "bytes": 256,
+      "offset": -4096,
+      "ticks": 5037
+    },
+    {
+      "bytes": 256,
+      "offset": -1,
+      "ticks": 5037
+    },
+    {
+      "bytes": 256,
+      "offset": 0,
+      "ticks": 5219
+    },
+    {
+      "bytes": 256,
+      "offset": 1,
+      "ticks": 5219
+    },
+    {
+      "bytes": 256,
+      "offset": 4096,
+      "ticks": 5200
+    },
+    {
+      "bytes": 257,
+      "offset": -4096,
+      "ticks": 5066
+    },
+    {
+      "bytes": 257,
+      "offset": -1,
+      "ticks": 5066
+    },
+    {
+      "bytes": 257,
+      "offset": 0,
+      "ticks": 5248
+    },
+    {
+      "bytes": 257,
+      "offset": 1,
+      "ticks": 5248
+    },
+    {
+      "bytes": 257,
+      "offset": 4096,
+      "ticks": 5229
+    },
+    {
+      "bytes": 1024,
+      "offset": -4096,
+      "ticks": 18879
+    },
+    {
+      "bytes": 1024,
+      "offset": -1,
+      "ticks": 18879
+    },
+    {
+      "bytes": 1024,
+      "offset": 0,
+      "ticks": 19445
+    },
+    {
+      "bytes": 1024,
+      "offset": 1,
+      "ticks": 19445
+    },
+    {
+      "bytes": 1024,
+      "offset": 4096,
+      "ticks": 19426
+    }
+  ]
+}

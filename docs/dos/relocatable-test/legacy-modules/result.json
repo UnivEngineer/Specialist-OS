@@ -1,0 +1,180 @@
+[
+  {
+    "case": "DOS-owns-RAM-disk-without-resident-or-EXEC-bank",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "DOS-service-slot-remains-free-for-other-DLLs",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "DOS-RAMDISK-reinstall-preserves-main-ready-volume-and-bank-pool",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "RAM-disk-RAW-boundary-protects-free-banks",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "load-errors-no-leaks",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "native-BANK-COM-arguments-RET-cleanup",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "MAIN-and-DRIVER-before-EXE-association",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "DOS-DLL-registers-local-RAW-BIOS-DOS-arena-busy-cleanup-rollback",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "DOS-DLL-refuses-to-overwrite-running-driver",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "invalid-COM-EXE-no-association-no-key-wait",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "repeat-registers-BANKMOD.DLL",
+    "allocations": [
+      1,
+      1
+    ]
+  },
+  {
+    "case": "nested-BIOS-DOS-owner-and-child-BANKMOD.DLL",
+    "allocations": [
+      3,
+      2
+    ]
+  },
+  {
+    "case": "unload-cleans-owned-blocks-stale-ID-BANKMOD.DLL",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "repeat-registers-MAINMOD.DLL",
+    "allocations": [
+      1,
+      1
+    ]
+  },
+  {
+    "case": "MAIN-BIOS-01FFh",
+    "status": "skipped",
+    "reason": "out-of-range sysBIOSTable index"
+  },
+  {
+    "case": "nested-BIOS-DOS-owner-and-child-MAINMOD.DLL",
+    "allocations": [
+      3,
+      2
+    ]
+  },
+  {
+    "case": "unload-cleans-owned-blocks-stale-ID-MAINMOD.DLL",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "foreign-allocation-not-reused-as-EXEC",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "descriptor-table-full-no-leak",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "no-free-bank-no-leak",
+    "allocations": [
+      0,
+      0
+    ]
+  },
+  {
+    "case": "Reset-cleans-nonresident-modules-and-preserves-RETAIN",
+    "allocations": [
+      2,
+      0
+    ]
+  },
+  {
+    "case": "forced-DOS-reload-by-clearing-ready",
+    "status": "skipped",
+    "reason": "hardware Reset only"
+  },
+  {
+    "case": "NC-native-BANK-COM-and-EXE-launch",
+    "allocations": [
+      2,
+      0
+    ]
+  },
+  {
+    "case": "normal-NC-controller-launch-with-B-files-after-Reset",
+    "allocations": [
+      2,
+      0
+    ]
+  },
+  {
+    "case": "NC-rejects-DLL-before-loading-main",
+    "allocations": [
+      2,
+      0
+    ]
+  },
+  {
+    "case": "C-SDK-module-lifecycle",
+    "allocations": [
+      0,
+      0
+    ]
+  }
+]

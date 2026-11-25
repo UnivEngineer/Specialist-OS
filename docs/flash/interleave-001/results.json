@@ -1,0 +1,61 @@
+{
+  "clusters": [
+    1539,
+    3587,
+    5635,
+    7683,
+    1540,
+    3588,
+    5636,
+    7684,
+    1541,
+    3589,
+    5637,
+    7685
+  ],
+  "sectors": [
+    1626,
+    3674,
+    5722,
+    7770,
+    1627,
+    3675,
+    5723,
+    7771,
+    1628,
+    3676,
+    5724,
+    7772
+  ],
+  "chips": [
+    0,
+    1,
+    2,
+    3,
+    0,
+    1,
+    2,
+    3,
+    0,
+    1,
+    2,
+    3
+  ],
+  "createCpuTicks": 4071869,
+  "physicalWriteCpuTicks": {
+    "Flash": 559620,
+    "FlashFst": 330078
+  },
+  "timeoutReadAndFlush": true,
+  "verifyMacroEnabledTested": true,
+  "compatibleReadback": [
+    "Flash",
+    "FlashFst"
+  ],
+  "metadataChip": 0,
+  "ncCopyAndFlush": true,
+  "fullDiskRejected": true,
+  "lastFreeFound": true,
+  "fullPreferredChipFallback": true,
+  "linearWrap": true
+}

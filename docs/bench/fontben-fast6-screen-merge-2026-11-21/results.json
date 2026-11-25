@@ -1,0 +1,54 @@
+{
+  "checks": 152,
+  "variants": {
+    "direct": {
+      "cycles_per_group": 225,
+      "body_bytes": 41,
+      "stream_bytes": 41,
+      "screen_reads": 3,
+      "screen_writes": 6
+    },
+    "directStream": {
+      "cycles_per_group": 252,
+      "body_bytes": 41,
+      "stream_bytes": 48,
+      "screen_reads": 3,
+      "screen_writes": 6
+    },
+    "directInverse": {
+      "cycles_per_group": 264,
+      "body_bytes": 44,
+      "stream_bytes": 51,
+      "screen_reads": 3,
+      "screen_writes": 6
+    },
+    "stackStream": {
+      "cycles_per_group": 224,
+      "body_bytes": 36,
+      "stream_bytes": 42,
+      "screen_reads": 3,
+      "screen_writes": 6
+    },
+    "stackInverse": {
+      "cycles_per_group": 236,
+      "body_bytes": 39,
+      "stream_bytes": 45,
+      "screen_reads": 3,
+      "screen_writes": 6
+    },
+    "parkStream": {
+      "cycles_per_group": 258,
+      "body_bytes": 45,
+      "stream_bytes": 52,
+      "screen_reads": 0,
+      "screen_writes": 3
+    },
+    "parkInverse": {
+      "cycles_per_group": 270,
+      "body_bytes": 48,
+      "stream_bytes": 55,
+      "screen_reads": 0,
+      "screen_writes": 3
+    }
+  }
+}

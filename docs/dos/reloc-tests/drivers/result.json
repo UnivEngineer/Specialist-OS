@@ -1,0 +1,18 @@
+{
+  "floppyBases": [
+    50294,
+    50777
+  ],
+  "retainedOnError": true,
+  "sectorBytes": [
+    512,
+    256
+  ],
+  "enumBase": 43437,
+  "fileopsBase": 45402,
+  "pinnedOverlays": 2,
+  "jumpTicks": {
+    "enumInvoke": 10,
+    "fileopsInvoke": 10
+  }
+}

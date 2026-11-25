@@ -1,0 +1,16 @@
+[
+  {
+    "command": "C:/DOS/NC.COM",
+    "base": 51408,
+    "entry": 51408,
+    "body": 264,
+    "core_page": 6
+  },
+  {
+    "command": "C:/DOS/EDIT.COM C:/AUTOEXEC.BAT",
+    "base": 51466,
+    "entry": 51466,
+    "body": 206,
+    "core_page": 7
+  }
+]

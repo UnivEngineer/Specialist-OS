@@ -1,0 +1,15 @@
+{
+  "corpus_sha256": "fadb99a07250a56dbb552a95418e0aa18cd66359861e9b6a46d295539ab1df93",
+  "sha256": {
+    "images/SystemRom_emu80_writable.bin": "40f6690bac689758438c58ec5e22f646bf657603e7c938b595b2de48901d7fdc",
+    "images/FlashDisk_emu80_seed.bin": "15bc5a6991dcc27bfbdeaeaa6bae2e2101cab30668add670450158916a38cdc6",
+    "bin/FONTCOM.i80": "fcc76704c006039b0312a98017278cbbfc07a447fc342d0f05000e7eeadb7403",
+    "bin/FONTBANK.i80": "6630ff4728d4192e98d7f83ed0a7091965abe95e931a2f59618c1fdf04baeb65",
+    "bin/fonts/RotRows.i80": "a3c698b70af538d6f28a0862678e6552b823083cd9da8e3adcb2ef0e6b32f69c",
+    "bin/fonts/FontPack.i80": "a3d2d5258c8f579bbcda20d1732a368cb86145563e4e70ea30edd8ec208d2f2d",
+    "bin/fonts/FontFull.i80": "38aacf678958488e2f4caebe2c1ebf7e00ee98588bba43095bdceea99b1a0b22",
+    "bin/fonts/Font4.i80": "36ec0ee5fd3133295d81ba38984232d6da5ce69cfe0ebd30b9199a0fbf657fd1",
+    "bin/fonts/Font4Fst.i80": "2a5f3b83b16d5babb020c9af69dbbc730b21a89ca368a05e9347f64eeaa9f22b",
+    "bin/fonts/Font4Cmp.i80": "f5be588f81d5c151d599ca848d2749208d1ddd32fdb6d39b6fc732109b7a5cdc"
+  }
+}

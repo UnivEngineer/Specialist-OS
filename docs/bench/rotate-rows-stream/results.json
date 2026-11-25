@@ -1,0 +1,534 @@
+[
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 0,
+    "route": 0,
+    "ms": 658.176
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 0,
+    "route": 1,
+    "ms": 2416.0
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 0,
+    "route": 2,
+    "ms": 2416.128
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 1,
+    "route": 0,
+    "ms": 633.216
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 1,
+    "route": 1,
+    "ms": 2391.04
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 1,
+    "route": 2,
+    "ms": 2391.168
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 2,
+    "route": 0,
+    "ms": 397.184
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 2,
+    "route": 3,
+    "ms": 463.616
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 2,
+    "route": 4,
+    "ms": 432.64
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 2,
+    "route": 5,
+    "ms": 423.296
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 3,
+    "route": 0,
+    "ms": 368.0
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 3,
+    "route": 3,
+    "ms": 439.04
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 3,
+    "route": 4,
+    "ms": 402.816
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 3,
+    "route": 5,
+    "ms": 394.24
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 4,
+    "route": 0,
+    "ms": 352.256
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 4,
+    "route": 3,
+    "ms": 429.568
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 4,
+    "route": 4,
+    "ms": 386.432
+  },
+  {
+    "engine": "6RotateQuads",
+    "phase": null,
+    "kind": 4,
+    "route": 5,
+    "ms": 377.856
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 0,
+    "route": 0,
+    "ms": 658.304
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 0,
+    "route": 1,
+    "ms": 2416.0
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 0,
+    "route": 2,
+    "ms": 2416.128
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 1,
+    "route": 0,
+    "ms": 633.216
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 1,
+    "route": 1,
+    "ms": 2391.168
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 1,
+    "route": 2,
+    "ms": 2391.04
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 2,
+    "route": 0,
+    "ms": 382.72
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 2,
+    "route": 3,
+    "ms": 449.152
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 2,
+    "route": 4,
+    "ms": 418.176
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 2,
+    "route": 5,
+    "ms": 408.832
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 3,
+    "route": 0,
+    "ms": 352.256
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 3,
+    "route": 3,
+    "ms": 423.296
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 3,
+    "route": 4,
+    "ms": 386.944
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 3,
+    "route": 5,
+    "ms": 378.368
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 4,
+    "route": 0,
+    "ms": 336.512
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 4,
+    "route": 3,
+    "ms": 413.824
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 4,
+    "route": 4,
+    "ms": 370.688
+  },
+  {
+    "engine": "6RotateRows",
+    "phase": null,
+    "kind": 4,
+    "route": 5,
+    "ms": 361.984
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 0,
+    "kind": 0,
+    "route": 0,
+    "ms": 393.216
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 0,
+    "kind": 1,
+    "route": 0,
+    "ms": 342.4
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 0,
+    "kind": 2,
+    "route": 0,
+    "ms": 163.328
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 0,
+    "kind": 3,
+    "route": 0,
+    "ms": 163.584
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 0,
+    "kind": 4,
+    "route": 0,
+    "ms": 155.392
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 1,
+    "kind": 0,
+    "route": 0,
+    "ms": 840.32
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 1,
+    "kind": 1,
+    "route": 0,
+    "ms": 789.504
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 1,
+    "kind": 2,
+    "route": 0,
+    "ms": 405.12
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 1,
+    "kind": 3,
+    "route": 0,
+    "ms": 405.376
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 1,
+    "kind": 4,
+    "route": 0,
+    "ms": 380.928
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 2,
+    "kind": 0,
+    "route": 0,
+    "ms": 883.968
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 2,
+    "kind": 1,
+    "route": 0,
+    "ms": 833.024
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 2,
+    "kind": 2,
+    "route": 0,
+    "ms": 440.448
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 2,
+    "kind": 3,
+    "route": 0,
+    "ms": 440.704
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 2,
+    "kind": 4,
+    "route": 0,
+    "ms": 416.128
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 3,
+    "kind": 0,
+    "route": 0,
+    "ms": 854.144
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 3,
+    "kind": 1,
+    "route": 0,
+    "ms": 803.328
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 3,
+    "kind": 2,
+    "route": 0,
+    "ms": 405.248
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 3,
+    "kind": 3,
+    "route": 0,
+    "ms": 405.248
+  },
+  {
+    "engine": "8RotateQuads",
+    "phase": 3,
+    "kind": 4,
+    "route": 0,
+    "ms": 380.928
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 0,
+    "kind": 0,
+    "route": 0,
+    "ms": 393.216
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 0,
+    "kind": 1,
+    "route": 0,
+    "ms": 342.4
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 0,
+    "kind": 2,
+    "route": 0,
+    "ms": 163.328
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 0,
+    "kind": 3,
+    "route": 0,
+    "ms": 163.584
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 0,
+    "kind": 4,
+    "route": 0,
+    "ms": 155.264
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 1,
+    "kind": 0,
+    "route": 0,
+    "ms": 840.32
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 1,
+    "kind": 1,
+    "route": 0,
+    "ms": 789.504
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 1,
+    "kind": 2,
+    "route": 0,
+    "ms": 542.08
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 1,
+    "kind": 3,
+    "route": 0,
+    "ms": 542.208
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 1,
+    "kind": 4,
+    "route": 0,
+    "ms": 517.76
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 2,
+    "kind": 0,
+    "route": 0,
+    "ms": 883.84
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 2,
+    "kind": 1,
+    "route": 0,
+    "ms": 833.152
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 2,
+    "kind": 2,
+    "route": 0,
+    "ms": 577.536
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 2,
+    "kind": 3,
+    "route": 0,
+    "ms": 577.536
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 2,
+    "kind": 4,
+    "route": 0,
+    "ms": 553.216
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 3,
+    "kind": 0,
+    "route": 0,
+    "ms": 854.144
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 3,
+    "kind": 1,
+    "route": 0,
+    "ms": 803.328
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 3,
+    "kind": 2,
+    "route": 0,
+    "ms": 542.08
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 3,
+    "kind": 3,
+    "route": 0,
+    "ms": 542.336
+  },
+  {
+    "engine": "8RotateStream",
+    "phase": 3,
+    "kind": 4,
+    "route": 0,
+    "ms": 517.76
+  }
+]

@@ -1,0 +1,123 @@
+{
+  "Rotate": {
+    "before": {
+      "prefont": 57885,
+      "end": 60485
+    },
+    "after": {
+      "prefont": 57463,
+      "end": 60416
+    },
+    "bytes_returned": 491
+  },
+  "Packed6K": {
+    "before": {
+      "prefont": 57907,
+      "end": 60485
+    },
+    "after": {
+      "prefont": 57485,
+      "end": 60416
+    },
+    "bytes_returned": 491
+  },
+  "Fast12K": {
+    "before": {
+      "prefont": 57628,
+      "end": 60485
+    },
+    "after": {
+      "prefont": 57206,
+      "end": 60416
+    },
+    "bytes_returned": 491
+  },
+  "Compact": {
+    "before": {
+      "prefont": null,
+      "end": 58973
+    },
+    "after": {
+      "prefont": null,
+      "end": 58392
+    },
+    "bytes_returned": 581
+  },
+  "Fast8": {
+    "before": {
+      "prefont": 56515,
+      "end": 60543
+    },
+    "after": {
+      "prefont": 56270,
+      "end": 60416
+    },
+    "bytes_returned": 372
+  },
+  "Graph8x4": {
+    "before": {
+      "prefont": 58284,
+      "end": 60543
+    },
+    "after": {
+      "prefont": 58043,
+      "end": 60416
+    },
+    "bytes_returned": 368
+  },
+  "GraphP8K": {
+    "before": {
+      "prefont": 58247,
+      "end": 60543
+    },
+    "after": {
+      "prefont": 58006,
+      "end": 60416
+    },
+    "bytes_returned": 368
+  },
+  "Graph14K": {
+    "before": {
+      "prefont": 58253,
+      "end": 60543
+    },
+    "after": {
+      "prefont": 58012,
+      "end": 60416
+    },
+    "bytes_returned": 368
+  },
+  "Cpm4": {
+    "before": {
+      "prefont": 57859,
+      "end": 60485
+    },
+    "after": {
+      "prefont": 57465,
+      "end": 60416
+    },
+    "bytes_returned": 463
+  },
+  "Cpm4Compact": {
+    "before": {
+      "prefont": 56828,
+      "end": 59461
+    },
+    "after": {
+      "prefont": 56434,
+      "end": 59392
+    },
+    "bytes_returned": 463
+  },
+  "Cpm4Fast": {
+    "before": {
+      "prefont": 57582,
+      "end": 60485
+    },
+    "after": {
+      "prefont": 57188,
+      "end": 60416
+    },
+    "bytes_returned": 463
+  }
+}

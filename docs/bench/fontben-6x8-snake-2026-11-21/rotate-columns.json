@@ -1,0 +1,119 @@
+{
+  "pixel_checks": 286,
+  "modes": {
+    "FontRot": {
+      "cycles_per_quad": {
+        "normal": 2286,
+        "inverse": 2382
+      },
+      "full_calls": {
+        "normal": {
+          "4": 3358,
+          "16": 10216,
+          "64": 37707
+        },
+        "inverse": {
+          "4": 3458,
+          "16": 10604,
+          "64": 39247
+        }
+      },
+      "code_bytes": 1916
+    },
+    "RotRows": {
+      "cycles_per_quad": {
+        "normal": 2180,
+        "inverse": 2276
+      },
+      "full_calls": {
+        "normal": {
+          "4": 3262,
+          "16": 9802,
+          "64": 36021
+        },
+        "inverse": {
+          "4": 3362,
+          "16": 10190,
+          "64": 37561
+        }
+      },
+      "code_bytes": 374
+    },
+    "Snake0": {
+      "cycles_per_quad": {
+        "normal": 2064,
+        "inverse": 2160
+      },
+      "full_calls": {
+        "normal": {
+          "4": 3146,
+          "16": 9338,
+          "64": 34165
+        },
+        "inverse": {
+          "4": 3246,
+          "16": 9726,
+          "64": 35705
+        }
+      },
+      "code_bytes": 596
+    },
+    "RotCol2": {
+      "cycles_per_quad": {
+        "normal": 1997,
+        "inverse": 2093
+      },
+      "full_calls": {
+        "normal": {
+          "4": 3079,
+          "16": 9070,
+          "64": 33093
+        },
+        "inverse": {
+          "4": 3179,
+          "16": 9458,
+          "64": 34633
+        }
+      },
+      "code_bytes": 516
+    },
+    "RotCol4": {
+      "cycles_per_quad": {
+        "normal": 1865,
+        "inverse": 1961
+      },
+      "full_calls": {
+        "normal": {
+          "4": 2947,
+          "16": 8542,
+          "64": 30981
+        },
+        "inverse": {
+          "4": 3047,
+          "16": 8930,
+          "64": 32521
+        }
+      },
+      "code_bytes": 808
+    },
+    "RotCol8": {
+      "cycles_per_quad": {
+        "normal": 1688,
+        "inverse": 1784
+      },
+      "full_calls": {
+        "normal": {
+          "4": 2770,
+          "16": 7834,
+          "64": 28149
+        },
+        "inverse": {
+          "4": 2870,
+          "16": 8222,
+          "64": 29689
+        }
+      },
+      "code_bytes": 1284
+    }
+  }
+}

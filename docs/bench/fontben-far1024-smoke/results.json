@@ -1,0 +1,26 @@
+{
+  "far1024": [
+    {
+      "kind": 2,
+      "stage": 9,
+      "ticks": 2255,
+      "ms": 288.64
+    },
+    {
+      "kind": 3,
+      "stage": 12,
+      "ticks": 2005,
+      "ms": 256.64
+    },
+    {
+      "kind": 4,
+      "stage": 15,
+      "ticks": 1875,
+      "ms": 240.0
+    }
+  ],
+  "bitmap": "PASS",
+  "cursor": "PASS",
+  "resources": "PASS",
+  "returnedToNC": true
+}

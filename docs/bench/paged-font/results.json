@@ -1,0 +1,32 @@
+{
+  "checks": 9,
+  "bitmap": "PASS",
+  "timings": {
+    "raw6": {
+      "cycles": 670923,
+      "ms": 335.4615
+    },
+    "linear-raw6": {
+      "cycles": 987051,
+      "ms": 493.5255
+    },
+    "pre6": {
+      "cycles": 340875,
+      "ms": 170.4375
+    },
+    "linear-pre6": {
+      "cycles": 601995,
+      "ms": 300.9975
+    },
+    "raw8": {
+      "cycles": 302427,
+      "ms": 151.2135
+    },
+    "linear-raw8": {
+      "cycles": 488523,
+      "ms": 244.2615
+    }
+  },
+  "code_bytes": 833,
+  "measurement": "8080 CPU model, 2 MHz; kernels only, full 256-glyph font; preparation excluded"
+}

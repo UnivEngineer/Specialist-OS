@@ -1,0 +1,57 @@
+--- a/src/Emulation.cpp
++++ b/src/Emulation.cpp
+@@ -739,6 +739,16 @@
+         setFrequency(values[0].asInt());
+         return true;
+     } else*/
++    if (propertyName == "speedMultiplier" && values[0].isInt()) {
++        setTemporarySpeedUpFactor(values[0].asInt());
++        return true;
++    }
++
++    if (propertyName == "fullThrottle") {
++        sysReq(nullptr, values[0].asString() == "yes" ? SR_FULLTHROTTLE : SR_SPEEDNORMAL);
++        return true;
++    }
++
+     if (propertyName == "maxFps" && values[0].isInt()) {
+         setFrameRate(values[0].asInt());
+         return true;
+--- a/src/mcp/McpServer.cpp
++++ b/src/mcp/McpServer.cpp
+@@ -413,6 +413,18 @@
+     // ================================================================
+     // Tool: sys_info
+     // ================================================================
++
++    json Tool_EmuFullSpeed(const json& args)
++    {
++        const bool enabled = args.at("enabled").get<bool>();
++        json result;
++        if (!mcp::Run([&] {
++            g_emulation->sysReq(nullptr, enabled ? SR_FULLTHROTTLE : SR_SPEEDNORMAL);
++            result["full_throttle"] = g_emulation->getFullThrottleState();
++        })) throw std::runtime_error("emulator main thread is not ready");
++        return result;
++    }
++
+     json Tool_SysInfo(const json& /*args*/)
+     {
+         json info;
+@@ -1944,6 +1956,16 @@
+             });
+         }
+ 
++
++        tools.push_back({
++            "emu_set_full_speed",
++            "Set host full throttling without changing the machine clock.",
++            json{ { "type", "object" },
++                  { "properties", { { "enabled", { { "type", "boolean" } } } } },
++                  { "required", json::array({ "enabled" }) } },
++            &Tool_EmuFullSpeed
++        });
++
+         tools.push_back({
+             "sys_info",
+             "Report environment info: MCP server identity, current platform name, "

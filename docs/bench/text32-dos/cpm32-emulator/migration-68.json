@@ -1,0 +1,64 @@
+{
+  "midpoints": [
+    "FF2E",
+    "FF81"
+  ],
+  "transfers": [],
+  "legacy": {
+    "image_sha256": "8fe06d83ac003eedc21396d1747231d4b6d1600e88b83d3899df03dee118928d",
+    "pid": 49984,
+    "port": 19781,
+    "runtime": "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\emu80\\19781\\text32-cpm32-mimfeqho",
+    "cpu": {
+      "breaked": false,
+      "frequency_hz": 2000000,
+      "full_throttle": false,
+      "paused": false,
+      "speed_factor": 32.0,
+      "type": "8080"
+    },
+    "nc_bank": 6,
+    "installed_signature": "e122c0ffe122c2ff",
+    "revision": 68,
+    "own_pid_closed": true
+  },
+  "image_sha256": "bd2d10e2dfd4112732b7cdfcabd9683daa8082cb0fc3ceae5debb6479a7041ab",
+  "pid": 31516,
+  "port": 19781,
+  "runtime": "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\emu80\\19781\\text32-cpm32-x0m_hkh6",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "cold_nc_bank": 6,
+  "warm_reset": {
+    "restored": [
+      {
+        "bank": 2,
+        "bytes": 16
+      },
+      {
+        "bank": 12,
+        "bytes": 16
+      }
+    ],
+    "boot_sector_bytes_preserved": 256,
+    "nc_bank_after": 6,
+    "signature": "e122c0ffe122c2ff"
+  },
+  "migration": {
+    "revision_before": 68,
+    "revision_after": 70,
+    "boot_ram_fresh": 0,
+    "data_bytes_preserved_at_boot_done": 65024,
+    "sentinel_bytes_preserved_in_nc": 512,
+    "nc_bank_after": 6,
+    "older_command_landing_before": "773adeffb7c200fc",
+    "current_command_landing_before": "773ad5fffe03da07"
+  },
+  "own_pid_closed": true
+}

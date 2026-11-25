@@ -1,0 +1,5470 @@
+{
+  "system": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "matched": 244,
+  "measured": 268,
+  "faster": 84,
+  "equal": 160,
+  "slower": 0,
+  "extraSetCursor": [
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 852,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "sysPacketReady",
+          "page": 0,
+          "t": 112,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 481,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "sysReturned",
+          "page": 0,
+          "t": 507,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 852,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "sysPacketReady",
+          "page": 0,
+          "t": 112,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 481,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "sysReturned",
+          "page": 0,
+          "t": 507,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 852,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "sysPacketReady",
+          "page": 0,
+          "t": 112,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 481,
+          "sp": 34298,
+          "profile": 1
+        },
+        {
+          "at": "sysReturned",
+          "page": 0,
+          "t": 507,
+          "sp": 34300,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 852,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "sysPacketReady",
+          "page": 0,
+          "t": 112,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 481,
+          "sp": 34298,
+          "profile": 1
+        },
+        {
+          "at": "sysReturned",
+          "page": 0,
+          "t": 507,
+          "sp": 34300,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 589,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 263,
+          "sp": 34292,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 513,
+          "sp": 34292,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 589,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 263,
+          "sp": 34292,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 513,
+          "sp": 34292,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 589,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 263,
+          "sp": 34292,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 513,
+          "sp": 34292,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 589,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 0,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 0,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 263,
+          "sp": 34292,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 513,
+          "sp": 34292,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 0,
+      "mapperWritesByAddress": {
+        "FFFC": 0,
+        "FFFD": 0
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 0,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 2627,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankMxCall",
+          "page": 1,
+          "t": 81,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 1,
+          "t": 301,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 1,
+          "t": 783,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 1,
+          "t": 807,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 881,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 1160,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 1222,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 1304,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 1554,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 1580,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 1656,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 1928,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 1972,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 1,
+          "t": 2046,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 1,
+          "t": 2061,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 1,
+          "t": 2181,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 2627,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankMxCall",
+          "page": 1,
+          "t": 81,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 1,
+          "t": 301,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 1,
+          "t": 783,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 1,
+          "t": 807,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 881,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 1160,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 1222,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 1304,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 1554,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 1580,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 1656,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 1928,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 1972,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 1,
+          "t": 2046,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 1,
+          "t": 2061,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 1,
+          "t": 2181,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 0,
+      "ticks": 3700,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankMxCall",
+          "page": 1,
+          "t": 81,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 1,
+          "t": 301,
+          "sp": 34298,
+          "profile": 1
+        },
+        {
+          "at": "memProfileCopy",
+          "page": 1,
+          "t": 534,
+          "sp": 34282,
+          "profile": 1
+        },
+        {
+          "at": "bankSwitch",
+          "page": 1,
+          "t": 1856,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 1,
+          "t": 1880,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 1954,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 2233,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 2295,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 2377,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 2627,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 2653,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 2729,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 3001,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 3045,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 1,
+          "t": 3119,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 1,
+          "t": 3134,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 1,
+          "t": 3254,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 1,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 32,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 2627,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankMxCall",
+          "page": 1,
+          "t": 81,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 1,
+          "t": 301,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 1,
+          "t": 783,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 1,
+          "t": 807,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 881,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 1160,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 1222,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 1304,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 1554,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 1580,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 1656,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 1928,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 1972,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 1,
+          "t": 2046,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 1,
+          "t": 2061,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 1,
+          "t": 2181,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 1,
+          "t": 92,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReady",
+          "page": 1,
+          "t": 238,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 1,
+          "t": 317,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 0
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 1,
+          "t": 542,
+          "sp": 61460,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 1,
+          "t": 92,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReady",
+          "page": 1,
+          "t": 238,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 1,
+          "t": 317,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 0
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 1,
+          "t": 542,
+          "sp": 61460,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 1,
+          "t": 92,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReady",
+          "page": 1,
+          "t": 238,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 1,
+          "t": 317,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 1
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 1,
+          "t": 542,
+          "sp": 61460,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 1,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 1,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 1,
+          "t": 92,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReady",
+          "page": 1,
+          "t": 238,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 1,
+          "t": 317,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 1
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 1,
+          "t": 542,
+          "sp": 61460,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 2627,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankMxCall",
+          "page": 6,
+          "t": 81,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 6,
+          "t": 301,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 6,
+          "t": 783,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 6,
+          "t": 807,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 881,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 1160,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 1222,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 1304,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 1554,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 1580,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 1656,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 1928,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 1972,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 6,
+          "t": 2046,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 6,
+          "t": 2061,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 6,
+          "t": 2181,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 2627,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankMxCall",
+          "page": 6,
+          "t": 81,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 6,
+          "t": 301,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 6,
+          "t": 783,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 6,
+          "t": 807,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 881,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 1160,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 1222,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 1304,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 1554,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 1580,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 1656,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 1928,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 1972,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 6,
+          "t": 2046,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 6,
+          "t": 2061,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 6,
+          "t": 2181,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 0,
+      "ticks": 3700,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankMxCall",
+          "page": 6,
+          "t": 81,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 6,
+          "t": 301,
+          "sp": 34298,
+          "profile": 1
+        },
+        {
+          "at": "memProfileCopy",
+          "page": 6,
+          "t": 534,
+          "sp": 34282,
+          "profile": 1
+        },
+        {
+          "at": "bankSwitch",
+          "page": 6,
+          "t": 1856,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 6,
+          "t": 1880,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 1954,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 2233,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 2295,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 2377,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 2627,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 2653,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 2729,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 3001,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 3045,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 6,
+          "t": 3119,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 6,
+          "t": 3134,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 6,
+          "t": 3254,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 1,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 32,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 2627,
+      "events": [
+        {
+          "at": "mx_call",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankMxCall",
+          "page": 6,
+          "t": 81,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankCallPacket",
+          "page": 6,
+          "t": 301,
+          "sp": 34298,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 6,
+          "t": 783,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 6,
+          "t": 807,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 0,
+          "t": 881,
+          "sp": 34296,
+          "profile": 0
+        },
+        {
+          "at": "bbEntry",
+          "page": 0,
+          "t": 1160,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarFast",
+          "page": 0,
+          "t": 1222,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "sysBiosRegs",
+          "page": 0,
+          "t": 1304,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 1554,
+          "sp": 60790,
+          "profile": 0
+        },
+        {
+          "at": "bbScalarDone",
+          "page": 0,
+          "t": 1580,
+          "sp": 60792,
+          "profile": 0
+        },
+        {
+          "at": "bankServiceReturn",
+          "page": 0,
+          "t": 1656,
+          "sp": 60794,
+          "profile": 0
+        },
+        {
+          "at": "bankSwitch",
+          "page": 0,
+          "t": 1928,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "BANK_WINDOW",
+          "page": 0,
+          "t": 1972,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankLanding",
+          "page": 6,
+          "t": 2046,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankResume",
+          "page": 6,
+          "t": 2061,
+          "sp": 60800,
+          "profile": 0
+        },
+        {
+          "at": "bankMxResult",
+          "page": 6,
+          "t": 2181,
+          "sp": 34300,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 14,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 12,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 6,
+          "t": 92,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReady",
+          "page": 6,
+          "t": 238,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 6,
+          "t": 317,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 0
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 6,
+          "t": 542,
+          "sp": 61460,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 0,
+      "endProfile": 0,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 6,
+          "t": 92,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReady",
+          "page": 6,
+          "t": 238,
+          "sp": 34300,
+          "profile": 0
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 6,
+          "t": 317,
+          "sp": 34302,
+          "profile": 0
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 0
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 0
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 0
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 6,
+          "t": 542,
+          "sp": 61460,
+          "profile": 0
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 6,
+          "t": 92,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReady",
+          "page": 6,
+          "t": 238,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 6,
+          "t": 317,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 1
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 6,
+          "t": 542,
+          "sp": 61460,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "startProfile": 1,
+      "endProfile": 1,
+      "ticks": 572,
+      "events": [
+        {
+          "at": "mx_callRegs",
+          "page": 6,
+          "t": 17,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankQueueBefore",
+          "page": 6,
+          "t": 44,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastDecode",
+          "page": 6,
+          "t": 92,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReady",
+          "page": 6,
+          "t": 238,
+          "sp": 34300,
+          "profile": 1
+        },
+        {
+          "at": "bankFastPrepare",
+          "page": 6,
+          "t": 317,
+          "sp": 34302,
+          "profile": 1
+        },
+        {
+          "at": "bankFastLanding",
+          "page": 0,
+          "t": 452,
+          "sp": 61456,
+          "profile": 1
+        },
+        {
+          "at": "getCursorPos",
+          "page": 0,
+          "t": 488,
+          "sp": 61458,
+          "profile": 1
+        },
+        {
+          "at": "bankFastReturn",
+          "page": 0,
+          "t": 514,
+          "sp": 61460,
+          "profile": 1
+        },
+        {
+          "at": "bankFastRestore",
+          "page": 6,
+          "t": 542,
+          "sp": 61460,
+          "profile": 1
+        }
+      ],
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      },
+      "serviceStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "mapperWrites": 2,
+      "mapperWritesByAddress": {
+        "FFFC": 1,
+        "FFFD": 1
+      },
+      "leafStackBytes": {
+        "0": 0,
+        "1": 0,
+        "6": 0
+      },
+      "leafStackMax": 0,
+      "leafReturnPages": [
+        0
+      ],
+      "bankSwitches": 2,
+      "profileChanges": 0,
+      "windowRegisterBytes": 0,
+      "shadowBytes": 0,
+      "callbacks": 0
+    }
+  ],
+  "matchedTimings": [
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 856,
+      "rev64": 856,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 856,
+      "rev64": 856,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 1099,
+      "rev64": 1099,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 1099,
+      "rev64": 1099,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 856,
+      "rev64": 856,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 856,
+      "rev64": 856,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 1099,
+      "rev64": 1099,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 1099,
+      "rev64": 1099,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 666,
+      "rev64": 593,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 666,
+      "rev64": 593,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 909,
+      "rev64": 836,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 909,
+      "rev64": 836,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 666,
+      "rev64": 593,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 666,
+      "rev64": 593,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 909,
+      "rev64": 836,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 909,
+      "rev64": 836,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 848,
+      "rev64": 848,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 848,
+      "rev64": 848,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 848,
+      "rev64": 848,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 848,
+      "rev64": 848,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 658,
+      "rev64": 585,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 658,
+      "rev64": 585,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 658,
+      "rev64": 585,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 658,
+      "rev64": 585,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 836,
+      "rev64": 836,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 836,
+      "rev64": 836,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 836,
+      "rev64": 836,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 836,
+      "rev64": 836,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 646,
+      "rev64": 573,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 646,
+      "rev64": 573,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 646,
+      "rev64": 573,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 646,
+      "rev64": 573,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 1803,
+      "rev64": 1803,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 1803,
+      "rev64": 1803,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 1803,
+      "rev64": 1803,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 1803,
+      "rev64": 1803,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 1613,
+      "rev64": 1540,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 1613,
+      "rev64": 1540,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 1613,
+      "rev64": 1540,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 1613,
+      "rev64": 1540,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2559,
+      "rev64": 2559,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2559,
+      "rev64": 2559,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 2802,
+      "rev64": 2802,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2802,
+      "rev64": 2802,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2559,
+      "rev64": 2559,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2559,
+      "rev64": 2559,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 2802,
+      "rev64": 2802,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2802,
+      "rev64": 2802,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2369,
+      "rev64": 2296,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2369,
+      "rev64": 2296,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 2612,
+      "rev64": 2539,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2612,
+      "rev64": 2539,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2369,
+      "rev64": 2296,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2369,
+      "rev64": 2296,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 2612,
+      "rev64": 2539,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2612,
+      "rev64": 2539,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3926,
+      "rev64": 3926
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3926,
+      "rev64": 3926
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4412,
+      "rev64": 4412
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4412,
+      "rev64": 4412
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4918,
+      "rev64": 4918
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3926,
+      "rev64": 3926
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5404,
+      "rev64": 5404
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4412,
+      "rev64": 4412
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3736,
+      "rev64": 3663
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3736,
+      "rev64": 3663
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4222,
+      "rev64": 4149
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4222,
+      "rev64": 4149
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4728,
+      "rev64": 4655
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3736,
+      "rev64": 3663
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5214,
+      "rev64": 5141
+    },
+    {
+      "page": 0,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4222,
+      "rev64": 4149
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3561,
+      "rev64": 3561
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3561,
+      "rev64": 3561
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4634,
+      "rev64": 4634
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3561,
+      "rev64": 3561
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3845,
+      "rev64": 3772
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3845,
+      "rev64": 3772
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4918,
+      "rev64": 4845
+    },
+    {
+      "page": 0,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3845,
+      "rev64": 3772
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2631,
+      "rev64": 2631,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2631,
+      "rev64": 2631,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 2874,
+      "rev64": 2874,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2874,
+      "rev64": 2874,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3704,
+      "rev64": 3704,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2631,
+      "rev64": 2631,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 3947,
+      "rev64": 3947,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2874,
+      "rev64": 2874,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2623,
+      "rev64": 2623,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2623,
+      "rev64": 2623,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3696,
+      "rev64": 3696,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2623,
+      "rev64": 2623,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2611,
+      "rev64": 2611,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2611,
+      "rev64": 2611,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3684,
+      "rev64": 3684,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2611,
+      "rev64": 2611,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3578,
+      "rev64": 3578,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3578,
+      "rev64": 3578,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4651,
+      "rev64": 4651,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3578,
+      "rev64": 3578,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3480,
+      "rev64": 3480,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3480,
+      "rev64": 3480,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4553,
+      "rev64": 4553,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3480,
+      "rev64": 3480,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4713,
+      "rev64": 4713,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 4713,
+      "rev64": 4713,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4956,
+      "rev64": 4956,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4956,
+      "rev64": 4956,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 5705,
+      "rev64": 5705,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 4713,
+      "rev64": 4713,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5948,
+      "rev64": 5948,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4956,
+      "rev64": 4956,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 5216,
+      "rev64": 5216,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 5216,
+      "rev64": 5216,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5459,
+      "rev64": 5459,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 5459,
+      "rev64": 5459,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 6208,
+      "rev64": 6208,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 5216,
+      "rev64": 5216,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 6451,
+      "rev64": 6451,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 5459,
+      "rev64": 5459,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3427,
+      "rev64": 3427
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3427,
+      "rev64": 3427
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 3670,
+      "rev64": 3670
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 3670,
+      "rev64": 3670
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4419,
+      "rev64": 4419
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3427,
+      "rev64": 3427
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4662,
+      "rev64": 4662
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 3670,
+      "rev64": 3670
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3913,
+      "rev64": 3913
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3913,
+      "rev64": 3913
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4156,
+      "rev64": 4156
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4156,
+      "rev64": 4156
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4905,
+      "rev64": 4905
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3913,
+      "rev64": 3913
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5148,
+      "rev64": 5148
+    },
+    {
+      "page": 1,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4156,
+      "rev64": 4156
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2160,
+      "rev64": 2160
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2160,
+      "rev64": 2160
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3152,
+      "rev64": 3152
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2160,
+      "rev64": 2160
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 508,
+      "rev64": 333
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 508,
+      "rev64": 333
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 508,
+      "rev64": 333
+    },
+    {
+      "page": 1,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 508,
+      "rev64": 333
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2631,
+      "rev64": 2631,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2631,
+      "rev64": 2631,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 2874,
+      "rev64": 2874,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2874,
+      "rev64": 2874,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3704,
+      "rev64": 3704,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2631,
+      "rev64": 2631,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 3947,
+      "rev64": 3947,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 2874,
+      "rev64": 2874,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 652,
+      "rev64": 525,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_UPPERCASE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 895,
+      "rev64": 768,
+      "directBiosTicks": 73
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2623,
+      "rev64": 2623,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2623,
+      "rev64": 2623,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3696,
+      "rev64": 3696,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2623,
+      "rev64": 2623,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_SUB_HL_DE",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 661,
+      "rev64": 534,
+      "directBiosTicks": 65
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2611,
+      "rev64": 2611,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2611,
+      "rev64": 2611,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3684,
+      "rev64": 3684,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2611,
+      "rev64": 2611,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_GET_CURSOR_POS",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 659,
+      "rev64": 539,
+      "directBiosTicks": 53
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3578,
+      "rev64": 3578,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3578,
+      "rev64": 3578,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4651,
+      "rev64": 4651,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3578,
+      "rev64": 3578,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3480,
+      "rev64": 3480,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3480,
+      "rev64": 3480,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4553,
+      "rev64": 4553,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_CHAR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3480,
+      "rev64": 3480,
+      "directBiosTicks": 1010
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4713,
+      "rev64": 4713,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 4713,
+      "rev64": 4713,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4956,
+      "rev64": 4956,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4956,
+      "rev64": 4956,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 5705,
+      "rev64": 5705,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 4713,
+      "rev64": 4713,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5948,
+      "rev64": 5948,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4956,
+      "rev64": 4956,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 5216,
+      "rev64": 5216,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 5216,
+      "rev64": 5216,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5459,
+      "rev64": 5459,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 5459,
+      "rev64": 5459,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 6208,
+      "rev64": 6208,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 5216,
+      "rev64": 5216,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 6451,
+      "rev64": 6451,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_PRINT_STRING_Z",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 5459,
+      "rev64": 5459,
+      "directBiosTicks": 1766
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3427,
+      "rev64": 3427
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3427,
+      "rev64": 3427
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 3670,
+      "rev64": 3670
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 3670,
+      "rev64": 3670
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4419,
+      "rev64": 4419
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3427,
+      "rev64": 3427
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4662,
+      "rev64": 4662
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 3670,
+      "rev64": 3670
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3913,
+      "rev64": 3913
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3913,
+      "rev64": 3913
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 4156,
+      "rev64": 4156
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4156,
+      "rev64": 4156
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4905,
+      "rev64": 4905
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3913,
+      "rev64": 3913
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": true,
+      "rev63": 5148,
+      "rev64": 5148
+    },
+    {
+      "page": 6,
+      "operation": "BIOS_COMMAND_BATCH",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": true,
+      "rev63": 4156,
+      "rev64": 4156
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3520,
+      "rev64": 3520
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3520,
+      "rev64": 3520
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 4593,
+      "rev64": 4593
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": false,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 3520,
+      "rev64": 3520
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 583,
+      "rev64": 501
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 583,
+      "rev64": 501
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 583,
+      "rev64": 501
+    },
+    {
+      "page": 6,
+      "operation": "DOS_GET_ERROR",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 583,
+      "rev64": 501
+    },
+    {
+      "page": 6,
+      "operation": "NESTED",
+      "inline": true,
+      "profile": "command",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 2200,
+      "rev64": 2073
+    },
+    {
+      "page": 6,
+      "operation": "NESTED",
+      "inline": true,
+      "profile": "command",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2200,
+      "rev64": 2073
+    },
+    {
+      "page": 6,
+      "operation": "NESTED",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 0,
+      "queue": false,
+      "rev63": 3273,
+      "rev64": 3146
+    },
+    {
+      "page": 6,
+      "operation": "NESTED",
+      "inline": true,
+      "profile": "copy",
+      "repeat": 1,
+      "queue": false,
+      "rev63": 2200,
+      "rev64": 2073
+    }
+  ],
+  "apps": "apps/summary.json",
+  "standardRepeat": "standard-repeat/summary.json",
+  "directBios": {
+    "BIOS_UPPERCASE": {
+      "vector": "bios_upperCase",
+      "address": 51317,
+      "ticks": 73,
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 20754
+      }
+    },
+    "BIOS_SUB_HL_DE": {
+      "vector": "bios_sub_hl_de",
+      "address": 51326,
+      "ticks": 65,
+      "registers": {
+        "hl": 61167,
+        "de": 9029,
+        "bc": 13393,
+        "af": 61063
+      }
+    },
+    "BIOS_GET_CURSOR_POS": {
+      "vector": "bios_getCursorPos",
+      "address": 51230,
+      "ticks": 53,
+      "registers": {
+        "hl": 4106,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      }
+    },
+    "BIOS_SET_CURSOR_POS": {
+      "vector": "bios_setCursorPos",
+      "address": 51233,
+      "ticks": 69,
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      }
+    },
+    "BIOS_PRINT_CHAR": {
+      "vector": "bios_printChar",
+      "address": 51209,
+      "ticks": 1010,
+      "registers": {
+        "hl": 4660,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      }
+    },
+    "BIOS_PRINT_STRING_Z": {
+      "vector": "bios_printStringZ",
+      "address": 51224,
+      "ticks": 1766,
+      "registers": {
+        "hl": 32865,
+        "de": 9029,
+        "bc": 13393,
+        "af": 29075
+      }
+    }
+  },
+  "copy": "window/README.md",
+  "main": "main/README.md"
+}

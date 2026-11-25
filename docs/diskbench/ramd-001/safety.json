@@ -1,0 +1,19 @@
+{
+  "status": "emulator-only",
+  "checks": [
+    "BPB: 256..4096 bytes, 1/2 FAT, root rounding at 65 entries",
+    "invalid BPB/FAT12 rejected before writes",
+    "FAT16 cluster 32768: free/bad entries without 16-bit offset wrap",
+    "real F menu: budget 0, reads completed, writes skipped, metadata unchanged",
+    "last valid buffer FE00h: read/write and data preserved",
+    "flash completion wrapper accepts synchronous RAM driver rejecting B=4",
+    "FORMAT B: Y R preserves all 16 tail replicas",
+    "A:DISKBEN.COM loaded by MXOS fileExec to 0000h"
+  ],
+  "flash_hardware_written": false,
+  "worst_buffer_driver_cycles": {
+    "1": 20564,
+    "2": 20600
+  },
+  "metadata_sha256_before_format": "2eb1490ee1ac7c6db5529fade1b7e39932ecdb1c13d468ec36af7a7ee1c107f3"
+}

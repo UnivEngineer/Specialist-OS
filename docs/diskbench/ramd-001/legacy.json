@@ -1,0 +1,141 @@
+{
+  "status": "emulator-only",
+  "physical_hardware_measured": false,
+  "variant": "Legacy",
+  "cpu_hz": 2000000,
+  "pit_hz": 2000000,
+  "divider": 256,
+  "driver_cycles": {
+    "1": 18236,
+    "2": 16981
+  },
+  "dos_bytes": 5946,
+  "dos_sha256": "ad3faba96c453d38c903f3db8ed7f86fcebc817ae1e3500e19f73ba0d8fd887f",
+  "rom_sha256": "b37854ab572eeff23721509d586a699eec1f552daa10f6c31304b1f7f5304848",
+  "bench_sha256": "788d8876d0b556ac90245fc701c27c2284b16f1a8424c50277c73a8b8badb646",
+  "metadata_sha256": "2eb1490ee1ac7c6db5529fade1b7e39932ecdb1c13d468ec36af7a7ee1c107f3",
+  "data_start": 41,
+  "runs": [
+    {
+      "read_seq": {
+        "ticks": 68701,
+        "operations": 1024,
+        "driver_cycles_per_op": 16981,
+        "pit_minus_nominal_cycles": -3840,
+        "kib_s": 29.111657763351335
+      },
+      "read_random": {
+        "ticks": 68717,
+        "operations": 1024,
+        "driver_cycles_per_op": 16981,
+        "pit_minus_nominal_cycles": 256,
+        "kib_s": 29.10487943303695
+      },
+      "write_seq": {
+        "ticks": 6908,
+        "operations": 96,
+        "driver_cycles_per_op": 18236,
+        "pit_minus_nominal_cycles": -1216,
+        "kib_s": 27.14244354371743
+      },
+      "write_random": {
+        "ticks": 6914,
+        "operations": 96,
+        "driver_cycles_per_op": 18236,
+        "pit_minus_nominal_cycles": 320,
+        "kib_s": 27.118889210297947
+      }
+    },
+    {
+      "read_seq": {
+        "ticks": 68732,
+        "operations": 1024,
+        "driver_cycles_per_op": 16981,
+        "pit_minus_nominal_cycles": 4096,
+        "kib_s": 29.098527614502707
+      },
+      "read_random": {
+        "ticks": 68716,
+        "operations": 1024,
+        "driver_cycles_per_op": 16981,
+        "pit_minus_nominal_cycles": 0,
+        "kib_s": 29.105302986204087
+      },
+      "write_seq": {
+        "ticks": 6908,
+        "operations": 96,
+        "driver_cycles_per_op": 18236,
+        "pit_minus_nominal_cycles": -1216,
+        "kib_s": 27.14244354371743
+      },
+      "write_random": {
+        "ticks": 6913,
+        "operations": 96,
+        "driver_cycles_per_op": 18236,
+        "pit_minus_nominal_cycles": 64,
+        "kib_s": 27.12281209315782
+      }
+    },
+    {
+      "read_seq": {
+        "ticks": 68734,
+        "operations": 1024,
+        "driver_cycles_per_op": 16981,
+        "pit_minus_nominal_cycles": 4608,
+        "kib_s": 29.097680914831088
+      },
+      "read_random": {
+        "ticks": 68718,
+        "operations": 1024,
+        "driver_cycles_per_op": 16981,
+        "pit_minus_nominal_cycles": 512,
+        "kib_s": 29.104455892197095
+      },
+      "write_seq": {
+        "ticks": 6909,
+        "operations": 96,
+        "driver_cycles_per_op": 18236,
+        "pit_minus_nominal_cycles": -960,
+        "kib_s": 27.13851498046027
+      },
+      "write_random": {
+        "ticks": 6912,
+        "operations": 96,
+        "driver_cycles_per_op": 18236,
+        "pit_minus_nominal_cycles": -192,
+        "kib_s": 27.12673611111111
+      }
+    }
+  ],
+  "start_sector": 41,
+  "median": {
+    "read_seq": {
+      "ticks": 68732,
+      "kib_s": 29.098527614502707
+    },
+    "read_random": {
+      "ticks": 68717,
+      "kib_s": 29.10487943303695
+    },
+    "write_seq": {
+      "ticks": 6908,
+      "kib_s": 27.14244354371743
+    },
+    "write_random": {
+      "ticks": 6913,
+      "kib_s": 27.12281209315782
+    }
+  },
+  "checks": [
+    "booted DOS/NC",
+    "16 pages",
+    "unaligned buffer and guards",
+    "data readback",
+    "registers and SP",
+    "invalid sector/page rejected",
+    "metadata unchanged after every run",
+    "PIT checked against full driver CPU cycles",
+    "all writes verified by DISKBEN"
+  ],
+  "packaged_rom_sha256": "38205bde3daf2142c96e91492bf30aed6f83e6d09b9fd9475921b6e172881c04"
+}

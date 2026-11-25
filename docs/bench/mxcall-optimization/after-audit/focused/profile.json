@@ -1,0 +1,615 @@
+[
+  {
+    "page": 6,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 652,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastDecode",
+        "page": 6,
+        "t": 92,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReady",
+        "page": 6,
+        "t": 187,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastPrepare",
+        "page": 6,
+        "t": 281,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "bankFastLanding",
+        "page": 0,
+        "t": 412,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bbFastIndex",
+        "page": 0,
+        "t": 481,
+        "sp": 65223,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 548,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReturn",
+        "page": 0,
+        "t": 594,
+        "sp": 65229,
+        "profile": 0
+      },
+      {
+        "at": "bankFastRestore",
+        "page": 6,
+        "t": 622,
+        "sp": 65229,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 2,
+    "mapperWritesByAddress": {
+      "FFFC": 1,
+      "FFFD": 1
+    },
+    "leafStackBytes": {
+      "0": 4,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 4,
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_UPPERCASE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 895,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 207,
+        "sp": 34288,
+        "profile": 0
+      },
+      {
+        "at": "bankFastDecode",
+        "page": 6,
+        "t": 335,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReady",
+        "page": 6,
+        "t": 430,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastPrepare",
+        "page": 6,
+        "t": 524,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "bankFastLanding",
+        "page": 0,
+        "t": 655,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bbFastIndex",
+        "page": 0,
+        "t": 724,
+        "sp": 65223,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 791,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReturn",
+        "page": 0,
+        "t": 837,
+        "sp": 65229,
+        "profile": 0
+      },
+      {
+        "at": "bankFastRestore",
+        "page": 6,
+        "t": 865,
+        "sp": 65229,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 2,
+    "mapperWritesByAddress": {
+      "FFFC": 1,
+      "FFFD": 1
+    },
+    "leafStackBytes": {
+      "0": 4,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 4,
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_SUB_HL_DE",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 661,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastDecode",
+        "page": 6,
+        "t": 92,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReady",
+        "page": 6,
+        "t": 204,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastPrepare",
+        "page": 6,
+        "t": 298,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "bankFastLanding",
+        "page": 0,
+        "t": 429,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bbFastIndex",
+        "page": 0,
+        "t": 498,
+        "sp": 65223,
+        "profile": 0
+      },
+      {
+        "at": "sub_hl_de",
+        "page": 0,
+        "t": 565,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReturn",
+        "page": 0,
+        "t": 603,
+        "sp": 65229,
+        "profile": 0
+      },
+      {
+        "at": "bankFastRestore",
+        "page": 6,
+        "t": 631,
+        "sp": 65229,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 61167,
+      "de": 9029,
+      "bc": 13393,
+      "af": 61063
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 2,
+    "mapperWritesByAddress": {
+      "FFFC": 1,
+      "FFFD": 1
+    },
+    "leafStackBytes": {
+      "0": 4,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 4,
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "DOS_GET_ERROR",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 583,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastDecode",
+        "page": 6,
+        "t": 92,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReady",
+        "page": 6,
+        "t": 202,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankFastPrepare",
+        "page": 6,
+        "t": 296,
+        "sp": 34296,
+        "profile": 0
+      },
+      {
+        "at": "kdLeafGetError",
+        "page": 1,
+        "t": 470,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "dosGetError",
+        "page": 1,
+        "t": 497,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReturn",
+        "page": 1,
+        "t": 525,
+        "sp": 65229,
+        "profile": 0
+      },
+      {
+        "at": "bankFastRestore",
+        "page": 6,
+        "t": 553,
+        "sp": 65229,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 70
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "mapperWrites": 2,
+    "mapperWritesByAddress": {
+      "FFFC": 0,
+      "FFFD": 2
+    },
+    "leafStackBytes": {
+      "0": 0,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 0,
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "NESTED",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2200,
+    "events": [
+      {
+        "at": "bankCallPacket",
+        "page": 6,
+        "t": 17,
+        "sp": 34302,
+        "profile": 0
+      },
+      {
+        "at": "bankSwitch",
+        "page": 6,
+        "t": 499,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 543,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "bankLanding",
+        "page": 1,
+        "t": 617,
+        "sp": 34300,
+        "profile": 0
+      },
+      {
+        "at": "mx_callRegs",
+        "page": 1,
+        "t": 1040,
+        "sp": 61494,
+        "profile": 0
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 1,
+        "t": 1067,
+        "sp": 61492,
+        "profile": 0
+      },
+      {
+        "at": "bankFastDecode",
+        "page": 1,
+        "t": 1115,
+        "sp": 61492,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReady",
+        "page": 1,
+        "t": 1210,
+        "sp": 61492,
+        "profile": 0
+      },
+      {
+        "at": "bankFastPrepare",
+        "page": 1,
+        "t": 1304,
+        "sp": 61488,
+        "profile": 0
+      },
+      {
+        "at": "bankFastLanding",
+        "page": 0,
+        "t": 1435,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bbFastIndex",
+        "page": 0,
+        "t": 1504,
+        "sp": 65223,
+        "profile": 0
+      },
+      {
+        "at": "upperCase",
+        "page": 0,
+        "t": 1571,
+        "sp": 65227,
+        "profile": 0
+      },
+      {
+        "at": "bankFastReturn",
+        "page": 0,
+        "t": 1617,
+        "sp": 65229,
+        "profile": 0
+      },
+      {
+        "at": "bankFastRestore",
+        "page": 1,
+        "t": 1645,
+        "sp": 65229,
+        "profile": 0
+      },
+      {
+        "at": "bankServiceReturn",
+        "page": 1,
+        "t": 1685,
+        "sp": 61498,
+        "profile": 0
+      },
+      {
+        "at": "bankSwitch",
+        "page": 1,
+        "t": 1957,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 1,
+        "t": 2001,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 2075,
+        "sp": 61504,
+        "profile": 0
+      },
+      {
+        "at": "bankResume",
+        "page": 6,
+        "t": 2090,
+        "sp": 61504,
+        "profile": 0
+      }
+    ],
+    "registers": {
+      "hl": 4660,
+      "de": 9029,
+      "bc": 13393,
+      "af": 20754
+    },
+    "serviceStackBytes": {
+      "0": 0,
+      "1": 16,
+      "6": 0
+    },
+    "mapperWrites": 4,
+    "mapperWritesByAddress": {
+      "FFFC": 1,
+      "FFFD": 3
+    },
+    "leafStackBytes": {
+      "0": 4,
+      "1": 0,
+      "6": 0
+    },
+    "leafStackMax": 4,
+    "bankSwitches": 4,
+    "profileChanges": 0,
+    "windowRegisterBytes": 12,
+    "shadowBytes": 0,
+    "callbacks": 0
+  }
+]

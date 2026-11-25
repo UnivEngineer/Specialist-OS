@@ -1,0 +1,31 @@
+{
+  "hashes": {
+    "rom": "a9cd0d628bd8526b4d2641eb9907582d21d15b07d17fe917dc28fd29932ca899",
+    "floppy": "335e04ef89b15d58964ec7b23f7cb030d0b5a998d1f780e0c6cfe1782afcf766"
+  },
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "physical_banks": 1,
+  "owned_pid": 33304,
+  "runtime": "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\emu80\\19781\\restored-cpm32-original-mx-o1p_lfe2",
+  "boot_prompt": false,
+  "keyboard": {
+    "edit_main": {
+      "page": 0,
+      "nc_return_page": 0,
+      "typed": "x",
+      "bytes_opened": 73
+    },
+    "cli_commands": [
+      "PWD",
+      "EXIT"
+    ],
+    "main_page": 0
+  }
+}

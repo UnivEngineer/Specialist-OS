@@ -1,0 +1,4213 @@
+{
+  "revision": 71,
+  "image_sha256": "b87ba3033b0dbc6cdd4fce4d0ecb9317c0e1d12f986190ec64f70c550c25dcee",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6142,
+    "DOS.sys": 31471,
+    "IO.sys": 818,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 348
+  },
+  "rows": [
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 121,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 627,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 0,
+      "ticks": 1100,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 627,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 0,
+      "ticks": 1100,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 0,
+      "ticks": 463,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 168,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 655,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 0,
+      "ticks": 1128,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 655,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 0,
+      "ticks": 1128,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 166,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 502,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 0,
+      "ticks": 975,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 502,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 0,
+      "ticks": 975,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 0,
+      "ticks": 445,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 0,
+      "ticks": 521,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 0,
+      "ticks": 994,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 0,
+      "ticks": 521,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 0,
+      "ticks": 994,
+      "result": {
+        "af": 23186,
+        "bc": 0,
+        "de": 4660,
+        "hl": 33792,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1766,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 2978,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3451,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 2978,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3451,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 1,
+      "ticks": 2814,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1743,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 2870,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3343,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 2870,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3343,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1616,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 2724,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3197,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 2724,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3197,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 1,
+      "ticks": 1959,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 1,
+      "ticks": 3113,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3586,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 1,
+      "ticks": 3113,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 1,
+      "ticks": 3586,
+      "result": {
+        "af": 23186,
+        "bc": 1,
+        "de": 4660,
+        "hl": 33793,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 16,
+      "ticks": 8894,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10899,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 16,
+      "ticks": 11372,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10899,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 16,
+      "ticks": 11372,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 16,
+      "ticks": 10735,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 16,
+      "ticks": 8962,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10274,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 16,
+      "ticks": 10747,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10274,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 16,
+      "ticks": 10747,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 16,
+      "ticks": 8465,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10002,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 16,
+      "ticks": 10475,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10002,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 16,
+      "ticks": 10475,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 16,
+      "ticks": 9325,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10908,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 16,
+      "ticks": 11381,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 16,
+      "ticks": 10908,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 16,
+      "ticks": 11381,
+      "result": {
+        "af": 23186,
+        "bc": 16,
+        "de": 4660,
+        "hl": 33808,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 28,
+      "ticks": 14945,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 28,
+      "ticks": 17391,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 28,
+      "ticks": 17864,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 28,
+      "ticks": 17391,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 28,
+      "ticks": 17864,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 28,
+      "ticks": 17227,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 28,
+      "ticks": 15013,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 28,
+      "ticks": 16310,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 28,
+      "ticks": 16783,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 28,
+      "ticks": 16310,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 28,
+      "ticks": 16783,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 28,
+      "ticks": 14060,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 28,
+      "ticks": 15930,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 28,
+      "ticks": 16403,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 28,
+      "ticks": 15930,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 28,
+      "ticks": 16403,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 28,
+      "ticks": 15376,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 28,
+      "ticks": 17292,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 28,
+      "ticks": 17765,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 28,
+      "ticks": 17292,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 28,
+      "ticks": 17765,
+      "result": {
+        "af": 23186,
+        "bc": 28,
+        "de": 4660,
+        "hl": 33820,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 29,
+      "ticks": 16653,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 29,
+      "ticks": 18938,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 29,
+      "ticks": 19411,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 29,
+      "ticks": 18938,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 29,
+      "ticks": 19411,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 29,
+      "ticks": 18774,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 29,
+      "ticks": 16651,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 29,
+      "ticks": 17793,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 29,
+      "ticks": 18266,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 29,
+      "ticks": 17793,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 29,
+      "ticks": 18266,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 29,
+      "ticks": 15510,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 29,
+      "ticks": 17346,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 29,
+      "ticks": 17819,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 29,
+      "ticks": 17346,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 29,
+      "ticks": 17819,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 29,
+      "ticks": 16890,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 29,
+      "ticks": 18772,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 29,
+      "ticks": 19245,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 29,
+      "ticks": 18772,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 29,
+      "ticks": 19245,
+      "result": {
+        "af": 23186,
+        "bc": 29,
+        "de": 4660,
+        "hl": 33821,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 30,
+      "ticks": 18358,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 30,
+      "ticks": 20595,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 30,
+      "ticks": 21068,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 30,
+      "ticks": 20595,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 30,
+      "ticks": 21068,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 30,
+      "ticks": 20431,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 30,
+      "ticks": 18286,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 30,
+      "ticks": 19386,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 30,
+      "ticks": 19859,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 30,
+      "ticks": 19386,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 30,
+      "ticks": 19859,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 30,
+      "ticks": 17070,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 30,
+      "ticks": 18916,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 30,
+      "ticks": 19389,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 30,
+      "ticks": 18916,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 30,
+      "ticks": 19389,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 30,
+      "ticks": 18514,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 30,
+      "ticks": 20406,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 30,
+      "ticks": 20879,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 30,
+      "ticks": 20406,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 30,
+      "ticks": 20879,
+      "result": {
+        "af": 23186,
+        "bc": 30,
+        "de": 4660,
+        "hl": 33822,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 19984,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 22173,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 31,
+      "ticks": 22646,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 22173,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 31,
+      "ticks": 22646,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 31,
+      "ticks": 22009,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 19842,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 20900,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 31,
+      "ticks": 21373,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 20900,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 31,
+      "ticks": 21373,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 18551,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 20421,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 31,
+      "ticks": 20894,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 20421,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 31,
+      "ticks": 20894,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 31,
+      "ticks": 20059,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 31,
+      "ticks": 21975,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 31,
+      "ticks": 22448,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 31,
+      "ticks": 21975,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 31,
+      "ticks": 22448,
+      "result": {
+        "af": 23186,
+        "bc": 31,
+        "de": 4660,
+        "hl": 33823,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 16962,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 19790,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 32,
+      "ticks": 20263,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 19790,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 32,
+      "ticks": 20263,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 32,
+      "ticks": 19626,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 17030,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 18557,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 32,
+      "ticks": 19030,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 18557,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 32,
+      "ticks": 19030,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 15925,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 17571,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 32,
+      "ticks": 18044,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 17571,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 32,
+      "ticks": 18044,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 32,
+      "ticks": 17393,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 32,
+      "ticks": 19085,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 32,
+      "ticks": 19558,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 32,
+      "ticks": 19085,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 32,
+      "ticks": 19558,
+      "result": {
+        "af": 23186,
+        "bc": 32,
+        "de": 4660,
+        "hl": 33824,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 18670,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 22141,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 33,
+      "ticks": 22614,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 22141,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 33,
+      "ticks": 22614,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 33,
+      "ticks": 21977,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 18668,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 20772,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 33,
+      "ticks": 21245,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 20772,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 33,
+      "ticks": 21245,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 17375,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 19793,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 33,
+      "ticks": 20266,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 19793,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 33,
+      "ticks": 20266,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 18907,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 21677,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 33,
+      "ticks": 22150,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 21677,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 33,
+      "ticks": 22150,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim-controls",
+      "caller": 0,
+      "route": "bios",
+      "length": 33,
+      "ticks": 24300,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim-controls",
+      "caller": 1,
+      "route": "regs",
+      "length": 33,
+      "ticks": 27070,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim-controls",
+      "caller": 1,
+      "route": "packet",
+      "length": 33,
+      "ticks": 27543,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim-controls",
+      "caller": 6,
+      "route": "regs",
+      "length": 33,
+      "ticks": 27070,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim-controls",
+      "caller": 6,
+      "route": "packet",
+      "length": 33,
+      "ticks": 27543,
+      "result": {
+        "af": 23186,
+        "bc": 33,
+        "de": 4660,
+        "hl": 33825,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 63,
+      "ticks": 39299,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 63,
+      "ticks": 45104,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 63,
+      "ticks": 45577,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 63,
+      "ticks": 45104,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 63,
+      "ticks": 45577,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 63,
+      "ticks": 44940,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 63,
+      "ticks": 38877,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 63,
+      "ticks": 42466,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 63,
+      "ticks": 42939,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 63,
+      "ticks": 42466,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 63,
+      "ticks": 42939,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 63,
+      "ticks": 37135,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 63,
+      "ticks": 41154,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 63,
+      "ticks": 41627,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 63,
+      "ticks": 41154,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 63,
+      "ticks": 41627,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 63,
+      "ticks": 39963,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 63,
+      "ticks": 44307,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 63,
+      "ticks": 44780,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 63,
+      "ticks": 44307,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 63,
+      "ticks": 44780,
+      "result": {
+        "af": 23186,
+        "bc": 63,
+        "de": 4660,
+        "hl": 33855,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 40941,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 47011,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 64,
+      "ticks": 47484,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 47011,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 64,
+      "ticks": 47484,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 64,
+      "ticks": 46847,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 40449,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 44309,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 64,
+      "ticks": 44782,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 44309,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 64,
+      "ticks": 44782,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 38624,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 42490,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 64,
+      "ticks": 42963,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 42490,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 64,
+      "ticks": 42963,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 64,
+      "ticks": 41516,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 64,
+      "ticks": 45707,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 64,
+      "ticks": 46180,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 64,
+      "ticks": 45707,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 64,
+      "ticks": 46180,
+      "result": {
+        "af": 23186,
+        "bc": 64,
+        "de": 4660,
+        "hl": 33856,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 65,
+      "ticks": 42504,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 65,
+      "ticks": 49393,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 65,
+      "ticks": 49866,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 65,
+      "ticks": 49393,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 65,
+      "ticks": 49866,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 65,
+      "ticks": 49229,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 65,
+      "ticks": 41942,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 65,
+      "ticks": 46555,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 65,
+      "ticks": 47028,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 65,
+      "ticks": 46555,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 65,
+      "ticks": 47028,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 65,
+      "ticks": 40105,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 65,
+      "ticks": 44743,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 65,
+      "ticks": 45216,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 65,
+      "ticks": 44743,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 65,
+      "ticks": 45216,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 65,
+      "ticks": 43061,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 65,
+      "ticks": 48330,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 65,
+      "ticks": 48803,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 65,
+      "ticks": 48330,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 65,
+      "ticks": 48803,
+      "result": {
+        "af": 23186,
+        "bc": 65,
+        "de": 4660,
+        "hl": 33857,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 74785,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 93865,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 128,
+      "ticks": 94338,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 93865,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 128,
+      "ticks": 94338,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 128,
+      "ticks": 93701,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 74335,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 88460,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 128,
+      "ticks": 88933,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 88460,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 128,
+      "ticks": 88933,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 70201,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 84975,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 128,
+      "ticks": 85448,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 84975,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 128,
+      "ticks": 85448,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 128,
+      "ticks": 75471,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 128,
+      "ticks": 91363,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 128,
+      "ticks": 91836,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 128,
+      "ticks": 91363,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 128,
+      "ticks": 91836,
+      "result": {
+        "af": 23186,
+        "bc": 128,
+        "de": 4660,
+        "hl": 33920,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 0,
+      "route": "bios",
+      "length": 256,
+      "ticks": 140811,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "regs",
+      "length": 256,
+      "ticks": 187573,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "packet",
+      "length": 256,
+      "ticks": 188046,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "regs",
+      "length": 256,
+      "ticks": 187573,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 6,
+      "route": "packet",
+      "length": 256,
+      "ticks": 188046,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "z",
+      "caller": 1,
+      "route": "dos-native",
+      "length": 256,
+      "ticks": 187409,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 0,
+      "route": "bios",
+      "length": 256,
+      "ticks": 140403,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "regs",
+      "length": 256,
+      "ticks": 176762,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 1,
+      "route": "packet",
+      "length": 256,
+      "ticks": 177235,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "regs",
+      "length": 256,
+      "ticks": 176762,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-z",
+      "caller": 6,
+      "route": "packet",
+      "length": 256,
+      "ticks": 177235,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 256,
+      "ticks": 131648,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 256,
+      "ticks": 169923,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 256,
+      "ticks": 170396,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 256,
+      "ticks": 169923,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "raw-lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 256,
+      "ticks": 170396,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 0,
+      "route": "bios",
+      "length": 256,
+      "ticks": 141728,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "regs",
+      "length": 256,
+      "ticks": 182653,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 1,
+      "route": "packet",
+      "length": 256,
+      "ticks": 183126,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "regs",
+      "length": 256,
+      "ticks": 182653,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    },
+    {
+      "operation": "lim",
+      "caller": 6,
+      "route": "packet",
+      "length": 256,
+      "ticks": 183126,
+      "result": {
+        "af": 23186,
+        "bc": 256,
+        "de": 4660,
+        "hl": 34048,
+        "sp": 34384
+      }
+    }
+  ]
+}

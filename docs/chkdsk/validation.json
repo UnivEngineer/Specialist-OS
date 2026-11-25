@@ -1,0 +1,237 @@
+{
+  "status": "emulator-only",
+  "moves": [
+    {
+      "bytes": 16,
+      "historical": 1354,
+      "stack": 905
+    },
+    {
+      "bytes": 256,
+      "historical": 18199,
+      "stack": 8585
+    },
+    {
+      "bytes": 4096,
+      "historical": 290839,
+      "stack": 131465
+    }
+  ],
+  "disks": [
+    {
+      "name": "good",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "bad-rks",
+      "result": 2,
+      "errors": 1,
+      "checked": 1,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "bad-mx-header",
+      "result": 2,
+      "errors": 1,
+      "checked": 1,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "cycle",
+      "result": 1,
+      "errors": 2,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "cross-link",
+      "result": 1,
+      "errors": 4,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "short-chain",
+      "result": 1,
+      "errors": 3,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "long-chain",
+      "result": 1,
+      "errors": 1,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "bad-cluster",
+      "result": 1,
+      "errors": 3,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "free-in-chain",
+      "result": 1,
+      "errors": 3,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "out-of-range",
+      "result": 1,
+      "errors": 4,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "lost-cluster",
+      "result": 1,
+      "errors": 1,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "duplicate",
+      "result": 1,
+      "errors": 1,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "unsupported-bpb",
+      "result": 3,
+      "errors": 0,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "reserved-fat",
+      "result": 1,
+      "errors": 1,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "directory-not-supported",
+      "result": 1,
+      "errors": 4,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "lfn-not-supported",
+      "result": 1,
+      "errors": 4,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "high-size",
+      "result": 1,
+      "errors": 4,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "missing-first-cluster",
+      "result": 1,
+      "errors": 4,
+      "checked": 0,
+      "skipped": 0,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-1",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-255",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-256",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-257",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-511",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-512",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-513",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    },
+    {
+      "name": "checksum-length-16000",
+      "result": 0,
+      "errors": 0,
+      "checked": 2,
+      "skipped": 1,
+      "disk_unchanged": true
+    }
+  ],
+  "move_cases": 67,
+  "io_error_status": 4,
+  "sha256": {
+    "DOS.sys": "471a364cb8e7d7e3f4475cb167d45859d83ebf28b302c475fef4b9cb513d3493",
+    "Debug.com": "c153c2be8063d6e6a83469733a2d9bc36ad2ee2332e671017dab2db68067ab30",
+    "CHKDSK.com": "13bb9b3467ce637c50a0403f0979e8bcccbadb1e8076b23a82aa96778e335314"
+  }
+}

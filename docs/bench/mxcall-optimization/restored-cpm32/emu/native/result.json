@@ -1,0 +1,56 @@
+[
+  {
+    "command": "RUN B:/MAINAPP.EXE Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "RUN B:/BANKAPP.EXE Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "RUN B:/DOSAPP.EXE Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "RUN B:/MAINAPP.COM Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "RUN B:/UNKNOWN.COM Test",
+    "menu": true,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "RUN B:/UNKNOWN.EXE Test",
+    "menu": true,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "B:/UNKNOWN.EXE Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "B:/UNKNOWN.COM Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  },
+  {
+    "command": "RUN B:/UNKNOWN.COM -MX Test",
+    "menu": false,
+    "returned": true,
+    "resourcesReleased": true
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "cpu": "8080 model; no color hardware",
+  "copyRect": [
+    {
+      "source": 37154,
+      "destination": 37144,
+      "width": 10,
+      "height": 170,
+      "model_log": "85206"
+    },
+    {
+      "source": 37144,
+      "destination": 37154,
+      "width": 10,
+      "height": 170,
+      "model_log": "85806"
+    },
+    {
+      "source": 40216,
+      "destination": 37314,
+      "width": 10,
+      "height": 10,
+      "model_log": "8116"
+    },
+    {
+      "source": 37314,
+      "destination": 40216,
+      "width": 10,
+      "height": 10,
+      "model_log": "8816"
+    },
+    {
+      "source": 43288,
+      "destination": 40216,
+      "width": 10,
+      "height": 180,
+      "model_log": "89716"
+    },
+    {
+      "source": 36864,
+      "destination": 36864,
+      "width": 48,
+      "height": 255,
+      "model_log": "607154"
+    },
+    {
+      "source": 36880,
+      "destination": 45082,
+      "width": 1,
+      "height": 246,
+      "model_log": "12341"
+    }
+  ],
+  "inverseRectCases": 52,
+  "windowCases": 4
+}

@@ -1,0 +1,2931 @@
+{
+  "image_sha256": "b87ba3033b0dbc6cdd4fce4d0ecb9317c0e1d12f986190ec64f70c550c25dcee",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "rows": [
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 16,
+      "route": "main",
+      "ticks": 16962,
+      "screen": "97e93a891fce3e4d7eef46887c95ca1fe749a53fc470fe7179d70dbcb5093f81"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 16,
+      "route": "win32",
+      "ticks": 19790,
+      "screen": "97e93a891fce3e4d7eef46887c95ca1fe749a53fc470fe7179d70dbcb5093f81"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 16,
+      "route": "far256",
+      "ticks": 27557,
+      "screen": "97e93a891fce3e4d7eef46887c95ca1fe749a53fc470fe7179d70dbcb5093f81"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 16,
+      "route": "after64",
+      "ticks": 19871,
+      "screen": "97e93a891fce3e4d7eef46887c95ca1fe749a53fc470fe7179d70dbcb5093f81"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 19914,
+      "screen": "97e93a891fce3e4d7eef46887c95ca1fe749a53fc470fe7179d70dbcb5093f81"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 0,
+      "route": "main",
+      "ticks": 16962,
+      "screen": "c56349fa20eec982ca73d4964f08b69e613810996185eafd6d23e94e2dd53fe2"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 0,
+      "route": "win32",
+      "ticks": 19790,
+      "screen": "c56349fa20eec982ca73d4964f08b69e613810996185eafd6d23e94e2dd53fe2"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 0,
+      "route": "far256",
+      "ticks": 27557,
+      "screen": "c56349fa20eec982ca73d4964f08b69e613810996185eafd6d23e94e2dd53fe2"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 0,
+      "route": "after64",
+      "ticks": 19871,
+      "screen": "c56349fa20eec982ca73d4964f08b69e613810996185eafd6d23e94e2dd53fe2"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 32,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 19914,
+      "screen": "c56349fa20eec982ca73d4964f08b69e613810996185eafd6d23e94e2dd53fe2"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 16,
+      "route": "main",
+      "ticks": 39299,
+      "screen": "b061d47777bfe8ae412767e9647e57bf5b08128fd8fdc2aea18201eb899d57ab"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 16,
+      "route": "win32",
+      "ticks": 45104,
+      "screen": "b061d47777bfe8ae412767e9647e57bf5b08128fd8fdc2aea18201eb899d57ab"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 16,
+      "route": "far256",
+      "ticks": 50501,
+      "screen": "b061d47777bfe8ae412767e9647e57bf5b08128fd8fdc2aea18201eb899d57ab"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 16,
+      "route": "after64",
+      "ticks": 45185,
+      "screen": "b061d47777bfe8ae412767e9647e57bf5b08128fd8fdc2aea18201eb899d57ab"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 45308,
+      "screen": "b061d47777bfe8ae412767e9647e57bf5b08128fd8fdc2aea18201eb899d57ab"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 0,
+      "route": "main",
+      "ticks": 36120,
+      "screen": "c23eff0e3850aec374ab929420c30ad031ed9042327beb2a2dfffad7a22002df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 0,
+      "route": "win32",
+      "ticks": 41336,
+      "screen": "c23eff0e3850aec374ab929420c30ad031ed9042327beb2a2dfffad7a22002df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 0,
+      "route": "far256",
+      "ticks": 47322,
+      "screen": "c23eff0e3850aec374ab929420c30ad031ed9042327beb2a2dfffad7a22002df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 0,
+      "route": "after64",
+      "ticks": 41417,
+      "screen": "c23eff0e3850aec374ab929420c30ad031ed9042327beb2a2dfffad7a22002df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 63,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 41540,
+      "screen": "c23eff0e3850aec374ab929420c30ad031ed9042327beb2a2dfffad7a22002df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "main",
+      "ticks": 40941,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "win32",
+      "ticks": 47011,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "far256",
+      "ticks": 52556,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "after64",
+      "ticks": 47010,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 48209,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "main",
+      "ticks": 33134,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "win32",
+      "ticks": 39083,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "far256",
+      "ticks": 44749,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "after64",
+      "ticks": 39082,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 39331,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 16,
+      "route": "main",
+      "ticks": 42504,
+      "screen": "3507dcc7bd7959b70b4d214f356815a2cab3b3cd0aa99a80dcba9db78ec2ead0"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 16,
+      "route": "win32",
+      "ticks": 49393,
+      "screen": "3507dcc7bd7959b70b4d214f356815a2cab3b3cd0aa99a80dcba9db78ec2ead0"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 16,
+      "route": "far256",
+      "ticks": 54197,
+      "screen": "3507dcc7bd7959b70b4d214f356815a2cab3b3cd0aa99a80dcba9db78ec2ead0"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 16,
+      "route": "after64",
+      "ticks": 58096,
+      "screen": "3507dcc7bd7959b70b4d214f356815a2cab3b3cd0aa99a80dcba9db78ec2ead0"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 49787,
+      "screen": "3507dcc7bd7959b70b4d214f356815a2cab3b3cd0aa99a80dcba9db78ec2ead0"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 0,
+      "route": "main",
+      "ticks": 34779,
+      "screen": "fc5a29d3effaf581d435c3b4845e5b65dd443a4246163f5092c3ae06a52efbbf"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 0,
+      "route": "win32",
+      "ticks": 41434,
+      "screen": "fc5a29d3effaf581d435c3b4845e5b65dd443a4246163f5092c3ae06a52efbbf"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 0,
+      "route": "far256",
+      "ticks": 46472,
+      "screen": "fc5a29d3effaf581d435c3b4845e5b65dd443a4246163f5092c3ae06a52efbbf"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 0,
+      "route": "after64",
+      "ticks": 50313,
+      "screen": "fc5a29d3effaf581d435c3b4845e5b65dd443a4246163f5092c3ae06a52efbbf"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 65,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 41762,
+      "screen": "fc5a29d3effaf581d435c3b4845e5b65dd443a4246163f5092c3ae06a52efbbf"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "main",
+      "ticks": 57908,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "win32",
+      "ticks": 69967,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "far256",
+      "ticks": 70543,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "after64",
+      "ticks": 79643,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 67496,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "main",
+      "ticks": 49975,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "win32",
+      "ticks": 58246,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "far256",
+      "ticks": 62610,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "after64",
+      "ticks": 67737,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 58618,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 16,
+      "route": "main",
+      "ticks": 73080,
+      "screen": "ed0e8e546685499b4626736fe459e41823d0377473d8308e897784fbb5d366dd"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 16,
+      "route": "win32",
+      "ticks": 91958,
+      "screen": "ed0e8e546685499b4626736fe459e41823d0377473d8308e897784fbb5d366dd"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 16,
+      "route": "far256",
+      "ticks": 86322,
+      "screen": "ed0e8e546685499b4626736fe459e41823d0377473d8308e897784fbb5d366dd"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 16,
+      "route": "after64",
+      "ticks": 96383,
+      "screen": "ed0e8e546685499b4626736fe459e41823d0377473d8308e897784fbb5d366dd"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 86068,
+      "screen": "ed0e8e546685499b4626736fe459e41823d0377473d8308e897784fbb5d366dd"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 0,
+      "route": "main",
+      "ticks": 69133,
+      "screen": "3578a38ca2dac2e2a59937e3d2c539321e0d9c7a43704656275977321125ceb6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 0,
+      "route": "win32",
+      "ticks": 79792,
+      "screen": "3578a38ca2dac2e2a59937e3d2c539321e0d9c7a43704656275977321125ceb6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 0,
+      "route": "far256",
+      "ticks": 82375,
+      "screen": "3578a38ca2dac2e2a59937e3d2c539321e0d9c7a43704656275977321125ceb6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 0,
+      "route": "after64",
+      "ticks": 88463,
+      "screen": "3578a38ca2dac2e2a59937e3d2c539321e0d9c7a43704656275977321125ceb6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 127,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 80244,
+      "screen": "3578a38ca2dac2e2a59937e3d2c539321e0d9c7a43704656275977321125ceb6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "main",
+      "ticks": 74785,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "win32",
+      "ticks": 93865,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "far256",
+      "ticks": 88440,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "after64",
+      "ticks": 98532,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 87725,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "main",
+      "ticks": 66147,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "win32",
+      "ticks": 77539,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "far256",
+      "ticks": 79802,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "after64",
+      "ticks": 85921,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 78035,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 16,
+      "route": "main",
+      "ticks": 90921,
+      "screen": "0a81795c8d36a77f1bbc1fa93edde6e0b6c0a015c23df379b2cbbe033918d646"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 16,
+      "route": "win32",
+      "ticks": 116821,
+      "screen": "0a81795c8d36a77f1bbc1fa93edde6e0b6c0a015c23df379b2cbbe033918d646"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 16,
+      "route": "far256",
+      "ticks": 105596,
+      "screen": "0a81795c8d36a77f1bbc1fa93edde6e0b6c0a015c23df379b2cbbe033918d646"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 16,
+      "route": "after64",
+      "ticks": 116680,
+      "screen": "0a81795c8d36a77f1bbc1fa93edde6e0b6c0a015c23df379b2cbbe033918d646"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 107012,
+      "screen": "0a81795c8d36a77f1bbc1fa93edde6e0b6c0a015c23df379b2cbbe033918d646"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 0,
+      "route": "main",
+      "ticks": 82988,
+      "screen": "91227149cf4d814d5bd6184926ae66b6c5cf7b6033e7f35a7158e6857a8a325a"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 0,
+      "route": "win32",
+      "ticks": 96702,
+      "screen": "91227149cf4d814d5bd6184926ae66b6c5cf7b6033e7f35a7158e6857a8a325a"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 0,
+      "route": "far256",
+      "ticks": 97663,
+      "screen": "91227149cf4d814d5bd6184926ae66b6c5cf7b6033e7f35a7158e6857a8a325a"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 0,
+      "route": "after64",
+      "ticks": 104774,
+      "screen": "91227149cf4d814d5bd6184926ae66b6c5cf7b6033e7f35a7158e6857a8a325a"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 160,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 97322,
+      "screen": "91227149cf4d814d5bd6184926ae66b6c5cf7b6033e7f35a7158e6857a8a325a"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "main",
+      "ticks": 107798,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "win32",
+      "ticks": 140719,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "far256",
+      "ticks": 123493,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "after64",
+      "ticks": 135569,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 127241,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "main",
+      "ticks": 99160,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "win32",
+      "ticks": 115995,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "far256",
+      "ticks": 114855,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "after64",
+      "ticks": 122958,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 116739,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 16,
+      "route": "main",
+      "ticks": 123934,
+      "screen": "d96b300d97e214ccdce23478e4ee72a21852231ebe847807b20473e4d53f2454"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 16,
+      "route": "win32",
+      "ticks": 163675,
+      "screen": "d96b300d97e214ccdce23478e4ee72a21852231ebe847807b20473e4d53f2454"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 16,
+      "route": "far256",
+      "ticks": 140649,
+      "screen": "d96b300d97e214ccdce23478e4ee72a21852231ebe847807b20473e4d53f2454"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 16,
+      "route": "after64",
+      "ticks": 153717,
+      "screen": "d96b300d97e214ccdce23478e4ee72a21852231ebe847807b20473e4d53f2454"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 146528,
+      "screen": "d96b300d97e214ccdce23478e4ee72a21852231ebe847807b20473e4d53f2454"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 0,
+      "route": "main",
+      "ticks": 116001,
+      "screen": "ad9406afc5071e14bca4c1af5bf50aafbfb46369a8e9232968a880e23f2b6d25"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 0,
+      "route": "win32",
+      "ticks": 135158,
+      "screen": "ad9406afc5071e14bca4c1af5bf50aafbfb46369a8e9232968a880e23f2b6d25"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 0,
+      "route": "far256",
+      "ticks": 132716,
+      "screen": "ad9406afc5071e14bca4c1af5bf50aafbfb46369a8e9232968a880e23f2b6d25"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 0,
+      "route": "after64",
+      "ticks": 141811,
+      "screen": "ad9406afc5071e14bca4c1af5bf50aafbfb46369a8e9232968a880e23f2b6d25"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 224,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 136026,
+      "screen": "ad9406afc5071e14bca4c1af5bf50aafbfb46369a8e9232968a880e23f2b6d25"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "main",
+      "ticks": 139106,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "win32",
+      "ticks": 185666,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "far256",
+      "ticks": 156082,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "after64",
+      "ticks": 170457,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 165100,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "main",
+      "ticks": 135159,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "win32",
+      "ticks": 156704,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "far256",
+      "ticks": 152135,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "after64",
+      "ticks": 162537,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 157652,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "main",
+      "ticks": 140811,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "win32",
+      "ticks": 187573,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "far256",
+      "ticks": 160970,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "after64",
+      "ticks": 172606,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 166757,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "main",
+      "ticks": 132173,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "win32",
+      "ticks": 154451,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "far256",
+      "ticks": 152332,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "after64",
+      "ticks": 159995,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 155443,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "main",
+      "ticks": 142437,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "win32",
+      "ticks": 189955,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "far256",
+      "ticks": 162548,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "after64",
+      "ticks": 174341,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 168335,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "main",
+      "ticks": 133818,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "win32",
+      "ticks": 156802,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "far256",
+      "ticks": 154055,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "after64",
+      "ticks": 161749,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 157874,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "main",
+      "ticks": 206837,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "win32",
+      "ticks": 281281,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "far256",
+      "ticks": 236084,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "after64",
+      "ticks": 254112,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 245789,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "main",
+      "ticks": 198199,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "win32",
+      "ticks": 231363,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "far256",
+      "ticks": 222763,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "after64",
+      "ticks": 236818,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 232851,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "main",
+      "ticks": 271158,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "win32",
+      "ticks": 373082,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "far256",
+      "ticks": 303713,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "after64",
+      "ticks": 326037,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 323164,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "main",
+      "ticks": 267211,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "win32",
+      "ticks": 310528,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "far256",
+      "ticks": 295083,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "after64",
+      "ticks": 313434,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "z",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 312468,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "main",
+      "ticks": 38624,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "win32",
+      "ticks": 42490,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "far256",
+      "ticks": 49861,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "after64",
+      "ticks": 42641,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 43629,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "main",
+      "ticks": 30904,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "win32",
+      "ticks": 34770,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "far256",
+      "ticks": 42141,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "after64",
+      "ticks": 34921,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 35018,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "main",
+      "ticks": 54383,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "win32",
+      "ticks": 63248,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "far256",
+      "ticks": 66640,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "after64",
+      "ticks": 72518,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 60822,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "main",
+      "ticks": 46663,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "win32",
+      "ticks": 51839,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "far256",
+      "ticks": 58920,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "after64",
+      "ticks": 61109,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 52211,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "main",
+      "ticks": 70201,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "win32",
+      "ticks": 84975,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "far256",
+      "ticks": 83478,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "after64",
+      "ticks": 89427,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 78984,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "main",
+      "ticks": 61642,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "win32",
+      "ticks": 69038,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "far256",
+      "ticks": 74919,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "after64",
+      "ticks": 77108,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 69534,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "main",
+      "ticks": 100939,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "win32",
+      "ticks": 127460,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "far256",
+      "ticks": 116256,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "after64",
+      "ticks": 122134,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 114339,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "main",
+      "ticks": 92380,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "win32",
+      "ticks": 103306,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "far256",
+      "ticks": 107697,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "after64",
+      "ticks": 109886,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 104050,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "main",
+      "ticks": 130117,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "win32",
+      "ticks": 168609,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "far256",
+      "ticks": 149207,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "after64",
+      "ticks": 155085,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 148095,
+      "screen": "7e61c1da50e113ecef0f68fa589be75fa3352a7f6dc16ff9fd15468a08c963a8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "main",
+      "ticks": 125685,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "win32",
+      "ticks": 140294,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "far256",
+      "ticks": 144775,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "after64",
+      "ticks": 146964,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 255,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 141242,
+      "screen": "38d115a09973d6f3469fe6d1c6fccb46fd2c88605d52cbf02e48214370325dea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "main",
+      "ticks": 131648,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "win32",
+      "ticks": 169923,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "far256",
+      "ticks": 148659,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "after64",
+      "ticks": 154890,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 149672,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "main",
+      "ticks": 123089,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "win32",
+      "ticks": 137552,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "far256",
+      "ticks": 140100,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "after64",
+      "ticks": 142642,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 138544,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "main",
+      "ticks": 133129,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "win32",
+      "ticks": 172176,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "far256",
+      "ticks": 153298,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "after64",
+      "ticks": 156784,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 151192,
+      "screen": "72635cef083dc1db5183fb21925353b110ee5ad05324e6a70b6104914ca11d42"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "main",
+      "ticks": 124539,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "win32",
+      "ticks": 139774,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "far256",
+      "ticks": 144708,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "after64",
+      "ticks": 144505,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 257,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 140846,
+      "screen": "ec8b5e0d996253532476cba8cdd17453a48566cd973322376fe11f2c45dc2eea"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "main",
+      "ticks": 193066,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "win32",
+      "ticks": 254805,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "far256",
+      "ticks": 221813,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "after64",
+      "ticks": 227747,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 220294,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "main",
+      "ticks": 184507,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "win32",
+      "ticks": 206000,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "far256",
+      "ticks": 208726,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "after64",
+      "ticks": 210871,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 207488,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "main",
+      "ticks": 252924,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "win32",
+      "ticks": 338373,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "far256",
+      "ticks": 287542,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "after64",
+      "ticks": 293405,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 289317,
+      "screen": "b85401c5bbe3e94aa4e0accccca6a1f62bf34befc2126d19165cdf0e86f517b8"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "main",
+      "ticks": 248521,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "win32",
+      "ticks": 277190,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "far256",
+      "ticks": 278582,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "after64",
+      "ticks": 280727,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "raw",
+      "controls": false,
+      "length": 511,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 279130,
+      "screen": "1ec6439c5bf95bae437b89b3b4894af8e4fdb49a412298eb0cefcbb02747b987"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "main",
+      "ticks": 41516,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "win32",
+      "ticks": 45707,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 64,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 47152,
+      "screen": "3b1f1ae5a8f6c534a4efe9f72a6bc46299030b8cdd76dc04d2a65c504b0d0f06"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "main",
+      "ticks": 33588,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "win32",
+      "ticks": 37779,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 64,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 38027,
+      "screen": "25f467fdba3b2669df087dfcd517bb5472db0209d8c995e81624352bef2e5310"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "main",
+      "ticks": 58464,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "win32",
+      "ticks": 68064,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 96,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 65840,
+      "screen": "e9d5ec07b7abd3d93a09ef04ae8d14bd8903557158d57cc6ee08bf90cdea4053"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "main",
+      "ticks": 50536,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "win32",
+      "ticks": 56343,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 96,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 56715,
+      "screen": "aea00c0616ff63de515e27f42968faaa1ce2a991a07f9d02c8ef0e12665bfb09"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "main",
+      "ticks": 75471,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "win32",
+      "ticks": 91363,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 128,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 85470,
+      "screen": "f636f74eac1566dce7371614efb6b0b791da5c968da42be080d84a18aa8b36df"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "main",
+      "ticks": 66731,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "win32",
+      "ticks": 75037,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 128,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 75533,
+      "screen": "c7d3b2455bc800ed4d736a965a7e2002782c65a0a63a37b128672c55240ecfa6"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "main",
+      "ticks": 108614,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "win32",
+      "ticks": 137019,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 192,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 123788,
+      "screen": "eb8f0e9936ac475155e25f0e5a1055437077d179ae4707786a7d6b2549ee028b"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "main",
+      "ticks": 99874,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "win32",
+      "ticks": 112295,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 192,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 113039,
+      "screen": "1d4ef3ad22efc2b7ea86d7aaa63ebe7e52e98ec819dd6ffd61671e3faebfcd29"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "main",
+      "ticks": 141728,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "win32",
+      "ticks": 182653,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 256,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 162084,
+      "screen": "0df1d2c90e271d3dc511e96904371ef1652f95224514519b120ccd5d4e523027"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "main",
+      "ticks": 132988,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "win32",
+      "ticks": 149531,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 256,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 150523,
+      "screen": "908dca0dee31d16e117b3eec9107946970db5ab5ccdca940fa8171b4bdace430"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "main",
+      "ticks": 207956,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "win32",
+      "ticks": 273877,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 384,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 238632,
+      "screen": "646b1bd19919feabdffc5f7e2e3bfef65ff1c3f9fdcae85259ae43e408402179"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "main",
+      "ticks": 199216,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "win32",
+      "ticks": 223959,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "lim",
+      "controls": false,
+      "length": 384,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 225447,
+      "screen": "5bcc10aca30094c4c5f3e06cfd32c35255b001c35989b30b6d7902d01d424d3c"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "main",
+      "ticks": 49297,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "win32",
+      "ticks": 55590,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "far256",
+      "ticks": 60912,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "after64",
+      "ticks": 55589,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 56821,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "main",
+      "ticks": 49297,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "win32",
+      "ticks": 55590,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "far256",
+      "ticks": 60912,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "after64",
+      "ticks": 55589,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 56821,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "main",
+      "ticks": 82478,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "win32",
+      "ticks": 101064,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "far256",
+      "ticks": 96133,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "after64",
+      "ticks": 106511,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 99656,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "main",
+      "ticks": 82478,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "win32",
+      "ticks": 101064,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "far256",
+      "ticks": 96133,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "after64",
+      "ticks": 106511,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 99656,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "main",
+      "ticks": 151569,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "win32",
+      "ticks": 195074,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "far256",
+      "ticks": 171728,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "after64",
+      "ticks": 183650,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 194603,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "main",
+      "ticks": 151569,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "win32",
+      "ticks": 195074,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "far256",
+      "ticks": 171728,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "after64",
+      "ticks": 183650,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "z",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 194603,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "main",
+      "ticks": 50921,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "win32",
+      "ticks": 54286,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 64,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 55770,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "main",
+      "ticks": 50921,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "win32",
+      "ticks": 54286,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 64,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 55770,
+      "screen": "9fb460cd5efa42497167e8c67ef098f2689febe2ab4ed45fd563dd6db1c3eeff"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "main",
+      "ticks": 84075,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "win32",
+      "ticks": 98562,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 128,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 97407,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "main",
+      "ticks": 84075,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "win32",
+      "ticks": 98562,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 128,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 97407,
+      "screen": "dfdd24d1944051498e7b9df6df2450c76c5d136d642ff52ddd49ece930ec089e"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "main",
+      "ticks": 154185,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "win32",
+      "ticks": 190154,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 256,
+      "x": 16,
+      "route": "aligned",
+      "ticks": 189894,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "main",
+      "ticks": 154185,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "win32",
+      "ticks": 190154,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    },
+    {
+      "kind": "lim",
+      "controls": true,
+      "length": 256,
+      "x": 0,
+      "route": "aligned",
+      "ticks": 189894,
+      "screen": "064850dce3c62e08a5704b5bcc75953004dda3ce3204d5f1e1357a9f437d76b3"
+    }
+  ]
+}

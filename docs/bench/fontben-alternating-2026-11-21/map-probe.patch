@@ -1,0 +1,79 @@
+--- a/source/include/mxos.inc
++++ b/source/include/mxos.inc
+@@ -365,7 +365,7 @@
+ FONT_ENGINE_END  = 04880h
+     ELSE
+ FONT_ENGINE_BASE = 0D800h
+-FONT_ENGINE_END  = 0EC80h
++FONT_ENGINE_END  = 0ECA0h
+     ENDIF
+ FONT_ENGINE_INIT = FONT_ENGINE_BASE
+ FONT_ENGINE_CHAR = FONT_ENGINE_BASE+3
+@@ -452,9 +452,9 @@
+ antiBsDelay   DB 0E0h
+ ramPageCount  DB RAMD_MAX_PAGE
+ diskWriteErr  DB 0
+-padding       BLOCK 7
+-    ENDS
+-bios_upper BIOS_UPPER_VARIABLES = 0EE90h
++
++    ENDS
++bios_upper BIOS_UPPER_VARIABLES = 0EEA8h
+ 
+ ; Плотные рабочие переменные IO.SYS, отдельно от кода и общего буфера текста.
+ ; Банк DOS не должен хранить NEAR-указатели на эти поля как свои локальные.
+@@ -488,7 +488,7 @@
+ fontName        BLOCK 8 ; MAIN, installed FNT basename padded with zero/space
+ 
+     ENDS
+-io_vars IO_VARIABLES = 0EFA0h
++io_vars IO_VARIABLES = 0EFB1h
+     ASSERT io_vars + IO_VARIABLES <= 0F000h
+ 
+ ; Блок переменных BIOS начинается с адреса 8FDFh
+@@ -1156,7 +1156,7 @@
+ ; Буферы в памяти
+ ; Поле геометрии верхних переменных точно соответствует структуре драйвера.
+     ASSERT DISK_INFO == 48
+-    ASSERT BIOS_UPPER_VARIABLES == 272
++    ASSERT BIOS_UPPER_VARIABLES == 265
+ ;-----------------------------------------------------------------------
+ 
+ ; Страница ДОЗУ 0 / DOS
+@@ -1300,14 +1300,14 @@
+ 
+ ; Резидентный принимающий адаптер банковых вызовов BIOS и его отдельный стек.
+ ; Используются после установки общего транспорта; публичный вход — F800h.
+-BIOS_TEMP_BUFFER       = 0ED80h ; Общая scratch-область MAIN, один синхронный вызов
++BIOS_TEMP_BUFFER       = 0EDA0h ; Общая scratch-область MAIN, один синхронный вызов
+ BIOS_TEMP_BUFFER_END   = bios_upper
+ BIOS_TEMP_BUFFER_SIZE  = BIOS_TEMP_BUFFER_END-BIOS_TEMP_BUFFER
+ BIOS_DISK_BUFFER       = BIOS_TEMP_BUFFER ; Первые 256 байт: сектор A:
+ BIOS_DISK_BUFFER_END   = BIOS_DISK_BUFFER+256
+ BIOS_IO_ADDR           = 0F000h
+ FONT_ARENA_START       = FONT_ADDR
+-FONT_ARENA_END         = 0EC80h
++FONT_ARENA_END         = 0ECA0h
+ GLYPH_CACHE_START      = bios_upper.cacheStart
+ GLYPH_CACHE_INVALID    = bios_upper.cacheInvalid
+ GLYPH_CACHE_END        = FONT_ARENA_END
+@@ -1318,8 +1318,8 @@
+ BIOS_BANK_GATE_END     = MEM_IMAGE_LOCAL_START
+ BIOS_BANK_IO_ADDR      = 0F240h
+ BIOS_BANK_IO_BUFFER    = BIOS_TEMP_BUFFER ; Пачки текста/UI: 256 байт + 5 защиты
+-BIOS_BANK_STACK_BOTTOM = 0EC80h
+-BIOS_BANK_STACK_TOP    = 0ED80h
++BIOS_BANK_STACK_BOTTOM = 0ECA0h
++BIOS_BANK_STACK_TOP    = BIOS_TEMP_BUFFER
+ 
+     IFDEF BANKED_DOS_BUILD
+ DOS_CODE_START         = DOS_BANK_CODE_ADDR
+@@ -1381,7 +1381,7 @@
+     ASSERT DOS_BANK_STACK_TOP == IO_BANK_KEYS
+     ASSERT DOS_BANK_STACK_TOP-DOS_BANK_STACK_BOTTOM == 576
+     ASSERT BIOS_DISK_BUFFER_END <= BIOS_TEMP_BUFFER_END
+-    ASSERT BIOS_TEMP_BUFFER_SIZE == 272
++    ASSERT BIOS_TEMP_BUFFER_SIZE == 264
+     ASSERT BIOS_BANK_STACK_TOP == BIOS_TEMP_BUFFER
+     ASSERT BIOS_BANK_IO_BUFFER+261 <= BIOS_TEMP_BUFFER_END
+     ASSERT FONT_ARENA_END <= BIOS_BANK_STACK_BOTTOM

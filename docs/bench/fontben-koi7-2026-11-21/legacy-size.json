@@ -1,0 +1,102 @@
+{
+  "Monitor2": {
+    "Rotate": {
+      "origin": 53248,
+      "end": 57344,
+      "code": 2957,
+      "checks": 12,
+      "padding": 115,
+      "tables": 1024,
+      "section": 4096,
+      "original_image": 4096,
+      "original_font": 768,
+      "old_plus_section": 8192
+    },
+    "Packed": {
+      "origin": 53248,
+      "end": 58624,
+      "code": 2161,
+      "checks": 12,
+      "padding": 143,
+      "tables": 3072,
+      "section": 5376,
+      "original_image": 4096,
+      "original_font": 768,
+      "old_plus_section": 9472
+    },
+    "Hybrid": {
+      "origin": 53248,
+      "end": 58368,
+      "code": 2017,
+      "checks": 12,
+      "padding": 31,
+      "tables": 3072,
+      "section": 5120,
+      "original_image": 4096,
+      "original_font": 768,
+      "old_plus_section": 9216
+    },
+    "Fast": {
+      "origin": 53248,
+      "end": 61696,
+      "code": 2202,
+      "checks": 12,
+      "padding": 102,
+      "tables": 6144,
+      "section": 8448,
+      "original_image": 4096,
+      "original_font": 768,
+      "old_plus_section": 12544
+    }
+  },
+  "RAMFOS-MXOS": {
+    "Rotate": {
+      "origin": 54016,
+      "end": 57856,
+      "code": 2669,
+      "checks": 12,
+      "padding": 147,
+      "tables": 1024,
+      "section": 3840,
+      "original_image": 6880,
+      "original_font": 1536,
+      "old_plus_section": 10720
+    },
+    "Packed": {
+      "origin": 54016,
+      "end": 59136,
+      "code": 1969,
+      "checks": 12,
+      "padding": 79,
+      "tables": 3072,
+      "section": 5120,
+      "original_image": 6880,
+      "original_font": 1536,
+      "old_plus_section": 12000
+    },
+    "Hybrid": {
+      "origin": 54016,
+      "end": 59136,
+      "code": 1897,
+      "checks": 12,
+      "padding": 151,
+      "tables": 3072,
+      "section": 5120,
+      "original_image": 6880,
+      "original_font": 1536,
+      "old_plus_section": 12000
+    },
+    "Fast": {
+      "origin": 54016,
+      "end": 62464,
+      "code": 2106,
+      "checks": 12,
+      "padding": 198,
+      "tables": 6144,
+      "section": 8448,
+      "original_image": 6880,
+      "original_font": 1536,
+      "old_plus_section": 15328
+    }
+  }
+}

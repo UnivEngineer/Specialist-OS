@@ -1,0 +1,278 @@
+[
+    {
+        "path":  "bin/BIOS.sym",
+        "sha256":  "064aca0bfca9c828aab92cae996d5887711cb5e76618826c347798883dbd1c79"
+    },
+    {
+        "path":  "bin/BIOS.sys",
+        "sha256":  "aaa9bff816eada693f1f2dc434c9d2627e187466eed50b42a7c5a708b952c084"
+    },
+    {
+        "path":  "bin/CLI.sym",
+        "sha256":  "6e8a116de0fd08ed9ddd21c563d9cb26ed995a7868a004363ea95a03c97bade4"
+    },
+    {
+        "path":  "bin/DOS.sym",
+        "sha256":  "064aca0bfca9c828aab92cae996d5887711cb5e76618826c347798883dbd1c79"
+    },
+    {
+        "path":  "bin/DOS.sys",
+        "sha256":  "08da9106e36adea30e9fc65c1da5b077b10ec2a8d03115dd2b3eb39d7d98e531"
+    },
+    {
+        "path":  "bin/EDIT.sym",
+        "sha256":  "25a63d8d3f169ad73e56ae58fd32025810dcf4d7e4221eff60a5576ccc1e399a"
+    },
+    {
+        "path":  "bin/EDITCORE.sym",
+        "sha256":  "fa6632768f9751905e250b533aa3b09012d79b24b8dc9e77ac68b0f1ccc321d4"
+    },
+    {
+        "path":  "bin/EDIT_DOS.sym",
+        "sha256":  "86c93c8001ab6aed9faad5f043f190e7c1f0ea1e7658d9fb6842086dacbf8914"
+    },
+    {
+        "path":  "bin/IO.main.bin",
+        "sha256":  "40dc7eeb57a085e24a7cd11537e00102ceea01a5085a32a799f3dde62a525c3c"
+    },
+    {
+        "path":  "bin/IO.sys",
+        "sha256":  "9ca7af5d71bb88ad6e4055ecbea5fbfca2a9784ecd02ef17accebb9a862a1487"
+    },
+    {
+        "path":  "bin/MEM.sym",
+        "sha256":  "56ae1d10a42d3df2941558615ee4022ef1719efb916b05392faca0719f7b1309"
+    },
+    {
+        "path":  "bin/MEM.sys",
+        "sha256":  "049b9492427d536ce15d0f244459d28643a678bd9a92a247a339c3b62a095160"
+    },
+    {
+        "path":  "bin/NC.i80",
+        "sha256":  "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002"
+    },
+    {
+        "path":  "bin/NC.sym",
+        "sha256":  "5c44400ce31126b68acdc05102a53bcad03a254eab5ca6eca60c31e16d58f44a"
+    },
+    {
+        "path":  "bin/NC_CORE.sym",
+        "sha256":  "9f5018b02fa0a6d529c3787d43e7eac5c4f4362fdf423dc24a790714e31dd669"
+    },
+    {
+        "path":  "bin/System.layout.inc",
+        "sha256":  "1f49da169fec43bcad8c381326d005655a7732db6e14684432c8dd4cc3c84139"
+    },
+    {
+        "path":  "bin/System.layout.json",
+        "sha256":  "11e6a2de15990441d8e805db948887f7d073bbdcb835b9b749e3cdcf88b015e7"
+    },
+    {
+        "path":  "bin/banked/CLIENT.bin",
+        "sha256":  "f863e2bb3b720c94f5d020f82861350663fa6f04ce5b1ecc63e057af67707032"
+    },
+    {
+        "path":  "bin/banked/CLIENT.lst",
+        "sha256":  "6c6cba0fd273583d5d620696a47e8eb58899707cf1f07f8a687ace2e8c081d3d"
+    },
+    {
+        "path":  "bin/banked/CLIENT.sym",
+        "sha256":  "34a6d16d67576bc253a27d25cd2af025767fb1f5fdbe94c3aeb0d711dc3ea8d4"
+    },
+    {
+        "path":  "bin/banked/DISKIO.bin",
+        "sha256":  "436590d8d1cfebe540745cfbc6cffcff3feef3a4d62fbbd0a93783951dcde553"
+    },
+    {
+        "path":  "bin/banked/DISKIO.lst",
+        "sha256":  "6b5f37b863280d746baf58ff263d27267c40049fef8a9a9adfceb19cebbc8f4f"
+    },
+    {
+        "path":  "bin/banked/DISKIO.sym",
+        "sha256":  "fdadd0d88d71565a592b3743ca619b01e43018be59c1e69b373b2f6c752350a2"
+    },
+    {
+        "path":  "bin/banked/FASTDRV.bin",
+        "sha256":  "ba321359c12adec6f9cc7fa3d3df46d99778378ae9994a4a1bb4dd064b8f15dc"
+    },
+    {
+        "path":  "bin/banked/FASTDRV.lst",
+        "sha256":  "c6166b858a033589330f5c860e16ead507e104c67ecc11072509ecb5e83d8d0e"
+    },
+    {
+        "path":  "bin/banked/FASTDRV.sym",
+        "sha256":  "adc9d6c9e120f019101bb1153bda0571e8cdc3a79332c965b1de0f9d71dccf5a"
+    },
+    {
+        "path":  "bin/banked/flash-imports.inc",
+        "sha256":  "f5f946cab2a9d400ab73300b488ab5e1f4c669ce0e0478803b8a9bf0bc2eec34"
+    },
+    {
+        "path":  "bin/banked/FLASHDRV.bin",
+        "sha256":  "af85496288b2ae65a677b34106ad055306b73ddbfe5a06967d07a0eb10f623e4"
+    },
+    {
+        "path":  "bin/banked/FLASHDRV.lst",
+        "sha256":  "e30d7c7115708f143dae15c2c032497367119608266acb48d307fc0a3ce73727"
+    },
+    {
+        "path":  "bin/banked/FLASHDRV.sym",
+        "sha256":  "bd65eba471f6a667c73d0e5f238cd507e15bcc184ed2ae27a918a0ba95cae2fc"
+    },
+    {
+        "path":  "bin/banked/kernel-layout.inc",
+        "sha256":  "f656f508cbe45239aca05dc04ad097eb1ccf31d651a05397a7f414395dacc415"
+    },
+    {
+        "path":  "bin/banked/kernel-services.inc",
+        "sha256":  "68fc25e51f6d49fb4f9735438411ddd3c85995e9f2e29662b58f312cd1c452fc"
+    },
+    {
+        "path":  "bin/banked/KERNEL.bin",
+        "sha256":  "08da9106e36adea30e9fc65c1da5b077b10ec2a8d03115dd2b3eb39d7d98e531"
+    },
+    {
+        "path":  "bin/banked/KERNEL.layout.json",
+        "sha256":  "ac11cd0a8922a2688e2a45acb159b6ba61d83d919a24b38b92a6a842fce25e3d"
+    },
+    {
+        "path":  "bin/banked/KERNEL.lst",
+        "sha256":  "905cd8779a30c9c7202736bf27c6b79edc06ba1a7fab8efa8aaa7f2329fbaacb"
+    },
+    {
+        "path":  "bin/banked/KERNEL.sym",
+        "sha256":  "b36057090198972df76615a3a1c2ca35d16ac788412f7318c9de19ae8958cc32"
+    },
+    {
+        "path":  "bin/banked/key-imports.inc",
+        "sha256":  "34e813ef60da815de06d63d46fc635010260df513c3f2754f125a531478f119f"
+    },
+    {
+        "path":  "bin/banked/KEYBANK.bin",
+        "sha256":  "e432e7012c3a8840cc17d68919986e99d09170c270d6e243d82c2b2624c9681d"
+    },
+    {
+        "path":  "bin/banked/KEYBANK.lst",
+        "sha256":  "4171051d1393d57b19e7f1be8396e264af0823636d5d034e6ed54d09114107db"
+    },
+    {
+        "path":  "bin/banked/KEYBANK.sym",
+        "sha256":  "a5417444a3a8e79fe3560f387078e69bddd3c2642c3b68185d7b88104663aeef"
+    },
+    {
+        "path":  "bin/banked/LOCALBLOCK.bin",
+        "sha256":  "7072d98fc944e6dd3344e5b292177cad08b632ee115fa4e142ce3ef4aa413dd1"
+    },
+    {
+        "path":  "bin/banked/LOCALBLOCK.lst",
+        "sha256":  "6c6cba0fd273583d5d620696a47e8eb58899707cf1f07f8a687ace2e8c081d3d"
+    },
+    {
+        "path":  "bin/banked/LOCALBLOCK.sym",
+        "sha256":  "34a6d16d67576bc253a27d25cd2af025767fb1f5fdbe94c3aeb0d711dc3ea8d4"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV0.bin",
+        "sha256":  "348a5f0f22bef00fdff49606ebf50786c048b03cf8a2488a9059deafc0fc78e4"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV0.lst",
+        "sha256":  "955579121fadf12b352103c2b513298ed97b82c34f297bc4ecb38dbe72566796"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV0.sym",
+        "sha256":  "0ce807d9409d5cc1ce88a161403c0b9ab2c16f94df0e43603d3b481e75b54c7e"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV1.bin",
+        "sha256":  "58c1e61fed89693afdeafe0fdacab2461ede8f2c8d45c4bed721e1b0c4c554c0"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV1.lst",
+        "sha256":  "c1d7de7360156765333f46674b9f401f0b26859b05bfae4de17d639e7f4c8806"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV1.sym",
+        "sha256":  "56f02ac821b5cdd13a409ed02c6fe8bd4643f5816c376e2ec60a60754e5356a1"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV2.bin",
+        "sha256":  "936cb1e4b9de4ff0a7704d7a4a76eaea5c3f9a56f7bb43f5ce8a75c53363c4ca"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV2.lst",
+        "sha256":  "84988a73c6bc10deb01426605abeea75cd0de5502b7176ac20e2cc8a53c4ccab"
+    },
+    {
+        "path":  "bin/banked/LOCALDRV2.sym",
+        "sha256":  "36406d70d5f5903583ab08676ef7a835b3d10ab951912b2ffc8bbd3c5c0b81a6"
+    },
+    {
+        "path":  "bin/banked/main-io-import.inc",
+        "sha256":  "b6d49f5370a7e5f53befb41488dd82bf8a4948f0ccfb22e529017a6c990f748a"
+    },
+    {
+        "path":  "bin/banked/MAINBIOS.bin",
+        "sha256":  "0846428b279936cc8c6b51a83a0021503b4c75d2ccffc78a0d130f88e54f26e6"
+    },
+    {
+        "path":  "bin/banked/MAINBIOS.lst",
+        "sha256":  "11837858c557b36fae6eb8835d9e8b8651063367542e9be653c3d50bff2adcf2"
+    },
+    {
+        "path":  "bin/banked/MAINBIOS.sym",
+        "sha256":  "fd0041ede97b4a5f77d6c5e56d7723c79a74ceb1160b8553476eb54ebfd859c1"
+    },
+    {
+        "path":  "bin/banked/MAINIO.bin",
+        "sha256":  "6095e72d1d0af1f5ef0d3ba898dc9559df95fb05591d43e516a261c83887c814"
+    },
+    {
+        "path":  "bin/banked/MAINIO.sym",
+        "sha256":  "064aca0bfca9c828aab92cae996d5887711cb5e76618826c347798883dbd1c79"
+    },
+    {
+        "path":  "bin/banked/ROMDRV.bin",
+        "sha256":  "d1817aadcbfd622cb4addc7b0578bdcc1a458d788de1ae5ea961ff8157201a70"
+    },
+    {
+        "path":  "bin/banked/ROMDRV.lst",
+        "sha256":  "f11a6d9757b3edcb176928102b91b70a424a69dcd4025ffe58d07770da05fb75"
+    },
+    {
+        "path":  "bin/banked/ROMDRV.sym",
+        "sha256":  "87b61b7ab48c4de82601636541fa16f7b4aa90064adcc49415a785f64074a7a6"
+    },
+    {
+        "path":  "bin/banked/transport-imports.inc",
+        "sha256":  "ae644bac2fecb478c20992f896cca55e6fef2b97c6e346c5dde90dcad7d3bf69"
+    },
+    {
+        "path":  "bin/banked/TRANSPORT.bin",
+        "sha256":  "d8af3c997abfc1c41e4cfba700ac4fae024e909cda62c6d1c00d5f386487ce7a"
+    },
+    {
+        "path":  "bin/banked/TRANSPORT.lst",
+        "sha256":  "da62c6441d8698e6371260fd75e43f43f008d7dc56a768ef2bdb220c31f58f0f"
+    },
+    {
+        "path":  "bin/banked/TRANSPORT.sym",
+        "sha256":  "41c091759e0f40dacfe98e31f16e2efbb4d5a377ce8bdd373859fce812d147f7"
+    },
+    {
+        "path":  "bin/banked/WINDOW.bin",
+        "sha256":  "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+    },
+    {
+        "path":  "bin/banked/WINDOW.lst",
+        "sha256":  "87b4dbaf943305c81f1b164ff887b7ecee7896eafbc35f7e8ad4eaa4a8fc44c0"
+    },
+    {
+        "path":  "bin/banked/WINDOW.sym",
+        "sha256":  "f407900a21a8d0ac6dba5662c1c3cbb22fdd4ab00334be28a54c0941f8deeef1"
+    },
+    {
+        "path":  "images/C-Flash-512k-MMX-System-Emu80.bin",
+        "sha256":  "cbcbecf413c63c7f25c6f8a6951e6c57b0d13b46b4ac1eef03ccd76f86062302"
+    }
+]

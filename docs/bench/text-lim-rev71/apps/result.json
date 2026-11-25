@@ -1,0 +1,47 @@
+{
+  "revision": 71,
+  "image_sha256": "b87ba3033b0dbc6cdd4fce4d0ecb9317c0e1d12f986190ec64f70c550c25dcee",
+  "emu_sha256": "27d60f01e7fff1c24c562ddcbef154a5c3663d4652668cb624f1df93979c8629",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6142,
+    "DOS.sys": 31471,
+    "IO.sys": 818,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 348
+  },
+  "rows": [
+    {
+      "operation": "keyboard",
+      "exec_page": 6,
+      "command": "C:/DOS/NC_MN.COM",
+      "main_page": 0,
+      "editors": [
+        {
+          "profile": "EDIT_MN",
+          "page": 0,
+          "bytes": 169,
+          "returned_to_main": true
+        },
+        {
+          "profile": "EDIT",
+          "page": 7,
+          "bytes": 169,
+          "returned_to_main": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,478 @@
+[
+  {
+    "label": "BASIC_MX",
+    "evidence": "C80F после A=8Bh/8Ch/9Ah; C821, C82D, C83C, C84E и F8xx",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanS4\\Programs\\Basic_MX.COM",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanS4\\Programs\\Basic_MX.COM"
+    ],
+    "payload_sha256": "bcdc1440b8288fad8c7d237c2406707076581d4c27fa4d8fddc8d87f28419fa2",
+    "size": 8892,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      1128,
+      1351,
+      1359,
+      1504,
+      1509,
+      1534,
+      1551,
+      1772,
+      1779,
+      2834,
+      2861,
+      2930,
+      2953,
+      2966
+    ],
+    "c80f_addresses_assumed": [
+      1128,
+      1351,
+      1359,
+      1504,
+      1509,
+      1534,
+      1551,
+      1772,
+      1779,
+      2834,
+      2861,
+      2930,
+      2953,
+      2966
+    ]
+  },
+  {
+    "label": "Editor.59392.EXE",
+    "evidence": "C80F после A=8Ch/8Bh; C83C, C82D, C854",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\Editor.59392.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\Editor.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\RomDisk\\Editor.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\UnpackRomDisk\\Editor.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-orig\\RomDisk\\Editor.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\UnpackRomDisk\\Editor.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\RAMFOS_master.rar :: RAMFOS-master\\RomDisk\\Editor.59392.EXE"
+    ],
+    "payload_sha256": "df7257358dd5f58076c01db9be6e976e31f119f3472fac8724efe8bbd1fe4980",
+    "size": 2048,
+    "load": 59392,
+    "load_evidence": "filename",
+    "c80f_offsets": [
+      130,
+      273,
+      278,
+      583,
+      713,
+      956,
+      1064,
+      1253,
+      1302
+    ],
+    "c80f_addresses_assumed": [
+      59522,
+      59665,
+      59670,
+      59975,
+      60105,
+      60348,
+      60456,
+      60645,
+      60694
+    ]
+  },
+  {
+    "label": "DisAsm.61440.EXE",
+    "evidence": "C80F после A=07h; C812, C854, F824/F827",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\DisAsm.61440.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\disabled\\DisAsm.61440.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\DisAsm.61440.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\ROM-disabled\\DisAsm.61440.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\RomDisk\\DisAsm.61440.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-orig\\RomDisk\\DisAsm.61440.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\RAMFOS_master.rar :: RAMFOS-master\\RomDisk\\DisAsm.61440.EXE"
+    ],
+    "payload_sha256": "1247c27b7a5637e28a18be8f064dc3f85d9fa7a5158ca25fe03fd198b5363302",
+    "size": 2048,
+    "load": 61440,
+    "load_evidence": "filename",
+    "c80f_offsets": [
+      153,
+      322
+    ],
+    "c80f_addresses_assumed": [
+      61593,
+      61762
+    ]
+  },
+  {
+    "label": "Dump_MX.59392.EXE",
+    "evidence": "Много выводов через C80F; C83C, C82D, C854",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\Dump_MX.59392.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\MySoft\\RAMFOS\\ROM\\makeROM\\Dump_MX.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-master\\RomDisk\\Dump_MX.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\OS\\RAMFOS-orig\\RomDisk\\Dump_MX.59392.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\RAMFOS_master.rar :: RAMFOS-master\\RomDisk\\Dump_MX.59392.EXE"
+    ],
+    "payload_sha256": "f9827419c085e322532bc279186964022b019f02af7a0f5d25536df74391a46c",
+    "size": 1437,
+    "load": 59392,
+    "load_evidence": "filename",
+    "c80f_offsets": [
+      48,
+      456,
+      463,
+      530,
+      567,
+      570,
+      854,
+      938,
+      973,
+      1054
+    ],
+    "c80f_addresses_assumed": [
+      59440,
+      59848,
+      59855,
+      59922,
+      59959,
+      59962,
+      60246,
+      60330,
+      60365,
+      60446
+    ]
+  },
+  {
+    "label": "Kalxkul.EXE",
+    "evidence": "C80F после A=1Fh/91h/9Ah; C821, C83C",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\System\\Other\\Kalxkul.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\System\\Other\\Kalxkul.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Utilites\\Калькул.i80"
+    ],
+    "payload_sha256": "cba6ad3cfaced03d701697984fff88d07591c014e355c4d4455cf76702c45a59",
+    "size": 4307,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      59,
+      558,
+      567,
+      572,
+      626,
+      655,
+      937,
+      1049,
+      1060,
+      1065,
+      1162,
+      1178,
+      1211,
+      1239,
+      1253,
+      1402,
+      3114
+    ],
+    "c80f_addresses_assumed": [
+      59,
+      558,
+      567,
+      572,
+      626,
+      655,
+      937,
+      1049,
+      1060,
+      1065,
+      1162,
+      1178,
+      1211,
+      1239,
+      1253,
+      1402,
+      3114
+    ]
+  },
+  {
+    "label": "Masm_MX.EXE",
+    "evidence": "A=1Fh → C80F; F845",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanS1\\Others\\AsmDiz\\Masm_MX.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanS1\\Others\\AsmDiz\\Masm_MX.EXE"
+    ],
+    "payload_sha256": "fc789bda93f95b1d9f59e6508a9db5d8d673ad504f0c1f4c3c5072fb2f4f5f42",
+    "size": 3853,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      63
+    ],
+    "c80f_addresses_assumed": [
+      63
+    ]
+  },
+  {
+    "label": "Copydis2.EXE",
+    "evidence": "A=1Fh → C80F; C83C",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\System\\Disk\\Copydis2.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\System\\Disk\\Copydis2.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Utilites\\CopyDisk2.i80"
+    ],
+    "payload_sha256": "915c3ea82df09faad7230b8851b2498e2ba72946bca12fc9528aa635f924dd82",
+    "size": 5112,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      5
+    ],
+    "c80f_addresses_assumed": [
+      5
+    ]
+  },
+  {
+    "label": "TEST_COL.EXE / Test-Col.COM",
+    "evidence": "A=98h/97h → C80F, переключение кодировок",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanS1\\Others\\Tests\\TEST_COL.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanS1\\Others\\Tests\\TEST_COL.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spmx_v42.rar :: test_col.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Utilites\\test_col.i80"
+    ],
+    "payload_sha256": "bcbe1639afcf0086dc90ac4d8ef9e5a3aa4fb11e444dacf75cc89e381716e93a",
+    "size": 2788,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      26,
+      76
+    ],
+    "c80f_addresses_assumed": [
+      26,
+      76
+    ]
+  },
+  {
+    "label": "Nardy..EXE",
+    "evidence": "C80F: A=97h; записи C63Eh; цвет FFF8h",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Nardy..EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Nardy..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Nardy..EXE"
+    ],
+    "payload_sha256": "3e8c25cca9a58da2be45b324efb3c9193e8093ff476500046cd945c2a24f2bfa",
+    "size": 5553,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      5235
+    ],
+    "c80f_addresses_assumed": [
+      5235
+    ]
+  },
+  {
+    "label": "Klad_M..EXE",
+    "evidence": "C80F: A=97h; записи C63Eh; C84E/C851/C854",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Klad_M..EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Klad_M..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX1\\Klad_M..EXE"
+    ],
+    "payload_sha256": "56e9491f5e3c2d557c414b755e8430edc0f0ccaba83fffa63833cf9ac6b4494c",
+    "size": 12638,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      11502
+    ],
+    "c80f_addresses_assumed": [
+      11502
+    ]
+  },
+  {
+    "label": "Tetris3..EXE",
+    "evidence": "C80F: A=A4h/A1h/A3h; цветовые управляющие коды",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris3..EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Tetris3..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Tetris3..EXE"
+    ],
+    "payload_sha256": "62eb70f8a92336c059d79c322644003938685c0e80e1903614cbd38a4e033bb8",
+    "size": 3168,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      3051,
+      3061,
+      3071,
+      3081,
+      3091
+    ],
+    "c80f_addresses_assumed": [
+      3051,
+      3061,
+      3071,
+      3081,
+      3091
+    ]
+  },
+  {
+    "label": "Ralli..EXE",
+    "evidence": "C80F: A=97h; C851",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Ralli..EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Ralli..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX3\\Ralli..EXE"
+    ],
+    "payload_sha256": "abbfbecaa514630cede2c311fe493339654a497a9f404aac1de6b91178339795",
+    "size": 3519,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      3362
+    ],
+    "c80f_addresses_assumed": [
+      3362
+    ]
+  },
+  {
+    "label": "Mars..EXE",
+    "evidence": "C80F: A=B1h/AEh",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Mars..EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Mars..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX2\\Mars..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\Марс.i80"
+    ],
+    "payload_sha256": "38c4f9f5d5f9e9b4b60648499b4904db5bdedd523e7a0d5b29476abd781a3580",
+    "size": 4502,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      26,
+      31
+    ],
+    "c80f_addresses_assumed": [
+      26,
+      31
+    ]
+  },
+  {
+    "label": "DIGGER.I80",
+    "evidence": "C80F: A=A6h; C84B",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DIGGER.I80",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\DIGGER.I80",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Digger..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX1\\Digger.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\digger.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: DIGGER.I80"
+    ],
+    "payload_sha256": "51c469b76fa8843731d62dd59c550307ca4589af509c8f98ebfcd59492f2c059",
+    "size": 10297,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      10255
+    ],
+    "c80f_addresses_assumed": [
+      10255
+    ]
+  },
+  {
+    "label": "TUTANK.I80",
+    "evidence": "C80F: A=1Fh; C84B",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\TUTANK.I80",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\TUTANK.I80",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam0\\Tutank..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG2\\GameMX3\\Tutank.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\emu_tests\\ВИ53_аудио\\tutank.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\tutank.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_rks\\Tutankhamun.rks",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: TUTANK.I80"
+    ],
+    "payload_sha256": "e20c1a37a17bf023d7def4dbb73102b27039f84fdf908c0f0f2d7b5980fcf855",
+    "size": 12187,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      12055
+    ],
+    "c80f_addresses_assumed": [
+      12055
+    ]
+  },
+  {
+    "label": "UDAV.I80",
+    "evidence": "C80F: A=97h; C82D",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\UDAV.I80",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\UDAV.I80",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\Udaw..EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\Udaw.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\udav.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: UDAV.I80"
+    ],
+    "payload_sha256": "cfa0250652dc352ba2c4bf4dbf2b0cc88d5337ce29b3236b38c8ae9193b5c7ed",
+    "size": 4117,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      4098
+    ],
+    "c80f_addresses_assumed": [
+      4098
+    ]
+  },
+  {
+    "label": "shahm_mx.i80",
+    "evidence": "C80F: A=A5h/A0h",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\shahm_mx.i80",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\games_mx_i80\\shahm_mx.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\bst_mx0\\Games\\Gam1\\[ah_MX.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ah_MX.EXE",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spmx_v42.rar :: shahm_mx.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar :: SPMX_java\\files_cpu\\shahm_mx.i80",
+      "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar :: shahm_mx.i80"
+    ],
+    "payload_sha256": "f38359a824d45a5b3f1f528119aeec069d40b6f98e8dbd1ef7449e07870465b1",
+    "size": 6378,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      864,
+      1030
+    ],
+    "c80f_addresses_assumed": [
+      864,
+      1030
+    ]
+  },
+  {
+    "label": "[ahmaty2.EXE",
+    "evidence": "C80F: A=A5h/A0h; C84B",
+    "sample": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ahmaty2.EXE",
+    "all_origins": [
+      "D:\\Projects\\RetroPC\\Specialist\\Soft\\Lafan\\LafanG1\\GameMX4\\[ahmaty2.EXE"
+    ],
+    "payload_sha256": "95143a60077e13e998dd11f9f61307677d5c3e8fcc3a58dc820f1e94f3a8f462",
+    "size": 8192,
+    "load": 0,
+    "load_evidence": "assumed_zero",
+    "c80f_offsets": [
+      3850,
+      3858
+    ],
+    "c80f_addresses_assumed": [
+      3850,
+      3858
+    ]
+  }
+]

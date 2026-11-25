@@ -1,0 +1,614 @@
+[
+  {
+    "stage": "biosBootExec",
+    "pc": 54532,
+    "registers": {
+      "af": 70,
+      "bc": 0,
+      "de": 89,
+      "hl": 54847,
+      "pc": 54532,
+      "sp": 36829
+    },
+    "ticks": 2567807,
+    "page": 0,
+    "count": "0000",
+    "window": "ff00000000000000e88f008c09004600cd8f01000001000040f2000000000000",
+    "stack": "ecd5ffff00c8ffffffffa018"
+  },
+  {
+    "stage": "mdInstallPart",
+    "pc": 27010,
+    "registers": {
+      "af": 1542,
+      "bc": 1984,
+      "de": 61504,
+      "hl": 61504,
+      "pc": 27010,
+      "sp": 61464
+    },
+    "ticks": 5165904,
+    "page": 1,
+    "count": "0000",
+    "window": "2cc3de01cdcd13211a5fcd5c3e1e01cd06f81302cd7504cdc905cd9706c9cd01",
+    "stack": "2b696d689ef889c900000008"
+  },
+  {
+    "stage": "mdInstallPart",
+    "pc": 27010,
+    "registers": {
+      "af": 70,
+      "bc": 448,
+      "de": 63488,
+      "hl": 63488,
+      "pc": 27010,
+      "sp": 61464
+    },
+    "ticks": 5231353,
+    "page": 1,
+    "count": "3e01",
+    "window": "fe09caaaf6fe0acaaaf6c3f7f73dc2f7f77efe18ca1bfef1e3f5c387f8000001",
+    "stack": "38696d689ef889c900000008"
+  },
+  {
+    "stage": "mdInstallPart",
+    "pc": 27010,
+    "registers": {
+      "af": 70,
+      "bc": 960,
+      "de": 64512,
+      "hl": 64512,
+      "pc": 27010,
+      "sp": 61464
+    },
+    "ticks": 5247746,
+    "page": 1,
+    "count": "0e01",
+    "window": "21c8ff1171fe0606cd35f3e1cdbff9cd79fee12275fee12273fee12271fec901",
+    "stack": "45696d689ef889c900000008"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1286,
+      "bc": 64544,
+      "de": 64544,
+      "hl": 51773,
+      "pc": 65441,
+      "sp": 64512
+    },
+    "ticks": 5250589,
+    "page": 1,
+    "count": "1e01",
+    "window": "3dca0df4c310f43dcaeefc2a10fdf92a0dfde53ad2ff6f2600e52ad0ffe52ad3",
+    "stack": "3dca0df4c310f43dcaeefc2a"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64576,
+      "de": 64576,
+      "hl": 8959,
+      "pc": 65441,
+      "sp": 64544
+    },
+    "ticks": 5251611,
+    "page": 1,
+    "count": "1d01",
+    "window": "ff220dfd210ffd3421c6fce5210000392210fd3ad2ff2ad8ffe9cde3fd32d6ff",
+    "stack": "ff220dfd210ffd3421c6fce5"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64608,
+      "de": 64608,
+      "hl": 55330,
+      "pc": 65441,
+      "sp": 64576
+    },
+    "ticks": 5252633,
+    "page": 1,
+    "count": "1c01",
+    "window": "22d8ffaf32d5ff2a10fde52100003922d0ff3a0ffdb7ca69fc3a0bfdb7c266fc",
+    "stack": "22d8ffaf32d5ff2a10fde521"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64640,
+      "de": 64640,
+      "hl": 65148,
+      "pc": 65441,
+      "sp": 64608
+    },
+    "ticks": 5253655,
+    "page": 1,
+    "count": "1b01",
+    "window": "7cfe90da69fc2210fd3a0bfd32d2ff2a0dfd22d3ff3ad6ffc3fffccde3fd32d6",
+    "stack": "7cfe90da69fc2210fd3a0bfd"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64672,
+      "de": 64672,
+      "hl": 16127,
+      "pc": 65441,
+      "sp": 64640
+    },
+    "ticks": 5254677,
+    "page": 1,
+    "count": "1a01",
+    "window": "ff3e0132d7ff22d8ff2100003922a3fcebf9e122c8ffe122caffe122ccffe122",
+    "stack": "ff3e0132d7ff22d8ff210000"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64704,
+      "de": 64704,
+      "hl": 65486,
+      "pc": 65441,
+      "sp": 64672
+    },
+    "ticks": 5255699,
+    "page": 1,
+    "count": "1901",
+    "window": "ceff3128f011c8ffaf32d5ffc347fcc5af32d7ff2aceffe52accff444d2acaff",
+    "stack": "ceff3128f011c8ffaf32d5ff"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64736,
+      "de": 64736,
+      "hl": 10987,
+      "pc": 65441,
+      "sp": 64704
+    },
+    "ticks": 5256721,
+    "page": 1,
+    "count": "1801",
+    "window": "eb2ac8fff1c9cde3fd22c8fff5e122ceffe122d0ffe17de1220dfd2100003922",
+    "stack": "eb2ac8fff1c9cde3fd22c8ff"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64768,
+      "de": 64768,
+      "hl": 64784,
+      "pc": 65441,
+      "sp": 64736
+    },
+    "ticks": 5257743,
+    "page": 1,
+    "count": "1701",
+    "window": "10fd210ffd3521d5ff3601c3fffc2ad0fff9e12210fd2aceffe5f12ac8ffc9b7",
+    "stack": "10fd210ffd3521d5ff3601c3"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64800,
+      "de": 64800,
+      "hl": 64545,
+      "pc": 65441,
+      "sp": 64768
+    },
+    "ticks": 5258765,
+    "page": 1,
+    "count": "1601",
+    "window": "21fcffcad0fe3d23c3d0fe011000000138f040eecdaffcf5af32d7fff1c93a0b",
+    "stack": "21fcffcad0fe3d23c3d0fe01"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64832,
+      "de": 64832,
+      "hl": 47101,
+      "pc": 65441,
+      "sp": 64800
+    },
+    "ticks": 5259787,
+    "page": 1,
+    "count": "1501",
+    "window": "fdb7c2c3f6e52a2ef6e3c93e0737c9cd79feaf3202fec5d5e511edfd0602cd60",
+    "stack": "fdb7c2c3f6e52a2ef6e3c93e"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64864,
+      "de": 64864,
+      "hl": 10995,
+      "pc": 65441,
+      "sp": 64832
+    },
+    "ticks": 5260809,
+    "page": 1,
+    "count": "1401",
+    "window": "f32af3fd7cb5cac1fd3aedfdcdc6fddac2fd3af0fdcdc6fddac2fd2aeefdcdd0",
+    "stack": "f32af3fd7cb5cac1fd3aedfd"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64896,
+      "de": 64896,
+      "hl": 56061,
+      "pc": 65441,
+      "sp": 64864
+    },
+    "ticks": 5261831,
+    "page": 1,
+    "count": "1301",
+    "window": "fddac2fd2af1fdcdd0fddac2fd3a02feb7c204f4c3fbf3c3c0f1cd79fec5d5e5",
+    "stack": "fddac2fd2af1fdcdd0fddac2"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64928,
+      "de": 64928,
+      "hl": 60689,
+      "pc": 65441,
+      "sp": 64896
+    },
+    "ticks": 5262853,
+    "page": 1,
+    "count": "1201",
+    "window": "11edfd0602cd60f3c377fdb7fa96fd672efcc8252cc9e60f672efec93a79f3b7",
+    "stack": "11edfd0602cd60f3c377fdb7"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 64960,
+      "de": 64960,
+      "hl": 47306,
+      "pc": 65441,
+      "sp": 64928
+    },
+    "ticks": 5263875,
+    "page": 1,
+    "count": "1101",
+    "window": "cab8fd32dfffaf3279f321000019f92ab7ff7c26ffc3a4fe2a77f3f93e0132df",
+    "stack": "cab8fd32dfffaf3279f32100"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 64992,
+      "de": 64992,
+      "hl": 45055,
+      "pc": 65441,
+      "sp": 64960
+    },
+    "ticks": 5264897,
+    "page": 1,
+    "count": "1001",
+    "window": "ffafe1d1c1c94f3a0cfdb9d03ee037c9eb2af3fd19dadffd3effbcc07db7c83e",
+    "stack": "ffafe1d1c1c94f3a0cfdb9d0"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1286,
+      "bc": 65024,
+      "de": 65024,
+      "hl": 14306,
+      "pc": 65441,
+      "sp": 64992
+    },
+    "ticks": 5265919,
+    "page": 1,
+    "count": "0f01",
+    "window": "e237c9f5af32deff32dffff1c90100fc0600fcc003cde3fdc13e0732d7ff37c3",
+    "stack": "e237c9f5af32deff32dffff1"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65056,
+      "de": 65056,
+      "hl": 62465,
+      "pc": 65441,
+      "sp": 65024
+    },
+    "ticks": 5266941,
+    "page": 1,
+    "count": "0e01",
+    "window": "01f400c5f5e5210400392242fe3a0bfd3d47e1f13114f032fcffc92323f1e33a",
+    "stack": "01f400c5f5e5210400392242"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65088,
+      "de": 65088,
+      "hl": 64779,
+      "pc": 65441,
+      "sp": 65056
+    },
+    "ticks": 5267963,
+    "page": 1,
+    "count": "0d01",
+    "window": "0bfd3dca5101c547e5210200392242fee13185feaf32fdffc351014f7832fdff",
+    "stack": "0bfd3dca5101c547e5210200"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65120,
+      "de": 65120,
+      "hl": 12665,
+      "pc": 65441,
+      "sp": 65088
+    },
+    "ticks": 5268985,
+    "page": 1,
+    "count": "0c01",
+    "window": "793122f0c1c93a0bfd3dca48013e01214501c37bfc2277fe7cb53ec9ca61fe3e",
+    "stack": "793122f0c1c93a0bfd3dca48"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65152,
+      "de": 65152,
+      "hl": 12995,
+      "pc": 65441,
+      "sp": 65120
+    },
+    "ticks": 5270007,
+    "page": 1,
+    "count": "0b01",
+    "window": "c33279fec90000000000000000000000000000000000000000c910f300000000",
+    "stack": "c33279fec900000000000000"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65184,
+      "de": 65184,
+      "hl": 0,
+      "pc": 65441,
+      "sp": 65152
+    },
+    "ticks": 5271029,
+    "page": 1,
+    "count": "0a01",
+    "window": "00000000c93bfe7731c0ffe1d1c131bdffc5d5e52ac6ff22bdff786926ff772a",
+    "stack": "00000000c93bfe7731c0ffe1"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65216,
+      "de": 65216,
+      "hl": 65480,
+      "pc": 65441,
+      "sp": 65184
+    },
+    "ticks": 5272051,
+    "page": 1,
+    "count": "0901",
+    "window": "c8fff9c977606911c0ff0e023adfff477e12231305c2b0fe0dcaadff2ab9ff7c",
+    "stack": "c8fff9c977606911c0ff0e02"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65248,
+      "de": 65248,
+      "hl": 65318,
+      "pc": 65441,
+      "sp": 65216
+    },
+    "ticks": 5273073,
+    "page": 1,
+    "count": "0801",
+    "window": "26ff7721000039eb2ec0c3acfe000000773adeffb7c200fc3ad5fffe03da07fc",
+    "stack": "26ff7721000039eb2ec0c3ac"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65280,
+      "de": 65280,
+      "hl": 6123,
+      "pc": 65441,
+      "sp": 65248
+    },
+    "ticks": 5274095,
+    "page": 1,
+    "count": "0701",
+    "window": "eb17d2effe4eb7f2f6fe2346c3f6fe71b7f2f6fe23702adcff7c26ff77c307f4",
+    "stack": "eb17d2effe4eb7f2f6fe2346"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65312,
+      "de": 65312,
+      "hl": 65535,
+      "pc": 65441,
+      "sp": 65280
+    },
+    "ticks": 5275117,
+    "page": 1,
+    "count": "0601",
+    "window": "ffffffff2ab7ff7c26ff776069f9e122c0ffe122c2ffe122c4ffe122c6ffe122",
+    "stack": "ffffffff2ab7ff7c26ff7760"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65344,
+      "de": 65344,
+      "hl": 65480,
+      "pc": 65441,
+      "sp": 65312
+    },
+    "ticks": 5276139,
+    "page": 1,
+    "count": "0501",
+    "window": "c8ffe122caffe122ccffe122ceffe122d0ffe122d2ffe122d4ffe122d6ffe122",
+    "stack": "c8ffe122caffe122ccffe122"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65376,
+      "de": 65376,
+      "hl": 65496,
+      "pc": 65441,
+      "sp": 65344
+    },
+    "ticks": 5277161,
+    "page": 1,
+    "count": "0401",
+    "window": "d8ffe122daffe122dcffe122deff21000039444d2ab9ff7c26ff7721200019f9",
+    "stack": "d8ffe122daffe122dcffe122"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65408,
+      "de": 65408,
+      "hl": 10987,
+      "pc": 65441,
+      "sp": 65376
+    },
+    "ticks": 5278183,
+    "page": 1,
+    "count": "0301",
+    "window": "eb2adeffe52adcffe52adaffe52ad8ffe52ad6ffe52ad4ffe52ad2ffe52ad0ff",
+    "stack": "eb2adeffe52adcffe52adaff"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65440,
+      "de": 65440,
+      "hl": 10981,
+      "pc": 65441,
+      "sp": 65408
+    },
+    "ticks": 5279205,
+    "page": 1,
+    "count": "0201",
+    "window": "e52aceffe52accffe52acaffe52ac8ffe52ac6ffe52ac4ffe52ac2ffe52ac0ff",
+    "stack": "e52aceffe52accffe52acaff"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1298,
+      "bc": 65472,
+      "de": 65472,
+      "hl": 8677,
+      "pc": 65441,
+      "sp": 65440
+    },
+    "ticks": 5280227,
+    "page": 1,
+    "count": "1e01",
+    "window": "e521bdff35c204ff2335c204ff2abbff7c26ff77c39cfdfd00fd05fd001e01a7",
+    "stack": "e521bdff35c204ff2335c204"
+  },
+  {
+    "stage": "bulk-count-before-decrement",
+    "pc": 65441,
+    "registers": {
+      "af": 1302,
+      "bc": 65504,
+      "de": 65504,
+      "hl": 8677,
+      "pc": 65441,
+      "sp": 65472
+    },
+    "ticks": 5281249,
+    "page": 1,
+    "count": "1d01",
+    "window": "e521bdff35c204ff2335c204ff2abbff7c26ff77c39cfdfd00fd05fd001e01a7",
+    "stack": "e521bdff35c204ff2335c204"
+  },
+  {
+    "stage": "after-overrun",
+    "pc": 65481,
+    "registers": {
+      "af": 70,
+      "bc": 389,
+      "de": 25085,
+      "hl": 61570,
+      "pc": 65481,
+      "sp": 36825
+    },
+    "ticks": 7281259,
+    "page": 0,
+    "count": "0801",
+    "window": "3e0032fdff7132fcffc93e0032fdff4e32fcffc932fcffc90000000000000000",
+    "stack": "f5813a015081ffff00c8ffff"
+  }
+]

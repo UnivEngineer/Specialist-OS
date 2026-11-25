@@ -1,0 +1,17 @@
+[
+  {
+    "variant": "bankCopyQuads",
+    "cycles": 301,
+    "inlineBytes": 14
+  },
+  {
+    "variant": "eight_bytes",
+    "cycles": 209,
+    "inlineBytes": 43
+  },
+  {
+    "variant": "four_words",
+    "cycles": 169,
+    "inlineBytes": 31
+  }
+]

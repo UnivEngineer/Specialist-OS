@@ -1,0 +1,115 @@
+{
+  "engine": "ORIONM1",
+  "corpus_bytes": 924,
+  "corpus_sha256": "d27cc797d5192e0d048788f1be19f5f5bff10d5f32f67583408f9ba405fb82c4",
+  "rows": [
+    {
+      "kind": 0,
+      "route": 0,
+      "ticks": 11119,
+      "ms": 1423.232
+    },
+    {
+      "kind": 0,
+      "route": 1,
+      "ticks": 22196,
+      "ms": 2841.088
+    },
+    {
+      "kind": 0,
+      "route": 2,
+      "ticks": 22196,
+      "ms": 2841.088
+    },
+    {
+      "kind": 1,
+      "route": 0,
+      "ticks": 11358,
+      "ms": 1453.824
+    },
+    {
+      "kind": 1,
+      "route": 1,
+      "ticks": 22435,
+      "ms": 2871.68
+    },
+    {
+      "kind": 1,
+      "route": 2,
+      "ticks": 22435,
+      "ms": 2871.68
+    },
+    {
+      "kind": 2,
+      "route": 0,
+      "ticks": 10717,
+      "ms": 1371.776
+    },
+    {
+      "kind": 2,
+      "route": 3,
+      "ticks": 11177,
+      "ms": 1430.656
+    },
+    {
+      "kind": 2,
+      "route": 4,
+      "ticks": 10959,
+      "ms": 1402.752
+    },
+    {
+      "kind": 2,
+      "route": 5,
+      "ticks": 10899,
+      "ms": 1395.072
+    },
+    {
+      "kind": 3,
+      "route": 0,
+      "ticks": 11140,
+      "ms": 1425.92
+    },
+    {
+      "kind": 3,
+      "route": 3,
+      "ticks": 11566,
+      "ms": 1480.448
+    },
+    {
+      "kind": 3,
+      "route": 4,
+      "ticks": 11375,
+      "ms": 1456.0
+    },
+    {
+      "kind": 3,
+      "route": 5,
+      "ticks": 11323,
+      "ms": 1449.344
+    },
+    {
+      "kind": 4,
+      "route": 0,
+      "ticks": 10968,
+      "ms": 1403.904
+    },
+    {
+      "kind": 4,
+      "route": 3,
+      "ticks": 11422,
+      "ms": 1462.016
+    },
+    {
+      "kind": 4,
+      "route": 4,
+      "ticks": 11205,
+      "ms": 1434.24
+    },
+    {
+      "kind": 4,
+      "route": 5,
+      "ticks": 11151,
+      "ms": 1427.328
+    }
+  ]
+}

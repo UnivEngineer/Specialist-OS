@@ -1,0 +1,786 @@
+[
+  {
+    "page": 6,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 4864,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 81,
+        "sp": 34302
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1630,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1674,
+        "sp": 34290
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1726,
+        "sp": 34290
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 1790,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 3704,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 3748,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 3810,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 4355,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 18,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 5107,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 207,
+        "sp": 34288
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 324,
+        "sp": 34302
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1873,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1917,
+        "sp": 34290
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1969,
+        "sp": 34290
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 2033,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 3947,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 3991,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 4053,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 4598,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 18,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 5150,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 317,
+        "sp": 34292
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1866,
+        "sp": 34280
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1910,
+        "sp": 34280
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1962,
+        "sp": 34280
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 2026,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 3940,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 3984,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 4046,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 4591,
+        "sp": 34290
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 18,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_PRINT_STRING_Z",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 5393,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 382,
+        "sp": 34278
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 560,
+        "sp": 34292
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 2109,
+        "sp": 34280
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 2153,
+        "sp": 34280
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 2205,
+        "sp": 34280
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 2269,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 4183,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 4227,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 4289,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 4834,
+        "sp": 34290
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 13393,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 18,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_COMMAND_BATCH",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2461,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 81,
+        "sp": 34302
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 989,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1033,
+        "sp": 34290
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1085,
+        "sp": 34290
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 1149,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 1549,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 1593,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 1655,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 1952,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 1,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 12,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_COMMAND_BATCH",
+    "inline": false,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2704,
+    "events": [
+      {
+        "at": "mx_call",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 44,
+        "sp": 34300
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 207,
+        "sp": 34288
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 324,
+        "sp": 34302
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1232,
+        "sp": 34290
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1276,
+        "sp": 34290
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1328,
+        "sp": 34290
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 1392,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 1792,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 1836,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 1898,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 2195,
+        "sp": 34300
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 1,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 12,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_COMMAND_BATCH",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": false,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2730,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 300,
+        "sp": 34292
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1208,
+        "sp": 34280
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1252,
+        "sp": 34280
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1304,
+        "sp": 34280
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 1368,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 1768,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 1812,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 1874,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 2171,
+        "sp": 34290
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 1,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 12,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 0
+  },
+  {
+    "page": 6,
+    "operation": "BIOS_COMMAND_BATCH",
+    "inline": true,
+    "profile": "command",
+    "repeat": 0,
+    "queue": true,
+    "startProfile": 0,
+    "endProfile": 0,
+    "ticks": 2973,
+    "events": [
+      {
+        "at": "mx_callRegs",
+        "page": 6,
+        "t": 17,
+        "sp": 34302
+      },
+      {
+        "at": "bankMxRegsRoute",
+        "page": 6,
+        "t": 202,
+        "sp": 34292
+      },
+      {
+        "at": "bankQueueBefore",
+        "page": 6,
+        "t": 382,
+        "sp": 34278
+      },
+      {
+        "at": "bankMxCall",
+        "page": 6,
+        "t": 543,
+        "sp": 34292
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 6,
+        "t": 1451,
+        "sp": 34280
+      },
+      {
+        "at": "bankLanding",
+        "page": 0,
+        "t": 1495,
+        "sp": 34280
+      },
+      {
+        "at": "memPrintMain",
+        "page": 0,
+        "t": 1547,
+        "sp": 34280
+      },
+      {
+        "at": "bios_textDispatch",
+        "page": 0,
+        "t": 1611,
+        "sp": 60796
+      },
+      {
+        "at": "BANK_WINDOW",
+        "page": 0,
+        "t": 2011,
+        "sp": 60800
+      },
+      {
+        "at": "bankLanding",
+        "page": 6,
+        "t": 2055,
+        "sp": 60800
+      },
+      {
+        "at": "memPrintReturn",
+        "page": 6,
+        "t": 2117,
+        "sp": 60800
+      },
+      {
+        "at": "bankMxResult",
+        "page": 6,
+        "t": 2414,
+        "sp": 34290
+      }
+    ],
+    "registers": {
+      "hl": 32865,
+      "de": 9029,
+      "bc": 1,
+      "af": 29075
+    },
+    "serviceStackBytes": {
+      "0": 12,
+      "1": 0,
+      "6": 0
+    },
+    "bankSwitches": 2,
+    "profileChanges": 0,
+    "windowRegisterBytes": 0,
+    "shadowBytes": 0,
+    "callbacks": 1
+  }
+]

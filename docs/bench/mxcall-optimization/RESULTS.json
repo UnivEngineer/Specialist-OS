@@ -1,0 +1,752 @@
+{
+  "beforeSystem": {
+    "git": "2791c88ae940d63df2db01f0df7a616fbf0cd18d",
+    "cpu": {
+      "available_platforms": [
+        {
+          "name": "Партнер-01.01",
+          "platform": "partner"
+        },
+        {
+          "name": "Апогей БК-01",
+          "platform": "apogey"
+        },
+        {
+          "name": "Апогей БК-01 (SD card)",
+          "platform": "apogey.sd"
+        },
+        {
+          "name": "Радио-86РК",
+          "platform": "rk86"
+        },
+        {
+          "name": "Радио-86РК (SD card / vinxru)",
+          "platform": "rk86.sd"
+        },
+        {
+          "name": "Радио-86РК (SDOS)",
+          "platform": "rk86.sdos"
+        },
+        {
+          "name": "Радио-86РК (CF/Мир)",
+          "platform": "rk86.mir"
+        },
+        {
+          "name": "РК86-Z80",
+          "platform": "rk86.z80"
+        },
+        {
+          "name": "Электроника КР-02/03",
+          "platform": "rk86.kr03"
+        },
+        {
+          "name": "Микроша",
+          "platform": "mikrosha"
+        },
+        {
+          "name": "Криста",
+          "platform": "mikrosha.krista"
+        },
+        {
+          "name": "Электроника КР-04",
+          "platform": "kr04"
+        },
+        {
+          "name": "Пальмира",
+          "platform": "palmira"
+        },
+        {
+          "name": "Орион-128",
+          "platform": "orion"
+        },
+        {
+          "name": "Орион-128 (Монитор 1)",
+          "platform": "orion.1"
+        },
+        {
+          "name": "Орион-128 (Монитор 3.1)",
+          "platform": "orion.31"
+        },
+        {
+          "name": "Орион-128 Z80 (Моск. вариант, Монитор 3.2)",
+          "platform": "orion.32"
+        },
+        {
+          "name": "Орион-128 Z80-Card II",
+          "platform": "orion.z2"
+        },
+        {
+          "name": "Орион-128 (Мон. 2 - DSDOS)",
+          "platform": "orion.dsdos"
+        },
+        {
+          "name": "Специалист",
+          "platform": "spec"
+        },
+        {
+          "name": "Специалист (SD card / vinxru)",
+          "platform": "spec.sd"
+        },
+        {
+          "name": "Специалист (SDOS)",
+          "platform": "spec.sdos"
+        },
+        {
+          "name": "Специалист (Qwerty)",
+          "platform": "spec.qwerty"
+        },
+        {
+          "name": "Лик",
+          "platform": "spec.lik"
+        },
+        {
+          "name": "Специалист Z80",
+          "platform": "spec.z80"
+        },
+        {
+          "name": "Специалист (Монитор 1)",
+          "platform": "spec.m1"
+        },
+        {
+          "name": "Специалист SP580",
+          "platform": "sp580"
+        },
+        {
+          "name": "Eureka",
+          "platform": "eureka"
+        },
+        {
+          "name": "Кроха",
+          "platform": "krokha"
+        },
+        {
+          "name": "Специалист-MX",
+          "platform": "spmx"
+        },
+        {
+          "name": "Специалист-MX Turbo (Z80)",
+          "platform": "spmx.turbo"
+        },
+        {
+          "name": "Специалист-MX (MXOS)",
+          "platform": "spmx.mxos"
+        },
+        {
+          "name": "Специалист-MX (Commander)",
+          "platform": "spmx.com"
+        },
+        {
+          "name": "Специалист-MX2",
+          "platform": "spmx2"
+        },
+        {
+          "name": "Микро-80",
+          "platform": "mikro80"
+        },
+        {
+          "name": "Микро-80 (Монитор РК)",
+          "platform": "mikro80.rk"
+        },
+        {
+          "name": "ЮТ-88",
+          "platform": "ut88"
+        },
+        {
+          "name": "Башкирия-2М",
+          "platform": "bashkiria"
+        },
+        {
+          "name": "ПК-8000",
+          "platform": "pk8000"
+        },
+        {
+          "name": "ПК-8000 (НГМД)",
+          "platform": "pk8000.fdc"
+        },
+        {
+          "name": "ПК-8000 (HDD/CF)",
+          "platform": "pk8000.hdd"
+        },
+        {
+          "name": "Вектор-06Ц",
+          "platform": "vector"
+        },
+        {
+          "name": "Вектор-06Ц Z80",
+          "platform": "vector.z80"
+        },
+        {
+          "name": "ПК-01 Львов",
+          "platform": "lvov"
+        },
+        {
+          "name": "ПК8020 Корвет",
+          "platform": "korvet"
+        },
+        {
+          "name": "ZX Spectrum (128K)",
+          "platform": "zx"
+        },
+        {
+          "name": "ZX Spectrum 48K",
+          "platform": "zx.48"
+        },
+        {
+          "name": "Pentagon 128K",
+          "platform": "zx.pentagon"
+        },
+        {
+          "name": "Байт",
+          "platform": "zx.byte"
+        },
+        {
+          "name": "Океан-240.2",
+          "platform": "okean"
+        }
+      ],
+      "cpu": {
+        "breaked": true,
+        "frequency_hz": 2000000,
+        "full_throttle": false,
+        "paused": false,
+        "speed_factor": 32.0,
+        "type": "8080"
+      },
+      "platform": "specialist-os",
+      "server": {
+        "name": "Emu80",
+        "port": 19782,
+        "protocol": "2024-11-05",
+        "version": "4.0.575"
+      }
+    },
+    "imageSha256": "d23a097a563c5185ad7f0a42d692becbd91ed4a0dfa1e3fea01f9da559bc5dad",
+    "emulatorSha256": "f1dabe9780e811ac495555d214adce8b548ce25ee8ab65ed1d2cfdcc15bcafd1",
+    "memBytes": 3069,
+    "runtimeRevision": 58
+  },
+  "afterSystem": {
+    "git": "2791c88ae940d63df2db01f0df7a616fbf0cd18d",
+    "cpu": {
+      "available_platforms": [
+        {
+          "name": "Партнер-01.01",
+          "platform": "partner"
+        },
+        {
+          "name": "Апогей БК-01",
+          "platform": "apogey"
+        },
+        {
+          "name": "Апогей БК-01 (SD card)",
+          "platform": "apogey.sd"
+        },
+        {
+          "name": "Радио-86РК",
+          "platform": "rk86"
+        },
+        {
+          "name": "Радио-86РК (SD card / vinxru)",
+          "platform": "rk86.sd"
+        },
+        {
+          "name": "Радио-86РК (SDOS)",
+          "platform": "rk86.sdos"
+        },
+        {
+          "name": "Радио-86РК (CF/Мир)",
+          "platform": "rk86.mir"
+        },
+        {
+          "name": "РК86-Z80",
+          "platform": "rk86.z80"
+        },
+        {
+          "name": "Электроника КР-02/03",
+          "platform": "rk86.kr03"
+        },
+        {
+          "name": "Микроша",
+          "platform": "mikrosha"
+        },
+        {
+          "name": "Криста",
+          "platform": "mikrosha.krista"
+        },
+        {
+          "name": "Электроника КР-04",
+          "platform": "kr04"
+        },
+        {
+          "name": "Пальмира",
+          "platform": "palmira"
+        },
+        {
+          "name": "Орион-128",
+          "platform": "orion"
+        },
+        {
+          "name": "Орион-128 (Монитор 1)",
+          "platform": "orion.1"
+        },
+        {
+          "name": "Орион-128 (Монитор 3.1)",
+          "platform": "orion.31"
+        },
+        {
+          "name": "Орион-128 Z80 (Моск. вариант, Монитор 3.2)",
+          "platform": "orion.32"
+        },
+        {
+          "name": "Орион-128 Z80-Card II",
+          "platform": "orion.z2"
+        },
+        {
+          "name": "Орион-128 (Мон. 2 - DSDOS)",
+          "platform": "orion.dsdos"
+        },
+        {
+          "name": "Специалист",
+          "platform": "spec"
+        },
+        {
+          "name": "Специалист (SD card / vinxru)",
+          "platform": "spec.sd"
+        },
+        {
+          "name": "Специалист (SDOS)",
+          "platform": "spec.sdos"
+        },
+        {
+          "name": "Специалист (Qwerty)",
+          "platform": "spec.qwerty"
+        },
+        {
+          "name": "Лик",
+          "platform": "spec.lik"
+        },
+        {
+          "name": "Специалист Z80",
+          "platform": "spec.z80"
+        },
+        {
+          "name": "Специалист (Монитор 1)",
+          "platform": "spec.m1"
+        },
+        {
+          "name": "Специалист SP580",
+          "platform": "sp580"
+        },
+        {
+          "name": "Eureka",
+          "platform": "eureka"
+        },
+        {
+          "name": "Кроха",
+          "platform": "krokha"
+        },
+        {
+          "name": "Специалист-MX",
+          "platform": "spmx"
+        },
+        {
+          "name": "Специалист-MX Turbo (Z80)",
+          "platform": "spmx.turbo"
+        },
+        {
+          "name": "Специалист-MX (MXOS)",
+          "platform": "spmx.mxos"
+        },
+        {
+          "name": "Специалист-MX (Commander)",
+          "platform": "spmx.com"
+        },
+        {
+          "name": "Специалист-MX2",
+          "platform": "spmx2"
+        },
+        {
+          "name": "Микро-80",
+          "platform": "mikro80"
+        },
+        {
+          "name": "Микро-80 (Монитор РК)",
+          "platform": "mikro80.rk"
+        },
+        {
+          "name": "ЮТ-88",
+          "platform": "ut88"
+        },
+        {
+          "name": "Башкирия-2М",
+          "platform": "bashkiria"
+        },
+        {
+          "name": "ПК-8000",
+          "platform": "pk8000"
+        },
+        {
+          "name": "ПК-8000 (НГМД)",
+          "platform": "pk8000.fdc"
+        },
+        {
+          "name": "ПК-8000 (HDD/CF)",
+          "platform": "pk8000.hdd"
+        },
+        {
+          "name": "Вектор-06Ц",
+          "platform": "vector"
+        },
+        {
+          "name": "Вектор-06Ц Z80",
+          "platform": "vector.z80"
+        },
+        {
+          "name": "ПК-01 Львов",
+          "platform": "lvov"
+        },
+        {
+          "name": "ПК8020 Корвет",
+          "platform": "korvet"
+        },
+        {
+          "name": "ZX Spectrum (128K)",
+          "platform": "zx"
+        },
+        {
+          "name": "ZX Spectrum 48K",
+          "platform": "zx.48"
+        },
+        {
+          "name": "Pentagon 128K",
+          "platform": "zx.pentagon"
+        },
+        {
+          "name": "Байт",
+          "platform": "zx.byte"
+        },
+        {
+          "name": "Океан-240.2",
+          "platform": "okean"
+        }
+      ],
+      "cpu": {
+        "breaked": true,
+        "frequency_hz": 2000000,
+        "full_throttle": false,
+        "paused": false,
+        "speed_factor": 32.0,
+        "type": "8080"
+      },
+      "platform": "specialist-os",
+      "server": {
+        "name": "Emu80",
+        "port": 19784,
+        "protocol": "2024-11-05",
+        "version": "4.0.575"
+      }
+    },
+    "imageSha256": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+    "emulatorSha256": "0bf142c01923e05f5f1d410516fc72a386b433b1d137be13dce01c7e1871ca48",
+    "memBytes": 3069,
+    "runtimeRevision": 63
+  },
+  "totals": [
+    {
+      "test": "EXEC → BIOS UPPERCASE, F806h",
+      "before": 3099,
+      "after": 652,
+      "ratio": 4.7531,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS UPPERCASE из COPY, F806h",
+      "before": 4316,
+      "after": 652,
+      "ratio": 6.6196,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS SUB_HL_DE, F806h",
+      "before": 3091,
+      "after": 661,
+      "ratio": 4.6762,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS GET_CURSOR_POS, F806h",
+      "before": 3079,
+      "after": 659,
+      "ratio": 4.6722,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS PRINT_CHAR, F806h",
+      "before": 4046,
+      "after": 3480,
+      "ratio": 1.1626,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → DOS GET_ERROR, F806h",
+      "before": 4686,
+      "after": 583,
+      "ratio": 8.0377,
+      "source": "profile"
+    },
+    {
+      "test": "DOS → DOS GET_ERROR, F806h",
+      "before": 1898,
+      "after": 508,
+      "ratio": 3.7362,
+      "source": "profile"
+    },
+    {
+      "test": "MAIN → BIOS UPPERCASE, F806h",
+      "before": 654,
+      "after": 666,
+      "ratio": 0.982,
+      "source": "profile"
+    },
+    {
+      "test": "MAIN → BIOS UPPERCASE, F800h",
+      "before": 856,
+      "after": 856,
+      "ratio": 1.0,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS UPPERCASE, F800h",
+      "before": 3511,
+      "after": 2631,
+      "ratio": 1.3345,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → DOS GET_ERROR, F800h",
+      "before": 5037,
+      "after": 3520,
+      "ratio": 1.431,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → DOS callback → BIOS → DOS → EXEC",
+      "before": 5384,
+      "after": 2200,
+      "ratio": 2.4473,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS PRINT_STRING_Z без подписчика",
+      "before": 5214,
+      "after": 5216,
+      "ratio": 0.9996,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS PRINT_STRING_Z с подписчиком",
+      "before": 5700,
+      "after": 5459,
+      "ratio": 1.0441,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS COMMAND_BATCH, одна запись",
+      "before": 3911,
+      "after": 3913,
+      "ratio": 0.9995,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS COMMAND_BATCH с подписчиком",
+      "before": 4397,
+      "after": 4156,
+      "ratio": 1.058,
+      "source": "profile"
+    },
+    {
+      "test": "EXEC → BIOS UPPERCASE с подписчиком",
+      "before": 3342,
+      "after": 895,
+      "ratio": 3.7341,
+      "source": "profile"
+    },
+    {
+      "test": "COPY → COMMAND, bankCommandWindow",
+      "before": 1211,
+      "after": 1067,
+      "ratio": 1.135,
+      "source": "setup"
+    },
+    {
+      "test": "MODULE_CALL, 16 вызовов",
+      "before": 321701,
+      "after": 292853,
+      "ratio": 1.0985,
+      "source": "queue"
+    },
+    {
+      "test": "MODULE_SCOPE, 16 вызовов",
+      "before": 56406,
+      "after": 44083,
+      "ratio": 1.2795,
+      "source": "queue"
+    },
+    {
+      "test": "NC EXEC, стрелка вниз",
+      "before": 57529,
+      "after": 56543,
+      "ratio": 1.0174,
+      "source": "apps"
+    },
+    {
+      "test": "NC EXEC, переход Tab",
+      "before": 189451,
+      "after": 184669,
+      "ratio": 1.0259,
+      "source": "apps"
+    },
+    {
+      "test": "NC MAIN, стрелка вниз",
+      "before": 29972,
+      "after": 29972,
+      "ratio": 1.0,
+      "source": "apps"
+    },
+    {
+      "test": "EDIT EXEC, ввод символа",
+      "before": 172788,
+      "after": 171802,
+      "ratio": 1.0057,
+      "source": "apps"
+    },
+    {
+      "test": "EDIT EXEC, первая PgDn",
+      "before": 1082834,
+      "after": 1081848,
+      "ratio": 1.0009,
+      "source": "apps"
+    },
+    {
+      "test": "EDIT MAIN, первая PgDn",
+      "before": 1028371,
+      "after": 1028371,
+      "ratio": 1.0,
+      "source": "apps"
+    }
+  ],
+  "matchedRows": 244,
+  "registerMismatches": 0,
+  "before": "baseline32/profile.json",
+  "after": "after/profile.json",
+  "nativeStages": [
+    "emu-final/final-command.json",
+    "emu-final/final-copy.json"
+  ],
+  "stackAudit": "after-audit/audit.json",
+  "apps": "apps.json",
+  "regressions": "regression.json",
+  "window": "window/results.json",
+  "selectorCost": "selector-cost/result.json",
+  "packetCost": [
+    {
+      "variant": "bankCopyQuads",
+      "cycles": 301,
+      "inlineBytes": 14
+    },
+    {
+      "variant": "eight_bytes",
+      "cycles": 209,
+      "inlineBytes": 43
+    },
+    {
+      "variant": "four_words",
+      "cycles": 169,
+      "inlineBytes": 31
+    }
+  ],
+  "shadowSetup": [
+    {
+      "profile": 0,
+      "bytes": 256,
+      "entry": "bankCopyFar",
+      "cycles": 3823,
+      "ms": 1.9115,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 0,
+      "bytes": 256,
+      "entry": "bankCopySector",
+      "cycles": 3333,
+      "ms": 1.6665,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 0,
+      "bytes": 8192,
+      "entry": "bankCopyFar",
+      "cycles": 4119,
+      "ms": 2.0595,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 0,
+      "bytes": 8192,
+      "entry": "bankCopySector",
+      "cycles": 3629,
+      "ms": 1.8145,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 0,
+      "entry": "bankCommandWindow",
+      "cycles": 75,
+      "ms": 0.0375,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 1,
+      "bytes": 256,
+      "entry": "bankCopyFar",
+      "cycles": 3046,
+      "ms": 1.523,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 1,
+      "bytes": 256,
+      "entry": "bankCopySector",
+      "cycles": 2556,
+      "ms": 1.278,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 1,
+      "bytes": 8192,
+      "entry": "bankCopyFar",
+      "cycles": 3342,
+      "ms": 1.671,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 1,
+      "bytes": 8192,
+      "entry": "bankCopySector",
+      "cycles": 2852,
+      "ms": 1.426,
+      "excludedCallerSetupCycles": 37
+    },
+    {
+      "profile": 1,
+      "entry": "bankCommandWindow",
+      "cycles": 1067,
+      "ms": 0.5335,
+      "excludedCallerSetupCycles": 37
+    }
+  ],
+  "heldDown": "held-down/summary.json",
+  "mainOnly": "main-only/result.json",
+  "mainOnlyDisplayComparison": "main-only/echo-comparison.json",
+  "nextRevision": "rev64/comparison.json"
+}

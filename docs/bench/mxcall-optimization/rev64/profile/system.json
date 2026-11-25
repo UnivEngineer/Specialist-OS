@@ -1,0 +1,228 @@
+{
+  "git": "2791c88ae940d63df2db01f0df7a616fbf0cd18d",
+  "cpu": {
+    "available_platforms": [
+      {
+        "name": "\u041f\u0430\u0440\u0442\u043d\u0435\u0440-01.01",
+        "platform": "partner"
+      },
+      {
+        "name": "\u0410\u043f\u043e\u0433\u0435\u0439 \u0411\u041a-01",
+        "platform": "apogey"
+      },
+      {
+        "name": "\u0410\u043f\u043e\u0433\u0435\u0439 \u0411\u041a-01 (SD card)",
+        "platform": "apogey.sd"
+      },
+      {
+        "name": "\u0420\u0430\u0434\u0438\u043e-86\u0420\u041a",
+        "platform": "rk86"
+      },
+      {
+        "name": "\u0420\u0430\u0434\u0438\u043e-86\u0420\u041a (SD card / vinxru)",
+        "platform": "rk86.sd"
+      },
+      {
+        "name": "\u0420\u0430\u0434\u0438\u043e-86\u0420\u041a (SDOS)",
+        "platform": "rk86.sdos"
+      },
+      {
+        "name": "\u0420\u0430\u0434\u0438\u043e-86\u0420\u041a (CF/\u041c\u0438\u0440)",
+        "platform": "rk86.mir"
+      },
+      {
+        "name": "\u0420\u041a86-Z80",
+        "platform": "rk86.z80"
+      },
+      {
+        "name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u0438\u043a\u0430 \u041a\u0420-02/03",
+        "platform": "rk86.kr03"
+      },
+      {
+        "name": "\u041c\u0438\u043a\u0440\u043e\u0448\u0430",
+        "platform": "mikrosha"
+      },
+      {
+        "name": "\u041a\u0440\u0438\u0441\u0442\u0430",
+        "platform": "mikrosha.krista"
+      },
+      {
+        "name": "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u0438\u043a\u0430 \u041a\u0420-04",
+        "platform": "kr04"
+      },
+      {
+        "name": "\u041f\u0430\u043b\u044c\u043c\u0438\u0440\u0430",
+        "platform": "palmira"
+      },
+      {
+        "name": "\u041e\u0440\u0438\u043e\u043d-128",
+        "platform": "orion"
+      },
+      {
+        "name": "\u041e\u0440\u0438\u043e\u043d-128 (\u041c\u043e\u043d\u0438\u0442\u043e\u0440 1)",
+        "platform": "orion.1"
+      },
+      {
+        "name": "\u041e\u0440\u0438\u043e\u043d-128 (\u041c\u043e\u043d\u0438\u0442\u043e\u0440 3.1)",
+        "platform": "orion.31"
+      },
+      {
+        "name": "\u041e\u0440\u0438\u043e\u043d-128 Z80 (\u041c\u043e\u0441\u043a. \u0432\u0430\u0440\u0438\u0430\u043d\u0442, \u041c\u043e\u043d\u0438\u0442\u043e\u0440 3.2)",
+        "platform": "orion.32"
+      },
+      {
+        "name": "\u041e\u0440\u0438\u043e\u043d-128 Z80-Card II",
+        "platform": "orion.z2"
+      },
+      {
+        "name": "\u041e\u0440\u0438\u043e\u043d-128 (\u041c\u043e\u043d. 2 - DSDOS)",
+        "platform": "orion.dsdos"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442",
+        "platform": "spec"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442 (SD card / vinxru)",
+        "platform": "spec.sd"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442 (SDOS)",
+        "platform": "spec.sdos"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442 (Qwerty)",
+        "platform": "spec.qwerty"
+      },
+      {
+        "name": "\u041b\u0438\u043a",
+        "platform": "spec.lik"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442 Z80",
+        "platform": "spec.z80"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442 (\u041c\u043e\u043d\u0438\u0442\u043e\u0440 1)",
+        "platform": "spec.m1"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442 SP580",
+        "platform": "sp580"
+      },
+      {
+        "name": "Eureka",
+        "platform": "eureka"
+      },
+      {
+        "name": "\u041a\u0440\u043e\u0445\u0430",
+        "platform": "krokha"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442-MX",
+        "platform": "spmx"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442-MX Turbo (Z80)",
+        "platform": "spmx.turbo"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442-MX (MXOS)",
+        "platform": "spmx.mxos"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442-MX (Commander)",
+        "platform": "spmx.com"
+      },
+      {
+        "name": "\u0421\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442-MX2",
+        "platform": "spmx2"
+      },
+      {
+        "name": "\u041c\u0438\u043a\u0440\u043e-80",
+        "platform": "mikro80"
+      },
+      {
+        "name": "\u041c\u0438\u043a\u0440\u043e-80 (\u041c\u043e\u043d\u0438\u0442\u043e\u0440 \u0420\u041a)",
+        "platform": "mikro80.rk"
+      },
+      {
+        "name": "\u042e\u0422-88",
+        "platform": "ut88"
+      },
+      {
+        "name": "\u0411\u0430\u0448\u043a\u0438\u0440\u0438\u044f-2\u041c",
+        "platform": "bashkiria"
+      },
+      {
+        "name": "\u041f\u041a-8000",
+        "platform": "pk8000"
+      },
+      {
+        "name": "\u041f\u041a-8000 (\u041d\u0413\u041c\u0414)",
+        "platform": "pk8000.fdc"
+      },
+      {
+        "name": "\u041f\u041a-8000 (HDD/CF)",
+        "platform": "pk8000.hdd"
+      },
+      {
+        "name": "\u0412\u0435\u043a\u0442\u043e\u0440-06\u0426",
+        "platform": "vector"
+      },
+      {
+        "name": "\u0412\u0435\u043a\u0442\u043e\u0440-06\u0426 Z80",
+        "platform": "vector.z80"
+      },
+      {
+        "name": "\u041f\u041a-01 \u041b\u044c\u0432\u043e\u0432",
+        "platform": "lvov"
+      },
+      {
+        "name": "\u041f\u041a8020 \u041a\u043e\u0440\u0432\u0435\u0442",
+        "platform": "korvet"
+      },
+      {
+        "name": "ZX Spectrum (128K)",
+        "platform": "zx"
+      },
+      {
+        "name": "ZX Spectrum 48K",
+        "platform": "zx.48"
+      },
+      {
+        "name": "Pentagon 128K",
+        "platform": "zx.pentagon"
+      },
+      {
+        "name": "\u0411\u0430\u0439\u0442",
+        "platform": "zx.byte"
+      },
+      {
+        "name": "\u041e\u043a\u0435\u0430\u043d-240.2",
+        "platform": "okean"
+      }
+    ],
+    "cpu": {
+      "breaked": true,
+      "frequency_hz": 2000000,
+      "full_throttle": false,
+      "paused": false,
+      "speed_factor": 32.0,
+      "type": "8080"
+    },
+    "platform": "specialist-os",
+    "server": {
+      "name": "Emu80",
+      "port": 19784,
+      "protocol": "2024-11-05",
+      "version": "4.0.575"
+    }
+  },
+  "imageSha256": "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b",
+  "emulatorSha256": "0bf142c01923e05f5f1d410516fc72a386b433b1d137be13dce01c7e1871ca48",
+  "memBytes": 3069,
+  "runtimeRevision": 64,
+  "auditOnly": false,
+  "leafReturnPC": 65223
+}

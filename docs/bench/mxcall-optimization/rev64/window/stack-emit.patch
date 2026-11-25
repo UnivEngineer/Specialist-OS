@@ -1,0 +1,178 @@
+diff --git a/scripts/build/build-banked-transport.py b/scripts/build/build-banked-transport.py
+index ecd7c85..f61c862 100644
+--- a/scripts/build/build-banked-transport.py
++++ b/scripts/build/build-banked-transport.py
+@@ -15,7 +15,7 @@ def main():
+     sy = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',
+                                           (OUT/'TRANSPORT.sym').read_text(),re.M)}
+     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
+-        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankMxRegsDos','bankFastPrepare','bankFastOp','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopyMove','bankCopySector','bankCopyPhysical','bankCommandWindow','bankCopyBytes','bankCopyQuads','bankCopySavedWindow','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopySP','bankCopyPairs','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
++        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankMxRegsDos','bankFastPrepare','bankFastOp','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopyMove','bankCopySector','bankCopyPhysical','bankCommandWindow','bankCopyBytes','bankCopyQuads','bankCopySavedWindow','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyTinyResume','bankCopySP','bankCopyPairs','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
+     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
+         stream.write(f'BANK_COPY_DATA_BYTES = {sy["bankCopyTailEnd"]-sy["BANK_COMMAND_LANDING"]}\n')
+         stream.write(f'BANK_TRANSPORT_BYTES = {(OUT/"TRANSPORT.bin").stat().st_size}\n')
+diff --git a/source/include/mxos.inc b/source/include/mxos.inc
+index 8ffb449..808e59b 100644
+--- a/source/include/mxos.inc
++++ b/source/include/mxos.inc
+@@ -1227,7 +1227,7 @@ MEM_COPY_PREPARE_ENTRY    = 0F1C0h                  ; CPM32: подготовк
+ MEM_BATCH_ENTRY           = 0F1C3h                  ; Пакет физических секторов в странице клиента
+ MEM_MAIN_IO_BRIDGE        = 0F240h                  ; JMP в аппаратную часть BIOS; цель задаёт сборщик
+ MEM_COPY_BYTES_ENTRY      = 0F335h
+-MEM_COPY_TINY_TEMPLATE    = 0F340h                  ; Точный остаток 1..31 байт, исполняется в окне
++MEM_COPY_TINY_ENTRY       = 0F340h                  ; Сборка точного остатка 1..31 байт в общем окне
+ MEM_COPY_QUADS_ENTRY      = 0F360h
+ MEM_COPY_STATE            = 0F377h                  ; SP, селекторы и остаток CPM32, 9 байт
+ MEM_EXTENSION_ENTRY       = 0F3F8h
+diff --git a/source/mem/abi.inc b/source/mem/abi.inc
+index 461172f..a13cd66 100644
+--- a/source/mem/abi.inc
++++ b/source/mem/abi.inc
+@@ -5,6 +5,11 @@
+ ; memcpy_far временно использует всё окно как данные COPY.
+ ; FAR: FAR-код, младший и старший байты смещения;
+ ; номер банка: 0=main, 1..16=банки ДОЗУ.
++    MACRO COPY_TINY_WORD lo_byte, hi_byte
++    ld hl,0 + ((lo_byte) | ((hi_byte) << 8))
++    push hl
++    ENDM
++
+ BANK_WINDOW       = 0FFC0h
+ BANK_SELECT_MAIN  = BANK_WINDOW
+ BANK_SELECT_RAM   = BANK_WINDOW
+diff --git a/source/mem/copy-prepare.inc b/source/mem/copy-prepare.inc
+index 872caab..40ca741 100644
+--- a/source/mem/copy-prepare.inc
++++ b/source/mem/copy-prepare.inc
+@@ -207,27 +207,27 @@ memBatchFailedCopy:
+     DEFINE COPY_HELPER_BYTES
+     INCLUDE "copy-helpers.inc"
+     UNDEFINE COPY_HELPER_BYTES
+-    ASSERT $ <= MEM_COPY_TINY_TEMPLATE
+-    DS MEM_COPY_TINY_TEMPLATE-$,0
+- ; Остаток 1..31: код исполняется в общем окне, без чтения за концом.
+-bankCopyTinyTemplate:
+-    ld hl,0
+-    ld (hl),0
+-    ld a,(bc)
+-    inc bc
+-    ld hl,0
+-    ld (hl),0
+-    ld (de),a
+-    inc de
+-    ld hl,BANK_WINDOW+29
+-    dec (hl)
+-    jp nz,BANK_WINDOW
+-    ld hl,0
+-    ld (hl),0
+-    jp bankCopyOK
+-    DB 0,0,BANK_PROFILE_COPY
+-bankCopyTinyEnd:
+-    ASSERT bankCopyTinyEnd-bankCopyTinyTemplate == 32
++    ASSERT $ <= MEM_COPY_TINY_ENTRY
++    DS MEM_COPY_TINY_ENTRY-$,0
++; Верхние слова остаточного трамплина. SP=FFE0h, A=число байт.
++; Каждый PUSH создаёт два байта потока команд, исполнение начнётся после
++; восстановления исходного SP в bankCopyTinyResume. FFDCh–FFDFh содержат
++; старший байт JP, счётчик, резерв и профиль COPY.
++copyTinyBuild:
++    COPY_TINY_WORD 0,BANK_PROFILE_COPY
++    ld h,a
++    ld l,bankCopyOK >> 8                      ; JP bankCopyOK: старший байт / счётчик
++    push hl
++    COPY_TINY_WORD 0C3h,bankCopyOK & 255       ; JP bankCopyOK: код и младший байт
++    ld hl,(bankCopyPairs+4)
++    ld a,l
++    ld l,036h                                ; MVI M,селектор исходного банка
++    push hl
++    ld l,a
++    ld h,0FFh                                ; Адрес регистра исходного банка
++    push hl
++    COPY_TINY_WORD BANK_WINDOW >> 8,021h      ; JP NZ: старший байт / LXI H
++    jp bankCopyTinyResume
+     ASSERT $ <= MEM_COPY_QUADS_ENTRY
+     DS MEM_COPY_QUADS_ENTRY-$,0
+     INCLUDE "copy-helpers.inc"
+diff --git a/source/mem/copy.inc b/source/mem/copy.inc
+index e40c1ce..cf9ea1e 100644
+--- a/source/mem/copy.inc
++++ b/source/mem/copy.inc
+@@ -106,40 +106,43 @@ bankCopySP    = MEM_COPY_STATE
+ bankCopyPairs = MEM_COPY_STATE+2
+ bankCopyRest  = MEM_COPY_STATE+8
+ 
+-; Полные 32-байтные порции закончены. BC/DE — первые непереданные адреса.
++; Полные порции закончены. BC/DE — первые непереданные адреса.
++; Остаточный трамплин в окне создаётся в обратном порядке через PUSH.
++; Только AF/HL нужны при сборке, поэтому BC/DE остаются адресами.
+ bankCopyReturn:
+-    ld hl,(bankCopySP)
+-    ld sp,hl
+     ld a,(bankCopyRest)
+     or a
+     jp z,bankCopyBulkDone
+-    push bc
+-    push de
+-    ld hl,bankCopyTinyTemplate
+-    ld de,BANK_WINDOW
+-    ld b,8
+-    call bankCopyQuads
+-    ld hl,(bankCopyPairs)
+-    ld a,h
+-    ld (BANK_WINDOW+4),a
+-    ld h,0FFh
+-    ld (BANK_WINDOW+1),hl
++    ld sp,BANK_WINDOW+32
++    jp MEM_COPY_TINY_ENTRY
++bankCopyTinyResume:
++    COPY_TINY_WORD 0C2h,BANK_WINDOW & 255      ; JP NZ: начало
++    COPY_TINY_WORD 0FFh,035h                  ; LXI H,FFDDh: старший байт / DCR M
++    COPY_TINY_WORD 021h,(BANK_WINDOW+29) & 255 ; LXI H,FFDDh: код и младший байт
++    COPY_TINY_WORD 012h,013h                  ; STAX D / INX D
+     ld hl,(bankCopyPairs+2)
+-    ld a,h
+-    ld (BANK_WINDOW+11),a
+-    ld h,0FFh
+-    ld (BANK_WINDOW+8),hl
+-    ld hl,(bankCopyPairs+4)
+-    ld a,h
+-    ld (BANK_WINDOW+25),a
+-    ld h,0FFh
+-    ld (BANK_WINDOW+22),hl
+-    ld a,(bankCopyRest)
+-    ld (BANK_WINDOW+29),a
+-    pop de
+-    pop bc
++    ld a,l
++    ld l,036h                                ; MVI M,селектор назначения
++    push hl
++    ld l,a
++    ld h,0FFh                                ; Адрес регистра назначения
++    push hl
++    COPY_TINY_WORD 003h,021h                  ; INX B / LXI H
++    ld hl,(bankCopyPairs)
++    ld a,l
++    ld l,h
++    ld h,00Ah                                ; Селектор источника / LDAX B
++    push hl
++    COPY_TINY_WORD 0FFh,036h                  ; LXI H: старший байт / MVI M
++    ld h,a
++    ld l,021h                                ; LXI H,регистр источника
++    push hl
++    ld hl,(bankCopySP)
++    ld sp,hl
+     jp BANK_WINDOW
+ bankCopyBulkDone:
++    ld hl,(bankCopySP)
++    ld sp,hl
+     ld a,BANK_PROFILE_COPY
+     ld (BANK_PROFILE),a
+ bankCopyOK:
+@@ -190,7 +193,6 @@ bankWindowReady:
+     pop af
+     ret
+ 
+-bankCopyTinyTemplate = MEM_COPY_TINY_TEMPLATE
+ bankCopyRequest: DS 8,0
+ bankCopySavedWindow = MEM_COMMAND_SHADOW
+ 

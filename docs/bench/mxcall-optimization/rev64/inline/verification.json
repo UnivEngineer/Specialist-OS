@@ -1,0 +1,32 @@
+{
+  "biosSha256": "20946387fd031c7298bd8f6d672d3e376dc9335211121655d7a98fcd536aa93a",
+  "cpu": "8080",
+  "validated": [
+    "AF",
+    "BC",
+    "DE",
+    "HL",
+    "SP",
+    "PC"
+  ],
+  "operations": {
+    "upper": {
+      "inputs": 256,
+      "inlineBytes": 37,
+      "callBytes": 3,
+      "registersSha256": "d996f3ea3de521ec8f0ece17e25ec4e7820eca4990f1bc1d49f8bb27e9006baf"
+    },
+    "cmp": {
+      "inputs": 64,
+      "inlineBytes": 7,
+      "callBytes": 3,
+      "registersSha256": "c9db01c4917e777afebfcaa0c2dac588d06c9791d8f5a90a87108a8fc3741ec5"
+    },
+    "sub": {
+      "inputs": 64,
+      "inlineBytes": 6,
+      "callBytes": 3,
+      "registersSha256": "c7f531aa0bde1f7cc60da491d19b627c65558c4c6808258fc0c36be5f61e56a6"
+    }
+  }
+}

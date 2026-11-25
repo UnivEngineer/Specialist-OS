@@ -1,0 +1,346 @@
+{
+  "cpu_hz": 2000000,
+  "profiles": {
+    "MAIN": {
+      "page": 0,
+      "panel": 1,
+      "files": 103,
+      "visible": 38,
+      "initial_cursor": 0,
+      "initial_top": 0,
+      "press_tick": 56533080,
+      "release_tick": 58268355,
+      "hold_ms_guest": 867.6375,
+      "hold_ms_host": 1938.317,
+      "press_to_first": {
+        "ticks": 100554,
+        "ms": 50.277,
+        "steps_per_second": 19.88981045010641
+      },
+      "first_repeat": {
+        "ticks": 1014040,
+        "ms": 507.02,
+        "steps_per_second": 1.972308784663327
+      },
+      "steady_decode_interval": {
+        "ticks": 73142.0,
+        "ms": 36.571,
+        "steps_per_second": 27.34407043832545
+      },
+      "steady_wait": {
+        "ticks": 42639.0,
+        "ms": 21.3195,
+        "steps_per_second": 46.905415230188325
+      },
+      "steady_handler": {
+        "ticks": 31444.0,
+        "ms": 15.722,
+        "steps_per_second": 63.60513929525506
+      },
+      "F806_wait_total": 0,
+      "F806_handler_total": 0,
+      "samples": [
+        {
+          "step": 1,
+          "cursor": 1,
+          "top": 0,
+          "decode_tick": 56633634,
+          "ready_tick": 56663487,
+          "decode_interval_ticks": 100554,
+          "waiting_ticks": 100554,
+          "handler_ticks": 29853,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 2,
+          "cursor": 2,
+          "top": 0,
+          "decode_tick": 57647674,
+          "ready_tick": 57677502,
+          "decode_interval_ticks": 1014040,
+          "waiting_ticks": 984187,
+          "handler_ticks": 29828,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 3,
+          "cursor": 3,
+          "top": 0,
+          "decode_tick": 57720141,
+          "ready_tick": 57750001,
+          "decode_interval_ticks": 72467,
+          "waiting_ticks": 42639,
+          "handler_ticks": 29860,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 4,
+          "cursor": 4,
+          "top": 0,
+          "decode_tick": 57792640,
+          "ready_tick": 57822580,
+          "decode_interval_ticks": 72499,
+          "waiting_ticks": 42639,
+          "handler_ticks": 29940,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 5,
+          "cursor": 5,
+          "top": 0,
+          "decode_tick": 57865219,
+          "ready_tick": 57895191,
+          "decode_interval_ticks": 72579,
+          "waiting_ticks": 42639,
+          "handler_ticks": 29972,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 6,
+          "cursor": 6,
+          "top": 0,
+          "decode_tick": 57937830,
+          "ready_tick": 57968864,
+          "decode_interval_ticks": 72611,
+          "waiting_ticks": 42639,
+          "handler_ticks": 31034,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 7,
+          "cursor": 7,
+          "top": 0,
+          "decode_tick": 58011503,
+          "ready_tick": 58043357,
+          "decode_interval_ticks": 73673,
+          "waiting_ticks": 42639,
+          "handler_ticks": 31854,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 8,
+          "cursor": 8,
+          "top": 0,
+          "decode_tick": 58086124,
+          "ready_tick": 58118218,
+          "decode_interval_ticks": 74621,
+          "waiting_ticks": 42767,
+          "handler_ticks": 32094,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 9,
+          "cursor": 9,
+          "top": 0,
+          "decode_tick": 58160985,
+          "ready_tick": 58193369,
+          "decode_interval_ticks": 74861,
+          "waiting_ticks": 42767,
+          "handler_ticks": 32384,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 10,
+          "cursor": 10,
+          "top": 0,
+          "decode_tick": 58236136,
+          "ready_tick": 58268355,
+          "decode_interval_ticks": 75151,
+          "waiting_ticks": 42767,
+          "handler_ticks": 32219,
+          "F806_wait": 0,
+          "F806_handler": 0
+        }
+      ]
+    },
+    "EXEC": {
+      "launch_ticks": 3121932,
+      "page": 6,
+      "panel": 1,
+      "files": 103,
+      "visible": 38,
+      "initial_cursor": 0,
+      "initial_top": 0,
+      "press_tick": 74014381,
+      "release_tick": 75130546,
+      "hold_ms_guest": 558.0825,
+      "hold_ms_host": 1742.3512,
+      "press_to_first": {
+        "ticks": 7238,
+        "ms": 3.619,
+        "steps_per_second": 276.3194252555955
+      },
+      "first_repeat": {
+        "ticks": 528257,
+        "ms": 264.1285,
+        "steps_per_second": 3.786035963555618
+      },
+      "steady_decode_interval": {
+        "ticks": 65676.0,
+        "ms": 32.838,
+        "steps_per_second": 30.452524514282235
+      },
+      "steady_wait": {
+        "ticks": 9511.0,
+        "ms": 4.7555,
+        "steps_per_second": 210.2828304068973
+      },
+      "steady_handler": {
+        "ticks": 56133.0,
+        "ms": 28.0665,
+        "steps_per_second": 35.62966525929489
+      },
+      "F806_wait_total": 0,
+      "F806_handler_total": 0,
+      "samples": [
+        {
+          "step": 1,
+          "cursor": 1,
+          "top": 0,
+          "decode_tick": 74021619,
+          "ready_tick": 74076154,
+          "decode_interval_ticks": 7238,
+          "waiting_ticks": 7238,
+          "handler_ticks": 54535,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 2,
+          "cursor": 2,
+          "top": 0,
+          "decode_tick": 74549876,
+          "ready_tick": 74607717,
+          "decode_interval_ticks": 528257,
+          "waiting_ticks": 473722,
+          "handler_ticks": 57841,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 3,
+          "cursor": 3,
+          "top": 0,
+          "decode_tick": 74615226,
+          "ready_tick": 74669775,
+          "decode_interval_ticks": 65350,
+          "waiting_ticks": 7509,
+          "handler_ticks": 54549,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 4,
+          "cursor": 4,
+          "top": 0,
+          "decode_tick": 74679868,
+          "ready_tick": 74734497,
+          "decode_interval_ticks": 64642,
+          "waiting_ticks": 10093,
+          "handler_ticks": 54629,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 5,
+          "cursor": 5,
+          "top": 0,
+          "decode_tick": 74745882,
+          "ready_tick": 74800543,
+          "decode_interval_ticks": 66014,
+          "waiting_ticks": 11385,
+          "handler_ticks": 54661,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 6,
+          "cursor": 6,
+          "top": 0,
+          "decode_tick": 74811928,
+          "ready_tick": 74867651,
+          "decode_interval_ticks": 66046,
+          "waiting_ticks": 11385,
+          "handler_ticks": 55723,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 7,
+          "cursor": 7,
+          "top": 0,
+          "decode_tick": 74876452,
+          "ready_tick": 74932995,
+          "decode_interval_ticks": 64524,
+          "waiting_ticks": 8801,
+          "handler_ticks": 56543,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 8,
+          "cursor": 8,
+          "top": 0,
+          "decode_tick": 74943344,
+          "ready_tick": 75000127,
+          "decode_interval_ticks": 66892,
+          "waiting_ticks": 10349,
+          "handler_ticks": 56783,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 9,
+          "cursor": 9,
+          "top": 0,
+          "decode_tick": 75007636,
+          "ready_tick": 75064709,
+          "decode_interval_ticks": 64292,
+          "waiting_ticks": 7509,
+          "handler_ticks": 57073,
+          "F806_wait": 0,
+          "F806_handler": 0
+        },
+        {
+          "step": 10,
+          "cursor": 10,
+          "top": 0,
+          "decode_tick": 75073638,
+          "ready_tick": 75130546,
+          "decode_interval_ticks": 66002,
+          "waiting_ticks": 8929,
+          "handler_ticks": 56908,
+          "F806_wait": 0,
+          "F806_handler": 0
+        }
+      ]
+    }
+  },
+  "sha256": {
+    "bin/NC.i80": "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002",
+    "bin/NC_CORE.i80": "86f9c10c8fcb96e2cf1130cd5e93dbc990ccd27004bef137cc4b7a904a3f0bae",
+    "bin/UI_GFX.i80": "c9f50506c8e53b315bb0a6e2acf602ab7a7971d5655f7f732119df2f1c0454e2",
+    "bin/BIOS.sys": "79c7fc1a99112dc92cc7340d942e0718d4fc5c149944d7968f7b3061ab028f0e",
+    "bin/DOS.sys": "8abee3713f4b91d79a1c374b873c010067b78c9267fd838508cf9039c658ac99",
+    "bin/MEM.sys": "f1d1fb70b8160cbcd8884b5a236e05803a867ecac20ea5b4ee631a51873880ba",
+    "images/C-Flash-512k-MMX-System-Emu80.bin": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+    "H:": "58c4bb9a065166020d302452ff1307f88b20d03ad138c920c90086216d2baccb"
+  },
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  }
+}

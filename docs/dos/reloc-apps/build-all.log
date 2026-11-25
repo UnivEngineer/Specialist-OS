@@ -1,0 +1,1206 @@
+[build] Build all started
+[build] Components (All) started
+[checking] System call registry
+[up-to-date] System call registry
+[prepare] Component build plan
+[time] Component build plan: 0,481 s
+[checking] UI_GFX
+[checking] Almaz
+[checking] Almaz-2 (All)
+[up-to-date] Almaz (0.021 s)
+[up-to-date] UI_GFX (0.028 s)
+[up-to-date] Almaz-2 (All) (0.037 s)
+[checking] Font engines
+[checking] COPYBEN variants
+[up-to-date] COPYBEN variants (0.010 s)
+[up-to-date] Font engines (0.021 s)
+[checking] DOS
+[build] DOS (checked in 0.073 s)
+Compact: 162 glyphs derived from KOI8.pf; DEL placeholder retained
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1716 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2645 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2138 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2246 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2512 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1970 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2121 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+copy-prepare.inc(170): warning[shortblock]: init data for block truncated to length: 0
+include data: name=fast.bin (135 bytes) Offset=0  Len=135
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+local-block.inc(4): ^ emitted from here
+LOCALBLOCK.asm(48): warning[shortblock]: init data for block truncated to length: 0
+LOCALBLOCK.asm(103): warning[shortblock]: init data for block truncated to length: 0
+local-io.inc(3): warning[shortblock]: init data for block truncated to length: 0
+CLIENT.asm(130): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 6, compiled: 3354 lines, work time: 0.047 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1992 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2170 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2300 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=LOCALBLOCK.bin (1600 bytes) Offset=0  Len=1600
+include data: name=CLIENT.bin (448 bytes) Offset=0  Len=448
+include data: name=TRANSPORT.bin (960 bytes) Offset=0  Len=960
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=32
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1688 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+System.measure.asm(150): warning[fileorg]: ORG does not pad output file to reach target address, bytes skipped: 16926
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.measure.asm(151): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.measure.asm(218): ^ emitted from here
+Pass 3 complete
+Errors: 0, warnings: 3, compiled: 18817 lines, work time: 0.156 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(127): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(136): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(142): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(147): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(153): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(159): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(165): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(170): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(180): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(188): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(194): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(200): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(205): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(211): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(217): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(222): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(228): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(234): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(239): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(245): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(250): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(256): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(262): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(272): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(278): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(283): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(289): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(295): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(301): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(305): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(311): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(316): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(321): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(327): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(333): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(339): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(344): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(350): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(356): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(360): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(366): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(372): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(378): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(382): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(388): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(398): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(404): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(414): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(420): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(424): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(430): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(436): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(446): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(452): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(458): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(468): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(474): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(480): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(486): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(492): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(498): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(504): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(510): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(520): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(526): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(532): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(538): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(544): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(550): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(556): ^ emitted from here
+include data: name=MAINBIOS.bin (341 bytes) Offset=0  Len=341
+Pass 3 complete
+Errors: 0, warnings: 70, compiled: 19373 lines, work time: 0.156 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(127): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(136): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(142): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(147): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(153): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(159): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(165): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(170): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(180): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(188): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(194): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(200): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(205): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(211): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(217): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(222): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(228): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(234): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(239): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(245): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(250): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(256): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(262): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(272): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(278): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(283): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(289): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(295): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(301): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(305): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(311): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(316): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(321): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(327): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(333): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(339): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(344): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(350): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(356): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(360): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(366): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(372): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(378): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(382): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(388): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(398): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(404): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(414): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(420): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(424): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(430): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(436): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(446): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(452): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(458): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(468): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(474): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(480): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(486): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(492): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(498): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(504): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(510): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(520): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(526): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(532): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(538): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(544): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(550): ^ emitted from here
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+System.layout.inc(556): ^ emitted from here
+include data: name=MAINBIOS.bin (341 bytes) Offset=0  Len=341
+Pass 3 complete
+Errors: 0, warnings: 70, compiled: 19373 lines, work time: 0.172 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1959 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1716 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2645 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2138 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2246 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2512 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1970 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2121 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+copy-prepare.inc(170): warning[shortblock]: init data for block truncated to length: 0
+include data: name=fast.bin (135 bytes) Offset=0  Len=135
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+local-block.inc(4): ^ emitted from here
+LOCALBLOCK.asm(48): warning[shortblock]: init data for block truncated to length: 0
+LOCALBLOCK.asm(103): warning[shortblock]: init data for block truncated to length: 0
+local-io.inc(3): warning[shortblock]: init data for block truncated to length: 0
+CLIENT.asm(130): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 6, compiled: 3354 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1992 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2170 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2300 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=LOCALBLOCK.bin (1600 bytes) Offset=0  Len=1600
+include data: name=CLIENT.bin (448 bytes) Offset=0  Len=448
+include data: name=TRANSPORT.bin (960 bytes) Offset=0  Len=960
+include data: name=WINDOW.bin (32 bytes) Offset=0  Len=32
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1688 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 24556 lines, work time: 0.188 seconds
+Bank DOS: 31470 bytes, end 7BEEh
+BIOS: 6090 bytes; IO: 431 bytes; bank DOS: 31470 bytes, end 7BEEh
+[time] DOS: 2.367 s
+[checking] Benchmark support
+[build] Benchmark support (checked in 0.013 s)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1839 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1826 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2173 lines, work time: 0.015 seconds
+[time] Benchmark support: 0.739 s
+[checking] TESTMX
+[checking] test-scr
+[checking] FONT
+[checking] COPYBEN
+[checking] FLOPPY
+[checking] tape
+[checking] CHKDSK
+[checking] FlashFst
+[checking] EXE
+[checking] Flash
+[checking] Rom
+[checking] RAMDISK
+[checking] Debug
+[checking] FlashSys
+[checking] Rom64
+[checking] Monitor2
+[checking] MONWIN
+[checking] RUN
+[checking] FORMAT
+[checking] RAMFOS
+[build] test-scr (checked in 0.054 s)
+[checking] EDIT
+[checking] NC
+[checking] FONTGRID
+[checking] TEXTCOM
+[checking] CLI
+[checking] ENGINEM
+[checking] ENGINEB
+[build] CHKDSK (checked in 0.075 s)
+[checking] ENGINEW
+[build] EXE (checked in 0.087 s)
+[checking] ENGINEP
+[build] TESTMX (checked in 0.073 s)
+[checking] ORIONM1
+[checking] ENGINE6
+[checking] ENGINEQ
+[build] FONT (checked in 0.112 s)
+[up-to-date] MONWIN (0.081 s)
+[checking] ENGINES
+[build] FlashSys (checked in 0.130 s)
+[build] FONTGRID (checked in 0.085 s)
+[build] tape (checked in 0.149 s)
+[build] FORMAT (checked in 0.108 s)
+[up-to-date] Monitor2 (0.129 s)
+[checking] ENGINE4
+[build] ENGINEW (checked in 0.083 s)
+[build] RUN (checked in 0.134 s)
+[build] ORIONM1 (checked in 0.079 s)
+[build] FLOPPY (checked in 0.189 s)
+[build] FlashFst (checked in 0.189 s)
+[build] ENGINEQ (checked in 0.106 s)
+[build] Rom64 (checked in 0.183 s)
+[build] ENGINEM (checked in 0.126 s)
+[build] Rom (checked in 0.189 s)
+[build] Flash (checked in 0.200 s)
+[build] CLI (checked in 0.156 s)
+[build] ENGINEB (checked in 0.143 s)
+[build] ENGINEP (checked in 0.139 s)
+[build] RAMDISK (checked in 0.205 s)
+[build] ENGINES (checked in 0.088 s)
+[build] Debug (checked in 0.200 s)
+[build] TEXTCOM (checked in 0.165 s)
+[build] ENGINE4 (checked in 0.068 s)
+[build] ENGINE6 (checked in 0.170 s)
+[build] COPYBEN (checked in 0.259 s)
+[build] EDIT (checked in 0.216 s)
+[build] NC (checked in 0.271 s)
+[up-to-date] RAMFOS (0.295 s)
+[checking] FONTCOM
+[build] FONTCOM (checked in 0.043 s)
+[build] D:\Projects\Specialist-OS\source-apps\test-scr\test-scr.asm
+[build] D:\Projects\Specialist-OS\source-apps\test-mx\TESTMX.asm
+[build] D:\Projects\Specialist-OS\source-apps\chkdsk\CHKDSK.asm
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source\exe\EXE.asmPass 2 complete (0 errors)
+
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+include data: name=Test-MX.COM (2048 bytes) Offset=0  Len=2048
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1971 lines, work time: 0.016 seconds
+Errors: 0, warnings: 0, compiled: 1587 lines, work time: 0.031 seconds
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\FONTGRID.asm
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3036 lines, work time: 0.031 seconds
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3096 lines, work time: 0.031 seconds
+[build] D:\Projects\Specialist-OS\source\font\FONT.asm
+[build] D:\Projects\Specialist-OS\source\flash\FlashSys.asm
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1980 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINEQ.asm
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source\tape\tape.asm
+Pass 2 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source\run\RUN.asm
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINEW.asm
+[time] test-scr: 0.979 s
+[time] TESTMX: 0.927 s
+[checking] FONTBLK
+[checking] FONTLAB
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2227 lines, work time: 0.047 seconds
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2983 lines, work time: 0.047 seconds
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINEP.asm
+[build] D:\Projects\Specialist-OS\source-apps\copybench\COPYBEN.asm
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+
+Pass 1 complete (0 errors)
+[time] CHKDSK: 0.983 s
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+[checking] FONTRMP
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=monitor_win.rom (8192 bytes) Offset=6144  Len=2048
+Pass 3 complete
+Pass 2 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 1711 lines, work time: 0.031 seconds
+Pass 2 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2770 lines, work time: 0.047 seconds
+Pass 3 complete
+Pass 1 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 3492 lines, work time: 0.047 seconds
+Pass 3 complete
+[build] D:\Projects\Specialist-OS\source\cli\CLI.asm
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINE4.asmErrors: 0, warnings: 0, compiled: 5122 lines, work time: 0.047 seconds
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINEM.asm
+
+Pass 1 complete (0 errors)
+[build] FONTBLK (checked in 0.082 s)
+[build] FONTLAB (checked in 0.082 s)
+[build] D:\Projects\Specialist-OS\source-apps\textbench\STANDALONE.asm
+[build] D:\Projects\Specialist-OS\source\debug\Debug.asm
+[build] D:\Projects\Specialist-OS\source\format\FORMAT.asm
+[time] EXE: 1.024 s
+[checking] RFTEST
+Pass 2 complete (0 errors)
+[up-to-date] RFTEST (0.002 s)
+[build] FONTRMP (checked in 0.048 s)
+[checking] RFTESTHI
+[up-to-date] RFTESTHI (0.002 s)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINEB.asm
+Pass 2 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 4492 lines, work time: 0.062 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+include data: name=stack.bin (353 bytes) Offset=0  Len=353
+include data: name=loop.bin (146 bytes) Offset=0  Len=146
+include data: name=unrolled.bin (216 bytes) Offset=0  Len=216
+include data: name=direct.bin (201 bytes) Offset=0  Len=201
+include data: name=regs2.bin (207 bytes) Offset=0  Len=207
+include data: name=regs4.bin (175 bytes) Offset=0  Len=175
+include data: name=regs6.bin (181 bytes) Offset=0  Len=181
+include data: name=CPMCOPY.bin (164 bytes) Offset=0  Len=164
+Pass 3 complete
+Pass 1 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 3803 lines, work time: 0.062 seconds
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINES.asm
+Pass 1 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ORIONM1.asm
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 2 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\STANDALONE.asm
+Pass 2 complete (0 errors)
+include data: name=FONTBEN.font4.bin (1024 bytes) Offset=0  Len=1024
+Pass 2 complete (0 errors)
+Pass 3 complete
+Pass 2 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 2847 lines, work time: 0.047 seconds
+Pass 1 complete (0 errors)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\ENGINE6.asmPass 2 complete (0 errors)
+
+[time] FONTGRID: 1.047 s
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3086 lines, workPass 3 complete time: 0.047 seconds
+
+Errors: 0, warnings: 0, compiled: 46Pass 3 complete
+19 lines, work time: 0.032 seconds
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2908 lines, work time: Errors: 0,0.047 seconds
+ warnings: 0, compiled: 2451 lines, work time: 0.047 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 2 complete (0 errors)
+Pass 3 complete
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Errors: 0, warnings: 0, compiled: 3567 lines, work time: 0.047 seconds
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+include data: name=KOI8.pf (2048 bytes) Offset=0  Len=2048
+Pass 3 complete
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+[time] FlashSys: 1.087 s
+Errors: 0, warnings: 0, compiled: 1784 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 4612 lines, work time: 0.063 seconPass 2 complete (0 errors)
+ds
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3387 lines, work time:Pass 3 complete 0.047 seconds
+Pass 2 complete (0 errors)
+
+Pass 1 complete (0 errors)
+[time] FONT: 1.125 s
+Errors: 0, warnings: 0, compiled: 1823 lines, work time: 0.031 seconds
+include data: name=LOCALDRV0.bin (265 bytes) Offset=0  Len=265
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2261 lines, work time: 0.047 seconds
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+include data: name=FONTKOI.packed.bin (4072 bytes) Offset=0  Len=32
+include data: name=FONTKOI.packed.index.bin (256 bytes) Offset=0  Len=256
+include data: name=FONTKOI.packed.codes.bin (147 bytes) Offset=0  Len=147
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 5622 lines, work time: 0.078 seconds
+[time] ENGINEW: 1.128 s
+[time] ENGINEQ: 1.098 s
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+[time] RUN: 1.136 s
+Pass 2 complete (0 errors)
+Pass SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)1 complete (0 errors)
+
+Pass 2 complete (0[time] tape: 1.153 s
+ errors)
+include data: name=FLOPPYSVC.bin (402 bytes) Offset=0  Len=402
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1730 lines, work time: 0.032 seconds
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 2 complete (0 errors)
+include data: name=corpus.koi8 (1152 bytes) Offset=0  Len=42
+Pass 1 complete (0 errors)
+include data: name=corpus.koi8 (1152 bytes) Offset=42  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=84  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=126  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=168  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=210  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=252  Len=42
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+include data: name=corpus.koi8 (1152 bytes) Offset=294  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=336  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=378  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=420  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=462  Len=42
+Pass 1 complete (0 errors)
+include data: name=corpus.koi8 (1152 bytes) Offset=504  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=546  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=588  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=630  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=672  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=714  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=756  Len=42
+include data: name=LOCALDRV0.bin (265 bytes) Offset=0  Len=265
+include data: name=corpus.koi8 (1152 bytes) Offset=798  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=840  Len=42
+include data: name=corpus.koi8 (1152 bytes) Offset=882  Len=42
+Pass 3 complete
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 4794 lines, work time: 0.093 seconds
+Pass 2 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 2260 lines, work time: 0.047 seconds
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+include data: name=LOCALDRV0.bin (265 bytes) Offset=0  Len=265
+include data: name=LOCALDRV2.bin (570 bytes) Offset=0  Len=570
+Pass 2 complete (0 errors)
+[time] ENGINEP: 1.136 s
+Pass 3 complete
+[time] ENGINE4: 1.119 s
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2260 lines, work time: 0.031 seconds
+Errors: 0, warnings: 0, compiled: 1981 lines, work time: 0.047 seconds
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)Pass 3 complete
+
+Errors: 0, warnings: 0, compiled: 2064 lines, work time: 0.032 seconds
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 2 complete (0 errors)
+[time] CLI: 1.178 s
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+include data: name=FLOPPYSVC.bin (402 bytes) Offset=0  Len=402
+Pass 3 complete
+[time] FORMAT: 1.225 s
+Errors: 0, warnings: 0, compiled: 1729 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+[time] ENGINEM: 1.188 s
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+include data: name=LOCALDRV1.bin (546 bytes) Offset=0  Len=546
+Pass 3 complete
+include data: name=LOCALDRV0.bin (265 bytes) Offset=0  Len=265
+[time] ENGINES: 1.191 s
+Errors: 0, warnings: 0, compiled: 1981 lines, work time: 0.031 seconds
+[time] ORIONM1: 1.237 s
+Pass 3 complete
+[time] ENGINEB: 1.197 s
+[time] TEXTCOM: 1.192 s
+Pass 2 complete (0 errors)
+include data: name=LOCALDRV0.bin (265 bytes) Offset=0  Len=265
+Errors: 0, warnings: 0, compiled: 2259 lines, worPass 1 complete (0 errors)k time: 0.015 seco
+nds
+[time] Debug: 1.194 s
+[time] COPYBEN: 1.153 s
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2260 lines, work time: 0.015 seconds
+Pass 2 complete (0 errors)
+include data: name=LOCALDRV2.bin (570 bytes) Offset=0  Len=570
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1980 lines, work time: 0.031 seconds
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2063 lines, work time: 0.016 seconds
+Rom64.asm: load 0000h, 1431 bytes, 78 relocations
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+[time] ENGINE6: 1.199 s
+Pass 2 complete (0 errors)
+Pass 3 complete
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 14824 lines, work time: 0.141 seconds
+Errors: 0, warnings: 0, compiled: 19754 lines, work time: 0.219 seconds
+include data: name=FLOPPYSVC.bin (402 bytes) Offset=0  Len=402
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1729 lines, work time: 0.031 seconds
+FLOPPY.asm: load 0000h, 581 bytes, 24 relocations
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=LOCALDRV0.bin (265 bytes) Offset=0  Len=265
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2259 lines, work time: 0.016 seconds
+include data: name=LOCALDRV2.bin (570 bytes) Offset=0  Len=570
+include data: name=LOCALDRV1.bin (546 bytes) Offset=0  Len=546
+Pass 3 complete
+Pass 3 complete
+Pass 3 complete
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Errors: 0, waSjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)rnings: 0, com[time] FONTCOM: 1.114 s
+pil
+ed: 2063 lines, work time: 0.031 seconds
+Errors: 0, warnings: 0, compiled: 1980 lines, work time: 0.031 seconds
+Errors: 0, warnings: 0, compiled: 1980 lines, work time: 0.031 seconds
+[time] Rom64: 1.300 s
+Rom.asm: load 0000h, 1429 bytes, 78 relocations
+RAMDISK.asm: load 0000h, 929 bytes, 74 relocations
+[time] FLOPPY: 1.328 s
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+FlashFst.asm: load 0000h, 1043 bytes, 66 relocations
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=LOCALDRV1.bin (546 bytes) Offset=0  Len=546
+Pass 3 complete
+Pass 1 complete (0 errors)
+Errors: 0, warnings: 0, compiled: 1980 lines, work time: 0.016 seconds
+Flash.asm: load 0000h, 1020 bytes, 66 relocations
+[time] Rom: 1.363 s
+Pass 2 complete (0 errors)
+[time] RAMDISK: 1.354 s
+[time] FlashFst: 1.382 s
+Pass 2 complete (0 errors)
+[time] Flash: 1.398 s
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\REMAP32.asm[build] D:\Projects\Specialist-OS\source-apps\fontbench\LEGACY.asm
+
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 15733 lines, work time: 0.125 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+[build] D:\Projects\Specialist-OS\source-apps\fontbench\BLOCK32.asm
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 19204 lines, work time: 0.171 seconds
+Pass 1 complete (0 errors)
+Pass 1 complete (0 errors)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 1 complete (0 errors)
+include data: name=FONTBEN.font4.bin (1024 bytes) Offset=0  Len=1024
+include data: name=FONTBEN.renderer.bin (265 bytes) Offset=0  Len=265
+include data: name=FONTBEN.font4.bin (1024 bytes) Offset=0  Len=1024
+include data: name=FONTBEN.renderer.bin (265 bytes) Offset=0  Len=265
+include data: name=KOI8.pf (2048 bytes) Offset=0  Len=2048
+include data: name=FONTBEN.shifts.bin (12288 bytes) Offset=0  Len=2048
+include data: name=KOI8.pf (2048 bytes) Offset=0  Len=2048
+include data: name=FONTBEN.shifts.bin (12288 bytes) Offset=0  Len=2048
+include data: name=FONTKOI.packed.bin (4072 bytes) Offset=0  Len=32
+include data: name=FONTKOI.packed.index.bin (256 bytes) Offset=0  Len=256
+include data: name=FONTKOI.packed.codes.bin (147 bytes) Offset=0  Len=147
+include data: name=FONTKOI.packed.bin (4072 bytes) Offset=0  Len=32
+include data: name=FONTKOI.packed.index.bin (256 bytes) Offset=0  Len=256
+include data: name=FONTKOI.packed.codes.bin (147 bytes) Offset=0  Len=147
+include data: name=corpus.koi8 (1152 bytes) Offset=0  Len=1152
+include data: name=FONTBEN.shifts.bin (12288 bytes) Offset=8192  Len=4096
+include data: name=corpus.koi8 (1152 bytes) Offset=0  Len=1152
+include data: name=FONTBEN.shifts.bin (12288 bytes) Offset=8192  Len=4096
+Pass 2 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 11518 lines, work time: 0.094 seconds
+Errors: 0, warnings: 0, compiled: 11389 lines, work time: 0.094 seconds
+include data: name=FONTBEN.font4.bin (1024 bytes) Offset=0  Len=1024
+include data: name=FONTBEN.renderer.bin (265 bytes) Offset=0  Len=265
+include data: name=KOI8.pf (2048 bytes) Offset=0  Len=2048
+include data: name=FONTBEN.shifts.bin (12288 bytes) Offset=0  Len=2048
+include data: name=FONTKOI.packed.bin (4072 bytes) Offset=0  Len=32
+include data: name=FONTKOI.packed.index.bin (256 bytes) Offset=0  Len=256
+include data: name=FONTKOI.packed.codes.bin (147 bytes) Offset=0  Len=147
+include data: name=corpus.koi8 (1152 bytes) Offset=0  Len=1152
+include data: name=FONTBEN.shifts.bin (12288 bytes) Offset=8192  Len=4096
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 11458 lines, work time: 0.094 seconds
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 15731 lines, work time: 0.125 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1792 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1791 lines, work time: 0.015 seconds
+[time] FONTLAB: 0.762 s
+[time] FONTRMP: 0.753 s
+[time] FONTBLK: 0.764 s
+NC_DOS.asm: load C8D0h, 264 bytes, 0 relocations
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1714 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+[time] NC: 1.640 s
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1713 lines, work time: 0.016 seconds
+EDIT_DOS.asm: load C90Ah, 206 bytes, 0 relocations
+[time] EDIT: 1.787 s
+[checking] ENUM
+[build] ENUM (checked in 0.010 s)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2245 lines, work time: 0.016 seconds
+[time] ENUM: 0.183 s
+[checking] FILEOPS
+[build] FILEOPS (checked in 0.011 s)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3911 lines, work time: 0.047 seconds
+[time] FILEOPS: 0.209 s
+[checking] DISKBEN (2000000 Hz)
+[build] DISKBEN (2000000 Hz) (checked in 0.016 s)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 5748 lines, work time: 0.062 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2963 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2963 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3164 lines, work time: 0.032 seconds
+[time] DISKBEN (2000000 Hz): 0.576 s
+[checking] SORTBEN
+[build] SORTBEN (checked in 0.012 s)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 5538 lines, work time: 0.062 seconds
+[time] SORTBEN: 0.225 s
+[build] Profile 'MMX Flash + floppy' started
+[checking] Bootstrap
+[build] Bootstrap (checked in 0.019 s)
+Boot splash: text 928 B RLE, digit 30 B raw
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=splash-text.rle (928 bytes) Offset=0  Len=928
+include data: name=splash-digit.bin (30 bytes) Offset=0  Len=30
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 751 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 42 lines, work time: 0.000 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 75 lines, work time: 0.016 seconds
+[time] Bootstrap: 0.285 s
+[checking] image: SystemHardware
+[build] image: SystemHardware (checked in 0.028 s)
+Nested FAT image: 7 directories, 66 files
+[image] D:\Projects\Specialist-OS\images\C-Flash-512k-MMX-System.bin
+[time] image: SystemHardware: 1.182 s
+[checking] Bootstrap
+[up-to-date] Bootstrap (0.012 s)
+[checking] image: SystemEmuWritable
+[build] image: SystemEmuWritable (checked in 0.019 s)
+Nested FAT image: 7 directories, 66 files
+[image] D:\Projects\Specialist-OS\images\C-Flash-512k-MMX-System-Emu80.bin
+[time] image: SystemEmuWritable: 1.190 s
+[checking] image: Games2M
+[build] image: Games2M (checked in 0.011 s)
+Nested FAT image: 14 directories, 161 files
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip1.bin
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip2.bin
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip3.bin
+[image] D:\Projects\Specialist-OS\images\H-Flash-2M-Games-chip4.bin
+[time] image: Games2M: 1.865 s
+[checking] image: Floppy720
+[up-to-date] image: Floppy720 (0.001 s)
+[time] Profile MMX Flash + floppy: 5,732 s
+[build] Profile 'MX ROM + floppy' started
+[build] Components (MX) started
+[checking] Bootstrap
+[up-to-date] Bootstrap (0.007 s)
+[checking] Original MX bootstrap
+[build] Original MX bootstrap (checked in 0.116 s)
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 24591 lines, work time: 0.187 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 19754 lines, work time: 0.156 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 14824 lines, work time: 0.125 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3086 lines, work time: 0.032 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2983 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2063 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2245 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 3911 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+copy-prepare.inc(170): warning[shortblock]: init data for block truncated to length: 0
+include data: name=fast.bin (135 bytes) Offset=0  Len=135
+mxos.inc(1464): warning[shortblock]: init data for block truncated to length: 0
+local-block.inc(4): ^ emitted from here
+LOCALBLOCK.asm(48): warning[shortblock]: init data for block truncated to length: 0
+LOCALBLOCK.asm(103): warning[shortblock]: init data for block truncated to length: 0
+local-io.inc(3): warning[shortblock]: init data for block truncated to length: 0
+CLIENT.asm(130): warning[shortblock]: init data for block truncated to length: 0
+Pass 3 complete
+Errors: 0, warnings: 6, compiled: 3357 lines, work time: 0.031 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 140 lines, work time: 0.000 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1655 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=fd-resident.bin (314 bytes) Offset=0  Len=314
+include data: name=flash-resident.bin (102 bytes) Offset=0  Len=102
+include data: name=MXROM.bin (136 bytes) Offset=0  Len=136
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 1239 lines, work time: 0.015 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=prompt.bin (320 bytes) Offset=0  Len=320
+include data: name=splash-text.rle (928 bytes) Offset=0  Len=928
+include data: name=splash-digit.bin (30 bytes) Offset=0  Len=30
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2159 lines, work time: 0.016 seconds
+SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
+Pass 1 complete (0 errors)
+Pass 2 complete (0 errors)
+include data: name=prompt.bin (320 bytes) Offset=0  Len=320
+Pass 3 complete
+Errors: 0, warnings: 0, compiled: 2069 lines, work time: 0.031 seconds
+[time] Original MX bootstrap: 1.329 s
+[checking] image: MxFloppy
+[build] image: MxFloppy (checked in 0.008 s)
+Nested FAT image: 7 directories, 62 files
+[image] D:\Projects\Specialist-OS\images\A-Floppy-720k-MX-System.img
+[time] image: MxFloppy: 1.468 s
+[checking] image: MxRom32
+[build] image: MxRom32 (checked in 0.007 s)
+[image] D:\Projects\Specialist-OS\images\C-ROM-32k-MX-System.bin
+[time] image: MxRom32: 0.566 s
+[checking] image: MxRom48
+[build] image: MxRom48 (checked in 0.007 s)
+[image] D:\Projects\Specialist-OS\images\C-ROM-48k-MX-System.bin
+[time] image: MxRom48: 0.576 s
+[checking] image: Games64k
+[up-to-date] image: Games64k (0.001 s)
+[time] Profile MX ROM + floppy: 4,976 s
+[build] Profile 'RAMFOS' started
+[checking] image: MxRamfos32
+[up-to-date] image: MxRamfos32 (0.020 s)
+[time] Profile RAMFOS: 0,161 s
+Done.
+[time] Build all: 18,760 s

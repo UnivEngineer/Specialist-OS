@@ -1,0 +1,367 @@
+﻿[
+    {
+        "path":  "bin\\BIOS.sym",
+        "size":  101740,
+        "sha256":  "3ffd0accc6b858cc5b743552925375b15fc78adb271ad1d45c0688e9d3f1e8db"
+    },
+    {
+        "path":  "bin\\BIOS.sys",
+        "size":  6139,
+        "sha256":  "20946387fd031c7298bd8f6d672d3e376dc9335211121655d7a98fcd536aa93a"
+    },
+    {
+        "path":  "bin\\CLI.sym",
+        "size":  43927,
+        "sha256":  "99cc9b1bbaa31ba314bac4a5e83db3d6b42d38857e0bbc949e47c075418737f7"
+    },
+    {
+        "path":  "bin\\DOS.sym",
+        "size":  101740,
+        "sha256":  "3ffd0accc6b858cc5b743552925375b15fc78adb271ad1d45c0688e9d3f1e8db"
+    },
+    {
+        "path":  "bin\\DOS.sys",
+        "size":  29975,
+        "sha256":  "e79ea4e784a6e587809785eda6631a44f0a4bb3724c5099bdccb5b2184df5313"
+    },
+    {
+        "path":  "bin\\IO.main.bin",
+        "size":  443,
+        "sha256":  "fcf40fbabf49b0e76e34153a1ceff51e8b601f44e203af22c92d43dfdef6e046"
+    },
+    {
+        "path":  "bin\\IO.sys",
+        "size":  823,
+        "sha256":  "98f534ed55830ce84ba758f222b3ccc1ff9619bbdd3cbee41bcf0e5cd230863b"
+    },
+    {
+        "path":  "bin\\MEM.sym",
+        "size":  41325,
+        "sha256":  "bc316b9243dcb40828e48990a8329d4703a90ababae172bfb5d10ece6be067ea"
+    },
+    {
+        "path":  "bin\\MEM.sys",
+        "size":  3069,
+        "sha256":  "606cf80fb3ece5f656dfc5a9a8d312c57afa0157282d6b8577fe15340764fb45"
+    },
+    {
+        "path":  "bin\\NC.i80",
+        "size":  24551,
+        "sha256":  "947b0bf66e7b37b5f04d980f7ad1b6cbcfccd2771223d06dc7449ddd57e0a002"
+    },
+    {
+        "path":  "bin\\NC.sym",
+        "size":  112125,
+        "sha256":  "b88697c8af92cad8003a3bb9f99acae58cbc3961c99702e607eed4cfe0c94cda"
+    },
+    {
+        "path":  "bin\\NC_CORE.sym",
+        "size":  111173,
+        "sha256":  "ce2ea50ef4c3c25f167031de03180ab4703280890df58b52081363fa7c4d79f2"
+    },
+    {
+        "path":  "bin\\System.layout.inc",
+        "size":  23173,
+        "sha256":  "175738d7a758a61fe980c33b091a87073b9ea9e7f9c7d92db1573812c80a9809"
+    },
+    {
+        "path":  "bin\\System.layout.json",
+        "size":  11082,
+        "sha256":  "59e5d7e2e1d7bf86e6d3402734f6b6c7e2f53d7cc1abee7fcb0cfe9e0b3c340b"
+    },
+    {
+        "path":  "bin\\banked\\CLIENT.bin",
+        "size":  448,
+        "sha256":  "fefaca1cc03adc5888eeffe4b607559d3bc5b50de12de8ae40b4813d6605dee5"
+    },
+    {
+        "path":  "bin\\banked\\CLIENT.lst",
+        "size":  229191,
+        "sha256":  "6b086eb219f87c04662c7e0535a880e3157f8ee1ae23dd80e50da17501669923"
+    },
+    {
+        "path":  "bin\\banked\\CLIENT.sym",
+        "size":  47298,
+        "sha256":  "06e217b0c1c36016f6db6da0505b6511b27876d08e8c6df4bcbfbf9e964cb718"
+    },
+    {
+        "path":  "bin\\banked\\DISKIO.bin",
+        "size":  595,
+        "sha256":  "85fc09d45268dc0006dae2d8c3c28b8a79697c8300eddea54e634f01ebfb507c"
+    },
+    {
+        "path":  "bin\\banked\\DISKIO.lst",
+        "size":  167636,
+        "sha256":  "8f2cab4bfbf954f1f003a44640845b01b4d56598a9f535b070c12f171acda66e"
+    },
+    {
+        "path":  "bin\\banked\\DISKIO.sym",
+        "size":  43846,
+        "sha256":  "88e667c73ce5acf3ad95625703644954ded9f5b0611259af071b9ed607c6dead"
+    },
+    {
+        "path":  "bin\\banked\\FASTDRV.bin",
+        "size":  905,
+        "sha256":  "ba321359c12adec6f9cc7fa3d3df46d99778378ae9994a4a1bb4dd064b8f15dc"
+    },
+    {
+        "path":  "bin\\banked\\FASTDRV.lst",
+        "size":  192217,
+        "sha256":  "62008662684cc93a560c30b57b265887d5a291290e09f640f413d8e376183994"
+    },
+    {
+        "path":  "bin\\banked\\FASTDRV.sym",
+        "size":  41692,
+        "sha256":  "979bfd8d4f59d6f4f237b7c6b4aa53866ffa2b553b66acbb996451d5ea6715ac"
+    },
+    {
+        "path":  "bin\\banked\\flash-imports.inc",
+        "size":  170,
+        "sha256":  "f5f946cab2a9d400ab73300b488ab5e1f4c669ce0e0478803b8a9bf0bc2eec34"
+    },
+    {
+        "path":  "bin\\banked\\FLASHDRV.bin",
+        "size":  688,
+        "sha256":  "af85496288b2ae65a677b34106ad055306b73ddbfe5a06967d07a0eb10f623e4"
+    },
+    {
+        "path":  "bin\\banked\\FLASHDRV.lst",
+        "size":  175217,
+        "sha256":  "603b94925d3c7f67e8eaa4ae79bb3eb731f45f63f002eff0e19a28779d839f05"
+    },
+    {
+        "path":  "bin\\banked\\FLASHDRV.sym",
+        "size":  41508,
+        "sha256":  "cc341843ada59b0aea54e5df022e06962c3846618b1a3f382072c3f9158927b0"
+    },
+    {
+        "path":  "bin\\banked\\kernel-layout.inc",
+        "size":  3805,
+        "sha256":  "f656f508cbe45239aca05dc04ad097eb1ccf31d651a05397a7f414395dacc415"
+    },
+    {
+        "path":  "bin\\banked\\kernel-services.inc",
+        "size":  1049,
+        "sha256":  "68fc25e51f6d49fb4f9735438411ddd3c85995e9f2e29662b58f312cd1c452fc"
+    },
+    {
+        "path":  "bin\\banked\\KERNEL.bin",
+        "size":  29975,
+        "sha256":  "e79ea4e784a6e587809785eda6631a44f0a4bb3724c5099bdccb5b2184df5313"
+    },
+    {
+        "path":  "bin\\banked\\KERNEL.layout.json",
+        "size":  341,
+        "sha256":  "05485abd1d47d91b43c57a25ab958b22132bb80a1fd51c072073a5336a7135b7"
+    },
+    {
+        "path":  "bin\\banked\\KERNEL.lst",
+        "size":  1272674,
+        "sha256":  "b9bb0460a96ccd10de8836eeb599c3cccfc5b3e4d55c1f4d058cfa1a14bbf6c3"
+    },
+    {
+        "path":  "bin\\banked\\KERNEL.sym",
+        "size":  108622,
+        "sha256":  "6e832a76974071b0a88b56f4e6132d53f5a7ebeda6dbfdc007693963f2266fab"
+    },
+    {
+        "path":  "bin\\banked\\key-imports.inc",
+        "size":  47,
+        "sha256":  "ada6fa2c870793cbb25f95128e1a762db0aae1c779d9a6cac5bdf43cab09408a"
+    },
+    {
+        "path":  "bin\\banked\\KEYBANK.bin",
+        "size":  380,
+        "sha256":  "530298f329a1e333afe4f8f40f17d031bbb41749de40eac8306af81cc5d1bd76"
+    },
+    {
+        "path":  "bin\\banked\\KEYBANK.lst",
+        "size":  155375,
+        "sha256":  "c255933beef116cccb029e716bd7718767a85c84aa494e4471ba5d7ad6ddf5c3"
+    },
+    {
+        "path":  "bin\\banked\\KEYBANK.sym",
+        "size":  41772,
+        "sha256":  "d23804a3b4d5c5908b5ad9372305bba54244c54dac68fba5a126dbcae9163acb"
+    },
+    {
+        "path":  "bin\\banked\\LOCALBLOCK.bin",
+        "size":  1600,
+        "sha256":  "36a35d8a9c72506225fc38b126ab6ba18f5ccfff92305da79b01dd6003cd62b7"
+    },
+    {
+        "path":  "bin\\banked\\LOCALBLOCK.lst",
+        "size":  229191,
+        "sha256":  "6b086eb219f87c04662c7e0535a880e3157f8ee1ae23dd80e50da17501669923"
+    },
+    {
+        "path":  "bin\\banked\\LOCALBLOCK.sym",
+        "size":  47298,
+        "sha256":  "06e217b0c1c36016f6db6da0505b6511b27876d08e8c6df4bcbfbf9e964cb718"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV0.bin",
+        "size":  265,
+        "sha256":  "348a5f0f22bef00fdff49606ebf50786c048b03cf8a2488a9059deafc0fc78e4"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV0.lst",
+        "size":  164467,
+        "sha256":  "bc46bafa94a3f0f37528e0a14519177fcc860c39726299fd3eac8d72e6a6e361"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV0.sym",
+        "size":  40473,
+        "sha256":  "7e6b4bcf4b41237a3f70da0a9a3a20f485f3c367b938842b9b774497fe703f0e"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV1.bin",
+        "size":  546,
+        "sha256":  "58c1e61fed89693afdeafe0fdacab2461ede8f2c8d45c4bed721e1b0c4c554c0"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV1.lst",
+        "size":  172629,
+        "sha256":  "d356491ce1f6e6c9fb4da3ce06a7ef7d01c3c3585099d0277b6413768f355b4d"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV1.sym",
+        "size":  40624,
+        "sha256":  "f46716695544aee3a7d25bf625fc659ca0f1652f10fcde7daf598ba8d1db031e"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV2.bin",
+        "size":  570,
+        "sha256":  "936cb1e4b9de4ff0a7704d7a4a76eaea5c3f9a56f7bb43f5ce8a75c53363c4ca"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV2.lst",
+        "size":  180232,
+        "sha256":  "376125570cc0b594e7603c0bce7c49ea4ea522eaf1af9a9c03d505a80774c553"
+    },
+    {
+        "path":  "bin\\banked\\LOCALDRV2.sym",
+        "size":  40777,
+        "sha256":  "caec9f802c25e910486f8ce854a60ca4529ec15f1319b26f6f5e68dc8774ffc3"
+    },
+    {
+        "path":  "bin\\banked\\main-io-import.inc",
+        "size":  31,
+        "sha256":  "c2a0f01151b74de7896321e294a18611ac3a1fee8f4419cf30fc8f85b7a5a09b"
+    },
+    {
+        "path":  "bin\\banked\\MAINBIOS.bin",
+        "size":  353,
+        "sha256":  "e6c4ad387961f48ab609289350acf5ef9f4059f53f39aa8f186906695443bbdb"
+    },
+    {
+        "path":  "bin\\banked\\MAINBIOS.lst",
+        "size":  165886,
+        "sha256":  "5fdab5c18951d5a9ebc3269485d6134489d31dcc25788215e6c91cbf1d2e6ae4"
+    },
+    {
+        "path":  "bin\\banked\\MAINBIOS.sym",
+        "size":  43660,
+        "sha256":  "0c27a2bbf142f0919e5dac928e86cb7cd617be063afb737ecf3d7cc9e785208c"
+    },
+    {
+        "path":  "bin\\banked\\MAINIO.bin",
+        "size":  3,
+        "sha256":  "16287d28d624438a065bc61561f10f36ebce2679cc2ccfd02f77a4b36cbf64eb"
+    },
+    {
+        "path":  "bin\\banked\\MAINIO.sym",
+        "size":  101740,
+        "sha256":  "3ffd0accc6b858cc5b743552925375b15fc78adb271ad1d45c0688e9d3f1e8db"
+    },
+    {
+        "path":  "bin\\banked\\ROMDRV.bin",
+        "size":  318,
+        "sha256":  "d1817aadcbfd622cb4addc7b0578bdcc1a458d788de1ae5ea961ff8157201a70"
+    },
+    {
+        "path":  "bin\\banked\\ROMDRV.lst",
+        "size":  161064,
+        "sha256":  "3bd0a2d7a0e9cfdd75aceca93b62ac1d8c0fb406852251736a05064577ab3f75"
+    },
+    {
+        "path":  "bin\\banked\\ROMDRV.sym",
+        "size":  40140,
+        "sha256":  "ad856de672b35f7a79f0d0b7c39768d6d8c6849de7e1f163e76b070db1e662da"
+    },
+    {
+        "path":  "bin\\banked\\transport-imports.inc",
+        "size":  1507,
+        "sha256":  "e8a14654862d09ec4446677f2567435ed312c3a6e550fc03f75dda3dbef95176"
+    },
+    {
+        "path":  "bin\\banked\\TRANSPORT.bin",
+        "size":  959,
+        "sha256":  "f03180c3c4d031ff4108053c4d2268cf3b705d65adbd45a75b9ec469a85e3941"
+    },
+    {
+        "path":  "bin\\banked\\TRANSPORT.lst",
+        "size":  188752,
+        "sha256":  "08f1964c714247072f43cfe35b24fd74c4dfe48e55447d6869eb2da4a58b6587"
+    },
+    {
+        "path":  "bin\\banked\\TRANSPORT.sym",
+        "size":  43242,
+        "sha256":  "c6a7969a1d73f01a930502fc6e0d28979e6b850f238e971d41e2443c558d150c"
+    },
+    {
+        "path":  "bin\\banked\\WINDOW.bin",
+        "size":  32,
+        "sha256":  "182b2a9524382074cbfeb2decd98d3bdd8dee43fa92af06e828ce5d21e9e604a"
+    },
+    {
+        "path":  "bin\\banked\\WINDOW.lst",
+        "size":  146358,
+        "sha256":  "efeb738acb8bc76e6bc2da2e13dc0d867d7969d0256ed76df2c53ba5fca955e8"
+    },
+    {
+        "path":  "bin\\banked\\WINDOW.sym",
+        "size":  40760,
+        "sha256":  "5f221920572ed14ba73d528b937410e2b591bd7ae3a9ed6ed02198b640ce6f0b"
+    },
+    {
+        "path":  "images\\C-Flash-512k-MMX-System-Emu80.bin",
+        "size":  524288,
+        "sha256":  "9d1b8508d793319edeb74a8c0cf7b7b80374ad20cc5b4ae398a3c004c979758b"
+    },
+    {
+        "path":  "metrics\\regression.json",
+        "size":  2619,
+        "sha256":  "d78079e85f65d99dc4f6913427beaa820a2907ca7e52f96eda9a9454d8d2162d"
+    },
+    {
+        "path":  "metrics\\regression-cpm32-final\\result.json",
+        "size":  11162,
+        "sha256":  "059b0ca49eb71671f93095454d66f0267ec17beb0c767f991499a3c082fa630b"
+    },
+    {
+        "path":  "metrics\\rev64\\direct\\result.json",
+        "size":  6738,
+        "sha256":  "fd5bc8cfbe8f42587a7c289209e765ae3e4cef278a13f21ed600dc89f2d2213b"
+    },
+    {
+        "path":  "metrics\\rev64\\main\\final\\queue\\result.json",
+        "size":  445,
+        "sha256":  "e50eb3ac20b12f87ea165513266be2a39448f792345547aa6b0a020385739d19"
+    },
+    {
+        "path":  "metrics\\rev64\\main\\final\\transport\\result.json",
+        "size":  9580,
+        "sha256":  "f314de9484ee73220b4969a31c58a0263523f7fd8b033326f255a25fcd10ff4e"
+    },
+    {
+        "path":  "metrics\\rev64\\profile\\profile.json",
+        "size":  601170,
+        "sha256":  "e4285e40db61b014e47da9b5fc1ae6813506345d471dc64379654f0e23f7944a"
+    },
+    {
+        "path":  "metrics\\rev64\\replica\\emu-result.json",
+        "size":  14905,
+        "sha256":  "9174cafcbb5cba1b0dd71c363d2b5c93bc145f39d22892b750e879c261c6c9bd"
+    }
+]

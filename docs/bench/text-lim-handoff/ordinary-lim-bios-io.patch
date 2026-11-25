@@ -1,0 +1,246 @@
+diff --git a/source/bios/bankText.inc b/source/bios/bankText.inc
+index a833231..7b515f4 100644
+--- a/source/bios/bankText.inc
++++ b/source/bios/bankText.inc
+@@ -7,53 +7,44 @@ window:
+ ;----------------------------------------------------------------------------
+ ; MXOS
+ ; Печать порции без копирования. До возврата движок не занимает окно.
+-; вход: HL = BANK_WINDOW, BC = длина 1..32, A = D = режим 0, 1, 2 или 8.
+-; Для Z и RAW_Z инициатор уже исключил завершающий NUL из длины.
+-; выход: HL сразу за выведенными байтами. Остальные регистры рабочие.
++; вход: HL = BANK_WINDOW, BC = длина до 32, A = D = режим 0, 1, 2 или 8.
++; Для всех режимов BC — точное число байтов. Отправитель Z и RAW_Z
++; уже остановился на NUL и исключил его из длины.
++; выход: C сохраняется.
+ ;----------------------------------------------------------------------------
+ printWindow:
+     cp 2
+     jp z,bios_printStringRawLim
+-    jp nc,bios_printStringRawPseudo
+-    ; Оставляем старым перехватчикам Z их собственный способ рисования.
++    jp c,printKnown
++    cp TEXT_PRINT_LIM
++    jp z,bios_printStringLim
++    jp bios_printStringRawPseudo
++printKnown:
+     or a
+-    ld hl,(bios_printStringZ+1)
++    ld hl,bios_printStringZ
+     ld de,FONT_ENGINE_Z+1
+     jp z,windowVector
+-    ld hl,(bios_printStringRawZ+1)
++    ld hl,bios_printStringRawZ
+     ld de,FONT_ENGINE_RAWZ+1
+ windowVector:
+     ld b,a
+-    ld a,(de)
+-    cp l
+-    jp nz,windowLegacy
+-    inc de
+-    ld a,(de)
+-    cp h
++    call fontVectorMatches
+     jp nz,windowLegacy
+     ld a,b
+     or a
+     ld b,0
+     ld hl,BANK_WINDOW
+     jp nz,FONT_ENGINE_LIM
+-    ld hl,(FONT_ENGINE_TEXT_EXT)
+-    ld a,h
+-    cp FONT_ENGINE_TEXT_LIM >> 8
+-    jp nz,windowLegacy
+-    ld a,l
+-    cp FONT_ENGINE_TEXT_LIM & 0FFh
++    call textLimCapability
+     ld hl,BANK_WINDOW
+     jp z,FONT_ENGINE_TEXT_LIM
+ windowLegacy:
+     ld d,b
+-    ld b,0
+     ld hl,BANK_WINDOW
+     ld a,c
+     cp BANK_TEXT_BYTES
+     ld a,d
+     jp nz,window
+-    ; Прежний вектор принимает только ASCIIZ. Печатаем 31+1 через этот же
+-    ; вектор. Последний код сохранён в E, после первого вызова HL = FFDFh.
+     ld a,(BANK_WINDOW+BANK_TEXT_BYTES-1)
+     ld e,a
+     xor a
+@@ -61,11 +52,61 @@ windowLegacy:
+     ld a,d
+     call window
+     dec hl
++    ld b,(hl)
+     ld (hl),e
+     ld a,d
+     call window
++    ld (hl),e
++    dec hl
++    ld (hl),b
++    ret
++
++; HL — публичный вектор, DE — адрес операнда штатного JMP движка.
++; Z=1 только при совпадении самого JMP и обоих байтов операнда.
++fontVectorMatches:
++    ld a,(hl)
++    cp 0C3h
++    ret nz
+     inc hl
++    ld a,(de)
++    cp (hl)
++    ret nz
++    inc de
++    inc hl
++    ld a,(de)
++    cp (hl)
++    ret
++textLimCapability:
++    ld hl,(FONT_ENGINE_TEXT_EXT)
++    ld de,-FONT_ENGINE_TEXT_LIM
++    add hl,de
++    ld a,h
++    or l
+     ret
++
++;----------------------------------------------------------------------------
++; MXOS
++; Печать ровно BC байт с управляющими кодами через активный шрифт.
++; вход: HL — буфер MAIN, BC — точная длина (00h тоже управляющий код).
++; выход: HL — исключающий конец, AF/BC/DE сохранены.
++;----------------------------------------------------------------------------
++printStringLim:
++    push af
++    push de
++    push hl
++    ld hl,bios_printChar
++    ld de,FONT_ENGINE_CHAR+1
++    call fontVectorMatches
++    call z,textLimCapability
++    pop hl
++    pop de
++    jp nz,printStringLimLegacy
++    pop af
++    jp FONT_ENGINE_TEXT_LIM
++printStringLimLegacy:
++    pop af
++    jp BIOS_BANK_GATE_ADDR+14h
++
+ ; Принимающий адаптер уже сохранил пакет и установил main-стек.
+ fromBank:
+     ld a,(io_vars.bbPage)
+@@ -180,17 +221,12 @@ print:
+     ld c,l
+     ld hl,(destination)
+     ld a,(kind)
+-    or a
+-    jp z,printZ
+-    dec a
+-    jp z,printRawZ
+-    call bios_printStringRawLim
+-    jp printed
+-printZ:
+-    call bios_printStringZ
++    cp TEXT_PRINT_RAW_LIM
++    jp z,printRawLim
++    call window
+     jp printed
+-printRawZ:
+-    call bios_printStringRawZ
++printRawLim:
++    call bios_printStringRawLim
+ printed:
+     push hl
+     ld hl,(destination)
+diff --git a/source/bios/jmps_c8e7.inc b/source/bios/jmps_c8e7.inc
+index 5c5a700..ed830c4 100644
+--- a/source/bios/jmps_c8e7.inc
++++ b/source/bios/jmps_c8e7.inc
+@@ -8,3 +8,5 @@
+                 jp bankText.fromBank    ; C8F3: исполнить запрос TEXT_PRINT из банка
+                 ASSERT $ == 0C8F6h
+                 jp printStringRawPseudo ; C8F6: HL=буфер, BC=байты
++                ASSERT $ == bios_printStringLim
++                jp bankText.printStringLim ; C8F9: HL=буфер, BC=точная длина с управлением
+diff --git a/source/bios/layout.json b/source/bios/layout.json
+index 75fbef3..1877736 100644
+--- a/source/bios/layout.json
++++ b/source/bios/layout.json
+@@ -137,7 +137,7 @@
+     },
+     {
+       "address": 51431,
+-      "size": 18,
++      "size": 21,
+       "files": [
+         "jmps_c8e7.inc"
+       ]
+diff --git a/source/bios/mem-mapped.inc b/source/bios/mem-mapped.inc
+index 5993a96..ecdb62e 100644
+--- a/source/bios/mem-mapped.inc
++++ b/source/bios/mem-mapped.inc
+@@ -52,9 +52,8 @@ biosMemPrintMain:
+     cp 7
+     jp z,memPrintBatch
+     call bankText.printWindow
+-    pop bc
++    pop af                     ; A = селектор из сохранённого B, C — число байтов.
+     pop de
+-    ld a,b
+     jp MEM_TEXT_RETURN
+ 
+ ; Пачка допускает банковый вызов из отдельной команды. На локальном стеке
+diff --git a/source/io/MAINBIOS.asm b/source/io/MAINBIOS.asm
+index ab6bc88..e851712 100644
+--- a/source/io/MAINBIOS.asm
++++ b/source/io/MAINBIOS.asm
+@@ -13,6 +13,7 @@
+ ;     банка приходит на стеке MAIN через TEXT. Возвращает A = 0, CF = 0,
+ ;     результаты записей не собираются.
+ ; +0Ch/+10h Пары слов SP для UPPERCASE и SUB_HL_DE.
++; +14h Совместимый посимвольный PRINT_STRING_LIM.
+ ;
+ ; Вызывающий гарантирует границы пакетов, номера операций и доступный стек.
+     INCLUDE "../include/mxos.inc"
+@@ -38,6 +39,26 @@ bbFastSlots:
+     BIOS_FAST_SLOT MXOS_BIOS_UPPERCASE,bios_upperCase
+     BIOS_FAST_SLOT MXOS_BIOS_SUB_HL_DE,bios_sub_hl_de
+ bbFastSlotsEnd:
++    ASSERT $ == BIOS_BANK_GATE_ADDR+14h
++; При прежнем FNT или перехваченном C809h каждый код идёт в printChar.
++bbPrintStringLimLegacy:
++    push af
++    push bc
++bbPrintStringLimLoop:
++    ld a,b
++    or c
++    jp z,bbPrintStringLimDone
++    push bc
++    ld c,(hl)
++    call bios_printChar
++    pop bc
++    inc hl
++    dec bc
++    jp bbPrintStringLimLoop
++bbPrintStringLimDone:
++    pop bc
++    pop af
++    ret
+ bbEntry:
+     ld (bbPage),a
+     ld b,0
+@@ -229,9 +250,10 @@ bbModes:
+     DB 5    ; TEXT_PRINT
+     DB 1    ; SET_FONT_ENCODING
+     DB 1    ; COMMAND_BATCH
+-    DB 0    ; PRINT_STRING_RAW_PSEUDO: intercepted by MEM
++    DB 0    ; PRINT_STRING_RAW_PSEUDO: перехватывает MEM
++    DB 0    ; PRINT_STRING_LIM: перехватывает MEM
+ bbModesEnd:
+-    ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-0100h+1
++    ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_LIM-0100h+1
+ bbBusy          = io_vars.bbBusy
+ bbFast          = io_vars.bbFast
+ bbPage          = io_vars.bbPage

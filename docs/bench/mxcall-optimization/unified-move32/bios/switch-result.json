@@ -1,0 +1,100 @@
+{
+  "bios": {
+    "start": 49152,
+    "end": 55099,
+    "bytes": 5947
+  },
+  "dos": {
+    "start": 256,
+    "end": 29970,
+    "bytes": 29714,
+    "page": 1,
+    "coreEnd": 19914,
+    "extensionStart": 19914,
+    "variablesStart": 30336,
+    "variablesEnd": 31628,
+    "dataStart": 31744
+  },
+  "native_dos": {
+    "start": 16384,
+    "end": 32212,
+    "bytes": 15828
+  },
+  "io": {
+    "start": 61440,
+    "end": 61871,
+    "bytes": 431,
+    "bankAddress": 61504,
+    "bankBytes": 380
+  },
+  "symbols": {
+    "bios_memcpy_bc_hl": "C42D",
+    "moveCore": "C107",
+    "biosMoveUseLow": "C10A",
+    "biosMoveUseMem": "C113",
+    "moveBiosLow": "C132",
+    "moveBytesForward": "C15E",
+    "moveCoreEnd": "C170",
+    "biosRecoverCopyTail": "D172",
+    "sysInstall": "C689",
+    "moveMemCore": "FE16",
+    "moveMemForward": "FE47"
+  },
+  "cpu": {
+    "cold": {
+      "cases": 13,
+      "benchOverheadTicks": 129,
+      "forward0Ticks": 151,
+      "forward31Ticks": 1658,
+      "forward32Ticks": 1706,
+      "forward33Ticks": 1754,
+      "forward256Ticks": 12458,
+      "forward1024Ticks": 49322,
+      "backward256Ticks": 12547
+    },
+    "missing": {
+      "cases": 13,
+      "benchOverheadTicks": 129,
+      "forward0Ticks": 151,
+      "forward31Ticks": 1658,
+      "forward32Ticks": 1706,
+      "forward33Ticks": 1754,
+      "forward256Ticks": 12458,
+      "forward1024Ticks": 49322,
+      "backward256Ticks": 12547
+    },
+    "installed": {
+      "cases": 13,
+      "benchOverheadTicks": 129,
+      "forward0Ticks": 482,
+      "forward31Ticks": 1016,
+      "forward32Ticks": 1041,
+      "forward33Ticks": 1065,
+      "forward256Ticks": 4986,
+      "forward1024Ticks": 18498,
+      "backward256Ticks": 10139
+    },
+    "std-disabled": {
+      "cases": 11,
+      "benchOverheadTicks": 129,
+      "forward0Ticks": 151,
+      "forward31Ticks": 1658,
+      "forward32Ticks": 1706,
+      "forward33Ticks": 1754,
+      "forward256Ticks": 12458,
+      "forward1024Ticks": 49322,
+      "backward256Ticks": 12547
+    },
+    "base": {
+      "cases": 13,
+      "benchOverheadTicks": 129,
+      "forward0Ticks": 131,
+      "forward31Ticks": 1171,
+      "forward32Ticks": 1051,
+      "forward33Ticks": 1080,
+      "forward256Ticks": 5020,
+      "forward1024Ticks": 18862,
+      "backward256Ticks": 5202
+    }
+  }
+}

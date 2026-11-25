@@ -1,0 +1,452 @@
+{
+  "file": "assets/games/Buran/Buran-ramfos.exe",
+  "sha256": "471e61f6702042ffc007b7b408297108c546a6198a679c4bd185361654260e66",
+  "visited_instructions": 926,
+  "external": [
+    {
+      "pc": 12,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 37,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 49,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 52,
+      "opcode": 205,
+      "target": 51203
+    },
+    {
+      "pc": 97,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 571,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 579,
+      "opcode": 202,
+      "target": 63488
+    },
+    {
+      "pc": 658,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 721,
+      "opcode": 205,
+      "target": 51215
+    },
+    {
+      "pc": 724,
+      "opcode": 195,
+      "target": 51224
+    },
+    {
+      "pc": 974,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 1936,
+      "opcode": 205,
+      "target": 51221
+    },
+    {
+      "pc": 1949,
+      "opcode": 205,
+      "target": 51224
+    },
+    {
+      "pc": 1955,
+      "opcode": 205,
+      "target": 51221
+    }
+  ],
+  "memory": [
+    {
+      "pc": 6,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 31,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 43,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 91,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 513,
+      "opcode": 33,
+      "target": 65535
+    },
+    {
+      "pc": 522,
+      "opcode": 33,
+      "target": 63490
+    },
+    {
+      "pc": 565,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 671,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 679,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 687,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 695,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 703,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 712,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 730,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 745,
+      "opcode": 1,
+      "target": 65519
+    },
+    {
+      "pc": 762,
+      "opcode": 50,
+      "target": 65517
+    },
+    {
+      "pc": 771,
+      "opcode": 50,
+      "target": 65516
+    },
+    {
+      "pc": 774,
+      "opcode": 50,
+      "target": 65516
+    },
+    {
+      "pc": 779,
+      "opcode": 50,
+      "target": 65518
+    },
+    {
+      "pc": 799,
+      "opcode": 50,
+      "target": 65518
+    },
+    {
+      "pc": 804,
+      "opcode": 50,
+      "target": 65518
+    },
+    {
+      "pc": 821,
+      "opcode": 50,
+      "target": 65516
+    },
+    {
+      "pc": 825,
+      "opcode": 50,
+      "target": 65516
+    },
+    {
+      "pc": 968,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 1080,
+      "opcode": 33,
+      "target": 55296
+    },
+    {
+      "pc": 1187,
+      "opcode": 17,
+      "target": 65528
+    },
+    {
+      "pc": 1223,
+      "opcode": 33,
+      "target": 50744
+    },
+    {
+      "pc": 1233,
+      "opcode": 50,
+      "target": 65506
+    },
+    {
+      "pc": 1249,
+      "opcode": 17,
+      "target": 65520
+    },
+    {
+      "pc": 1647,
+      "opcode": 50,
+      "target": 65528
+    },
+    {
+      "pc": 1877,
+      "opcode": 50,
+      "target": 65507
+    },
+    {
+      "pc": 1882,
+      "opcode": 58,
+      "target": 65504
+    },
+    {
+      "pc": 1896,
+      "opcode": 58,
+      "target": 65506
+    },
+    {
+      "pc": 1912,
+      "opcode": 50,
+      "target": 65507
+    },
+    {
+      "pc": 1924,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 1943,
+      "opcode": 34,
+      "target": 50750
+    },
+    {
+      "pc": 5825,
+      "opcode": 50,
+      "target": 65507
+    },
+    {
+      "pc": 5833,
+      "opcode": 50,
+      "target": 65507
+    },
+    {
+      "pc": 5863,
+      "opcode": 49,
+      "target": 49152
+    }
+  ],
+  "stops": [
+    {
+      "pc": 147,
+      "opcode": 195
+    },
+    {
+      "pc": 1376,
+      "opcode": 195
+    },
+    {
+      "pc": 1090,
+      "opcode": 195
+    },
+    {
+      "pc": 1297,
+      "opcode": 195
+    },
+    {
+      "pc": 1958,
+      "opcode": 201
+    },
+    {
+      "pc": 1939,
+      "opcode": 201
+    },
+    {
+      "pc": 724,
+      "opcode": 195
+    },
+    {
+      "pc": 1591,
+      "opcode": 201
+    },
+    {
+      "pc": 1547,
+      "opcode": 201
+    },
+    {
+      "pc": 1568,
+      "opcode": 201
+    },
+    {
+      "pc": 734,
+      "opcode": 195
+    },
+    {
+      "pc": 1485,
+      "opcode": 201
+    },
+    {
+      "pc": 1323,
+      "opcode": 195
+    },
+    {
+      "pc": 810,
+      "opcode": 201
+    },
+    {
+      "pc": 828,
+      "opcode": 195
+    },
+    {
+      "pc": 1602,
+      "opcode": 201
+    },
+    {
+      "pc": 1623,
+      "opcode": 201
+    },
+    {
+      "pc": 1580,
+      "opcode": 201
+    },
+    {
+      "pc": 1417,
+      "opcode": 195
+    },
+    {
+      "pc": 1478,
+      "opcode": 201
+    },
+    {
+      "pc": 1613,
+      "opcode": 201
+    },
+    {
+      "pc": 1427,
+      "opcode": 195
+    },
+    {
+      "pc": 1442,
+      "opcode": 195
+    },
+    {
+      "pc": 1450,
+      "opcode": 195
+    },
+    {
+      "pc": 1920,
+      "opcode": 201
+    },
+    {
+      "pc": 174,
+      "opcode": 195
+    },
+    {
+      "pc": 317,
+      "opcode": 195
+    },
+    {
+      "pc": 582,
+      "opcode": 195
+    },
+    {
+      "pc": 1041,
+      "opcode": 195
+    },
+    {
+      "pc": 1018,
+      "opcode": 201
+    },
+    {
+      "pc": 1871,
+      "opcode": 195
+    },
+    {
+      "pc": 5892,
+      "opcode": 201
+    },
+    {
+      "pc": 1853,
+      "opcode": 201
+    },
+    {
+      "pc": 5847,
+      "opcode": 201
+    },
+    {
+      "pc": 5853,
+      "opcode": 201
+    },
+    {
+      "pc": 716,
+      "opcode": 195
+    },
+    {
+      "pc": 1644,
+      "opcode": 201
+    },
+    {
+      "pc": 1846,
+      "opcode": 201
+    },
+    {
+      "pc": 706,
+      "opcode": 195
+    },
+    {
+      "pc": 698,
+      "opcode": 195
+    },
+    {
+      "pc": 690,
+      "opcode": 195
+    },
+    {
+      "pc": 682,
+      "opcode": 195
+    },
+    {
+      "pc": 674,
+      "opcode": 195
+    },
+    {
+      "pc": 661,
+      "opcode": 201
+    }
+  ]
+}

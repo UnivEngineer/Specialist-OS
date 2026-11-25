@@ -1,0 +1,224 @@
+{
+  "bitmap": "PASS",
+  "restore": "PASS",
+  "memory": "PASS",
+  "injectedFailure": false,
+  "rows": [
+    {
+      "engine": "SCALAR12",
+      "kind": 0,
+      "route": 0,
+      "ticks": 3678
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 0,
+      "route": 1,
+      "ticks": 5724
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 0,
+      "route": 2,
+      "ticks": 5724
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 1,
+      "route": 0,
+      "ticks": 3584
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 1,
+      "route": 1,
+      "ticks": 5625
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 1,
+      "route": 2,
+      "ticks": 5625
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 2,
+      "route": 0,
+      "ticks": 3068
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 2,
+      "route": 3,
+      "ticks": 3755
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 2,
+      "route": 4,
+      "ticks": 3271
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 2,
+      "route": 5,
+      "ticks": 3229
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 3,
+      "route": 0,
+      "ticks": 3068
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 3,
+      "route": 3,
+      "ticks": 3729
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 3,
+      "route": 4,
+      "ticks": 3260
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 3,
+      "route": 5,
+      "ticks": 3224
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 4,
+      "route": 0,
+      "ticks": 2896
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 4,
+      "route": 3,
+      "ticks": 3573
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 4,
+      "route": 4,
+      "ticks": 3088
+    },
+    {
+      "engine": "SCALAR12",
+      "kind": 4,
+      "route": 5,
+      "ticks": 3052
+    },
+    {
+      "engine": "4DUP",
+      "kind": 0,
+      "route": 0,
+      "ticks": 3937
+    },
+    {
+      "engine": "4DUP",
+      "kind": 0,
+      "route": 1,
+      "ticks": 5985
+    },
+    {
+      "engine": "4DUP",
+      "kind": 0,
+      "route": 2,
+      "ticks": 5984
+    },
+    {
+      "engine": "4DUP",
+      "kind": 1,
+      "route": 0,
+      "ticks": 3844
+    },
+    {
+      "engine": "4DUP",
+      "kind": 1,
+      "route": 1,
+      "ticks": 5890
+    },
+    {
+      "engine": "4DUP",
+      "kind": 1,
+      "route": 2,
+      "ticks": 5891
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 0,
+      "ticks": 1182
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 3,
+      "ticks": 1948
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 4,
+      "ticks": 1391
+    },
+    {
+      "engine": "4DUP",
+      "kind": 2,
+      "route": 5,
+      "ticks": 1344
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 0,
+      "ticks": 1135
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 3,
+      "ticks": 1860
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 4,
+      "ticks": 1339
+    },
+    {
+      "engine": "4DUP",
+      "kind": 3,
+      "route": 5,
+      "ticks": 1297
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 0,
+      "ticks": 963
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 3,
+      "ticks": 1704
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 4,
+      "ticks": 1167
+    },
+    {
+      "engine": "4DUP",
+      "kind": 4,
+      "route": 5,
+      "ticks": 1120
+    }
+  ]
+}

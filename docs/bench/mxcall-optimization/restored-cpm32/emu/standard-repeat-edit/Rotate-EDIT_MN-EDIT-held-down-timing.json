@@ -1,0 +1,313 @@
+{
+  "cpuHz": 2000000,
+  "fileSha256": "2f5c32c7a34b7477f915f43aaaf2f3a46ab76908a0358cb52c2ad31deb004616",
+  "binarySha256": {
+    "EDIT": "2867f6f6de5214af1efc8b4c4801c67bb959a60135d4ff0b76c0abdf70235fe9",
+    "EDIT_DOS": "1ca6cdfee0ae3be07fa0b755f06ddbfc8ea0f74521e9686bf3a27181cd36e203",
+    "EDITCORE": "a6cc38ad86f534a0318cc549480a321e8ae49b330a56e5f4059dfe7a1405c50c",
+    "UI_GFX": "c9f50506c8e53b315bb0a6e2acf602ab7a7971d5655f7f732119df2f1c0454e2"
+  },
+  "scope": "Handler entry to next key wait, including queued MAIN flush and all rendering. Launch starts at NC Enter dispatch with Rotate or CLI Enter completion with Fast12K. Keyboard scanning and host RPC time excluded.",
+  "rows": [
+    {
+      "profile": "EDIT_MN",
+      "font": "Rotate",
+      "operation": "launch_document",
+      "cycles": 5005970,
+      "ms": 2502.985,
+      "fileBytes": 4213
+    },
+    {
+      "profile": "EDIT_MN",
+      "font": "Rotate",
+      "operation": "held_down",
+      "initialLine": 1,
+      "initialTop": 21248,
+      "press": 259301049,
+      "decodedAt": "loc_C311",
+      "acceptedAt": "keyHandler_Down",
+      "renderedAt": "keyInput",
+      "pollingAt": "loc_C23C",
+      "initialRepeatConfiguration": {
+        "antiBsDelay": 224,
+        "cursorDelay": 32
+      },
+      "samples": [
+        {
+          "decoded": 259401232,
+          "accepted": 259401678,
+          "rendered": 259420475,
+          "pollReady": 259458707,
+          "line": 2,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260405308,
+          "accepted": 260405754,
+          "rendered": 260423461,
+          "pollReady": 260461693,
+          "line": 3,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260466746,
+          "accepted": 260467192,
+          "rendered": 260486968,
+          "pollReady": 260525200,
+          "line": 4,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260530253,
+          "accepted": 260530699,
+          "rendered": 260550750,
+          "pollReady": 260588982,
+          "line": 5,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260594035,
+          "accepted": 260594481,
+          "rendered": 260614803,
+          "pollReady": 260653035,
+          "line": 6,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260658088,
+          "accepted": 260658534,
+          "rendered": 260679127,
+          "pollReady": 260717359,
+          "line": 7,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260722412,
+          "accepted": 260722858,
+          "rendered": 260743722,
+          "pollReady": 260781954,
+          "line": 8,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        },
+        {
+          "decoded": 260787007,
+          "accepted": 260787453,
+          "rendered": 260807080,
+          "pollReady": 260845312,
+          "line": 9,
+          "top": 21248,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "antiBsDelay": 224,
+            "cursorDelay": 32
+          }
+        }
+      ]
+    },
+    {
+      "profile": "EDIT",
+      "font": "Rotate",
+      "operation": "launch_document",
+      "cycles": 6584515,
+      "ms": 3292.2575,
+      "fileBytes": 4213,
+      "graphicsBatches": 4,
+      "rowReads": 19,
+      "graphicsBytes": 3103,
+      "cacheRows": 255,
+      "cacheStride": 64
+    },
+    {
+      "profile": "EDIT",
+      "font": "Rotate",
+      "operation": "held_down",
+      "initialLine": 1,
+      "initialTop": 17152,
+      "press": 290683324,
+      "decodedAt": "ebInputReady",
+      "acceptedAt": "keyHandler_Down",
+      "renderedAt": "ebWaitReady",
+      "pollingAt": "ebPollKey",
+      "initialRepeatConfiguration": {
+        "repeatCount": 0,
+        "repeatStart": 0,
+        "timed": 1
+      },
+      "samples": [
+        {
+          "decoded": 290690466,
+          "accepted": 290694411,
+          "rendered": 290726512,
+          "pollReady": 290730293,
+          "line": 2,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 12,
+            "repeatStart": 78,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 291428081,
+          "accepted": 291432026,
+          "rendered": 291463037,
+          "pollReady": 291466818,
+          "line": 3,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 90,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 291558135,
+          "accepted": 291562080,
+          "rendered": 291595150,
+          "pollReady": 291598931,
+          "line": 4,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 92,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 291690248,
+          "accepted": 291694193,
+          "rendered": 291727528,
+          "pollReady": 291731309,
+          "line": 5,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 94,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 291821315,
+          "accepted": 291825260,
+          "rendered": 291858856,
+          "pollReady": 291862637,
+          "line": 6,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 96,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 291951332,
+          "accepted": 291955277,
+          "rendered": 291989134,
+          "pollReady": 291992915,
+          "line": 7,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 98,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 292082921,
+          "accepted": 292086866,
+          "rendered": 292120984,
+          "pollReady": 292124765,
+          "line": 8,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 100,
+            "timed": 1
+          }
+        },
+        {
+          "decoded": 292213460,
+          "accepted": 292217405,
+          "rendered": 292250276,
+          "pollReady": 292254057,
+          "line": 9,
+          "top": 17152,
+          "pollF806": null,
+          "postRenderF806": null,
+          "repeatConfiguration": {
+            "repeatCount": 2,
+            "repeatStart": 102,
+            "timed": 1
+          }
+        }
+      ]
+    }
+  ],
+  "fileBytes": 4213,
+  "payloadSha256": "c64f3005fe0a66d00677aa55ca53b7c870ab1dcfb6e32c93403da01d896ed054",
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  }
+}

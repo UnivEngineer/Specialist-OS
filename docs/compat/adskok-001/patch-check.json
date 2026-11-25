@@ -1,0 +1,15 @@
+{
+  "patched_sha256": "4b1c1d4828cc688d6d7d85c691feda8b90aae8ebc5aa0b966c010978f89c5eee",
+  "decoded_changes": [
+    "0x7396",
+    "0x73f8"
+  ],
+  "stop_pc": "7407",
+  "cleared_range": "0000-2FFF",
+  "upper_9000_FFFF_unchanged_by_clear": true,
+  "kernel_C000_CFFF_unchanged": true,
+  "variables_8FE0_8FFF_unchanged": true,
+  "rks_checksum": "A33A",
+  "cpu_cycles_to_after_clear": 665490,
+  "functional_emulator_test": false
+}

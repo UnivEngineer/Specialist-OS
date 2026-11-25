@@ -1,0 +1,86 @@
+{
+  "RotRows": {
+    "normal": {
+      "bytes": 48,
+      "min": 233,
+      "max": 233
+    },
+    "inverse": {
+      "bytes": 51,
+      "min": 245,
+      "max": 245
+    },
+    "screen_writes": 3,
+    "kernel_bytes": 408
+  },
+  "FontPack": {
+    "normal": {
+      "bytes": 41,
+      "min": 213,
+      "max": 213
+    },
+    "inverse": {
+      "bytes": 44,
+      "min": 225,
+      "max": 225
+    },
+    "screen_writes": 3,
+    "kernel_bytes": 426
+  },
+  "FontFull": {
+    "normal": {
+      "bytes": 38,
+      "min": 192,
+      "max": 192
+    },
+    "inverse": {
+      "bytes": 41,
+      "min": 204,
+      "max": 204
+    },
+    "screen_writes": 3,
+    "kernel_bytes": 450
+  },
+  "Font4": {
+    "normal": {
+      "bytes": 17,
+      "min": 84,
+      "max": 84
+    },
+    "inverse": {
+      "bytes": 18,
+      "min": 88,
+      "max": 88
+    },
+    "screen_writes": 1,
+    "kernel_bytes": 285
+  },
+  "Font4Fst": {
+    "normal": {
+      "bytes": 14,
+      "min": 70,
+      "max": 70
+    },
+    "inverse": {
+      "bytes": 15,
+      "min": 74,
+      "max": 74
+    },
+    "screen_writes": 1,
+    "kernel_bytes": 287
+  },
+  "Font4Cmp": {
+    "normal": {
+      "bytes": 74,
+      "min": 281,
+      "max": 313
+    },
+    "inverse": {
+      "bytes": 75,
+      "min": 285,
+      "max": 317
+    },
+    "screen_writes": 1,
+    "kernel_bytes": 397
+  }
+}

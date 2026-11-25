@@ -1,0 +1,11 @@
+--- a/src/Emulation.cpp
++++ b/src/Emulation.cpp
+@@ -76,6 +76,8 @@
+     }
+ 
+     getConfig()->updateConfig();
++    m_speedUpFactor = 32.0;
++    setTemporarySpeedUpFactorDbl(32.0);
+ 
+     if (!m_platformList.empty()) {
+         checkPlatforms();

@@ -1,0 +1,777 @@
+{
+  "revision": 71,
+  "image_sha256": "b87ba3033b0dbc6cdd4fce4d0ecb9317c0e1d12f986190ec64f70c550c25dcee",
+  "emu_sha256": "962fcd8c9877368e4cf1085f93aa3a68ecfce1990a70e90aa1da940dc573e9e8",
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "hidden": true,
+  "components": {
+    "MEM.sys": 3070,
+    "BIOS.sys": 6142,
+    "DOS.sys": 31471,
+    "IO.sys": 818,
+    "banked/CLIENT.bin": 448,
+    "banked/LOCALBLOCK.bin": 1600,
+    "banked/TRANSPORT.bin": 960,
+    "banked/WINDOW.bin": 32,
+    "banked/MAINBIOS.bin": 348
+  },
+  "rows": [
+    {
+      "route": "main-z",
+      "start_x": 16,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 16962,
+          "x": 112,
+          "y": 10
+        }
+      ],
+      "ticks": 16962,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "main-lim",
+      "start_x": 16,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 17393,
+          "x": 112,
+          "y": 10
+        }
+      ],
+      "ticks": 17393
+    },
+    {
+      "route": "font-whole",
+      "start_x": 16,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 112,
+          "y": 10
+        }
+      ],
+      "ticks": 17114
+    },
+    {
+      "route": "font-32",
+      "start_x": 16,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 112,
+          "y": 10
+        }
+      ],
+      "ticks": 17114
+    },
+    {
+      "route": "bank-z",
+      "start_x": 16,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 19790,
+          "x": 112,
+          "y": 10
+        }
+      ],
+      "ticks": 19790,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 16,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 19085,
+          "x": 112,
+          "y": 10
+        }
+      ],
+      "ticks": 19085
+    },
+    {
+      "route": "main-z",
+      "start_x": 16,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 40941,
+          "x": 18,
+          "y": 20
+        }
+      ],
+      "ticks": 40941,
+      "scalar_glyphs": 8
+    },
+    {
+      "route": "main-lim",
+      "start_x": 16,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 41516,
+          "x": 18,
+          "y": 20
+        }
+      ],
+      "ticks": 41516
+    },
+    {
+      "route": "font-whole",
+      "start_x": 16,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 41237,
+          "x": 18,
+          "y": 20
+        }
+      ],
+      "ticks": 41237
+    },
+    {
+      "route": "font-32",
+      "start_x": 16,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 112,
+          "y": 10
+        },
+        {
+          "ticks": 25172,
+          "x": 18,
+          "y": 20
+        }
+      ],
+      "ticks": 42286
+    },
+    {
+      "route": "bank-z",
+      "start_x": 16,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 47011,
+          "x": 18,
+          "y": 20
+        }
+      ],
+      "ticks": 47011,
+      "scalar_glyphs": 8
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 16,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 45707,
+          "x": 18,
+          "y": 20
+        }
+      ],
+      "ticks": 45707
+    },
+    {
+      "route": "main-z",
+      "start_x": 16,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 74785,
+          "x": 18,
+          "y": 30
+        }
+      ],
+      "ticks": 74785,
+      "scalar_glyphs": 8
+    },
+    {
+      "route": "main-lim",
+      "start_x": 16,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 75471,
+          "x": 18,
+          "y": 30
+        }
+      ],
+      "ticks": 75471
+    },
+    {
+      "route": "font-whole",
+      "start_x": 16,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 75192,
+          "x": 18,
+          "y": 30
+        }
+      ],
+      "ticks": 75192
+    },
+    {
+      "route": "font-32",
+      "start_x": 16,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 112,
+          "y": 10
+        },
+        {
+          "ticks": 25172,
+          "x": 18,
+          "y": 20
+        },
+        {
+          "ticks": 20907,
+          "x": 114,
+          "y": 20
+        },
+        {
+          "ticks": 21849,
+          "x": 18,
+          "y": 30
+        }
+      ],
+      "ticks": 85042
+    },
+    {
+      "route": "bank-z",
+      "start_x": 16,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 93865,
+          "x": 18,
+          "y": 30
+        }
+      ],
+      "ticks": 93865,
+      "scalar_glyphs": 16
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 16,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 91363,
+          "x": 18,
+          "y": 30
+        }
+      ],
+      "ticks": 91363
+    },
+    {
+      "route": "main-z",
+      "start_x": 16,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 140811,
+          "x": 18,
+          "y": 50
+        }
+      ],
+      "ticks": 140811,
+      "scalar_glyphs": 8
+    },
+    {
+      "route": "main-lim",
+      "start_x": 16,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 141728,
+          "x": 18,
+          "y": 50
+        }
+      ],
+      "ticks": 141728
+    },
+    {
+      "route": "font-whole",
+      "start_x": 16,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 141449,
+          "x": 18,
+          "y": 50
+        }
+      ],
+      "ticks": 141449
+    },
+    {
+      "route": "font-32",
+      "start_x": 16,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 112,
+          "y": 10
+        },
+        {
+          "ticks": 25172,
+          "x": 18,
+          "y": 20
+        },
+        {
+          "ticks": 20907,
+          "x": 114,
+          "y": 20
+        },
+        {
+          "ticks": 21849,
+          "x": 18,
+          "y": 30
+        },
+        {
+          "ticks": 20907,
+          "x": 114,
+          "y": 30
+        },
+        {
+          "ticks": 21849,
+          "x": 18,
+          "y": 40
+        },
+        {
+          "ticks": 20907,
+          "x": 114,
+          "y": 40
+        },
+        {
+          "ticks": 21849,
+          "x": 18,
+          "y": 50
+        }
+      ],
+      "ticks": 170554
+    },
+    {
+      "route": "bank-z",
+      "start_x": 16,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 187573,
+          "x": 18,
+          "y": 50
+        }
+      ],
+      "ticks": 187573,
+      "scalar_glyphs": 32
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 16,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 182653,
+          "x": 18,
+          "y": 50
+        }
+      ],
+      "ticks": 182653
+    },
+    {
+      "route": "main-z",
+      "start_x": 0,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 16962,
+          "x": 96,
+          "y": 10
+        }
+      ],
+      "ticks": 16962,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "main-lim",
+      "start_x": 0,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 17393,
+          "x": 96,
+          "y": 10
+        }
+      ],
+      "ticks": 17393
+    },
+    {
+      "route": "font-whole",
+      "start_x": 0,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 10
+        }
+      ],
+      "ticks": 17114
+    },
+    {
+      "route": "font-32",
+      "start_x": 0,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 10
+        }
+      ],
+      "ticks": 17114
+    },
+    {
+      "route": "bank-z",
+      "start_x": 0,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 19790,
+          "x": 96,
+          "y": 10
+        }
+      ],
+      "ticks": 19790,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 0,
+      "length": 32,
+      "portions": [
+        {
+          "ticks": 19085,
+          "x": 96,
+          "y": 10
+        }
+      ],
+      "ticks": 19085
+    },
+    {
+      "route": "main-z",
+      "start_x": 0,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 33134,
+          "x": 0,
+          "y": 20
+        }
+      ],
+      "ticks": 33134,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "main-lim",
+      "start_x": 0,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 33588,
+          "x": 0,
+          "y": 20
+        }
+      ],
+      "ticks": 33588
+    },
+    {
+      "route": "font-whole",
+      "start_x": 0,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 33309,
+          "x": 0,
+          "y": 20
+        }
+      ],
+      "ticks": 33309
+    },
+    {
+      "route": "font-32",
+      "start_x": 0,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 10
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 20
+        }
+      ],
+      "ticks": 34358
+    },
+    {
+      "route": "bank-z",
+      "start_x": 0,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 39083,
+          "x": 0,
+          "y": 20
+        }
+      ],
+      "ticks": 39083,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 0,
+      "length": 64,
+      "portions": [
+        {
+          "ticks": 37779,
+          "x": 0,
+          "y": 20
+        }
+      ],
+      "ticks": 37779
+    },
+    {
+      "route": "main-z",
+      "start_x": 0,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 66147,
+          "x": 0,
+          "y": 30
+        }
+      ],
+      "ticks": 66147,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "main-lim",
+      "start_x": 0,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 66731,
+          "x": 0,
+          "y": 30
+        }
+      ],
+      "ticks": 66731
+    },
+    {
+      "route": "font-whole",
+      "start_x": 0,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 66452,
+          "x": 0,
+          "y": 30
+        }
+      ],
+      "ticks": 66452
+    },
+    {
+      "route": "font-32",
+      "start_x": 0,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 10
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 20
+        },
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 20
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 30
+        }
+      ],
+      "ticks": 68716
+    },
+    {
+      "route": "bank-z",
+      "start_x": 0,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 77539,
+          "x": 0,
+          "y": 30
+        }
+      ],
+      "ticks": 77539,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 0,
+      "length": 128,
+      "portions": [
+        {
+          "ticks": 75037,
+          "x": 0,
+          "y": 30
+        }
+      ],
+      "ticks": 75037
+    },
+    {
+      "route": "main-z",
+      "start_x": 0,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 132173,
+          "x": 0,
+          "y": 50
+        }
+      ],
+      "ticks": 132173,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "main-lim",
+      "start_x": 0,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 132988,
+          "x": 0,
+          "y": 50
+        }
+      ],
+      "ticks": 132988
+    },
+    {
+      "route": "font-whole",
+      "start_x": 0,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 132709,
+          "x": 0,
+          "y": 50
+        }
+      ],
+      "ticks": 132709
+    },
+    {
+      "route": "font-32",
+      "start_x": 0,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 10
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 20
+        },
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 20
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 30
+        },
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 30
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 40
+        },
+        {
+          "ticks": 17114,
+          "x": 96,
+          "y": 40
+        },
+        {
+          "ticks": 17244,
+          "x": 0,
+          "y": 50
+        }
+      ],
+      "ticks": 137432
+    },
+    {
+      "route": "bank-z",
+      "start_x": 0,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 154451,
+          "x": 0,
+          "y": 50
+        }
+      ],
+      "ticks": 154451,
+      "scalar_glyphs": 0
+    },
+    {
+      "route": "bank-lim",
+      "start_x": 0,
+      "length": 256,
+      "portions": [
+        {
+          "ticks": 149531,
+          "x": 0,
+          "y": 50
+        }
+      ],
+      "ticks": 149531
+    }
+  ]
+}

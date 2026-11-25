@@ -1,0 +1,73 @@
+{
+  "corpusBytes": 1152,
+  "rows": 24,
+  "columns": 48,
+  "stages": 12,
+  "engineFilter": 4,
+  "arguments": "-N -Q",
+  "options": [
+    1,
+    7,
+    3,
+    63,
+    1,
+    1,
+    0
+  ],
+  "cases": [
+    "labelPageRawLine",
+    "labelPageRawFar48",
+    "labelPageRawFar1152",
+    "labelPagePreLine",
+    "labelPagePreFar48",
+    "labelPagePreFar1152"
+  ],
+  "bitmap": "PASS",
+  "continuousRun": true,
+  "firstFailedStage": 0,
+  "ticks": {
+    "PageRawLineMain": 3073,
+    "PageRawLineBank": 10443,
+    "PageRawFar48Main": 3074,
+    "PageRawFar48Bank": 6150,
+    "PageRawFar1152Main": 3073,
+    "PageRawFar1152Bank": 5714,
+    "PagePreLineMain": 1807,
+    "PagePreLineBank": 9177,
+    "PagePreFar48Main": 1807,
+    "PagePreFar48Bank": 4884,
+    "PagePreFar1152Main": 1807,
+    "PagePreFar1152Bank": 4448
+  },
+  "ms": {
+    "PageRawLineMain": 393.344,
+    "PageRawLineBank": 1336.704,
+    "PageRawFar48Main": 393.472,
+    "PageRawFar48Bank": 787.2,
+    "PageRawFar1152Main": 393.344,
+    "PageRawFar1152Bank": 731.392,
+    "PagePreLineMain": 231.296,
+    "PagePreLineBank": 1174.656,
+    "PagePreFar48Main": 231.296,
+    "PagePreFar48Bank": 625.152,
+    "PagePreFar1152Main": 231.296,
+    "PagePreFar1152Bank": 569.344
+  },
+  "misses": {},
+  "reportBytes": 0,
+  "file": null,
+  "publicModuleABI": true,
+  "nativeBankLaunch": true,
+  "modulesUnloaded": true,
+  "allocationLeaks": 0,
+  "dosReserveUnchanged": true,
+  "executionBank": 6,
+  "unsupportedBankCases": [],
+  "enterOnlyVerified": false,
+  "quickReturnVerified": true,
+  "returnedToNC": true,
+  "binarySha256": {
+    "bin\\FONTRMP.i80": "170163e2fc036919bd3bde9d336b3468044e976cff1bcecc870b1c5a2e7f8b85",
+    "images\\SystemRom_emu80_writable.bin": "7fd59b7c07546d05bc815cfce2735fab57b3a6d4f3dba9bf185694e7f688a978"
+  }
+}

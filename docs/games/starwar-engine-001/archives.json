@@ -1,0 +1,1003 @@
+[
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Specialist3D\\Specialist3D_rks.7z",
+    "aliases": [],
+    "sha256": "daffd99016b3b24ada9677ae6045e2d81d0f8dcb58b1c1872968a4f95ac3d3c4",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\daffd99016b3b24a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\Soft\\Specialist3D\\Specialist3D_src.7z",
+    "aliases": [],
+    "sha256": "fceb8e35d58084cc399fdd8f24328e1222083786f32f55308fc50e95ba1d92b2",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\fceb8e35d58084cc",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\Soft\\SystemSoft\\disk.0.0.0.1.zip",
+    "aliases": [],
+    "sha256": "a234d85872e0cd502601c9e0a2b1a8d74cf1ff198c0e0aec3bb3a6d0e95f4777",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a234d85872e0cd50",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\Soft\\SystemSoft\\progs.rar",
+    "aliases": [],
+    "sha256": "3af2d9e14e585e4aec9abc43e19ec176a9f00fe066f5fa403b28f5a32f7b6eb4",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\3af2d9e14e585e4a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games1_rks.rar",
+    "aliases": [],
+    "sha256": "5925f7b60f6a4916936fa9b4e6bbe54d39857d1c01e7e2b16f9d103c8e0f6836",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\5925f7b60f6a4916",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games2_rks.rar",
+    "aliases": [],
+    "sha256": "60698f981d94066ed3f27a4782c299847640adee579df16e582fdc3268a86544",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\60698f981d94066e",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_lik_rks.rar",
+    "aliases": [],
+    "sha256": "63ffcf04dcf62eea3a81b19158b9df3b1b6482f624e26daf811b8f7639372808",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\63ffcf04dcf62eea",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_i80.rar",
+    "aliases": [],
+    "sha256": "dfde7b7819b404726e49503b3831d41e1b1597b4221fe2d00cc5bf1c8dcfbebe",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\dfde7b7819b40472",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_mx_new.rar",
+    "aliases": [],
+    "sha256": "8d7a0fb44a76b76f4645dfdc9a2795c7ac12a57a6a928316acf65c368526e42e",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\8d7a0fb44a76b76f",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\games_new.rar",
+    "aliases": [],
+    "sha256": "d19b19bff726d7a20b96f7c5f6dbf528d80ed180b207e8bbd9f651f51a7fe5a8",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d19b19bff726d7a2",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\LafanG1.rar",
+    "aliases": [],
+    "sha256": "39f1792ac077e809278cd2a6e79b89db9ce9016dd40e225ac15234ab894ea1f9",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\39f1792ac077e809",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\LafanG2.rar",
+    "aliases": [],
+    "sha256": "3935a577eda6e52208f6dfea241c9d48bd08789631bda02a9fad1e9f1e16b30f",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\3935a577eda6e522",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\LafanG3.rar",
+    "aliases": [],
+    "sha256": "0780737b7374329a64ee7ec17b694ae7014dd7c9f8209b6e07378f2be1e5dad7",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\0780737b7374329a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\LafanG4.rar",
+    "aliases": [],
+    "sha256": "ead302ef34157e9b8babc98f64ff3ea1deb9aebec5646aac10ab9bc87bef7726",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\ead302ef34157e9b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\lines.rar",
+    "aliases": [],
+    "sha256": "df39fe73883cdb05e54e35971eb1f3b660532986850b78235bf428d7a5266c82",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\df39fe73883cdb05",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Games\\rks_games.rar",
+    "aliases": [],
+    "sha256": "d78bd47b4956eb8bc3ff80deb101835047cff61f2004e756fac969acbcd4b601",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d78bd47b4956eb8b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\01-MAGIC.rar",
+    "aliases": [],
+    "sha256": "0327fce89af08f42011feb4178607ff5d9f9d9256087a1df09ad36d81e4c20a6",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\0327fce89af08f42",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\02-TDK-NIK.rar",
+    "aliases": [],
+    "sha256": "a49bee0dc23e45779ee1e46a7c4a368a6e54aa8a4a432c9eafdf8bdec202e476",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a49bee0dc23e4577",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\03-CHERK-DNEPR.rar",
+    "aliases": [],
+    "sha256": "7b142280e8a2e87dc23fb5ffca688baa1ff695ae41a7d97c6f81bbcca95398b3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\7b142280e8a2e87d",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\04-TRANS-4-ALMA-ATA.rar",
+    "aliases": [],
+    "sha256": "3e7d059c4dd2b6d43595b990dcfcb94f31a081a8becb4adb29085a7f1272482a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\3e7d059c4dd2b6d4",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\05-BASIC-LERN.rar",
+    "aliases": [],
+    "sha256": "c3ede682ef89e935385f16af30be39a7c51c8a422f28af583ed5a6155bb675b2",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\c3ede682ef89e935",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\06-ZIMA_93_94.rar",
+    "aliases": [],
+    "sha256": "a3659181369a30bcf30387020acf9200f6a0a3a357a8b8702a00d727a5ed5d7e",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a3659181369a30bc",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\07-RABOCHAYA-4.rar",
+    "aliases": [],
+    "sha256": "90dc0fd8fd9513bf08e57bd00f36e097392aa9b6679f6a3e73c52e00c4d0f298",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\90dc0fd8fd9513bf",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\AdbeRdr930_ru_RU.rar",
+    "aliases": [],
+    "sha256": "9ba374170672ae8b18b34a93d999242dcbe3b75de2c857c6ce707aaffbb2a234",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\9ba374170672ae8b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Anakonda.rar",
+    "aliases": [],
+    "sha256": "4f8f25009d512da50cd11bc86b7e21bb830a3ae1936a613d21418f665ebed490",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\4f8f25009d512da5",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic1.rar",
+    "aliases": [],
+    "sha256": "bf1e3515a3c24399958f0bce9a4fb6b41779806974595aae703770c415debed5",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\bf1e3515a3c24399",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic2.rar",
+    "aliases": [],
+    "sha256": "35950708b269da4843becc9317f26329f23e10da24fd792ab93b6041b8bdf661",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\35950708b269da48",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic3.rar",
+    "aliases": [],
+    "sha256": "d334d41c747730cb4eca9ae919c3808091a0445bc1d59e862c89e9357ff2ecae",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d334d41c747730cb",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic_ext.rar",
+    "aliases": [],
+    "sha256": "d2991b6fa9daf5d12b9b803cdaa8ad73d63b30fab1c80ab9be1c25d39c5cc4b7",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d2991b6fa9daf5d1",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic_gr.rar",
+    "aliases": [],
+    "sha256": "890e73bff69d6b8cd24c8f66da102f64d0bba9829ab4b38eb84fa9cbd6b6d066",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\890e73bff69d6b8c",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic_gr_circle.rar",
+    "aliases": [],
+    "sha256": "61c13f05e7d73257c06277ad212e18379ed1bc72c2fa41e1da553d4c930fdc5e",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\61c13f05e7d73257",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\basic_lik_rks.rar",
+    "aliases": [],
+    "sha256": "d7dbe42d583e715b8571f663495bee8ac430a9546155fa567476d834b4e855de",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d7dbe42d583e715b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\col_monitor2.rar",
+    "aliases": [],
+    "sha256": "55645f6d74b6f057e5c3f50345b367cd958bf719663575e858fb351fc8147bae",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\55645f6d74b6f057",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\dissasm.rar",
+    "aliases": [],
+    "sha256": "ce6e77575736b8929f173feffa49a6a83f1fc8d1c3c558f59f393b6039ace900",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\ce6e77575736b892",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\DumpCor.rar",
+    "aliases": [],
+    "sha256": "8225d663dc98991e4e4b2d14e7f75093e82b3e9c84e67cf8a9b98522212d47da",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\8225d663dc98991e",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\edit_assm.rar",
+    "aliases": [],
+    "sha256": "a15932e7c693a3ba40715d929c47cd112a6d360ed810ff7fbde0ebf632b3be10",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a15932e7c693a3ba",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\emu.rar",
+    "aliases": [],
+    "sha256": "5b4e54b30218e95470a236bf3a09d178b9de6a3f2133155b66c31cd0cc2a44e5",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\5b4e54b30218e954",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Emu80.rar",
+    "aliases": [],
+    "sha256": "34cb6930eaefbf1380a76471432251a540d0b4b60e558c66317e8fa8677ddbae",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\34cb6930eaefbf13",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Emu80_4.rar",
+    "aliases": [],
+    "sha256": "e69ce13713f9eaa46bfe2b788a5d706f9a18a3706b135061e38c0d78c56f0ac7",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\e69ce13713f9eaa4",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Erick_PCB.rar",
+    "aliases": [],
+    "sha256": "122331a06e77dbb20ec1dd5d3ba6c38e3da00f3dfaeba49deb9c39c8fcdf9f8f",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\122331a06e77dbb2",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Erick_rom.rar",
+    "aliases": [],
+    "sha256": "69a948bccd574a8210e288cc7ebe9487372ac956653d73898d6bd42e830f41b3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\69a948bccd574a82",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\eureka.rar",
+    "aliases": [],
+    "sha256": "fb07d03c03b23384316e7ebc9fa16fc494bcbbe15f1b7232b3462bba478b1ce9",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\fb07d03c03b23384",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Express_PCB.rar",
+    "aliases": [],
+    "sha256": "a9b7672aef84fd897e944097e7ae8f788d254c9b874fa4ced89510759d51e2df",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a9b7672aef84fd89",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\germanovitsh.rar",
+    "aliases": [],
+    "sha256": "87402f36966353a4064c5fce4d7feab45113dbd1966c87c60712f0292ad7d170",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\87402f36966353a4",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Kharkovsky.rar",
+    "aliases": [],
+    "sha256": "a1f9f70c0221e98a9205f81aeb23bc0725fb28d178f9afc6cfb2fe2ba0af3c7c",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a1f9f70c0221e98a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Kvant123r.rar",
+    "aliases": [],
+    "sha256": "05789f26348596e491849f6399ca876838a231063eaf64d8ce9b91931a296dfb",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\05789f26348596e4",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Linevo_PCB.rar",
+    "aliases": [],
+    "sha256": "76e9413325214ae2f7b4b5a1f1b33d8693a17adae13880424e835badbb31b684",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\76e9413325214ae2",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Lodi_3.rar",
+    "aliases": [],
+    "sha256": "c009d8b68f6b3c8ee5c387196681c60829e0b543311cb3b14f747581a491419f",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\c009d8b68f6b3c8e",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M168P16m.rar",
+    "aliases": [],
+    "sha256": "f5d7a5b0d2d6d2a250500498e2fc09e1d78c2de72c94247a78e1a39914a99983",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f5d7a5b0d2d6d2a2",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M168P20m.rar",
+    "aliases": [],
+    "sha256": "07bfa07ea7084026199bc1d967ad3633336e5428ae15111c6eb510cda409c0c5",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\07bfa07ea7084026",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M168P22118.rar",
+    "aliases": [],
+    "sha256": "fc149e0e49b520bb94e0d8ccce9e64213f92e481a72ff87a75b4b6b3da59d346",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\fc149e0e49b520bb",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\m2_rom-disk.rar",
+    "aliases": [],
+    "sha256": "20c54b3ea943277b68544c28b3cf5dc79e9d796de7d5b3ff7731aa1f0c7443d9",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\20c54b3ea943277b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M48P16m.rar",
+    "aliases": [],
+    "sha256": "091f1e1050f2f6ba42c41b3c2cc773b712ff5f8cdcac27ccd11533f95da6932d",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\091f1e1050f2f6ba",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M48P20m.rar",
+    "aliases": [],
+    "sha256": "ce8264e562ae426ff5fadd0698b0e7d85ed2da282e1294cb352b05e8cb316343",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\ce8264e562ae426f",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M48P22118.rar",
+    "aliases": [],
+    "sha256": "4686a6ba0c46f8b8b1f54c1af86197956c6f93d620d3d6bf67e61b2461d61df3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\4686a6ba0c46f8b8",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M88P16m.rar",
+    "aliases": [],
+    "sha256": "6894e51f86ee003e31944ea75e8a653541367fc7fb94ea8d8c7c19b61bae1bf7",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\6894e51f86ee003e",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M88P20m.rar",
+    "aliases": [],
+    "sha256": "61325aa4bdda5acc48ccd258768034a5e4c6ea21c0b5d2f9a3be91590dc12314",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\61325aa4bdda5acc",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\M88P22118.rar",
+    "aliases": [],
+    "sha256": "1d8e7ab41e0040240f6df1a0f2fd0eb22d1e9f00b8d1e2238a56044c0aa29385",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\1d8e7ab41e004024",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Mikron2.rar",
+    "aliases": [],
+    "sha256": "174c2d1481e43d2558b4bbd4b5fee95d4ab7cef55ff785f97fa758fa02a1b7a6",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\174c2d1481e43d25",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\monitor1.rar",
+    "aliases": [],
+    "sha256": "ffa429a8db799b36fcbf649c62d43766c421792a675bc7794a5151824e3a00af",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\ffa429a8db799b36",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\monitor2_1.rar",
+    "aliases": [],
+    "sha256": "0e1bab3c546fb21516ebf8d32fdafcc547c17a1694b5f86f4e13230a364219f1",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\0e1bab3c546fb215",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\monitor2_2.rar",
+    "aliases": [],
+    "sha256": "f4b2a20f102c8db28992af5a3257e6f7d60b9afe81acf2994f04002c85d1f42a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f4b2a20f102c8db2",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\monitor2_3.rar",
+    "aliases": [],
+    "sha256": "0b15800f0554877a95b2adedc5135eef88af41a9ac8a98439646f12c95881934",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\0b15800f0554877a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\music_lik_rks.rar",
+    "aliases": [],
+    "sha256": "8b8366dc445aa0120a92339596e8b090ba582da3fae98b3d0ed82b285450f00c",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\8b8366dc445aa012",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\MXOS.rar",
+    "aliases": [],
+    "sha256": "d261ef41c67541b50be980254f134f16a18072fb9bdb5fc3411678ed8924d245",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d261ef41c67541b5",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\MXOS_master.rar",
+    "aliases": [],
+    "sha256": "074c53d425ce75b7b23d5caeee8b730e57991c0d3aa9579dd1635ee69df427b6",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\074c53d425ce75b7",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\nc.rar",
+    "aliases": [],
+    "sha256": "f31dcf7c0ed7f87d015c2488929eead9d3f63a15d4234668b75c718feb7ee820",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f31dcf7c0ed7f87d",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\ncrdy.rar",
+    "aliases": [],
+    "sha256": "6d4dd3f25845f3dfd0c9d78fdc285e50d499a1830c81f5e80a2e58f7a224c0dc",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\6d4dd3f25845f3df",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\NewPS2Spets.rar",
+    "aliases": [],
+    "sha256": "2e6fc70a21b4f73555213e0985a5a74b97d58dbb1a0684b890c8d270703f0527",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\2e6fc70a21b4f735",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\odi_utils.rar",
+    "aliases": [],
+    "sha256": "687954c8e5a554da52cb7a421c6388133e98b93cfaf6c6d98975f3a41b51d0e3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\687954c8e5a554da",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\others_lik_rks.rar",
+    "aliases": [],
+    "sha256": "daa1afc48cdf1077a43b8523892b15fec436306cb5d279c3ee28d89b0d534800",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\daa1afc48cdf1077",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\pioner.rar",
+    "aliases": [],
+    "sha256": "aef410441b6e59508a43627fc71cc8be54ca85677542e3a2616b01134d759725",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\aef410441b6e5950",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\pr1.rar",
+    "aliases": [],
+    "sha256": "fec9969f661dc3c11d8aea8f419849001d4172811de7460a324e51648062af9a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\fec9969f661dc3c1",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\progr1.rar",
+    "aliases": [],
+    "sha256": "e1dc6ef6502fa2e6f4cbae1feccaf7d75c79b39d38f6fa0198cc5ba5b455af8a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\e1dc6ef6502fa2e6",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\progr2.rar",
+    "aliases": [],
+    "sha256": "1b75be86f17a84fc3fc3991ceca5f26a8e59b2427b94e9d61b3fcfac0b40367c",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\1b75be86f17a84fc",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\PS_2_keyboard.rar",
+    "aliases": [],
+    "sha256": "975bf1b34b07453a1a5401fc3dc6d1b68cbe9d4ecc15aa8fb645f0a8b790ae64",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\975bf1b34b07453a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\RAMFOS.rar",
+    "aliases": [],
+    "sha256": "837cb6413f3688f98de331410d86522de3f38fec7d8ac634701ead8ac9889d61",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\837cb6413f3688f9",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\RAMFOS_master.rar",
+    "aliases": [],
+    "sha256": "b98d035e2671f1e3b7e540f18618f1110fd814cdd909d7e2420f6b6594986d70",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\b98d035e2671f1e3",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\rd_dos.rar",
+    "aliases": [],
+    "sha256": "303744972eff85dc658e5c12969b8ddd6239ca0fd0464fcdfb9cfb48681283c5",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\303744972eff85dc",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\root1.rar",
+    "aliases": [],
+    "sha256": "134264b8b491e55bfad1753381f03989781ef3f6ceccb3110b551f71cd4b46d9",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\134264b8b491e55b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\rw1p2.rar",
+    "aliases": [],
+    "sha256": "e138b1cd49910568484116d8112c6d685772716ad3b5ae7b1fa01f427664016f",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\e138b1cd49910568",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SDcontroller.rar",
+    "aliases": [],
+    "sha256": "f65ff5383a15a83c771b1e9b629dac21c288380647e3b64eebabb03e07065b38",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f65ff5383a15a83c",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SD_contr.rar",
+    "aliases": [],
+    "sha256": "c9e408c27e913dbdfb8d1be4b51b6fea5533cefb9c3fce0a61fe6049110aaa57",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\c9e408c27e913dbd",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\soft_lik_rks.rar",
+    "aliases": [],
+    "sha256": "5e6cb6fc10aef65badc37845d64da5a29fcefdbc678e5144b885e3fbbdfa58eb",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\5e6cb6fc10aef65b",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\soft_mx_i80.rar",
+    "aliases": [],
+    "sha256": "8153a4f867c918000b0008f16a07a05e5e06ac0255e05aeb88019289a8f46e10",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\8153a4f867c91800",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\soft_rks.rar",
+    "aliases": [],
+    "sha256": "4da94d5de4ebc52c6f91a336c750035dfe9fffea1fca4491dc6dc58e9a5f3736",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\4da94d5de4ebc52c",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SP580.rar",
+    "aliases": [],
+    "sha256": "4f8acdbbbead4c4ff0e6bffe865928567c0e27ab394d75772e12635015d227e9",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\4f8acdbbbead4c4f",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpEastExp2Gerbers.rar",
+    "aliases": [],
+    "sha256": "08f9d5b16f5ccac778ca3f97f8fb735371c58f9239aa741747758dd6c4fcbc58",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\08f9d5b16f5ccac7",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spec.rar",
+    "aliases": [],
+    "sha256": "0d43493bf2bb9afdabad466a74f835ad401d9bf8443b2698f58891498de4d04a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\0d43493bf2bb9afd",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\specialist-wxeda-master.rar",
+    "aliases": [],
+    "sha256": "81ad69a4aa5db14378b4d6120e695b401dac57f3be49ed8585b910aacceb806a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\81ad69a4aa5db143",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\specialist_1988_gerber.rar",
+    "aliases": [],
+    "sha256": "a8f3185205460652cc46aa2d2dc8ffb2cea36e0256c66c242478dd30ff4e857f",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a8f3185205460652",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Specialist_PS2.rar",
+    "aliases": [],
+    "sha256": "22bdf9a8916303cd762f3c6c9380cd1ad33abc841199e79097ff0b4c05c2a7d1",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\22bdf9a8916303cd",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Specialist_SD.rar",
+    "aliases": [],
+    "sha256": "bb2c194829b1c79f9929a949f197e13e96cb9efbff1d791628d743021918543b",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\bb2c194829b1c79f",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Specimx.rar",
+    "aliases": [],
+    "sha256": "a68fbc2659245274b6b88ffc179ab884130d9bec12a2742af3d5aed3df52c5ee",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a68fbc2659245274",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Specimx1.rar",
+    "aliases": [],
+    "sha256": "2a038f0777a4baa70b56c2a8c5999a0970b882df85d3d1c54c29154e4bfb48af",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\2a038f0777a4baa7",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Specimx2.rar",
+    "aliases": [],
+    "sha256": "5f28b5939bc9dd0c39b6f3d329ec907dcb449ff3582807277b611e7ea8ba4e0f",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\5f28b5939bc9dd0c",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\Specimx_asm.rar",
+    "aliases": [],
+    "sha256": "5e733db7b7293266cac641cd93a9550367dbaea677242d4b0519d811e849dfed",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\5e733db7b7293266",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spetsialist_mx_plm_std.rar",
+    "aliases": [],
+    "sha256": "dca4b0ba4b681de5575d4452201b450867638f8138d7e55a643418efc863a7c0",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\dca4b0ba4b681de5",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spetsialist_sram_pr.rar",
+    "aliases": [],
+    "sha256": "dc8e21559eb21ce85d2a51f9d59a7236162ceafcf268170b8d3c008849db0dff",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\dc8e21559eb21ce8",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpetsMX.rar",
+    "aliases": [],
+    "sha256": "b56efc70aee6d592e3a3883cedce62daba07099fce6b5be747dc356d06f57efd",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\b56efc70aee6d592",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spets_48_pr_pof.rar",
+    "aliases": [],
+    "sha256": "fd3e801e5509bbac1855ca47fb521387d19a2347b1ce16374a3135cd77e5198d",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\fd3e801e5509bbac",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spets_mx2_sd.rar",
+    "aliases": [],
+    "sha256": "de28b65d112ad4f57e37159999b2dbf3e9f58ca9460430710a4bbb954cdbfbe0",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\de28b65d112ad4f5",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpMG.rar",
+    "aliases": [],
+    "sha256": "973cbaad77a1a9dbd0f542cf3eabe07fd2a2ef20069875b0f6c6ac7dbba7ff15",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\973cbaad77a1a9db",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpMG2.rar",
+    "aliases": [],
+    "sha256": "f30a6a035c1a1825ba3683102b97cbe0ee07131ca7e50aa8ec6753c1d7df4085",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f30a6a035c1a1825",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpMX2CPLD1.rar",
+    "aliases": [],
+    "sha256": "4440fd50e86e700781ce50de4172601a80d2d60bf2d76db42b38d7703548c81c",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\4440fd50e86e7007",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpMX2CPLD1_v1.rar",
+    "aliases": [],
+    "sha256": "988e748918f27ca7e80f7599b2bd6c5591f5c0c5ad8fd9069547d81f40c7b2e5",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\988e748918f27ca7",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpMX2CPLD2.rar",
+    "aliases": [],
+    "sha256": "f3868f09926c9648012073235958d48be758940a590beb894b76719618389860",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f3868f09926c9648",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SpMX2CPLD2_v1.rar",
+    "aliases": [],
+    "sha256": "44fe374d1fcb6ee15a55e2ee7f40ad2cf3af5ad4ca1970a98a075227b8b57e54",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\44fe374d1fcb6ee1",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SPMX_java.rar",
+    "aliases": [],
+    "sha256": "19f2421f4481200dd27a6b210243b8f0228c9af587f3962ae6f578e29cfcd834",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\19f2421f4481200d",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\spmx_v42.rar",
+    "aliases": [],
+    "sha256": "10dd76db382c5febfa7e9551d561c3bd7854c0348c06bbc29196f34890a47257",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\10dd76db382c5feb",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\st48sram.rar",
+    "aliases": [],
+    "sha256": "fc6f950b70f70472aecd0738d7a099e37790bae06a51c302a5eac37873faabc0",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\fc6f950b70f70472",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SVGASpec.rar",
+    "aliases": [],
+    "sha256": "a6d53f5cacc396867a901b609998c35a9c721992b0443667213217270f2a5385",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a6d53f5cacc39686",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SVGASpecVinxru.rar",
+    "aliases": [],
+    "sha256": "b5a8dc3ff98175adb568817d0e397f5c317e9bebe92611818a00601e29f23ac2",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\b5a8dc3ff98175ad",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SyabrMX2ROM.rar",
+    "aliases": [],
+    "sha256": "a4c93237f8b14d67d393840375a3356e6076ad0f7781a3eb85333dce746583d4",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\a4c93237f8b14d67",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SyabrMXROM32k.rar",
+    "aliases": [],
+    "sha256": "4a5d6354067168cb90a9f43ceacca53408eedf0cc92ea237c33b42463e365353",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\4a5d6354067168cb",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SyabrMXROM64k.rar",
+    "aliases": [],
+    "sha256": "b1aef8e6813adb7e1ec4bcb575fedcb2b7ef0ee9a912ac100edcce68c98f3826",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\b1aef8e6813adb7e",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SyabrROM16k.rar",
+    "aliases": [],
+    "sha256": "8de42c6de47b9e2a0fc65b41f3d936c1cb622113d06291ad39a80db196804e8d",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\8de42c6de47b9e2a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SyabrROM32k.rar",
+    "aliases": [],
+    "sha256": "dba54acd44d9ab0d071dbb871deb7d0c802b410a13a80e6c495adbb3a68529a8",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\dba54acd44d9ab0d",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\SyabrROM64k.rar",
+    "aliases": [],
+    "sha256": "3dd86433618f80a7d3e1bc22849aafcbdf976df053d4d3f8ff19c8124f2918de",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\3dd86433618f80a7",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\tasm.rar",
+    "aliases": [],
+    "sha256": "53194422dd265051149e5ad4378686ce10ec4509ca156ea6cfae9e9b80c079cd",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\53194422dd265051",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\test1.rar",
+    "aliases": [],
+    "sha256": "f8c0227e7c8c45cce919af89c65ea69a81a84a7343bd37b7f62365aeac22c806",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f8c0227e7c8c45cc",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\test_m.rar",
+    "aliases": [],
+    "sha256": "be9f5f5b29c74f1f5ad3e26e571759e25cbe7c382a9c938f42defeda541802a2",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\be9f5f5b29c74f1f",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\test_mx.rar",
+    "aliases": [],
+    "sha256": "eb7aeab3b562eb30289ac90da19ead559dca07fd7d34234bb8f7c86d68072f89",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\eb7aeab3b562eb30",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\u9_specialist.rar",
+    "aliases": [],
+    "sha256": "f66f3968ac97eb8ac2b46749ddd9bc937fea7229e30d98f623c3e6d86f753157",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\f66f3968ac97eb8a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\unga.rar",
+    "aliases": [],
+    "sha256": "b2632577beae654c73ad1ec89da944a9df86b3e388e0ca7329f4ab1877acc0b3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\b2632577beae654c",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\ve_without_sd.rar",
+    "aliases": [],
+    "sha256": "5ef7b630382d016469141f780885f5e36f6d4611b724001d5ed10a8a4f2f66c2",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\5ef7b630382d0164",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\ve_with_sd.rar",
+    "aliases": [],
+    "sha256": "34a0533de181357873aa628ccc91251ea77e133ad9a79d860f03703b032ee49d",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\34a0533de1813578",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\WinDjView.rar",
+    "aliases": [],
+    "sha256": "92295a9363e8aab19806ac1b10b6b645be763cdb501ed596cb399bdc98352d4d",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\92295a9363e8aab1",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\winmon1.rar",
+    "aliases": [],
+    "sha256": "cf697afd63c020d85c8aa773325cda0acb69c4c4e0fe467b28c94761f0ca618d",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\cf697afd63c020d8",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\winmon2.rar",
+    "aliases": [],
+    "sha256": "df1f47c3b19d25322074f98810600bbe030f7087dd83948954bc11b3bd570b04",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\df1f47c3b19d2532",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\winmon3.rar",
+    "aliases": [],
+    "sha256": "bd8c808fa380ce85e153a2f0e4fd579e30d5f2eeb8820d597fc3a582ada1d957",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\bd8c808fa380ce85",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Soft\\winmon4.rar",
+    "aliases": [],
+    "sha256": "96ff4dff249de6585eb3ec6923621a8e63a2289937339a2fa077459bd395aed3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\96ff4dff249de658",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\2_DISK_2.rar",
+    "aliases": [],
+    "sha256": "080fac9bb0468c267a8da474d3129cf8c5ab337072418762b76c9e81a6c9df40",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\080fac9bb0468c26",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\bst_cpm0.rar",
+    "aliases": [],
+    "sha256": "ac4a3e05f4a2c9539a42f832566070ae6339a68b9156e7819ea3b26034fe8591",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\ac4a3e05f4a2c953",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\bst_mx0.rar",
+    "aliases": [],
+    "sha256": "d3558c32d02677c964e4900fd8de7c1d64be0f6efd80b326e33c6deb430e0cf8",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\d3558c32d02677c9",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanL1.rar",
+    "aliases": [],
+    "sha256": "3766ea39f1cd7a866c8bdf4a288b5e3ceb044ed981bf2930715e295112611c98",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\3766ea39f1cd7a86",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanL2.rar",
+    "aliases": [],
+    "sha256": "14c385351c5477fa81ffc85f2fd6bfda3d60ec4f21c37b4edfaf6e2712e70d79",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\14c385351c5477fa",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanL3.rar",
+    "aliases": [],
+    "sha256": "2a5006c4d57d697ad0bdb0639caed0d649313bcda1cb5ac8fa9e14c9595f5107",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\2a5006c4d57d697a",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanS1.rar",
+    "aliases": [],
+    "sha256": "becad28eb1e395b2c8b5fe3262c99b957e661ff7b7946f4f070a8d3be65831e3",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\becad28eb1e395b2",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanS2.rar",
+    "aliases": [],
+    "sha256": "685fdc7da9e81c9cfd8f5604dd18328013b5f4c40e49aff06b65dda3cbadf2a9",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\685fdc7da9e81c9c",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanS3.rar",
+    "aliases": [],
+    "sha256": "9db9a5f34d878fbe2664f943ad70b9356d429bb29710c5fb5d7d18dda8a88ecd",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\9db9a5f34d878fbe",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\LafanS4.rar",
+    "aliases": [],
+    "sha256": "e1ce0090551a54e3ef342087972d93e667885cf699b663dbb78ad01082361d9a",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\e1ce0090551a54e3",
+    "exit": 0
+  },
+  {
+    "archive": "D:\\Projects\\RetroPC\\Specialist\\specialist-mx.org\\Systems\\rks_systems.rar",
+    "aliases": [],
+    "sha256": "48dfdec0972cc38ff0948bab8fda578f33a55a0f1f977325d58e005402f05b0b",
+    "directory": "docs\\games\\starwar-engine-001\\extracted\\48dfdec0972cc38f",
+    "exit": 0
+  }
+]

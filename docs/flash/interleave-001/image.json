@@ -1,0 +1,14 @@
+{
+  "files": 141,
+  "dataSectors": 6621,
+  "sectorsPerChip": [
+    1656,
+    1655,
+    1655,
+    1655
+  ],
+  "metadataChip": 0,
+  "allPayloadsMatch": true,
+  "noSharedClusters": true,
+  "numbering": "physical, compatible with Flash and FlashFst"
+}

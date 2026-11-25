@@ -1,0 +1,224 @@
+[
+  {
+    "operation": "UPPERCASE",
+    "bank": 6,
+    "input": {
+      "af": 25047,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 16662,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "UPPERCASE",
+    "bank": 6,
+    "input": {
+      "af": 14679,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 14743,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "SET_CURSOR_POS",
+    "bank": 6,
+    "input": {
+      "af": 42455,
+      "hl": 4106,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 42455,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4106,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_CURSOR_POS",
+    "bank": 6,
+    "input": {
+      "af": 42311,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 42311,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4106,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "SUB_HL_DE",
+    "bank": 6,
+    "input": {
+      "af": 20695,
+      "hl": 0,
+      "de": 1,
+      "bc": 13398
+    },
+    "result": {
+      "af": 65415,
+      "bc": 13398,
+      "de": 1,
+      "hl": 65535,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "SUB_HL_DE",
+    "bank": 6,
+    "input": {
+      "af": 86,
+      "hl": 42241,
+      "de": 42241,
+      "bc": 13398
+    },
+    "result": {
+      "af": 86,
+      "bc": 13398,
+      "de": 42241,
+      "hl": 0,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_ERROR",
+    "bank": 1,
+    "busy": false,
+    "input": {
+      "af": 22359,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 70,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_ERROR",
+    "bank": 6,
+    "busy": false,
+    "input": {
+      "af": 22359,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 70,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_ERROR",
+    "bank": 1,
+    "busy": false,
+    "input": {
+      "af": 22359,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 42375,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_ERROR",
+    "bank": 6,
+    "busy": false,
+    "input": {
+      "af": 22359,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 42375,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_ERROR",
+    "bank": 1,
+    "busy": true,
+    "input": {
+      "af": 22359,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 1539,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  },
+  {
+    "operation": "GET_ERROR",
+    "bank": 6,
+    "busy": true,
+    "input": {
+      "af": 22359,
+      "hl": 4660,
+      "de": 22136,
+      "bc": 13398
+    },
+    "result": {
+      "af": 1539,
+      "bc": 13398,
+      "de": 22136,
+      "hl": 4660,
+      "pc": 28672,
+      "sp": 28672
+    }
+  }
+]

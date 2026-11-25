@@ -1,0 +1,27 @@
+{
+  "descriptors": {
+    "RAM/R4 banked": 50200,
+    "ROM/MX2/banked": 49954,
+    "FLASHSYS/128-512K mapped": 56593,
+    "FLASH/4x512K sequential": 57147,
+    "FLASHFST/4x512K pipeline": 57278,
+    "ROM/64K read only": 56965
+  },
+  "writes": {
+    "Flash": {
+      "1": 46679,
+      "5": 74909
+    },
+    "FlashFst": {
+      "1": 25584,
+      "5": 73825
+    },
+    "FlashSys": {
+      "1": 46540,
+      "5": 78548
+    }
+  },
+  "mismatchRejected": true,
+  "readFailureRejected": true,
+  "systemImageBytes": 262144
+}

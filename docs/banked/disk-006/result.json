@@ -1,0 +1,291 @@
+{
+  "cpuHz": 2000000,
+  "driverBytes": 597,
+  "dosServiceBytes": 578,
+  "cases": [
+    {
+      "case": "probe-in-DOS",
+      "chips": 4,
+      "capacity": 8192
+    },
+    {
+      "case": "system-ROM-proxy-read",
+      "block": 0
+    },
+    {
+      "case": "system-ROM-proxy-read",
+      "block": 127
+    },
+    {
+      "case": "system-ROM-proxy-read",
+      "block": 128
+    },
+    {
+      "case": "system-ROM-proxy-read",
+      "block": 2047
+    },
+    {
+      "case": "system-flash-proxy-write-verify"
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 0,
+      "block": 0,
+      "ticks": 43795
+    },
+    {
+      "case": "read",
+      "caller": 3,
+      "page": 3,
+      "block": 0,
+      "ticks": 43842
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 3,
+      "block": 0,
+      "ticks": 43811
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 0,
+      "block": 1,
+      "ticks": 43795
+    },
+    {
+      "case": "read",
+      "caller": 3,
+      "page": 3,
+      "block": 1,
+      "ticks": 43842
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 3,
+      "block": 1,
+      "ticks": 43811
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 0,
+      "block": 2047,
+      "ticks": 43795
+    },
+    {
+      "case": "read",
+      "caller": 3,
+      "page": 3,
+      "block": 2047,
+      "ticks": 43842
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 3,
+      "block": 2047,
+      "ticks": 43811
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 0,
+      "block": 2048,
+      "ticks": 43795
+    },
+    {
+      "case": "read",
+      "caller": 3,
+      "page": 3,
+      "block": 2048,
+      "ticks": 43842
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 3,
+      "block": 2048,
+      "ticks": 43811
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 0,
+      "block": 8191,
+      "ticks": 43795
+    },
+    {
+      "case": "read",
+      "caller": 3,
+      "page": 3,
+      "block": 8191,
+      "ticks": 43842
+    },
+    {
+      "case": "read",
+      "caller": 0,
+      "page": 3,
+      "block": 8191,
+      "ticks": 43811
+    },
+    {
+      "case": "write-read",
+      "operation": 1
+    },
+    {
+      "case": "write-read",
+      "operation": 5
+    },
+    {
+      "case": "reject",
+      "args": [
+        7,
+        2,
+        8192,
+        0,
+        12289,
+        1
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        6,
+        2,
+        0,
+        0,
+        12289,
+        9
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        8,
+        2,
+        0,
+        0,
+        12289,
+        7
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        7,
+        3,
+        0,
+        0,
+        12289,
+        7
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        7,
+        2,
+        0,
+        17,
+        12289,
+        7
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        7,
+        2,
+        0,
+        1,
+        12289,
+        7
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        7,
+        2,
+        0,
+        0,
+        63233,
+        7
+      ]
+    },
+    {
+      "case": "reject",
+      "args": [
+        7,
+        1,
+        0,
+        0,
+        65520,
+        7
+      ]
+    },
+    {
+      "case": "RAMD-roundtrip",
+      "block": 0
+    },
+    {
+      "case": "RAMD-roundtrip",
+      "block": 254
+    },
+    {
+      "case": "RAMD-roundtrip",
+      "block": 256
+    },
+    {
+      "case": "RAMD-roundtrip",
+      "block": 3838
+    },
+    {
+      "case": "block-size",
+      "length": 128
+    },
+    {
+      "case": "block-size",
+      "length": 512
+    },
+    {
+      "case": "driver-read-error-preserves-buffer"
+    },
+    {
+      "case": "reentry-rejected-preserves-busy"
+    }
+  ],
+  "timings": [],
+  "transport": {
+    "emptyCallTicks": 2399,
+    "copy": [
+      {
+        "bytes": 7,
+        "ticks": 6263,
+        "ms": 3.1315
+      },
+      {
+        "bytes": 256,
+        "ticks": 18735,
+        "ms": 9.3675
+      },
+      {
+        "bytes": 512,
+        "ticks": 32301,
+        "ms": 16.1505
+      }
+    ]
+  },
+  "mainBridgeBytes": 157,
+  "sha256": {
+    "DISKIO": "2238d0ce53a37620c86a8ddbb4012a26362d37dff7ae58d094128d2be2b247dd",
+    "FLASHDRV": "cb458973be692228122d3f6a203c73e37411a884373b758749ff422b772722a7",
+    "MAINIO": "22e2febae75cb41cbf196f9245a7e784540016de8fc2e8f90e9641e15c9beac9",
+    "TRANSPORT": "f543240f973e8c37915dc380a2e5b3ab99e9e2f3011f6bb9e5b229ec631f798f",
+    "WINDOW": "bdb90cb57cb9bc404ac50c8b603367257bc2b612e60952899ca011d7400971f4"
+  }
+}

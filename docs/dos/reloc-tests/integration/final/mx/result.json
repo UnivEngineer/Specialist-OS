@@ -1,0 +1,40 @@
+{
+  "port": 19781,
+  "rom_sha256": "263e2602737cd5907e68b0651498dc571bdbfc4b68169181a9680e621d74e17f",
+  "floppy_seed_sha256": "1982f2ee698d4002551487cdcf5010a72f22dee4472288dea9e8951f691a7b60",
+  "mmx_bundle_sha256": "3218a100aee386db38c179e00e9b33934edfcb70d3d994a231815d189af38f5d",
+  "reltest_floppy_sha256": "973b692858e745cace51063d2d88fe65d429f55b1f5a6ffb180eab1b1fefea16",
+  "pid": 6432,
+  "runtime": "C:\\Users\\Vovan\\AppData\\Local\\Specialist-OS\\emu80\\19781\\reloc-original-mx-xue1kdyy",
+  "hidden": true,
+  "muted": true,
+  "cpu": {
+    "breaked": false,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "physical_banks": 1,
+  "boot_prompt": false,
+  "reltest": {
+    "status": "PASS",
+    "signature": "aa55",
+    "return": "NC_MN"
+  },
+  "keyboard": {
+    "edit_main": {
+      "page": 0,
+      "nc_return_page": 0,
+      "typed": "x",
+      "bytes_opened": 73
+    },
+    "cli_commands": [
+      "PWD",
+      "EXIT"
+    ],
+    "main_page": 0
+  },
+  "own_pid_closed": true
+}

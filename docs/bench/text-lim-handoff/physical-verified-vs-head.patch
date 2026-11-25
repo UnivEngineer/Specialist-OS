@@ -1,0 +1,545 @@
+diff --git a/scripts/build/build-banked-transport.py b/scripts/build/build-banked-transport.py
+index 20def80..4c20000 100644
+--- a/scripts/build/build-banked-transport.py
++++ b/scripts/build/build-banked-transport.py
+@@ -28,8 +28,10 @@ def main():
+     (OUT/'fast.bin').write_bytes(payload[length:])
+     transport.write_bytes(payload[:length])
+     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
+-        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankBiosStringError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
++        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
+     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
++        for name in ('bankTextCopy32','bankTextChecked'):
++            stream.write(f'{name} = 0{sy[name]:04X}h\n')
+         stream.write(f'bankNearForward = 0{sy["compact223Forward"]:04X}h\n')
+         stream.write(f'bankLocalForward = 0{sy["MEM_LOCAL_FORWARD"]:04X}h\n')
+         stream.write(f'bankMoveRevision = {sy["MEM_RUNTIME_REVISION"]}\n')
+diff --git a/source/mem/LOCALBLOCK.asm b/source/mem/LOCALBLOCK.asm
+index ebe7d65..f28f898 100644
+--- a/source/mem/LOCALBLOCK.asm
++++ b/source/mem/LOCALBLOCK.asm
+@@ -127,7 +127,7 @@ bankFastDecode:
+     jp z,bankFastReady
+     cp MXOS_BIOS_SUB_HL_DE & 255
+     jp z,bankFastReady
+-    jp bankFastFallback
++    jp bankFastCheckText
+ bankFastCheckDos:
+     dec a
+     jp nz,bankFastFallback
+diff --git a/source/mem/TRANSPORT.asm b/source/mem/TRANSPORT.asm
+index 4e34364..cde967c 100644
+--- a/source/mem/TRANSPORT.asm
++++ b/source/mem/TRANSPORT.asm
+@@ -240,10 +240,6 @@ bankLocalChecked:
+     ld hl,(MEM_LOCAL_CHECKED)
+     ex (sp),hl
+     ret
+-bankLocalBlockBad:
+-    ld a,DOS_ERR_ARGUMENT
+-    scf
+-    ret
+     INCLUDE "copy.inc"
+ ;----------------------------------------------------------------------------
+ ; MXOS
+@@ -255,6 +251,27 @@ bankLocalBlockBad:
+ bankMoveToMain:
+     ld (BANK_IO_MAIN),a
+     jp bankCopyMoveRemote
++; Ровно одна порция, остановка в той же странице, что и источник.
++bankTextCopy32:
++    jp bankTextLoad32
++bankTextChecked:
++    ld b,BANK_TEXT_BYTES/4
++bankTextQuad:
++    DUP 4
++    ld a,(hl)
++    ld (de),a
++    or a
++    ret z
++    inc hl
++    inc e
++    EDUP
++    dec b
++    jp nz,bankTextQuad
++    ret
++bankLocalBlockBad:
++    ld a,DOS_ERR_ARGUMENT
++    scf
++    ret
+     ASSERT $ <= MEM_DATA_START-3
+     IF $ < MEM_DATA_START-3
+     DS MEM_DATA_START-3-$,0
+@@ -275,6 +292,8 @@ coldEnd:
+     DS BANK_COMMAND_LANDING-$,0
+     ENDIF
+     INCLUDE "scalar-command.inc"
++bankCopyLocalParams:
++    DS 8,0
+     ASSERT $ <= 0FF00h
+     IF $ < 0FF00h
+     DS 0FF00h-$,0
+diff --git a/source/mem/abi.inc b/source/mem/abi.inc
+index f2d0434..d465270 100644
+--- a/source/mem/abi.inc
++++ b/source/mem/abi.inc
+@@ -120,8 +120,9 @@ BANK_CALLEE_BYTES      = 8
+ 
+ 
+ ; Метки 32-байтной локальной развёртки в полном профиле.
+-MEM_LOCAL_FORWARD      = 0F925h
+-MEM_FORWARD_BLOCK_END  = MEM_LOCAL_FORWARD+8+5+80
++MEM_LOCAL_FORWARD      = 0F928h
++MEM_FORWARD_BLOCK      = MEM_LOCAL_FORWARD+8+5
++MEM_FORWARD_BLOCK_END  = MEM_FORWARD_BLOCK+16*5
+ MEM_FORWARD_RESTORE    = MEM_FORWARD_BLOCK_END+8
+ MEM_SCREEN_RETURN      = 0F58Fh
+ MEM_TEXT_RETURN        = 0F561h
+diff --git a/source/mem/copy-prepare.inc b/source/mem/copy-prepare.inc
+index c47aa69..e6ed9f8 100644
+--- a/source/mem/copy-prepare.inc
++++ b/source/mem/copy-prepare.inc
+@@ -56,6 +56,11 @@ memRouteInvoke:
+     ret
+     MEM_CURSOR_GATE memFixedSetCursor,0
+     ASSERT $ <= MEM_MAIN_IO_BRIDGE
++memPrintZEmpty:
++    pop de
++    pop hl
++    pop bc
++    jp memPrintHaveHL
+     DS MEM_MAIN_IO_BRIDGE-$,0
+ memMainIoBridge:
+     jp MAIN_BLOCK_IO_TARGET      ; Генерируется после размещения BIOS.
+@@ -123,9 +128,9 @@ copyCountReady:
+     ld a,h
+     or a
+     jp nz,bankCopyTail
+-    ld a,l
+-    cp 32
+-    jp nc,bankCopyTail
++    ld a,31
++    cp l
++    jp c,bankCopyTail
+     jp bankCopyReturn
+ copyClone:
+     ld a,h
+@@ -169,6 +174,7 @@ memBatchFailedCopy:
+     INCLUDE "queue-work.inc"
+     INCLUDE "fixed-word-return.inc"
+     ASSERT $ <= MEM_COPY_BYTES_ENTRY
++memOperation: DB 0
+     DS MEM_COPY_BYTES_ENTRY-$,0
+     DEFINE COPY_HELPER_BYTES
+     INCLUDE "copy-helpers.inc"
+diff --git a/source/mem/copy-resident.inc b/source/mem/copy-resident.inc
+index 3a498dc..3882dae 100644
+--- a/source/mem/copy-resident.inc
++++ b/source/mem/copy-resident.inc
+@@ -6,19 +6,18 @@ bankCopyClone:
+     ld (hl),a
+     ld sp,BANK_COPY_SETUP_SOURCE
+     pop hl
+-    pop de
+-    pop bc
+-    ld sp,bankCopyLocalParams+6
+-    push bc
+-    push de
+-    push hl
+-    ld hl,(BANK_COPY_SETUP_COUNT)
+-    ld (bankCopyCount),hl
+-    ld a,b
+-    ld l,c
++    ld (bankCopySourcePair),hl
++    pop hl
++    ld (bankCopyDestPair),hl
++    pop hl
++    ld (bankCopyReturnPair),hl
++    ld a,h
+     ld h,0FFh
+-    ld (hl),a
+-    ld hl,(BANK_COPY_SETUP_SP)
++    ex de,hl
++    pop hl
++    ld (bankCopyCount),hl
++    ld (de),a
++    pop hl
+     ld sp,hl
+     ret
+ 
+diff --git a/source/mem/copy.inc b/source/mem/copy.inc
+index fd1c8c5..406142f 100644
+--- a/source/mem/copy.inc
++++ b/source/mem/copy.inc
+@@ -154,11 +154,3 @@ bankCopyBadRange:
+     ret
+ 
+ bankCopyRequest: DS 8,0
+-
+-; Ошибка стандартного PRINT_STRING: пакет не меняем, возвращаем код отказа.
+-bankBiosStringError:
+-    pop bc
+-    ld a,DOS_ERR_ARGUMENT
+-    ld (BANK_FRAME_STATUS),a
+-    scf
+-    jp MEM_BIOS_RESULT
+diff --git a/source/mem/copytail.inc b/source/mem/copytail.inc
+index 51293e6..6292861 100644
+--- a/source/mem/copytail.inc
++++ b/source/mem/copytail.inc
+@@ -2,24 +2,28 @@
+ bankKeyboardSignature:
+     DB 0FFh,0FFh,0FFh,0FFh
+ bankCopyTail:
+-    ld hl,(bankCopySourcePair)
++bankCopySourcePair = $+1
++    ld hl,0
+     ld a,h
+     ld h,0FFh
+     ld (hl),a
+     ld h,b
+     ld l,c
+     ld sp,hl
++bankCopyRead32:
+ index = 0
+     DUP 32/2
+     pop hl
+     ld (BANK_WINDOW+index*2),hl
+ index = index+1
+     EDUP
++    jp z,MEM_FORWARD_RESTORE
+     ld hl,0
+     add hl,sp
+     ld b,h
+     ld c,l
+-    ld hl,(bankCopyDestPair)
++bankCopyDestPair = $+1
++    ld hl,0
+     ld a,h
+     ld h,0FFh
+     ld (hl),a
+@@ -40,15 +44,12 @@ index = index+1
+     dec (hl)
+     jp nz,bankCopyTail
+ bankCopySelectHome:
+-    ld hl,(bankCopyReturnPair)
++bankCopyReturnPair = $+1
++    ld hl,0
+     ld a,h
+     ld h,0FFh
+     ld (hl),a
+     jp bankCopyReturn
+-bankCopyLocalParams:
+-bankCopySourcePair:     DW 0
+-bankCopyDestPair:       DW 0
+-bankCopyReturnPair:     DW 0
+-bankCopyCount:          DW 0
++bankCopyCount: DW 0
+ bankCopyTailEnd:
+     ASSERT $ <= BANK_WINDOW
+diff --git a/source/mem/fixed-main.inc b/source/mem/fixed-main.inc
+index e4e2e6c..266afc2 100644
+--- a/source/mem/fixed-main.inc
++++ b/source/mem/fixed-main.inc
+@@ -13,10 +13,11 @@ memPrintReturn:
+     ld (bankServiceSP),hl
+     pop de
+     pop hl
+-    ld a,d
+-    sub c
+-    jp nz,memPrintAtNul
+-    pop de
++    ld b,0
++    add hl,bc
++    ld a,c
++    cp BANK_TEXT_BYTES
++    jp nz,memPrintShort
+     ex (sp),hl
+     ld a,l
+     sub c
+@@ -26,16 +27,17 @@ memPrintReturn:
+     ld b,a
+     pop hl
+     jp memPrintLoop
+-memPrintAtNul:
+-    dec hl
+-    pop de
+-    pop de
++memPrintShort:
++    pop bc
+ memPrintHaveHL:
+     pop de
+     pop bc
+-    pop af
+-    or a
++    xor a
+     ret
++memPrintStack:
++    call bankTextCopy32
++    ld c,BANK_TEXT_BYTES
++    jp memPrintFilled
+     ASSERT $ <= MEM_SCREEN_RETURN
+     DS MEM_SCREEN_RETURN-$,0
+     ld (BANK_IO_RAM),a
+diff --git a/source/mem/local-forward.inc b/source/mem/local-forward.inc
+index b37279c..e0b9af7 100644
+--- a/source/mem/local-forward.inc
++++ b/source/mem/local-forward.inc
+@@ -14,6 +14,7 @@ compact223Page:
+         ld      c, 8
+         jp      compact223Block
+ compact223Block:
++        ASSERT $ == MEM_FORWARD_BLOCK
+         DUP 16
+         pop     de
+         ld      (hl), e
+diff --git a/source/mem/local-move.inc b/source/mem/local-move.inc
+index 2adcef7..4854298 100644
+--- a/source/mem/local-move.inc
++++ b/source/mem/local-move.inc
+@@ -90,5 +90,14 @@ compact223Partial:
+ ; При установке DATA этот участок заменяется локальным циклом.
+ ; Полный профиль использует собственную подготовку и место до FE8Ah.
+ moveDataForward = compact223Forward
+-    DS 16,0
++bankTextLoad32:
++    ex de,hl
++    ld hl,0
++    add hl,sp
++    ld (MEM_FORWARD_RESTORE+1),hl
++    ex de,hl
++    ld sp,hl
++    xor a
++    jp bankCopyRead32
++    DS 2,0
+ moveDataForwardEnd:
+diff --git a/source/mem/regs-route.inc b/source/mem/regs-route.inc
+index 50e227f..9237b76 100644
+--- a/source/mem/regs-route.inc
++++ b/source/mem/regs-route.inc
+@@ -6,21 +6,30 @@ bankMxRegsRoute:
+     ld a,b
+     cp MXOS_GROUP_DOS
+     jp z,bankMxRegsDos
+-    ; Очередь уже сброшена. Текст и короткая пачка идут прямо к банковому клиенту.
++    ; Очередь уже сброшена. Пачка проходит прежний пакетный маршрут.
+     ld a,c
+     cp MXOS_BIOS_COMMAND_BATCH & 255
+     jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_Z & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 255
+-    jp z,bankMxCall
+-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
++    ; BIOS TEXT уже обработан. Для другой группы совпадение номера
++    ; сохраняет прежний пакетный отказ.
++    call memBiosTextMode
+     jp z,bankMxCall
+     xor a
+     ld hl,BIOS_BANK_GATE_ADDR+3
+     jp bankCallPacket
++; HL указывает на DW, в стеке исходные AF и HL. Меняется только HL результата.
++bankFastCheckText:
++    call memBiosTextMode
++    jp nz,bankFastFallback
++    ld (memOperation),a
++    inc hl
++    inc hl
++    pop af
++    ex (sp),hl
++    push af
++    call memPrintTyped
++    pop af
++    ret
+ bankFastReady:
+     ; Младший байт SP для BIOS_FAST_SLOT в MAIN. Старший постоянен.
+     add a,BIOS_FAST_SLOT_BIAS
+@@ -32,9 +41,3 @@ bankFastReady:
+     pop af
+     ex (sp),hl
+     jp bankFastPrepare
+-bankMxNativeRegs:
+-    ld hl,(MEM_NATIVE_CALL)
+-    inc hl
+-    inc hl
+-    inc hl
+-    jp (hl)
+diff --git a/source/mem/scalar-command.inc b/source/mem/scalar-command.inc
+index 21d6118..9e18ab5 100644
+--- a/source/mem/scalar-command.inc
++++ b/source/mem/scalar-command.inc
+@@ -7,17 +7,15 @@ scalarCommandLanding:
+     cp 3
+     jp c,bankLanding
+     ex de,hl
+-    rla                    ; CY=чтение; bit7=слово, иначе байт.
++    add a,a
+     jp nc,scalarCommandWrite
+     ld c,(hl)
+-    or a
+     jp p,scalarCommandDone
+     inc hl
+     ld b,(hl)
+     jp scalarCommandDone
+ scalarCommandWrite:
+     ld (hl),c
+-    or a
+     jp p,scalarCommandDone
+     inc hl
+     ld (hl),b
+diff --git a/source/mem/text-route.inc b/source/mem/text-route.inc
+index 874652a..a2e479c 100644
+--- a/source/mem/text-route.inc
++++ b/source/mem/text-route.inc
+@@ -4,26 +4,27 @@ memBiosRoute:
+     ld a,c
+     cp MXOS_BIOS_COMMAND_BATCH & 255
+     jp z,memBiosQueue
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_Z & 0FFh
+-    ld a,0
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_Z & 0FFh
+-    ld a,1
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_LIM & 0FFh
+-    ld a,2
+-    jp z,memBiosText
+-    ld a,c
+-    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO & 255
+-    ld a,8
++    call memBiosTextMode
+     jp z,memBiosText
+ memBiosGeneric:
+     xor a
+     ld hl,BIOS_BANK_GATE_ADDR+3
+     jp bankMxInvoke
++; A содержит младший байт BIOS ID. При совпадении Z=1, A содержит режим.
++memBiosTextMode:
++    sub MXOS_BIOS_PRINT_STRING_Z & 255
++    ret z
++    sub MXOS_BIOS_PRINT_STRING_RAW_Z-MXOS_BIOS_PRINT_STRING_Z
++    jp z,memBiosTextModeRawZ
++    ASSERT MXOS_BIOS_PRINT_STRING_RAW_LIM-MXOS_BIOS_PRINT_STRING_RAW_Z == TEXT_PRINT_RAW_LIM
++    cp TEXT_PRINT_RAW_LIM
++    ret z
++    cp MXOS_BIOS_PRINT_STRING_RAW_PSEUDO-MXOS_BIOS_PRINT_STRING_RAW_Z
++    ld a,8
++    ret
++memBiosTextModeRawZ:
++    ld a,TEXT_PRINT_RAW_Z
++    ret
+ memBiosText:
+     ld (memOperation),a
+ memBiosString:
+@@ -48,8 +49,14 @@ memBiosString:
+     ld l,a
+     ex (sp),hl
+     call memPrintTyped
+-    jp c,bankBiosStringError
+     xor a
+     ld (BANK_FRAME_STATUS),a
+     pop af
+     jp bankMxResult
++
++bankMxNativeRegs:
++    ld hl,(MEM_NATIVE_CALL)
++    inc hl
++    inc hl
++    inc hl
++    jp (hl)
+diff --git a/source/mem/text.inc b/source/mem/text.inc
+index 30e4b0b..3667012 100644
+--- a/source/mem/text.inc
++++ b/source/mem/text.inc
+@@ -12,50 +12,54 @@ memPrint:
+     xor a
+     ld (memOperation),a
+ memPrintTyped:
+-    push af
+     push bc
+     push de
+     ld a,(memOperation)
+     ld d,a
+-    cp 2
+-    jp nc,memPrintLoop
+-    ld bc,0FFFFh
+ memPrintLoop:
++    ld a,d
++    cp 2
++    jp c,memPrintFrame
+     ld a,b
+     or c
+     jp z,memPrintHaveHL
++memPrintFrame:
+     push bc
++    push hl
+     push de
++    ld de,BANK_WINDOW
++    jp c,memPrintZ
+     ld a,b
+     or a
+-    ld b,BANK_TEXT_BYTES
+-    jp nz,memPrintSize
++    jp nz,memPrintStack
+     ld a,c
+-    cp b
+-    jp nc,memPrintSize
+-    ld b,c
+-memPrintSize:
+-    ld a,d
+-    cp 2
+-    ld c,0
+-    jp nc,memPrintReady
+-    inc c
+-memPrintReady:
+-    ld de,BANK_WINDOW
+-    MEM_TEXT_FILL memPrintFill,memPrintFilled
+-memPrintFilled:
+-    ; CF отмечает прочитанный NUL. C — длина печати, B — расход источника.
++    cp BANK_TEXT_BYTES
++    jp nc,memPrintStack
++memPrintBytes:
++    ld a,c
++    cp 4
++    jp c,memPrintTail
++    rrca
++    rrca
++    and 7
++    ld b,a
++    call bankCopyQuads
++    ld a,c
++    and 3
++    jp z,memPrintFilled
++memPrintTail:
++    ld b,a
++    call bankCopyBytes
++    jp memPrintFilled
++memPrintZ:
++    call bankTextChecked
+     ld a,e
+-    sbc a,BANK_WINDOW & 0FFh
+-    jp z,memPrintAtNul
++    sub BANK_WINDOW & 255
+     ld c,a
+-    ld a,e
+-    sub BANK_WINDOW & 0FFh
+-    ld b,a
++    jp z,memPrintZEmpty
++memPrintFilled:
+     pop de
+     push de
+-    push hl
+-    push bc
+     ld hl,(bankServiceSP)
+     push hl
+     ld hl,0
+@@ -76,4 +80,3 @@ memPrintMain = MAIN_PRINT_TARGET
+     DS MEM_LOCAL_FORWARD-$,0
+     ENDIF
+     INCLUDE "local-forward.inc"
+-memOperation:       DB 0

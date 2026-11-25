@@ -1,0 +1,167 @@
+[
+  {
+    "case": "C-DOSTEST",
+    "completedLines": 23,
+    "pauses": 2
+  },
+  {
+    "case": "NC-keyboard-command",
+    "completedLines": 2
+  },
+  {
+    "file": "PARENT.BAT",
+    "error": 0,
+    "executed": 4,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "EVICT.BAT",
+    "error": 0,
+    "executed": 2,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "PLAIN.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "PLAIN.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "DRVTEST.BAT",
+    "error": 0,
+    "executed": 2,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "CPTEST.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "SUB/LOCAL.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "LARGE.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "EMPTY.BAT",
+    "error": 0,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "EDGE.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "MAXLINE.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "LONG.BAT",
+    "error": 7,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "ERROR.BAT",
+    "error": 2,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "NUL.BAT",
+    "error": 7,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "KOI.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "DEPTH8.BAT",
+    "error": 0,
+    "executed": 1,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "SELF.BAT",
+    "error": 7,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "CYCLEA.BAT",
+    "error": 7,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "PARENT.BAT",
+    "error": 0,
+    "executed": 4,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "DELSELF.BAT",
+    "error": 6,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "DELSELF.BAT",
+    "error": 6,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "DELPAR.BAT",
+    "error": 6,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "DELPAR.BAT",
+    "error": 6,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "BEFORE.BAT",
+    "error": 2,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "AFTER.BAT",
+    "error": 0,
+    "executed": 3,
+    "bankAndStackPreserved": true
+  },
+  {
+    "file": "MISSING.BAT",
+    "error": 2,
+    "executed": 0,
+    "bankAndStackPreserved": true
+  }
+]

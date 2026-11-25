@@ -1,0 +1,25 @@
+{
+  "corpus": {
+    "ordinary": "fadb99a07250a56dbb552a95418e0aa18cd66359861e9b6a46d295539ab1df93",
+    "phase": "cd1fc258a19f939812e15b6c5cef16cbe4a711e0a1c84cc024062115cc835693",
+    "pseudo": "f0fa63f10286de61298aee1f70e4169d5bfae532aa4ab55dfbccc63b2b094730"
+  },
+  "sha256": {
+    "images/SystemRom_emu80_writable.bin": "0a02e24d41547b5147cfd5c215a785b962a5589d29a3e6d5da5b2a65a9a8dabd",
+    "images/SystemRom_512K.bin": "0a02e24d41547b5147cfd5c215a785b962a5589d29a3e6d5da5b2a65a9a8dabd",
+    "images/FlashDisk_emu80_seed.bin": "9401d0fd2b12e4bea789e629df2f23851f5022d25de311c753616a6754944eb1",
+    "bin/fonts/Rotate.i80": "694e0b0bdb7d85f077832a135b13e1bec7de6a870acb89f25db2eb3ddc97edb0",
+    "bin/fonts/Rot6Col4.i80": "d7ada492832f73c96bc2775382dd549838dd5e9fa62e0bf0f10c9faf22824fdf",
+    "bin/FONTCOM.i80": "ee7a06b82d0617af76360fe9653910e65d7221a6b8ee56d88f8f0336c648ba2c",
+    "bin/FONTBANK.i80": "6630ff4728d4192e98d7f83ed0a7091965abe95e931a2f59618c1fdf04baeb65"
+  },
+  "additional_corpus": {
+    "orion-m1": "d27cc797d5192e0d048788f1be19f5f5bff10d5f32f67583408f9ba405fb82c4"
+  },
+  "origins": {
+    "alternating-carried": 1864,
+    "stream-carried": 252,
+    "rotate-col4-measured": 76,
+    "orion-m1-carried": 48
+  }
+}

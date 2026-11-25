@@ -1,0 +1,17 @@
+{
+  "cases": 26,
+  "dos_bytes": [
+    29988,
+    29975
+  ],
+  "local_entries": 48,
+  "external_entries": 46,
+  "dos_slack": [
+    92,
+    105
+  ],
+  "sha256": [
+    "2ccd2ae553053ba665c3356d6810d9d0ec94532068fba92bce863c43787604f8",
+    "856ca5f398caaf908ddafea620970125dbbf460bc06ada75ca2ea7e4d1ed4ac7"
+  ]
+}

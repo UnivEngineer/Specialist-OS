@@ -1,0 +1,31 @@
+{
+  "checks": 13923,
+  "bitmap": "PASS",
+  "abi": "PASS",
+  "timings": {
+    "paged-char": {
+      "cycles": 1535294,
+      "ms": 767.647
+    },
+    "paged-char-pre": {
+      "cycles": 1309412,
+      "ms": 654.706
+    },
+    "paged-rotate": {
+      "cycles": 745940,
+      "ms": 372.97
+    },
+    "paged-prerender": {
+      "cycles": 423164,
+      "ms": 211.582
+    },
+    "paged-real-rotate": {
+      "cycles": 747476,
+      "ms": 373.738
+    },
+    "paged-real-prerender": {
+      "cycles": 424700,
+      "ms": 212.35
+    }
+  }
+}

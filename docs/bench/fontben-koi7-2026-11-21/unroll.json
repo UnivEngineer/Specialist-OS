@@ -1,0 +1,16 @@
+{
+  "fixed_koi8": {
+    "assembled": false,
+    "code_end": 58707,
+    "code": 3411,
+    "fits_font_at_E400": false,
+    "spare_before_font": -339
+  },
+  "fixed_koi7": {
+    "assembled": true,
+    "code_end": 58059,
+    "code": 2763,
+    "fits_font_at_E400": true,
+    "spare_before_font": 309
+  }
+}

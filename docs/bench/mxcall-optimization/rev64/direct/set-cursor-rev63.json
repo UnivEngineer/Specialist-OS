@@ -1,0 +1,69 @@
+{
+  "image_sha256": "c2c14339cf74248b8418385a5563147704eda7f3c0096fba75f89cb8e702c223",
+  "mem_sha256": "f1d1fb70b8160cbcd8884b5a236e05803a867ecac20ea5b4ee631a51873880ba",
+  "profile": "COMMAND",
+  "queue": false,
+  "cpu": {
+    "breaked": true,
+    "frequency_hz": 2000000,
+    "full_throttle": false,
+    "paused": false,
+    "speed_factor": 32.0,
+    "type": "8080"
+  },
+  "cursor_before": 4106,
+  "rows": [
+    {
+      "bank": 0,
+      "repeat": 0,
+      "ticks": 662,
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384,
+        "pc": 32965
+      }
+    },
+    {
+      "bank": 0,
+      "repeat": 1,
+      "ticks": 662,
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384,
+        "pc": 32965
+      }
+    },
+    {
+      "bank": 6,
+      "repeat": 0,
+      "ticks": 692,
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384,
+        "pc": 32965
+      }
+    },
+    {
+      "bank": 6,
+      "repeat": 1,
+      "ticks": 692,
+      "result": {
+        "af": 29075,
+        "bc": 13393,
+        "de": 9029,
+        "hl": 4660,
+        "sp": 34384,
+        "pc": 32965
+      }
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "cpuHz": 2000000,
+  "speedFactor": 32,
+  "measure": "guest ticks between successive redraw completions; first repeat excluded from steady distribution",
+  "paths": {
+    "NC MAIN": {
+      "before": {
+        "steps": 10,
+        "pressToFirstFrame": 130407,
+        "firstFrameRepeat": 1014015,
+        "steadyFrameIntervals": [
+          72499,
+          72579,
+          72611,
+          73673,
+          74493,
+          74861,
+          75151,
+          74986
+        ],
+        "medianFrameTicks": 74083.0,
+        "medianFrameMs": 37.0415,
+        "stepsPerSecond": 26.996746891999514,
+        "medianDecodedMs": 36.571
+      },
+      "after": {
+        "steps": 10,
+        "pressToFirstFrame": 130407,
+        "firstFrameRepeat": 1014015,
+        "steadyFrameIntervals": [
+          72499,
+          72579,
+          72611,
+          73673,
+          74493,
+          74861,
+          75151,
+          74986
+        ],
+        "medianFrameTicks": 74083.0,
+        "medianFrameMs": 37.0415,
+        "stepsPerSecond": 26.996746891999514,
+        "medianDecodedMs": 36.571
+      }
+    },
+    "NC EXEC": {
+      "before": {
+        "steps": 10,
+        "pressToFirstFrame": 63598,
+        "firstFrameRepeat": 505060,
+        "steadyFrameIntervals": [
+          63883,
+          63963,
+          65287,
+          66349,
+          65877,
+          66117,
+          66407,
+          66242
+        ],
+        "medianFrameTicks": 65997.0,
+        "medianFrameMs": 32.9985,
+        "stepsPerSecond": 30.304407776111034,
+        "medianDecodedMs": 32.791
+      },
+      "after": {
+        "steps": 10,
+        "pressToFirstFrame": 61773,
+        "firstFrameRepeat": 531563,
+        "steadyFrameIntervals": [
+          62058,
+          64722,
+          66046,
+          67108,
+          65344,
+          67132,
+          64582,
+          65837
+        ],
+        "medianFrameTicks": 65590.5,
+        "medianFrameMs": 32.79525,
+        "stepsPerSecond": 30.492220672201004,
+        "medianDecodedMs": 32.838
+      }
+    },
+    "EDIT MAIN": {
+      "before": {
+        "steps": 8,
+        "pressToFirstFrame": 119426,
+        "firstFrameRepeat": 1002986,
+        "steadyFrameIntervals": [
+          63507,
+          63782,
+          64053,
+          64324,
+          64595,
+          63358
+        ],
+        "medianFrameTicks": 63917.5,
+        "medianFrameMs": 31.95875,
+        "stepsPerSecond": 31.290335197715805,
+        "medianDecodedMs": 31.95875
+      },
+      "after": {
+        "steps": 8,
+        "pressToFirstFrame": 119426,
+        "firstFrameRepeat": 1002986,
+        "steadyFrameIntervals": [
+          63507,
+          63782,
+          64053,
+          64324,
+          64595,
+          63358
+        ],
+        "medianFrameTicks": 63917.5,
+        "medianFrameMs": 31.95875,
+        "stepsPerSecond": 31.290335197715805,
+        "medianDecodedMs": 31.95875
+      }
+    },
+    "EDIT EXEC": {
+      "before": {
+        "steps": 8,
+        "pressToFirstFrame": 49443,
+        "firstFrameRepeat": 780002,
+        "steadyFrameIntervals": [
+          132462,
+          131416,
+          131677,
+          130627,
+          132199,
+          129641
+        ],
+        "medianFrameTicks": 131546.5,
+        "medianFrameMs": 65.77325,
+        "stepsPerSecond": 15.20374924456371,
+        "medianDecodedMs": 65.50975
+      },
+      "after": {
+        "steps": 8,
+        "pressToFirstFrame": 46924,
+        "firstFrameRepeat": 733661,
+        "steadyFrameIntervals": [
+          131871,
+          132136,
+          131086,
+          131347,
+          131608,
+          129050
+        ],
+        "medianFrameTicks": 131477.5,
+        "medianFrameMs": 65.73875,
+        "stepsPerSecond": 15.211728242474948,
+        "medianDecodedMs": 65.47775
+      }
+    }
+  },
+  "pollBefore": "poll-before/result.json",
+  "pollAfter": "poll-after/result.json"
+}

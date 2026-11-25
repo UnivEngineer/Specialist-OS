@@ -1,0 +1,16 @@
+PHASE UNIFIED
+PASS retired preallocation/volume-registration IDs unsupported
+PASS open-path/write/read/EOF/close 0
+PASS open-path/write/read/EOF/close 1
+PASS open-path/write/read/EOF/close 255
+PASS open-path/write/read/EOF/close 256
+PASS open-path/write/read/EOF/close 257
+PASS open-path/write/read/EOF/close 4097
+PASS open-path/write/read/EOF/close 8193
+PASS exact DOS strings, window and MAIN range boundaries, and GETCWD tail
+PASS EXEC range, file name cursor, and exact fixed descriptor output
+PASS OPEN_AT, reopen/closed object, read-only and protected/empty ranges
+PASS nested full path
+PASS cached FILEOPS and recursive COPY
+PASS local ASM read/write wrappers, capacity and overlap rejection
+UNIFIED FILE API PASS
