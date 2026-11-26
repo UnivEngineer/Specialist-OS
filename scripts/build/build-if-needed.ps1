@@ -16,7 +16,9 @@ param(
     [Parameter(DontShow)]
     [switch] $Describe,
     [Parameter(DontShow)]
-    [switch] $RunBuild
+    [switch] $RunBuild,
+    [Parameter(DontShow)]
+    [uint32] $VersionBuild
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,6 +54,8 @@ $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
 $editor = $SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\EDIT')
 $commander = $SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')
 $dos = $SourceBase -eq 'DOS' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\dos')
+$format = $SourceBase -eq 'FORMAT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\format')
+$versioned = $dos -or $editor -or $commander -or $format
 $flashDriver = $SourceBase -in @('Flash', 'FlashFst', 'Rom', 'Rom64', 'SysRom') -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\flash')
 $floppyDriver = $SourceBase -eq 'FLOPPY' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\floppy')
 $ramDriver = $SourceBase -eq 'RAMDISK' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\ramdisk')
@@ -132,6 +136,9 @@ if (-not $RunBuild) {
     foreach ($path in $outputs) { $cacheArgs += @('--output', (Join-Path $repositoryRoot $path)) }
     if ($Force) { $cacheArgs += '--force' }
     $cacheArgs += @('--', $PSCommandPath, $SourceBase, $Extension, $Address, $OutputBase, '-RunBuild')
+    if ($versioned -and $env:_SPECIALIST_RELEASE_BUILD) {
+        $cacheArgs += @('-VersionBuild', $env:_SPECIALIST_RELEASE_BUILD)
+    }
     if ($Describe) {
         return @{ cwd = $buildDirectory; args = $cacheArgs }
     }
@@ -155,6 +162,9 @@ if (-not $RunBuild) {
 
 . (Join-Path $repositoryRoot "scripts/images/cpu.ps1")
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+if ($versioned) {
+    $env:SPECIALIST_VERSION_BUILD = $VersionBuild.ToString([Globalization.CultureInfo]::InvariantCulture)
+}
 
 # DOS требует предварительного измерения блоков и размещения между входами ABI.
 if ($editor) {

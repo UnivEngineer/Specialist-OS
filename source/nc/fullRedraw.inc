@@ -140,7 +140,7 @@ ncPreparePanels:
 
 ncStartupCopyright:
             COLOR COLOR_CMDSCREEN
-            ld hl,aCommanderVer
+            ld hl,aCommanderBuild
             call bios_printStringReal
             ld c,' '
             call bios_printChar

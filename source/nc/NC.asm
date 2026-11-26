@@ -13,6 +13,7 @@
 
 
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/version.inc"
 
     IFNDEF NC_BANKED
 NC_BANKED = 0
@@ -317,11 +318,16 @@ inverseRect = uiInverseRect
 
 
 
+aCommanderVer:      DB "Commander ",NC_VERSION
     IF NC_BANKED
-aCommanderVer:      DB "Commander 3.0 BANK",0
-    ELSE
-aCommanderVer:      DB "Commander 3.0",0
+                    DB " BANK"
     ENDIF
+                    DB 0
+aCommanderBuild:    DB "Commander ",NC_VERSION,'.',NC_REVISION,'.',VERSION_BUILD
+    IF NC_BANKED
+                    DB " BANK"
+    ENDIF
+                    DB 0
 
 aCopyright:         DB "(C) Omsk/SPb 1992-2026",0
 

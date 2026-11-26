@@ -148,10 +148,6 @@
 
     DEFINE DOS_SPLIT_BUILD 1
 BIOS_DOS_SPLIT     = 1         ; BIOS C000h в main, DOS 0100h в физической странице 0
-BIOS_VERSION_MAJOR = 6
-BIOS_VERSION_MINOR = 1
-DOS_VERSION_MAJOR  = 3
-DOS_VERSION_MINOR  = 1
 ; Назначение банка: DATA получает COMMAND/CPM32 с MEM_DATA_START, DOS/EXEC — полный хвост.
 MEM_BANK_DATA        = 0
 MEM_BANK_EXEC        = 1
@@ -618,7 +614,7 @@ TAPE_DRIVER_JUMPS = bios_tapeReadOld    ; старая таблица перех
 ;-----------------------------------------------------------------------
 
 mx_callPacket     = 0F800h  ; B=группа, C=номер, DE=пакет MX_REGS
-mx_сallCPM        = 0F803h  ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
+mx_callCPM        = 0F803h  ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
 mx_callRegs       = 0F806h  ; CALL + DW операции; регистры как у исполнителя
 mx_queueBind      = 0F809h  ; HL=local flush callback, 0 disables; AF destroyed
 mx_queueFlush     = 0F80Ch  ; explicit flush; all registers and flags preserved

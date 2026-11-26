@@ -49,13 +49,14 @@ def main():
         return memory
 
     checked = 0
+    body, gfx = load_graphics()
+    base = gfx['entry']
+    assert gfx['ngFileEnd'] <= core['NC_MAIN_PACKET'] < core['NC_MAIN_END'] <= 0x6400
     for font, width in [('Cpm4', 4), ('Rotate', 6), ('Fast8', 8), ('Fast12K', 6), ('Packed6K', 6), ('Compact', 6)]:
         value_x = 28 if width == 8 else 32
         value_chars = (184-2*value_x)//width
         label_end = 26 if width == 8 else 28
         native = seed('NC', 0, font)
-        base = 0x19ed if width == 8 else 0x1af7
-        body, gfx = load_graphics(base)
         target = seed('UI_GFX', base, font, body)
         packet = 0x550d if width == 8 else core['NC_MAIN_PACKET']
         lower_base = 0x6400 if font == 'Fast12K' else 0x7c00

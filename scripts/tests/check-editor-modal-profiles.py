@@ -4,7 +4,7 @@ import re,subprocess
 from relocated_component import load_graphics
 R=Path(__file__).resolve().parents[2];O=R/'.local/editor-modal-check';O.mkdir(parents=True,exist_ok=True)
 def symbols(name):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin'/name).read_text(),re.M)}
-gfx,S=load_graphics(0x1b3d);C=symbols('EDITCORE.sym');M=symbols('EDIT.sym');W=lambda n:n.to_bytes(2,'little')
+gfx,S=load_graphics();C=symbols('EDITCORE.sym');M=symbols('EDIT.sym');W=lambda n:n.to_bytes(2,'little')
 assert 'hexSaveUnderlay' in M and 'uiBitmapSave' in M and 'ebSnapshotModal' not in M
 assert M['EDITOR_TEXT_BEGIN']&255==0
 # Resident block operations share editing code without using the overlay space.
@@ -13,7 +13,7 @@ assert M['EDITOR_MEMORY_END']-M['EDITOR_TEXT_BEGIN']-1>=14_500
 assert 'uiHelpLine' not in C and 'uiHelpLine' in S
 assert C['EDIT_MAIN_PIXELS']==C['EDIT_MAIN_PACKET']+C['EDIT_QUEUE_BYTES']
 assert C['EDIT_MAIN_CACHE']==C['EDIT_MAIN_END']
-assert S['ngFileEnd']-S['entry']==S['IMAGE_MEM_END']
+assert S['ngFileEnd']==S['IMAGE_MEM_END']<=C['EDIT_MAIN_PACKET']
 assert 'EDIT_MAIN_CACHE' not in S and 'ngPanelColors' not in S
 assert C['EDIT_MAIN_END']<=0x6400 and C['EDIT_MAIN_END']-C['EDIT_MAIN_PIXELS']==32*148
 core=(R/'bin/EDITCORE.i80').read_bytes();base=bytearray(65536)

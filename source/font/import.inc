@@ -122,7 +122,7 @@ restoreDrive:
 loadInitializer:
     ; Descriptor word +46 is a resident-address pointer to the companion
     ; initializer's ASCIZ filename. Resolve it relative to the DLL directory.
-    ld hl,path
+    ld hl,(request+FILE_PATH_IO.path)
     ld de,initializerPath
     call copyPath
     ld hl,initializerPath
@@ -132,8 +132,11 @@ initDirectory:
     or a
     jp z,initName
     inc hl
+    cp ':'
+    jp z,initDirectoryPrefix
     cp 05Ch
     jp nz,initDirectory
+initDirectoryPrefix:
     ld d,h
     ld e,l
     jp initDirectory

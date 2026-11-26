@@ -26,7 +26,7 @@ loadPrepared:
     ld (preparedIO+FILE_PATH_IO.count),hl
     ld hl,(lowerBase)
     ld (preparedIO+FILE_PATH_IO.buffer),hl
-    ld hl,path
+    ld hl,(request+FILE_PATH_IO.path)
     ld de,preparedPath
     call copyPath
     ld hl,preparedPath

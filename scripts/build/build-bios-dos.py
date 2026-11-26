@@ -29,7 +29,9 @@ def main():
     out.mkdir(exist_ok=True)
     manifest, groups = component_groups()
     inc = h['include']
-    lines = ['    DEFINE DOS_REFERENCE_BUILD 1',inc(ROOT/'source/include/mxos.inc'),inc(ROOT/'source/common/layoutMacros.inc'),inc(out/'banked/transport-imports.inc'),'DOS_IMAGE_SUM = 0','    ORG DOS_CODE_START','dosCoreStart:']
+    lines = ['    DEFINE DOS_REFERENCE_BUILD 1',inc(ROOT/'source/include/mxos.inc'),
+             inc(ROOT/'source/include/version.inc'),inc(ROOT/'source/common/layoutMacros.inc'),
+             inc(out/'banked/transport-imports.inc'),'DOS_IMAGE_SUM = 0','    ORG DOS_CODE_START','dosCoreStart:']
     for u in groups['dos']:
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')

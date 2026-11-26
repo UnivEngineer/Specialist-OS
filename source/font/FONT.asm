@@ -34,23 +34,14 @@ skipSpace:
 argument:
     or a
     jp z,usage
-    ; An explicit drive path bypasses the C:\FONTS prefix.
-    push hl
-    inc hl
-    ld a,(hl)
-    pop hl
-    cp ':'
     ld de,relativeEnginePath
-    ld a,0
-    ld (hasExtension),a
-    jp nz,fontRelativePath
-    ld de,path
-    jp fontPathReady
-fontRelativePath:
     call fontExpandShortName
-    jp nc,pathDone
+    jp c,fontPathReady
+    ld c,0
+    jp pathDone
 fontPathReady:
     ld b,MAX_PATH-(relativeEnginePath-path)-5 ; Reserve .fnt and its terminator.
+    ld c,0
 copyArgument:
     ld a,(hl)
     or a
@@ -58,12 +49,16 @@ copyArgument:
     cp ' '
     jp z,pathDone
     cp '/'
+    jp z,fontSeparator
+    cp 05Ch
     jp nz,notSlash
+fontSeparator:
+    ld c,0
     ld a,05Ch
 notSlash:
     cp '.'
     jp nz,notDot
-    ld (hasExtension),a
+    ld c,a
 notDot:
     ld (de),a
     inc de
@@ -73,7 +68,8 @@ notDot:
     jp usage
 pathDone:
     ld (argTail),hl
-    ld a,(hasExtension)
+    ld a,c
+    ld (typedExtension),a
     or a
     jp nz,terminatePath
     ld hl,extension
@@ -93,14 +89,9 @@ terminatePath:
     ld e,0
     MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (oldDrive),a
-    ld hl,request
     FONT_STAMP 0
-    call fileReadAll
+    call fontReadEngine
     FONT_STAMP 2
-    push af
-    ld a,(oldDrive)
-    MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
-    pop af
     jp c,error
     call validate
     jp c,error
@@ -169,6 +160,41 @@ fontExportReady:
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
+; Открыть движок для FONT или ассоциации CLI.EXT.
+; вход: relativeEnginePath = путь ASCIIZ с расширением; typedExtension != 0,
+;   если расширение ввёл вызывающий. oldDrive содержит исходный диск.
+; выход: cf=0, staging содержит файл, request — его путь, размер и дескриптор.
+;   cf=1/a — ошибка чтения. Восстанавливает диск, af/bc/de/hl рабочие.
+;----------------------------------------------------------------------------
+fontReadEngine:
+    ld hl,relativeEnginePath
+    ld a,(hl)
+    cp 05Ch
+    jp z,fontReadSelected
+    cp '.'
+    jp z,fontReadSelected
+    inc hl
+    ld a,(hl)
+    dec hl
+    cp ':'
+    jp z,fontReadSelected
+    ld a,(typedExtension)
+    or a
+    jp z,fontReadLibrary
+    call fontReadSelected
+    ret nc
+    cp DOS_ERR_NOT_FOUND
+    scf
+    ret nz
+fontReadLibrary:
+    ld hl,path
+fontReadSelected:
+    ld (request+FILE_PATH_IO.path),hl
+    ld hl,request
+    jp loadPath
+;----------------------------------------------------------------------------
+; MXOS
+;
 ; Развернуть короткое имя штатного шрифта в путь относительно C:\FONTS.
 ;
 ; вход:
@@ -193,7 +219,7 @@ fontAliasCompare:
     push de
     ld d,a
     ld a,(hl)
-    and 0DFh
+    call bios_upperCase
     cp d
     pop de
     jp nz,fontAliasMismatch
@@ -401,7 +427,7 @@ magic: MXOS_IMAGE_SIGNATURE
 engineMagic:        DB 'FNT1',FONT_ENGINE_VERSION
 extension:          DB '.fnt',0
 help:               DB 'FONT NAME|PATH [-FILE] [-IMPORT FILE.PF [-OUT PATH]]',13,10,0
-installed:          DB 'FONT ENGINE INSTALLED.',13,10,0
+installed:          DB 'FONT ENGINE INSTALLED',13,10,0
 failed:             DB 'FONT ERROR: ',0
 errorSeparator:     DB ' - ',0
 errorCode:          DB 0
@@ -465,7 +491,7 @@ msgActive:          DB 'MEMORY RESOURCE IS BUSY',0
 msgUnknown:         DB 'UNKNOWN ERROR',0
 newline:            DB 13,10,0
 imageBytes:         DW 0
-hasExtension:       DB 0
+typedExtension:     DB 0
 oldDrive:           DB 0
 path:               DB BOOT_VOLUME_LETTER,':',05Ch,'FONTS',05Ch
 relativeEnginePath:

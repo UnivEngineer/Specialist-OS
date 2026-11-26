@@ -26,13 +26,20 @@ def load_at(source, stem, origin_symbol, base, kind="dll"):
     return body, symbols
 
 
-def load_graphics(base):
-    return load_at(ROOT / 'source/ui-gfx/UI_GFX.asm', 'UI_GFX', 'GFX_ORIGIN', base)
+def load_graphics():
+    packed = (ROOT / 'bin/UI_GFX.dll').read_bytes()
+    image = EXE['decode'](packed, 'dll')
+    symbols = {key: int(value, 16) for key, value in re.findall(
+        r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (ROOT / 'bin/UI_GFX.sym').read_text('utf8'), re.M)}
+    assert packed[4] == 2 and image.reloc_kind is None
+    assert image.load == image.entry == image.memory_begin == symbols['entry'] == 0x1B00
+    assert image.load + len(image.data) == image.memory_end == symbols['ngFileEnd']
+    assert image.options == symbols['IMAGE_OPTION_CACHEABLE'] | symbols['IMAGE_OPTION_REUSABLE']
+    return image.data, symbols
 
 
 if __name__ == '__main__':
-    for origin in (0x1AFB, 0x5927):
-        load_graphics(origin)
+    load_graphics()
     for origin in (0x3200, 0xA500):
         load_at(ROOT / 'source-apps/fontbench/FONTGRID.asm', 'FONTGRID', 'FONTGRID_ORIGIN', origin)
-    print('UI_GFX WORD16 and FONTGRID HIGH8 match direct assembly at two bases each')
+    print('UI_GFX matches its fixed v2 layout; FONTGRID HIGH8 matches direct assembly at two bases')

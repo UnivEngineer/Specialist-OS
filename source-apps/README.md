@@ -4,7 +4,7 @@
 
 - [Алмаз](almaz/README.md): точная реконструкция RKS для Intel 8080, управление и разбор исходных задержек.
 - [Алмаз-2](almaz2/README.md): восстановленный исходник Intel 8080, чёрно-белая и цветная графика, программный звук и ВИ53, ABI MXOS и Ramfos.
-- [LLM80](llm80/README.md): mockup инференса 8080: INT1–INT4, LUT/кэш, XOR/popcount, банковая память, KV/attention и чат. Задача `build: llm80` публикует `assets/programs/llm80/LLM80.EXE` (нативный BANK EXE, системное выделение банков; файлы образа — `H:/BENCH/LLM80/`, трёхбанковый эксперимент — LLM3.EXE/LLM3W.DLL).
+- Эксперимент [LLM80](llm80/README.md) выполняет на 8080 операции INT1–INT4, LUT, XOR/popcount, KV и attention. Сборщик публикует меню LLM80.EXE, контроллер MAIN LLM3.EXE и рабочий модуль LLM3W.DLL в `assets/programs/llm80/`. Для прямого запуска контроллера нужны три свободных банка ДОЗУ.
 - [DISKBEN](diskbench/README.md): сравнение File access (создание настоящего TMP-файла через DOS) и Raw access (прямая запись его секторов), секторное чтение, ВИ53, строковый ввод BIOS, бюджет flash и отдельное измерение flush. Входит в `scripts/build/build-project.ps1 OS` и системный ROM; путь запуска — `A:\BENCH\DiskBen\DiskBen.com`. Ключ `-C:MAIN/BANK/DOS/ALL` выбирает размещение общего DLL-измерителя с локальным буфером файла.
 
 - [CHKDSK](chkdsk/README.md): проверка структуры диска и встроенных сумм файлов, без записи. Входит в системный ROM.

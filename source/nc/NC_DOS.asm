@@ -1,5 +1,6 @@
 ; Одноразовый установщик банковой оболочки в свободном участке DOS.
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/version.inc"
     INCLUDE "bank-api.inc"
     IFNDEF DRIVER_ORIGIN
 DRIVER_ORIGIN = 0
@@ -80,7 +81,7 @@ failed:
     MXOS_CALL_REGS MXOS_BIOS_GETCH
     pop af
     ret
-copyright:      DB 'Commander 3.0 BANK (C) Omsk/SPb 1992-2026',0
+copyright:      DB 'Commander ',NC_VERSION,'.',NC_REVISION,'.',VERSION_BUILD,' BANK (C) Omsk/SPb 1992-2026',0
 corePath:       DB 'C:',05Ch,'DOS',05Ch,'NC_CORE.DLL',0
 message:        DB 'NC BANK: load/call error ',0
 coreHandle:     DW 0

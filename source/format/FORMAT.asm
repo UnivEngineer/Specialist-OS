@@ -10,6 +10,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/version.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 SECTOR_SIZE = 256           ; размер сектора в байтах
@@ -642,7 +643,9 @@ errParams:
     scf
     ret
 
-str_Usage:          DB 0Ah,"INVALID ARGUMENTS",0Ah,"FORMAT.COM [A:-H:] [-R] [-Y]",0Ah,0
+str_Usage:          DB 0Ah,"INVALID ARGUMENTS",0Ah
+                    DB "FORMAT ",FORMAT_VERSION,'.',FORMAT_REVISION,'.',VERSION_BUILD,0Ah
+                    DB "FORMAT.COM [A:-H:] [-R] [-Y]",0Ah,0
 str_SystemDrive:    DB "CANNOT FORMAT SYSTEM DRIVE C:",0Ah,0
 str_Format:         DB 0Ah,"FORMAT DRIVE "
 str_A_Y_N:          DB "A: [Y/N]? ",0

@@ -6,6 +6,7 @@
 ;----------------------------------------------------------------------------
 
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/version.inc"
     IFNDEF EDIT_BANKED
 EDIT_BANKED = 0
     ENDIF

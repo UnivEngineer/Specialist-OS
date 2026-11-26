@@ -14,8 +14,8 @@ for name,component,source in [('DISKBEN','diskbench','DISKBEN.asm'),('LLM80','ll
     subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',f'-DPIT_HZ={hz}',f'--sym={stem}.sym',f'--raw={stem}.bin',source],cwd=ROOT/f'source-apps/{component}',check=True,capture_output=True)
     s=symbols(stem.with_suffix('.sym'));code=stem.with_suffix('.bin').read_bytes()
     base=bytearray(65536)
-    if name=='LLM80':base[0xC000:0xC000+len(code)-256]=code[256:]
-    else:base[:len(code)]=code
+    origin = s['loader'] if name == 'LLM80' else 0
+    base[origin:origin + len(code)] = code
     def run(label,value,conversion=True):
         mem=bytearray(base)
         if conversion:

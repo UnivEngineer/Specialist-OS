@@ -84,7 +84,7 @@ dosInitVariables:
 
 j_reboot3:
     jp dosBoot
-kernelVersion:      DB "DOS ",'0'+DOS_VERSION_MAJOR,'.','0'+DOS_VERSION_MINOR,0Dh,0Ah,0
+kernelVersion:      DB "DOS ",MXOS_VERSION,'.',MXOS_REVISION,'.',VERSION_BUILD,0Dh,0Ah,0
 
 ;----------------------------------------------------------------------------
 ; MXOS

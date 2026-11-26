@@ -20,6 +20,7 @@ import time
 
 ROOT = Path(__file__).absolute().parents[2]
 CACHE = ROOT / 'bin/.build-cache'
+RELEASE_BUILD = '_SPECIALIST_RELEASE_BUILD'
 INCLUDE = re.compile(
     r"""^[ \t]*(?:[\w.@]+:[ \t]*)?(include|incbin)[ \t]+(?:"([^"]+)"|'([^']+)'|([^\s;,]+))""",
     re.I | re.M,
@@ -161,6 +162,10 @@ def assembly_inputs(roots, excluded=()):
 
 @contextmanager
 def build_lock():
+    # Локальный сценарий выпуска держит блокировку до упаковки всех профилей.
+    if RELEASE_BUILD in os.environ:
+        yield
+        return
     CACHE.mkdir(parents=True, exist_ok=True)
     with (CACHE / 'build.lock').open('a+b') as lock:
         wait_started = None

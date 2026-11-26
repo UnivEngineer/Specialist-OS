@@ -1,5 +1,6 @@
 ; Одноразовый загрузчик банкового редактора в свободном участке DOS.
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/version.inc"
     IFNDEF DRIVER_ORIGIN
 DRIVER_ORIGIN = 0
     ENDIF
@@ -64,7 +65,7 @@ waitEnter:
     pop af
     ret
 corePath:       DB 'C:',05Ch,'DOS',05Ch,'EDITCORE.DLL',0
-error:          DB 'EDIT BANK: load/call error ',0
+error:          DB 'EDIT ',EDIT_VERSION,'.',EDIT_REVISION,'.',VERSION_BUILD,' BANK: load/call error ',0
 prompt:         DB 13,10,'Press Enter to return.',13,10,0
 coreHandle:     DW 0
 registers:      DS MX_REGS,0

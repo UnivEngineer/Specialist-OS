@@ -4,6 +4,7 @@
     DEFINE FAT_CACHE_TABLE_ADDR DOS_BANK_CACHE_TABLE
     DEFINE BANKED_DOS_BUILD 1
     INCLUDE "../include/mxos.inc"
+    INCLUDE "../include/version.inc"
     INCLUDE "../mem/diskabi.inc"
     INCLUDE "../mem/abi.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"

@@ -125,7 +125,7 @@ editorLoadingBanner:
         JP bios_printString
     MACRO EDIT_STARTUP_CREDIT
 editorCopyright:
-        DB "EDIT 6.0 (C) 2026 SPb SpaceEngineer",13,10
+        DB "EDIT ",EDIT_VERSION,'.',EDIT_REVISION,'.',VERSION_BUILD," (C) 2026 SPb SpaceEngineer",13,10
         DB "Based on E 4.1 (C) 1992 Omsk KSOFT",13,10,0
     ENDM
 

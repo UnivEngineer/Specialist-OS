@@ -148,7 +148,7 @@ $planTimer = [Diagnostics.Stopwatch]::StartNew()
 $jobs = @(
     # Этот этап пишет в разные файлы и каталоги. DOS ждёт его завершения.
     @{ cwd = $repositoryRoot; describe = @((Join-Path $PSScriptRoot 'build-font-engines.py')) + $forceArgs; serial = $false }
-    Get-ComponentJob @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = '0' }
+    Get-ComponentJob @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = 'entry' }
     if ($Target -ne 'MX') {
         @{ cwd = (Get-Location).ProviderPath; describe = @((Join-Path $repositoryRoot 'source-apps/copybench/build.py')) + $forceArgs; serial = $false }
     }
