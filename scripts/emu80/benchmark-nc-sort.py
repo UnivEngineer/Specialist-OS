@@ -48,7 +48,7 @@ def build(out, profile=False):
     source = (ROOT/'source-apps/sortbench/comparison.inc').read_text(encoding='utf-8-sig')
     fixture = (ROOT/'source-apps/sortbench/kernels.inc').read_text(encoding='utf-8')
     fixture = fixture.replace('@CORE@', 'sort-under-test.inc')
-    fixture = fixture.replace('@TIMING@', (ROOT/'source/include/timing-pit.inc').as_posix())
+    fixture = fixture.replace('@TIMING@', (ROOT/'sdk/asm/lib/timing-pit.inc').as_posix())
     if profile:
         def count(label, counter, text):
             code = ('    push hl\n    ld hl,(' + counter + ')\n    inc hl\n'
@@ -68,7 +68,7 @@ def build(out, profile=False):
         (folder/'sort-under-test.inc').write_text(
             source.replace('    call bios_upperCase', '    ; normalized key') if prepared else source,
             encoding='utf-8')
-        assembly = ('    INCLUDE "' + (ROOT/'source/include/mxos.inc').as_posix() + '"\n'
+        assembly = ('    INCLUDE "' + (ROOT/'sdk/asm/mxos.inc').as_posix() + '"\n'
                     '    ORG 0100h\nPREUPPER = ' + str(prepared) + '\n' + fixture)
         (folder/'bench.asm').write_text(assembly, encoding='utf-8')
         run = subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',

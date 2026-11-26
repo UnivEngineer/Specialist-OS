@@ -1,5 +1,5 @@
 ; Lazy DOS file-operation engine. Native MXOS container, DRIVER placement.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     DEFINE BANKED_DOS_BUILD 1
 KD_OBJECT = DOS_BANK_OBJECT_ADDR
     IFDEF MX_FLOPPY_BOOT
@@ -14,7 +14,7 @@ OVERLAY_ORIGIN = 0
     RELOCATE_START
 overlayBody:
     jp foEntry
-    INCLUDE "../include/fileops-host.inc"
+    INCLUDE "../dos/fileops-host.inc"
 
 ;----------------------------------------------------------------------------
 ; MXOS

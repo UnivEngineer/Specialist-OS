@@ -38,7 +38,7 @@ def main():
             m.write(0xFFFC,b'\0')
             m.write(0xC000,path.read_bytes())
             m.stop_at(ns['mainLoop'])
-            m.call('regs_set',pc=0xC009,sp=0)
+            m.call('regs_set',pc=0xC000,sp=0)
             m.until(ns['mainLoop'])
             assert m.read(SYSTEM['NC_LOAD_ADDR'],32)==(ROOT/'bin/NC.i80').read_bytes()[:32]
             assert m.read(SYSTEM['SYSTEM_FLASH_ADDR'],8)==m.resident_bytes('FlashSys')[:8]
@@ -65,7 +65,7 @@ def main():
             m.write(0x8FFC,b'\x08\0')
             m.write(0x7000,b'\x1BI\x1BI\x1BI\0');m.subroutine(0xC438,hl=0x7000)
             graphic['scroll_down']=hashlib.sha256(m.read(0x9000,0x3000)).hexdigest()
-            m.write(0x8FE9,b'\x21');m.subroutine(0xC006)
+            m.write(0x8FE9,b'\x21');m.subroutine(ds.get('bios_drawCursor') or ds['bios_drawCursorOld'])
             graphic['cursor']=hashlib.sha256(m.read(0x9000,0x3000)).hexdigest()
             m.screenshot(out/f'{name}-drawing.png')
             flags = []
@@ -87,19 +87,19 @@ def main():
                     hl=source+length,de=source+length,bc=destination+length,sp=0x8F00).items())
                 copies.append(hashlib.sha256(expected).hexdigest())
             m.subroutine(0xC842,af=0x100,de=1)
-            state,_=m.subroutine(0xC863,bc=0x200,de=0xFFE,hl=0x4001)
+            state,_=m.subroutine(ds['bios_diskDriver'],bc=0x200,de=0xFFE,hl=0x4001)
             assert not state['flags']['C']
             original=m.read(0x4001,256)
             payload=bytes((i*29+17)&255 for i in range(256))
             try:
                 m.write(0x4000,b'\xDA'+payload+b'\xAD')
-                state,_=m.subroutine(0xC863,bc=0x100,de=0xFFE,hl=0x4001)
+                state,_=m.subroutine(ds['bios_diskDriver'],bc=0x100,de=0xFFE,hl=0x4001)
                 assert not state['flags']['C']
                 m.write(0x4001,b'\0'*256)
-                state,_=m.subroutine(0xC863,bc=0x200,de=0xFFE,hl=0x4001)
+                state,_=m.subroutine(ds['bios_diskDriver'],bc=0x200,de=0xFFE,hl=0x4001)
                 assert not state['flags']['C'] and m.read(0x4000,258)==b'\xDA'+payload+b'\xAD'
             finally:
-                m.write(0x4001,original);m.subroutine(0xC863,bc=0x100,de=0xFFE,hl=0x4001)
+                m.write(0x4001,original);m.subroutine(ds['bios_diskDriver'],bc=0x100,de=0xFFE,hl=0x4001)
             m.subroutine(0xC842,af=0,de=1)
             for address in (0x4001,0x8201):
                 for sector in (0,127,128,2047):
@@ -114,7 +114,7 @@ def main():
             print(name,'BIOS graphics/scroll, registers, memcpy, RAM/ROM OK',flush=True)
     finally:
         m.write(0xFFFC,b'\0');m.write(0xC000,(ROOT/'bin/DOS.sys').read_bytes())
-        m.stop_at(ns['mainLoop']);m.call('regs_set',pc=0xC009,sp=0);m.until(ns['mainLoop'])
+        m.stop_at(ns['mainLoop']);m.call('regs_set',pc=0xC000,sp=0);m.until(ns['mainLoop'])
     assert (args.runtime/'specialist-os/system-flash.bin').read_bytes()==system
     (out/'emulator.json').write_text(json.dumps(results,indent=2)+'\n',encoding='utf-8')
 

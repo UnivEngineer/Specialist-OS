@@ -6,7 +6,7 @@ s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/
 base=bytearray(65536);runpy.run_path(str(R/'scripts/tests/mem-image.py'))['install'](base,s)
 def case(name,code,prepare,check):
  m=bytearray(base);prepare(m)
- asm=f' INCLUDE "{(R/"source/include/mxos.inc").as_posix()}"\n ORG 08000h\n ld sp,08FDFh\n'+code+'\n ld (08502h),hl\n push af\n pop hl\n ld (08500h),hl\n ld h,b\n ld l,c\n ld (08504h),hl\n ex de,hl\n ld (08506h),hl\n jp 08100h\n END\n'
+ asm=f' INCLUDE "{(R/"sdk/asm/mxos.inc").as_posix()}"\n ORG 08000h\n ld sp,08FDFh\n'+code+'\n ld (08502h),hl\n push af\n pop hl\n ld (08500h),hl\n ld h,b\n ld l,c\n ld (08504h),hl\n ex de,hl\n ld (08506h),hl\n jp 08100h\n END\n'
  (O/'case.asm').write_text(asm,encoding='utf-8');subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080',f'--raw={O/"case.bin"}',str(O/'case.asm')],check=True,capture_output=True)
  c=(O/'case.bin').read_bytes();m[0x8000:0x8000+len(c)]=c;(O/'in.bin').write_bytes(m)
  p=subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8000','-end','8100','-counter','10000000','-output',str(O/'out.bin'),str(O/'in.bin')],capture_output=True,text=True,check=True)

@@ -22,7 +22,7 @@ keyDecode:
     jp c,keyPunctuation
     cp 07Fh
     jp nc,keyModifiers
-    ld a,(IO_KEYB_B)
+    call ioKeyReadRows
     and 2
     rrca
     rrca                    ; bit 7 = Shift released
@@ -45,7 +45,7 @@ keyRussianCode:
     xor 080h
     jp keyModifiers
 keyPunctuation:
-    ld a,(IO_KEYB_B)
+    call ioKeyReadRows
     and 2
     ld a,b
     jp nz,keyModifiers
@@ -55,13 +55,7 @@ keyPunctuation:
     ld a,05Fh
 keyModifiers:
     ld c,a
-    call setKeybMode83
-    ld a,0F7h
-    ld (IO_KEYB_A),a
-    ld a,(IO_KEYB_B)
-    cpl
-    ld d,a
-    call setKeybMode82
+    call ioKeyReadCtrl
     ld a,1
     or a
     ld a,d
@@ -72,7 +66,7 @@ keyModifiers:
 loc_C311:                   ; key ready in A, profiling breakpoint
     ret
 keyToggle:
-    ld a,(IO_KEYB_B)
+    call ioKeyReadRows
     and 2
     jp z,keyCaps
     ld a,d

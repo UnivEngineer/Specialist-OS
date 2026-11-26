@@ -5,8 +5,8 @@
 ; 2022-02-03 Дизассемблировано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/version.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../common/version.inc"
     IFNDEF EDIT_BANKED
 EDIT_BANKED = 0
     ENDIF
@@ -116,7 +116,7 @@ EDITOR_BUFFER_SIZE EQU EDITOR_MEMORY_END - EDITOR_TEXT_BEGIN
 
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/ui.inc"
+    INCLUDE "../../sdk/asm/lib/ui.inc"
     INCLUDE "startup.inc" ; Старт, данные сеанса и цикл строки состояния
 editorShiftState: DB 0
     IF !EDIT_BANKED
@@ -138,7 +138,7 @@ editorShiftState: DB 0
     INCLUDE "interface.inc"
     INCLUDE "hex-block.inc"
     DEFINE LINEEDIT_RECALL
-    INCLUDE "../include/lineedit.inc"
+    INCLUDE "../../sdk/asm/lib/lineedit.inc"
     IF EDIT_BANKED
     INCLUDE "bank-runtime.inc"
     ELSE
@@ -147,10 +147,10 @@ editorShiftState: DB 0
     DEFINE UI_TEXT_RECT
     DEFINE UI_BYTE_RECT
     DEFINE UI_IMPLEMENTATION
-    INCLUDE "../include/ui.inc"
+    INCLUDE "../../sdk/asm/lib/ui.inc"
     ENDIF
-    INCLUDE "../include/ui-text-align.inc"
-    INCLUDE "../include/ui-button.inc"
+    INCLUDE "../../sdk/asm/lib/ui-text-align.inc"
+    INCLUDE "../../sdk/asm/lib/ui-button.inc"
     IF EDIT_BANKED
     DEFINE UI_MODAL_SNAPSHOT ebSnapshotModal
     ELSE
@@ -158,21 +158,21 @@ editorShiftState: DB 0
     INCLUDE "hex-underlay.inc"
     ENDIF
     DEFINE UI_MODAL_KEYS
-    INCLUDE "../include/ui-modal.inc"
+    INCLUDE "../../sdk/asm/lib/ui-modal.inc"
     IF EDIT_BANKED
     DEFINE UI_HELP_HANDLE ebGfxHandle
     DEFINE UI_HELP_REGS ebGfxRegisters
     DEFINE UI_HELP_BANK ebNumber
     DEFINE UI_HELP_PIXELS EDIT_MAIN_PIXELS
     DEFINE UI_HELP_KEY uiModalGetch
-    INCLUDE "../include/ui-bank-help.inc"
+    INCLUDE "../../sdk/asm/lib/ui-bank-help.inc"
     ELSE
     DEFINE UI_HELP_OPEN editorModalBegin
     DEFINE UI_HELP_KEY uiModalGetch
     DEFINE UI_HELP_CLOSE editorCloseModal
     DEFINE UI_HELP_COLOR editorHelpColor
     DEFINE UI_HELP_BUFFER inputBuf
-    INCLUDE "../include/ui-help.inc"
+    INCLUDE "../../sdk/asm/lib/ui-help.inc"
     ASSERT MAX_PATH >= UI_HELP_BLOCK
     ENDIF
 FILE_NAME_HISTORY: DS MAX_PATH,0
@@ -181,8 +181,9 @@ editor_vars EDITOR_VARIABLES
 
     IF !STANDARD_EDITOR
     DEFINE FILE_IO_DESCRIPTOR_ONLY
-    INCLUDE "../include/file-io.inc"
-    INCLUDE "../include/errors.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
+    DEFINE DOS_ERRORS_DRIVE BOOT_VOLUME_LETTER
+    INCLUDE "../../sdk/asm/lib/errors.inc"
     IF !EDIT_BANKED
     INCLUDE "hex-view.inc"
     EDIT_STARTUP_CREDIT

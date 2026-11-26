@@ -1,5 +1,5 @@
 ; Автономный тест полного текстового пути BIOS с прокруткой, Intel 8080.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 
@@ -111,7 +111,7 @@ charTicks:          DD 0
 stringTicks:        DD 0
 bankCharTicks:      DD 0
     DEFINE APP_COMMAND_ADDR MAIN_COMMAND_ADDR
-    INCLUDE "../../source/include/app-drive.inc"
+    INCLUDE "../../sdk/asm/lib/app-drive.inc"
     INCLUDE "bank-runtime.inc"
     INCLUDE "standalone.inc"
 programEnd:

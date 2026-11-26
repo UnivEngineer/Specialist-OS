@@ -54,7 +54,7 @@ def check_copies(root, out, m, ks, bios, select, invoke, request, regs, rows):
         return count
 
     source=out/'copy-callback.asm'
-    source.write_text(f''' INCLUDE "{(root/'source/include/mxos.inc').as_posix()}"
+    source.write_text(f''' INCLUDE "{(root/'sdk/asm/mxos.inc').as_posix()}"
  ORG 03800h
  DEFINE COPY_CONFIRM_BODY callbackBody
  INCLUDE "{(root/'source/common/copyConfirmLocal.inc').as_posix()}"

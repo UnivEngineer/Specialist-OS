@@ -2,6 +2,7 @@
 ; MXOS
 ;
 ; Показать имя и размер выбранного файла либо действие для каталога.
+; Размер занимает до пяти знаков, включая суффикс единицы.
 ;
 ; вход:
 ;   Активная панель, её каталог и геометрия NC готовы. Регистровых параметров нет.
@@ -62,12 +63,7 @@ ncStatusFile:
         call ncStatusPad
         pop hl
         push de
-        ld de,FILE_INFO.size
-        add hl,de
-        ld e,(hl)
-        inc hl
-        ld d,(hl)
-        call ncFormatDecimal
+        call ncFormatFileSize
         ld a,(ncDecimalCount)
         ld c,a
         pop de

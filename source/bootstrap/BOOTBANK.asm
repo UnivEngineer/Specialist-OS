@@ -1,5 +1,5 @@
-; РҐРѕР»РѕРґРЅР°СЏ Р·Р°РіСЂСѓР·РєР°: BIOS РІ main, DOS РІ С„РёР·РёС‡РµСЃРєСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ Р”РћР—РЈ 0.
-; РђРґСЂРµСЃР° С„Р°Р№Р»РѕРІ С„РёРєСЃРёСЂРѕРІР°РЅС‹ СЃР±РѕСЂС‰РёРєРѕРј. FAT РЅРµ РЅСѓР¶РµРЅ bootstrap.
+; Холодная загрузка: BIOS в main, DOS в физическую страницу ДОЗУ 0.
+; Адреса файлов фиксированы сборщиком. FAT не нужен bootstrap.
     INCLUDE "../../bin/bootstrap/config.inc"
     IFDEF ORIGINAL_MX
     INCLUDE "../../bin/mx/imports.inc"
@@ -49,7 +49,7 @@ biosLoaded:
     ld bc,BOOT_IO_RAM
     call moveCore
 ioLoaded:
-    ; Fixed-slot module includes its prepared font. Skip the DLL header in ROM.
+    ; В слоте шрифта пропускаем заголовок DLL.
     ld hl,BOOT_FONT_ROM
     ld de,BOOT_FONT_ROM+BOOT_FONT_BYTES
     IFDEF ORIGINAL_MX
@@ -66,35 +66,28 @@ fontLoaded:
     ld de,bootFontName+8
     ld bc,BOOT_FONT_NAME_RAM
     call moveCore
-    ; Р”РµС‚РµРєС‚РѕСЂ СЂР°Р±РѕС‚Р°РµС‚ РґРѕ СѓСЃС‚Р°РЅРѕРІРєРё РѕР±С‰РµРіРѕ С€Р»СЋР·Р°.
-    ld a,15
-    ld hl,BOOT_RAM_PROBE
-    call BIOS_CHECK_RAMD
+    call checkBootRam
     jp z,bootFailed
-    ; РђРґСЂРµСЃ РїРѕР»СЏ Р±РµСЂС‘С‚СЃСЏ РёР· СЃС‚СЂСѓРєС‚СѓСЂС‹ BIOS, РЅРµ РёР· РєРѕРЅС†Р° РѕР±Р»Р°СЃС‚Рё.
-    ld a,(BIOS_PAGE_COUNT)
     ld (pageCount),a
     ld (dosContext+1),a
     ld (BIOS_BOOT_PAGES),a
-    ld hl,byteWindow
-    ld de,byteWindowEnd
-    ld bc,0FFC0h
-    call moveCore
-    ; Р”Рѕ РїРµСЂРµСѓСЃС‚Р°РЅРѕРІРєРё MEM РїСЂРѕРІРµСЂСЏРµРј РІРѕСЃРµРјСЊ Р±Р°Р№С‚РѕРІ РєРѕРїРёСЂРѕРІС‰РёРєР° РІ РїРµСЂРІРѕРј
-    ; Р±Р°РЅРєРµ B:. РџРѕСЃР»Рµ РїРѕС‚РµСЂРё РћР—РЈ СЃРѕРґРµСЂР¶РёРјРѕРјСѓ boot-СЃРµРєС‚РѕСЂР° РґРѕРІРµСЂСЏС‚СЊ РЅРµР»СЊР·СЏ.
+    ; Детектор оставил в общем окне байтовые входы bootstrap. До решения о
+    ; тёплом старте можно читать банки без установленного транспорта MEM.
     IFDEF ORIGINAL_MX
     INCLUDE "mx-load.inc"
     INCLUDE "mx-bundle.inc"
     ELSE
-    ld a,1
-    ld (0FFC0h+byteRead-byteWindow+1),a
     ; Проверяем неизменяемые пары развёртки CPM32. Код COMMAND меняется с ABI.
     ld hl,BOOT_RAM_SIGNATURE
     ld de,memImage+MEM_DATA_OFFSET+(BOOT_RAM_SIGNATURE-MEM_DATA_START)
     ld b,8
 checkRamTail:
-    call 0FFC0h+byteRead-byteWindow
-    call readSource
+    ld a,1
+    call BOOT_BYTE_READ
+    xor a
+    ld (0FFFEh),a
+    ld a,(de)
+    ld (0FFFCh),a
     cp c
     jp nz,ramTailChecked
     inc hl
@@ -104,81 +97,75 @@ checkRamTail:
     xor a
     ld (ramFresh),a
 ramTailChecked:
-    xor a
-    ld (0FFC0h+byteRead-byteWindow+1),a
     ld a,(ramFresh)
     or a
     jp nz,loadDos
-    ; BIOS Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ РІСЃРµРіРґР°. DOS СЃРѕС…СЂР°РЅСЏРµРј С‚РѕР»СЊРєРѕ РїРѕ РµС‘ СЃРѕР±СЃС‚РІРµРЅРЅРѕРјСѓ
-    ; С„Р»Р°РіСѓ РіРѕС‚РѕРІРЅРѕСЃС‚Рё Рё СЃРѕРІРјРµСЃС‚РёРјРѕР№ СЂРµРІРёР·РёРё MEM; СЌС‚Рѕ РЅРµ РїСЂРѕРІРµСЂРєР° С†РµР»РѕСЃС‚РЅРѕСЃС‚Рё.
+    ; BIOS загружается всегда. DOS сохраняем только по её собственному
+    ; флагу готовности и совместимой ревизии MEM; это не проверка целостности.
     ld hl,DOS_READY
-    call 0FFC0h+byteRead-byteWindow
+    xor a
+    call BOOT_BYTE_READ
     ld a,c
     cp 1
     jp nz,loadDos
-    ; РџСЂРё СЃРјРµРЅРµ РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ ABI СЃС‚Р°СЂРѕРµ СЏРґСЂРѕ РЅРµР»СЊР·СЏ СЃРѕРµРґРёРЅСЏС‚СЊ СЃ РЅРѕРІС‹Рј MEM.
-    ; Р­С‚Рѕ РїСЂРѕРІРµСЂРєР° РІРµСЂСЃРёРё СЃРІСЏР·РєРё, РЅРµ РєРѕРЅС‚СЂРѕР»СЊ С†РµР»РѕСЃС‚РЅРѕСЃС‚Рё DOS.
+    ; При смене внутреннего ABI старое ядро нельзя соединять с новым MEM.
+    ; Это проверка версии связки, не контроль целостности DOS.
     ld hl,BOOT_MEM_REVISION_ADDR
-    call 0FFC0h+byteRead-byteWindow
+    xor a
+    call BOOT_BYTE_READ
     ld a,c
     cp BOOT_MEM_REVISION
     jp nz,loadDos
     inc hl
-    call 0FFC0h+byteRead-byteWindow
+    xor a
+    call BOOT_BYTE_READ
     ld a,c
     or a
     jp nz,loadDos
-    ld a,1
-    ld (BIOS_BOOT_WARM),a
-    jp dosLoaded
+    jp checkWarmPages
 loadDos:
-    ; R4 ROM -> DOS: РєРѕРґ С…РІРѕСЃС‚Р° РѕРґРёРЅР°РєРѕРІ РІ РѕР±РµРёС… СЃС‚СЂР°РЅРёС†Р°С….
-    ld de,romTailImage
-    ld hl,0FF00h
-    ld bc,romTailEnd-romTailImage
+    ; Сбрасываем готовность до первой записи, в том числе при смене ревизии.
+    xor a
+    ld hl,DOS_READY
+    ld c,a
+    call BOOT_BYTE_WRITE
+    ld a,1                      ; DOS.SYS начинается в следующем окне ROM.
+    ld (installRomPage+1),a
+    ld de,0
+    ld hl,MODULE_LOAD
+    ASSERT MODULE_LOAD+BOOT_KERNEL_BYTES <= BOOT_KERNEL_END_LIMIT
+    IF BOOT_KERNEL_BYTES > 08000h
+    ; Окно ПЗУ занимает 32 КиБ. Хвост DOS начинается с нулевого
+    ; смещения следующей страницы ПЗУ, сразу за первым окном образа.
+    ld bc,08000h
     xor a
     call install
-    ld hl,romTailImage
-    ld de,romTailEnd
-    ld bc,0FF00h
-    call moveCore
-    ld hl,romWindow
-    ld de,romWindowEnd
-    ld bc,0FFC0h
-    call moveCore
-    ld hl,0
-    add hl,sp
-    dec hl
-    dec hl
-    ld (0FFD4h),hl
-    ld a,MODULE_SECTORS
-    ld (0FFD3h),a
-    ld hl,MODULE_LOAD+4
-    call 0FFC0h
+    ld a,2
+    ld (installRomPage+1),a
+    ld de,0
+    ld hl,MODULE_LOAD+08000h
+    ld bc,BOOT_KERNEL_BYTES-08000h
+    ELSE
+    ld bc,BOOT_KERNEL_BYTES
+    ENDIF
+    xor a
+    call install
+    xor a
+    ld (installRomPage+1),a
     ENDIF
 dosLoaded:
-    ; Install the current MEM tails in DOS and data banks.
-    ld hl,byteWindow
-    ld de,byteWindowEnd
-    ld bc,0FFC0h
-    call moveCore
     ld a,(BIOS_BOOT_WARM)
     or a
-    jp nz,ramStateReady
-    ; A freshly installed image has no initialized data at DOS_READY.
-    ld hl,DOS_READY
-    ld c,0
-    ld (0FFC1h),a
-    call 0FFC0h
+    jp nz,installDosProfile
     ld de,ramFresh
     ld hl,BOOT_RAM_FRESH
     ld bc,1
-    xor a
     call install
-ramStateReady:
+    ; Нулевой банк сразу получает полный TRANSPORT с собственным MOVE.
     ld a,(pageCount)
 installPages:
     dec a
+    jp z,installDosProfile
     push af
     ld de,memImage+MEM_DATA_OFFSET
     ld hl,MEM_DATA_START
@@ -197,9 +184,21 @@ installPages:
     ld bc,2
     call install
     pop af
-    or a
-    jp nz,installPages
-    ld de,transportImage
+    jp installPages
+installDosProfile:
+    IFNDEF ORIGINAL_MX
+    xor a
+    ld (0FFFEh),a             ; MEM.SYS читается из собственного ROM-слота.
+    ENDIF
+    ld hl,transportImage
+    ld de,transportEnd
+    ld bc,0FC00h
+    call moveCore
+    ld a,(pageCount)
+    ld (BANK_PAGE_COUNT),a
+    ; В шаблоне MAIN уже фактическое число страниц. Повторный Reset
+    ; посреди установки DOS увидит прежнюю геометрию и сохранит её ядро.
+    ld de,0FC00h
     ld hl,0FC00h
     ld bc,transportEnd-transportImage
     xor a
@@ -241,25 +240,19 @@ installPages:
     call install
     IFNDEF ORIGINAL_MX
     xor a
-    ld (0FFFEh),a             ; MEM.SYS С‡РёС‚Р°РµС‚СЃСЏ РёР· СЃРѕР±СЃС‚РІРµРЅРЅРѕРіРѕ ROM-СЃР»РѕС‚Р°.
+    ld (0FFFEh),a
     ENDIF
-    ld hl,transportImage
-    ld de,transportEnd
-    ld bc,0FC00h
-    call moveCore
-    ld a,(pageCount)
-    ld (BANK_PAGE_COUNT),a
     ld hl,BOOT_BIOS_STACK_TOP
     ld (BANK_SERVICE_SP),hl
     ld hl,BOOT_BIOS_STACK_FLOOR
     ld (BANK_STACK_FLOOR),hl
-    ; РџРѕР»РЅС‹Р№ MEM-РєР»РёРµРЅС‚ РѕРґРёРЅР°РєРѕРІ РІ main Рё DOS; BIOS Р·Р°РґР°СЃС‚ Р»РѕРєР°Р»СЊРЅС‹Р№ РІС…РѕРґ.
+    ; Полный MEM-клиент одинаков в main и DOS; BIOS задаст локальный вход.
     ld hl,localBlockImage
     ld de,localBlockImage+BANK_MAIN_LOCAL_BYTES
     ld bc,BOOT_LOCAL_BLOCK
     call moveCore
     ld hl,clientImage
-    ; CLIENT РѕРґРёРЅР°РєРѕРІ РІ MAIN Рё DOS; СЃР»РѕС‚ AT512KS СЂР°СЃРїРѕР»РѕР¶РµРЅ РІ LOCAL.
+    ; CLIENT одинаков в MAIN и DOS; слот AT512KS расположен в LOCAL.
     ld de,clientImage+BANK_MAIN_CLIENT_BYTES
     ld bc,0F800h
     call moveCore
@@ -278,85 +271,49 @@ bootFailed:
     halt
     jp bootFailed
 
-; A=С„РёР·РёС‡РµСЃРєР°СЏ СЃС‚СЂР°РЅРёС†Р°, DE=РёСЃС‚РѕС‡РЅРёРє main, HL=РЅР°Р·РЅР°С‡РµРЅРёРµ, BC=РґР»РёРЅР°.
-; РћР±С‰РёР№ Р±Р°Р№С‚РѕРІС‹Р№ СѓСЃС‚Р°РЅРѕРІС‰РёРє РЅСѓР¶РµРЅ С‚РѕР»СЊРєРѕ РґР»СЏ С…РІРѕСЃС‚РѕРІ РґРѕ Р·Р°РїСѓСЃРєР° С‚СЂР°РЅСЃРїРѕСЂС‚Р°.
-install:
-    ld (0FFC1h),a
-installLoop:
-    call readSource
-    push bc
-    ld c,a
-    call 0FFC0h
-    pop bc
-    inc de
-    inc hl
-    dec bc
-    ld a,b
-    or c
-    jp nz,installLoop
-    ret
-; DE: РІСЂРµРјРµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ stage РЅР°С…РѕРґСЏС‚СЃСЏ РІ MAIN, MEM.SYS вЂ” РІ ROM 7000h.
-readSource:
-    IFNDEF ORIGINAL_MX
-    ld a,d
-    or a
-    jp m,readSourceRam
+;----------------------------------------------------------------------------
+; MXOS
+; Завершить проверку тёплого Reset перед использованием сохранённых банков.
+; вход: DOS готова и совместима, в окне байтовые входы bootstrap, pageCount от детектора.
+; выход: при прежней геометрии BIOS_BOOT_WARM=1 и переход к dosLoaded.
+; При изменении числа банков начинается холодная загрузка. AF/C/HL изменены.
+;----------------------------------------------------------------------------
+checkWarmPages:
     xor a
-    ld (0FFFEh),a
-    ld a,(de)
-    push af
-    xor a
-    ld (0FFFCh),a
-    pop af
-    ret
-readSourceRam:
+    ld hl,BANK_PAGE_COUNT
+    call BOOT_BYTE_READ
+    ld a,(pageCount)
+    cp c
+    IFDEF ORIGINAL_MX
+    jp nz,mxLoadDos
+    ELSE
+    jp nz,loadDos
     ENDIF
-    ld a,(de)
-    ret
-byteWindow:
-    ld a,0
-    ld (0FFFDh),a
-    ld (hl),c
-    ld (0FFFCh),a
-    ret
-byteRead:
-    ; Р’С‚РѕСЂРѕР№ РІС…РѕРґ С‡РёС‚Р°РµС‚ Р±Р°Р№С‚ РІ C; РЅРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ Р·Р°РґР°С‘С‚СЃСЏ РїРµСЂРµРґ РїСЂРѕРІРµСЂРєРѕР№.
-    ld a,0
-    ld (0FFFDh),a
-    ld c,(hl)
-    ld (0FFFCh),a
-    ret
-byteWindowEnd:
-    ASSERT byteWindowEnd-byteWindow == 20
-romWindow:
-    ld sp,0
     ld a,1
-    ld (0FFFEh),a
-    jp romRead4
-    xor a
-    ld (0FFFDh),a
-    jp ramWrite4
-romWindowEnd:
-    ASSERT romWindowEnd-romWindow == 18
+    ld (BIOS_BOOT_WARM),a
+    jp dosLoaded
+
+    INCLUDE "check-ram.inc"
+    INCLUDE "install.inc"
     IFNDEF ORIGINAL_MX
     INCLUDE "splash.inc"
     ENDIF
     INCLUDE "memcpy.inc"
-bootFontName:   DB BOOT_SELECTED_BASENAME
-pageCount:      DB 16
+bootFontName:    DB BOOT_SELECTED_BASENAME
+pageCount:       DB 16
 dataForwardWord: DW BOOT_DATA_FORWARD
-ramFresh:       DB 1
-dosKind:        DB 2
+ramFresh:        DB 1
+dosKind:         DB 2
     IFDEF ORIGINAL_MX
-dosLocalA:      DW MX_DOS_LOCAL_A
-dosNearCopy:    DW MX_DOS_NEAR_COPY
+dosLocalA:       DW MX_DOS_LOCAL_A
+dosNearCopy:     DW MX_DOS_NEAR_COPY
     ELSE
-dosLocalA:      DW BOOT_DOS_LOCAL_A
-dosNearCopy:    DW BOOT_DOS_NEAR_COPY
+dosLocalA:       DW BOOT_DOS_LOCAL_A
+dosNearCopy:     DW BOOT_DOS_NEAR_COPY
     ENDIF
 dosContext:
     DB 1
-    ; Р§РёСЃР»Рѕ СЃС‚СЂР°РЅРёС† РїРѕСЃР»Рµ РґРµС‚РµРєС‚РѕСЂР° РєРѕРїРёСЂСѓРµС‚СЃСЏ СЃСЋРґР° РїРµСЂРµРґ СѓСЃС‚Р°РЅРѕРІРєРѕР№.
+    ; Число страниц после детектора копируется сюда перед установкой.
     DB 16,0,0,0
     DW BOOT_DOS_STACK_TOP,BOOT_DOS_STACK_BOTTOM+64
 dosContextEnd:
@@ -370,46 +327,6 @@ localBlockEnd   = localBlockImage+MEM_LOCAL_SIZE
 windowImage     = memImage+MEM_WINDOW_OFFSET
 windowEnd       = windowImage+MEM_WINDOW_SIZE
     ENT
-romTailStorage:
-    DISP 0FF00h
-romRead4:
-    pop bc
-    pop de
-    jp 0FFCBh
-ramWrite4:
-    ld sp,hl
-    push de
-    push bc
-    inc hl
-    inc hl
-    inc hl
-    inc hl
-    ld a,(0FFC1h)
-    add a,4
-    ld (0FFC1h),a
-    jp nz,0FFC0h
-    ld a,(0FFC2h)
-    inc a
-    cp 080h
-    jp nz,romSamePage
-    ld a,(0FFC4h)
-    inc a
-    ld (0FFC4h),a
-    xor a
-romSamePage:
-    ld (0FFC2h),a
-    ld a,(0FFD3h)
-    dec a
-    ld (0FFD3h),a
-    jp nz,0FFC0h
-    ld (0FFFCh),a
-    ld hl,(0FFD4h)
-    ld sp,hl
-    ret
-    ENT
-romTailStorageEnd:
-romTailImage = BOOT_STAGE_BASE+romTailStorage-stageImage
-romTailEnd   = romTailImage+romTailStorageEnd-romTailStorage
 dataForwardStorage:
     DISP BOOT_DATA_FORWARD
     INCLUDE "../mem/data-forward.inc"
@@ -419,6 +336,6 @@ dataForwardImage = BOOT_STAGE_BASE+dataForwardStorage-stageImage
     ASSERT dataForwardStorageEnd-dataForwardStorage == BOOT_DATA_FORWARD_BYTES
 stageEnd:
     ASSERT stageEnd <= 03000h
-    ; РҐРѕР»РѕРґРЅС‹Р№ bootstrap РІСЂРµРјРµРЅРЅРѕ Р·Р°РЅРёРјР°РµС‚ С‚Р°РєР¶Рµ СЃРІРѕР±РѕРґРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ RUN.
-    ; РЎС‚РµРє Рё РїРµСЂРµРјРµРЅРЅС‹Рµ BIOS РѕСЃС‚Р°СЋС‚СЃСЏ РІС‹С€Рµ BOOT_STAGE_LIMIT.
+    ; Холодный bootstrap временно занимает также свободную область RUN.
+    ; Стек и переменные BIOS остаются выше BOOT_STAGE_LIMIT.
     ASSERT BOOT_STAGE_BASE+stageEnd-stageImage <= BOOT_STAGE_LIMIT

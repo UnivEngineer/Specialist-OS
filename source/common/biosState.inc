@@ -1,9 +1,5 @@
 ; Эти данные нужны монитор-совместимым сервисам без обращения к данным DOS.
-    IFDEF DOS_SPLIT_BUILD
 v_memTop: DW DOS_CODE_START-1
-    ELSE
-v_memTop: DW APP_MEMORY_END-1
-    ENDIF
 v_input_start: DW 0
 v_input_end:   DW 0
 

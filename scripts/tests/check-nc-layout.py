@@ -155,12 +155,12 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
   q=bytearray(m);q[N['bios_vars.cursorY']:N['bios_vars.cursorY']+2]=bytes([243,x])
   q[N['bios_upper.cursorCfg']]=1
   q[0x9000:0xc000]=bytes([0x55])*12288
-  result=call(q,'bios_drawCursorOld')
+  result=call(q,'bios_drawCursor')
   xp=x*2 if width==6 else (x*2//width)*width
   expected=bytearray(q[0x9000:0xc000])
   for pixel in range(xp,xp+width):expected[pixel//8*256+245]^=128>>(pixel%8)
   assert result[0x9000:0xc000]==expected,(name,x,'BIOS cursor mask')
-  assert call(result,'bios_drawCursorOld')[0x9000:0xc000]==q[0x9000:0xc000]
+  assert call(result,'bios_drawCursor')[0x9000:0xc000]==q[0x9000:0xc000]
  # Path display budgets include the full 8.3 leaf and never mutate the source.
  for path in [r'A:\Folder\Middle\File.txt',r'A:\FOLDER01\FOLDER02\FOLDER03\FILENAME.TXT',r'A:\12345678.123','A:\\',r'A:\ABC\DEF\GHI\JKL\FILE.TXT']:
   for budget in [19,20,22,24,28,36,40,44]:

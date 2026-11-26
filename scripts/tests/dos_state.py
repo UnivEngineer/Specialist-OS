@@ -22,3 +22,7 @@ def initialize_dos_state(memory, symbols, bundle=Path(__file__).resolve().parent
     end = symbols['dosZeroEnd']
     memory[start:defaults_end] = memory[source:source + defaults_end - start]
     memory[defaults_end:end] = bytes(end - defaults_end)
+    if 'dosResidentWorkEnd' in symbols:
+        start = symbols['DOS_RESIDENT_WORK']
+        end = symbols['dosResidentWorkEnd']
+        memory[start:end] = bytes(end - start)

@@ -4,7 +4,7 @@
 ; 2022-02-07 Дизассемблировано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../../common/system.inc"
 
 ; Используемые подпрограммы DOS.SYS:
 ; bios_keyScanOld        = 0C003h

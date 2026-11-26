@@ -37,7 +37,7 @@ def main():
     assert not m.subroutine(0xC842, af=0x0100, de=1)['flags']['C']
     assert not m.subroutine(0xC842, af=0x0000, de=1)['flags']['C']
     native = symbols(ROOT / 'bin/DOS.lst')['diskDriver']
-    driver = 0xC863 if args.locked else symbols(ROOT / 'bin/FlashSys.lst')['Driver']
+    driver = SYSTEM['bios_diskDriver'] if args.locked else symbols(ROOT / 'bin/FlashSys.lst')['Driver']
     for sector in [0,127,128,255,256,capacity//256-1]:
         assert not m.subroutine(native, bc=0x0200, de=sector, hl=0x4001)['flags']['C']
         assert m.read(0x4001,256) == image.read_bytes()[sector*256:(sector+1)*256]

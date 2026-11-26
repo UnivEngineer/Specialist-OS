@@ -13,7 +13,7 @@ exe=subprocess.run(['powershell.exe','-NoProfile','-Command',query],capture_outp
 assert Path(exe).resolve()==Path('D:/Projects/RetroPC/Specialist/Emulator/Emu80-flash-test/Emu80qt-mcp.exe').resolve()
 out=ROOT/'docs/dos/exec-extensions-001';out.mkdir(parents=True,exist_ok=True)
 m.call('debug_break');m.stop_at(nc['mainLoop']);m.tap('ESC');m.until(nc['mainLoop'])
-assert m.read(0xC000,len((ROOT/'bin/DOS.sys').read_bytes()))[:3]==bytes.fromhex('C309C0')
+assert m.read(0xC000,3)==(ROOT/'bin/BIOS.sys').read_bytes()[:3]
 assert m.read(s['aBat'],6)==b'BATCOM'
 m.screenshot(out/'cold-boot-nc.png')
 stop=0x8700
@@ -24,7 +24,7 @@ def call(address,**regs):
     return m.until(stop)
 for drive, technology in [(2,'S'),(7,'P')]:
     assert not call(0xC842,af=drive<<8,de=1)['flags']['C']
-    assert call(0xC863,bc=0xFF00)['registers']['bc']['dec']>>8==ord(technology)
+    assert call(SYSTEM['bios_diskDriver'],bc=0xFF00)['registers']['bc']['dec']>>8==ord(technology)
 assert not call(0xC842,af=0x0100,de=1)['flags']['C']
 assert not call(0xC896)['flags']['C']
 def create(name,payload,address):

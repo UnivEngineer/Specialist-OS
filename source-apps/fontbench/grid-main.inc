@@ -1,4 +1,4 @@
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
     INCLUDE "../../bin/FONTBEN.bios.entries.inc"
     DEFINE FONT_NATIVE_GRID
     INCLUDE "grid-corpus.inc"
@@ -13,7 +13,7 @@ entry:
     call gridSetModuleDrive
     call bench_init
     pop hl
-    ret c
+    jp c,bench_restore
     call gridArgs
     jp c,gridExit
     ld a,(gridPseudoOnly)
@@ -815,7 +815,7 @@ gridSetModuleDrive:
     ld (enginePath),a
     ret
     DEFINE APP_COMMAND_ADDR MAIN_COMMAND_ADDR
-    INCLUDE "../../source/include/app-drive.inc"
+    INCLUDE "../../sdk/asm/lib/app-drive.inc"
     INCLUDE "engine-hooks.inc"
     INCLUDE "engine-select.inc"
     INCLUDE "../textbench/standalone.inc"

@@ -1,4 +1,4 @@
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     INCLUDE "abi.inc"
     INCLUDE "../../bin/banked/main-io-import.inc"
     ORG BANK_LANDING

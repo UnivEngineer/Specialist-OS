@@ -174,12 +174,12 @@ overlayBusy:
 
 fileopsName: DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"FILEOPS.DLL",0
 fileopsHost:
-    INCLUDE "../include/fileops-host.inc"
+    INCLUDE "fileops-host.inc"
 fileopsHostEnd:
     ASSERT fileopsHostEnd-fileopsHost < 256
 
 enumName: DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"ENUM.DLL",0
 enumHost:
-    INCLUDE "../include/enumerate-host.inc"
+    INCLUDE "enumerate-host.inc"
 enumHostEnd:
     ASSERT enumHostEnd-enumHost < 256

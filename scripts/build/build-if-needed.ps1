@@ -50,6 +50,7 @@ $symbolPath = Join-Path $outputDirectory ($OutputBase + '.sym')
 $rawOutputPath = $outputPath
 if ($Extension -eq 'cpu') { $rawOutputPath = Join-Path $outputDirectory ($OutputBase + '.i80') }
 $assemblerPath = Join-Path $repositoryRoot "tasm\sjasmplus.exe"
+$sdkAsm = Join-Path $repositoryRoot 'sdk/asm'
 
 $editor = $SourceBase -eq 'EDIT' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\EDIT')
 $commander = $SourceBase -eq 'NC' -and $OutputBase -eq 'NC' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\nc')
@@ -63,7 +64,7 @@ $monitor2 = $SourceBase -eq 'Monitor2' -and $buildDirectory -eq (Join-Path $repo
 $monitorWin = $SourceBase -eq 'MONWIN' -and $buildDirectory -eq (Join-Path $repositoryRoot 'source\monitor_win')
 
 if (-not $RunBuild) {
-    $cacheArgs = @($OutputBase, '--input-content', '--asm', $sourcePath)
+    $cacheArgs = @($OutputBase, '--input-content', '--asm', $sourcePath, '--inc', $sdkAsm)
     $inputs = @()
     $outputs = @()
     if ($dos) {
@@ -76,14 +77,14 @@ if (-not $RunBuild) {
         foreach ($folder in 'bios', 'dos', 'io', 'mem', 'common', 'bootstrap/tests') {
             $cacheArgs += @('--asm', (Join-Path $repositoryRoot "source/$folder"))
         }
-        foreach ($path in 'bin', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc') {
+        foreach ($path in 'bin', 'sdk/asm/abi/syscall-ids.inc', 'source/bios/syscall-tables.inc', 'source/bios/vectors.inc') {
             $cacheArgs += @('--exclude', (Join-Path $repositoryRoot $path))
         }
         $cacheArgs += @('--scan-output', $outputDirectory)
         $outputs += @('bin/BIOS.sys', 'bin/BIOS.sym', 'bin/DOS.sys', 'bin/IO.sys', 'bin/MEM.sys', 'bin/MEM.sym',
             'bin/System.layout.json', 'bin/banked/KERNEL.sym', 'bin/banked/TRANSPORT.sym',
-            'bin/fonts/Compact.pf', 'source/include/syscall-ids.inc', 'source/bios/syscall-tables.inc',
-            'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
+            'bin/fonts/Compact.pf', 'sdk/asm/abi/syscall-ids.inc', 'source/bios/syscall-tables.inc',
+            'source/bios/vectors.inc', 'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
     } elseif ($editor -or $commander) {
         $inputs += @('bin/banked/KERNEL.sym', 'scripts/build/build-driver.py', 'scripts/build/pack-dos.py',
             'scripts/images/executable.py', 'scripts/images/cpu.py')
@@ -189,6 +190,7 @@ if ($flashDriver -or $ramDriver -or $floppyDriver) {
 Write-Host "[build] $sourcePath"
 & $assemblerPath `
     "--i8080" `
+    "--inc=$sdkAsm" `
     "-Wno-rdlow" `
     ("--lst={0}" -f $listingPath) `
     ("--sym={0}" -f $symbolPath) `

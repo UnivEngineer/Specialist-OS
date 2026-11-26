@@ -19,13 +19,13 @@ clearScreen:
             ld    (bios_vars.oldSP), hl
 
             ; Устанавливаем sp в конец видеопамяти
-            ld    sp, 0C000h
+            ld    sp, MX_SCREEN_END
 
             ; Байт (слово) для заполнения памяти
             ld    hl, (bios_vars.inverse)
 
             ; Помещаем в стек 3000h байт
-            ld    bc, 3000h / 16
+            ld    bc, MX_SCREEN_BYTES / 16
 clearScreen_0:
             push      hl
             push      hl

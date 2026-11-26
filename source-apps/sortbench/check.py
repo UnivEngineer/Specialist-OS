@@ -41,6 +41,7 @@ def main():
                     # This CPU model has no PIT; timer readiness is tested
                     # separately by check-timing.py with scripted reads.
                     memory[symbols[f'{module}.benchTimerInit']:symbols[f'{module}.benchTimerInit']+2] = b'\xb7\xc9'
+                    memory[symbols['io_pitRead']:symbols['io_pitRead']+4] = b'\x21\x00\x00\xc9'
                     memory[0x4000:0x4000+len(raw)] = raw
                     for ns in ('raw','upper'):
                         memory[symbols[f'{ns}.state.panelA_filesCnt']] = len(rows)

@@ -24,7 +24,7 @@ printer:    ; Сохраняем регистры
             ld    (IO_PROG_B), a
 
 printer_loop:     ; Выход     при нажатии любой клавиши
-            ld    a, (IO_KEYB_B)     
+            call  ioKeyReadRows
             and   2
             jp z, printer_ret
 

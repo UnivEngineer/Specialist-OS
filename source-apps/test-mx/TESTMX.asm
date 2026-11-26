@@ -1,5 +1,5 @@
 ; Метаданные нативного системного теста; историческое тело не изменяется.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS         = IMAGE_FLAG_MAIN
 IMAGE_API           = 0
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE

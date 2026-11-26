@@ -426,7 +426,7 @@ editorStatusField:
         EX DE,HL
         LD (bios_vars.cursorY),HL
         EX DE,HL
-        JP bios_printStringReal
+        JP bios_printStringRawZ
 editorFormatFour:
         CALL editorFormatColumn
         LD A,(editorNumberBuffer)

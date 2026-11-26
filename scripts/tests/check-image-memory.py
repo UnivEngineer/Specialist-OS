@@ -70,9 +70,17 @@ for kind in ('main','dos'):
 # Header checksum covers all 32 bytes; reserved/mode/policy rejected even when checksum is recomputed.
 m=seed();good=header(m);q,e,_=run(m,'imageValidateHeader');assert not e;count+=1
 from executable import checksum
-for at,value in [(27,16),(29,1),(22,3),(26,5),(23,1),(28,2)]:
+for at,value in [(27,16),(29,1),(22,4),(26,5),(23,1),(28,2)]:
  m=seed();h=bytearray(good);h[at]=value;h[30:32]=W(checksum(h[:30]));m[s['v_imageHeader']:s['v_imageHeader']+32]=h
  q,e,_=run(m,'imageValidateHeader');assert e,(at,value);count+=1
+# TRANSIENT still validates the fixed MAIN header and bypasses the allocation table.
+m=seed()
+h=encode(Image(b'\xc9',0,0,4,bss=128,policy=3),'com')[:32]
+m[s['v_imageHeader']:s['v_imageHeader']+32]=h
+q,e,_=run(m,'imageValidateHeader');assert not e
+q,e,_=run(m,'keReserveImage');assert not e and q[s['keImageToken']:s['keImageToken']+2]==W(0)
+assert q[s['MEM_ALLOC_TABLE']:s['MEM_ALLOC_TABLE']+192]==m[s['MEM_ALLOC_TABLE']:s['MEM_ALLOC_TABLE']+192]
+count+=1
 # Fixed internal MAIN reservations can begin at zero without public NULL ambiguity.
 m=seed();q,e,_=run(m,'memoryReserveMain',hl=0,de=0x1234);assert not e and q[s['MEM_ALLOC_TABLE']:s['MEM_ALLOC_TABLE']+6]==b'\0\0\0\x34\x12\xff';count+=1
 # No loader-side zero fill: BSS is an owned interval, initialized by startup.

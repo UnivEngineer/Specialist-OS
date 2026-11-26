@@ -1,0 +1,5 @@
+@label DISK BENCH
+BENCH/DiskBen/DiskBen.com  ../bin/DISKBEN.cpu  0
+BENCH/DiskBen/DiskBank.dll ../bin/DISKBANK.cpu 0
+BENCH/DiskBen/DiskDos.dll  ../bin/DISKDOS.cpu  0
+BENCH/DiskBen/DiskMain.dll ../bin/DISKMAIN.cpu 0

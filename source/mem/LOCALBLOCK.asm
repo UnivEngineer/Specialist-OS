@@ -1,6 +1,6 @@
 ; Общая сборка LOCAL/CLIENT/TEXT с взаимными ссылками.
 ; Сборщик разделяет бинарник по mx_callPacket на два установочных сегмента.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     INCLUDE "biosabi.inc"
     INCLUDE "abi.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"

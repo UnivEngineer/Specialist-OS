@@ -30,7 +30,7 @@
 ; после успешного ID резидент копируется в SYSTEM_FLASH_ADDR (F6C0h–F7FFh).
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     INCLUDE "../../bin/bios-copy-imports.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 

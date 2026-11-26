@@ -114,7 +114,7 @@ for xphase in range(4):
                     x=(c%24)*8+xphase
                     y=7+(c//24)*8
                     code+=b'\x21'+W((x<<8)|y)+b'\x22'+W(S['bios_vars.cursorY'])
-                    code+=bytes([0x3E,c,0xCD])+W(S['bios_printCharReal'])
+                    code+=bytes([0x3E,c,0xCD])+W(S['bios_printCharRaw'])
                     code+=b'\x2A'+W(S['bios_vars.cursorY'])+b'\x22'+W(0x7800+c*2)
                     accepted=True
                     positions+=list(bytes([y,x+3 if accepted else x]))
@@ -146,7 +146,7 @@ for koi in (0,255):
             routine[6:8] = W(0x800+len(routine)-4)
             rawref[0x800:0x800+len(routine)] = routine
             reference,_ = render(rawref,clean,0x800,inverse=inverse,koi=koi)
-            actual,_ = render(memory,text,S['bios_printStringReal'],inverse=inverse,koi=koi)
+            actual,_ = render(memory,text,S['bios_printStringRawZ'],inverse=inverse,koi=koi)
             assert actual[0x9000:0xC000] == reference[0x9000:0xC000], 'real controls'
             assert actual[S['bios_upper.escMode']] == 255 and actual[S['fast6.realMode']] == 0
             checks += 1
@@ -168,7 +168,7 @@ for memory in (m,built[:65536]):
     checks += 1
 esc_memory = bytearray(m)
 esc_memory[S['bios_upper.escMode']] = 1
-actual,_ = render(esc_memory,b'ABCDEFGH',S['bios_printStringReal'])
+actual,_ = render(esc_memory,b'ABCDEFGH',S['bios_printStringRawZ'])
 reference,_ = render(m,b'ABCDEFGH',0x800)
 assert actual[0x9000:0xC000] == reference[0x9000:0xC000]
 assert actual[S['bios_upper.escMode']] == 1
@@ -229,7 +229,7 @@ corpus = (R/'assets/system-rom/README.TXT').read_bytes().replace(b'\r\n', b' ').
 corpus = bytes(c if c >= 32 else 32 for c in corpus)[:1152].ljust(1152, b' ')
 for linear, (plain, pre) in prepared.items():
     images = []
-    for label, memory, entry in [('char', plain, 0x800), ('char-pre',pre,0x800), ('rotate', plain, S['bios_printString']), ('prerender', pre, S['bios_printString']), ('real-rotate',plain,S['bios_printStringReal']), ('real-prerender',pre,S['bios_printStringReal'])]:
+    for label, memory, entry in [('char', plain, 0x800), ('char-pre',pre,0x800), ('rotate', plain, S['bios_printString']), ('prerender', pre, S['bios_printString']), ('real-rotate',plain,S['bios_printStringRawZ']), ('real-prerender',pre,S['bios_printStringRawZ'])]:
         mem = bytearray(memory)
         code = b'\x31'+W(0x8FE0)
         for row in range(24):

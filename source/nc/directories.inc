@@ -335,7 +335,7 @@ commandPathTail:
             pop hl
 commandPathPrint:
             push bc
-            call bios_printStringReal
+            call bios_printStringRawZ
             pop bc
             ld hl,(bios_vars.cursorY)
             ld (vars.cmdTextPos),hl
@@ -399,7 +399,7 @@ printPanelPath:
             ld hl,00408h
             call setCursorPosPanel
             pop hl
-            jp bios_printStringReal
+            jp bios_printStringRawZ
 
  ; HL=absolute ASCIIZ path, B=available characters (>=19 for full FAT 8.3).
 ; Preserve complete components, a useful leading directory when it fits, and

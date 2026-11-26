@@ -19,13 +19,9 @@ fileChangeDrive:
             jp nc,  fileOpError
             call    fileSelectDrive
             ret c
-    IFDEF DOS_SPLIT_BUILD
             call    fatCheckMounted
             ret c
             jp      dosClearError
-    ELSE
-            jp      fatCheckMounted
-    ENDIF
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -82,12 +78,7 @@ fgd_Next:
             jp c,   fgd_Loop
             pop     af
             call    fileSelectDrive
-    IFDEF DOS_SPLIT_BUILD
             jp      dosClearError
-    ELSE
-            xor     a
-            ret
-    ENDIF
 
     ENDIF
 
@@ -126,7 +117,6 @@ for_Good:
             pop     de
             pop     hl
     IFNDEF BANKED_DOS_BUILD
-    IFDEF DOS_SPLIT_BUILD
             ; Временное размещение ядра в основной памяти: буфер и запрос
             ; не должны перекрывать его, даже находясь ниже bios_vars.
             push hl
@@ -145,7 +135,6 @@ for_Good:
 for_MainMemoryOk:
             pop de
             pop hl
-    ENDIF
     ENDIF
             or      a
             ret

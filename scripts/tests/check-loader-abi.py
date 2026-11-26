@@ -19,6 +19,7 @@ def main():
     p.add_argument('--ticks', type=Path, default=Path(
         'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'))
     p.add_argument('--image', type=Path, default=ROOT/'bin/BIOS.sys')
+    p.add_argument('--io-image', type=Path)
     p.add_argument('--report-directory', type=Path,
                    default=ROOT/'docs/compat/loader-abi-001/cpu')
     args = p.parse_args()
@@ -40,13 +41,17 @@ def main():
     for name, path, port in [('MXOS', args.image, 0xFFE3),
                               ('Monitor2', ROOT/'assets/programs/Monitor2.mon', 0xFF03)]:
         code = path.read_bytes()
+        base = bytearray(65536)
+        base[0xC000:0xC000+len(code)] = code
+        if name == 'MXOS':
+            io = (args.io_image or path.with_name('IO.main.bin')).read_bytes()
+            base[0xF000:0xF000+len(io)] = io
         count = 0
         for entry, mode in [(0xC254, 0x82), (0xC25A, 0x91)]:
             for bits in range(32):
                 flags = 2 | sum((1 << bit) for i, bit in enumerate((0, 2, 4, 6, 7))
                                 if bits & (1 << i))
-                m = bytearray(65536)
-                m[0xC000:0xC000+len(code)] = code
+                m = bytearray(base)
                 m[port] = 0x55
                 # LXI SP; POP PSW через HL; контрольные BC/DE/HL; CALL.
                 wrapper = bytes.fromhex('31 00 8F 21') + bytes((flags, 0x5A))
@@ -70,8 +75,7 @@ def main():
         memtop_cases = 0
         for value in (0, 1, 0x7FFF, 0x8FDE, 0xCFFF, 0xD000, 0xFFFF):
             for flags in (2, 0xD7):
-                m = bytearray(65536)
-                m[0xC000:0xC000+len(code)] = code
+                m = bytearray(base)
                 m[state_address:state_address+2] = b'\x55\xAA'
                 # AF/BC/DE/HL до setter; все четыре пары сохраняем в снимок.
                 wrapper = bytes.fromhex('31 00 8F 21')+bytes((flags,0x5A))

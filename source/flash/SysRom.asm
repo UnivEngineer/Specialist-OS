@@ -1,5 +1,5 @@
 ; Read-only disk in the original MX linear system ROM (0000h..7FFFh/BFFFh).
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     IFNDEF DRIVER_ORIGIN

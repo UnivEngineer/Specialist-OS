@@ -14,8 +14,17 @@ ncConfigInit:
     ld (ncConfigRuleEnd),hl
     ret
 ncConfigLoad:
+    xor a
+    ld (vars.stateFile),a
+    ld (ncConfigStateLayer),a
     call ncConfigInit
     ld hl,ncConfigPath
+    call ncConfigRead
+    push af
+    ld a,1
+    ld (ncConfigStateLayer),a
+    pop af
+    ret
 ; HL=path, CF/A=read status. Paths and input reuse NC buffers; selected drive
 ; is restored even if the parsed configuration changes either panel's CWD.
 ncConfigRead:
@@ -94,6 +103,8 @@ ncConfigDirective:
     call ncConfigLookup
     ret c
     ld (ncConfigKind),a
+    cp 17
+    jp z,ncConfigStateFile
     cp 15
     jp nc,ncConfigDrive
     cp 4
@@ -241,6 +252,51 @@ ncConfigRuleColor:
     ld (hl),a
     jp ncConfigExtensions
 
+;----------------------------------------------------------------------------
+; MXOS
+; Принять абсолютный путь из главной конфигурации.
+; вход: курсор токенов у значения StateFile.
+; выход: корректный путь скопирован в vars.stateFile, AF/BC/DE/HL рабочие.
+;----------------------------------------------------------------------------
+ncConfigStateFile:
+    ld a,(ncConfigStateLayer)
+    or a
+    ret nz
+    call ncConfigToken
+    ret c
+    ld a,b
+    cp 4
+    ret c
+    cp MAX_PATH
+    ret nc
+    ex de,hl
+    ld a,(hl)
+    sub 'A'
+    cp 8
+    ret nc
+    inc hl
+    ld a,(hl)
+    cp ':'
+    ret nz
+    inc hl
+    ld a,(hl)
+    cp '/'
+    jp z,ncConfigStateAbsolute
+    cp 05Ch
+    ret nz
+ncConfigStateAbsolute:
+    dec hl
+    dec hl
+    ex de,hl
+    ld l,b
+    ld h,0
+    inc hl
+    add hl,de
+    ex de,hl
+    ld bc,vars.stateFile
+    jp bios_memcpy_bc_hl
+ncConfigStateLayer: DB 0
+
 ; Next uppercase token, DE=start, B=length, CF=end/comment; cursor retained.
 ncConfigToken:
     ld hl,(ncConfigCursor)
@@ -350,6 +406,7 @@ ncConfigKind:           DB 0
 ncConfigColor:          DB 0
 ncConfigPath:           DB BOOT_VOLUME_LETTER,':',05Ch,'DOS',05Ch,'NC.CFG',0
 ncConfigDirectives:
+    DB 'STATEFILE',0,17
     DB 'FILECOLORUSER',0,0,'FILECOLORSYS',0,1,'FILECOLORDEF',0,2
     DB 'DEFAULTSORTMODE',0,3
     DB 'DEFAULTLEFTDRIVE',0,15,'DEFAULTRIGHTDRIVE',0,16

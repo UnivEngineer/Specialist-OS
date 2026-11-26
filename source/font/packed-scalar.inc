@@ -23,7 +23,7 @@ scalar:
     rrca
     rrca
     and 3Fh
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld d,a
     ld a,l
     sub 7
@@ -99,7 +99,7 @@ scalar:
     rrca
     rrca
     and 3Fh
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld d,a
     ld a,l
     sub 7

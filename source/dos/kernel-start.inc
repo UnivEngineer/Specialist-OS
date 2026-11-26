@@ -78,6 +78,9 @@ dosInitVariables:
     ld de,dosWorkStart
     ld bc,dosDefaultsEnd-dosWorkStart
     call moveBytesForward
+    ld hl,DOS_RESIDENT_WORK
+    ld bc,dosResidentWorkEnd-DOS_RESIDENT_WORK
+    call cliZero
     ld hl,dosDefaultsEnd
     ld bc,dosZeroEnd-dosDefaultsEnd
     jp cliZero
@@ -122,6 +125,10 @@ kernelWarm:
     ld (ksDirect),a
     ld (diActive),a
     call moduleWarm
+    xor a
+    ld (pressureCommandReady),a
+    ld (pressureBusy),a
+    call pressureRestore
     ld a,(v_bootAutoexec)
     or a
     call nz,fontConfigReset

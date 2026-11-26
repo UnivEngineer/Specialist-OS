@@ -9,8 +9,8 @@
 ; 2022-01-14 Дизассемблировано и переработано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/version.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../common/version.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 SECTOR_SIZE = 256           ; размер сектора в байтах
@@ -206,10 +206,10 @@ readAnswer:
     MODULE formatMath
     DEFINE MATH_MUL
     DEFINE MATH_DIV
-    INCLUDE "../include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDMODULE
 
-    INCLUDE "../include/lineedit.inc"
+    INCLUDE "../../sdk/asm/lib/lineedit.inc"
 
 Confirmed:
     ld      a, b            ; восстановить букву диска в a

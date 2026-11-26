@@ -1,5 +1,5 @@
 ; Драйвер загрузочного FAT12-тома во внешней flash. Исполняется в банке DOS.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     ORG DOS_FLOPPY_ADDR
     ld a,b
     cp 4

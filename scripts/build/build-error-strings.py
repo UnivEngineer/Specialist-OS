@@ -4,7 +4,7 @@ import re
 import struct
 import sys
 
-MXOS_INCLUDE = Path(__file__).resolve().parents[2] / 'source/include/mxos.inc'
+MXOS_INCLUDE = Path(__file__).resolve().parents[2] / 'sdk/asm/abi/dos-errors.inc'
 MESSAGES = {
     'DOS_ERR_IO':              'Disk input/output error',
     'DOS_ERR_NOT_FOUND':       'File or path not found',

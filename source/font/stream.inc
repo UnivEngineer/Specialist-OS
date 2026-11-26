@@ -25,10 +25,10 @@ streamCapacity:
     ld a,(bios_vars.cursorX)
     rrca
     rrca
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld (streamStart),a
     ld d,a
-    ld a,0C0h
+    ld a,high MX_SCREEN_END
     sub d
     IFDEF CELL_WIDTH
     add a,a
@@ -274,7 +274,7 @@ limit: cp 0
 streamFinish:
 streamSavedSP: ld sp,0
     ld a,d
-    sub 90h
+    sub high MX_SCREEN_BASE
     add a,a
     add a,a
     ld (bios_vars.cursorX),a

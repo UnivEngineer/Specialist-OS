@@ -8,7 +8,7 @@ printChar_position:
             rrca
             rrca
             and 3Fh
-            add a,90h
+            add a,high MX_SCREEN_BASE
 printChar_positionReady:
             inc h
             inc h

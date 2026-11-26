@@ -211,7 +211,7 @@ dosRecords:
     body += marks
     with tempfile.TemporaryDirectory(prefix='mxos-memory-') as folder:
         out = Path(folder)
-        src = imports + f'\n INCLUDE "{(ROOT / "source/include/mxos.inc").as_posix()}"\n ORG 0B800h\n ld sp,08FDFh\n' + body + '\n END\n'
+        src = imports + f'\n INCLUDE "{(ROOT / "source/common/system.inc").as_posix()}"\n ORG 0B800h\n ld sp,08FDFh\n' + body + '\n END\n'
         (out / 'case.asm').write_text(src, encoding='utf-8')
         subprocess.run([str(ROOT / 'tasm/sjasmplus.exe'), '--i8080', f'--raw={out / "case.bin"}', str(out / 'case.asm')], check=True, capture_output=True)
         memory = bytearray(65536)

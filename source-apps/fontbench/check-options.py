@@ -16,13 +16,9 @@ def main():
     cases = [x.split(',') for x in re.findall(r'^    CASE (.+)$', (ROOT/'source-apps/fontbench/matrix-data.inc').read_text(), re.M)]
     word=lambda x:x.to_bytes(2,'little')
     call=lambda name:b'\xcd'+word(sym[name])
-    asm=args.out/'argNext.asm'
-    asm.write_text('    ORG 0C8B7h\n    INCLUDE "'+(ROOT/'source/common/argNext.inc').as_posix()+'"\n',encoding='utf-8')
-    subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow','--raw='+str(args.out/'argNext.bin'),str(asm)],capture_output=True,check=True)
     base=bytearray(65536)
     data=(ROOT/'bin/FONTLAB.i80').read_bytes();base[:len(data)]=data
     data=(ROOT/'bin/BIOS.sys').read_bytes();base[0xc000:0xc000+len(data)]=data
-    arg_code=(args.out/'argNext.bin').read_bytes();base[sym['bios_argNext']:sym['bios_argNext']+len(arg_code)]=arg_code
     checks=0
     def run(text, options=(7,7,3,63,0,0,0), bad=False, null=False, engines=7):
         nonlocal checks

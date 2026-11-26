@@ -20,7 +20,7 @@ def symbols(name):
 
 def memory(name=None):
     m = bytearray(65536)
-    dos = (ROOT / 'bin/DOS.sys').read_bytes()
+    dos = (ROOT / 'bin/BIOS.sys').read_bytes()
     m[0xC000:0xC000+len(dos)] = dos
     if name:
         sy = symbols(name)
@@ -51,9 +51,9 @@ def run(m, entry, end=0x8100, hl=0x7000, de=0x7000, bc=0xAA5A):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     ds = symbols('DOS')
-    assert ds['bios_argNext'] == 0xC8B7
-    dos = (ROOT/'bin/DOS.sys').read_bytes()
-    assert dos[0x8B7:0x8BA] == b'\xC3'+ds['argNext'].to_bytes(2, 'little')
+    offset = ds['bios_argNext'] - ds['bios_init']
+    bios = (ROOT/'bin/BIOS.sys').read_bytes()
+    assert bios[offset:offset+3] == b'\xC3'+ds['argNext'].to_bytes(2, 'little')
     token_cases = 0
     for raw in (b'\0', b'   \r', b'foo bar\0', b'  -MON:Test  A:GAME.EXE  \r',
                 b'A:\0', bytes((0xC1, 0xE2, 0xFF, 0)), b'x'*255+b'\0',

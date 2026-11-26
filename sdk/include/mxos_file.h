@@ -1,10 +1,7 @@
 /* Двоичный файловый ABI MXOS2; структура не зависит от выравнивания C. */
 #ifndef MXOS_FILE_H
 #define MXOS_FILE_H
-typedef unsigned char mxos_u8;
-typedef unsigned short mxos_u16;
-typedef unsigned long mxos_u32;
-typedef signed long mxos_i32;
+#include "mxos_types.h"
 typedef struct { mxos_u8 bytes[64]; } MXOS_FILE;
 /* Целый файл по пути: 40 байт, рабочий дескриптор принадлежит вызывающему.
  * count — вместимость загрузки / длина сохранения; actual — результат.
@@ -55,11 +52,6 @@ typedef struct {
 #define MXOS_ERR_CANCELLED 12
 
 /* Переходники компилятора: один указатель на 64-байтный блок; код DOS=0 при успехе. */
-#ifdef __Z88DK
-#define MXOS_FASTCALL __z88dk_fastcall
-#else
-#define MXOS_FASTCALL
-#endif
 mxos_u8 mxos_file_call(MXOS_FILE *file) MXOS_FASTCALL;
 mxos_u8 mxos_current_drive(void);
 

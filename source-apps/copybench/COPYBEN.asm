@@ -1,7 +1,9 @@
 ; Автономный тест ROM/main/ДОЗУ и межстраничного копирования. Intel 8080.
 ; Последние обнаруженные страницы временно используются с полным сохранением
 ; изменяемых данных, хвоста и общего окна. Файловые вызовы внутри теста запрещены.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
+COPYBEN_READ  = 0FFC0h
+COPYBEN_WRITE = 0FFD0h
 IMAGE_FLAGS         = IMAGE_FLAG_MAIN
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_EXCLUSIVE
 PIT_HZ              = 2000000
@@ -58,6 +60,10 @@ entry:
     call bios_printDecWord
     ld hl,working
     call puts
+    ld a,TIMER_RAW
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    ld hl,timerMessage
+    jp c,messageExit
     ld hl,0FFC0h
     ld de,oldWindow
     ld bc,32
@@ -121,7 +127,7 @@ blockLoop:
     push hl
     ld a,(targetPage)
     ld c,a
-    call bios_RAMDWrite
+    call COPYBEN_WRITE
     pop hl
     pop de
     pop bc
@@ -190,6 +196,8 @@ restore:
     ld bc,32
     call localCopy
 restored:
+    ld a,TIMER_RELEASE
+    MXOS_CALL_REGS MXOS_DOS_TIMER
     ld a,(timerError)
     or a
     ld hl,timerMessage
@@ -233,7 +241,7 @@ byteMode:
 bankRead:
     push bc
     ld a,(targetPage)
-    call bios_RAMDRead
+    call COPYBEN_READ
     ld a,c
     ld (de),a
     pop bc
@@ -260,7 +268,7 @@ bankWrite:
     ld a,(de)
     ld c,a
     ld a,(targetPage)
-    call bios_RAMDWrite
+    call COPYBEN_WRITE
     pop bc
     inc hl
     inc de
@@ -299,7 +307,7 @@ verify:
 verifyLoop:
     push bc
     ld a,(targetPage)
-    call bios_RAMDRead
+    call COPYBEN_READ
     ld a,(de)
     cp c
     pop bc
@@ -324,13 +332,13 @@ verifyBad:
     INCLUDE "enginetests.inc"
 inputBuffer: DS 11,0
 ; Локальные настройки общей измерительной библиотеки приложений.
-    INCLUDE "../../source/include/timing-pit.inc"
-timer_read   = pitTimerRead
+    INCLUDE "../../sdk/asm/lib/timing-pit.inc"
+timer_read   = io_pitRead
 timing_print = puts
 
     MODULE copyMath
     DEFINE MATH_DIV
-    INCLUDE "../../source/include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDMODULE
 timing_div_hl_de    = copyMath.div_hl_de
 TIMING_NUMBER_WIDTH = 8
@@ -338,8 +346,8 @@ DECIMAL             = inputBuffer
 timing_printChar:
     ld c,a
     jp bios_printChar
-    INCLUDE "../../source/include/timing.inc"
-    INCLUDE "../../source/include/timing-ms.inc"
+    INCLUDE "../../sdk/asm/lib/timing.inc"
+    INCLUDE "../../sdk/asm/lib/timing-ms.inc"
 callerSP:           DW 0
 callerKoi:          DB 0
 targetPage:         DB 0

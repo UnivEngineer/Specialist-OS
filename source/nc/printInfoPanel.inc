@@ -475,7 +475,7 @@ pip_numberPadding:
             COLOR COLOR_INFONUMBER
             call nz,printSpaces
             ld hl,ncDecimalText
-            jp bios_printStringReal
+            jp bios_printStringRawZ
 pip_printDiskNumber:
             call pip_printNumber
             jp pip_printInfoDrive ; Same color as the label, no color seam.

@@ -88,6 +88,14 @@ def main():
         m.stop_at(symbols['cliInput'])
         m.tap('f10')
         wait_cli()
+        assert byte('cliHistoryOnDisk') == 1, 'CLI must use the RAM-disk history'
+        command('PWD')
+        m.tap('up')
+        assert text() == b'PWD'
+        ring = symbols['cliHistoryEntries']
+        assert m.read(ring, 4096) == bytes(4096), 'Disk history copied the ring into MAIN'
+        m.tap('esc')
+        print('PASS RAM disk holds history and Up reads a single record', flush=True)
         def engine(line, width, kind):
             command(line, font_result=0)
             actual = m.read(symbols['FONT_ENGINE_HEADER'] + 5, 3)

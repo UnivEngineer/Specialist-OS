@@ -15,6 +15,3 @@ biosCliExecReturn:
     jp nc,bios_reboot
     ld (bios_cliExecError),a
     jp bios_reboot
-
-    ASSERT $ == bios_cliExecError
-    DB 0

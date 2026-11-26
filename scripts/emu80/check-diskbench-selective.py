@@ -2,8 +2,18 @@
 from pathlib import Path
 import argparse,json,runpy,shutil,struct
 R=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--runtime',type=Path,required=True);p.add_argument('--port',type=int,default=19782);p.add_argument('--profile-only',action='store_true');p.add_argument('--report',type=Path,default=R/'docs/diskbench/selective-2026-11-13');a=p.parse_args();a.report.mkdir(parents=True,exist_ok=True)
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--runtime',type=Path,required=True)
+p.add_argument('--port',type=int,default=19782)
+p.add_argument('--disk',type=Path,default=R/'images/DiskBench-H.bin', help='writable H: fixture with a free root entry')
+p.add_argument('--profile-only',action='store_true')
+p.add_argument('--report',type=Path,default=R/'docs/diskbench/selective-2026-11-13')
+a = p.parse_args()
+a.report.mkdir(parents=True,exist_ok=True)
+if not a.disk.is_file():
+ p.error('Build H: with scripts/images/build-image.ps1 Games2M -ManifestFile scripts/emu80/fixtures/DiskBench-H.txt or pass --disk')
 f=a.report/'input';f.mkdir(exist_ok=True)
+shutil.copy2(a.disk,f/'disk.bin')
 for name in ('NC.i80','NC.sym','BIOS.sys','DOS.sys','DOS.sym','DISKBEN.i80','DISKMAIN.i80'):
  shutil.copy2(R/'bin'/name,f/name)
 for name in ('DISKBEN','DISKMAIN'):shutil.copy2(R/f'source-apps/diskbench/build/{name}.sym',f/f'{name}.sym')
@@ -57,17 +67,17 @@ def trace_batch(drive):
   m.call('emu_run_for',ms=500)
  raise RuntimeError(('batch trace timeout',state))
 try:
- x.start('diskbench-selective',system=f/'system.bin',nc_binary=f/'NC.i80',nc_symbols=f/'NC.sym',dos=f/'DOS.sys')
+ x.start('diskbench-selective',system=f/'system.bin',disk=f/'disk.bin',nc_binary=f/'NC.i80',nc_symbols=f/'NC.sym',dos=f/'DOS.sys')
  cases=[('H',1,0,True)] if a.profile_only else [('B',0,0,False),('H',0,0,False),('H',1,0,False),('H',1,1,False),('H',1,0,True)]
  for index,(drive,offset,random,diagnostic) in enumerate(cases):
   if index==0 and drive=='B':
-   command('a:/bench/diskben/diskben.com');trap(cs['menu_drive'],cs['menu_executor']);m.tap('enter');wait(cs['menu_drive'])
+   command('h:/bench/diskben/diskben.com -m:all');trap(cs['menu_drive'],cs['menu_executor']);m.tap('enter');wait(cs['menu_drive'])
    m.screenshot(a.report/'first-menu-drive.png');answer('menu_drive','b','menu_executor');answer('menu_executor','main','menu_verify')
   else:
-   command('a:/bench/diskben/diskben.com '+drive.lower()+': -c:main -m:all -b:'+('unaligned' if offset else 'aligned'))
+   command('h:/bench/diskben/diskben.com '+drive.lower()+': -c:main -m:all -b:'+('unaligned' if offset else 'aligned'))
    trap(cs['menu_verify'],cs['error'],cs['bank_module_error']);m.tap('enter')
   for menu,value,next_menu in [('menu_verify','0','menu_writes'),('menu_writes','1','menu_size'),('menu_size','8','menu_fragment'),('menu_fragment',str(random),'moduleSelect')]:answer(menu,value,next_menu)
-  wait(cs['moduleSelect']);trap(ws['pitTimerInit'],cs['error'],cs['bank_module_error']);m.call('emu_run_for',ms=500);wait(ws['pitTimerInit'])
+  wait(cs['moduleSelect']);trap(ws['pitTimerInitDivisor'],cs['error'],cs['bank_module_error']);m.call('emu_run_for',ms=500);wait(ws['pitTimerInitDivisor'])
   assert m.read(ws['config']+10,1)==bytes([offset]) and m.read(ws['config']+1,1)==b'\1'
   if diagnostic:trace_batch(ord(drive)-65)
   else:
@@ -81,6 +91,20 @@ try:
  trap(ks['batExecute']);m.call('emu_reset')
  for i in range(3):
   wait(ks['batExecute'],page=1);m.screenshot(a.report/f'autoexec-{i}.png');m.call('debug_step',mode='into');m.call('emu_run_for',ms=500)
- trap(ns['mainLoop']);m.call('emu_run_for',ms=500);m.until(ns['mainLoop'],120,page=0)
+ # Reset uses the image's normal shell profile, which can be banked even
+ # though Matrix.start selects NC_MN for the application measurements.
+ if b'NC_MN   COM' in (f/'system.bin').read_bytes():
+  core=sy(R/'bin/NC_CORE.sym')
+  target=core['ncBankInputPoll']
+  trap(target)
+  for _ in range(120):
+   state=m.call('cpu_state')
+   if state['registers']['pc']['dec']==target:
+    if m.read(x.pageAddress,1)[0]>1:break
+    m.call('debug_step',mode='into')
+   m.call('emu_run_for',ms=500)
+  else:raise RuntimeError(('Resident NC did not reach keyboard input',state))
+ else:
+  trap(ns['mainLoop']);m.call('emu_run_for',ms=500);m.until(ns['mainLoop'],120,page=0)
  print('AUTOEXEC ECHO / DRIVE-FIRST / SELECTIVE RAW+FILE PASS',flush=True)
 finally:x.stop()

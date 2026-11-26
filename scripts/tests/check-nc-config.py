@@ -134,6 +134,16 @@ def main():
     result=parse(b'LeftSelected "unfinished\n',result)
     assert result[n['vars.savedSelectedA']:n['vars.savedSelectedA']+11]==b'#MIXED.TXT\0'
     fallback = call(memory, 'ncConfigInit')
+    path = n['vars.stateFile']
+    selected = b'A:\\DOS\\NC-STATE.CFG\0'
+    configured = parse(b'StateFile a:\\dos\\nc-state.cfg\n')
+    assert configured[path:path+len(selected)] == selected
+    for invalid in (b'relative.cfg', b'I:\\OTHER.CFG', b'A:FILE.CFG', b'A:\\'+b'X'*126):
+        checked = parse(b'StateFile '+invalid, configured)
+        assert checked[path:path+len(selected)] == selected
+    configured[n['ncConfigStateLayer']] = 1
+    checked = parse(b'StateFile B:\\OTHER.CFG', configured)
+    assert checked[path:path+len(selected)] == selected
     assert color(fallback, 'EXE') == n['COLOR_EXECUTABLE']
     assert color(fallback, 'TXT') == n['COLOR_FILE']
     print('NC.CFG PASS: layered last-wins settings/colors, CR/LF/CRLF, comments, 32-rule bound, validation, numeric state and selected names')

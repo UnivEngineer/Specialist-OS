@@ -9,7 +9,7 @@ tmp/
 .codex-tmp
 # Необязательные локальные установки/checkout эмуляторов.
 /.local/
-# Локальный эксперимент LLM80, пока не включённый в историю проекта.
+# Прежнее расположение LLM80 в старых рабочих копиях. Проект переехал в UnivEngineer/LLM80.
 /source-apps/llm80/
 /assets/programs/[Ll][Ll][Mm]80.*
 /assets/programs/[Ll][Ll][Mm]3*

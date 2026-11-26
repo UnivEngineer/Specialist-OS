@@ -27,6 +27,8 @@ def verify_mem_profiles(m,page,BIN,b,k,ls,s,symbols):
  data_size=symbols(BIN/'MEM.sym')['MEM_DATA_SIZE']
  data_start=b['MEM_DATA_START']
  assert data_start+data_size==b['BANK_WINDOW']
+ page(0)
+ warm=m.read(b['biosBootWarm'],1)==b'\1'
  page(2)
  actual=m.read(data_start,data_size)
  expected=bytearray(transport[data_start-0xfc00:data_start-0xfc00+data_size])
@@ -48,6 +50,11 @@ def verify_mem_profiles(m,page,BIN,b,k,ls,s,symbols):
   for address in (ts['bankMoveHome']+1,s['moveDataOverlayReturn']+1):
    start=address-data_start
    expected[start:start+2]=actual[start:start+2]
+ if warm and 'checkBootRam' in s:
+  expected[s['BOOT_RAM_PROBE']-data_start]=0xA6
+ elif warm and 'installDosProfile' in s:
+  # Детектор оставил номер физической страницы + 1 в пробном байте DATA.
+  expected[s['BOOT_RAM_PROBE']-data_start]=2
  assert actual==expected
  page(0)
 
@@ -63,10 +70,19 @@ h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__i
 g['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue; if($p){{$p[0].OwningProcess}};exit 0')
 x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp';s=h['symbols'](BIN/'bootstrap/BOOT.sym');b=h['symbols'](BIN/'BIOS.sym');k=h['symbols'](BIN/'banked/KERNEL.sym');n=h['symbols'](BIN/'NC.sym');ls=h['symbols'](BIN/'banked/LOCALBLOCK.sym');rows=[]
 def page(value):m.write(0xFFFD if value else 0xFFFC,bytes([value-1 if value else 0]))
+core_symbols=BIN/'NC_CORE.sym'
+core=h['symbols'](core_symbols) if core_symbols.exists() else {}
+nc_target=core.get('ncBankInputPoll',n['mainLoop'])
+nc_page=0
+local=(BIN/'banked/LOCALBLOCK.bin').read_bytes()
 def nc():
- for _ in range(20):
-  m.stop_at(n['mainLoop']);state=m.until(n['mainLoop'],120)
-  if m.read(0,32)==(BIN/'NC.i80').read_bytes()[:32]:return state
+ global nc_page
+ m.stop_at(nc_target)
+ for _ in range(120):
+  state=m.until(nc_target,120)
+  nc_page=m.read(b['bankPage'],1)[0]
+  if nc_target!=n['mainLoop'] and nc_page>1:return state
+  if nc_page==0 and m.read(0,32)==(BIN/'NC.i80').read_bytes()[:32]:return state
   m.call('debug_step',mode='into')
  raise AssertionError('NC was not restored')
 try:
@@ -79,7 +95,7 @@ try:
   for label in ('stage','biosLoaded','dosLoaded','bootDone'):
    m.stop_at(s[label]);state=m.until(s[label],40);ticks[label]=state['cpu_ticks']
    if label=='biosLoaded':
-    image=(BIN/'BIOS.sys').read_bytes();assert m.read(0xC000,len(image))==image
+    image=(BIN/'BIOS.sys').read_bytes();assert m.read(b['bios_init'],len(image))==image
    if label=='dosLoaded':
     page(1)
     if mode=='cold':
@@ -87,18 +103,27 @@ try:
     else:
      assert m.read(0xA800,17)==b'DOS survives warm'
      page(2);assert m.read(0xE000,17)==b'RAM disk survives'
+     if 'checkBootRam' in s:
+      page(2);assert m.read(s['BOOT_RAM_PROBE'],1)==b'\xA6'
     page(0)
   linear=(FONT).read_bytes()
   font=bytes(linear[c*8+y] for y in range(8) for c in range(256))
   assert m.read(b['FONT_ADDR'],len(font))==font
-  state=nc();ticks['nc']=state['cpu_ticks'];assert m.read(b['v_memTop'],2)==bytes.fromhex('ff8b')
+  state=nc();ticks['nc']=state['cpu_ticks']
+  ceiling=b.get('APP_MEMORY_END',0x8c00)
+  if nc_page and 'memoryPublishedEnd' in k:
+   page(1);ceiling=int.from_bytes(m.read(k['memoryPublishedEnd'],2),'little')
+   assert 0<ceiling<=b['APP_MEMORY_END']
+  page(0);assert m.read(b['v_memTop'],2)==(ceiling-1).to_bytes(2,'little')
   # Общий код MEM и разные данные установки main/DOS; минимальный профиль данных.
   verify_mem_profiles(m,page,BIN,b,k,ls,s,h['symbols'])
 
   page(1);assert m.read(k['memoryRamPages'],1)==b'\x04';assert m.read(k['v_dosModuleReady'],1)==b'\1';m.write(0xA800,b'DOS survives warm')
   page(2)
   if mode!='cold':assert m.read(0xE000,17)==b'RAM disk survives'
-  m.write(0xE000,b'RAM disk survives');page(0)
+  m.write(0xE000,b'RAM disk survives')
+  if mode=='cold' and 'checkBootRam' in s:m.write(s['BOOT_RAM_PROBE'],b'\xA6')
+  page(0)
   # Следующий Reset обязан восстановить обе части внешнего шрифта.
   m.write(b['FONT_ADDR'],b'\xA5');m.write(b['FONT_ADDR']+len(font)-1,b'\x5A')
   row=dict(mode=mode,ticks=ticks,biosMs=(ticks['biosLoaded']-ticks['stage'])/2000,dosAndProbeMs=(ticks['dosLoaded']-ticks['biosLoaded'])/2000,bootMs=(ticks['nc']-ticks['stage'])/2000,dosReloaded=mode=='cold');rows.append(row);print(row,flush=True);m.screenshot(a.report/(mode+'.png'))
@@ -109,35 +134,49 @@ try:
  driver=m.read(b['SYSTEM_FLASH_ADDR'],16)
  for shell in ('NC','CLI'):
   if shell=='CLI':
+   page(nc_page)
    m.call('bp_clear');m.call('emu_run_for',ms=500)
    m.stop_at(cli['cliPrompt']);m.tap('f10');m.until(cli['cliPrompt'],120)
-  target=n['mainLoop'] if shell=='NC' else cli['cliPrompt']
+  target=nc_target if shell=='NC' else cli['cliPrompt']
   binary=(BIN/f'{shell}.i80').read_bytes()[:32]
-  for entry,std in ((0xC000,False),(0xC800,False),(0xC800,True)):
+  page(1);shell_depth=m.read(t['bankDepth'],1);page(0)
+  for entry,std in ((b['bios_init'],False),(b['bios_reboot'],False),(b['bios_reboot'],True)):
    # Изолированная проверка ABI; возврат реального COM проверяет system-019.
    m.stop_at(target);start=m.call('cpu_state')['cpu_ticks']
+   page(0)
    if std:m.write(0xFFFF,b'\0')
-   m.call('regs_set',pc=entry,sp=0x8FDF);state=m.until(target,120)
-   assert m.read(0,32)==binary
+   m.call('regs_set',pc=entry,sp=0x8FDF)
+   if shell=='NC':state=nc()
+   else:
+    state=m.until(target,120,page=0)
+    assert m.read(0,32)==binary
+   page(0)
    assert m.read(marker,1)==b'9','Software restart reloaded BIOS'
    assert m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
    page(1);assert m.read(k['v_shell'],1)==bytes([shell=='CLI'])
    assert m.read(0xA800,17)==b'DOS survives warm'
-   assert m.read(t['bankDepth'],1)==b'\1'
+   assert m.read(t['bankDepth'],1)==shell_depth
    assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
    assert int.from_bytes(m.read(t['bankServiceSP'],2),'little') <= b['DOS_BANK_STACK_TOP']
    page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
    row=dict(mode=f'{entry:04X}',std=std,shell=shell,biosReloaded=False,dosReloaded=False,returnMs=(state['cpu_ticks']-start)/2000)
    rows.append(row);print(row,flush=True)
   m.screenshot(a.report/('software-'+shell+'.png'))
- # Reset обязан восстановить даже повреждённый драйвер main, сохранив CLI.
- m.write(b['SYSTEM_FLASH_ADDR'],b'\x76');m.stop_at(cli['cliPrompt']);m.call('emu_reset');m.until(cli['cliPrompt'],120)
- assert m.read(0,32)==(BIN/'CLI.i80').read_bytes()[:32]
- assert m.read(marker,1)==original and m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
- page(1);assert m.read(k['v_shell'],1)==b'\1';assert m.read(0xA800,17)==b'DOS survives warm'
+ # После аппаратного Reset штатный AUTOEXEC явно запускает NC.COM.
+ # Архивные комплекты без банкового NC возвращаются в выбранную CLI.
+ reset_shell='NC' if core else 'CLI'
+ m.write(b['SYSTEM_FLASH_ADDR'],b'\x76')
+ m.stop_at(nc_target if core else cli['cliPrompt']);m.call('emu_reset')
+ if core:nc()
+ else:
+  m.until(cli['cliPrompt'],120,page=0)
+  assert m.read(0,32)==(BIN/'CLI.i80').read_bytes()[:32]
+ page(0);assert m.read(marker,1)==original and m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
+ page(1);assert m.read(k['v_shell'],1)==bytes([reset_shell=='CLI'])
+ assert m.read(0xA800,17)==b'DOS survives warm'
  page(2);assert m.read(0xE000,17)==b'RAM disk survives';page(0)
- rows.append(dict(mode='reset-corrupt-main',shell='CLI',biosRestored=True,driverRestored=True,dosReloaded=False))
- print('RESET RESTORED BIOS/DRIVER; CLI/DOS/B: PRESERVED',flush=True)
+ rows.append(dict(mode='reset-corrupt-main',shell=reset_shell,biosRestored=True,driverRestored=True,dosReloaded=False))
+ print('RESET RESTORED BIOS/DRIVER; DOS/B: PRESERVED',flush=True)
  # Старое ядро нельзя сохранять при несовместимой версии транспорта.
  page(1);m.write(b['MEM_RUNTIME_REVISION_ADDR'],b'\0\0')
  m.write(k['kernelVersion'],b'\0');page(0)

@@ -5,12 +5,12 @@ moduleTimerStart:
     ld (elapsed),hl
     ld (elapsed+2),hl
     xor a
-    call pitTimerRead
+    call io_pitRead
     ld (lastTick),hl
     ret
 moduleTimerSample:
     xor a
-    call pitTimerRead
+    call io_pitRead
     ex de,hl
     ld hl,(lastTick)
     ld a,l
@@ -40,8 +40,5 @@ moduleTimerResult:
     xor a
     ret
 ; Настройка сделана управляющей программой до FILE_EXEC_NATIVE.
-    DEFINE TIMING_PIT_READ_ONLY
-    INCLUDE "../../source/include/timing-pit.inc"
-    UNDEFINE TIMING_PIT_READ_ONLY
 elapsed:        DD 0
 lastTick:       DW 0

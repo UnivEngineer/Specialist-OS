@@ -4,7 +4,7 @@
 ; допускает любое значение X. При 4×8 сохраняется соседний полубайт.
 ; Attach: DE = база подготовленного нижнего пререндера или 0, если
 ; FONT_LOWER_BYTES=0. Возвращает A=0, CF=0 и выбирает KOI-8.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
 FONT_MODE = 0
     IFNDEF GRAPH_PRE_MODE
 GRAPH_PRE_MODE = 0
@@ -86,7 +86,7 @@ scalarPosition:
     rrca
     rrca
     and 63
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld d,a
     IFDEF FONT4_COMPACT
     INCLUDE "compact4-scalar.inc"

@@ -14,7 +14,7 @@ Bench = runpy.run_path(str(ROOT/'source-apps/diskbench/check-emulator.py'))['Ben
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--runtime', type=Path, required=True)
-    p.add_argument('--ram-only',action='store_true',help='Проверить B=FFh RAMD R3 и R4 без записи')
+    p.add_argument('--ram-only',action='store_true',help='Проверить B=FFh установленного RAM-диска без записи')
     p.add_argument('--report-directory',type=Path,default=ROOT/'docs/flash/driver-api')
     p.add_argument('--locked', action='store_true', help='Проверить отказ B=5 при запрете J4')
     args = p.parse_args()
@@ -38,9 +38,11 @@ def main():
     out.mkdir(parents=True,exist_ok=True)
 
     def select(drive):
-        assert not m.subroutine(0xC842, af=drive<<8, de=1)['flags']['C']
+        service = ds['MXOS_DOS_FILE_GET_SET_DRIVE']
+        m.write(0x7e00, b'\xcd'+ds['mx_callRegs'].to_bytes(2,'little')+service.to_bytes(2,'little')+b'\xc9')
+        assert not m.subroutine(0x7e00, af=drive<<8, de=1)['flags']['C']
 
-    def info(expected, entry=0xC863):
+    def info(expected, entry=ds['bios_diskDriver']):
         state = m.subroutine(entry, bc=0xFF00, hl=0)
         assert not state['flags']['C']
         addr = state['registers']['hl']['dec']
@@ -49,8 +51,12 @@ def main():
         assert len(name)<=22 and 0<len(description)<=30
         bc=state['registers']['bc']['dec']
         technology,capabilities=bc>>8,bc&255
-        assert technology==ord(dict(RAMD='R',ROM='Q',FLASH='P',FLASHFST='P',FLASHSYS='S')[expected])
-        assert capabilities==dict(RAMD=3,ROM=1,FLASH=7,FLASHFST=15,FLASHSYS=7)[expected]
+        if expected == 'BANK RAM':
+            assert technology == ds['DISK_TECH_RAM']
+            assert capabilities == ds['DISK_CAP_READ'] | ds['DISK_CAP_WRITE'] | ds['DISK_CAP_VERIFY']
+        else:
+            assert technology == ord(dict(ROM='Q',FLASH='P',FLASHFST='P',FLASHSYS='S')[expected])
+            assert capabilities == dict(ROM=1,FLASH=7,FLASHFST=15,FLASHSYS=7)[expected]
         report['descriptors'][expected+'/'+description.decode()] = dict(address=addr,
             technology=chr(technology),capabilities=capabilities)
 
@@ -61,19 +67,9 @@ def main():
 
     if args.ram_only:
         select(1)
-        # Штатный AUTOEXEC уже установил R4; явно выбираем встроенный R3.
-        m.subroutine(0xC860,af=0x0100,hl=ds['diskDriver'])
-        m.subroutine(0xC86F,bc=0x0200,hl=ds['driverBlockStart'])
-        m.subroutine(0xC86F,bc=0)
-        info('RAMD')
-        assert 'RAMD/R3' in report['descriptors']
-        m.write(0x7000,b'A:DRIVERS/RAMDISK.COM\0')
-        assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
-        select(1)
-        info('RAMD')
-        assert 'RAMD/R4 BANKED' in report['descriptors']
+        info('BANK RAM')
         (out/'ramd.json').write_text(json.dumps(report['descriptors'],indent=2)+'\n')
-        print('RAMD R3/R4 B=FFh: name, description, technology R, capabilities 03h OK')
+        print('BANK RAM B=FFh: name, technology, read/write/verify OK')
         return
 
     if args.locked:
@@ -82,7 +78,7 @@ def main():
         select(0)
         m.write(0x4000,bytes(b^255 for b in before[-256:]))
         m.write(0x8FF9,b'\0')
-        state=m.subroutine(0xC863,bc=0x0500,de=len(before)//256-1,hl=0x4000)
+        state=m.subroutine(ds['bios_diskDriver'],bc=0x0500,de=len(before)//256-1,hl=0x4000)
         assert state['flags']['C'] and m.read(0x8FF9,1)==b'\1'
         assert state['registers']['sp']['dec']==0x8F00 and image.read_bytes()==before
         (out/'locked.json').write_text(json.dumps(dict(checkedWriteRejected=True,
@@ -93,7 +89,7 @@ def main():
     absent=m.subroutine(ds['diskDriverDummy'],bc=0xFF00,hl=0xBEEF)
     assert absent['flags']['C'] and absent['registers']['hl']['dec']==0
     select(1); info('RAMD')
-    m.subroutine(0xC860, af=0, hl=ds['diskDriver'])
+    m.subroutine(ds['bios_installDriver'], af=0, hl=ds['diskDriver'])
     select(0); info('ROM')
     m.install_flash('FlashSys')
     select(1); select(0); info('FLASHSYS')
@@ -112,14 +108,14 @@ def main():
             m.write(0x4000,b'\xDA'+payload+b'\xAD')
             m.write(0x8DC0,bytes([0xCD])*32)
             before=m.call('cpu_state')['cpu_ticks']
-            state=m.subroutine(0xC863,bc=mode<<8|0xA7,de=sector,hl=0x4001)
+            state=m.subroutine(ds['bios_diskDriver'],bc=mode<<8|0xA7,de=sector,hl=0x4001)
             ticks[str(mode)]=state['cpu_ticks']-before
             assert not state['flags']['C'], (name,mode)
             assert all(state['registers'][k]['dec']==v for k,v in
                        dict(bc=mode<<8|0xA7,de=sector,hl=0x4001,sp=0x8F00).items())
             assert m.read(0x8DC0,32)==bytes([0xCD])*32
             assert m.read(0x4000,258)==b'\xDA'+payload+b'\xAD'
-            assert not m.subroutine(0xC863,bc=0x0200,de=sector,hl=0x5000)['flags']['C']
+            assert not m.subroutine(ds['bios_diskDriver'],bc=0x0200,de=sector,hl=0x5000)['flags']['C']
             assert m.read(0x5000,256)==payload
         report['writes'][name]=ticks
 
@@ -129,14 +125,14 @@ def main():
     saved=m.read(fs['FuncRead'],4)
     m.write(fs['FuncRead'],bytes((0x37,0xC3,fs['Exit']&255,fs['Exit']>>8)))
     m.write(0x8FF9,b'\0')
-    state=m.subroutine(0xC863,bc=0x0500,de=8191,hl=0x4001)
+    state=m.subroutine(ds['bios_diskDriver'],bc=0x0500,de=8191,hl=0x4001)
     assert state['flags']['C'] and m.read(0x8FF9,1)==b'\1'
     m.write(fs['FuncRead'],saved)
     report['readFailureRejected']=True
 
     # После настоящего чтения меняем байт временного буфера до сравнения.
     m.call('bp_set',addr=ds['dwcCompare'],type='exec')
-    m.write(0x8000,b'\xCD\x63\xC8\xC3\x00\x81')
+    m.write(0x8000,b'\xcd'+ds['bios_diskDriver'].to_bytes(2,'little')+b'\xc3\x00\x81')
     m.write(0x8FF9,b'\0')
     m.call('regs_set',pc=0x8000,sp=0x8F00,bc=0x0500,de=8191,hl=0x4001)
     for _ in range(120):

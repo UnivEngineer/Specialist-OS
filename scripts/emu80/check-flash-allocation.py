@@ -198,10 +198,10 @@ def main():
     for name in ('Flash', 'FlashFst'):
         install(name)
         m.write(0x4000, bytes(range(256)))
-        assert not m.subroutine(0xC863, bc=0x0500, de=8191, hl=0x4000)['flags']['C']
+        assert not m.subroutine(SYSTEM['bios_diskDriver'], bc=0x0500, de=8191, hl=0x4000)['flags']['C']
     select(0)
     m.write(0x4000, bytes(range(256)))
-    assert not m.subroutine(0xC863, bc=0x0500, de=2047, hl=0x4000)['flags']['C']
+    assert not m.subroutine(SYSTEM['bios_diskDriver'], bc=0x0500, de=2047, hl=0x4000)['flags']['C']
     report = dict(clusters=chain, sectors=sectors, chips=chips,
                   createCpuTicks=create_ticks, physicalWriteCpuTicks=physical_ticks,
                   timeoutReadAndFlush=True, checkedWriteApiTested=True, compatibleReadback=['Flash', 'FlashFst'],

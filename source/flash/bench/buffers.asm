@@ -1,7 +1,7 @@
 ; Только стенд DiskBen RAW: BANK-буфер 2001h, scratch 9000h, драйвер B000h.
 ; BENCH_DOS=0: локальный memcpy moveBytesForward; =1: DOS B600h + memcpy_far.
 ; Адреса измерителя и транспорта задаёт хост из замороженных SYM.
-    INCLUDE "../../include/mxos.inc"
+    INCLUDE "../../common/system.inc"
     ORG 0A000h
 entry:
     push bc

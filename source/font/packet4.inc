@@ -42,7 +42,7 @@ quotaReady:
     or a
     jp z,empty
     ld a,d
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld d,a
     ld (startColumn+1),a
     ; D продвигается на каждом байте экрана. Для Lim задаём границу
@@ -58,7 +58,7 @@ quotaReady:
     jp z,rawBound
     add a,a
     jp nz,limitReady
-    ld a,0C0h
+    ld a,high MX_SCREEN_END
     jp nc,zBoundReady
     ld a,d
     add a,e
@@ -155,7 +155,7 @@ page: ld b,0
     IF kind != 1
 limit: cp 0
     ELSE
-    cp 0C0h
+    cp high MX_SCREEN_END
     ENDIF
     jp z,finish
     ; E и B уже у последней строки, начинаем с неё следующую пару.
@@ -166,7 +166,7 @@ limit: cp 0
     IF kind != 1
 reverseLimit: cp 0
     ELSE
-    cp 0C0h
+    cp high MX_SCREEN_END
     ENDIF
     jp nz,.forward
     jp finish
@@ -203,7 +203,7 @@ savedSP: ld sp,0
     ld a,d
 startColumn: cp 0
     jp z,empty
-    sub 90h
+    sub high MX_SCREEN_BASE
     add a,a
     add a,a
     ld (bios_vars.cursorX),a

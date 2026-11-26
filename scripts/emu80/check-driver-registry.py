@@ -61,9 +61,9 @@ def main():
         x.console()
         for drive, capacity, name in ((0,2048,b'FLASHSYS'), (1,3840,b'BANK RAM'), (7,8192,b'FLASH')):
             x.select(drive)
-            size = x.func(0xC863, bc=0x0300)
+            size = x.func(bios['bios_diskDriver'], bc=0x0300)
             assert size['registers']['de']['dec'] == capacity, size
-            info = x.func(0xC863, bc=0xFF00)
+            info = x.func(bios['bios_diskDriver'], bc=0xFF00)
             text = m.read(info['registers']['hl']['dec'],64).split(b'\0')[0]
             assert text == name, text
             rows.append(dict(case='registry-metadata',drive=drive,capacity=capacity,name=text.decode()))
@@ -71,9 +71,9 @@ def main():
         # Повторное RAW не входит в DOS и не упаковывает регистры заново.
         for drive in (0,1,7):
             x.select(drive)
-            assert not x.func(0xC863,bc=0x0200,de=0,hl=0x2000)['flags']['C']
+            assert not x.func(bios['bios_diskDriver'],bc=0x0200,de=0,hl=0x2000)['flags']['C']
             assert m.read(ks['MAIN_RAW_LEASE'],1) == bytes([drive+1])
-            m.write(0x8E00,b'\xcd\x63\xc8\xc3\x10\x8e')
+            m.write(0x8E00,b'\xcd'+word(bios['bios_diskDriver'])+b'\xc3\x10\x8e')
             m.stop_at(0x8E10)
             m.call('bp_set',addr=ks['kernelDispatch'],type='exec')
             m.call('bp_set',addr=h['symbols'](ROOT/'bin/banked/CLIENT.sym')['bankMxCallRegs'],type='exec')
@@ -85,9 +85,9 @@ def main():
         # Ошибка локального пути возвращается и через GET_ERROR; смена диска
         # завершает прямую серию. Проверяем обе границы сектора/буфера.
         x.select(1)
-        assert not x.func(0xC863,bc=0x0200,de=0,hl=0x2000)['flags']['C']
+        assert not x.func(bios['bios_diskDriver'],bc=0x0200,de=0,hl=0x2000)['flags']['C']
         for block, buf in ((255,0x2000),(3840,0x2000),(0,0xFB01),(0,0xFF00)):
-            state = x.func(0xC863,bc=0x0200,de=block,hl=buf)
+            state = x.func(bios['bios_diskDriver'],bc=0x0200,de=block,hl=buf)
             assert state['flags']['C'] and state['registers']['af']['dec']>>8 == 7
             state = x.func(0xC8C9)
             assert state['flags']['C'] and state['registers']['af']['dec']>>8 == 7
@@ -105,14 +105,14 @@ def main():
             m.write(ks['DOS_BANK_DRIVER_ADDR'],bytes([0xCC])*(ks['DOS_BANK_DRIVER_END']-ks['DOS_BANK_DRIVER_ADDR']))
             page(0)
             x.select(7)
-            info = x.func(0xC863,bc=0xFF00)
+            info = x.func(bios['bios_diskDriver'],bc=0xFF00)
             text = m.read(info['registers']['hl']['dec'],64)
             assert text.startswith(name.upper().encode()+b'\0'), text
-            assert not x.func(0xC863,bc=0x0200,de=0,hl=0x2000)['flags']['C']
+            assert not x.func(bios['bios_diskDriver'],bc=0x0200,de=0,hl=0x2000)['flags']['C']
             if kind == 0:
-                assert not x.func(0xC863,bc=0x0200,de=256,hl=0x2000)['flags']['C']
-                assert x.func(0xC863,bc=0x0200,de=8192,hl=0x2000)['flags']['C']
-                assert x.func(0xC863,bc=0x0100,de=0,hl=0x2000)['flags']['C']
+                assert not x.func(bios['bios_diskDriver'],bc=0x0200,de=256,hl=0x2000)['flags']['C']
+                assert x.func(bios['bios_diskDriver'],bc=0x0200,de=8192,hl=0x2000)['flags']['C']
+                assert x.func(bios['bios_diskDriver'],bc=0x0100,de=0,hl=0x2000)['flags']['C']
             rows.append(dict(case='initializer-reusable-arena-owned-metadata',driver=name))
 
         # Маркер страницы исполнения и передаваемого DE с аргументами.
@@ -155,17 +155,17 @@ def main():
         for drive, blocks in ((1,(254,256,3838)),(0,(127,128,2047)),(7,(2047,2048,8191))):
             x.select(drive)
             for block in blocks:
-                assert not x.func(0xC863,bc=0x0200,de=block,hl=0x2000)['flags']['C']
+                assert not x.func(bios['bios_diskDriver'],bc=0x0200,de=block,hl=0x2000)['flags']['C']
                 old=m.read(0x2000,256)
                 payload=bytes((i^block)&255 for i in range(256))
                 try:
                     m.write(0x2000,payload)
-                    assert not x.func(0xC863,bc=0x0100,de=block,hl=0x2000)['flags']['C']
-                    assert not x.func(0xC863,bc=0x0200,de=block,hl=0x2200)['flags']['C']
+                    assert not x.func(bios['bios_diskDriver'],bc=0x0100,de=block,hl=0x2000)['flags']['C']
+                    assert not x.func(bios['bios_diskDriver'],bc=0x0200,de=block,hl=0x2200)['flags']['C']
                     assert m.read(0x2200,256)==payload
                 finally:
                     m.write(0x2000,old)
-                    assert not x.func(0xC863,bc=0x0100,de=block,hl=0x2000)['flags']['C']
+                    assert not x.func(bios['bios_diskDriver'],bc=0x0100,de=block,hl=0x2000)['flags']['C']
                 rows.append(dict(case='write-read-restore-boundary',drive=drive,block=block))
         (out/'result.json').write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
         print('DRIVER REGISTRY PASS',len(rows),flush=True)

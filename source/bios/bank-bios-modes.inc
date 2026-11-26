@@ -1,0 +1,55 @@
+bbModes:
+    MACRO BB_FIXED_COMMAND command, vector
+        ASSERT $-bbModes == command
+        ASSERT (vector & 0FF80h) == (bios_printChar & 0FF80h)
+        DB 080h | (vector & 07Fh)
+    ENDM
+    DB 1    ; GETCH
+    DB 0    ; TAPE_READ
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_CHAR,bios_printChar
+    DB 0    ; TAPE_WRITE
+    DB 0    ; INPUT
+    DB 1    ; KEY_CHECK
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_HEX_BYTE,bios_printHexByte
+    DB 2    ; PRINT_STRING_Z
+    DB 1    ; KEY_SCAN
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_GET_CURSOR_POS,bios_getCursorPos
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_SET_CURSOR_POS,bios_setCursorPos
+    DB 0    ; TAPE_LOAD
+    DB 0    ; TAPE_SAVE
+    DB 0    ; CALC_CS
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_HEX_WORD,bios_printHexWord
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_SET_MEM_TOP,bios_setMemTop
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_GET_MEM_TOP,bios_getMemTop
+    DB 1    ; PRINTER
+    DB 0    ; INSTALL_DRIVER
+    DB 0    ; DISK_DRIVER
+    BB_FIXED_COMMAND MXOS_COMMAND_BIOS_PRINT_CHAR_RAW,bios_printCharRaw
+    DB 1    ; PRINT_DEC_WORD
+    DB 0    ; Резерв
+    DB 1    ; UPPERCASE
+    DB 0    ; STRCMP
+    DB 0    ; STRICMP
+    DB 1    ; SUB_HL_DE
+    DB 1    ; BEEP_TIMER
+    DB 0    ; DISK_WRITE_CHECKED
+    DB 0    ; ARG_NEXT
+    DB 0    ; INSTALL_BLOCK_DRIVER
+    DB 0    ; SET_INPUT_HOOK
+    DB 0    ; BLOCK_IO
+    DB 0    ; MEMCPY
+    DB 0    ; FILE_BODY
+    DB 1    ; GLYPH_CACHE
+    DB 1    ; PRINT_STRING_Z_MAIN
+    DB 1    ; FONT_RENDER
+    DB 2    ; PRINT_STRING_RAW_Z
+    DB 1    ; PRINT_STRING_RAW_Z_MAIN
+    DB 0    ; PRINT_STRING_RAW_LIM
+    DB 1    ; PRINT_STRING_RAW_LIM_MAIN
+    DB 1    ; PRINT_STRING_LIM_MAIN
+    DB 1    ; SET_FONT_ENCODING
+    DB 1    ; COMMAND_BATCH
+    DB 0    ; PRINT_STRING_RAW_PSEUDO: перехватывает MEM
+    DB 0    ; PRINT_STRING_LIM: перехватывает MEM
+bbModesEnd:
+    ASSERT bbModesEnd-bbModes == MXOS_BIOS_PRINT_STRING_LIM-0100h+1

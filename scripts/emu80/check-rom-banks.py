@@ -78,7 +78,7 @@ def main():
         assert not m.subroutine(0xC842, af=drive<<8, de=1)['flags']['C']
     def native():
         select(1)
-        m.subroutine(0xC860, af=0, hl=syms['diskDriver'])
+        m.subroutine(SYSTEM['bios_installDriver'], af=0, hl=syms['diskDriver'])
         select(0)
     if args.phase == 'boot':
         assert m.read(SYSTEM['FONT_ADDR'], 2048) == (ROOT / 'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
@@ -121,7 +121,7 @@ def main():
             assert m.read(0x4001,length) == logical[sector*256:sector*256+length], hex(sector)
             assert m.read(0x4000,1) == b'\xBE' and m.read(0x4101,1) == b'\xEF'
             assert m.read(0x123,1) == b'\x6A', 'Основное ОЗУ не восстановлено'
-    reads(0xC863, True)
+    reads(SYSTEM['bios_diskDriver'], True)
     # Необёрнутый вариант проверяем тем же аппаратным маппером, только чтение.
     legacy = (ROOT / 'bin/DOS-rom-legacy.sys').read_bytes()
     legsyms = symbols(ROOT / 'bin/DOS-rom-legacy.lst')

@@ -165,8 +165,16 @@ moduleCopyName:
     MXOS_CALL_REGS MXOS_DOS_MODULE_LOAD
     jp c,bank_module_error
     ld (bankModuleHandle),hl
+    ld a,TIMER_RAW
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    jp c,moduleUnload
+    ld hl,(bankModuleHandle)
     ld de,bankModuleRegs
     MXOS_CALL_REGS MXOS_DOS_MODULE_CALL
+    push af
+    ld a,TIMER_RELEASE
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    pop af
     jp c,moduleUnload
     ld a,(bankModuleRegs+6)
     rra
@@ -437,8 +445,9 @@ bank_module_error:
     jp show_error
 
     DEFINE FILE_IO_HANDLE_ONLY
-    INCLUDE "../../source/include/file-io.inc"
-    INCLUDE "../../source/include/errors.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
+    DEFINE DOS_ERRORS_DRIVE BOOT_VOLUME_LETTER
+    INCLUDE "../../sdk/asm/lib/errors.inc"
     ELSE
 bank_module_error:
     push af
@@ -459,7 +468,7 @@ workerResultCopy:   DB 0
     DB 0
     DW resultsLow,40
     DEFINE APP_COMMAND_ADDR MAIN_COMMAND_ADDR
-    INCLUDE "../../source/include/app-drive.inc"
+    INCLUDE "../../sdk/asm/lib/app-drive.inc"
 ; Share one path between workers; capture its drive at controller entry.
 modulePath:         DB 'C:',05Ch,'BENCH',05Ch,'DiskBen',05Ch
 moduleFileName:     DS 13,0

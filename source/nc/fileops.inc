@@ -838,11 +838,6 @@ ncProgressPath EQU vars.pathArg  ; Reuse the existing modal path buffer.
     IF NC_BANKED
 ncProgressReadClock = io_bankClockRead
     ELSE
-    DEFINE TIMING_PIT_READ_ONLY
-    MODULE ncProgressClock
-    INCLUDE "../include/timing-pit.inc"
-    ENDMODULE
-    UNDEFINE TIMING_PIT_READ_ONLY
-ncProgressReadClock = ncProgressClock.pitTimerRead
+ncProgressReadClock = io_pitRead
     ENDIF
 

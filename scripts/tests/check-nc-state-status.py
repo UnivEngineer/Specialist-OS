@@ -9,6 +9,10 @@ OUT = ROOT / '.local/nc-state-status-cpu'
 W = lambda x: int(x).to_bytes(2, 'little')
 
 
+def file_info(name, extension, size=0, attrib=0):
+    return name.ljust(8) + extension + bytes([attrib]) + size.to_bytes(4, 'little')
+
+
 def sy(path):
     return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', path.read_text(encoding='utf-8-sig'),re.M)}
 
@@ -20,6 +24,10 @@ def main():
     executable=runpy.run_path(str(ROOT/'scripts/images/executable.py'))
     asm = f'''
     ORG 8200h
+readCatalog:
+    xor a
+    push af                 ; lf_ReadCatalog снимает сохранённый статус диска.
+    jp {n['lf_ReadCatalog']}
 gateway:
     ld (requestedOp),a
     ex (sp),hl
@@ -240,7 +248,7 @@ statusClosed: DB 0
                 assert total[start:start+8]==fast[start:start+8],(font,panel,'disk capacity')
             label=bytearray(q)
             label[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([46,value_x+96*panel])
-            label=call(label,'bios_printStringReal',hl=n['aMainRAM'])
+            label=call(label,'bios_printStringRawZ',hl=n['aMainRAM'])
             for x in range(value_x//4+24*panel,23+24*panel):
                 assert fast[0x9000+x*256+39:0x9000+x*256+47]==label[0x9000+x*256+39:0x9000+x*256+47], (font,'memory label')
             # Independently place each label/value: common left value edge,
@@ -254,10 +262,10 @@ statusClosed: DB 0
                 expected=bytearray(m)
                 expected[0x8500:0x8500+len(label)+1]=label+b'\0'
                 expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,label_end-len(label)*char_width+96*panel])
-                expected=call(expected,'bios_printStringReal',hl=0x8500)
+                expected=call(expected,'bios_printStringRawZ',hl=0x8500)
                 expected[0x8500:0x8500+len(value)+1]=value+b'\0'
                 expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,value_x+96*panel])
-                expected=call(expected,'bios_printStringReal',hl=0x8500)
+                expected=call(expected,'bios_printStringRawZ',hl=0x8500)
                 for x in range(24*panel,23+24*panel):
                     assert fast[0x9000+x*256+y-7:0x9000+x*256+y+1]==expected[0x9000+x*256+y-7:0x9000+x*256+y+1],(font,panel,y,'metadata column alignment')
             # Same-drive Enter/CD redraws only the file panel. A drive change
@@ -290,7 +298,7 @@ statusClosed: DB 0
                     (bytes([92])+b'       ',b'Go to drive root',b'',True),
                     (b'GAMES   ',b'GAMES',b'<DIR>',True),
                     (b'FILE    ',b'FILE.TXT',b'42',False)]:
-                q[0x8000:0x8010]=name+(b'   ' if isdir else b'TXT')+bytes([16 if isdir else 0,0,0])+W(42)
+                q[0x8000:0x8010]=file_info(name,b'   ' if isdir else b'TXT',42,16 if isdir else 0)
                 result=call(q,'printInfoLine')
                 width=m[n['ncStatusChars']]
                 assert width=={'Cpm4':43,'Compact':29,'Fast8':21}[font],(font,'right margin')
@@ -302,6 +310,15 @@ statusClosed: DB 0
                 expected=call(expected,'bios_printStringRawLim',hl=0x8700,bc=width)
                 assert result[0x9000:0xc000]==expected[0x9000:0xc000],(font,panel,name,'status text')
                 q=result
+            for size, suffix in [(0,b'0'),(65535,b'65535'),(65536,b'64K'),(443802,b'433K'),
+                                 (10000*1024-1,b'9999K'),(10000*1024,b'9M'),(0xffffffff,b'4095M')]:
+                q[0x8000:0x8010]=file_info(b'FILE',b'TXT',size)
+                result=call(q,'printInfoLine')
+                start=n['ncTextBuffer']
+                assert result[start:start+width]==b'FILE.TXT'.ljust(width-len(suffix))+suffix,(font,panel,size)
+                if font=='Fast8':
+                    detailed=call(q,'printFileNamOnPanel',hl=0x8000)
+                    assert detailed[start:start+18]==b'FILE     TXT'+suffix.rjust(5)+b'\0',(panel,size)
             for stem,flags,mode,extension,full,short,bad in [
                     (b'PLATFORM',4,0,b'COM',b'MXOS',b'MX',False),
                     (b'P',0,1,b'EXE',b'MXOS',b'MX',False),
@@ -314,7 +331,7 @@ statusClosed: DB 0
                 q[n['state.panelA_drive']+panel]=panel+2
                 q[n['state.panelA_dirLow']+panel]=0x34
                 q[n['state.panelA_dirHigh']+panel]=0x12
-                q[0x8000:0x8010]=stem.ljust(8)+extension+bytes(3)+W(12345)
+                q[0x8000:0x8010]=file_info(stem,extension,12345)
                 image=executable['Image'](bytes(12345-n['IMAGE_HEADER_SIZE']),flags=flags,mode=mode)
                 header=bytearray(executable['encode'](image,'exe')[:n['IMAGE_HEADER_SIZE']])
                 if bad:
@@ -366,7 +383,7 @@ statusClosed: DB 0
                 assert call(result,'ncStatusIdle')[s['statusClosed']]==1
             # Смена выбора на обычный файл отменяет запланированное чтение.
             q=call(q,'printInfoLine')
-            q[0x8000:0x8010]=b'FILE    TXT'+bytes(3)+W(42)
+            q[0x8000:0x8010]=file_info(b'FILE',b'TXT',42)
             q=call(q,'printInfoLine')
             q[n['ncStatusInput']]=1
             q[n['IO_KEYB_B']]=0xff
@@ -400,7 +417,7 @@ statusClosed: DB 0
         # Ctrl+Enter appends the selected absolute path by repainting text only.
         q[n['vars.pathValidA']]=1
         q[n['vars.pathA']:n['vars.pathA']+4]=b'A:\\\0'
-        q[0x8000:0x8010]=b'FILE    TXT'+bytes(3)+W(42)
+        q[0x8000:0x8010]=file_info(b'FILE',b'TXT',42)
         trampoline=b'\x21'+W(0x8000)+b'\xcd'+W(n['selFileToCmdLine'])+b'\xc9'
         q[0x8500:0x8500+len(trampoline)]=trampoline
         final,_,trace,initial=trace_tools['execute'](q,0x8500,OUT,trace=True)
@@ -420,7 +437,7 @@ statusClosed: DB 0
                 expected=bytearray(m)
                 expected[0x8500:0x8500+len(prefix)]=prefix
                 expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,28])
-                expected=call(expected,'bios_printStringReal',hl=0x8500)
+                expected=call(expected,'bios_printStringRawZ',hl=0x8500)
                 for col in range(7,24):
                     start=0x9000+col*256+y-7
                     assert fast[start:start+8]==expected[start:start+8],(y,'value must stop at 16 characters in 8px')
@@ -486,7 +503,7 @@ statusClosed: DB 0
         q[n['state.panelA_dirLow']:n['state.panelA_dirLow']+1]=bytes([directory&255])
         q[n['state.panelA_dirHigh']]=directory>>8
         patch(q,'lf_StoreCount','stopCount')
-        final=call(q,'lf_ReadCatalog')
+        final=call(q,'readCatalog')
         assert final[s['listSkip']:s['listSkip']+2]==W(bool(directory))
         assert final[s['visibleCount']]==3-bool(directory)
     print('F3 state restores either panel; subdirectory listing skips only FAT dot PASS')
@@ -502,7 +519,7 @@ statusClosed: DB 0
         q[n['ncCatalogs']+n['CATALOG_OVERFLOW']]=old
         q[s['listTotal']:s['listTotal']+2]=W(total)
         patch(q,'lf_StoreCount','stopCount')
-        final=call(q,'lf_ReadCatalog')
+        final=call(q,'readCatalog')
         assert final[s['visibleCount']]==min(total-skip,capacity)
         assert final[n['ncCatalogs']+n['CATALOG_OVERFLOW']]==overflow
         if overflow:

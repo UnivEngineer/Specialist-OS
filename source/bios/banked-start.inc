@@ -249,17 +249,11 @@ biosEmptyDosContext:
     ASSERT bankServiceSP == bankOwner+3
 
 bios_reset_sound:
-    ld a,0B6h
-    ld (IO_TIMER_MODE),a
-    ld a,076h
-    ld (IO_TIMER_MODE),a
-    ld a,036h
-    ld (IO_TIMER_MODE),a
-    ld a,00Ah
-    ld (IO_KEYB_MODE),a
+    call ioResetSound
     ld hl,(initVars.beepFreq)
     ld (bios_vars.beepFreq),hl
     ret
+    ASSERT bios_vars.beepDuration == bios_vars.beepFreq+1
 
 ; В банковой системе BIOS обслуживает только физический C:. B:/H:
 ; принадлежат DOS; старый BIOS-драйвер B: иначе затёр бы её страницу.

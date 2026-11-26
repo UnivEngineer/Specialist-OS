@@ -64,7 +64,7 @@ base[0xED7F]=0xAB;base[0xEE80]=0xCD
 rows=[]
 for mode in range(4):
  mem=bytearray(base);mem[0x8100]=mode
- stub=b'\x31'+W(0xED70)+b'\x21'+W(0x4000)+b'\x11'+W(0x1234)+b'\x01'+W(0x80f0)+b'\xcd'+W(0xC89F)
+ stub=b'\x31'+W(0xED70)+b'\x21'+W(0x4000)+b'\x11'+W(0x1234)+b'\x01'+W(0x80f0)+b'\xcd'+W(s['bios_diskWriteChecked'])
  stub+=b'\x22'+W(0x8302)+b'\xeb\x22'+W(0x8304)+b'\x60\x69\x22'+W(0x8306)+b'\xf5\xe1\x22'+W(0x8300)+b'\x21'+W(0)+b'\x39\x22'+W(0x8308)+b'\xc3'+W(0x82ff)
  mem[0x8200:0x8200+len(stub)]=stub;(O/'in.bin').write_bytes(mem)
  subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8200','-end','82ff','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True)

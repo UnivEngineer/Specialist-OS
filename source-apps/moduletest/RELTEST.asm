@@ -1,5 +1,5 @@
 ; Контроллер проверки двух MAIN DLL на исходном MX, без свободного EXEC.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 ;----------------------------------------------------------------------------

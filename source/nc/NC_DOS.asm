@@ -1,6 +1,6 @@
 ; Одноразовый установщик банковой оболочки в свободном участке DOS.
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/version.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../common/version.inc"
     INCLUDE "bank-api.inc"
     IFNDEF DRIVER_ORIGIN
 DRIVER_ORIGIN = 0
@@ -86,7 +86,8 @@ corePath:       DB 'C:',05Ch,'DOS',05Ch,'NC_CORE.DLL',0
 message:        DB 'NC BANK: load/call error ',0
 coreHandle:     DW 0
 registers:      DS MX_REGS,0
-    INCLUDE "../include/app-drive.inc"
+    DEFINE APP_COMMAND_ADDR DOS_BANK_CMD_ADDR
+    INCLUDE "../../sdk/asm/lib/app-drive.inc"
     RELOCATE_END
 IMAGE_BODY_SIZE  = $-entry
 IMAGE_MEM_END    = IMAGE_BODY_SIZE

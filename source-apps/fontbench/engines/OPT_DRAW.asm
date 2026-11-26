@@ -1,5 +1,5 @@
             IFNDEF FONTBEN_EMBED_OPT
-            include "../../../source/include/mxos.inc"
+            include "../../../sdk/asm/mxos.inc"
             ENDIF
 ; Замена только пиксельной части штатного printChar в тестовой машине.
 ; Вход как у drawChar: BC = экран, DE = глиф, H = следующий cursorX/2.

@@ -26,17 +26,14 @@ cfd_loop:   ld      a, (de)
 
 ;----------------------------------------------------------------------------
 ; MXOS
-; Проеобразование дескриптора файла в компактную форму
-; FILE_DESCRIPTOR -> FILE_INFO
+; Скопировать имя, атрибуты и полный размер из FILE_DESCRIPTOR в FILE_INFO.
 ;
 ; вход:
-;  de = адрес откуда
-;  hl = адрес куда
+;   DE = адрес FILE_DESCRIPTOR, HL = адрес буфера на одну запись FILE_INFO.
 ;
 ; выход:
-;  hl = адрес следующего описателя
-;
-;  de - сохраняется
+;   Запись FILE_INFO заполнена. HL = адрес следующей записи, DE сохранён.
+;   AF, BC и флаги разрушены.
 ;
 ; 2022-02-16 SpaceEngineer
 ;----------------------------------------------------------------------------
@@ -60,23 +57,18 @@ cfdc_first:
             inc     de
             EDUP
 
-            ; В компактной записи адреса загрузки больше нет.
-            xor a
-            ld (hl),a
-            inc hl
-            ld (hl),a
-            inc hl
             ex hl,de
             ld bc,FILE_DESCRIPTOR.size-FILE_DESCRIPTOR.attrib-1
             add hl,bc
             ex hl,de
+            ld b,4
+cfdc_size:
             ld      a, (de)
             ld      (hl), a
             inc     hl
             inc     de
-            ld      a, (de)
-            ld      (hl), a
-            inc     hl
+            dec     b
+            jp nz,  cfdc_size
 
             pop     de
             ret

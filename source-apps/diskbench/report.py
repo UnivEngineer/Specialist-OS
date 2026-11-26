@@ -46,7 +46,7 @@ def main():
     for name in ['legacy','buffered']:
         path=ROOT/f'images/C-ROM-64k-MMX-System-RAMD-{name}.bin'
         hashes.append(f"- Финальный C-ROM-64k-MMX-System-RAMD-{name}.bin: `{hashlib.sha256(path.read_bytes()).hexdigest()}`.")
-    filelist=['source/include/mxos.inc','source/dos/DOS.asm','source/dos/DOSChecked.asm',
+    filelist=['source/common/system.inc','source/dos/DOS.asm','source/dos/DOSChecked.asm',
         'source/bios/driverFFC0.inc','source/dos/driverBuffered.inc','source/dos/driverChecked.inc',
         'source/bios/reboot2.inc','source/dos/reboot3.inc','source/nc/saveLoadState.inc',
         'scripts/build/build-if-needed.ps1','scripts/build/build-project.ps1','scripts/emu80/check-boot.py',

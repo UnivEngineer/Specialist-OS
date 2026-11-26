@@ -46,7 +46,8 @@ def emit_fixed(item):
     if item.get('abi'):
         lines.append(f'    ASSERT {item["abi"]} == {number(start)}')
     if item.get('target'):
-        lines.append(f'    DOS_ABI_GATE {number(start)}, {item["target"]}')
+        main_io = int(item.get('target_main_io', False))
+        lines.append(f'    DOS_ABI_GATE {number(start)}, {item["target"]}, {main_io}')
     else:
         lines.extend(include(SOURCE / name) for name in item['files'])
     lines.append(f'    ASSERT $ == {number(start + size)}')

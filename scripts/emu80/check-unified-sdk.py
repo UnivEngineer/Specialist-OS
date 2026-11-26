@@ -30,7 +30,7 @@ try:
  h['main_bios'](m,k['mx_printChar'],bc=31)
  data=(R/'docs/file-api-001/stdlib/stdio_code_crt_init.bin').read_bytes()
  assert len(data)+0x2000<0x5e80
- saved={address:m.read(address,3) for address in (b['getch'],b['j_keyScan'])}
+ saved={address:m.read(address,3) for address in (b['getch'],b['keyScan2'])}
  m.write(0x6200,bytes.fromhex('3E 51 37 C9'));m.write(0x6210,bytes.fromhex('3E FF B7 C9'))
  for address in saved:m.write(address,b'\xc3'+word(0x6200 if address==b['getch'] else 0x6210))
  m.write(0x2000,data);m.stop_at(0x6100);m.call('regs_set',pc=0x2000,sp=0x8fdf)

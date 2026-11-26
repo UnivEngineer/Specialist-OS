@@ -9,8 +9,8 @@ OUT=ROOT/'docs/banked/syscall-main-001';OUT.mkdir(parents=True,exist_ok=True)
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 W=lambda n:n.to_bytes(2,'little')
 base=bytearray(65536)
-for name,addr in [('BIOS',0xC000),('IO',0xF000),('DOS.native',0x4000)]:
-    data=(ROOT/f'bin/{name}.sys').read_bytes();base[addr:addr+len(data)]=data
+for name,addr in [('BIOS.sys',0xC000),('IO.main.bin',S['BIOS_IO_ADDR']),('DOS.native.sys',S['dosCoreStart'])]:
+    data=(ROOT/'bin'/name).read_bytes();base[addr:addr+len(data)]=data
 base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
 font=(ROOT/'bin/fonts/Compact.pf').read_bytes()
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
@@ -21,7 +21,7 @@ rows=[]
 def run(body,memory=None):
     m=bytearray(base if memory is None else memory)
     src=OUT/'case.asm'
-    src.write_text(f' INCLUDE "{(ROOT/"source/include/mxos.inc").as_posix()}"\n ORG 02000h\n ld sp,STACK_ADDR\n'+body+'''
+    src.write_text(f' INCLUDE "{(ROOT/"source/common/system.inc").as_posix()}"\n ORG 02000h\n ld sp,STACK_ADDR\n'+body+'''
  push af
  push bc
  push de
@@ -108,7 +108,7 @@ r,_=run(' ld a,061h\n MXOS_CALL_REGS MXOS_BIOS_UPPERCASE',m)
 assert r[0x3B07]==0x41,'BIOS не должен требовать DOS'
 
 # Преждевременный адаптер CP/M удалён: вход и группа зарезервированы.
-for call in (' ld bc,0A50Ch\n call mx_CallCPM', ' ld bc,0Ch\n call mx_callPacket'):
+for call in (' ld bc,0A50Ch\n call mx_callCPM', ' ld bc,0Ch\n call mx_callPacket'):
  r,_=run(call)
  assert r[0x3B07]==S['DOS_ERR_UNSUPPORTED'] and r[0x3B06]&1
 (OUT/'result.json').write_text(json.dumps(dict(registerCases=rows,nested=True,bdosUnsupported=True),indent=2)+'\n')

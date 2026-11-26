@@ -88,19 +88,19 @@ def main():
     m.write(0xFE00,payload)
     for mode in [1,2]:
         before=m.call('cpu_state')['cpu_ticks']
-        state=m.subroutine(0xC863,bc=mode*256,de=0x1FE,hl=0xFE00)
+        state=m.subroutine(SYSTEM['bios_diskDriver'],bc=mode*256,de=0x1FE,hl=0xFE00)
         assert not state['flags']['C']
         worst[str(mode)]=state['cpu_ticks']-before-27
     assert m.read(0xFE00,256)==payload
     checks.append('last valid buffer FE00h: read/write and data preserved')
     m.write(0x4000,payload)
     # Обёртка вызывается только при объявленном B=4; отказ барьера не скрывается.
-    jump=m.read(0xC863,3)
+    jump=m.read(SYSTEM['bios_diskDriver'],3)
     m.write(0x7000,bytes.fromhex('78fe01c837c9'))  # B=1: CF=0; B=4: CF=1.
     try:
-        m.write(0xC863,bytes.fromhex('c30070'))
+        m.write(SYSTEM['bios_diskDriver'],bytes.fromhex('c30070'))
         assert m.subroutine(s['write_with_flush'],bc=0x100,de=0x1FE,hl=0x4000)['flags']['C']
-    finally:m.write(0xC863,jump)
+    finally:m.write(SYSTEM['bios_diskDriver'],jump)
     checks.append('declared async flush failure is propagated')
     # FORMAT пишет только метаданные B:; хвосты не должны меняться.
     n=rs['ramdBankTailEnd']-0xFF00

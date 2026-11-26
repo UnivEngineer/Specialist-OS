@@ -42,7 +42,7 @@ ncSortDrawOption:
     pop hl
     ld de,4
     add hl,de
-    call bios_printStringReal
+    call bios_printStringRawZ
     ld a,b
     call ncSortDrawCheck
     inc b

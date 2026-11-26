@@ -13,6 +13,8 @@ def component_groups():
     def resolve(unit,region):
         return {**unit,'files':[os.path.normpath(ROOT/f'source/{region}'/f) for f in unit['files']]}
     manifest=manifests['bios']
+    start, size = runpy.run_path(str(ROOT/'scripts/build/build-syscalls.py'))['bios_vector_window'](manifest)
+    manifest['fixed'].append(dict(address=start, size=size, files=['vectors.inc']))
     manifest['fixed']=[resolve(f,'bios') if 'files' in f else f for f in manifest['fixed']]
     groups={region:[resolve(u,region) for u in manifests[region]['units']]
             for region in ('bios','dos')}
@@ -29,8 +31,17 @@ def main():
     out.mkdir(exist_ok=True)
     manifest, groups = component_groups()
     inc = h['include']
-    lines = ['    DEFINE DOS_REFERENCE_BUILD 1',inc(ROOT/'source/include/mxos.inc'),
-             inc(ROOT/'source/include/version.inc'),inc(ROOT/'source/common/layoutMacros.inc'),
+    main_io = ['bankBiosImageStart:',
+               inc(ROOT/'source/io/main-bios-gate.inc'),
+               'bankBiosImageEnd:',
+               inc(ROOT/'source/io/main-ppi.inc'),
+               inc(ROOT/'source/io/key-scan.inc'),
+               inc(ROOT/'source/io/beep-timer.inc'),
+               inc(ROOT/'source/io/input-clock.inc'),
+               'mainPpiImageEnd:',
+               inc(ROOT/'source/io/pit-tail.inc')]
+    lines = ['    DEFINE DOS_REFERENCE_BUILD 1',inc(ROOT/'source/common/system.inc'),
+             inc(ROOT/'source/common/version.inc'),inc(ROOT/'source/common/layoutMacros.inc'),
              inc(out/'banked/transport-imports.inc'),'DOS_IMAGE_SUM = 0','    ORG DOS_CODE_START','dosCoreStart:']
     for u in groups['dos']:
         for i,f in enumerate(u['files']):
@@ -43,7 +54,8 @@ def main():
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
     lines += [inc(ROOT/'source/bios'/f) for f in ('getch.inc','cmp_hl_de_2.inc')]
-    lines += [inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/syscall-tables.inc'), inc(ROOT/'source/io/shell-input.inc')]
+    lines += [inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/syscall-tables.inc'),
+              '    ORG BIOS_IO_ADDR', *main_io]
     probe=out/'System.measure.asm'
     probe.write_text('\n'.join(lines+['    END','']),encoding='utf-8')
     h['assemble'](probe,out/'System.measure.bin',[])
@@ -57,11 +69,7 @@ def main():
               inc(ROOT/'source/bios/banked-start.inc'),
               'ioTablesStart:', inc(ROOT/'source/bios/syscall-tables.inc'), 'ioTablesEnd:',
               'biosLowEnd:', '    ASSERT $ <= FONT_ENGINE_BASE',
-              '    ORG_PAD BIOS_IO_ADDR',
-              'bankBiosImageStart:',
-              '    INCBIN "'+(out/'banked/MAINBIOS.bin').as_posix()+'"',
-              inc(ROOT/'source/io/shell-input.inc'),
-              'bankBiosImageEnd:',
+              '    ORG_PAD BIOS_IO_ADDR', *main_io,
               '    ASSERT $ <= BIOS_BANK_GATE_END',
               'bankIoImageStart = BIOS_BANK_IO_ADDR',
               'bankIoImageEnd = BIOS_BANK_IO_ADDR+3',
@@ -91,6 +99,9 @@ def main():
     keybank=(out/'banked/KEYBANK.bin').read_bytes()
     (out/'IO.main.bin').write_bytes(io)  # Flat MAIN segment for standalone CPU fixtures.
     (out/'IO.sys').write_bytes(io+keybank)
+    (out/'banked/MAINBIOS.bin').write_bytes(io[:sy['bankBiosImageEnd']-sy['bankBiosImageStart']])
+    for suffix in ('sym','lst'):
+        (out/f'banked/MAINBIOS.{suffix}').write_bytes((out/f'System.linked.{suffix}').read_bytes())
     (out/'DOS.native.sys').write_bytes(dos)
     (out/'BIOS.sys').write_bytes(bios)
     (out/'banked/MAINIO.bin').write_bytes(bytes([0xC3,sy['mainBlockIO']&255,sy['mainBlockIO']>>8]))
@@ -117,6 +128,10 @@ def main():
                         if b['block']['key'] not in ('fileBodyAdapter','rawLocalAdapter','glyphCacheAdapter')]
                        + [dict(name='bankBiosGateway', address=sy['bankBiosImageStart'],
                                size=sy['bankBiosImageEnd']-sy['bankBiosImageStart']),
+                          dict(name='mainPpi', address=sy['bankBiosImageEnd'],
+                               size=sy['mainPpiImageEnd']-sy['bankBiosImageEnd']),
+                          dict(name='ioTimer', address=sy['io_pitRead'],
+                               size=sy['ioImageEnd']-sy['io_pitRead']),
                           dict(name='bankDiskBridge', address=sy['bankIoImageStart'],
                                size=sy['bankIoImageEnd']-sy['bankIoImageStart']),
                           dict(name='fileBodyLoader', address=sy['fileBodyLoad'],

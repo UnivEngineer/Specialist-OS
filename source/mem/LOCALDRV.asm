@@ -1,5 +1,5 @@
 ; Исполняемая копия H: для слота клиента. Установка и выбор остаются в DOS.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     DEFINE FLASH_BANKED_DRIVER 1
     DEFINE DRIVER_IO_ONLY 1
 LATCH_0          = 00Ah

@@ -3,6 +3,10 @@
 
 audio_game_start:
     LD SP,07FFFh
+    IF ALMAZ_MXOS_TIMER
+        CALL audio_claim_timer
+        JP C,app_bios_return
+    ENDIF
     CALL audio_init
     IF ALMAZ_OPTIMIZE
         CALL input_initialize
@@ -10,12 +14,20 @@ audio_game_start:
     JP game_initialize
 audio_game_exit:
     CALL audio_stop
+    IF ALMAZ_MXOS_TIMER
+        LD A,TIMER_RELEASE
+        MXOS_CALL_REGS MXOS_DOS_TIMER
+    ENDIF
     IF ALMAZ_OPTIMIZE && !ALMAZ_MONITOR_TARGET && ALMAZ_COLOR == 1
         CALL color_exit_clear
     ENDIF
     JP app_bios_return
 audio_editor_new:
     LD SP,07FFFh
+    IF ALMAZ_MXOS_TIMER
+        CALL audio_claim_timer
+        JP C,app_bios_return
+    ENDIF
     CALL audio_init
     IF ALMAZ_OPTIMIZE
         CALL input_editor_release
@@ -24,12 +36,41 @@ audio_editor_new:
     JP editor_create_map
 audio_editor_existing:
     LD SP,07FFFh
+    IF ALMAZ_MXOS_TIMER
+        CALL audio_claim_timer
+        JP C,app_bios_return
+    ENDIF
     CALL audio_init
     IF ALMAZ_OPTIMIZE
         CALL input_editor_release
         CALL input_initialize
     ENDIF
     JP editor_open
+
+    IF ALMAZ_MXOS_TIMER
+; Захват и привязка выполняются один раз, включая переходы игры в редактор.
+; Входа нет. CF=1 при отказе DOS. BC, DE, HL сохранены.
+audio_claim_timer:
+    LD A,(v_audio_claimed)
+    OR A
+    RET NZ
+    PUSH BC
+    PUSH DE
+    PUSH HL
+    LD A,TIMER_RAW
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    JP C,audio_claim_done
+    CALL pitTimerBindWrites
+    LD A,1
+    LD (v_audio_claimed),A
+    OR A
+audio_claim_done:
+    POP HL
+    POP DE
+    POP BC
+    RET
+v_audio_claimed: DB 0
+    ENDIF
 
 ; Вход B=X/C=Y. Выход и разрушаемые регистры — как у map_get_cell.
 ; Без буфера и часов: 85 добавленных тактов при выключенном звуке,

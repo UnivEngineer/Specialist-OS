@@ -1,6 +1,6 @@
 ; Драйвер H: в странице DOS. Та же аппаратная реализация, что FLASH.COM.
 ; Пока фиксированная сборка слотов: релокируемый формат — отдельный этап.
-    INCLUDE "../../include/mxos.inc"
+    INCLUDE "../../common/system.inc"
     INCLUDE "../../mem/diskabi.inc"
     IFNDEF FLASH_SLOT
 FLASH_SLOT = DOS_DRIVER_START

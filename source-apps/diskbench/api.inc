@@ -43,7 +43,7 @@ bench_cmp_hl_de    = bios_cmp_hl_de
     DEFINE MATH_MUL
     DEFINE MATH_DIV2
     DEFINE MATH_DIV
-    INCLUDE "../../source/include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDMODULE
 bench_mul_hl_de = benchMath.mul_hl_de
 bench_div_hl_2  = benchMath.div_hl_2

@@ -141,7 +141,7 @@ try:
  m.write(0x3400,b'DEL B:/CLONE'+bytes(115));call(k['MXOS_DOS_CLI'],hl=0x3400)
  import subprocess
  fixture_source=O/'library.asm'
- fixture_source.write_text('    INCLUDE "'+(R/'source/include/mxos.inc').as_posix()+'"\n    ORG 06000h\n    INCLUDE "'+(R/'source/include/file-io.inc').as_posix()+'"\n    INCLUDE "'+(R/'source/include/file-image.inc').as_posix()+'"\n',encoding='utf-8')
+ fixture_source.write_text('    INCLUDE "'+(R/'sdk/asm/mxos.inc').as_posix()+'"\n    ORG 06000h\n    INCLUDE "'+(R/'sdk/asm/lib/file-io.inc').as_posix()+'"\n    INCLUDE "'+(R/'sdk/asm/lib/file-image.inc').as_posix()+'"\n',encoding='utf-8')
  subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow','--raw='+str(O/'library.bin'),'--sym='+str(O/'library.sym'),str(fixture_source)],check=True,capture_output=True)
  lib=sy(O/'library.sym');m.write(0x6000,(O/'library.bin').read_bytes())
  def local(entry,expected=0):

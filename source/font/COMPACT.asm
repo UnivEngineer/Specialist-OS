@@ -1,9 +1,11 @@
+    INCLUDE "../../sdk/asm/hardware/spec_mx.inc"
 ; Компактный движок KOI-8 6×8, 162 встроенных глифа по 8 байт.
 ; Карта заменяет отсутствующие коды исходным глифом DEL. Переключение
 ; KOI-7R меняет карту и подставляет пробел для кода 7Fh.
 ; Attach не требует нижних таблиц, восстанавливает KOI-8 и подключает
 ; входы BIOS. Выход A=0, CF=0.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG FONT_ENGINE_BASE
     IFDEF FONT_BENCH_MAIN

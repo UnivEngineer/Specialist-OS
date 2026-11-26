@@ -130,13 +130,8 @@ imageResult:
     or a
     ret
 imageError:
-    IFDEF DOS_SPLIT_BUILD
     ld a,DOS_ERR_BAD_IMAGE
     jp dosSetError
-    ELSE
-    scf
-    ret
-    ENDIF
 
 ; Заголовок читается общим потоком; курсор сохраняется отдельно от кэша.
 imageReadPrefix:
@@ -296,8 +291,17 @@ imageCommonHeader:
     or a
     jp nz,imageError
     ld a,(v_imageHeader+IMAGE_POLICY)
-    cp 3
+    cp IMAGE_POLICY_TRANSIENT+1
     jp nc,imageError
+    cp IMAGE_POLICY_TRANSIENT
+    jp nz,imageMemoryPolicyReady
+    ld a,(v_imageHeader+4)
+    cp 2
+    jp nz,imageError
+    ld a,(v_imageHeader+5)
+    cp IMAGE_FLAG_MAIN
+    jp nz,imageError
+imageMemoryPolicyReady:
     ld a,(v_imageHeader+IMAGE_API_VERSION)
     or a
     jp z,imageApiReady

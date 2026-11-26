@@ -1,5 +1,5 @@
 ; Одноразовый инициализатор H:, загружаемый FILE_EXEC в страницу DOS.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
 LOCAL_KIND  = 2
     INCLUDE "driver-init.inc"

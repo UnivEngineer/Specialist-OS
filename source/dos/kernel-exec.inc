@@ -217,7 +217,16 @@ keImageReady:
     ld de,keRegs
     call bankCallPacket
     call appLeave
+    ; Внутренний вызов FORMAT должен подтвердить запись всех структур.
+    push af
+    ld a,(pressureBusy)
+    or a
+    jp nz,keFormatStatus
+    pop af
     xor a
+    jp keAppRejected
+keFormatStatus:
+    pop af
 keAppRejected:
     push af
     call keDropImage
@@ -225,6 +234,7 @@ keAppRejected:
     pop hl
     push bc
     call keCacheRelease
+    call pressureRestore
     pop af
     ret
 ; Банковое приложение использует тот же жизненный цикл, что DLL.
@@ -422,6 +432,7 @@ keDone:
     pop af
     push bc
     call fileSelectDrive
+    call pressureRestore
     pop af
     ret
 keExtensionDenied:
@@ -474,6 +485,12 @@ keReserveImage:
     call cmp_hl_de
     ret nc                   ; explicit upper utility, cache token handles it
     call keRetireMain
+    ld a,(v_imageHeader+IMAGE_POLICY)
+    cp IMAGE_POLICY_TRANSIENT
+    jp nz,keReserveTracked
+    xor a
+    ret
+keReserveTracked:
     ld hl,(v_imageHeader+IMAGE_BSS)
     inc hl
     ld a,h

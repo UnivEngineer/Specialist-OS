@@ -6,9 +6,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
+def bios_vector_window(layout):
+    """Продолжить таблицу Монитора-2 плотным рядом JMP и байтом результата CLI."""
+    monitor = layout['fixed'][-1]
+    return monitor['address'] + monitor['size'], 3 * len(layout['vectors']) + 1
+
+
 def generate(check=False):
     registry = json.loads((ROOT/'source/bios/syscalls.json').read_text('utf-8'))
-    asm = ['; Создано scripts/build/build-syscalls.py из source/bios/syscalls.json.']
+    asm = ['; Создано scripts/build/build-syscalls.py из source/bios/syscalls.json.',
+           '    IFNDEF MXOS_ABI_SYSCALL_IDS_INC', '    DEFINE MXOS_ABI_SYSCALL_IDS_INC']
     c = ['/* Создано из source/bios/syscalls.json; номера групп и функций. */',
          '#ifndef MXOS_SYSCALL_IDS_H', '#define MXOS_SYSCALL_IDS_H']
     tables = ['; Создано из source/bios/syscalls.json; внутренние адреса, не публичный ABI.']
@@ -44,16 +51,38 @@ def generate(check=False):
             asm.append(f'{name} = 0{value:02X}h')
             c.append(f'#define {name} 0x{value:02X}')
             z80.append(f'defc {name} = 0{value:02X}h')
-    # Адреса регистровых входов определены в карте MEM вместе с таблицей JMP.
-    abi = (ROOT/'source/include/mxos.inc').read_text(encoding='utf-8')
-    for name, addr in re.findall(r'^mx_(\w+)\s*=\s*0([0-9A-F]{4})h\b', abi, re.M):
-        z80.append(f'defc mx_{name} = 0{addr}h')
-    vector = re.search(r'^bios_printStringLim\s*=\s*(\w+)', abi, re.M)[1]
-    z80.append(f'defc bios_printStringLim = {vector}')
+    # Читаем только листы-владельцы прямых входов. Манифест задаёт исполнителей.
+    abi = '\n'.join((ROOT/'sdk/asm/abi'/name).read_text(encoding='utf-8')
+                    for name in ('bios.inc', 'memory.inc', 'keyboard.inc', 'timer.inc'))
+    addresses = {name: int(value, 16) for name, value in re.findall(
+        r'^((?:mx|bios|io)_\w+)\s*=\s*0([0-9A-Fa-f]{4})h\b', abi, re.M)}
+    for name, address in addresses.items():
+        if name.startswith(('mx_', 'io_')):
+            z80.append(f'defc {name} = 0{address:04X}h')
+    layout = json.loads((ROOT/'source/bios/layout.json').read_text('utf-8'))
+    start, size = bios_vector_window(layout)
+    jumps = ['; Адреса из sdk/asm/abi/bios.inc, исполнители из source/bios/layout.json.']
+    for index, (name, target, *sdk_names) in enumerate(layout['vectors']):
+        symbol = 'bios_' + name
+        address = addresses[symbol]
+        if address != start + 3 * index:
+            raise ValueError(f'{symbol} ({address:04X}h): нарушен порядок JMP в layout.json')
+        jumps.extend([f'    ASSERT $ == {symbol}', f'    jp {target:<23} ; {address:04X}h'])
+        for sdk_name in sdk_names:
+            c.append(f'#define MXOS_BIOS_ABI_{sdk_name} 0x{address:04X}')
+        if name == 'printStringLim':
+            z80.append(f'defc {symbol} = 0{address:04X}h')
+    error_byte = addresses['bios_cliExecError']
+    if error_byte != start + size - 1:
+        raise ValueError(f'bios_cliExecError ({error_byte:04X}h) должен следовать за последним JMP')
+    jumps.extend(['    ASSERT $ == bios_cliExecError', f'    db 0                       ; {error_byte:04X}h',
+                  'j_diskDriver = bios_diskDriver'])
+    asm.append('    ENDIF')
     c.append('#endif')
     outputs = {
-        ROOT/'source/include/syscall-ids.inc':asm,
+        ROOT/'sdk/asm/abi/syscall-ids.inc':asm,
         ROOT/'source/bios/syscall-tables.inc':tables,
+        ROOT/'source/bios/vectors.inc':jumps,
         ROOT/'sdk/include/mxos_syscall_ids.h':c,
         ROOT/'sdk/src/mxos_syscall_ids.inc':z80,
     }

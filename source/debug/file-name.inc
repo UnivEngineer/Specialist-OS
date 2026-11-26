@@ -27,7 +27,7 @@ printFileNameReal:
         LD (DE),A
         PUSH HL
         LD HL,debugNameBuffer
-        CALL bios_printStringReal
+        CALL bios_printStringRawZ
         POP HL
         POP DE
         POP AF

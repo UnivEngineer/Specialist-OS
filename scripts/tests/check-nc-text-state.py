@@ -18,7 +18,8 @@ def main():
 
     def call(base,entry,a=0,de=0,hl=0):
         result=bytearray(base)
-        code=b'\x31'+W(0x8b00)+b'\x3e'+bytes([a])+b'\x11'+W(de)+b'\x21'+W(hl)+b'\xcd'+W(n[entry])+b'\xc3'+W(0x81ff)
+        code=(b'\x31'+W(0x8b00)+b'\x3e'+bytes([a])+b'\x11'+W(de)+b'\x21'+W(hl)
+              +b'\xcd'+W(n[entry])+b'\x3e\x00\xce\x00\x32'+W(0x85ff)+b'\xc3'+W(0x81ff))
         result[0x8100:0x8100+len(code)]=code
         (OUT/'input.bin').write_bytes(result)
         subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe',
@@ -45,6 +46,9 @@ def main():
 
     for active in (0,1):
         base=bytearray(memory)
+        state_path=b'B:\\NC-STATE.CFG\0'
+        address=n['vars.stateFile']
+        base[address:address+len(state_path)]=state_path
         # Filesystem writes are intercepted; the production serializer/capture,
         # packet setup, pointer restoration and decimal conversion run unchanged.
         patch(base,'mx_callRegs',b'\xe3\x23\x23\xe3\xaf\xc9')
@@ -70,7 +74,39 @@ def main():
         expected_path=b'B:\\NC-STATE.CFG\0'
         path=result[n['vars.pathArg']:n['vars.pathArg']+len(expected_path)]
         assert path==expected_path,path
-    print('Text state PASS: 256 decimal values, both active panels, paths/selected leaves, CRLF, IO packet, list pointer and SP')
+    n = sy(ROOT/'bin/NC_CORE.sym')
+    bank = bytearray(65536)
+    core = (ROOT/'bin/NC_CORE.i80').read_bytes()
+    bank[0x100:0x100+len(core)] = core
+    patch(bank, 'loadFiles', b'\xc9')
+    patch(bank, 'getSelectedFile', choose(0x8400, 0x8410))
+    fields = bytes((1, 0x12, 0x34, 0, 7, 1, 2, 15, 140))
+    sorts_views = bytes((2, 1, 1, 0))
+    leaves = (b'README  TXT', b'MIXED   CFG')
+    bank[0x8400:0x840b], bank[0x8410:0x841b] = leaves
+    active, sort = n['state.activePanel'], n['state.panelA_sort']
+    bank[active:active+9], bank[sort:sort+4] = fields, sorts_views
+    packed = call(bank, 'ncBankPackState')
+    snapshot = n['ncBankSnapshot']
+    assert packed[snapshot:snapshot+35] == fields + sorts_views + b''.join(leaves)
+    bank[snapshot:snapshot+35] = packed[snapshot:snapshot+35]
+    bank[active:active+9], bank[sort:sort+4] = bytes(9), bytes(4)
+    restored = call(bank, 'ncBankUnpackState')
+    assert restored[active:active+9] == fields and restored[sort:sort+4] == sorts_views
+    for field, leaf in [('A', b'README.TXT'), ('B', b'MIXED.CFG')]:
+        offset = n['vars.savedSelected'+field]
+        assert restored[offset:offset+len(leaf)+1] == leaf+b'\0'
+        assert restored[n['vars.restoreSelected'+field]] == 1
+
+    # MEM_RAMDISK_STATUS returns B: in E. Exercise the production path check
+    # with the configured comparison and the actual return carry.
+    patch(bank, 'mx_callRegs', b'\xe3\x23\x23\xe3\x1e\x01\xaf\xc9')
+    path = n['vars.stateFile']
+    for value, carry in [(b'B:\\NC-STATE.CFG\0', 1), (b'A:\\DOS\\NC-STATE.CFG\0', 0), (b'\0', 1)]:
+        bank[path:path+len(value)] = value
+        result = call(bank, 'ncBankStateFile')
+        assert result[0x85ff] == carry, value
+    print('Text and bank state PASS: MAIN serialization, 35-byte EXEC snapshot, both FAT names and physical StateFile selection')
 
 
 if __name__=='__main__':main()

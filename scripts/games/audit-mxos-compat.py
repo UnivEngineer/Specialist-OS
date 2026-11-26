@@ -146,7 +146,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / 'docs/compat/monitor-001-static.json')
     args = parser.parse_args()
-    include = (ROOT / 'source/include/mxos.inc').read_text(encoding='utf-8')
+    include = (ROOT / 'sdk/asm/abi/bios.inc').read_text(encoding='utf-8')
     public = {int(x, 16) for x in re.findall(r'^bios_\w+\s*=\s*0?([0-9A-Fa-f]{4})h', include, re.M)}
     records = []
     for record, data in inventory():

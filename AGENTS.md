@@ -14,7 +14,7 @@
 
 Выбирай инструкции по текущей задаче. Один маршрут может охватывать несколько компонентов.
 
-- **ASM/INC** в `source/`, `source-apps/` или SDK — [правила исходников](source/AGENTS.md), основной ASM компонента и связанные INCLUDE. Для ABI, оборудования и памяти находи нужные символы в `source/include/mxos.inc` и проверяй их потребителей.
+- **ASM/INC** в `source/`, `source-apps/` или SDK — [правила исходников](source/AGENTS.md), основной ASM компонента и связанные INCLUDE. Для ABI, оборудования и памяти находи нужные символы через `sdk/asm/mxos.inc` и внутренний `source/common/system.inc` и проверяй их потребителей.
 - **FAT, тома, драйверы** — [условия и граничные тесты](source/dos/README.md#проверка-изменений-fat). **RUN и смена ядра** — [загрузка и память](source/run/README.md#загрузка-и-память). **NC, графика и командная строка** — [README NC](source/nc/README.md).
 - **Сборка, линковка, образы и проверка ASM** — [навык mxos-build](.agents/skills/mxos-build/SKILL.md). **Перед запуском Emu80 или подключением к MCP** — [навык mxos-emu80](.agents/skills/mxos-emu80/SKILL.md).
 - **Игровые патчи** — [правила и реестр](assets/games/README.md#исправления-бинарников). **Схемы DipTrace** — [аппаратная часть](hardware/README.md). Каталоги и назначение компонентов — в [README](README.md#репозиторий-и-сборка) и README самих компонентов.

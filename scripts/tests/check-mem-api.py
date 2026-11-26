@@ -4,6 +4,7 @@ import runpy,re,struct,subprocess,json
 R=Path(__file__).resolve().parents[2];O=R/'docs/banked/memory-054/copy';O.mkdir(parents=True,exist_ok=True)
 sy=lambda p:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text(),re.M)}
 s=sy(R/'bin/BIOS.sym');base=bytearray(65536)
+transport=sy(R/'bin/banked/TRANSPORT.sym')
 runpy.run_path(str(R/'scripts/tests/mem-image.py'))['install'](base,s)
 payload=bytes((i*17+11)&255 for i in range(256));base[0x3000:0x3100]=payload
 rows=[]
@@ -12,7 +13,7 @@ for label,size,bank,copies,damage in [('local',256,0,32,False),('repeat-far',256
  m=bytearray(base);m[0x6000:0x6008]=struct.pack('<BHBHH',0,0xfe00 if label=='bad-range' else 0x3000,bank,0x4000,size)
  m[0xffc0:0xffe0]=window
  if damage:m[0xff00:0xff04]=b'\0'*4
- body=f''' INCLUDE "{(R/'source/include/mxos.inc').as_posix()}"
+ body=f''' INCLUDE "{(R/'sdk/asm/mxos.inc').as_posix()}"
  ORG 08000h
  ld sp,08FDFh
  call mx_memInfo
@@ -52,7 +53,16 @@ loop:
  assert b[0x8508:0x850a]==bytes.fromhex('7856'),label
  if size and not error:assert b[0x4000:0x4100]==payload,label
  assert b[0xff00:0xff04]==(b'\0'*4 if damage else b'\xff'*4),label
- assert b[0xff04:0xff9c]==base[0xff04:0xff9c],label
+ # CPM32 настраивает три операнда LXI адресами исходной, целевой и домашней страниц.
+ expected=bytearray(base)
+ if label=='repeat-far':
+  for symbol,pair in [('bankCopySourcePair',(s['IO_PAGE_RAM']&255,0)),
+                      ('bankCopyDestPair',(s['IO_PAGE_RAMD']&255,bank-1)),
+                      ('bankCopyReturnPair',(s['IO_PAGE_RAM']&255,0))]:
+   at=transport[symbol]
+   expected[at:at+2]=bytes(pair)
+ tail=slice(transport['bankCopyTail'],transport['bankCopyTailEnd'])
+ assert b[tail]==expected[tail],label
  assert b[0xffc0:0xffe0]==(payload[-32:] if label=='repeat-far' else window),label
  cycles=int(p.stdout.strip());rows.append(dict(case=label,copies=copies,cycles=cycles,ms=cycles/2000))
 (O/'checks.json').write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(rows))

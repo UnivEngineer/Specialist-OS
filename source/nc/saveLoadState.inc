@@ -2,7 +2,21 @@
 ; Save only navigation/view fields, leaving the system color configuration alone.
     ASSERT 2*MAX_PATH+2*13+11*20 < 2048 ; Maximum two paths/leaves plus keys/numbers.
 loadState:
+    IF NC_BANKED
+    ld hl,ncBankSnapshot
+    ld de,RESIDENT_STATE_BYTES
+    ld b,0
+    ld a,RESIDENT_SHELL_STATE
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
+    jp c,ncStateColdFile
+    call ncBankUnpackState
+    jp ncStateValidate
+ncStateColdFile:
+    call ncBankStateFile
+    jp c,ncStateValidate
+    ELSE
     call ncRamStatePath
+    ENDIF
     call ncConfigRead
     jp nc,ncStateValidate
     cp DOS_ERR_NOT_FOUND
@@ -181,6 +195,16 @@ ncStateSelectedBase:
     ret
 
 saveState:
+    IF NC_BANKED
+    call ncBankPackState
+    ld hl,ncBankSnapshot
+    ld de,RESIDENT_STATE_BYTES
+    ld b,1
+    ld a,RESIDENT_SHELL_STATE
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
+    call ncBankStateFile
+    ret c
+    ENDIF
     ld a,(ncStateDisabled)
     or a
     ret nz
@@ -225,7 +249,11 @@ saveState:
     ld de,NC_SORT_KEYS
     call bios_sub_hl_de
     ld (ncStateIO+FILE_PATH_IO.count),hl
+    IF NC_BANKED
+    ld hl,vars.stateFile
+    ELSE
     call ncRamStatePath
+    ENDIF
     call ncConfigSetPath
     ld hl,NC_SORT_KEYS
     ld (ncStateIO+FILE_PATH_IO.buffer),hl
@@ -435,6 +463,11 @@ ncStateIO:
     DS FILE_DESCRIPTOR,0
  ; Return HL = NC state path for the current RAM disk. AF/BC/DE are scratch.
 ncRamStatePath:
+    IF !NC_BANKED
+    ld hl,vars.stateFile
+    ld a,(hl)
+    or a
+    ret nz
     ld c,MEM_RAMDISK_STATUS
     ld a,MEM_OP_RAMDISK
     MXOS_CALL_REGS MXOS_DOS_MEMORY
@@ -444,3 +477,104 @@ ncRamStatePath:
     ld hl,ncStatePath
     ret
 ncStatePath: DB 'B:',05Ch,'NC-STATE.CFG',0
+    ELSE
+;----------------------------------------------------------------------------
+; MXOS
+; Выбрать дисковую копию панелей банкового NC.
+; вход: vars.stateFile содержит абсолютный путь либо пустую строку.
+; выход: HL=путь, CF=0 для внешнего носителя, CF=1 при отсутствии пути или
+; выборе RAM-диска. AF, BC, DE рабочие.
+;----------------------------------------------------------------------------
+ncBankStateFile:
+    ld c,MEM_RAMDISK_STATUS
+    ld a,MEM_OP_RAMDISK
+    MXOS_CALL_REGS MXOS_DOS_MEMORY
+    ret c
+    ld hl,vars.stateFile
+    ld a,(hl)
+    sub 'A'
+    ret c
+    cp e
+    scf
+    ret z
+    or a
+    ret
+
+;----------------------------------------------------------------------------
+; MXOS
+; Перенести параметры панелей и выбранные имена между EXEC и снимком DOS.
+; вход: при упаковке обе панели подготовлены, при распаковке снимок прочитан
+; в ncBankSnapshot. Первые 9 байтов содержат активную панель, каталоги,
+; диски и прокрутку; следующие 4 — режимы, последние 22 — два имени FAT.
+; выход: при упаковке активная панель и её список восстановлены. При
+; распаковке выделение применяется после чтения каталога. Все регистры рабочие.
+;----------------------------------------------------------------------------
+ncBankPackState:
+    ld hl,state.activePanel
+    ld de,state.panelA_curFile
+    ld bc,ncBankSnapshot
+    call bios_memcpy_bc_hl
+    ld hl,state.panelA_sort
+    ld de,stateEnd
+    call bios_memcpy_bc_hl
+    xor a
+    ld bc,ncBankSnapshot+13
+    call ncBankPackLeaf
+    ld a,1
+    ld bc,ncBankSnapshot+24
+    call ncBankPackLeaf
+    ld a,(ncBankSnapshot)
+    ld (state.activePanel),a
+    ld hl,state.panelA_drive
+    call readBytePanel
+    jp loadFiles
+ncBankPackLeaf:
+    push bc
+    ld (state.activePanel),a
+    ld hl,state.panelA_drive
+    call readBytePanel
+    call loadFiles
+    call getSelectedFile
+    pop bc
+    ld a,(hl)
+    cp 0FFh
+    jp nz,ncBankPackName
+    xor a
+    ld (bc),a
+    ret
+ncBankPackName:
+    push hl
+    ld de,11
+    add hl,de
+    ex de,hl
+    pop hl
+    jp bios_memcpy_bc_hl
+ncBankUnpackState:
+    ld hl,ncBankSnapshot
+    ld de,ncBankSnapshot+9
+    ld bc,state.activePanel
+    call bios_memcpy_bc_hl
+    ld de,ncBankSnapshot+13
+    ld bc,state.panelA_sort
+    call bios_memcpy_bc_hl
+    ld hl,ncBankSnapshot+13
+    ld de,vars.savedSelectedA
+    call ncBankUnpackLeaf
+    ld (vars.restoreSelectedA),a
+    ld hl,ncBankSnapshot+24
+    ld de,vars.savedSelectedB
+    call ncBankUnpackLeaf
+    ld (vars.restoreSelectedB),a
+    ret
+ncBankUnpackLeaf:
+    ld a,(hl)
+    or a
+    ret z
+    call compactName
+    ld a,1
+    ret
+ncBankSnapshot: DS RESIDENT_STATE_BYTES,0
+    ASSERT state.panelA_curFile-state.activePanel == 9
+    ASSERT stateEnd-state.panelA_sort == 4
+    ASSERT 13+2*11 == RESIDENT_STATE_BYTES
+    ENDIF

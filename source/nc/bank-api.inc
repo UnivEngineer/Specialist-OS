@@ -1,4 +1,4 @@
-    INCLUDE "../ui-gfx/abi.inc"
+    INCLUDE "../../sdk/asm/abi/ui-gfx.inc"
 NC_MAIN_PACKET         = 03380h
 NC_GFX_NORMAL_RECORD   = 96
 NC_GFX_QUEUE_BYTES     = 3072

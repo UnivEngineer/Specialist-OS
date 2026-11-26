@@ -2,7 +2,7 @@
 from pathlib import Path
 import random,re,struct,subprocess
 R=Path(__file__).resolve().parents[2]; O=R/'docs/bench/local-math'; O.mkdir(parents=True,exist_ok=True)
-asm=O/'math.asm';asm.write_text(' ORG 04000h\n DEFINE MATH_SUB\n DEFINE MATH_DIV2\n DEFINE MATH_MUL\n DEFINE MATH_DIV\n INCLUDE "'+(R/'source/include/math.inc').as_posix()+'"\n END\n',encoding='utf-8')
+asm=O/'math.asm';asm.write_text(' ORG 04000h\n DEFINE MATH_SUB\n DEFINE MATH_DIV2\n DEFINE MATH_MUL\n DEFINE MATH_DIV\n INCLUDE "'+(R/'sdk/asm/lib/math.inc').as_posix()+'"\n END\n',encoding='utf-8')
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'math.bin'),'--sym='+str(O/'math.sym'),str(asm)],check=True,capture_output=True)
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(O/'math.sym').read_text(),re.M)}
 rng=random.Random(8080);edges=[0,1,2,255,256,32767,32768,65534,65535];cases=[(x,y) for x in edges for y in edges]+[(rng.randrange(65536),rng.randrange(65536)) for _ in range(256)]

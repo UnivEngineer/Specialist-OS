@@ -40,7 +40,7 @@ legacyOutputStringReturn:  POP   HL
         POP   AF
         RET
 drawSearchMarkerBody:  LD    (bios_upper.cursorCfg),A
-        CALL  bios_drawCursorOld
+        CALL  bios_drawCursor
         POP   AF
         LD    (bios_upper.cursorCfg),A
         LD    C,18H         ; 24

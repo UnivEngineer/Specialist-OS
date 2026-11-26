@@ -18,7 +18,7 @@ mon2_printChar:     JP    bios_printCharOld     ; F809
                     JP    setMIfKeyPressed      ; F812
 mon2_printHexByte:  JP    bios_printHexByte     ; F815
 mon2_printString:   JP    bios_printStringOld   ; F818
-mon2_keyScan:       JP    bios_keyScanOld       ; F81B
+mon2_keyScan:       JP    bios_keyScan       ; F81B
                     JP    bios_getCursorPos     ; F81E
                     RET                         ; F821 - не используется
                     NOP

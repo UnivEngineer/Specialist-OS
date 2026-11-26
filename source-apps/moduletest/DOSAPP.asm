@@ -1,5 +1,5 @@
 ; Тест одноразового инициализатора в банке DOS, без установки резидента.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     ORG DOS_BANK_DRIVER_ADDR
 

@@ -4,6 +4,8 @@
     INCLUDE "mxos_syscall_ids.inc"
     PUBLIC _mxos_bios_call
     PUBLIC _mxos_call_packet
+    PUBLIC _mxos_pit_read, _mxos_pit_get_port
+    defc _mxos_pit_read = io_pitRead
     PUBLIC _mxos_queue_bind, _mxos_queue_flush
     PUBLIC _mxos_memmove_far, _mxos_puts_local
     PUBLIC _mxos_printString_bank, _mxos_printString_main
@@ -14,6 +16,28 @@
     PUBLIC _mxos_cls, _mxos_cursor_get, _mxos_cursor_set, _mxos_upper
 
 ; Консоль/таймер используют общий ABI и одинаково работают в main и BANK.
+
+;----------------------------------------------------------------------------
+; MXOS
+; Получить базу каналов таймера и пространство адресации платформы.
+; вход:
+;   HL = адрес выходного слова в текущей странице.
+; выход:
+;   По переданному адресу записана база. HL = 0 для MMIO, 1 для IN/OUT.
+;   AF и DE разрушены.
+;----------------------------------------------------------------------------
+_mxos_pit_get_port:
+    push hl
+    call io_pitGetPort
+    ex de,hl
+    pop hl
+    ld (hl),e
+    inc hl
+    ld (hl),d
+    ld hl,0
+    ret nc
+    inc l
+    ret
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -192,7 +216,7 @@ _mxos_puts:
 ;----------------------------------------------------------------------------
 
 _mxos_bank_key_modifiers:
-    call 0F04Ch
+    call io_bankKeyModifiers
     ld l,a
     ld h,0
     ret
@@ -210,7 +234,7 @@ _mxos_bank_key_modifiers:
 ;----------------------------------------------------------------------------
 
 _mxos_bank_key_shift:
-    call 0F04Fh
+    call io_bankKeyShift
     ld l,a
     ld h,0
     ret
@@ -229,7 +253,7 @@ _mxos_bank_key_shift:
 ;----------------------------------------------------------------------------
 
 _mxos_bank_getch_cursor:
-    call 0F049h
+    call io_bankGetChCursor
     jp bankKeyResult
 
 ;----------------------------------------------------------------------------
@@ -245,7 +269,7 @@ _mxos_bank_getch_cursor:
 ;----------------------------------------------------------------------------
 
 _mxos_bank_getch:
-    call 0F040h
+    call io_bankGetCh
     jp bankKeyResult
 
 ;----------------------------------------------------------------------------
@@ -262,7 +286,7 @@ _mxos_bank_getch:
 ;----------------------------------------------------------------------------
 
 _mxos_bank_key_poll:
-    call 0F043h
+    call io_bankKeyPoll
 
 ;----------------------------------------------------------------------------
 ; MXOS

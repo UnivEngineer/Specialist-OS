@@ -4,7 +4,7 @@
 ; Загружается вместо NC.COM и использует локальный низкоуровневый драйвер.
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
     ORG     SYSTEM_PROGRAM_ADDR
@@ -24,5 +24,5 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ; TAPE.COM не должен попасть в кэш FAT.
     ASSERT_DONT_FIT 0FB00h
 
-    INCLUDE "../include/file-io.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
     END

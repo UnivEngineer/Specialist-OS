@@ -19,7 +19,7 @@ kernelReal:
 kernelString:
     jp bios_printString
 kernelRealString:
-    jp bios_printStringReal
+    jp bios_printStringRawZ
 kernelCoreEnd:
 ; HL=описатель CASE. A=1 для API, A=0 для standalone, ZF; BC/DE/HL сохранены.
 benchIsKernel:
@@ -63,7 +63,7 @@ kernelRealBatch:
     pop hl
     push af
     push hl
-    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_REAL_MAIN
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_RAW_Z_MAIN
     pop hl
     push hl
     ld b,0

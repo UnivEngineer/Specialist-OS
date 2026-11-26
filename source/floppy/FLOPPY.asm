@@ -1,7 +1,7 @@
 ; ВГ93 «Специалиста-МХ». Выбор, позиционирование и аппаратный запрос
 ; FFF0h портированы из floppy.a80 (Fifan, 2016). Физическая геометрия
 ; PC DD: 80 цилиндров, 2 стороны, 9 секторов MFM по 512 байт.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     IFNDEF DRIVER_ORIGIN
 DRIVER_ORIGIN = 0

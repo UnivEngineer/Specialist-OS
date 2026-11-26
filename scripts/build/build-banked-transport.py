@@ -43,8 +43,8 @@ def main():
         stream.write(f'BANK_COPY_DATA_BYTES = {sy["bankDataTailEnd"]-sy["MEM_DATA_START"]}\n')
         stream.write(f'BANK_TRANSPORT_BYTES = {(OUT/"TRANSPORT.bin").stat().st_size}\n')
         stream.write(f'BANK_COPY_GUARD_ADDR = 0{sy["bankKeyboardSignature"]:04X}h\n')
-    for name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV','MAINBIOS','LOCALBLOCK'):
-        folder='source/io' if name in ('MAINIO','MAINBIOS') else ('source/bootstrap/tests' if name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV') else 'source/mem')
+    for name in ('DISKIO','FLASHDRV','FASTDRV','ROMDRV','LOCALBLOCK'):
+        folder='source/mem' if name == 'LOCALBLOCK' else 'source/bootstrap/tests'
         subprocess.run([str(ROOT/'tasm/sjasmplus.exe'), '--i8080', '-Wno-rdlow',
                         f'--lst={OUT/name}.lst', f'--sym={OUT/name}.sym',
                         f'--raw={OUT/name}.bin', (ROOT/f'{folder}/{name}.asm').as_posix()], check=True)

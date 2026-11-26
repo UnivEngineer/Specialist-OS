@@ -1,7 +1,7 @@
 ; Orion-128 Monitor M1, m1rk.bin FCFAh-FD25h.
 ; Keep the paired DAD H shifts, masked merge and eight-row loop.
 ; FontBen supplies its common KOI8 font, text frontends and screen geometry.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 02000h
     jp initialize

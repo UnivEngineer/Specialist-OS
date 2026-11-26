@@ -30,7 +30,7 @@ ncFieldDone:
         xor a
         ld (de),a
         ld hl,ncTextBuffer
-        call bios_printStringReal
+        call bios_printStringRawZ
         pop hl
         pop de
         pop bc
@@ -45,7 +45,7 @@ ncPrintChar:
         ld a,c
         ld (ncCharText),a
         ld hl,ncCharText
-        call bios_printStringReal
+        call bios_printStringRawZ
         pop hl
         pop af
         ret
@@ -129,7 +129,7 @@ ncPanelTextEnd:
         ld (de),a
         push hl
         ld hl,ncTextBuffer
-        call bios_printStringReal
+        call bios_printStringRawZ
         pop hl
         pop de
         pop bc
@@ -144,7 +144,7 @@ ncPrintDecWord:
         push de
         push hl
         call ncFormatDecimal
-        call bios_printStringReal
+        call bios_printStringRawZ
         pop hl
         pop de
         pop bc
@@ -206,5 +206,69 @@ ncDecimalStore:
         pop de
         pop hl
         ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Форматировать размер файла в поле до пяти знаков. До 65535 выводятся байты.
+; Далее выводятся целые КиБ (K), с 10000 КиБ — целые МиБ (M), с округлением вниз.
+;
+; вход:
+;   HL = FILE_INFO в текущей странице, размер хранится в четырёх байтах.
+;
+; выход:
+;   HL = ASCIIZ в ncDecimalText, ncDecimalCount = длина без нуля.
+;   Буфер действителен до следующего форматирования числа. AF, BC, DE и флаги разрушены.
+;----------------------------------------------------------------------------
+ncFormatFileSize:
+        ld de,FILE_INFO.size
+        add hl,de
+        ld e,(hl)
+        inc hl
+        ld d,(hl)
+        inc hl
+        ld c,(hl)
+        inc hl
+        ld b,(hl)
+        ld a,b
+        or c
+        jp z,ncFormatDecimal
+
+        ; 10000 КиБ = 009C4000h. Младший байт при делении на 1024 не нужен.
+        ld a,b
+        or a
+        jp nz,ncFileSizeMiB
+        ld a,c
+        cp 09Ch
+        jp c,ncFileSizeKiB
+        jp nz,ncFileSizeMiB
+        ld a,d
+        cp 040h
+        jp nc,ncFileSizeMiB
+ncFileSizeKiB:
+        ld e,d
+        ld d,c
+        ld bc,2*256+'K'
+        jp ncFileSizeShift
+ncFileSizeMiB:
+        ; Для деления на 1048576 достаточно старшего слова и сдвига на 4.
+        ld e,c
+        ld d,b
+        ld bc,4*256+'M'
+ncFileSizeShift:
+        xor a
+        ld a,d
+        rra
+        ld d,a
+        ld a,e
+        rra
+        ld e,a
+        dec b
+        jp nz,ncFileSizeShift
+        push bc
+        call ncFormatDecimal
+        pop bc
+        ld a,c
+        jp ncDecimalStore
+
 ncDecimalCount:     DB     0
 ncDecimalText:      BLOCK  6,0

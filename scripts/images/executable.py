@@ -9,7 +9,7 @@ MAGIC = b'\xcd\x20MX\x02\x00'
 HEADER_SIZE = 32
 RELOC_HEADER_SIZE = 40
 WORD16, HIGH8 = range(2)
-POLICY_EXCLUSIVE, POLICY_PRESERVE, POLICY_MANAGED = range(3)
+POLICY_EXCLUSIVE, POLICY_PRESERVE, POLICY_MANAGED, POLICY_TRANSIENT = range(4)
 
 
 def checksum(data):
@@ -49,7 +49,7 @@ class Image:
             raise ValueError('Invalid image memory interval')
         if bss!=0xffff and self.load+len(self.data)+bss>end:
             raise ValueError('BSS exceeds image memory interval')
-        if policy not in (0,1,2) or bss==0xffff and policy!=POLICY_EXCLUSIVE:
+        if policy not in (0,1,2,3) or bss==0xffff and policy!=POLICY_EXCLUSIVE:
             raise ValueError('Invalid image memory policy')
         if not (0<=self.min_heap<=65535 and 0<=self.stack<=65535 and api in (0,2) and self.mode in range(5) and self.options in (0,1,3)):
             raise ValueError('Invalid image requirements')
@@ -60,6 +60,8 @@ class Image:
             raise ValueError('Invalid image address or size')
         if not self.load <= self.entry < self.load + len(self.data):
             raise ValueError('Entry is outside the image')
+        if self.policy == POLICY_TRANSIENT and (self.flags != 4 or self.reloc_kind is not None or self.min_heap or self.options):
+            raise ValueError('TRANSIENT requires a fixed MAIN image without minimum heap or cache flags')
         if self.flags not in (0, 1, 2, 4):
             raise ValueError("Unknown COM/EXE flags")
         if self.reloc_kind is not None:
@@ -136,6 +138,8 @@ def decode(data, kind, load=None, entry=None, path=None):
             stack=struct.unpack_from('<H',data,24)[0]
             if data[27]!=header or data[29]: raise ValueError('Invalid image header size/reserve')
             image=Image(body,start,run,data[5],bss,begin,end,heap,stack,data[22],data[23],data[26],data[28])
+            if image.policy == POLICY_TRANSIENT and kind not in ('com', 'exe'):
+                raise ValueError('TRANSIENT requires COM or EXE')
             image.memory()
         if version == 3:
             check_reloc_target(kind, image.flags)
@@ -157,7 +161,7 @@ def decode(data, kind, load=None, entry=None, path=None):
         choice=lambda key,names,default=None:names.get(fields[key].upper(),None) if key in fields and fields[key].upper() in names else number(key,default)
         image=Image(Path(path).with_suffix('.i80').read_bytes(),descriptor['load'],descriptor['entry'],descriptor['flags'],
                     number('BSS'),number('MEM_BEGIN'),number('MEM_END'),number('MIN_HEAP',0),number('STACK',0),
-                    choice('POLICY',{'EXCLUSIVE':0,'PRESERVE':1,'MANAGED':2}),number('API'),
+                    choice('POLICY',{'EXCLUSIVE':0,'PRESERVE':1,'MANAGED':2,'TRANSIENT':3}),number('API'),
                     choice('MODE',{'AUTO':0,'MX':1,'STD':2,'MON':3,'RF':4},0),number('CACHEABLE',0))
         if 'RELOC_KIND' in fields:
             size = number('BODY_SIZE')
@@ -178,6 +182,8 @@ def decode(data, kind, load=None, entry=None, path=None):
 
 def encode(image, kind):
     image.validate()
+    if image.policy == POLICY_TRANSIENT and kind not in ('com', 'exe'):
+        raise ValueError('TRANSIENT requires COM or EXE')
     kind = kind.lower().lstrip('.')
     if image.reloc_kind is not None:
         check_reloc_target(kind, image.flags)

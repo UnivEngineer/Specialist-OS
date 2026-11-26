@@ -3,7 +3,7 @@
 ; FONT_MODE=1 (Packed): 4096 байт нижних таблиц; FONT_MODE=2 (Fast): 10240.
 ; Перед Attach DE = база подготовленных страниц MAIN или 0 для Rotate.
 ; Attach подключает входы BIOS, выбирает KOI-8 и возвращает A=0, CF=0.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     IFNDEF FONT_MODE
 FONT_MODE = 0

@@ -44,7 +44,7 @@ initialize_dos_state(base, s)
 raw=(O/'stubs.bin').read_bytes();base[0x8400:0x8400+len(raw)]=raw
 for name,target in [('kdFetch','fetch'),('flushVolume','flush'),('klInstall','install')]:base[s[name]:s[name]+3]=b'\xc3'+W(st[target])
 # Реальный MAIN ABI намеренно отличается от одноимённого blockIO в DOS.
-struct.pack_into('<H',base,s['MEM_LOCAL_SYSTEM'],0xC8EA)
+struct.pack_into('<H',base,s['MEM_LOCAL_SYSTEM'],s['bios_blockIO'])
 struct.pack_into('<H',base,s['MEM_LOCAL_CHECKED'],0xC195)
 stub=b'\x31'+W(0xE000)+b'\xcd'+W(s['dosRawPrepare'])
 stub+=b'\x22'+W(0x8302)+b'\xeb\x22'+W(0x8304)+b'\x60\x69\x22'+W(0x8306)+b'\xf5\xe1\x22'+W(0x8300)+b'\xc3'+W(0x82ff)

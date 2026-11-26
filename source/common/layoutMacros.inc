@@ -1,10 +1,14 @@
 ; Фиксированный вход: только один трёхбайтный JP и неизменный адрес ABI.
-    MACRO DOS_ABI_GATE address, target
+    MACRO DOS_ABI_GATE address, target, main_io
         ASSERT $ == address
         jp target
         ASSERT $ == address + 3
         ASSERT target != address
-        ASSERT (target >= DOS_CODE_START && target < DOS_CODE_END_MAX) || (target >= 0C000h && target < DOS_END_MAX)
+        IF main_io
+            ASSERT target >= bankBiosImageEnd && target < mainPpiImageEnd
+        ELSE
+            ASSERT (target >= DOS_CODE_START && target < DOS_CODE_END_MAX) || (target >= 0C000h && target < DOS_END_MAX)
+        ENDIF
     ENDM
 
 ; Обход фиксированного входа между двумя частями реализации.

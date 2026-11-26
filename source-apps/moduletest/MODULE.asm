@@ -1,5 +1,5 @@
 ; Один тестовый модуль для main, EXEC-банка и арены DOS. Вход — RET ABI.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
     IF MAIN_MODULE == 2
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     ORG DOS_BANK_DRIVER_ADDR

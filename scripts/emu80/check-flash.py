@@ -102,7 +102,8 @@ def main():
         machine.write(0, (ROOT / "bin/FlashSys.i80").read_bytes())
         assert not machine.subroutine(0)["flags"]["C"], "The flash upgrade must skip a readable ROM"
         machine.subroutine(0xC842, af=0x0000, de=1)
-        entry = 0xC863
+        from runpy import run_path
+        entry = run_path(str(Path(__file__).with_name('system-map.py')))['MEMORY_MAP']['bios_diskDriver']
         image = (args.runtime / "specialist-os/system.bin").read_bytes()
         # MX ROM занимает вторую половину образа; старшие страницы пока не моделируются.
         for sector in [0, 1, 0x3F, 0x7F]:

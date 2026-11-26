@@ -1,6 +1,6 @@
 ; CHKDSK: диагностика текущего тома MXOS, без операций записи.
-; Физический ABI C863h, сектор/кластер 256 байт, одна FAT16-подобная таблица.
-    INCLUDE "../../source/include/mxos.inc"
+; Физический вход bios_diskDriver, сектор/кластер 256 байт, одна FAT16-подобная таблица.
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     MACRO LOAD_DE address
     push hl
@@ -1212,7 +1212,7 @@ txtNoMemory:        DB "NOT ENOUGH MEMORY",0
 
     MODULE checkMath
     DEFINE MATH_DIV2
-    INCLUDE "../../source/include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDMODULE
 
 codeEnd:

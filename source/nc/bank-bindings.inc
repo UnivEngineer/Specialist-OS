@@ -5,7 +5,7 @@
     DEFINE bios_upper.cursorCfg ncBankCursorCfg
     DEFINE bios_upper.ramPageCount ncBankRamPages
     DEFINE FONT_ENGINE_HEADER ncBankFontHeader
-    DEFINE bios_printStringReal ncBankPrintRaw
+    DEFINE bios_printStringRawZ ncBankPrintRaw
     DEFINE bios_printStringRawLim ncBankPrintLim
     DEFINE bios_printStringZ ncBankPrintString
     DEFINE bios_printString ncBankPrintString

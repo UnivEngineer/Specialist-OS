@@ -31,7 +31,7 @@ print('UI alignment PASS',count,'cases; plain/modal exact bounds and 2-pixel ver
 # Draw/focus share one widget API. Stub only the BIOS text/cursor callbacks;
 # real text layout is exercised by the visible emulator tests.
 m=bytearray(base);m[0x9000:0xc000]=bytes(12288)
-m[n['bios_setCursorPos']]=0xc9;m[n['bios_printStringReal']]=0xc9
+m[n['bios_setCursorPos']]=0xc9;m[n['bios_printStringRawZ']]=0xc9
 m[0x8100:0x810a]=W(0x8180)+bytes([36,56,130,14,6,1,7,3]);m[0x8180:0x8188]=b'Yes [Y]\0'
 def widget(memory,name,a=0):
  stub=b'\x21'+W(0x8100)+b'\x3e'+bytes([a])+b'\xcd'+W(n[name])+b'\xc9'

@@ -1,6 +1,7 @@
 ; Самостоятельная консоль MXOS. Общие команды выполняет DOS в своей странице.
-    INCLUDE "../include/mxos.inc"
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
+    INCLUDE "../common/system.inc"
+IMAGE_FLAGS         = IMAGE_FLAG_MAIN
+IMAGE_MEMORY_POLICY = IMAGE_POLICY_TRANSIENT
     ORG 0000h
 
 ;----------------------------------------------------------------------------
@@ -27,6 +28,15 @@ cliStart:
     ld a,2
     MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
+    ld hl,cliFileEnd
+    ld bc,IMAGE_BSS_SIZE
+cliClearBss:
+    ld (hl),0
+    inc hl
+    dec bc
+    ld a,b
+    or c
+    jp nz,cliClearBss
     call cliHistoryLoad
     ld hl,bios_cliExecError
     ld a,(hl)
@@ -61,11 +71,10 @@ cliPrompt:
     jp cliPrompt
 cliExternal:
     call cliHistorySave
-    ; Нижнее ОЗУ может быть затёрто программой; возврат через загрузку оболочки.
     ld a,1
     MXOS_CALL_REGS MXOS_DOS_SET_SHELL
+    ; Внешняя команда может занять MAIN. BIOS загрузит CLI заново.
     ld hl,CMD_LINE
-    ; После RET приложения код CLI в main уже может быть затёрт.
     MXOS_EXEC bios_cliExecDone
 cliLeave:
     call cliHistorySave
@@ -87,15 +96,27 @@ cliError:
     MXOS_CALL_REGS MXOS_DOS_GET_ERROR
 cliShowError:
     call dosErrorText
-    call bios_printStringReal
+    call bios_printStringRawZ
     ld c,0Ah
     call bios_printChar
     jp cliPrompt
 cliPromptPath: DS MAX_PATH,0
     INCLUDE "overwrite.inc"
-    INCLUDE "../include/errors.inc"
+    DEFINE DOS_ERRORS_DRIVE BOOT_VOLUME_LETTER
+    INCLUDE "../../sdk/asm/lib/errors.inc"
     INCLUDE "input.inc"
     INCLUDE "history.inc"
-    INCLUDE "../include/file-io.inc"
-    ASSERT $ < APP_MEMORY_END
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
+cliFileEnd:
+; Черновик и кольцо находятся в BSS после кода и рабочих дескрипторов.
+cliHistoryDraft   = cliFileEnd
+cliHistoryRecord  = cliHistoryDraft+MAX_PATH
+cliHistoryData    = cliHistoryRecord+MAX_PATH
+cliHistoryCount   = cliHistoryData+4
+cliHistoryNext    = cliHistoryCount+1
+cliHistoryEntries = cliHistoryNext+1
+cliHistoryEnd     = cliHistoryEntries+CLI_HISTORY_COUNT*MAX_PATH
+IMAGE_BSS_SIZE = cliHistoryEnd-cliFileEnd
+IMAGE_MEM_END  = cliHistoryEnd
+    ASSERT IMAGE_MEM_END < APP_MEMORY_END
     END

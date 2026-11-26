@@ -73,7 +73,7 @@ def main():
         m[0x8600:0x8600+len(stub)] = stub
         at = s['lineEdit']; m[at:at+3] = bytes.fromhex('c3 00 86')
         # Любой выбор тома/драйвера вместо отказа уводит исполнение в ловушку.
-        for entry in (0xC842,0xC863):m[entry:entry+3]=bytes.fromhex('c3 01 83')
+        for entry in (0xC842,s['bios_diskDriver']):m[entry:entry+3]=bytes.fromhex('c3 01 83')
         wrapper=bytes.fromhex('31 df 8f 11 00 84 cd 00 00 22 02 85 f5 e1 22 00 85 c3 00 83')
         m[0x8200:0x8200+len(wrapper)] = wrapper
         arg = text.encode('ascii') + b'\r\0'

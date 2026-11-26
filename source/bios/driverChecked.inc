@@ -144,7 +144,7 @@ diskDriver_w:
             jp c,   diskWriteFailed
 
             call    ramDWriteSector
-            ; bios_RAMDWrite возвращает основную страницу перед RET.
+            ; Секторная запись возвращает основную страницу перед RET.
 
 popDBHA_success:
             pop     de

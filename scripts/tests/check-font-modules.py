@@ -51,7 +51,7 @@ for name in ('Rotate','Packed6K','Fast12K'):
  # Stop before and after a successful quartet, at each possible slot.
  for n in range(8):
   for entry,char_entry,separator in [('bios_printStringZ','bios_printChar',b'\t'),
-                                     ('bios_printStringReal','bios_printCharRaw',b'\x01')]:
+                                     ('bios_printStringRawZ','bios_printCharRaw',b'\x01')]:
    text=b'ABCDEFG'[:n]+separator+b'wxyz'
    b=bytearray(m)
    b[0x1000:0x1000+len(text)+1]=text+b'\0'

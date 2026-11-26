@@ -419,12 +419,35 @@ dosWorkNext = dosWorkNext + DISK_INFO
     DOS_FIELD ramRequestedDrive, 1
 
 ; lifecycle
+dosWorkBeforeResident = dosWorkNext
+dosWorkNext = DOS_RESIDENT_WORK
     DOS_FIELD residentShellHandle, 2
     DOS_FIELD appOwner, 1
     DOS_FIELD appDepth, 1
     DOS_FIELD appImage, 2
     DOS_FIELD residentKeys, MODULE_MAX*2
     DOS_FIELD residentIndex, 1
+    DOS_FIELD residentPriorities, MODULE_MAX
+    DOS_FIELD residentVetoCodes, MODULE_MAX
+    DOS_FIELD residentVetoTexts, MODULE_MAX*2
+    DOS_FIELD residentVetoFlags, MODULE_MAX*2
+    DOS_FIELD residentManaged, MODULE_MAX
+    DOS_FIELD residentReloadSlots, MODULE_MAX
+    DOS_FIELD residentReloadStatus, pressureSlotCount
+    DOS_FIELD pressureTried, MODULE_MAX
+    DOS_FIELD pressureBest, 1
+    DOS_FIELD pressureIndex, 1
+    DOS_FIELD pressureRefusal, 1
+    DOS_FIELD pressureBusy, 1
+    DOS_FIELD pressureRecord, 2
+    DOS_FIELD pressurePages, 1
+    DOS_FIELD pressureCommandReady, 1
+    DOS_FIELD pressureStateSize, 1
+    DOS_FIELD pressureState, RESIDENT_STATE_BYTES
+    DOS_FIELD pressurePaths, pressureSlotCount*PRESSURE_PATH_BYTES
+    DOS_FIELD pressureRefusalName, 2
+    DOS_FIELD pressureRefusalText, 2
+    DOS_FIELD pressureRefusalBank, 1
 
 ; memory-extra
     DOS_FIELD memoryFillSize, 2
@@ -509,6 +532,9 @@ dosWorkNext = dosWorkNext + DISK_INFO
 
 ; romproxy
     DOS_FIELD dosSystemRequest, 5
+dosResidentWorkEnd = dosWorkNext
+    ASSERT dosResidentWorkEnd <= DOS_ARENA_START
+dosWorkNext = dosWorkBeforeResident
     ENDIF
 
 ; services

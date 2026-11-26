@@ -76,4 +76,4 @@ hexUnderlay:        DB 0
 hexUnderlayVRAM:    DW 0
 hexUnderlaySize:    DW 0
     DEFINE UI_BITMAP_RAW_ONLY
-    INCLUDE "../include/ui-bitmap.inc"
+    INCLUDE "../../sdk/asm/lib/ui-bitmap.inc"

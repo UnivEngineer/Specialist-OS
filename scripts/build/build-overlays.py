@@ -21,7 +21,7 @@ def build(name, output_dir=ROOT / 'bin', kernel=KERNEL, defines=()):
     pack = runpy.run_path(str(ROOT / 'scripts/build/pack-dos.py'))
     cpu = runpy.run_path(str(ROOT / 'scripts/images/cpu.py'))
     symbols = pack['symbols'](kernel)
-    host = ROOT / f'source/include/{component}-host.inc'
+    host = ROOT / f'source/dos/{component}-host.inc'
     names = re.findall(r'^\s*DW (\S+)', host.read_text(encoding='utf-8'), re.M)
     imports = output_dir / f'{component}-imports.inc'
     imports.write_text(''.join(f'{symbol} = 0{symbols[symbol]:04X}h\n' for symbol in names), encoding='utf-8')

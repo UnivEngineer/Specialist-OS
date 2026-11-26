@@ -5,10 +5,10 @@ sysBIOSTable:
     DW 0
     DW t_tapeWrite
     DW input
-    DW j_keyScan
+    DW keyScan2
     DW 0
     DW printStringZ
-    DW j_keyScan
+    DW keyScan2
     DW 0
     DW 0
     DW t_tapeLoad
@@ -22,7 +22,7 @@ sysBIOSTable:
     DW sysDiskDriver
     DW 0
     DW printDecWord
-    DW setRAMDDriver
+    DW 0
     DW upperCase
     DW strcmp
     DW stricmp

@@ -1,5 +1,5 @@
 ; All three preserved CP/M 4x8 formats, selected at initialization.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
     DEFINE FONT_ENGINE_DLL
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 02000h

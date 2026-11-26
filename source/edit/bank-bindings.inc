@@ -6,7 +6,7 @@
     DEFINE bios_vars.keyLocks ebKeyLocks
     DEFINE FONT_ENGINE_HEADER ebFont
     DEFINE IO_COLOR ebColor
-    DEFINE bios_printStringReal ebPrintRaw
+    DEFINE bios_printStringRawZ ebPrintRaw
     DEFINE bios_printStringRawLim ebPrintLim
     DEFINE bios_printString ebPrintString
     DEFINE bios_printChar ebPrintChar

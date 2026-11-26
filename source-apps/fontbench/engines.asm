@@ -1,5 +1,6 @@
 ; Scalar-only collection. The common FontBen hooks own AF/BC/DE/HL.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
     DEFINE FONT_ENGINE_DLL
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 02000h

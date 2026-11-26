@@ -1,4 +1,4 @@
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
     INCLUDE "../../bin/FONTBEN.bios.entries.inc"
     DEFINE FONT_CORPUS_TEST
 FONT_COLUMNS     = 48

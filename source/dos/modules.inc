@@ -309,6 +309,9 @@ mdStackLimit:
     jp c,mdStackReady
     jp nz,mdRange
 mdStackReady:
+    ld a,(v_imageHeader+IMAGE_POLICY)
+    cp IMAGE_POLICY_TRANSIENT
+    jp z,mdImage
     ld a,(mdPlacement)
     cp MODULE_TARGET_DOS
     jp z,mdDosImage
@@ -386,8 +389,12 @@ mdBank:
     ld hl,MEM_DATA_LIMIT
     ld b,MEM_ALLOC_ANY
     call memoryAlloc
-    jp c,mdError
-    jp mdReserved
+    jp nc,mdReserved
+    ld b,MEM_ALLOC_ANY
+    call pressureReclaim
+    jp nc,moduleLoad
+    call kdCapture
+    jp kdFinish
 mdDos:
     push hl
     ld hl,(v_imageHeader+IMAGE_BSS)
@@ -534,6 +541,7 @@ mdLoadReady:
     ld (hl),d
     xor a
     ld (mdLoadingBank),a
+    call pressureInitModule
     call mdReuseTrack
     call memoryPublishTop
     xor a
@@ -732,6 +740,17 @@ moduleUnload:
     xor a
     jp kdError
 mdExplicitUnload:
+    call residentKey
+    jp z,mdCheckDiskOwner
+    push hl
+    call pressureSlot
+    ld hl,residentPriorities
+    call pressureByte
+    ld a,(hl)
+    pop hl
+    cp RESIDENT_PRIORITY_PINNED
+    jp z,mdUnloadProtected
+mdCheckDiskOwner:
     push hl
     ld de,9
     add hl,de
@@ -748,6 +767,7 @@ mdUnloadAllowed:
     jp kdError
 mdUnloadPinned:
     pop hl
+mdUnloadProtected:
     ld a,MEM_ERROR_ACTIVE
     jp mdError
 
@@ -942,6 +962,9 @@ mdDiscardImage:
     ex de,hl
     ld (hl),0FFh
 mdFreeRecord:
+    pop hl
+    push hl
+    call pressureForgetModule
     pop hl
     push hl
     ld de,3

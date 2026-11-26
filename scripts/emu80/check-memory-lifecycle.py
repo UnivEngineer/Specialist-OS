@@ -77,7 +77,7 @@ try:
     call(k['MXOS_DOS_MEMORY'],hl=address,bc=bank<<8,af=k['MEM_OP_FREE']<<8)
     print('PASS: remote FILL, atomic range error and QUERY',flush=True)
     # Приложение намеренно оставляет MAIN-блок: завершение обязано его убрать.
-    asm=f' INCLUDE "{(ROOT/"source/include/mxos.inc").as_posix()}"\n ORG 00100h\n'+'''
+    asm=f' INCLUDE "{(ROOT/"source/common/system.inc").as_posix()}"\n ORG 00100h\n'+'''
     ld hl,06000h
     ld de,01000h
     ld b,0

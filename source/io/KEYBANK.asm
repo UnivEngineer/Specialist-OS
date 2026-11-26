@@ -1,5 +1,6 @@
 ; MX keyboard. Only an edge, a due repeat, or a requested caret change enters MAIN.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "timer-hardware.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
     INCLUDE "../../bin/banked/key-imports.inc"
     ORG IO_BANK_KEYS
@@ -22,14 +23,10 @@
     ASSERT $ == io_bankClockRead
 keyClockRead:
     push de
-    ld hl,(keyBias)
-    ex de,hl
-    ld hl,IO_TIMER_MODE
-    ld (hl),080h
-    dec hl
-    ld a,(hl)
-    ld h,(hl)
-    ld l,a
+    ; Поправка хранится в операнде LXI, локальном для текущей страницы.
+    ld de,0
+keyBias = $-2
+    call io_pitRead
     add hl,de
     pop de
     ret
@@ -129,8 +126,8 @@ keyPresent:
 keyRaw:
     call keyPresent
     ret z
-    push hl
     push bc
+    push hl
     push de
     ld hl,bios_keyScan
     xor a
@@ -142,20 +139,18 @@ keyGet:
     call keyPoll
     jp z,keyGet
     ret
-keyPoll:
-    push hl
-    push bc
-    push de
-    ld b,0
-    jp keySample
-
 ; Like keyPoll but ask BIOS to hide a visible caret when it delivers a key.
 keyPollCursor:
-    push hl
     push bc
-    push de
     ld b,e
+    jp keySample
+
+keyPoll:
+    push bc
+    ld b,0
 keySample:
+    push hl
+    push de
     call keyPresent
     jp z,keyReleased
     ld a,(hl)
@@ -247,15 +242,15 @@ keyEmpty:
     xor a
 keyReturn:
     pop de
-    pop bc
     pop hl
+    pop bc
     ret
 
 ; Optional built-in blink at the current BIOS text position. E holds actual
 ; visibility, so a disabled/zero-height cursor never leads to periodic calls.
 keyGetCursor:
-    push hl
     push bc
+    push hl
     push de
     ld e,0
     call keyTicks
@@ -285,10 +280,6 @@ keyCursorWait:
 keyCursorOff:
     call keyGet
     jp keyReturn
-; Same down counter before, during and after the hardware one-shot.
-; Offset is private to the current bank. Only the timer owner may use it.
-keyBias: DW 0
-
 keyClick:
     push hl
     call keyClockRead
@@ -300,4 +291,4 @@ keyClick:
     ld (hl),0
     pop hl
     ret
-    ASSERT $ <= MEM_IMAGE_LOCAL_START
+    INCLUDE "pit-tail.inc"

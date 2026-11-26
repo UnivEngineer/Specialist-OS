@@ -8,7 +8,7 @@ s=sy(R/'bin/BIOS.sym');k=sy(R/'bin/banked/KERNEL.sym');m=bytearray(65536);runpy.
 initialize_dos_state(m, k)
 m[0x3040:0x3080]=bytes(range(64))
 imports=''.join(f'{n} = 0{k[n]:04X}h\n' for n in ('memoryInit','dosMemoryService','kdPage','memoryRamPages'))
-code=imports+f' INCLUDE "{(R/"source/include/mxos.inc").as_posix()}"\n'+"""
+code=imports+f' INCLUDE "{(R/"source/common/system.inc").as_posix()}"\n'+"""
  ORG 08000h
  ld sp,08FDFh
  call memoryInit

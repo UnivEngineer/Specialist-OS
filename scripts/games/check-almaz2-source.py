@@ -635,6 +635,8 @@ def check_command_input(data, symbols, matrix, pit, calls):
         require(data[entry] == 0xC3 and word(data, entry+1) == entry_target, "Editor entry adapter missing")
         at = symbols[name]
         body = bytes.fromhex("31 ff 7f")
+        if symbols["ALMAZ_MXOS_TIMER"]:
+            body += b"\xcd" + u16("audio_claim_timer") + b"\xda" + u16("app_bios_return")
         if pit:
             body += b"\xcd" + u16("audio_init")
         body += b"\xcd" + u16("input_editor_release") + b"\xcd" + u16("input_initialize") + b"\xc3" + u16(destination)
@@ -735,6 +737,19 @@ def check_audio_exit(data, symbols):
     u16 = lambda name: symbols[name].to_bytes(2, "little")
     at = symbols["audio_game_exit"]
     expected = b"\xcd" + u16("audio_stop")
+    if symbols["ALMAZ_MXOS_TIMER"]:
+        expected += b"\x3e" + bytes([symbols["TIMER_RELEASE"]])
+        expected += b"\xcd" + u16("mx_callRegs") + u16("MXOS_DOS_TIMER")
+        claim = data[symbols["audio_claim_timer"]:symbols["v_audio_claimed"]]
+        require(b"\x3e" + bytes([symbols["TIMER_RAW"]]) + b"\xcd" + u16("mx_callRegs") +
+                u16("MXOS_DOS_TIMER") in claim and b"\xcd" + u16("pitTimerBindWrites") in claim,
+                "MXOS timer lease or register binding is missing")
+        read = b"\xcd" + u16("io_pitRead")
+        require(read in data[symbols["audio_update"]:symbols["audio_next"]],
+                "MXOS effects must use the local IO read")
+        if symbols["app_frame_pacing_enabled"]:
+            require(read in data[symbols["frame_clock_sample"]:symbols["frame_clock_sample_saved"]],
+                    "MXOS frame clock must use the local IO read")
     if symbols["app_optimizations_enabled"] and not symbols["app_monitor_target"]:
         expected += b"\xcd" + u16("color_exit_clear")
     expected += b"\xc3" + u16("app_bios_return")

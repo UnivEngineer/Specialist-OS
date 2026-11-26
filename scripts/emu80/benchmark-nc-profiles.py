@@ -198,14 +198,19 @@ class Campaign:
   # No banked application or public ABI is patched by this comparison.
   local=origin+0xc00
   table=self.read(0,self.b['v_keybTbl'],96)
-  asm=f'''    INCLUDE "{(ROOT/'source/include/mxos.inc').as_posix()}"
+  asm=f'''    INCLUDE "{(ROOT/'sdk/asm/mxos.inc').as_posix()}"
+    INCLUDE "{(ROOT/'sdk/asm/hardware/spec_mx.inc').as_posix()}"
     ORG {local}
     jp keyScan2
-setKeybMode82:
+ioKeyMode82:
     ld a,082h
     ld (IO_KEYB_MODE),a
     ret
+    INCLUDE "{(ROOT/'source/io/key-scan.inc').as_posix()}"
     INCLUDE "{(ROOT/'source/bios/keyScan.inc').as_posix()}"
+keyColumn: DW 0
+keyRow: DB 0
+    ALIGN 256
 v_keybTbl:
     DB {','.join(str(v) for v in table)}
     END

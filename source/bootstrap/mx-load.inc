@@ -11,11 +11,13 @@
     ld (MX_NC_PATH),a
     ld (MX_NC_MAIN_PATH),a
     call mxCheckWarm
-    jp z,dosLoaded
+    jp z,checkWarmPages
+mxLoadDos:
     ; Незавершённая холодная загрузка не должна помечать старое ядро готовым.
     ld hl,DOS_READY
     ld c,0
-    call 0FFC0h
+    xor a
+    call BOOT_BYTE_WRITE
     ld e,MX_KERNEL_LBA
 mxNextSector:
     ld d,0

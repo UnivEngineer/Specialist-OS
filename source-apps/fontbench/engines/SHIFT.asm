@@ -1,5 +1,5 @@
     IFNDEF FONT_ENGINE_DLL
-            include "../../../source/include/mxos.inc"
+            include "../../../sdk/asm/mxos.inc"
     ENDIF
 ; Посимвольный пререндер 12 КБ автономного FONTBEN.
 ; C — код, координаты и курсор общие с BIOS. Регистры сохранены.

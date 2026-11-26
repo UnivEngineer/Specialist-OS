@@ -37,7 +37,7 @@ printFileGap:
         ld a,(ncFontWidth)
         cp 8
         jp z,ncPrintDetailedFile
-        call bios_printStringReal
+        call bios_printStringRawZ
     IF !ENABLE_COLOR
         ld a,(ncFontWidth)
         cp 6
@@ -48,6 +48,19 @@ ncPanelNameDone:
         pop bc
         pop hl
         ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Дополнить имя в 8×8 пятисимвольным полем размера или маркером каталога.
+;
+; вход:
+;   HL = FILE_INFO, первые 12 символов ncTextBuffer содержат имя на панели.
+;   В стеке сохранены DE, BC, HL вызывающей программы.
+;
+; выход:
+;   Имя и размер выведены в текущей строке панели. BC, DE, HL восстановлены
+;   из стека, AF и флаги разрушены. ncTextBuffer содержит полную строку ASCIIZ.
+;----------------------------------------------------------------------------
 ncPrintDetailedFile:
         pop de
         pop bc
@@ -62,31 +75,32 @@ ncPrintDetailedFile:
         and 10h
         pop hl
         jp nz,ncDetailedDirectory
-        ld de,FILE_INFO.size
-        add hl,de
-        ld e,(hl)
-        inc hl
-        ld d,(hl)
-        ld b,20h
-        call ncFormatDecimal
-        jp ncDetailedSuffix
-ncDetailedDirectory:
-        ld hl,ncDirectory5
-ncDetailedSuffix:
+        call ncFormatFileSize
+        ld a,(ncDecimalCount)
+        ld c,a
+        ld a,5
+        sub c
         ld de,ncTextBuffer+12
-        ld b,5
+        jp z,ncDetailedCopy
+        ld b,a
         ld a,' '
 ncDetailedGap:
         ld (de),a
         inc de
         dec b
         jp nz,ncDetailedGap
-        ld b,5
-        call ncCopyNamePart
+        jp ncDetailedCopy
+ncDetailedDirectory:
+        ld hl,ncDirectory5
+        ld c,5
+        ld de,ncTextBuffer+12
+ncDetailedCopy:
+        ld b,c
+        call ncStatusCopy
         xor a
         ld (de),a
         ld hl,ncTextBuffer
-        call bios_printStringReal
+        call bios_printStringRawZ
         jp ncPanelNameDone
 ncDirectory5: DB '<DIR>'
     IF !ENABLE_COLOR

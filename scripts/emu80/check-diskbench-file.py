@@ -11,10 +11,10 @@ assert Path(exe).resolve()==(runtime/'Emu80qt-mcp.exe').resolve()
 s=symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym');nc=symbols(ROOT/'bin/NC.sym')
 out=ROOT/'docs/diskbench/file-004';out.mkdir(parents=True,exist_ok=True)
 m.call('debug_break')
-assert m.read(0xC000,3)==bytes.fromhex('C309C0')
+assert m.read(0xC000,3)==(ROOT/'bin/BIOS.sys').read_bytes()[:3]
 m.stop_at(0x8100)
 m.subroutine(0xC842,af=0,de=1)
-if m.subroutine(0xC863,bc=0xFF00)['registers']['bc']['dec']>>8!=s['DISK_TECH_MX_SYSTEM_FLASH']:
+if m.subroutine(s['bios_diskDriver'],bc=0xFF00)['registers']['bc']['dec']>>8!=s['DISK_TECH_MX_SYSTEM_FLASH']:
     m.install_flash('FlashSys')
 results={}
 scenarios=[('h-default','h','Flash','0','2',''),('h-one','h','FlashFst','0','1','1'),('h-nine','h','FlashFst','0','1','9'),('h-max','h','FlashFst','0','1','24'),('h-verify','h','FlashFst','1','1','16'),('a-max','a',None,'0','1','24'),('a-verify','a',None,'1','1','9'),('b-max','b',None,'0','2','24'),('h-zero','h','FlashFst','0','0',None)]
@@ -54,7 +54,7 @@ for name,drive,driver,choice,budget,size in scenarios:
         assert m.read(s['v_fileKiB'],1)==bytes([kib])
         assert m.read(s['v_fileSectors'],1)==bytes([sectors])
         assert m.read(s['v_bufferEndHi'],1)==bytes([0x20+sectors])
-    original=m.read(0xC864,2)
+    original=m.read(s['bios_diskDriver']+1,2)
     count=int(budget);buffers=1
     if count:
         m.stop_at(s['file_cleanup'])
@@ -64,7 +64,7 @@ for name,drive,driver,choice,budget,size in scenarios:
                 assert m.read(s['v_pass'],1)==bytes([attempt]),name
                 assert m.read(s['v_bufferMode'],1)==bytes([buf]),name
                 assert m.read(s['v_fileOwned'],1)==b'\1'
-                assert m.read(0xC864,2)==original
+                assert m.read(s['bios_diskDriver']+1,2)==original
                 payload=m.read(0x2000,length)
                 assert payload==bytes(((i+0x2000)>>8)^((i+0x2000)&255)^attempt for i in range(length)),name
                 if image:

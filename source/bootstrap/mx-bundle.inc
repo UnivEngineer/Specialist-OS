@@ -79,12 +79,13 @@ mxRomDirectoryEnd:
 ; MXOS
 ;
 ; Проверить готовность ядра и соответствие системного комплекта и носителя.
-; Вход: byteWindow в FFC0h, выбран физический банк DOS 0.
-; Выход: Z=1 и BIOS_BOOT_WARM=1 при совпадении. AF/BC/DE/HL изменены.
+; Вход: детектор ДОЗУ установил в общем окне байтовые входы bootstrap.
+; Выход: Z=1 при совпадении. AF/BC/DE/HL изменены.
 ;----------------------------------------------------------------------------
 mxCheckWarm:
     ld hl,DOS_READY
-    call 0FFC0h+byteRead-byteWindow
+    xor a
+    call BOOT_BYTE_READ
     ld a,c
     cp 1
     ret nz
@@ -92,7 +93,8 @@ mxCheckWarm:
     ld de,mxBootMedium
     ld b,mxBootIdentityEnd-mxBootMedium
 .compare:
-    call 0FFC0h+byteRead-byteWindow
+    xor a
+    call BOOT_BYTE_READ
     ld a,(de)
     cp c
     ret nz
@@ -100,7 +102,4 @@ mxCheckWarm:
     inc de
     dec b
     jp nz,.compare
-    ld a,1
-    ld (BIOS_BOOT_WARM),a
-    xor a
     ret

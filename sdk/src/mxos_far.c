@@ -9,9 +9,19 @@ static mxos_u16 memory_call(MXOS_CALL_PACKET *r, mxos_u8 op, mxos_u8 bank, mxos_
 }
 mxos_u16 mxos_malloc_far(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out)
 {
+    return mxos_malloc_far_ex(bank, bytes, out, 0);
+}
+mxos_u16 mxos_malloc_far_ex(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out, MXOS_UNLOAD_REFUSAL *refusal)
+{
     MXOS_CALL_PACKET r; mxos_u16 af;
     af=memory_call(&r,MXOS_MEM_OP_ALLOC,bank,bytes,0);
     if (!(af & MXOS_CF)) { out->bank=r.bc>>8; out->offset=r.hl; }
+    else if ((af >> 8) == MXOS_RESIDENT_APP_CANT_UNLOAD && refusal) {
+        refusal->bank = r.bc >> 8;
+        refusal->reason = (mxos_u8)r.bc;
+        refusal->name = r.hl;
+        refusal->message = r.de;
+    }
     return af;
 }
 mxos_u16 mxos_free_far(MXOS_FAR_ADDRESS *address)

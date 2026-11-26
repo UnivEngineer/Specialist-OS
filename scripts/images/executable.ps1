@@ -99,7 +99,7 @@ function Convert-ExecutableFile {
         $begin=Read-ImageNumber 'MEM_BEGIN' $(if ($null -ne $relocKind) {0} else {$load})
         $end=Read-ImageNumber 'MEM_END' ($load+$size+$(if($bss -eq 65535){0}else{$bss}))
         $heap=Read-ImageNumber 'MIN_HEAP' 0;$stack=Read-ImageNumber 'STACK' 0
-        $policy=if($fields.ContainsKey('POLICY') -and $fields.POLICY -in @('EXCLUSIVE','PRESERVE','MANAGED')){@{EXCLUSIVE=0;PRESERVE=1;MANAGED=2}[$fields.POLICY]}else{Read-ImageNumber 'POLICY' $(if($nativeDefaults){2}else{0})}
+        $policy=if($fields.ContainsKey('POLICY') -and $fields.POLICY -in @('EXCLUSIVE','PRESERVE','MANAGED','TRANSIENT')){@{EXCLUSIVE=0;PRESERVE=1;MANAGED=2;TRANSIENT=3}[$fields.POLICY]}else{Read-ImageNumber 'POLICY' $(if($nativeDefaults){2}else{0})}
         $api=Read-ImageNumber 'API' $(if($nativeDefaults){2}else{0})
         $modes = @{AUTO=0;MX=1;STD=2;MON=3;RF=4}
         $mode=if($fields.ContainsKey('MODE') -and $modes.ContainsKey($fields.MODE)){$modes[$fields.MODE]}else{Read-ImageNumber 'MODE' 0}
@@ -128,7 +128,8 @@ function Convert-ExecutableFile {
         }
         if($Format -ne 'rks') {
             if($bss -lt 0 -or $bss -gt 65535 -or $begin -lt 0 -or $begin -gt $load -or $end -lt $load+$size -or $end -gt 65535 -or ($bss -ne 65535 -and $load+$size+$bss -gt $end)){throw 'Invalid image memory interval'}
-            if($policy -notin @(0,1,2) -or ($bss -eq 65535 -and $policy -ne 0)){throw 'Invalid image memory policy'}
+            if($policy -notin @(0,1,2,3) -or ($bss -eq 65535 -and $policy -ne 0)){throw 'Invalid image memory policy'}
+            if($policy -eq 3 -and ($Format -notin @('com','exe') -or $flags -ne 4 -or $null -ne $relocKind -or $heap -or $options)){throw 'TRANSIENT requires a fixed MAIN executable without minimum heap or cache flags'}
             if($heap -lt 0 -or $heap -gt 65535 -or $stack -lt 0 -or $stack -gt 65535 -or $api -notin @(0,2) -or $mode -notin @(0,1,2,3,4) -or $options -notin @(0,1,3)){throw 'Invalid image requirements'}
         }
         if($Format -eq 'rks') {

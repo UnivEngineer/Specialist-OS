@@ -60,7 +60,13 @@ timerService:
     ld a,b
     or a
     ret z               ; exclusive raw access, no PIT writes
-    call pitTimerInit
+    IFDEF BANKED_DOS_BUILD
+    xor a
+    ld hl,BIOS_BANK_KEY_CLOCK_INIT
+    call bankCall
+    ELSE
+    call ioKeyClockInit
+    ENDIF
     ret nc
     xor a
     ld (timerOwner),a
@@ -83,10 +89,6 @@ timerQuery:
     or a
     ret
 
-    DEFINE TIMING_PIT_INPUT_CLOCK
-    INCLUDE "../include/timing-pit.inc"
-    UNDEFINE TIMING_PIT_INPUT_CLOCK
-
 dosMemoryService:
     cp MEM_OP_MAINRETIRE
     jp z,memoryRetireMain
@@ -105,7 +107,7 @@ dosMemoryService:
     cp MEM_OP_QUERY
     jp z,memoryQuery
     cp MEM_OP_ALLOC
-    jp z,memoryAlloc
+    jp z,pressureAlloc
     cp MEM_OP_FREE
     jp z,memoryFree
     cp MEM_OP_REALLOC
@@ -505,7 +507,7 @@ memoryRealloc:
     jp nz,memoryResizeExisting
     ex de,hl
     ld b,MEM_ALLOC_ANY
-    jp memoryAlloc
+    jp pressureAlloc
 memoryResizeExisting:
     ld a,d
     or e
@@ -543,7 +545,7 @@ memoryResizeGrow:
     jp z,memoryResizeAllocate
     ld b,MEM_ALLOC_ANY
 memoryResizeAllocate:
-    call memoryAlloc
+    call pressureAlloc
     ret c
     ld (memoryCopy+4),hl
     ld a,b

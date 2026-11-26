@@ -17,7 +17,7 @@ static mxos_u8 result(MXOS_REGS *r)
     if (!(r->af & MXOS_CF)) return 0;
     error=mxos_last_error(); return error ? error : 1;
 }
-static mxos_u16 timer_request(mxos_u8 op)
+mxos_u16 mxos_timer_request(mxos_u8 op)
 {
     MXOS_CALL_PACKET request = {MXOS_DOS_TIMER, 0, 0, 0, 0};
     request.af = (mxos_u16)op << 8;
@@ -27,7 +27,7 @@ static mxos_u16 timer_request(mxos_u8 op)
 mxos_u8 mxos_bank_key_begin(MXOS_KEY_STATE *state)
 {
     if (!state->timed) {
-        state->timed = !(timer_request(MXOS_TIMER_CLOCK) & MXOS_CF);
+        state->timed = !(mxos_timer_request(MXOS_TIMER_CLOCK) & MXOS_CF);
         state->last_key = 255;
     }
     return state->timed;
@@ -36,7 +36,7 @@ mxos_u8 mxos_bank_key_begin(MXOS_KEY_STATE *state)
 void mxos_bank_key_end(MXOS_KEY_STATE *state)
 {
     if (state->timed) {
-        timer_request(MXOS_TIMER_RELEASE);
+        mxos_timer_request(MXOS_TIMER_RELEASE);
         state->timed = 0;
     }
 }

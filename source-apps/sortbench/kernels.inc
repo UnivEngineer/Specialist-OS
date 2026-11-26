@@ -18,11 +18,11 @@ benchRun:
     call benchFill
     call benchTimerInit
     jp c,benchDone
-    call pitTimerRead
+    call io_pitRead
     ld (benchStart),hl
 benchInvoke:
     call ncSortPass
-    call pitTimerRead
+    call io_pitRead
     ex de,hl
     ld hl,(benchStart)
     ld a,l
@@ -46,11 +46,11 @@ benchPrepareRun:
     ENDIF
     call benchTimerInit
     jp c,benchDone
-    call pitTimerRead
+    call io_pitRead
     ld (benchStart),hl
 benchPrepareInvoke:
     call benchPrepare
-    call pitTimerRead
+    call io_pitRead
     ex de,hl
     ld hl,(benchStart)
     ld a,l
@@ -160,24 +160,10 @@ benchPlaneKey:
 ; Configurable divider: 256 normally, 4096 for quadratic insertion cases.
 ; The latter gives a 134-second range rather than silently wrapping at 8 s.
 benchTimerInit:
-    ld hl,IO_TIMER_MODE
-    ld (hl),036h
-    ld (hl),074h
-    dec hl
-    dec hl
-    xor a
-    ld (hl),a
     ld a,(benchDivisorHigh)
-    ld (hl),a
-    inc hl
-    inc hl
-    ld (hl),0B4h
-    dec hl
-    xor a
-    ld (hl),a
-    ld (hl),a
-    ; Shared readiness check; wait is outside the measured interval.
-    jp pitTimerWaitReady
+    ld h,a
+    ld l,0
+    jp pitTimerInitDivisor
 
 benchFill:
     ld hl,FILE_INDEX_A

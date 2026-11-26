@@ -19,4 +19,4 @@ cliInput:
     ld bc,0
     jp lineEdit
     DEFINE LINEEDIT_HISTORY
-    INCLUDE "../include/lineedit.inc"
+    INCLUDE "../../sdk/asm/lib/lineedit.inc"

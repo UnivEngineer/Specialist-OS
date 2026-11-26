@@ -9,7 +9,7 @@ assert N['IMAGE_BSS_SIZE']==N['FILE_CACHE_A']-N['vars']
 assert N['IMAGE_MIN_HEAP_SIZE']==N['NC_MIN_END']-N['FILE_CACHE_A']
 # Execute the real included NC initialization beside the DOS bank, not on top
 # of it. Only the bank gateway and three MAIN BIOS arithmetic calls are stubs.
-source=f' INCLUDE "{(ROOT/"source/include/mxos.inc").as_posix()}"\n'
+source=f' INCLUDE "{(ROOT/"source/common/system.inc").as_posix()}"\n'
 for name in ['FILE_CACHE_A','NC_MIN_END','FILE_INFO_SIZE','FILE_CACHE_CAPACITY','FILE_CACHE_BYTES','NC_END']:source+=f'{name} EQU {N[name]}\n'
 source+=' ORG 0E600h\n'
 source+=f' INCLUDE "{(ROOT/"source/nc/memory.inc").as_posix()}"\n END\n'

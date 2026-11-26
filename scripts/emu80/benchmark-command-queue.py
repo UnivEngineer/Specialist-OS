@@ -9,7 +9,7 @@ h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init
 x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{a.port}/mcp';W=lambda n:struct.pack('<H',n)
 def page(n):m.write(0xfffd if n else 0xfffc,bytes([n-1 if n else 0]))
 def asm(n,custom=False):
- text=f' INCLUDE "{(R/"source/include/mxos.inc").as_posix()}"\n ORG 02000h\n'
+ text=f' INCLUDE "{(R/"sdk/asm/mxos.inc").as_posix()}"\n ORG 02000h\n'
  if custom:text+=' DEFINE COMMAND_QUEUE_SEND customSend\n'
  def section(name,body):
   nonlocal text
@@ -91,7 +91,7 @@ dllPath: DB "B:/QROUTE.DLL",0
  for i in range(n):text+=f'packet{i}: DB 1\n DW {0x100a+i*256}\n'
  text+='copyArgs: DB 7\n DW 06100h,06101h,06000h\ncopyReq: DB 6\n DW 05000h\n DB 0\n DW 06000h,1\ntextArgs: DB 16\ntextBytes: DB "Command queue: inline text, COPY flush, registers OK",0\ntextEnd:\n'
  text+='customSend:\n ld h,b\n ld l,c\n ld (customBytes),hl\n ret\ncustomBytes: DW 0\n'
- text+=f' INCLUDE "{(R/"source/include/command-queue.inc").as_posix()}"\n ASSERT $<04000h\n'
+ text+=f' INCLUDE "{(R/"sdk/asm/lib/command-queue.inc").as_posix()}"\n ASSERT $<04000h\n'
  src=O/'fixture.asm';src.write_text(text,encoding='utf-8');subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'fixture.bin'),'--sym='+str(O/'fixture.sym'),str(src)],check=True,capture_output=True)
  return sy(O/'fixture.sym'),(O/'fixture.bin').read_bytes()
 def run(s,label,bank=6,**regs):

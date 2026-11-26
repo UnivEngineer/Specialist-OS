@@ -1,4 +1,4 @@
-    INCLUDE "../ui-gfx/abi.inc"
+    INCLUDE "../../sdk/asm/abi/ui-gfx.inc"
 EDIT_MAIN_PACKET         = 03380h
 EDIT_MAIN_KEY_LOCKS = bios_vars.keyLocks
 EDIT_BANK_QUEUE     = 0DB00h

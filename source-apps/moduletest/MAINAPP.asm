@@ -1,5 +1,5 @@
 ; Нативная main-программа: затирает нижний RUN, завершает работу через RET.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0000h
 

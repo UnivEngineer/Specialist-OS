@@ -161,7 +161,7 @@ def run_pit(m):
                 for method in (('mono',) if mono else ('hybrid','runs','inline')):
                     memory=select_method(prepared,n,method);step=step_code(n,memory,40,direction,True)
                     (OUT/'step.bin').write_bytes(step)
-                    asm=f''' INCLUDE "{(ROOT/'source/include/mxos.inc').as_posix()}"
+                    asm=f''' INCLUDE "{(ROOT/'sdk/asm/mxos.inc').as_posix()}"
  ORG 8000h
 entry:
  ld sp,8F00h
@@ -175,12 +175,12 @@ entry:
  call {n['drawCursor']}
  call pitTimerInit
  jp c,failed
- call pitTimerRead
+ call io_pitRead
  ld (started),hl
  ld a,(scope)
  or a
  call nz,step
- call pitTimerRead
+ call io_pitRead
  ex de,hl
  ld hl,(started)
  ld a,l
@@ -199,7 +199,7 @@ error: DB 0
 started: DW 0
 elapsed: DW 0
 step: INCBIN "{(OUT/'step.bin').as_posix()}"
- INCLUDE "{(ROOT/'source/include/timing-pit.inc').as_posix()}"
+ INCLUDE "{(ROOT/'sdk/asm/lib/timing-pit.inc').as_posix()}"
  ASSERT $<8B00h
 '''
                     (OUT/'pit.asm').write_text(asm)

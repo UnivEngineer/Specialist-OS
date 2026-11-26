@@ -5,7 +5,7 @@
 ; 2022-02-03 Дизассемблировано SpaceEngineer
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../../common/system.inc"
 
 ; Используемые подпрограммы DOS.SYS:
 ; bios_beep_Old         = 0C170h

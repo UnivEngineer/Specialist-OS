@@ -5,7 +5,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / '.local/ui-modal-layout-check'
 OUT.mkdir(parents=True, exist_ok=True)
-source = [f'    INCLUDE "{(ROOT / "source/include/ui.inc").as_posix()}"',
+source = [f'    INCLUDE "{(ROOT / "sdk/asm/lib/ui.inc").as_posix()}"',
           '    ORG 0']
 cases = []
 for body in (0, 12, 36):

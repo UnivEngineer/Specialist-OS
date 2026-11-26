@@ -1,5 +1,6 @@
 ; Independent MAIN index-sort benchmark. DOS and output are outside PIT intervals.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 PIT_HZ      = 2000000
     DEFINE SORTBEN_STANDALONE
@@ -119,6 +120,11 @@ sourceDescription:
     call number
     ld hl,crlf
     call output
+    ld a,TIMER_RAW
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    jp c,timerFailed
+    ld a,1
+    ld (timerHeld),a
     ld a,(count)
     ld (raw.state.panelA_filesCnt),a
     ld (upper.state.panelA_filesCnt),a
@@ -272,6 +278,14 @@ timerFailed:
     ld hl,timerErrorText
     call output
 save:
+    ld a,(timerHeld)
+    or a
+    jp z,saveReport
+    xor a
+    ld (timerHeld),a
+    ld a,TIMER_RELEASE
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+saveReport:
     ld hl,(reportEnd)
     ld de,REPORT
     call math.sub_hl_de
@@ -619,7 +633,7 @@ millisecondsReady:
     MODULE math
     DEFINE MATH_DIV
     DEFINE MATH_SUB
-    INCLUDE "../../source/include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDMODULE
     MODULE timer
     MACRO LOAD_DE address
@@ -631,12 +645,12 @@ millisecondsReady:
 timing_print     = output
 timing_printChar = character
 timing_div_hl_de = math.div_hl_de
-timer_read       = raw.pitTimerRead
+timer_read       = io_pitRead
 v_elapsed:      DD 0
 v_setup:        DD 0
 v_last:         DW 0
-    INCLUDE "../../source/include/timing.inc"
-    INCLUDE "../../source/include/timing-ms.inc"
+    INCLUDE "../../sdk/asm/lib/timing.inc"
+    INCLUDE "../../sdk/asm/lib/timing-ms.inc"
     ENDMODULE
 
     MACRO ROW prepared,divider,method,text
@@ -705,6 +719,7 @@ rowUpper:           DB 0
 divisor:            DB 1
 random:             DB 05Ah
 failed:             DB 0
+timerHeld:          DB 0
 saveIO:
     DW savePath,REPORT,0,0
     DS FILE_DESCRIPTOR,0
@@ -713,5 +728,5 @@ savePath: DB 'B:\SORTBEN.TXT',0
 REFERENCE = 07200h
 REPORT    = 07300h
     ASSERT $ < raw.benchRaw
-    INCLUDE "../../source/include/file-io.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
     END

@@ -6,9 +6,9 @@ R=Path(__file__).resolve().parents[2]
 O=R/'docs/cli/history-2026-11-05/cpu';O.mkdir(parents=True,exist_ok=True)
 def symbols(name):
     return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin'/name).read_text(),re.M)}
-s=symbols('DOS.sym');c=symbols('CLI.sym');W=lambda v:struct.pack('<H',v)
+s=symbols('BIOS.sym');c=symbols('CLI.sym');W=lambda v:struct.pack('<H',v)
 m=bytearray(65536)
-for name,at in [('CLI.i80',0),('DOS.sys',0xC000)]:
+for name,at in [('CLI.i80',0),('BIOS.sys',0xC000),('IO.main.bin',0xF000),('fonts/Rotate.i80',0xD800)]:
     b=(R/'bin'/name).read_bytes();m[at:at+len(b)]=b
 m[s['bios_printChar']]=0xC9
 def run(name,end=0x6100):

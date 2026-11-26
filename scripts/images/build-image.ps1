@@ -355,7 +355,7 @@ if (-not $RunBuild) {
     if ($bootPath) { $inputs += $bootPath }
     if ($gameExeEntries.Count) { $inputs += $gameCatalogPath }
     if ($stagedBoot) { $inputs += $bootSetPath }
-    if ($stagedBoot -and -not $Prebuilt) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'source/include/mxos.inc')) }
+    if ($stagedBoot -and -not $Prebuilt) { $inputs += @($errorBuilder, (Join-Path $repositoryRoot 'sdk/asm/abi/dos-errors.inc')) }
     if ($hasNestedFiles) { $inputs += (Join-Path $PSScriptRoot 'nest-fat-image.py') }
     $inputs += @(foreach ($entry in $manifest) {
         $path = [IO.Path]::GetFullPath([IO.Path]::Combine($assetDirectory, $entry.Source))

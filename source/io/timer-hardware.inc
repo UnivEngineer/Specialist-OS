@@ -1,0 +1,12 @@
+; Аппаратный ВИ53 «Специалиста-MX»
+    IFNDEF MXOS_TIMER_HARDWARE_INC
+    DEFINE MXOS_TIMER_HARDWARE_INC
+
+    INCLUDE "../../sdk/asm/hardware/spec_mx.inc"
+
+IO_TIMER_CH0  = IO_PIT_CH0
+IO_TIMER_CH1  = IO_PIT_CH1
+IO_TIMER_CH2  = IO_PIT_CH2
+IO_TIMER_MODE = IO_PIT_CONTROL
+
+    ENDIF

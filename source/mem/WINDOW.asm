@@ -1,4 +1,4 @@
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     INCLUDE "abi.inc"
     ORG BANK_WINDOW
 ; При старте окно обнулено.

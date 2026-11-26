@@ -3,8 +3,8 @@
     DEFINE FAT_CACHE_ADDR DOS_BANK_CACHE_ADDR
     DEFINE FAT_CACHE_TABLE_ADDR DOS_BANK_CACHE_TABLE
     DEFINE BANKED_DOS_BUILD 1
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/version.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../common/version.inc"
     INCLUDE "../mem/diskabi.inc"
     INCLUDE "../mem/abi.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
@@ -44,6 +44,7 @@ dosExtensionStart:
     INCLUDE "kernel-registry.inc"
     INCLUDE "memory.inc"
     INCLUDE "modules.inc"
+    INCLUDE "pressure.inc"
     INCLUDE "arena.inc"
     INCLUDE "variables.inc"
 kernelEnd:

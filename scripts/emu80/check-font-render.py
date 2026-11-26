@@ -19,7 +19,7 @@ x = h['Matrix']()
 m = x.m
 S = {k: int(v, 16) for k, v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (R/'bin/BIOS.sym').read_text(), re.M)}
 timer_asm=O/'local-timer.asm'
-timer_asm.write_text('    INCLUDE "'+(R/'source/include/mxos.inc').as_posix()+'"\n    ORG 08400h\n    INCLUDE "'+(R/'source/include/timing-pit.inc').as_posix()+'"\n',encoding='utf8')
+timer_asm.write_text('    INCLUDE "'+(R/'sdk/asm/mxos.inc').as_posix()+'"\n    ORG 08400h\n    INCLUDE "'+(R/'sdk/asm/lib/timing-pit.inc').as_posix()+'"\n',encoding='utf8')
 subprocess.run([str(R/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(O/'local-timer.bin'),'--sym='+str(O/'local-timer.sym'),str(timer_asm)],check=True,capture_output=True)
 timer_sy={k:int(v,16) for k,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',(O/'local-timer.sym').read_text(),re.M)}
 W = lambda n: n.to_bytes(2, 'little')
@@ -60,7 +60,7 @@ try:
         m.write(0x3000, b''.join(source[row*48:row*48+48]+b'\0' for row in range(24)))
         code = b'\x31'+W(0x8FDF)+b'\xcd'+W(S['bios_clearScreenOld'])
         m.write(0x8400,(O/'local-timer.bin').read_bytes())
-        code += b'\xcd'+W(timer_sy['pitTimerInit'])+b'\xcd'+W(timer_sy['pitTimerRead'])+b'\x22'+W(0x4000)
+        code += b'\xcd'+W(timer_sy['pitTimerInit'])+b'\xcd'+W(timer_sy['io_pitRead'])+b'\x22'+W(0x4000)
         for row in range(24):
             code += b'\x21'+W(7+row*8)+mx('SET_CURSOR_POS')
             code += b'\x21'+W(0x3000+row*49)
@@ -71,7 +71,7 @@ try:
                 code += b'\x4E\xCD'+W(S['bios_printChar'])+b'\x23\x05\xC2'+W(loop)
             else:
                 code += mx('PRINT_STRING_MAIN')
-        code += b'\xcd'+W(timer_sy['pitTimerRead'])+b'\x22'+W(0x4002)+b'\xc3'+W(0x2000)
+        code += b'\xcd'+W(timer_sy['io_pitRead'])+b'\x22'+W(0x4002)+b'\xc3'+W(0x2000)
         m.write(0x1000, code)
         m.stop_at(0x2000)
         m.call('regs_set', pc=0x1000, sp=0x8FDF)

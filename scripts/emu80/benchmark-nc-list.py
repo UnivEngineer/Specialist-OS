@@ -17,13 +17,13 @@ def build(symbols):
     for context, listing in ((0,1),(1,0),(1,1)):
         folder = OUT/f'list-build/{context}-{listing}'
         folder.mkdir(parents=True, exist_ok=True)
-        source = f'''    INCLUDE "{(ROOT/'source/include/mxos.inc').as_posix()}"
+        source = f'''    INCLUDE "{(ROOT/'sdk/asm/mxos.inc').as_posix()}"
     ORG 07000h
 entry:
     ld sp,08B00h
     call pitTimerInit
     jp c,finished
-    call pitTimerRead
+    call io_pitRead
     ld (started),hl
     IF {context}
     ld a,7
@@ -47,7 +47,7 @@ listCapacity:
 finished:
     push af
     push de
-    call pitTimerRead
+    call io_pitRead
     ex de,hl
     ld hl,(started)
     ld a,l
@@ -70,7 +70,7 @@ started: DW 0
 elapsed: DW 0
 count: DW 0
 error: DB 0
-    INCLUDE "{(ROOT/'source/include/timing-pit.inc').as_posix()}"
+    INCLUDE "{(ROOT/'sdk/asm/lib/timing-pit.inc').as_posix()}"
     ASSERT $ < 07800h
 '''
         (folder/'list.asm').write_text(source, encoding='utf-8')

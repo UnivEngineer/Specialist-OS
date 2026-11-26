@@ -3,6 +3,7 @@
 import hashlib
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 from unittest.mock import patch
@@ -29,6 +30,29 @@ def check_assembly_dependencies(root, worker, output):
     assert build_cache.main(command) == 0 and output.stat().st_mtime_ns == created
     binary.write_bytes(b'changed')
     assert build_cache.main(command) == 0 and output.read_bytes() == b'changedA'
+
+
+def check_include_search(root):
+    # Два каталога --inc содержат одно имя. Соседний с листом INC имеет приоритет.
+    app, nested, first, last = (root / name for name in ('app', 'app/nested', 'sdk', 'override'))
+    for directory in (app, nested, first, last):
+        directory.mkdir()
+    source = app / 'client.asm'
+    header = nested / 'part.inc'
+    source.write_text('    ORG 0100h\n    INCLUDE "nested/part.inc"\n', encoding='ascii')
+    header.write_text('    INCLUDE "value.inc"\n', encoding='ascii')
+    for value, directory in enumerate((root, first, last, nested)):
+        (directory / 'value.inc').write_text(f'    DB {value}\n', encoding='ascii')
+    output = root / 'client.bin'
+    for value, directory in ((3, nested), (2, last), (1, first), (0, root)):
+        dependency = directory / 'value.inc'
+        assert build_cache.assembly_inputs([source], include_dirs=(first, last), working_directory=root) == {
+            source, header, dependency}
+        subprocess.run([str(build_cache.ROOT / 'tasm/sjasmplus.exe'), '--i8080',
+                        '--inc=' + first.as_posix(), '--inc=' + last.as_posix(),
+                        '--raw=' + output.as_posix(), source.as_posix()], cwd=root, check=True, capture_output=True)
+        assert output.read_bytes() == bytes([value])
+        dependency.unlink()
 
 
 def main():
@@ -70,6 +94,7 @@ def main():
             assert build() == 0 and output.read_bytes() == b'recoveredA'
             assert build(force=True) == 0
             check_assembly_dependencies(root, worker, output)
+            check_include_search(root)
     print('Build cache: hits, configuration, assembly dependencies, invalidation, failure and recovery OK')
 
 

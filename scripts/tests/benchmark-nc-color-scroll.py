@@ -814,7 +814,7 @@ def main():
         return
     inputs = out/'inputs'; inputs.mkdir(exist_ok=True)
     input_paths = [ROOT/'bin/NC.i80', ROOT/'bin/NC.sym', ROOT/'bin/BIOS.sys',
-                   ROOT/'bin/BIOS.sym', ROOT/'bin/IO.main.bin', ROOT/'source/include/ui.inc',
+                   ROOT/'bin/BIOS.sym', ROOT/'bin/IO.main.bin', ROOT/'sdk/asm/lib/ui.inc',
                    ROOT/'source/common/move8080.inc', ROOT/'source/nc/scrollBitmap.inc']
     input_paths += [ROOT/f'bin/fonts/{font}.i80' for font in ('Cpm4','Compact','Rotate','Packed6K','Fast12K','Fast8')]
     input_paths += [ROOT/f'bin/fonts/{font}.pre' for font in ('Packed6K','Fast12K')]

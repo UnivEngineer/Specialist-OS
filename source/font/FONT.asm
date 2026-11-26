@@ -1,8 +1,8 @@
 ; FONT: stage a fixed-slot engine, invoke its disposable initializer, publish.
 ; DE is the normal MAIN application argument string. PRE reads go directly
 ; into reserved memory; a failed read is repaired before any text output.
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/font-init.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../../sdk/asm/formats/font-init.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 ; Optional PIT instrumentation: no emitted bytes in the production build.
 ; One local timestamp per phase; preserve the phase result registers/flags.
@@ -10,7 +10,7 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     IFDEF FONT_BENCH
     push af
     push hl
-    call pitTimerRead
+    call io_pitRead
     ld (benchStamps+offset),hl
     pop hl
     pop af
@@ -20,10 +20,6 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 start:
     call rememberCommand
     jp c,usage
-    IFDEF FONT_BENCH
-    call pitTimerInit
-    jp c,error
-    ENDIF
     ex de,hl
 skipSpace:
     ld a,(hl)
@@ -86,6 +82,16 @@ terminatePath:
     ld (de),a
     call parseOption
     jp c,usage
+    IFDEF FONT_BENCH
+    ld a,TIMER_RAW
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    jp c,error
+    ld a,1
+    ld (benchTimerHeld),a
+    call pitTimerInit
+    ld a,DOS_ERR_UNSUPPORTED
+    jp c,error
+    ENDIF
     ld e,0
     MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld (oldDrive),a
@@ -137,6 +143,9 @@ resourcesReady:
     call FONT_ENGINE_INIT
     FONT_STAMP 14
 committed:
+    IFDEF FONT_BENCH
+    call fontBenchReleaseTimer
+    ENDIF
     ld a,3
     MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
     ld hl,request+FILE_PATH_IO.descriptor
@@ -379,6 +388,9 @@ needsMemory:
     ret
 error:
     ld (errorCode),a
+    IFDEF FONT_BENCH
+    call fontBenchReleaseTimer
+    ENDIF
     ld hl,failed
     call bios_printStringZ
     ld a,(errorCode)
@@ -415,8 +427,18 @@ usage:
     jp bios_printStringZ
 
     IFDEF FONT_BENCH
-    INCLUDE "../include/timing-pit.inc"
-benchStamps: DS 20,0
+fontBenchReleaseTimer:
+    ld a,(benchTimerHeld)
+    or a
+    ret z
+    xor a
+    ld (benchTimerHeld),a
+    ld a,TIMER_RELEASE
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    ret
+    INCLUDE "../../sdk/asm/lib/timing-pit.inc"
+benchStamps:    DS 20,0
+benchTimerHeld: DB 0
     ENDIF
     INCLUDE "import.inc"
     INCLUDE "export.inc"
@@ -498,7 +520,7 @@ relativeEnginePath:
     DS MAX_PATH-(relativeEnginePath-path),0
 request: DW path,staging,FONT_ENGINE_END-FONT_ENGINE_BASE+IMAGE_HEADER_SIZE,0
     DS FILE_DESCRIPTOR,0
-    INCLUDE "../include/file-io.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
     DS (-$-IMAGE_HEADER_SIZE) & 255,0 ; Body starts on a page boundary after its DLL header.
 staging: DS FONT_ENGINE_END-FONT_ENGINE_BASE+IMAGE_HEADER_SIZE,0
 preStage = $ ; Uninitialized MAIN workspace, not zeroes in FONT.COM on disk.

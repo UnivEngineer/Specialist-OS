@@ -7,7 +7,8 @@
 ; привязку шага, поэтому длительный ввод и музыка не требуют догонять игру.
 
 ; Выход HL=защёлкнутый счётчик 2. AF/флаги меняются, BC/DE сохраняются.
-; 38 байт, 214 тактов. Одна запись и два чтения ВИ53; накапливается
+; MXOS: 29 байт, 233 такта. RAMFOS: 38 байт, 214 тактов.
+; Одна запись и два чтения ВИ53; накапливается
 ; 16-битное время в отсчётах. Переходники перезагрузки компенсируют
 ; интервал от защёлки до нового старта двумя отсчётами (около 0,2 мс).
 
@@ -27,12 +28,17 @@
 
 frame_clock_sample:
     PUSH DE
+    IF ALMAZ_MXOS_TIMER
+    CALL io_pitRead
+    EX DE,HL
+    ELSE
     LD A,080h
     LD (IO_TIMER_MODE),A
     LD A,(IO_TIMER_CH2)
     LD E,A
     LD A,(IO_TIMER_CH2)
     LD D,A
+    ENDIF
     LD HL,(v_clock_previous)
     LD A,L
     SUB E
@@ -77,10 +83,10 @@ frame_clock_idle:
     PUSH HL
     CALL frame_clock_sample
     LD A,0B0h
-    LD (IO_TIMER_MODE),A
+    APP_WRITE_TIMER pitTimerWriteControl,IO_TIMER_MODE
     XOR A
-    LD (IO_TIMER_CH2),A
-    LD (IO_TIMER_CH2),A
+    APP_WRITE_TIMER pitTimerWriteCh2,IO_TIMER_CH2
+    APP_WRITE_TIMER pitTimerWriteCh2,IO_TIMER_CH2
     LD HL,2
     LD (v_clock_previous),HL
     POP HL

@@ -4,7 +4,7 @@
 ; режим 3 использует стендовые таблицы по K7_LOWER. Attach возвращает
 ; A=0, CF=0. Вход SET_FONT_ENCODING сохраняет регистры и флаги;
 ; раскладка остаётся KOI-7R.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     DEFINE FONT_KOI7
     IF K7_MODE == 0 || K7_MODE == 3

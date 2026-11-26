@@ -3,7 +3,7 @@ graphicScalar:
     ld b,a
     ld h,FONT_ADDR/256
     ld a,d
-    cp 0BFh
+    cp high (MX_SCREEN_END-1)
     jp z,graphicClipped
     IF GRAPH_PRE_MODE == 1
     ld a,b

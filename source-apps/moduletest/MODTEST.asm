@@ -1,5 +1,5 @@
 ; Контроллер main: обычная загрузка COM, все модули — через публичный ABI.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 

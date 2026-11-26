@@ -131,7 +131,7 @@ fontPseudoMargins:
     rrca
     rrca
     and 3Fh
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld h,a
     ld (fontPseudoVideo),hl
     xor a
@@ -358,7 +358,7 @@ fontPseudoFlush:
 fontPseudoWriteColumn:
     ld hl,(fontPseudoVideo)
     ld a,h
-    cp 0C0h
+    cp high MX_SCREEN_END
     ret nc
     inc h
     ld (fontPseudoVideo),hl

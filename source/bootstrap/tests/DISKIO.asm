@@ -1,6 +1,6 @@
 ; Автономный стенд физического обмена в банковой памяти.
 ; Не определяет размещение и входы штатного файлового ядра DOS.
-    INCLUDE "../../include/mxos.inc"
+    INCLUDE "../../common/system.inc"
     INCLUDE "../../mem/abi.inc"
     INCLUDE "../../mem/diskabi.inc"
     INCLUDE "../../../bin/banked/transport-imports.inc"

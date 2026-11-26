@@ -96,8 +96,8 @@ def check_keys(bank, timed=False):
         assert event >> 8 == 13 and not event & 0x41,hex(event)
         if timed:
             def countdown():
-                m.write(k['IO_TIMER_MODE'],bytes([0x80]))
-                return int.from_bytes(m.read(k['IO_TIMER_CH2'],1)+m.read(k['IO_TIMER_CH2'],1),'little')
+                m.write(key['IO_TIMER_MODE'],bytes([0x80]))
+                return int.from_bytes(m.read(key['IO_TIMER_CH2'],1)+m.read(key['IO_TIMER_CH2'],1),'little')
             before=countdown()
             m.write(end,b'\xc3'+word(end))
             m.call('bp_clear')
@@ -144,7 +144,9 @@ def check_keys(bank, timed=False):
         assert m.read(state+2,1)==b'\x01'
         release('caps'); idle()
         press('a')
-        assert poll() >> 8 == (raw ^ 0x20) + 0x80
+        # В КОИ-8 регистр кириллицы инвертирует бит 5 относительно латиницы.
+        event = poll() >> 8
+        assert event == raw ^ 0x80, (hex(raw),hex(event))
         release('a'); idle()
         m.write(state+3,b'\xff'); press('caps'); idle()
         assert m.read(state+2,1)==b'\x81'
@@ -239,6 +241,18 @@ try:
         assert module_timer(k[op]) & 1, op
     call(k['MXOS_DOS_TIMER'], a=k['TIMER_RELEASE'])
     assert call(k['MXOS_DOS_TIMER'], a=k['TIMER_QUERY'])['registers']['af']['dec'] >> 8 == 0
+    # Постоянный отсчёт имитирует остановленный CLK. Исполняем весь путь EXEC → DOS → MAIN и обратно.
+    entry = bios['io_pitRead']
+    stationary = bytes.fromhex('21 00 00 7D C9')  # HL=0, A=L, флаги сохранены.
+    original = m.read(entry, len(stationary))
+    try:
+        m.write(entry, stationary)
+        timeout = module_timer(k['TIMER_CLOCK'])
+        assert timeout & 1 and timeout >> 8 == k['DOS_ERR_UNSUPPORTED'], hex(timeout)
+        assert module_timer(k['TIMER_QUERY']) >> 8 == 0
+    finally:
+        m.write(entry, original)
+    print('PASS stopped clock reports UNSUPPORTED and releases the lease', flush=True)
     assert not module_timer(k['TIMER_CLOCK']) & 1
     check_keys(bank, timed=True)
     page(0)
@@ -252,12 +266,12 @@ try:
     # press, observe the software beep, then compare the live counters.
     call(k['MXOS_DOS_TIMER'], a=k['TIMER_RAW'])
     for channel, divisor in enumerate((1001,4096,0)):
-        m.write(k['IO_TIMER_MODE'],bytes([0x34+64*channel]))
+        m.write(key['IO_TIMER_MODE'],bytes([0x34+64*channel]))
         for part in word(divisor):
-            m.write(k['IO_TIMER_CH0']+channel,bytes([part]))
+            m.write(key['IO_TIMER_CH0']+channel,bytes([part]))
     def latched(channel):
-        m.write(k['IO_TIMER_MODE'],bytes([channel*64]))
-        port=k['IO_TIMER_CH0']+channel
+        m.write(key['IO_TIMER_MODE'],bytes([channel*64]))
+        port=key['IO_TIMER_CH0']+channel
         return int.from_bytes(m.read(port,1)+m.read(port,1),'little')
     m.write(0x2800,b'\xcd'+word(k['bios_getch'])+b'\xc3'+word(0x8b00))
     m.stop_at(bios['loc_C23C'])
@@ -279,8 +293,9 @@ try:
     print('PASS C803h software click preserves game carrier and clock',flush=True)
     page(1); m.write(k['IO_BANK_KEYS'],bytes(3))
     page(0)
-    boot = symbols(ROOT/'bin/BIOS.sym')['biosTryShell']
-    m.stop_at(boot); m.call('emu_reset'); m.until(boot,120,page=0)
+    # Обе копии IO установлены перед передачей BIOS, независимо от выбранной оболочки.
+    boot = symbols(ROOT/'bin/bootstrap/BOOT.sym')['bootDone']
+    m.stop_at(boot); m.call('emu_reset'); m.until(boot,120)
     page(1); assert m.read(k['IO_BANK_KEYS'],len(driver)) == driver
     print('PASS Reset reinstalls keyboard segment',flush=True)
 finally:

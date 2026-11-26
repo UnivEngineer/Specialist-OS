@@ -116,7 +116,7 @@ def snapshot(paths, excluded=(), content=False, hashed=(), *, files_only=False, 
     return records
 
 
-def assembly_inputs(roots, excluded=()):
+def assembly_inputs(roots, excluded=(), include_dirs=(), working_directory=None):
     paths = set()
     read = set()
     skip = {path_key(item) for item in excluded}
@@ -144,7 +144,12 @@ def assembly_inputs(roots, excluded=()):
             if is_excluded(dependency):
                 continue
             if not is_file(dependency):
-                dependency = Path(os.path.abspath(top_directory / name))
+                # SjASMPlus проверяет последний --inc первым, затем рабочий каталог.
+                fallback = working_directory if include_dirs and working_directory else top_directory
+                for directory in (*reversed(include_dirs), fallback):
+                    dependency = Path(os.path.abspath(directory / name))
+                    if is_file(dependency):
+                        break
             if is_excluded(dependency):
                 continue
             paths.add(dependency)
@@ -309,7 +314,7 @@ def main(argv, *, cwd=None, batch_locked=False):
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('label')
-    for flag in ('input', 'output', 'scan-output', 'asm', 'hash', 'exclude'):
+    for flag in ('input', 'output', 'scan-output', 'asm', 'inc', 'hash', 'exclude'):
         parser.add_argument('--' + flag, type=Path, action='append', default=[])
     parser.add_argument('--inputs-from-stdin', action='store_true', help='Read additional input paths as a JSON array')
     parser.add_argument('--z88dk', action='store_true')
@@ -337,7 +342,7 @@ def main(argv, *, cwd=None, batch_locked=False):
     elif script.suffix.lower() == '.py':
         command = [sys.executable, *command]
 
-    for flag in ('input', 'output', 'scan_output', 'asm', 'hash', 'exclude'):
+    for flag in ('input', 'output', 'scan_output', 'asm', 'inc', 'hash', 'exclude'):
         setattr(args, flag, [cwd / path for path in getattr(args, flag)])
     paths = [Path(__file__), Path(sys.executable), script, *args.input]
     if args.asm:
@@ -346,7 +351,7 @@ def main(argv, *, cwd=None, batch_locked=False):
         z88dk = z88dk_directory()
         paths.extend(z88dk / name for name in ('bin', 'include', 'lib'))
     def input_state():
-        assembly = assembly_inputs(args.asm, args.exclude)
+        assembly = assembly_inputs(args.asm, args.exclude, args.inc, cwd)
         options = dict(content=args.content or args.input_content, hashed=args.hash, inputs=True)
         records = snapshot(paths, args.exclude, **options)
         records.update(snapshot(assembly, args.exclude, files_only=True, **options))

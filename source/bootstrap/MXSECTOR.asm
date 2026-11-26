@@ -1,6 +1,6 @@
 ; Линейное ПЗУ MX. После переноса загрузчик работает в верхнем ОЗУ,
 ; доступном в MAIN и при подключённом ПЗУ.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     IFDEF MX_BOOT_MINIMAL
     ORG 0000h
     ELSE

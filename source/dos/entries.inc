@@ -1,4 +1,4 @@
-; Плотная таблица DOS. Адреса объявлены в mxos.inc, реализации перемещаемы.
+; Плотная таблица DOS. Адреса объявлены в internal.inc, реализации перемещаемы.
     ASSERT $ == dos_dosBoot
     jp dosBoot
     ASSERT $ == dos_fileList

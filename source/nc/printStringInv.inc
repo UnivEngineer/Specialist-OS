@@ -8,7 +8,7 @@
 printStringInv:   ld    a, 0FFh
             ld    (bios_vars.inverse),a
             ld    (bios_vars.inverse+1),a
-            call  bios_printStringReal
+            call  bios_printStringRawZ
             xor   a
             ld    (bios_vars.inverse),a
             ld    (bios_vars.inverse+1),a

@@ -12,15 +12,22 @@ def main():
     symbols = {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',
                (ROOT/'bin/SORTBEN.sym').read_text(encoding='utf-8'),re.M)}
     image = (ROOT/'bin/SORTBEN.i80').read_bytes()
+    io_main = (ROOT/'bin/IO.main.bin').read_bytes()
+    io = (ROOT/'bin/IO.sys').read_bytes()
     word = lambda x:x.to_bytes(2,'little')
+    reader = symbols['io_pitRead']
+    get_port = symbols['io_pitGetPort']
+    assert io_main[reader-0xf000:] == io[-15:] == bytes.fromhex('21 ef ff 36 80 2b 7e 66 6f c9 21 ec ff b7 c9')
 
-    def run(memory,code):
+    def run(memory,code,cycles=None):
         memory[0x8000:0x8000+len(code)] = code
         source,destination = OUT/'input.bin',OUT/'output.bin'
         source.write_bytes(memory)
-        subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe',
-                        '-m8080','-pc','8000','-end','80ff','-counter','2000000',
-                        '-output',str(destination),str(source)],check=True,capture_output=True)
+        cpu = subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe',
+                              '-m8080','-pc','8000','-sp','8b00','-end','80ff','-counter','2000000',
+                              '-output',str(destination),str(source)],check=True,capture_output=True)
+        if cycles is not None:
+            assert int(cpu.stdout) == cycles
         result = destination.read_bytes()
         assert int.from_bytes(result[65542:65544],'little')==0x80ff
         return result
@@ -28,10 +35,31 @@ def main():
     def fresh():
         memory = bytearray(65536)
         memory[:len(image)] = image
+        memory[0xf000:0xf000+len(io_main)] = io_main
         return memory
 
     cases = 0
+    for origin, segment in ((0xf000, io_main), (0xf040, io[len(io_main):])):
+        for entry, cycles in ((reader, 71), (get_port, 41)):
+            memory = bytearray(65536)
+            memory[origin:origin+len(segment)] = segment
+            memory[0xffee] = 0x5a
+            # CALL, тело, RET и 10 тактов перехода к контрольному адресу.
+            result = run(memory,b'\xcd'+word(entry)+b'\xc3\xff\x80',cycles+10)
+            if entry == reader:
+                assert result[0xffef] == 0x80
+            cases += 1
     for module in ('raw','upper'):
+        # В IN/OUT 8080 номер порта встроен в команду. Проверяем все четыре
+        # подставленных адреса на условном профиле с портовой адресацией.
+        memory = fresh()
+        memory[get_port:get_port+5] = bytes.fromhex('21 10 00 37 c9')
+        code = b'\x31\x00\x8b\xcd'+word(symbols[f'{module}.pitTimerBindWrites'])+b'\xc3\xff\x80'
+        result = run(memory,code)
+        writers = symbols[f'{module}.pitTimerWriteCh0']
+        expected = b''.join(bytes([0xd3, port, 0, 0xc9]) for port in range(0x10, 0x14))
+        assert result[writers:writers+16] == expected
+        cases += 1
         for method,divider in (('benchTimerInit',1),('benchTimerInit',16),
                                ('pitTimerInit',1),('pitTimerWaitReady',1),
                                ('pitTimerWaitReady',16)):
@@ -42,9 +70,8 @@ def main():
                             (59000,)*257):
                 memory = fresh()
                 memory[symbols[f'{module}.benchDivisorHigh']] = divider
-                reader = symbols[f'{module}.pitTimerRead']
                 memory[reader:reader+3] = b'\xc3\x00\x82'
-                # Return scripted HL while preserving BC/DE, like pitTimerRead.
+                # Выдаём заданные показания в HL, сохраняя BC/DE по ABI io_pitRead.
                 stub = bytes.fromhex('2a 00 84 7e 23 f5 7e 23 22 00 84 67 f1 6f c9')
                 memory[0x8200:0x8200+len(stub)] = stub
                 data = b''.join(word(x) for x in samples)
@@ -58,6 +85,8 @@ def main():
                 assert bool(result[0x8440]&1)==(len(samples)==257),(module,method,divider)
                 assert bool(result[0x8440]&0x40)==(len(samples)==257),(module,method,divider)
                 assert result[0x8442:0x8446]==bytes.fromhex('34 12 78 56'),(module,method,divider)
+                if method != 'pitTimerWaitReady':
+                    assert result[0xffed:0xfff0] == bytes([divider, 0, 0xb4])
                 cases += 1
 
     for ticks in (0,1,945,32768,59109,65535):
@@ -72,7 +101,7 @@ def main():
             microseconds = ticks*divider*128
             assert actual==f'{microseconds//1000}.{microseconds%1000:03} ms',actual
             cases += 1
-    print('PIT/SORTBEN TIMING PASS:',cases,'cases; init/wait, delayed reload, stopped clock, BC/DE, U32 formatting.')
+    print('PIT/SORTBEN TIMING PASS:',cases,'cases; MAIN/banked tail, MMIO and port binding, delayed reload, stopped clock, BC/DE, U32 formatting.')
 
 
 if __name__=='__main__':

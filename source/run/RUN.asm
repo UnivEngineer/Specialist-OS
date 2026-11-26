@@ -12,8 +12,9 @@
 ;   8DEC–8DFF: резерв продолжения, 20 байт.
 ; Подмена MON/RF использует FONT_ADDR; верхняя программа RF — экран AB00h.
 ; До запуска приложения 8C00h также служит временным ID-кодом FLASHSYS.
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/ramfos.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../io/timer-hardware.inc"
+    INCLUDE "ramfos.inc"
     INCLUDE "../../bin/bios-move-switch.inc"
 IMAGE_FLAGS      = IMAGE_FLAG_MAIN
 RUN_BODY_REQUEST = RAMFOS_CONTEXT
@@ -1218,7 +1219,7 @@ txtUsage:       DB     0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
 txtNotFound:    DB     0Ah,"FILE NOT FOUND",0
 txtBad:         DB     0Ah,"BAD IMAGE OR ADDRESS RANGE",0
 upperEnd: ; Граница прежнего CPU-стенда, все эти байты теперь в нижнем RUN.
-    INCLUDE "../include/file-io.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
 bodyRequest:        FILE_BODY_IO
 expectedChecksum:   DW 0
 bodyCallerDrive:    DB 0

@@ -48,7 +48,7 @@ quotaReady:
     or a
     jp z,empty
     ld a,d
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld d,a
     ld (startColumn+1),a
     ld a,d
@@ -153,7 +153,7 @@ finish:
     ld a,d
 startColumn: cp 0
     jp z,empty
-    sub 90h
+    sub high MX_SCREEN_BASE
     add a,a
     add a,a
     ld (bios_vars.cursorX),a

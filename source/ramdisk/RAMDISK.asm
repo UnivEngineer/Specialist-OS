@@ -1,12 +1,5 @@
 ; RAMDISK — одноразовая подготовка B: с передачей фиксированного пула DOS.
-    INCLUDE "../include/mxos.inc"
-    IFNDEF RAMDISK_LEGACY
-RAMDISK_LEGACY = 0
-    ENDIF
-    IF RAMDISK_LEGACY
-IMAGE_FLAGS = IMAGE_FLAG_MAIN
-    INCLUDE "legacy.inc"
-    ELSE
+    INCLUDE "../common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_DRIVER
     IFNDEF DRIVER_ORIGIN
 DRIVER_ORIGIN = 0
@@ -27,5 +20,4 @@ IMAGE_BSS_SIZE   = 0
 IMAGE_RELOC_KIND = 0
 IMAGE_ALIGN_LOG2 = 0
     RELOCATE_TABLE driverBody
-    ENDIF
     END

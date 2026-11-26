@@ -1,5 +1,5 @@
 ; Пакетный драйвер H: с независимым программированием чипов.
-    INCLUDE "../../include/mxos.inc"
+    INCLUDE "../../common/system.inc"
 LATCH_0               = 00Ah
 LATCH_1               = 00Bh
 WRITE_0               = 00Ch

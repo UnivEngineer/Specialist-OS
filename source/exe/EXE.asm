@@ -1,5 +1,5 @@
 ; EXE.COM: conversion between RAW, RKS and MXOS executable containers.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 
 EXE_LOAD_ADDR       = 0100h
 IMAGE_FLAGS         = IMAGE_FLAG_MAIN
@@ -850,8 +850,21 @@ finishHeader:
     ret c
 
     ld a,(work.header+IMAGE_POLICY)
-    cp IMAGE_POLICY_MANAGED+1
+    cp IMAGE_POLICY_TRANSIENT+1
     jp nc,invalid
+    cp IMAGE_POLICY_TRANSIENT
+    jp nz,.checkMode
+    ld a,(work.header+HDR_FLAGS)
+    cp IMAGE_FLAG_MAIN
+    jp nz,invalid
+    ld hl,(work.header+IMAGE_MIN_HEAP)
+    ld a,h
+    or l
+    jp nz,invalid
+    ld a,(work.header+IMAGE_OPTIONS)
+    or a
+    jp nz,invalid
+.checkMode:
     ld a,(work.header+IMAGE_MODE)
     cp IMAGE_MODE_RF+1
     jp nc,invalid

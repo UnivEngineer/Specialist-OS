@@ -43,7 +43,7 @@ def run(m,n,out,font='Compact',dataset=None):
     (out/'machine.bin').write_bytes(snapshot)
     origin=n['NC_SORT_KEYS'];strings=origin+0x400;rows=origin+0x600
     assert rows+visible*16<=n['FILE_CACHE_A']
-    asm=f'''    INCLUDE "{(ROOT/'source/include/mxos.inc').as_posix()}"
+    asm=f'''    INCLUDE "{(ROOT/'sdk/asm/mxos.inc').as_posix()}"
     ORG {origin}
 entry:
     ld sp,08F00h
@@ -52,10 +52,10 @@ entry:
     jp c,timerError
     xor a
     ld (error),a
-    call pitTimerRead
+    call io_pitRead
     ld (started),hl
     call renderPanel
-    call pitTimerRead
+    call io_pitRead
     ex de,hl
     ld hl,(started)
     ld a,l
@@ -144,7 +144,7 @@ scope: DB 0
 error: DB 0
 started: DW 0
 elapsed: DW 0
-    INCLUDE "{(ROOT/'source/include/timing-pit.inc').as_posix()}"
+    INCLUDE "{(ROOT/'sdk/asm/lib/timing-pit.inc').as_posix()}"
     ASSERT $<{strings}
 '''
     (out/'bench.asm').write_text(asm,encoding='utf-8')
@@ -156,7 +156,7 @@ elapsed: DW 0
     patched=bytearray(snapshot);patched[origin:origin+len(code)]=code
     # Both layouts use exactly the same 12-byte BIOS call. Exclude the cursor
     # padding pixel; only the actual name text belongs to this comparison.
-    at=patched.index(b'\xcd'+W(n['bios_printStringReal']),n['printFileNamOnPanel'],n['ncPrintDetailedFile'])
+    at=patched.index(b'\xcd'+W(n['bios_printStringRawZ']),n['printFileNamOnPanel'],n['ncPrintDetailedFile'])
     patched[at+1:at+3]=W(s['text12'])
     m.write(origin,code);m.write(at+1,W(s['text12']))
     if 'ncNamePadding' in n:

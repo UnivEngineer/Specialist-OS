@@ -1,7 +1,7 @@
 ; Тест MXOS: физическое чтение и создание временного файла через DOS.
 ; ВИ53: CLK1 / 256 -> CLK2, GATE1/2=1, без прерываний.
 ; Запись включает выделение кластеров, FAT, каталог и штатные барьеры DOS.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
     INCLUDE "layout.inc"
     IFDEF DISKBEN_BANK
 IMAGE_FLAGS = IMAGE_FLAG_BANK

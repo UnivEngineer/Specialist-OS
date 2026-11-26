@@ -1,5 +1,5 @@
 ; Один модуль для проверки на разных базах и в трёх страницах.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 IMAGE_FLAGS       = TEST_FLAGS
 IMAGE_LOAD_OFFSET = 0020h
     ORG IMAGE_LOAD_OFFSET

@@ -36,7 +36,7 @@ def main():
         assert m.read(SYSTEM['SYSTEM_FLASH_ADDR'], 8) == m.resident_bytes('FlashSys')[:8], 'FlashSys не установлен при загрузке'
     m.subroutine(0xC842, af=0x0100, de=1)
     m.subroutine(0xC842, af=0x0000, de=1)
-    driver = 0xC863 if args.locked else entry('FlashSys')
+    driver = SYSTEM['bios_diskDriver'] if args.locked else entry('FlashSys')
     if args.locked:
         before = image.read_bytes()
         sector = 0x7FF

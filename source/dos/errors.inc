@@ -89,7 +89,6 @@ dosNoMedia:
             ld a,DOS_ERR_NO_MEDIA
             jp dosSetError
 
-    IFDEF DOS_SPLIT_BUILD
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
@@ -106,7 +105,6 @@ dosClearError:
             xor a
             ld (v_dosError),a
             ret
-    ENDIF
 
 ;----------------------------------------------------------------------------
 ; MXOS

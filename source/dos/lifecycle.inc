@@ -212,6 +212,10 @@ residentKey:
 ; Резидент становится самостоятельным сервисом и доступен другим владельцам.
 residentService:
     ld a,(kdRegs+7)
+    cp RESIDENT_SHELL_STATE
+    jp z,residentShellState
+    cp RESIDENT_POLICY
+    jp nc,pressureService
     cp RESIDENT_SHELL_SET
     jp z,residentShellSet
     cp RESIDENT_SHELL_RESUME
@@ -235,6 +239,47 @@ residentShellSet:
     ld hl,(kdRegs+2)
     ld (residentShellKey),hl
     xor a
+    jp kdError
+
+;----------------------------------------------------------------------------
+; MXOS
+; Скопировать двоичный снимок панелей между NC и банком DOS.
+; вход: текущий модуль владеет ключом NC_BANK_KEY; B=0 чтение или 1 запись,
+; HL=адрес в EXEC, DE=RESIDENT_STATE_BYTES. Файловый ввод-вывод отсутствует.
+; выход: CF/A=статус. Пустой слот при чтении возвращает NOT_FOUND; снимок
+; доступен до холодной загрузки DOS. BC/DE/HL рабочие.
+;----------------------------------------------------------------------------
+residentShellState:
+    call pressureNcActor
+    jp nz,residentDenied
+    ld hl,(kdRegs+2)
+    ld de,RESIDENT_STATE_BYTES
+    call cmp_hl_de
+    jp nz,kdBad
+    ld hl,(kdRegs)
+    ld bc,RESIDENT_STATE_BYTES
+    call kdFileRange
+    jp c,kdBad
+    ld a,(kdRegs+5)
+    or a
+    jp z,residentShellRead
+    dec a
+    jp nz,kdBad
+    ld de,pressureState
+    call kdFetch
+    jp c,kdBad
+    ld a,1
+    ld (pressureStateSize),a
+    xor a
+    jp kdError
+residentShellRead:
+    ld a,(pressureStateSize)
+    or a
+    ld a,DOS_ERR_NOT_FOUND
+    jp z,mdError
+    ex de,hl
+    ld hl,pressureState
+    call kdStore
     jp kdError
 residentDirectoryEpoch:
     ld a,(kdRegs+5)
@@ -264,6 +309,13 @@ residentRelease:
     sub MODULE_OWNER_BASE
     cp MODULE_MAX
     jp nc,residentDenied
+    ld hl,residentPriorities
+    call pressureByte
+    ld c,a
+    ld a,(hl)
+    cp RESIDENT_PRIORITY_PINNED
+    jp z,mdUnloadProtected
+    ld a,c
     ld b,a
     ld l,a
     ld h,0
@@ -369,6 +421,7 @@ residentShellStatusReady:
     ld (kdPage),a
     push bc
     pop af
+    call nc,pressureRunCommand
     call kdCapture
     jp kdFinish
 residentFind:

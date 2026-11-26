@@ -26,6 +26,11 @@
         INCLUDE "music.inc"
         INCLUDE "sounds.inc"
     ENDIF
+    IF ALMAZ_MXOS_TIMER
+        DEFINE TIMING_PIT_WRITES_ONLY
+        INCLUDE "../../sdk/asm/lib/timing-pit.inc"
+        UNDEFINE TIMING_PIT_WRITES_ONLY
+    ENDIF
     IF ALMAZ_OPTIMIZE
         INCLUDE "input.inc"
     ENDIF

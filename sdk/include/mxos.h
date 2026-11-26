@@ -3,13 +3,10 @@
 #define MXOS_H
 #include "mxos_file.h"
 #include "mxos_syscall_ids.h"
+#include "mxos_timer.h"
 
 /* Direct local keyboard in DOS/EXEC. Keep one initialized state per input stream. */
 typedef struct { mxos_u8 last_key, repeat_count, locks, koi7; mxos_u16 column; mxos_u8 row_mask, repeat_start, timed, soft_divider, soft_ticks; } MXOS_KEY_STATE;
-#define MXOS_TIMER_RAW 0
-#define MXOS_TIMER_CLOCK 1
-#define MXOS_TIMER_RELEASE 2
-#define MXOS_TIMER_QUERY 3
 #define MXOS_KEY_STATE_INIT {255,0,0,0,0,0,0,0,0,0}
 #define MXOS_KEY_EVENT 0x0100
 #define MXOS_KEY_CTRL  0x0200
@@ -37,6 +34,7 @@ typedef struct {
     mxos_u16 entry, af, bc, de, hl;
 } MXOS_REGS;
 typedef struct { mxos_u8 bytes[32]; } MXOS_DESCRIPTOR;
+/* Имя 8.3 и атрибут занимают первые 12 байт, размер little-endian — байты 12–15. */
 typedef struct { mxos_u8 bytes[16]; } MXOS_FILE_INFO;
 typedef struct { mxos_u8 bytes[48]; } MXOS_DISK_INFO;
 typedef struct { mxos_u8 bytes[86]; } MXOS_COPY_REQUEST;
@@ -94,11 +92,7 @@ mxos_u16 mxos_enumerate(mxos_u8 operation,MXOS_ENUM_REQUEST *request);
 #define MXOS_DISK_TECH_MX_VV55_ROM     'Q'
 #define MXOS_RAW_PREPARE 6 /* RAW_IO B=6: unified entry HL (B=1/2/4/5), DE=0, shift B, drive C. */
 
-#define MXOS_BIOS_ABI_PRINT_CHAR_RAW 0xC869
 #define MXOS_BIOS_ABI_PRINT_STRING_Z 0xC818
-#define MXOS_BIOS_ABI_PRINT_STRING_RAW_Z 0xC8ED
-#define MXOS_BIOS_ABI_PRINT_STRING_RAW_LIM 0xC8F0
-#define MXOS_BIOS_ABI_PRINT_STRING_LIM 0xC8F9
 #define MXOS_FONT_PRERENDER_BYTES 10240
 #define MXOS_FONT_RENDER_QUERY 0
 #define MXOS_FONT_RENDER_BUILD 1
@@ -132,6 +126,7 @@ typedef struct {
 #define MXOS_IMAGE_POLICY_EXCLUSIVE 0
 #define MXOS_IMAGE_POLICY_PRESERVE 1
 #define MXOS_IMAGE_POLICY_MANAGED 2
+#define MXOS_IMAGE_POLICY_TRANSIENT 3
 #define MXOS_IMAGE_MODE_AUTO 0
 #define MXOS_IMAGE_MODE_MX 1
 #define MXOS_IMAGE_MODE_STD 2
@@ -152,37 +147,19 @@ typedef struct {
 #define MXOS_COPY_REPLY_YES_ALL 2
 #define MXOS_COPY_REPLY_NO_ALL 3
 #define MXOS_CLI_OBSERVER 9
-#define MXOS_RAMD_DRIVER_RESTORE 0
-#define MXOS_RAMD_DRIVER_BYTE 1
-#define MXOS_RAMD_DRIVER_REGISTER 2
-#define MXOS_RAMD_DRIVER_BLOCK 3
-#define MXOS_RAMD_DRIVER_USER 4
 typedef struct { char bytes[MXOS_MAX_PATH]; } MXOS_PATH;
 
-#define MXOS_CF 0x0001
-#define MXOS_BIOS_ABI_INPUT_HOOK 0xC8E7
-#define MXOS_ZF 0x0040
 #define MXOS_BIOS_ABI_MEMCPY 0xC42D
 #define MXOS_BIOS_ABI_GETCH 0xC803
 #define MXOS_BIOS_ABI_PUTCH 0xC809
 #define MXOS_BIOS_ABI_INPUT 0xC80F
 #define MXOS_BIOS_ABI_PUTS 0xC818
-#define MXOS_BIOS_ABI_PUTS_REAL 0xC8ED
 #define MXOS_BIOS_ABI_PRINT_HEX8 0xC815
-#define MXOS_BIOS_ABI_PRINT_HEX16 0xC82D
 #define MXOS_BIOS_ABI_KEY_SCAN 0xC81B
 #define MXOS_BIOS_ABI_CURSOR_GET 0xC81E
-#define MXOS_BIOS_ABI_CURSOR_SET 0xC821
 #define MXOS_BIOS_ABI_CHECKSUM 0xC82A
 #define MXOS_BIOS_ABI_MEMTOP_SET 0xC830
 #define MXOS_BIOS_ABI_MEMTOP_GET 0xC833
-#define MXOS_BIOS_ABI_DISK_DRIVER 0xC863
-#define MXOS_BIOS_ABI_RAMD_DRIVER 0xC86F
-#define MXOS_BIOS_ABI_PRINT_DEC 0xC86C
-#define MXOS_BIOS_ABI_UPPER 0xC875
-#define MXOS_BIOS_ABI_STRCMP 0xC878
-#define MXOS_BIOS_ABI_STRICMP 0xC87B
-#define MXOS_BIOS_ABI_ARG_NEXT 0xC8B7
 
 /* Один мост позволяет обращаться и к остальным уже объявленным ABI. */
 void mxos_bios_call(MXOS_REGS *regs) MXOS_FASTCALL;
@@ -242,6 +219,18 @@ mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 #define MXOS_RESIDENT_DIRECTORY_EPOCH 5
 #define MXOS_RESIDENT_EPOCH_ALL 0xFE
 #define MXOS_RESIDENT_RELEASE 6
+#define MXOS_RESIDENT_POLICY 7
+#define MXOS_RESIDENT_EXEC 8
+#define MXOS_RESIDENT_VETO 9
+#define MXOS_RESIDENT_SHELL_STATE 10
+#define MXOS_RESIDENT_PRIORITY_APP 100
+#define MXOS_RESIDENT_PRIORITY_EDIT 150
+#define MXOS_RESIDENT_PRIORITY_NC 200
+#define MXOS_RESIDENT_PRIORITY_DISK 254
+#define MXOS_RESIDENT_PRIORITY_PINNED 255
+#define MXOS_RESIDENT_AUTO_RESTORE 1
+#define MXOS_RESIDENT_RELOAD 3
+#define MXOS_RESIDENT_APP_CANT_UNLOAD 0xE8
 #define MXOS_RAMDISK_STATUS 0
 #define MXOS_RAMDISK_COMMIT 1
 #define MXOS_MEM_ERR_BANK 0xE0
@@ -253,6 +242,10 @@ mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 #define MXOS_MEM_ERR_ACTIVE 0xE6
 #define MXOS_MEM_ERR_UNSUPPORTED 0xE7
 typedef struct { mxos_u8 bank; mxos_u16 offset; } MXOS_FAR_ADDRESS;
+typedef struct {
+    mxos_u8 bank, reason;
+    mxos_u16 name, message;
+} MXOS_UNLOAD_REFUSAL;
 /* При перекрытии в одном банке требуется зарегистрированный локальный перенос. */
 /* Для MOVE внутри DATA возвращается MXOS_MEM_ERR_UNSUPPORTED. */
 mxos_u16 mxos_memmove_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
@@ -263,6 +256,7 @@ const char *mxos_printStringLim(const char *text, mxos_u16 bytes);
 void mxos_printString_main(mxos_u16 address) MXOS_FASTCALL;
 /* AF результата; при ошибке realloc адрес не меняется. Дополнительно mxos_far.c. */
 mxos_u16 mxos_malloc_far(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out);
+mxos_u16 mxos_malloc_far_ex(mxos_u8 bank, mxos_u16 bytes, MXOS_FAR_ADDRESS *out, MXOS_UNLOAD_REFUSAL *refusal);
 mxos_u16 mxos_free_far(MXOS_FAR_ADDRESS *address);
 mxos_u16 mxos_realloc_far(MXOS_FAR_ADDRESS *address, mxos_u16 bytes);
 mxos_u16 mxos_main_arena(void *start, mxos_u16 bytes);
@@ -280,6 +274,9 @@ mxos_u16 mxos_resident_retain(mxos_u16 key);
 /* Соглашение входа резидента: A=1 RESTORE, A=2 CLOSE; отказ CLOSE сохраняет модуль. */
 mxos_u16 mxos_resident_restore(mxos_u16 handle);
 mxos_u16 mxos_resident_close(mxos_u16 handle);
+mxos_u16 mxos_resident_policy(mxos_u8 priority, mxos_u8 flags, const char *reload_path);
+/* diagnostic contains "NAME.COM\0message\0" in the resident's bank. */
+mxos_u16 mxos_resident_veto(mxos_u8 reason, const char *diagnostic, const mxos_u8 *dirty);
 mxos_u16 mxos_resident_kill(mxos_u16 handle);
 mxos_u16 mxos_resident_find(mxos_u16 key, mxos_u16 *handle);
 mxos_u16 mxos_resident_next(mxos_u8 *index, mxos_u16 *handle, mxos_u16 *key, mxos_u8 *bank);

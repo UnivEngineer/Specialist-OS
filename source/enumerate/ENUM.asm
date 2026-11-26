@@ -1,5 +1,5 @@
 ; Lazy shared wildcard/recursive enumerator. No public fixed entry address.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
     IFDEF MX_FLOPPY_BOOT
     INCLUDE "../../bin/mx/enumerate-imports.inc"
     ELSE
@@ -12,7 +12,7 @@ OVERLAY_ORIGIN = 0
     RELOCATE_START
 overlayBody:
     jp enumEntry
-    INCLUDE "../include/enumerate-host.inc"
+    INCLUDE "../dos/enumerate-host.inc"
 
 ;----------------------------------------------------------------------------
 ; MXOS

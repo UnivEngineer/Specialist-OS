@@ -13,8 +13,7 @@ dosBoot:    ; Инициализация стека; BIOS уже загрузи�
             call    bios_reset_sound
 
             ; Восстанавливаем обычный режим доступа к RAM-диску
-            ld      b, 0
-            call    setRAMDDriver
+            call    nativeInstallBlock
 
             ; Обновляем переменные
             ld      hl, j_reboot3
@@ -32,27 +31,17 @@ reboot3_1:
             ld      hl, reboot3_2
             ld      (reboot3_0+1), hl
 
-            ; Устанавливаем побайтовый драйвер
-            ld      b, 1
-            call    setRAMDDriver
-
-            ; Если в рам-диске по адресу 0FF00h (последний неполный сектор)
-            ; нет специальной метки, значит, не запускали форматирование
-            ld      hl, 0FFBFh      ; адрес в странице
-            xor     a               ; 0 страница
-            call    bios_RAMDRead
-            ld      a, c            ; считанный байт в c
-            cp      5Ah
-            jp z,   skipFormat      ; метка есть - пропускаем форматирование
-
-            ; Записываем метку
-            xor     a               ; 0 страница
-            ld      c, 5Ah          ; записываемый байт
-            call    bios_RAMDWrite
-
-            ; Восстанавливаем обычный режим доступа к RAM-диску
-            ld      b, 0
-            call    setRAMDDriver
+            ; Только линковочный native-профиль проверяет историческую метку.
+            ld      hl, nativeMarkImage
+            ld      de, nativeMarkEnd
+            ld      bc, 0FFC0h
+            call    memcpy_bc_hl
+            ld      hl, 0FFBFh
+            call    0FFC0h
+            push    af
+            call    nativeInstallBlock
+            pop     af
+            jp z,   skipFormat
 
             ; Запуск файла "A:FORMAT.BAT"
             ; До форматирования B: нельзя восстанавливать его контекст
@@ -63,12 +52,8 @@ reboot3_1:
             call    fileExec
 
 skipFormat:
-            ; Проверка метки могла оставить сервисный побайтовый режим.
-            ld      b, 0
-            call    setRAMDDriver
-
             ; Если нажата клавиша, пропустить запуск A:AUTOEX.BAT
-            ld      a, (IO_KEYB_B)     
+            call    ioKeyReadRows
             and     2
             jp z,   reboot3_2
 
@@ -110,27 +95,56 @@ rebootShellReady:
             ; Теплая перезагрузка
             jp      j_reboot3
 
-
-; Общий сброс звука при холодной и горячей перезагрузке.
-; Входа нет. A/HL разрушаются; BC/DE и флаги сохраняются.
-; 27 байт, 122 такта (139 с CALL); четыре записи аппаратных регистров,
-; два чтения шаблона и две записи переменных BIOS. Новых переменных нет.
-; Режим 3 без загрузки счёта останавливает каждый канал ВИ53, OUT=1.
-; BSR-команда 0Ah выключает программный звук PC5, не меняя режим ВВ55.
-; Параметры берутся из общего шаблона, а не из состояния чужой программы.
-    IF BIOS_DOS_SPLIT == 0
-bios_reset_sound:
-            ld      a, 0B6h
-            ld      (IO_TIMER_MODE), a
-            ld      a, 076h
-            ld      (IO_TIMER_MODE), a
-            ld      a, 036h
-            ld      (IO_TIMER_MODE), a
-            ld      a, 00Ah
-            ld      (IO_KEYB_MODE), a
-            ld      hl, (initVars.beepFreq)
-            ld      (bios_vars.beepFreq), hl
+;----------------------------------------------------------------------------
+; MXOS
+; Проверить и установить метку форматирования в нулевом банке native-DOS.
+; вход: код исполняется из общего окна, HL указывает на историческую метку.
+; выход: MAIN, Z при прежней метке 5Ah, AF изменены, BC/DE/HL/SP сохранены.
+;----------------------------------------------------------------------------
+nativeMarkImage:
+            xor     a
+            ld      (IO_PAGE_RAMD), a
+            ld      a, (hl)
+            ld      (hl), 5Ah
+            ld      (IO_PAGE_RAM), a
+            cp      5Ah
             ret
+nativeMarkEnd:
+            ASSERT nativeMarkEnd-nativeMarkImage <= 32
 
-            ASSERT bios_vars.beepDuration == bios_vars.beepFreq+1
-    ENDIF
+; Установить секторное окно линковочного профиля DOS.native.
+nativeInstallBlock:
+            ld      hl, driverBlockStart
+            ld      de, driverBlockEnd
+            ld      bc, NATIVE_RAMD_READ
+            jp      memcpy_bc_hl
+
+; Встроенный блочный драйвер целиком помещается в общее окно.
+; FFC0h/FFD0h: C=страница, DE=сектор<<8 (E=0), HL=буфер основной RAM.
+; Передаёт ровно 256 байт. C сохраняется; AF/B/DE/HL разрушаются.
+; При выходе снова включена основная RAM; стек не переключается.
+driverBlockStart:
+            ld      a,c
+            ld      (IO_PAGE_RAMD),a
+            ld      a,(de)
+            ld      (IO_PAGE_RAM),a
+            ld      (hl),a
+            inc     hl
+            inc     e
+            jp nz,  NATIVE_RAMD_READ
+            ret
+            nop
+driverBlockWrite:
+            ld      b,(hl)
+            ld      a,c
+            ld      (IO_PAGE_RAMD),a
+            ld      a,b
+            ld      (de),a
+            ld      (IO_PAGE_RAM),a
+            inc     hl
+            inc     e
+            jp nz,  NATIVE_RAMD_WRITE
+            ret
+driverBlockEnd:
+    ASSERT driverBlockWrite-driverBlockStart == NATIVE_RAMD_WRITE-NATIVE_RAMD_READ
+    ASSERT driverBlockEnd-driverBlockStart == 32

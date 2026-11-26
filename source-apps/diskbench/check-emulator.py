@@ -59,7 +59,7 @@ class Bench(Machine):
         path.write_bytes(base64.b64decode(block['data']))
 
     def sector(self, number):
-        self.subroutine(0xC863, bc=0x0200, de=number, hl=0x6000)
+        self.subroutine(SYSTEM['bios_diskDriver'], bc=0x0200, de=number, hl=0x6000)
         return self.read(0x6000, 256)
 
 
@@ -73,6 +73,8 @@ def main():
     args = p.parse_args()
     if args.runtime.name != 'Emu80-flash-test' or args.url != 'http://127.0.0.1:19781/mcp':
         raise ValueError('Use isolated Emu80-flash-test at local port 19781')
+    if 'bios_setRAMDDriver' not in SYSTEM:
+        p.error('Замер R3/R4 требует архивного BIOS с селектором окна RAMD.')
     query = '(Get-Process -Id (Get-NetTCPConnection -State Listen -LocalPort 19781 | Select-Object -First 1 -ExpandProperty OwningProcess)).Path'
     listener = subprocess.run(['powershell.exe','-NoProfile','-Command',query],capture_output=True,text=True,check=True).stdout.strip()
     assert Path(listener).resolve() == (args.runtime/'Emu80qt-mcp.exe').resolve()
@@ -99,7 +101,7 @@ def main():
         m.write(0x7000,b'A:RAMDISK.COM\0')
         assert not m.subroutine(0xC85D,hl=0x7000)['flags']['C']
     m.subroutine(0xC842, af=0x0100, de=1)
-    m.subroutine(0xC86F, bc=0)
+    m.subroutine(SYSTEM['bios_setRAMDDriver'], bc=0)
     count = m.read(0x8FF8, 1)[0]
     assert count == 16
     cycles = {}
@@ -107,11 +109,11 @@ def main():
         sector = page*256+254
         payload = bytes((i*37+page*17+13)&255 for i in range(256))
         m.write(0x4000, b'\xDA'+payload+b'\xAD')
-        state = m.subroutine(0xC863, bc=0x0100, de=sector, hl=0x4001)
+        state = m.subroutine(SYSTEM['bios_diskDriver'], bc=0x0100, de=sector, hl=0x4001)
         assert not state['flags']['C']
         for mode in [1, 2]:
             before = m.call('cpu_state')['cpu_ticks']
-            state = m.subroutine(0xC863, af=0x5A02, bc=mode*256+0xA7, de=sector, hl=0x4001)
+            state = m.subroutine(SYSTEM['bios_diskDriver'], af=0x5A02, bc=mode*256+0xA7, de=sector, hl=0x4001)
             elapsed = state['cpu_ticks']-before-27  # CALL + JMP обвязки, RET входит в драйвер.
             assert not state['flags']['C']
             assert state['registers']['af']['dec'] >> 8 == 0x5A
@@ -122,10 +124,10 @@ def main():
         assert m.sector(sector) == payload
     for sector in [0x00FF, 0x01FF, 0x0FFF, count*256]:
         for mode in [1, 2]:
-            assert m.subroutine(0xC863, bc=mode*256, de=sector, hl=0x4000)['flags']['C']
+            assert m.subroutine(SYSTEM['bios_diskDriver'], bc=mode*256, de=sector, hl=0x4000)['flags']['C']
     if args.variant == 'Buffered':
         for addr in [0xFE01, 0xFF00]:
-            assert m.subroutine(0xC863, bc=0x100, de=0x100, hl=addr)['flags']['C']
+            assert m.subroutine(SYSTEM['bios_diskDriver'], bc=0x100, de=0x100, hl=addr)['flags']['C']
         rs = symbols(ROOT/'bin/RAMDISK.sym')
         tail_length = rs['ramdBankTailEnd']-0xFF00
         tail = m.read(0xFF00, tail_length)
@@ -133,11 +135,9 @@ def main():
             m.write(0xFFFD, bytes([page]))
             assert m.read(0xFF00, tail_length) == tail
             m.write(0xFFFC,b'\0')
-        # Переключение режимов не переписывает хвост; сервисный ABI переносит один байт.
-        m.subroutine(0xC86F, bc=0x100)
-        m.subroutine(0xFFD0, af=0, bc=0x69, hl=0xFFBD)
-        assert m.subroutine(0xFFC0, af=0, hl=0xFFBD)['registers']['bc']['dec']&255 == 0x69
-        m.subroutine(0xC86F, bc=0)
+        # Временный выбор блочного драйвера сохраняет резидентный хвост.
+        m.subroutine(SYSTEM['bios_setRAMDDriver'], bc=0x300)
+        m.subroutine(SYSTEM['bios_setRAMDDriver'], bc=0)
         assert m.read(0xFF00, tail_length) == tail
     boot = m.sector(0)
     size,spc,res,nf,root,total,fatsz = (struct.unpack_from('<H',boot,11)[0],boot[13],

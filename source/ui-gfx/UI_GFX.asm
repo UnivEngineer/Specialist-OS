@@ -1,6 +1,6 @@
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "abi.inc"
-    INCLUDE "../include/ui.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/abi/ui-gfx.inc"
+    INCLUDE "../../sdk/asm/lib/ui.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 01B00h
 entry:
@@ -164,7 +164,7 @@ ngCursor:
     push af
     ld a,b
     ld (bios_upper.cursorCfg),a
-    call bios_drawCursorOld
+    call bios_drawCursor
     pop af
     ld (bios_upper.cursorCfg),a
     xor a
@@ -467,7 +467,7 @@ ngOperation:    DB 0
     DEFINE UI_TEXT_RECT_COLORS
     DEFINE UI_MODAL_BORDER
     DEFINE UI_IMPLEMENTATION
-    INCLUDE "../include/ui.inc"
+    INCLUDE "../../sdk/asm/lib/ui.inc"
     INCLUDE "help.inc"
 ngTransfer: DB 0
     DW 0

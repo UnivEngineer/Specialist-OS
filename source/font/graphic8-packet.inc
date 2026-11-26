@@ -12,7 +12,7 @@ graphicPacket:
     rrca
     and 3Fh
     ld d,a
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld (graphStart),a
     ld a,48
     sub d
@@ -309,7 +309,7 @@ label:
     jp nz,.byte
     ENDIF
     ld a,d
-    cp 0C0h
+    cp high MX_SCREEN_END
     jp z,.nextRow
     ld a,(de)
     IF GRAPH_PRE_MODE == 2 && inverse
@@ -363,9 +363,9 @@ graphSavedSP:
     ENDIF
 graphDone:
     ld a,(graphEnd)
-    cp 0C0h
+    cp high MX_SCREEN_END
     jp z,graphWrap
-    sub 90h
+    sub high MX_SCREEN_BASE
     add a,a
     add a,a
     ld b,a

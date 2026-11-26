@@ -58,6 +58,28 @@ mxos_u16 mxos_resident_close(mxos_u16 handle)
 }
 mxos_u16 mxos_resident_kill(mxos_u16 handle) { return mxos_module_unload(handle); }
 
+mxos_u16 mxos_resident_policy(mxos_u8 priority, mxos_u8 flags, const char *reload_path)
+{
+    MXOS_CALL_PACKET r;
+    r.operation = MXOS_DOS_RESIDENT;
+    r.af = MXOS_RESIDENT_POLICY << 8;
+    r.bc = ((mxos_u16)priority << 8) | flags;
+    r.hl = (mxos_u16)reload_path;
+    r.de = 0;
+    return mxos_call_packet(&r);
+}
+
+mxos_u16 mxos_resident_veto(mxos_u8 reason, const char *diagnostic, const mxos_u8 *dirty)
+{
+    MXOS_CALL_PACKET r;
+    r.operation = MXOS_DOS_RESIDENT;
+    r.af = MXOS_RESIDENT_VETO << 8;
+    r.bc = reason;
+    r.hl = (mxos_u16)diagnostic;
+    r.de = (mxos_u16)dirty;
+    return mxos_call_packet(&r);
+}
+
 mxos_u16 mxos_shell_resident(mxos_u16 key)
 {
     MXOS_CALL_PACKET r; r.operation=MXOS_DOS_RESIDENT;

@@ -1,6 +1,6 @@
 ; Fixed KOI-7R tables are embedded. Flat-font import requires a generator.
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/font-init.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font-init.inc"
     ORG FONT_INIT_ADDR
     jp initialize
     DB 'FIN1',1

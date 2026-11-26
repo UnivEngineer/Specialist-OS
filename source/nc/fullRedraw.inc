@@ -141,11 +141,11 @@ ncPreparePanels:
 ncStartupCopyright:
             COLOR COLOR_CMDSCREEN
             ld hl,aCommanderBuild
-            call bios_printStringReal
+            call bios_printStringRawZ
             ld c,' '
             call bios_printChar
             ld hl,aCopyright
-            call bios_printStringReal
+            call bios_printStringRawZ
             ld c,10
     IF NC_BANKED
             call bios_printChar

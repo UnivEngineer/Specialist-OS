@@ -1,5 +1,5 @@
 ; Leaf module for benchmark-command-queue.py. Scalar calls return HL+1.
-    INCLUDE "../../../source/include/mxos.inc"
+    INCLUDE "../../../sdk/asm/mxos.inc"
     ORG 06000h
     ld d,a                  ; submitting bank for a DLL batch
     ld a,b

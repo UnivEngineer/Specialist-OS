@@ -3,8 +3,9 @@
 ; секторов/кластер, страниц/сектор, dataStart:word, RAW/FILE mask, scatter, смещение буфера 0/1. Выход B=FAR-банк, HL=88 байт статистики.
 ; Первые 48 байт прежние; +48/+52 — RAW WRITE/READ HIGH, +56 — VERIFY HIGH U32.
 ; +60/+70 — FILE HIGH WRITE/READ (по 10 байт), +84 — VERIFY HIGH U32.
+; Контроллер удерживает TIMER_RAW на время вызова, включая восстановление опций.
 ; CF/A=ошибка DOS. Загрузка/пересылка результатов вне замеров.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
     INCLUDE "layout.inc"
     IFDEF WORKER_MAIN
     ORG BENCH_MAIN_WORK_ADDR
@@ -91,10 +92,10 @@ clearStats:
     jp nz,clearStats
     call setOptions
     ret c
-    call pitTimerInit
+    call timerRange
+    call pitTimerInitDivisor
     ld a,DOS_ERR_UNSUPPORTED
     ret c
-    call timerRange
     ld a,(config+3)
     cp BUFFER_SECTORS+1
     jp nc,chainInvalid
@@ -266,9 +267,7 @@ fileReadPass:
     call timer_sample
     ld de,10
     call fileAddStats
-    call compareFileBuffer
-    ret c
-    ret
+    jp compareFileBuffer
 fileAddStats:
     ld hl,(fileStats)
     add hl,de
@@ -277,13 +276,9 @@ fileAddStats:
 
 ; Параметры/цепочка определены до начала обмена. CF=ошибка, регистры разрушены.
 begin:
-    xor a
-    ld (flushTicks),a
-    ld (flushTicks+1),a
-    ld (flushTicks+2),a
-    ld (flushTicks+3),a
-    ld (flushCount),a
-    ld (flushCount+1),a
+    ld hl,0
+    ld (flushTicks),hl
+    ld (flushTicks+2),hl
     jp reset_timing
 
 ; RAW использует один стабильный секторный буфер. Подготовка и обычная
@@ -539,9 +534,6 @@ flushDone:
     ld d,a
     ld hl,flushTicks
     call add_u16
-    ld hl,(flushCount)
-    inc hl
-    ld (flushCount),hl
     pop af
     ret
 
@@ -1000,9 +992,11 @@ sectorOutside:
 
 ; Отсчёты не пересекают банк: иначе стоимость BIOS-маршрута искажает
 ; сравнение MAIN/DOS/BANK несколько раз на каждом секторе.
-    INCLUDE "../../source/include/timing-pit.inc"
-timer_read = pitTimerRead
-    INCLUDE "../../source/include/timing-counter.inc"
+    INCLUDE "../../sdk/asm/lib/timing-pit.inc"
+timer_read = io_pitRead
+    DEFINE TIMING_PROBE_READY pitTimerWaitReady
+    INCLUDE "../../sdk/asm/lib/timing-counter.inc"
+    UNDEFINE TIMING_PROBE_READY
     DEFINE BH_DESCRIPTOR descriptor
     DEFINE BH_SCATTER config+9
     DEFINE BH_DRIVE config
@@ -1043,6 +1037,9 @@ exchangeOptions:
 ; Дискеты и разбросанные цепочки медленнее: период 33,55 с вместо 8,39 с.
 ; В отчёт по-прежнему возвращаются эквивалентные тики по 128 мкс.
 timerRange:
+    ld hl,256
+    xor a
+    ld (elapsedShift),a
     ld a,(sectorPages)
     cp 2
     jp z,timerLongRange
@@ -1052,12 +1049,7 @@ timerRange:
 timerLongRange:
     ld a,2
     ld (elapsedShift),a
-    ld hl,IO_TIMER_MODE
-    ld (hl),074h
-    dec hl
-    dec hl
-    ld (hl),0
-    ld (hl),4
+    ld h,4
     ret
 ; HL=U32; сохранить DE (назначение накопления), BC/AF разрушены.
 scaleTime:
@@ -1111,7 +1103,6 @@ writeStat:          DW 0
 verifyStat:         DW 0
 flushStart:         DW 0
 flushTicks:         DD 0
-flushCount:         DW 0
 v_elapsed:          DD 0
 v_setup:            DD 0
 v_last:             DW 0

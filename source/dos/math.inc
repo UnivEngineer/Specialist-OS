@@ -3,5 +3,5 @@
     DEFINE MATH_DIV2
     DEFINE MATH_MUL
     DEFINE MATH_DIV
-    INCLUDE "../include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDIF

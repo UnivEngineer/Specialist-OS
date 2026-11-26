@@ -165,15 +165,15 @@ ngHelpInverse:  DW 0
 ngHelpPalette:  DB 0
 ngHelpBuffer:   DS MAX_PATH,0
 
-    INCLUDE "../include/ui-text-align.inc"
-    INCLUDE "../include/ui-button.inc"
+    INCLUDE "../../sdk/asm/lib/ui-text-align.inc"
+    INCLUDE "../../sdk/asm/lib/ui-button.inc"
     DEFINE UI_MODAL_SNAPSHOT ngHelpSnapshot
-    INCLUDE "../include/ui-modal.inc"
+    INCLUDE "../../sdk/asm/lib/ui-modal.inc"
     DEFINE FILE_IO_HANDLE_ONLY
-    INCLUDE "../include/file-io.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
     DEFINE UI_HELP_STEPPED
     DEFINE UI_HELP_OPEN ngHelpFrame
     DEFINE UI_HELP_CLOSE ngHelpClose
     DEFINE UI_HELP_COLOR ngHelpColor
     DEFINE UI_HELP_BUFFER ngHelpBuffer
-    INCLUDE "../include/ui-help.inc"
+    INCLUDE "../../sdk/asm/lib/ui-help.inc"

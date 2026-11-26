@@ -23,6 +23,11 @@ bench_init:
     ENDIF
     call bios_cmp_hl_de
     jp c,bench_no_memory
+    ld a,TIMER_RAW
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    jp c,bench_no_timer
+    ld a,1
+    ld (benchTimerHeld),a
     call pitTimerInit
     jp c,bench_no_timer
     call timer_probe
@@ -30,6 +35,7 @@ bench_init:
     or a
     ret
 bench_no_timer:
+    call bench_release_timer
     ld hl,noTimer
     jp bench_error
 bench_no_memory:
@@ -40,6 +46,7 @@ bench_error:
     ret
 ; Ожидание клавиши и восстановление режима текста. Регистры разрушены.
 bench_finish:
+    call bench_release_timer
     IFDEF FONT_CORPUS_TEST
     ld a,(benchQuick)
     or a
@@ -52,6 +59,9 @@ waitKey:
     cp 13
     jp nz,waitKey
 bench_restore:
+    push af
+    call bench_release_timer
+    pop af
     ld a,(savedKoi)
     call bios_setFontEncoding
     ld a,(savedInverse)
@@ -61,6 +71,18 @@ bench_restore:
     ld hl,(savedFont)
     ld (bios_upper.charGen),hl
     ret
+
+bench_release_timer:
+    ld a,(benchTimerHeld)
+    or a
+    ret z
+    xor a
+    ld (benchTimerHeld),a
+    ld a,TIMER_RELEASE
+    MXOS_CALL_REGS MXOS_DOS_TIMER
+    ret
+benchTimerHeld: DB 0
+
 puts:
     IFDEF FONT_NATIVE_GRID
     jp gridPuts
@@ -95,13 +117,13 @@ reportCharScreen:
     ENDIF
     ld c,a
     jp bios_printChar
-    INCLUDE "../../source/include/timing-pit.inc"
-timer_read   = pitTimerRead
+    INCLUDE "../../sdk/asm/lib/timing-pit.inc"
+timer_read   = io_pitRead
 timing_print = puts
 
     MODULE textMath
     DEFINE MATH_DIV
-    INCLUDE "../../source/include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
     ENDMODULE
 timing_div_hl_de = textMath.div_hl_de
 PIT_HZ           = 2000000
@@ -118,8 +140,8 @@ DECIMAL = decimalBuffer
     ex de,hl
     pop hl
     ENDM
-    INCLUDE "../../source/include/timing.inc"
-    INCLUDE "../../source/include/timing-ms.inc"
+    INCLUDE "../../sdk/asm/lib/timing.inc"
+    INCLUDE "../../sdk/asm/lib/timing-ms.inc"
 savedKoi:       DB 0
 savedInverse:   DB 0
 savedEsc:       DB 0

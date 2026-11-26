@@ -15,7 +15,7 @@ def prepare(h):
  for name,bank,end,policy in [('TINY',False,0,'MANAGED'),('BIG',False,0x6000,'MANAGED'),('ALL',False,0x8c00,'EXCLUSIVE'),('BNK',True,0,'MANAGED')]:
   folder=OUT/'fixtures';folder.mkdir(exist_ok=True)
   origin=0x100 if bank else 0
-  source=f'''    INCLUDE "{(ROOT/'source/include/mxos.inc').as_posix()}"
+  source=f'''    INCLUDE "{(ROOT/'sdk/asm/mxos.inc').as_posix()}"
     ORG {origin}
     jp start
     DB 'RETURNBENCH-{name}',0

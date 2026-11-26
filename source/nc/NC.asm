@@ -12,8 +12,8 @@
 
 
 
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/version.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../common/version.inc"
 
     IFNDEF NC_BANKED
 NC_BANKED = 0
@@ -28,7 +28,7 @@ NC_CATALOG_SLOTS = 2
 IMAGE_FLAGS      = IMAGE_FLAG_MAIN
     ENDIF
 
-    INCLUDE "../include/ui.inc"
+    INCLUDE "../../sdk/asm/lib/ui.inc"
 
 
 
@@ -116,7 +116,8 @@ NC_FILE_COLORS = ENABLE_COLOR
     INCLUDE "overwrite.inc"
 
 
-    INCLUDE "../include/errors.inc"
+    DEFINE DOS_ERRORS_DRIVE BOOT_VOLUME_LETTER
+    INCLUDE "../../sdk/asm/lib/errors.inc"
 
 
 
@@ -168,7 +169,7 @@ NC_FILE_COLORS = ENABLE_COLOR
 
     DEFINE UI_IMPLEMENTATION
 
-    INCLUDE "../include/ui.inc"
+    INCLUDE "../../sdk/asm/lib/ui.inc"
 
 
     UNDEFINE UI_PIXEL_RECT
@@ -255,7 +256,7 @@ inverseRect = uiInverseRect
 
     DEFINE MATH_MUL
 
-    INCLUDE "../include/math.inc"
+    INCLUDE "../../sdk/asm/lib/math.inc"
 
     ENDMODULE
 
@@ -267,20 +268,20 @@ inverseRect = uiInverseRect
     INCLUDE "memory.inc"
     ENDIF
 
-    INCLUDE "../include/ui-text-align.inc"
+    INCLUDE "../../sdk/asm/lib/ui-text-align.inc"
     INCLUDE "align.inc"
     IF ENABLE_COLOR
     DEFINE UI_BUTTON_COLOR ncSetColor
     ENDIF
-    INCLUDE "../include/ui-button.inc"
+    INCLUDE "../../sdk/asm/lib/ui-button.inc"
     DEFINE UI_MODAL_SNAPSHOT ncModalSnapshot
     DEFINE UI_MODAL_BUTTON_DRAW ncDrawButton
     DEFINE UI_MODAL_KEYS
-    INCLUDE "../include/ui-modal.inc"
+    INCLUDE "../../sdk/asm/lib/ui-modal.inc"
     INCLUDE "modal.inc"
-    INCLUDE "../include/file-io.inc"
+    INCLUDE "../../sdk/asm/lib/file-io.inc"
     IF !NC_BANKED
-    INCLUDE "../include/ui-scrollbar.inc"
+    INCLUDE "../../sdk/asm/lib/ui-scrollbar.inc"
     ENDIF
     IF NC_BANKED
     DEFINE UI_HELP_HANDLE ncGfxHandle
@@ -288,14 +289,14 @@ inverseRect = uiInverseRect
     DEFINE UI_HELP_BANK ncBankNumber
     DEFINE UI_HELP_PIXELS 0
     DEFINE UI_HELP_KEY uiModalGetch
-    INCLUDE "../include/ui-bank-help.inc"
+    INCLUDE "../../sdk/asm/lib/ui-bank-help.inc"
     ELSE
     DEFINE UI_HELP_OPEN ncModalOpen
     DEFINE UI_HELP_KEY uiModalGetch
     DEFINE UI_HELP_CLOSE ncDialogClose
     DEFINE UI_HELP_COLOR ncHelpColor
     DEFINE UI_HELP_BUFFER vars.pathArg
-    INCLUDE "../include/ui-help.inc"
+    INCLUDE "../../sdk/asm/lib/ui-help.inc"
     ASSERT MAX_PATH >= UI_HELP_BLOCK
     ENDIF
     INCLUDE "help.inc"
@@ -681,6 +682,7 @@ cacheSortA          DB                 0
 cacheSortB          DB                 0
 
 fileColorRules      BLOCK              4*32+1,0             ; Runtime NC.CFG extension rules, terminated by 0.
+stateFile           BLOCK              MAX_PATH,0           ; Путь снимка из главной конфигурации.
 
 savedSelectedA      BLOCK              13,0
 

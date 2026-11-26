@@ -1,5 +1,5 @@
 ; Фиксированные адреса оригинала. ABI стандартного Монитора/MXOS.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
 GAME_LOAD             = 01EFDh
 GAME_LAST             = 030FFh
 app_bios_key_scan     = bios_keyScan

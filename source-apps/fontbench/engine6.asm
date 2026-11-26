@@ -1,5 +1,5 @@
 ; Standalone MAIN DLL; descriptor width/quantum/scalar/batch/reset.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
     DEFINE FONT_ENGINE_DLL
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 02000h

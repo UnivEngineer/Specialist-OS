@@ -1,10 +1,10 @@
 ; MEM.SYS: плотный установочный образ общих служб исполняемых банков.
-; Каноническая карта MAIN/DOS/EXEC/DATA и адреса IO/MEM — ../include/mxos.inc.
+; Каноническая карта MAIN/DOS/EXEC/DATA и адреса IO/MEM — ../common/system.inc.
 ; Полный хвост F1C0h–FFBFh. Профиль DATA начинается по MEM_DATA_START.
 ; Сегменты файла и резерв хвоста различаются: слоты A:/H: устанавливаются отдельно.
 ; Заголовок MXMM, версия, число сегментов; записи {адрес, размер, смещение}.
 ; Банки DATA получают часть TRANSPORT от MEM_DATA_START до bankDataTailEnd.
-    INCLUDE "../include/mxos.inc"
+    INCLUDE "../common/system.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
     ORG 0
     DB 'MXMM',1,4

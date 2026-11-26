@@ -56,5 +56,5 @@ def build():
 if __name__ == '__main__':
     python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']
     sys.exit(python_build(__file__, 'Module tests', build,
-                          inputs=(HERE, 'source/include', 'scripts/images/executable.py', 'scripts/images/cpu.py'),
+                          asm=(HERE,), inputs=('scripts/images/executable.py', 'scripts/images/cpu.py'),
                           scan_outputs=(OUTPUT,)))

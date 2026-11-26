@@ -116,4 +116,4 @@ ncCommandEditResume: DB 0
     DEFINE LINEEDIT_BATCH 1
 LINEEDIT_PRINT_CHAR EQU ncPrintChar
 LINEEDIT_PAINT      EQU ncPrintField
-    INCLUDE "../include/lineedit.inc"
+    INCLUDE "../../sdk/asm/lib/lineedit.inc"

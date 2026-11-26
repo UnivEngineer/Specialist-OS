@@ -16,6 +16,10 @@
 ncBankEntry:
     cp 2 ; Shared resident convention: RESTORE=1, CLOSE=2.
     jp z,ncBankClose
+    cp RESIDENT_RELOAD
+    jp nz,ncBankNormalEntry
+    ld a,c
+ncBankNormalEntry:
     ld c,a
     ld a,b
     ld (ncBankInitOnly),a
@@ -30,6 +34,7 @@ ncBankEntry:
     ld (ncGfxPath),a
     ld (ncEditorPath),a
     ld (ncAssociatedEditor),a
+    ld (ncCorePath),a
     ld (ncConfigPath),a
     ld (ncHelpPath),a
 ncBankEntryDriveReady:
@@ -50,6 +55,14 @@ ncBankEntryDriveReady:
     ret c
     ld a,1
     ld (ncBankRegistered),a
+    ld bc,RESIDENT_PRIORITY_NC*256+RESIDENT_AUTO_RESTORE
+    ld hl,ncCorePath
+    ld a,RESIDENT_POLICY
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
+    ret c
+    ld a,(ncBankInitOnly)
+    cp 2
+    ret z
 ncBankRetained:
     ld de,NC_BANK_KEY
     ld a,RESIDENT_SHELL_SET
@@ -119,16 +132,9 @@ ncBankScopeFailed:
     scf
     ret
 ncBankExec:
-    ; MXOS_EXEC leaves its register packet on this stack on return.
-    ld hl,0
-    add hl,sp
-    ld (ncBankExecSP),hl
     ld hl,vars.cmdLine
-    MXOS_EXEC ncBankExecDone
-ncBankExecDone:
-    ld hl,(ncBankExecSP)
-    ld sp,hl
-    xor a
+    ld a,RESIDENT_EXEC
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
     ret
 ; Synchronous child. Both UIs release the drawing scope before handing
 ; over MAIN. RET resumes this same NC, independently of the selected shell.
@@ -1011,7 +1017,7 @@ ncBankEpoch:            DS 32,0
 ncBankNewEpoch:         DS 32,0
 ncBankEpochDiff:        DB 0
 ncBankReturnSP:         DW 0
-ncBankExecSP:           DW 0
+ncCorePath:             DB 'C:',05Ch,'DOS',05Ch,'NC_CORE.DLL',0
 ncGfxHandle:            DW 0
 ncGfxResultPtr:         DW 0
 ncGfxBase:              DW 0
@@ -1034,4 +1040,4 @@ ncQRegisters:           DS MX_REGS,0
 ncQTransfer:            DS MEM_COPY_REQUEST,0
 ncInputState:           IO_KEY_STATE
 
-    INCLUDE "../include/command-queue.inc"
+    INCLUDE "../../sdk/asm/lib/command-queue.inc"

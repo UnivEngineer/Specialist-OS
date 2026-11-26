@@ -31,8 +31,24 @@ def main():
     assert io[layout['io']['bytes']:]==(ROOT/'bin/banked/KEYBANK.bin').read_bytes()
     assert io[:layout['io']['bytes']]==(ROOT/'bin/IO.main.bin').read_bytes()
     assert layout['io']['bankAddress']==dos['IO_BANK_KEYS']
-    assert layout['io']['bankAddress']+layout['io']['bankBytes']<=dos['MEM_IMAGE_LOCAL_START']
-    assert layout['io']['end']<=bios['MEM_IMAGE_LOCAL_START']
+    assert layout['io']['bankAddress']+layout['io']['bankBytes']==dos['MEM_IMAGE_LOCAL_START']
+    assert layout['io']['end']==bios['MEM_IMAGE_LOCAL_START']
+    assert io[layout['io']['bytes']-15:layout['io']['bytes']]==io[-15:]
+    assert bios['io_pitRead']==dos['io_pitRead']==layout['io']['end']-15
+    assert bios['io_pitGetPort']==dos['io_pitGetPort']==layout['io']['end']-5
+    assert layout['io']['start'] <= bios['beep'] < bios['ioKeyReadCtrl'] < bios['keyScan2']
+    assert bios['keyScan2'] < bios['beepTimer'] < bios['ioKeyClockInit'] < bios['io_pitRead']
+    clock_gate = dos['BIOS_BANK_KEY_CLOCK_INIT']
+    relative = clock_gate-layout['io']['start']
+    assert io[relative:relative+3] == b'\xC3'+bios['ioKeyClockInit'].to_bytes(2,'little')
+    assert 'ioKeyClockInit' not in dos and 'IO_TIMER_MODE' not in dos
+    timer_service = image[dos['timerService']-layout['dos']['start']:dos['timerRelease']-layout['dos']['start']]
+    assert b'\xaf\x21'+clock_gate.to_bytes(2,'little')+b'\xcd'+dos['bankCall'].to_bytes(2,'little') in timer_service
+    for mode in (82,91):
+        legacy = bios[f'bios_setKeybMode{mode}']-layout['bios']['start']
+        io_mode = bios[f'ioKeyMode{mode}']
+        assert bios['ioKeyReadCtrl'] < io_mode < bios['keyScan2']
+        assert binary[legacy:legacy+6] == b'\xC3'+io_mode.to_bytes(2,'little')+bytes(3)
     mem=(ROOT/'bin/MEM.sys').read_bytes()
     address,size,offset=struct.unpack_from('<HHH',mem,6)
     at=offset+bios['MEM_MAIN_IO_BRIDGE']-address
@@ -61,6 +77,7 @@ def main():
                               ('DOS_VERIFY_BUFFER',256,'verify'),('DOS_IO_BATCH_ADDR',152,'LBA-batch'),
                               ('DOS_CACHE_BOOT_ADDR',512,'BPB'),
                               ('DOS_BANK_CMD_ADDR',130,'command'),('DOS_BANK_COMPAT_ADDR',33,'variables'),
+                              ('DOS_RESIDENT_WORK',dos['dosResidentWorkEnd']-dos['DOS_RESIDENT_WORK'],'resident and memory variables'),
                               ('DOS_ARENA_START',dos['DOS_BANK_MODULE_END']-dos['DOS_ARENA_START'],'DLL and installer arena'),('BAT_BUFFER',dos['BAT_BUFFER_SIZE'],'BAT'),
                               ('IO_BANK_KEYS',layout['io']['bankBytes'],'local keyboard'),('DOS_BANK_STACK_BOTTOM',dos['DOS_BANK_STACK_TOP']-dos['DOS_BANK_STACK_BOTTOM'],'stack'),('mx_callPacket',0x800,'tail')]:
         spans.append((dos[address],dos[address]+size,name))

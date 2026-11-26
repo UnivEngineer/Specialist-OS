@@ -1,7 +1,7 @@
 /* Локальная NEAR-куча. Контекст, заголовки и блоки находятся в одном банке. */
 #ifndef MXOS_HEAP_H
 #define MXOS_HEAP_H
-#include "mxos_file.h"
+#include "mxos_types.h"
 typedef struct {
     unsigned char *base;
     mxos_u16 bytes, first;

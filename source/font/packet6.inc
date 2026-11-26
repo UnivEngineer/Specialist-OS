@@ -57,7 +57,7 @@ routeReady:
     ld a,h
     rrca
     rrca
-    add a,90h
+    add a,high MX_SCREEN_BASE
     ld d,a
     ld (startColumn+1),a
     ; Cap the first disallowed starting column by the right edge. A
@@ -183,7 +183,7 @@ noGroup:
     ld a,d
 startColumn: cp 0
     jp z,emptyGroup
-    sub 90h
+    sub high MX_SCREEN_BASE
     add a,a
     add a,a
     ld (bios_vars.cursorX),a

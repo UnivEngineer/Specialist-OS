@@ -13,11 +13,16 @@ audio_update:
     OR A
     JP Z,audio_update_return
     PUSH HL
+    IF ALMAZ_MXOS_TIMER
+    CALL io_pitRead
+    LD A,H
+    ELSE
     LD A,080h                 ; Защёлкнуть счётчик 2: команда именно 8253.
     LD (IO_TIMER_MODE),A
     LD A,(IO_TIMER_CH2)
     LD L,A
     LD A,(IO_TIMER_CH2)
+    ENDIF
     OR A
     JP M,audio_update_next
     OR L
@@ -53,14 +58,14 @@ audio_next:
     OR C
     JP Z,audio_stop
     LD A,036h
-    LD (IO_TIMER_MODE),A
+    APP_WRITE_TIMER pitTimerWriteControl,IO_TIMER_MODE
     LD A,D
     OR E
     JP Z,audio_next_duration
     LD A,E
-    LD (IO_TIMER_CH0),A
+    APP_WRITE_TIMER pitTimerWriteCh0,IO_TIMER_CH0
     LD A,D
-    LD (IO_TIMER_CH0),A
+    APP_WRITE_TIMER pitTimerWriteCh0,IO_TIMER_CH0
 audio_next_duration:
     IF USE_FRAME_CLOCK
         CALL frame_clock_sample_saved
@@ -71,11 +76,11 @@ audio_next_duration:
         LD (v_clock_previous),HL
     ENDIF
     LD A,0B0h
-    LD (IO_TIMER_MODE),A
+    APP_WRITE_TIMER pitTimerWriteControl,IO_TIMER_MODE
     LD A,C
-    LD (IO_TIMER_CH2),A
+    APP_WRITE_TIMER pitTimerWriteCh2,IO_TIMER_CH2
     LD A,B
-    LD (IO_TIMER_CH2),A
+    APP_WRITE_TIMER pitTimerWriteCh2,IO_TIMER_CH2
     RET
 
 ; Остановить звук без ожидания; AF разрушается, остальные сохраняются.
@@ -86,10 +91,10 @@ audio_stop:
         CALL frame_clock_idle
     ELSE
     LD A,0B2h
-    LD (IO_TIMER_MODE),A
+    APP_WRITE_TIMER pitTimerWriteControl,IO_TIMER_MODE
     ENDIF
     LD A,036h
-    LD (IO_TIMER_MODE),A
+    APP_WRITE_TIMER pitTimerWriteControl,IO_TIMER_MODE
     XOR A
     LD (v_audio_active),A
     LD (v_audio_priority),A
@@ -106,13 +111,15 @@ audio_init:
     ENDIF
     CALL audio_stop
     LD A,074h
-    LD (IO_TIMER_MODE),A
+    APP_WRITE_TIMER pitTimerWriteControl,IO_TIMER_MODE
     LD A,LOW(PIT_CLOCK_HZ/PIT_TICK_HZ)
-    LD (IO_TIMER_CH1),A
+    APP_WRITE_TIMER pitTimerWriteCh1,IO_TIMER_CH1
     LD A,HIGH(PIT_CLOCK_HZ/PIT_TICK_HZ)
-    LD (IO_TIMER_CH1),A
+    APP_WRITE_TIMER pitTimerWriteCh1,IO_TIMER_CH1
+    IF !ALMAZ_MXOS_TIMER
     LD A,00Ah                 ; Программный звук PC5 должен быть выключен.
     LD (IO_KEYB_MODE),A
+    ENDIF
     IF USE_FRAME_CLOCK
         XOR A
         LD (v_frame_ready),A

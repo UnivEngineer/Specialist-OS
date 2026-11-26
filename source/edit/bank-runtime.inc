@@ -22,6 +22,16 @@ editorBankEntry:
     ex de,hl
     ld (ebArguments),hl
     call editorOverlayDrive
+    ld bc,RESIDENT_PRIORITY_EDIT*256
+    ld a,RESIDENT_POLICY
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
+    ret c
+    ld c,1
+    ld de,v_documentDirty
+    ld hl,ebDirtyReason
+    ld a,RESIDENT_VETO
+    MXOS_CALL_REGS MXOS_DOS_RESIDENT
+    ret c
     call mx_memInfo
     ld (ebNumber),a
     ld hl,(ebArguments)
@@ -778,9 +788,10 @@ ebSubtract:
     INCLUDE "../common/argNext.inc"
     ENDMODULE
     INCLUDE "bank-cache.inc"
-    INCLUDE "../include/command-queue.inc"
+    INCLUDE "../../sdk/asm/lib/command-queue.inc"
 ebNumber:           DB 0
 ebQuiet:            DB 0
+ebDirtyReason:      DB 'EDIT.COM',0,'Document has unsaved changes',0
 ebArgBank:          DB 0
 ebArguments:        DW 0
 ebGfxHandle:        DW 0

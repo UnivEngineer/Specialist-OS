@@ -1,5 +1,5 @@
 """Общий пересчёт ВИ53/десятичный вывод в двух приложениях: Intel 8080."""
-import argparse,json,random,re,struct,subprocess
+import argparse,json,os,random,re,struct,subprocess
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__)
@@ -7,11 +7,20 @@ p.add_argument('--ticks',type=Path,default=Path('D:/Projects/RetroPC/Specialist/
 a=p.parse_args();out=ROOT/'docs/timing/shared-001';out.mkdir(parents=True,exist_ok=True)
 def symbols(path):return {k:int(v,16) for k,v in re.findall(r'^(\w+): EQU 0x([0-9A-Fa-f]+)',path.read_text(),re.M)}
 report={}
-for name,component,source in [('DISKBEN','diskbench','DISKBEN.asm'),('LLM80','llm80','LLM80.asm')]:
- if not (ROOT/'source-apps'/component/source).is_file():continue
+llm80 = Path(os.environ.get('LLM80_ROOT', ROOT.parent / 'LLM80'))
+for name, folder, source in [('DISKBEN', ROOT/'source-apps/diskbench', 'DISKBEN.asm'), ('LLM80', llm80/'src', 'LLM80.asm')]:
+ if not (folder/source).is_file():continue
+ if name == 'LLM80':
+    # Внешний снимок SDK включал карту MX из мастера и давал локальному чтению имя pitTimerRead.
+    # Связываем старый исходник с актуальными листами для проверки арифметики на обоих CLK.
+    client = out/'llm80-sdk.asm'
+    client.write_text('    INCLUDE "mxos.inc"\n    INCLUDE "hardware/spec_mx.inc"\n'
+                      'pitTimerRead = io_pitRead\n'
+                      f'    INCLUDE "{(folder/source).as_posix()}"\n', encoding='utf-8')
+    source = client.as_posix()
  for hz in [2000000,2500000]:
     stem=out/f'{name}-{hz}'
-    subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','-Wno-rdlow',f'-DPIT_HZ={hz}',f'--sym={stem}.sym',f'--raw={stem}.bin',source],cwd=ROOT/f'source-apps/{component}',check=True,capture_output=True)
+    subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080',f'--inc={ROOT / "sdk/asm"}',f'--inc={ROOT / "sdk/asm/lib"}','-Wno-rdlow',f'-DPIT_HZ={hz}',f'--sym={stem}.sym',f'--raw={stem}.bin',source],cwd=folder,check=True)
     s=symbols(stem.with_suffix('.sym'));code=stem.with_suffix('.bin').read_bytes()
     base=bytearray(65536)
     origin = s['loader'] if name == 'LLM80' else 0

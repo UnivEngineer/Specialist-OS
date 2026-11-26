@@ -1,4 +1,4 @@
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
 
     IFNDEF FONTGRID_ORIGIN
         DEFINE FONTGRID_ORIGIN 0

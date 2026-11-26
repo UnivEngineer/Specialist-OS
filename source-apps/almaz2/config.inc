@@ -1,5 +1,6 @@
 ; Конфигурация игры. Флаги независимы от одноимённых настроек ОС.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/hardware/spec_mx.inc"
 
     IFNDEF ALMAZ_COLOR
 ALMAZ_COLOR = 1
@@ -24,6 +25,18 @@ ALMAZ_STEP_HZ = 8              ; Один проход карты; полный 
     ENDIF
 ; Производная возможность оборудования, не отдельный переключатель сборки.
 USE_FRAME_CLOCK = ALMAZ_OPTIMIZE && ALMAZ_PIT
+ALMAZ_MXOS_TIMER = ALMAZ_PIT && !ALMAZ_RAMFOS && !ALMAZ_MONITOR_TARGET
+    IF ALMAZ_PIT && !ALMAZ_MXOS_TIMER
+    INCLUDE "../../source/io/timer-hardware.inc"
+    ENDIF
+
+    MACRO APP_WRITE_TIMER native, legacy
+        IF ALMAZ_MXOS_TIMER
+            CALL native
+        ELSE
+            LD (legacy),A
+        ENDIF
+    ENDM
     IFNDEF ANIMATION_QUOTA
 ANIMATION_QUOTA = 10           ; Общий бюджет: Q=max(QUOTA-N_dynamic, MIN_QUOTA).
     ENDIF

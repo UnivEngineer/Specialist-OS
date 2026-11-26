@@ -1,4 +1,4 @@
-"""Встроенный блочный RAMD, сервисный байтовый ABI и устанавливаемые CP/M и R4."""
+"""Встроенный блочный RAMD, выбор окна и архивные CP/M и R4."""
 from pathlib import Path
 import argparse,json,re,runpy
 
@@ -16,6 +16,8 @@ def symbols(name):
  return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/f'bin/{name}.sym').read_text(),re.M)}
 
 d,n,r=[symbols(name) for name in ['DOS','NC','RAMDISK']]
+if 'bios_setRAMDDriver' not in d:
+ parser.error('Проверка R3/R4 требует архивного BIOS с селектором окна RAMD.')
 driverLabel='CPM16' if r.get('RAMD_USE_CPM',0) else 'R4'
 Base=globals_['Bench'];stages=[];cold=True
 targets={d[name]:name for name in ['reboot3_1','fileExec','skipFormat','reboot3_2']}
@@ -79,20 +81,14 @@ try:
  assert any(row.get('window')=='builtin-block' for row in stages)
  user=r['driverBufferedStart']
  select(d['RAMD_DRIVER_USER']);window(user)
- select(d['RAMD_DRIVER_BYTE']);window(d['driverByteStart'])
- saved=m.func(d['bios_RAMDRead'],af=0x0200,hl=0x1234)['registers']['bc']['dec']&255
- m.func(d['bios_RAMDWrite'],af=0x0200,bc=0x5A,hl=0x1234)
- assert m.func(d['bios_RAMDRead'],af=0x0200,hl=0x1234)['registers']['bc']['dec']&255==0x5A
- m.func(d['bios_RAMDWrite'],af=0x0200,bc=saved,hl=0x1234)
  select(d['RAMD_DRIVER_BLOCK']);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_RESTORE']);window(user)
- report['checks'].append('byte access and explicit block selection preserve registered user driver; all selector registers/flags preserved')
+ report['checks'].append('explicit block selection preserve registered user driver; all selector registers/flags preserved')
  # Для испытания встроенного физического пути заменяем только регистрацию B:.
  assert not m.func(d['bios_installDriver'],af=0x0100,hl=d['diskDriver'])['flags']['C']
  select(d['RAMD_DRIVER_BLOCK']);m.select(1);io('R3')
  # REGISTER не устанавливает окно, USER/RESTORE применяют новый шаблон.
  select(d['RAMD_DRIVER_REGISTER'],d['driverBlockStart']);window(d['driverBlockStart'])
- select(d['RAMD_DRIVER_BYTE']);window(d['driverByteStart'])
  select(d['RAMD_DRIVER_USER']);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_REGISTER'],user);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_RESTORE']);window(user)

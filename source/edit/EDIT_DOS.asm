@@ -1,6 +1,6 @@
 ; Одноразовый загрузчик банкового редактора в свободном участке DOS.
-    INCLUDE "../include/mxos.inc"
-    INCLUDE "../include/version.inc"
+    INCLUDE "../common/system.inc"
+    INCLUDE "../common/version.inc"
     IFNDEF DRIVER_ORIGIN
 DRIVER_ORIGIN = 0
     ENDIF
@@ -69,7 +69,8 @@ error:          DB 'EDIT ',EDIT_VERSION,'.',EDIT_REVISION,'.',VERSION_BUILD,' BA
 prompt:         DB 13,10,'Press Enter to return.',13,10,0
 coreHandle:     DW 0
 registers:      DS MX_REGS,0
-    INCLUDE "../include/app-drive.inc"
+    DEFINE APP_COMMAND_ADDR DOS_BANK_CMD_ADDR
+    INCLUDE "../../sdk/asm/lib/app-drive.inc"
     RELOCATE_END
 IMAGE_BODY_SIZE     = $-entry
 IMAGE_BSS_SIZE      = 0

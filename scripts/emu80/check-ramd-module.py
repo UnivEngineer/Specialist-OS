@@ -1,4 +1,4 @@
-"""RAMDISK.COM и встроенный байтовый обмен; только изолированный Emu80-flash-test."""
+"""Архивный RAMDISK.COM и регистрация драйвера; только изолированный Emu80-flash-test."""
 import argparse
 import hashlib
 import json
@@ -31,6 +31,8 @@ def main():
         capture_output=True,text=True,check=True).stdout.strip()
     assert Path(listener).resolve()==(args.runtime/'Emu80qt-mcp.exe').resolve()
     ds=symbols(ROOT/'bin/DOS.sym');rs=symbols(ROOT/'bin/RAMDISK.sym');ns=symbols(ROOT/'bin/NC.sym')
+    if 'bios_setRAMDDriver' not in ds:
+        p.error('Проверка R4 требует архивного BIOS с селектором окна RAMD.')
     m=Bench('http://127.0.0.1:19781/mcp')
     m.call('debug_break');m.write(0xC000,(ROOT/'bin/DOS.sys').read_bytes())
     m.stop_at(ns['mainLoop'])
@@ -45,7 +47,7 @@ def main():
         assert not sub(0xC842,af=drive<<8,de=1)['flags']['C']
 
     def description():
-        s=sub(0xC863,bc=0xFF00)
+        s=sub(ds['bios_diskDriver'],bc=0xFF00)
         assert not s['flags']['C'] and s['registers']['bc']['dec']==0x5203
         return m.read(s['registers']['hl']['dec'],40).split(b'\0')[:2]
 
@@ -65,7 +67,7 @@ def main():
                     if mode==2:m.write(buf,bytes(256))
                     m.stop_at(0x8100)
                     before=m.call('cpu_state')['cpu_ticks']
-                    s=m.subroutine(0xC863,af=0x5A02,bc=mode*256+0xA7,de=sector,hl=buf)
+                    s=m.subroutine(ds['bios_diskDriver'],af=0x5A02,bc=mode*256+0xA7,de=sector,hl=buf)
                     assert not s['flags']['C'] and s['registers']['af']['dec']>>8==0x5A
                     assert all(s['registers'][k]['dec']==v for k,v in
                         dict(bc=mode*256+0xA7,de=sector,hl=buf,sp=0x8F00).items())
@@ -74,8 +76,8 @@ def main():
                         report['cycles'][label][str(mode)]=s['cpu_ticks']-before-27
         for sector,buf in [(0xFF,0x4001),(0xFFF,0x4001),(0x1000,0x4001),(0x100,0xFE01)]:
             for mode in [1,2]:
-                assert sub(0xC863,bc=mode*256,de=sector,hl=buf)['flags']['C']
-        assert sub(0xC863,bc=0x0400,de=0x100,hl=0x4001)['flags']['C']
+                assert sub(ds['bios_diskDriver'],bc=mode*256,de=sector,hl=buf)['flags']['C']
+        assert sub(ds['bios_diskDriver'],bc=0x0400,de=0x100,hl=0x4001)['flags']['C']
         report['checks'].append(label+': read/write boundaries, guards, registers, invalid arguments')
         print(label,'I/O OK',flush=True)
 
@@ -83,8 +85,8 @@ def main():
     assert description()==[b'RAMD',b'R4 BANKED']
     report['checks'].append('stock AUTOEXEC installs R4 before NC')
     # Для сравнения явно возвращаем встроенный R3 после обычной загрузки.
-    sub(0xC860,af=0x0100,hl=ds['diskDriver'])
-    sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)
+    sub(ds['bios_installDriver'],af=0x0100,hl=ds['diskDriver'])
+    sub(ds['bios_setRAMDDriver'],bc=0x0200,hl=ds['driverBlockStart']);sub(ds['bios_setRAMDDriver'],bc=0)
     assert description()==[b'RAMD',b'R3']
     assert int.from_bytes(m.read(ds['v_drives']+2,2),'little')==ds['diskDriver']
     check_io('R3')
@@ -117,18 +119,6 @@ def main():
         return main,banks
 
     expected=tails()
-    # Переключение на сервисный ABI: метаданные страницы 0, за кодом и NC.
-    state=sub(0xC86F,af=0x5AD7,bc=0x01A7,de=0x1234,hl=0x5678)
-    assert all(state['registers'][k]['dec']==v for k,v in
-        dict(af=0x5AD7,bc=0x01A7,de=0x1234,hl=0x5678,sp=0x8F00).items())
-    saved=sub(0xFFC0,af=0,hl=0xFFBD)['registers']['bc']['dec']&255
-    sub(0xFFD0,af=0,bc=0x5A,hl=0xFFBD)
-    assert sub(0xFFC0,af=0,hl=0xFFBD)['registers']['bc']['dec']&255==0x5A
-    sub(0xFFD0,af=0,bc=saved,hl=0xFFBD)
-    sub(0xC86F,bc=0)
-    assert tails()==expected
-    report['checks'].append('service byte read/write, full register preservation, R4 restored')
-
     # Установка с B:, который уже активен. Проверяет немедленную регистрацию.
     module=(ROOT/'bin/RAMDISK.i80').read_bytes()
     desc=bytearray(32);desc[:11]=b'RAMDISK COM'
@@ -137,7 +127,7 @@ def main():
     m.write(0,packed);m.write(0x7000,desc)
     assert not sub(0xC845,hl=0x7000,de=0)['flags']['C']
     execute('B:RAMDISK.COM')
-    assert int.from_bytes(m.read(0xC864,2),'little')==rs['Driver']
+    assert int.from_bytes(m.read(ds['bios_diskDriver']+1,2),'little')==rs['Driver']
     assert description()==[b'RAMD',b'R4 BANKED']
     assert tails()==expected
     report['checks'].append('reinstall from active B: immediately updates C863h')
@@ -182,8 +172,8 @@ def main():
     report['checks'].append('missing RAM / flush failure leave installed driver and tails intact')
 
     # Восстанавливаем встроенный драйвер и проверяем файл через байтовый путь.
-    sub(0xC860,af=0x0100,hl=ds['diskDriver'])
-    sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)
+    sub(ds['bios_installDriver'],af=0x0100,hl=ds['diskDriver'])
+    sub(ds['bios_setRAMDDriver'],bc=0x0200,hl=ds['driverBlockStart']);sub(ds['bios_setRAMDDriver'],bc=0)
     assert description()==[b'RAMD',b'R3']
     m.write(0x7000,desc);m.write(0x4000,bytes(768))
     assert not sub(0xC848,hl=0x7000)['flags']['C'] and m.read(0x4000,768)==payload
@@ -199,8 +189,8 @@ def main():
     bs=symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
     for label in ['R3','R4 BANKED']:
         if label=='R3':
-            sub(0xC860,af=0x0100,hl=ds['diskDriver'])
-            sub(0xC86F,bc=0x0200,hl=ds['driverBlockStart']);sub(0xC86F,bc=0)
+            sub(ds['bios_installDriver'],af=0x0100,hl=ds['diskDriver'])
+            sub(ds['bios_setRAMDDriver'],bc=0x0200,hl=ds['driverBlockStart']);sub(ds['bios_setRAMDDriver'],bc=0)
         else:
             m.write(0,module);assert not sub(0)['flags']['C']
         m.write(0,(ROOT/'bin/DISKBEN.i80').read_bytes())

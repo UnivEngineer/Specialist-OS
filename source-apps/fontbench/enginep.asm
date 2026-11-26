@@ -1,5 +1,6 @@
 ; Preserved full post-row standalone engines; MAIN descriptor ABI.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS     = IMAGE_FLAG_MAIN
 PAGED_FONT_BASE = 02800h
 PAGED_PRE_BASE  = 03000h

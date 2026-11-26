@@ -32,7 +32,7 @@ if not a.run_build:
         options.extend(('--asm', str(ROOT / 'source/bootstrap' / source)))
     for product in ('BOOT.bin', 'sector.bin', 'boot-set.json'):
         options.extend(('--output', str(out / product)))
-    for name in ('source/bootstrap/splash.bin', 'scripts/build/build-boot-splash.py',
+    for name in ('sdk/asm/formats/font.inc', 'source/bootstrap/splash.bin', 'scripts/build/build-boot-splash.py',
                  'scripts/images/executable.py', 'scripts/images/cpu.py', 'assets/C-Flash-512k-MMX-System.txt',
                  'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/MEM.sys', 'bin/DOS.sys',
                  'bin/System.layout.json', 'bin/banked/TRANSPORT.sym', 'bin/banked/KERNEL.sym', 'bin/MEM.sym'):
@@ -52,7 +52,7 @@ assert io['bytes'] + io['bankBytes'] == (ROOT / 'bin/IO.sys').stat().st_size
 font=font_path.read_bytes()
 if font[:4]==b'\xcd MX':
  font=runpy.run_path(str(ROOT/'scripts/images/executable.py'))['decode'](font,'fnt').data
-abi_source=(ROOT/'source/include/mxos.inc').read_text(encoding='utf-8')
+abi_source=(ROOT/'sdk/asm/formats/font.inc').read_text(encoding='utf-8')
 font_version=int(re.search(r'^FONT_ENGINE_VERSION\s*=\s*(\d+)',abi_source,re.M).group(1))
 if len(font)<48 or font[32:37]!=b'FNT1'+bytes([font_version]) or int.from_bytes(font[40:42],'little')!=len(font):
  raise ValueError('Invalid boot font module descriptor')
@@ -98,12 +98,16 @@ with (out/'config.inc').open('a',encoding='utf-8') as f:
  f.write(f'BIOS_BOOT_LOAD_DOS = 0{int(symbols["biosLoadDosImage"],16):04X}h\n')
 ts=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/TRANSPORT.sym').read_text(),re.M))
 with (out/'config.inc').open('a',encoding='utf-8') as f:
- for alias,key in [('BIOS_CHECK_RAMD','checkRAMD'),('BIOS_PAGE_COUNT','bios_upper.ramPageCount'),('BIOS_BOOT_PAGES','biosBootPages'),('BIOS_BOOT_WARM','biosBootWarm'),('BIOS_BANKED','v_dosBanked'),('BIOS_DOS_READY','v_dosModuleReady')]:
+ for alias,key in [('BIOS_BOOT_PAGES','biosBootPages'),('BIOS_BOOT_WARM','biosBootWarm'),('BIOS_BANKED','v_dosBanked'),('BIOS_DOS_READY','v_dosModuleReady')]:
   f.write(f'{alias} = 0{int(symbols[key],16):04X}h\n')
  for alias,key in [('BANK_PAGE','bankPage'),('BANK_PAGE_COUNT','bankPageCount'),('BANK_SERVICE_SP','bankServiceSP'),('BANK_STACK_FLOOR','bankStackFloor')]:
   f.write(f'{alias} = 0{int(ts[key],16):04X}h\n')
 ks=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/KERNEL.sym').read_text(),re.M))
 with (out/'config.inc').open('a',encoding='utf-8') as f:
+ f.write(f'BOOT_KERNEL_BYTES = {len(module)}\n')
+ f.write(f'BOOT_KERNEL_END_LIMIT = 0{int(ks["DOS_CODE_END_MAX"],16):04X}h\n')
+ for alias,key in [('BOOT_WINDOW','BANK_WINDOW'),('BOOT_MAX_PAGES','RAMD_MAX_PAGE')]:
+  f.write(f'{alias} = 0{int(symbols[key],16):04X}h\n')
  f.write(f'BOOT_MEM_LOCAL_SYSTEM = 0{int(symbols["MEM_LOCAL_SYSTEM"],16):04X}h\n')
  f.write(f'BOOT_MEM_NEAR_COPY = 0{int(symbols["MEM_NEAR_COPY"],16):04X}h\n')
  f.write(f'BOOT_DOS_NEAR_COPY = 0{int(ks["memcpy_bc_hl"],16):04X}h\n')

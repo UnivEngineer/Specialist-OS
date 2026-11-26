@@ -5,7 +5,7 @@
 ; 2022-02-05 SpaceEnigneer
 ;----------------------------------------------------------------------------
 
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
     ORG 0

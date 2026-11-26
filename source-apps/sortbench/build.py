@@ -21,7 +21,7 @@ def main():
         if prepared:
             core = core.replace('    call bios_upperCase','    ; already normalized')
         (folder/f'{name}-core.inc').write_text(core,encoding='utf-8')
-        fixture = kernels.replace('@TIMING@',(ROOT/'source/include/timing-pit.inc').as_posix())
+        fixture = kernels.replace('@TIMING@',(ROOT/'sdk/asm/lib/timing-pit.inc').as_posix())
         fixture = fixture.replace('@CORE@',f'{name}-core.inc')
         (folder/f'{name}-kernels.inc').write_text(fixture,encoding='utf-8')
     output = ROOT/'bin'
@@ -36,7 +36,7 @@ if __name__=='__main__':
     python_build = runpy.run_path(str(ROOT / 'scripts/build/build_cache.py'))['python_build']
     sys.exit(python_build(__file__, 'SORTBEN', main,
                           asm=(HERE / 'SORTBEN.asm',), input_content=True,
-                          inputs=(HERE, 'source/include/timing-pit.inc', 'scripts/images/cpu.py'),
+                          inputs=(HERE, 'sdk/asm/lib/timing-pit.inc', 'scripts/images/cpu.py'),
                           exclude=(HERE / 'build',),
                           outputs=tuple(f'bin/SORTBEN.{ext}' for ext in ('cpu', 'i80', 'sym', 'lst')),
                           scan_outputs=(HERE / 'build',)))

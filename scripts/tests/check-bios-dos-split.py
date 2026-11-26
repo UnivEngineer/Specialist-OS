@@ -21,7 +21,7 @@ for line in (ROOT/'source/dos/entries.inc').read_text().splitlines():
 
 def run(memory,body):
  source=OUT/'call.asm'
- source.write_text(f' INCLUDE "{(ROOT/"source/include/mxos.inc").as_posix()}"\n ORG 02000h\n ld sp,STACK_ADDR\n'+body+'\n jp 02100h\n',encoding='utf-8')
+ source.write_text(f' INCLUDE "{(ROOT/"source/common/system.inc").as_posix()}"\n ORG 02000h\n ld sp,STACK_ADDR\n'+body+'\n jp 02100h\n',encoding='utf-8')
  subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080','--raw='+str(OUT/'call.bin'),str(source)],check=True,capture_output=True)
  code=(OUT/'call.bin').read_bytes();memory[0x2000:0x2000+len(code)]=code
  (OUT/'input.bin').write_bytes(memory)

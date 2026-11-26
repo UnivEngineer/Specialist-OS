@@ -1,5 +1,5 @@
 ; Нативное банковое приложение: локальные аргументы DE, завершение через RET.
-    INCLUDE "../../source/include/mxos.inc"
+    INCLUDE "../../source/common/system.inc"
 IMAGE_FLAGS = IMAGE_FLAG_BANK
     ORG 00100h
 

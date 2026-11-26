@@ -29,7 +29,7 @@ uiInputFieldPixels:
     ld a,0FFh
     jp uiFillRectPixels
 ; uiClearWindow only calculates a rectangle; use the same source as MAIN.
-    INCLUDE "../include/ui-clear-window.inc"
+    INCLUDE "../../sdk/asm/lib/ui-clear-window.inc"
 
     NC_GFX_STUB ncSaveBitmap,GFX_BITMAP_SAVE
     NC_GFX_STUB ncStoreBytes,GFX_STORE
