@@ -11,6 +11,80 @@ static void unlock(At29Flash& chip, uint64_t t) {
     pulse(chip, 0x2AAA, 0x55, t + 50);
     pulse(chip, 0x5555, 0xA0, t + 100);
 }
+static void disableSdp(At29Flash& chip, uint64_t time) {
+    pulse(chip, 0x5555, 0xAA, time);
+    pulse(chip, 0x2AAA, 0x55, time + 50);
+    pulse(chip, 0x5555, 0x80, time + 100);
+    pulse(chip, 0x5555, 0xAA, time + 150);
+    pulse(chip, 0x2AAA, 0x55, time + 200);
+    pulse(chip, 0x5555, 0x20, time + 250);
+}
+
+static void protectionTransitions(unsigned capacity) {
+    At29Flash chip(capacity);
+    unsigned dirtyPage = 0;
+    const unsigned first = 0x100, second = 0x200;
+    assert(!chip.protectedData());
+
+    unlock(chip, 0);
+    pulse(chip, first, 0x11, 150);
+    pulse(chip, second, 0x22, 200);
+    chip.advance(10351);
+    assert(!chip.protectedData() && !chip.takeDirtyPage(dirtyPage));
+    assert(chip.read(first, 10351) == 0xFF && chip.read(second, 10351) == 0xFF);
+
+    unlock(chip, 11000);
+    chip.advance(11252); // Команда истекла до загрузки данных.
+    assert(!chip.protectedData() && !chip.takeDirtyPage(dirtyPage));
+
+    unlock(chip, 12000);
+    pulse(chip, first, 0x33, 12150);
+    chip.advance(22300);
+    assert(chip.busy() && !chip.protectedData() && !chip.takeDirtyPage(dirtyPage));
+    chip.advance(22301);
+    assert(!chip.busy() && chip.protectedData());
+    assert(chip.takeDirtyPage(dirtyPage) && dirtyPage == first);
+
+    pulse(chip, second, 0x44, 23000);
+    assert(chip.busy());
+    chip.advance(33151);
+    assert(chip.protectedData() && !chip.takeDirtyPage(dirtyPage));
+    assert(chip.read(first, 33151) == 0x33 && chip.read(second, 33151) == 0xFF);
+
+    disableSdp(chip, 34000);
+    pulse(chip, first, 0x55, 34300);
+    pulse(chip, second, 0x66, 34350);
+    chip.advance(44501);
+    assert(chip.protectedData() && !chip.takeDirtyPage(dirtyPage));
+    assert(chip.read(first, 44501) == 0x33 && chip.read(second, 44501) == 0xFF);
+
+    disableSdp(chip, 45000);
+    pulse(chip, second, 0x77, 45300);
+    chip.advance(55450);
+    assert(chip.busy() && chip.protectedData() && !chip.takeDirtyPage(dirtyPage));
+    chip.advance(55451);
+    assert(!chip.busy() && !chip.protectedData());
+    assert(chip.takeDirtyPage(dirtyPage) && dirtyPage == second);
+
+    pulse(chip, first, 0x88, 56000);
+    chip.advance(66151);
+    assert(!chip.protectedData() && chip.read(first, 66151) == 0x88);
+    assert(chip.takeDirtyPage(dirtyPage) && dirtyPage == first);
+
+    unlock(chip, 67000);
+    // Время проверяется по спаду /WE даже при вызове advance до подъёма.
+    chip.beginWrite(first, 67251);
+    chip.advance(67255);
+    chip.endWrite(0x99, 67260);
+    chip.advance(67410);
+    chip.beginWrite(first + 1, 67410);
+    chip.advance(67415);
+    chip.endWrite(0xAA, 67420);
+    chip.advance(77570);
+    assert(chip.protectedData() && chip.takeDirtyPage(dirtyPage) && dirtyPage == first);
+    assert(chip.read(first, 77570) == 0x99 && chip.read(first + 1, 77570) == 0xAA);
+}
+
 static void geometry(unsigned capacity, unsigned pageSize, uint8_t id) {
     At29Flash chip(capacity);
     assert(chip.bytes().size() == capacity && chip.pageSize() == pageSize);
@@ -45,6 +119,9 @@ static void geometry(unsigned capacity, unsigned pageSize, uint8_t id) {
 }
 
 int main() {
+    protectionTransitions(128 * 1024);
+    protectionTransitions(256 * 1024);
+    protectionTransitions(512 * 1024);
     geometry(128 * 1024, 128, 0xD5);
     geometry(256 * 1024, 256, 0xDA);
     geometry(512 * 1024, 256, 0xA4);
@@ -97,12 +174,8 @@ int main() {
     pulse(b, 0x5555, 0xF0, 12300);
     assert(b.read(0x10, 12301) == 0x12);
     // SDP disable применяется после программирования и сохраняет данные.
-    uint64_t t = 80000;
-    for (const auto& item : {std::array<unsigned, 2>{{0x5555, 0xAA}}, {{0x2AAA, 0x55}},
-                             {{0x5555, 0x80}}, {{0x5555, 0xAA}}, {{0x2AAA, 0x55}}, {{0x5555, 0x20}}}) {
-        pulse(a, item[0], item[1], t); t += 50;
-    }
-    pulse(a, 0x300, 0x5A, t);
+    disableSdp(a, 80000);
+    pulse(a, 0x300, 0x5A, 80300);
     a.advance(92000);
     assert(!a.protectedData() && a.read(0x300, 92000) == 0x5A);
     pulse(a, 0x300, 0xA5, 93000);

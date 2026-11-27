@@ -14,7 +14,8 @@ At29Flash::At29Flash(unsigned capacity) : m_bytes(capacity, 0xFF),
 }
 
 void At29Flash::advance(uint64_t now) {
-    if (m_loading && !m_pulse && now >= m_deadline) {
+    // Спад /WE на границе tBLC ещё относится к текущей загрузке.
+    if (m_loading && !m_pulse && now > m_deadline) {
         m_loading = false;
         m_programming = true;
         m_finish = m_deadline + 10000; // tWC: моделируем предельные 10 мс.
@@ -22,24 +23,24 @@ void At29Flash::advance(uint64_t now) {
     if (m_programming && now >= m_finish) {
         if (!m_discard) {
             std::copy(m_page.begin(), m_page.begin() + m_pageSize, m_bytes.begin() + m_pageBase);
+            // SDP меняется вместе с сектором по завершении командного цикла.
+            if (m_authorized) m_protected = !m_disableProtection;
             m_dirty = true;
         }
-        if (m_enableProtection) m_protected = true;
-        if (m_disableProtection) m_protected = false;
-        m_programming = m_authorized = m_enableProtection = m_disableProtection = false;
+        m_programming = m_authorized = m_disableProtection = false;
         m_sequence = 0;
     }
-    if (!m_loading && !m_programming && m_sequence && now > m_commandDeadline)
+    if (!m_pulse && !m_loading && !m_programming && now > m_commandDeadline) {
         m_sequence = 0;
-    if (!m_loading && !m_programming && m_authorized && now > m_commandDeadline) {
-        m_authorized = m_enableProtection = m_disableProtection = false;
-        ++m_errors;
+        if (m_authorized) {
+            m_authorized = m_disableProtection = false;
+            ++m_errors;
+        }
     }
 }
 
 void At29Flash::beginWrite(unsigned address, uint64_t now) {
-    // Спад /WE ровно через tBLC ещё принадлежит текущей загрузке.
-    if (!(m_loading && !m_pulse && now == m_deadline)) advance(now);
+    advance(now);
     m_address = address & (static_cast<unsigned>(m_bytes.size()) - 1);
     m_acceptPulse = !m_programming;
     m_pulse = true;
@@ -75,7 +76,7 @@ void At29Flash::commandByte(unsigned address, uint8_t value, uint64_t now) {
     else if (m_sequence == 1 && commandAddress == 0x2AAA && value == 0x55) m_sequence = 2;
     else if (m_sequence == 2 && commandAddress == 0x5555) {
         m_sequence = 0;
-        if (value == 0xA0) { m_authorized = true; m_enableProtection = true; }
+        if (value == 0xA0) m_authorized = true;
         else if (value == 0x80) m_sequence = 3;
         else if (value == 0x90) m_identification = true;
         else if (value == 0xF0) m_identification = false;

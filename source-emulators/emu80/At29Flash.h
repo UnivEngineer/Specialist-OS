@@ -36,6 +36,6 @@ private:
     uint8_t m_lastData = 0xFF;
     bool m_loading = false, m_programming = false, m_pulse = false;
     bool m_acceptPulse = false, m_protected = false, m_authorized = false;
-    bool m_enableProtection = false, m_disableProtection = false;
+    bool m_disableProtection = false;
     bool m_discard = false, m_identification = false, m_toggle = false, m_dirty = false;
 };
