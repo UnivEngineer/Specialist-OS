@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse,json,re,runpy,struct,subprocess,os
 R=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19785),default=19782);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17/queue');a=p.parse_args();O=a.out.resolve();O.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19797),default=19782);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17/queue');a=p.parse_args();O=a.out.resolve();O.mkdir(parents=True,exist_ok=True)
 sy=lambda f:{n:int(v,16) for n,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',Path(f).read_text('utf-8'),re.M)}
 k=sy(R/'bin/banked/LOCALBLOCK.sym');t=sy(R/'bin/banked/TRANSPORT.sym');b=sy(R/'bin/BIOS.sym');dos=sy(R/'bin/banked/KERNEL.sym')
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__;g.update(OUT=O,RUNTIME=a.runtime.resolve());g['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue;if($p){{$p[0].OwningProcess}};exit 0')

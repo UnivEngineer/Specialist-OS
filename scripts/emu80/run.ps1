@@ -15,6 +15,7 @@ param(
     [switch] $ProtectSystemFlash,
     [switch] $Mcp,
     [switch] $Mute,
+    [ValidateRange(19781, 19796)] [int] $McpPort,
     [switch] $PassThru
 )
 
@@ -113,7 +114,10 @@ if (Test-Path -LiteralPath $marker) {
     $mx2Models = @($customBuild.sources | Where-Object { $_.path -eq 'SpecialistMx2VideoRam.cpp' }).Count -ne 0
 }
 # Не заменяем образы и профиль работающего экземпляра этой установки.
-$running = @(Get-Process -Name Emu80qt,Emu80qt-mcp -ErrorAction SilentlyContinue | Where-Object { $_.Path -and (Split-Path -Parent $_.Path) -eq $runtime })
+$running = @(Get-Process -Name Emu80qt,Emu80qt-mcp -ErrorAction SilentlyContinue | Where-Object {
+    $processPath = $_.Path
+    $processPath -and (Split-Path -Parent $processPath) -eq $runtime
+})
 if ($running.Count -ne 0) { throw 'Close this Emu80 instance before preparing or launching the profile.' }
 if ($hasFloppy) {
     try {
@@ -192,6 +196,7 @@ Write-Host "Prepared MXOS profile: $deployment"
 if (-not $PrepareOnly) {
     $windowStyle = if ($Hidden) { 'Hidden' } else { 'Normal' }
     $configName = 'specialist-os/launch.conf'
+    $previousMcpPort = $env:SPECIALIST_EMU80_MCP_PORT
     $previousPlatform = $env:QT_QPA_PLATFORM
     $previousPlugins = $env:QT_QPA_PLATFORM_PLUGIN_PATH
     try {
@@ -199,8 +204,10 @@ if (-not $PrepareOnly) {
             $env:QT_QPA_PLATFORM = 'offscreen'
             $env:QT_QPA_PLATFORM_PLUGIN_PATH = $platforms
         }
+        if ($McpPort) { $env:SPECIALIST_EMU80_MCP_PORT = [string]$McpPort }
         Start-Process -FilePath $executable -ArgumentList '--conf-file', $configName, '--platform', 'specialist-os' -WorkingDirectory $runtime -WindowStyle $windowStyle -PassThru:$PassThru
     } finally {
+        $env:SPECIALIST_EMU80_MCP_PORT = $previousMcpPort
         if ($Hidden) {
             $env:QT_QPA_PLATFORM = $previousPlatform
             $env:QT_QPA_PLATFORM_PLUGIN_PATH = $previousPlugins

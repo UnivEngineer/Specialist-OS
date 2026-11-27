@@ -52,7 +52,7 @@ def check_copy(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', required=True, type=int, choices=range(19781, 19785))
+    parser.add_argument('--port', required=True, type=int, choices=range(19781, 19797))
     parser.add_argument('--caller', choices=('MAIN', 'DOS', 'ALL'), default='MAIN')
     parser.add_argument('--access', choices=('RAW', 'FILE', 'ALL'), default='FILE')
     parser.add_argument('--drive', choices=('B','A'), default='A')

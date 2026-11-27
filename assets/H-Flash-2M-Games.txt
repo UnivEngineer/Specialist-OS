@@ -15,7 +15,7 @@
 #
 # Целевой формат задаёт расширение имени в первом столбце:
 #   COM/EXE: общий контейнер MXOS2 — заголовок 32 байта (загрузка, вход, размер, суммы) + нагрузка.
-#   Для игровых EXE режим RUN берётся из games/catalog.csv; нативный MAIN запускается через DOS.
+#   Игровые EXE получают MODE=RF для RAMFOS и MODE=MX для проверенных MX. По умолчанию MODE=AUTO; MAIN запускается через DOS.
 #   RKS: заголовок 4 байта + нагрузка + сумма 2 байта; через CLI.EXT запускается RUN, по умолчанию -MON.
 #   При RKS -> COM/EXE заголовок и сумма RKS заменяются контейнером MXOS2; результат не является RAW.
 #   При преобразовании в RKS адрес входа должен совпадать с адресом загрузки.
@@ -38,10 +38,10 @@ BldrDash/Almaz-2/Almaz2MN.rks games/families/almaz-2/builds/Almaz2-8color.rks
 BldrDash/DwnEarth.rks         games/std/DwnEarth.rks
 
 # Lode Runner, клоны и игры с подобной механикой
-LodeRun/BUDI/BUDI-STD.EXE     games/families/budi/patched/Budi-std.exe
+LodeRun/BUDI/BUDI-STD.RKS     games/families/budi/patched/Budi-std.exe
 LodeRun/BUDI/BUDI-RF.EXE      games/families/budi/patched/Budi-ramfos.exe
-LodeRun/BUDI/BUDI2STD.EXE     games/families/budi/patched/Budi2-std.exe
-LodeRun/BUDI/BUD2FFF8.EXE     games/families/budi/patched/Budi2-std-fff8.exe
+LodeRun/BUDI/BUDI2STD.RKS     games/families/budi/patched/Budi2-std.exe
+LodeRun/BUDI/BUD2FFF8.RKS     games/families/budi/patched/Budi2-std-fff8.exe
 LodeRun/LodeRun.RKS           games/std/LodeRun.rks
 LodeRun/LRunner.RKS           games/std/LRunner.rks
 LodeRun/ZOO.RKS               games/families/zoo/originals/Zoo-std.rks
@@ -54,12 +54,12 @@ Space3D/StarWars/StarWars.rks games/families/starwars/originals/StarWars-std.rks
 Space3D/StarWars/StarWar2.rks games/families/starwars/repacked/StarWars2-std.rks
 Space3D/StarWars/StarWar2.exe games/families/starwars/originals/StarWars2-mx.cpu
 Space3D/StarWars/SW2-RF.exe   games/families/starwars/repacked/StarWars2-ramfos.exe
-Space3D/Elite/Elite.exe       games/families/elite/originals/Elite-jcuken.rks
+Space3D/Elite/Elite.rks       games/families/elite/originals/Elite-jcuken.rks
 Space3D/Elite/Elite.txt       games/families/elite/manuals/Elite.txt
 
 # Буран и его вариации
-Buran/Buran.rks               games/families/buran/originals/Buran-std.rks
-Buran/Buran-SW.rks            games/families/buran/originals/Buran-starwars-std.rks
+Buran/Buran.rks               games/families/buran/originals/Buran-starwars-std.rks
+Buran/Buran2.rks              games/families/buran/originals/Buran-std.rks
 Buran/Buran-RF.exe            games/families/buran/repacked/Buran-ramfos.exe
 Buran/Buran-RF.bat            games/families/buran/repacked/Buran-ramfos.bat
 
@@ -70,7 +70,7 @@ Chess/CHESS2.RKS              games/std/Chess2.rks
 Chess/CHESS3.RKS              games/std/Chess3.rks
 
 ARCANOID.RKS                  games/std/Arcanoid.rks
-Ball.exe                      games/std/Ball.rks
+Ball.rks                      games/std/Ball.rks
 Ball.bat                      programs/Ball.bat
 BKT.RKS                       games/std/BKT.rks
 ADSKOK.RKS                    games/families/adskok/repaired/Adskok.rks
@@ -146,7 +146,7 @@ spatrol.rks                   games/std/SPatrol.rks
 SpKing.rks                    games/std/SpKing.rks
 SPKING2.RKS                   games/std/SpKing2.rks
 SQUARE.RKS                    games/std/Square.rks
-StarTrek.exe                  games/families/startrek/originals/StarTrek-std.rks
+StarTrek.rks                  games/families/startrek/originals/StarTrek-std.rks
 STENA.RKS                     games/std/Stena.rks
 STENA2.RKS                    games/std/Stena2.rks
 SUPPITON.RKS                  games/std/Suppiton.rks

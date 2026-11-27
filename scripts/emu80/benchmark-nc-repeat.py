@@ -13,7 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('phase', choices=['before', 'after'])
     parser.add_argument('--runtime', type=Path, required=True)
-    parser.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), required=True)
     parser.add_argument('--output', type=Path, default=OUT)
     parser.add_argument('--disk', type=Path, default=ROOT/'images/H-Flash-2M-Games.bin')
     parser.add_argument('--counters', action='store_true', help='Record syscall counters in a separate run')

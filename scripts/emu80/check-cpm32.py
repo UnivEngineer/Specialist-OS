@@ -1,5 +1,6 @@
 """CPM32 в собственном видимом Emu80: реальные EXEC/DATA/ROM, без bootstrap."""
 from pathlib import Path
+import os
 import argparse,json,re,runpy,struct,subprocess,time
 R=Path(__file__).resolve().parents[2];W=lambda n:struct.pack('<H',n)
 def sy(path):return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9a-fA-F]+)',path.read_text(),re.M)}
@@ -9,7 +10,7 @@ def main():
  assert not owner.stdout.strip(),'Port is owned; no emulator started'
  launch=(a.runtime/'specialist-os/launch.conf').read_text();assert 'pitSoundSource.muted = yes' in launch and 'tapeMonitor.muted = yes' in launch
  B=runpy.run_path(str(R/'source-apps/diskbench/check-emulator.py'))['Bench'];m=B(f'http://127.0.0.1:{a.port}/mcp');rows=[]
- process=subprocess.Popen([str(a.runtime/'Emu80qt-mcp.exe'),'--conf-file','specialist-os/launch.conf','--platform','specialist-os'],cwd=a.runtime)
+ process=subprocess.Popen([str(a.runtime/'Emu80qt-mcp.exe'),'--conf-file','specialist-os/launch.conf','--platform','specialist-os'],cwd=a.runtime,env=dict(os.environ,SPECIALIST_EMU80_MCP_PORT=str(a.port)))
  try:
   for _ in range(60):
    try:m.call('debug_break');break

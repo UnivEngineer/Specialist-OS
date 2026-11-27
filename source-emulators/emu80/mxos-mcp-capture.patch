@@ -1,0 +1,128 @@
+--- a/src/mcp/McpServer.h
++++ b/src/mcp/McpServer.h
+@@ -29,4 +29,6 @@
+         std::unique_ptr<Impl> m_pImpl;
+ };
+ 
++void mcpCaptureMxSample(int value);
++
+ extern CMcpServer g_McpServer;
+--- a/src/Specialist.cpp
++++ b/src/Specialist.cpp
+@@ -30,6 +30,9 @@
+ #include "AddrSpace.h"
+ #include "Fdc1793.h"
+ #include "SoundMixer.h"
++#ifdef MCP_SERVER
++#include "mcp/McpServer.h"
++#endif
+ #include "WavReader.h"
+ #include "Cpu.h"
+ #include "Pit8253.h"
+@@ -1414,6 +1417,9 @@
+     m_sumClocksTotal = 0;
+     m_sumClocksHi = 0;
+ 
++#ifdef MCP_SERVER
++    mcpCaptureMxSample(res);
++#endif
+     return res;
+ }
+ 
+--- a/src/mcp/McpServer.cpp
++++ b/src/mcp/McpServer.cpp
+@@ -714,6 +714,57 @@
+     // ================================================================
+     // Tool: screen
+     // ================================================================
++    // Выход ВИ53 до выключения звука. Доступ только в потоке эмуляции.
++    std::vector<uint8_t> mxAudioPcm;
++    int mxAudioRate = 0;
++    bool mxAudioActive = false;
++    bool mxAudioTruncated = false;
++
++    json Tool_MxAudio(const json& args)
++    {
++        const std::string action = args.at("action").get<std::string>();
++        json result;
++        std::string error;
++        const bool ok = mcp::Run([&] {
++            if (action == "start") {
++                if (mxAudioActive || g_emulation->getSpeedUpFactor() != 1.0 ||
++                    g_emulation->getFullThrottleState()) {
++                    error = "start requires normal speed and an idle recorder";
++                    return;
++                }
++                mxAudioPcm.clear();
++                mxAudioRate = g_emulation->getSampleRate();
++                mxAudioActive = true;
++                mxAudioTruncated = false;
++                result = { {"rate", mxAudioRate} };
++            } else if (action == "stop" && mxAudioActive) {
++                mxAudioActive = false;
++                result = { {"rate", mxAudioRate}, {"samples", mxAudioPcm.size() / 2},
++                           {"truncated", mxAudioTruncated}, {"pcm_base64", Base64(mxAudioPcm.data(), mxAudioPcm.size())} };
++            } else {
++                error = "invalid audio action or no active recorder";
++            }
++        });
++        if (!ok) throw std::runtime_error("emulator main thread is not ready");
++        if (!error.empty()) throw std::runtime_error(error);
++        return result;
++    }
++
++    json Tool_EmuSpeed(const json& args)
++    {
++        const int factor = args.at("factor").get<int>();
++        if (factor < 1 || factor > 32)
++            throw std::runtime_error("factor must be in 1..32");
++        bool busy = false;
++        const bool ok = mcp::Run([&] {
++            busy = mxAudioActive || g_emulation->getFullThrottleState();
++            if (!busy) g_emulation->setTemporarySpeedUpFactor(factor);
++        });
++        if (!ok) throw std::runtime_error("emulator main thread is not ready");
++        if (busy) throw std::runtime_error("speed unavailable during audio capture or full throttle");
++        return json{ {"factor", factor} };
++    }
++
+     json Tool_Screen(const json& /*args*/)
+     {
+         std::string b64;
+@@ -2037,6 +2088,18 @@
+         });
+ 
+         tools.push_back({
++            "emu_speed", "Set this machine's fixed emulation speed.",
++            json{ {"type", "object"}, {"properties", { {"factor", { {"type", "integer"}, {"minimum", 1}, {"maximum", 32} }} }},
++                  {"required", json::array({"factor"})} }, &Tool_EmuSpeed
++        });
++
++        tools.push_back({
++            "mx_audio", "Start or stop up to two seconds of MX speaker PCM before host mute, at 1x. Returns s16le mono.",
++            json{ {"type", "object"}, {"properties", { {"action", { {"type", "string"}, {"enum", json::array({"start", "stop"})} }} }},
++                  {"required", json::array({"action"})} }, &Tool_MxAudio
++        });
++
++        tools.push_back({
+             "screen",
+             "Capture the current display as a PNG image at native resolution. "
+             "Returns MCP image content block.",
+@@ -2446,6 +2509,17 @@
+         return RpcError(id, -32601, "Method not found: " + method);
+     }
+ };
++
++void mcpCaptureMxSample(int value)
++{
++    if (!mxAudioActive) return;
++    if (mxAudioPcm.size() >= static_cast<size_t>(mxAudioRate) * 4) {
++        mxAudioTruncated = true;
++        return;
++    }
++    mxAudioPcm.push_back(static_cast<uint8_t>(value));
++    mxAudioPcm.push_back(static_cast<uint8_t>(value >> 8));
++}
+ 
+ CMcpServer::CMcpServer() : m_pImpl(std::make_unique<Impl>()) {}
+ CMcpServer::~CMcpServer() { Stop(); }

@@ -4,7 +4,7 @@ import argparse,json,runpy,urllib.request
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--runtime',type=Path,default=R/'.local/monitor2-001')
-p.add_argument('--port',type=int,choices=range(19781,19785),default=19781)
+p.add_argument('--port',type=int,choices=range(19781,19797),default=19781)
 a=p.parse_args();O=R/'.local/cpu-descriptor-check';O.mkdir(parents=True,exist_ok=True)
 h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));g=h['Matrix'].__init__.__globals__
 g.update(OUT=O,RUNTIME=a.runtime.resolve())

@@ -48,7 +48,7 @@ try:
   assert int.from_bytes(m.read(d['v_drives']+14,2),'little')==d['DISK_DRIVER_ADDR']==0xE800
  # Реальная игра BALL: 5040 байт с 0000h, ниже временного DOS 4000h.
  for mode in ([] if '--files-only' in sys.argv else ['MX','STD','MON']):
-  command('H:/Ball.bat' if mode=='MX' else 'RUN -'+mode+' H:/Ball.exe',r['ready'])
+  command('H:/Ball.bat' if mode=='MX' else 'RUN -'+mode+' H:/Ball.rks',r['ready'])
   m.stop_at(0);m.until(0,40)
   assert m.read(0,32)==(ROOT/'assets/games/std/Ball.rks').read_bytes()[4:36]
   if mode in ['MX','STD']:assert m.read(d['bios_upper.koi7'],1)==b'\xff'

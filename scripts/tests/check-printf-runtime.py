@@ -204,7 +204,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, required=True,
                         help='Шаблон Emu80 MCP с фиксированной скоростью 32x и Qt offscreen')
-    parser.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), required=True)
     parser.add_argument('--z88dk', type=Path, default=Path(os.environ.get('SPECIALIST_Z88DK_DIR',
                         'D:/Projects/RetroPC/Specialist/MySoft/z88dk')))
     args = parser.parse_args()

@@ -14,7 +14,7 @@ FONT_PATHS = {'Rotate':'6x8/Rotate','Cpm4':'4x8/Packed','Fast8':'8x8/Rotate'}
 
 def main():
     parser=argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--port',type=int,choices=range(19781,19785),default=19781)
+    parser.add_argument('--port',type=int,choices=range(19781,19797),default=19781)
     parser.add_argument('--runtime',type=Path,default=ROOT/'.local/nc-sort-benchmark-runtime')
     parser.add_argument('--startup-font',choices=('Cpm4','Rotate','Fast8'))
     args,_=parser.parse_known_args()
@@ -36,7 +36,7 @@ def main():
                 raise RuntimeError('MCP port belongs to another emulator')
             helpers['command'](['powershell.exe', '-NoProfile', '-File',
                 ROOT / 'scripts/emu80/run.ps1', '-EmulatorDirectory', runtime,
-                '-Flash', '-Mcp', '-Mute'] + ([] if '--keep-system' in sys.argv else ['-UpdateSystemFlash']))
+                '-Flash', '-Mcp', '-McpPort', str(args.port), '-Mute'] + ([] if '--keep-system' in sys.argv else ['-UpdateSystemFlash']))
             pid = helpers['shell']("$p=Get-Process Emu80qt-mcp -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq " +
                 helpers['ps'](runtime / 'Emu80qt-mcp.exe') + " }; $p.Id")
             machine.pid = int(pid)

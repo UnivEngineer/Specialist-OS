@@ -61,7 +61,7 @@
 | RF-037 | `Wertole..EXE` | `strong-candidate` | C63Eh | `Soft/Lafan/bst_mx0/Games/Gam1/Wertole..EXE` |
 | RF-038 | `ZOO_.I80` | `strong-candidate` | C84Eh, C851h; C63Eh | `Soft/games_mx_i80/ZOO_.I80` |
 | RF-039 | `[ahmaty2.EXE` | `strong-candidate` | C80Fh, C84Bh; символ в A → C80Fh | `Soft/Lafan/LafanG1/GameMX4/[ahmaty2.EXE` |
-| RF-040 | `Buran-ramfos.exe` | `user-tested-issues` | C80Fh; C63Eh; символ в A → C80Fh | `{repo}/assets/games/families/buran/repacked/Buran-ramfos.exe` |
+| RF-040 | `Buran-ramfos.exe` | `user-tested` | C80Fh; C63Eh; в RUN -RF подтверждён пуск по Up | `{repo}/assets/games/families/buran/repacked/Buran-ramfos.exe` |
 | RF-041 | `StarWars2-ramfos.exe` | `user-tested-issues` | C84Bh; C63Eh | `{repo}/assets/games/families/starwars/repacked/StarWars2-ramfos.exe` |
 | RF-042 | `30.rks` | `weak-candidate` | C836h | `Soft/games_rks/30.rks` |
 | RF-043 | `Boulder2.COM` | `weak-candidate` | C84Eh | `Soft/Lafan/LafanG2/GameMX1/Boulder2.COM` |

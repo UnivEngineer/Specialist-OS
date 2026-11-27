@@ -1,5 +1,6 @@
 """GET/PUT8/16 через COMMAND: реальные MAIN/EXEC/DOS/DATA."""
 from pathlib import Path
+import os
 import argparse, itertools, json, re, runpy, struct, subprocess, time
 R=Path(__file__).resolve().parents[2]
 W=lambda n:struct.pack('<H',n)
@@ -18,7 +19,7 @@ def main():
     m=Bench(f'http://127.0.0.1:{a.port}/mcp');ts=symbols(R/'bin/banked/TRANSPORT.sym')
     image=(R/'bin/MEM.sys').read_bytes();parts=[struct.unpack_from('<HHH',image,6+i*6) for i in range(image[5])]
     rows=[]
-    process=subprocess.Popen([str(a.runtime/'Emu80qt-mcp.exe'),'--conf-file','specialist-os/launch.conf','--platform','specialist-os'],cwd=a.runtime)
+    process=subprocess.Popen([str(a.runtime/'Emu80qt-mcp.exe'),'--conf-file','specialist-os/launch.conf','--platform','specialist-os'],cwd=a.runtime,env=dict(os.environ,SPECIALIST_EMU80_MCP_PORT=str(a.port)))
     try:
         for _ in range(60):
             try:m.call('debug_break');break

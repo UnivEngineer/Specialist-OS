@@ -256,7 +256,7 @@ def main():
  global RUNTIME,PORT
  parser=argparse.ArgumentParser(description=__doc__)
  parser.add_argument('--runtime',type=Path,default=RUNTIME)
- parser.add_argument('--port',type=int,choices=range(19781,19785),default=PORT)
+ parser.add_argument('--port',type=int,choices=range(19781,19797),default=PORT)
  parser.add_argument('--resume',action='store_true',help='Continue incomplete rows from this frozen build')
  parser.add_argument('--refresh',action='store_true',help='Build OS/image and freeze current outputs before measuring')
  parser.add_argument('--verify-only',action='store_true',help='Check frozen image against binaries; no emulator')

@@ -29,7 +29,7 @@ BIOS_VECTORS = {
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', required=True, type=Path)
-    parser.add_argument('--port', required=True, type=int, choices=range(19781, 19785))
+    parser.add_argument('--port', required=True, type=int, choices=range(19781, 19797))
     parser.add_argument('--out', required=True, type=Path)
     parser.add_argument('--quick', action='store_true', help='Контрольные строки COMMAND из EXEC')
     parser.add_argument('--audit-only', action='store_true', help='Счётчики и стеки с минимумом точек останова')

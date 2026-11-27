@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--runtime', type=Path)
-parser.add_argument('--port', type=int, choices=range(19781, 19785), default=19782)
+parser.add_argument('--port', type=int, choices=range(19781, 19797), default=19782)
 parser.add_argument('--report', type=Path, default=ROOT / 'docs/bench/text-current')
 args = parser.parse_args()
 runtime = args.runtime or Path(os.environ['LOCALAPPDATA']) / 'Specialist-OS/emu80' / str(args.port)

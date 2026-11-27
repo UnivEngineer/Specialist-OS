@@ -1,42 +1,63 @@
 """Короткий запуск библиотеки без ввода в изолированном Emu80.
 
-Нужен отдельный runtime .local/monitor-compat-001 с MCP localhost:19781.
+Нужен отдельный ROM-runtime .local/monitor-compat-001 или monitor-compat-001-<порт>.
 Это проверка старта и наблюдение зависимостей, не функциональная приёмка игр.
 """
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
+import msvcrt
 from pathlib import Path
 import runpy
-import subprocess
+
+import psutil
 
 ROOT = Path(__file__).resolve().parents[2]
 Machine = runpy.run_path(str(ROOT / 'scripts/emu80/check-flash.py'))['Machine']
 audit = runpy.run_path(str(ROOT / 'scripts/games/audit-mxos-compat.py'))
 
 
+class OwnedMachine(Machine):
+    def __init__(self, port, runtime):
+        listeners = {(c.laddr.ip,c.pid) for c in psutil.net_connections(kind="tcp")
+                     if c.status==psutil.CONN_LISTEN and c.laddr.port==port}
+        if len(listeners)!=1:
+            raise ValueError(f'Нет единственного владельца MCP {port}')
+        ip, pid = listeners.pop()
+        self.process = psutil.Process(pid)
+        if ip!="127.0.0.1" or Path(self.process.exe())!=runtime/'Emu80qt-mcp.exe':
+            raise ValueError(f'MCP {port} принадлежит другой установке')
+        super().__init__(f'http://127.0.0.1:{port}/mcp')
+
+    def call(self, name, **args):
+        if not self.process.is_running():
+            raise ConnectionError("Владелец ROM-экземпляра завершился")
+        return super().call(name,**args)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, required=True)
+    parser.add_argument('--port', type=int, choices=range(19781,19797), default=19781)
+    parser.add_argument('--output', type=Path)
     parser.add_argument('--limit', type=int)
     parser.add_argument('--ms', type=int, default=250)
     args = parser.parse_args()
     runtime = args.runtime.resolve()
-    if runtime != ROOT / '.local/monitor-compat-001':
-        raise ValueError('Разрешена только изолированная monitor-compat-001')
+    if runtime not in (ROOT/'.local/monitor-compat-001', ROOT/'.local'/f'monitor-compat-001-{args.port}'):
+        raise ValueError('Укажите изолированный ROM-runtime для данного порта')
+    with (runtime/'smoke.lock').open('a+b') as lock:
+        lock.seek(0)
+        msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK,1)
+        run(args,runtime)
+
+
+def run(args,runtime):
     image = (runtime / 'specialist-os/system.bin').read_bytes()
     if image != (ROOT / 'images/C-ROM-64k-MMX-System-Emu80.bin').read_bytes():
         raise ValueError('Образ тестовой машины отличается от текущей сборки')
-    # До любых записей убедиться, что единственный слушатель — наш экземпляр.
-    command = "$ErrorActionPreference='Stop'; @(Get-NetTCPConnection -State Listen -LocalPort 19781 | ForEach-Object { (Get-CimInstance Win32_Process -Filter ('ProcessId = '+$_.OwningProcess)).ExecutablePath }) | ConvertTo-Json -Compress"
-    answer = subprocess.run(['powershell.exe', '-NoProfile', '-Command', command],
-                            check=True, capture_output=True, text=True).stdout
-    owners = json.loads(answer)
-    owners = [owners] if isinstance(owners, str) else owners
-    expected = str(runtime / 'Emu80qt-mcp.exe').lower()
-    if len(owners) != 1 or owners[0].lower() != expected:
-        raise ValueError(f'MCP принадлежит другой установке: {owners}')
-    m = Machine('http://127.0.0.1:19781/mcp')
+    m = OwnedMachine(args.port,runtime)
     m.call('debug_break')
     m.call('bp_clear')
     m.call('emu_reset')
@@ -115,8 +136,9 @@ def main():
     m.call('emu_reset')
     m.call('emu_run_for', ms=1500)
     m.call('debug_break')
-    output = ROOT / 'docs/compat/monitor-001-smoke.json'
-    report = {'experiment':'monitor-001', 'date':'2026-10-31',
+    output = args.output or ROOT/'docs/compat'/('monitor-001-smoke.json' if args.port==19781 else f'monitor-001-smoke-{args.port}.json')
+    output.parent.mkdir(parents=True,exist_ok=True)
+    report = {'experiment':'monitor-001', 'date':datetime.now(timezone.utc).date().isoformat(), 'port':args.port,
               'method':'Emu80 8080, explicit RAM mapping and full payload readback, isolated ROM profile, no keyboard input',
               'limits':['250 ms is not a functional test; breakpoints may stop earlier.',
                         'No games declared compatible solely from this smoke test.'],

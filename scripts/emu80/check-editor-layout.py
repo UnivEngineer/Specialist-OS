@@ -6,7 +6,7 @@ R=Path(__file__).resolve().parents[2]
 O=R/'.local/editor-ui-check';O.mkdir(exist_ok=True)
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782')
-p.add_argument('--port',type=int,choices=range(19781,19785),default=19782)
+p.add_argument('--port',type=int,choices=range(19781,19797),default=19782)
 p.add_argument('--scroll-only',action='store_true',help='Check scroll/header/banner scenarios only')
 p.add_argument('--modern-only',action='store_true',help='Check editing keys and unsaved-exit modal')
 p.add_argument('--tabs-only',action='store_true',help='Literal Tab, visual movement and disk round trip')

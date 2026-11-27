@@ -4,7 +4,7 @@ import argparse,runpy,re,json
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782')
-p.add_argument('--port',type=int,choices=range(19781,19785),default=19782)
+p.add_argument('--port',type=int,choices=range(19781,19797),default=19782)
 a=p.parse_args();O=R/'.local/edit-launch-check';O.mkdir(exist_ok=True)
 sy=lambda f:{k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin'/f).read_text(),re.M)}
 s=sy('EDIT.sym');n=sy('NC.sym')

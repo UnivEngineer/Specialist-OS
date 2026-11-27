@@ -4,7 +4,7 @@ import argparse,runpy,re,json,struct,hashlib
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--runtime',type=Path,default=R/'.local/monitor2-001')
-p.add_argument('--port',type=int,default=19781,choices=range(19781,19785))
+p.add_argument('--port',type=int,default=19781,choices=range(19781,19797))
 p.add_argument('--profiles',nargs='+',choices=['EDIT_MN','EDIT'],default=['EDIT_MN','EDIT'])
 p.add_argument('--font',default='Rotate',choices=['Rotate','Packed6K','Fast12K'])
 p.add_argument('--cache-only',action='store_true',help='Check cache capacity, idle prefetch and LRU')

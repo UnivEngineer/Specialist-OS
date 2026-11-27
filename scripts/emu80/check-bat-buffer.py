@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--report', type=Path, default=ROOT/'.local/bat-check')
-    p.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
+    p.add_argument('--port', type=int, choices=range(19781, 19797), required=True)
     args = p.parse_args()
     out = args.report.resolve()
     out.mkdir(parents=True, exist_ok=True)

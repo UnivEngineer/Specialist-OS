@@ -1,8 +1,11 @@
 """Интеграционная проверка через MCP. Изменяет только явно указанную тестовую машину!"""
 import argparse
+from contextlib import contextmanager
 import hashlib
+import http.client
 import json
 import re
+from urllib.parse import urlsplit
 import urllib.request
 from pathlib import Path
 
@@ -13,6 +16,19 @@ class Machine:
     def __init__(self, url):
         self.url = url
         self.sequence = 0
+        self.connection = None
+
+    @contextmanager
+    def keep_alive(self):
+        """Переиспользовать соединение при частых пошаговых запросах к этому экземпляру."""
+        address = urlsplit(self.url)
+        with_connection = http.client.HTTPConnection(address.hostname,address.port,timeout=30)
+        self.connection = with_connection
+        try:
+            yield
+        finally:
+            self.connection = None
+            with_connection.close()
 
     def call(self, name, **arguments):
         self.sequence += 1
@@ -20,7 +36,15 @@ class Machine:
             "jsonrpc": "2.0", "id": self.sequence, "method": "tools/call",
             "params": {"name": name, "arguments": arguments},
         }).encode(), {"Content-Type": "application/json", "Accept": "application/json, text/event-stream"})
-        response = json.load(urllib.request.urlopen(request, timeout=30))
+        if self.connection is None:
+            with urllib.request.urlopen(request, timeout=30) as reply:
+                response = json.load(reply)
+        else:
+            self.connection.request("POST",request.selector,request.data,dict(request.header_items()))
+            with self.connection.getresponse() as reply:
+                if reply.status!=200:
+                    raise RuntimeError(f"MCP HTTP {reply.status}: {reply.read(256)!r}")
+                response = json.load(reply)
         if "error" in response:
             raise RuntimeError(response["error"])
         result = response["result"]

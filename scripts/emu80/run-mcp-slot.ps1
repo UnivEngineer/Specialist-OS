@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('19781', '19782', '19783', '19784')]
-    [string] $Port,
+    [ValidateRange(19781, 19796)]
+    [int] $Port,
     [switch] $TestFlashSeed
 )
 
@@ -34,7 +34,7 @@ try {
         throw "Emu80 MCP port $Port is already in use (PID $owners). Choose another slot."
     }
 
-    $process = & (Join-Path $PSScriptRoot 'run.ps1') -EmulatorDirectory $runtime -Flash -Mcp -UpdateSystemFlash -TestFlashSeed:$TestFlashSeed -PassThru
+    $process = & (Join-Path $PSScriptRoot 'run.ps1') -EmulatorDirectory $runtime -Flash -Mcp -McpPort $Port -UpdateSystemFlash -TestFlashSeed:$TestFlashSeed -PassThru
     $startup = [Diagnostics.Stopwatch]::StartNew()
     do {
         if ($process.HasExited) { throw "Emu80 for slot $Port exited during startup." }

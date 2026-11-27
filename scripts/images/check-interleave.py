@@ -21,9 +21,8 @@ def main():
     assert image == (ROOT / 'images/H-Flash-2M-Games.bin').read_bytes()
     entries = {}
     files_by_path, _ = runpy.run_path(str(ROOT / 'scripts/tests/check-nested-image.py'))['read_tree'](image, entries)
-    modes = ('AUTO', 'MX', 'STD', 'MON', 'RF')
     with (ROOT / 'assets/games/catalog.csv').open(encoding='utf-8-sig', newline='') as catalog:
-        game_modes = {'games/' + row['File'].replace('\\', '/').lower(): row['RunMode'] for row in csv.DictReader(catalog)}
+        games = {'games/' + row['File'].replace('\\', '/').lower(): row for row in csv.DictReader(catalog)}
     label_lines = [line.strip()[7:].strip() for line in
                    (ROOT/'assets/H-Flash-2M-Games.txt').read_text('utf-8-sig').splitlines()
                    if line.strip().startswith('@label ')]
@@ -45,10 +44,14 @@ def main():
         address = int(fields[2], 0) if len(fields) >= 3 else 0
         if ext in ('com', 'exe', 'dll', 'fnt', 'rks'):
             expected, program = convert(path, ext, address)
-            if ext == 'exe' and source.lower().startswith('games/'):
-                mode = game_modes[source.lower()]
-                if mode != 'NATIVE':
-                    expected = encode(replace(program, mode=modes.index(mode)), ext)
+            if source.lower().startswith('games/'):
+                game = games[source.lower()]
+                assert ext == ('rks' if game['Platform'] in ('STD', 'STD+MON') else 'exe'), name
+                if ext == 'exe' and game['RunMode'] != 'NATIVE':
+                    mode = game['RunMode']
+                    if mode == 'MX' and game['Status'] != 'user-tested':
+                        mode = 'AUTO'
+                    expected = encode(replace(program, mode={'RF': 4, 'MX': 1}.get(mode, 0)), ext)
         else:
             expected = path.read_bytes()
         stored_size = struct.unpack_from('<I', entry, 28)[0]

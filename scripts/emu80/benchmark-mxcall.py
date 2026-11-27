@@ -8,7 +8,7 @@ def symbols(path):
   result.setdefault('mx_callPacket',result['mx_call'])
  return result
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--label',required=True);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17');p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19785),default=19782);p.add_argument('--profile',choices=('command','copy'),default='command');a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--label',required=True);p.add_argument('--out',type=Path,default=R/'docs/bench/mxcall-2026-11-17');p.add_argument('--runtime',type=Path,default=R/'.local/rom-pio-19782');p.add_argument('--port',type=int,choices=range(19781,19797),default=19782);p.add_argument('--profile',choices=('command','copy'),default='command');a=p.parse_args()
  out=a.out.resolve();out.mkdir(parents=True,exist_ok=True)
  h=runpy.run_path(str(R/'scripts/emu80/benchmark-disks.py'));h['Matrix'].__init__.__globals__.update(OUT=out,RUNTIME=a.runtime.resolve())
  h['Matrix'].__init__.__globals__['mcp_owner']=lambda:h['shell'](f'$p=Get-NetTCPConnection -State Listen -LocalPort {a.port} -ErrorAction SilentlyContinue;if($p){{$p[0].OwningProcess}};exit 0')

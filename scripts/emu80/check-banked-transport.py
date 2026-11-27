@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, required=True)
-    parser.add_argument('--port', type=int, choices=range(19781,19785), default=19781)
+    parser.add_argument('--port', type=int, choices=range(19781,19797), default=19781)
     parser.add_argument('--report', type=Path, default=ROOT/'docs/banked/transport-001')
     args = parser.parse_args()
     out = args.report.resolve(); out.mkdir(parents=True, exist_ok=True)

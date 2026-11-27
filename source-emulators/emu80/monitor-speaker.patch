@@ -1,0 +1,65 @@
+--- a/src/SoundMixer.h
++++ b/src/SoundMixer.h
+@@ -69,6 +69,9 @@
+ class GeneralSoundSource : public SoundSource
+ {
+     public:
++#ifdef MCP_SERVER
++        bool setProperty(const std::string& propertyName, const EmuValuesList& values) override;
++#endif
+         // derived from SoundSOurce
+         int calcValue() override;
+ 
+@@ -83,6 +86,9 @@
+         static EmuObject* create(const EmuValuesList&) {return new GeneralSoundSource();}
+ 
+     private:
++#ifdef MCP_SERVER
++        bool m_captureSpeaker = false;
++#endif
+         int m_curValue = 0;
+         uint64_t initClock = 0;
+         uint64_t prevClock = 0;
+--- a/src/SoundMixer.cpp
++++ b/src/SoundMixer.cpp
+@@ -24,6 +24,9 @@
+ 
+ #include "Pal.h"
+ #include "SoundMixer.h"
++#ifdef MCP_SERVER
++#include "mcp/McpServer.h"
++#endif
+ 
+ using namespace std;
+ 
+@@ -183,6 +186,19 @@
+ }
+ 
+ 
++#ifdef MCP_SERVER
++bool GeneralSoundSource::setProperty(const std::string& propertyName, const EmuValuesList& values)
++{
++    if (propertyName == "mcpCaptureSpeaker") {
++        if (values[0].asString() != "yes" && values[0].asString() != "no")
++            return false;
++        m_captureSpeaker = values[0].asString() == "yes";
++        return true;
++    }
++    return SoundSource::setProperty(propertyName, values);
++}
++#endif
++
+ void GeneralSoundSource::setValue(int value)
+ {
+     updateStats();
+@@ -222,6 +238,10 @@
+     sumVal = 0;
+     initClock = g_emulation->getCurClock();
+ 
++#ifdef MCP_SERVER
++    if (m_captureSpeaker)
++        mcpCaptureMxSample(res);
++#endif
+     return res;
+ }
+ 

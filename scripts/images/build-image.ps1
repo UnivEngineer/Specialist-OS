@@ -394,12 +394,12 @@ if (-not $RunBuild) {
 }
 
 . (Join-Path $PSScriptRoot 'executable.ps1')
-$gameModes = @{}
+$games = @{}
 if ($gameExeEntries.Count) {
     foreach ($game in Import-Csv -LiteralPath $gameCatalogPath -Encoding UTF8) {
         $key = 'games/' + $game.File.Replace('\', '/')
-        if ($gameModes.ContainsKey($key)) { throw "Duplicate game in catalog: $key" }
-        $gameModes[$key] = $game.RunMode
+        if ($games.ContainsKey($key)) { throw "Duplicate game in catalog: $key" }
+        $games[$key] = $game
     }
 }
 if ($stagedBoot -and -not $Prebuilt) {
@@ -493,10 +493,16 @@ try {
 
         $baseName = [IO.Path]::GetFileNameWithoutExtension($sourceName)
         $loadAddress = Get-LoadAddress $manifestEntry.LoadAddress
-        $gameMode = $gameModes[$manifestEntry.Source.Replace('\', '/')]
         if ($extension -eq 'exe' -and $manifestEntry.Source -match '^games[/\\]') {
+            $game = $games[$manifestEntry.Source.Replace('\', '/')]
+            $gameMode = $game.RunMode
             if ($gameMode -notin @('AUTO','MX','STD','MON','RF','NATIVE')) {
                 throw "Missing or invalid RunMode in the game catalog for $($manifestEntry.Source) at $($manifestEntry.Location)"
+            }
+            $confirmedMx = $gameMode -eq 'MX' -and $game.Status -eq 'user-tested'
+            if ($Target -in @('Games2M','Games64k') -and -not $ManifestFile -and
+                $gameMode -notin @('RF','NATIVE') -and -not $confirmedMx) {
+                $gameMode = 'AUTO'
             }
             $storedBytes = Convert-ExecutableFile $sourcePath $extension $loadAddress -GameMode $gameMode
         } elseif ($extension -in @('com', 'exe', 'dll', 'fnt', 'rks')) {

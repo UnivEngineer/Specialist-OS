@@ -181,7 +181,7 @@ def verify(machine, floppy, out):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', type=int, required=True, choices=range(19781,19785))
+    parser.add_argument('--port', type=int, required=True, choices=range(19781,19797))
     args = parser.parse_args()
     out = ROOT / 'docs/dos/reloc-tests/drivers'
     out.mkdir(parents=True, exist_ok=True)

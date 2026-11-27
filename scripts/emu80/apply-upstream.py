@@ -62,7 +62,7 @@ def integrate(source):
             raise ValueError(f"Unrelated modifications in {source / name}")
         changes[name] = data
     apply = ["git", "-C", str(source), "apply"]
-    for name in ("mxos-end.patch", "mxos-underscore.patch", "mxos-cyrillic.patch", "mxos-scancodes.patch"):
+    for name in ("mxos-end.patch", "mxos-underscore.patch", "mxos-cyrillic.patch", "mxos-scancodes.patch", "mxos-mcp-port.patch", "mxos-mcp-capture.patch"):
         patch = str(OVERLAY / name)
         if subprocess.run(apply + ["--reverse", "--check", patch], stderr=subprocess.DEVNULL).returncode:
             subprocess.run(apply + [patch], check=True)

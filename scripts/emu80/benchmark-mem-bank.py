@@ -55,7 +55,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bundle',type=Path,default=ROOT,help='Каталог с bin и images')
     parser.add_argument('--runtime',type=Path,required=True)
-    parser.add_argument('--port',type=int,choices=range(19781,19785),default=19781)
+    parser.add_argument('--port',type=int,choices=range(19781,19797),default=19781)
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--suite',choices=('copy','bios','legacy','user','remote-move','local-copy','text','text-windows','text-main','all'),default='copy',help='all: copy + bios')
     parser.add_argument('--text-lengths',type=int,nargs='+',default=(0,1,20,31,32,33,64,128),
@@ -644,7 +644,7 @@ def main():
     # Применяем снимок только в частном runtime, после подтверждения свободного слота.
     shutil.copyfile(image,runtime/'specialist-os/system-flash.bin')
     launch=ROOT/'scripts/emu80/run.ps1'
-    stdout=shell(f'$p=& {ps(launch)} -EmulatorDirectory {ps(runtime)} -Hidden -Flash -Mcp -PassThru; $p.Id')
+    stdout=shell(f'$p=& {ps(launch)} -EmulatorDirectory {ps(runtime)} -Hidden -Flash -Mcp -McpPort {args.port} -PassThru; $p.Id')
     pid=int(stdout.splitlines()[-1])
     try:
         for _ in range(30):

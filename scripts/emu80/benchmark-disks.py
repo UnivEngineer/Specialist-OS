@@ -1,5 +1,6 @@
 """Матрица DISKBEN: реальные файловые вызовы и Raw, только отдельный Emu80-flash-test."""
 import argparse,hashlib,json,os,runpy,shutil,struct,subprocess,time
+from urllib.parse import urlsplit
 from datetime import datetime,timezone
 from pathlib import Path
 
@@ -183,9 +184,10 @@ class Matrix:
             self.pid=None
     def start(self,phase,flash=True,system=None,disk=None,locked=False,dos=None,chip_count=None,disk_locked=False,nc_binary=None,nc_symbols=None,bios=None,main_boot=False):
         self.stop()
-        # Порт MCP фиксирован upstream. Не подключаемся к чужому эмулятору.
+        port = urlsplit(self.m.url).port
+        if port not in range(19781, 19797): raise ValueError(f'Invalid MCP port {port}')
         owner=mcp_owner()
-        if owner:raise RuntimeError('MCP port 19781 is already owned by process '+owner+'; test emulator was not started')
+        if owner:raise RuntimeError(f'MCP port {port} is already owned by process '+owner+'; test emulator was not started')
         command(['powershell.exe','-NoProfile','-File','scripts/emu80/run.ps1','-EmulatorDirectory',RUNTIME,'-PrepareOnly','-Mcp']+(['-Flash','-ResetFlash'] if flash else [])+(['-ProtectSystemFlash'] if locked else []))
         if system:shutil.copyfile(system,RUNTIME/'specialist-os'/('system-flash.bin' if flash else 'system.bin'))
         if disk:shutil.copyfile(disk,RUNTIME/'specialist-os'/('flash-disk.bin' if flash else 'rom-disk.bin'))
@@ -198,7 +200,7 @@ class Matrix:
                 (RUNTIME/'specialist-os/flash-disk.bin.sdp').write_bytes(bytes(chip_count))
             if disk_locked:text+='\nflashDisk.readOnly = yes\n'
             config.write_text(text,encoding='utf-8')
-        self.pid=int(shell('$p=Start-Process -FilePath '+ps(RUNTIME/'Emu80qt-mcp.exe')+" -ArgumentList '--conf-file','specialist-os/launch.conf','--platform','specialist-os' -WorkingDirectory "+ps(RUNTIME)+" -WindowStyle Normal -PassThru; $p.Id"))
+        self.pid=int(shell(f"$env:SPECIALIST_EMU80_MCP_PORT='{port}'; "+'$p=Start-Process -FilePath '+ps(RUNTIME/'Emu80qt-mcp.exe')+" -ArgumentList '--conf-file','specialist-os/launch.conf','--platform','specialist-os' -WorkingDirectory "+ps(RUNTIME)+" -WindowStyle Normal -PassThru; $p.Id"))
         for _ in range(30):
             try:
                 owner=mcp_owner()
@@ -206,7 +208,7 @@ class Matrix:
                     time.sleep(.2);continue
                 self.m.call('debug_break');break
             except Exception:time.sleep(.2)
-        else:raise RuntimeError('Owned test emulator did not acquire MCP port 19781')
+        else:raise RuntimeError(f'Owned test emulator did not acquire MCP port {port}')
         set_benchmark_speed(self.m, self.pid)
         nc_binary=nc_binary or ROOT/'bin/NC.i80'
         nc_symbols=nc_symbols or ROOT/'bin/NC.sym'

@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 word = lambda n: struct.pack('<H', n)
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--runtime', type=Path, required=True)
-parser.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
+parser.add_argument('--port', type=int, choices=range(19781, 19797), required=True)
 args = parser.parse_args()
 matrix = runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
 context = matrix['Matrix'].__init__.__globals__

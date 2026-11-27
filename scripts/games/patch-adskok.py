@@ -1,4 +1,4 @@
-"""ADSKOK: безопасная очистка нижней памяти и штатная очистка экрана.
+"""ADSKOK: ограничить очистку нижней памятью и сохранить самопроверку игры.
 
 Исходный упакованный RKS сохраняется в originals. Сумма упаковщика сохраняется
 компенсацией в неисполняемом байте; внешняя сумма RKS пересчитывается.
@@ -11,9 +11,10 @@ ROOT = Path(__file__).resolve().parents[2]
 TARGET = ROOT / 'assets/games/families/adskok/repaired/Adskok.rks'
 ORIGINAL = ROOT / 'assets/games/families/adskok/originals/Adskok.rks.bin'
 ORIGINAL_SHA = 'cdabd464f516f97581f9f32dd35599911eed3cef6eb88c91e15bcbc6ed5b062d'
+REGRESSION_SHA = '117c6047598743c76ac368c24c0b0311939a3b539b04250b4354f1dedaee3f93'
 
 
-def patch(original, first_only=False):
+def patch(original):
     if sha256(original).hexdigest() != ORIGINAL_SHA:
         raise ValueError('Неизвестный оригинал ADSKOK')
     fixed = bytearray(original)
@@ -25,16 +26,8 @@ def patch(original, first_only=False):
     # +7 компенсирует -7 в счётчике; код восстановления зависит от суммы.
     assert fixed[0x4506:0x4509] == bytes.fromhex('C9 E0 C5')
     fixed[0x4507] = 0xE7
-    if first_only:
-        return bytes(fixed)
-    # 6B8Ah: вместо прямого CALL 73D6h вызываем свободный хвост 74A9h.
+    # Игра проверяет байт D6h операнда CALL 73D6h по адресу 6B8Bh.
     assert fixed[0x3CFB:0x3CFE] == bytes.fromhex('CD D6 73')
-    fixed[0x3CFB:0x3CFE] = bytes.fromhex('CD A9 74')
-    # После возврата из очистки нижнего RAM стек уже восстановлен.
-    # Хвост находится вне внутреннего диапазона суммы [6B81h,74A9h).
-    assert fixed[0x461A:0x4621] == bytes(7)
-    fixed[0x461A:0x4621] = bytes.fromhex('CD D6 73 CD 10 C0 C9')
-    fixed[0x4507] = 0x13  # компенсация счётчика и нового адреса CALL, mod 256
     # Внешняя сумма RKS пересчитывается существующей хостовой формулой.
     payload = fixed[4:-2]
     total = sum(payload[:-1]) * 0x101
@@ -50,7 +43,7 @@ def main():
     current = TARGET.read_bytes()
     original = ORIGINAL.read_bytes() if ORIGINAL.exists() else current
     fixed = patch(original)
-    if current not in (original, patch(original, first_only=True), fixed):
+    if current not in (original, fixed) and sha256(current).hexdigest() != REGRESSION_SHA:
         raise ValueError('ADSKOK изменён вне этого патча')
     if args.check:
         if current != fixed or not ORIGINAL.exists():

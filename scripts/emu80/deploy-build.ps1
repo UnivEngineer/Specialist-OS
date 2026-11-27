@@ -25,7 +25,7 @@ if (-not (Test-Path -LiteralPath $builtExe)) { throw "Missing executable: $built
 $buildInfo = Get-Content -LiteralPath (Join-Path $BuildDirectory 'build-specialist.json') -Raw | ConvertFrom-Json
 if ((Get-FileHash -LiteralPath $builtExe).Hash.ToLowerInvariant() -ne $buildInfo.executableSha256) { throw 'Executable does not match the recorded build.' }
 $lock = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'upstream.json') -Raw | ConvertFrom-Json
-$sources = foreach ($name in @('At29Flash.cpp','At29Flash.h','SpecialistFlashDisk.cpp','SpecialistFlashDisk.h','SpecialistMx2VideoRam.cpp','SpecialistMx2VideoRam.h','SpecialistSystemFlash.cpp','SpecialistSystemFlash.h','mxos-end.patch','mxos-underscore.patch','mxos-cyrillic.patch','mxos-scancodes.patch')) {
+$sources = foreach ($name in @('At29Flash.cpp','At29Flash.h','SpecialistFlashDisk.cpp','SpecialistFlashDisk.h','SpecialistMx2VideoRam.cpp','SpecialistMx2VideoRam.h','SpecialistSystemFlash.cpp','SpecialistSystemFlash.h','mxos-end.patch','mxos-underscore.patch','mxos-cyrillic.patch','mxos-scancodes.patch', 'mxos-mcp-port.patch', 'mxos-mcp-capture.patch')) {
     $hash = (Get-FileHash -LiteralPath (Join-Path $root ('source-emulators/emu80/' + $name))).Hash.ToLowerInvariant()
     $builtHash = @($buildInfo.sources | Where-Object { $_.path -eq $name })
     if ($builtHash.Count -ne 1 -or $builtHash[0].sha256 -ne $hash) { throw "Source changed since build: $name" }
@@ -46,6 +46,6 @@ foreach ($plugin in @('platforms/qwindows.dll','platforms/qoffscreen.dll','audio
     Copy-Item -LiteralPath (Join-Path $qt ('plugins/' + $plugin)) -Destination $target
 }
 [IO.File]::WriteAllText((Join-Path $destination 'qt.conf'), "[Paths]`nPlugins=_qtplugins`n")
-$record = [ordered]@{ model = 'SpecialistFlashDisk'; commit = $lock.referenceCommit; mcp = [bool]$Mcp; sources = @($sources) }
+$record = [ordered]@{ model = 'SpecialistFlashDisk'; commit = $lock.referenceCommit; executableSha256 = $buildInfo.executableSha256; mcp = [bool]$Mcp; sources = @($sources) }
 [IO.File]::WriteAllText((Join-Path $destination 'specialist-build.json'), ($record | ConvertTo-Json -Depth 5) + "`n", (New-Object Text.UTF8Encoding($false)))
 Write-Host "Deployed custom Emu80: $destination"

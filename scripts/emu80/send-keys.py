@@ -2,6 +2,7 @@
 import argparse
 import base64
 import json
+import os
 from pathlib import Path
 import runpy
 import subprocess
@@ -14,18 +15,25 @@ Machine = runpy.run_path(str(Path(__file__).with_name('check-flash.py')))['Machi
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', required=True, type=Path)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), default=19781)
     parser.add_argument('--text')
     parser.add_argument('--key')
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--screenshot', type=Path)
     args = parser.parse_args()
     runtime = args.runtime.resolve()
-    assert runtime == ROOT / '.local/monitor-compat-001', 'Нужен отдельный тестовый runtime'
-    query = '(Get-Process -Id (Get-NetTCPConnection -State Listen -LocalPort 19781 | Select-Object -First 1 -ExpandProperty OwningProcess)).Path'
+    installs = Path(os.environ['LOCALAPPDATA']) / 'Specialist-OS/emu80'
+    allowed = [installs / str(args.port), installs / 'pool' / str(args.port)]
+    if args.port == 19781:
+        allowed.append(ROOT / '.local/monitor-compat-001')
+    if runtime not in allowed:
+        parser.error('Нужен отдельный тестовый runtime выбранного порта')
+    query = f'(Get-Process -Id (Get-NetTCPConnection -State Listen -LocalPort {args.port} | Select-Object -First 1 -ExpandProperty OwningProcess)).Path'
     owner = subprocess.run(['powershell.exe', '-NoProfile', '-Command', query],
                            check=True, capture_output=True, text=True).stdout.strip()
-    assert Path(owner).resolve() == runtime / 'Emu80qt-mcp.exe'
-    m = Machine('http://127.0.0.1:19781/mcp')
+    if Path(owner).resolve() != runtime / 'Emu80qt-mcp.exe':
+        raise RuntimeError('Порт принадлежит другому процессу')
+    m = Machine(f'http://127.0.0.1:{args.port}/mcp')
     m.call('bp_clear')
     m.call('emu_run_for', ms=500)
     mapping = {':':'colon', '.':'period', '-':'minus', ' ':'space', '/':'slash'}

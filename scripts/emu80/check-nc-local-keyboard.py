@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, required=True)
-    parser.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), required=True)
     parser.add_argument('--font', help='Switch font in MAIN before starting NC_BANK, e.g. 4x8/Packed')
     parser.add_argument('--reselect', action='store_true', help='Start NC_BANK again from its own command prompt')
     parser.add_argument('--editor', action='store_true', help='Check banked F4 and TXT handoff and return')

@@ -1,0 +1,36 @@
+diff --git a/src/Main.cpp b/src/Main.cpp
+index 121c49c..da997e1 100644
+--- a/src/Main.cpp
++++ b/src/Main.cpp
+@@ -30,6 +30,7 @@
+ #include "Emulation.h"
+ 
+ #ifdef MCP_SERVER
++#include <cstdlib>
+ #include "mcp/McpMarshal.h"
+ #include "mcp/McpServer.h"
+ #endif
+@@ -121,6 +122,14 @@ int main (int argc, char** argv)
+         palMsgBox("Warnings:\n\n" + warnings + "\nFor brief help: " EXE_NAME " --help");
+ 
+ #ifdef MCP_SERVER
++    unsigned short port = MCP_SERVER_PORT;
++    if (const char* requested = std::getenv("SPECIALIST_EMU80_MCP_PORT")) {
++        char* end = nullptr;
++        long value = std::strtol(requested, &end, 10);
++        if (*end || value < 19781 || value > 19796)
++            return EXIT_FAILURE;
++        port = static_cast<unsigned short>(value);
++    }
+     mcp::RegisterMainThread();
+ #endif
+ 
+@@ -129,7 +138,7 @@ int main (int argc, char** argv)
+     palStart();
+ 
+ #ifdef MCP_SERVER
+-    g_McpServer.Start(MCP_SERVER_PORT);
++    g_McpServer.Start(port);
+ #endif
+ 
+     palExecute();

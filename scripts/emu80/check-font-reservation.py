@@ -160,7 +160,7 @@ def check(m, out):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', type=int, choices=range(19781, 19785), default=19781)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), default=19781)
     parser.add_argument('--report', type=Path, default=ROOT/'.local/font-reservation')
     args = parser.parse_args()
     out = args.report.resolve()

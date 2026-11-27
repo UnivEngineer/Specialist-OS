@@ -4,10 +4,12 @@ param(
     [string] $QtDirectory = $env:SPECIALIST_EMU80_QT_DIR,
     [string] $BuildDirectory,
     [switch] $Mcp,
-    [switch] $Deploy
+    [switch] $Deploy,
+    [switch] $PoolTemplate
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2.0
+if ($PoolTemplate -and -not $Mcp) { throw '-PoolTemplate requires -Mcp.' }
 if (-not $SourceDirectory) { $SourceDirectory = [Environment]::GetEnvironmentVariable('SPECIALIST_EMU80_SOURCE_DIR', 'User') }
 if (-not $QtDirectory) { $QtDirectory = [Environment]::GetEnvironmentVariable('SPECIALIST_EMU80_QT_DIR', 'User') }
 if (-not $SourceDirectory -or -not $QtDirectory) { throw 'Set SPECIALIST_EMU80_SOURCE_DIR and SPECIALIST_EMU80_QT_DIR or pass their parameters.' }
@@ -47,7 +49,7 @@ $exeName = if ($Mcp) { 'Emu80qt-mcp.exe' } else { 'Emu80qt.exe' }
 $files = foreach ($name in @('At29Flash.cpp','At29Flash.h','SpecialistFlashDisk.cpp','SpecialistFlashDisk.h','SpecialistMx2VideoRam.cpp','SpecialistMx2VideoRam.h','SpecialistSystemFlash.cpp','SpecialistSystemFlash.h')) {
     [ordered]@{ path = $name; sha256 = (Get-FileHash -LiteralPath (Join-Path $source ('src/' + $name))).Hash.ToLowerInvariant() }
 }
-foreach ($name in @('mxos-end.patch', 'mxos-underscore.patch', 'mxos-cyrillic.patch', 'mxos-scancodes.patch')) {
+foreach ($name in @('mxos-end.patch', 'mxos-underscore.patch', 'mxos-cyrillic.patch', 'mxos-scancodes.patch', 'mxos-mcp-port.patch', 'mxos-mcp-capture.patch')) {
     $keyPatch = Join-Path $PSScriptRoot ('../../source-emulators/emu80/' + $name)
     $files += [ordered]@{ path = $name; sha256 = (Get-FileHash -LiteralPath $keyPatch).Hash.ToLowerInvariant() }
 }
@@ -57,4 +59,8 @@ if ($Deploy) {
     . (Join-Path $PSScriptRoot 'runtime.ps1')
     $runtime = Resolve-Emu80Runtime -Flash
     & (Join-Path $PSScriptRoot 'deploy-build.ps1') -SourceDirectory $source -QtDirectory $qt -BuildDirectory $build -DestinationDirectory $runtime -Mcp:$Mcp -Update
+}
+if ($PoolTemplate) {
+    $template = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Specialist-OS/emu80/pool-template'
+    & (Join-Path $PSScriptRoot 'deploy-build.ps1') -SourceDirectory $source -QtDirectory $qt -BuildDirectory $build -DestinationDirectory $template -Mcp -Update
 }

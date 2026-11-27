@@ -7,7 +7,7 @@ def main():
  p=argparse.ArgumentParser(description=__doc__)
  p.add_argument('--snapshot',type=Path,required=True)
  p.add_argument('--runtime',type=Path,default=ROOT/'.local/rom-pio-19782')
- p.add_argument('--port',type=int,default=19782,choices=range(19781,19785))
+ p.add_argument('--port',type=int,default=19782,choices=range(19781,19797))
  args=p.parse_args();snap=args.snapshot.resolve();out=ROOT/'.local/main-buffer-live';out.mkdir(exist_ok=True)
  h=runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
  g=h['Matrix'].__init__.__globals__

@@ -15,7 +15,7 @@ OUT = ROOT / '.local/resident-pressure'
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', type=int, choices=range(19781, 19785), required=True)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), required=True)
     port = parser.parse_args().port
     OUT.mkdir(parents=True, exist_ok=True)
     h = runpy.run_path(str(ROOT / 'scripts/emu80/benchmark-disks.py'))
@@ -50,7 +50,7 @@ def main():
     shutil.copyfile(ROOT / 'images' / manifest.with_suffix('.bin').name,
                     runtime / 'specialist-os/test-flash.bin')
     process = subprocess.Popen([str(exe), '--conf-file', 'specialist-os/launch.conf',
-                                '--platform', 'specialist-os'], cwd=runtime)
+                                '--platform', 'specialist-os'], cwd=runtime, env=dict(os.environ, SPECIALIST_EMU80_MCP_PORT=str(port)))
 
     def page():
         return machine.read(k['bankPage'], 1)[0]

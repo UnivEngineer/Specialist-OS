@@ -1,11 +1,11 @@
 {
-  "files": 141,
-  "dataSectors": 6621,
+  "files": 161,
+  "dataSectors": 7638,
   "sectorsPerChip": [
-    1656,
-    1655,
-    1655,
-    1655
+    1910,
+    1910,
+    1909,
+    1909
   ],
   "metadataChip": 0,
   "allPayloadsMatch": true,

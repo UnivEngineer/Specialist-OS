@@ -1,1 +1,1 @@
-RUN Ball.exe -MX -KOI7
+RUN Ball.rks -MX -KOI7

@@ -11,7 +11,7 @@ OUT = ROOT / '.local/cli-font-cursor-ui'
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runtime', type=Path, default=ROOT / '.local/nc-sort-benchmark-runtime')
-    parser.add_argument('--port', type=int, choices=range(19781, 19785), default=19781)
+    parser.add_argument('--port', type=int, choices=range(19781, 19797), default=19781)
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     helpers = runpy.run_path(str(ROOT / 'scripts/emu80/benchmark-disks.py'))

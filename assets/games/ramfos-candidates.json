@@ -2249,7 +2249,7 @@
     {
       "name": "Buran-ramfos.exe",
       "display_name": "Buran-ramfos.exe",
-      "status": "user-tested-issues",
+      "status": "user-tested",
       "payload_sha256": "471e61f6702042ffc007b7b408297108c546a6198a679c4bd185361654260e66",
       "payload_bytes": 5893,
       "load_address": "0000",
@@ -2277,7 +2277,8 @@
       "evidence": [
         "передача символа/управляющего кода в A перед C80Fh",
         "запись курсора SHLD C63Eh",
-        "пользователь сообщил об ошибках под текущей MXOS"
+        "через RUN -RF автор подтвердил цвет, звук, выбор сложности и управление",
+        "в Emu80 при RUN -RF стрелка Up увеличивает 8808h при пуске ракеты"
       ],
       "origin": "D:\\Projects\\Specialist-OS\\assets\\games\\families\\buran\\repacked\\Buran-ramfos.exe",
       "aliases": [
