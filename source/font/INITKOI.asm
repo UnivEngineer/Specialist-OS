@@ -1,4 +1,5 @@
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../bin/bios-imports.inc"
     INCLUDE "../../sdk/asm/formats/font.inc"
     INCLUDE "../../sdk/asm/formats/font-init.inc"
     ORG FONT_INIT_ADDR
@@ -52,7 +53,7 @@ importFlat:
     ld d,(hl)
     ex de,hl
     ld de,FONT_ENGINE_BASE
-    call bios_sub_hl_de
+    call biosEngineSubtract
     pop de
     add hl,de
     ex de,hl ; DE=staged compact font, not its resident address.

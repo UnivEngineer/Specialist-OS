@@ -104,7 +104,7 @@ editorPrepareDocument:
         LD    H,A
         LD    L,A
         LD    (v_selectionBegin),HL
-        LD    (bios_vars.inverse),HL
+        LD    (mon2_vars.inverse),HL
         LD    HL,0001H    ; 1
         LD    (v_lineNumber),HL
         LD    HL,(v_textBeginLo)

@@ -23,10 +23,10 @@ for font in ['Rotate','Fast8','Cpm4']:
     for line in range(2,34):
         m=run(m,'moveNextWord')
         assert number(m,'v_lineNumber')==line and number(m,'v_column')==0
-    assert m[S['bios_vars.cursorY']]==S['EDITOR_LAST_Y'] and m[S['v_lineDirty']]
+    assert m[S['mon2_vars.cursorY']]==S['EDITOR_LAST_Y'] and m[S['v_lineDirty']]
     assert document(m)==changed
     for line in range(32,0,-1):
         m=run(m,'movePreviousWord')
         assert number(m,'v_lineNumber')==line and number(m,'v_column')==0
-    assert m[S['bios_vars.cursorY']]==S['EDITOR_FIRST_Y'] and document(m)==changed
+    assert m[S['mon2_vars.cursorY']]==S['EDITOR_FIRST_Y'] and document(m)==changed
 print('EDITOR WORD LINES PASS',g['run'].__globals__['count'])

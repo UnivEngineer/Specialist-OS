@@ -24,7 +24,7 @@ def call(address,**regs):
     return m.until(stop)
 for drive, technology in [(2,'S'),(7,'P')]:
     assert not call(0xC842,af=drive<<8,de=1)['flags']['C']
-    assert call(SYSTEM['bios_diskDriver'],bc=0xFF00)['registers']['bc']['dec']>>8==ord(technology)
+    assert call(SYSTEM['sysDiskDriver'],bc=0xFF00)['registers']['bc']['dec']>>8==ord(technology)
 assert not call(0xC842,af=0x0100,de=1)['flags']['C']
 assert not call(0xC896)['flags']['C']
 def create(name,payload,address):

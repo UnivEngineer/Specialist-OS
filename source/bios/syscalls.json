@@ -16,6 +16,11 @@
         "legacy": "bios_tapeRead"
       },
       {
+        "id": 2,
+        "name": "PRINT_CHAR",
+        "target": "printChar"
+      },
+      {
         "id": 3,
         "name": "TAPE_WRITE",
         "target": "t_tapeWrite",
@@ -34,6 +39,11 @@
         "legacy": "bios_keyCheck"
       },
       {
+        "id": 6,
+        "name": "PRINT_HEX_BYTE",
+        "target": "printHexByte"
+      },
+      {
         "id": 7,
         "name": "PRINT_STRING_Z",
         "target": "printStringZ",
@@ -49,6 +59,16 @@
         "name": "KEY_SCAN",
         "target": "keyScan2",
         "legacy": "bios_keyScan"
+      },
+      {
+        "id": 9,
+        "name": "GET_CURSOR_POS",
+        "target": "getCursorPos"
+      },
+      {
+        "id": 10,
+        "name": "SET_CURSOR_POS",
+        "target": "setCursorPos"
       },
       {
         "id": 11,
@@ -69,6 +89,21 @@
         "legacy": "bios_calcCS"
       },
       {
+        "id": 14,
+        "name": "PRINT_HEX_WORD",
+        "target": "printHexWord"
+      },
+      {
+        "id": 15,
+        "name": "SET_MEM_TOP",
+        "target": "setMemTop"
+      },
+      {
+        "id": 16,
+        "name": "GET_MEM_TOP",
+        "target": "getMemTop"
+      },
+      {
         "id": 17,
         "name": "PRINTER",
         "target": "printer",
@@ -85,6 +120,11 @@
         "name": "DISK_DRIVER",
         "target": "sysDiskDriver",
         "legacy": "bios_diskDriver"
+      },
+      {
+        "id": 20,
+        "name": "PRINT_CHAR_RAW",
+        "target": "printCharRaw"
       },
       {
         "id": 21,
@@ -212,7 +252,7 @@
       {
         "id": 42,
         "name": "PRINT_STRING_LIM_MAIN",
-        "target": "bios_printStringLim"
+        "target": "bankText.printStringLim"
       },
       {
         "id": 43,
@@ -239,7 +279,17 @@
         "aliases": [
           "PRINT_STRING_LIM_BANK"
         ],
-        "target": "bios_printStringLim"
+        "target": "bankText.printStringLim"
+      },
+      {
+        "id": 47,
+        "name": "PROFILE",
+        "target": "biosSetProfile"
+      },
+      {
+        "id": 48,
+        "name": "DRAW_CURSOR",
+        "target": "drawCursor3"
       }
     ],
     "commands": [

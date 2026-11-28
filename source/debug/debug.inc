@@ -5,7 +5,7 @@
 ; Директива R - чтеине файла с ленты
 
 Dir_R:  ; загрузка файла
-        CALL  mon2_tapeLoad
+        CALL  debug_tapeLoad
         PUSH  BC
         PUSH  DE
         PUSH  HL
@@ -25,7 +25,7 @@ Dir_R:  ; загрузка файла
         POP   HL
         LD    D,B
         LD    E,C
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
 
         ; если не совпадают - переход
         JP    NZ,printChecksumMismatch
@@ -37,7 +37,7 @@ Dir_R:  ; загрузка файла
 printChecksumMismatch:  ; печать знака вопроса и выход
         CALL  printSpace
         LD    C, '?'
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
         RET
 
 ;----------------------------------------------------------------------------
@@ -100,7 +100,7 @@ printRegisterPairsLoop:  PUSH  BC
 ; Если нажата клавиша, записать 0FFh по адресу (HL)
 
 setMIfKeyPressed:
-        CALL  bios_keyScan
+        MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
         INC   A
         RET   Z
         LD    (HL), 0FFh
@@ -115,16 +115,16 @@ printSavedRegisterPair:   LD    B,(HL)
         PUSH  BC
         CALL  printRegisterName
         LD    A,B
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  printRegisterName
         POP   BC
         LD    A,C
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         RET
 printRegisterName:   EX    DE,HL         ; [5]
         PUSH  BC
         CALL  printSpace
-        CALL  bios_printStringOld
+        CALL  mon2_printStringOld
         INC   HL
         POP   BC
         EX    DE,HL

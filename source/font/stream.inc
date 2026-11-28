@@ -5,13 +5,13 @@
     MODULE rowStream
 tryGroup:
     ld (text),hl
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     cp 192
     jp nc,empty
     and 3
     jp nz,empty
     IFNDEF CELL_WIDTH
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     cp 7
     jp c,empty
     ENDIF
@@ -22,7 +22,7 @@ tryGroup:
     inc a
     jp nz,empty
 streamCapacity:
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     rrca
     rrca
     add a,high MX_SCREEN_BASE
@@ -106,13 +106,13 @@ streamPlanned:
     ld (streamInverseLimit+1),a
     xor a
     ld (streamRow),a
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     sub 7
     ld e,a
     ld hl,0
     add hl,sp
     ld (streamSavedSP+1),hl
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,streamInverse
 
@@ -277,10 +277,10 @@ streamSavedSP: ld sp,0
     sub high MX_SCREEN_BASE
     add a,a
     add a,a
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     cp 192
     jp c,streamReturn
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     call fontLineEnd
 streamReturn:
     ld hl,(streamNext)

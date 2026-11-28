@@ -13,6 +13,7 @@
 ;     результаты записей не собираются.
 ; +0Ch/+10h Пары слов SP для UPPERCASE и SUB_HL_DE.
 ; +14h JMP на совместимый посимвольный PRINT_STRING_LIM в BIOS.
+; +17h/+1Ah Частные входы MEM для вывода байта и слова в HEX.
 ;
 ; Вызывающий гарантирует границы пакетов, номера операций и доступный стек.
     INCLUDE "../mem/biosabi.inc"
@@ -32,11 +33,15 @@ bankBiosBatchLocal:
         DW vector,bankFastReturn
     ENDM
 bbFastSlots:
-    BIOS_FAST_SLOT MXOS_BIOS_UPPERCASE,bios_upperCase
-    BIOS_FAST_SLOT MXOS_BIOS_SUB_HL_DE,bios_sub_hl_de
+    BIOS_FAST_SLOT MXOS_BIOS_UPPERCASE,upperCase
+    BIOS_FAST_SLOT MXOS_BIOS_SUB_HL_DE,sub_hl_de
 bbFastSlotsEnd:
     ASSERT $ == BIOS_BANK_GATE_ADDR+14h
     jp bbPrintStringLimLegacy
+    ASSERT $ == BIOS_BANK_PRINT_HEX_BYTE
+    jp printHexByte
+    ASSERT $ == BIOS_BANK_PRINT_HEX_WORD
+    jp printHexWord
 ; 0 — нужен отдельный адаптер указателей/состояния; 1 — регистры;
 ; 2 — ASCIIZ.
 ; Дисковые функции, memcpy/strcmp, установка драйверов/хуков и memtop
@@ -83,10 +88,6 @@ bbBatchRecord:
     ld c,a
     ld hl,bbBatchNext
     push hl
-    ld b,0
-    ld hl,bbModes
-    add hl,bc
-    ld a,(hl)
     ld hl,(MEM_NATIVE_CALL)
     ld de,9
     add hl,de
@@ -96,7 +97,7 @@ bbBatchNext:
     pop hl
     pop de
     push de
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp c,bbBatchRecord
 bbBatchDone:
     pop hl

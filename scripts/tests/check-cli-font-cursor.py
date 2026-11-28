@@ -23,20 +23,20 @@ def main():
                               (0xf000, 'IO.main.bin'), (0xd800, f'fonts/{font}.i80')):
             data = (ROOT / 'bin' / name).read_bytes()
             memory[address:address + len(data)] = data
-        memory[bios['bios_vars']:bios['bios_vars'] + bios['BIOS_VARIABLES']] = \
-            memory[bios['initVars']:bios['initVarsEnd']]
+        memory[bios['mon2_vars']:bios['mon2_vars'] + bios['MON2_VARIABLES']] = \
+            (ROOT/'bin/BIOS.defaults.bin').read_bytes()[:bios['MON2_VARIABLES']]
         memory[bios['bios_upper.escMode']] = 255
         memory[symbols['cliHistoryCount']] = 1
         memory[symbols['cliHistoryNext']] = 1
         at = symbols['cliHistoryEntries']
         memory[at:at + len(text) + 1] = text + b'\0'
-        memory[bios['bios_getch']:bios['bios_getch'] + 3] = b'\xc3' + word(0x8500)
+        memory[bios['mon2_getchOld']:bios['mon2_getchOld'] + 3] = b'\xc3' + word(0x8500)
         reader = bytes.fromhex('2a 00 86 7e 23 22 00 86 b7 c9')
         memory[0x8500:0x8500 + len(reader)] = reader
         memory[0x8600:0x8602] = word(0x8700)
         memory[0x8700:0x8700 + len(keys)] = bytes(keys)
         code = (b'\x31' + word(0x8b00) + b'\xcd' + word(bios['FONT_ENGINE_INIT']) +
-                b'\x21' + bytes([120, x]) + b'\x22' + word(bios['bios_vars.cursorY']) +
+                b'\x21' + bytes([120, x]) + b'\x22' + word(bios['mon2_vars.cursorY']) +
                 b'\xcd' + word(symbols['cliInput']) + b'\xc3' + word(0x80ff))
         memory[0x8000:0x8000 + len(code)] = code
         (OUT / 'in.bin').write_bytes(memory)
@@ -69,10 +69,10 @@ def main():
                 assert actual == expected, (font, x, keys, actual)
                 assert value('lineEditPosition') == position
                 assert value('lineEditWidth') == (192 - step - origin) // step
-                assert m[bios['bios_vars.cursorY']] == y, (font, x, 'unexpected newline')
+                assert m[bios['mon2_vars.cursorY']] == y, (font, x, 'unexpected newline')
                 cursor = origin + (position - value('lineEditOffset')) * step
-                assert m[bios['bios_vars.cursorX']] == cursor, (font, x, keys, cursor,
-                                                              m[bios['bios_vars.cursorX']])
+                assert m[bios['mon2_vars.cursorX']] == cursor, (font, x, keys, cursor,
+                                                              m[bios['mon2_vars.cursorX']])
                 assert cursor < 192 - step
         print(font, 'history/backspace/insertion/Home/End/draft/scroll/right edge PASS')
 

@@ -1,5 +1,5 @@
 ; Общая сборка LOCAL/CLIENT/TEXT с взаимными ссылками.
-; Сборщик разделяет бинарник по mx_callPacket на два установочных сегмента.
+; Сборщик разделяет бинарник по MEM_BANK_CLIENT_START на два установочных сегмента.
     INCLUDE "../common/system.inc"
     INCLUDE "biosabi.inc"
     INCLUDE "abi.inc"
@@ -110,7 +110,7 @@ mainLocalEnd:
 ;----------------------------------------------------------------------------
 ; MXOS
 ; Распознать регистровую BIOS-службу без вложенных вызовов.
-; вход: DOS/EXEC, стек содержит AF и адрес DW после CALL F806h; BC/DE/HL исходные.
+; вход: DOS/EXEC, стек содержит AF и адрес DW после CALL mx_callRegs; BC/DE/HL исходные.
 ; выход: обычная ветвь восстанавливает кадр декодера; быстрая возвращает AF/BC/DE/HL за DW.
 ;----------------------------------------------------------------------------
 bankFastDecode:
@@ -147,7 +147,9 @@ bankMxCall:
     push de
     jp memBiosRoute
 localBlockEnd:
-    ASSERT $ <= mx_callPacket
-    DS mx_callPacket-$,0
+    ASSERT $ <= MEM_BANK_CLIENT_START
+    DS MEM_BANK_CLIENT_START-$,0
+    INCLUDE "client-bank.inc"
+    ASSERT $ == mx_callPacket
     INCLUDE "CLIENT.asm"
     END

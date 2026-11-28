@@ -28,6 +28,13 @@ function Test-RelocatableTarget($Format, $Flags) {
     }
 }
 
+function Get-MonitorBytes([string]$Name) {
+    if ($Name.Length -gt 63 -or $Name -cnotmatch '\A(?:[a-zA-Z]:)?[a-zA-Z0-9_.~\\-]+\z') {
+        throw 'Invalid DOS monitor name'
+    }
+    return ,[Text.Encoding]::ASCII.GetBytes($Name)
+}
+
 function Convert-ExecutableFile {
     param(
         [string]$Path,
@@ -39,6 +46,7 @@ function Convert-ExecutableFile {
         $data=[IO.File]::ReadAllBytes($Path);$kind=[IO.Path]::GetExtension($Path).ToLowerInvariant()
         $load=$LoadAddress;$entry=$load;$flags=0;$offset=0;$size=$data.Length;$expected=$null
         $fields=@{};$relocKind=$null;$alignment=0;[byte[]]$table=@()
+        $monitor='';$cpuMonitor=''
         if($kind -in @('.com','.exe','.dll','.fnt') -and $data.Length -ge 4 -and $data[2] -eq 0x4D -and $data[3] -eq 0x58) {
             if($data.Length -lt 16 -or $data[0] -ne 0xCD -or $data[1] -ne 0x20 -or $data[4] -notin @(1,2,3)){throw 'Expected MXOS2 container header'}
             $offset=@(16,32,40)[$data[4]-1]
@@ -55,11 +63,22 @@ function Convert-ExecutableFile {
                 $sum=[BitConverter]::ToUInt16($data,30)
                 Set-Word $data 30 0
                 if ((Get-ExecutableChecksum $data 40) -ne $sum) {throw 'Invalid v3 header checksum'}
-            } elseif ($data.Length -ne $offset+$size -or (Get-ExecutableChecksum $data ($offset-2)) -ne [BitConverter]::ToUInt16($data,$offset-2)) {
-                throw 'Invalid image size or checksum'
+            } else {
+                $count = if ($offset -eq 32) { [int]$data[29] } else { 0 }
+                $end = $offset + $size
+                if ($count) {
+                    if ($kind -notin @('.com','.exe') -or $data.Length -ne $end+$count+2) { throw 'Invalid named monitor trailer' }
+                    $monitor = [Text.Encoding]::ASCII.GetString($data,$end,$count)
+                    $name = Get-MonitorBytes $monitor
+                    if ((Get-ExecutableChecksum $name) -ne [BitConverter]::ToUInt16($data,$end+$count)) { throw 'Invalid named monitor checksum' }
+                    $end += $count+2
+                }
+                if ($data.Length -ne $end -or (Get-ExecutableChecksum $data ($offset-2)) -ne [BitConverter]::ToUInt16($data,$offset-2)) {
+                    throw 'Invalid image size or checksum'
+                }
             }
             if($offset -ge 32) {
-                if($data[27] -ne $offset -or $data[29]){throw 'Invalid image header size/reserve'}
+                if($data[27] -ne $offset -or ($offset -eq 40 -and $data[29])){throw 'Invalid image header size/reserve'}
                 foreach($pair in @(@('BSS',14),@('MEM_BEGIN',16),@('MEM_END',18),@('MIN_HEAP',20),@('STACK',24))){$fields[$pair[0]]='{0:X}' -f [BitConverter]::ToUInt16($data,$pair[1])}
                 $fields.POLICY='{0:X}' -f $data[22];$fields.API='{0:X}' -f $data[23];$fields.MODE='{0:X}' -f $data[26];$fields.CACHEABLE='{0:X}' -f $data[28]
             }
@@ -72,6 +91,7 @@ function Convert-ExecutableFile {
             $i80=[IO.Path]::ChangeExtension($Path,'.i80')
             if([IO.File]::Exists($i80)) {
                 $descriptor=Read-CpuDescriptor $data;$load=$descriptor.Load;$entry=$descriptor.Entry;$flags=$descriptor.Flags;$fields=$descriptor.Fields
+                $cpuMonitor=$descriptor.Monitor
                 $data=[IO.File]::ReadAllBytes($i80);$size=$data.Length
                 if ($fields.ContainsKey('RELOC_KIND')) {
                     if (-not $fields.ContainsKey('BODY_SIZE') -or -not $fields.ContainsKey('ALIGN_LOG2')) {throw 'Relocatable CPU requires BODY_SIZE and ALIGN_LOG2'}
@@ -103,6 +123,11 @@ function Convert-ExecutableFile {
         $api=Read-ImageNumber 'API' $(if($nativeDefaults){2}else{0})
         $modes = @{AUTO=0;MX=1;STD=2;MON=3;RF=4}
         $mode=if($fields.ContainsKey('MODE') -and $modes.ContainsKey($fields.MODE)){$modes[$fields.MODE]}else{Read-ImageNumber 'MODE' 0}
+        if ($monitor -and ($mode -ne 3 -or $flags -notin @(0,4))) { throw 'Named monitor requires a fixed MAIN COM/EXE' }
+        if ($cpuMonitor -and $flags -in @(0,4) -and $null -eq $relocKind) {
+            if ($cpuMonitor -iin @('mon2.mon','monitor2.mon')) { $monitor = 'MONITOR2.MON' }
+            elseif ($mode -eq 3 -and $cpuMonitor -ine 'mxos2.mon') { $monitor = $cpuMonitor }
+        }
         if ($GameMode) {
             if ($Format -ne 'exe') { throw 'GameMode requires EXE output' }
             if ($GameMode -eq 'NATIVE') {
@@ -111,6 +136,12 @@ function Convert-ExecutableFile {
                 if ($flags) { throw 'RUN modes require a source with flags=0' }
                 $mode = $modes[$GameMode]
             }
+        }
+        [byte[]]$monitorBytes=@()
+        if ($monitor) {
+            if ($Format -in @('dll','fnt')) { throw 'Named monitor requires COM or EXE' }
+            $monitorBytes=Get-MonitorBytes $monitor
+            $mode=3
         }
         $options=Read-ImageNumber 'CACHEABLE' 0
         if ($null -ne $relocKind) {
@@ -141,7 +172,12 @@ function Convert-ExecutableFile {
             if($size -gt 65535){throw 'Image payload exceeds 65535 bytes'}
             $header=32;$version=2
             if ($null -ne $relocKind) {$header=40;$version=3}
-            $result=New-Object byte[] ($size+$header+$table.Length)
+            $resultBytes=$size+$header+$table.Length
+            if ($monitorBytes.Length) {
+                $resultBytes += $monitorBytes.Length+2
+                if ($resultBytes -gt 65535) { throw 'Named executable exceeds 65535 bytes' }
+            }
+            $result=New-Object byte[] $resultBytes
             $result[0]=0xCD;$result[1]=0x20;$result[2]=0x4D;$result[3]=0x58;$result[4]=$version;$result[5]=$flags
             Set-Word $result 6 $load;Set-Word $result 8 $entry;Set-Word $result 10 $size;Set-Word $result 12 $checksum
             Set-Word $result 14 $bss;Set-Word $result 16 $begin;Set-Word $result 18 $end;Set-Word $result 20 $heap
@@ -153,6 +189,11 @@ function Convert-ExecutableFile {
                 Set-Word $result 30 (Get-ExecutableChecksum $result 40)
                 [Array]::Copy($table,0,$result,$header+$size,$table.Length)
             } else {
+                $result[29]=$monitorBytes.Length
+                if ($monitorBytes.Length) {
+                    [Array]::Copy($monitorBytes,0,$result,$header+$size,$monitorBytes.Length)
+                    Set-Word $result ($header+$size+$monitorBytes.Length) (Get-ExecutableChecksum $monitorBytes)
+                }
                 Set-Word $result 30 (Get-ExecutableChecksum $result 30)
             }
             [Array]::Copy($payload,0,$result,$header,$size)

@@ -85,7 +85,7 @@ benchPrepareRow:
     ld c,11
 benchPrepareText:
     ld a,(hl)
-    call bios_upperCase
+    call sortStrings.upperCase
     ld (de),a
     inc hl
     inc de
@@ -131,7 +131,7 @@ benchPreparePlaneRow:
     ld c,11
 benchPreparePlaneByte:
     ld a,(hl)
-    call bios_upperCase
+    call sortStrings.upperCase
     ld (de),a
     inc hl
     inc d
@@ -482,7 +482,7 @@ benchRadixKey:
 benchRadixKeyLoad:
     ld a,(hl)
     IF PREUPPER == 0
-    jp bios_upperCase
+    jp sortStrings.upperCase
     ELSE
     ret
     ENDIF

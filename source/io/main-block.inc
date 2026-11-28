@@ -23,14 +23,14 @@ mainBlockIO:
     jp nc,mainIoDispatch
     ld b,3
     ld a,SYSTEM_DRIVE
-    call bios_blockIO
+    call blockIO
     jp c,mainIoFailed
     ex de,hl
     ld a,h
     ld (io_vars.romBlocksHi),a
     ex de,hl
     ld hl,(mainIoRequest+1)
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp nc,mainIoBad
     ld hl,(mainIoRequest+3)
     ld a,h
@@ -53,7 +53,7 @@ mainIoDispatch:
     ; Прямую запись выполняем только для установленного AT29C-драйвера.
     ld b,0FFh
     ld a,SYSTEM_DRIVE
-    call bios_blockIO
+    call blockIO
     jp c,mainIoFailed
     ld a,b
     cp DISK_TECH_MX_SYSTEM_FLASH
@@ -77,6 +77,6 @@ mainIoDispatch:
     ld hl,BIOS_DISK_BUFFER
     ld b,1
     ld a,SYSTEM_DRIVE
-    call bios_blockIO
+    call blockIO
     ret nc
     jp mainIoFailed

@@ -20,9 +20,9 @@ base = bytearray(65536)
 for name, address in [('BIOS', 0xC000), ('IO', 0xF000)]:
     data = (R/f'bin/{name}.sys').read_bytes()
     base[address:address+len(data)] = data
-base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']] = base[S['initVars']:S['initVarsEnd']]
+base[S['mon2_vars']:S['mon2_vars']+S['MON2_VARIABLES']] = (R/'bin/BIOS.defaults.bin').read_bytes()[:S['MON2_VARIABLES']]
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(compact)] = compact
-base[S['bios_upper.charGen']:S['bios_upper.charGen']+9] = base[S['initTextVars']:S['initTextVarsEnd']]
+base[S['bios_upper.charGen']:S['bios_upper.charGen']+9] = (R/'bin/BIOS.defaults.bin').read_bytes()[S['MON2_VARIABLES']:]
 base[0x6000:0x6800] = font
 base[0x6800:0x7000] = bytes((x ^ 0x15) & 63 for x in font)
 base[0x9000:0xC000] = bytes((i*37+(i>>8)*13)&255 for i in range(12288))
@@ -30,7 +30,7 @@ base[S['GLYPH_CACHE_EPOCH']] = 9
 base[S['bios_upper.escMode']] = 255
 
 # РќРµР·Р°РІРёСЃРёРјС‹Р№ РїРѕСЃРёРјРІРѕР»СЊРЅС‹Р№ С†РёРєР»: РїРѕР»РЅС‹Р№ printChar СЃРѕ С€С‚Р°С‚РЅС‹Рј С„СЂРѕРЅС‚РµРЅРґРѕРј.
-reference = bytes.fromhex('C5 F5 7E B7 CA 0F 08 4F CD')+W(S['bios_printChar'])+bytes.fromhex('23 C3 02 08 F1 C1 C9')
+reference = bytes.fromhex('C5 F5 7E B7 CA 0F 08 4F CD')+W(S['mon2_printCharOld'])+bytes.fromhex('23 C3 02 08 F1 C1 C9')
 base[0x800:0x800+len(reference)] = reference
 
 def execute(memory, code):
@@ -47,14 +47,14 @@ def call(memory, entry, af=0, hl=0, bc=0x1357, de=0x2468):
     return execute(memory, code)
 
 def state(data):
-    return tuple(bytes(data[S[k]:S[k]+n]) for k, n in [('bios_vars.cursorY', 2), ('bios_upper.escMode', 1), ('bios_upper.koi7', 1)])
+    return tuple(bytes(data[S[k]:S[k]+n]) for k, n in [('mon2_vars.cursorY', 2), ('bios_upper.escMode', 1), ('bios_upper.koi7', 1)])
 
 def render(memory, text, entry, x=0, y=8, inverse=0, koi=0):
     m = bytearray(memory)
     m[0x1000:0x1000+len(text)+1] = text+b'\0'
-    m[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2] = bytes([y, x])
-    m[S['bios_vars.inverse']:S['bios_vars.inverse']+2] = bytes([inverse])*2
-    m = bytearray(call(m,S['bios_setFontEncoding'],af=koi<<8)[0][:65536])
+    m[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2] = bytes([y, x])
+    m[S['mon2_vars.inverse']:S['mon2_vars.inverse']+2] = bytes([inverse])*2
+    m = bytearray(call(m,S['FONT_ENGINE_ENCODING'],af=koi<<8)[0][:65536])
     got, cycles = call(m, entry, af=0x5A97, hl=0x1000)
     assert got[65536:65538] == bytes([0x97, 0x5A]), got[65536:65538].hex()
     assert got[65538:65542] == W(0x1357)+W(0x1000+len(text)), got[65538:65542].hex()
@@ -93,7 +93,7 @@ for linear in (False,):
     for text, x, y, inverse, koi in samples:
         expected, _ = render(m, text, 0x800, x, y, inverse, koi)
         for label, memory in [('rotate', m), ('prerender', built[:65536])]:
-            actual, _ = render(memory, text, S['bios_printString'], x, y, inverse, koi)
+            actual, _ = render(memory, text, S['mon2_printStringOld'], x, y, inverse, koi)
             assert actual[0x9000:0xC000] == expected[0x9000:0xC000], (label, linear, x, y, inverse, koi, text[:12])
             assert state(actual) == state(expected), (label, 'state', linear, x, y)
             checks += 1
@@ -105,17 +105,17 @@ for xphase in range(4):
         for koi in (0,255):
             for memory in (m,built[:65536]):
                 mem=bytearray(memory)
-                mem[S['bios_vars.inverse']:S['bios_vars.inverse']+2]=bytes([inv])*2
-                mem=bytearray(call(mem,S['bios_setFontEncoding'],af=koi<<8)[0][:65536])
+                mem[S['mon2_vars.inverse']:S['mon2_vars.inverse']+2]=bytes([inv])*2
+                mem=bytearray(call(mem,S['FONT_ENGINE_ENCODING'],af=koi<<8)[0][:65536])
                 expected=bytearray(mem)
                 code=b'\x31'+W(0x8FE0)
                 positions=[]
                 for c in range(256):
                     x=(c%24)*8+xphase
                     y=7+(c//24)*8
-                    code+=b'\x21'+W((x<<8)|y)+b'\x22'+W(S['bios_vars.cursorY'])
-                    code+=bytes([0x3E,c,0xCD])+W(S['bios_printCharRaw'])
-                    code+=b'\x2A'+W(S['bios_vars.cursorY'])+b'\x22'+W(0x7800+c*2)
+                    code+=b'\x21'+W((x<<8)|y)+b'\x22'+W(S['mon2_vars.cursorY'])
+                    code+=bytes([0x3E,c,0xCD])+W(S['FONT_ENGINE_RAW'])
+                    code+=b'\x2A'+W(S['mon2_vars.cursorY'])+b'\x22'+W(0x7800+c*2)
                     accepted=True
                     positions+=list(bytes([y,x+3 if accepted else x]))
                     if not accepted: continue
@@ -142,18 +142,18 @@ for koi in (0,255):
             clean = text
             # Independent scalar Raw loop, including control-code glyphs.
             rawref = bytearray(memory)
-            routine = bytearray.fromhex('C5 F5 D5 7E B7 CA 00 00 E5 C5 D5 7E CD')+W(S['bios_printCharRaw'])+bytes.fromhex('D1 C1 E1 23 C3 03 08 D1 F1 C1 C9')
+            routine = bytearray.fromhex('C5 F5 D5 7E B7 CA 00 00 E5 C5 D5 7E CD')+W(S['FONT_ENGINE_RAW'])+bytes.fromhex('D1 C1 E1 23 C3 03 08 D1 F1 C1 C9')
             routine[6:8] = W(0x800+len(routine)-4)
             rawref[0x800:0x800+len(routine)] = routine
             reference,_ = render(rawref,clean,0x800,inverse=inverse,koi=koi)
-            actual,_ = render(memory,text,S['bios_printStringRawZ'],inverse=inverse,koi=koi)
+            actual,_ = render(memory,text,S['FONT_ENGINE_RAWZ'],inverse=inverse,koi=koi)
             assert actual[0x9000:0xC000] == reference[0x9000:0xC000], 'real controls'
             assert actual[S['bios_upper.escMode']] == 255 and actual[S['fast6.realMode']] == 0
             checks += 1
 # РџРµСЂРµСЃС‚Р°РЅРѕРІРєР° KOI РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ РЅРµР·Р°РІРёСЃРёРјРѕ РѕС‚ РѕР±РѕРёС… СЂРµРЅРґРµСЂРѕРІ.
 for memory in (m,built[:65536]):
     koi = bytearray(memory)
-    after,_ = call(koi,S['bios_setFontEncoding'],af=0xFF00)
+    after,_ = call(koi,S['FONT_ENGINE_ENCODING'],af=0xFF00)
     source_font = memory[S['FONT_ADDR']:S['FONT_ADDR']+2048]
     expected_font = bytearray(source_font)
     for y in range(8):
@@ -162,13 +162,13 @@ for memory in (m,built[:65536]):
             expected_font[y*256+0xE0+c] = source_font[y*256+0x60+c]
     assert after[S['FONT_ADDR']:S['FONT_ADDR']+2048] == expected_font
     after = bytearray(after[:65536])
-    restored,_ = call(after,S['bios_setFontEncoding'],af=0)
+    restored,_ = call(after,S['FONT_ENGINE_ENCODING'],af=0)
     assert restored[S['FONT_ADDR']:S['FONT_ADDR']+2048] == source_font
     assert restored[0x3000:0x5800] == memory[0x3000:0x5800], 'KOI round trip prerender'
     checks += 1
 esc_memory = bytearray(m)
 esc_memory[S['bios_upper.escMode']] = 1
-actual,_ = render(esc_memory,b'ABCDEFGH',S['bios_printStringRawZ'])
+actual,_ = render(esc_memory,b'ABCDEFGH',S['FONT_ENGINE_RAWZ'])
 reference,_ = render(m,b'ABCDEFGH',0x800)
 assert actual[0x9000:0xC000] == reference[0x9000:0xC000]
 assert actual[S['bios_upper.escMode']] == 1
@@ -179,7 +179,7 @@ linear_memory = bytearray(base)
 linear_memory[S['bios_upper.charGen']:S['bios_upper.charGen']+2] = W(0x6000)
 for text in (b'abcDEF', bytes(range(32,256))):
     expected,_ = render(linear_memory,text,0x800)
-    actual,_ = render(linear_memory,text,S['bios_printString'])
+    actual,_ = render(linear_memory,text,S['mon2_printStringOld'])
     assert actual[0x9000:0xC000] == expected[0x9000:0xC000], 'linear fallback'
     checks += 1
 
@@ -199,7 +199,7 @@ for change in ('font', 'epoch'):
     got, _ = call(stale, S['fast6.service'])
     assert got[65537] == 0 and not got[65536]&1
     expected, _ = render(stale, b'abcdefgh', 0x800)
-    actual, _ = render(stale, b'abcdefgh', S['bios_printString'])
+    actual, _ = render(stale, b'abcdefgh', S['mon2_printStringOld'])
     assert actual[0x9000:0xC000] == expected[0x9000:0xC000], change
     checks += 1
 # РћРґРёРЅРѕС‡РЅС‹Рµ РіРѕР»РѕРІС‹/С…РІРѕСЃС‚С‹ РЅРµ С‡РёС‚Р°СЋС‚ РёСЃРїРѕСЂС‡РµРЅРЅС‹Рµ С„Р°Р·С‹ РїРѕСЃР»Рµ РёРЅРІР°Р»РёРґРёСЂРѕРІР°РЅРёСЏ.
@@ -211,7 +211,7 @@ for x in range(4):
         for n in (1,2,3):
             text=b'ABC'[:n]
             expected,_=render(m,text,0x800,x=x,inverse=inverse)
-            actual,_=render(stale,text,S['bios_printString'],x=x,inverse=inverse)
+            actual,_=render(stale,text,S['mon2_printStringOld'],x=x,inverse=inverse)
             assert actual[0x9000:0xC000]==expected[0x9000:0xC000],('stale scalar',x,inverse,n)
             checks+=1
 
@@ -229,13 +229,13 @@ corpus = (R/'assets/system-rom/README.TXT').read_bytes().replace(b'\r\n', b' ').
 corpus = bytes(c if c >= 32 else 32 for c in corpus)[:1152].ljust(1152, b' ')
 for linear, (plain, pre) in prepared.items():
     images = []
-    for label, memory, entry in [('char', plain, 0x800), ('char-pre',pre,0x800), ('rotate', plain, S['bios_printString']), ('prerender', pre, S['bios_printString']), ('real-rotate',plain,S['bios_printStringRawZ']), ('real-prerender',pre,S['bios_printStringRawZ'])]:
+    for label, memory, entry in [('char', plain, 0x800), ('char-pre',pre,0x800), ('rotate', plain, S['mon2_printStringOld']), ('prerender', pre, S['mon2_printStringOld']), ('real-rotate',plain,S['FONT_ENGINE_RAWZ']), ('real-prerender',pre,S['FONT_ENGINE_RAWZ'])]:
         mem = bytearray(memory)
         code = b'\x31'+W(0x8FE0)
         for row in range(24):
             address = 0x1000+row*49
             mem[address:address+49] = corpus[row*48:row*48+48]+b'\0'
-            code += b'\x21'+W(7+row*8)+b'\x22'+W(S['bios_vars.cursorY'])+b'\x21'+W(address)+b'\xcd'+W(entry)
+            code += b'\x21'+W(7+row*8)+b'\x22'+W(S['mon2_vars.cursorY'])+b'\x21'+W(address)+b'\xcd'+W(entry)
         code += b'\xc3'+W(0x2000)
         got, cycles = execute(mem, code)
         images.append(got[0x9000:0xC000])
@@ -249,12 +249,12 @@ for memory in prepared[False]:
         for phase in range(4):
             raw=bytearray(memory)
             raw[0x1000:0x1000+n+4]=bytes(c&255 for c in range(n+4))
-            raw[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2]=bytes([7,phase])
-            routine=bytearray.fromhex('78 B1 CA 00 00 C5 E5 7E CD')+W(S['bios_printCharRaw'])+bytes.fromhex('E1 C1 23 0B C3 00 08 C9')
+            raw[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2]=bytes([7,phase])
+            routine=bytearray.fromhex('78 B1 CA 00 00 C5 E5 7E CD')+W(S['FONT_ENGINE_RAW'])+bytes.fromhex('E1 C1 23 0B C3 00 08 C9')
             routine[3:5]=W(0x800+len(routine)-1)
             raw[0x800:0x800+len(routine)]=routine
             ref,_=call(raw,0x800,hl=0x1000,bc=n)
-            got,_=call(raw,S['bios_printStringRawLim'],af=0x5A97,hl=0x1000,bc=n)
+            got,_=call(raw,S['FONT_ENGINE_LIM'],af=0x5A97,hl=0x1000,bc=n)
             assert got[65536:65538]==W(0x5A97),('RawLim AF',n,phase)
             assert got[65538:65540]==W(n),('RawLim BC',n,phase)
             assert got[65548:65550]==W(0x2468),('RawLim DE',n,phase)
@@ -267,11 +267,11 @@ for memory in prepared[False]:
 for n in (0,1,3,4,20,256,257):
     raw=bytearray(prepared[False][0])
     raw[S['bios_upper.charGen']:S['bios_upper.charGen']+2]=W(0x6000)
-    raw[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2]=bytes([7,1])
+    raw[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2]=bytes([7,1])
     raw[0x1000:0x1000+n+4]=bytes(c&255 for c in range(n+4))
     raw[0x800:0x800+len(routine)]=routine
     ref,_=call(raw,0x800,hl=0x1000,bc=n)
-    got,_=call(raw,S['bios_printStringRawLim'],hl=0x1000,bc=n)
+    got,_=call(raw,S['FONT_ENGINE_LIM'],hl=0x1000,bc=n)
     assert got[0x9000:0xC000]==ref[0x9000:0xC000],('RawLim linear',n)
     assert got[65540:65542]==W(0x1000+n)
     assert state(got)==state(ref)

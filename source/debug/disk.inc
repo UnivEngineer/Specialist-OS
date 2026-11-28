@@ -1,9 +1,10 @@
 ; Выход, каталог и дисковые директивы
 ; Порядок включения задан главным .asm; см. README.md.
 
-Dir_J:  CALL  bios_keyCheck
+Dir_J:
+        MXOS_CALL_REGS MXOS_BIOS_KEY_CHECK
         INC   A
-        JP    Z,bios_reboot
+        JP    Z,mon2_init
         JP    Dir_J
 
 ;----------------------------------------------------------------------------
@@ -37,9 +38,9 @@ DirDiskLoop:
         LD    A,(HL)            ; первый символ имени файла
         INC   A
         RET   Z                 ; если FF (конец каталога) - выходим
-        CALL  bios_keyCheck     ; Проверяем, не нажата ли клавиша
+        MXOS_CALL_REGS MXOS_BIOS_KEY_CHECK     ; Проверяем, не нажата ли клавиша
         CP    1FH               ; СТР
-        CALL  Z,bios_getch      ; если нажата СТР, ждем нажатия СТР еще раз
+        CALL  Z,mon2_getchOld      ; если нажата СТР, ждем нажатия СТР еще раз
         CP    1FH               ; СТР
         RET   Z                 ; выход, если СТР нажата еще раз
         CALL  printFileNameReal ; 8 символов имени, точка и 3 расширения одним пакетом
@@ -105,10 +106,10 @@ Dir_B:  ; адрес начала - в дескриптор
         ; или "МАЛ DIR"
 printCreateError:   OR    A
         JP    Z,printDirectoryFull
-        JP    bios_printString
+        JP    mon2_printStringOld
 
 printDirectoryFull:   LD    HL, txtSmallDir
-        JP    bios_printString
+        JP    mon2_printStringOld
 
 ;----------------------------------------------------------------------------
 ; Русский текст в кодировке КОИ-7
@@ -121,7 +122,7 @@ txtNoFile:      DB 0AH,0DH,"NO FILE ",00H
 ; Директива A - изменение адреса загрузки файла
 
 Dir_A:  LD HL,txtHeaderAddress
-        JP bios_printString
+        JP mon2_printStringOld
 txtHeaderAddress:   DB 0AH,"ADDRESS IS IN FILE HEADER",0
 v_dumpAddress:      DW 0
 
@@ -145,7 +146,7 @@ Dir_V:  ; запоминаем первый параметр директивы 
         ; если файл не найден - вывод сообщения "НЕТ ФАЙЛА" и выход
         PUSH  AF
         LD    HL,txtNoFile
-        CALL  C,bios_printString
+        CALL  C,mon2_printStringOld
         POP   AF
         POP   DE
         RET   C
@@ -198,7 +199,7 @@ Dir_Y:  PUSH  HL
         POP   HL
         MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_ATTR ; установка байта атрибутов файла
         LD    HL,txtNoFile
-        CALL  C,bios_printString    ; если файл не найден - вывести сообщение
+        CALL  C,mon2_printStringOld    ; если файл не найден - вывести сообщение
         RET
 
 ;----------------------------------------------------------------------------
@@ -211,10 +212,10 @@ Dir_Q:
         MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_ATTR ; чтение байта атрибутов файла
         PUSH  AF                    ; результат и флаг ошибки (cf) - в стек
         LD    HL,txtNoFile
-        CALL  C,bios_printString    ; если файл не найден - вывести сообщение
+        CALL  C,mon2_printStringOld    ; если файл не найден - вывести сообщение
         CALL  printSpace
         POP   AF                    ; вытаскиваем байт атрибутов
-        CALL  NC,bios_printHexByte  ; печатаем байт атрибутов, если не было ошибки
+        CALL  NC,mx_printHexByte  ; печатаем байт атрибутов, если не было ошибки
         RET
 
 ;----------------------------------------------------------------------------
@@ -224,10 +225,10 @@ Dir_Q:
 
 EnterFileName:
         LD    HL,txtFileQuestMark   ; печать приглашеиня ввести имя файла
-        CALL  bios_printString
+        CALL  mon2_printStringOld
         LD    HL,INPUT_BUF          ; буфер для ввода строки
         LD    DE,INPUT_BUF_END
-        CALL  bios_input
+        MXOS_CALL_REGS MXOS_BIOS_INPUT
         LD    DE,v_fileDescr.name   ; буфер для подготовленного имени файла
         MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE ; подготавливаем имя файла
         EX    DE,HL                 ; HL = подготовленное имя файла

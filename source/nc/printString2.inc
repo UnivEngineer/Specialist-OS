@@ -30,7 +30,7 @@ ncFieldDone:
         xor a
         ld (de),a
         ld hl,ncTextBuffer
-        call bios_printStringRawZ
+        call FONT_ENGINE_RAWZ
         pop hl
         pop de
         pop bc
@@ -45,7 +45,7 @@ ncPrintChar:
         ld a,c
         ld (ncCharText),a
         ld hl,ncCharText
-        call bios_printStringRawZ
+        call FONT_ENGINE_RAWZ
         pop hl
         pop af
         ret
@@ -71,7 +71,7 @@ ncTextLimCount:
         jp nz,ncTextLimCount
 ncTextLimReady:
         pop hl
-        call bios_printStringRawLim
+        call FONT_ENGINE_LIM
         pop de
         pop bc
         pop af
@@ -85,7 +85,7 @@ ncPrintPanelText:
         push bc
         push de
         push hl
-        ld a,(bios_vars.cursorX)
+        ld a,(mon2_vars.cursorX)
         cp 96
         jp c,ncPanelTextLeft
         sub 96
@@ -129,7 +129,7 @@ ncPanelTextEnd:
         ld (de),a
         push hl
         ld hl,ncTextBuffer
-        call bios_printStringRawZ
+        call FONT_ENGINE_RAWZ
         pop hl
         pop de
         pop bc
@@ -144,7 +144,7 @@ ncPrintDecWord:
         push de
         push hl
         call ncFormatDecimal
-        call bios_printStringRawZ
+        call FONT_ENGINE_RAWZ
         pop hl
         pop de
         pop bc

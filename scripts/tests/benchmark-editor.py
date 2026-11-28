@@ -53,7 +53,7 @@ def fixture(font,full=False):
     payload=elite if full else elite[:min(16000,0x6400-T-129)].rsplit(b'\r',1)[0]+b'\r'
     assert T+len(payload)+1<limit,(font,len(payload),T,limit)
     m[T:T+len(payload)+1]=payload+b'\0'
-    for name,v in [('v_textBeginLo',T),('v_textEnd',T+len(payload)),('v_currentLine',T),('v_topLine',T),('v_lineNumber',1),('v_textLimitLo',limit),('bios_vars.cursorY',S['EDITOR_FIRST_Y'])]:word(m,name,v)
+    for name,v in [('v_textBeginLo',T),('v_textEnd',T+len(payload)),('v_currentLine',T),('v_topLine',T),('v_lineNumber',1),('v_textLimitLo',limit),('mon2_vars.cursorY',S['EDITOR_FIRST_Y'])]:word(m,name,v)
     if 'v_fullLimit' in S:word(m,'v_fullLimit',limit)
     m[S['IO_KEYB_B']]=2
     if 'gapInitialize' in S:m,_=call(m,'gapInitialize')
@@ -99,7 +99,7 @@ for font in ['Rotate','Packed6K','Fast12K']:
     m,payload=fixture(font)
     m,cycles=call(m,'redrawPreservingCursor')
     record(font,'initial_page',cycles,fileBytes=len(payload))
-    assert int.from_bytes(m[S['bios_printStringRawLim']+1:S['bios_printStringRawLim']+3],'little')>=0xd800
+    assert int.from_bytes(m[S['FONT_ENGINE_LIM']+1:S['FONT_ENGINE_LIM']+3],'little')>=0xd800
     for i in range(3):
         m,cycles=call(m,'editorPageDown',trace='page' if a.trace_page and font=='Fast12K' and i==0 else False);record(font,'page_down',cycles,page=i+1,fileBytes=len(payload))
     for i in range(3):

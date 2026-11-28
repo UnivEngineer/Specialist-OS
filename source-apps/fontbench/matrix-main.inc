@@ -15,9 +15,9 @@ entry:
     ld a,1
     ld (packedOverlay),a
     call font4RestorePackedOverlay
-    call bios_getMemTop
+    call mx_getMemTop
     ld de,textCorpus+FONT_CORPUS_SIZE-1
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,corpusNoMemory
     ld hl,07E00h
     ld (cachePrivateStart),hl
@@ -26,7 +26,7 @@ entry:
     ld hl,fontCorpus
     ld de,fontCorpus+FONT_CORPUS_SIZE
     ld bc,textCorpus
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     IFDEF FONT_BLOCK32
     call blockNormalizeCorpus
     ENDIF
@@ -41,7 +41,7 @@ entry:
     ld bc,3
     call bench_copy
     ld c,'A'
-    call bios_printChar
+    call mon2_printCharOld
     call bench_clear
 report:
     ld hl,matchText
@@ -239,7 +239,7 @@ matrixPrint:
     ld hl,matrixPageText
     call puts
 matrixPageKey:
-    call bios_getch
+    call mon2_getchOld
     cp 13
     jp nz,matrixPageKey
     call bench_clear
@@ -251,7 +251,7 @@ matrixPageReady:
     ld a,(matrixSummaryY)
     ld l,a
     ld h,0
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld a,(matrixSummaryY)
     add a,8
     ld (matrixSummaryY),a
@@ -319,7 +319,7 @@ matrixPrinted:
     ld a,(matrixSummaryY)
     ld l,a
     ld h,0
-    call bios_setCursorPos
+    call mx_setCursorPos
 matrixResultsText:
     call bank_close
     ld hl,(bitmapResult)

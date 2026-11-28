@@ -131,20 +131,31 @@ v_batEcho:          DB 1  ; BAT печатает команды, пока не �
     IFDEF BANKED_DOS_BUILD
 v_memTop: DW DOS_CODE_START-1
 kernelRamDrive: DB RAM_DRIVE
+    IFDEF MX_FLOPPY_BOOT
+kernelFloppyDrive: DB FLOPPY_DRIVE
+    ELSE
 kernelFloppyDrive: DB 0FFh
+    ENDIF
 kernelExternalDrive: DB 0FFh
 v_drive:        DB RAM_DRIVE
-v_drives:       DW diskDriverDummy, diskDriver      ; A:, B:
+v_drives:
     IFDEF MX_FLOPPY_BOOT
-                DW diskDriverDummy, diskDriverDummy ; C: подключается командой SYSROM
+    ASSERT FLOPPY_DRIVE == 0
+                DW diskDriver,      diskDriver      ; A:, B:
+                DW diskDriverDummy, diskDriverDummy ; C:, D:. SYSROM подключает C:
     ELSE
-                DW diskDriver, diskDriverDummy      ; C:, D:
+                DW diskDriverDummy, diskDriver      ; A:, B:
+                DW diskDriver,      diskDriverDummy ; C:, D:
     ENDIF
-                    DW diskDriverDummy, diskDriverDummy  ; E:, F:
-                    DW diskDriverDummy, diskDriverDummy  ; G:, H:
+                DW diskDriverDummy, diskDriverDummy ; E:, F:
+                DW diskDriverDummy, diskDriverDummy ; G:, H:
 
 ; installDriver
+    IFDEF MX_FLOPPY_BOOT
+v_blockShifts: DB 9,8,8,8,8,8,8,8
+    ELSE
 v_blockShifts: DB 8,8,8,8,8,8,8,8
+    ENDIF
     ENDIF
 
 ; PATH занимает MAX_PATH байт и переживает тёплый перезапуск.

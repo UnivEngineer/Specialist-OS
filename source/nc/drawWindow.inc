@@ -37,15 +37,15 @@ drawWindow1:
         ld a,(ncGlyphHeight)
         call uiInputFieldPixels
         call ncModalInputCursor
-        call bios_setCursorPos
+        call mx_setCursorPos
         ld a,1
-        ld (bios_vars.inverse),a
+        ld (mon2_vars.inverse),a
         ld hl,ncInputEmpty
         ld a,(ncInputChars)
         ld b,a
         call ncPrintField
         xor a
-        ld (bios_vars.inverse),a
+        ld (mon2_vars.inverse),a
         ret
 
 ; ---------------------------------------------------------------------------

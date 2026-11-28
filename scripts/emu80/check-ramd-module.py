@@ -47,7 +47,7 @@ def main():
         assert not sub(0xC842,af=drive<<8,de=1)['flags']['C']
 
     def description():
-        s=sub(ds['bios_diskDriver'],bc=0xFF00)
+        s=sub(ds['sysDiskDriver'],bc=0xFF00)
         assert not s['flags']['C'] and s['registers']['bc']['dec']==0x5203
         return m.read(s['registers']['hl']['dec'],40).split(b'\0')[:2]
 
@@ -67,7 +67,7 @@ def main():
                     if mode==2:m.write(buf,bytes(256))
                     m.stop_at(0x8100)
                     before=m.call('cpu_state')['cpu_ticks']
-                    s=m.subroutine(ds['bios_diskDriver'],af=0x5A02,bc=mode*256+0xA7,de=sector,hl=buf)
+                    s=m.subroutine(ds['sysDiskDriver'],af=0x5A02,bc=mode*256+0xA7,de=sector,hl=buf)
                     assert not s['flags']['C'] and s['registers']['af']['dec']>>8==0x5A
                     assert all(s['registers'][k]['dec']==v for k,v in
                         dict(bc=mode*256+0xA7,de=sector,hl=buf,sp=0x8F00).items())
@@ -76,8 +76,8 @@ def main():
                         report['cycles'][label][str(mode)]=s['cpu_ticks']-before-27
         for sector,buf in [(0xFF,0x4001),(0xFFF,0x4001),(0x1000,0x4001),(0x100,0xFE01)]:
             for mode in [1,2]:
-                assert sub(ds['bios_diskDriver'],bc=mode*256,de=sector,hl=buf)['flags']['C']
-        assert sub(ds['bios_diskDriver'],bc=0x0400,de=0x100,hl=0x4001)['flags']['C']
+                assert sub(ds['sysDiskDriver'],bc=mode*256,de=sector,hl=buf)['flags']['C']
+        assert sub(ds['sysDiskDriver'],bc=0x0400,de=0x100,hl=0x4001)['flags']['C']
         report['checks'].append(label+': read/write boundaries, guards, registers, invalid arguments')
         print(label,'I/O OK',flush=True)
 
@@ -85,7 +85,7 @@ def main():
     assert description()==[b'RAMD',b'R4 BANKED']
     report['checks'].append('stock AUTOEXEC installs R4 before NC')
     # Для сравнения явно возвращаем встроенный R3 после обычной загрузки.
-    sub(ds['bios_installDriver'],af=0x0100,hl=ds['diskDriver'])
+    sub(ds['installDriver'],af=0x0100,hl=ds['diskDriver'])
     sub(ds['bios_setRAMDDriver'],bc=0x0200,hl=ds['driverBlockStart']);sub(ds['bios_setRAMDDriver'],bc=0)
     assert description()==[b'RAMD',b'R3']
     assert int.from_bytes(m.read(ds['v_drives']+2,2),'little')==ds['diskDriver']
@@ -127,7 +127,7 @@ def main():
     m.write(0,packed);m.write(0x7000,desc)
     assert not sub(0xC845,hl=0x7000,de=0)['flags']['C']
     execute('B:RAMDISK.COM')
-    assert int.from_bytes(m.read(ds['bios_diskDriver']+1,2),'little')==rs['Driver']
+    assert int.from_bytes(m.read(ds['sysDiskDriver']+1,2),'little')==rs['Driver']
     assert description()==[b'RAMD',b'R4 BANKED']
     assert tails()==expected
     report['checks'].append('reinstall from active B: immediately updates C863h')
@@ -172,7 +172,7 @@ def main():
     report['checks'].append('missing RAM / flush failure leave installed driver and tails intact')
 
     # Восстанавливаем встроенный драйвер и проверяем файл через байтовый путь.
-    sub(ds['bios_installDriver'],af=0x0100,hl=ds['diskDriver'])
+    sub(ds['installDriver'],af=0x0100,hl=ds['diskDriver'])
     sub(ds['bios_setRAMDDriver'],bc=0x0200,hl=ds['driverBlockStart']);sub(ds['bios_setRAMDDriver'],bc=0)
     assert description()==[b'RAMD',b'R3']
     m.write(0x7000,desc);m.write(0x4000,bytes(768))
@@ -189,7 +189,7 @@ def main():
     bs=symbols(ROOT/'source-apps/diskbench/build/DISKBEN.sym')
     for label in ['R3','R4 BANKED']:
         if label=='R3':
-            sub(ds['bios_installDriver'],af=0x0100,hl=ds['diskDriver'])
+            sub(ds['installDriver'],af=0x0100,hl=ds['diskDriver'])
             sub(ds['bios_setRAMDDriver'],bc=0x0200,hl=ds['driverBlockStart']);sub(ds['bios_setRAMDDriver'],bc=0)
         else:
             m.write(0,module);assert not sub(0)['flags']['C']

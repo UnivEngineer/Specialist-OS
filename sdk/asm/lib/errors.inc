@@ -51,7 +51,7 @@ dosErrorText:
     jp c,dosTextClose
     ld hl,(dosTextBuffer)
     ld de,DOS_ERROR_INDEX_BYTES
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,dosTextBad
     ld a,(dosTextBuffer+2)
     or a
@@ -125,7 +125,7 @@ dosTextReadAt:
     pop de
     ret c
     ld hl,(flHandle+FH_COUNT)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret z
     scf
     ret

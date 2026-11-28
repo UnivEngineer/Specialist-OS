@@ -22,7 +22,7 @@ printChar_c1A:    ; Если cursorY < 246, то cursorY += 10 и выход
             jp nc,  saveVCursorLA
 
             ; Сохраняем положение курсора (изменен только cursorX)
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
 
             ; Далее прокрутка экрана вверх
 

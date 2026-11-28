@@ -32,17 +32,17 @@ matrixProgressClearRow:
     dec b
     jp nz,matrixProgressClear
     ld hl,000FFh
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld hl,matrixStage
     inc (hl)
     ld a,(hl)
     call matrixProgressNumber
     ld c,'/'
-    call bios_printChar
+    call mon2_printCharOld
     ld a,(benchStageTotal)
     call matrixProgressNumber
     ld c,' '
-    call bios_printChar
+    call mon2_printCharOld
     ld a,(matrixBank)
     or a
     ld hl,matrixMainText
@@ -69,7 +69,7 @@ matrixProgressFont:
     ex de,hl
     call puts
     ld c,' '
-    call bios_printChar
+    call mon2_printCharOld
     ld hl,v_elapsed
     call print_time_ms
     ld hl,matrixMsText
@@ -91,7 +91,7 @@ matrixProgressHundredDone:
     cp '0'
     jp z,matrixProgressNoHundreds
     ld c,b
-    call bios_printChar
+    call mon2_printCharOld
     ld d,1
 matrixProgressNoHundreds:
     pop af
@@ -112,12 +112,12 @@ matrixProgressUnits:
     jp z,matrixProgressNoTens
 matrixProgressShowTens:
     ld c,b
-    call bios_printChar
+    call mon2_printCharOld
 matrixProgressNoTens:
     pop af
     add a,'0'
     ld c,a
-    jp bios_printChar
+    jp mon2_printCharOld
 
 matrixMainText:     DB 'MAIN ',0
 matrixDosText:      DB 'BANK ',0

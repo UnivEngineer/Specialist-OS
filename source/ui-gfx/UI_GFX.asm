@@ -71,17 +71,17 @@ ngBindCapacityOK:
     add hl,bc
     jp c,ngBindBad
     ld de,APP_MEMORY_END
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,ngBindCheckDll
     jp nc,ngBindBad
 ngBindCheckDll:
     ld de,entry
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     pop hl
     jp c,ngBindReady
     jp z,ngBindReady
     ld de,ngFileEnd
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,ngBad
 ngBindReady:
     ld (ngTransfer+4),hl
@@ -94,7 +94,7 @@ ngBindReady:
     ld hl,FONT_ENGINE_HEADER
     ld de,FONT_ENGINE_HEADER+8
     ld bc,ngResult+8
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     call ngSaveCursor
     ld hl,ngResult
     ld de,entry
@@ -148,23 +148,23 @@ ngStorePadding:
     xor a
     ret
 ngSaveCursor:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld (ngResult),hl
-    ld hl,(bios_vars.inverse)
+    ld hl,(mon2_vars.inverse)
     ld (ngResult+2),hl
     xor a
     ret
 ; CURSOR: HL = позиция BIOS, B = конфигурация курсора на один вывод,
 ; C = цвет. Восстанавливает прежнюю конфигурацию и возвращает A=0, CF=0.
 ngCursor:
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,c
     ld (IO_COLOR),a
     ld a,(bios_upper.cursorCfg)
     push af
     ld a,b
     ld (bios_upper.cursorCfg),a
-    call bios_drawCursor
+    MXOS_CALL_REGS MXOS_BIOS_DRAW_CURSOR
     pop af
     ld (bios_upper.cursorCfg),a
     xor a
@@ -179,7 +179,7 @@ ngBatch:
     ex de,hl
     ld hl,(ngPacketLimit)
     ex de,hl
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,ngBatchSizeOK
     jp nc,ngBad
 ngBatchSizeOK:
@@ -207,7 +207,7 @@ ngRecord:
     ex de,hl
     ld hl,(ngEnd)
     ex de,hl
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,ngSaveCursor
     jp nc,ngBad
     ld a,(hl)
@@ -225,14 +225,14 @@ ngRecord:
     ld d,(hl)
     inc hl
     ex de,hl
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ex de,hl
     ld e,(hl)
     inc hl
     ld d,(hl)
     inc hl
     ex de,hl
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     ex de,hl
     ld (ngRegisters),hl
     ld de,8
@@ -247,7 +247,7 @@ ngRecord:
     ex de,hl
     ld hl,(ngEnd)
     ex de,hl
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,ngDispatch
     jp nc,ngBad
 ngDispatch:
@@ -303,10 +303,10 @@ ngBad:
     ret
 ngVector:
     DW ngDraw,uiFillRectPixels,uiFrameRectPixels,uiInverseRectPixels
-    DW uiFillRectBytes,uiInverseRect,ngText,bios_printChar
+    DW uiFillRectBytes,uiInverseRect,ngText,mon2_printCharOld
     DW uiCopyTextRect,ngCopyColors,ngRecolor,uiDrawCheckbox
     DW ngToolbar,uiBitmapSave,ngRestoreColors,ngTileColumn
-    DW ngStore,uiBitmapRestore,ngStoreText,bios_printStringRawLim
+    DW ngStore,uiBitmapRestore,ngStoreText,FONT_ENGINE_LIM
     DW ngScrollbar,uiRecolorRectBytes,ngPseudoRows,ngTextPseudo,uiCopyRect,ngTextRows
     INCLUDE "text-rows.inc"
 ngScrollbar:
@@ -322,10 +322,11 @@ ngDraw:
     jp uiDraw
 ngText:
     ld hl,(ngPayload)
-    jp bios_printStringRawLim
+    jp FONT_ENGINE_LIM
 ngTextPseudo:
     ld hl,(ngPayload)
-    jp bios_printStringRawPseudo
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING_RAW_PSEUDO
+    ret
 ngStore:
     push de
     ld hl,(ngPayload)
@@ -333,7 +334,7 @@ ngStore:
     ld hl,(ngNextRecord)
     ex de,hl
     pop bc
-    jp bios_memcpy_bc_hl
+    jp mon2_memcpy_bc_hl
 ngRestoreColors:
     ld hl,(ngPayload)
     jp uiBitmapRestoreColors
@@ -426,7 +427,7 @@ ngStoreText:
     add hl,de
     ex de,hl
     ld hl,(ngPayload)
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,(ngStoredTexts)
     inc hl
     ld (ngStoredTexts),hl
@@ -449,7 +450,7 @@ ngPadLoop:
 ngSlotReady:
     pop hl
     ld b,0
-    jp bios_printStringRawLim
+    jp FONT_ENGINE_LIM
 ngBatches:      DW 0
 ngStoredTexts:  DW 0
 ngPacketBytes:  DW 0

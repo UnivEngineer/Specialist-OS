@@ -9,12 +9,12 @@ scalarEntry:
 batchEntry: jp render
 newLine:    push af
             push hl
-            ld hl, (bios_vars.cursorY)
+            ld hl, (mon2_vars.cursorY)
             ld h, 0
             ld a, l
             add a, 8
             ld l, a
-            ld (bios_vars.cursorY), hl
+            ld (mon2_vars.cursorY), hl
             pop hl
             pop af
             ret
@@ -23,12 +23,12 @@ render:     push af
             push de
             push hl
 glyphBody:
-            ld hl, (bios_vars.cursorY)
+            ld hl, (mon2_vars.cursorY)
             ld b, h
             inc h
             inc h
             inc h
-            ld (bios_vars.cursorY), hl
+            ld (mon2_vars.cursorY), hl
             ld h, b
             ld a, h
             and 3

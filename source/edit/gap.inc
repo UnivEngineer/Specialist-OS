@@ -36,7 +36,7 @@ gapPhysical:
         JP C,gapPhysicalDone
         PUSH HL
         LD HL,(v_gapHi)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         EX DE,HL
         POP HL
         ADD HL,DE
@@ -55,10 +55,10 @@ gapLogical:
         PUSH HL
         LD HL,(v_gapLo)
         EX DE,HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         POP DE
         RET
 ; Physical NUL can be a document byte, the gap marker, or EOF.
@@ -171,7 +171,7 @@ gapFree:
         LD HL,(v_undoLength)
         EX DE,HL
         POP HL
-        JP bios_sub_hl_de
+        JP nativeMath.sub_hl_de
 ; Total width, including a snapshot that a committed edit can discard.
 gapCapacity:
         LD HL,(v_gapHi)
@@ -179,7 +179,7 @@ gapCapacity:
         LD HL,(v_gapLo)
         EX DE,HL
         POP HL
-        JP bios_sub_hl_de
+        JP nativeMath.sub_hl_de
 
 ; Move the snapshot to end at DE. Snapshot size may be zero.
 gapMoveUndo:
@@ -196,7 +196,7 @@ gapMoveUndo:
         EX DE,HL
         POP HL
         PUSH BC
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         POP HL
         LD (v_undoStart),HL
         RET
@@ -225,7 +225,7 @@ gapMoveLoop:
         JP Z,gapSentinel
         PUSH AF
         JP C,gapMoveRightDistance
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         JP gapMoveDistanceReady
 gapMoveRightDistance:
         CALL subtractHLFromDE
@@ -252,7 +252,7 @@ gapMoveChunkReady:
         LD HL,(gapAmount)
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         EX DE,HL
         CALL gapMoveUndo
         LD HL,(v_gapLo)
@@ -260,7 +260,7 @@ gapMoveChunkReady:
         LD HL,(gapAmount)
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         PUSH HL
         LD HL,(v_gapHi)
         EX DE,HL
@@ -275,16 +275,16 @@ gapMoveChunkReady:
         EX DE,HL
         POP HL
         POP HL
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         LD HL,(v_gapLo)
         PUSH HL
         LD HL,(gapAmount)
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (v_gapLo),HL
         LD HL,(v_gapHi)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (v_gapHi),HL
         JP gapMoveLoop
 gapMoveRight:
@@ -301,7 +301,7 @@ gapMoveRight:
         LD B,H
         LD C,L
         POP HL
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         LD HL,(v_gapHi)
         PUSH HL
         LD HL,(gapAmount)

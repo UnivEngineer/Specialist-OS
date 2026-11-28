@@ -18,6 +18,9 @@ PRIVATE_SYMBOLS = {
     "IMAGE_LOAD_CONTEXT",
     "IO_VARIABLES",
     "MEM_WINDOW_VERSION",
+    "biosCliExecError",
+    "biosCliExecReturn",
+    "bios_setProfile",
     "bios_upper.cacheStart",
     "dos_fileHandle",
     "io_vars",
@@ -32,7 +35,7 @@ CLIENT = """
     INCLUDE "mxos.inc"
     ASSERT $ == 0100h
 
-    call bios_getMemTop
+    call mx_getMemTop
     ld hl,handle
     MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
     MXOS_CALL_PACKET MXOS_DOS_GET_ERROR,regs
@@ -41,6 +44,11 @@ handle BLOCK FILE_HANDLE,0
 regs MX_REGS
     ASSERT $ - regs == 8
     ASSERT FILE_DESCRIPTOR == 32
+    ASSERT bios_init == 0C800h
+    ASSERT bios_reboot == 0F800h
+    ASSERT mon2_init == 0C000h
+    ASSERT mon2_getch == 0C803h
+    ASSERT mon2_vars == 08FDFh
 """
 
 OPTIONAL_HEADERS = """
@@ -146,7 +154,7 @@ def main():
         directory = Path(temporary)
         shutil.copytree(ROOT / "sdk/asm", directory / "asm")
         client = assemble(directory, "client", CLIENT)
-        assert {"bios_getMemTop", "mx_callPacket", "FILE_DESCRIPTOR"} <= client
+        assert {"mx_getMemTop", "mx_callPacket", "FILE_DESCRIPTOR"} <= client
         assert {"DRIVER_INSTALL", "FAT16_BAD", "IMAGE_RELOC_HEADER", "GFX_HELP_OPEN"}.isdisjoint(client)
         assemble(directory, "optional", OPTIONAL_HEADERS)
         ui = assemble(directory, "ui", MAIN_UI)

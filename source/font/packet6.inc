@@ -32,7 +32,7 @@ checkEsc:
     inc a
     jp nz,emptyGroup
 stateReady:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 3
     jp nz,emptyGroup
@@ -44,13 +44,13 @@ stateReady:
 selectInverse:
     ; Обычное ядро не содержит NOP. Инверсное содержит CPL после слияния.
     ; Выбираем вход один раз перед пакетом, без проверки в пиксельном цикле.
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp z,routeReady
     ex de,hl
 routeReady:
     ld (route+1),hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 181
     jp nc,emptyGroup
@@ -186,10 +186,10 @@ startColumn: cp 0
     sub high MX_SCREEN_BASE
     add a,a
     add a,a
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     cp 192
     jp c,groupReturn
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     call fontLineEnd
 groupReturn:
     ld hl,(text)

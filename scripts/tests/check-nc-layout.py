@@ -1,6 +1,6 @@
 """8080 checks for NC runtime font geometry, bounded fields and lazy toolbar."""
 from pathlib import Path
-import re,subprocess
+import re,runpy,subprocess
 R=Path(__file__).resolve().parents[2]; O=R/'.local/nc-layout-cpu'; O.mkdir(exist_ok=True)
 def sy(p): return {k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',p.read_text(encoding='utf-8'),re.M)}
 N=sy(R/'bin/NC.sym'); S=sy(R/'bin/BIOS.sym'); W=lambda n:n.to_bytes(2,'little')
@@ -17,9 +17,10 @@ def call(m,entry,a=0,bc=0,de=0,hl=0):
  return bytearray(b[:65536])
 def seed(name):
  m=bytearray(65536)
- for at,file in [(0,'bin/NC.i80'),(0xc000,'bin/BIOS.sys'),(0xd800,f'bin/fonts/{name}.i80'),(0xf000,'bin/IO.main.bin')]:
+ runpy.run_path(str(Path(__file__).with_name('mem-image.py')))['install'](m,S,main=True)
+ for at,file in [(0,'bin/NC.i80'),(0xd800,f'bin/fonts/{name}.i80')]:
   data=(R/file).read_bytes();m[at:at+len(data)]=data
- m[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=m[S['initVars']:S['initVarsEnd']]
+ m[S['mon2_vars']:S['mon2_vars']+S['MON2_VARIABLES']]=(R/'bin/BIOS.defaults.bin').read_bytes()[:S['MON2_VARIABLES']]
  m[S['bios_upper.escMode']]=255
  m=call(m,'FONT_ENGINE_INIT');m=call(m,'ncLayoutInit')
  return m
@@ -139,7 +140,7 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
  # Full name with extension, file size/DIR: cannot overwrite any other cell.
  for directory in [False,True]:
   q=bytearray(m);q[0x8000:0x8010]=b'ABCDEFGHXYZ'+bytes([16 if directory else 0,0,0,255,255])
-  q[N['bios_vars.cursorY']:N['bios_vars.cursorY']+2]=bytes([N['P_FILE_LIST_Y'],4])
+  q[N['mon2_vars.cursorY']:N['mon2_vars.cursorY']+2]=bytes([N['P_FILE_LIST_Y'],4])
   q[0x9000:0xc000]=bytes([0x55])*12288
   result=call(q,'printFileNamOnPanel',hl=0x8000)
   changed=[i for i,(a,b) in enumerate(zip(q[0x9000:0xc000],result[0x9000:0xc000])) if a!=b]
@@ -148,19 +149,19 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
    assert m[N['ncCellBytes']]==6 and {i//256 for i in changed}==set(range(1,7)), '12 narrow characters occupy exactly 6 screen bytes'
  # The editing cursor uses the selected width, including a scrolled window.
  q=bytearray(m);q[N['lineEditOrigin']:N['lineEditOrigin']+2]=bytes([243,8]);q[N['lineEditPosition']]=13;q[N['lineEditOffset']]=3
- q=call(q,'lineEditCursor');assert q[N['bios_vars.cursorX']]==8+10*width//2
+ q=call(q,'lineEditCursor');assert q[N['mon2_vars.cursorX']]==8+10*width//2
  # BIOS blinking cursor: width, engine alignment, XOR restoration, right edge.
  for x in [0,1,2,3,4,186,188,190]:
   if width==6 and x==190:continue
-  q=bytearray(m);q[N['bios_vars.cursorY']:N['bios_vars.cursorY']+2]=bytes([243,x])
+  q=bytearray(m);q[N['mon2_vars.cursorY']:N['mon2_vars.cursorY']+2]=bytes([243,x])
   q[N['bios_upper.cursorCfg']]=1
   q[0x9000:0xc000]=bytes([0x55])*12288
-  result=call(q,'bios_drawCursor')
+  result=call(q,'drawCursor3')
   xp=x*2 if width==6 else (x*2//width)*width
   expected=bytearray(q[0x9000:0xc000])
   for pixel in range(xp,xp+width):expected[pixel//8*256+245]^=128>>(pixel%8)
   assert result[0x9000:0xc000]==expected,(name,x,'BIOS cursor mask')
-  assert call(result,'bios_drawCursor')[0x9000:0xc000]==q[0x9000:0xc000]
+  assert call(result,'drawCursor3')[0x9000:0xc000]==q[0x9000:0xc000]
  # Path display budgets include the full 8.3 leaf and never mutate the source.
  for path in [r'A:\Folder\Middle\File.txt',r'A:\FOLDER01\FOLDER02\FOLDER03\FILENAME.TXT',r'A:\12345678.123','A:\\',r'A:\ABC\DEF\GHI\JKL\FILE.TXT']:
   for budget in [19,20,22,24,28,36,40,44]:
@@ -178,7 +179,7 @@ for name,width,cols in [('Cpm4',4,3),('Compact',6,2),('Fast8',8,1)]:
    q[N['buildDriveList']]=0xc9
    q[N['vars.driveCount']]=count
    q[N['vars.driveList']:N['vars.driveList']+8]=bytes(range(8))
-   q[N['bios_getch']:N['bios_getch']+4]=bytes.fromhex('3e 1b b7 c9')
+   q[N['mon2_getchOld']:N['mon2_getchOld']+4]=bytes.fromhex('3e 1b b7 c9')
    q[0x9000:0xc000]=bytes([0x55])*12288
    result=call(q,'chooseDrive')
    changed=[i for i,(a,b) in enumerate(zip(q[0x9000:0xc000],result[0x9000:0xc000])) if a!=b]

@@ -652,15 +652,15 @@ driverCopy:
         record('DOS4000 streaming copy preserves guards and cleans up a failed physical read')
         # РњРѕРЅРёС‚РѕСЂ-СЃРѕРІРјРµСЃС‚РёРјС‹Рµ СЃРµСЂРІРёСЃС‹ СЂР°Р±РѕС‚Р°СЋС‚ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ РІСЃРµРіРѕ РЅРёР¶РЅРµРіРѕ DOS.
         m=fresh();m[sy['dosCoreStart']:sy['dosCoreEnd']]=bytes([0xA5])*(sy['dosCoreEnd']-sy['dosCoreStart'])
-        assert run(m,'bios_getMemTop')['hl']==0x3FFF
+        assert run(m,'mx_getMemTop')['hl']==0x3FFF
         payload=bytes(range(256));m[0x2000:0x2100]=payload
-        run(m,'bios_memcpy_bc_hl',hl=0x2000,de=0x2100,bc=0x3000)
+        run(m,'mon2_memcpy_bc_hl',hl=0x2000,de=0x2100,bc=0x3000)
         assert m[0x3000:0x3100]==payload
         m[0x9000:0xC000]=bytes(0x3000)
-        run(m,'bios_printChar',bc=ord('A'))
+        run(m,'mon2_printCharOld',bc=ord('A'))
         assert any(m[0x9000:0xC000])
         m[sy['j_diskDriver']+1:sy['j_diskDriver']+3]=word(sy['diskDriver'])
-        result=run(m,'bios_diskDriver',bc=0x0300)
+        result=run(m,'sysDiskDriver',bc=0x0300)
         assert not result['carry'] and result['hl']==sy['v_diskInfo'] and result['de']>0
         record('BIOS memTop/memcpy/printChar/disk-info work with the DOS4000 region erased')
     (OUT/'result.json').write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')

@@ -14,7 +14,7 @@ monitor_game_exit:
         XOR A
         LD (0FF02h),A
     ENDIF
-    CALL bios_clearScreenOld
+    CALL mon2_clearScreenOld
     JP app_bios_return
     ENDIF
 

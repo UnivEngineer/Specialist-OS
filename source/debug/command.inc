@@ -5,15 +5,15 @@
 debugMemoryReady:
         ; Начинаем с очистки экрана
         XOR   A
-        call bios_setFontEncoding      ; Имена и текстовые дампы — KOI-8.
+        call FONT_ENGINE_ENCODING      ; Имена и текстовые дампы — KOI-8.
         LD    C,1FH ; код символа очистки экрана
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
 
         ; Рестарт без очистки экрана
 RestartNoCls:
         LD    SP,STACK_ADDR ; Системный стек снова вне переменных DEBUG.
-        LD    HL,mon2_restart           ; установить обработчик ошибки магнитофона
-        LD    (bios_vars.tapeError),HL  ; на рестарт монитора
+        LD    HL,debug_restart           ; установить обработчик ошибки магнитофона
+        LD    (mon2_vars.tapeError),HL  ; на рестарт монитора
         LD    HL,7EFFH    ; 32511
         LD    (vars1.LegacyMemoryTop),HL
         CALL  MonitorMain
@@ -25,20 +25,20 @@ RestartNoCls:
 MonitorMain:
         ; перевод строки
         LD    HL,txtNewLine
-        CALL  bios_printStringOld
+        CALL  mon2_printStringOld
 
         ; узнать текущий диск
         LD    E,02H
         MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE ; печать промпта A:\>
         ADD   A,'A'
         LD    C,A
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
         LD    C,':'
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
         LD    C,'\'
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
         LD    C,'>'
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
 
         ; очистка буфера
         CALL  ClearInputBuf
@@ -89,7 +89,7 @@ MonitorMain:
         CP    58H           ; Директива X - печать содержимого регистров процессора
         JP    Z,Dir_X
         CP    57H           ; Директива W - запись блока памяти на ленту без имени
-        JP    Z,mon2_tapeSave
+        JP    Z,debug_tapeSave
         CP    52H           ; Директива R - чтение файла с ленты
         JP    Z,Dir_R
         CP    43H           ; Директива C - сравнение двух блоков памяти

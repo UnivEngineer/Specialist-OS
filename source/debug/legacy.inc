@@ -40,12 +40,12 @@ legacyOutputStringReturn:  POP   HL
         POP   AF
         RET
 drawSearchMarkerBody:  LD    (bios_upper.cursorCfg),A
-        CALL  bios_drawCursor
+        MXOS_CALL_REGS MXOS_BIOS_DRAW_CURSOR
         POP   AF
         LD    (bios_upper.cursorCfg),A
         LD    C,18H         ; 24
         POP   AF
-        JP    mon2_printChar
+        JP    debug_printChar
 ;----------------------------------------------------------------------------
 
 ; Вход: HL = буфер, DE = адрес предела. Выход: строка с завершающим CR.
@@ -68,19 +68,19 @@ drawSearchMarkerBody:  LD    (bios_upper.cursorCfg),A
 
 inputLineCR:  LD    B,H
         LD    C,L
-inputLineKey:  CALL  mon2_getch
+inputLineKey:  CALL  debug_getch
         CP    08H           ; клавиша влево
         JP    Z,inputLineBackspace
         CP    0DH           ; клавиша Enter
         JP    Z,inputLineEnter
         LD    (vars1.InputCharacter),A
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         JP    Z,inputLineKey
         LD    A,(vars1.InputCharacter)
         LD    (HL),A
         PUSH  BC
         LD    C,A
-        CALL  mon2_printChar
+        CALL  debug_printChar
         POP   BC
         INC   HL
         JP    inputLineKey
@@ -96,11 +96,11 @@ inputLineBackspace:  LD    A,H
 inputLineErase:  DEC   HL
         PUSH  BC
         LD    C,08H         ; 8
-        CALL  mon2_printChar
+        CALL  debug_printChar
         LD    C,20H         ; 32 ' '
-        CALL  mon2_printChar
+        CALL  debug_printChar
         LD    C,08H         ; 8
-        CALL  mon2_printChar
+        CALL  debug_printChar
         POP   BC
         JP    inputLineKey
 inputLineEnter:

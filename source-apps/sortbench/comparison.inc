@@ -277,10 +277,10 @@ ncComparePart:
     jp ncCompareNext
 ncCompareDifferent:
     ld a,c
-    call bios_upperCase
+    call sortStrings.upperCase
     ld c,a
     ld a,(hl)
-    call bios_upperCase
+    call sortStrings.upperCase
     cp c
     ret nz
 ncCompareNext:

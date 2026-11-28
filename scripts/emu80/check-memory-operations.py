@@ -13,28 +13,28 @@ try:
  x.start('FAR memory banks');m.call('debug_break');m.call('bp_clear')
  page(3);m.write(0x4000,bytes.fromhex('123456'));page(0)
  for op in (1,2,3,4):
-  r,t=invoke(0xf815,af=op*256+2,bc=0x300,hl=0x4000,de=0xabcd);assert not r['af']&1
+  r,t=invoke(0xF875,af=op*256+2,bc=0x300,hl=0x4000,de=0xabcd);assert not r['af']&1
   if op==1:assert r['de']==0x12
   if op==2:assert r['de']==0x3412
   rows.append(dict(case='scalar',operation=op,ticks=t));print(rows[-1],flush=True)
  page(3);assert m.read(0x4000,3)==bytes.fromhex('cdab56')
  initial=bytes((i*37)&255 for i in range(512));m.write(0x4000,initial);page(0)
- m.write(0x6000,struct.pack('<BHBHH',3,0x4000,3,0x4001,257));r,t=invoke(0xf815,af=2,bc=0x1234,de=0x5678,hl=0x6000);assert not r['af']&1
+ m.write(0x6000,struct.pack('<BHBHH',3,0x4000,3,0x4001,257));r,t=invoke(0xF875,af=2,bc=0x1234,de=0x5678,hl=0x6000);assert not r['af']&1
  page(3);expected=bytearray(initial);expected[1:258]=initial[:257];assert m.read(0x4000,512)==expected;page(0);rows.append(dict(case='remote-overlap',ticks=t))
- page(1);m.write(0xa000,initial[:256]);m.write(0x800,struct.pack('<BHBHH',1,0xa000,1,0xa200,256));r,t=invoke(0xf80f,hl=0x800,bc=0x1234,de=0x5678);assert not r['af']&1 and m.read(0xa200,256)==initial[:256];page(0);rows.append(dict(case='DOS-near-copy',ticks=t))
+ page(1);m.write(0xa000,initial[:256]);m.write(0x800,struct.pack('<BHBHH',1,0xa000,1,0xa200,256));r,t=invoke(0xF86F,hl=0x800,bc=0x1234,de=0x5678);assert not r['af']&1 and m.read(0xa200,256)==initial[:256];page(0);rows.append(dict(case='DOS-near-copy',ticks=t))
  # COPY -> TEXT -> COPY и повторные операции на одном окне.
  # Вызовы ABI тестовые; самостоятельное банковое приложение не запускается.
  for length in (0,1,19,20,21,40,41,256):
   payload=b'X'*length+b'\0'
   page(1);m.write(0xa600,payload)
   m.write(0xa400,struct.pack('<BHBHH',1,0xa600,0,0x6000,len(payload)))
-  r,t=invoke(0xf80f,hl=0xa400,bc=0x1234,de=0x5678);assert not r['af']&1
+  r,t=invoke(0xF86F,hl=0xa400,bc=0x1234,de=0x5678);assert not r['af']&1
   portion=len(payload)%32 or 32
   assert m.read(0xffc0,portion)==payload[-portion:]
   for repeat in range(2):
-   r,t=invoke(0xf815,af=0x502,hl=0xa600,bc=0x1234,de=0x5678)
+   r,t=invoke(0xF875,af=0x502,hl=0xa600,bc=0x1234,de=0x5678)
    assert r['hl']==0xa600+length and r['bc']==0x1234 and r['de']==0x5678 and not r['af']&1,r
-  r,t=invoke(0xf80f,hl=0xa400);assert not r['af']&1
+  r,t=invoke(0xF86F,hl=0xa400);assert not r['af']&1
   assert m.read(0xffc0,portion)==payload[-portion:]
   # Вызов BIOS после COPY печатает строку по адресу MAIN.
   m.write(0xa500,struct.pack('<HHHH',0x6000,0x4567,0x89ab,0x5502))
@@ -44,8 +44,8 @@ try:
   rows.append(dict(case='COPY-TEXT-TEXT-COPY-BIOS',bytes=length))
  # Повторный SCALAR обрабатывает новое значение без подготовки окна.
  for value in (0x1234,0xabcd):
-  r,t=invoke(0xf815,af=0x402,bc=0x300,hl=0x4200,de=value);assert not r['af']&1
-  r,t=invoke(0xf815,af=0x202,bc=0x300,hl=0x4200);assert r['de']==value and not r['af']&1
+  r,t=invoke(0xF875,af=0x402,bc=0x300,hl=0x4200,de=value);assert not r['af']&1
+  r,t=invoke(0xF875,af=0x202,bc=0x300,hl=0x4200);assert r['de']==value and not r['af']&1
  rows.append(dict(case='SCALAR-repeat',count=4))
  # Изолированный стенд удаляет разметку только собственного B: для разделения пула.
  page(2);m.write(0,bytes(256));page(0)

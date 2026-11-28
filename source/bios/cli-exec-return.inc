@@ -8,10 +8,12 @@
 ;   CLI забрал предыдущий код перед передачей управления.
 ;
 ; выход:
-;   При отказе bios_cliExecError содержит код. Управление передаётся штатному
+;   При отказе biosCliExecError содержит код. Управление передаётся штатному
 ;   возврату в оболочку. Регистры и стек вызывающего не сохраняются.
 ;----------------------------------------------------------------------------
 biosCliExecReturn:
-    jp nc,bios_reboot
-    ld (bios_cliExecError),a
-    jp bios_reboot
+    jp nc,reboot3
+    ld (biosCliExecError),a
+    jp reboot3
+
+biosCliExecError: DB 0

@@ -7,8 +7,8 @@
 ; Термины: банк ДОЗУ — физические 64 КиБ; FAR-код 0 — main, 1..16 — банки 0..15.
 ; Общая область — аппаратные 32 байта; хвосты банков содержат отдельные копии кода.
 ; Карта 1: основная память / BIOS, FAR-код 0, режим MX.
-;   0000-8BFF - [35840 B] Область программ и буферов; memtop=8BFFh
-;   8C00-8DFF - [  512 B] Область RUN
+;   0000-8DFF - [36352 B] Нативные программы и буферы; максимальный memTop=8DFFh
+;   8C00-8DFF - [  512 B] Верх нативной памяти MAIN; временная область RUN при загрузке старой программы
 ;   8E00-8FDE - [  479 B] Системный стек, SP=8FDFh
 ;   8FDF-8FFF - [   33 B] Переменные BIOS
 ;   9000-BFFF - [12288 B] Экран; временный образ сменного ядра и переходник
@@ -21,7 +21,9 @@
 ;   ED80-EE8F - [  272 B] Общий временный буфер A: / текста и UI
 ;   EE90-EF9F - [  272 B] BIOS_UPPER_VARIABLES, включая состояние текста MXOS
 ;   EFA0-EFDB - [   60 B] IO_VARIABLES — рабочие переменные IO.SYS и имя шрифта
-;   EFDC-EFFF - [   36 B] Резерв
+;   EFDC-EFE5 - [   10 B] Снимок глифа RAMFOS, маска и инверсия
+;   EFE6-EFE7 - [    2 B] Обычная цель RAW_Z установленного FNT
+;   EFE8-EFFF - [   24 B] Резерв
 ;   F000-F19F - [  416 B] IO.SYS (точный конец — bin/System.layout.json)
 ;   F1A0-F1BF - [   32 B] Свободно в MAIN перед MEM.SYS
 ;   F1C0-F33F - [  384 B] MEM.SYS: подготовка CPM32, серия I/O, мост A:, копировщик
@@ -32,8 +34,9 @@
 ;   F5C0-F67B - [  188 B] MEM.SYS: локальный блоковый ввод-вывод, контекст, входы BIOS
 ;   F67C-F6BF - [   68 B] Быстрый регистровый вход MEM и резерв
 ;   F6C0-F7FF - [  320 B] MAIN: AT512KS; DOS/EXEC: службы A:, проверки и суммы
-;   F800-F8B3 - [  180 B] MEM.SYS: публичные входы CLIENT и резерв
-;   F8B4-F9BF - [  268 B] MEM.SYS: передача TEXT, прямой MOVE и вызов DLL
+;   F800-F85F - [   96 B] Резерв таблицы RAMFOS в MAIN
+;   F860-F8BD - [   94 B] MEM.SYS: публичные входы и общий клиент
+;   F8BE-F9BF - [  258 B] MEM.SYS: передача TEXT, прямой MOVE и вызов DLL
 ;   F9C0-FBFF - [  576 B] Один слот ROM2MX/AT2MX/AT2MXF, одинаковый во всех EXEC
 ;   FC00-FEFF - [  768 B] MEM.SYS: транспорт и контексты
 ;   FF00-FFBF - [  192 B] Защищённый хвост копировщика и резерв
@@ -44,7 +47,7 @@
 ; занимает D800-EBFF (5120 Б); свободны EC00-EC7F (128 Б). Другие движки
 ; могут иначе использовать свой слот D800-EC7F и резервировать память MAIN.
 ; Например, Packed6K занимает ещё 7C00-8BFF (4096 Б), снижая memtop до 7BFFh.
-; Поэтому 8BFFh — штатный максимум memtop, а не неизменная граница свободной памяти.
+; Текущую границу с учётом резидентных таблиц публикует DOS.
 ;
 ; Для верхней программы RF мост RUN временно находится в AB00h экрана,
 ; поскольку загружаемое тело может перекрывать область шрифта.
@@ -53,7 +56,7 @@
 ;
 ; Карта 2: физический банк ДОЗУ 0 / DOS, FAR-код 1.
 ; Bootstrap загружает DOS.SYS в этот банк до запуска BIOS.
-;   0000-00FF - [  256 B] Резерв векторов/обработчиков, совместимый с моделью CP/M
+;   0000-00FF - [  256 B] Эталон накладок BIOS MAIN и резерв
 ;   0100-7C7F - Образ DOS и резерв до переменных
 ;   7C80-81FF - Переменные DOS и резерв до буфера обмена
 ;   8200-8AFF - [ 2304 B] Буфер файлового обмена и списка каталога, первые 512 байт также использует CLI
@@ -96,8 +99,9 @@
 ;   F5C0-F67B - [  188 B] MEM.SYS: локальный блоковый ввод-вывод, контекст, входы BIOS
 ;   F67C-F6BF - [   68 B] Быстрый регистровый вход MEM и резерв
 ;   F6C0-F7FF - [  320 B] MAIN: AT512KS; DOS/EXEC: службы A:, проверки и суммы
-;   F800-F8B3 - [  180 B] MEM.SYS: публичные входы CLIENT и резерв
-;   F8B4-F9BF - [  268 B] MEM.SYS: передача TEXT, прямой MOVE и вызов DLL
+;   F800-F85F - [   96 B] MEM.SYS: частный клиент DOS/EXEC
+;   F860-F8BD - [   94 B] MEM.SYS: публичные входы и общий клиент
+;   F8BE-F9BF - [  258 B] MEM.SYS: передача TEXT, прямой MOVE и вызов DLL
 ;   F9C0-FBFF - [  576 B] Один слот ROM2MX/AT2MX/AT2MXF, одинаковый во всех EXEC
 ;   FC00-FEFF - [  768 B] MEM.SYS: транспорт, контексты и общий копировщик
 ;   FF00-FFBF - [  192 B] Копия хвоста копировщика и резерв
@@ -149,7 +153,7 @@ MEM_BANK_EXEC        = 1
 MEM_BANK_DOS         = 2
 MEM_EXEC_READY_VALUE = 0A7h
 
-MEM_RUNTIME_REVISION = 77  ; Переменные и менеджер резидентов в ядре DOS
+MEM_RUNTIME_REVISION = 79  ; Тёплый старт проверяет версию транспорта и контракт BIOS
 MEM_WINDOW_VERSION   = 2   ; Внутренний протокол физического окна
     IFNDEF DOS_IO_BATCH_SECTORS
 DOS_IO_BATCH_SECTORS = 32  ; 16/32/64 полных физических секторов за серию
@@ -216,7 +220,7 @@ cacheStart    DW     0          ; Первый байт после загруж�
 cacheInvalid  DB     1          ; 1 — индекс/битмапы не действуют
 charGen       DW     FONT_ADDR  ; Физический адрес RAM-шрифта
 cursorCfg     DB     021h
-koi7          DB     0          ; Только чтение; менять через bios_setFontEncoding / MXOS_BIOS_SET_FONT_ENCODING
+koi7          DB     0          ; Только чтение; менять через FONT_ENGINE_ENCODING / MXOS_BIOS_SET_FONT_ENCODING
 escMode       DB     0FFh
 cursorDelay   DB     020h
 antiBsDelay   DB     0E0h
@@ -274,7 +278,11 @@ fontName        BLOCK  8    ; MAIN, installed FNT basename padded with zero/spac
 
     ENDS
 io_vars IO_VARIABLES = 0EFA0h
-    ASSERT io_vars + IO_VARIABLES <= 0F000h
+ramfosScreenRows   = io_vars+IO_VARIABLES
+ramfosGlyphMask    = ramfosScreenRows+8
+ramfosGlyphInverse = ramfosGlyphMask+1
+biosRawZTarget     = ramfosGlyphInverse+1
+    ASSERT biosRawZTarget+2 <= 0F000h
 
 ; Страница ДОЗУ 0 / DOS
 DOS_BANK_PAGE        = 1                          ; Логический FAR ID физической страницы 0
@@ -286,6 +294,8 @@ PRESSURE_PATH_BYTES  = 32
 DOS_BANK_OBJECT_ADDR = 08E00h
 DOS_BANK_PATH_ADDR   = 08E80h
 DOS_BANK_CODE_ADDR   = 00100h
+DOS_BIOS_OVERLAY_ADDR  = 00000h                    ; Эталон накладок MAIN, до кода банка DOS
+DOS_BIOS_OVERLAY_SIZE  = DOS_BANK_CODE_ADDR-DOS_BIOS_OVERLAY_ADDR
 DOS_BANK_COMPAT_ADDR = 093DFh
 DOS_DRIVER_REGISTRY  = 08F00h                     ; 8 записей по DRIVER_RECORD_SIZE
 DOS_DRIVER_IMAGE     = 09180h                     ; сохранённая служба H:, без инициализатора
@@ -327,12 +337,13 @@ MEM_BANK_KIND             = 0F642h
 MEM_LOCAL_SYSTEM          = 0F643h
 MEM_LOCAL_INFO_ADDR       = 0F645h                  ; Внутренний обработчик общего образа MEM
 MEM_RUNTIME_REVISION_ADDR = 0F658h                  ; Word: версия установленного транспорта
-MEM_NEAR_COPY             = 0F67Ah                  ; Слово прежней регистрации в шаблоне. F80Fh вызывает moveCore напрямую.
+MEM_NEAR_COPY             = 0F67Ah                  ; Слово прежней регистрации в шаблоне. F86Fh вызывает moveCore напрямую.
 MAIN_COMMAND_ADDR         = bios_upper.commandLine
 MAIN_DISK_INFO            = bios_upper.diskInfo
 MAIN_DRIVER_INFO          = bios_upper.driverInfo
 MAIN_RAW_LEASE            = bios_upper.rawLease     ; диск+1, ёмкость word, последнее A/CF, признак результата
-MEM_TEXT_ENTRY            = 0F8B4h                  ; TEXT расположен после публичного клиента
+MEM_BANK_CLIENT_START     = 0F800h                  ; В DOS/EXEC перед публичной таблицей находится частный код клиента
+MEM_TEXT_ENTRY            = 0F8BEh                  ; TEXT расположен после публичного клиента
 MEM_SCOPE_ENTRY           = 0F993h                  ; Internal DOS callback in the controller bank
 MEM_ROUTE_STATE           = 0F4E6h                  ; scoped DLL handle, entry, bank and owner
 MEM_QUEUE_HOOK            = MEM_ROUTE_STATE+6       ; local callback, followed by its gate
@@ -408,7 +419,7 @@ SYSTEM_PROGRAM_END  = 0EB00h
 DOS_END_MAX         = DISK_DRIVER_ADDR  ; Далее отдельный резерв физического драйвера
 
 ; Резидентный принимающий адаптер банковых вызовов BIOS и его отдельный стек.
-; Используются после установки общего транспорта; публичный вход — F800h.
+; Используются после установки общего транспорта; публичный вход — F860h.
 BIOS_TEMP_BUFFER       = 0ED80h                                 ; Общая scratch-область MAIN, один синхронный вызов
 BIOS_TEMP_BUFFER_END   = bios_upper
 BIOS_TEMP_BUFFER_SIZE  = BIOS_TEMP_BUFFER_END-BIOS_TEMP_BUFFER
@@ -425,6 +436,8 @@ GLYPH_CACHE_ENTRIES    = bios_upper.cacheEntries
 GLYPH_CACHE_EPOCH      = bios_upper.cacheEpoch
 BIOS_BANK_GATE_ADDR    = 0F000h
 BIOS_BANK_KEY_CLOCK_INIT = BIOS_BANK_GATE_ADDR+6
+BIOS_BANK_PRINT_HEX_BYTE = BIOS_BANK_GATE_ADDR+17h
+BIOS_BANK_PRINT_HEX_WORD = BIOS_BANK_GATE_ADDR+1Ah
 BIOS_BANK_GATE_END     = MEM_IMAGE_LOCAL_START
 BIOS_BANK_IO_ADDR      = 0F240h
 BIOS_BANK_IO_BUFFER    = BIOS_TEMP_BUFFER                       ; Пачки текста/UI: 256 байт + 5 защиты
@@ -455,7 +468,7 @@ NC_STATE_ADDR = 0FFB0h  ; 12 байт; FFBEh — детектор, FFBFh — м�
     ASSERT DOS_BANK_PATH_ADDR+MAX_PATH <= DOS_DRIVER_REGISTRY
     ASSERT MEM_ALLOC_TABLE+MEM_ALLOC_RECORDS*6 <= MODULE_TABLE
     ASSERT MODULE_TABLE+MODULE_MAX*MODULE_RECORD_SIZE <= DOS_BANK_OBJECT_ADDR
-    ASSERT DOS_BANK_COMPAT_ADDR+BIOS_VARIABLES <= DOS_BANK_DRIVER_ADDR
+    ASSERT DOS_BANK_COMPAT_ADDR+MON2_VARIABLES <= DOS_BANK_DRIVER_ADDR
     ASSERT DOS_BANK_CMD_ADDR+CMD_LINE_SIZE <= DOS_BANK_COMPAT_ADDR
     ASSERT CACHE_GRANULES <= 64
     ASSERT (CACHE_GRANULES & (CACHE_GRANULES-1)) == 0
@@ -486,9 +499,12 @@ NC_STATE_ADDR = 0FFB0h  ; 12 байт; FFBEh — детектор, FFBFh — м�
     ASSERT SYSTEM_PROGRAM_END <= SYSTEM_FLASH_ADDR
     ASSERT CMD_LINE + CMD_LINE_SIZE <= MAIN_DISK_INFO
     ASSERT SYSTEM_FLASH_ADDR + 0140h == SYSTEM_FLASH_END
+    ASSERT SYSTEM_FLASH_END == MEM_BANK_CLIENT_START
+    ASSERT MEM_BANK_CLIENT_START + 060h == mx_callPacket
+    ASSERT mx_setMemTop+3 <= MEM_TEXT_ENTRY
     ASSERT SYSTEM_FLASH_END <= LOCAL_DRIVER_ADDR
     ASSERT LOCAL_DRIVER_END <= 0FC00h
-    ASSERT RAMD_RESIDENT_ADDR + 00C0h <= mx_callPacket
+    ASSERT RAMD_RESIDENT_ADDR + 00C0h <= MEM_BANK_CLIENT_START
     ASSERT BIOS_BANK_IO_BUFFER+261 <= MAIN_COMMAND_ADDR
     ASSERT MAIN_DRIVER_INFO + 64 <= MAIN_RAW_LEASE
     ASSERT bios_upper + BIOS_UPPER_VARIABLES <= io_vars
@@ -497,6 +513,7 @@ NC_STATE_ADDR = 0FFB0h  ; 12 байт; FFBEh — детектор, FFBFh — м�
     ASSERT DOS_DRIVER_IMAGE + LOCAL_DRIVER_END-LOCAL_DRIVER_ADDR <= DOS_BANK_DRIVER_ADDR
     ASSERT FAT_CACHE_ADDR + FAT_CACHE_SIZE <= 0FF00h
     ASSERT CMD_LINE_SIZE == 130
+    ASSERT LEGACY_APP_MEMORY_END <= APP_MEMORY_END && APP_MEMORY_END <= STACK_BOTTOM
     ASSERT STACK_BOTTOM < STACK_ADDR && STACK_ADDR <= STD_IO_ADDR
     ASSERT DOS_END_MAX <= STD_IO_ADDR
     ASSERT FONT_ADDR + FONT_BYTES <= BIOS_BANK_STACK_BOTTOM

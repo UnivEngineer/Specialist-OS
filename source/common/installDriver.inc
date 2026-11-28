@@ -20,21 +20,13 @@ installDriver:
             ret
 installDriverCommon:
             and 7
-            push hl
             push de
+            push hl
             ld e,a
             ld d,0
             ld hl,v_blockShifts
             add hl,de
             ld (hl),c
-            pop de
-            pop hl
-            ; Сохранение регистров
-            push de
-            push hl
-
-            ; Максимум дисков
-            and 7
 
             ; Вычисление адреса в таблице дисков
             add   a, a
@@ -95,9 +87,8 @@ installBlockDriver:
             jp nc,installBlockError
             push af
             ld a,c
-            cp 7
-            jp c,installBlockBad
-            cp 10
+            sub 7
+            cp 3
             jp nc,installBlockBad
             pop af
             jp installDriverCommon

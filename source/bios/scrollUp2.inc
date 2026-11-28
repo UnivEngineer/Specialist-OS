@@ -11,7 +11,7 @@ scrollCopyFill:
             pop bc
             pop de
             pop hl
-            call bios_memcpy_bc_hl
+            call mon2_memcpy_bc_hl
             pop af
             ; Край, не затронутый переносом: BFF6..BFFF вверх, 9000..9009 вниз.
             ld h,090h
@@ -39,7 +39,7 @@ scrollFillColumn:
             ret
 scrollFillTen:
             push hl
-            ld hl,(bios_vars.inverse)
+            ld hl,(mon2_vars.inverse)
             ex de,hl
             pop hl
             DUP 5

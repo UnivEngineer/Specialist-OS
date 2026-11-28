@@ -54,12 +54,12 @@ for font in ['Rotate','Fast8','Cpm4']:
     m=run(m,'editorUndoLine');assert document(m)==original
 
     # The idle callback refreshes language only, preserving BIOS text state.
-    m=run(m,'drawStatusBar');word(m,'bios_vars.cursorY',0x1815)
-    word(m,'bios_vars.inverse',0xffff)
-    before=bytes(m[0x9000:0xc000]);m[S['bios_vars.keyLocks']]|=1
+    m=run(m,'drawStatusBar');word(m,'mon2_vars.cursorY',0x1815)
+    word(m,'mon2_vars.inverse',0xffff)
+    before=bytes(m[0x9000:0xc000]);m[S['mon2_vars.keyLocks']]|=1
     m=run(m,'editorKeyboardIdle')
     assert m[S['editorLastLanguage']]==1
-    assert number(m,'bios_vars.cursorY')==0x1815 and number(m,'bios_vars.inverse')==65535
+    assert number(m,'mon2_vars.cursorY')==0x1815 and number(m,'mon2_vars.inverse')==65535
     start=m[S['editorStatusLangPos']]*m[S['v_charStep']]*2//8
     for x in range(48):
         for y in range(256):
@@ -74,8 +74,8 @@ for font in ['Rotate','Fast8','Cpm4']:
     prefix=0x9000+S['EDITOR_TEXT_TOP']+3
     tail=0x9000+45*256+S['EDITOR_TEXT_TOP']+3
     m[prefix]^=0x55;m[tail]^=0x33;markers=(m[prefix],m[tail])
-    public=S['bios_printStringRawLim'];target=int.from_bytes(m[public+1:public+3],'little')
-    code=b'\xf5\x3a'+W(S['bios_vars.cursorX'])+b'\x32\x80\x8d\x79\x32\x81\x8d\x22\x82\x8d\xf1\xc3'+W(target)
+    public=S['FONT_ENGINE_LIM'];target=int.from_bytes(m[public+1:public+3],'little')
+    code=b'\xf5\x3a'+W(S['mon2_vars.cursorX'])+b'\x32\x80\x8d\x79\x32\x81\x8d\x22\x82\x8d\xf1\xc3'+W(target)
     m[0x8d00:0x8d00+len(code)]=code;m[public+1:public+3]=W(0x8d00)
     at=S['uiFillRectBytes'];m[at:at+6]=b'\x3e\x01\x32\x84\x8d\xc9'
     m=run(m,'keyHandler_Space',bc=ord('X'))

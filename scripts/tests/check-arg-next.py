@@ -3,6 +3,7 @@ import itertools
 import json
 from pathlib import Path
 import re
+import runpy
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,14 +21,16 @@ def symbols(name):
 
 def memory(name=None):
     m = bytearray(65536)
-    dos = (ROOT / 'bin/BIOS.sys').read_bytes()
-    m[0xC000:0xC000+len(dos)] = dos
+    install(m, symbols('BIOS'), main=True)
     if name:
         sy = symbols(name)
         code = (ROOT / 'bin' / (name + '.i80')).read_bytes()
-        address = 0 if name in ('CHKDSK', 'DISKBEN') else sy.get('start', 0xF100)
+        address = sy.get('start', 0)
         m[address:address+len(code)] = code
     return m
+
+
+install = runpy.run_path(str(Path(__file__).with_name('mem-image.py')))['install']
 
 
 def run(m, entry, end=0x8100, hl=0x7000, de=0x7000, bc=0xAA5A):
@@ -51,9 +54,9 @@ def run(m, entry, end=0x8100, hl=0x7000, de=0x7000, bc=0xAA5A):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     ds = symbols('DOS')
-    offset = ds['bios_argNext'] - ds['bios_init']
+    offset = ds['sysBIOSTable'] - ds['mon2_init'] + 2*(ds['MXOS_BIOS_ARG_NEXT'] & 0xff)
     bios = (ROOT/'bin/BIOS.sys').read_bytes()
-    assert bios[offset:offset+3] == b'\xC3'+ds['argNext'].to_bytes(2, 'little')
+    assert bios[offset:offset+2] == ds['argNext'].to_bytes(2, 'little')
     token_cases = 0
     for raw in (b'\0', b'   \r', b'foo bar\0', b'  -MON:Test  A:GAME.EXE  \r',
                 b'A:\0', bytes((0xC1, 0xE2, 0xFF, 0)), b'x'*255+b'\0',
@@ -68,7 +71,7 @@ def main():
                 stop += 1
             m = memory()
             m[0x7000:0x7000+len(raw)] = raw
-            got = run(m, ds['bios_argNext'], hl=0x7000+cursor)
+            got = run(m, ds['argNext'], hl=0x7000+cursor)
             assert got[0x7200:0x7206] == ((0x7000+stop).to_bytes(2, 'little')+
                 (0x7000+start).to_bytes(2, 'little')+bytes((0x5A, stop-start)))
             assert bool(got[0x7206] & 1) == (start==stop)
@@ -83,7 +86,7 @@ def main():
         raw = ('  '+'   '.join(tokens).lower()+'  ').encode()+b'\r'
         m = memory('FORMAT')
         m[0x7000:0x7000+len(raw)] = raw
-        got = run(m, 0xF100, end=fs['Confirmed'])
+        got = run(m, fs['formatMain'], end=fs['Confirmed'])
         assert got[fs['v_FormatConfirmed']] == 255
         assert got[fs['v_FormatRAMdisk']] == 255
         # BC СЃРѕС…СЂР°РЅСЏРµС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ РґРёСЃРє РґРѕ РЅР°С‡Р°Р»Р° С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ.
@@ -92,7 +95,7 @@ def main():
     for raw in (b'B: B: -Y\0', b'B: -RR\0', b'B: -Yjunk\0', b'-X B:\0'):
         m = memory('FORMAT')
         m[0x7000:0x7000+len(raw)] = raw
-        run(m, 0xF100, end=fs['errParams'])
+        run(m, fs['formatMain'], end=fs['errParams'])
         format_cases += 1
     bs = symbols('DISKBEN')
     size_cases = 0
@@ -124,7 +127,7 @@ def main():
     for raw, target in ((b'  B:  \0', 'chooseDrive'), (b'   \r', 'askDrive')):
         m = memory('CHKDSK')
         # Только CPU-тест разбора; вывод не участвует в выборе аргумента.
-        m[0xC809] = m[0xC818] = 0xC9
+        m[cs['mon2_printCharOld']] = m[cs['mon2_printStringOld']] = 0xC9
         m[0x7000:0x7000+len(raw)] = raw
         got = run(m, cs['entry'], end=cs[target])
         if target=='chooseDrive':

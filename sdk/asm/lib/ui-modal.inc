@@ -170,9 +170,9 @@ uiModalText:
     ret c
     push hl
     ex de,hl
-    call bios_setCursorPos
+    call mx_setCursorPos
     pop hl
-    jp bios_printStringRawZ
+    jp FONT_ENGINE_RAWZ
 ; Body-relative baseline: A=offset, returns E=absolute baseline. HL preserved.
 
 ;----------------------------------------------------------------------------
@@ -218,14 +218,14 @@ uiModalButtonAt:
     ret
     IFDEF UI_MODAL_KEYS
 ; Button focus is drawn by the modal. Only lineEdit has a text caret.
-; Same key in A and modifier flags as bios_getch, including CF.
+; Same key in A and modifier flags as mon2_getchOld, including CF.
 uiModalGetch:
     push bc
     ld a,(bios_upper.cursorCfg)
     push af
     xor a
     ld (bios_upper.cursorCfg),a
-    call bios_getch
+    call mon2_getchOld
     push af
     pop bc
     pop af

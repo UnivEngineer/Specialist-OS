@@ -5,6 +5,7 @@
 ; Attach: DE = база подготовленного нижнего пререндера или 0, если
 ; FONT_LOWER_BYTES=0. Возвращает A=0, CF=0 и выбирает KOI-8.
     INCLUDE "../common/system.inc"
+    INCLUDE "../../bin/bios-imports.inc"
 FONT_MODE = 0
     IFNDEF GRAPH_PRE_MODE
 GRAPH_PRE_MODE = 0
@@ -56,18 +57,18 @@ FONT4_REVERSE_ADDR = FONT_ADDR-0400h
     ASSERT $ == FONT_ENGINE_TEXT_LIM
     jp printStringLim
 initializerName: DB 'InitA.dll',0
-printChar2    = bios_fontControl
-printCharBody = bios_fontControl
+printChar2    = biosEngineControl
+printCharBody = biosEngineControl
     INCLUDE "char.inc"
 printCharRawHelper:
     call scalar
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 192
     ret c
     jp fontLineEnd
 scalar:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 192
     jp nc,scalarWrap
@@ -78,7 +79,7 @@ scalarPosition:
     ld h,a
     ENDIF
     add a,CELL_WIDTH/2
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,l
     sub 7
     ld e,a
@@ -103,7 +104,7 @@ scalarPosition:
     jp nz,graphicScalar
     ENDIF
     ld h,FONT_ADDR/256
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,scalarInverse
     IF CELL_WIDTH == 4
@@ -191,9 +192,9 @@ scalarWrap:
     ; Preserve the code only on the exceptional pre-render wrap. Normal
     ; aligned scalar calls do not save BC or reload the cursor twice.
     push bc
-    call bios_fontNewLine
+    call biosEngineNewLine
     pop bc
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     jp scalarPosition
 printChar_real2 = printCharRawHelper
     IF CELL_WIDTH == 8

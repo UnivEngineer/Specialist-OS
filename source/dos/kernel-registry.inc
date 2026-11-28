@@ -17,18 +17,11 @@ registryBoot:
     ld bc,registryRamNameEnd-registryRamName
     call moveBytesForward
     IFDEF MX_FLOPPY_BOOT
-    ; Stage has installed the physical floppy service, independently of ROM C:.
+    ; BOOT устанавливает службу A: и сообщает её фактическую длину.
     ld hl,DOS_FLOPPY_ADDR
     ld (diFloppyStart),hl
-    ld (diFloppyCall+1),hl
     ld hl,(bootFloppyEnd)
     ld (diFloppyEnd),hl
-    ld hl,diskDriver
-    ld (v_drives+2*FLOPPY_DRIVE),hl
-    ld a,FLOPPY_DRIVE
-    ld (kernelFloppyDrive),a
-    ld a,9
-    ld (v_blockShifts+FLOPPY_DRIVE),a
     ld hl,bootFloppyRecord
     ld de,DOS_DRIVER_REGISTRY+FLOPPY_DRIVE*DRIVER_RECORD_SIZE
     ld bc,bootFloppyRecordEnd-bootFloppyRecord
@@ -115,25 +108,7 @@ dosDriverRefresh:
     jp registryTextReady
 registryUseBuiltin:
     ld hl,registryRomName
-    push hl
-    ld b,64
-    ld c,2
-registryValidateByte:
-    ld a,(hl)
-    inc hl
-    or a
-    jp nz,registryValidateNext
-    dec c
-    jp z,registryValidateReady
-registryValidateNext:
-    dec b
-    jp nz,registryValidateByte
-    pop hl
-    jp blockArgument
-registryValidateReady:
-    ld a,65
-    sub b
-    pop hl
+    ld a,registryRomNameEnd-registryRomName
 registryTextReady:
     ld (registrySystemText),hl
     ld (registryCopyLength+1),a
@@ -173,6 +148,8 @@ registryRomName:        DB "ROM48KS",0,"MX LINEAR ROM",0
     ELSE
 registryRomName:        DB "ROM512KS",0,"BUILT-IN, READ ONLY",0
     ENDIF
+registryRomNameEnd:
+    ASSERT registryRomNameEnd-registryRomName <= 64
 
 ; HL — две проверенные строки, DE — поле реестра, A — длина с обоими нулями.
 registryCopyText:

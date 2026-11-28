@@ -110,9 +110,9 @@ sysInstall:
     ; Привязать регистровый вызов MAIN к его диспетчеру.
     ld hl,sysRegsEntry
     ld (bankMxRegsRouteCall+1),hl
-    ld hl,bios_memcpy_bc_hl
+    ld hl,mon2_memcpy_bc_hl
     ld (MEM_NEAR_COPY),hl
-    ld hl,bios_blockIO
+    ld hl,blockIO
     ld (MEM_LOCAL_SYSTEM),hl
     ld hl,localBlockChecked
     ld (MEM_LOCAL_CHECKED),hl

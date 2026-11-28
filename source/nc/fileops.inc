@@ -28,7 +28,7 @@ ncFileopsMode:
     ld hl,vars.copyRequest
     ld de,vars.copyRequest+FILE_COPY_REQUEST
     ld bc,vars.fileJob.request
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     xor a
     ld (vars.fileJob.flags),a
     ld (ncProgressVisible),a
@@ -168,7 +168,7 @@ ncProgressInput:
     jp z,ncProgressStep
     ld a,c
     ELSE
-    call bios_keyScan
+    call ncKeyScan
     ld b,a
     ld a,(ncProgressKey)
     cp b
@@ -332,7 +332,7 @@ ncProgressFilesReady:
     call uiModalBodyY
     ld h,36
     ld l,e
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld hl,96
     call ncProgressFieldWidth
     ld hl,ncProgressText
@@ -353,7 +353,7 @@ ncProgressSizeReady:
     call uiModalBodyY
     ld h,84
     ld l,e
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld hl,144
     call ncProgressFieldWidth
     ld hl,ncProgressText
@@ -431,7 +431,7 @@ ncProgressPathCompare:
     call uiModalBodyY
     ld h,36
     ld l,e
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld hl,240
     call ncProgressFieldWidth
     pop hl
@@ -472,11 +472,11 @@ ncProgressBar:
     ld hl,vars.fileJob.total
     ld de,vars.fileJob.total+4
     ld bc,ncProgressDenom
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,vars.fileJob.bytes
     ld de,vars.fileJob.bytes+4
     ld bc,ncProgressNumer
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
 ncProgressScale:
     ld hl,(ncProgressDenom+2)
     ld a,h
@@ -484,7 +484,7 @@ ncProgressScale:
     jp nz,ncProgressScaleOne
     ld hl,(ncProgressDenom)
     ld de,656
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,ncProgressRatio
 ncProgressScaleOne:
     ld hl,ncProgressDenom+3
@@ -542,7 +542,7 @@ ncProgressBarFrameReady:
     ld hl,(uiModalCurrent)
     ld l,(hl)
     ld h,140
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld hl,ncProgressText
     ld b,4
     call ncPrintRightField
@@ -592,7 +592,7 @@ ncProgressNumberCopy:
     jp nz,ncProgressKiB
     ld hl,(ncProgressNumber)
     ld de,1024
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nc,ncProgressKiB
     ex de,hl
     call ncProgressAppendWord
@@ -602,7 +602,7 @@ ncProgressKiB:
     ld hl,ncProgressNumber
     ld de,ncProgressNumber+4
     ld bc,ncProgressRemainder
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld c,10
     call ncProgressNumberShift
     ld hl,ncProgressKiBText
@@ -613,13 +613,13 @@ ncProgressKiB:
     jp nz,ncProgressUseMiB
     ld hl,(ncProgressNumber)
     ld de,1024
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,ncProgressUnitsReady
 ncProgressUseMiB:
     ld hl,ncProgressNumber
     ld de,ncProgressNumber+4
     ld bc,ncProgressRemainder
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld c,10
     call ncProgressNumberShift
     ld hl,ncProgressMiB
@@ -659,7 +659,7 @@ ncProgressCounts:
     jp nz,ncProgressCountKiB
     ld hl,(vars.fileJob.total)
     ld de,1024
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nc,ncProgressCountKiB
     xor a
     ld hl,ncProgressB
@@ -689,7 +689,7 @@ ncProgressInteger:
     ex de,hl
     pop hl
     ld bc,ncProgressNumber
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,(ncProgressCountShift)
     or a
     jp z,ncProgressIntegerReady

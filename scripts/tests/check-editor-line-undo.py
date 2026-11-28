@@ -25,7 +25,7 @@ for font in ['Rotate','Fast8','Cpm4']:
     m=run(m,'editorUndoLine');m=run(m,'editorPositionCursor')
     assert document(m)==original
     assert number(m,'v_currentLine')==T and number(m,'v_lineNumber')==1
-    assert number(m,'v_column')==1 and m[S['bios_vars.cursorY']]==S['EDITOR_FIRST_Y']
+    assert number(m,'v_column')==1 and m[S['mon2_vars.cursorY']]==S['EDITOR_FIRST_Y']
     assert not m[S['v_lineDirty']]
 
     # A saved line still on screen retains the viewport and the correct Y.
@@ -33,7 +33,7 @@ for font in ['Rotate','Fast8','Cpm4']:
     m=run(m,'keyHandler_Up');m=run(m,'editorUndoLine')
     assert document(m)==original and number(m,'v_currentLine')==T+4
     assert number(m,'v_lineNumber')==2 and number(m,'v_column')==2
-    assert number(m,'v_topLine')==T and m[S['bios_vars.cursorY']]==S['EDITOR_FIRST_Y']+10
+    assert number(m,'v_topLine')==T and m[S['mon2_vars.cursorY']]==S['EDITOR_FIRST_Y']+10
 
     # A genuine edit in another line replaces the snapshot. F8 must retain
     # the first line's changes and undo only the newly edited line.

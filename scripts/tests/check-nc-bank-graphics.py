@@ -43,7 +43,7 @@ def main():
             ext = '.sys' if name in ('BIOS', 'IO') else '.i80'
             data = body if name == image and body is not None else (ROOT / 'bin' / (name+ext)).read_bytes()
             memory[base:base+len(data)] = data
-        memory[bios['bios_vars']:bios['bios_vars']+bios['BIOS_VARIABLES']] = memory[bios['initVars']:bios['initVarsEnd']]
+        memory[bios['mon2_vars']:bios['mon2_vars']+bios['MON2_VARIABLES']] = (ROOT/'bin/BIOS.defaults.bin').read_bytes()[:bios['MON2_VARIABLES']]
         memory[bios['bios_upper.charGen']:bios['bios_upper.charGen']+2] = W(bios['FONT_ADDR'])
         memory[bios['bios_upper.escMode']] = 255
         return memory
@@ -127,8 +127,8 @@ def main():
                         memory[sy['ncCatalogs']] = 1
                         memory[sy['ncCatalogs']+sy['CATALOG_OVERFLOW']] = 2
                     memory[sy['vars.rowColors']:sy['vars.rowColors']+120] = bytes([0xa1, 0xa1, 0xb1, 0xf1]*30)
-                    memory[sy['bios_vars.cursorY'] if sy is main else sy['ncBankCursor']:
-                           (sy['bios_vars.cursorY'] if sy is main else sy['ncBankCursor'])+2] = bytes([27, 4])
+                    memory[sy['mon2_vars.cursorY'] if sy is main else sy['ncBankCursor']:
+                           (sy['mon2_vars.cursorY'] if sy is main else sy['ncBankCursor'])+2] = bytes([27, 4])
                 params = {}
                 if label in ('ncPrintPanelCentered', 'pip_printDescription'):
                     for memory in (left, right): memory[0x8d00:0x8d51] = b'ABCDEFGHIJ'*8+b'\0'
@@ -203,7 +203,7 @@ def main():
                 # Command painting pads the field, then moves the logical cursor
                 # back to the text end. MAIN receives that position at KEY entry.
                 cursor_source = left if action == 'redrawCommandText' else display
-                assert cursor_source[bios['bios_vars.cursorY']:bios['bios_vars.cursorY']+2] == right[
+                assert cursor_source[bios['mon2_vars.cursorY']:bios['mon2_vars.cursorY']+2] == right[
                     core['ncBankCursor']:core['ncBankCursor']+2], (font, panel, label, 'cursor')
                 if action == 'ncPrintPanelCentered':
                     assert right[core['ncBankCursor']] == 120, (font, panel, action, 'wrapped')

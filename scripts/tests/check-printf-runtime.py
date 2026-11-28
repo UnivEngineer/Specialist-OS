@@ -136,7 +136,7 @@ def check(machine, symbols, entry, exit_main, images):
         assert machine.read(HANDLE + 51, 2) == word(len(image))
         invoke('MXOS_DOS_FILEHANDLE', af=0x0500, hl=HANDLE)
 
-    print_entry = b['bios_printStringLim']
+    print_entry = b['bankText.printStringLim']
     copy_entry = b['mx_memcpyFar']
     for name in images:
         machine.write(PATH, f'B:/{name}.COM\0'.encode('ascii'))

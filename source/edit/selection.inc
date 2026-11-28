@@ -63,7 +63,7 @@ editorSelectionColumn:
         LD HL,(editorSelectionRow)
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD B,H
         LD C,L
         LD HL,(editorSelectionRow)
@@ -72,7 +72,7 @@ editorSelectionColumn:
         EX DE,HL
         LD HL,(v_leftColumn)
         EX DE,HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD A,(v_leftColumnHi)
         LD C,A
         LD A,B
@@ -143,7 +143,7 @@ editorSelectionPaintWidth:
         LD H,0
         CALL editorSelectionPixels
         POP BC
-        LD A,(bios_vars.cursorY)
+        LD A,(mon2_vars.cursorY)
         SUB 7
         LD D,A
         LD E,8

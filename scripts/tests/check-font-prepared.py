@@ -79,7 +79,7 @@ for output in [b'B:\\Custom',b'B:\\Custom.fnt',b'A:\\FONTS\\6x8\\Custom']:
  m=bytearray(65536)
  for addr,file in [(0xc000,'bin/BIOS.sys'),(0,'bin/FONT.i80')]:
   data=(R/file).read_bytes();m[addr:addr+len(data)]=data
- for addr in [S['fileWriteAll'],S['fileReadAll'],S['mx_callRegs'],S['bios_printStringZ']]:m[addr:addr+2]=b'\xaf\xc9'
+ for addr in [S['fileWriteAll'],S['fileReadAll'],S['mx_callRegs'],S['mon2_printStringOld']]:m[addr:addr+2]=b'\xaf\xc9'
  m[S['mx_callRegs']:S['mx_callRegs']+6]=bytes.fromhex('E3 23 23 E3 AF C9')
  body=(R/'bin/fonts/Fast12K.i80').read_bytes();stage=S['staging']
  header=bytearray(b'\xcd MX\x02\x04'+W(0xd800)+W(0xd800)+W(len(body))+b'\0'*4).ljust(H,b'\0')
@@ -100,7 +100,7 @@ print('Export filenames and native checksums PASS')
 m=bytearray(65536);data=(R/'bin/FONT.i80').read_bytes();m[:len(data)]=data
 m[S['importPath']]=ord('X')
 m[S['mx_callRegs']:S['mx_callRegs']+2]=b'\x37\xc9'
-m[S['bios_printStringZ']]=0xc9
+m[S['mon2_printStringOld']]=0xc9
 m,cf=call(m,S['saveImported'])
 assert not cf and m[S['exportDrive']]==8 and m[S['outputPath']]==0
 print('Unavailable RAM disk: skip export PASS')

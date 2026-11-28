@@ -32,7 +32,7 @@ fileBodyLoad:
     add hl,bc
     ex de,hl
     pop hl
-    call bios_sub_hl_de
+    call sub_hl_de
     jp c,fbBad
     ld b,h
     ld c,l
@@ -188,7 +188,7 @@ fbRange:
     jp c,fbRangeBad
     ld (fbEnd),hl
     ld de,0C000h
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp c,fbRangeBelow
     jp z,fbRangeBelow
     pop hl
@@ -198,7 +198,7 @@ fbRange:
     jp c,fbRangeBad
     ld hl,(fbEnd)
     ld de,SYSTEM_PROGRAM_END
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp c,fbRangeBelow
     jp nz,fbRangeBad
 fbRangeBelow:
@@ -210,7 +210,7 @@ fbRangeBelow:
     pop hl
     push hl
     ld hl,(fbEnd)
-    call bios_cmp_hl_de
+    call cmp_hl_de
     pop hl
     jp c,fbRangeGood
     jp z,fbRangeGood
@@ -219,7 +219,7 @@ fbRangeBelow:
     add hl,de
     ex de,hl
     pop hl
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp c,fbRangeBad
 fbRangeGood:
     pop hl

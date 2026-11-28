@@ -28,14 +28,14 @@ EDITOR_MEMORY_END = APP_MEMORY_END
 STANDARD_EDITOR = 0
 
 ; Используемые подпрограммы DOS.SYS:
-; bios_beep_Old         = 0C170h
-; bios_delay_b          = 0C190h
-; bios_cmp_hl_de        = 0C427h
-; bios_memcpy_bc_hl     = 0C42Dh
-; bios_reboot           = 0C800h
-; bios_getch            = 0C803h
-; bios_printChar        = 0C809h
-; bios_printString      = 0C818h
+; mon2_beep_Old         = 0C170h
+; mon2_delay_b          = 0C190h
+; mon2_cmp_hl_de        = 0C427h
+; mon2_memcpy_bc_hl     = 0C42Dh
+; mon2_init           = 0C800h
+; mon2_getchOld            = 0C803h
+; mon2_printCharOld        = 0C809h
+; mon2_printStringOld      = 0C818h
 ; bios_calcCS           = 0C82Ah
 ; bios_fileCreate       = 0C845h
 ; bios_fileLoadInfo     = 0C851h
@@ -43,10 +43,10 @@ STANDARD_EDITOR = 0
 ; fileReadDescriptor        = 0C866h
 
 ; Используемые переменные DOS.SYS:
-; bios_vars.lastKey     = 08FF0h
+; mon2_vars.lastKey     = 08FF0h
 ; bios_upper.cursorDelay = 08FF4h
-; bios_vars.inverse     = 08FFAh
-; bios_vars.cursorY     = 08FFCh
+; mon2_vars.inverse     = 08FFAh
+; mon2_vars.cursorY     = 08FFCh
 
 ; Используемые порты устройств:
 ; IO_KEYB_A = 0FFE0h
@@ -139,9 +139,19 @@ editorShiftState: DB 0
     INCLUDE "hex-block.inc"
     DEFINE LINEEDIT_RECALL
     INCLUDE "../../sdk/asm/lib/lineedit.inc"
+    MODULE nativeMath
+    DEFINE MATH_SUB
+    INCLUDE "../../sdk/asm/lib/math.inc"
+    ENDMODULE
+    MODULE editArgs
+    INCLUDE "../common/argNext.inc"
+    ENDMODULE
     IF EDIT_BANKED
     INCLUDE "bank-runtime.inc"
     ELSE
+editSetInputHook:
+    MXOS_CALL_REGS MXOS_BIOS_SET_INPUT_HOOK
+    ret
     DEFINE UI_SCROLL_BAR
     DEFINE UI_PIXEL_RECT
     DEFINE UI_TEXT_RECT

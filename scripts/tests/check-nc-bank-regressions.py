@@ -57,7 +57,7 @@ erase:
  mem[0xe500:0xe500+len(stub)]=stub
  mem[c['mx_callRegs']:c['mx_callRegs']+3]=b'\xc3'+W(0xe500)
  mem[c['mx_callPacket']:c['mx_callPacket']+3]=b'\xc3'+W(0xe540)
- mem[c['bios_reboot']:c['bios_reboot']+3]=b'\xc3'+W(0xe400)
+ mem[c['mon2_init']:c['mon2_init']+3]=b'\xc3'+W(0xe400)
  result=run(mem,c['cliExternal'])
  assert result[0xe700:0xe702]==W(c['MXOS_DOS_FILE_EXEC'])
  packet=int.from_bytes(result[0xe702:0xe704],'little')

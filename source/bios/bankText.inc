@@ -2,8 +2,8 @@
     MODULE bankText
 window:
     or a
-    jp z,bios_printStringZ
-    jp bios_printStringRawZ
+    jp z,printStringZ
+    jp printStringRawZ
 ;----------------------------------------------------------------------------
 ; MXOS
 ; Печать порции без копирования. До возврата движок не занимает окно.
@@ -12,18 +12,18 @@ window:
 ;----------------------------------------------------------------------------
 printWindow:
     cp MEM_TEXT_RAW_LIM
-    jp z,bios_printStringRawLim
+    jp z,printStringRawLim
     jp c,printKnown
     cp MEM_TEXT_LIM
-    jp z,bios_printStringLim
-    jp bios_printStringRawPseudo
+    jp z,bankText.printStringLim
+    jp printStringRawPseudo
 printKnown:
     or a
-    ld hl,bios_printStringZ
+    ld hl,printStringZ
     ld de,FONT_ENGINE_Z+1
     jp z,windowVector
-    ld hl,bios_printStringRawZ
-    ld de,FONT_ENGINE_RAWZ+1
+    ld hl,printStringRawZ
+    ld de,biosRawZTarget
 windowVector:
     ld b,a
     call fontVectorMatches
@@ -92,7 +92,7 @@ printStringLim:
     push af
     push de
     push hl
-    ld hl,bios_printChar
+    ld hl,printChar
     ld de,FONT_ENGINE_CHAR+1
     call fontVectorMatches
     call z,textLimCapability

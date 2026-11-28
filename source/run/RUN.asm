@@ -1,4 +1,4 @@
-; RUN.COM v2: общий запуск COM/EXE/RKS в MX/STD/MON/RAMFOS.
+; RUN.COM v3: общий запуск COM/EXE/RKS в MX/STD/MON/RAMFOS.
 ; DE=аргументы, CF=ошибка до передачи. Регистры/флаги разрушаются.
 ; Тело читается прямо по месту; подготовка и меню не остаются резидентными.
 ; Разбор/меню в main; финальный загрузчик 8DB0h, переходник 8C00h или FONT_ADDR.
@@ -16,6 +16,7 @@
     INCLUDE "../io/timer-hardware.inc"
     INCLUDE "ramfos.inc"
     INCLUDE "../../bin/bios-move-switch.inc"
+    INCLUDE "../../bin/bios-imports.inc"
 IMAGE_FLAGS      = IMAGE_FLAG_MAIN
 RUN_BODY_REQUEST = RAMFOS_CONTEXT
 RUN_LOAD_STAGE   = RAMFOS_CONTEXT+48
@@ -44,7 +45,7 @@ start:
     ld (callerDrive),a
     pop de
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ex de,hl
     xor a
     ld (appName),a
@@ -56,7 +57,7 @@ start:
 nextArgument:
     push bc
     push de
-    call bios_argNext
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp c,argumentsDone
     push hl                 ; Курсор следующего слова, отдельно от его начала.
     ex de,hl
@@ -95,6 +96,8 @@ runtimeOption:
     jp nz,unknownOption
     ld a,2
     ld (mode),a
+    xor a
+    ld (monitorGiven),a
     inc hl
     inc hl
     inc hl
@@ -104,6 +107,8 @@ runtimeOption:
     inc hl
     call coreName
     jp c,argumentError
+    ld a,1
+    ld (monitorGiven),a
     jp endOption
 shortOption:
     ld (mode),a
@@ -223,21 +228,63 @@ nativeOpen:
     jp c,badImage
     call runNativeHeader
     jp c,badImage
-    ld a,(rksHeader+5)
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
     or a
-    jp nz,nativeForward
-    ; Режим задаёт ключ RUN или меню, а не рекомендация из заголовка.
-    ld hl,(rksHeader+12)
-    ld (expectedChecksum),hl
+    call nz,readNamedMonitor
+    jp c,badImage
+    call runFileClose
+    jp c,badImage
     ld a,(mode)
     inc a
-    jp nz,ready
-    jp chooseMode
+    jp nz,nativeModeReady
+    ld a,(rksHeader+IMAGE_MODE)
+    cp IMAGE_MODE_STD
+    jp nc,nativeModeFromHeader
+    ld a,1
+nativeModeFromHeader:
+    dec a
+    ld (mode),a
+nativeModeReady:
+    ld a,(mode)
+    cp 2
+    jp nz,nativeDispatch
+    ld a,(monitorGiven)
+    or a
+    jp nz,nativeDispatch
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
+    or a
+    jp z,nativeDispatch
+    ld hl,monitorTrailer
+    call coreName
+    jp c,badImage
+    ld a,1
+    ld (monitorGiven),a
+nativeDispatch:
+    ld a,(rksHeader+5)
+    or a
+    jp z,nativeLoadLegacy
+    ld a,(mode)
+    or a
+    jp nz,nativeLegacyAllowed
+    ld a,(rksHeader+IMAGE_MODE)
+    cp IMAGE_MODE_STD
+    jp c,nativeForward
+nativeLegacyAllowed:
+    ld a,(rksHeader+5)
+    cp IMAGE_FLAG_MAIN
+    jp nz,usage
+nativeLoadLegacy:
+    ld hl,(rksHeader+12)
+    ld (expectedChecksum),hl
+    jp ready
 ; Подтверждённый MAIN/DRIVER/BANK исполняет DOS без CLI/PATH/ассоциаций.
 ; main-приложение может затереть RUN: продолжение заранее переносится в 8C00h.
 nativeForward:
+    ld a,BIOS_PROFILE_RAMFOS
+    MXOS_CALL_REGS MXOS_BIOS_PROFILE
+    jp c,badImage
     ld a,(launchKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld hl,appName
     ld de,coreInput
     ld b,MAX_PATH-1
@@ -253,15 +300,19 @@ nativeForward:
     jp c,usage
     xor a
     ld (de),a
+    ; Пакет живёт на служебном стеке, а строку DOS читает до загрузки тела.
     ld hl,coreInput
-    ld de,RAMFOS_ARGS
-    ld bc,MAX_PATH
-    call copyBytes
-    ld hl,nativeBridge
-    ld de,RAMFOS_BRIDGE
-    ld bc,nativeBridgeEnd-nativeBridge
-    call copyBytes
-    jp RAMFOS_BRIDGE
+    push af
+    push bc
+    push de
+    push hl
+    ld hl,0
+    add hl,sp
+    ex de,hl
+    ld bc,MXOS_DOS_FILE_EXEC_NATIVE
+    ld hl,biosCliExecReturn
+    push hl
+    jp mx_callPacket
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -289,18 +340,6 @@ nativeCopyArgument:
     jp nz,nativeCopyArgument
     scf
     ret
-nativeBridge:
-    ld hl,RAMFOS_ARGS
-    MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
-    jp nc,0C000h
-    ld hl,RAMFOS_BRIDGE+nativeError-nativeBridge
-    call bios_printString
-    call bios_getch
-    jp 0C000h
-nativeError: DB 'NATIVE LOAD FAILED',13,10,0
-nativeBridgeEnd:
-    ASSERT nativeBridgeEnd-nativeBridge <= 256
-
 rksOpen:
     ld hl,descriptor
     MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
@@ -312,7 +351,7 @@ rksOpen:
     ld hl,(descriptor+FILE_DESCRIPTOR.size)
     ld (fileSize),hl
     ld de,6
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,badImage
     call runFileOpen
     jp c,badImage
@@ -325,7 +364,7 @@ rksOpen:
     ld hl,(rksHeader+2)
     PUT_DE appLoad
     PUT_DE appEntry
-    call bios_sub_hl_de
+    call runMath.sub_hl_de
     jp c,badImage
     inc hl
     ld (appSize),hl
@@ -336,55 +375,15 @@ rksOpen:
     add hl,de
     jp c,badImage
     GET_DE fileSize
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
+    call runFileClose
+    jp c,badImage
     ld a,(mode)
     inc a
     jp nz,ready
-    ld a,2
-setDefault:
+    xor a
     ld (mode),a
-    jp ready
-chooseMode:
-    ld hl,txtTitle
-    call bios_printString
-    ld hl,appName
-    call bios_printString
-    ld hl,txtLoad
-    call bios_printString
-    ld hl,(appLoad)
-    call bios_printHexWord
-    ld hl,txtEntry
-    call bios_printString
-    ld hl,(appEntry)
-    call bios_printHexWord
-    ld hl,txtModes
-    call bios_printString
-modeKey:
-    call bios_getch
-    sub '1'
-    cp 5
-    jp nc,modeKey
-    cp 4
-    jp z,customMode
-    ld hl,modeMap
-    ld e,a
-    ld d,0
-    add hl,de
-    ld a,(hl)
-    jp setDefault
-customMode:
-    ld hl,txtCustom
-    call bios_printString
-    ld hl,coreInput
-    ld de,coreInput+MAX_PATH-1
-    call bios_input
-    ld hl,coreInput
-    call coreName
-    jp c,usage
-    ld a,2
-    jp setDefault
-    jp ready
 ready:
     ld hl,0
     ld bc,APP_MEMORY_END
@@ -396,17 +395,32 @@ upperSource = ready ; Метка прежнего CPU-стенда; верхне
     GET_DE appSize
     add hl,de
     jp c,badImage
+    ld a,(descriptor+FILE_DESCRIPTOR.ext)
+    and 0DFh
+    cp 'R'
+    jp z,runMemoryRange
+    GET_DE rksHeader+IMAGE_MEMORY_END
+    call mon2_cmp_hl_de
+    jp z,runMemoryEndReady
+    jp nc,badImage
+runMemoryEndReady:
+    ex de,hl
+    GET_DE rksHeader+IMAGE_MIN_HEAP
+    add hl,de
+    jp c,badImage
+runMemoryRange:
+    ld (appMemoryEnd),hl
     ld a,(mode)
     cp 3
     jp z,rfRange
-    ld de,LEGACY_APP_MEMORY_END
+    ld de,RAMFOS_BRIDGE
     ld a,(mode)
     cp 2 ; MON replaces the kernel; MX and STD keep its resident resources.
     jp z,rangeLowReady
     push hl
-    call bios_getMemTop
-    ld de,APP_MEMORY_END-1
-    call bios_cmp_hl_de
+    call mx_getMemTop
+    ld de,RAMFOS_BRIDGE-1
+    call mon2_cmp_hl_de
     jp c,rangeMemTopReady
     ex de,hl
 rangeMemTopReady:
@@ -426,13 +440,13 @@ rangeLowReady:
     ld de,SYSTEM_PROGRAM_END
     jp rangeEnd
 rfRange:
-    ld de,LEGACY_APP_MEMORY_END
+    ld de,RAMFOS_BRIDGE
     ld a,(appLoad+1)
     cp 0D3h
     jp c,rangeEnd
     ld de,RAMFOS_HIGH_ADDR
 rangeEnd:
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,rangeOK
     jp nz,badImage
 rangeOK:
@@ -480,7 +494,14 @@ bodyDestinationReady:
     ld a,(descriptor+FILE_DESCRIPTOR.ext)
     and 0DFh
     cp 'R'
-    jp nz,bodyPrepared
+    jp z,rksBodyFormat
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
+    or a
+    jp z,bodyPrepared
+    add a,2
+    ld (bodyRequest+FILE_BODY_IO.tail),a
+    jp bodyPrepared
+rksBodyFormat:
     ld a,4
     ld (bodyRequest+FILE_BODY_IO.header),a
     ld a,2
@@ -491,13 +512,19 @@ bodyPrepared:
     ld a,(mode)
     cp 2
     jp c,install
-    ld hl,corePath
-    cp 3
-    jp nz,openCore
     ld hl,rfPath
+    cp 3
+    jp z,openCore
+    ld hl,coreDefaultPath
+    ld a,(monitorGiven)
+    or a
+    jp z,openCore
+    ld hl,corePath
 openCore:
+    ld (coreFilePath),hl
     ld de,descriptor
     MXOS_CALL_REGS MXOS_DOS_FILE_NAME_PREPARE
+    jp c,notFound
     ld hl,descriptor
     MXOS_CALL_REGS MXOS_DOS_FILE_LOAD_INFO
     jp c,notFound
@@ -512,19 +539,21 @@ openCore:
     jp nz,coreSize
     ld de,RAMFOS_IMAGE_SIZE
 coreSize:
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     xor a
     ld (IO_COLOR),a
-    call bios_clearScreenOld
-    ld hl,descriptor
-    ld de,RAMFOS_TEMP
-    call fileReadDescriptor
+    call mon2_clearScreenOld
+    ld hl,(coreFilePath)
+    call readCoreToScreen
     jp c,notFound
     ld a,(mode)
     cp 3
-    jp z,install
+    jp z,validateClassicRF
     ; Два известных пролога Monitor-2: оригинальный JMP и старый POP B.
+    ld a,(RAMFOS_TEMP+0800h)
+    cp 0C3h
+    jp nz,badImage
     ld hl,RAMFOS_TEMP+4
     ld a,(RAMFOS_TEMP)
     cp 0C1h
@@ -557,19 +586,53 @@ monitorOld:
     inc hl
     ld d,(hl)
     PUT_DE monInit
+    ld a,d
+    cp 0C0h
+    jp c,badImage
+    cp 0D0h
+    jp nc,badImage
+    ld hl,(monSP)
+    ld a,h
+    cp 08Eh
+    jp nc,badImage
+    or a
+    jp z,badImage
+    GET_DE appLoad
+    call mon2_cmp_hl_de
+    jp c,install
+    jp z,install
+    ld de,64
+    call runMath.sub_hl_de
+    GET_DE appMemoryEnd
+    call mon2_cmp_hl_de
+    jp c,badImage
+    jp install
+validateClassicRF:
+    ld a,(RAMFOS_TEMP+0800h)
+    cp 0C3h
+    jp nz,badImage
+    ld a,(RAMFOS_TEMP+RAMFOS_CORE_SIZE+RAMFOS_START-RAMFOS_HIGH_ADDR)
+    cp 0C3h
+    jp nz,badImage
 install:
     ; Исходный том восстанавливается до последнего копирования тела/ядра.
     ld a,(appDrive)
     ld e,1
     MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
+    jp c,notFound
     ld a,(callerDrive)
     ld (bodyCallerDrive),a
     ; Кодировка независима от MX/STD; сменные ядра задают её сами.
     ld a,(launchKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ; Переходник остаётся доступным после переключения в STD.
     ld hl,RAMFOS_BRIDGE
     ld de,RAMFOS_ARGS
+    ld a,(mode)
+    cp 2
+    jp nc,bridgeArgsReady
+    ld de,MAIN_COMMAND_ADDR
+bridgeArgsReady:
     ld bc,RAMFOS_BRIDGE_SP
 bridgeLowImage:
     ld (bridgeBase),hl
@@ -604,10 +667,7 @@ bridgeNoBodyCopy:
     ld hl,(appEntry)
     ld (bridgeEntry+1-bridge+bridgeImage),hl
     ld (monAfterInitEntry+1),hl
-    ld hl,(callerSP)
-    ld (bridgeCallerSP+1-bridge+bridgeImage),hl
-    ld hl,(cacheToken)
-    ld (bridgeCacheLimit+1-bridge+bridgeImage),hl
+    ld (rfAfterInitEntry+1),hl
     ld hl,(callerSP)
     ld (bridgeGameSP+1-bridge+bridgeImage),hl
     ld hl,(monSP)
@@ -616,15 +676,14 @@ bridgeNoBodyCopy:
     ld (bridgeInit+1-bridge+bridgeImage),hl
     ld a,(mode)
     ld (bridgeMode-bridge+bridgeImage),a
-    ld a,(callerKoi)
-    ld (bridgeRestoreKoi+1-bridge+bridgeImage),a
     ld hl,(argAddress)
     ld (bridgeArguments+1-bridge+bridgeImage),hl
     ld (monAfterInitArgs+1),hl
+    ld (rfAfterInitArgs+1),hl
     ; Все внутренние адреса переходника корректируются один раз при установке.
     ld hl,(bridgeBase)
     ld de,bridge
-    call bios_sub_hl_de
+    call runMath.sub_hl_de
     ld (bridgeDelta),hl
     ld hl,bridgeRelocations
     ld a,bridgeRelocationsEnd-bridgeRelocations
@@ -655,9 +714,9 @@ bridgeRelocate:
     jp c,copyBridge
     xor a
     ld (IO_COLOR),a
-    ld hl,coldStub
+    ld hl,foreignBridge
     ld de,RAMFOS_BRIDGE
-    ld bc,monAfterInitEnd-coldStub
+    ld bc,foreignBridgeEnd-foreignBridge
     call copyBytes
 copyBridge:
     ld hl,appArgs
@@ -700,6 +759,17 @@ runBodyReady:
 ;----------------------------------------------------------------------------
 
 runFileOpen:
+    ld hl,appName
+    call runOpenPath
+    ret c
+    ld a,DIR_OP_RESOLVED
+    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
+    PUT_DE bodyRequest+FILE_BODY_IO.parent
+    xor a
+    ret
+
+runOpenPath:
+    push hl
     ld hl,runHandle
     ld b,FILE_HANDLE
     xor a
@@ -708,23 +778,63 @@ runHandleClear:
     inc hl
     dec b
     jp nz,runHandleClear
-    ld hl,descriptor
-    ld de,runHandle
-    ld bc,FILE_DESCRIPTOR
-    call copyBytes
-    ld hl,appName
+    pop hl
     ld (runHandle+FH_BUFFER),hl
     ld a,FILE_MODE_READ
     ld (runHandle+FH_MODE),a
     ld a,FILE_OP_OPEN_PATH
     ld hl,runHandle
     MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
-    ret c
-    ld a,DIR_OP_RESOLVED
-    MXOS_CALL_REGS MXOS_DOS_DIRECTORY
-    PUT_DE bodyRequest+FILE_BODY_IO.parent
-    xor a
     ret
+
+; Прочитать MON/RF в MAIN и скопировать в экран.
+readCoreToScreen:
+    call runOpenPath
+    ret c
+    ld hl,(descriptor+FILE_DESCRIPTOR.size)
+    ld (coreRemaining),hl
+    ld hl,RAMFOS_TEMP
+    ld (coreScreenCursor),hl
+coreScreenRead:
+    ld hl,(coreRemaining)
+    ld a,h
+    or a
+    jp z,coreScreenCount
+    ld hl,0100h
+coreScreenCount:
+    ld b,h
+    ld c,l
+    push bc
+    ld hl,coreReadBuffer
+    call rksRead
+    pop de
+    ret c
+    ld h,b
+    ld l,c
+    call mon2_cmp_hl_de
+    jp nz,runHeaderBad
+    push de
+    ld hl,coreReadBuffer
+    GET_DE coreScreenCursor
+    call copyBytes
+    PUT_DE coreScreenCursor
+    pop de
+    ld hl,(coreRemaining)
+    ld a,l
+    sub e
+    ld l,a
+    ld a,h
+    sbc a,d
+    ld h,a
+    ld (coreRemaining),hl
+    or l
+    jp nz,coreScreenRead
+    jp runFileClose
+
+coreFilePath: DW 0
+coreRemaining: DW 0
+coreScreenCursor: DW 0
+coreReadBuffer: DS 0100h,0
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -738,6 +848,12 @@ runHandleClear:
 ;   При cf = 0 bc = фактическая длина, hl указывает за прочитанными данными. Короткое
 ;   чтение проверяет вызывающий. При cf = 1 возвращается ошибка DOS.
 ;----------------------------------------------------------------------------
+
+runFileClose:
+    ld hl,runHandle
+    ld a,FILE_OP_CLOSE
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
+    ret
 
 rksRead:
     ld (runHandle+FH_BUFFER),hl
@@ -776,9 +892,20 @@ runHeaderFlagsReady:
     ld a,(rksHeader+IMAGE_HEADER_BYTES)
     cp IMAGE_HEADER_SIZE
     jp nz,runHeaderBad
-    ld a,(rksHeader+29)
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
     or a
+    jp z,runHeaderMode
+    cp IMAGE_MONITOR_MAX+1
+    jp nc,runHeaderBad
+    ld a,(rksHeader+IMAGE_MODE)
+    cp IMAGE_MODE_MON
     jp nz,runHeaderBad
+    ld a,(rksHeader+5)
+    or a
+    jp z,runHeaderMode
+    cp IMAGE_FLAG_MAIN
+    jp nz,runHeaderBad
+runHeaderMode:
     ld a,(rksHeader+IMAGE_MODE)
     cp 5
     jp nc,runHeaderBad
@@ -788,29 +915,113 @@ runHeaderFlagsReady:
     ld hl,(rksHeader+IMAGE_HEADER_CHECKSUM)
     ld d,b
     ld e,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,runHeaderBad
     ld hl,(descriptor+FILE_DESCRIPTOR.size+2)
     ld a,h
     or l
     jp nz,runHeaderBad
     ld hl,(rksHeader+10)
+    ld a,h
+    or l
+    jp z,runHeaderBad
     ld (appSize),hl
     ld de,IMAGE_HEADER_SIZE
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
+    or a
+    jp z,runHeaderSize
+    add a,IMAGE_HEADER_SIZE+2
+    ld e,a
+runHeaderSize:
     add hl,de
     jp c,runHeaderBad
     GET_DE descriptor+FILE_DESCRIPTOR.size
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,runHeaderBad
     ld hl,(rksHeader+6)
     ld (appLoad),hl
     ld hl,(rksHeader+8)
     ld (appEntry),hl
-    or a
+    GET_DE appLoad
+    call mon2_cmp_hl_de
+    jp c,runHeaderBad
+    ld hl,(appLoad)
+    GET_DE appSize
+    add hl,de
+    jp c,runHeaderBad
+    GET_DE appEntry
+    call mon2_cmp_hl_de
+    jp c,runHeaderBad
+    jp z,runHeaderBad
+    xor a
     ret
 runHeaderBad:
     scf
     ret
+;----------------------------------------------------------------------------
+; MXOS
+;
+; Прочитать и проверить назначенный монитор до чтения тела.
+; вход: runHandle открыт, IMAGE_MONITOR_BYTES > 0, appSize проверен.
+; выход: CF=0 имя ASCIIZ в monitorTrailer, иначе CF=1. AF/BC/DE/HL рабочие.
+;----------------------------------------------------------------------------
+readNamedMonitor:
+    ld hl,(appSize)
+    ld de,IMAGE_HEADER_SIZE
+    add hl,de
+    ld (runHandle+FH_SEEK),hl
+    ld hl,0
+    ld (runHandle+FH_SEEK+2),hl
+    xor a
+    ld (runHandle+FH_ORIGIN),a
+    ld hl,runHandle
+    ld a,FILE_OP_SEEK
+    MXOS_CALL_REGS MXOS_DOS_FILEHANDLE
+    ret c
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
+    add a,2
+    ld b,0
+    ld c,a
+    ld hl,monitorTrailer
+    call rksRead
+    ret c
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
+    add a,2
+    cp c
+    jp nz,runHeaderBad
+    ld hl,monitorTrailer
+    dec c
+    dec c
+    add hl,bc
+    push hl
+    dec hl
+    ex de,hl
+    ld hl,monitorTrailer
+    call bios_calcCS
+    pop hl
+    ld e,(hl)
+    ld (hl),0
+    inc hl
+    ld d,(hl)
+    ld h,b
+    ld l,c
+    call mon2_cmp_hl_de
+    jp nz,runHeaderBad
+    ld hl,monitorTrailer
+    ld a,(rksHeader+IMAGE_MONITOR_BYTES)
+    ld b,a
+namedMonitorChar:
+    ld a,(hl)
+    cp 021h
+    jp c,runHeaderBad
+    cp 07Fh
+    jp nc,runHeaderBad
+    inc hl
+    dec b
+    jp nz,namedMonitorChar
+    xor a
+    ret
+monitorTrailer: DS IMAGE_MONITOR_MAX+2,0
 runImageMagic:
     MXOS_IMAGE_SIGNATURE
 runHandle: DS FILE_HANDLE,0
@@ -821,27 +1032,38 @@ rksChecksum:
     ld d,(hl)
     ld h,b
     ld l,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret z
     scf
     ret
-coldStub:
-    xor a
-    ld (IO_PAGE_ROM-0800h),a
-    jp 0
-coldStubEnd:
+foreignBridge:
 ; Monitor-2 может очистить и экранный код, и весь экранный стек.
 ; После его инициализации продолжаем из 8C00h, затем ставим стек игры.
 monAfterInitSP:
     ld sp,0
-    ld hl,RAMFOS_BRIDGE
+    ld hl,0C800h
     push hl
 monAfterInitArgs:
     ld de,0
 monAfterInitEntry:
     ld hl,0
     jp (hl)
-monAfterInitEnd:
+
+; Инициализация RAMFOS очищает экран. Продолжение и стек вне экрана.
+rfAfterCopy:
+    ld sp,RAMFOS_CORE_ADDR+RAMFOS_CORE_SIZE-1
+    call 0C800h
+    ld hl,08FFFh
+    call 0C833h
+    ld hl,RAMFOS_MONITOR
+    push hl
+rfAfterInitArgs:
+    ld de,0
+rfAfterInitEntry:
+    ld hl,0
+    jp (hl)
+foreignBridgeEnd:
+    ASSERT foreignBridgeEnd-foreignBridge <= RAMFOS_ARGS-RAMFOS_BRIDGE
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -858,7 +1080,7 @@ monAfterInitEnd:
 
 option:
     push hl
-    call bios_stricmp
+    MXOS_CALL_REGS MXOS_BIOS_STRICMP
     pop hl
     ret
 ; HL — имя до пробела/терминатора, сохраняется позиция разделителя.
@@ -966,6 +1188,12 @@ badImage:
     ld hl,txtBad
 error:
     push hl
+    ld a,(runHandle+FH_STATE)
+    or a
+    call nz,runFileClose
+    ld a,(callerDrive)
+    ld e,1
+    MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
     ld hl,(cacheToken)
     ld a,h
     or l
@@ -976,9 +1204,9 @@ errorCacheReady:
     pop hl
     ld a,COLOR_BIOS
     ld (IO_COLOR),a
-    call bios_printString
+    call mon2_printStringOld
     ld a,(callerKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     scf
     ret
 
@@ -1021,14 +1249,18 @@ bridgeReloc6:
     ld bc,RAMFOS_HIGH_SIZE
 bridgeReloc7:
     call bridgeMove
-bridgeReloc8:
-    jp bridgeEntry
+    jp RAMFOS_BRIDGE+rfAfterCopy-foreignBridge
 bridgeNative:
-    or a
+    inc a
+    MXOS_CALL_REGS MXOS_BIOS_PROFILE
+    jp c,mon2_init
 bridgeReloc9:
+    ld a,(bridgeMode)
+    or a
+bridgeReloc12:
     jp z,bridgeStart
     ld a,0FFh
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     call biosMoveUseLow
 bridgeSTD:
     ld a,0B6h
@@ -1053,55 +1285,20 @@ bridgeReloc11:
     jp nz,bridgeStart
 bridgeMonSP:
     ld sp,STACK_ADDR
-    ld hl,RAMFOS_BRIDGE+coldStubEnd-coldStub
+    ld hl,RAMFOS_BRIDGE+monAfterInitSP-foreignBridge
     push hl
 bridgeInit:
     jp 0C444h
 bridgeStart:
 bridgeGameSP:
     ld sp,0
-bridgeReloc12:
-    ld hl,bridgeReturn
+    ld hl,mon2_init
     push hl
 bridgeEntry:
     ld hl,0
 bridgeArguments:
     ld de,RAMFOS_ARGS
-bridgeReloc13:
-    ld a,(bridgeMode)
-    cp 3
-    jp z,RAMFOS_START
     jp (hl)
-bridgeReturn:
-bridgeReloc14:
-    ld a,(bridgeMode)
-    or a
-bridgeReloc15:
-    jp z,bridgeReturnedMX
-    ld (IO_PAGE_RAM-0800h),a
-bridgeReturnedMX:
-bridgeCallerSP:
-    ld sp,0
-    push af                 ; Режим нужен после восстановления кэша и KOI.
-bridgeCacheLimit:
-    ld hl,0
-    ld a,h
-    or l
-bridgeReloc19:
-    jp z,bridgeCacheDone
-    ld a,1
-    MXOS_CALL_REGS MXOS_BIOS_GLYPH_CACHE
-bridgeCacheDone:
-bridgeRestoreKoi:
-    ld a,0
-    call bios_setFontEncoding
-    ld a,COLOR_BIOS
-    ld (IO_COLOR),a
-    pop af
-    cp 2
-    jp c,0C000h             ; MX/STD: нижний RUN и код оболочки могли быть затёрты.
-    or a
-    ret
 ; Неперекрывающиеся диапазоны: тело 0000h -> верхнее ОЗУ,
 ; ядро 9000h -> C000h/F800h. BC>0; AF/BC/DE/HL разрушаются.
 ; Свой копировальщик, без вызовов уже заменяемого DOS.
@@ -1168,39 +1365,35 @@ bridgeRelocations:
     DB bridgeReloc5+1-bridge
     DB bridgeReloc6+1-bridge
     DB bridgeReloc7+1-bridge
-    DB bridgeReloc8+1-bridge
     DB bridgeReloc9+1-bridge
+    DB bridgeReloc12+1-bridge
     DB bridgeReloc10+1-bridge
     DB bridgeReloc11+1-bridge
-    DB bridgeReloc12+1-bridge
-    DB bridgeReloc13+1-bridge
-    DB bridgeReloc14+1-bridge
-    DB bridgeReloc15+1-bridge
     DB bridgeReloc16+1-bridge
     DB bridgeReloc17+1-bridge
     DB bridgeReloc18+1-bridge
-    DB bridgeReloc19+1-bridge
 bridgeRelocationsEnd:
 
 keyMX:          DB "MX"
-keyKOI7:        DB "KOI7"
 keyRF:          DB "RF"
 keySTD:         DB "STD"
 keyMON:         DB "MON"
-modeMap:        DB 0,1,3,2
+keyKOI7:        DB "KOI7"
 monSystemDirectory: DB 'A'+SYSTEM_DRIVE,':',05Ch,"DOS",05Ch
 monSystemDirectoryEnd:
 monSuffix:      DB ".MON"
 monExtension:   DB "MON"
 rfPath:         DB "C:",05Ch,"DOS",05Ch,"RAMFOS.MON",0
-corePath:       DB "C:",05Ch,"DOS",05Ch,"MONITOR2.MON",0
-    BLOCK MAX_PATH-($-corePath),0
+coreDefaultPath: DB "C:",05Ch,"DOS",05Ch,"MONITOR2.MON",0
+corePath:        BLOCK MAX_PATH,0
+monitorGiven:    DB 0
 appArgs:        BLOCK  128,0
 mode:           DB     0FFh
 callerSP:       DW     0
 appLoad:        DW     0
 appEntry:       DW     0
 appSize:        DW     0
+appMemoryEnd:   DW     0
 
 rksHeader:      BLOCK  IMAGE_HEADER_SIZE,0
 bridgeBase:     DW     0
@@ -1215,11 +1408,14 @@ appDrive:       DB     0
 monSP:          DW     07FFFh
 monInit:        DW     0C444h
 descriptor:     BLOCK  FILE_DESCR_SIZE,0
-txtUsage:       DB     0Ah,"RUN FILE [-MX|-STD|-RF|-MON[:FILE]] [-KOI7]",0
+txtUsage:       DB     0Ah,"RUN 3: FILE [-MX|-STD|-MON[:FILE]|-RF] [-KOI7]",0
 txtNotFound:    DB     0Ah,"FILE NOT FOUND",0
 txtBad:         DB     0Ah,"BAD IMAGE OR ADDRESS RANGE",0
 upperEnd: ; Граница прежнего CPU-стенда, все эти байты теперь в нижнем RUN.
-    INCLUDE "../../sdk/asm/lib/file-io.inc"
+    MODULE runMath
+    DEFINE MATH_SUB
+    INCLUDE "../../sdk/asm/lib/math.inc"
+    ENDMODULE
 bodyRequest:        FILE_BODY_IO
 expectedChecksum:   DW 0
 bodyCallerDrive:    DB 0
@@ -1248,7 +1444,7 @@ loadStage:
     ld hl,(RUN_BODY_REQUEST+FILE_BODY_IO)
     ld d,b
     ld e,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,RUN_LOAD_STAGE+loadStageError-loadStage
 loadStageBridge:
     jp 0
@@ -1260,17 +1456,7 @@ loadStageEnd:
     ASSERT RUN_LOAD_STAGE+loadStageEnd-loadStage <= RAMFOS_CONTEXT+128
     ASSERT $ < RAMFOS_BRIDGE
 
-txtTitle:       DB 0Ah,"MXOS2 EXECUTABLE LAUNCHER V2.0",0Ah,0
-txtLoad:        DB ": LOAD ADDRESS ",0
-txtEntry:       DB ", RUN ADDRESS ",0
-txtModes:       DB 0Ah,"CHOOSE THE RUNTIME MODE:",0Ah
-    DB "1 - MX:  MX  HARDWARE, MXOS2 CORE",0Ah
-    DB "2 - STD: STD HARDWARE, MXOS2 CORE",0Ah
-    DB "3 - RF:  MX  HARDWARE, RAMFOS CORE",0Ah
-    DB "4 - MON: STD HARDWARE, MONITOR-2 CORE",0Ah
-    DB "5 - MON:CUSTOM: STD HARDWARE, CUSTOM CORE",0Ah,"> ",0
 coreInput:      BLOCK  MAX_PATH,0
 appName:        BLOCK  MAX_PATH,0
-txtCustom:      DB     0Ah,"MONITOR FILE: ",0
 cacheToken:     DW     0
     END

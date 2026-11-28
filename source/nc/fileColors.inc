@@ -18,15 +18,15 @@ ncFileColor:
     ld de,FILE_INFO.ext-FILE_INFO.attrib
     add hl,de
     ld a,(hl)
-    call bios_upperCase
+    call ncStrings.upperCase
     ld b,a
     inc hl
     ld a,(hl)
-    call bios_upperCase
+    call ncStrings.upperCase
     ld c,a
     inc hl
     ld a,(hl)
-    call bios_upperCase
+    call ncStrings.upperCase
     ld d,a
     ld hl,vars.fileColorRules
 ncFileColorRule:

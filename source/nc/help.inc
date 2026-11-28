@@ -13,7 +13,7 @@ ncHelp:
     call uiModalGetch
 ncHelpWaitRelease:
     ; Keep an autorepeat of the closing key inside the modal.
-    call bios_keyScan
+    call ncKeyScan
     inc a
     jp nz,ncHelpWaitRelease
     jp ncRefreshDirty

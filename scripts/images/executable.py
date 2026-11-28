@@ -1,6 +1,7 @@
 """Независимый эталон COM/EXE/DLL/FNT/RKS для Python-проверок. Сборщик использует executable.ps1."""
 from dataclasses import dataclass, replace
 from pathlib import Path
+import re
 import struct
 import runpy
 parse_cpu=runpy.run_path(str(Path(__file__).with_name("cpu.py")))["parse_cpu"]
@@ -8,8 +9,24 @@ parse_cpu=runpy.run_path(str(Path(__file__).with_name("cpu.py")))["parse_cpu"]
 MAGIC = b'\xcd\x20MX\x02\x00'
 HEADER_SIZE = 32
 RELOC_HEADER_SIZE = 40
+MONITOR_MAX_BYTES = 63
 WORD16, HIGH8 = range(2)
 POLICY_EXCLUSIVE, POLICY_PRESERVE, POLICY_MANAGED, POLICY_TRANSIENT = range(4)
+
+
+def checked_monitor(name):
+    if len(name) > MONITOR_MAX_BYTES or not re.fullmatch(r'(?:[a-zA-Z]:)?[a-zA-Z0-9_.~\\-]+', name):
+        raise ValueError('Invalid DOS monitor name')
+    return name.encode('ascii')
+
+
+def cpu_monitor(name, mode):
+    if name.lower() in ('mon2.mon', 'monitor2.mon'):
+        return 'MONITOR2.MON'
+    if mode == 3 and name.lower() != 'mxos2.mon':
+        checked_monitor(name)
+        return name
+    return ''
 
 
 def checksum(data):
@@ -37,6 +54,7 @@ class Image:
     reloc_kind: int | None = None
     align_log2: int = 0
     relocations: tuple[int, ...] = ()
+    monitor: str = ""
 
     def memory(self):
         native = self.flags or self.reloc_kind is not None
@@ -64,6 +82,10 @@ class Image:
             raise ValueError('TRANSIENT requires a fixed MAIN image without minimum heap or cache flags')
         if self.flags not in (0, 1, 2, 4):
             raise ValueError("Unknown COM/EXE flags")
+        if self.monitor:
+            checked_monitor(self.monitor)
+            if self.mode != 3 or self.flags not in (0, 4) or self.reloc_kind is not None:
+                raise ValueError('Named monitor requires a fixed MAIN COM/EXE')
         if self.reloc_kind is not None:
             if self.options == 3 and self.flags not in (0, 4):
                 raise ValueError('REUSABLE requires MAIN-compatible placement')
@@ -130,14 +152,22 @@ def decode(data, kind, load=None, entry=None, path=None):
         header_sum = checksum(data[:30] + bytes(2) + data[32:header]) if version == 3 else checksum(data[:sum_at])
         if len(body)!=size or header_sum!=hs or checksum(body)!=cs:
             raise ValueError('Invalid image size or checksum')
-        if version != 3 and table:
+        monitor = ''
+        if version == 2 and data[29]:
+            count = data[29]
+            if kind not in ('com', 'exe') or len(table) != count + 2:
+                raise ValueError('Invalid named monitor trailer')
+            monitor = table[:count].decode('ascii')
+            if checked_monitor(monitor) != table[:count] or checksum(table[:count]) != int.from_bytes(table[count:], 'little'):
+                raise ValueError('Invalid named monitor checksum')
+        elif version != 3 and table:
             raise ValueError('Unexpected bytes after fixed image')
         image=Image(body,start,run,data[5])
         if version>=2:
             bss,begin,end,heap=struct.unpack_from('<4H',data,14)
             stack=struct.unpack_from('<H',data,24)[0]
-            if data[27]!=header or data[29]: raise ValueError('Invalid image header size/reserve')
-            image=Image(body,start,run,data[5],bss,begin,end,heap,stack,data[22],data[23],data[26],data[28])
+            if data[27] != header or version == 3 and data[29]: raise ValueError('Invalid image header size/reserve')
+            image=Image(body,start,run,data[5],bss,begin,end,heap,stack,data[22],data[23],data[26],data[28],monitor=monitor)
             if image.policy == POLICY_TRANSIENT and kind not in ('com', 'exe'):
                 raise ValueError('TRANSIENT requires COM or EXE')
             image.memory()
@@ -163,6 +193,10 @@ def decode(data, kind, load=None, entry=None, path=None):
                     number('BSS'),number('MEM_BEGIN'),number('MEM_END'),number('MIN_HEAP',0),number('STACK',0),
                     choice('POLICY',{'EXCLUSIVE':0,'PRESERVE':1,'MANAGED':2,'TRANSIENT':3}),number('API'),
                     choice('MODE',{'AUTO':0,'MX':1,'STD':2,'MON':3,'RF':4},0),number('CACHEABLE',0))
+        if descriptor['flags'] in (0, 4) and 'RELOC_KIND' not in fields:
+            monitor = cpu_monitor(descriptor['monitor'], image.mode)
+            if monitor:
+                image = replace(image, mode=3, monitor=monitor)
         if 'RELOC_KIND' in fields:
             size = number('BODY_SIZE')
             alignment = number('ALIGN_LOG2')
@@ -185,6 +219,8 @@ def encode(image, kind):
     if image.policy == POLICY_TRANSIENT and kind not in ('com', 'exe'):
         raise ValueError('TRANSIENT requires COM or EXE')
     kind = kind.lower().lstrip('.')
+    if image.monitor and kind in ('dll', 'fnt'):
+        raise ValueError('Named monitor requires COM or EXE')
     if image.reloc_kind is not None:
         check_reloc_target(kind, image.flags)
     if kind in ('com','exe','dll','fnt'):
@@ -206,6 +242,12 @@ def encode(image, kind):
                              len(image.relocations), checksum(table), 0)
             header_sum = checksum(header)
         else:
+            if image.monitor:
+                name = checked_monitor(image.monitor)
+                header[29] = len(name)
+                table = name + struct.pack('<H', checksum(name))
+                if len(header) + len(image.data) + len(table) > 65535:
+                    raise ValueError('Named executable exceeds 65535 bytes')
             header_sum = checksum(header[:30])
         struct.pack_into('<H',header,30,header_sum)
         return bytes(header)+image.data+table

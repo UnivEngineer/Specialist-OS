@@ -89,7 +89,7 @@ editorBlockInsert:
         JP Z,Beep4
         EX DE,HL
         LD HL,(v_selectionEnd)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (editorBlockLength),HL
         CALL getLineBufferCursor
         LD (editorBlockTarget),HL
@@ -139,7 +139,7 @@ editorBlockDeleteSource:
         LD HL,(editorBlockLength)
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (v_selectionBegin),HL
         JP editorBlockReposition
 
@@ -186,7 +186,7 @@ editorOverwriteMoveGap:
         LD HL,(v_selectionEnd)
         EX DE,HL
         LD HL,(v_selectionBegin)
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         CALL editorSetDirty
         POP HL
         RET
@@ -229,10 +229,10 @@ editorBlockCaret:
         LD HL,(v_currentLine)
         LD (v_topLine),HL
         EX DE,HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (v_column),HL
         LD A,EDITOR_FIRST_Y
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         CALL editorResetGoal
         CALL editorPositionCursor
         JP redrawPreservingCursor

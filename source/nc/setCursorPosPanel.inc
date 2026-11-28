@@ -18,7 +18,7 @@ setCursorPosPanel:
             ld    a, 96       ; Половина экрана
 loc_D9BA:   add   a, h
             ld    h, a
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
 
             ; Восстанавливаем регистры
             pop   af

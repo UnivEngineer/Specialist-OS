@@ -9,27 +9,27 @@
     ORG_PAD0 00700h
 
 
-mon2_restart:       JP    RestartNoCls          ; F800
-mon2_getch:         JP    bios_getchOld         ; F803
-                    JP    bios_tapeReadOld      ; F806
-mon2_printChar:     JP    bios_printCharOld     ; F809
-                    JP    bios_tapeWriteOld     ; F80C
-                    JP    bios_printer          ; F80F
+debug_restart:       JP    RestartNoCls          ; F800
+debug_getch:         JP    mon2_getchOld         ; F803
+                    JP    mon2_tapeReadOld      ; F806
+debug_printChar:     JP    mon2_printCharOld     ; F809
+                    JP    mon2_tapeWriteOld     ; F80C
+                    JP    debugPrinterNative          ; F80F
                     JP    setMIfKeyPressed      ; F812
-mon2_printHexByte:  JP    bios_printHexByte     ; F815
-mon2_printString:   JP    bios_printStringOld   ; F818
-mon2_keyScan:       JP    bios_keyScan       ; F81B
-                    JP    bios_getCursorPos     ; F81E
+debug_printHexByte:  JP    mx_printHexByte     ; F815
+debug_printString:   JP    mon2_printStringOld   ; F818
+debug_keyScan:       JP    debugKeyScanNative       ; F81B
+                    JP    mx_getCursorPos     ; F81E
                     RET                         ; F821 - не используется
                     NOP
                     NOP
-mon2_tapeLoad:      JP    bios_tapeLoad         ; F824
-mon2_tapeSave:      JP    bios_tapeSave         ; F827
-mon2_calcCS:        JP    bios_calcCS           ; F82A
-                    JP    bios_beep_Old         ; F82D
-                    JP    bios_getMemTop        ; F830
-                    JP    bios_setMemTop        ; F833
-mon2_printHexWord:  PUSH  BC                    ; F836 - печать слова из HL в HEX формате, дополняется пробелом
+debug_tapeLoad:      JP    debugTapeLoadNative         ; F824
+debug_tapeSave:      JP    debugTapeSaveNative         ; F827
+debug_calcCS:        JP    bios_calcCS           ; F82A
+                    JP    mon2_beep_Old         ; F82D
+                    JP    mx_getMemTop        ; F830
+                    JP    mx_setMemTop        ; F833
+debug_printHexWord:  PUSH  BC                    ; F836 - печать слова из HL в HEX формате, дополняется пробелом
                     JP    printHexWordHL_noSpace
 
 ;----------------------------------------------------------------------------

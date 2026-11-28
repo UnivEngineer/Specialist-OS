@@ -2,11 +2,11 @@
 ; caller's MAIN cache. A cached source already has the slot stride.
 ngPseudoRows:
     push hl
-    ld hl,bios_printStringRawPseudo
+    ld hl,FONT_ENGINE_PSEUDO
     jp ngRowsSelectPrint
 ngTextRows:
     push hl
-    ld hl,bios_printStringRawLim
+    ld hl,FONT_ENGINE_LIM
 ngRowsSelectPrint:
     ld (ngRowsPrintCall+1),hl
     pop hl
@@ -23,7 +23,7 @@ ngRowsSelectPrint:
     jp z,ngRowsBad
     ld (ngRowsWidth),a
     ld (ngRowsStep),a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld (ngRowsCursor),hl
     ld hl,(ngPayload)
     push hl
@@ -42,7 +42,7 @@ ngRowsLengthLoop:
 ngRowsLength:
     ex de,hl
     ld hl,(ngNextRecord)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     pop hl
     jp nz,ngRowsBad
     ex de,hl
@@ -71,7 +71,7 @@ ngRowsNext:
     ex de,hl
     pop hl
     push hl
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,(ngRowsDestination)
     ld a,(ngRowsStride)
     ld e,a
@@ -80,7 +80,7 @@ ngRowsNext:
     ld (ngRowsDestination),hl
 ngRowsPrint:
     ld hl,(ngRowsCursor)
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,l
     add a,10
     ld l,a

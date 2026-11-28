@@ -26,11 +26,11 @@ scalar:
     add hl,de
     push hl
 
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld c,h
     ld a,h
     add a,3
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,h
     rrca
     rrca
@@ -65,7 +65,7 @@ scalar:
 entry:
     push af
     push hl
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     xor (hl)
     and 3Fh
     ld l,a

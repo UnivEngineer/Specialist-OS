@@ -37,7 +37,7 @@ printFileGap:
         ld a,(ncFontWidth)
         cp 8
         jp z,ncPrintDetailedFile
-        call bios_printStringRawZ
+        call FONT_ENGINE_RAWZ
     IF !ENABLE_COLOR
         ld a,(ncFontWidth)
         cp 6
@@ -100,13 +100,13 @@ ncDetailedCopy:
         xor a
         ld (de),a
         ld hl,ncTextBuffer
-        call bios_printStringRawZ
+        call FONT_ENGINE_RAWZ
         jp ncPanelNameDone
 ncDirectory5: DB '<DIR>'
     IF !ENABLE_COLOR
 ; The 1px right border follows the inverse cursor in monochrome.
 ncNamePadding:
-        ld hl,(bios_vars.cursorY)
+        ld hl,(mon2_vars.cursorY)
         ld a,h
         ld h,0
         ld d,l
@@ -117,7 +117,7 @@ ncNamePadding:
         ld d,a
         ld e,10
         ld bc,1
-        ld a,(bios_vars.inverse)
+        ld a,(mon2_vars.inverse)
         jp uiFillRectPixels
     ENDIF
 ; Поля FAT не являются ASCIIZ; непечатный байт заменяется пробелом.

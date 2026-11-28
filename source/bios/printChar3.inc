@@ -10,7 +10,7 @@
 
 printChar3: ; Код 7
             sub   7
-            jp z, beep
+            jp z, biosBeep
             ; Код 8
             dec   a
             jp z, printChar_c08
@@ -44,7 +44,7 @@ printChar3: ; Код 7
 ; Обработка кода 0Ch. Курсор в левый верхний угол экрана
 
 printChar_c0C:
-            ; bios_vars.cursorY = 8
+            ; mon2_vars.cursorY = 8
             ld    l, 8
 
             ; Продолжение в printChar_c0D
@@ -53,12 +53,12 @@ printChar_c0C:
 ; Обработка кода 0Dh. Курсор в начало строки
 
 printChar_c0D:
-            ; bios_vars.cursorX = 0
+            ; mon2_vars.cursorX = 0
             xor   a
 saveVCursorHA:
             ld    h, a
 saveVCursor:
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
             ret
 
 ; ---------------------------------------------------------------------------
@@ -79,7 +79,7 @@ printChar_c08:    ; cursorX -= 3
             ld    a,192
             sub   b
             ld    h,a
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
 
             ; Продолжение в printChar_c19
 

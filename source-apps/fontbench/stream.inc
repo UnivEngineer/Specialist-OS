@@ -5,46 +5,46 @@ streamInstall:
     ld (streamReal),a
     ld hl,(output+1)
     ld de,kernelReal
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,streamSaveEntries
     ld a,1
     ld (streamReal),a
 streamSaveEntries:
-    ld hl,(bios_printChar+1)
+    ld hl,(mon2_printCharOld+1)
     ld (streamOriginalChar+1),hl
-    ld hl,(bios_printString+1)
+    ld hl,(mon2_printStringOld+1)
     ld (streamOriginalString+1),hl
     ld hl,(matrixCase)
     call benchIsKernel
     jp z,streamInstallChar
     ld hl,(output+1)
     ld de,kernelRealString
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret nz
     ld hl,kernelRealBatch
     ld (serialOutput+1),hl
     jp streamInstallString
 streamInstallChar:
     ld hl,streamChar
-    ld (bios_printChar+1),hl
+    ld (mon2_printCharOld+1),hl
 streamInstallString:
     ld hl,streamString
-    ld (bios_printString+1),hl
+    ld (mon2_printStringOld+1),hl
     ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_STRING_BANK-0100h)),hl
     ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_STRING_MAIN-0100h)),hl
     ret
 streamRestore:
     ld hl,(streamOriginalChar+1)
-    ld (bios_printChar+1),hl
+    ld (mon2_printCharOld+1),hl
     ld hl,(streamOriginalString+1)
-    ld (bios_printString+1),hl
+    ld (mon2_printStringOld+1),hl
     ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_STRING_BANK-0100h)),hl
     ld (BASE_BIOS_TABLE+2*(MXOS_BIOS_PRINT_STRING_MAIN-0100h)),hl
     ret
 streamOriginalChar:
-    jp bios_printChar
+    jp mon2_printCharOld
 streamOriginalString:
-    jp bios_printString
+    jp mon2_printStringOld
 ; Управляющие коды всегда обрабатывает исходный BIOS.
 streamChar:
     push af
@@ -57,7 +57,7 @@ output:
 streamControlChar:
     pop af
     jp streamOriginalChar
-; AF/BC/DE сохранены, HL возвращается на нуле, как у bios_printString.
+; AF/BC/DE сохранены, HL возвращается на нуле, как у mon2_printStringOld.
 streamString:
     push af
     push bc
@@ -82,7 +82,7 @@ streamBatch:
     cp 3
     jp nc,streamScan
     ; 6x8: голова до границы байта; затем только полные четвёрки.
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     and 3
     jp nz,streamTail
 streamScan:
@@ -171,7 +171,7 @@ streamPrepareByte:
     xor a
     ld (de),a
     ld hl,7
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ret
 
 streamReal: DB 0

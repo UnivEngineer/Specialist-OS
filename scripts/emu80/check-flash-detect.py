@@ -13,7 +13,7 @@ x=Matrix(); rows=[]
 if args.no_id_only:rows=[r for r in json.loads((out/'results.json').read_text()) if 'noIdRejected' not in r]
 def save(): (out/'results.json').write_text(json.dumps(rows,indent=2)+'\n')
 def size(drive,expected,step):
-    x.select(drive); r=x.func(SYSTEM['bios_diskDriver'],bc=0x0300)
+    x.select(drive); r=x.func(SYSTEM['sysDiskDriver'],bc=0x0300)
     assert r['registers']['de']['dec']==expected//256
     assert r['registers']['bc']['dec']==step
 def check_sectors(drive,image,sectors,flush=False):
@@ -21,18 +21,18 @@ def check_sectors(drive,image,sectors,flush=False):
     for sector in sectors:
         payload=bytes((i*37+sector*13+0x39)&255 for i in range(256))
         x.m.write(0x4001,payload)
-        assert not x.func(SYSTEM['bios_diskDriver'],bc=0x0500,de=sector,hl=0x4001)['flags']['C']
-        if flush: assert not x.func(SYSTEM['bios_diskDriver'],bc=0x0400)['flags']['C']
-        assert not x.func(SYSTEM['bios_diskDriver'],bc=0x0200,de=sector,hl=0x5001)['flags']['C']
+        assert not x.func(SYSTEM['sysDiskDriver'],bc=0x0500,de=sector,hl=0x4001)['flags']['C']
+        if flush: assert not x.func(SYSTEM['sysDiskDriver'],bc=0x0400)['flags']['C']
+        assert not x.func(SYSTEM['sysDiskDriver'],bc=0x0200,de=sector,hl=0x5001)['flags']['C']
         assert x.m.read(0x5001,256)==payload
         actual=image.read_bytes();a=sector*256
         assert actual[:a]==before[:a] and actual[a:a+256]==payload and actual[a+256:]==before[a+256:]
         x.m.write(0x4001,before[a:a+256])
-        assert not x.func(SYSTEM['bios_diskDriver'],bc=0x0100,de=sector,hl=0x4001)['flags']['C']
-        if flush: assert not x.func(SYSTEM['bios_diskDriver'],bc=0x0400)['flags']['C']
+        assert not x.func(SYSTEM['sysDiskDriver'],bc=0x0100,de=sector,hl=0x4001)['flags']['C']
+        if flush: assert not x.func(SYSTEM['sysDiskDriver'],bc=0x0400)['flags']['C']
     for op in [1,2,5]:
-        assert x.func(SYSTEM['bios_diskDriver'],bc=op<<8,de=capacity,hl=0x4001)['flags']['C']
-        assert x.func(SYSTEM['bios_diskDriver'],bc=op<<8,de=0xFFFF,hl=0x4001)['flags']['C']
+        assert x.func(SYSTEM['sysDiskDriver'],bc=op<<8,de=capacity,hl=0x4001)['flags']['C']
+        assert x.func(SYSTEM['sysDiskDriver'],bc=op<<8,de=0xFFFF,hl=0x4001)['flags']['C']
     assert image.read_bytes()==before
 
 try:
@@ -45,7 +45,7 @@ try:
             before=image.read_bytes();sdp=image.with_suffix('.bin.sdp').read_bytes()
             x.install(name);assert image.read_bytes()==before and image.with_suffix('.bin.sdp').read_bytes()==sdp
             size(7,count*524288,2048 if name=='FlashFst' else 0)
-            info=x.func(SYSTEM['bios_diskDriver'],bc=0xFF00)['registers']['hl']['dec']
+            info=x.func(SYSTEM['sysDiskDriver'],bc=0xFF00)['registers']['hl']['dec']
             strings=x.m.read(info,48).split(b'\0');assert strings[1].startswith(str(count).encode()+b'x512K')
             driver_symbols=syms(ROOT/f'bin/{name}.sym')
             assert x.m.read(driver_symbols['v_chipMap'],count)==bytes(i*8 for i in range(count))
@@ -79,7 +79,7 @@ try:
         size(0,kib*1024,0)
         s=syms(ROOT/'bin/FlashSys.sym')
         assert x.m.read(s['v_halfPage'],1)==bytes([128 if kib==128 else 0])
-        info=x.func(SYSTEM['bios_diskDriver'],bc=0xFF00)['registers']['hl']['dec']
+        info=x.func(SYSTEM['sysDiskDriver'],bc=0xFF00)['registers']['hl']['dec']
         assert x.m.read(info,48).split(b'\0')[1]==f'{kib}K mapped'.encode()
         check_sectors(0,image,[127,128,255,256,kib*4-1])
         rows.append(dict(driver='FlashSys',physicalKiB=kib,pageBytes=128 if kib==128 else 256,idDoesNotWrite=True,readWriteVerified=True,boundsRejected=True));save();print(rows[-1],flush=True)

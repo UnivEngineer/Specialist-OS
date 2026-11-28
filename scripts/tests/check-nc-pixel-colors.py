@@ -16,7 +16,7 @@ for font,width,columns,text_width in [('Cpm4',4,3,48),('Compact',6,2,72),('Fast8
     m=bytearray(65536)
     for at,path in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin'),(0xd800,f'fonts/{font}.i80')]:
         data=(ROOT/'bin'/path).read_bytes();m[at:at+len(data)]=data
-    m[b['bios_vars']:b['bios_vars']+b['BIOS_VARIABLES']]=m[b['initVars']:b['initVarsEnd']]
+    m[b['mon2_vars']:b['mon2_vars']+b['MON2_VARIABLES']]=(ROOT/'bin/BIOS.defaults.bin').read_bytes()[:b['MON2_VARIABLES']]
     m[b['bios_upper.escMode']]=255
     m=run(m,n['FONT_ENGINE_INIT'])[0];m=run(m,n['ncLayoutInit'])[0]
     for panel in (0,1):

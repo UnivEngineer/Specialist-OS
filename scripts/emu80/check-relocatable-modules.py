@@ -47,7 +47,7 @@ def check(machine, out):
     def syscall(op,hl=0,a=0,de=0,bc=0,error=None):
         page(0)
         m.write(0x3100,struct.pack('<4H',hl,de,bc,a<<8|2))
-        m.write(0x2800,b'\xcd\x00\xf8')
+        m.write(0x2800,b'\xcd\x60\xf8')
         m.stop_at(0x2803)
         m.call('regs_set',pc=0x2800,sp=0x2700,bc=op,de=0x3100)
         start = m.call('cpu_state')['cpu_ticks']
@@ -196,7 +196,7 @@ def check(machine, out):
     # до публикации handle. После Reset следует заново загрузить NC и выйти в CLI.
     filename('RELOCB.DLL')
     m.write(0x3100,struct.pack('<4H',0x3200,0,0,2))
-    m.write(0x2800,b'\xcd\x00\xf8')
+    m.write(0x2800,b'\xcd\x60\xf8')
     m.stop_at(k['relocReadTable'])
     m.call('regs_set',pc=0x2800,sp=0x2700,bc=k['MXOS_DOS_MODULE_LOAD'],de=0x3100)
     m.until(k['relocReadTable'],100,page=1)

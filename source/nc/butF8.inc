@@ -28,7 +28,7 @@ but_F8:
             ld hl,vars.pathArg
             ld de,vars.pathArg+MAX_PATH
             ld bc,vars.input
-            call bios_memcpy_bc_hl
+            call mon2_memcpy_bc_hl
             ld hl,240
             call ncProgressFieldWidth
             ld hl,vars.pathArg

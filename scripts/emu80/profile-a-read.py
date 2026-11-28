@@ -36,7 +36,7 @@ try:
  m.write(0x3400,b'A:/APROFILE.BIN'+bytes(113));data=bytes((i*31+7)&255 for i in range(8192));m.write(0x4000,data)
  m.write(0x3200,w(0x3400)+w(0x4000)+w(len(data))+bytes(34));api['path_io'](m,call,k,0x3200,True)
  f=bytearray(64);f[41]=1;f[49:51]=w(0x3400);m.write(0x3100,f);call(k['MXOS_DOS_FILEHANDLE'],hl=0x3100,a=7)
- m.write(0x7e00,b'\xcd\x06\xf8'+w(k['MXOS_DOS_FILEHANDLE'])+b'\xc9')
+ m.write(0x7e00,b'\xcd\x66\xf8'+w(k['MXOS_DOS_FILEHANDLE'])+b'\xc9')
  for buffer in (0x4000,0x9000):
   m.write(0x3100+53,bytes(5));call(k['MXOS_DOS_FILEHANDLE'],hl=0x3100,a=3)
   m.write(0x3100+49,w(buffer)+w(len(data)))

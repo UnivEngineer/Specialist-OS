@@ -36,7 +36,7 @@ quadEntry:
     jp nz,quadError
     ld a,c
     ld (quadRemaining),a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 3
     jp nz,quadError
@@ -102,7 +102,7 @@ quadGroup:
     ld (quadRaw),hl
     ex de,hl
     ld (quadText),hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -172,9 +172,9 @@ quadPixels:
     or (hl)
     ld (bc),a
 quadPixelsEnd:
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     add a,12
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld hl,quadRemaining
     ld a,(hl)
     sub 4

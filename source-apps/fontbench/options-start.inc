@@ -1,11 +1,11 @@
 ; Используется только до старта матрицы; затем заменяется фазой 4 пререндера.
-; HL=ASCIIZ аргументы, CF=ошибка. bios_argNext сохраняет курсор/длину слова.
+; HL=ASCIIZ аргументы, CF=ошибка. MXOS_BIOS_ARG_NEXT сохраняет курсор/длину слова.
 benchParseArgs:
     ld a,h
     or l
     ret z
 benchNextArg:
-    call bios_argNext
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp c,benchArgsDone
     ld (benchArgCursor),hl
     ex de,hl

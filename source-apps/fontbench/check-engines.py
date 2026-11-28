@@ -13,13 +13,13 @@ font4=bytes((f4[(c//2)*8+y]>>(0 if c&1 else 4))&15 for c in range(256) for y in 
 base=bytearray(65536)
 for name,at,ext in [('BIOS',0xC000,'sys'),('IO',0xF000,'sys'),('FONTCOM',0,'i80')]:
     data=(R/f'bin/{name}.{ext}').read_bytes();base[at:at+len(data)]=data
-base[bs['bios_vars']:bs['bios_vars']+bs['BIOS_VARIABLES']]=base[bs['initVars']:bs['initVarsEnd']]
+base[bs['mon2_vars']:bs['mon2_vars']+bs['MON2_VARIABLES']]=base[bs['initVars']:bs['initVarsEnd']]
 base[bs['bios_upper.charGen']:bs['bios_upper.charGen']+9]=base[bs['initTextVars']:bs['initTextVarsEnd']]
 resident=(R/'bin/fonts/Rotate.i80').read_bytes()
 base[bs['FONT_ENGINE_BASE']:bs['FONT_ENGINE_BASE']+len(resident)]=resident
 base[bs['bios_upper.escMode']]=255
 base[bs['bios_upper.koi7']]=0
-base[bs['bios_vars.inverse']]=0
+base[bs['mon2_vars.inverse']]=0
 base[bs['bios_upper.charGen']:bs['bios_upper.charGen']+2]=w(bs['FONT_ADDR'])
 TICKS='D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe'
 def run(mem,entry,af=0xA597,bc=0x1357,hl=0x8600,de=0x2468):
@@ -80,13 +80,13 @@ if len(sys.argv)>1: cases=[c for c in cases if c[0] in sys.argv[1:]]
 for module,variant,width in cases:
     for pre in (0,1):
         mem=init(module,variant,pre,width)
-        for api in ('bios_printChar','bios_printCharRaw','bios_printStringZ','bios_printStringRawZ','bios_printStringRawLim'):
-            raw=api not in ('bios_printChar','bios_printStringZ')
-            payload=(bytes(range(256)) if api=='bios_printStringRawLim' else bytes(range(1,256)) if raw else b'Test ABC\r\n01234\r\nabc')
+        for api in ('mon2_printCharOld','FONT_ENGINE_RAW','mon2_printStringOld','FONT_ENGINE_RAWZ','FONT_ENGINE_LIM'):
+            raw=api not in ('mon2_printCharOld','mon2_printStringOld')
+            payload=(bytes(range(256)) if api=='FONT_ENGINE_LIM' else bytes(range(1,256)) if raw else b'Test ABC\r\n01234\r\nabc')
             if api.endswith('CharRaw'):payload=bytes([0,13,10,32,65,127,128,192,255])*2
             if api.endswith('Char'):payload=b'ABC\r\nxyz'
             m=bytearray(mem);m[0x8600:0x8600+len(payload)+1]=payload+b'\0'
-            m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]=bytes([7,0])
+            m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2]=bytes([7,0])
             m[0x9000:0xC000]=bytes(12288)
             entry=s[api]
             if 'String' in api:
@@ -104,7 +104,7 @@ for module,variant,width in cases:
             expected,cursor=oracle(payload,raw,width)
             diffs=[i for i in range(12288) if m[0x9000+i]!=expected[i]]
             assert not diffs,(module,variant,pre,api,'pixels',diffs[:16],[(m[0x9000+i],expected[i]) for i in diffs[:8]])
-            assert m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]==cursor,(module,variant,pre,api,'cursor')
+            assert m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2]==cursor,(module,variant,pre,api,'cursor')
             checks+=1
             m,_,_=run(m,s['engineRestore'])
             for i in range(s['HOOK_SLOTS']):
@@ -116,19 +116,19 @@ for module,variant,width in cases:
             for count in (0,1,2,3,4,5,19,20,21,31,32,33):
                 payload=bytes((c*37)&255 for c in range(count))
                 m=bytearray(mem);m[0x8600:0x8600+count]=payload
-                m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]=bytes([7,x])
+                m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2]=bytes([7,x])
                 m[0x9000:0xC000]=bytes([0xA5])*12288
-                m,regs,_=run(m,s['bios_printStringRawLim'],bc=count)
+                m,regs,_=run(m,s['FONT_ENGINE_LIM'],bc=count)
                 expected,cursor=oracle(payload,True,width,x,0xA5)
                 assert m[0x9000:0xC000]==expected,(module,variant,pre,x,count,'tail pixels')
-                assert m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]==cursor,(module,variant,pre,x,count,'tail cursor')
+                assert m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2]==cursor,(module,variant,pre,x,count,'tail cursor')
                 assert regs[:6]==w(0xA597)+w(count)+w(0x8600+count) and regs[12:14]==w(0x2468),'tail ABI'
                 checks+=1
         print(module,variant,pre,'PASS',flush=True)
 # The actual BIOS Raw wrapper must retain the caller loop registers too.
 for code in range(256):
-    m=bytearray(base);m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2]=bytes([7,0])
-    m,regs,_=run(m,s['bios_printCharRaw'],af=(code<<8)|0x97,bc=0x1357)
+    m=bytearray(base);m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2]=bytes([7,0])
+    m,regs,_=run(m,s['FONT_ENGINE_RAW'],af=(code<<8)|0x97,bc=0x1357)
     assert regs[:6]==w((code<<8)|0x97)+w(0x1357)+w(0x8600) and regs[12:14]==w(0x2468),('native Raw ABI',code)
     checks+=1
 (O/'results.json').write_text(json.dumps(dict(checks=checks,bitmap='PASS',registers='PASS',slotsRestored=s['HOOK_SLOTS'],engines=len(cases)),indent=2)+'\n')

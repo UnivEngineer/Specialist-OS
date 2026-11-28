@@ -1,7 +1,7 @@
 printChar_position:
             ; Как в standalone PAGED: вычисление адреса в горячем пути.
             ; При X >= 190 оставляем штатный перенос перед рисованием.
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld a,h
             cp 190
             jp nc,printChar_positionWrap
@@ -13,7 +13,7 @@ printChar_positionReady:
             inc h
             inc h
             inc h
-            ld (bios_vars.cursorY),hl
+            ld (mon2_vars.cursorY),hl
             ld b,a
             ld a,l
             sub 7

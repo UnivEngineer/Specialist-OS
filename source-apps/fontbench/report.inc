@@ -42,7 +42,7 @@ reportBuilt:
     ret nz
     ld hl,(reportPointer)
     ld de,REPORT_BUFFER
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     ld (reportSize),hl
     ld e,0
     MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
@@ -74,7 +74,7 @@ reportBuilt:
     ld hl,(reportSize)
     ex de,hl
     ld hl,(reportHandle+FH_COUNT)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,reportClose
 reportShortWrite:
     ld a,1

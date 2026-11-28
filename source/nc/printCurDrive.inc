@@ -6,5 +6,5 @@ printDrive:
             add a,'A'
             ld (ncDriveText),a
             ld hl,ncDriveText
-            jp bios_printStringRawZ
+            jp FONT_ENGINE_RAWZ
 ncDriveText: DB 'A',':',0

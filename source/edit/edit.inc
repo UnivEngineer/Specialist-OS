@@ -19,13 +19,13 @@ editorExitNow:
     ENDIF
         COLOR COLOR_BIOS
         LD C,31
-        CALL bios_printChar
+        CALL mon2_printCharOld
         CALL resetSessionStack
-        JP bios_reboot
+        JP mon2_init
 keyHandler_DocumentHome:
         CALL editorResetGoal
         LD A,EDITOR_FIRST_Y
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         LD HL,0
         LD (v_leftColumn),HL
         XOR A
@@ -71,18 +71,18 @@ editorPageRowsReady:
         CALL editorPaintRows
         JP finishPageAndHome
 editorPaintRows:
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
 drawPageLine:
         CALL drawTextLine
-        LD A,(bios_vars.cursorY)
+        LD A,(mon2_vars.cursorY)
         ADD A,10
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         DEC B
         JP NZ,drawPageLine
         RET
 finishPageAndHome:
         LD A,EDITOR_FIRST_Y
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         RET
 redrawPreservingCursor:
         CALL saveCursor
@@ -96,17 +96,17 @@ keyHandler_Down:
         PUSH HL
         CALL nextCurrentLine
         RET Z
-        LD A,(bios_vars.cursorY)
+        LD A,(mon2_vars.cursorY)
         CP EDITOR_LAST_Y
         JP Z,editorScrollDown
         ADD A,10
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         RET
 editorScrollDown:
         LD HL,editorPageWidths+3
         LD DE,editorPageWidths+EDITOR_ROWS*3
         LD BC,editorPageWidths
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         LD HL,editorRowLengths+1
         LD DE,editorRowLengths
         LD B,EDITOR_ROWS-1
@@ -131,17 +131,17 @@ keyHandler_Up:
         PUSH HL
         CALL previousCurrentLine
         RET Z
-        LD A,(bios_vars.cursorY)
+        LD A,(mon2_vars.cursorY)
         CP EDITOR_FIRST_Y
         JP Z,editorScrollUp
         SUB 10
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         RET
 editorScrollUp:
         LD HL,editorPageWidths
         LD DE,editorPageWidths+(EDITOR_ROWS-1)*3
         LD BC,editorPageWidths+3
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         LD HL,editorRowLengths+EDITOR_ROWS-2
         LD DE,editorRowLengths+EDITOR_ROWS-1
         LD B,EDITOR_ROWS-1
@@ -194,7 +194,7 @@ drawSliceX:
         ADD A,B
         JP drawSliceX
 drawSliceXReady:
-        LD (bios_vars.cursorY+1),A
+        LD (mon2_vars.cursorY+1),A
         LD A,(editorSliceWidth)
         LD C,A
         LD A,(editorSliceStart)
@@ -267,7 +267,7 @@ drawBufferReady:
         CALL editorRecordRowWidth
         PUSH HL
         PUSH AF
-        LD HL,(bios_vars.cursorY)
+        LD HL,(mon2_vars.cursorY)
         PUSH HL
         LD HL,editorRowBuffer
         LD A,(editorPartialRow)
@@ -283,7 +283,7 @@ drawBufferReady:
     IF EDIT_BANKED
         CALL ebPaintRow
     ELSE
-        CALL bios_printStringRawLim
+        CALL FONT_ENGINE_LIM
     ENDIF
         JP editorRowPrinted
 editorPrintPartialRow:
@@ -308,15 +308,15 @@ editorPartialX:
         ADD A,B
         JP editorPartialX
 editorPartialXReady:
-        LD (bios_vars.cursorY+1),A
+        LD (mon2_vars.cursorY+1),A
         POP HL
         POP AF
         LD C,A
         LD B,0
-        CALL bios_printStringRawLim
+        CALL FONT_ENGINE_LIM
 editorRowPrinted:
         POP HL
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
         CALL editorPaintSelection
         POP AF
         POP HL
@@ -340,7 +340,7 @@ editorEditStart:    DB 0
 ; Return HL = cache entry for the current screen baseline; preserve BC/DE.
 editorRowLengthAddress:
         PUSH BC
-        LD A,(bios_vars.cursorY)
+        LD A,(mon2_vars.cursorY)
         SUB EDITOR_FIRST_Y
         LD C,0
 editorRowIndex:
@@ -475,7 +475,7 @@ editorLineLength:
         JP Z,editorLengthReady
         DEC HL
 editorLengthReady:
-        JP bios_sub_hl_de
+        JP nativeMath.sub_hl_de
 getLineBufferCursor:
         PUSH BC
         CALL editorLineLength
@@ -553,7 +553,7 @@ editorBeginSnapshot:
         POP DE
         PUSH DE
         LD HL,(v_gapHi)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (v_undoStart),HL
         EX DE,HL
         LD HL,(v_currentLine)
@@ -777,7 +777,7 @@ editorUndoLine:
         LD (v_currentLine),HL
         LD (v_topLine),HL
         LD A,EDITOR_FIRST_Y
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         LD A,1
         LD (editorUndoRelocated),A
         EX DE,HL
@@ -884,7 +884,7 @@ editorUndoOutsideView:
         LD C,EDITOR_FIRST_Y
 editorUndoRowReady:
         LD A,C
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         RET
 
 ; Обычная правка обновляет только строку; горизонтальное окно меняется отдельно.
@@ -911,7 +911,7 @@ editorRememberEditStart:
         CALL compareHLDE
         JP C,editorEditBeforeView
 editorEditDistance:
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD A,B
         SBC A,C
         OR A
@@ -1012,7 +1012,7 @@ gapResizeDelete:
         LD HL,(gapDelta)
         EX DE,HL
         POP HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         EX DE,HL
         PUSH DE
         CALL gapMoveUndo

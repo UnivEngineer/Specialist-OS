@@ -1,25 +1,23 @@
 ; Only software mirrors are visible in EXEC; MAIN owns BIOS and VRAM.
-    DEFINE bios_vars.cursorY ebCursor
-    DEFINE bios_vars.cursorX ebCursor+1
-    DEFINE bios_vars.inverse ebInverse
+    DEFINE mon2_vars.cursorY ebCursor
+    DEFINE mon2_vars.cursorX ebCursor+1
+    DEFINE mon2_vars.inverse ebInverse
     DEFINE bios_upper.cursorCfg ebCursorCfg
-    DEFINE bios_vars.keyLocks ebKeyLocks
+    DEFINE mon2_vars.keyLocks ebKeyLocks
     DEFINE FONT_ENGINE_HEADER ebFont
     DEFINE IO_COLOR ebColor
-    DEFINE bios_printStringRawZ ebPrintRaw
-    DEFINE bios_printStringRawLim ebPrintLim
-    DEFINE bios_printString ebPrintString
-    DEFINE bios_printChar ebPrintChar
-    DEFINE bios_setCursorPos ebSetCursor
-    DEFINE bios_getch ebGetch
-    DEFINE bios_getMemTop ebMemTop
-    DEFINE bios_sub_hl_de ebSubtract
-    DEFINE bios_cmp_hl_de compareHLDE
-    DEFINE bios_memcpy_bc_hl ebCopy.memcpy_bc_hl
-    DEFINE bios_argNext ebArgs.argNext
-    DEFINE bios_setFontEncoding ebEncoding
-    DEFINE bios_setInputHook ebSetHook
-    DEFINE bios_reboot ebReturn
+    DEFINE FONT_ENGINE_RAWZ ebPrintRaw
+    DEFINE FONT_ENGINE_LIM ebPrintLim
+    DEFINE mon2_printStringOld ebPrintString
+    DEFINE mon2_printCharOld ebPrintChar
+    DEFINE mx_setCursorPos ebSetCursor
+    DEFINE mon2_getchOld ebGetch
+    DEFINE mx_getMemTop ebMemTop
+    DEFINE mon2_cmp_hl_de compareHLDE
+    DEFINE mon2_memcpy_bc_hl ebCopy.memcpy_bc_hl
+    DEFINE FONT_ENGINE_ENCODING ebEncoding
+    DEFINE editSetInputHook ebSetHook
+    DEFINE mon2_init ebReturn
     DEFINE UI_BUTTON_RECOLOR ebRecolor
 ebCursor    = EDIT_BANK_STATE
 ebInverse   = EDIT_BANK_STATE+2

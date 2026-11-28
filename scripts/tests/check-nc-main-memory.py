@@ -8,22 +8,23 @@ assert len((ROOT/'bin/NC.i80').read_bytes())==N['vars']
 assert N['IMAGE_BSS_SIZE']==N['FILE_CACHE_A']-N['vars']
 assert N['IMAGE_MIN_HEAP_SIZE']==N['NC_MIN_END']-N['FILE_CACHE_A']
 # Execute the real included NC initialization beside the DOS bank, not on top
-# of it. Only the bank gateway and three MAIN BIOS arithmetic calls are stubs.
+# of it. The bank gateway and direct MAIN helpers are stubs.
 source=f' INCLUDE "{(ROOT/"source/common/system.inc").as_posix()}"\n'
 for name in ['FILE_CACHE_A','NC_MIN_END','FILE_INFO_SIZE','FILE_CACHE_CAPACITY','FILE_CACHE_BYTES','NC_END']:source+=f'{name} EQU {N[name]}\n'
 source+=' ORG 0E600h\n'
 source+=f' INCLUDE "{(ROOT/"source/nc/memory.inc").as_posix()}"\n END\n'
+source=source.replace(' END\n',f' MODULE nativeMath\n DEFINE MATH_SUB\n INCLUDE "{(ROOT/"sdk/asm/lib/math.inc").as_posix()}"\n ENDMODULE\n END\n')
 (OUT/'case.asm').write_text(source,encoding='utf-8')
 subprocess.run([str(ROOT/'tasm/sjasmplus.exe'),'--i8080',f'--raw={OUT}/case.bin',f'--sym={OUT}/case.sym',str(OUT/'case.asm')],check=True,capture_output=True)
 S=sy(OUT/'case.sym')
 helper=runpy.run_path(str(ROOT/'scripts/tests/check-main-buffer-registration.py'))
-for top in [N['NC_MIN_END']-2,N['NC_MIN_END']-1,0x63ff,0x7bff,0x8bff]:
+for top in [N['NC_MIN_END']-2,N['NC_MIN_END']-1,0x63ff,0x7bff,0x8bff,N['APP_MEMORY_END']-1]:
  m=helper['seed']();table=K['MEM_ALLOC_TABLE'];owner=K['APP_OWNER_BASE']
  m[table:table+6]=b'\0'+W(0)+W(N['FILE_CACHE_A'])+bytes([owner])
  m[K['memorySystemEnd']:K['memorySystemEnd']+2]=W(top+1)
  body=(OUT/'case.bin').read_bytes();m[0xe600:0xe600+len(body)]=body
- m[K['bios_getMemTop']:K['bios_getMemTop']+4]=b'\x21'+W(top)+b'\xc9'
- for entry,target in [('bios_cmp_hl_de','cmp_hl_de'),('bios_sub_hl_de','sub_hl_de')]:m[K[entry]:K[entry]+3]=b'\xc3'+W(K[target])
+ m[K['mx_getMemTop']:K['mx_getMemTop']+4]=b'\x21'+W(top)+b'\xc9'
+ for entry,target in [('mon2_cmp_hl_de','cmp_hl_de')]:m[K[entry]:K[entry]+3]=b'\xc3'+W(K[target])
  m[K['mx_callRegs']:K['mx_callRegs']+7]=bytes.fromhex('e32323e3c3')+W(K['dosMemoryService'])
  # The helper runs actual assembled DOS and checks CPU/SP completion.
  helper['S']['ncMemoryTest']=S['ncMemoryInit']

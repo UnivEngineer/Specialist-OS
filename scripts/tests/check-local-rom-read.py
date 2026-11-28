@@ -59,11 +59,13 @@ print('LOCAL ROM READ PASS:',count,'cases; ROM banks, unaligned buffer, preserve
 # Публичные/внутренние DOS-обёртки проверяют границы до доверенного MEM.
 k=syms('KERNEL');base=bytearray(65536);code=(R/'bin/DOS.sys').read_bytes();base[0x100:0x100+len(code)]=code
 initialize_dos_state(base, k)
-# Обмен подменён только на успешный обработчик с отметкой вызова.
-hook=b'\x3e\x01\x32'+W(0x8321)+b'\xaf\xc9';base[0x8000:0x8000+len(hook)]=hook
-base[k['MEM_IO_SYSTEM']:k['MEM_IO_SYSTEM']+3]=b'\xc3'+W(0x8000)
-base[t['bankCallPacket']:t['bankCallPacket']+3]=b'\xc3'+W(0x8000)
-base[t['bankCopySector']:t['bankCopySector']+3]=b'\xc3'+W(0x8000)
+# Сценарий лежит в свободной DLL-арене, за кодом DOS и рабочими переменными.
+hook_addr=k['DOS_ARENA_START']
+test_pc,stop_pc,flags_addr,called_addr=(hook_addr+i for i in (0x20,0x40,0x42,0x44))
+hook=b'\x3e\x01\x32'+W(called_addr)+b'\xaf\xc9';base[hook_addr:hook_addr+len(hook)]=hook
+base[k['MEM_IO_SYSTEM']:k['MEM_IO_SYSTEM']+3]=b'\xc3'+W(hook_addr)
+base[t['bankCallPacket']:t['bankCallPacket']+3]=b'\xc3'+W(hook_addr)
+base[t['bankCopySector']:t['bankCopySector']+3]=b'\xc3'+W(hook_addr)
 count=0
 for capacity in (512,1024,2048):
  for entry in ('dosSystemDriver','klBlock'):
@@ -73,11 +75,11 @@ for capacity in (512,1024,2048):
    mem=bytearray(base);struct.pack_into('<H',mem,k['DOS_DRIVER_REGISTRY']+k['SYSTEM_DRIVE']*k['DRIVER_RECORD_SIZE'],capacity)
    mem[k['v_drive']]=k['SYSTEM_DRIVE'];mem[k['kdPage']]=1
    stub=b'\x31'+W(0xE000)+b'\x01'+W(0x0200)+b'\x11'+W(sector)+b'\x21'+W(buffer)+b'\xcd'+W(k[entry])
-   stub+=b'\xf5\xe1\x22'+W(0x8300)+b'\xc3'+W(0x82ff)
-   mem[0x8200:0x8200+len(stub)]=stub;(O/'in.bin').write_bytes(mem)
-   subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8200','-end','82ff','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True)
-   out=(O/'out.bin').read_bytes();assert int.from_bytes(out[65542:65544],'little')==0x82ff
-   assert bool(out[0x8300]&1)==error,(capacity,entry,sector,hex(buffer),out[0x8300:0x8302].hex())
-   assert bool(out[0x8321])!=error
+   stub+=b'\xf5\xe1\x22'+W(flags_addr)+b'\xc3'+W(stop_pc)
+   mem[test_pc:test_pc+len(stub)]=stub;(O/'in.bin').write_bytes(mem)
+   subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc',f'{test_pc:04x}','-end',f'{stop_pc:04x}','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True)
+   out=(O/'out.bin').read_bytes();assert int.from_bytes(out[65542:65544],'little')==stop_pc
+   assert bool(out[flags_addr]&1)==error,(capacity,entry,sector,hex(buffer),out[flags_addr:flags_addr+2].hex())
+   assert bool(out[called_addr])!=error,(capacity,entry,sector,hex(buffer),out[called_addr])
    count+=1
 print('LOCAL ROM BOUNDS PASS:',count,'cases; last/outside sector, 128/256/512 KiB, buffer ends')

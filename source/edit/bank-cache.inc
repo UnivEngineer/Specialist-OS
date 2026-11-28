@@ -44,14 +44,14 @@ ebSetStride:
     ld hl,APP_MEMORY_END
 ebCacheCeilingReady:
     ld de,EDIT_MAIN_CACHE
-    call ebSubtract
+    call nativeMath.sub_hl_de
     jp c,ebWorkspaceOnly
     ld a,(ebCacheStride)
     ld e,a
     ld d,0
     ld b,0
 ebCountSlots:
-    call ebSubtract
+    call nativeMath.sub_hl_de
     jp c,ebRegisterSlots
     inc b
     ld a,b

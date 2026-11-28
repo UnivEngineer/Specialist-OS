@@ -266,7 +266,21 @@ inverseRect = uiInverseRect
     INCLUDE "bank-runtime.inc"
     ELSE
     INCLUDE "memory.inc"
+ncKeyScan:
+    MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
+    ret
+ncDiskDriver:
+    MXOS_CALL_REGS MXOS_BIOS_DISK_DRIVER
+    ret
     ENDIF
+
+    MODULE nativeMath
+    DEFINE MATH_SUB
+    INCLUDE "../../sdk/asm/lib/math.inc"
+    ENDMODULE
+    MODULE ncStrings
+    INCLUDE "../common/strcmp.inc"
+    ENDMODULE
 
     INCLUDE "../../sdk/asm/lib/ui-text-align.inc"
     INCLUDE "align.inc"
@@ -833,7 +847,7 @@ NC_END_MAX = APP_MEMORY_END
     IF NC_BANKED
     ASSERT NC_END < ncBankQueue
     ELSE
-    ASSERT NC_END_MAX <= bios_vars
+    ASSERT NC_END_MAX <= mon2_vars
     ENDIF
 
 

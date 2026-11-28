@@ -22,7 +22,7 @@ cliOverwritePrompt:
 cliOverwriteBody:
     push hl
     ld hl,cliOverwriteText
-    call bios_printString
+    call mon2_printStringOld
     pop hl
     ld b,8
     call cliOverwritePart
@@ -31,15 +31,15 @@ cliOverwriteBody:
     jp z,cliOverwriteSuffix
     push hl
     ld c,'.'
-    call bios_printChar
+    call mon2_printCharOld
     pop hl
     ld b,3
     call cliOverwritePart
 cliOverwriteSuffix:
     ld hl,cliOverwriteKeys
-    call bios_printString
+    call mon2_printStringOld
 cliOverwriteKey:
-    call bios_getch
+    call mon2_getchOld
     cp 0Dh
     jp z,cliOverwriteNo
     cp 01Bh
@@ -66,7 +66,7 @@ cliOverwriteNo:
 cliOverwriteReturn:
     push af
     ld c,0Ah
-    call bios_printChar
+    call mon2_printCharOld
     pop af
     or a
     ret
@@ -90,7 +90,7 @@ cliOverwritePart:
     push hl
     push bc
     ld c,a
-    call bios_printChar
+    call mon2_printCharOld
     pop bc
     pop hl
 cliOverwritePartNext:

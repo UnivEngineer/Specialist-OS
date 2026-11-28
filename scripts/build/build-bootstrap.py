@@ -34,7 +34,7 @@ if not a.run_build:
         options.extend(('--output', str(out / product)))
     for name in ('sdk/asm/formats/font.inc', 'source/bootstrap/splash.bin', 'scripts/build/build-boot-splash.py',
                  'scripts/images/executable.py', 'scripts/images/cpu.py', 'assets/C-Flash-512k-MMX-System.txt',
-                 'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/IO.sys', 'bin/MEM.sys', 'bin/DOS.sys',
+                 'assets/system-rom/boot-system.bin', 'bin/BIOS.sys', 'bin/BIOS.sym', 'bin/BIOS.defaults.bin', 'bin/BIOS.main-overlay.bin', 'bin/IO.sys', 'bin/MEM.sys', 'bin/DOS.sys',
                  'bin/System.layout.json', 'bin/banked/TRANSPORT.sym', 'bin/banked/KERNEL.sym', 'bin/MEM.sym'):
         options.extend(('--input', str(ROOT / name)))
     options.extend(('--input', str(font_path.absolute())))
@@ -85,7 +85,7 @@ with (out/'config.inc').open('a',encoding='utf-8') as f:
  f.write(f'BANK_MAIN_CLIENT_BYTES = {int(symbols["BANK_MAIN_CLIENT_BYTES"],16)}\n')
  f.write(f'BANK_MAIN_LOCAL_BYTES = {int(symbols["BANK_MAIN_LOCAL_BYTES"],16)}\n')
  f.write(f"BOOT_IO_BYTES = {io['bytes']}\nBOOT_IO_KEYS = {io['bankAddress']}\nBOOT_IO_KEY_BYTES = {io['bankBytes']}\nBOOT_IO_ROM = 06000h\n")
- for alias,key in [('BOOT_IO_RAM','BIOS_IO_ADDR'),('BOOT_LOCAL_BLOCK','MEM_IMAGE_LOCAL_START'),('BOOT_MEM_KIND','MEM_BANK_KIND'),('BOOT_DOS_STACK_TOP','DOS_BANK_STACK_TOP'),('BOOT_DOS_STACK_BOTTOM','DOS_BANK_STACK_BOTTOM'),('BOOT_BIOS_STACK_TOP','BIOS_BANK_STACK_TOP')]:
+ for alias,key in [('BOOT_IO_RAM','BIOS_IO_ADDR'),('BOOT_LOCAL_BLOCK','MEM_IMAGE_LOCAL_START'),('BOOT_BANK_CLIENT','MEM_BANK_CLIENT_START'),('BOOT_BIOS_OVERLAY_DOS','DOS_BIOS_OVERLAY_ADDR'),('BOOT_MAIN_CLIENT','mx_callPacket'),('BOOT_MEM_KIND','MEM_BANK_KIND'),('BOOT_DOS_STACK_TOP','DOS_BANK_STACK_TOP'),('BOOT_DOS_STACK_BOTTOM','DOS_BANK_STACK_BOTTOM'),('BOOT_BIOS_STACK_TOP','BIOS_BANK_STACK_TOP')]:
   f.write(f'{alias} = 0{int(symbols[key],16):04X}h\n')
  f.write(f'BOOT_BIOS_STACK_FLOOR = 0{int(symbols["BIOS_BANK_STACK_BOTTOM"],16)+64:04X}h\n')
  f.write(f'BOOT_FONT_ROM = 04820h\nBOOT_FONT_BYTES = {len(font)}\n')
@@ -100,6 +100,16 @@ ts=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/TRANSPOR
 with (out/'config.inc').open('a',encoding='utf-8') as f:
  for alias,key in [('BIOS_BOOT_PAGES','biosBootPages'),('BIOS_BOOT_WARM','biosBootWarm'),('BIOS_BANKED','v_dosBanked'),('BIOS_DOS_READY','v_dosModuleReady')]:
   f.write(f'{alias} = 0{int(symbols[key],16):04X}h\n')
+ for name in ('biosBootEntry', 'biosBootFinish', 'biosBootWarm', 'biosBootPages',
+              'biosBootRomBlocks', 'biosLoadHalt', 'biosVersion', 'biosVersionNumber',
+              'bios_reset_sound', 'biosSetProfile', 'BIOS_PROFILE_DEFAULT',
+              'mon2_vars', 'mon2_vars.cursorY', 'bios_upper.charGen',
+              'bios_upper.ramPageCount', 'MON2_VARIABLES', 'glyphCacheService', 'memcpy_bc_hl', 'FONT_ENGINE_INIT',
+              'COLOR_BIOS', 'IO_PAGE_RAM', 'IO_COLOR', 'v_diskInfo.totalSectors',
+              'v_drive', 'SYSTEM_DRIVE', 'sysInstall', 'setMemTop', 'printString',
+              'printDecWord', 'BANK_DOS_GATE', 'bankCall', 'mx_callRegs',
+              'MXOS_DOS_DRIVER_REFRESH', 'APP_MEMORY_END'):
+  f.write(f'{name} = 0{int(symbols[name],16):04X}h\n')
  for alias,key in [('BANK_PAGE','bankPage'),('BANK_PAGE_COUNT','bankPageCount'),('BANK_SERVICE_SP','bankServiceSP'),('BANK_STACK_FLOOR','bankStackFloor')]:
   f.write(f'{alias} = 0{int(ts[key],16):04X}h\n')
 ks=dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/banked/KERNEL.sym').read_text(),re.M))

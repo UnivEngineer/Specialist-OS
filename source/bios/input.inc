@@ -68,7 +68,7 @@ loc_C8DE:   push  bc
             inc   hl
             inc   de          
 loc_C8EC:   push  hl
-            ld    hl, (bios_vars.cursorY)
+            ld    hl, (mon2_vars.cursorY)
             ex    (sp), hl
             push  hl
             call  j_printString
@@ -76,7 +76,7 @@ loc_C8EC:   push  hl
             call  j_printChar
             pop   hl
             ex    (sp), hl
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
             pop   hl
 
             ; Продолжение

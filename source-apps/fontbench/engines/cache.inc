@@ -13,7 +13,7 @@ cacheRender:
     push hl
 cacheBody:
     ; Исходной фазе не нужны ни Query, ни проверка/инициализация кеша.
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 3
     cp 1
@@ -24,12 +24,12 @@ cacheBody:
 cacheMode:
     jp cacheFallback
 cacheReady:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld b,h
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld h,b
     ld a,h
     and 3

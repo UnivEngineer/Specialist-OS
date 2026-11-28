@@ -38,7 +38,7 @@ Menu:
     ld   a,COLOR_BIOS
     ld   (IO_COLOR),a
     ld   hl,MenuText
-    call bios_printStringZ
+    call mon2_printStringOld
 MenuKey:
     call ReadKey
     cp   1Bh
@@ -107,7 +107,7 @@ NextMode:
     jp   SelectMode
 Exit:
     ld   c,1Fh
-    jp   bios_printChar
+    jp   mon2_printCharOld
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -117,13 +117,13 @@ Exit:
 ;----------------------------------------------------------------------------
 
 ReadKey:
-    call bios_keyScan
+    MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
     cp   0FFh
     jp   z,ReadKey
 ReleaseKey:
     push af
 WaitRelease:
-    call bios_keyScan
+    MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
     cp   0FFh
     jp   nz,WaitRelease
     pop  af
@@ -176,10 +176,10 @@ Print2:
 
 TestPrintRep:
     ld   c,0Ch              ; Курсор в начало экрана
-    call bios_printChar
+    call mon2_printCharOld
     ld   hl,(TextStart)
     ld   bc,TEXT_LENGTH
-    call bios_printStringRawLim
+    call FONT_ENGINE_LIM
 
     ; Следующий экран начинается со следующего символа периода
     ; Запас в буфере позволяет печатать одним вызовом без перекопирования
@@ -195,7 +195,7 @@ TextShiftReady:
     ld   (TextShift),a
     ld   (TextStart),hl
 
-    call bios_keyCheck
+    MXOS_CALL_REGS MXOS_BIOS_KEY_CHECK
     cp   0FFh
     jp   z,TestPrintRep
     call ReleaseKey
@@ -213,20 +213,20 @@ TestColorTable:
     ld   a,COLOR_BIOS
     ld   (IO_COLOR),a
     ld   hl,TableText
-    call bios_printStringZ
+    call mon2_printStringOld
     ld   de,HexDigits
     ld   b,(TABLE_X+4)/2    ; X подписи столбца в единицах BIOS (два пикселя)
     ld   c,TABLE_Y+8        ; Y нижней строки глифа слева от ячейки
 TableLabel:
     ld   h,b
     ld   l,TABLE_Y-5
-    call bios_setCursorPos
+    call mx_setCursorPos
     ld   a,(de)
-    call bios_printCharRaw
+    call FONT_ENGINE_RAW
     ld   h,(TABLE_X-16)/2
     ld   l,c
-    call bios_setCursorPos
-    call bios_printCharRaw
+    call mx_setCursorPos
+    call FONT_ENGINE_RAW
     inc  de
     ld   a,b
     add  a,8

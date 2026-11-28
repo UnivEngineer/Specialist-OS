@@ -1,17 +1,17 @@
 """8080: рендер BIOS без DOS, независимый физический запрос и таблицы ABI."""
 from pathlib import Path
-import json, re, subprocess
+import json, re, runpy, subprocess
 
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'docs/bios-dos-split-2026-11-06/cpu';OUT.mkdir(parents=True,exist_ok=True)
 S={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(ROOT/'bin/BIOS.sym').read_text(),re.M)}
 W=lambda n:n.to_bytes(2,'little')
 base=bytearray(65536)
-for name,start in [('BIOS.sys',0xC000),('IO.main.bin',S['BIOS_IO_ADDR']),
-                   ('DOS.native.sys',0x4000),('fonts/Rotate.i80',S['FONT_ENGINE_BASE'])]:
+runpy.run_path(str(Path(__file__).with_name('mem-image.py')))['install'](base,S,main=True)
+for name,start in [('DOS.native.sys',0x4000),('fonts/Rotate.i80',S['FONT_ENGINE_BASE'])]:
  data=(ROOT/'bin'/name).read_bytes();base[start:start+len(data)]=data
-base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
-text_vars=base[S['initTextVars']:S['initTextVarsEnd']]
+base[S['mon2_vars']:S['mon2_vars']+S['MON2_VARIABLES']]=(ROOT/'bin/BIOS.defaults.bin').read_bytes()[:S['MON2_VARIABLES']]
+text_vars=(ROOT/'bin/BIOS.defaults.bin').read_bytes()[S['MON2_VARIABLES']:]
 base[S['bios_upper.charGen']:S['bios_upper.charGen']+len(text_vars)]=text_vars
 base[S['v_dosModuleReady']]=1
 for line in (ROOT/'source/dos/entries.inc').read_text().splitlines():
@@ -36,13 +36,13 @@ def init_font(memory):
  initialized,_=run(memory, ' ld de,0\n call FONT_ENGINE_INIT\n')
  return bytearray(initialized)
 
-render=''' call bios_clearScreenOld
+render=''' call mon2_clearScreenOld
  ld hl,0
- call bios_setCursorPos
+ call mx_setCursorPos
  ld c,'A'
- call bios_printChar
+ call mon2_printCharOld
  ld c,'b'
- call bios_printChar
+ call mon2_printCharOld
 '''
 normal,t1=run(init_font(bytearray(base)),render)
 without=bytearray(base);without[0x4000:0x8C00]=b'\x76'*0x4C00;without[S['v_dosModuleReady']]=0
@@ -65,7 +65,7 @@ for drive,mode,error in [(1,2,False),(7,2,False),(7,1,False),(8,2,True),(7,0,Tru
  ld bc,0{mode:02X}31h
  ld de,01234h
  ld hl,01000h
- call bios_blockIO
+ MXOS_CALL_REGS MXOS_BIOS_BLOCK_IO
  push af
  push bc
  push de

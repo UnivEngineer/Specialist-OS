@@ -36,7 +36,7 @@ def main():
         nonlocal checks
         m = bytearray(m)
         m[input_at:input_at + len(chars)] = chars
-        m[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] = bytes((y, x // 2))
+        m[s['mon2_vars.cursorY']:s['mon2_vars.cursorY'] + 2] = bytes((y, x // 2))
         count = len(chars)
         valid = (not scalar and count == 0) or (count <= 48 and x % 4 == 0 and x + count * 4 <= 384 and y >= 7)
         c = chars[0] if scalar else count
@@ -56,7 +56,7 @@ def main():
         assert data[0x83c0:0x83c6] == word(input_at) + bytes((c, 0x12, 0x78, 0x56)), 'registers'
         assert data[0x83c7] == 0xa5 and bool(data[0x83c6] & 1) == (not valid), 'AF/CF'
         assert data[0x83c8:0x83ca] == word(0x8b00), 'SP restored'
-        assert data[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] == bytes((y, (x + (count * 4 if valid else 0)) // 2)), 'cursor'
+        assert data[s['mon2_vars.cursorY']:s['mon2_vars.cursorY'] + 2] == bytes((y, (x + (count * 4 if valid else 0)) // 2)), 'cursor'
         assert data[0x2800:0x3800] == m[0x2800:0x3800], 'font unchanged'
         assert data[0x4000:0x6000] == m[0x4000:0x6000], 'full phases unchanged'
         checks += 1
@@ -120,15 +120,15 @@ def main():
         m[s['matrixStage']] = 11
         m[s['matrixCase']:s['matrixCase'] + 2] = word(s['matrixCases'] + index * 14)
         m[s['reportMode']] = 0
-        m[s['bios_setCursorPos']] = 0xc9
-        m[s['bios_printChar']:s['bios_printChar'] + 3] = b'\xC3' + word(0x8300)
-        m[s['bios_printString']:s['bios_printString'] + 3] = b'\xC3' + word(0x8320)
+        m[s['mx_setCursorPos']] = 0xc9
+        m[s['mon2_printCharOld']:s['mon2_printCharOld'] + 3] = b'\xC3' + word(0x8300)
+        m[s['mon2_printStringOld']:s['mon2_printStringOld'] + 3] = b'\xC3' + word(0x8320)
         char_stub = bytes.fromhex('F5 E5 2A E0 83 71 23 22 E0 83 E1 F1 C9')
         m[0x8300:0x8300 + len(char_stub)] = char_stub
-        string_stub = bytes.fromhex('7E B7 C8 4F CD') + word(s['bios_printChar']) + bytes.fromhex('23 C3 20 83')
+        string_stub = bytes.fromhex('7E B7 C8 4F CD') + word(s['mon2_printCharOld']) + bytes.fromhex('23 C3 20 83')
         m[0x8320:0x8320 + len(string_stub)] = string_stub
         m[s['print_time_ms']:s['print_time_ms'] + 3] = b'\xC3' + word(0x8350)
-        m[0x8350:0x8356] = bytes.fromhex('21 60 83 C3') + word(s['bios_printString'])
+        m[0x8350:0x8356] = bytes.fromhex('21 60 83 C3') + word(s['mon2_printStringOld'])
         m[0x8360:0x8367] = b'65.536\0'
         m[0x83e0:0x83e2] = word(0x8400)
         data = execute(m, bytes.fromhex('31 00 8B') + call('matrixProgress'))

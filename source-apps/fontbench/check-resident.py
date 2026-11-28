@@ -86,7 +86,7 @@ try:
    expect,cursor=refs[kind in (1,3,4)];actual=m.read(0x9000,12288)
    diffs=[i for i in range(12288) if i%256<240 and actual[i]!=expect[i]]
    assert not diffs,(tag,stage,kind,route,'pixels',diffs[:12])
-   assert m.read(s['bios_vars.cursorY'],2)==cursor,(tag,stage,'cursor')
+   assert m.read(s['mon2_vars.cursorY'],2)==cursor,(tag,stage,'cursor')
    ticks=int.from_bytes(m.read(s['v_elapsed'],4),'little');assert 0<ticks<65536,(tag,stage,ticks)
    results.append(dict(kind=kind,route=route,ticks=ticks,ms=round(ticks*.128,3)))
    (folder/'results.json').write_text(json.dumps(dict(module=module,engine=engine,results=results),indent=2))

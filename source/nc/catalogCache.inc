@@ -363,7 +363,7 @@ ncCatalogRoom:
     ex de,hl
     push de
     ld hl,(NC_MIN_CATALOG_CAPACITY+1)*FILE_INFO_SIZE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,ncCatalogRoomCompute
     ex de,hl
 ncCatalogRoomCompute:
@@ -378,7 +378,7 @@ ncCatalogRoomReserve:
     ret
 ncCatalogFreeCount:
     ld hl,(ncCatalogPoolSize)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld bc,FILE_INFO_SIZE
     ld a,l
     sub c
@@ -429,7 +429,7 @@ ncCatalogMoveOther:
     add hl,de
     ex de,hl
     pop hl
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
 ncCatalogOtherPlaced:
     pop af
     ld hl,FILE_CACHE_A
@@ -516,7 +516,7 @@ ncCatalogRestoreIndex:
     ld d,h
     ld e,l
     inc d
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     jp ncCatalogIndexReady
 ncCatalogBuildIndex:
     call buildFileIndex
@@ -531,7 +531,7 @@ ncCatalogSaveIndex:
     ld d,h
     ld e,l
     inc d
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,(ncCatalogChoice)
     call ncCatalogEntry
     ld de,5

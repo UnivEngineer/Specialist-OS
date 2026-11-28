@@ -50,7 +50,7 @@ def seed(font,mono):
     for at,path in files:
         data=path.read_bytes();m[at:at+len(data)]=data
     b=sy(ROOT/'bin/BIOS.sym')
-    m[b['bios_vars']:b['bios_vars']+b['BIOS_VARIABLES']]=m[b['initVars']:b['initVarsEnd']]
+    m[b['mon2_vars']:b['mon2_vars']+b['MON2_VARIABLES']]=(ROOT/'bin/BIOS.defaults.bin').read_bytes()[:b['MON2_VARIABLES']]
     m[b['bios_upper.escMode']]=255
     m=call(m,n,'FONT_ENGINE_INIT');m=call(m,n,'ncLayoutInit')
     m[n['loadFiles']]=0xc9
@@ -209,7 +209,7 @@ step: INCBIN "{(OUT/'step.bin').as_posix()}"
                     memory[0x8000:0x8000+len(code)]=code
                     def sample(scope):
                         m.call('debug_break');m.write(0,memory[:0x8c00]);m.write(0x9000,memory[0x9000:0xc000])
-                        b=sy(ROOT/'bin/BIOS.sym');m.write(b['bios_vars'],memory[b['bios_vars']:b['bios_vars']+b['BIOS_VARIABLES']])
+                        b=sy(ROOT/'bin/BIOS.sym');m.write(b['mon2_vars'],memory[b['mon2_vars']:b['mon2_vars']+b['MON2_VARIABLES']])
                         m.write(s['scope'],bytes([scope]));m.stop_at(s['done']);m.call('regs_set',pc=s['entry'],sp=0x8f00)
                         m.until(s['done'],60,page=0)
                         assert m.read(s['error'],1)==b'\0'

@@ -58,15 +58,15 @@ ncEnterFileAction:
             add hl,de
             push hl
             ld a,(hl)
-            call bios_upperCase
+            call ncStrings.upperCase
             ld b,a
             inc hl
             ld a,(hl)
-            call bios_upperCase
+            call ncStrings.upperCase
             ld c,a
             inc hl
             ld a,(hl)
-            call bios_upperCase
+            call ncStrings.upperCase
             ld d,a
             ld a,b
             cp 'C'
@@ -148,7 +148,7 @@ ncMatchEditorChar:
 ncMatchEnd:
             xor a
 ncMatchPrintable:
-            call bios_upperCase
+            call ncStrings.upperCase
             ld b,a
             ld a,(de)
             cp b
@@ -230,13 +230,13 @@ EnterCmdLine:
             ld (ncCommandCursorKept),a
             COLOR COLOR_CMDSCREEN
             ld c,01Fh
-            call bios_printChar
+            call mon2_printCharOld
             ld hl,8
-            call bios_setCursorPos
+            call mx_setCursorPos
             ld hl,vars.cmdLine
-            call bios_printString
+            call mon2_printStringOld
             ld c,0Ah
-            call bios_printChar
+            call mon2_printCharOld
 ncCommandRun:
     IF NC_BANKED
             call ncBankFlush
@@ -257,7 +257,7 @@ ncCommandResult:
             ld (ncCommandContext),a
             ld a,b
             and 1
-            call nz,bios_getch
+            call nz,mon2_getchOld
             ld a,(ncCommandScreen)
             xor 1
             ld (ncKeepFrames),a
@@ -326,7 +326,7 @@ ncCommandContextUnknown:
 ncCommandRestoreScreen:
             COLOR COLOR_HELP_F
             ld c,01Fh
-            call bios_printChar
+            call mon2_printCharOld
             jp drawToolbar
 ncCommandError:
             MXOS_CALL_REGS MXOS_DOS_GET_ERROR
@@ -390,5 +390,5 @@ EnterExec:
             ld hl,vars.cmdLine
             ; COM внутри BAT может затереть NC и вернуться обычным RET.
             ; Возвращаться следует в BIOS, который загрузит оболочку заново.
-            MXOS_EXEC bios_reboot
+            MXOS_EXEC mon2_init
     ENDIF

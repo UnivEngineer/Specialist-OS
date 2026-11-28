@@ -28,7 +28,7 @@ def fixture(variant='large'):
 def metadata(x):
     # Один верхний сектор: нижний кэш и его таблица остаются нетронутыми.
     def read(i):
-        assert not x.func(x.ds['bios_diskDriver'], bc=0x0200, de=i, hl=x.s['highBuffer'])['flags']['C']
+        assert not x.func(x.ds['sysDiskDriver'], bc=0x0200, de=i, hl=x.s['highBuffer'])['flags']['C']
         return x.m.read(x.s['highBuffer'],256)
     boot = read(0)
     word = lambda n: struct.unpack_from('<H',boot,n)[0]

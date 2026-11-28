@@ -14,9 +14,9 @@ Dir_M:  CALL  moveCursorUp
 editMemoryByte:  CALL  printNewLine
         CALL  printHexWordHL
         LD    A,(HL)
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  printSpace
-        CALL  mon2_getch
+        CALL  debug_getch
         CALL  RestartIfCls
         CP    1AH           ; кнопка вниз
         JP    Z,editNextByte
@@ -31,14 +31,14 @@ editPreviousByte:  DEC   HL
 inputHexByteFromFirstChar:  PUSH  BC
         JP    inputHexByteDigits
         PUSH  BC
-        CALL  mon2_getch
+        CALL  debug_getch
 inputHexByteDigits:  CALL  inputHexDigitEcho
         RLCA
         RLCA
         RLCA
         RLCA
         LD    B,A
-        CALL  mon2_getch
+        CALL  debug_getch
         CALL  inputHexDigitEcho
         OR    B
         POP   BC
@@ -55,14 +55,14 @@ inputHexDigitEcho:  CP    20H           ; 32 ' '; [2]
         JP    NC,TypeErrorRestart
         PUSH  AF
         LD    C,A
-        CALL  mon2_printChar
+        CALL  debug_printChar
         POP   AF
         SUB   37H           ; 55 '7'
         RET
 inputDecimalDigitEcho:  OR    10H           ; 16
         PUSH  AF
         LD    C,A
-        CALL  mon2_printChar
+        CALL  debug_printChar
         POP   AF
         SUB   30H           ; 48 '0'
         RET
@@ -72,7 +72,7 @@ inputDecimalDigitEcho:  OR    10H           ; 16
 
 TypeErrorRestart:
         LD    HL,txtSpaceQuestMark
-        CALL  bios_printStringOld
+        CALL  mon2_printStringOld
         JP    RestartNoCls
 
 ;----------------------------------------------------------------------------
@@ -91,17 +91,17 @@ inputCommandLineBody:  PUSH  BC
 
 printSpace:
         LD    C,20H
-        CALL  mon2_printChar
+        CALL  debug_printChar
         RET
 
 ;----------------------------------------------------------------------------
 ; Ожидание нажатия клавиши СТР
 
 WaitClsKey:
-        CALL  mon2_keyScan
+        CALL  debug_keyScan
         CP    1FH
         RET   NZ
-        CALL  mon2_getch
+        CALL  debug_getch
         ; продолжение в RestartIfCls
 
 ;----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ RestartIfCls:
 ;----------------------------------------------------------------------------
 ; Директива D - дамп блока памяти в HEX виде
 
-Dir_D:  CALL  mon2_printHexWord
+Dir_D:  CALL  debug_printHexWord
         LD    A,L
         AND   0FH
         LD    C,A
@@ -129,17 +129,17 @@ Dir_D:  CALL  mon2_printHexWord
         ADD   A,A
         ADD   A,C
         ADD   A,0FH
-        LD    (bios_vars.cursorX),A
+        LD    (mon2_vars.cursorX),A
 hexDumpByte:  LD    A,(HL)
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         LD    A,B
         CP    09H
         JP    NZ,hexDumpSpace
         LD    C,2DH         ; печать символа '-'
-        CALL  mon2_printChar
+        CALL  debug_printChar
         JP    hexDumpNext
 hexDumpSpace:  CALL  printSpace
-hexDumpNext:  CALL  bios_cmp_hl_de
+hexDumpNext:  CALL  mon2_cmp_hl_de
         RET   Z
         DEC   B
         INC   HL

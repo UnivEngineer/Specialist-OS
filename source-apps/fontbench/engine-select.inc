@@ -31,9 +31,9 @@ nativePreReady:
     ret
 engineStandalone:
     ; Never place a standalone DLL over a resident prerender reservation.
-    call bios_getMemTop
+    call mx_getMemTop
     ld de,084FFh
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret c
     ld hl,07C00h
     ld (gridControl+8),hl
@@ -149,7 +149,7 @@ engineHook:
     or a
     ret z
     ld hl,0007h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld hl,gridText
     ld bc,GRID_TEXT_BYTES
     call hookLim

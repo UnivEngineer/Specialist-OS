@@ -18,7 +18,7 @@ lineEdit:
     ld (de),a
     ld (lineEditOffset),a
     ex de,hl
-    call bios_sub_hl_de
+    call lineEditMath.sub_hl_de
     ld a,l
     ld (lineEditLength),a
     ld (lineEditPosition),a
@@ -26,7 +26,7 @@ lineEdit:
     or a
     rra
     ld d,a ; Шаг символа в единицах cursorX.
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,c
     or a
     jp nz,lineEditWidthReady
@@ -43,8 +43,8 @@ lineEdit:
     jp nc,lineEditOriginReady
 lineEditOriginNewline:
     ld c,0Ah
-    call bios_printChar
-    ld hl,(bios_vars.cursorY)
+    call mon2_printCharOld
+    ld hl,(mon2_vars.cursorY)
 lineEditOriginReady:
     ; Оставить последнюю ячейку пустой: печать не должна прокрутить экран.
     ld a,192
@@ -62,7 +62,7 @@ lineEditWidthReady:
     ld (lineEditOrigin),hl
     jp lineEditRedraw
 lineEditLoop:
-    call bios_getch
+    call mon2_getchOld
     jp nc,lineEditKey
     push af
     ld a,(lineEditFlags)
@@ -170,7 +170,7 @@ lineEditInserted:
     IFDEF LINEEDIT_BATCH
     call LINEEDIT_PRINT_CHAR
     ELSE
-    call bios_printChar
+    call mon2_printCharOld
     ENDIF
     jp lineEditLoop
     IFDEF LINEEDIT_RECALL
@@ -286,7 +286,7 @@ lineEditPaint:
     jp lineEditLoop
 lineEditPaintOnly:
     ld hl,(lineEditOrigin)
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,(lineEditOffset)
     ld e,a
     ld d,0
@@ -305,7 +305,7 @@ lineEditPaintLoop:
     ld c,a
     inc hl
 lineEditPaintSpace:
-    call bios_printChar
+    call mon2_printCharOld
     dec b
     jp nz,lineEditPaintLoop
     ENDIF
@@ -363,7 +363,7 @@ lineEditCursorReady:
     ld hl,(lineEditOrigin)
     add a,h
     ld h,a
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ret
 lineEditOrigin:   DW 0
 lineEditWidth:    DB 0
@@ -372,3 +372,8 @@ lineEditPosition: DB 0
 lineEditOffset:   DB 0
 lineEditBuffer:   DW 0
 lineEditFlags:    DB 0
+
+    MODULE lineEditMath
+    DEFINE MATH_SUB
+    INCLUDE "math.inc"
+    ENDMODULE

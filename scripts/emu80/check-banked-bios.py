@@ -26,6 +26,7 @@ def main():
     cs = symbols(base/'CLIENT.sym')
     live = symbols(ROOT/'bin/BIOS.sym')
     bios = (ROOT/'bin/IO.sys').read_bytes()
+    overlays = tuple(runpy.run_path(str(ROOT/'scripts/tests/mem-image.py'))['read_bios_overlays'](ROOT/'bin'))
     bridge = (base/'MAINBIOS.bin').read_bytes()
     assert bios[bs['BANK_BIOS_GATE']-live['BIOS_IO_ADDR']:][:len(bridge)] == bridge, 'Rebuild BIOS and system image first'
     h = runpy.run_path(str(ROOT/'scripts/emu80/benchmark-disks.py'))
@@ -48,28 +49,32 @@ def main():
             m.write(ts['bankServiceSP'], word(top)); m.write(ts['bankStackFloor'], word(low+64))
             m.write(low-16, b'guard-bios-stack')
             client = (base/'CLIENT.bin').read_bytes()
+            client_start = cs['MEM_BANK_CLIENT_START']
             if page == 0:
-                client = client[:cs['bankClientEnd']-cs['mx_callPacket']]
-            m.write(cs['mx_callPacket'], client)
+                client = client[cs['mx_callPacket']-client_start:]
+                client_start = cs['mx_callPacket']
+            m.write(client_start, client)
             m.write(cs['MEM_IMAGE_LOCAL_START'], (base/'LOCALBLOCK.bin').read_bytes())
             if page == 0:
+                for address,body in overlays:
+                    m.write(address, body)
                 m.write(live['MEM_NATIVE_CALL'], word(live['sysCall']))
                 if 'bankMxRegsRouteCall' in cs:
                     m.write(cs['bankMxRegsRouteCall']+1, word(live['sysRegsEntry']))
-                m.write(live['MEM_LOCAL_SYSTEM'], word(live['bios_blockIO']))
+                m.write(live['MEM_LOCAL_SYSTEM'], word(live['blockIO']))
                 m.write(live['MEM_LOCAL_CHECKED'], word(live['localBlockChecked']))
-                m.write(live['MEM_NEAR_COPY'], word(live['bios_memcpy_bc_hl']))
+                m.write(live['MEM_NEAR_COPY'], word(live['mon2_memcpy_bc_hl']))
         select(0)
         assert m.read(bs['BANK_BIOS_GATE'], len(bridge)) == bridge, 'Gateway must be loaded by bootstrap'
         m.write(0xFFC0, window)
-        bios_state = m.read(live['bios_vars'], 33)
+        bios_state = m.read(live['mon2_vars'], 33)
         font_state = m.read(live['FONT_ADDR'], live['FONT_BYTES'])
 
         def reset_screen():
-            select(0); m.write(0x9000, bytes(0x3000)); m.write(live['bios_vars'], bios_state)
-            m.write(live['bios_vars.cursorY'], b'\0\0')
+            select(0); m.write(0x9000, bytes(0x3000)); m.write(live['mon2_vars'], bios_state)
+            m.write(live['mon2_vars.cursorY'], b'\0\0')
             m.write(live['bios_upper.escMode'], b'\0')
-            m.write(live['bios_vars.inverse'], b'\0\0')
+            m.write(live['mon2_vars.inverse'], b'\0\0')
             m.write(live['bios_upper.koi7'], b'\0')
 
         def run(page, operation, packet, data=b'', address=0x3200, inline=False, packet_at=0x3000, key=None, busy=0):
@@ -102,7 +107,7 @@ def main():
             select(0)
             assert m.read(live['FONT_ADDR'], live['FONT_BYTES']) == font_state, 'BIOS call damaged font'
             screen = m.read(0x9000, 0x3000)
-            cursor = m.read(live['bios_vars.cursorY'], 2)
+            cursor = m.read(live['mon2_vars.cursorY'], 2)
             if 'bbBusy' in bs:
                 assert m.read(bs['bbBusy'], 1) == bytes([busy])
             for p in (0, 1, 3):
@@ -205,7 +210,7 @@ def main():
         assert result['saved'] == result['registers']
         rows.append(dict(case='getch-from-bank', key=af >> 8))
         # Реальная последовательность main -> банк DOS -> BIOS -> DOS -> main.
-        # Внутри DOS используется F806h и пакет на его служебном стеке F7xxh.
+        # Внутри DOS используется F866h и пакет на его служебном стеке F7xxh.
         select(1)
         nested_text = b'Nested DOS -> BIOS\r\n\0'
         m.write(0x3200, nested_text)

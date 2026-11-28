@@ -1,5 +1,6 @@
 ; EXE.COM: conversion between RAW, RKS and MXOS executable containers.
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 
 EXE_LOAD_ADDR       = 0100h
 IMAGE_FLAGS         = IMAGE_FLAG_MAIN
@@ -13,7 +14,6 @@ HDR_LOAD         = 6
 HDR_ENTRY        = 8
 HDR_SIZE         = 10
 HDR_SUM          = 12
-HDR_RESERVED     = IMAGE_OPTIONS+1
 V1_SIZE          = 16
 RKS_HEADER_SIZE  = 4
 RKS_TRAILER_SIZE = 2
@@ -44,7 +44,7 @@ OPT_POLICY       = 16
 ;   через обычную точку входа.
 ;
 ; выход:
-;   После convert прежняя кодировка восстанавливается через bios_setFontEncoding. Вход
+;   После convert прежняя кодировка восстанавливается через FONT_ENGINE_ENCODING. Вход
 ;   использует стек вызывающего.
 ;----------------------------------------------------------------------------
 
@@ -55,11 +55,11 @@ exeStart:
     ld a,(bios_upper.koi7)
     push af
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     call convert
 exeRestoreEncoding:
     pop af
-    jp bios_setFontEncoding
+    jp FONT_ENGINE_ENCODING
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -91,7 +91,7 @@ convert:
     ld (hl),0
     ld (work.argEnd),hl
     ld hl,banner
-    call bios_printString
+    call mon2_printStringOld
     ld hl,work.command
     ld (work.argCursor),hl
 
@@ -180,12 +180,19 @@ convert:
     ld de,outputTypes
     call lookup
     jp c,invalidMetadata
-    ld (work.rksOutput),a
     or a
     jp z,.checkTarget
+    cp 1
+    jp z,.rksTarget
+    ld a,(work.monitorTailBytes)
+    or a
+    jp nz,invalidMetadata
+    jp .checkTarget
+.rksTarget:
+    ld (work.rksOutput),a
     ld hl,(work.header+HDR_ENTRY)
     GET_DE work.header+HDR_LOAD
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,invalidMetadata
 
 .checkTarget:
@@ -202,18 +209,18 @@ convert:
     jp nz,.confirm
     ld hl,(work.outputHandle+FILE_DESCRIPTOR.firstCluster)
     GET_DE work.inputHandle+FILE_DESCRIPTOR.firstCluster
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,sameOpenFile
 .confirm:
     ld a,(work.overwrite)
     or a
     jp nz,.createTarget
     ld hl,overwritePrompt
-    call bios_printString
-    call bios_getch
-    call bios_upperCase
+    call mon2_printStringOld
+    call mon2_getchOld
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     ld c,10
-    call bios_printChar
+    call mon2_printCharOld
     cp 'Y'
     jp nz,declined
 .createTarget:
@@ -244,9 +251,18 @@ convert:
 
     ld a,(work.rksOutput)
     or a
+    jp nz,.rksTrailer
+    ld a,(work.monitorTailBytes)
+    or a
     jp z,.close
+    ld b,0
+    ld c,a
+    ld de,work.monitorTail
+    jp .writeTrailer
+.rksTrailer:
     ld de,work.bodySum
     ld bc,RKS_TRAILER_SIZE
+.writeTrailer:
     call writeOutput
     jp c,writeError
 .close:
@@ -258,19 +274,19 @@ convert:
     jp c,fail
 
     ld hl,savedText
-    call bios_printString
+    call mon2_printStringOld
     ld hl,(work.targetPath)
-    call bios_printStringRawZ
+    call FONT_ENGINE_RAWZ
     ld hl,loadText
-    call bios_printString
+    call mon2_printStringOld
     ld hl,(work.header+HDR_LOAD)
-    call bios_printHexWord
+    call mx_printHexWord
     ld hl,entryText
-    call bios_printString
+    call mon2_printStringOld
     ld hl,(work.header+HDR_ENTRY)
-    call bios_printHexWord
+    call mx_printHexWord
     ld c,10
-    call bios_printChar
+    call mon2_printCharOld
     ld hl,0
     ret
 
@@ -302,7 +318,7 @@ closeAndFail:
     call closeInput
     pop hl
 fail:
-    call bios_printString
+    call mon2_printStringOld
     ld hl,1
     ret
 declined:
@@ -328,7 +344,7 @@ nextArg:
     ld hl,(work.argCursor)
     GET_DE work.argEnd
 .skip:
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret z
     ld a,(hl)
     inc hl
@@ -377,10 +393,10 @@ importHeader:
     ret nz
     ld hl,(work.bodySize)
     ld de,V1_SIZE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,.tryRks
     ld de,IMAGE_HEADER_SIZE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,.probe
     ex de,hl
 .probe:
@@ -391,11 +407,11 @@ importHeader:
     ret c
     ld hl,(work.prefix)
     ld de,020CDh
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,.tryRks
     ld hl,(work.prefix+2)
     ld de,'M'+'X'*256
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,.tryRks
 
     ld a,(work.prefix+HDR_VERSION)
@@ -411,8 +427,23 @@ importHeader:
     ld hl,(work.bodySize)
     call subtract
     ret c
+    ld a,(work.bodyOffset)
+    cp IMAGE_HEADER_SIZE
+    jp nz,.checkBodySize
+    ld a,(work.prefix+IMAGE_MONITOR_BYTES)
+    or a
+    jp z,.checkBodySize
+    cp IMAGE_MONITOR_MAX+1
+    jp nc,invalid
+    add a,2
+    ld (work.monitorTailBytes),a
+    ld e,a
+    ld d,0
+    call subtract
+    ret c
+.checkBodySize:
     GET_DE work.prefix+HDR_SIZE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,invalid
     ld (work.bodySize),hl
     ld hl,(work.bodyOffset)
@@ -427,7 +458,7 @@ importHeader:
     ld d,(hl)
     ld h,b
     ld l,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,invalid
 
     ld hl,(work.prefix+HDR_SUM)
@@ -439,9 +470,10 @@ importHeader:
     ld a,(work.prefix+IMAGE_HEADER_BYTES)
     cp IMAGE_HEADER_SIZE
     jp nz,invalid
-    ld a,(work.prefix+HDR_RESERVED)
+    ld a,(work.monitorTailBytes)
     or a
-    jp nz,invalid
+    call nz,importMonitorTail
+    ret c
     ld de,work.prefix+IMAGE_HEADER_SIZE
     jp .copyHeader
 .v1:
@@ -457,7 +489,7 @@ importHeader:
 .copyHeader:
     ld hl,work.prefix
     ld bc,work.header
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     or a
     ret
 
@@ -469,7 +501,7 @@ importHeader:
     jp nz,.raw
     ld hl,(work.bodySize)
     ld de,RKS_HEADER_SIZE+RKS_TRAILER_SIZE+1
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,invalid
     ld hl,0
     call seekInput
@@ -491,7 +523,7 @@ importHeader:
     ld de,RKS_HEADER_SIZE+RKS_TRAILER_SIZE
     call subtract
     pop de
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,invalid
     ld (work.bodySize),hl
     ld hl,RKS_HEADER_SIZE
@@ -566,10 +598,50 @@ scanBody:
     or a
     ret z
     GET_DE work.expectedSum
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret z
 invalid:
     scf
+    ret
+
+importMonitorTail:
+    ld a,(work.prefix+IMAGE_MODE)
+    cp IMAGE_MODE_MON
+    jp nz,invalid
+    ld a,(work.prefix+HDR_FLAGS)
+    and 0FFh-IMAGE_FLAG_MAIN
+    jp nz,invalid
+    ld hl,(work.bodySize)
+    ld de,IMAGE_HEADER_SIZE
+    add hl,de
+    jp c,invalid
+    call seekInput
+    ret c
+    ld a,(work.monitorTailBytes)
+    ld c,a
+    ld b,0
+    ld de,work.monitorTail
+    call readInput
+    ret c
+    ld a,(work.prefix+IMAGE_MONITOR_BYTES)
+    ld c,a
+    ld b,0
+    ld hl,work.monitorTail
+    add hl,bc
+    push hl
+    dec hl
+    ex de,hl
+    ld hl,work.monitorTail
+    call bios_calcCS
+    pop hl
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+    ld h,b
+    ld l,c
+    call mon2_cmp_hl_de
+    jp nz,invalid
+    xor a
     ret
 
 ;----------------------------------------------------------------------------
@@ -701,6 +773,11 @@ applyOption:
     call lookup
     ret c
     ld (work.header+IMAGE_MODE),a
+    cp IMAGE_MODE_MON
+    ret z
+    xor a
+    ld (work.header+IMAGE_MONITOR_BYTES),a
+    ld (work.monitorTailBytes),a
     ret
 .flags:
     ld de,flags
@@ -797,13 +874,13 @@ finishHeader:
 .checkLoad:
     ld hl,(work.header+HDR_ENTRY)
     GET_DE work.header+HDR_LOAD
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,invalid
     ld hl,(work.bodySize)
     add hl,de
     ret c
     GET_DE work.header+HDR_ENTRY
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,invalid
     jp z,invalid
     GET_DE work.header+IMAGE_BSS
@@ -829,20 +906,20 @@ finishHeader:
     cp IMAGE_HEADER_SIZE
     jp nz,.defaultEnd
     GET_DE work.header+IMAGE_MEMORY_END
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,.checkBegin
 .defaultEnd:
     ld (work.header+IMAGE_MEMORY_END),hl
     jp .checkBegin
 .checkEnd:
     GET_DE work.header+IMAGE_MEMORY_END
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,.checkBegin
     jp nz,invalid
 .checkBegin:
     ld hl,(work.header+HDR_LOAD)
     GET_DE work.header+IMAGE_MEMORY_BEGIN
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,invalid
     ld hl,(work.header+IMAGE_MEMORY_END)
     GET_DE work.header+IMAGE_MIN_HEAP
@@ -877,6 +954,13 @@ finishHeader:
     ld a,(work.header+IMAGE_OPTIONS)
     cp IMAGE_OPTION_CACHEABLE+1
     jp nc,invalid
+    ld a,(work.monitorTailBytes)
+    or a
+    jp z,.checkFlags
+    ld a,(work.header+HDR_FLAGS)
+    and 0FFh-IMAGE_FLAG_MAIN
+    jp nz,invalid
+.checkFlags:
     ld a,(work.header+HDR_FLAGS)
     or a
     ret z
@@ -919,7 +1003,7 @@ writeHeader:
     ld hl,imageMagic
     ld de,imageMagic+HDR_FLAGS
     ld bc,work.header
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,(work.bodySize)
     ld (work.header+HDR_SIZE),hl
     ld hl,(work.bodySum)
@@ -1152,7 +1236,7 @@ transfer:
     dec hl
     ld l,(hl)
     ld h,b
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret z
     scf
     ret
@@ -1177,7 +1261,7 @@ parseHex:
     or a
     jp z,invalid
 .digit:
-    call bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     sub '0'
     jp c,invalid
     cp 10
@@ -1254,10 +1338,10 @@ sameText:
     push hl
 .next:
     ld a,(hl)
-    call bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     ld c,a
     ld a,(de)
-    call bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     cp c
     jp nz,.done
     or a
@@ -1391,7 +1475,7 @@ modes:
     DB IMAGE_MODE_AUTO,"AUTO",0, IMAGE_MODE_MX,"MX",0, IMAGE_MODE_STD,"STD",0
     DB IMAGE_MODE_MON,"MON",0, IMAGE_MODE_RF,"RF",0, 0FFh
 outputTypes:
-    DB 1,".RKS",0, 0,".EXE",0, 0,".COM",0, 0,".DLL",0, 0,".FNT",0, 0FFh
+    DB 1,".RKS",0, 0,".EXE",0, 0,".COM",0, 2,".DLL",0, 2,".FNT",0, 0FFh
 rksExtension:   DB ".RKS",0
 rawName:        DB "RAW",0
 overwriteName:  DB "Y",0
@@ -1430,12 +1514,14 @@ rawInput        BLOCK 1
 overwrite       BLOCK 1
 overrides       BLOCK 1
 rksOutput       BLOCK 1
+monitorTailBytes BLOCK 1
 header          BLOCK IMAGE_HEADER_SIZE
 prefix          BLOCK IMAGE_HEADER_SIZE
 inputHandle     BLOCK FILE_HANDLE
 outputHandle    BLOCK FILE_HANDLE
 command         BLOCK ARG_LIMIT+1
 buffer          BLOCK BLOCK_SIZE
+monitorTail     BLOCK IMAGE_MONITOR_MAX+2
     ENDS
 
 bssStart:

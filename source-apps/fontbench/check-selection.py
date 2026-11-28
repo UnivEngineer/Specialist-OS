@@ -51,7 +51,7 @@ try:
             expected,cursor=context['oracle'](corpus,kind in (1,3,4))
             got=m.read(0x9000,12288)
             assert all(got[i]==expected[i] for i in range(12288) if i%256<240),(stage,name,'pixels')
-            assert m.read(s['bios_vars.cursorY'],2)==cursor,(stage,name,'cursor')
+            assert m.read(s['mon2_vars.cursorY'],2)==cursor,(stage,name,'cursor')
             assert m.read(s['gridPre'],1)==b'\1'
             rows.append(dict(engine=name,kind=kind,route=m.read(s['gridRoute'],1)[0],ticks=int.from_bytes(m.read(s['v_elapsed'],4),'little')))
             print(stage+1,rows[-1],flush=True)

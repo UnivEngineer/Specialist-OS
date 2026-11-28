@@ -11,19 +11,20 @@
 ; 0Eh: BSS bytes (FFFFh — неизвестный объём); 10h: memoryBegin;
 ; 12h: memoryEnd исключительно; 14h: minHeap; 16h: policy;
 ; 17h: API (0/2); 18h: stackBytes; 1Ah: MODE; 1Bh: headerBytes=32;
-; 1Ch: options (bit 0 CACHEABLE, bit 1 REUSABLE); 1Dh: reserved=0;
+; 1Ch: options (bit 0 CACHEABLE, bit 1 REUSABLE); 1Dh: длина имени монитора или 0;
 ; 1Eh: headerChecksum по байтам 00h..1Dh; 20h: начало тела.
 ; bodyChecksum — штатная сумма Монитора-2 по телу, хвостовой суммы нет.
-; Размер файла строго bodyBytes+32, entry внутри тела. Релокации нет.
+; После тела COM/EXE с ненулевым 1Dh идут имя ASCII и его 16-битная сумма.
+; Обычный размер bodyBytes+32. При наличии имени добавляются указанная длина и два байта суммы.
+; Entry находится внутри тела. Релокаций нет.
 ; memoryBegin <= load; memoryEnd >= load+bodyBytes+BSS (если BSS известен).
 ; BSS и прочая рабочая память резервируются, но не обнуляются загрузчиком.
 ; Инициализацию выполняет программа; C CRT обнуляет собственный BSS.
 ; EXCLUSIVE=0: освобождение прикладной MAIN; неизвестный BSS требует её.
 ; PRESERVE=1: отказ при пересечении; MANAGED=2: можно вытеснять CACHEABLE.
 ; Активный код не вытесняется. DOS-арена освобождает лишь явный кэш.
-; MODE=AUTO/MX/STD/MON/RF (0..4). FLAGS=0 передаёт выбор среды RUN;
-; MODE!=AUTO позволяет RUN выбрать известное стандартное ядро без BAT/меню.
-; Имя произвольного монитора и сценарии остаются в BAT с вызовом RUN.
+; MODE=AUTO/MX/STD/MON/RF (0..4). Ненулевой 1Dh требует MODE=MON и FLAGS=0/MAIN.
+; RUN применяет явный ключ, затем MODE; AUTO выбирает RAMFOS/MX.
 ; CPU: load, entry, monitor; далее ID=VALUE. Символы ASM метаданных:
 ; IMAGE_BSS_SIZE, IMAGE_MEM_BEGIN, IMAGE_MEM_END, IMAGE_MIN_HEAP_SIZE,
 ; IMAGE_STACK_SIZE, IMAGE_MEMORY_POLICY, IMAGE_API, IMAGE_COMPAT_MODE,
@@ -50,6 +51,8 @@ IMAGE_MODE_MON         = 3
 IMAGE_MODE_RF          = 4
 IMAGE_HEADER_BYTES     = 27
 IMAGE_OPTIONS          = 28
+IMAGE_MONITOR_BYTES    = 29
+IMAGE_MONITOR_MAX      = 63
 IMAGE_HEADER_CHECKSUM  = 30
 IMAGE_POLICY_EXCLUSIVE = 0
 IMAGE_POLICY_PRESERVE  = 1

@@ -22,10 +22,10 @@ FLOPPY_MEDIA = 0F9h
 ;----------------------------------------------------------------------------
 FormatFloppy:
     ld hl,FLOPPY_TOTAL_SECTORS
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,errBlockSize
     ld b,0FFh
-    call bios_diskDriver
+    call formatDiskDriver
     jp c,errIO
     ld a,b
     cp DISK_TECH_FLOPPY
@@ -80,7 +80,7 @@ FormatFloppy:
     ld hl,floppyBoot
     ld de,floppyBootEnd
     ld bc,buffer
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,0AA55h
     ld (buffer+FLOPPY_SECTOR_BYTES-2),hl
     ld de,0

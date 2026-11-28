@@ -18,7 +18,7 @@ def main():
         memory[address:address+len(data)] = data
     for name in ('ncInputHookBegin','ncInputHookEnd','ncPrintField','ncPrintChar'):
         memory[n[name]] = 0xc9
-    memory[n['bios_getch']:n['bios_getch']+3] = bytes.fromhex('c3 00 85')
+    memory[n['mon2_getchOld']:n['mon2_getchOld']+3] = bytes.fromhex('c3 00 85')
     reader = bytes.fromhex('2a 00 86 7e 23 22 00 86 b7 c9')
     memory[0x8500:0x8500+len(reader)] = reader
     buffer = n['vars.cmdLine']

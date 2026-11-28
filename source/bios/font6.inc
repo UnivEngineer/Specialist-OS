@@ -59,7 +59,7 @@ stateReady:
     ld a,l
     or a
     jp nz,noGroup
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 3
     jp nz,noGroup
@@ -91,13 +91,13 @@ stateReady:
 selectInverse:
     ; Обычное ядро не содержит NOP. Инверсное содержит CPL после слияния.
     ; Выбираем вход один раз перед пакетом, без проверки в пиксельном цикле.
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp z,routeReady
     ex de,hl
 routeReady:
     ld (route+1),hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 181
     jp nc,noGroup
@@ -167,12 +167,12 @@ noGroup:
     ld b,a
     add a,a
     add a,b
-    ld hl,bios_vars.cursorX
+    ld hl,mon2_vars.cursorX
     add a,(hl)
     ld (hl),a
     cp 192
     jp c,groupReturn
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     call printChar_c0A
 groupReturn:
     ld hl,(text)

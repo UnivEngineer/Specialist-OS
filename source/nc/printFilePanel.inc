@@ -355,12 +355,12 @@ pks_Normal:
         COLOR   COLOR_CURSOR
         ; По контракту BIOS инверсия — слово FFFFh, а не логический байт 1.
         ld      a, 0FFh
-        ld      (bios_vars.inverse), a
-        ld      (bios_vars.inverse+1), a
+        ld      (mon2_vars.inverse), a
+        ld      (mon2_vars.inverse+1), a
         call    printPanelFile
         xor     a
-        ld      (bios_vars.inverse), a
-        ld      (bios_vars.inverse+1), a
+        ld      (mon2_vars.inverse), a
+        ld      (mon2_vars.inverse+1), a
         COLOR   COLOR_FILE
         ret
     ENDIF

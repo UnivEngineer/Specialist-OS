@@ -20,7 +20,7 @@ editorSubtractLines:
     ld hl,(editorBarV.total)
     ld d,b
     ld e,c
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp c,editorLineCountFloor
     ld a,h
     or l
@@ -179,7 +179,7 @@ editorBarWidthReady:
     ret
 
 editorDrawVerticalBar:
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     sub EDITOR_FIRST_Y
     ld de,1
 editorBarRow:
@@ -189,7 +189,7 @@ editorBarRow:
     jp editorBarRow
 editorBarTop:
     ld hl,(v_lineNumber)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp nc,editorBarTopReady
     ld hl,0
 editorBarTopReady:
@@ -252,7 +252,7 @@ editorBarTrackStable:
     ld a,(v_columns)
     ld e,a
     ld d,0
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,(editorLineWidthHi)
     sbc a,0
     jp c,editorBarMinimumRange
@@ -349,7 +349,7 @@ editorMeasureAtEnd:
     ld hl,(editorSelectionRow)
     ex de,hl
     pop hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld b,h
     ld c,l
     ex de,hl

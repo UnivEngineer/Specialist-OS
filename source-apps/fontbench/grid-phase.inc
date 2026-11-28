@@ -23,7 +23,7 @@ gridPhaseYReady:
     ld b,GRID_PHASE_ROWS
 gridPhaseRow:
     ex de,hl
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ex de,hl
     push bc
     push de
@@ -47,7 +47,7 @@ gridPhaseChar:
     ld b,c
 .next:
     ld c,(hl)
-    call bios_printChar
+    call mon2_printCharOld
     inc hl
     dec b
     jp nz,.next
@@ -56,14 +56,14 @@ gridPhaseRaw:
     ld b,c
 .next:
     ld a,(hl)
-    call bios_printCharRaw
+    call FONT_ENGINE_RAW
     inc hl
     dec b
     jp nz,.next
     ret
 gridPhaseRoutes:
-    DW gridPhaseChar,gridPhaseRaw,bios_printStringZ
-    DW bios_printStringRawZ,bios_printStringRawLim,bios_printStringRawPseudo
+    DW gridPhaseChar,gridPhaseRaw,mon2_printStringOld
+    DW FONT_ENGINE_RAWZ,FONT_ENGINE_LIM,FONT_ENGINE_PSEUDO
 
 gridPseudoSetup:
     xor a

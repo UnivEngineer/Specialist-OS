@@ -2,6 +2,7 @@
 ; DE is the normal MAIN application argument string. PRE reads go directly
 ; into reserved memory; a failed read is repaired before any text output.
     INCLUDE "../common/system.inc"
+    INCLUDE "../../bin/bios-imports.inc"
     INCLUDE "../../sdk/asm/formats/font-init.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
 ; Optional PIT instrumentation: no emitted bytes in the production build.
@@ -136,7 +137,7 @@ resourcesReady:
     ex de,hl
     ld hl,staging+IMAGE_HEADER_SIZE
     ld bc,FONT_ENGINE_BASE
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     FONT_STAMP 12
     ld hl,(lowerBase)
     ex de,hl
@@ -151,7 +152,7 @@ committed:
     ld hl,request+FILE_PATH_IO.descriptor
     ld de,request+FILE_PATH_IO.descriptor+8
     ld bc,io_vars.fontName
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,resumeCommand
     xor a
     MXOS_CALL_REGS MXOS_DOS_FONT_CONFIG
@@ -165,7 +166,7 @@ fontExportReady:
     or a
     jp nz,error
     ld hl,installed
-    jp bios_printStringZ
+    jp mon2_printStringOld
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
@@ -228,7 +229,7 @@ fontAliasCompare:
     push de
     ld d,a
     ld a,(hl)
-    call bios_upperCase
+    call biosEngineUppercase
     cp d
     pop de
     jp nz,fontAliasMismatch
@@ -299,7 +300,7 @@ resumeArguments:
 validate:
     ld hl,(request+FILE_PATH_IO.actual)
     ld de,IMAGE_HEADER_SIZE+48
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,badImage
     ld hl,staging
     ld de,magic
@@ -314,26 +315,26 @@ magicLoop:
     jp nz,magicLoop
     ld hl,(staging+6)
     ld de,FONT_ENGINE_BASE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,(staging+8)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,(staging+10)
     ld (imageBytes),hl
     ld de,FONT_ENGINE_END-FONT_ENGINE_BASE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,sizeFits
     jp nz,badImage
 sizeFits:
     ld de,48
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,badImage
     ld de,IMAGE_HEADER_SIZE
     add hl,de
     ex de,hl
     ld hl,(request+FILE_PATH_IO.actual)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,staging
     ld de,staging+IMAGE_HEADER_CHECKSUM-1
@@ -341,7 +342,7 @@ sizeFits:
     ld hl,(staging+IMAGE_HEADER_CHECKSUM)
     ld d,b
     ld e,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,(imageBytes)
     ld de,staging+IMAGE_HEADER_SIZE-1
@@ -352,7 +353,7 @@ sizeFits:
     ld hl,(staging+12)
     ld d,b
     ld e,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,staging+IMAGE_HEADER_SIZE+32
     ld de,engineMagic
@@ -368,7 +369,7 @@ engineMagicLoop:
     ld hl,(imageBytes)
     ex de,hl
     ld hl,(staging+IMAGE_HEADER_SIZE+40)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ; Lower allocation is opaque to FONT. MEM requires page-sized blocks;
     ; bitmap geometry and the transformation belong to the initializer.
@@ -392,11 +393,11 @@ error:
     call fontBenchReleaseTimer
     ENDIF
     ld hl,failed
-    call bios_printStringZ
+    call mon2_printStringOld
     ld a,(errorCode)
     call bios_printHexByte
     ld hl,errorSeparator
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,errorMessages
 errorFind:
     ld a,(hl)
@@ -416,15 +417,15 @@ errorFind:
 errorUnknown:
     ld hl,msgUnknown
 errorExplain:
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,newline
-    call bios_printStringZ
+    call mon2_printStringOld
     ld a,(errorCode)
     scf
     ret
 usage:
     ld hl,help
-    jp bios_printStringZ
+    jp mon2_printStringOld
 
     IFDEF FONT_BENCH
 fontBenchReleaseTimer:

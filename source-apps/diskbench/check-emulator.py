@@ -59,7 +59,7 @@ class Bench(Machine):
         path.write_bytes(base64.b64decode(block['data']))
 
     def sector(self, number):
-        self.subroutine(SYSTEM['bios_diskDriver'], bc=0x0200, de=number, hl=0x6000)
+        self.subroutine(SYSTEM['sysDiskDriver'], bc=0x0200, de=number, hl=0x6000)
         return self.read(0x6000, 256)
 
 
@@ -109,11 +109,11 @@ def main():
         sector = page*256+254
         payload = bytes((i*37+page*17+13)&255 for i in range(256))
         m.write(0x4000, b'\xDA'+payload+b'\xAD')
-        state = m.subroutine(SYSTEM['bios_diskDriver'], bc=0x0100, de=sector, hl=0x4001)
+        state = m.subroutine(SYSTEM['sysDiskDriver'], bc=0x0100, de=sector, hl=0x4001)
         assert not state['flags']['C']
         for mode in [1, 2]:
             before = m.call('cpu_state')['cpu_ticks']
-            state = m.subroutine(SYSTEM['bios_diskDriver'], af=0x5A02, bc=mode*256+0xA7, de=sector, hl=0x4001)
+            state = m.subroutine(SYSTEM['sysDiskDriver'], af=0x5A02, bc=mode*256+0xA7, de=sector, hl=0x4001)
             elapsed = state['cpu_ticks']-before-27  # CALL + JMP обвязки, RET входит в драйвер.
             assert not state['flags']['C']
             assert state['registers']['af']['dec'] >> 8 == 0x5A
@@ -124,10 +124,10 @@ def main():
         assert m.sector(sector) == payload
     for sector in [0x00FF, 0x01FF, 0x0FFF, count*256]:
         for mode in [1, 2]:
-            assert m.subroutine(SYSTEM['bios_diskDriver'], bc=mode*256, de=sector, hl=0x4000)['flags']['C']
+            assert m.subroutine(SYSTEM['sysDiskDriver'], bc=mode*256, de=sector, hl=0x4000)['flags']['C']
     if args.variant == 'Buffered':
         for addr in [0xFE01, 0xFF00]:
-            assert m.subroutine(SYSTEM['bios_diskDriver'], bc=0x100, de=0x100, hl=addr)['flags']['C']
+            assert m.subroutine(SYSTEM['sysDiskDriver'], bc=0x100, de=0x100, hl=addr)['flags']['C']
         rs = symbols(ROOT/'bin/RAMDISK.sym')
         tail_length = rs['ramdBankTailEnd']-0xFF00
         tail = m.read(0xFF00, tail_length)

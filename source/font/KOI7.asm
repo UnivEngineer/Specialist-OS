@@ -5,6 +5,7 @@
 ; A=0, CF=0. Вход SET_FONT_ENCODING сохраняет регистры и флаги;
 ; раскладка остаётся KOI-7R.
     INCLUDE "../common/system.inc"
+    INCLUDE "../../bin/bios-imports.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     DEFINE FONT_KOI7
     IF K7_MODE == 0 || K7_MODE == 3
@@ -42,15 +43,15 @@ K7_LOWER = 05000h
     jp printStringLim
 initializerName: DB 'Init7.dll',0
 
-printChar2     = bios_fontControl
-printCharBody  = bios_fontControl
-calcCursorAd_0 = bios_fontPosition
-fontLineEnd    = bios_fontNewLine
+printChar2     = biosEngineControl
+printCharBody  = biosEngineControl
+calcCursorAd_0 = biosEnginePosition
+fontLineEnd    = biosEngineNewLine
     INCLUDE "char.inc"
 printChar_real2:
 printCharRawHelper:
     call scalar
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 192
     ret c

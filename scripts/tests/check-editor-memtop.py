@@ -19,7 +19,7 @@ def run(memory,code,end):
 for top in [0x5FFF,0x6FFF,0x7FFF,0x8BFF]:
  # Stop at the first memory-registration call with the chosen BIOS limit.
  m=bytearray(base)
- getter=e['bios_getMemTop']
+ getter=e['mx_getMemTop']
  m[getter:getter+4]=b'\x21'+word(top)+b'\xc9'
  code=b'\x31'+word(d['STACK_ADDR'])+b'\x11\x00\x60\xCD'+word(e['editorLoadingDone'])
  got=run(m,code,e['mx_callRegs'])

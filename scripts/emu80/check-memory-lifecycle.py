@@ -26,7 +26,7 @@ def page(bank):
 def call(op, hl=0, de=0, bc=0, af=0, error=None):
     page(0)
     m.write(0x3000, struct.pack('<4H', hl, de, bc, af))
-    m.write(0x2000, bytes.fromhex('cd00f8c30070'))
+    m.write(0x2000, bytes.fromhex('cd60f8c30070'))
     m.stop_at(0x7000)
     m.call('regs_set', pc=0x2000, sp=0x8fdf, bc=op, de=0x3000)
     z=m.until(0x7000, 50)

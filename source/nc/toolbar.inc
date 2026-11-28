@@ -32,7 +32,7 @@ ncToolbarCapture:
     ld c,9
     call uiBitmapSave
     ld hl,0
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     ret
 ncToolbarReplay:
     ld hl,(ncToolbarBuffer)

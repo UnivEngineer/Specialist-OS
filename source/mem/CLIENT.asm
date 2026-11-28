@@ -3,7 +3,7 @@
 ; +06h вызов с DW операции, +09h привязка очереди, +0Ch сброс очереди,
 ; +0Fh FAR-копирование, +12h запрос MEM, +15h локальные операции памяти,
 ; +18h вызов DLL по текущему маршруту MODULE_SCOPE. Контракты в api.md.
-    ORG mx_callPacket
+    ASSERT $ == mx_callPacket
     jp MEM_CALL_PACKET_ENTRY
     jp bankCpmCall
     jp bankMxCallRegs
@@ -20,59 +20,17 @@
     jp memFixedRaw
     jp memFixedHexByte
     jp memFixedHexWord
-    DS mx_getMemTop-$,0
+    ASSERT $ == mx_getMemTop
     jp memFixedGetTop
     jp memFixedSetTop
 
-; B=группа, C=номер, DE=MX_REGS в исходной странице.
-; AF/BC/DE/HL — результат исполнителя. SP и страница сохраняются.
-; BIOS выполняется в main, файловые функции — в физическом банке ДОЗУ 0.
-bankMxDos:
-    dec a
-    jp nz,bankMxUnsupported
-    push de
-    ld a,(bankPage)
-    cp 1
-    jp z,bankMxLocalDos
-    ld a,1
-    ld hl,BANK_DOS_GATE
-bankMxInvoke:
-    call bankCallPacket
-    jp bankMxResult
-bankMxLocalDos:
-    call BANK_DOS_GATE+3
-bankMxResult:
-    push af
-    push bc
-    push de
-    push hl
-    ld a,(BANK_FRAME_STATUS)
-    or a
-    jp nz,bankMxReturned
-    ld hl,8
-    add hl,sp
-    ld e,(hl)
-    inc hl
-    ld d,(hl)
-    ld hl,0
-    add hl,sp
-    ld b,MX_REGS/4
-    call bankCopyQuads
-bankMxReturned:
-    pop hl
-    pop de
-    pop bc
-    pop af
-    inc sp
-    inc sp
-    ret
 ;----------------------------------------------------------------------------
 ; MXOS
 ;
 ; Выполнить системный вызов mx_callRegs с номером операции в потоке кода.
 ;
 ; вход:
-;   Сразу после CALL F806h следует DW операции (группа в старшем байте).
+;   Сразу после CALL mx_callRegs следует DW операции (группа в старшем байте).
 ;   Листовые службы принимают аргументы в CPU, общий маршрут использует MX_REGS.
 ;
 ; выход:
@@ -113,21 +71,7 @@ bankMxRegsRouteCall:
     inc sp
     inc sp
     ret
-memBiosQueue:
-    ld hl,4
-    add hl,de
-    ld a,(hl)
-    dec a
-    cp BANK_TEXT_BYTES
-    jp nc,memBiosGeneric
-    inc hl
-    ld a,(hl)
-    or a
-    jp nz,memBiosGeneric
-    ld a,MEM_TEXT_BATCH
-    jp memBiosText
-    ASSERT $ <= MEM_TEXT_ENTRY
-    DS MEM_TEXT_ENTRY-$,0
+    ASSERT $ == MEM_TEXT_ENTRY
     INCLUDE "text.inc"
     ASSERT $ <= MEM_SCOPE_ENTRY
     IF $ < MEM_SCOPE_ENTRY

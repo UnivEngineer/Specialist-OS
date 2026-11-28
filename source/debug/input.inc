@@ -120,7 +120,7 @@ hexDigitValue:  SUB   '0'
 
 moveCursorUp:  PUSH  BC
         LD    C,19h
-        CALL  mon2_printChar
+        CALL  debug_printChar
         POP   BC
         RET
 
@@ -135,9 +135,9 @@ inputCommandLine:  PUSH  HL
 
 printNewLine:
         LD    C,0AH
-        CALL  mon2_printChar
+        CALL  debug_printChar
         LD    C,0DH
-        CALL  mon2_printChar
+        CALL  debug_printChar
         RET
 
 ;----------------------------------------------------------------------------

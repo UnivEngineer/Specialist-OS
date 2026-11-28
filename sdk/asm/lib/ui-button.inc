@@ -6,10 +6,10 @@
 ; Override UI_BUTTON_CURSOR/PRINT with local MXCALL shims for banked callers.
     INCLUDE "../hardware/spec_mx.inc"
     IFNDEF UI_BUTTON_CURSOR
-    DEFINE UI_BUTTON_CURSOR bios_setCursorPos
+    DEFINE UI_BUTTON_CURSOR mx_setCursorPos
     ENDIF
     IFNDEF UI_BUTTON_PRINT
-    DEFINE UI_BUTTON_PRINT bios_printStringRawZ
+    DEFINE UI_BUTTON_PRINT FONT_ENGINE_RAWZ
     ENDIF
     IFNDEF UI_BUTTON_COLOR
     DEFINE UI_BUTTON_COLOR uiButtonSetColor

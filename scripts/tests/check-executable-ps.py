@@ -105,6 +105,33 @@ def relocatable_cases(folder, add):
         add(path,'dll')
 
 
+def monitor_cases(folder, add):
+    for index, (name, fields, expected) in enumerate((
+        ('mon2.mon', {}, 'MONITOR2.MON'),
+        ('monitor2.mon', {'MODE': 'AUTO'}, 'MONITOR2.MON'),
+        ('C:\\DOS\\CUSTOM.MON', {'MODE': 'MON'}, 'C:\\DOS\\CUSTOM.MON'),
+        ('m2_d400.mon', {}, ''),
+    )):
+        cpu = folder/f'monitor-{index}.cpu'
+        cpu.write_text(format_cpu(0x1000, monitor=name, fields=fields), 'ascii')
+        cpu.with_suffix('.i80').write_bytes(b'\xc9')
+        for target in ('com', 'exe', 'rks', 'dll', 'fnt'):
+            add(cpu, target)
+        packed, _ = convert(cpu, 'exe')
+        image = decode(packed, 'exe')
+        assert image.monitor == expected
+        assert encode(image, 'exe') == packed
+        path = cpu.with_suffix('.exe')
+        path.write_bytes(packed)
+        add(path, 'com')
+        if expected:
+            broken = bytearray(packed)
+            broken[-1] ^= 1
+            path = folder/f'monitor-bad-{index}.exe'
+            path.write_bytes(broken)
+            add(path, 'exe')
+
+
 def main():
     with tempfile.TemporaryDirectory() as temporary:
         folder = Path(temporary)
@@ -113,6 +140,7 @@ def main():
             destination = folder/f'output-{len(cases)}.bin'
             cases.append(dict(source=str(path), target=target, load=load, output=str(destination)))
         relocatable_cases(folder, add)
+        monitor_cases(folder, add)
         for size in (1,239,240,241,255,256,257,4096,65535,65536):
             data = bytes((i*71+19)&255 for i in range(size))
             raw = folder/f'raw-{size}.bin'

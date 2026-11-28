@@ -9,54 +9,40 @@ import tempfile
 R=Path(__file__).resolve().parents[2]
 s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/DOS.sym').read_text(encoding='utf-8'),re.M)}
 header=(R/'sdk/include/mxos.h').read_text(encoding='utf-8')
-macros={k:int(v,16) for k,v in re.findall(r'^#define MXOS_BIOS_ABI_(\w+) (0x[0-9A-Fa-f]+)',header+(R/'sdk/include/mxos_syscall_ids.h').read_text(encoding='utf-8'),re.M)}
-mapping=dict(MEMCPY='memcpy_bc_hl',GETCH='getch',PUTCH='printChar',INPUT='input',PUTS='printString',KEY_SCAN='keyScan',PRINT_HEX8='printHexByte',PRINT_HEX16='printHexWord',CURSOR_GET='getCursorPos',CURSOR_SET='setCursorPos',CHECKSUM='calcCS',MEMTOP_SET='setMemTop',MEMTOP_GET='getMemTop',FILE_LIST='fileList',DRIVE='fileGetSetDrive',FILE_CREATE='fileCreate',FILE_DELETE='fileDelete',FILE_RENAME='fileRename',FILE_STAT='fileLoadInfo',FILE_ATTR='fileGetSetAttr',FILE_NAME='fileNamePrepare',FILE_LOAD='fileLoad2',DISK_DRIVER='diskDriver',PRINT_DEC='printDecWord',UPPER='upperCase',STRCMP='strcmp',STRICMP='stricmp',FLUSH='flushVolume',ARG_NEXT='argNext',DRIVE_SELECT='fileSelectDrive',FILE_COPY='fileCopy',ERROR='getError',SECTOR='sectorIO')
-mapping['PRINT_STRING_LIM']='printStringLim'
-mapping.update(PRINT_CHAR_RAW='printCharRaw',PRINT_STRING_Z='printStringZ',PRINT_STRING_RAW_Z='printStringRawZ',PRINT_STRING_RAW_LIM='printStringRawLim')
-mapping['DIRECTORY']='directory'
-mapping['CLI']='cli'
-mapping['SHELL']='setShell'
-mapping['INPUT_HOOK']='setInputHook'
+ids_header=(R/'sdk/include/mxos_syscall_ids.h').read_text(encoding='utf-8')
+assert 'MXOS_BIOS_ABI_' not in header+ids_header
 assert 'bios_setRAMDDriver' not in s and 'MXOS_BIOS_SET_RAMD_DRIVER' not in s
-layout = json.loads((R/'source/bios/layout.json').read_text(encoding='utf-8'))
-image = (R/'bin/BIOS.sys').read_bytes()
-for index, (name, target, *_) in enumerate(layout['vectors'], 1):
- address = s['bios_getMemTop'] + 3*index
- assert s['bios_'+name] == address, name
- offset = address - s['bios_init']
- assert image[offset:offset+3] == bytes([0xc3])+s[target].to_bytes(2, 'little'), name
-for address in (0xC821,0xC82D):
- assert image[address-s['bios_init']] == 0xc9
-assert s['bios_cliExecError'] == s['bios_cliExecDone']+3
 assert s['MAX_PATH']==128
-assert '#define MXOS_MAX_PATH 128' in (R/'sdk/include/mxos.h').read_text(encoding='utf-8')
-for key in list(mapping):
- if key not in macros: del mapping[key]
-assert macros.keys()==mapping.keys(),(macros.keys()-mapping.keys(),mapping.keys()-macros.keys())
-for name,value in macros.items():assert value==s['bios_'+mapping[name]],(name,value,s['bios_'+mapping[name]])
+assert '#define MXOS_MAX_PATH 128' in header
+c_entries={name:int(value,16) for name,value in re.findall(r'^#define MXOS_MEM_(\w+)\s+(0x[0-9A-Fa-f]+)$',header,re.M)}
+for c_name, asm_name in dict(PRINT_CHAR='printChar',GET_CURSOR_POS='getCursorPos',SET_CURSOR_POS='setCursorPos',
+                            PRINT_HEX_BYTE='printHexByte',PRINT_HEX_WORD='printHexWord',
+                            GET_TOP='getMemTop',SET_TOP='setMemTop').items():
+ assert c_entries[c_name]==s['mx_'+asm_name],c_name
 for name,value in dict(FILE_HANDLE=64,FILE_DESCR_SIZE=32,FILE_INFO=16,DISK_INFO=48,FILE_COPY_REQUEST=86,FILE_PATH_IO=40).items():assert s[name]==value,(name,s[name],value)
 runpy.run_path(str(R/'scripts/build/build-syscalls.py'))['generate'](check=True)
-for name,value in dict(mx_callPacket=0xF800,mx_callCPM=0xF803,mx_callRegs=0xF806).items():assert s[name]==value
+for name,value in dict(mx_callPacket=0xF860,mx_callCPM=0xF863,mx_callRegs=0xF866).items():assert s[name]==value
 sdk_asm=(R/'sdk/src/mxos_syscall_ids.inc').read_text(encoding='utf-8')
 direct={name:int(value,16) for name,value in re.findall(r'^defc (mx_\w+)\s*= 0([0-9A-F]{4})h$',sdk_asm,re.M)}
-assert direct['mx_callPacket']==0xF800 and direct['mx_callRegs']==0xF806
+assert direct['mx_callPacket']==0xF860 and direct['mx_callRegs']==0xF866
 assert 'mx_call' not in s and 'mx_call' not in direct
 assert not re.search(r'\b(?:mxos_call|MXOS_CALL)\b',header)
 for name,value in direct.items():
  assert s[name]==value,(name,value)
-fast_entries=dict(mx_printChar=0xF81B,mx_getCursorPos=0xF81E,mx_setCursorPos=0xF821,
-                  mx_printCharRaw=0xF824,mx_printHexByte=0xF827,mx_printHexWord=0xF82A,
-                  mx_getMemTop=0xF830,mx_setMemTop=0xF833)
+fast_entries=dict(mx_printChar=0xF87B,mx_getCursorPos=0xF87E,mx_setCursorPos=0xF881,
+                  mx_printCharRaw=0xF884,mx_printHexByte=0xF887,mx_printHexWord=0xF88A,
+                  mx_getMemTop=0xF88D,mx_setMemTop=0xF890)
 for name,value in fast_entries.items():
  assert direct[name]==value,(name,direct[name],value)
-ids_header=(R/'sdk/include/mxos_syscall_ids.h').read_text(encoding='utf-8')
 for name in ('PRINT_CHAR','PRINT_HEX_BYTE','GET_CURSOR_POS','SET_CURSOR_POS',
-             'PRINT_HEX_WORD','SET_MEM_TOP','GET_MEM_TOP','PRINT_CHAR_RAW','PRINT_CHAR_REAL'):
- old_name='MXOS_BIOS_'+name
- assert old_name not in s and not re.search(r'\b'+old_name+r'\b',ids_header+'\n'+sdk_asm),old_name
+             'PRINT_HEX_WORD','SET_MEM_TOP','GET_MEM_TOP','PRINT_CHAR_RAW'):
+ service='MXOS_BIOS_'+name
+ command='MXOS_COMMAND_BIOS_'+name
+ assert s[service] == s[command]+0x100, name
+assert 'MXOS_BIOS_PRINT_CHAR_REAL' not in s and 'MXOS_BIOS_PRINT_CHAR_REAL' not in ids_header
 errors=re.findall(r'^#define MXOS_ERR_(\w+) (\d+)',(R/'sdk/include/mxos_file.h').read_text(encoding='utf-8'),re.M)
 for name,value in errors:assert int(value)==s['DOS_ERR_'+name]
-print('C SDK ABI PASS',len(macros),'addresses;',len(errors),'error codes')
+print('C SDK ABI PASS',len(c_entries),'MEM definitions;',len(errors),'error codes')
 
 assert s['IO_KEY_STATE'] == 11
 keyboard_wrappers = (R/'sdk/src/mxos_z88dk.asm').read_text(encoding='utf-8')
@@ -70,7 +56,7 @@ for name in ('KEY_MOD_SHIFT','KEY_MOD_CTRL'):
     assert int(re.search(rf'^#define MXOS_{name}\s+(\d+)$',header,re.M)[1]) == s['IO_'+name]
 
 assert s['MEM_COPY_REQUEST']==8
-assert direct['mx_memcpyFar']==s['mx_memcpyFar']==0xF80F and s['mx_memInfo']==0xF812
+assert direct['mx_memcpyFar']==s['mx_memcpyFar']==0xF86F and s['mx_memInfo']==0xF872
 assert s['MEM_ABI_VERSION']==int(re.search(r'^#define MXOS_MEM_ABI_VERSION (0x[0-9A-Fa-f]+)',(R/'sdk/include/mxos.h').read_text(encoding='utf-8'),re.M).group(1),16)
 assert re.search(r'^_mxos_memcpy_far:\s+call mx_memcpyFar$',keyboard_wrappers,re.M)
 assert re.search(r'^_mxos_memmove_far:\s+xor a\s+call mx_memory$',keyboard_wrappers,re.M)
@@ -89,7 +75,7 @@ for name in ('BANK','STACK','RANGE','NOMEM','OWNER','HANDLE','ACTIVE','UNSUPPORT
  assert cm['MXOS_MEM_ERR_'+name]==s['MEM_ERROR_'+name],name
 for name in ('COPY','MEMORY_OPS','MODULES','ALLOCATOR','COMMAND_QUEUE','BIOS_REGISTERS'):
  assert cm['MXOS_MEM_CAP_'+name]==s['MEM_CAP_'+name],name
-assert cm['MXOS_MEM_SERVICE']==s['mx_memory']==0xF815
+assert cm['MXOS_MEM_SERVICE']==s['mx_memory']==0xF875
 assert s['MXOS_BIOS_PRINT_STRING_BANK']==s['MXOS_BIOS_PRINT_STRING']==0x107
 assert s['MXOS_BIOS_PRINT_STRING_MAIN']==0x124
 assert s['MXOS_BIOS_FONT_RENDER']==0x125
@@ -117,8 +103,10 @@ for removed in ('bios_reservedC88D','bios_loadDosModule','bios_releaseDosModule'
                 'MXOS_DOS_RESERVEDC88D','MXOS_BIOS_LOADDOSMODULE','MXOS_BIOS_RELEASEDOSMODULE'):
  assert removed not in s,removed
 # The linker can place private code in the former slots.
-for released in (0xC88D,0xC8D8,0xC8DB):
- assert released not in macros.values()
+public_asm=(R/'sdk/asm/abi/bios.inc').read_text(encoding='utf-8')
+addresses={int(address,16) for address in re.findall(r'^\w+\s*=\s*0([0-9a-fA-F]{4})h',public_asm,re.M)}
+assert not addresses.intersection({0xC88D,0xC8D8,0xC8DB})
+assert not any(0xD700<=address<0xD78E for address in addresses)
 print('Removed BIOS development entries absent from ASM and C')
 
 assert s['FILEOPS_JOB']==112
@@ -176,9 +164,9 @@ with tempfile.TemporaryDirectory() as temp:
      +'  packet.operation = MXOS_BIOS_PRINT_STRING_LIM; packet.hl = (mxos_u16)text;\n'
      +'  packet.de = 0; packet.bc = 3; packet.af = 0;\n'
      +'  if ((mxos_call_packet(&packet) & MXOS_CF) || packet.hl != (mxos_u16)(text+3)) return 32;\n'
-     +'  packet.operation = 0x0102; packet.de = 0x5678; packet.af = 0x1234;\n'
+     +'  packet.operation = 0x01fe; packet.de = 0x5678; packet.af = 0x1234;\n'
      +'  if ((mxos_call_packet(&packet) & 0xff01) != ((MXOS_ERR_UNSUPPORTED << 8) | MXOS_CF)) return 33;\n'
-     +'  if (packet.operation != 0x0102 || packet.hl != (mxos_u16)(text+3) ||\n'
+     +'  if (packet.operation != 0x01fe || packet.hl != (mxos_u16)(text+3) ||\n'
      +'      packet.de != 0x5678 || packet.bc != 3 || packet.af != 0x1234) return 34;\n'
      +'  packet.operation = 0x0116; packet.de = 0x5678; packet.af = 0x1234;\n'
      +'  if ((mxos_call_packet(&packet) & 0xff01) != ((MXOS_ERR_UNSUPPORTED << 8) | MXOS_CF)) return 33;\n'
@@ -195,11 +183,18 @@ with tempfile.TemporaryDirectory() as temp:
  assert bytes([0xcd])+s['io_pitRead'].to_bytes(2,'little') in body, 'C: прямой CALL входа IO.SYS'
  memory=bytearray(65536)
  bios={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)',(R/'bin/BIOS.sym').read_text(encoding='utf-8'),re.M)}
- runpy.run_path(str(R/'scripts/tests/mem-image.py'))['install'](memory,bios)
+ ramfos_start,ramfos_end=bios['MEM_BANK_CLIENT_START'],bios['mx_callPacket']
+ assert ramfos_start==0xF800 and ramfos_end==0xF860
+ ramfos_sentinel=bytes([0x76])*(ramfos_end-ramfos_start)
+ memory[ramfos_start:ramfos_end]=ramfos_sentinel
+ runpy.run_path(str(R/'scripts/tests/mem-image.py'))['install'](memory,bios,main=True)
+ assert memory[ramfos_start:ramfos_end]==ramfos_sentinel
+ for address in range(ramfos_end,bios['mx_setMemTop']+3,3):
+  assert memory[address]==0xc3,hex(address)
  # CPU-стенд возвращает один байт из MMIO при каждом из двух чтений канала.
  memory[0xffee] = 0x4b
- # Штатные MAIN F800h и F806h вызывают bios_printStringLim. Перехватчик C809h считает байты.
- putch=bios['bios_printChar']
+ # Штатные MAIN F860h и F866h вызывают bios_printStringLim. Перехватчик mon2_printCharOld считает байты.
+ putch=bios['mon2_printCharOld']
  memory[putch:putch+3]=bytes.fromhex('c3 00 60')
  hook=bytes.fromhex('f5 79 32 83 5e 3a 82 5e 3c 32 82 5e f1 c9')
  memory[0x6000:0x6000+len(hook)]=hook
@@ -210,12 +205,12 @@ with tempfile.TemporaryDirectory() as temp:
                  '-counter','100000','-output','result.bin','input.bin'],cwd=directory,check=True,capture_output=True)
  result=(directory/'result.bin').read_bytes()
  assert result[65542:65544]==b'\x00\x61' and result[0x5e80:0x5e82]==b'\0\0','v3 C layout'
- assert result[0x5e82:0x5e84]==b'\x06B','sccz80 printStringLim via F800h and F806h'
+ assert result[0x5e82:0x5e84]==b'\x06B','sccz80 printStringLim via F860h and F866h'
 print('EXE v2/v3, C packet calls and layout, module record and FONT restoration ABI PASS')
 
-assert s['mx_queueBind']==0xf809 and s['mx_queueFlush']==0xf80c
+assert s['mx_queueBind']==0xF869 and s['mx_queueFlush']==0xF86C
 assert s['MXOS_BIOS_COMMAND_BATCH']==0x12c
 assert s['MEM_CAP_COMMAND_QUEUE']==32 and '#define MXOS_MEM_CAP_COMMAND_QUEUE 32' in header
-assert '#define MXOS_QUEUE_BIND_ADDR 0xF809' in header and '#define MXOS_QUEUE_FLUSH_ADDR 0xF80C' in header
-assert s['mx_routeCall']==0xf818 and s['MXOS_DOS_MODULE_SCOPE']==0x22e and s['MXOS_DOS_COMMAND_BATCH']==0x22f
+assert '#define MXOS_QUEUE_BIND_ADDR 0xF869' in header and '#define MXOS_QUEUE_FLUSH_ADDR 0xF86C' in header
+assert s['mx_routeCall']==0xF878 and s['MXOS_DOS_MODULE_SCOPE']==0x22e and s['MXOS_DOS_COMMAND_BATCH']==0x22f
 print('MEM 1.3 queue, direct DLL and BIOS/DOS batch entries PASS')

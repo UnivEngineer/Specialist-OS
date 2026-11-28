@@ -23,7 +23,7 @@ glyphCacheFull:
     ld hl,GLYPH_CACHE_END
 glyphCacheSet:
     ld de,GLYPH_CACHE_END
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp c,glyphCacheBelowEnd
     jp nz,glyphCacheBad
 glyphCacheBelowEnd:
@@ -31,13 +31,13 @@ glyphCacheBelowEnd:
     ld hl,(GLYPH_CACHE_START)
     ex de,hl
     pop hl
-    call bios_cmp_hl_de
+    call cmp_hl_de
     jp c,glyphCacheBad
     push hl
     ld hl,(GLYPH_CACHE_LIMIT)
     ex de,hl
     pop hl
-    call bios_cmp_hl_de
+    call cmp_hl_de
     ld (GLYPH_CACHE_LIMIT),hl
     jp nc,glyphCacheUnchanged
     ; Сужение: сохраняем DE старой границы, возвращаем CF=0.
@@ -62,7 +62,7 @@ glyphCacheQuery:
     ld hl,(GLYPH_CACHE_START)
     ex de,hl
     pop hl
-    call bios_sub_hl_de
+    call sub_hl_de
     ld b,h
     ld c,l
     pop de

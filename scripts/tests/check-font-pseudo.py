@@ -25,8 +25,8 @@ variants = (
 font_dir = ROOT / 'bin/fonts'
 start = 0xD800
 screen = 0x9000
-cursor = bios['bios_vars.cursorY']
-inverse_flag = bios['bios_vars.inverse']
+cursor = bios['mon2_vars.cursorY']
+inverse_flag = bios['mon2_vars.inverse']
 
 
 def put_pixel(memory, x, y, value):
@@ -99,7 +99,7 @@ with tempfile.TemporaryDirectory(prefix='font-pseudo-') as work:
                 m[inverse_flag] = inv
                 expected = bytearray(m)
                 position = oracle(expected, font, name, width, text, x, y, bool(inv))
-                result, regs, _ = run(m, bios['bios_printStringRawPseudo'], af=0x0097, hl=0x200, bc=len(text), de=0x2468)
+                result, regs, _ = run(m, bios['FONT_ENGINE_PSEUDO'], af=0x0097, hl=0x200, bc=len(text), de=0x2468)
                 assert result[screen:0xc000] == expected[screen:0xc000], (
                     name, inv, x, y, [(hex(i), result[i], expected[i])
                                       for i in range(screen, 0xc000) if result[i] != expected[i]][:24])
@@ -120,8 +120,8 @@ with tempfile.TemporaryDirectory(prefix='font-pseudo-') as work:
             for i, code in enumerate(text):
                 draw_cell(expected, font, name, width, code, x + i * (width // 2), y, bool(inv))
             expected[cursor:cursor + 2] = bytes([y, 192])
-            expected, _, _ = run(expected, bios['bios_fontNewLine'], hl=(192 << 8) | y)
-            result, _, _ = run(m, bios['bios_printStringRawPseudo'], hl=0x200, bc=len(text))
+            expected, _, _ = run(expected, bios['printChar_c0A'], hl=(192 << 8) | y)
+            result, _, _ = run(m, bios['FONT_ENGINE_PSEUDO'], hl=0x200, bc=len(text))
             assert result[screen:0xc000] == expected[screen:0xc000], (name, inv, 'bottom-right scroll')
             assert result[cursor:cursor + 2] == expected[cursor:cursor + 2], (name, inv, 'scroll cursor')
         print(name, 'margins, adjacent pixels, wrap and public registers PASS', flush=True)

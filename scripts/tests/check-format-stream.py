@@ -71,9 +71,9 @@ loop:
   m=bytearray(65536)
   for at,p in [(0,config.binary_dir/'FORMAT.i80'),(0xc000,config.binary_dir/'BIOS.sys'),(0x9000,out/'driver.bin')]:
    b=p.read_bytes();m[at:at+len(b)]=b
-  m[d['bios_diskDriver']:d['bios_diskDriver']+3]=bytes.fromhex('C3 00 90')
-  m[f['bios_printString']]=0xc9
-  m[f['bios_setFontEncoding']]=0xc9
+  m[d['sysDiskDriver']:d['sysDiskDriver']+3]=bytes.fromhex('C3 00 90')
+  m[f['mon2_printStringOld']]=0xc9
+  m[f['FONT_ENGINE_ENCODING']]=0xc9
   # The selected drive is B:. Mount/chdir succeed; consume the inline operation word.
   m[0x8a00+f['DISK_INFO.blockShift']]=block_size.bit_length()-1
   caller=d['mx_callRegs']

@@ -45,7 +45,7 @@ exportNextDrive:
     ld a,(oldDrive)
     MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
     ld hl,exportNoRam
-    call bios_printStringZ
+    call mon2_printStringOld
     xor a
     ret
 exportChosen:
@@ -147,11 +147,11 @@ exportInitializer:
     ret c
 exportFinished:
     ld hl,exportSaved
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,outputPath
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,newline
-    call bios_printStringZ
+    call mon2_printStringOld
     xor a
     ret
 exportWrite:

@@ -65,9 +65,9 @@ ngHelpInactive:
 ngHelpSetActive:
     ld (ngHelpActive),a
     ld hl,(ngHelpCursor)
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld hl,(ngHelpInverse)
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     pop af
     ret
 
@@ -77,7 +77,7 @@ ngHelpSetActive:
 ; Снять координаты курсора и атрибуты вывода перед работой со справкой.
 ;
 ; вход:
-;   В MAIN доступны слова bios_vars.cursorY и bios_vars.inverse.
+;   В MAIN доступны слова mon2_vars.cursorY и mon2_vars.inverse.
 ;
 ; выход:
 ;   Слова скопированы в ngHelpCursor и ngHelpInverse соответственно. af, bc и de
@@ -85,16 +85,16 @@ ngHelpSetActive:
 ;----------------------------------------------------------------------------
 
 ngHelpSaveCursor:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld (ngHelpCursor),hl
-    ld hl,(bios_vars.inverse)
+    ld hl,(mon2_vars.inverse)
     ld (ngHelpInverse),hl
     ret
 ngHelpFrame:
     call ngHelpColor
     xor a
-    ld (bios_vars.inverse),a
-    ld (bios_vars.inverse+1),a
+    ld (mon2_vars.inverse),a
+    ld (mon2_vars.inverse+1),a
     ld a,(FONT_ENGINE_HEADER+5)
     jp uiModalOpen
 

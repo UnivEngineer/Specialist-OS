@@ -13,12 +13,32 @@ def component_groups():
     def resolve(unit,region):
         return {**unit,'files':[os.path.normpath(ROOT/f'source/{region}'/f) for f in unit['files']]}
     manifest=manifests['bios']
-    start, size = runpy.run_path(str(ROOT/'scripts/build/build-syscalls.py'))['bios_vector_window'](manifest)
-    manifest['fixed'].append(dict(address=start, size=size, files=['vectors.inc']))
     manifest['fixed']=[resolve(f,'bios') if 'files' in f else f for f in manifest['fixed']]
     groups={region:[resolve(u,region) for u in manifests[region]['units']]
             for region in ('bios','dos')}
     return manifest, groups
+
+def emit_main_overlays(inc, symbols):
+    # Только банковые участки. Метки переходов маппера исключены из интервалов.
+    slots = (
+        ('memBatchIO', 'memRouteCall', 'ramfos-cursor.inc'),
+        ('memBatchNext', 'memFixedGetCursor', 'ramfos-high-words.inc'),
+        ('bankFastPrepare', 'bankFastLanding', 'ramfos-oldbeep.inc'),
+        ('memPrintResumeInBank', 'MEM_SCREEN_RETURN', 'ramfos-text.inc'),
+        ('memPrintTyped', 'memPrintJumpMain', 'ramfos-low-words.inc'),
+    )
+    lines = ['biosMainOverlayStart:']
+    for index, (first, last, name) in enumerate(slots):
+        origin, limit = symbols[first], symbols[last]
+        start, end = f'biosMainOverlay{index}Start', f'biosMainOverlay{index}End'
+        lines += [f'    DB {end}-{start}', f'    DW 0{origin:04X}h',
+                  f'{start}:', f'    DISP 0{origin:04X}h',
+                  inc(ROOT/'source/bios'/name), f'    ASSERT $ <= 0{limit:04X}h',
+                  '    ENT', f'{end}:', f'    ASSERT {end} > {start}']
+    lines += ['    DB 0', 'biosMainOverlayEnd:',
+              '    ASSERT biosMainOverlayEnd-biosMainOverlayStart <= DOS_BIOS_OVERLAY_SIZE']
+    return lines
+
 
 def main():
     import subprocess
@@ -31,6 +51,8 @@ def main():
     out.mkdir(exist_ok=True)
     manifest, groups = component_groups()
     inc = h['include']
+    overlays = emit_main_overlays(inc, h['symbols'](out/'banked/LOCALBLOCK.sym'))
+    bios_defaults = [inc(ROOT/'source/bios/initVars.inc')]
     main_io = ['bankBiosImageStart:',
                inc(ROOT/'source/io/main-bios-gate.inc'),
                'bankBiosImageEnd:',
@@ -42,11 +64,12 @@ def main():
                inc(ROOT/'source/io/pit-tail.inc')]
     lines = ['    DEFINE DOS_REFERENCE_BUILD 1',inc(ROOT/'source/common/system.inc'),
              inc(ROOT/'source/common/version.inc'),inc(ROOT/'source/common/layoutMacros.inc'),
+             inc(ROOT/'source/bios/reference-dos.inc'),
              inc(out/'banked/transport-imports.inc'),'DOS_IMAGE_SUM = 0','    ORG DOS_CODE_START','dosCoreStart:']
     for u in groups['dos']:
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
-    lines += [h['include'](source/'variables.inc'),'dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX','    ORG 0C000h']
+    lines += [inc(source/'native-syscalls.inc'),inc(source/'variables.inc'),'dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX','    ORG 0C000h']
     for f in manifest['fixed']:
         lines += [f'    ORG_PAD {h["number"](f["address"])}',*h['emit_fixed'](f)]
     for u in groups['bios']:
@@ -54,8 +77,7 @@ def main():
         for i,f in enumerate(u['files']):
             lines += h['emit_unit']({**u,'files':[f]},f'{u["name"]}_{i}')
     lines += [inc(ROOT/'source/bios'/f) for f in ('getch.inc','cmp_hl_de_2.inc')]
-    lines += [inc(ROOT/'source/bios/banked-start.inc'), inc(ROOT/'source/bios/syscall-tables.inc'),
-              '    ORG BIOS_IO_ADDR', *main_io]
+    lines += ['    ORG BIOS_IO_ADDR', *main_io, *overlays, *bios_defaults]
     probe=out/'System.measure.asm'
     probe.write_text('\n'.join(lines+['    END','']),encoding='utf-8')
     h['assemble'](probe,out/'System.measure.bin',[])
@@ -64,10 +86,8 @@ def main():
     lines=['    ORG DOS_CODE_START','dosCoreStart:']
     for u in groups['dos']:
         lines += h['emit_unit'](u,u['name'])
-    lines += [h['include'](source/'variables.inc'),'dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX']
+    lines += [inc(source/'native-syscalls.inc'),inc(source/'variables.inc'),'dosCoreEnd:','dosImageEnd = dosCoreEnd','    ASSERT $ <= DOS_CODE_END_MAX']
     lines += [h['emit_plan'](bios_plan,manifest['fixed']).replace('    ORG 0C000h','    ORG_PAD 0C000h',1),
-              inc(ROOT/'source/bios/banked-start.inc'),
-              'ioTablesStart:', inc(ROOT/'source/bios/syscall-tables.inc'), 'ioTablesEnd:',
               'biosLowEnd:', '    ASSERT $ <= FONT_ENGINE_BASE',
               '    ORG_PAD BIOS_IO_ADDR', *main_io,
               '    ASSERT $ <= BIOS_BANK_GATE_END',
@@ -75,7 +95,7 @@ def main():
               'bankIoImageEnd = BIOS_BANK_IO_ADDR+3',
               'ioImageEnd:', '    ASSERT $ <= MEM_IMAGE_LOCAL_START',
               '    ASSERT BIOS_BANK_IO_BUFFER+261 <= MAIN_COMMAND_ADDR',
-              '    ASSERT BIOS_BANK_STACK_TOP <= BIOS_BANK_IO_BUFFER']
+              '    ASSERT BIOS_BANK_STACK_TOP <= BIOS_BANK_IO_BUFFER', *overlays, *bios_defaults]
     layout='\n'.join(lines)+'\n'
     (out/'System.layout.inc').write_text('DOS_IMAGE_SUM = 0\n'+layout,encoding='utf-8')
     h['assemble'](ROOT/'source/bios/BIOS.asm',out/'System.linked.bin',[])
@@ -93,6 +113,7 @@ def main():
     bios=raw[0xC000-dos_start:sy['biosLowEnd']-dos_start]
     io=raw[sy['BIOS_IO_ADDR']-dos_start:sy['ioImageEnd']-dos_start]
     key_imports = ('bankKeyEvent', 'bankCursorSet')
+    key_imports += ('ioKeyScan2',)
     (out/'banked/key-imports.inc').write_text(''.join(
         f'{name} = 0{sy[name]:04X}h\n' for name in key_imports), encoding='utf-8')
     h['assemble'](ROOT/'source/io/KEYBANK.asm',out/'banked/KEYBANK.bin',[])
@@ -104,6 +125,10 @@ def main():
         (out/f'banked/MAINBIOS.{suffix}').write_bytes((out/f'System.linked.{suffix}').read_bytes())
     (out/'DOS.native.sys').write_bytes(dos)
     (out/'BIOS.sys').write_bytes(bios)
+    (out/'BIOS.defaults.bin').write_bytes(raw[sy['initVars']-dos_start:sy['initTextVarsEnd']-dos_start])
+    (out/'BIOS.main-overlay.bin').write_bytes(
+        raw[sy['biosMainOverlayStart']-dos_start:sy['biosMainOverlayEnd']-dos_start]
+    )
     (out/'banked/MAINIO.bin').write_bytes(bytes([0xC3,sy['mainBlockIO']&255,sy['mainBlockIO']>>8]))
     (out/'banked/MAINIO.sym').write_bytes((out/'System.linked.sym').read_bytes())
     # Internal linked entry: the flash installer is rebuilt with this BIOS.
@@ -111,6 +136,19 @@ def main():
         '; Generated internal BIOS copy entry; not a fixed public ABI.\n'
         f'bios_copyForward = 0{sy["moveBytesForward"]:04X}h\n', encoding='utf-8')
     (out/'bios-move-switch.inc').write_text(f'biosMoveUseLow = 0{sy["biosMoveUseLow"]:04X}h\n', encoding='utf-8')
+    imports = {
+        'biosEngineControl': 'printCharBody',
+        'biosEngineNewLine': 'printChar_c0A',
+        'biosEnginePosition': 'calcCursorAd_0',
+        'biosEngineSubtract': 'sub_hl_de',
+        'biosEngineUppercase': 'upperCase',
+        'biosEngineRawZTarget': 'biosRawZTarget',
+        'biosCliExecReturn': 'biosCliExecReturn',
+        'biosCliExecError': 'biosCliExecError',
+        'reboot3': 'reboot3',
+    }
+    (out/'bios-imports.inc').write_text(''.join(
+        f'{name} = 0{sy[target]:04X}h\n' for name, target in imports.items()), encoding='utf-8')
     for stem in ('DOS','BIOS','IO'):
         (out/f'{stem}.sym').write_bytes((out/'System.linked.sym').read_bytes())
         (out/f'{stem}.lst').write_bytes((out/'System.linked.lst').read_bytes())
@@ -125,7 +163,7 @@ def main():
                 units={k:[u['name'] for u in v] for k,v in groups.items()},windows=manifest['fixed'],
                 blocks=[dict(name=b['block']['key'],address=b['address'],size=b['block']['size'])
                         for b in sorted(bios_plan['placed'],key=lambda b:b['address'])
-                        if b['block']['key'] not in ('fileBodyAdapter','rawLocalAdapter','glyphCacheAdapter')]
+                        if b['block']['key'] not in ('fileBodyAdapter','rawLocalAdapter','glyphCacheAdapter','bankedBoot')]
                        + [dict(name='bankBiosGateway', address=sy['bankBiosImageStart'],
                                size=sy['bankBiosImageEnd']-sy['bankBiosImageStart']),
                           dict(name='mainPpi', address=sy['bankBiosImageEnd'],
@@ -136,7 +174,7 @@ def main():
                                size=sy['bankIoImageEnd']-sy['bankIoImageStart']),
                           dict(name='fileBodyLoader', address=sy['fileBodyLoad'],
                                size=sy['fileBodyEnd']-sy['fileBodyLoad']),
-                          dict(name='bankedBoot',address=sy['biosBankCold'],size=sy['ioTablesStart']-sy['biosBankCold']),
+                          dict(name='bankedBoot',address=sy['biosBootFinish'],size=sy['ioTablesStart']-sy['biosBootFinish']),
                           dict(name='rawMain',address=sy['sysRawRoute'],size=sy['sysRawEnd']-sy['sysRawRoute']),
                           dict(name='glyphCache',address=sy['glyphCacheService'],size=sy['glyphCacheEnd']-sy['glyphCacheService']),
                           dict(name='ioInitialize',address=sy['ioInitialize'],size=sy['ioInitializeEnd']-sy['ioInitialize']),

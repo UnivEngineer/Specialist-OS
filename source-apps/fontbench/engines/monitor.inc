@@ -16,7 +16,7 @@ body:
     IFNDEF FONT_ENGINE_DLL
     ld a,c
     cp 020h
-    jp c,bios_printChar
+    jp c,mon2_printCharOld
     ld a,(bios_upper.koi7)
     inc a
     jp nz,mapped
@@ -31,14 +31,14 @@ body:
     ld c,a
     ENDIF
 mapped:
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
 printChar_poly:
     call z,normalVideo
     ld hl,(renderFont8)
     jp printChar_alt
 calcCursorAddr:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -74,9 +74,9 @@ printChar_e29:
 ; Обработка кода 9. Табуляция
 
 printChar_c9:
-            ld    a, (bios_vars.cursorX)  
+            ld    a, (mon2_vars.cursorX)
             add   a, 12 ; 24
-            ld    (bios_vars.cursorX),a
+            ld    (mon2_vars.cursorX),a
             ret
 
 ; ---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ printChar_de:
             inc   h
             inc   h
             inc   h           
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
 
             ; Корректируем адрес вывода (bc = al - 7)
             ld    b, a

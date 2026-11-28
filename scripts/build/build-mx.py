@@ -59,6 +59,11 @@ def build():
     padded = kernel + bytes(-len(kernel) % 512)
     sectors = len(padded) // 512
     dos = PACK['symbols'](OUT / 'KERNEL.sym')
+    shared_dos = PACK['symbols'](BIN / 'banked/KERNEL.sym')
+    # BOOTBANK получает эти два адреса из общего конфига загрузчика.
+    for name in ('v_dosModuleReady', 'memoryRamFresh'):
+        if dos[name] != shared_dos[name]:
+            raise ValueError(f'MX DOS field {name} differs from the shared bootstrap layout')
     start = dos['DOS_BANK_CODE_ADDR']
     # Sector padding may reach the DOS work area initialized by kernelCold.
     if not sectors or start + len(kernel) > dos['dosWorkStart'] or start + len(padded) > dos['dosZeroEnd']:

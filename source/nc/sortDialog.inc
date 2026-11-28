@@ -42,7 +42,7 @@ ncSortDrawOption:
     pop hl
     ld de,4
     add hl,de
-    call bios_printStringRawZ
+    call FONT_ENGINE_RAWZ
     ld a,b
     call ncSortDrawCheck
     inc b

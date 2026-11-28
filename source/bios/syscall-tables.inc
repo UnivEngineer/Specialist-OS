@@ -2,25 +2,25 @@
 sysBIOSTable:
     DW getch
     DW t_tapeRead
-    DW 0
+    DW printChar
     DW t_tapeWrite
     DW input
     DW keyScan2
-    DW 0
+    DW printHexByte
     DW printStringZ
     DW keyScan2
-    DW 0
-    DW 0
+    DW getCursorPos
+    DW setCursorPos
     DW t_tapeLoad
     DW t_tapeSave
     DW calcCS
-    DW 0
-    DW 0
-    DW 0
+    DW printHexWord
+    DW setMemTop
+    DW getMemTop
     DW printer
     DW installDriver
     DW sysDiskDriver
-    DW 0
+    DW printCharRaw
     DW printDecWord
     DW 0
     DW upperCase
@@ -42,59 +42,11 @@ sysBIOSTable:
     DW printStringRawZ
     DW printStringRawLim
     DW printStringRawLim
-    DW bios_printStringLim
+    DW bankText.printStringLim
     DW FONT_ENGINE_ENCODING
     DW BIOS_BANK_GATE_ADDR
     DW printStringRawPseudo
-    DW bios_printStringLim
+    DW bankText.printStringLim
+    DW biosSetProfile
+    DW drawCursor3
 sysBIOSCount = ($-sysBIOSTable)/2
-sysDOSTable:
-    DW dos_fileList
-    DW dos_fileGetSetDrive
-    DW dos_dosUnsupported
-    DW dos_dosUnsupported
-    DW dos_fileDelete
-    DW dos_fileRename
-    DW dos_fileLoadInfo
-    DW dos_dosUnsupported
-    DW dos_fileGetSetAttr
-    DW dos_fileNamePrepare
-    DW dos_fileExec
-    DW dos_dosUnsupported
-    DW dos_getDriveFreeSpace
-    DW dos_dosUnsupported
-    DW dos_dosUnsupported
-    DW dos_dosUnsupported
-    DW dos_mountVolume
-    DW dos_flushVolume
-    DW dos_fileAssociation
-    DW dos_fileChangeDrive
-    DW dos_dosUnsupported
-    DW dos_dosUnsupported
-    DW dos_fileCopy
-    DW dos_fileGetDrives
-    DW dos_dosGetError
-    DW dos_logicalSectorIO
-    DW timerService
-    DW dos_fileHandle
-    DW dos_directoryService
-    DW dos_cliService
-    DW dos_setShell
-    DW dos_dosUnsupported
-    DW dos_dosUnsupported
-    DW dosRawIO
-    DW dos_dosUnsupported
-    DW dosDriverInstall
-    DW dosDriverRefresh
-    DW dosMemoryService
-    DW moduleLoad
-    DW moduleCall
-    DW moduleUnload
-    DW fileExecNative
-    DW residentService
-    DW fileopsService
-    DW enumService
-    DW fontConfigService
-    DW moduleScope
-    DW dosCommandBatch
-sysDOSCount  = ($-sysDOSTable)/2

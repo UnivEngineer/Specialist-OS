@@ -19,7 +19,7 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
 
 entry:
     ld hl,message
-    call bios_printString
+    call mon2_printStringOld
     ld hl,055AAh
     ld (08800h),hl
     ret

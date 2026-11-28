@@ -7,7 +7,7 @@ graphicPacket:
     dec a
     ld (graphPhase),a
     ENDIF
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     rrca
     rrca
     and 3Fh
@@ -89,7 +89,7 @@ graphPlanned:
     ENDIF
     ld a,(graphPhase)
     ld l,a
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     ld a,l
     jp z,graphSelect
@@ -105,7 +105,7 @@ graphSelect:
     ld d,(hl)
     ex de,hl
     ld (graphJump+1),hl
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     sub 7
     ld e,a
     IF GRAPH_PRE_MODE
@@ -372,14 +372,14 @@ graphDone:
     IFDEF FONT_ALIGNED_ROWS
     ld a,b
     ELSE
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     and 3
     or b
     ENDIF
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     jp graphReturn
 graphWrap:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     call fontLineEnd
 graphReturn:
     ld hl,(graphNext)

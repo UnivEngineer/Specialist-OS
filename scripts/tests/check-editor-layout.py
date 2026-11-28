@@ -31,7 +31,7 @@ def fixture(payload, font='Rotate'):
     word(m, 'v_textEnd', T+len(payload))
     word(m, 'v_lineNumber', 1)
     word(m, 'editorBarV.total', len(re.findall(rb'\r\n|[\r\n]',payload))+1)
-    word(m, 'bios_vars.cursorY', S['EDITOR_FIRST_Y'])
+    word(m, 'mon2_vars.cursorY', S['EDITOR_FIRST_Y'])
     m[T:T+len(payload)+1] = payload+b'\0'
     m[0xffe1] = 2
     m[S['editorInterfaceReady']] = 1
@@ -75,14 +75,14 @@ def scrolling_checks():
         m = run(m,'redrawPreservingCursor')
         for name,top,current,y in [('keyHandler_Down',0,22,S['EDITOR_LAST_Y']),('keyHandler_Up',5,5,S['EDITOR_FIRST_Y'])]:
             word(m,'v_topLine',offsets[top]);word(m,'v_currentLine',offsets[current])
-            word(m,'v_lineNumber',current+1);word(m,'bios_vars.cursorY',y)
+            word(m,'v_lineNumber',current+1);word(m,'mon2_vars.cursorY',y)
             m = run(m,'redrawPreservingCursor')
             m = run(m,name)
             full = run(m,'redrawPreservingCursor')
             assert m[0x9000:0xc000] == full[0x9000:0xc000],(font,name)
             lengths(m)
         word(m,'v_topLine',T);word(m,'v_currentLine',T)
-        word(m,'bios_vars.cursorY',S['EDITOR_FIRST_Y'])
+        word(m,'mon2_vars.cursorY',S['EDITOR_FIRST_Y'])
         m = run(m,'redrawPreservingCursor')
         for column in [m[S['v_columns']],7,200,0]:
             word(m,'v_column',column)
@@ -134,7 +134,7 @@ def scrolling_checks():
             word(m,'v_currentLine',offsets[cursor_row])
             word(m,'v_lineNumber',cursor_row+1)
             word(m,'v_leftColumn',8)
-            word(m,'bios_vars.cursorY',S['EDITOR_FIRST_Y']+cursor_row*10)
+            word(m,'mon2_vars.cursorY',S['EDITOR_FIRST_Y']+cursor_row*10)
             m=run(m,'redrawPreservingCursor')
             for key in ['editorPageDown','editorPageUp','editorPageUp','editorPageDown']:
                 m=run(m,key)
@@ -207,13 +207,13 @@ def editing_keys():
         m=fixture(text,font);m=run(m,'keyHandler_DocumentEnd')
         assert number(m,'v_currentLine')==T+200 and number(m,'v_column')==4
         assert number(m,'v_lineNumber')==41
-        assert m[S['bios_vars.cursorY']]==S['EDITOR_LAST_Y']
+        assert m[S['mon2_vars.cursorY']]==S['EDITOR_LAST_Y']
         m=run(m,'keyHandler_DocumentHome')
         assert number(m,'v_lineNumber')==1 and number(m,'v_column')==0
         # CTRL from BIOS must be dispatched before ordinary Home/End.
         for key,target in [(12,'keyHandler_DocumentHome'),(10,'keyHandler_DocumentEnd')]:
             probe=bytearray(m)
-            at=S['bios_getch'];probe[at:at+4]=bytes([0x3e,key,0x37,0xc9])
+            at=S['mon2_getchOld'];probe[at:at+4]=bytes([0x3e,key,0x37,0xc9])
             run(probe,'keyInput',end=S[target])
     assert not any(name in S for name in ['keyHandler_Esc_S','keyHandler_Esc_J','readTapeByte'])
     # Startup errors use the console; errors within an active editor use
@@ -232,11 +232,11 @@ def packet_alignment():
                 if selected:
                     word(m,'v_selectionBegin',T);word(m,'v_selectionEnd',T+size+1)
                 m[S['editorRowLengths']]=columns
-                public=S['bios_printStringRawLim']
+                public=S['FONT_ENGINE_LIM']
                 target=int.from_bytes(m[public+1:public+3],'little')
                 # Check the actual API calls: every length is a multiple of
                 # four and every X begins on a whole VRAM byte (X/2 & 3=0).
-                code=b'\xf5\x79\xe6\x03\xc2'+W(0x8d30)+b'\x3a'+W(S['bios_vars.cursorX'])+b'\xe6\x03\xc2'+W(0x8d30)+b'\xf1\xc3'+W(target)
+                code=b'\xf5\x79\xe6\x03\xc2'+W(0x8d30)+b'\x3a'+W(S['mon2_vars.cursorX'])+b'\xe6\x03\xc2'+W(0x8d30)+b'\xf1\xc3'+W(target)
                 m[0x8d00:0x8d00+len(code)]=code
                 m[0x8d30:0x8d37]=b'\xf1\x3e\x01\x32\x80\x8d\xc9'
                 m[0x8d80]=0;m[public+1:public+3]=W(0x8d00)
@@ -249,14 +249,14 @@ def packet_alignment():
 def console_startup():
     m=fixture(b'ABC\r')
     m[S['bios_upper.escMode']]=255
-    word(m,'bios_vars.cursorY',100)
+    word(m,'mon2_vars.cursorY',100)
     m[0x9000]=0xa5;m[0x90c8]=0x5a
     m=run(m,'editorLoadingBanner')
     assert m[0x9000]==0xa5 and m[0x90c8]==0x5a,'banner cleared console'
-    assert number(m,'bios_vars.cursorY')==120
+    assert number(m,'mon2_vars.cursorY')==120
     m[S['editorInterfaceReady']]=0
     m=run(m,'editorShowFileTooLarge',end=S['editorStartupErrorWait'])
-    assert number(m,'bios_vars.cursorY')==140,'extra blank line before error'
+    assert number(m,'mon2_vars.cursorY')==140,'extra blank line before error'
     assert m[0x9000]==0xa5 and m[0x90c8]==0x5a
 
 
@@ -384,15 +384,15 @@ def main():
             word(m, 'v_column', column)
             m = run(m, 'editorPositionCursor')
             assert number(m, 'v_column') == column
-            assert m[S['bios_vars.cursorX']] == (column-number(m, 'v_leftColumn'))*(192//cols)
+            assert m[S['mon2_vars.cursorX']] == (column-number(m, 'v_leftColumn'))*(192//cols)
             assert document(m) == payload
         # A full bottom row must neither scroll nor change the row baseline.
         word(m, 'v_leftColumn', 0)
-        word(m, 'bios_vars.cursorY', S['EDITOR_LAST_Y'])
+        word(m, 'mon2_vars.cursorY', S['EDITOR_LAST_Y'])
         for x in range(48):
             m[0x9000+x*256+243:0x9000+x*256+256] = bytes([0x59])*13
         m = run(m, 'drawTextLine', hl=T)
-        assert m[S['bios_vars.cursorY']] == S['EDITOR_LAST_Y']
+        assert m[S['mon2_vars.cursorY']] == S['EDITOR_LAST_Y']
         for x in range(48):
             assert m[0x9000+x*256+243:0x9000+x*256+256] == bytes([0x59])*13
         word(m, 'v_column', 300)
@@ -410,14 +410,14 @@ def main():
         assert document(m) == payload
         assert number(m, 'v_currentLine') == T+401
         # Toolbar uses installed font and preserves BIOS cursor/inverse.
-        word(m, 'bios_vars.cursorY', 0x1812)
-        word(m, 'bios_vars.inverse', 0xffff)
+        word(m, 'mon2_vars.cursorY', 0x1812)
+        word(m, 'mon2_vars.inverse', 0xffff)
         for x in range(48):
             m[0x9000+x*256:0x9000+x*256+247] = bytes([x+1])*247
         before = bytes(m[0x9000:0xc000])
         m = run(m, 'editorToolbar')
-        assert number(m, 'bios_vars.cursorY') == 0x1812
-        assert number(m, 'bios_vars.inverse') == 0xffff
+        assert number(m, 'mon2_vars.cursorY') == 0x1812
+        assert number(m, 'mon2_vars.inverse') == 0xffff
         for x in range(48):
             assert m[0x9000+x*256:0x9000+x*256+247] == before[x*256:x*256+247], (font, 'toolbar scrolled other rows')
     for payload, expected in [(b'ABC\rNEXT\r', b'\rABC\rNEXT\r'), (b'ABC', b'\rABC'), (b'  ABC\r', b'\r  ABC\r')]:
@@ -445,7 +445,7 @@ def main():
     for _ in range(25):
         m = run(m, 'keyHandler_Down')
     assert number(m, 'v_currentLine') == T+75
-    assert number(m, 'v_topLine') == T+9 and m[S['bios_vars.cursorY']] == S['EDITOR_LAST_Y']
+    assert number(m, 'v_topLine') == T+9 and m[S['mon2_vars.cursorY']] == S['EDITOR_LAST_Y']
     m = run(m, 'editorPageUp')
     assert number(m, 'v_topLine') == T and number(m, 'v_currentLine') == T+66
     m = run(m, 'editorPageDown')

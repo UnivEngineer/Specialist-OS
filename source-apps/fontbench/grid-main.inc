@@ -21,9 +21,9 @@ entry:
     call nz,gridPseudoSetup
     ld hl,(enginePreFirst)
     ld (gridRequestedPre),hl
-    call bios_getMemTop
+    call mx_getMemTop
     ld de,GRID_MIN_MAIN_TOP
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,gridError
     call engineSave
     ld a,(gridPhase)
@@ -180,10 +180,10 @@ gridRouteNext:
     ld a,(gridInverse)
     ld l,a
     ld h,a
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     call engineHook
     ld hl,0007h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,(gridRoute)
     or a
     jp nz,gridBankRun
@@ -211,7 +211,7 @@ gridRouteReady:
     ld (v_elapsed+2),hl
 gridMeasured:
     ld hl,0
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     call engineUnhook
     call gridResultAddress
     ex de,hl
@@ -222,7 +222,7 @@ gridMeasured:
     inc (hl)
     call gridClearInfo
     ld hl,00F7h ; row 240: engine + stage; both lines fit 48 cells at 8x8
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     call engineName
     call puts
     ld hl,gridProgress
@@ -234,7 +234,7 @@ gridMeasured:
     ; Status is outside the timer. Do not wrap at the physical bottom:
     ; wrapping would scroll the test image even though timing is finished.
     ld hl,00FFh ; row 248: phase/API/transport/time
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     call gridPrintLabel
     call gridPrintRoute
     ld hl,v_elapsed
@@ -309,7 +309,7 @@ gridKindsDone:
     ld hl,gridNextText
     call puts
 gridNextKey:
-    call bios_getch
+    call mon2_getchOld
     cp 13
     jp nz,gridNextKey
 gridAdvanceEngine:
@@ -329,10 +329,10 @@ gridError:
     call puts
 gridExit:
     ld hl,0
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     call engineUnhook
     ; Quick mode leaves the last timing on the bottom line.
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     or a
     ld hl,gridCRLF
     call nz,puts
@@ -346,18 +346,18 @@ gridMainRun:
     ld bc,GRID_TEXT_BYTES
     ld a,(gridKind)
     cp 2
-    jp z,bios_printStringZ
+    jp z,mon2_printStringOld
     cp 3
-    jp z,bios_printStringRawZ
+    jp z,FONT_ENGINE_RAWZ
     cp 4
-    jp z,bios_printStringRawLim
+    jp z,FONT_ENGINE_LIM
     or a
     jp nz,gridMainRaw
     ld b,GRID_TEXT_BYTES/GRID_UNROLL ; B/HL сохраняются самим API.
 gridMainChar:
     DUP GRID_UNROLL
     ld c,(hl)
-    call bios_printChar
+    call mon2_printCharOld
     inc hl
     EDUP
     dec b
@@ -368,7 +368,7 @@ gridMainRaw:
 gridMainRawLoop:
     DUP GRID_UNROLL
     ld a,(hl)
-    call bios_printCharRaw
+    call FONT_ENGINE_RAW
     inc hl
     EDUP
     dec b
@@ -623,7 +623,7 @@ gridPrintChar:
     ld (gridWrite),hl
     jp gridCharDone
 gridScreenChar:
-    call bios_printChar
+    call mon2_printCharOld
 gridCharDone:
     pop hl
     pop de
@@ -664,7 +664,7 @@ gridFileMode:
     ld hl,(gridControl+8)
     ex de,hl
     ld hl,(gridWrite)
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     ld (gridHandle+FH_COUNT),hl
     ld hl,(gridControl+8)
     ld (gridHandle+FH_BUFFER),hl

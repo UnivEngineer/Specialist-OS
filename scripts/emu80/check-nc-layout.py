@@ -60,7 +60,7 @@ def main():
    # Up/Down must preserve the middle text position even across panel scrolling.
    for _ in range(byte('ncVisibleCount')+1):m.tap('down')
    assert byte('lineEditPosition')==pos and text().upper()==long.encode().upper()
-   assert byte('bios_vars.cursorX')==m.read(n['lineEditOrigin']+1,1)[0]+(pos-byte('lineEditOffset'))*width//2
+   assert byte('mon2_vars.cursorX')==m.read(n['lineEditOrigin']+1,1)[0]+(pos-byte('lineEditOffset'))*width//2
    shot(font+'-command');m.tap('esc')
    print(font,'menus, command editing, panel navigation PASS',flush=True)
   def observed_command(value,expect_refresh):

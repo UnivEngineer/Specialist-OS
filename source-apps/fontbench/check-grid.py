@@ -136,7 +136,7 @@ try:
         actual=m.read(0x9000,12288)
         diffs=[i for i in range(12288) if i%256<240 and actual[i]!=expected[i]]
         assert not diffs,(stage,pre,kind,route,'bitmap',diffs[:12],[(actual[i],expected[i]) for i in diffs[:12]])
-        assert m.read(s['bios_vars.cursorY'],2)==cursor,(stage,'cursor',m.read(s['bios_vars.cursorY'],2).hex(),cursor.hex())
+        assert m.read(s['mon2_vars.cursorY'],2)==cursor,(stage,'cursor',m.read(s['mon2_vars.cursorY'],2).hex(),cursor.hex())
         targets=s['directTargets'] if m.read(s['engineHistoricalMode'],1)[0]&128 else s['hookTargets']
         expectedslots=originalslots if engine=='BIOS' else [m.read(targets+i*2,2) for i in range(s['HOOK_SLOTS'])]
         assert [m.read(a,2) for a in slotaddrs]==expectedslots,('hook slots',stage)

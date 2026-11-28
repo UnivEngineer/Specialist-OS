@@ -127,7 +127,7 @@ def main():
         assert not machine.subroutine(0)["flags"]["C"], "The flash upgrade must skip a readable ROM"
         machine.subroutine(0xC842, af=0x0000, de=1)
         from runpy import run_path
-        entry = run_path(str(Path(__file__).with_name('system-map.py')))['MEMORY_MAP']['bios_diskDriver']
+        entry = run_path(str(Path(__file__).with_name('system-map.py')))['MEMORY_MAP']['sysDiskDriver']
         image = (args.runtime / "specialist-os/system.bin").read_bytes()
         # MX ROM занимает вторую половину образа; старшие страницы пока не моделируются.
         for sector in [0, 1, 0x3F, 0x7F]:
@@ -138,7 +138,7 @@ def main():
         machine.write(0x4000, bytes(value ^ 255 for value in original))
         state = machine.subroutine(entry, bc=0x0100, de=0, hl=0x4000)
         assert state["flags"]["C"], "FlashSys accepted a write to read-only ROM"
-        assert machine.read(0x8FF9, 1) == b"\x01"  # BIOS_VARIABLES.diskWriteErr
+        assert machine.read(0x8FF9, 1) == b"\x01"  # MON2_VARIABLES.diskWriteErr
         # diskWriteErr и сохранность массива, а также возврат маппера в RAM.
         machine.subroutine(entry, bc=0x0200, de=0, hl=0x4100)
         assert machine.read(0x4100, 256) == original

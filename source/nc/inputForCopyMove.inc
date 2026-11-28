@@ -44,7 +44,7 @@ inputSwitchPanel:
 
 inputForFile:
             call ncModalInputCursor
-            ld      (bios_vars.cursorY), hl
+            ld      (mon2_vars.cursorY), hl
             ld      de, vars.input
             ; Записать выбранный файл
             call    getSelectedFile

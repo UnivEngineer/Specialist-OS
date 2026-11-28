@@ -11,7 +11,7 @@
 ;----------------------------------------------------------------------------
 
 calcCursorAddr:   ; В hl положение курсора
-            ld    hl, (bios_vars.cursorY)
+            ld    hl, (mon2_vars.cursorY)
 
             ; An aligned 4px cell at X=380 is valid; only X>=384 wraps.
             ; Иначе рассчитываем адрес старшего байта a = cursorX / 4 + 90h

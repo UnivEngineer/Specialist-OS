@@ -7,7 +7,7 @@ fixture,run,document,word,number=(g[k] for k in ('fixture','run','document','wor
 S=g['S'];T=g['T'];W=g['W']
 
 def key(m,code,ctrl=False,end=0x8c40):
-    m=bytearray(m);at=S['bios_getch']
+    m=bytearray(m);at=S['mon2_getchOld']
     m[at:at+4]=bytes([0x3e,code,0x37 if ctrl else 0xb7,0xc9])
     return run(m,'keyInput',end=end)
 
@@ -33,9 +33,9 @@ for mode,shape in [(0xff,0x21),(0,0x28)]:
         cfg=S['bios_upper.cursorCfg']
         m[cfg]=initial
         m[S['v_insertMode']]=mode
-        entered=run(m,'editorGetch',end=S['bios_getch'])
+        entered=run(m,'editorGetch',end=S['mon2_getchOld'])
         assert entered[cfg]==(shape if initial==0x37 else initial)
-        at=S['bios_getch']
+        at=S['mon2_getchOld']
         m[at:at+4]=b'\x3e\x1b\xb7\xc9'
         returned=run(m,'editorGetch')
         assert returned[cfg]==initial
@@ -77,11 +77,11 @@ for font in ['Rotate','Fast8','Cpm4']:
                    for y in range(1,9) for pos in range(x+margin,x+width-margin))
     # KOI8 alphabet is the language lock; Shift changes case only.
     for lock,shift in [(0,False),(0,True),(1,False),(1,True),(0,False)]:
-        m[S['bios_vars.keyLocks']]=0xba|lock;m[0xffe1]=0 if shift else 2
-        word(m,'bios_vars.cursorY',0x3015);word(m,'bios_vars.inverse',65535)
+        m[S['mon2_vars.keyLocks']]=0xba|lock;m[0xffe1]=0 if shift else 2
+        word(m,'mon2_vars.cursorY',0x3015);word(m,'mon2_vars.inverse',65535)
         m=run(m,'editorKeyboardIdle')
         assert m[S['editorLastLanguage']]==lock
-        assert number(m,'bios_vars.cursorY')==0x3015 and number(m,'bios_vars.inverse')==65535
+        assert number(m,'mon2_vars.cursorY')==0x3015 and number(m,'mon2_vars.inverse')==65535
     # The buffered viewer expands tabs and pads the row used by RawLim.
     m=fixture(b'AB\tCD\r',font)
     data=b'F2\tOpen help\r\n'
@@ -128,10 +128,10 @@ for target in [4,6,10,0,4]:
 # Search itself is an SDK modal, cancelled without changing text.
 m=fixture(b'ABC\rNEXT');m=run(m,'drawStatusBar')
 m=run(m,'editorFind',end=S['lineEditLoop'])
-m[S['bios_getch']:S['bios_getch']+4]=b'\x3e\x1b\xb7\xc9'
+m[S['mon2_getchOld']:S['mon2_getchOld']+4]=b'\x3e\x1b\xb7\xc9'
 m=run(m,'editorFind');assert document(m)==b'ABC\rNEXT'
 m=fixture(b'ABC\r');m[S['v_searchText']:S['v_searchText']+4]=b'ZZZ\0'
-info=run(m,'editorFindNext',end=S['bios_getch'])
+info=run(m,'editorFindNext',end=S['mon2_getchOld'])
 assert info[S['IO_COLOR']]==7 and info[S['bios_upper.cursorCfg']]==0
 info=run(m,'editorFindNext',end=S['editorInfoWait'])
 assert number(info,'uiModalCurrent')==S['editorInfoDescriptor']
@@ -149,9 +149,9 @@ assert m[S['editorSaveDescriptor']+18]==0
 # Save changes hides the caret during getch and restores the configuration.
 cfg=S['bios_upper.cursorCfg']
 m[cfg]=0x37
-hidden=run(m,'editorSaveWait',end=S['bios_getch'])
+hidden=run(m,'editorSaveWait',end=S['mon2_getchOld'])
 assert hidden[cfg]==0
-m[S['bios_getch']:S['bios_getch']+4]=b'\x3e\x1b\xb7\xc9'
+m[S['mon2_getchOld']:S['mon2_getchOld']+4]=b'\x3e\x1b\xb7\xc9'
 m=run(m,'editorSaveWait')
 assert m[cfg]==0x37 and document(m)==b'ABC\r'
 m=run(m,'editorDiscardFile',end=S['clearAndRedrawDocument']);assert document(m)==b''

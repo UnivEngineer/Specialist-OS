@@ -6,7 +6,7 @@
     MODULE fast6
 tryGroup:
     ld (text),hl
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     cp 192
     jp nc,empty
     and 3
@@ -18,7 +18,7 @@ tryGroup:
     inc a
     jp nz,empty
 escReady:
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     rrca
     rrca
     ld d,a
@@ -77,7 +77,7 @@ rawBound:
     ld (inverseReverseLimit+1),a
 limitReady:
     ENDIF
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     sub 7
     ld e,a
     IFDEF FONT4_COMPACT
@@ -88,7 +88,7 @@ limitReady:
     ld l,a
     ld h,0
     ld bc,normalRoutes
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp z,routeReady
     ld bc,inverseRoutes
@@ -206,10 +206,10 @@ startColumn: cp 0
     sub high MX_SCREEN_BASE
     add a,a
     add a,a
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     cp 192
     jp c,done
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     call fontLineEnd
 done:
     ld hl,(text)

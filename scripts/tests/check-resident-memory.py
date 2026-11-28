@@ -23,11 +23,11 @@ assert call('dosMemoryService',15,0x100,0x1000,0x3000)==(0,0x7c00)
 call('moduleWarm');assert end()==0x7c00
 assert call('dosMemoryService',15,0x101,0x200,0x3000)==(0,0x7a00)
 assert call('dosMemoryService',15,0x100,0,0)==(0,0);assert end()==0x7a00
-assert call('dosMemoryService',15,0x101,0,0)==(0,0);assert end()==0x8c00
-before=bytes(m[S['mrSlots']:S['mrSlots']+16]);assert call('dosMemoryService',15,0x100,0x1000,0x8000)[0]==1;assert end()==0x8c00;assert bytes(m[S['mrSlots']:S['mrSlots']+16])==before
+assert call('dosMemoryService',15,0x101,0,0)==(0,0);assert end()==S['APP_MEMORY_END']
+before=bytes(m[S['mrSlots']:S['mrSlots']+16]);assert call('dosMemoryService',15,0x100,0x1000,0x8000)[0]==1;assert end()==S['APP_MEMORY_END'];assert bytes(m[S['mrSlots']:S['mrSlots']+16])==before
 assert call('dosMemoryService',15,0x100,1,0)[0]==1
 m[S['MEM_ALLOC_TABLE']:S['MEM_ALLOC_TABLE']+6]=b'\0'+W(0x7b00)+W(0x200)+b'\x20'
-assert call('dosMemoryService',15,0x100,0x1000,0)[0]==1;assert end()==0x8c00
+assert call('dosMemoryService',15,0x100,0x1000,0)[0]==1;assert end()==S['APP_MEMORY_END']
 m[S['MEM_ALLOC_TABLE']]=255
 assert call('dosMemoryService',15,0x100,0x1000,0x3000)==(0,0x7c00)
 assert call('dosMemoryService',9,0,0x7000,0xd00)[0]==1

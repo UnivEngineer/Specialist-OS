@@ -336,10 +336,10 @@ class Matrix:
         self.select(1)
     def init_app(self,drive,mode=1):
         self.m.write(0,self.appBinary.read_bytes());self.select(drive)
-        info=self.func(self.ds['bios_diskDriver'],bc=0x0300);capacity=info['registers']['de']['dec'];pointer=info['registers']['hl']['dec']
+        info=self.func(self.ds['sysDiskDriver'],bc=0x0300);capacity=info['registers']['de']['dec'];pointer=info['registers']['hl']['dec']
         self.m.write(self.s['v_info'],pointer.to_bytes(2,'little'));self.m.write(self.s['v_capacity'],capacity.to_bytes(2,'little'))
         self.m.write(self.s['v_drive'],bytes([drive]));self.m.write(self.s['v_budget'],bytes([PASSES]));self.m.write(self.s['v_writeMode'],bytes([mode]))
-        self.func(self.s['detect_driver']);self.func(self.ds['bios_diskDriver'],bc=0x0200,de=0,hl=self.s['sectorBuffer'])
+        self.func(self.s['detect_driver']);self.func(self.ds['sysDiskDriver'],bc=0x0200,de=0,hl=self.s['sectorBuffer'])
         assert not self.func(self.s['geometry'])['flags']['C'];self.func(self.s['select_layout'])
         self.func(0xC8A2);assert not self.func(self.s['timer_probe'])['flags']['Z']
         self.m.write(self.s['v_operations'],(32*PASSES).to_bytes(2,'little'))
@@ -365,7 +365,7 @@ class Matrix:
         raise RuntimeError(('timeout',self.m.call('cpu_state')))
     def snapshot_metadata(self):
         # Читаем Boot/FAT/root одним циклом вне измерений; на B: нет host-файла.
-        self.func(self.ds['bios_diskDriver'],bc=0x0200,de=0,hl=0x2000);boot=self.m.read(0x2000,256)
+        self.func(self.ds['sysDiskDriver'],bc=0x0200,de=0,hl=0x2000);boot=self.m.read(0x2000,256)
         word=lambda n:struct.unpack_from('<H',boot,n)[0]
         count=word(14)+boot[16]*word(22)+(word(17)*32+255)//256
         assert count<96
@@ -376,7 +376,7 @@ class Matrix:
     def inventory(self):
         for drive in range(8):
             self.func(0xC842,af=drive<<8,de=1)
-            info=self.func(self.ds['bios_diskDriver'],bc=0x0300)
+            info=self.func(self.ds['sysDiskDriver'],bc=0x0300)
             self.report['inventory'][chr(65+drive)]={'sectors':info['registers']['de']['dec'],'available':info['registers']['de']['dec']>0}
         self.save()
     def writable(self,drive,driver,mode,variant='Buffered'):
@@ -434,7 +434,7 @@ class Matrix:
         info=self.init_app(drive);assert not info['caps']&2
         initial=sha(image)
         # Отказы записи подтверждаются вне замера.
-        for op in [1,5]:assert self.func(self.ds['bios_diskDriver'],bc=op<<8,de=0,hl=0x2000)['flags']['C']
+        for op in [1,5]:assert self.func(self.ds['sysDiskDriver'],bc=op<<8,de=0,hl=0x2000)['flags']['C']
         for buf in range(2 if drive==0 else 1):
             self.m.write(self.s['v_bufferMode'],bytes([buf]));self.m.write(self.s['v_pass'],b'\1');self.m.write(self.s['statAll'],bytes(40))
             assert not self.func(0xC866,hl=self.s['tmpDescriptor'],de=0x2000)['flags']['C']
@@ -490,7 +490,7 @@ def main():
         for name in ['Flash','FlashFst']:
             matrix.install(name)
             for mode in [1,6]:matrix.writable(7,name,mode)
-        matrix.func(matrix.ds['bios_installDriver'],af=0x0100,hl=matrix.ds['diskDriver'])
+        matrix.func(matrix.ds['installDriver'],af=0x0100,hl=matrix.ds['diskDriver'])
         matrix.func(matrix.ds['bios_setRAMDDriver'],bc=0x0200,hl=matrix.ds['driverBlockStart'])
         matrix.func(matrix.ds['bios_setRAMDDriver'],bc=0)
         matrix.select(1);matrix.format_ram()
@@ -498,7 +498,7 @@ def main():
         matrix.install('RAMD');matrix.select(1)
         for mode in [1,6]:matrix.writable(1,'RAMD',mode,'R4')
         matrix.start('rom512',system=OUT/'rom512/C-Flash-512k-MMX-System-Emu80.bin',locked=True)
-        matrix.func(matrix.ds['bios_installDriver'],af=0,hl=matrix.ds['diskDriver']);matrix.func(0xC842,af=0x0100,de=1)
+        matrix.func(matrix.ds['installDriver'],af=0,hl=matrix.ds['diskDriver']);matrix.func(0xC842,af=0x0100,de=1)
         matrix.readonly(0,'A-native-ROM-512K',RUNTIME/'specialist-os/system-flash.bin')
         matrix.start('rom64',flash=False,system=OUT/'rom64/C-ROM-64k-MMX-System-Emu80.bin',disk=OUT/'external-rom64/H-ROM-64k-Games.bin')
         matrix.install('Rom');matrix.readonly(7,'H-ROM-64K',RUNTIME/'specialist-os/rom-disk.bin')

@@ -17,7 +17,7 @@ ncRadixPrepareRow:
     ld b,11
 ncRadixPrepareByte:
     ld a,(hl)
-    call bios_upperCase
+    call ncStrings.upperCase
     ld (de),a
     inc hl
     inc d

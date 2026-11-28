@@ -35,12 +35,12 @@ packed = bytes(mem[0x3000:0x4800])
 for x in range(4):
     for code in range(256):
         m = bytearray(mem)
-        m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2] = bytes([7, x])
+        m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2] = bytes([7, x])
         m[0x9000:0xC000] = bytes([0xA5])*12288
-        out, _, _ = q['run'](m, s['bios_printCharRaw'], af=code<<8)
+        out, _, _ = q['run'](m, s['FONT_ENGINE_RAW'], af=code<<8)
         expected, cursor = q['oracle'](bytes([code]), True, 6, x, 0xA5)
         assert out[0x9000:0xC000] == expected, (code, x, 'scalar pixels')
-        assert out[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2] == cursor
+        assert out[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2] == cursor
         assert out[0x3000:0x4800] == packed, 'table modified'
 print('TRIPACK all 256 scalar codes x 4 phases PASS', flush=True)
 apis = ('printChar', 'printCharRaw', 'printStringZ', 'printStringRawZ', 'printStringRawLim')
@@ -54,12 +54,12 @@ for name, module, variant, pre in (('ROW6 OFF', 'ENGINEP', 0, 0),
         s, bs = q['s'], q['bs']
         m[s['gridText']:s['gridText']+len(text)+1] = text+b'\0'
         m[s['gridKind']] = kind
-        m[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2] = bytes([7, 0])
+        m[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2] = bytes([7, 0])
         m[0x9000:0xC000] = bytes(12288)
         out, regs, cycles = q['run'](m, s['gridMainRun'])
         expected, cursor = q['oracle'](text, kind in (1, 3, 4), 6)
         assert out[0x9000:0xC000] == expected, (name, api, 'pixels')
-        assert out[bs['bios_vars.cursorY']:bs['bios_vars.cursorY']+2] == cursor
+        assert out[bs['mon2_vars.cursorY']:bs['mon2_vars.cursorY']+2] == cursor
         results.append(dict(engine=name, api=api, cycles=cycles, ms=cycles/2000))
         print(name, api, cycles/2000, 'ms', flush=True)
 paths = ['bin/'+f+ext for f, ext in (('ENGINEP','.i80'), ('ENGINES','.i80'),

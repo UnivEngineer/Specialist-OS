@@ -1,5 +1,6 @@
 ; Самостоятельная консоль MXOS. Общие команды выполняет DOS в своей странице.
     INCLUDE "../common/system.inc"
+    INCLUDE "../../bin/bios-imports.inc"
 IMAGE_FLAGS         = IMAGE_FLAG_MAIN
 IMAGE_MEMORY_POLICY = IMAGE_POLICY_TRANSIENT
     ORG 0000h
@@ -14,7 +15,7 @@ IMAGE_MEMORY_POLICY = IMAGE_POLICY_TRANSIENT
 ;   регистрах не требуется.
 ;
 ; выход:
-;   При EXIT сохраняется история и управление передаётся bios_reboot. Внешняя программа
+;   При EXIT сохраняется история и управление передаётся mon2_init. Внешняя программа
 ;   получает строку из CMD_LINE и собственный путь возврата в оболочку. Сохранённый код
 ;   отказа FILE_EXEC печатается один раз перед первым приглашением.
 ;----------------------------------------------------------------------------
@@ -24,7 +25,7 @@ cliStart:
     ld a,CLI_OP_OBSERVER
     MXOS_CALL_REGS MXOS_DOS_CLI
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld a,2
     MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     MXOS_CALL_REGS MXOS_DOS_FILE_SELECT_DRIVE
@@ -38,7 +39,7 @@ cliClearBss:
     or c
     jp nz,cliClearBss
     call cliHistoryLoad
-    ld hl,bios_cliExecError
+    ld hl,biosCliExecError
     ld a,(hl)
     ld (hl),0
     or a
@@ -51,13 +52,13 @@ cliPrompt:
     MXOS_CALL_REGS MXOS_DOS_DIRECTORY
     jp c,cliError
     ld hl,cliPromptPath
-    call bios_printString
+    call mon2_printStringOld
     ld c,'>'
-    call bios_printChar
+    call mon2_printCharOld
     call cliInput
     call cliHistoryAdd
     ld c,0Ah
-    call bios_printChar
+    call mon2_printCharOld
     ld hl,CMD_LINE
     ld de,cliOverwritePrompt
     ld a,CLI_OP_COMMAND
@@ -75,10 +76,10 @@ cliExternal:
     MXOS_CALL_REGS MXOS_DOS_SET_SHELL
     ; Внешняя команда может занять MAIN. BIOS загрузит CLI заново.
     ld hl,CMD_LINE
-    MXOS_EXEC bios_cliExecDone
+    MXOS_EXEC biosCliExecReturn
 cliLeave:
     call cliHistorySave
-    jp bios_reboot
+    jp mon2_init
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -96,9 +97,9 @@ cliError:
     MXOS_CALL_REGS MXOS_DOS_GET_ERROR
 cliShowError:
     call dosErrorText
-    call bios_printStringRawZ
+    call FONT_ENGINE_RAWZ
     ld c,0Ah
-    call bios_printChar
+    call mon2_printCharOld
     jp cliPrompt
 cliPromptPath: DS MAX_PATH,0
     INCLUDE "overwrite.inc"

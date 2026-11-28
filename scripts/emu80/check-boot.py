@@ -54,7 +54,7 @@ def main():
         elif opcode in (0xC2, 0xC3):  # JNZ/JMP
             target = memory[pc] | memory[pc + 1] << 8
             pc = target if opcode == 0xC3 or not zero else pc + 2
-        elif opcode == 0x31 and pc - 1 == system['bios_init']:  # LXI SP в DOS
+        elif opcode == 0x31 and pc - 1 == system['mon2_init']:  # LXI SP в DOS
             sp = memory[pc] | memory[pc + 1] << 8
             if sp not in (0xFFC0, system['STACK_ADDR']):
                 raise ValueError("Unexpected DOS entry or stack")

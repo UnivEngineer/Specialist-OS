@@ -8,11 +8,11 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-keyScan2:   ; Режим чтения ряда
+ioKeyScan2: ; Режим чтения ряда
             call    ioKeyMode82
 
             ; Одним чтением првоеряем все клавиши
-            ld      a, (IO_KEYB_B)
+            ld      a, (PPI_KEY_B)
 
             ; Эти биты не используются в сканировании
             or      3
@@ -31,14 +31,14 @@ keyScan2:   ; Режим чтения ряда
             ld      de, v_keybTbl + 11
             ld      b, 0FFh
 loc_C1DD:   ld      a, h
-            ld      (IO_KEYB_C),a
+            ld      (PPI_KEY_C),a
             ld      a, l
-            ld      (IO_KEYB_A),a
+            ld      (PPI_KEY_A),a
             rrca
             cpl
             and     4
             ld      c, a
-            ld      a, (IO_KEYB_B)
+            ld      a, (PPI_KEY_B)
             or      c
 
             ; Перебираем 6 кнопок в столбце

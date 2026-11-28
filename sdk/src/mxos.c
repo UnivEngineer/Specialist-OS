@@ -5,15 +5,17 @@ static void prepare(MXOS_REGS *r, mxos_u16 entry)
 {
     r->entry=entry; r->af=r->bc=r->de=r->hl=0;
 }
+static void invoke(MXOS_REGS *r)
+{
+    MXOS_CALL_PACKET q;
+    q.operation=r->entry; q.hl=r->hl; q.de=r->de; q.bc=r->bc; q.af=r->af;
+    mxos_call_packet(&q);
+    r->hl=q.hl; r->de=q.de; r->bc=q.bc; r->af=q.af;
+}
 static mxos_u8 result(MXOS_REGS *r)
 {
     mxos_u8 error;
-    if (r->entry < 0x1000) {
-        MXOS_CALL_PACKET q;
-        q.operation=r->entry; q.hl=r->hl; q.de=r->de; q.bc=r->bc; q.af=r->af;
-        mxos_call_packet(&q);
-        r->hl=q.hl; r->de=q.de; r->bc=q.bc; r->af=q.af;
-    } else mxos_bios_call(r);
+    invoke(r);
     if (!(r->af & MXOS_CF)) return 0;
     error=mxos_last_error(); return error ? error : 1;
 }
@@ -44,9 +46,9 @@ void mxos_bank_key_end(MXOS_KEY_STATE *state)
 void *mxos_memcpy(void *dst, const void *src, mxos_u16 bytes)
 {
     MXOS_REGS r;
-    prepare(&r,MXOS_BIOS_ABI_MEMCPY);
+    prepare(&r,MXOS_BIOS_MEMCPY);
     r.hl=(mxos_u16)src; r.de=r.hl+bytes; r.bc=(mxos_u16)dst;
-    mxos_bios_call(&r); return dst;
+    invoke(&r); return dst;
 }
 void *mxos_memmove(void *dst, const void *src, mxos_u16 bytes) { return mxos_memcpy(dst,src,bytes); }
 mxos_u8 mxos_directory_get(mxos_u16 *cluster)
@@ -108,8 +110,8 @@ mxos_u16 mxos_checksum(const void *buffer, mxos_u16 bytes)
 {
     MXOS_REGS r;
     if (!bytes) return 0;
-    prepare(&r,MXOS_BIOS_ABI_CHECKSUM); r.hl=(mxos_u16)buffer; r.de=r.hl+bytes-1;
-    mxos_bios_call(&r); return r.bc;
+    prepare(&r,MXOS_BIOS_CALC_CS); r.hl=(mxos_u16)buffer; r.de=r.hl+bytes-1;
+    invoke(&r); return r.bc;
 }
 #ifndef __Z88DK
 const char *mxos_printStringLim(const char *text, mxos_u16 bytes)
@@ -119,32 +121,32 @@ const char *mxos_printStringLim(const char *text, mxos_u16 bytes)
     return (const char *)request.hl;
 }
 /* Для sccz80 горячие однорегистровые вызовы находятся в коротком ASM-мосте. */
-mxos_u16 mxos_memtop(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_MEMTOP_GET); mxos_bios_call(&r); return r.hl; }
-void mxos_set_memtop(mxos_u16 top) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_MEMTOP_SET); r.hl=top; mxos_bios_call(&r); }
-mxos_u16 mxos_getkey(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_GETCH); mxos_bios_call(&r); return r.af; }
+mxos_u16 mxos_memtop(void) { MXOS_REGS r; prepare(&r,MXOS_MEM_GET_TOP); mxos_bios_call(&r); return r.hl; }
+void mxos_set_memtop(mxos_u16 top) { MXOS_REGS r; prepare(&r,MXOS_MEM_SET_TOP); r.hl=top; mxos_bios_call(&r); }
+mxos_u16 mxos_getkey(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_GETCH); invoke(&r); return r.af; }
 int mxos_getch(void) { return mxos_getkey()>>8; }
 int mxos_keyscan(void)
 {
     MXOS_REGS r; mxos_u8 ch;
-    prepare(&r,MXOS_BIOS_ABI_KEY_SCAN); mxos_bios_call(&r); ch=(mxos_u8)(r.af>>8);
+    prepare(&r,MXOS_BIOS_KEY_SCAN); invoke(&r); ch=(mxos_u8)(r.af>>8);
     return ch==255 ? -1 : ch;
 }
-void mxos_putch(mxos_u8 ch) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_PUTCH); r.bc=ch; mxos_bios_call(&r); }
-void mxos_puts(const char *text) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_PUTS); r.hl=(mxos_u16)text; mxos_bios_call(&r); }
+void mxos_putch(mxos_u8 ch) { MXOS_REGS r; prepare(&r,MXOS_MEM_PRINT_CHAR); r.bc=ch; mxos_bios_call(&r); }
+void mxos_puts(const char *text) { MXOS_REGS r; prepare(&r,MXOS_BIOS_PRINT_STRING); r.hl=(mxos_u16)text; invoke(&r); }
 void mxos_cls(void) { mxos_putch(31); }
-mxos_u16 mxos_cursor_get(void) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_CURSOR_GET); mxos_bios_call(&r); return r.hl; }
-void mxos_cursor_set(mxos_u16 xy) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_CURSOR_SET); r.hl=xy; mxos_bios_call(&r); }
-mxos_u8 mxos_upper(mxos_u8 ch) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_UPPER); r.af=(mxos_u16)ch<<8; mxos_bios_call(&r); return (mxos_u8)(r.af>>8); }
+mxos_u16 mxos_cursor_get(void) { MXOS_REGS r; prepare(&r,MXOS_MEM_GET_CURSOR_POS); mxos_bios_call(&r); return r.hl; }
+void mxos_cursor_set(mxos_u16 xy) { MXOS_REGS r; prepare(&r,MXOS_MEM_SET_CURSOR_POS); r.hl=xy; mxos_bios_call(&r); }
+mxos_u8 mxos_upper(mxos_u8 ch) { MXOS_REGS r; prepare(&r,MXOS_BIOS_UPPERCASE); r.af=(mxos_u16)ch<<8; invoke(&r); return (mxos_u8)(r.af>>8); }
 #endif
-void mxos_print_dec(mxos_u16 value, mxos_u8 padding) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_PRINT_DEC); r.de=value; r.bc=(mxos_u16)padding<<8; mxos_bios_call(&r); }
-void mxos_print_hex8(mxos_u8 value) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_PRINT_HEX8); r.af=(mxos_u16)value<<8; mxos_bios_call(&r); }
-void mxos_print_hex16(mxos_u16 value) { MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_PRINT_HEX16); r.hl=value; mxos_bios_call(&r); }
+void mxos_print_dec(mxos_u16 value, mxos_u8 padding) { MXOS_REGS r; prepare(&r,MXOS_BIOS_PRINT_DEC_WORD); r.de=value; r.bc=(mxos_u16)padding<<8; invoke(&r); }
+void mxos_print_hex8(mxos_u8 value) { MXOS_REGS r; prepare(&r,MXOS_MEM_PRINT_HEX_BYTE); r.af=(mxos_u16)value<<8; mxos_bios_call(&r); }
+void mxos_print_hex16(mxos_u16 value) { MXOS_REGS r; prepare(&r,MXOS_MEM_PRINT_HEX_WORD); r.hl=value; mxos_bios_call(&r); }
 mxos_u16 mxos_readline(char *buffer, mxos_u16 capacity)
 {
     MXOS_REGS r; mxos_u16 n=0;
     if (!capacity) return 0;
-    prepare(&r,MXOS_BIOS_ABI_INPUT); r.hl=(mxos_u16)buffer; r.de=r.hl+capacity-1;
-    mxos_bios_call(&r);
+    prepare(&r,MXOS_BIOS_INPUT); r.hl=(mxos_u16)buffer; r.de=r.hl+capacity-1;
+    invoke(&r);
     while (n<capacity-1 && buffer[n] && buffer[n]!=13) ++n;
     buffer[n]=0; return n;
 }
@@ -152,18 +154,16 @@ int mxos_equal_n(const char *a, const char *b, mxos_u8 bytes, int ignore_case)
 {
     MXOS_REGS r;
     if (!bytes) return 1;
-    prepare(&r,ignore_case ? MXOS_BIOS_ABI_STRICMP : MXOS_BIOS_ABI_STRCMP);
+    prepare(&r,ignore_case ? MXOS_BIOS_STRICMP : MXOS_BIOS_STRCMP);
     r.de=(mxos_u16)a; r.hl=(mxos_u16)b; r.bc=bytes;
-    mxos_bios_call(&r); return (r.af & MXOS_ZF)!=0;
+    invoke(&r); return (r.af & MXOS_ZF)!=0;
 }
-#ifndef __Z88DK
-#endif
 mxos_u8 mxos_drive_select(mxos_u8 drive) { MXOS_REGS r; prepare(&r,MXOS_DOS_FILE_SELECT_DRIVE); r.af=(mxos_u16)drive<<8; return result(&r); }
 mxos_u8 mxos_volume_flush(void) { MXOS_REGS r; prepare(&r,MXOS_DOS_FLUSH_VOLUME); return result(&r); }
 mxos_u8 mxos_last_error(void) { MXOS_CALL_PACKET q; q.operation=MXOS_DOS_GET_ERROR; q.hl=q.de=q.bc=q.af=0; mxos_call_packet(&q); return (mxos_u8)(q.af>>8); }
 const MXOS_DISK_INFO *mxos_disk_info(mxos_u16 *physical_blocks)
 {
-    MXOS_REGS r; prepare(&r,MXOS_BIOS_ABI_DISK_DRIVER); r.bc=0x0300; mxos_bios_call(&r);
+    MXOS_REGS r; prepare(&r,MXOS_BIOS_DISK_DRIVER); r.bc=0x0300; invoke(&r);
     if (physical_blocks) *physical_blocks=r.de;
     return (r.af & MXOS_CF) ? 0 : (const MXOS_DISK_INFO *)r.hl;
 }

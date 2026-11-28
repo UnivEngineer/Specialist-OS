@@ -118,7 +118,7 @@ for_Good:
             pop     hl
     IFNDEF BANKED_DOS_BUILD
             ; Временное размещение ядра в основной памяти: буфер и запрос
-            ; не должны перекрывать его, даже находясь ниже bios_vars.
+            ; не должны перекрывать его, даже находясь ниже mon2_vars.
             push hl
             push de
             ld de,dosCoreEnd

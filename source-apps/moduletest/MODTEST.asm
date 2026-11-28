@@ -1,5 +1,6 @@
 ; Контроллер main: обычная загрузка COM, все модули — через публичный ABI.
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 
@@ -20,7 +21,7 @@ entry:
     ld a,(bios_upper.koi7)
     push af
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld hl,06000h
     ld de,02000h
     ld b,0
@@ -37,7 +38,7 @@ entry:
     jp c,failed
     ld hl,(regs)
     ld de,01235h
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,failed
     ld hl,(handle)
     MXOS_CALL_REGS MXOS_DOS_MODULE_UNLOAD
@@ -76,9 +77,9 @@ failed:
     ld hl,error
     MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 finish:
-    call bios_getch
+    call mon2_getchOld
     pop af
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ret
 testResult:     DW 0
 handle:         DW 0

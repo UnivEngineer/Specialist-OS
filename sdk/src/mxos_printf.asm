@@ -88,11 +88,12 @@ printfFlush:
     ld hl,(printfSource)
     ld a,(_mxos_home_page)
     or a
-    jp z,bios_printStringLim
+    jp z,printfNear
     ld d,a
     ld a,(printfBound)
     or a                        ; StringLim сохраняет входные флаги.
     jp nz,printfFar
+printfNear:
     call mx_callRegs
     defw MXOS_BIOS_PRINT_STRING_LIM
     jp printfStatus

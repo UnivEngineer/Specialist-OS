@@ -6,11 +6,11 @@
 ;----------------------------------------------------------------------------
 
 printStringInv:   ld    a, 0FFh
-            ld    (bios_vars.inverse),a
-            ld    (bios_vars.inverse+1),a
-            call  bios_printStringRawZ
+            ld    (mon2_vars.inverse),a
+            ld    (mon2_vars.inverse+1),a
+            call  FONT_ENGINE_RAWZ
             xor   a
-            ld    (bios_vars.inverse),a
-            ld    (bios_vars.inverse+1),a
+            ld    (mon2_vars.inverse),a
+            ld    (mon2_vars.inverse+1),a
             ret
 

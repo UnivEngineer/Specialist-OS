@@ -772,20 +772,9 @@ ebEncoding:
 ebMemTop:
     ld hl,EDITOR_MEMORY_END-1
     ret
-ebSubtract:
-    ld a,l
-    sub e
-    ld l,a
-    ld a,h
-    sbc a,d
-    ld h,a
-    ret
     MODULE ebCopy
     INCLUDE "../common/memcpy_bc_hl.inc"
     INCLUDE "../common/move8080.inc"
-    ENDMODULE
-    MODULE ebArgs
-    INCLUDE "../common/argNext.inc"
     ENDMODULE
     INCLUDE "bank-cache.inc"
     INCLUDE "../../sdk/asm/lib/command-queue.inc"

@@ -17,7 +17,7 @@ dosBoot:    ; Инициализация стека; BIOS уже загрузи�
 
             ; Обновляем переменные
             ld      hl, j_reboot3
-            ld      (bios_vars.tapeError), hl
+            ld      (mon2_vars.tapeError), hl
 
 reboot3_0:
             jp      reboot3_1

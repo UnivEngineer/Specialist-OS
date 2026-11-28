@@ -177,24 +177,24 @@ class Guest(Bench):
         self.tap("enter")
         if not (self.regs()["pc"] == run_start and in_run()) and not self.seek(run_start,10000,in_run):
             raise Observation("Оболочка не передала управление штатному RUN.COM")
-        addr, end = 0xc800, self.bios["bios_cliExecError"]+3
-        vectors = self.read(addr,end-addr)
-        baked = self.system["DOS/BIOS.SYS"][addr-0xc000:end-0xc000]
-        allowed = bytearray(baked)
+        firmware = self.system["DOS/BIOS.SYS"]
+        addr = self.bios["biosCompatVectors"]
+        end = self.bios["biosCompatVectorsEnd"]
+        vectors = self.read(addr, end-addr)
+        if vectors != firmware[addr-0xc000:end-0xc000]:
+            raise RuntimeError("Таблица RAMFOS после загрузки отличается от штатной")
+        self.mx_vectors = {addr: vectors}
         redirects = {}
-        for name in ("bios_printChar","bios_printCharRaw","bios_printStringZ","bios_printStringRawZ",
-                     "bios_printStringRawLim","bios_setFontEncoding"):
-            i = self.bios[name] - addr
-            if vectors[i:i+3] == baked[i:i+3]:
+        for name in ("mon2_printCharOld", "mon2_printStringOld"):
+            entry = self.bios[name]
+            actual = self.read(entry, 3)
+            self.mx_vectors[entry] = actual
+            if actual == firmware[entry-0xc000:entry-0xc000+3]:
                 continue
-            target = int.from_bytes(vectors[i+1:i+3],"little")
-            if vectors[i] != 0xc3 or not self.bios["FONT_ENGINE_BASE"] <= target < self.bios["GLYPH_CACHE_END"]:
+            target = int.from_bytes(actual[1:],"little")
+            if actual[0] != 0xc3 or not self.bios["FONT_ENGINE_BASE"] <= target < self.bios["GLYPH_CACHE_END"]:
                 raise RuntimeError(f"Неизвестная привязка шрифта {name} к {target:04X}h")
-            allowed[i+1:i+3] = vectors[i+1:i+3]
             redirects[name] = target
-        if vectors != allowed:
-            raise RuntimeError("Векторы холодной системы отличаются вне известных привязок шрифта")
-        self.mx_vectors = vectors
         self.result["cold_font_bindings"] = redirects
         run_body = (self.build/"RUN.i80").read_bytes()
         bad = self.run_syms["badImage"]
@@ -202,7 +202,10 @@ class Guest(Bench):
         def stage_matches():
             start = self.run_syms["loadStage"]
             return self.read(stage,3)==run_body[start:start+3]
-        if self.profile != "NATIVE":
+        uses_stage = self.profile not in ("NATIVE", "MX") or (
+            self.profile == "MX" and route["kind"].lower() == "rks"
+        )
+        if uses_stage:
             stop = self.loader_stop({stage:stage_matches, bad:lambda:in_run() and self.read(bad,4)==run_body[bad:bad+4]},12000)
             if stop == bad:
                 self.result.update(launch="rejected_header_or_range", loader_pc=bad)
@@ -215,7 +218,7 @@ class Guest(Bench):
             return sha(data) == record["payload_sha256"]
         if not (self.regs()["pc"] == entry and matches()):
             targets = {entry:matches}
-            if self.profile != "NATIVE" and error!=entry:
+            if uses_stage and error!=entry:
                 orig = self.run_syms["loadStageError"]
                 targets[error] = lambda:self.read(error,6)==run_body[orig:orig+6]
             stop = self.loader_stop(targets,12000)
@@ -228,8 +231,10 @@ class Guest(Bench):
         sp = regs["sp"]
         ret = int.from_bytes(self.read(sp, 2), "little") if sp < 65535 else 0
         self.result.update(launch="entry_and_payload_verified", entry_sp=sp, stack_return=ret)
-        self.return_points = {0xc800:"vector_C800", 0xc000:"vector_C000"}
-        if self.profile == "RF":
+        self.return_points = {0xc000:"vector_C000", 0xf800:"vector_F800"}
+        if self.profile in ("STD", "MON"):
+            self.return_points = {0xc800:"vector_C800", 0xc000:"vector_C000"}
+        elif self.profile == "RF":
             self.return_points = {0xf800:"vector_F800", 0xf854:"vector_F854"}
         if ret >= 0x8000 and ret not in self.return_points:
             self.return_points[ret] = "return_address"
@@ -237,6 +242,7 @@ class Guest(Bench):
 
     def integrity(self, phase, shell=False):
         profile = "MX" if shell else self.profile
+        expected_vectors = {}
         if profile == "MON":
             raw = self.system["DOS/MONITOR2.MON"]
             ranges = [(0xc000, 0xc500), (0xc800, 0xd000)]
@@ -268,11 +274,23 @@ class Guest(Bench):
             mutable = set()
             for name,offset,size in (("v_dosBanked",0,1),("v_dosModuleReady",0,1),("keyColumn",0,2),
                     ("keyRow",0,1),("bankCaretVisible",0,1),("moveCore",1,2),
-                    ("memFixedCallerSP",1,2),("memFixedVector",1,2)):
+                    ("memFixedCallerSP",1,2),("memFixedVector",1,2),("biosProfile",0,1),
+                    ("biosPpiVectors",0,9),("biosKeyRows",1,1),("biosCliExecError",0,1),
+                    ("j_diskDriver",1,2)):
                 start = self.bios[name]+offset
                 mutable.update(range(start,start+size))
             ranges = split_ranges(ranges,mutable)
-            vectors = [(0xc800, self.bios["bios_cliExecError"]+3-0xc800)]
+            expected_vectors = dict(self.mx_vectors or {})
+            if profile == "STD":
+                addr = self.bios["biosCompatVectors"]
+                extent = self.bios["biosCompatVectorsEnd"]-addr
+                start, end = self.bios["mon2Vectors"]-0xc000, self.bios["mon2VectorsEnd"]-0xc000
+                targets = raw[start:end]
+                table = bytearray(b"".join(b"\xc3"+targets[i:i+2] for i in range(0,len(targets),2)))
+                for unused in (0x21, 0x2d):
+                    table[unused] = 0xc9
+                expected_vectors[addr] = table.ljust(extent,b"\xc9")
+            vectors = [(address,len(vector)) for address,vector in sorted(expected_vectors.items())]
             reference = lambda addr,n: raw[addr-0xc000:addr-0xc000+n]
         observations = []
         # Читаем связные области только раз за фазу; ВВ55 и регистры устройств
@@ -284,8 +302,9 @@ class Guest(Bench):
             for a,b in spans:
                 start,block = next((base,d) for base,d in blocks if base<=a and b<=base+len(d))
                 observed = block[a-start:b-start]
-                expect = (self.mx_vectors if profile in ("MX","STD","NATIVE") and purpose=="vectors" and self.mx_vectors
-                          else reference(a, b-a))
+                expect = expected_vectors.get(a) if purpose == "vectors" else None
+                if expect is None:
+                    expect = reference(a, b-a)
                 observations.append(dict(kind=purpose, start=a, end=b, sha256=sha(observed),
                     expected_sha256=sha(expect), differences=[a+i for i,(v,w) in enumerate(zip(expect, observed)) if v!=w]))
         self.result.setdefault("integrity", {})[phase] = observations

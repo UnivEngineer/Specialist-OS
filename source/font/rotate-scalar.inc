@@ -7,7 +7,7 @@ scalar6Draw:
     and 3
     ex de,hl
     ld e,a
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,inverse
     ld a,e

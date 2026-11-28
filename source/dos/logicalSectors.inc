@@ -113,7 +113,7 @@ logicalPhysicalIO:
             jp j_diskDriver
     ELSE
             ld a,(v_drive)
-            jp bios_blockIO
+            jp blockIO
     ENDIF
 
 ;----------------------------------------------------------------------------

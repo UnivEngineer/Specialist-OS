@@ -4,7 +4,7 @@ import struct
 def main_call(machine, symbols, operation, hl=0, a=0):
     """Isolated ABI fixture only; this intentionally replaces MAIN test code."""
     machine.write(0x2f80,struct.pack('<4H',hl,0,0,(a<<8)|2))
-    machine.write(0x2800,b'\xcd\x00\xf8\xc3\x00\x8b')
+    machine.write(0x2800,b'\xcd'+struct.pack('<H',symbols['mx_callPacket'])+b'\xc3\x00\x8b')
     machine.stop_at(0x8b00)
     machine.call('regs_set',pc=0x2800,sp=0x8fdf,bc=operation,de=0x2f80)
     state=machine.until(0x8b00,90,page=0)

@@ -56,7 +56,7 @@ for p,at in [(R/'bin/BIOS.sys',0xC000),(R/'bin/IO.main.bin',0xF000),(R/'bin/DOS.
  b=p.read_bytes();m[at:at+len(b)]=b
 m[S['v_dosModuleReady']]=1;m[S['v_drive']]=0
 m[S['j_diskDriver']:S['j_diskDriver']+3]=b'\xC3'+W(0xA000)
-m[S['bios_printChar']]=0xC9
+m[S['mon2_printCharOld']]=0xC9
 # printString вызывает внутренний printChar напрямую: экран содержит тестовый
 # драйвер A000h, поэтому отключаем и этот путь вывода (UI проверяется в Emu80).
 m[S['printChar']]=0xC9

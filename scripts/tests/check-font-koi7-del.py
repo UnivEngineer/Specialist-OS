@@ -9,9 +9,9 @@ model = {'__file__': str(runner)}
 exec(compile(runner.read_text(encoding='utf8').split('cases=')[0], str(runner), 'exec'), model)
 bs, base, run, symbols = [model[key] for key in ('bs','base','run','symbols')]
 font_bin = ROOT / 'bin/fonts'
-cursor = bs['bios_vars.cursorY']
-inverse_flag = bs['bios_vars.inverse']
-encoding = bs['bios_setFontEncoding']
+cursor = bs['mon2_vars.cursorY']
+inverse_flag = bs['mon2_vars.inverse']
+encoding = bs['FONT_ENGINE_ENCODING']
 fixtures = {
     4: ('Cpm4','Cpm4Fast','Cpm4Compact'),
     6: ('Rotate','Packed6K','Fast12K','Compact'),
@@ -74,9 +74,9 @@ def check_pixels(memory, glyphs, width, name, koi):
             seed[inverse_flag:inverse_flag+2] = bytes([255*inverse])*2
             seed[0x9000:0xc000] = bytes([0xa5])*12288
             seed[0x8600:0x8600+len(text)+1] = text + b'\0'
-            for api, output in (('bios_printChar', b'\x7f'), ('bios_printCharRaw', b'\x7f'),
-                                ('bios_printStringZ', text), ('bios_printStringRawZ', text),
-                                ('bios_printStringRawLim', text)):
+            for api, output in (('mon2_printCharOld', b'\x7f'), ('FONT_ENGINE_RAW', b'\x7f'),
+                                ('mon2_printStringOld', text), ('FONT_ENGINE_RAWZ', text),
+                                ('FONT_ENGINE_LIM', text)):
                 rendered, _, _ = run(seed,bs[api],af=0x7f00,bc=0x7f if len(output)==1 else len(text),hl=0x8600)
                 assert rendered[0x9000:0xc000] == expected_pixels(output,glyphs,x*2,width,inverse), (name,koi,x,inverse,api)
                 assert rendered[cursor:cursor+2] == bytes([7,x+len(output)*width//2]), (name,api,'cursor')

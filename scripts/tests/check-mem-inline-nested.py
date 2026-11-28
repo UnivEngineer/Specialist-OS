@@ -86,12 +86,13 @@ def main():
 
     put(image, cursor, word(output))
     for name, target in (
-            ('bios_printChar', print_char),
-            ('FONT_ENGINE_Z', print_z), ('bios_printStringZ', print_z),
-            ('FONT_ENGINE_RAWZ', print_raw_z), ('bios_printStringRawZ', print_raw_z),
+            ('mon2_printCharOld', print_char),
+            ('FONT_ENGINE_Z', print_z), ('mon2_printStringOld', print_z),
+            ('FONT_ENGINE_RAWZ', print_raw_z),
             ('FONT_ENGINE_TEXT_LIM', print_text_lim), ('FONT_ENGINE_LIM', print_raw_lim),
-            ('bios_printStringRawLim', print_raw_lim), ('bios_printStringRawPseudo', print_pseudo)):
+            ('FONT_ENGINE_PSEUDO', print_pseudo)):
         vector(name, target)
+    put(image, bios['biosRawZTarget'], word(print_raw_z))
     put(image, bios['FONT_ENGINE_TEXT_EXT'], word(bios['FONT_ENGINE_TEXT_LIM']))
     # Добавить A к выводу, сохранив позицию печати в HL.
     put(image, write_char, b'\xe5\x2a' + word(cursor) + b'\x77\x23\x22'
@@ -185,7 +186,7 @@ def main():
                 pc in (continuation - 2, continuation - 1) for pc in pcs), (call.hex(), 'возврат за DW')
             if not native:
                 assert mem['bankFastCheckText'] in pcs and mem['bankMxCallRegsSaved'] not in pcs, (
-                    call.hex(), 'прямой F806h')
+                    call.hex(), 'прямой F866h')
         if queued:
             assert actual[queue_count] == 1 and actual[mem['bankQueueBefore']] == 0xc3, call.hex()
         hardware = bios['IO_KEYB_A']
@@ -295,9 +296,9 @@ def main():
         def line_bytes(count):
             return bytes(0x21 + (index * 37) % 94 for index in range(count))
 
-        lim_vector = bios['bios_printStringLim']
+        lim_vector = bios['bankText.printStringLim']
         font_char = bios['FONT_ENGINE_CHAR']
-        public_char = bios['bios_printChar']
+        public_char = bios['mon2_printCharOld']
         normal_lim = image.copy()
         for vector_addr in (font_char, public_char):
             put(normal_lim, vector_addr, b'\xc3' + word(scalar_hook))
@@ -361,12 +362,12 @@ def main():
         no_exports = image.copy()
         put(no_exports, bios['FONT_ENGINE_TEXT_EXT'], b'\0\0')
         other_vectors = image.copy()
-        put(other_vectors, bios['bios_printStringZ'], b'\xc3' + word(alternate_z))
-        put(other_vectors, bios['bios_printStringRawZ'], b'\xc3' + word(alternate_raw_z))
+        put(other_vectors, bios['mon2_printStringOld'], b'\xc3' + word(alternate_z))
+        put(other_vectors, bios['FONT_ENGINE_RAWZ'], b'\xc3' + word(alternate_raw_z))
         # CALL/RET с тем же операндом, что у штатного JMP, остаётся перехватчиком.
         other_opcodes = image.copy()
-        put(other_opcodes, bios['bios_printStringZ'], b'\xcd' + word(print_z) + b'\xc9')
-        put(other_opcodes, bios['bios_printStringRawZ'], b'\xcd' + word(print_raw_z) + b'\xc9')
+        put(other_opcodes, bios['mon2_printStringOld'], b'\xcd' + word(print_z) + b'\xc9')
+        put(other_opcodes, bios['FONT_ENGINE_RAWZ'], b'\xcd' + word(print_raw_z) + b'\xc9')
         profiles = ((no_exports, (print_z,), (print_raw_lim,)),
                     (other_vectors, (alternate_z,), (alternate_raw_z,)),
                     (other_opcodes, (print_z,), (print_raw_z,)))
@@ -400,7 +401,7 @@ def main():
             run_case(folder, batch + b'poison', b'\x01' + word(size) + b'\x3e\x01\xcd'
                      + word(mem['mx_callRegs']) + word(mem['MXOS_BIOS_COMMAND_BATCH']),
                      b'A!' + b'B' * tail, batch=True, read_count=size)
-    print('MEM INLINE NESTED PASS: F806h, очередь, точное чтение Z/LIM, граница FFE0h '
+    print('MEM INLINE NESTED PASS: F866h, очередь, точное чтение Z/LIM, граница FFE0h '
           'и вложенные пачки 10–33 байта')
 
 

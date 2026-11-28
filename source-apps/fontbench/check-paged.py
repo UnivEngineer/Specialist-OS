@@ -38,7 +38,7 @@ def run(memory, calls):
     code = b'\x31'+word(0x8F00)+b'\x21'+word(0xA597)+b'\xe5\xf1'
     for text, length, target, screen in calls:
         if target.startswith('linear-'):
-            code += b'\x21'+word((screen&255)+7)+b'\x22'+word(old['bios_vars.cursorY'])
+            code += b'\x21'+word((screen&255)+7)+b'\x22'+word(old['mon2_vars.cursorY'])
             entry = old[entries[target[7:]]]
         else:
             entry = s['paged.'+target]

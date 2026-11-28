@@ -12,7 +12,7 @@ font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes();checks=0;reference={
 for name in ('Rotate','Packed6K','Fast12K'):
  m=bytearray(65536);data=(R/'bin/BIOS.sys').read_bytes();m[0xc000:0xc000+len(data)]=data
  data=(R/f'bin/fonts/{name}.i80').read_bytes();m[0xd800:0xd800+len(data)]=data
- m[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=m[S['initVars']:S['initVarsEnd']]
+ m[S['mon2_vars']:S['mon2_vars']+S['MON2_VARIABLES']]=(R/'bin/BIOS.defaults.bin').read_bytes()[:S['MON2_VARIABLES']]
  m[S['bios_upper.escMode']]=255
  p=bytes(font[c*8+y]&63 for y in range(8) for c in range(256))
  m[0x3000:0x3800]=bytes(((b<<2)|(b>>4))&255 for b in p)
@@ -38,30 +38,30 @@ for name in ('Rotate','Packed6K','Fast12K'):
   for x in range(4):
    for n in (1,3,4,5,64):
     b=bytearray(m);text=bytes(range(256))[:n];b[0x1000:0x1000+n]=text
-    b[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2]=bytes([8,x]);b[S['bios_vars.inverse']]=inv
-    got=call(b,S['bios_printStringRawLim'],hl=0x1000,bc=n)
+    b[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2]=bytes([8,x]);b[S['mon2_vars.inverse']]=inv
+    got=call(b,S['FONT_ENGINE_LIM'],hl=0x1000,bc=n)
     ref=bytearray(b)
-    for c in text:ref=call(ref,S['bios_printCharRaw'],a=c)
+    for c in text:ref=call(ref,S['FONT_ENGINE_RAW'],a=c)
     assert got[0x9000:0xc000]==ref[0x9000:0xc000],(name,inv,x,n,'batch vs scalar')
-    assert got[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2]==ref[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2],(name,inv,x,n,'cursor')
+    assert got[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2]==ref[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2],(name,inv,x,n,'cursor')
     key=inv,x,n
     if name=='Rotate':reference[key]=got[0x9000:0xc000]
     else:assert got[0x9000:0xc000]==reference[key],(name,key,'rotate reference')
     checks+=1
  # Stop before and after a successful quartet, at each possible slot.
  for n in range(8):
-  for entry,char_entry,separator in [('bios_printStringZ','bios_printChar',b'\t'),
-                                     ('bios_printStringRawZ','bios_printCharRaw',b'\x01')]:
+  for entry,char_entry,separator in [('mon2_printStringOld','mon2_printCharOld',b'\t'),
+                                     ('FONT_ENGINE_RAWZ','FONT_ENGINE_RAW',b'\x01')]:
    text=b'ABCDEFG'[:n]+separator+b'wxyz'
    b=bytearray(m)
    b[0x1000:0x1000+len(text)+1]=text+b'\0'
-   b[S['bios_vars.cursorY']:S['bios_vars.cursorY']+2]=b'\x08\0'
+   b[S['mon2_vars.cursorY']:S['mon2_vars.cursorY']+2]=b'\x08\0'
    actual=call(b,S[entry],hl=0x1000)
    expected=b
    for glyph in text:
     expected=call(expected,S[char_entry],a=glyph,bc=glyph)
    assert actual[0x9000:0xc000]==expected[0x9000:0xc000],(name,entry,n)
-   cursor=S['bios_vars.cursorY']
+   cursor=S['mon2_vars.cursorY']
    assert actual[cursor:cursor+2]==expected[cursor:cursor+2],(name,entry,n)
    checks+=1
  print(name,'PASS',flush=True)
@@ -74,18 +74,18 @@ for name,width in [('Cpm4',4),('Rotate',6),('Fast8',8)]:
  for binary,address in [(R/'bin/BIOS.sys',0xc000),(R/f'bin/fonts/{name}.i80',0xd800)]:
   data=binary.read_bytes()
   m[address:address+len(data)]=data
- m[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=m[S['initVars']:S['initVarsEnd']]
+ m[S['mon2_vars']:S['mon2_vars']+S['MON2_VARIABLES']]=(R/'bin/BIOS.defaults.bin').read_bytes()[:S['MON2_VARIABLES']]
  m[S['bios_upper.escMode']]=255
  m=call(m,S['FONT_ENGINE_INIT'])
  m[0x1000:0x1002]=b'\t\0'
  screen=bytes(m[0x9000:0xc000])
  stop=2*width
  for x in (0,1,width//2,stop-1,stop,stop+1,192-stop-1,192-stop,191,192,255):
-  at=S['bios_vars.cursorY']
+  at=S['mon2_vars.cursorY']
   m[at:at+2]=bytes([8,x])
   target=(x//stop+1)*stop
   expected=bytes([8,target]) if target<192 else b'\x12\0'
-  for entry in ('bios_printChar','bios_printStringZ'):
+  for entry in ('mon2_printCharOld','mon2_printStringOld'):
    result=call(m,S[entry],bc=9,hl=0x1000)
    assert result[at:at+2]==expected,(name,entry,x,result[at:at+2],expected)
    assert result[0x9000:0xc000]==screen

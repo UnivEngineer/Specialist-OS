@@ -40,16 +40,17 @@ def main():
                  ('active code', 0x3000, 0x100, 4, True, False),
                  ('active BSS', 0x5000, 0x100, 4, True, False),
                  ('unknown legacy', 0x100, 0x100, 0, False, True),
-                 ('upper launcher', 0x8c00, 0x100, 4, False, True)]
+                 ('native above old RUN base', 0x8c00, 0x100, 4, False, False),
+                 ('upper launcher', s['APP_MEMORY_END'], 0x100, 4, False, True)]
     for name, start, length, flags, active, removed in scenarios:
         memory = bytearray(seed)
-        memory[s['v_imageHeader']+s['IMAGE_POLICY']]=2 if flags==4 and start<0x8c00 else 0
+        memory[s['v_imageHeader']+s['IMAGE_POLICY']]=2 if flags==4 and start<s['APP_MEMORY_END'] else 0
         memory[s['v_imageHeader']+s['IMAGE_MEMORY_BEGIN']:s['v_imageHeader']+s['IMAGE_MEMORY_BEGIN']+2]=W(start)
         memory[s['v_imageHeader']+s['IMAGE_MEMORY_END']:s['v_imageHeader']+s['IMAGE_MEMORY_END']+2]=W(start+length)
         memory[s['MODULE_TABLE']+16+2] = int(active)
         code = b'\x31'+W(0xef70)+b'\x21'+W(start)+b'\x01'+W(length)
         code += b'\xcd'+W(s['moduleMainClaim'])+b'\xf5\xd1\xeb\x22'+W(0xe702)
-        code += b'\x21'+W(0x8c00)+b'\xcd'+W(s['memoryMainCeiling'])
+        code += b'\x21'+W(s['APP_MEMORY_END'])+b'\xcd'+W(s['memoryMainCeiling'])
         code += b'\x22'+W(0xe700)+b'\xc3'+W(0xe400)
         memory[0xe000:0xe000+len(code)] = code
         (OUT / 'input.bin').write_bytes(memory)
@@ -61,7 +62,7 @@ def main():
         assert data[65542:65544] == W(0xe400), (name, 'PC')
         assert data[65544:65546] == W(0xef70), (name, 'SP')
         assert bool(data[0xe702]&1) == active, (name, 'CF')
-        assert data[0xe700:0xe702] == W(0x8c00 if removed else 0x3000), (name, 'memTop ceiling')
+        assert data[0xe700:0xe702] == W(s['APP_MEMORY_END'] if removed else 0x3000), (name, 'memTop ceiling')
         assert data[s['MODULE_TABLE']:s['MODULE_TABLE']+2] == W(1), (name, 'CORE')
         assert data[s['residentKeys']:s['residentKeys']+2] == W(0x434e), (name, 'key')
         handle = data[s['MODULE_TABLE']+16:s['MODULE_TABLE']+18]

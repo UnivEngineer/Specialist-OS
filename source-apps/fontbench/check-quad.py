@@ -31,13 +31,13 @@ def main():
     word = lambda value: value.to_bytes(2, 'little')
     def put(m, name, value):
         m[s[name]:s[name] + 2] = word(value)
-    base[0xf806:0xf80d] = b'\xe1\x23\x23\xe5\xc3' + word(io['glyphCacheService'])
+    base[s['mx_callRegs']:s['mx_callRegs'] + 7] = b'\xe1\x23\x23\xe5\xc3' + word(io['glyphCacheService'])
     put(base, 'GLYPH_CACHE_START', 0x4b90)
     put(base, 'GLYPH_CACHE_ENTRIES', 0)
     put(base, 'renderFont8', 0x2800 // 8)
     base[s['bios_upper.escMode']] = 255
     base[s['bios_upper.koi7']] = 0
-    base[s['bios_vars.inverse']] = 0
+    base[s['mon2_vars.inverse']] = 0
     base[s['GLYPH_CACHE_INVALID']] = 1
     # Развёрнутое ядро: источники через DE/HL, экран только STAX B.
     # Разрешённые инструкции исключают чтение экрана, маски, CALL и стек.
@@ -80,7 +80,7 @@ def main():
         code = bytearray(b'\x31\x00\x8b')
         if optimized:
             code += b'\xcd' + word(s['installOptimized'])
-        m[s['bios_vars.inverse']] = 255 if inverse else 0
+        m[s['mon2_vars.inverse']] = 255 if inverse else 0
         if prepare:
             code += b'\xcd' + word(s['quadPreparePacked' if direct == 'packed' else 'quadPrepareHalf'])
         source = 0x6000
@@ -92,7 +92,7 @@ def main():
             packed_ready = not half_missing
             packed_overlay = prepare and direct == 'packed' and limit - 0x4b90 < 4072
             valid = count == 0 or (count <= 48 and (serial or count % 4 == 0 and x % 8 == 0) and baseline >= 7 and x + count * 6 <= 384 and (serial or full or direct or slots >= 3) and (direct != 'half' or half_ready) and (direct != 'packed' or packed_ready))
-            code += b'\x21' + bytes((baseline, x // 2)) + b'\x22' + word(s['bios_vars.cursorY'])
+            code += b'\x21' + bytes((baseline, x // 2)) + b'\x22' + word(s['mon2_vars.cursorY'])
             code += bytes.fromhex('21 97 A5 E5 F1')
             code += b'\x01' + bytes((count, 0x12)) + bytes.fromhex('11 78 56 21') + word(source)
             entry = 'quadDynamicRender' if direct == 'dynamic' else 'quadHalfRender' if direct == 'half' else 'quadFullRender' if full else 'quadRender'
@@ -134,7 +134,7 @@ def main():
             assert data[record + 7] == 0xa5
             assert bool(data[record + 6] & 1) == (not valid), ('carry', events, slots)
         _, _, count, valid, x, y = records[-1]
-        assert data[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] == bytes((y, x // 2 + (count * 3 if valid else 0)))
+        assert data[s['mon2_vars.cursorY']:s['mon2_vars.cursorY'] + 2] == bytes((y, x // 2 + (count * 3 if valid else 0)))
         if not packed_overlay:
             assert data[0x4b80:0x4b90] == before[0x4b80:0x4b90]
         if not packed_overlay:

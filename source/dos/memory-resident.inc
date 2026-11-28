@@ -32,7 +32,14 @@ memoryResident:
     or a
     jp nz,memoryBad
     ; Exclude the replaced slot when finding the next available top.
+    ld hl,(mrSize)
+    ld a,h
+    or l
     ld hl,APP_MEMORY_END
+    jp z,mrInitialCeiling
+    ; Таблицы живут и при запуске старых программ с временной областью RUN.
+    ld hl,LEGACY_APP_MEMORY_END
+mrInitialCeiling:
     ld (mrCeiling),hl
     ld hl,mrSlots
     ld b,MEM_RESIDENT_SLOTS

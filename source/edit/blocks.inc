@@ -56,7 +56,7 @@ pageDownLineLoop:  LD    E,L
         JP    pageDownRedraw
 pageDownAdvance:  PUSH  HL
         CALL  nextCurrentLine
-        CALL  Z,bios_printChar
+        CALL  Z,mon2_printCharOld
         POP   HL
         DEC   B
         JP    NZ,pageDownLineLoop
@@ -132,7 +132,7 @@ editorPageRetainAndDraw:
         LD HL,editorPageWidths+EDITOR_PAGE_STEP*3
         LD DE,editorPageWidths+EDITOR_ROWS*3
         LD BC,editorPageWidths
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         LD HL,(editorRowLengths+EDITOR_PAGE_STEP)
         LD (editorRowLengths),HL
         LD HL,09000h+EDITOR_TEXT_TOP+EDITOR_PAGE_STEP*10
@@ -142,7 +142,7 @@ editorPageCopyUp:
         LD HL,editorPageWidths
         LD DE,editorPageWidths+6
         LD BC,editorPageWidths+EDITOR_PAGE_STEP*3
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         LD HL,(editorRowLengths)
         LD (editorRowLengths+EDITOR_PAGE_STEP),HL
         LD HL,09000h+EDITOR_TEXT_TOP
@@ -185,7 +185,7 @@ editorDocumentEndY:
         ADD A,10
         JP editorDocumentEndY
 editorDocumentEndReady:
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         JP redrawPreservingCursor
 
 editorMarkActive: DB 0

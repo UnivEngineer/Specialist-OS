@@ -8,7 +8,7 @@
 memPrint:
     ld a,(bankPage)
     or a
-    jp z,bios_printStringZ
+    jp z,mon2_printStringOld
     xor a
     ld (memOperation),a
 memPrintTyped:
@@ -53,12 +53,6 @@ memPrintTail:
     ld b,a
     call bankCopyBytes
     jp memPrintFilled
-memPrintZ:
-    call bankTextChecked
-    ld a,e
-    sub BANK_WINDOW & 255
-    ld c,a
-    jp z,memPrintZEmpty
 memPrintFilled:
     pop de
     push de
@@ -73,6 +67,7 @@ memPrintFilled:
     dec a
     ld b,a
     ld (BANK_IO_MAIN),a
+memPrintJumpMain:
     jp memPrintMain
 
 ; MAIN читает текст из окна. Для пачки команд MAIN сохраняет список на стеке.

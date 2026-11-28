@@ -83,7 +83,7 @@ def main():
             assert byte('lineEditPosition') == position
             origin = m.read(symbols['lineEditOrigin'] + 1, 1)[0]
             x = origin + (position - byte('lineEditOffset')) * width // 2
-            assert byte('bios_vars.cursorX') == x, (width, x, byte('bios_vars.cursorX'))
+            assert byte('mon2_vars.cursorX') == x, (width, x, byte('mon2_vars.cursorX'))
 
         m.stop_at(symbols['cliInput'])
         m.tap('f10')

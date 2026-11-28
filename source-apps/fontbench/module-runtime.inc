@@ -15,7 +15,7 @@ bankBufferReady:
     ld (bankRegs+7),a
     ld hl,(output+1)
     ld de,kernelReal
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,bankRowInvoke
     ld a,4
     ld (bankRegs+7),a

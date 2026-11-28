@@ -17,16 +17,8 @@ sysRegsEntry:
     jp z,sysBiosRegs
     ; Keep the prepared local RAW route and DOS adapters.
     jp sysPacketReady
-; Очередь передаёт C=команду, A=режим bbModes, DE=MX_REGS текущей записи.
-; У выделенных команд bit 7 установлен, младшие 7 бит выбирают JMP в C800h.
+; Очередь передаёт C=команду, DE=MX_REGS текущей записи.
 sysBiosBatch:
-    or a
-    jp p,sysBiosRegs
-    and 07Fh
-    ld l,a
-    ld h,bios_printChar >> 8
-    push hl
-    jp sysLoadRegs
 sysBiosRegs:
     call sysBios
     ret c

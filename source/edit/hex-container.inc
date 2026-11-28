@@ -11,7 +11,7 @@ hexRawLength:
     ld hl,(v_textBeginLo)
     ex de,hl
     ld hl,(v_textEnd)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld (hexSize),hl
     ret
 
@@ -149,9 +149,18 @@ hexMXHeader:
     ld a,(hexRow+IMAGE_HEADER_BYTES)
     cp IMAGE_HEADER_SIZE
     jp nz,hexInvalidHeader
-    ld a,(hexRow+29)
+    ld a,(hexRow+IMAGE_MONITOR_BYTES)
     or a
+    jp z,hexMXFields
+    cp IMAGE_MONITOR_MAX+1
+    jp nc,hexInvalidHeader
+    ld a,(hexRow+IMAGE_MODE)
+    cp IMAGE_MODE_MON
     jp nz,hexInvalidHeader
+    ld a,(hexRow+5)
+    and 0FFh-IMAGE_FLAG_MAIN
+    jp nz,hexInvalidHeader
+hexMXFields:
     ld hl,(hexRow+6)
     ld (hexLoad),hl
     ld hl,(hexRow+8)
@@ -160,6 +169,12 @@ hexMXHeader:
     ld (hexExpectedCS),hl
     ld hl,(hexRow+10)
     ld de,IMAGE_HEADER_SIZE
+    ld a,(hexRow+IMAGE_MONITOR_BYTES)
+    or a
+    jp z,hexMXSize
+    add a,IMAGE_HEADER_SIZE+2
+    ld e,a
+hexMXSize:
     add hl,de
     jp c,hexInvalidHeader
     ex de,hl
@@ -185,8 +200,9 @@ hexMXEntryUpper:
     jp z,hexMXEntryLower
     jp nc,hexInvalidHeader
 hexMXEntryLower:
-    ld hl,(hexSize)
+    ld hl,(hexRow+10)
     ld de,IMAGE_HEADER_SIZE
+    add hl,de
     ld a,1
     jp hexInstallSpan
 
@@ -199,7 +215,7 @@ hexParseRKS:
     ex de,hl
     ld hl,(hexRow+2)
     ld (hexEntry),hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp c,hexInvalidHeader
     ld de,7
     add hl,de
@@ -332,7 +348,7 @@ hexContainerName:
     ex de,hl
     pop hl
     ld bc,hexContainerEntry
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,(hexLoad)
     ex de,hl
     ld hl,hexContainerLoad
@@ -348,7 +364,7 @@ hexContainerName:
     COLOR COLOR_STATUSBAR
     call enableInverse
     ld hl,0008h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld hl,hexContainerTitle
     ld bc,hexContainerEnd-hexContainerTitle
     call hexPrintAt
