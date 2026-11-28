@@ -141,17 +141,17 @@ ncPreparePanels:
 ncStartupCopyright:
             COLOR COLOR_CMDSCREEN
             ld hl,aCommanderBuild
-            call bios_printStringRawZ
+            call FONT_ENGINE_RAWZ
             ld c,' '
-            call bios_printChar
+            call mon2_printCharOld
             ld hl,aCopyright
-            call bios_printStringRawZ
+            call FONT_ENGINE_RAWZ
             ld c,10
     IF NC_BANKED
-            call bios_printChar
+            call mon2_printCharOld
             jp ncBankFlush
     ELSE
-            jp bios_printChar
+            jp mon2_printCharOld
     ENDIF
 ncStartupPrepared: DB 0
 

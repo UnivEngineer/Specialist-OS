@@ -23,7 +23,7 @@ word=lambda v:struct.pack('<H',v)
 regs=lambda hl=0,de=0,bc=0,af=2:struct.pack('<4H',hl,de,bc,af)
 def page(v):m.write(0xfffd if v else 0xfffc,bytes([v-1 if v else 0]))
 def call(op,hl=0,de=0,bc=0,af=2,error=None):
- page(0);m.write(0x3000,regs(hl,de,bc,af));m.write(0x2000,b'\xcd\x00\xf8\xc3\x00\x8b')
+ page(0);m.write(0x3000,regs(hl,de,bc,af));m.write(0x2000,b'\xcd\x60\xf8\xc3\x00\x8b')
  m.stop_at(0x8b00);m.call('regs_set',pc=0x2000,sp=0x8fdf,bc=op,de=0x3000)
  z=m.until(0x8b00,40);r={key:v['dec'] for key,v in z['registers'].items()}
  assert r['sp']==0x8fdf,r
@@ -299,7 +299,7 @@ try:
   page(1)                 # Продолжение нативного FILE_EXEC в DOS.
   # NC может ждать подтверждения после консольного вывода BANK-программы.
   # Не полагаемся на то, что Enter запуска заодно снимет это ожидание.
-  getch_points={font_symbols['bios_getch'],font_symbols['getch']}
+  getch_points={font_symbols['mon2_getchOld'],font_symbols['getch']}
   m.stop_at(n['mainLoop'])
   for getch in getch_points:m.call('bp_set',addr=getch,type='exec')
   for _ in range(120):

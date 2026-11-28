@@ -11,20 +11,19 @@
       "address": 49168,
       "size": 3,
       "target": "clearScreen",
-      "abi": "bios_clearScreenOld"
+      "abi": "mon2_clearScreenOld"
     },
     {
       "address": 49207,
       "size": 3,
       "target": "FONT_ENGINE_CHAR",
-      "abi": "bios_printCharOld"
+      "abi": "mon2_printCharOld"
     },
     {
       "address": 49520,
       "size": 3,
-      "target": "beep",
-      "target_main_io": true,
-      "abi": "bios_beep_Old"
+      "target": "biosBeep",
+      "abi": "mon2_beep_Old"
     },
     {
       "address": 49551,
@@ -39,43 +38,43 @@
       "files": [
         "keybModes.inc"
       ],
-      "abi": "bios_setKeybMode82"
+      "abi": "mon2_setKeybMode82"
     },
     {
       "address": 49975,
       "size": 3,
       "target": "getch",
-      "abi": "bios_getchOld"
+      "abi": "mon2_getchOld"
     },
     {
       "address": 50039,
       "size": 3,
-      "abi": "bios_tapeReadOld",
+      "abi": "mon2_tapeReadOld",
       "target": "t_tapeRead"
     },
     {
       "address": 50128,
       "size": 3,
       "target": "t_tapeWrite",
-      "abi": "bios_tapeWriteOld"
+      "abi": "mon2_tapeWriteOld"
     },
     {
       "address": 50215,
       "size": 3,
       "target": "cmp_hl_de",
-      "abi": "bios_cmp_hl_de"
+      "abi": "mon2_cmp_hl_de"
     },
     {
       "address": 50221,
       "size": 3,
       "target": "memcpy_bc_hl",
-      "abi": "bios_memcpy_bc_hl"
+      "abi": "mon2_memcpy_bc_hl"
     },
     {
       "address": 50232,
       "size": 3,
       "target": "FONT_ENGINE_Z",
-      "abi": "bios_printStringOld"
+      "abi": "mon2_printStringOld"
     },
     {
       "address": 50336,
@@ -83,48 +82,73 @@
       "files": [
         "keyTable.inc"
       ],
-      "abi": "bios_keybTable"
+      "abi": "mon2_keybTable"
+    },
+    {
+      "address": 50750,
+      "size": 18,
+      "files": [
+        "ramfos-state.inc"
+      ]
+    },
+    {
+      "address": 50783,
+      "size": 13,
+      "files": [
+        "ramfos-tape-state.inc"
+      ]
     },
     {
       "address": 51200,
-      "size": 54,
+      "size": 93,
       "files": [
         "jmps_c800.inc"
-      ],
-      "abi": "bios_reboot"
+      ]
     }
   ],
-  "vectors": [
-    ["drawCursor",           "drawCursor3"],
-    ["setCursorPos",         "setCursorPos",            "CURSOR_SET"],
-    ["printHexWord",         "printHexWord",            "PRINT_HEX16"],
-    ["printer",              "printer"],
-    ["strToHex",             "strToHex"],
-    ["installDriver",        "installDriver"],
-    ["diskDriver",           "sysDiskDriver",           "DISK_DRIVER"],
-    ["printCharRaw",         "FONT_ENGINE_RAW",         "PRINT_CHAR_RAW"],
-    ["printDecWord",         "printDecWord",            "PRINT_DEC"],
-    ["upperCase",            "upperCase",               "UPPER"],
-    ["strcmp",               "strcmp",                  "STRCMP"],
-    ["stricmp",              "stricmp",                 "STRICMP"],
-    ["sub_hl_de",            "sub_hl_de"],
-    ["fontControl",          "printCharBody"],
-    ["fontNewLine",          "printChar_c0A"],
-    ["fontPosition",         "calcCursorAd_0"],
-    ["beepTimer",            "beepTimer"],
-    ["diskWriteChecked",     "diskWriteChecked"],
-    ["setFontEncoding",      "FONT_ENGINE_ENCODING"],
-    ["argNext",              "argNext",                 "ARG_NEXT"],
-    ["installBlockDriver",   "installBlockDriver"],
-    ["setInputHook",         "setInputHook",            "INPUT_HOOK"],
-    ["blockIO",              "blockIO"],
-    ["printStringRawZ",      "FONT_ENGINE_RAWZ",        "PRINT_STRING_RAW_Z"],
-    ["printStringRawLim",    "FONT_ENGINE_LIM",         "PRINT_STRING_RAW_LIM"],
-    ["printStringRawPseudo", "printStringRawPseudo"],
-    ["printStringLim",       "bankText.printStringLim", "PRINT_STRING_LIM"],
-    ["cliExecDone",          "biosCliExecReturn"]
-  ],
   "units": [
+    {
+      "name": "ramfosTape",
+      "files": [
+        "ramfos-tape.inc"
+      ]
+    },
+    {
+      "name": "bankedBoot",
+      "files": [
+        "banked-core.inc"
+      ]
+    },
+    {
+      "name": "compatProfile",
+      "files": [
+        "compat-profile.inc"
+      ]
+    },
+    {
+      "name": "stdPpi",
+      "files": [
+        "../io/std-ppi.inc"
+      ]
+    },
+    {
+      "name": "ramfosConsole",
+      "files": [
+        "ramfos-console.inc"
+      ]
+    },
+    {
+      "name": "ramfosMemory",
+      "files": [
+        "ramfos-memory.inc"
+      ]
+    },
+    {
+      "name": "ramfosScreen",
+      "files": [
+        "ramfos-screen.inc"
+      ]
+    },
     {
       "name": "clearScreen",
       "files": [
@@ -239,12 +263,6 @@
       "name": "driverInfo",
       "files": [
         "driverInfo.inc"
-      ]
-    },
-    {
-      "name": "initVars",
-      "files": [
-        "initVars.inc"
       ]
     },
     {

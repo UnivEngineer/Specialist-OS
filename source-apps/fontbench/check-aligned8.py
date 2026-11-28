@@ -37,7 +37,7 @@ def main():
         nonlocal checks
         m = bytearray(base)
         m[0x7800:0x7800 + len(chars)] = chars
-        m[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] = bytes((y, x // 2))
+        m[s['mon2_vars.cursorY']:s['mon2_vars.cursorY'] + 2] = bytes((y, x // 2))
         count = len(chars)
         valid = (not scalar and count == 0) or (count <= 48 and x % 8 == 0 and x + count * 8 <= 384 and y >= 7)
         c = chars[0] if scalar else count
@@ -52,7 +52,7 @@ def main():
         assert data[0x9000:0xc000] == expected, ('pixels', scalar, chars, x, y)
         assert data[0x83c0:0x83c6] == word(0x7800) + bytes((c, 0x12, 0x78, 0x56)), 'registers'
         assert data[0x83c7] == 0xa5 and bool(data[0x83c6] & 1) == (not valid), 'AF/CF'
-        assert data[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] == bytes((y, (x + (count * 8 if valid else 0)) // 2))
+        assert data[s['mon2_vars.cursorY']:s['mon2_vars.cursorY'] + 2] == bytes((y, (x + (count * 8 if valid else 0)) // 2))
         assert data[0x2800:0x3800] == base[0x2800:0x3800]
         assert data[0xdb90:0xeb90] == base[0xdb90:0xeb90], 'no cache'
         checks += 1
@@ -79,7 +79,7 @@ def main():
     # Заглушка экранного ABI записывает C, сохраняя используемые регистры.
     for stage in (0, 1, 9, 10, 12, 99, 100, 108, 255):
         m = bytearray(base)
-        m[s['bios_printChar']:s['bios_printChar'] + 3] = b'\xc3\x50\x83'
+        m[s['mon2_printCharOld']:s['mon2_printCharOld'] + 3] = b'\xc3\x50\x83'
         m[0x8350:0x8350 + 14] = bytes.fromhex('F5 E5 2A E0 83 71 23 22 E0 83 E1 F1 C9 00')
         m[0x83e0:0x83e2] = word(0x8400)
         code = bytearray(bytes.fromhex('31 00 8B') + bytes((0x3e, stage, 0xcd)) + word(s['matrixProgressNumber']))

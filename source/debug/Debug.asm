@@ -16,8 +16,20 @@ IMAGE_BSS_SIZE      = IMAGE_BSS_UNKNOWN
     INCLUDE "memory.inc" ; Поиск, сравнение, перенос, заполнение и текстовый дамп
     INCLUDE "input.inc" ; Разбор HEX-параметров и вход ввода строки
     INCLUDE "console.inc" ; Редактор памяти, ввод HEX, пауза и HEX-дамп
-    INCLUDE "legacy.inc" ; Остатки старого обмена и общий ввод строки
     INCLUDE "vectors.inc" ; Фиксированная таблица совместимости F800h
+    INCLUDE "legacy.inc" ; Остатки старого обмена и общий ввод строки
+debugPrinterNative:
+    MXOS_CALL_REGS MXOS_BIOS_PRINTER
+    ret
+debugKeyScanNative:
+    MXOS_CALL_REGS MXOS_BIOS_KEY_SCAN
+    ret
+debugTapeLoadNative:
+    MXOS_CALL_REGS MXOS_BIOS_TAPE_LOAD
+    ret
+debugTapeSaveNative:
+    MXOS_CALL_REGS MXOS_BIOS_TAPE_SAVE
+    ret
 
 ; Собственные фиксированные буферы допустимы только ниже текущего memtop.
 
@@ -27,7 +39,7 @@ IMAGE_BSS_SIZE      = IMAGE_BSS_UNKNOWN
 ; Проверить, помещается ли рабочая область DEBUG в MAIN.
 ;
 ; вход:
-;   bios_getMemTop возвращает последний доступный адрес. Рабочие данные начинаются по
+;   mx_getMemTop возвращает последний доступный адрес. Рабочие данные начинаются по
 ;   vars1.
 ;
 ; выход:
@@ -37,12 +49,12 @@ IMAGE_BSS_SIZE      = IMAGE_BSS_UNKNOWN
 ;----------------------------------------------------------------------------
 
 debugCheckMemory:
-        CALL bios_getMemTop
+        CALL mx_getMemTop
         LD DE,vars1+MON2_VARS_1-1
-        CALL bios_cmp_hl_de
+        CALL mon2_cmp_hl_de
         JP NC,debugMemoryReady
         LD HL,debugNoMemory
-        CALL bios_printString
+        CALL mon2_printStringOld
         RET
 debugNoMemory: DB "NOT ENOUGH MEMORY",0
 

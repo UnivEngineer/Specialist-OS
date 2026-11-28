@@ -76,7 +76,7 @@ def main():
             m.write(0xC000,binary)
             m.write(ds['v_drive'],b'\0')
             m.write(ds['v_diskInfo']+10,total.to_bytes(2,'little'))
-            m.write(ds['bios_diskDriver']+1,ds['diskDriver'].to_bytes(2,'little'))
+            m.write(ds['sysDiskDriver']+1,ds['diskDriver'].to_bytes(2,'little'))
             cases = {}
             for address in [0,1,0x2000,0x7F00,0x7F01,0x7FFF,0x8000,0x8001,0x8200,0x83FF,0x8C00,
                             0xEEFF,0xEF00,0xEF01,0xEFFF,0xF000,0xF100]:
@@ -87,7 +87,7 @@ def main():
                     m.write(start,guard)
                     # Наличие этого маркера после вызова проверяет возврат RAM.
                     if not start <= 0x6000 < start+len(guard):m.write(0x6000,b'\x6A')
-                    state,ticks = m.subroutine(ds['bios_diskDriver'],af=0x55D7,bc=0x025A,de=sector,hl=address)
+                    state,ticks = m.subroutine(ds['sysDiskDriver'],af=0x55D7,bc=0x025A,de=sector,hl=address)
                     assert state['flags']['C'] == (name == 'unchecked')
                     assert state['registers']['af']['dec']>>8 == 0x55
                     assert all(state['registers'][k]['dec']==v for k,v in

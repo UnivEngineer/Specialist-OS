@@ -49,7 +49,7 @@ def main():
         return m
     def key(m,code,ctrl=False):
         # Второй getch завершает одну итерацию штатного цикла NC.
-        stub=bytes.fromhex('3A 00 65 3C 32 00 65 3D C2 00 63 3E')+bytes([code,0x37 if ctrl else 0xB7,0xC9]);m[0x6400:0x6400+len(stub)]=stub;m[0x6500]=0;m[ds['bios_getch']:ds['bios_getch']+3]=bytes.fromhex('C3 00 64')
+        stub=bytes.fromhex('3A 00 65 3C 32 00 65 3D C2 00 63 3E')+bytes([code,0x37 if ctrl else 0xB7,0xC9]);m[0x6400:0x6400+len(stub)]=stub;m[0x6500]=0;m[ds['mon2_getchOld']:ds['mon2_getchOld']+3]=bytes.fromhex('C3 00 64')
         return run(m,ns['mainLoop_cursorReady'],event=True)
     def file_pixels(m,panel):
         start=24*panel
@@ -64,7 +64,7 @@ def main():
         for code,first,selected,new_first,new_selected in [(0x1A,0,count-1,1,count),(0x19,1,1,0,0)]:
             m=memory(panel,first,selected);b=key(m,code)
             assert b[ns['state']+8+panel]==new_first and b[ns['state']+10+panel]==new_selected,(panel,code,list(b[ns['state']:ns['state']+12]),new_first,new_selected)
-            assert b[0x6510]==inversions and b[ns['bios_vars.inverse']]==0,(panel,code,b[0x6510])
+            assert b[0x6510]==inversions and b[ns['mon2_vars.inverse']]==0,(panel,code,b[0x6510])
             actual=file_pixels(b,panel)
             # Полная перерисовка + битовая инверсия служит независимым эталоном.
             for x in list(range(0x91,0x9B))+list(range(0x9D,0xA7)):

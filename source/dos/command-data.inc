@@ -76,11 +76,6 @@ cliCommands:
     DB 0
     DB 0
 cliExtensions:      DB 'COMEXEBAT',0
-cliHelpText:        DB 'DIR CD PWD PATH A: MD RD COPY MOVE REN DEL TYPE CLS ECHO PAUSE REM HELP EXIT ATTRIB'
-    IFDEF MX_FLOPPY_BOOT
-    DB ' SYSROM'
-    ENDIF
-    DB 0
 cliDirText:         DB '<DIR>',0
     IFDEF BANKED_DOS_BUILD
 cliPath1 = DOS_CLI_PATH1

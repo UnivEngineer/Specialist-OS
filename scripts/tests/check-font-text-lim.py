@@ -55,10 +55,10 @@ def scalar_code(payload, raw, bios):
     # Независимый эталон не читает строку из памяти и не использует пакетный цикл.
     if raw:
         instruction = b'\x3e'
-        entry = bios['bios_printCharRaw']
+        entry = bios['FONT_ENGINE_RAW']
     else:
         instruction = b'\x0e'
-        entry = bios['bios_printChar']
+        entry = bios['mon2_printCharOld']
     return b''.join(instruction + bytes([value]) + b'\xcd' + word(entry)
                     for value in payload) + b'\xc9'
 
@@ -80,16 +80,17 @@ def main():
     parser.add_argument('engines', nargs='*', default=ENGINES)
     args = parser.parse_args()
     bios = symbols(args.bin / 'BIOS.sym')
-    cursor = bios['bios_vars.cursorY']
-    inverse = bios['bios_vars.inverse']
+    cursor = bios['mon2_vars.cursorY']
+    inverse = bios['mon2_vars.inverse']
     esc, koi = bios['bios_upper.escMode'], bios['bios_upper.koi7']
     font_bin = args.bin / 'fonts'
     template = bytearray(65536)
     for name, address in (('BIOS', 0xc000), ('IO', 0xf000)):
         put(template, address, (args.bin / f'{name}.sys').read_bytes())
-    for name, start, end in (('bios_vars', 'initVars', 'initVarsEnd'),
-                             ('bios_upper.charGen', 'initTextVars', 'initTextVarsEnd')):
-        put(template, bios[name], template[bios[start]:bios[end]])
+    defaults = (args.bin / 'BIOS.defaults.bin').read_bytes()
+    split = bios['MON2_VARIABLES']
+    put(template, bios['mon2_vars'], defaults[:split])
+    put(template, bios['bios_upper.charGen'], defaults[split:])
 
     video = bytes((index * 37 + (index >> 8) * 13) & 255 for index in range(0x3000))
     text = (b'A\tB\rC\nD\x1b(E\x1b)FG' + bytes([0x60, 0x7f, 0x80, 0xe0, 0xff])

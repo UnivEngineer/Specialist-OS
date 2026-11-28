@@ -24,18 +24,43 @@ biosRecoveryBad:
     ld a,1
 biosRecoveryFlag:
     push af
-    ; Код один и тот же; пять полей контекста LOCALBLOCK задаёт sysInstall.
+    ; Общий MEM берём из DOS; контексты и накладки восстановим отдельно.
     ld hl,MEM_IMAGE_LOCAL_START
     ; MAIN: не затирать установленный AT512KS локальными службами DOS/EXEC.
     ld de,BANK_MAIN_LOCAL_BYTES
     call biosRecoverRange
     ld hl,mx_callPacket
-    ; Общий CLIENT включает таблицу вызовов и текстовый шлюз.
+    ; Общий CLIENT включает таблицу вызовов и текстовый шлюз. F800h–F85Fh не копируются.
     ld de,BANK_MAIN_CLIENT_BYTES
     call biosRecoverRange
     ld hl,BANK_LANDING
     ld de,BANK_TRANSPORT_BYTES
     call biosRecoverRange
+    ; Эталон накладок MAIN хранится перед кодом DOS. Формат каждой записи
+    ; — длина, адрес и байты. Нулевая длина завершает обход.
+    ld hl,DOS_BIOS_OVERLAY_ADDR
+.overlay:
+    call BANK_WINDOW
+    inc hl
+    or c
+    jp z,.done
+    ld b,c
+    call BANK_WINDOW
+    ld e,c
+    inc hl
+    call BANK_WINDOW
+    ld d,c
+    inc hl
+.copyOverlay:
+    call BANK_WINDOW
+    ld a,c
+    ld (de),a
+    inc hl
+    inc de
+    dec b
+    jp nz,.copyOverlay
+    jp .overlay
+.done:
     pop af
     ret
 ; HL=общий адрес main/DOS, DE=длина>0. Никаких стековых команд в банке DOS.
@@ -61,6 +86,6 @@ biosMemWarning:
     call printString
     jp getch
 biosMemWarningText:
-    DB 0Ah,"STD I/O WRITE IN MX MODE. PRESS ANY KEY",0Ah,0
+    DB 0Ah,"STD I/O IN MX. KEY?",0Ah,0
     ASSERT BANK_TRANSPORT_BYTES-0300h <= 0C0h
     ASSERT biosRecoveryWindowEnd-biosRecoveryWindow <= 32

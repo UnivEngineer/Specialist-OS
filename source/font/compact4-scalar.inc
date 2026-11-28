@@ -22,7 +22,7 @@
     ld a,c
     COMPACT4_POINTER h,l,FONT_ADDR
     ex de,hl
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     sub 1
     sbc a,a
     cpl

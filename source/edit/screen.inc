@@ -32,7 +32,7 @@ copyUntilDE:
         ADD HL,DE
         EX DE,HL
         POP HL
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         POP DE
         LD H,D
         LD L,E
@@ -72,7 +72,7 @@ Beep4:
 
         ; Печать b раз символа с кодом c
 TypeCharCtimesB:
-        CALL  bios_printChar
+        CALL  mon2_printCharOld
         DEC   B
         JP    NZ,TypeCharCtimesB
         RET
@@ -111,7 +111,7 @@ editorScanEnd:
 ; Запомнить координаты курсора для restoreCursor.
 ;
 ; вход:
-;   В bios_vars.cursorY и следующем байте хранятся текущие Y и X. Операнд
+;   В mon2_vars.cursorY и следующем байте хранятся текущие Y и X. Операнд
 ;   восстановления доступен для записи.
 ;
 ; выход:
@@ -119,14 +119,14 @@ editorScanEnd:
 ;----------------------------------------------------------------------------
 
 saveCursor:  PUSH  HL            ; [7]
-        LD    HL,(bios_vars.cursorY)
+        LD    HL,(mon2_vars.cursorY)
         ; САМОМОДИФИКАЦИЯ: сохранение курсора в операнде LD HL,nn.
         LD    (smc_restoreCursor+1),HL
         POP   HL
         RET
 restoreCursor:  PUSH  HL            ; [7]
 smc_restoreCursor:   LD    HL,0000H
-        LD    (bios_vars.cursorY),HL
+        LD    (mon2_vars.cursorY),HL
         POP   HL
         RET
 resumeAtTextPointer:
@@ -173,7 +173,7 @@ drawStatusBar:
         PUSH HL
         PUSH DE
         PUSH BC
-        LD HL,(bios_vars.cursorY)
+        LD HL,(mon2_vars.cursorY)
         PUSH HL
         CALL editorLayoutStatus
         COLOR COLOR_STATUSBAR
@@ -186,23 +186,23 @@ drawStatusBar:
         LD C,0
         CALL editorStatusPosition
         LD HL,editorStatusLnText
-        CALL bios_printString
+        CALL mon2_printStringOld
         LD A,(editorStatusColPos)
         LD C,A
         CALL editorStatusPosition
         LD HL,editorStatusColText
-        CALL bios_printString
+        CALL mon2_printStringOld
         LD A,(editorStatusTabPos)
         LD C,A
         CALL editorStatusPosition
         LD HL,editorStatusTabText
-        CALL bios_printString
+        CALL mon2_printStringOld
         LD A,(editorStatusLangPos)
         SUB 7
         LD C,A
         CALL editorStatusPosition
         LD HL,editorEncodingLabel
-        CALL bios_printString
+        CALL mon2_printStringOld
         LD HL,0FFFFh
         LD (editorLastLine),HL
         LD (editorLastCol),HL
@@ -253,7 +253,7 @@ updateStatusBar:
         PUSH HL
         PUSH DE
         PUSH BC
-        LD HL,(bios_vars.cursorY)
+        LD HL,(mon2_vars.cursorY)
         PUSH HL
         LD HL,(editorLastLine)
         EX DE,HL
@@ -325,13 +325,13 @@ editorStatusMode:
         JP NZ,editorStatusPrintMode
         LD HL,txtOvr
 editorStatusPrintMode:
-        CALL bios_printString
+        CALL mon2_printStringOld
         CALL disableInverse
 editorStatusLanguageCheck:
         CALL editorStatusLanguage
 editorStatusRestore:
         POP HL
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
         POP BC
         POP DE
         POP HL
@@ -356,7 +356,7 @@ editorStatusLanguage:
         JP Z,editorStatusPrintLanguage
         LD HL,editorStatusRus
 editorStatusPrintLanguage:
-        CALL bios_printString
+        CALL mon2_printStringOld
         JP disableInverse
 
 ;----------------------------------------------------------------------------
@@ -365,14 +365,14 @@ editorStatusPrintLanguage:
 ; Получить бит раскладки клавиатуры из состояния BIOS.
 ;
 ; вход:
-;   bios_vars.keyLocks содержит выбранные переключатели клавиатуры.
+;   mon2_vars.keyLocks содержит выбранные переключатели клавиатуры.
 ;
 ; выход:
 ;   a = значение бита 0, z = 1 если он сброшен, cf = 0. bc, de и hl сохранены.
 ;----------------------------------------------------------------------------
 
 editorReadLanguage:
-        LD A,(bios_vars.keyLocks)
+        LD A,(mon2_vars.keyLocks)
         AND 1
         RET
 editorStatusNumber:
@@ -424,9 +424,9 @@ editorStatusField:
         LD A,UI_ALIGN_CENTER
         CALL uiAlignText
         EX DE,HL
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
         EX DE,HL
-        JP bios_printStringRawZ
+        JP FONT_ENGINE_RAWZ
 editorFormatFour:
         CALL editorFormatColumn
         LD A,(editorNumberBuffer)
@@ -457,7 +457,7 @@ editorStatusMultiply:
 editorStatusXY:
         LD H,A
         LD L,8
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
         RET
 editorStatusLnText:     DB 'Ln',0
 editorStatusColText:    DB 'Col',0
@@ -486,7 +486,7 @@ editorPreviousHook: DW 0
 editorGetch:
         CALL editorUpdateToolbarKeys
         LD HL,editorKeyboardIdle
-        CALL bios_setInputHook
+        CALL editSetInputHook
         LD (editorPreviousHook),HL
         ; Use the document caret only for this wait. Modal fields and the
         ; calling shell keep the original BIOS cursor configuration.
@@ -503,14 +503,14 @@ editorGetch:
 editorSetCaret:
         LD (bios_upper.cursorCfg),A
 editorWaitKey:
-        CALL bios_getch
+        CALL mon2_getchOld
         PUSH AF
         POP HL
         EX (SP),HL
         LD A,H
         LD (bios_upper.cursorCfg),A
         LD HL,(editorPreviousHook)
-        CALL bios_setInputHook
+        CALL editSetInputHook
         POP AF
         RET
 editorKeyboardIdle:
@@ -518,18 +518,18 @@ editorKeyboardIdle:
         PUSH BC
         PUSH DE
         PUSH HL
-        LD HL,(bios_vars.cursorY)
+        LD HL,(mon2_vars.cursorY)
         PUSH HL
-        LD HL,(bios_vars.inverse)
+        LD HL,(mon2_vars.inverse)
         PUSH HL
         CALL editorUpdateToolbarKeys
         LD A,(hexActive)
         OR A
         CALL Z,editorStatusLanguage
         POP HL
-        LD (bios_vars.inverse),HL
+        LD (mon2_vars.inverse),HL
         POP HL
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
         COLOR COLOR_TEXT
         POP HL
         POP DE
@@ -574,7 +574,7 @@ editorPositionCursor:
         CALL compareHLDE
         JP C,editorWindowLeft
 editorWindowDistance:
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD A,B
         SBC A,C
         OR A
@@ -593,7 +593,7 @@ editorWindowRight:
         DEC A
         LD E,A
         LD D,0
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD A,(v_visualColumnHi)
         SBC A,0
         LD B,A
@@ -619,7 +619,7 @@ editorWindowChanged:
         EX DE,HL
         POP HL
         LD (v_leftColumn),HL
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD A,B
         SBC A,C
         OR A
@@ -658,7 +658,7 @@ editorCursorMultiply:
         ADD A,B
         JP editorCursorMultiply
 editorCursorReady:
-        LD (bios_vars.cursorY+1),A
+        LD (mon2_vars.cursorY+1),A
         RET
 
 ; HL = new left column - old left column. Large jumps render the full page.
@@ -740,16 +740,16 @@ editorShiftGapReady:
         LD A,8
         LD (editorSliceWidth),A
         LD A,EDITOR_FIRST_Y
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         LD HL,(v_topLine)
         LD B,EDITOR_ROWS
 editorShiftDraw:
         CALL drawTextSlice
         OR A
         JP Z,restoreCursor
-        LD A,(bios_vars.cursorY)
+        LD A,(mon2_vars.cursorY)
         ADD A,10
-        LD (bios_vars.cursorY),A
+        LD (mon2_vars.cursorY),A
         DEC B
         JP NZ,editorShiftDraw
         JP restoreCursor
@@ -893,7 +893,7 @@ clearTextViewport:
         RET
 enableInverse:  PUSH  HL            ; [5]
         LD    HL,0FFFFH   ; 65535
-setVideoInverse: LD    (bios_vars.inverse),HL
+setVideoInverse: LD    (mon2_vars.inverse),HL
         POP   HL
         RET
 disableInverse:  PUSH  HL            ; [6]

@@ -5,7 +5,7 @@ ncConfigInit:
     ld hl,ncDefaultColorRules
     ld de,ncDefaultColorRulesEnd
     ld bc,vars.fileColorRules
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,vars.fileColorRules+ncDefaultColorRulesEnd-ncDefaultColorRules-1
     ELSE
     ld hl,vars.fileColorRules
@@ -294,7 +294,7 @@ ncConfigStateAbsolute:
     add hl,de
     ex de,hl
     ld bc,vars.stateFile
-    jp bios_memcpy_bc_hl
+    jp mon2_memcpy_bc_hl
 ncConfigStateLayer: DB 0
 
 ; Next uppercase token, DE=start, B=length, CF=end/comment; cursor retained.
@@ -327,7 +327,7 @@ ncConfigTokenByte:
     jp z,ncConfigTokenEnd
     cp 9
     jp z,ncConfigTokenEnd
-    call bios_upperCase
+    call ncStrings.upperCase
     ld (hl),a
     inc hl
     inc b
@@ -351,7 +351,7 @@ ncConfigQuotedByte:
     jp z,ncConfigBadQuote
     cp '"'
     jp z,ncConfigTokenEnd
-    call bios_upperCase
+    call ncStrings.upperCase
     ld (hl),a
     inc hl
     inc b

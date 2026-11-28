@@ -44,10 +44,10 @@ editorCheckFileSize:
         LD    HL,(v_textBeginLo)
         EX    DE,HL
         LD    HL,(v_textLimitLo)
-        CALL  bios_sub_hl_de
+        CALL  nativeMath.sub_hl_de
         EX    DE,HL
         LD    HL,(fileDescSize)
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         JP    NC,editorCheckFileSizeError
         OR    A
         RET
@@ -72,7 +72,7 @@ editorShowFileTooLarge:
 ; выход:
 ;   editorStart получает загруженный или пустой документ. MAIN регистрирует буфер в DOS
 ;   до первой записи. При нехватке памяти, недопустимом размере или пути к каталогу
-;   показан диалог и вызван bios_reboot.
+;   показан диалог и вызван mon2_init.
 ;----------------------------------------------------------------------------
 
 openCommandLineFile:
@@ -85,7 +85,7 @@ openCommandLineFile:
     ENDIF
         PUSH DE
         EX DE,HL
-        CALL bios_argNext
+        CALL editArgs.argNext
         JP C,editorConsoleBanner
         LD A,B
         CP 3
@@ -109,16 +109,16 @@ editorConsoleBanner:
         POP DE
 editorLoadingDone:
         PUSH  DE
-        CALL  bios_getMemTop
+        CALL  mx_getMemTop
         LD    DE,EDITOR_MEMORY_END-1
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         JP    C,editorLimitReady
         EX    DE,HL
 editorLimitReady:
         INC   HL
         LD    (v_textLimitLo),HL
         LD    DE,EDITOR_TEXT_BEGIN+2
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         POP   DE
         JP    C,editorMemoryTooSmall
     IF !EDIT_BANKED
@@ -127,7 +127,7 @@ editorLimitReady:
         LD HL,(v_textBeginLo)
         EX DE,HL
         LD HL,(v_textLimitLo)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         EX DE,HL
         LD HL,(v_textBeginLo)
         LD B,0
@@ -141,9 +141,9 @@ editorLimitReady:
         LD    (v_textEnd),HL
         LD    (HL),00h
         XOR   A
-        call bios_setFontEncoding      ; Файлы MXOS хранятся в KOI-8.
+        call FONT_ENGINE_ENCODING      ; Файлы MXOS хранятся в KOI-8.
         EX    DE,HL
-        CALL  bios_argNext
+        CALL  editArgs.argNext
         JP    C,editorStart
         EX    DE,HL
         LD    DE,fileDescName
@@ -179,7 +179,7 @@ editorPathEnd:
 
 commandLineFileTooLarge:
         CALL  editorShowFileTooLarge
-        JP    bios_reboot
+        JP    mon2_init
 
 editorCheckStartupDirectory:
         LD HL,fileDescName
@@ -191,7 +191,7 @@ editorCheckStartupDirectory:
         LD HL,editorDirectoryMessage
         LD DE,editorOpenErrorTitle
         CALL editorErrorWithTitle
-        JP bios_reboot
+        JP mon2_init
 
         DB    00H,00H
 
@@ -199,7 +199,7 @@ editorCheckStartupDirectory:
 editorMemoryTooSmall:
         LD HL,editorMemoryMessage
         CALL editorErrorModal
-        JP bios_reboot
+        JP mon2_init
 editorMemoryMessage:        DB 'No memory for text buffer.',0
 editorFileTooLargeMessage:  DB 'File does not fit in memory.',0
 editorDirectoryMessage:     DB 'Path is a directory.',0

@@ -419,7 +419,7 @@ editorNumberSubtract:
         CALL compareHLDE
         JP C,editorNumberEmit
 editorNumberTake:
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (editorNumberLow),HL
         LD A,(editorNumberHigh)
         SBC A,C

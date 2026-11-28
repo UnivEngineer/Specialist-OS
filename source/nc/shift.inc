@@ -6,7 +6,7 @@ ncInputHookBegin:
     push de
     ld (ncInputColor),a
     ld hl,ncShiftPoll
-    call bios_setInputHook
+    MXOS_CALL_REGS MXOS_BIOS_SET_INPUT_HOOK
     ld (ncPreviousHook),hl
     pop de
     pop hl
@@ -16,7 +16,7 @@ ncInputHookEnd:
     push hl
     push de
     ld hl,(ncPreviousHook)
-    call bios_setInputHook
+    MXOS_CALL_REGS MXOS_BIOS_SET_INPUT_HOOK
     pop de
     pop hl
     pop af
@@ -24,7 +24,7 @@ ncInputHookEnd:
 ncGetch:
     ld a,COLOR_CMDLINE
     call ncInputHookBegin
-    call bios_getch
+    call mon2_getchOld
     jp ncInputHookEnd
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -52,17 +52,17 @@ ncShiftPoll:
     push bc
     push de
     push hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     push hl
-    ld hl,(bios_vars.inverse)
+    ld hl,(mon2_vars.inverse)
     push hl
     xor a
-    ld (bios_vars.inverse),a
+    ld (mon2_vars.inverse),a
     call drawToolbar
     pop hl
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     pop hl
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,(ncInputColor)
     ld (IO_COLOR),a
     pop hl

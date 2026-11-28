@@ -9,9 +9,9 @@ ncPrintAligned:
     ret c
     push hl
     ex de,hl
-    call bios_setCursorPos
+    call mx_setCursorPos
     pop hl
-    jp bios_printStringRawZ
+    jp FONT_ENGINE_RAWZ
  ; Same arguments, with B relative to the active panel.
 ncPrintPanelAligned:
     push af
@@ -102,7 +102,7 @@ ncRightCopy:
     jp nz,ncRightCopy
     pop bc
     ld hl,ncTextBuffer
-    jp bios_printStringRawZ
+    jp FONT_ENGINE_RAWZ
 
 ; Bind the current NC font; appearance and focus stay in the shared widget API.
 ncDrawButton:

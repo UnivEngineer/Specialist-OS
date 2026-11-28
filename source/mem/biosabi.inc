@@ -1,6 +1,6 @@
 ; Внутреннее размещение адаптера BIOS на этапе интеграции.
 ; Публичные номера функций и MX_REGS определены только в mxos.inc.
-; MAINBIOS не содержит копий рендера: вызывает установленный BIOS через F800h.
+; MAINBIOS не содержит копий рендера: вызывает установленный BIOS через F860h.
 BANK_BIOS_GATE        = BIOS_BANK_GATE_ADDR
 BANK_BIOS_END         = BIOS_BANK_GATE_END
 BANK_BIOS_STACK_LOW   = BIOS_BANK_STACK_BOTTOM

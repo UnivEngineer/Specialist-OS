@@ -17,9 +17,9 @@ kernelReal:
     ret
 ; Эти адреса также служат тегами CASE; общий цикл делает один MXOS_CALL_REGS на поток.
 kernelString:
-    jp bios_printString
+    jp mon2_printStringOld
 kernelRealString:
-    jp bios_printStringRawZ
+    jp FONT_ENGINE_RAWZ
 kernelCoreEnd:
 ; HL=описатель CASE. A=1 для API, A=0 для standalone, ZF; BC/DE/HL сохранены.
 benchIsKernel:

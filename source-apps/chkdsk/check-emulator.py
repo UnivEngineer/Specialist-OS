@@ -127,13 +127,13 @@ def main():
     finally:
         m.write(0xFFFD,b'\0');m.write(0,backup);m.write(0xFFFC,b'\0')
     # Отказ физического чтения: выполнение прерывается с отдельным статусом.
-    dispatch=m.read(ds['bios_diskDriver'],3)
+    dispatch=m.read(ds['sysDiskDriver'],3)
     try:
-        m.write(ds['bios_diskDriver'],b'\x37\xc9\0');m.write(0,(ROOT/'bin/CHKDSK.i80').read_bytes())
+        m.write(ds['sysDiskDriver'],b'\x37\xc9\0');m.write(0,(ROOT/'bin/CHKDSK.i80').read_bytes())
         m.stop_at(s['waitKey']);m.call('regs_set',pc=s['scan'],sp=0x8F00);m.until(s['waitKey'],30)
         assert m.read(s['result'],1)==b'\4'
         report['io_error_status']=4
-    finally:m.write(ds['bios_diskDriver'],dispatch)
+    finally:m.write(ds['sysDiskDriver'],dispatch)
     report['sha256']={n:hashlib.sha256((ROOT/'bin'/n).read_bytes()).hexdigest() for n in ['DOS.sys','Debug.i80','CHKDSK.i80']}
     a.report.parent.mkdir(parents=True,exist_ok=True);a.report.write_text(json.dumps(report,indent=2)+'\n')
 

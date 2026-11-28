@@ -27,7 +27,7 @@ printFileNameReal:
         LD (DE),A
         PUSH HL
         LD HL,debugNameBuffer
-        CALL bios_printStringRawZ
+        CALL FONT_ENGINE_RAWZ
         POP HL
         POP DE
         POP AF

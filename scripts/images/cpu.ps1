@@ -24,7 +24,7 @@ function Read-CpuDescriptor {
 function New-CpuDescriptor {
     param([int]$Load,[int]$Entry=-1,[int]$Flags=0,[string]$Monitor='',[System.Collections.IDictionary]$Fields=@{})
     if($Entry -lt 0){$Entry=$Load}
-    if(-not $Monitor){$Monitor=if($Flags){'mxos2.mon'}else{'mon2.mon'}}
+    if(-not $Monitor){$Monitor='mxos2.mon'}
     $text="{0:X4}`r`n{1:X4}`r`n{2}`r`nFLAGS={3:X2}`r`n" -f $Load,$Entry,$Monitor,$Flags
     foreach($key in $Fields.Keys) { $text += "{0}={1}`r`n" -f $key,$Fields[$key] }
     $null=Read-CpuDescriptor ([Text.Encoding]::ASCII.GetBytes($text))

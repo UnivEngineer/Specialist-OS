@@ -7,6 +7,6 @@
 
 tapeReadError:    pop   de
             pop   bc
-            ld    hl, (bios_vars.tapeError)
+            ld    hl, (mon2_vars.tapeError)
             jp    (hl)
 

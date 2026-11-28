@@ -20,12 +20,12 @@ SECTOR_SIZE = 256           ; размер сектора в байтах
     ld a,(bios_upper.koi7)
     push af
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     call formatMain
     pop bc
     push af
     ld a,b
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     pop af
     ret
 
@@ -41,7 +41,7 @@ SECTOR_SIZE = 256           ; размер сектора в байтах
 ; выход:
 ;   При выполнении записаны структуры нового тома выбранного диска. Ошибки параметров и
 ;   ввода-вывода сопровождаются сообщением и cf = 1. Отмена выводит сообщение и
-;   возвращается через bios_printString.
+;   возвращается через mon2_printStringOld.
 ;----------------------------------------------------------------------------
 
 formatMain:
@@ -68,12 +68,12 @@ formatMain:
 
 chooseDrive:
     ld      hl, str_ChoseDrive
-    call    bios_printString
+    call    mon2_printStringOld
     call    readAnswer
     cp      01Bh
     jp z,   errAbort
     ld      hl, v_Answer
-    call    bios_argNext
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp c,   errAbort
     ld      a, b
     cp      1
@@ -87,19 +87,19 @@ chooseDrive:
     jp nz,  errParams
 chooseLetter:
     ld      a, (de)
-    call    bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     cp      'A'
     jp c,   errInvalidDrive
     cp      'I'
     jp nc,  errInvalidDrive
     ld      c, a
-    call    bios_argNext
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp nc,  errParams
     ld      b, c
     jp      SearchExit
 
 ReadParams:
-    call    bios_argNext
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp c,   ParamsDone
     ld      a, b
     cp      2               ; Диск B: и ключи -R/-Y занимают два байта.
@@ -107,7 +107,7 @@ ReadParams:
     ld      a, (de)
     cp      '-'
     jp z,   ReadSwitch
-    call    bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     cp      'A'
     jp c,   errInvalidDrive
     cp      'I'
@@ -125,7 +125,7 @@ ReadParams:
 ReadSwitch:
     inc     de
     ld      a, (de)
-    call    bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     ld      de, v_FormatConfirmed
     cp      'Y'
     jp z,   SetSwitch
@@ -158,7 +158,7 @@ ConfirmRequest:
     ld      a, b
     ld      (str_A_Y_N), a  ; заменить 'A' в строке сообщения на введённую букву
     ld      hl, str_Format
-    call    bios_printString; вывод сообщения 'FORMAT <буква>: [Y/N]?'
+    call    mon2_printStringOld; вывод сообщения 'FORMAT <буква>: [Y/N]?'
     push    bc
     call    readAnswer
     pop     bc
@@ -166,7 +166,7 @@ ConfirmRequest:
     jp z,   errAbort
     ld      hl, v_Answer
     ld      a, (hl)
-    call    bios_upperCase
+    MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
     cp      'Y'
     jp nz,  errAbort
     inc     hl
@@ -198,7 +198,7 @@ readAnswer:
     call    lineEdit
     push    af
     ld      c, 0Ah
-    call    bios_printChar
+    call    mon2_printCharOld
     pop     af
     ret
 
@@ -232,7 +232,7 @@ Format:
     cp      b
     jp nz,  errIO
     ld      b, 3
-    call    bios_diskDriver ; de = число физических секторов
+    call formatDiskDriver ; de = число физических секторов
     jp c,   errIO
 
     ; Если de == 0, драйвер диска не установлен
@@ -250,7 +250,7 @@ Format:
     jp nz,errBlockSize
     push de
     ld hl,8192
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     pop de
     jp c,errSize
 
@@ -268,7 +268,7 @@ Format:
     ld      hl, str_RAM_DISK
     ld      de, str_RAM_DISK + 11
     ld      bc, v_VolLabel
-    call    bios_memcpy_bc_hl
+    call    mon2_memcpy_bc_hl
     pop     hl
 
 CalcParams:
@@ -308,7 +308,7 @@ CalcParams:
     ; Расчитывем размер области данных
     ex      hl, de
     ld      hl, (v_TotalSectors); hl = количество секторов на диске
-    call    bios_sub_hl_de      ; hl = количество секторов на диске минус все зарезервированные
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE      ; hl = количество секторов на диске минус все зарезервированные
     ld      (v_DataSectors), hl ; сохраняем значение
 
 ;----------------------------------------------------------------------------
@@ -318,7 +318,7 @@ CalcParams:
     ld      hl, v_HeaderStart
     ld      de, v_HeaderEnd
     ld      bc, buffer
-    call    bios_memcpy_bc_hl
+    call    mon2_memcpy_bc_hl
 
     ; Остальное заполняем байтом 0FFh
     ld      hl, buffer      + v_HeaderEnd - v_HeaderStart
@@ -364,9 +364,9 @@ FormatFatSector:
     ld hl,(v_FatIndex)
     ex de,hl
     ld hl,(v_FatEnd)
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     ld de,SECTOR_SIZE / FAT_ITEM_SIZE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nc,FormatFatHeader
     add hl,hl                ; смещение первого элемента запаса в байтах
     ex de,hl
@@ -374,7 +374,7 @@ FormatFatSector:
     add hl,de
     push hl
     ld hl,SECTOR_SIZE
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     ex de,hl
     pop hl
     ld b,0FFh
@@ -395,12 +395,12 @@ FormatFatBads:
     ld hl,(v_NextBad)
     ex de,hl
     ld hl,(v_FatEnd)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,FormatFatWrite
     jp z,FormatFatWrite
     ld hl,(v_FatIndex)
     ex de,hl
-    call bios_sub_hl_de        ; расстояние до следующей BAD-записи
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE        ; расстояние до следующей BAD-записи
     ld a,h
     or a
     jp nz,FormatFatWrite
@@ -478,7 +478,7 @@ WriteRoot:
     add hl,bc
     ex de,hl
     ld bc,buffer
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,8
     ld (buffer+11),a
     ld hl,(v_DirStartSector)
@@ -521,7 +521,7 @@ WriteBuffer:
     ld      b,  1   ; режим 1 - запись
     ld      hl, buffer
 WriteBufferLoop:
-    call    bios_diskDriver
+    call formatDiskDriver
     ret c
     inc     de      ; следующий сектор
     ; Следующий сектор получает тот же подготовленный буфер.
@@ -586,7 +586,7 @@ memset:
 
 errIO:
     ld hl,str_IO
-    call bios_printString
+    call mon2_printStringOld
     scf
     ret
 errBlockSize:
@@ -595,7 +595,7 @@ errBlockSize:
 errSize:
     ld hl,str_Size
 formatSizeMessage:
-    call bios_printString
+    call mon2_printStringOld
     scf
     ret
 str_IO:         DB 0Ah,"I/O ERROR",0
@@ -604,11 +604,11 @@ str_Size:       DB 0Ah,"TOO LARGE",0
 
 errInvalidDrive:
     ld      hl, str_InvalidDrive
-    jp      bios_printString
+    jp      mon2_printStringOld
 
 errSystemDrive:
     ld      hl, str_SystemDrive
-    call    bios_printString
+    call    mon2_printStringOld
     ld      a, DOS_ERR_ACCESS
     scf
     ret
@@ -618,28 +618,28 @@ errSystemDrive:
 
 errNoDriver:
     ld      hl, str_NoDriver
-    jp      bios_printString
+    jp      mon2_printStringOld
 
 ;----------------------------------------------------------------------------
 ; Вывод сообщения 'DRIVE SIZE IS UNKNOWN'
 
 ;errSizeUnknown:
 ;    ld      hl, str_SizeUnknown
-;    jp      bios_printString
+;    jp      mon2_printStringOld
 
 ;----------------------------------------------------------------------------
 ; Вывод сообщения 'ABORTING'
 
 errAbort:
     ld      hl, str_Aborting
-    jp      bios_printString
+    jp      mon2_printStringOld
 
 ;----------------------------------------------------------------------------
 ; Данные
 
 errParams:
     ld      hl, str_Usage
-    call    bios_printString
+    call    mon2_printStringOld
     scf
     ret
 
@@ -708,5 +708,8 @@ v_HeaderEnd:            ; остальное заполняется байтом
 ;----------------------------------------------------------------------------
 
     INCLUDE "fat12.inc"
+formatDiskDriver:
+    MXOS_CALL_REGS MXOS_BIOS_DISK_DRIVER
+    ret
     ASSERT_DONT_FIT buffer
     END

@@ -558,7 +558,7 @@ batError:
     inc hl
     ld d,(hl)
     ld b,0
-    call bios_printDecWord
+    call printDecWord
     ld hl,batCodeText
     call j_printString
     pop af
@@ -566,7 +566,7 @@ batError:
     ld e,a
     ld d,0
     ld b,0
-    call bios_printDecWord
+    call printDecWord
     call printCharA
 batErrorDone:
     ld a,(v_batDepth)

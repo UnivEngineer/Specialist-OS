@@ -48,10 +48,10 @@ aligned8Glyph:
     add hl,hl
     add hl,hl
     ex de,hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     add a,4
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,h
     ; X кратен восьми: два RRCA уже дают номер столбца, AND не нужна.
     rrca
@@ -91,7 +91,7 @@ aligned8Error:
     scf
     ret
 aligned8Validate:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 3
     jp nz,aligned8Invalid

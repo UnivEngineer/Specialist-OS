@@ -16,7 +16,7 @@ inputFilePrompt:
         CALL prepareFilePrompt
         LD DE,FILE_NAME_RECALL_END
         LD BC,inputBuf
-        CALL bios_memcpy_bc_hl
+        CALL mon2_memcpy_bc_hl
         CALL editorOpenFileModal
         LD HL,inputBuf
         LD D,H
@@ -41,9 +41,9 @@ editorFileInput:
 finishFilePrompt: LD    HL,inputBuf
         LD    DE,inputBuf+MAX_PATH
         LD    BC,FILE_NAME_HISTORY
-        CALL  bios_memcpy_bc_hl
+        CALL  mon2_memcpy_bc_hl
         LD    HL,0000H
-        LD    (bios_vars.inverse),HL
+        LD    (mon2_vars.inverse),HL
         RET
 
 ;----------------------------------------------------------------------
@@ -87,7 +87,7 @@ saveFile:
         LD HL,(v_textBeginLo)
         EX DE,HL
         LD HL,(v_textEnd)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (fileDescSize),HL
         LD HL,editorBusySaving
         CALL editorShowFileProgress
@@ -120,7 +120,7 @@ editorWriteGapFile:
         LD (flHandle+FH_BUFFER),HL
         EX DE,HL
         LD HL,(v_gapLo)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (flHandle+FH_COUNT),HL
         LD A,FILE_OP_WRITE
         CALL flCall
@@ -130,7 +130,7 @@ editorWriteGapFile:
         LD HL,(v_gapLo)
         EX DE,HL
         LD HL,(v_textEnd)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (flHandle+FH_COUNT),HL
         LD A,FILE_OP_WRITE
         CALL flCall

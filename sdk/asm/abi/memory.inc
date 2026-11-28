@@ -4,33 +4,33 @@
     IFNDEF MXOS_ABI_MEMORY_INC
     DEFINE MXOS_ABI_MEMORY_INC
 
-mx_callPacket   = 0F800h  ; B=группа, C=номер, DE=пакет MX_REGS
-mx_callCPM      = 0F803h  ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
-mx_callRegs     = 0F806h  ; CALL + DW операции; регистры как у исполнителя
-mx_queueBind    = 0F809h  ; HL=local flush callback, 0 disables; AF destroyed
-mx_queueFlush   = 0F80Ch  ; explicit flush; all registers and flags preserved
-mx_memcpyFar    = 0F80Fh  ; HL=MEM_COPY_REQUEST; CF/A=статус, BC/DE/HL сохранены
-mx_memInfo      = 0F812h  ; HL=версия, DE=возможности, A=FAR-код, B=банки, C=тип; CF=0
-mx_memory       = 0F815h  ; A=MEM_OP_*, регистры/ошибки: source/mem/api.md
-mx_routeCall    = 0F818h  ; HL=bound DLL handle, DE=local MX_REGS, results in CPU
-mx_printChar    = 0F81Bh  ; C=символ с обработкой управляющих кодов
-mx_getCursorPos = 0F81Eh  ; HL=координаты BIOS
-mx_setCursorPos = 0F821h  ; HL=новые координаты BIOS
-mx_printCharRaw = 0F824h  ; A=код глифа
-mx_printHexByte = 0F827h  ; A=байт
-mx_printHexWord = 0F82Ah  ; HL=слово
-mx_getMemTop    = 0F830h  ; HL=верхняя граница MAIN включительно
-mx_setMemTop    = 0F833h  ; HL=новая верхняя граница MAIN
+mx_callPacket   = 0F860h  ; B=группа, C=номер, DE=пакет MX_REGS
+mx_callCPM      = 0F863h  ; Резерв для будущего адаптера CP/M; пока UNSUPPORTED
+mx_callRegs     = 0F866h  ; CALL + DW операции; регистры как у исполнителя
+mx_queueBind    = 0F869h  ; HL=local flush callback, 0 disables; AF destroyed
+mx_queueFlush   = 0F86Ch  ; explicit flush; all registers and flags preserved
+mx_memcpyFar    = 0F86Fh  ; HL=MEM_COPY_REQUEST; CF/A=статус, BC/DE/HL сохранены
+mx_memInfo      = 0F872h  ; HL=версия, DE=возможности, A=FAR-код, B=банки, C=тип; CF=0
+mx_memory       = 0F875h  ; A=MEM_OP_*, регистры/ошибки: source/mem/api.md
+mx_routeCall    = 0F878h  ; HL=bound DLL handle, DE=local MX_REGS, results in CPU
+mx_printChar    = 0F87Bh  ; C=символ с обработкой управляющих кодов
+mx_getCursorPos = 0F87Eh  ; HL=координаты BIOS
+mx_setCursorPos = 0F881h  ; HL=новые координаты BIOS
+mx_printCharRaw = 0F884h  ; A=код глифа
+mx_printHexByte = 0F887h  ; A=байт
+mx_printHexWord = 0F88Ah  ; HL=слово
+mx_getMemTop    = 0F88Dh  ; HL=верхняя граница MAIN включительно
+mx_setMemTop    = 0F890h  ; HL=новая верхняя граница MAIN
 
 MXOS_GROUP_BDOS   = 0
 MXOS_GROUP_MEMORY = 3
 ; Публичный memcpy: банки 0=main, 1..16=ДОЗУ; слова little-endian.
 ; Нулевая длина возвращает успех. Исключающий конец не выше FE00h. В одной странице допускается перекрытие.
 ; Пакет, код и стек инициатора не должны попадать в область назначения.
-MEM_ABI_VERSION = 00104h  ; Публичный ABI MEM 1.4
+MEM_ABI_VERSION = 00105h  ; Публичный ABI MEM 1.5
 
 MEM_CAP_COPY        = 1
-MEM_CAP_LAZY_WINDOW = 2   ; Исторический бит 1.3, в 1.4 сброшен
+MEM_CAP_LAZY_WINDOW = 2   ; Исторический бит 1.3, сброшен начиная с 1.4
 MEM_CAP_MEMORY_OPS  = 4
 MEM_CAP_MODULES     = 8
 MEM_OP_MOVE         = 0
@@ -71,7 +71,7 @@ RAM_ALTERNATE_DRIVE      = 3
 RAMDISK_SERVICE_KEY      = 04452h  ; Исторический ключ RAMDSVC; штатный B: принадлежит DOS.
 MEM_CAP_ALLOCATOR        = 16
 MEM_CAP_COMMAND_QUEUE    = 32
-MEM_CAP_BIOS_REGISTERS   = 64      ; Прямые регистровые входы в таблице F800h
+MEM_CAP_BIOS_REGISTERS   = 64      ; Прямые регистровые входы в таблице F860h
 RESIDENT_RETAIN          = 0
 RESIDENT_FIND            = 1
 RESIDENT_ENUM            = 2
@@ -129,8 +129,8 @@ count               DW 0
     ASSERT MEM_COPY_REQUEST == 8
 
 MEM_DATA_LIMIT        = 0FE00h  ; исключающий конец для FAR
-APP_MEMORY_END        = 08C00h  ; штатный исключающий предел MAIN
-LEGACY_APP_MEMORY_END = 08C00h  ; физическая граница обычной памяти
+APP_MEMORY_END        = 08E00h  ; исключающий предел нативного приложения перед стеком MAIN
+LEGACY_APP_MEMORY_END = 08C00h  ; начало временной области загрузки в режимах совместимости
 ; Текущий доступный диапазон MAIN уточняется через mx_getMemTop.
 
     ENDIF

@@ -62,10 +62,10 @@ print('NC FILE COUNT PASS: 24 cases, both columns and last short-list entry')
 
 # Курсор после прокрутки: обычная соседняя строка, затем инверсная новая.
 text = source.read_text('utf-8').replace('    ld (08102h),hl',
-    f'''    ld a,({n['bios_vars.inverse']})
+    f'''    ld a,({n['mon2_vars.inverse']})
     ld (hl),a
     inc hl
-    ld a,({n['bios_vars.inverse']+1})
+    ld a,({n['mon2_vars.inverse']+1})
     ld (hl),a
     inc hl
     ld (08102h),hl''')
@@ -75,7 +75,7 @@ stub = (O/'record.bin').read_bytes()
 memory[0x7000:0x7000+len(stub)] = stub
 memory[0x8100] = 0
 struct.pack_into('<H', memory, 0x8102, 0x8200)
-struct.pack_into('<H', memory, n['bios_vars.inverse'], 0)
+struct.pack_into('<H', memory, n['mon2_vars.inverse'], 0)
 code = bytes.fromhex('31008F21005011')+struct.pack('<H', (n['P_FILE_LIST_X2'] << 8)+n['P_FILE_LIST_Y_MAX']-10)+b'\xCD'+struct.pack('<H',n['printKeptScrollFile'])+bytes.fromhex('C3FF80')
 memory[0x8000:0x8000+len(code)] = code
 (O/'in.bin').write_bytes(memory)
@@ -84,5 +84,5 @@ result = (O/'out.bin').read_bytes()
 assert result[0x8100] == 2
 assert result[0x8204:0x8206] == b'\0\0'
 assert result[0x820A:0x820C] == b'\xff\xff'
-assert result[n['bios_vars.inverse']:n['bios_vars.inverse']+2] == b'\0\0'
+assert result[n['mon2_vars.inverse']:n['mon2_vars.inverse']+2] == b'\0\0'
 print('NC SCROLL INVERSE PASS: 0000h, FFFFh, restored 0000h')

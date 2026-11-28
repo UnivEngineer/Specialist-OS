@@ -1,6 +1,6 @@
     INCLUDE "../../sdk/asm/abi/ui-gfx.inc"
 EDIT_MAIN_PACKET         = 03380h
-EDIT_MAIN_KEY_LOCKS = bios_vars.keyLocks
+EDIT_MAIN_KEY_LOCKS = mon2_vars.keyLocks
 EDIT_BANK_QUEUE     = 0DB00h
 EDIT_BANK_STATE     = DOS_BANK_STACK_BOTTOM-17
 EDIT_BANK_STATE_END = EDIT_BANK_STATE+17

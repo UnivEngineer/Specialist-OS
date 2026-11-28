@@ -8,43 +8,21 @@ v_dosModuleReady: DB 0
 
 ; C000h: первый вход из bootstrap или программный перезапуск.
 reboot1:
-    call biosCheckReentry
-    ld a,3
-    call glyphCacheService
-    ld (IO_PAGE_RAM),a
-    call bios_reset_sound
-    ld hl,initVars
-    ld de,initVarsEnd
-    ld bc,bios_vars
-    call memcpy_bc_hl
-    ld hl,initTextVars
-    ld de,initTextVarsEnd
-    ld bc,bios_upper.charGen
-    call memcpy_bc_hl
-    ld a,COLOR_BIOS
-    ld (IO_COLOR),a
-    ; The boot sector cleared the screen; keep the BOOT.SYS splash.
-    ; Diagnostics start at the top, above the logo.
-    ld hl,8
-    ld (bios_vars.cursorY),hl
-    ; Bootstrap installs the default self-contained module before first output.
-    ld de,0
-    call FONT_ENGINE_INIT
-    ld hl,biosVersion
-    call printString
-    ld a,(v_dosBanked)
+    ld hl,(biosBootEntry)
+    ld a,h
     or a
-    jp z,biosNativeCold
-    ld a,(biosBootWarm)
-    or a
-    jp nz,biosBankWarm
-    jp biosBankCold
-biosNativeCold:
-    jp biosLoadFailure
+    jp z,reboot3
+    xor a
+    ld (biosBootEntry+1),a
+    jp (hl)
+biosBootEntry: DW 0
 
-; Программный возврат отбрасывает контексты приложения и возвращает оболочку.
-; Восстановление BIOS из ROM выполняется только аппаратным Reset/bootstrap.
 reboot3:
+    di
+    ; В STD F7FCh возвращает отображение MX. В MX сохраняем байт RAM по F7FCh.
+    ld a,(IO_PAGE_RAM-0800h)
+    ld (IO_PAGE_RAM-0800h),a
+    ld (IO_PAGE_RAM),a
     ld sp,STACK_ADDR
     ld a,(v_dosBanked)
     or a
@@ -55,7 +33,7 @@ biosLoadFailure:
 biosLoadHalt:
     jp biosLoadHalt
 
-biosVersion:        DB "BIOS ",MXOS_VERSION,'.',MXOS_REVISION,'.',VERSION_BUILD,10,0
-biosDosVersion:     DB "DOS ",MXOS_VERSION,'.',MXOS_REVISION,'.',VERSION_BUILD,10,0
+biosVersion:        DB "BIOS "
+biosVersionNumber:  DB MXOS_VERSION,'.',MXOS_REVISION,'.',VERSION_BUILD,10,0
 biosLoadError:      DB "DOS LOAD ERROR",10,0
 

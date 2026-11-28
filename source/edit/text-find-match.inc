@@ -39,7 +39,7 @@ editorSearchLineReady:
         LD HL,(v_currentLine)
         EX DE,HL
         LD HL,(editorFoundPointer)
-        CALL bios_sub_hl_de
+        CALL nativeMath.sub_hl_de
         LD (v_column),HL
         CALL editorRevealCurrentLine
         CALL editorPositionCursor

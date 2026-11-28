@@ -184,7 +184,7 @@ forwardRow:
 def source(n):
     return f'''
 IO_COLOR EQU {n['IO_COLOR']}
-CURSOR EQU {n['bios_vars.cursorY']}
+CURSOR EQU {n['mon2_vars.cursorY']}
     ORG 4000h
 empty: ret
 lookupShift:
@@ -208,7 +208,7 @@ lookupReady:
     jp z,lookupCopy
     dec hl
 lookupCopy:
-    jp {n['bios_memcpy_bc_hl']}
+    jp {n['mon2_memcpy_bc_hl']}
 bulk:
     ld a,0F1h
     ld (IO_COLOR),a
@@ -689,7 +689,7 @@ def write_report(out, report):
 
 ## Варианты
 
-`generic` использует текущий `uiCopyRect` NC и текущий `bios_memcpy_bc_hl` из снимка BIOS. `copy10` — специальный копировщик текстовых ячеек с развёрнутыми пятью парами байтов; `copy8` — четыре пары глифа с пропуском двух пустых строк. Во всех таблицах ниже, кроме отдельного сравнения копировщиков, используется `copy8`.
+`generic` использует текущий `uiCopyRect` NC и текущий `mon2_memcpy_bc_hl` из снимка BIOS. `copy10` — специальный копировщик текстовых ячеек с развёрнутыми пятью парами байтов; `copy8` — четыре пары глифа с пропуском двух пустых строк. Во всех таблицах ниже, кроме отдельного сравнения копировщиков, используется `copy8`.
 
 1a сначала переносит сохраняемую часть базовым цветом, затем заново вызывает реальную печать имени/размера для каждой цветной строки. 1b вместо рендера устанавливает цвет и выполняет развёрнутые `MOV A,M / MOV M,A` над строкой. 2a устанавливает цвет и вызывает прямоугольный копировщик отдельно для каждой строки. 2b ищет подряд идущие одинаковые атрибуты в пределах физического прямоугольника и переносит диапазон одним вызовом. Прототип 2c сохраняет SP и выполняет весь прямоугольник внутри одного вызова; перед каждым восьмибайтным вертикальным фрагментом читает атрибут из lookup-таблицы и записывает регистр цвета. Цвет задаётся повторно для каждого байтового столбца, зато отсутствуют повторные входы в копировщик для каждой текстовой строки.
 
@@ -814,7 +814,7 @@ def main():
         return
     inputs = out/'inputs'; inputs.mkdir(exist_ok=True)
     input_paths = [ROOT/'bin/NC.i80', ROOT/'bin/NC.sym', ROOT/'bin/BIOS.sys',
-                   ROOT/'bin/BIOS.sym', ROOT/'bin/IO.main.bin', ROOT/'sdk/asm/lib/ui.inc',
+                   ROOT/'bin/BIOS.sym', ROOT/'bin/BIOS.defaults.bin', ROOT/'bin/IO.main.bin', ROOT/'sdk/asm/lib/ui.inc',
                    ROOT/'source/common/move8080.inc', ROOT/'source/nc/scrollBitmap.inc']
     input_paths += [ROOT/f'bin/fonts/{font}.i80' for font in ('Cpm4','Compact','Rotate','Packed6K','Fast12K','Fast8')]
     input_paths += [ROOT/f'bin/fonts/{font}.pre' for font in ('Packed6K','Fast12K')]
@@ -850,7 +850,7 @@ def main():
                                (0xd800, inputs/f'bin/fonts/{font}.i80'), (0xf000, inputs/'bin/IO.main.bin'),
                                (0x4000, out/'bench.bin')]:
                 data = path.read_bytes(); m[addr:addr+len(data)] = data
-            m[bios['bios_vars']:bios['bios_vars']+bios['BIOS_VARIABLES']] = m[bios['initVars']:bios['initVarsEnd']]
+            m[bios['mon2_vars']:bios['mon2_vars']+bios['MON2_VARIABLES']] = (inputs/'bin/BIOS.defaults.bin').read_bytes()[:bios['MON2_VARIABLES']]
             m[bios['bios_upper.escMode']] = 255
             m[n['ncFontWidth']] = width
             prepared = font in ('Packed6K','Fast12K')
@@ -867,7 +867,7 @@ def main():
             for slot in range(visible):
                 col, row = divmod(slot, rows)
                 x, y = (n['SCROLL_LEFT']-0x90+col*step)*4, n['P_FILE_LIST_Y']+row*10
-                prep += b'\x21'+bytes([y,x])+b'\x22'+W(n['bios_vars.cursorY'])
+                prep += b'\x21'+bytes([y,x])+b'\x22'+W(n['mon2_vars.cursorY'])
                 prep += b'\x21'+W(0x5200+(first+slot)*16)+b'\xcd'+W(n['printFileNamOnPanel'])
                 base = (n['SCROLL_LEFT']+col*step)*256+n['SCROLL_TOP']+row*10
                 for byte in range(cell): m[base+byte*256:base+byte*256+10] = bytes(10)

@@ -63,7 +63,7 @@ entry:
     ld a,(bios_upper.koi7)
     ld (callerKoi),a
     xor a
-    call bios_setFontEncoding       ; Имена файлов — KOI-8.
+    call FONT_ENGINE_ENCODING       ; Имена файлов — KOI-8.
     ENDIF
     IF FAT_CACHE_ADDR == 0FB00h
     call bench_getMemTop
@@ -301,7 +301,7 @@ exit_wait:
 finished:
     IFNDEF DISKBEN_BANK
     ld a,(callerKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ENDIF
     ld hl,(callerSP)
     ld sp,hl

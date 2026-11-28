@@ -105,7 +105,7 @@ copyFileShowError:
             call ncBankFlush
     ENDIF
 copyFileWaitRelease:
-            call    bios_keyScan
+            call    ncKeyScan
             inc     a
             jp nz,  copyFileWaitRelease
 

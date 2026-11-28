@@ -146,7 +146,8 @@ if ($Target -eq 'MX') {
 Write-Host '[prepare] Component build plan'
 $planTimer = [Diagnostics.Stopwatch]::StartNew()
 $jobs = @(
-    # Этот этап пишет в разные файлы и каталоги. DOS ждёт его завершения.
+    # Парная линковка публикует импорты BIOS для резидентных модулей и FNT.
+    Get-ComponentJob @{ Directory = 'source/dos'; Source = 'DOS'; Extension = 'sys'; Address = '0x0100' }
     @{ cwd = $repositoryRoot; describe = @((Join-Path $PSScriptRoot 'build-font-engines.py')) + $forceArgs; serial = $false }
     Get-ComponentJob @{ Directory = 'source/ui-gfx'; Source = 'UI_GFX'; Extension = 'cpu'; Address = 'entry' }
     if ($Target -ne 'MX') {
@@ -156,7 +157,6 @@ $jobs = @(
         & (Join-Path $PSScriptRoot 'build-almaz.ps1') -Describe -Force:$Force
         & (Join-Path $PSScriptRoot 'build-almaz2.ps1') All -PublishMxTimer -Describe -Force:$Force
     }
-    Get-ComponentJob @{ Directory = 'source/dos'; Source = 'DOS'; Extension = 'sys'; Address = '0x0100' }
     if ($Target -ne 'MX') { @{ cwd = $repositoryRoot; args = $benchArgs; serial = $true } }
     foreach ($component in $components) { Get-ComponentJob $component }
     if ($Target -eq 'All') {

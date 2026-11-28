@@ -3,7 +3,7 @@ import json,re,struct,subprocess
 from pathlib import Path
 R=Path(__file__).resolve().parents[2];O=R/'docs/diskbench/shared-buffer-2026-11-10/cpu-checked';O.mkdir(parents=True,exist_ok=True)
 W=lambda x:struct.pack('<H',x)
-s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\da-fA-F]+)',(R/'bin/banked/CLIENT.sym').read_text(),re.M)}
+s={k:int(v,16) for k,v in re.findall(r'^([\w.]+): EQU 0x([\da-fA-F]+)',(R/'bin/BIOS.sym').read_text(),re.M)}
 source='''    ORG 08000h
     push bc
     push de
@@ -64,7 +64,7 @@ base[0xED7F]=0xAB;base[0xEE80]=0xCD
 rows=[]
 for mode in range(4):
  mem=bytearray(base);mem[0x8100]=mode
- stub=b'\x31'+W(0xED70)+b'\x21'+W(0x4000)+b'\x11'+W(0x1234)+b'\x01'+W(0x80f0)+b'\xcd'+W(s['bios_diskWriteChecked'])
+ stub=b'\x31'+W(0xED70)+b'\x21'+W(0x4000)+b'\x11'+W(0x1234)+b'\x01'+W(0x80f0)+b'\xcd'+W(s['diskWriteChecked'])
  stub+=b'\x22'+W(0x8302)+b'\xeb\x22'+W(0x8304)+b'\x60\x69\x22'+W(0x8306)+b'\xf5\xe1\x22'+W(0x8300)+b'\x21'+W(0)+b'\x39\x22'+W(0x8308)+b'\xc3'+W(0x82ff)
  mem[0x8200:0x8200+len(stub)]=stub;(O/'in.bin').write_bytes(mem)
  subprocess.run([r'D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','8200','-end','82ff','-counter','2000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True)

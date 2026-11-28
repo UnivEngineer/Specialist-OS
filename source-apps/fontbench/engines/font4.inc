@@ -155,7 +155,7 @@ font4Batch:
     jp c,font4Error
     ld (font4Remaining),a
     ld (font4Read+1),hl
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     and 2
     jp z,font4BatchAligned
     ld hl,font4HeadDone
@@ -178,7 +178,7 @@ font4BatchAligned:
     and 0FEh
     ld b,a
     add a,a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     add a,h
     ld (font4EndX),a
     ld a,b
@@ -266,7 +266,7 @@ font4FastContinue:
 font4SavedSP:
     ld sp,0
     ld a,(font4EndX)
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,(font4Tail)
     or a
     jp z,font4Return
@@ -451,7 +451,7 @@ font4Single:
     ld (font4SingleCode),a
     call font4Pointer
     ex de,hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 2
     ld b,a
@@ -485,9 +485,9 @@ font4SinglePhase:
 font4SinglePlain:
     call font4SinglePixels
 font4SingleDone:
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     add a,2
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
 font4SingleContinue:
     jp font4Return
 ; Длина 0..48, X кратен четырём пикселям; правый край и все восемь строк.
@@ -496,7 +496,7 @@ font4Validate:
     ld a,c
     cp 49
     jp nc,font4Invalid
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 1
     jp nz,font4Invalid

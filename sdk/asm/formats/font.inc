@@ -31,7 +31,7 @@ FONT_ENGINE_TEXT_EXT = FONT_ENGINE_BASE+30  ; DW FONT_ENGINE_TEXT_LIM для о�
 ; Kind identifies the engine, independently of imported glyphs/file names.
 FONT_ENGINE_HEADER        = FONT_ENGINE_BASE+32
 FONT_ENGINE_TEXT_LIM      = FONT_ENGINE_BASE+48  ; HL=текст с управлением, BC=длина, HL=конец
-FONT_ENGINE_VERSION       = 2
+FONT_ENGINE_VERSION       = 3
 FONT_FORMAT_4_PACKED      = 5                    ; Дублированные полубайты, постраничная таблица
 FONT_FORMAT_GRAPH8        = 6                    ; Fast8 variant with exact two-pixel cursor coordinates
 FONT_FORMAT_GRAPH8_PACKED = 7                    ; three pagesets of rotated bytes

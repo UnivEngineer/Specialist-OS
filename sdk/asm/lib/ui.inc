@@ -480,9 +480,9 @@ uiToolbar:
     ld a,c
     ld (toolbarNativeLabelColor),a
     ex de,hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     push hl
-    ld hl,(bios_vars.inverse)
+    ld hl,(mon2_vars.inverse)
     push hl
     ex de,hl
     ld a,090h
@@ -504,7 +504,7 @@ toolbarNativeField:
 toolbarNativeFillColumn:
     ld l,247
     ld c,9
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
 toolbarNativeFillRow:
     ld (hl),a
     inc l
@@ -554,7 +554,7 @@ toolbarNativeMeasured:
 toolbarNativeXReady:
     ld h,a
     ld l,255
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     pop hl
     ; A toolbar is a bitmap row, not a console stream. The FNT1 scalar entry
     ; draws a glyph and advances X without the console's post-glyph newline.
@@ -579,14 +579,14 @@ toolbarNativeSetColor:
     ld (IO_COLOR),a
     push hl
     ex de,hl
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     pop hl
     ret
 toolbarNativeCapture:
     pop hl
-    ld (bios_vars.inverse),hl
+    ld (mon2_vars.inverse),hl
     pop hl
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ret
 toolbarNativeText:
     ld a,(hl)
@@ -642,7 +642,7 @@ uiCopyRect:
             add     hl, de
             ex      de, hl
             pop     hl
-            call    bios_memcpy_bc_hl
+            call    mon2_memcpy_bc_hl
             pop     hl
             pop     bc
             pop     de

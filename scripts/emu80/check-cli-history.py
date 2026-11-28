@@ -89,7 +89,7 @@ try:
     ck=h['symbols'](R/'bin/CHKDSK.sym')
     text('CHKDSK B:');m.m.stop_at(ck['waitKey']);tap('enter');m.m.until(ck['waitKey'],60)
     resume();m.m.stop_at(s['defAppReturn']);tap('space');m.m.until(s['defAppReturn'],30)
-    assert m.m.read(s['bios_vars.cursorX'],1)==b'\0','CHKDSK did not finish its output line'
+    assert m.m.read(s['mon2_vars.cursorX'],1)==b'\0','CHKDSK did not finish its output line'
     m.m.screenshot(O/'chkdsk-exit.png')
     m.m.stop_at(s['reboot3_2']);m.m.until(s['reboot3_2'],30)
     m.m.call('bp_clear');m.m.stop_at(c['cliPrompt']);m.m.until(c['cliPrompt'],40);resume()
@@ -98,9 +98,9 @@ try:
     tap('esc');m.m.screenshot(O/'history-after-com.png')
     # Редактор уже перевёл строку: BAD COMMAND печатается без пустой строки.
     text('ZZMISSING');m.m.stop_at(s['badCommand']);tap('enter');m.m.until(s['badCommand'],30)
-    y=m.m.read(s['bios_vars.cursorY'],1)
+    y=m.m.read(s['mon2_vars.cursorY'],1)
     m.m.stop_at(s['execCommandErrorDone']);m.m.until(s['execCommandErrorDone'],20)
-    assert m.m.read(s['bios_vars.cursorY'],1)==y,'extra newline before BAD COMMAND'
+    assert m.m.read(s['mon2_vars.cursorY'],1)==y,'extra newline before BAD COMMAND'
     m.m.screenshot(O/'bad-command.png')
     m.m.stop_at(c['cliPrompt']);m.m.until(c['cliPrompt'],40);resume()
     (O/'result.json').write_text(json.dumps(dict(dirDrive=True,history=True,draft=True,deduplicate=True,afterCom=True,singlePanel=True,badCommandNoBlank=True,chkdskNewline=True),indent=2)+'\n')

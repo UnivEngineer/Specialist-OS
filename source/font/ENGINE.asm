@@ -4,6 +4,7 @@
 ; Перед Attach DE = база подготовленных страниц MAIN или 0 для Rotate.
 ; Attach подключает входы BIOS, выбирает KOI-8 и возвращает A=0, CF=0.
     INCLUDE "../common/system.inc"
+    INCLUDE "../../bin/bios-imports.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     IFNDEF FONT_MODE
 FONT_MODE = 0
@@ -38,15 +39,15 @@ FONT_LOWER_BYTES = FONT_MODE*4096
     ASSERT $ == FONT_ENGINE_TEXT_LIM
     jp printStringLim
 initializerName: DB "Init6.dll",0
-printChar2     = bios_fontControl
-printCharBody  = bios_fontControl
-calcCursorAd_0 = bios_fontPosition
+printChar2     = biosEngineControl
+printCharBody  = biosEngineControl
+calcCursorAd_0 = biosEnginePosition
     INCLUDE "char.inc"
 printChar_real2:
 printCharRawHelper:
     ld hl,(bios_upper.charGen)
     call scalar
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 192
     ret c

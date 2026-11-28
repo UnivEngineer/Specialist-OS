@@ -30,15 +30,15 @@ initialize:
 ; Нарисовать один символ заменой восьми экранных строк в текущей позиции.
 ;
 ; вход:
-;   c = код KOI8. Позиция задана bios_vars.cursorY и bios_vars.cursorX,
+;   c = код KOI8. Позиция задана mon2_vars.cursorY и mon2_vars.cursorX,
 ;   положение должно допускать запись знакоместа без переноса строки.
 ;
 ; выход:
-;   bios_vars.cursorX увеличен на 4. AF, BC, DE, HL и флаги меняются.
+;   mon2_vars.cursorX увеличен на 4. AF, BC, DE, HL и флаги меняются.
 ;----------------------------------------------------------------------------
 
 scalar:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -46,9 +46,9 @@ scalar:
     add a,90h
     ld h,a
     ld (screenCursor),hl
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     add a,4
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,c
 glyph:
     ld hl,blockMap               ; D172: original table, relocated

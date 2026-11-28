@@ -9,18 +9,25 @@ def verify_mem_profiles(m,page,BIN,b,k,ls,s,symbols):
  transport=(BIN/'banked/TRANSPORT.bin').read_bytes()
  for bank,kind in ((0,1),(1,2)):
   page(bank)
-  client_size=b['BANK_MAIN_CLIENT_BYTES'] if bank==0 else len(client)
-  actual=bytearray(m.read(b['mx_callPacket'],client_size))
-  expected=bytearray(client[:client_size])
+  bank_client=b.get('MEM_BANK_CLIENT_START',b['mx_callPacket'])
+  client_start=b['mx_callPacket'] if bank==0 else bank_client
+  client_end=b['BANK_MAIN_CLIENT_BYTES']+b['mx_callPacket']-bank_client if bank==0 else len(client)
+  expected=bytearray(client[client_start-bank_client:client_end])
+  actual=bytearray(m.read(client_start,len(expected)))
   if 'memTextRemaining' in ls:  # Сохранённые сборки с рабочими полями TEXT внутри CLIENT.
-   at=ls['memTextRemaining']-b['mx_callPacket']
+   at=ls['memTextRemaining']-client_start
    expected[at:at+9]=actual[at:at+9]
   if bank==0 and 'bankMxRegsRouteCall' in ls:
-   at=ls['bankMxRegsRouteCall']+1-b['mx_callPacket']
+   at=ls['bankMxRegsRouteCall']+1-client_start
    expected[at:at+2]=b['sysRegsEntry'].to_bytes(2,'little')
   if 'MEM_FORWARD_RESTORE' in ls:
-   at=ls['MEM_FORWARD_RESTORE']+1-b['mx_callPacket']
+   at=ls['MEM_FORWARD_RESTORE']+1-client_start
    expected[at:at+2]=actual[at:at+2]  # SP последнего прямого MOVE.
+  if bank==0:
+   for address,body in overlays:
+    if client_start<=address<client_start+len(expected):
+     start=address-client_start
+     expected[start:start+len(body)]=body
   assert actual==expected
   assert m.read(b['LOCAL_BLOCK_ENTRY'],ls['localRamCopy']-b['LOCAL_BLOCK_ENTRY'])==local[b['LOCAL_BLOCK_ENTRY']-b['MEM_IMAGE_LOCAL_START']:ls['localRamCopy']-b['MEM_IMAGE_LOCAL_START']]
   assert m.read(b['MEM_BANK_KIND'],1)==bytes([kind])
@@ -75,6 +82,16 @@ core=h['symbols'](core_symbols) if core_symbols.exists() else {}
 nc_target=core.get('ncBankInputPoll',n['mainLoop'])
 nc_page=0
 local=(BIN/'banked/LOCALBLOCK.bin').read_bytes()
+overlay_file=BIN/'BIOS.main-overlay.bin'
+overlays=tuple(runpy.run_path(str(ROOT/'scripts/tests/mem-image.py'))['read_bios_overlays'](BIN)) if overlay_file.exists() else ()
+def verify_overlays():
+ if not overlays:return
+ page(1)
+ expected=overlay_file.read_bytes()
+ assert m.read(b['DOS_BIOS_OVERLAY_ADDR'],len(expected))==expected
+ page(0)
+ for address,body in overlays:
+  assert m.read(address,len(body))==body,hex(address)
 def nc():
  global nc_page
  m.stop_at(nc_target)
@@ -88,14 +105,18 @@ def nc():
 try:
  x.start('bootstrap',system=a.bundle/'System.bin' if a.bundle else None,nc_binary=BIN/'NC.i80',nc_symbols=BIN/'NC.sym',dos=BIN/'DOS.sys')
  m.call('debug_break');page(1);m.write(k['v_dosModuleReady'],b'\0');page(0)
+ ramfos_range=b['mx_callPacket']-b.get('MEM_BANK_CLIENT_START',b['mx_callPacket'])
+ ramfos_sentinel=bytes((0xA5^i) for i in range(ramfos_range))
  for mode in ('cold','warm'):
+  if ramfos_range:
+   m.write(b['MEM_BANK_CLIENT_START'],ramfos_sentinel)
   m.stop_at(s['stage'])
   m.call('emu_reset')
   m.until(s['stage'],40);ticks={}
   for label in ('stage','biosLoaded','dosLoaded','bootDone'):
    m.stop_at(s[label]);state=m.until(s[label],40);ticks[label]=state['cpu_ticks']
    if label=='biosLoaded':
-    image=(BIN/'BIOS.sys').read_bytes();assert m.read(b['bios_init'],len(image))==image
+    image=(BIN/'BIOS.sys').read_bytes();assert m.read(b['mon2_init'],len(image))==image
    if label=='dosLoaded':
     page(1)
     if mode=='cold':
@@ -106,6 +127,10 @@ try:
      if 'checkBootRam' in s:
       page(2);assert m.read(s['BOOT_RAM_PROBE'],1)==b'\xA6'
     page(0)
+   if label=='bootDone':
+    if ramfos_range:
+     assert m.read(b['MEM_BANK_CLIENT_START'],ramfos_range)==ramfos_sentinel
+    verify_overlays()
   linear=(FONT).read_bytes()
   font=bytes(linear[c*8+y] for y in range(8) for c in range(256))
   assert m.read(b['FONT_ADDR'],len(font))==font
@@ -140,10 +165,12 @@ try:
   target=nc_target if shell=='NC' else cli['cliPrompt']
   binary=(BIN/f'{shell}.i80').read_bytes()[:32]
   page(1);shell_depth=m.read(t['bankDepth'],1);page(0)
-  for entry,std in ((b['bios_init'],False),(b['bios_reboot'],False),(b['bios_reboot'],True)):
+  for entry,std in ((b['mon2_init'],False),(b['mon2_init'],False),(b['mon2_init'],True)):
    # Изолированная проверка ABI; возврат реального COM проверяет system-019.
    m.stop_at(target);start=m.call('cpu_state')['cpu_ticks']
    page(0)
+   for address,body in overlays:
+    m.write(address,bytes(value^0xff for value in body))
    if std:m.write(0xFFFF,b'\0')
    m.call('regs_set',pc=entry,sp=0x8FDF)
    if shell=='NC':state=nc()
@@ -153,6 +180,7 @@ try:
    page(0)
    assert m.read(marker,1)==b'9','Software restart reloaded BIOS'
    assert m.read(b['SYSTEM_FLASH_ADDR'],16)==driver
+   verify_overlays()
    page(1);assert m.read(k['v_shell'],1)==bytes([shell=='CLI'])
    assert m.read(0xA800,17)==b'DOS survives warm'
    assert m.read(t['bankDepth'],1)==shell_depth

@@ -5,7 +5,7 @@
 ; Вход как у drawChar: BC = экран, DE = глиф, H = следующий cursorX/2.
 ; Выход: регистры разрушены; их сохраняет внешний штатный printChar.
 ; Font/KOI/управляющие коды/курсор/принтер остаются в штатном коде.
-; Таблицы сдвигов не используются. Учитывается bios_vars.inverse.
+; Таблицы сдвигов не используются. Учитывается mon2_vars.inverse.
             IFNDEF OPT_DRAW_ORIGIN
 OPT_DRAW_ORIGIN = 0ED00h
             ENDIF
@@ -15,7 +15,7 @@ optimizedDraw:
             and 3
             ex de, hl
             ld e, a
-            ld a, (bios_vars.inverse)
+            ld a, (mon2_vars.inverse)
             or a
             jp z, inverseReady
             ld a, 3Fh

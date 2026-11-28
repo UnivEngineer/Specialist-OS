@@ -1,5 +1,6 @@
 ; Контроллер проверки двух MAIN DLL на исходном MX, без свободного EXEC.
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG 0
 ;----------------------------------------------------------------------------
@@ -13,7 +14,7 @@ entry:
     ld a,(bios_upper.koi7)
     push af
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld hl,pathA
     call loadMain
     jp c,failed
@@ -64,9 +65,9 @@ finish:
     ex de,hl
     MXOS_CALL_REGS MXOS_BIOS_PRINT_STRING
 testDone:
-    call bios_getch
+    call mon2_getchOld
     pop af
-    jp bios_setFontEncoding
+    jp FONT_ENGINE_ENCODING
 ;----------------------------------------------------------------------------
 ; MXOS
 ; Загрузить DLL из текущего каталога.
@@ -91,7 +92,7 @@ probe:
     pop de
     jp c,probeFailed
     ld hl,(packet)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret nz
     ld hl,(packet+2)
     ld a,(hl)

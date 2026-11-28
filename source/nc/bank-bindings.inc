@@ -1,27 +1,23 @@
 ; The EXEC profile has a local cursor mirror; MAIN remains the only renderer.
-    DEFINE bios_vars.cursorY ncBankCursor
-    DEFINE bios_vars.cursorX ncBankCursor+1
-    DEFINE bios_vars.inverse ncBankInverse
+    DEFINE mon2_vars.cursorY ncBankCursor
+    DEFINE mon2_vars.cursorX ncBankCursor+1
+    DEFINE mon2_vars.inverse ncBankInverse
     DEFINE bios_upper.cursorCfg ncBankCursorCfg
     DEFINE bios_upper.ramPageCount ncBankRamPages
     DEFINE FONT_ENGINE_HEADER ncBankFontHeader
-    DEFINE bios_printStringRawZ ncBankPrintRaw
-    DEFINE bios_printStringRawLim ncBankPrintLim
-    DEFINE bios_printStringZ ncBankPrintString
-    DEFINE bios_printString ncBankPrintString
-    DEFINE bios_printChar ncBankPrintChar
-    DEFINE bios_printHexWord ncBankPrintHexWord
-    DEFINE bios_setCursorPos ncBankSetCursor
-    DEFINE bios_getch ncBankGetch
-    DEFINE bios_getMemTop ncBankGetMemTop
-    DEFINE bios_cmp_hl_de ncBankCompare
-    DEFINE bios_sub_hl_de ncBankSubtract
-    DEFINE bios_upperCase ncBankStrings.upperCase
-    DEFINE bios_memcpy_bc_hl ncBankCopy.memcpy_bc_hl
-    DEFINE bios_setFontEncoding ncBankEncoding
-    DEFINE bios_keyScan io_bankKeyScan
-    DEFINE bios_diskDriver ncBankDiskInfo
-    DEFINE bios_reboot ncBankReturn
+    DEFINE FONT_ENGINE_RAWZ ncBankPrintRaw
+    DEFINE FONT_ENGINE_LIM ncBankPrintLim
+    DEFINE mon2_printStringOld ncBankPrintString
+    DEFINE mon2_printCharOld ncBankPrintChar
+    DEFINE mx_printHexWord ncBankPrintHexWord
+    DEFINE mx_setCursorPos ncBankSetCursor
+    DEFINE mon2_getchOld ncBankGetch
+    DEFINE mon2_cmp_hl_de ncBankCompare
+    DEFINE mon2_memcpy_bc_hl ncBankCopy.memcpy_bc_hl
+    DEFINE FONT_ENGINE_ENCODING ncBankEncoding
+    DEFINE ncKeyScan io_bankKeyScan
+    DEFINE ncDiskDriver ncBankDiskInfo
+    DEFINE mon2_init ncBankReturn
 ncBankQueue      = 0D000h
 ncBankCursor     = 0DF00h
 ncBankInverse    = 0DF02h

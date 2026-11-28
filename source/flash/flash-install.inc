@@ -1,6 +1,6 @@
 ; Нерезидентный установщик, COM загружается с 0000h. Резидент копируется
 ; только после успешного ID; при отказе прежний драйвер остаётся установлен.
-; Временный ID использует 8C00h–8CFFh, общий системный резерв переходников.
+; Пока системное ПЗУ отображено в нижнюю память, проба ID исполняется в общем временном буфере BIOS.
 ; Выход CF=0: установлен либо сохранена прежняя служба без подходящего ID.
 ; CF=1: ошибка аргументов, flush или регистрации.
 Install:
@@ -13,12 +13,12 @@ Install:
     ld a,(bios_upper.koi7)
     push af
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     call InstallBody
     pop bc
     push af
     ld a,b
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     pop af
     ret
 InstallBody:
@@ -28,8 +28,8 @@ InstallBody:
     IF SYSTEM_FLASH
     ld hl,sys_probe_file
     ld de,sys_probe_file_end
-    ld bc,08C00h
-    call bios_memcpy_bc_hl
+    ld bc,BIOS_TEMP_BUFFER
+    call mon2_memcpy_bc_hl
     call SysProbe
     call DecodeSystemID
     jp c,InstallSkipped             ; Системный том может находиться в обычном ПЗУ.
@@ -44,7 +44,7 @@ InstallBody:
     inc de
     inc de
     inc de
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ELSE
     ld b,0
     ld hl,resident_file+v_chipMap-Driver
@@ -93,10 +93,10 @@ probeNext:
     ld hl,resident_file
     ld de,resident_file_end
     ld bc,RESIDENT_ADDRESS
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,DRIVE
     ld hl,Driver
-    call bios_installDriver
+    MXOS_CALL_REGS MXOS_BIOS_INSTALL_DRIVER
     ld (FuncSize+4),hl
     IF SYSTEM_FLASH
     ld hl,DriverInfo
@@ -112,7 +112,7 @@ probeUnsupported:
     pop bc
 InstallFailed:
     ld hl,txtIDError
-    call bios_printString
+    call mon2_printStringOld
     scf
     ret
 txtIDError: DB "FLASH: UNSUPPORTED / MISSING CHIP",00Ah,0
@@ -171,7 +171,7 @@ txt256: DB "256"
 txt512: DB "512"
 
 sys_probe_file:
-    DISP 08C00h
+    DISP BIOS_TEMP_BUFFER
 SysProbe:
     xor a
     ld (IO_PAGE_ROM),a
@@ -219,7 +219,7 @@ sysDelayLoop:
     or l
     jp nz,sysDelayLoop
     ret
-    ASSERT $ <= 08D00h
+    ASSERT $ <= BIOS_TEMP_BUFFER_END
     ENT
 sys_probe_file_end:
     ENDIF

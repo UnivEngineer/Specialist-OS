@@ -169,7 +169,7 @@ name:
     push bc
     push de
     push hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -187,7 +187,7 @@ name:
     add a,a
     ENDIF
     add a,h
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     pop hl
     push hl
     call renderer
@@ -213,7 +213,7 @@ batch8: ret
 ; Вывести одно восьмипиксельное знакоместо из построчной таблицы.
 ;
 ; вход:
-;   c = код символа. Текущую позицию задают bios_vars.cursorY и cursorX.
+;   c = код символа. Текущую позицию задают mon2_vars.cursorY и cursorX.
 ;   Рендерер выбирается дескриптором после initialize.
 ;
 ; выход:
@@ -223,7 +223,7 @@ batch8: ret
 
 scalar8:
     ld e,c
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -238,7 +238,7 @@ scalar8:
     ld e,a
     ld a,h
     add a,4
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld h,PAGED_FONT_BASE >> 8
     DUP 7
     ld a,(hl)
@@ -253,7 +253,7 @@ scalar8:
 ; Вывести одно шестипиксельное знакоместо в текущей позиции.
 ;
 ; вход:
-;   c = код символа, позиция в bios_vars.cursorY. Таблица глифов
+;   c = код символа, позиция в mon2_vars.cursorY. Таблица глифов
 ;   подготовлена при initialize.
 ;
 ; выход:
@@ -269,7 +269,7 @@ scalarSix:
     ld d,PAGED_FONT_BASE >> 8
     ENDIF
     ld e,c
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -279,7 +279,7 @@ scalarSix:
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,l
     sub 7
     ld c,a

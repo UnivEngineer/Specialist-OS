@@ -11,14 +11,14 @@ TAPE_BUFFER_END = 08FFFh
 Start:
 tapeMenu:
             xor     a
-            call bios_setFontEncoding    ; Имена файлов — KOI-8.
+            call FONT_ENGINE_ENCODING    ; Имена файлов — KOI-8.
             ; После магнитофонной операции экран и состояние курсора могут
             ; остаться произвольными. Меню всегда начинает с чистого экрана.
             ld      hl, 0
-            ld      (bios_vars.inverse), hl
-            call    bios_clearScreenOld
+            ld      (mon2_vars.inverse), hl
+            call    mon2_clearScreenOld
             ld      hl, 0008h
-            ld      (bios_vars.cursorY), hl
+            ld      (mon2_vars.cursorY), hl
             ld      a, 0FFh
             ld      (bios_upper.escMode), a
 
@@ -28,16 +28,16 @@ tapeMenu:
             ld      (v_savedSP), hl
 
             ld      hl, tapeOperationAbort
-            ld      (bios_vars.tapeError), hl
+            ld      (mon2_vars.tapeError), hl
 
             ld      hl, txtMenu
-            call    bios_printString
+            call    mon2_printStringOld
 
 tapeMenuWait:
-            call    bios_getch
+            call    mon2_getchOld
             cp      1Bh
             jp z,   tapeExit
-            call    bios_upperCase
+            MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
             cp      'L'
             jp z,   tapeLoadFile
             cp      'S'
@@ -45,7 +45,7 @@ tapeMenuWait:
             jp      tapeMenuWait
 
 tapeExit:
-            jp      bios_reboot
+            jp      mon2_init
 
 ;----------------------------------------------------------------------------
 ; Загрузка файла с магнитофона
@@ -56,7 +56,7 @@ tapeLoadFile:
             jp c,   tapeMenu
 
             ld      hl, txtWaiting
-            call    bios_printString
+            call    mon2_printStringOld
             call    tapePrepareHardware
             call    clearFileDescriptor
 
@@ -98,9 +98,9 @@ tapeReadNameStore:
             ld      a, 8
             call    tapeReadWordA           ; hl = конечный адрес
 
-            call    bios_cmp_hl_de
+            call    mon2_cmp_hl_de
             jp c,   tapeBadRange
-            call    bios_sub_hl_de          ; hl = размер файла - 1
+            MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE          ; hl = размер файла - 1
             ld      a, h
             cp      (TAPE_BUFFER_END + 1) >> 8
             jp nc,  tapeTooLarge
@@ -186,10 +186,10 @@ tapeReadData:
 tapeSaveFile:
             call    clearFileDescriptor
             ld      hl, txtFilePrompt
-            call    bios_printString
+            call    mon2_printStringOld
             ld      hl, v_path
             ld      de, v_path + 21
-            call    bios_input
+            MXOS_CALL_REGS MXOS_BIOS_INPUT
 
             ld      hl, v_path
             ld      de, v_fileDescr
@@ -227,7 +227,7 @@ tapeSaveFile:
             ld (v_tapeLoadAddr),hl
             ex de,hl
             ld hl,(2)
-            call bios_sub_hl_de
+            MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
             jp c,tapeBadCRC
             ld (v_fileSize),hl
             ld de,7
@@ -236,7 +236,7 @@ tapeSaveFile:
             ld hl,(v_fileDescr+FILE_DESCRIPTOR.size)
             ex de,hl
             pop hl
-            call bios_cmp_hl_de
+            call mon2_cmp_hl_de
             jp nz,tapeBadCRC
             ld hl,(v_fileSize)
             ld de,5
@@ -253,7 +253,7 @@ tapeSaveFile:
             ex de,hl
             ld hl,4
             ld bc,0
-            call bios_memcpy_bc_hl
+            call mon2_memcpy_bc_hl
             ld      hl, (v_fileSize)
             ex      de, hl
             ld      hl, 0
@@ -267,7 +267,7 @@ tapeSaveFile:
             jp nz,  tapeBadCRC
 
             ld      hl, txtSaving
-            call    bios_printString
+            call    mon2_printStringOld
             call    tapePrepareHardware
 
             call    tapeWritePilot
@@ -314,24 +314,24 @@ tapeSaveFile:
 chooseDestinationDrive:
 chooseDriveAgain:
             ld      hl, txtDrivePrompt
-            call    bios_printString
-            call    bios_getch
+            call    mon2_printStringOld
+            call    mon2_getchOld
             cp      1Bh
             jp z,   chooseDriveCancel
-            call    bios_upperCase
+            MXOS_CALL_REGS MXOS_BIOS_UPPERCASE
             cp      'A'
             jp c,   chooseDriveInvalid
             cp      'I'
             jp nc,  chooseDriveInvalid
             push    af
             ld      c, a
-            call    bios_printChar
+            call    mon2_printCharOld
             pop     af
             sub     'A'
             ld      e, 1
             MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE
             ld      b, 3
-            call    bios_diskDriver
+            MXOS_CALL_REGS MXOS_BIOS_DISK_DRIVER
             ld      a, d
             or      e
             jp z,   chooseDriveNoDriver
@@ -340,12 +340,12 @@ chooseDriveAgain:
 
 chooseDriveInvalid:
             ld      hl, txtInvalidDrive
-            call    bios_printString
+            call    mon2_printStringOld
             jp      chooseDriveAgain
 
 chooseDriveNoDriver:
             ld      hl, txtNoDriver
-            call    bios_printString
+            call    mon2_printStringOld
             jp      chooseDriveAgain
 
 chooseDriveCancel:
@@ -507,10 +507,10 @@ tapeFileNotFound:
             ld      hl, txtFileNotFound
 
 tapeMessageAndMenu:
-            call    bios_printString
+            call    mon2_printStringOld
             ld      hl, txtPressKey
-            call    bios_printString
-            call    bios_getch
+            call    mon2_printStringOld
+            call    mon2_getchOld
             cp      1Bh
             jp z,   tapeExit
             jp      tapeMenu

@@ -34,7 +34,7 @@ def read(path):
   raise
  size=int.from_bytes(m.read(0x3206,2),'little');return m.read(0x4000,size)
 def restore_nc():
- m.stop_at(b['biosTryShell']);m.call('regs_set',pc=b['bios_reboot'],sp=0x8fdf);m.until(b['biosTryShell'],120,page=0)
+ m.stop_at(b['biosTryShell']);m.call('regs_set',pc=b['mon2_init'],sp=0x8fdf);m.until(b['biosTryShell'],120,page=0)
  m.stop_at(n['mainLoop']);m.until(n['mainLoop'],120,page=0)
 def font_state():
  m.write(0xfffd,b'\0')
@@ -42,7 +42,7 @@ def font_state():
  m.write(0xfffc,b'\0')
  return state
 def raw_call(op,hl=0,de=0,bc=0,af=2,error=None):
- m.write(0x2f80,struct.pack('<4H',hl,de,bc,af));m.write(0x2800,b'\xcd\x00\xf8\xc3\x00\x8b');m.stop_at(0x8b00)
+ m.write(0x2f80,struct.pack('<4H',hl,de,bc,af));m.write(0x2800,b'\xcd\x60\xf8\xc3\x00\x8b');m.stop_at(0x8b00)
  m.call('regs_set',pc=0x2800,sp=0x8fdf,bc=op,de=0x2f80);z=m.until(0x8b00,90,page=0)
  r={key:v['dec'] for key,v in z['registers'].items()};assert r['sp']==0x8fdf
  assert bool(r['af']&1)==(error is not None),(hex(op),r,error)
@@ -164,7 +164,7 @@ try:
   assert image.data==original.data and image.load==original.load
   print('PASS NC keyboard -> EXE utility -> v2 body, flags, mode, checksum',flush=True)
   # The isolated read fixture replaced MAIN test code; return through BIOS.
-  m.stop_at(n['mainLoop']);m.call('regs_set',pc=b['bios_reboot'],sp=0x8fdf);m.until(n['mainLoop'],120,page=0)
+  m.stop_at(n['mainLoop']);m.call('regs_set',pc=b['mon2_init'],sp=0x8fdf);m.until(n['mainLoop'],120,page=0)
   command('exe b:/rain.exe b:/rain1.exe -b:80 -begin:0 -end:6000 -p:preserve -mode:mx')
   data=read('B:/RAIN1.EXE');changed=decode(data,'exe');assert changed.bss==0x80 and changed.memory_end==0x6000 and changed.policy==1 and changed.data==image.data
   print('PASS native header editing preserves body and writes memory metadata',flush=True)

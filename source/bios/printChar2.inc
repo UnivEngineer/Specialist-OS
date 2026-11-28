@@ -15,7 +15,7 @@ printChar2:
 
 printCharBody:
             ; Помещаем в hl координаты курсора
-            ld  hl, (bios_vars.cursorY)
+            ld  hl, (mon2_vars.cursorY)
 
             ; Продолжаем, если не включен режим обработки ESC последовательности (bios_upper.escMode==0FFh)
             ld  a, (bios_upper.escMode)
@@ -55,7 +55,7 @@ printCharRawHelper:
 printChar_real2:  
             ld hl,(bios_upper.charGen)
 fontScalarCall: call FONT_ENGINE_SCALAR
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld a,h
             cp 192
             ret c
@@ -152,7 +152,7 @@ printChar_esc1:   ; Если код меньше 20h или больше 20h + 2
             add   a, c
             add   a, c
             add   a,8
-            ld    (bios_vars.cursorY),a
+            ld    (mon2_vars.cursorY),a
 
 loc_C693:   ; Следующий символ будет обработан в printChar_esc2
             ld    a, 2
@@ -180,65 +180,44 @@ escColumnLoop:
             ret nc
             jp escColumnLoop
 escColumnReady:
-            ld (bios_vars.cursorX),a
+            ld (mon2_vars.cursorX),a
             ret
 
 ; ---------------------------------------------------------------------------
 ; Обработка первого символа ESC последовательности
 
-printChar_esc0:   ; Если код больше 20h
-            ld    a, c
-            cp    'P' ; 50h
-            jp z, printChar_eP
-            sub   'A' ; 41h
-            jp z, printChar19
-            dec   a ; 'b' 42h
-            jp z, printChar1A
-            dec   a ; 'c' 43h
-            jp z, printChar18
-            dec   a ; 'd' 44h
-            jp z, printChar08
-            dec   a ; 'e' 45h
-            jp z, printChar1F
-            dec   a ; 'F' 46h
-            jp z, printChar_eF
-            dec   a
-            dec   a ; 'h' 48h
-            jp z, printChar0C
-            dec   a ; 'I' 49h
-            jp z, printChar_eI
-            dec   a
-            dec   a
-            sub   14 ; 'Y' 59h
-            jp z, setEscMode_eY
-
-            ; Вывод символа
+printChar_esc0:
+            ld    a,c
+            sub   'A'
+            cp    5
+            jp    nc,printCharEscOther
+            ld    hl,printCharEscControls
+            ld    e,a
+            ld    d,0
+            add   hl,de
+            ld    c,(hl)
             jp    printChar2
 
-; ---------------------------------------------------------------------------
-; Обработка ESC+Y.
+printCharEscOther:
+            cp    'F'-'A'
+            jp    z,printChar_eF
+            cp    'H'-'A'
+            jp    z,printChar0C
+            cp    'I'-'A'
+            jp    z,printChar_eI
+            cp    'P'-'A'
+            jp    z,printChar_eP
+            cp    'Y'-'A'
+            jp    z,setEscMode_eY
+            jp    printChar2
+
+printCharEscControls:
+            DB 19h,1Ah,18h,8,1Fh
 
 setEscMode_eY:    ; Следующий символ будет обработан в printChar_esc1 
             ld    a, 1
             ld    (bios_upper.escMode),a
             ret
-
-; ---------------------------------------------------------------------------
-
-printChar18:
-            ld    c, 18h
-            jp    printChar2
-
-; ---------------------------------------------------------------------------
-
-printChar08:
-            ld    c, 8
-            jp    printChar2
-
-; ---------------------------------------------------------------------------
-
-printChar1F:      ld    c, 1Fh
-            jp    printChar2
 
 ; ---------------------------------------------------------------------------
 
@@ -255,19 +234,6 @@ printChar_eP:
             ret
 
 ; ---------------------------------------------------------------------------
-
-printChar19:
-            ld    c, 19h
-            jp    printChar2
-
-; ---------------------------------------------------------------------------
-
-printChar1A:
-            ld    c, 1Ah
-            jp    printChar2
-
-; ---------------------------------------------------------------------------
-; Режим эхопечати на принтере. Включается ESC+P
 
 printChar_esc3:
             ; Выходим, из режима, если код нулевой
@@ -294,9 +260,9 @@ printChar_eI_2:
             cp    19
             jp nc,  printChar2
 
-            ; Устанаваливаем bios_vars.cursorY=8
+            ; Устанаваливаем mon2_vars.cursorY=8
             ld    a, 8
-            ld    (bios_vars.cursorY),a
+            ld    (mon2_vars.cursorY),a
             ret
 
 ; ---------------------------------------------------------------------------
@@ -306,9 +272,9 @@ printChar_eI:
             ; Используется дальше функцией printChar2
             ld    c, 19h
 
-            ; Прокручиваем экран вних, только если bios_vars.cursorY == 8.
+            ; Прокручиваем экран вних, только если mon2_vars.cursorY == 8.
             ; иначе переходим на printChar_eI_2
-            ld    a, (bios_vars.cursorY)
+            ld    a, (mon2_vars.cursorY)
             cp    8
             jp nz,  printChar_eI_2
 

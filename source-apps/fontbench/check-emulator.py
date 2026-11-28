@@ -138,14 +138,14 @@ try:
     finally:
         m.write(0xfffc, b'\0')
     bios_draw_before = m.read(s['BASE_DRAWCHAR'], 3)
-    bios_hooks_before = [m.read(s[k], n) for k,n in [('bios_printChar',3), ('bios_printString',3), ('BASE_BIOS_TABLE',102)]]
+    bios_hooks_before = [m.read(s[k], n) for k,n in [('mon2_printCharOld',3), ('mon2_printStringOld',3), ('BASE_BIOS_TABLE',102)]]
     if args.missing_module:
         # Проверяем ошибку штатного загрузчика, не меняя файлов системного диска.
         m.write(s['bankPath'], b'A:\\ABSENT.COM\0')
         free_until(s['waitKey'])
         assert m.read(s['bankHandle'], 2) == b'\0\0'
         assert m.read(s['matrixStage'], 1) == b'\0'
-        assert [m.read(s[k], n) for k,n in [('bios_printChar',3), ('bios_printString',3), ('BASE_BIOS_TABLE',102)]] == bios_hooks_before, 'BIOS hooks not restored after load failure'
+        assert [m.read(s[k], n) for k,n in [('mon2_printCharOld',3), ('mon2_printStringOld',3), ('BASE_BIOS_TABLE',102)]] == bios_hooks_before, 'BIOS hooks not restored after load failure'
         m.screenshot(O / 'missing-module.png')
         m.call('bp_clear')
         m.call('emu_run_for', ms=250)
@@ -209,7 +209,7 @@ try:
     assert int.from_bytes(m.read(s['reportMessage'], 2), 'little') == s['benchSkippedText'] if options[4] else int.from_bytes(m.read(s['reportMessage'], 2), 'little') == s['reportSavedText']
     assert m.read(s['reportHandle'] + 42, 1) == b'\0'
     assert m.read(s['BASE_DRAWCHAR'], 3) == bios_draw_before
-    assert [m.read(s[k], n) for k,n in [('bios_printChar',3), ('bios_printString',3), ('BASE_BIOS_TABLE',102)]] == bios_hooks_before, 'BIOS hooks not restored'
+    assert [m.read(s[k], n) for k,n in [('mon2_printCharOld',3), ('mon2_printStringOld',3), ('BASE_BIOS_TABLE',102)]] == bios_hooks_before, 'BIOS hooks not restored'
     assert m.read(s['bankHandle'], 2) == b'\0\0', 'module not unloaded'
     kernel = sy(R / 'bin/banked/KERNEL.sym')
     try:

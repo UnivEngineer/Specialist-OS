@@ -4,7 +4,8 @@
 ; Расшифровать код матрицы с учётом раскладки и модификаторов.
 ;
 ; вход:
-;   b = сырой код матрицы, d = режим КОИ-7, e = состояние переключателей. Вход Shift
+;   b = сырой код матрицы, d = режим КОИ-7, e = состояние переключателей.
+;   keyDecodeCurrent читает D/E из текущих переменных BIOS. Вход Shift
 ;   читается с платы клавиатуры.
 ;
 ; выход:
@@ -12,6 +13,11 @@
 ;   означает Ctrl. b сохранён, e содержит обновлённые переключатели.
 ;----------------------------------------------------------------------------
 
+keyDecodeCurrent:
+    ld a,(bios_upper.koi7)
+    ld d,a
+    ld a,(mon2_vars.keyLocks)
+    ld e,a
 keyDecode:
     ld a,b
     cp 081h
@@ -22,7 +28,7 @@ keyDecode:
     jp c,keyPunctuation
     cp 07Fh
     jp nc,keyModifiers
-    call ioKeyReadRows
+    call biosKeyRows
     and 2
     rrca
     rrca                    ; bit 7 = Shift released
@@ -45,7 +51,7 @@ keyRussianCode:
     xor 080h
     jp keyModifiers
 keyPunctuation:
-    call ioKeyReadRows
+    call biosKeyRows
     and 2
     ld a,b
     jp nz,keyModifiers
@@ -55,7 +61,7 @@ keyPunctuation:
     ld a,05Fh
 keyModifiers:
     ld c,a
-    call ioKeyReadCtrl
+    call biosKeyCtrl
     ld a,1
     or a
     ld a,d
@@ -66,7 +72,7 @@ keyModifiers:
 loc_C311:                   ; key ready in A, profiling breakpoint
     ret
 keyToggle:
-    call ioKeyReadRows
+    call biosKeyRows
     and 2
     jp z,keyCaps
     ld a,d

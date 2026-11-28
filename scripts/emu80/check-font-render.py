@@ -42,10 +42,10 @@ try:
     m.call('emu_run_for', ms=500)
     m.tap('f7')
     m.screenshot(O/'dialog.png')
-    assert m.read(S['bios_vars.inverse'], 1)[0] in (1, 255)
+    assert m.read(S['mon2_vars.inverse'], 1)[0] in (1, 255)
     m.tap('esc')
     m.call('emu_run_for', ms=500)
-    assert m.read(S['bios_vars.inverse'], 1) == b'\0'
+    assert m.read(S['mon2_vars.inverse'], 1) == b'\0'
     # Это отдельная проверка ABI после нормальной загрузки, не ввод команды NC.
     # Дальнейший тест владеет main и завершается закрытием своего экземпляра.
     m.call('debug_break')
@@ -58,7 +58,7 @@ try:
         assert not state['flags']['C'], state
         assert state['registers']['af']['dec']>>8 == (mode == 1), state
         m.write(0x3000, b''.join(source[row*48:row*48+48]+b'\0' for row in range(24)))
-        code = b'\x31'+W(0x8FDF)+b'\xcd'+W(S['bios_clearScreenOld'])
+        code = b'\x31'+W(0x8FDF)+b'\xcd'+W(S['mon2_clearScreenOld'])
         m.write(0x8400,(O/'local-timer.bin').read_bytes())
         code += b'\xcd'+W(timer_sy['pitTimerInit'])+b'\xcd'+W(timer_sy['io_pitRead'])+b'\x22'+W(0x4000)
         for row in range(24):
@@ -68,7 +68,7 @@ try:
                 # Штатный посимвольный ABI сохраняет указатель и счётчик.
                 code += b'\x06\x30'
                 loop = 0x1000+len(code)
-                code += b'\x4E\xCD'+W(S['bios_printChar'])+b'\x23\x05\xC2'+W(loop)
+                code += b'\x4E\xCD'+W(S['mon2_printCharOld'])+b'\x23\x05\xC2'+W(loop)
             else:
                 code += mx('PRINT_STRING_MAIN')
         code += b'\xcd'+W(timer_sy['io_pitRead'])+b'\x22'+W(0x4002)+b'\xc3'+W(0x2000)

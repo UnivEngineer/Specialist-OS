@@ -21,7 +21,7 @@ base[0x9000:0xC000] = bytes((i*37+(i>>8)*13)&255 for i in range(0x3000))
 def run(entry, phase, inverse, opt=False):
     m = bytearray(base)
     for field, data in [('charGen', word(0x2800)), ('koi7', b'\0'), ('escMode', b'\xff'), ('inverse', bytes([inverse]))]:
-        a = s[('bios_vars.' if field == 'inverse' else 'bios_upper.')+field]
+        a = s[('mon2_vars.' if field == 'inverse' else 'bios_upper.')+field]
         m[a:a+len(data)] = data
     if opt:
         a = s['monitor.drawEntry']
@@ -29,7 +29,7 @@ def run(entry, phase, inverse, opt=False):
     code = b'\x31'+word(0x8FE0)
     for i, c in enumerate(range(32, 256)):
         cursor = ((i%32)*3+phase)*256 + 7+(i//32)*8
-        code += b'\x21'+word(cursor)+b'\x22'+word(s['bios_vars.cursorY'])
+        code += b'\x21'+word(cursor)+b'\x22'+word(s['mon2_vars.cursorY'])
         code += bytes([0x0E, c, 0xCD])+word(entry)
     code += b'\xc3'+word(0x8E80)
     assert 0x7800+len(code) < 0x8E00
@@ -41,11 +41,11 @@ def run(entry, phase, inverse, opt=False):
 checks = 0
 for inverse in (0, 1, 255):
     for phase in range(4):
-        reference = run(s['bios_printChar'], phase, inverse)
+        reference = run(s['mon2_printCharOld'], phase, inverse)
         for opt in (False, True):
             actual = run(s['monitor.scalar'], phase, inverse, opt)
             assert actual[0x9000:0xC000] == reference[0x9000:0xC000], (phase, inverse, opt)
-            a = s['bios_vars.cursorY']
+            a = s['mon2_vars.cursorY']
             assert actual[a:a+2] == reference[a:a+2], (phase, inverse, opt, 'cursor')
             checks += 224
 (O/'results.json').write_text(json.dumps(dict(checks=checks, monitor='PASS', optimized='PASS', reference='BIOS.sys + IO.sys', printableCodes=224, phases=4, inverseModes=3), indent=2)+'\n')

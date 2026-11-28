@@ -173,7 +173,7 @@ ncQSnapshotRun:
     ld hl,ncQSnapshot
     push hl
     ex de,hl
-    call ncBankSubtract
+    call nativeMath.sub_hl_de
     ld b,h
     ld c,l
     pop hl

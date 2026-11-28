@@ -178,10 +178,10 @@ benchIsPaged:
     ld d,(hl)
     ex de,hl
     ld de,pagedCoreStart
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,benchPagedNo
     ld de,pagedCoreEnd
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nc,benchPagedNo
     ld a,1
     jp benchPagedDone

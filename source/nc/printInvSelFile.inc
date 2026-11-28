@@ -9,7 +9,7 @@ printInvSelFile:
             call  getSelectedFile
             ex    de, hl
 printInvFile:     ld    hl, 3C6Eh
-            ld    (bios_vars.cursorY), hl
+            ld    (mon2_vars.cursorY), hl
             ex    de, hl
             ld    de, vars.input
             call  compactName

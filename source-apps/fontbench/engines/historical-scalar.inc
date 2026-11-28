@@ -13,10 +13,10 @@ prepare:
     ld de,02800h
     add hl,de
     ld (glyph),hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     add a,3
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,h
     and 3
     ld c,a
@@ -90,7 +90,7 @@ current: ld a,0
     ret
 eraseByte:
     ld c,a
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,eraseWhite
     ld a,c
@@ -127,7 +127,7 @@ maskShift:
     ex de,hl
     jp drawChar
 clearChar:
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,clearWhite
     ld a,h

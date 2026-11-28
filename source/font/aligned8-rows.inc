@@ -1,10 +1,10 @@
 ; This alternative reads the codes eight times but keeps H on a single font
 ; page and E on a single scanline throughout the horizontal inner loop.
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     sub 7
     ld e,a
     ld h,FONT_ADDR/256
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,alignedRowsInverse
 

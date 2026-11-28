@@ -36,7 +36,7 @@ def run(version):
  def cpu():return m.call('cpu_state')
  def call(op,hl=0,de=0,bc=0,aa=0,keep=False):
   page(0);saved=cpu()['registers'] if keep else None
-  m.write(0x8d00,struct.pack('<4H',hl,de,bc,aa*256+2));m.write(0x8d20,b'\xcd\x00\xf8\xc3\x30\x8d')
+  m.write(0x8d00,struct.pack('<4H',hl,de,bc,aa*256+2));m.write(0x8d20,b'\xcd\x60\xf8\xc3\x30\x8d')
   m.stop_at(0x8d30);m.call('regs_set',pc=0x8d20,sp=0x8df0,bc=op,de=0x8d00)
   z=m.until(0x8d30,180,page=0);rr={kk:v['dec'] for kk,v in z['registers'].items()}
   assert not rr['af']&1,(version,hex(op),rr)

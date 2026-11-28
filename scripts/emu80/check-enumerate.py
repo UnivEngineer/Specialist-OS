@@ -16,7 +16,7 @@ x=h['Matrix']();m=x.m;m.url=f'http://127.0.0.1:{args.port}/mcp'
 word=lambda n:struct.pack('<H',n)
 def page(v):m.write(0xfffd if v else 0xfffc,bytes([v-1 if v else 0]))
 def call(op,hl=0,de=0,bc=0,a=0,error=False):
- page(0);m.write(0x3000,struct.pack('<4H',hl,de,bc,a*256+2));m.write(0x2000,b'\xcd\x00\xf8\xc3\x00\x8b')
+ page(0);m.write(0x3000,struct.pack('<4H',hl,de,bc,a*256+2));m.write(0x2000,b'\xcd\x60\xf8\xc3\x00\x8b')
  m.stop_at(0x8b00);m.call('regs_set',pc=0x2000,sp=0x8fdf,bc=op,de=0x3000)
  z=m.until(0x8b00,90);r={key:v['dec'] for key,v in z['registers'].items()}
  assert r['sp']==0x8fdf,r

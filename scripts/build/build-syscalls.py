@@ -6,22 +6,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-def bios_vector_window(layout):
-    """Продолжить таблицу Монитора-2 плотным рядом JMP и байтом результата CLI."""
-    monitor = layout['fixed'][-1]
-    return monitor['address'] + monitor['size'], 3 * len(layout['vectors']) + 1
-
-
 def generate(check=False):
     registry = json.loads((ROOT/'source/bios/syscalls.json').read_text('utf-8'))
     asm = ['; Создано scripts/build/build-syscalls.py из source/bios/syscalls.json.',
            '    IFNDEF MXOS_ABI_SYSCALL_IDS_INC', '    DEFINE MXOS_ABI_SYSCALL_IDS_INC']
     c = ['/* Создано из source/bios/syscalls.json; номера групп и функций. */',
          '#ifndef MXOS_SYSCALL_IDS_H', '#define MXOS_SYSCALL_IDS_H']
-    tables = ['; Создано из source/bios/syscalls.json; внутренние адреса, не публичный ABI.']
+    group_tables = {}
     z80 = ['; Создано из source/bios/syscalls.json для ассемблера z88dk.']
     for group in registry:
         group_id = group['group']
+        tables = ['; Создано из source/bios/syscalls.json; внутренние адреса, не публичный ABI.']
+        group_tables[group['name']] = tables
         asm.append(f"MXOS_GROUP_{group['name']} = {group_id}")
         c.append(f"#define MXOS_GROUP_{group['name']} {group_id}")
         assert len({s['id'] for s in group['services']}) == len(group['services'])
@@ -59,30 +55,12 @@ def generate(check=False):
     for name, address in addresses.items():
         if name.startswith(('mx_', 'io_')):
             z80.append(f'defc {name} = 0{address:04X}h')
-    layout = json.loads((ROOT/'source/bios/layout.json').read_text('utf-8'))
-    start, size = bios_vector_window(layout)
-    jumps = ['; Адреса из sdk/asm/abi/bios.inc, исполнители из source/bios/layout.json.']
-    for index, (name, target, *sdk_names) in enumerate(layout['vectors']):
-        symbol = 'bios_' + name
-        address = addresses[symbol]
-        if address != start + 3 * index:
-            raise ValueError(f'{symbol} ({address:04X}h): нарушен порядок JMP в layout.json')
-        jumps.extend([f'    ASSERT $ == {symbol}', f'    jp {target:<23} ; {address:04X}h'])
-        for sdk_name in sdk_names:
-            c.append(f'#define MXOS_BIOS_ABI_{sdk_name} 0x{address:04X}')
-        if name == 'printStringLim':
-            z80.append(f'defc {symbol} = 0{address:04X}h')
-    error_byte = addresses['bios_cliExecError']
-    if error_byte != start + size - 1:
-        raise ValueError(f'bios_cliExecError ({error_byte:04X}h) должен следовать за последним JMP')
-    jumps.extend(['    ASSERT $ == bios_cliExecError', f'    db 0                       ; {error_byte:04X}h',
-                  'j_diskDriver = bios_diskDriver'])
     asm.append('    ENDIF')
     c.append('#endif')
     outputs = {
         ROOT/'sdk/asm/abi/syscall-ids.inc':asm,
-        ROOT/'source/bios/syscall-tables.inc':tables,
-        ROOT/'source/bios/vectors.inc':jumps,
+        ROOT/'source/bios/syscall-tables.inc':group_tables['BIOS'],
+        ROOT/'source/dos/native-syscalls.inc':group_tables['DOS'],
         ROOT/'sdk/include/mxos_syscall_ids.h':c,
         ROOT/'sdk/src/mxos_syscall_ids.inc':z80,
     }

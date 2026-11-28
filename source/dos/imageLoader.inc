@@ -15,28 +15,17 @@ imageOpenModule:
 imageOpenKind:
     ld (relocAccepted),a
     ENDIF
-    call fileLoadInfo
+    call imageOpenHeader
     ret c
-    ld hl,(v_tmpFileDescr+30)
-    ld a,h
-    or l
+imageOpenLength:
+    ld a,(v_imageHeader+29)
+    or a
     jp nz,imageError
-    ld de,IMAGE_HEADER_SIZE+1
-    ld hl,(v_tmpFileDescr+28)
-    call cmp_hl_de
-    jp c,imageError
-    call imageReadPrefix
-    ret c
-    ld de,v_tmpFileDescr
-    ld bc,16
-    call moveBytesForward
-    call imageValidateHeader
-    ret c
     ld de,IMAGE_HEADER_SIZE
     IFDEF BANKED_DOS_BUILD
     ld a,(v_imageHeader+4)
     cp IMAGE_RELOC_VERSION
-    jp nz,imageFileSize
+    jp nz,imageBodyLength
     ld hl,(v_imageHeader+IMAGE_RELOC_COUNT)
     add hl,hl
     jp c,imageError
@@ -44,8 +33,8 @@ imageOpenKind:
     add hl,de
     jp c,imageError
     ex de,hl
-imageFileSize:
     ENDIF
+imageBodyLength:
     ld hl,(v_tmpFileDescr+10)
     jp imageLength
 imageLength:
@@ -129,6 +118,56 @@ imageResult:
     ld hl,(v_tmpFileDescr+8)
     or a
     ret
+    IFDEF BANKED_DOS_BUILD
+; CF=1 при ошибке чтения или проверки заголовка. При CF=0 значение A=0
+; обозначает нативный образ, A=1 передаёт запуск программы совместимости в RUN.
+imageClassify:
+    ld a,1
+    ld (relocAccepted),a
+    call imageOpenHeader
+    ret c
+    ld a,(v_imageHeader+5)
+    or a
+    jp z,imageLegacy
+    cp IMAGE_FLAG_MAIN
+    jp nz,imageNative
+    ld a,(v_imageHeader+IMAGE_MODE)
+    cp IMAGE_MODE_STD
+    jp nc,imageLegacy
+imageNative:
+    xor a
+    ret
+imageLegacy:
+    ld a,1
+    or a
+    ret
+
+imageOpenExec:
+    call imageClassify
+    ret c
+    or a
+    jp nz,imageError
+    jp imageOpenLength
+    ENDIF
+
+imageOpenHeader:
+    call fileLoadInfo
+    ret c
+    ld hl,(v_tmpFileDescr+30)
+    ld a,h
+    or l
+    jp nz,imageError
+    ld de,IMAGE_HEADER_SIZE+1
+    ld hl,(v_tmpFileDescr+28)
+    call cmp_hl_de
+    jp c,imageError
+    call imageReadPrefix
+    ret c
+    ld de,v_tmpFileDescr
+    ld bc,16
+    call moveBytesForward
+    jp imageValidateHeader
+
 imageError:
     ld a,DOS_ERR_BAD_IMAGE
     jp dosSetError
@@ -287,9 +326,6 @@ imageFixedHeader:
     cp IMAGE_HEADER_SIZE
     jp nz,imageError
 imageCommonHeader:
-    ld a,(v_imageHeader+29)
-    or a
-    jp nz,imageError
     ld a,(v_imageHeader+IMAGE_POLICY)
     cp IMAGE_POLICY_TRANSIENT+1
     jp nc,imageError

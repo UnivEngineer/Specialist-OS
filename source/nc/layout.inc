@@ -152,7 +152,7 @@ ncCenterLine:
     add a,2
     and 0FCh
     ld h,a
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ret
 ncSubVisible:
     push hl
@@ -228,7 +228,7 @@ ncAdaptiveEmpty:
     ret
 ; Erase one aligned cell at current BIOS position, including line spacing.
 ncClearCell:
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca

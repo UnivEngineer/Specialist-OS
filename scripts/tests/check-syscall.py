@@ -11,7 +11,7 @@ W=lambda n:n.to_bytes(2,'little')
 base=bytearray(65536)
 for name,addr in [('BIOS.sys',0xC000),('IO.main.bin',S['BIOS_IO_ADDR']),('DOS.native.sys',S['dosCoreStart'])]:
     data=(ROOT/'bin'/name).read_bytes();base[addr:addr+len(data)]=data
-base[S['bios_vars']:S['bios_vars']+S['BIOS_VARIABLES']]=base[S['initVars']:S['initVarsEnd']]
+base[S['mon2_vars']:S['mon2_vars']+S['MON2_VARIABLES']]=(ROOT/'bin/BIOS.defaults.bin').read_bytes()[:S['MON2_VARIABLES']]
 font=(ROOT/'bin/fonts/Compact.pf').read_bytes()
 base[S['FONT_ADDR']:S['FONT_ADDR']+len(font)]=font
 __import__('runpy').run_path(str(Path(__file__).with_name('mem-image.py')))['install'](base, S)
@@ -75,7 +75,7 @@ for op in (0x202,0x203,0x207,0x20b,0x20d,0x20e,0x20f,0x21f,0x220):
 
 # Реальные функции: прямой вход и новый адаптер имеют одинаковые результаты.
 for legacy,op,setup in [
-    ('bios_upperCase','MXOS_BIOS_UPPERCASE',' ld a,061h'),
+    ('upperCase','MXOS_BIOS_UPPERCASE',' ld a,061h'),
     ('dosGetError','MXOS_DOS_GET_ERROR',registers),
 ]:
     direct,dc=run(setup+f'\n call 0{S[legacy]:04X}h')

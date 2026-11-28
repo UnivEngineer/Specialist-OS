@@ -273,7 +273,7 @@ hexMarkStart:
     ex de,hl
     pop hl
     push hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,h
     or a
     jp nz,hexMarkOutside
@@ -290,7 +290,7 @@ hexMarkStart:
     push af
     ld hl,(hexPaintedTop)
     ex de,hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,h
     or a
     jp nz,hexMarkLastRow
@@ -423,14 +423,14 @@ hexDown:
 hexPageUp:
     ld hl,(hexTop)
     ld de,EDITOR_PAGE_STEP
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp nc,hexPageUpTop
     ld hl,0
 hexPageUpTop:
     call hexSetTop
     ld hl,(hexCaretRow)
     ld de,EDITOR_PAGE_STEP
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp nc,hexPageTarget
     ld hl,0
     jp hexPageTarget
@@ -599,7 +599,7 @@ hexScrollToBottom:
     ld e,a
     ld d,0
     dec de
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
 hexNewTop:
 hexSetTop:
     push hl
@@ -607,7 +607,7 @@ hexSetTop:
     ld a,(hexBar.visible)
     ld e,a
     ld d,0
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp nc,hexTopLimit
     ld hl,0
 hexTopLimit:
@@ -651,7 +651,7 @@ hexDecodeRow:
     ld a,(hexHeaderRows)
     ld e,a
     ld d,0
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp c,hexDecodeHeader
     call hexSkipHalf
     jp z,hexDecodeStartBlock
@@ -662,7 +662,7 @@ hexDecodeStartBlock:
     ld d,0
     ld b,0
 hexDecodeBlock:
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp c,hexDecodeRemainder
     inc b
     jp hexDecodeBlock
@@ -736,7 +736,7 @@ hexDrawPage:
     ex de,hl
     ld hl,(hexTop)
     ld (hexPaintedTop),hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,(hexDirtyScreen)
     ld b,a
     xor a
@@ -757,7 +757,7 @@ hexDrawPage:
     jp z,hexScrollForward
     ex de,hl
     ld hl,0
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     call hexScrollDistance
     jp nc,hexRedrawRows
     ld b,090h
@@ -970,7 +970,7 @@ hexViewportEnd:
     ld hl,(hexTop)
     ex de,hl
     ld hl,(hexBar.total)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,(hexBar.visible)
     ld b,a
     ld a,h
@@ -1014,12 +1014,12 @@ hexClearVacatedRows:
 ;   hexY = экранная координата Y.
 ;
 ; выход:
-;   bios_vars.cursorY и a = hexY. bc, de, hl и флаги сохранены.
+;   mon2_vars.cursorY и a = hexY. bc, de, hl и флаги сохранены.
 ;----------------------------------------------------------------------------
 
 hexSetRowY:
     ld a,(hexY)
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     ret
 hexPrintRow:
     IF EDIT_BANKED
@@ -1029,7 +1029,7 @@ hexPrintRow:
     ENDIF
     call hexSetRowY
     xor a
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,(hexLineLen)
     ld c,a
     ld b,0
@@ -1039,7 +1039,7 @@ hexPrintSpan:
     push bc
     push af
     ld a,(hexY)
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     pop af
     ld l,a
     push af
@@ -1059,9 +1059,9 @@ hexPrintAt:
     jp ebQueueCommand
     ELSE
     IF EDIT_HEX_PSEUDO
-    jp bios_printStringRawPseudo
+    jp FONT_ENGINE_PSEUDO
     ELSE
-    jp bios_printStringRawLim
+    jp FONT_ENGINE_LIM
     ENDIF
     ENDIF
 
@@ -1126,7 +1126,7 @@ hexSpanLength:
     ld c,e
     ex de,hl
     ld hl,(v_gapLo)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp c,hexSpanSuffix
     ld a,h
     or l
@@ -1493,7 +1493,7 @@ hexInvert:
     ld e,8
     jp uiInverseRectPixels
 hexClipIndex:
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,0
     ret c
     ld a,h
@@ -1508,7 +1508,7 @@ hexSource:
     ld hl,(hexCachedLine)
     ex de,hl
     ld hl,(hexOffset)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ex de,hl
     ld hl,(hexLineBytes)
     add hl,de
@@ -1760,7 +1760,7 @@ hexAddressX:
 hexAddressY:
     ld hl,hexHeaderY
     add a,(hl)
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     ld hl,hexRow
     ld bc,4
     call hexPrintAt
@@ -1770,10 +1770,10 @@ hexPlaceCursor:
     ld hl,(hexTop)
     ex de,hl
     ld hl,(hexCaretRow)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,l
     call hexScreenY
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
 hexPlaceByteX:
     ld hl,(hexCaret)
     call hexGrid
@@ -1792,7 +1792,7 @@ hexPlaceNibble:
     ld a,(v_charStep)
     add a,b
 hexStoreCaretX:
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ret
 
 ; The same byte-column table positions digits and ruler labels. Place each
@@ -1812,7 +1812,7 @@ hexDrawRuler:
     ld de,hexAddressLabel+4
 hexRulerAddress:
     ld bc,hexRow
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld c,0
     call hexRulerDigits
     ld a,(hexSumCol)
@@ -1824,10 +1824,10 @@ hexRulerAddress:
     ld (hl),'S'
 hexHeaderPrint:
     xor a
-    ld (bios_vars.cursorY+1),a
+    ld (mon2_vars.cursorY+1),a
     ld a,(hexHeaderY)
     add a,8
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     ld a,(hexLineLen)
     ld c,a
     ld b,0
@@ -1840,10 +1840,10 @@ hexHeaderPrint:
     ld c,8
     call hexRulerDigits
     xor a
-    ld (bios_vars.cursorY+1),a
+    ld (mon2_vars.cursorY+1),a
     ld a,(hexHeaderY)
     add a,18
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     ld hl,hexRow
     ld bc,30
     call hexPrintAt
@@ -1869,7 +1869,7 @@ hexHeaderCharset:
 hexHeaderLabel:
     ld a,(hexHeaderY)
     add a,8
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     ld bc,10
     call hexPrintAt
 hexRulerDone:
@@ -1998,7 +1998,7 @@ hexSection:
     or a
     ret z
     ld e,a
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ret nc
     add hl,de
     ld e,0
@@ -2019,7 +2019,7 @@ hexRemaining:
     ld h,0
 hexRemainingEnd:
     pop de
-    jp bios_sub_hl_de
+    jp nativeMath.sub_hl_de
 
 ; Avoid the unused columns at the end of a short RKS header.
 hexBoundSection:
@@ -2055,7 +2055,7 @@ hexHeaderDivider:
     call hexDividerTarget
     ld hl,hexHeaderBlockLabel
     ld de,hexHeaderBlockLabel+6
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,(hexViewType)
     cp 1
     ret nz
@@ -2146,7 +2146,7 @@ hexTrailerDivider:
     call hexDividerTarget
     ld hl,hexTrailerLabel
     ld de,hexTrailerLabel+6
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,(hexExpectedCS)
     ex de,hl
     call hexBlockColumn

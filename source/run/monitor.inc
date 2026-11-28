@@ -16,15 +16,15 @@ monitorOpen:
     ld hl,(descriptor+FILE_DESCRIPTOR.size)
     ld (monitorSize),hl
     ld de,01000h
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ld a,0
     jp z,monitorProfile
     ld de,02000h
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ld a,1
     jp z,monitorProfile
     ld de,RAMFOS_IMAGE_SIZE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld a,2
 monitorProfile:
@@ -33,10 +33,9 @@ monitorProfile:
     ; screen; error restores COLOR_BIOS before printing a diagnostic.
     xor a
     ld (IO_COLOR),a
-    call bios_clearScreenOld
-    ld hl,descriptor
-    ld de,RAMFOS_TEMP
-    call fileReadDescriptor
+    call mon2_clearScreenOld
+    ld hl,appName
+    call readCoreToScreen
     jp c,notFound
     ; Reject unrelated files of the same length before modifying the kernel.
     ld a,(RAMFOS_TEMP+0800h)
@@ -65,7 +64,7 @@ monitorLoaded:
     ld hl,monitorBootImage
     ld de,monitorBootImage+monitorBootEnd-monitorBoot
     ld bc,RAMFOS_BRIDGE
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,(monitorKind)
     ld (monitorBootKind+1),a
     ld hl,(monitorSize)

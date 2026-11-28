@@ -1,18 +1,18 @@
 ; Two packed catalogs share one allocation below the active font and memTop.
 ncMemoryInit:
-    call bios_getMemTop
+    call mx_getMemTop
     ld (ncMemoryTop),hl
     ld de,NC_MIN_END-1
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret c
     inc hl
     ld de,FILE_CACHE_A
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,l
     and 0F0h
     ld l,a
     ld de,2*FILE_CACHE_BYTES
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,ncMemorySizeReady
     ex de,hl
 ncMemorySizeReady:
@@ -34,34 +34,34 @@ ncMemorySizeReady:
 ncMemoryReserveError:
     push af
     ld hl,ncMemoryReserveMessage
-    call bios_printStringZ
+    call mon2_printStringOld
     pop af
-    call bios_printHexByte
+    call mx_printHexByte
     jp ncMemoryRetryPrompt
 ncCatalogPoolSize: DW 0
 ncMemoryError:
     ld hl,ncMemoryMessage
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,(ncMemoryTop)
-    call bios_printHexWord
+    call mx_printHexWord
     ld hl,ncMemoryNeed
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,NC_MIN_END-1
-    call bios_printHexWord
+    call mx_printHexWord
 ncMemoryRetryPrompt:
     ld hl,ncMemoryPrompt
-    call bios_printStringZ
+    call mon2_printStringOld
 ncMemoryWait:
-    call bios_getch
+    call mon2_getchOld
     cp 13
     jp nz,ncMemoryWait
     ld c,10
-    call bios_printChar
+    call mon2_printCharOld
     ; Avoid retrying NC forever when it cannot fit. CLI can install a smaller
     ; font module or release other resident resources before the next attempt.
     ld a,1
     MXOS_CALL_REGS MXOS_DOS_SET_SHELL
-    jp bios_reboot
+    jp mon2_init
 ncCatalogCapacity:          DB FILE_CACHE_CAPACITY
 ncMemoryTop:                DW 0
 ncMemoryEnd:                DW NC_END

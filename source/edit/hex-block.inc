@@ -67,7 +67,7 @@ hexBlockAdvance:
     ex de,hl
     ld hl,(v_textBeginLo)
     ex de,hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld (hexCaret),hl
     jp hexBlockChanged
 
@@ -144,7 +144,7 @@ hexSelectionLength:
     jp z,hexEmptySelection
     ex de,hl
     ld hl,(v_selectionEnd)
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ret c
     ld a,h
     or l

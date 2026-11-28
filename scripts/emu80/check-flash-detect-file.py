@@ -50,10 +50,10 @@ try:
     struct.pack_into('<H',system,19,512)
     path=out/'physical512-volume128.bin';path.write_bytes(system)
     x.start('physical-vs-bpb',system=path)
-    x.select(0);r=x.func(SYSTEM['bios_diskDriver'],bc=0x0300);assert r['registers']['de']['dec']==2048
+    x.select(0);r=x.func(SYSTEM['sysDiskDriver'],bc=0x0300);assert r['registers']['de']['dec']==2048
     image=n['RUNTIME']/'specialist-os/system-flash.bin';before=image.read_bytes()
     payload=bytes((i*71+0x23)&255 for i in range(256));x.m.write(0x4001,payload)
-    assert not x.func(SYSTEM['bios_diskDriver'],bc=0x0500,de=2047,hl=0x4001)['flags']['C']
+    assert not x.func(SYSTEM['sysDiskDriver'],bc=0x0500,de=2047,hl=0x4001)['flags']['C']
     assert image.read_bytes()[:-256]==before[:-256] and image.read_bytes()[-256:]==payload
     results['bpbIndependent']=dict(physicalKiB=512,volumeKiB=128,physicalPageBytes=256,fullPageWrite=True)
     (out/'filesystem/results.json').write_text(json.dumps(results,indent=2)+'\n')

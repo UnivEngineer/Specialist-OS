@@ -98,7 +98,7 @@ try:
  m.write(0x3200,w(0x3400)+w(0x4000)+w(len(payload))+bytes(34))
  api['path_io'](m,call,k,0x3200,True)
  call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
- m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['bios_reboot'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
+ m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['mon2_init'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
  for font,width in [('Rotate',6),('Fast8',8)]:
   command('C:/DOS/FONT '+{'Rotate':'6x8/Rotate','Cpm4':'4x8/Packed','Fast8':'8x8/Rotate'}[font],0,font_program=True)
   m.stop_at(n['mainLoop'])
@@ -152,7 +152,7 @@ try:
    edit('f3',s['lineEditLoop']);replace_input('not-found');edit('enter',s['editorInfoWait']);m.screenshot(O/(font+'-find-information.png'));edit('enter')
    edit('home')
    # Real KOI8 keys: Shift changes case; LANG alone changes alphabet.
-   ready();locks=m.read(s['bios_vars.keyLocks'],1)[0];old=locks&1
+   ready();locks=m.read(s['mon2_vars.keyLocks'],1)[0];old=locks&1
    def typed_letter(language, uppercase):
     char='а' if language else 'a'
     return (char.upper() if uppercase else char).encode('koi8-r')[0]
@@ -164,20 +164,20 @@ try:
    modified=doc();edit('f9',s['hexWait'],shift=True);edit('f9',shift=True);assert doc()==modified
    chord('rpt','z');assert doc()==expected
    ready();tap('caps');m.call('emu_run_for',ms=500)
-   assert m.read(s['bios_vars.keyLocks'],1)[0]==locks^1
+   assert m.read(s['mon2_vars.keyLocks'],1)[0]==locks^1
    assert m.read(s['editorLastLanguage'],1)[0]==(old^1)
    edit('a');assert doc()[0]==typed_letter(old^1,not locks&128)
    chord('rpt','z');assert doc()==expected
    ready();m.call('kbd_send',keys=['shift'],action='press');tap('caps')
    m.call('kbd_send',keys=['shift'],action='release');m.call('emu_run_for',ms=500)
-   assert m.read(s['bios_vars.keyLocks'],1)[0]==locks^0x81
+   assert m.read(s['mon2_vars.keyLocks'],1)[0]==locks^0x81
    assert m.read(s['editorLastLanguage'],1)[0]==old^1
    edit('a');assert doc()[0]==typed_letter(old^1,bool(locks&128))
    chord('rpt','z');assert doc()==expected
    ready();m.call('kbd_send',keys=['shift'],action='press');tap('caps')
    m.call('kbd_send',keys=['shift'],action='release');m.call('emu_run_for',ms=500)
    tap('caps');m.call('emu_run_for',ms=500)
-   assert m.read(s['bios_vars.keyLocks'],1)[0]==locks
+   assert m.read(s['mon2_vars.keyLocks'],1)[0]==locks
    assert m.read(s['editorLastLanguage'],1)[0]==old
    edit('f3',s['editorSaveWait'],shift=True);edit('esc');assert doc()==expected
    edit('f3',s['editorSaveWait'],shift=True);edit('d');assert doc()==b'' and not m.read(s['v_documentDirty'],1)[0]
@@ -189,7 +189,7 @@ try:
   if args.tab_width_only:
    def visual():return val('v_visualColumn')+(m.read(s['v_visualColumnHi'],1)[0]<<16)
    assert m.read(s['v_tabWidth'],1)==b'\4'
-   assert m.read(s['editorLastLanguage'],1)[0]==(m.read(s['bios_vars.keyLocks'],1)[0]&1)
+   assert m.read(s['editorLastLanguage'],1)[0]==(m.read(s['mon2_vars.keyLocks'],1)[0]&1)
    edit('right');edit('right');edit('right');assert visual()==4
    for tab in [6,8,2,4]:
     action('tab');assert m.read(s['v_tabWidth'],1)==bytes([tab])
@@ -207,16 +207,16 @@ try:
    (O/'keyboard-schema.json').write_text(json.dumps(schema,indent=2))
    names=schema.get('inputSchema',{}).get('properties',{}).get('keys',{}).get('items',{}).get('enum',[])
    lang=next((key for key in names if key.lower() in ['rus','ruslat','lang','rc']),None)
-   old=m.read(s['bios_vars.keyLocks'],1)[0]
+   old=m.read(s['mon2_vars.keyLocks'],1)[0]
    ready()
    if lang:tap(lang)
-   else:m.write(s['bios_vars.keyLocks'],bytes([old^1]))
+   else:m.write(s['mon2_vars.keyLocks'],bytes([old^1]))
    m.call('emu_run_for',ms=500)
    assert m.read(s['editorLastLanguage'],1)[0]==((old^1)&1)
    assert doc()==expected
    m.screenshot(O/(font+'-rus-indicator.png'))
    if lang:tap(lang)
-   else:m.write(s['bios_vars.keyLocks'],bytes([old]))
+   else:m.write(s['mon2_vars.keyLocks'],bytes([old]))
    m.call('emu_run_for',ms=500)
    assert m.read(s['editorLastLanguage'],1)[0]==(old&1)
    edit('down');edit('down');edit('down');edit('lf')
@@ -257,7 +257,7 @@ try:
    m.write(0x3200,w(0x3400)+w(0x4000)+w(len(payload))+bytes(34))
    api['path_io'](m,call,k,0x3200,True)
    call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
-   m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['bios_reboot'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
+   m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['mon2_init'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
    print('PASS',font,'retained snapshot, F8 return, replacement, dialogs and save',flush=True)
    continue
   if args.tabs_only:
@@ -283,7 +283,7 @@ try:
    edit('right');assert visual()==8 and val('v_column')==1
    edit('down');assert visual()==8 and val('v_column')==8
    edit('lf');assert visual()==65 and val('v_column')==62
-   assert m.read(s['bios_vars.cursorX'],1)[0]==(visual()-val('v_leftColumn'))*(width//2)
+   assert m.read(s['mon2_vars.cursorX'],1)[0]==(visual()-val('v_leftColumn'))*(width//2)
    m.screenshot(O/(font+'-tabs-scroll.png'))
    edit('home');assert val('v_leftColumn')==0
    assert b'\t' not in m.read(s['editorRowBuffer'],96)
@@ -292,7 +292,7 @@ try:
    m.write(0x3200,w(0x3400)+w(0x4000)+w(len(payload))+bytes(34))
    api['path_io'](m,call,k,0x3200,True)
    call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
-   m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['bios_reboot'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
+   m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['mon2_init'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
    print('PASS',font,'literal Tab, visual movement, scrolling, undo and save/reopen',flush=True)
    continue
   if args.modern_only:
@@ -356,7 +356,7 @@ try:
    assert val('v_leftColumn')==0
    for _ in range(25):edit('down')
    assert val('v_lineNumber')==26
-   assert m.read(s['bios_vars.cursorY'],1)==bytes([s['EDITOR_LAST_Y']])
+   assert m.read(s['mon2_vars.cursorY'],1)==bytes([s['EDITOR_LAST_Y']])
    m.screenshot(O/(font+'-scroll-down.png'))
    for _ in range(25):edit('up')
    assert val('v_lineNumber')==1 and val('v_topLine')==val('v_textBeginLo')
@@ -390,7 +390,7 @@ try:
   m.write(0x3200,w(0x3400)+w(0x4000)+w(len(payload))+bytes(34))
   api['path_io'](m,call,k,0x3200,True)
   call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
-  m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['bios_reboot'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
+  m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['mon2_init'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
   print('PASS',font,'load, columns, long line, undo, Esc, save/reopen',flush=True)
  print('EDITOR UI PASS',flush=True)
 except Exception:

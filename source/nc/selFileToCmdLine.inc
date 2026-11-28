@@ -56,7 +56,7 @@ getPathLeaf:
         jp c,getPathLeafEnd
         push hl
         ld hl,vars.pathArg+MAX_PATH-1
-        call bios_cmp_hl_de
+        call mon2_cmp_hl_de
         pop hl
         jp z,getPathLeafOverflow
         ld a,(hl)
@@ -94,7 +94,7 @@ getPathCapacity:
         add hl,de
         jp c,getPathReject
         ld de,vars.cmdLineCtrl
-        call bios_cmp_hl_de
+        call mon2_cmp_hl_de
         jp c,getPathFits
         jp nz,getPathReject
 getPathFits:

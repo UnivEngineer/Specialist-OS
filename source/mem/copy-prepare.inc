@@ -183,7 +183,7 @@ memOperation: DB 0
     INCLUDE "near-copy.inc"
 memFixedHexWord:
     push de
-    ld de,bios_printHexWord
+    ld de,BIOS_BANK_PRINT_HEX_WORD
     jp memFixedEnter
     ASSERT $ <= MEM_COPY_QUADS_ENTRY
     DS MEM_COPY_QUADS_ENTRY-$,0

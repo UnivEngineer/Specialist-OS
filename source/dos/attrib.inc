@@ -107,16 +107,16 @@ cliAttribPrintLoop:
     jp z,cliAttribPrintChar
     ld c,(hl)
 cliAttribPrintChar:
-    call bios_printChar
+    call mon2_printCharOld
     inc hl
     inc de
     ld a,(hl)
     or a
     jp nz,cliAttribPrintLoop
     ld c,' '
-    call bios_printChar
+    call mon2_printCharOld
     ld hl,cliPath1
-    call bios_printString
+    call mon2_printStringOld
     call cliNewLine
     jp cliFileDone
 cliAttribLettersText:   DB 'RHSA',0

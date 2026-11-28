@@ -244,7 +244,7 @@ FuncWriteChecked:
     ELSE
     push    bc
     ld      bc, Driver
-    call    bios_diskWriteChecked
+    MXOS_CALL_REGS MXOS_BIOS_DISK_WRITE_CHECKED
     pop     bc
     ret
     ENDIF

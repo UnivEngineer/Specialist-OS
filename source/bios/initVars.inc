@@ -1,5 +1,5 @@
 ; Начальные значения BIOS, копируемые при холодном старте.
-initVars        BIOS_VARIABLES
+initVars        MON2_VARIABLES
 initVarsEnd:
 
 ; Только новые поля верхнего блока, без копии буферов строки/драйверов.

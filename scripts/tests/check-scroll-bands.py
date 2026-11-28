@@ -14,10 +14,10 @@ for down in (False,True):
  for fill in (0,255):
   m=bytearray(65536);dos=(R/'bin/DOS.sys').read_bytes();m[0xC000:0xC000+len(dos)]=dos
   screen=bytes((x*31+y*7+1)&255 for x in range(48) for y in range(256));m[0x9000:0xC000]=screen
-  at=S['bios_vars.inverse'];m[at:at+2]=bytes([fill,fill])
+  at=S['mon2_vars.inverse'];m[at:at+2]=bytes([fill,fill])
   entry=S['dos_piece_scrollDown_1_start' if down else 'dos_piece_scroll_1_start']
   code=b'\x31'+W(S['STACK_ADDR'])+b'\xCD'+W(entry)+b'\xC3'+W(0x6100);m[0x6000:0x6000+len(code)]=code
-  pre=run(m,S['bios_memcpy_bc_hl']);out=run(m,0x6100)
+  pre=run(m,S['mon2_memcpy_bc_hl']);out=run(m,0x6100)
   for x in range(48):
    old=screen[x*256:(x+1)*256];base=0x9000+x*256
    want=(bytes([fill])*10+old[:246]) if down else (old[10:]+bytes([fill])*10)

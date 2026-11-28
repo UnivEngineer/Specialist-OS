@@ -14,7 +14,7 @@ graphicScalar:
     ; C свободен после загрузки кода в L. Счётчик общий для всех фаз.
     ld c,8
     ENDIF
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     ld a,b
     jp nz,graphicInverse
@@ -144,7 +144,7 @@ graphicClipped:
     add a,0FEh
     ld c,a
     ld b,0
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     add a,0FFh
     sbc a,a
     ld (graphicClipInverse+1),a

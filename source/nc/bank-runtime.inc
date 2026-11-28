@@ -255,7 +255,7 @@ ncBankResumeCommandReady:
     jp ncBankResumeToolbar
 ncBankResumeClear:
     ld c,31
-    call bios_printChar
+    call mon2_printCharOld
 ncBankResumeToolbar:
     call drawToolbar
     ld a,(ncEditorError)
@@ -930,9 +930,6 @@ ncBankInputCursor:
 ncBankEncoding:
     MXOS_CALL_REGS MXOS_BIOS_SET_FONT_ENCODING
     ret
-ncBankGetMemTop:
-    call mx_getMemTop
-    ret
 ncBankSyncCursor:
     push af
     push bc
@@ -949,17 +946,6 @@ ncBankDiskInfo:
     MXOS_CALL_REGS MXOS_DOS_RAW_IO
     ret
 ncBankCompare EQU cqCompare
-ncBankSubtract:
-    ld a,l
-    sub e
-    ld l,a
-    ld a,h
-    sbc a,d
-    ld h,a
-    ret
-    MODULE ncBankStrings
-    INCLUDE "../common/strcmp.inc"
-    ENDMODULE
     MODULE ncBankCopy
     INCLUDE "../common/memcpy_bc_hl.inc"
     INCLUDE "../common/move8080.inc"

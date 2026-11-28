@@ -1,5 +1,5 @@
 ; Файловое ядро и CLI в физической странице ДОЗУ 0.
-; 0000h–00FFh оставлены под будущие векторы; образ содержит только код/данные.
+; Bootstrap заполняет 0000h–00FFh эталоном накладок MAIN. Файл ядра начинается с 0100h.
     DEFINE FAT_CACHE_ADDR DOS_BANK_CACHE_ADDR
     DEFINE FAT_CACHE_TABLE_ADDR DOS_BANK_CACHE_TABLE
     DEFINE BANKED_DOS_BUILD 1
@@ -13,12 +13,11 @@
     DEFINE CMD_LINE DOS_BANK_CMD_ADDR
 BANK_KERNEL_CACHE = DOS_BANK_CACHE_ADDR
 bankKernelCommand = DOS_BANK_CMD_ADDR
-; BIOS вызывается через F806h; функции над NEAR-памятью остаются локальными.
-    DEFINE bios_printChar bankDosPrintChar
-    DEFINE bios_printString bankDosPrintString
-    DEFINE bios_printDecWord bankDosPrintDecWord
-    DEFINE bios_getch bankDosGetch
-    DEFINE bios_blockIO blockIO
+; BIOS вызывается через F866h; функции над NEAR-памятью остаются локальными.
+    DEFINE mon2_printCharOld bankDosPrintChar
+    DEFINE mon2_printStringOld bankDosPrintString
+    DEFINE printDecWord bankDosPrintDecWord
+    DEFINE mon2_getchOld bankDosGetch
     ORG DOS_CODE_START
 dosCoreStart:
     INCLUDE "../../bin/banked/kernel-layout.inc"

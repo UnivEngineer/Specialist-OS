@@ -1,17 +1,8 @@
 ; Bootstrap уже установил транспорт и образ DOS; повторного чтения DOS нет.
-biosBankCold:
-    ld a,(biosBootPages)
-    ld (bios_upper.ramPageCount),a
-    call biosPrintPhysicalRam
-    call biosInstallBootDrive
-    ld hl,08BFFh
-    call setMemTop
-    ld a,1
-    ld hl,BANK_DOS_GATE+6
-    call bankCall
-    jp c,biosLoadHalt
+biosBootFinish:
     ld hl,biosAutoexecPath
     call biosBootExec
+biosBootShellReady:
     ld c,0
     ld a,1
     ld hl,BANK_DOS_GATE+9
@@ -21,9 +12,9 @@ biosBankCold:
 ; но не мешает входу в оболочку (B: может отсутствовать).
 biosBootExec:
     push hl
-    call bios_printString
+    call printStringZ
     ld c,0Ah
-    call bios_printChar
+    call printChar
     pop hl
     MXOS_CALL_REGS MXOS_DOS_FILE_EXEC
     ret nc
@@ -36,86 +27,25 @@ biosNcResumeFailed:
 ; A=error, HL=prefix. Return CF set so the caller can enter recovery.
 biosReportBootError:
     push af
-    call bios_printString
+    call printStringZ
     pop af
-    call bios_printHexByte
+    call printHexByte
     ld c,0Ah
-    call bios_printChar
+    call printChar
     ld hl,biosBootWaitText
-    call bios_printString
+    call printStringZ
 biosBootWaitEnter:
-    call bios_getch
+    call getch
     cp 0Dh
     jp nz,biosBootWaitEnter
     ld c,0Ah
-    call bios_printChar
+    call printChar
     scf
     ret
 biosBootError:      DB 'BOOT ERROR ',0
 biosNcResumeError:  DB 'NC BANK ERROR ',0
 biosBootWaitText:   DB 'Press Enter',0
 
- ; Только холодный старт: физический объём, включая зарезервированный банк DOS.
-; Геометрия и свободный объём B: определяются отдельно драйвером и MEM.
-biosPrintPhysicalRam:
-    ld hl,biosRamText
-    call printString
-    ld a,(biosBootPages)
-    ld l,a
-    ld h,0
-    DUP 6
-        add hl,hl
-    EDUP
-    ex de,hl
-    ld b,0
-    call printDecWord
-    ld hl,biosRamBanksText
-    call printString
-    ld a,(biosBootPages)
-    ld e,a
-    ld d,0
-    ld b,0
-    call printDecWord
-    ld hl,biosRamEndText
-    jp printString
-biosRamText:        DB 'RAM: ',0
-biosRamBanksText:   DB ' KiB, ',0
-biosRamEndText:     DB ' banks',10,0
-
-biosInstallBootDrive:
-    ld hl,(biosBootRomBlocks)
-    ld (v_diskInfo.totalSectors),hl
-    ld a,SYSTEM_DRIVE
-    ld (v_drive),a
-    jp sysInstall
-
-biosBankWarm:
-    ; Bootstrap уже восстановил транспорт и стеки. До AUTOEXEC доступен
-    ; встроенный ROM-драйвер A:, без знания файлов внешних драйверов.
-    ld a,(biosBootPages)
-    ld (bios_upper.ramPageCount),a
-    call biosInstallBootDrive
-    ld c,1
-    ld a,1
-    ld hl,BANK_DOS_GATE+9
-    call bankCall
-    ; Reset preserves DOS, so kernelCold does not print its version here.
-    ; Report the resident DOS once per bootstrap start, before AUTOEXEC.
-    ld hl,biosDosVersion
-    call printString
-    ld hl,08BFFh
-    call setMemTop
-    ; Согласовать реестр DOS со встроенным ROM после восстановления BIOS.
-    ; Драйверы повторно устанавливает только явный сценарий пользователя.
-    ld hl,0                     ; ROM512KS: описание по умолчанию из DOS
-    ld a,SYSTEM_DRIVE
-    MXOS_CALL_REGS MXOS_DOS_DRIVER_REFRESH
-    ld hl,biosAutoexecPath
-    call biosBootExec
-    ld c,0
-    ld a,1
-    ld hl,BANK_DOS_GATE+9
-    call bankCall
 biosBankShell:
     call biosRestoreFont
     call biosRunShell
@@ -153,22 +83,6 @@ biosCliPath:        DB "C:",05Ch,"DOS",05Ch,"CLI.COM",0
 biosBootRomBlocks:   DW 2048
 biosBootPages:      DB 16
 biosBootWarm:       DB 0
-biosBootEntered:    DB 0
-
-; Повторный C000h возвращается в DOS, как C800h; bootstrap нужен для Reset.
-; Свежая копия BIOS имеет нулевой флаг; native-вариант сохраняет старый вход.
-; Вход: нет. Выход: AF разрушены, BC/DE/HL сохранены.
-biosCheckReentry:
-    ld a,(v_dosBanked)
-    or a
-    ret z
-    ld a,(biosBootEntered)
-    or a
-    jp nz,biosBankReturn
-    inc a
-    ld (biosBootEntered),a
-    ret
-
 ; Секторный ABI основной памяти обслуживает драйвер выбранного тома DOS.
 sysDiskDriver:
     push af
@@ -192,6 +106,7 @@ sysDiskRequest:
     ret
 sysDiskNative:
     pop af
+j_diskDriver:
     jp diskDriver
 
 ; Программный возврат без перезагрузки BIOS/DOS и переустановки драйверов.
@@ -200,13 +115,6 @@ sysDiskNative:
 ; не затрагивая её код, кэш, драйверы и выбранную оболочку.
 ; Вход/выход: нет возврата. Все регистры и прежние стеки уничтожаются.
 biosBankReturn:
-    di
-    ; В STD селектор находится по F7FCh, а FFFCh относится к клавиатуре.
-    ; В MX это RAM: запись прочитанного байта сохраняет резидентный хвост.
-    ld a,(IO_PAGE_RAM-0800h)
-    ld (IO_PAGE_RAM-0800h),a
-    ld (IO_PAGE_RAM),a
-    ld sp,STACK_ADDR
     ; The installed renderer and system-owned font resources survive app exit.
     call biosMoveUseLow
     call biosRecoverCopyTail
@@ -223,6 +131,8 @@ biosBankReturn:
     ld (bankOwner),hl
     ld hl,BIOS_BANK_STACK_TOP
     ld (bankServiceSP),hl
+    ld a,BIOS_PROFILE_DEFAULT
+    call biosSetProfile
     pop af
     or a
     call nz,biosMemWarning
@@ -230,11 +140,7 @@ biosBankReturn:
     call bankCopyFar
     jp c,biosLoadHalt
     call bios_reset_sound
-    ld c,0
-    ld a,1
-    ld hl,BANK_DOS_GATE+9
-    call bankCall
-    jp biosBankShell
+    jp biosBootShellReady
 biosResetDosContext:
     DB 0
     DW biosEmptyDosContext
@@ -250,10 +156,10 @@ biosEmptyDosContext:
 
 bios_reset_sound:
     call ioResetSound
-    ld hl,(initVars.beepFreq)
-    ld (bios_vars.beepFreq),hl
+    ld hl,BIOS_BEEP_DURATION_DEFAULT*256+BIOS_BEEP_FREQ_DEFAULT
+    ld (mon2_vars.beepFreq),hl
     ret
-    ASSERT bios_vars.beepDuration == bios_vars.beepFreq+1
+    ASSERT mon2_vars.beepDuration == mon2_vars.beepFreq+1
 
 ; В банковой системе BIOS обслуживает только физический C:. B:/H:
 ; принадлежат DOS; старый BIOS-драйвер B: иначе затёр бы её страницу.

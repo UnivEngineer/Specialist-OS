@@ -13,9 +13,9 @@ getch2:     ; Сохраняем регистры
             push    bc
             push    de
 
-            ; Получаем код нажатой клавиши и сохраняем его в bios_vars.lastKey
+            ; Получаем код нажатой клавиши и сохраняем его в mon2_vars.lastKey
             call    keyScan2
-            ld      (bios_vars.lastKey),a
+            ld      (mon2_vars.lastKey),a
 
 getch_retry:
             ; Тут будет признак, нарисован курсор или нет
@@ -44,8 +44,8 @@ loc_C23C:   call inputIdle
             cp      0FFh
             jp nz,  getch2_pressed
 
-            ; Записываем bios_vars.lastKey=0FFh
-            ld      (bios_vars.lastKey),a
+            ; Записываем mon2_vars.lastKey=0FFh
+            ld      (mon2_vars.lastKey),a
 
             ; Повторяем 500h раз
             dec     de
@@ -75,7 +75,7 @@ getch2_pressed:
             jp c,   loc_C269
             call    drawCursor2
 loc_C269:   
-            ld      hl, (bios_vars.lastLastKey)   ; h = bios_vars.lastKey, l = bios_vars.lastLastKey
+            ld      hl, (mon2_vars.lastLastKey)   ; h = mon2_vars.lastKey, l = mon2_vars.lastLastKey
             ld      a, b        ; a = b = код нажатой клавиши
             cp      h
             jp nz,    loc_C28D    ; Код нажатой клавиши изменился
@@ -103,40 +103,36 @@ loc_C27C:   call    keyScan2
 ; ---------------------------------------------------------------------------
 
 loc_C28D:   ; Звуковой сигнал
-            call    beep
+            call    biosBeep
 
 loc_C290:   ld      l, h
-            ld      h, b  ; код нажатой и предыдущей клавиши сохраняем в bios_vars.lastKey
-            ld      (bios_vars.lastLastKey), hl
+            ld      h, b  ; код нажатой и предыдущей клавиши сохраняем в mon2_vars.lastKey
+            ld      (mon2_vars.lastLastKey), hl
 
 loc_C295:
-            ld a,(bios_upper.koi7)
-            ld d,a
-            ld a,(bios_vars.keyLocks)
-            ld e,a
-            call keyDecode
+            call keyDecodeCurrent
             jp nz,popa_ret_2
-            ld a,(bios_vars.keyLocks)
+            ld a,(mon2_vars.keyLocks)
             xor e
             ld a,e
-            ld (bios_vars.keyLocks),a
+            ld (mon2_vars.keyLocks),a
             jp m,getchCapsBeep
-            ld a,(bios_vars.beepFreq)
+            ld a,(mon2_vars.beepFreq)
             push af
             ld a,04Fh
-            ld (bios_vars.beepFreq),a
-            call beep
+            ld (mon2_vars.beepFreq),a
+            call biosBeep
             ld a,05Fh
-            ld (bios_vars.beepFreq),a
-            call beep
+            ld (mon2_vars.beepFreq),a
+            call biosBeep
             pop af
-            ld (bios_vars.beepFreq),a
+            ld (mon2_vars.beepFreq),a
             jp getch_retry
 getchCapsBeep:
-            ld a,(bios_vars.beepFreq)
+            ld a,(mon2_vars.beepFreq)
             xor 10h
-            ld (bios_vars.beepFreq),a
-            call beep
+            ld (mon2_vars.beepFreq),a
+            call biosBeep
             jp getch_retry
 
 popa_ret_2: ; Восстаналиваем регистры и выходим

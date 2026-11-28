@@ -7,15 +7,15 @@
 engineSave:
     ld hl,(0D816h)
     ld (savedModuleScalar),hl
-    ld hl,(bios_setFontEncoding+1)
+    ld hl,(FONT_ENGINE_ENCODING+1)
     ld (savedEncoding),hl
     ld a,(0D825h)
     ld (savedWidth),a
-    ld hl,bios_printChar
+    ld hl,mon2_printCharOld
     ld de,originalChar
     ld bc,3
     call gridCopy
-    ld hl,bios_printCharRaw
+    ld hl,FONT_ENGINE_RAW
     ld de,originalRaw
     ld bc,3
     call gridCopy
@@ -49,7 +49,7 @@ engineInstall:
     ld hl,(directScalar)
     ld (0D816h),hl
     ld hl,(directEncoding)
-    ld (bios_setFontEncoding+1),hl
+    ld (FONT_ENGINE_ENCODING+1),hl
     ld de,directTargets
     ld hl,hookSlots
     jp writeSlots
@@ -65,7 +65,7 @@ engineRestore:
     ld hl,(savedModuleScalar)
     ld (0D816h),hl
     ld hl,(savedEncoding)
-    ld (bios_setFontEncoding+1),hl
+    ld (FONT_ENGINE_ENCODING+1),hl
     ld de,savedSlots
     ld hl,hookSlots
 writeSlots:
@@ -88,8 +88,8 @@ writeSlot:
     ld (hookLeft),a
     jp nz,writeSlot
     ret
-originalChar: jp bios_printChar
-originalRaw: jp bios_printCharRaw
+originalChar: jp mon2_printCharOld
+originalRaw: jp FONT_ENGINE_RAW
 hookChar:
     push af
     push bc
@@ -126,7 +126,7 @@ engineBatch: jp 0
 engineResetStage: jp engineEmpty
 engineEmpty: ret
 engineWrap:
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     cp 192
     ret c
     push bc
@@ -180,13 +180,13 @@ hookCountCheck:
     pop hl
     jp z,hookDone
 hookTryBatch:
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     and 3
     jp nz,hookOne
     ; Byte-column lookup yields a run fitting the screen, capped at 48.
     ; The table depends on width; no repeated division in the hot path.
     push hl
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     rrca
     rrca
     and 63
@@ -290,10 +290,10 @@ hookRemaining:  DW 0
     ENDIF
     ENDM
 hookSlots:
-    DW bios_printChar+1,bios_printCharRaw+1
-    HOOK_SLOT bios_printStringZ,MXOS_BIOS_PRINT_STRING_Z,MXOS_BIOS_PRINT_STRING_Z_MAIN
-    HOOK_SLOT bios_printStringRawZ,MXOS_BIOS_PRINT_STRING_RAW_Z,MXOS_BIOS_PRINT_STRING_RAW_Z_MAIN
-    HOOK_SLOT bios_printStringRawLim,MXOS_BIOS_PRINT_STRING_RAW_LIM,MXOS_BIOS_PRINT_STRING_RAW_LIM_MAIN
+    DW mon2_printCharOld+1,FONT_ENGINE_RAW+1
+    HOOK_SLOT mon2_printStringOld,MXOS_BIOS_PRINT_STRING_Z,MXOS_BIOS_PRINT_STRING_Z_MAIN
+    HOOK_SLOT FONT_ENGINE_RAWZ,MXOS_BIOS_PRINT_STRING_RAW_Z,MXOS_BIOS_PRINT_STRING_RAW_Z_MAIN
+    HOOK_SLOT FONT_ENGINE_LIM,MXOS_BIOS_PRINT_STRING_RAW_LIM,MXOS_BIOS_PRINT_STRING_RAW_LIM_MAIN
 HOOK_SLOTS = ($-hookSlots)/2
 hookTargets:
     DW hookChar,hookRaw

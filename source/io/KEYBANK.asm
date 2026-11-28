@@ -129,7 +129,7 @@ keyRaw:
     push bc
     push hl
     push de
-    ld hl,bios_keyScan
+    ld hl,ioKeyScan2
     xor a
     call bankCall
     jp keyReturn

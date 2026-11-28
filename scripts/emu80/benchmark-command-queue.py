@@ -99,7 +99,7 @@ def run(s,label,bank=6,**regs):
  r={n:v['dec'] for n,v in z['registers'].items()};assert r['sp']==0x7000,r
  return elapsed,r
 def cursor():
- page(0);v=int.from_bytes(m.read(b['bios_vars.cursorY'],2),'little');page(6);return v
+ page(0);v=int.from_bytes(m.read(b['mon2_vars.cursorY'],2),'little');page(6);return v
 rows=[]
 leaf_results=[]
 try:

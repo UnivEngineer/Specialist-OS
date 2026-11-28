@@ -5,6 +5,7 @@
 ; Attach не требует нижних таблиц, восстанавливает KOI-8 и подключает
 ; входы BIOS. Выход A=0, CF=0.
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../bin/bios-imports.inc"
     INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ORG FONT_ENGINE_BASE
@@ -30,13 +31,13 @@ IMAGE_FLAGS = IMAGE_FLAG_MAIN
     ASSERT $ == FONT_ENGINE_TEXT_LIM
     jp printStringLim
 initializerName: DB 'InitKoi.dll',0
-printChar2     = bios_fontControl
-printCharBody  = bios_fontControl
-calcCursorAd_0 = bios_fontPosition
+printChar2     = biosEngineControl
+printCharBody  = biosEngineControl
+calcCursorAd_0 = biosEnginePosition
     INCLUDE "char.inc"
 printCharRawHelper:
     call scalar
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 192
     ret c

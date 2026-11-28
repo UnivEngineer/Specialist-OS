@@ -594,8 +594,8 @@ mdInstall:
     ld bc,MEM_IMAGE_LOCAL_START-IO_BANK_KEYS+BANK_LOCAL_BYTES
     call mdInstallPart
     ret c
-    ld hl,mx_callPacket
-    ld de,mx_callPacket
+    ld hl,MEM_BANK_CLIENT_START
+    ld de,MEM_BANK_CLIENT_START
     ld bc,BANK_CLIENT_BYTES
     call mdInstallPart
     ret c

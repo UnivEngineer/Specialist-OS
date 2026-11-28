@@ -20,9 +20,9 @@ WATCH_SKIP = 1_000_000
 LEAF_STACK_BYTES = 4
 LEAF_GUARD_BYTES = 2
 BIOS_VECTORS = {
-    'BIOS_UPPERCASE': 'bios_upperCase', 'BIOS_SUB_HL_DE': 'bios_sub_hl_de',
-    'BIOS_GET_CURSOR_POS': 'bios_getCursorPos', 'BIOS_SET_CURSOR_POS': 'bios_setCursorPos',
-    'BIOS_PRINT_CHAR': 'bios_printChar', 'BIOS_PRINT_STRING_Z': 'bios_printStringZ',
+    'BIOS_UPPERCASE': 'upperCase', 'BIOS_SUB_HL_DE': 'sub_hl_de',
+    'BIOS_GET_CURSOR_POS': 'mx_getCursorPos', 'BIOS_SET_CURSOR_POS': 'mx_setCursorPos',
+    'BIOS_PRINT_CHAR': 'mon2_printCharOld', 'BIOS_PRINT_STRING_Z': 'mon2_printStringOld',
 }
 
 
@@ -33,7 +33,7 @@ def main():
     parser.add_argument('--out', required=True, type=Path)
     parser.add_argument('--quick', action='store_true', help='Контрольные строки COMMAND из EXEC')
     parser.add_argument('--audit-only', action='store_true', help='Счётчики и стеки с минимумом точек останова')
-    parser.add_argument('--inline-only', action='store_true', help='Только вход F806h и вложенный вызов')
+    parser.add_argument('--inline-only', action='store_true', help='Только вход F866h и вложенный вызов')
     parser.add_argument('--direct-bios-only', action='store_true', help='Только прямые CALL векторов BIOS из MAIN')
     parser.add_argument('--operations', nargs='+')
     parser.add_argument('--pages', nargs='+', type=int, choices=PAGES)
@@ -79,9 +79,9 @@ def main():
     mark(io, 'bbFastIndex', [0])
     slots = {}
     if 'bbFastSlots' in io:
-        leaves = [('BIOS_UPPERCASE', 'bios_upperCase'), ('BIOS_SUB_HL_DE', 'bios_sub_hl_de')]
+        leaves = [('BIOS_UPPERCASE', 'upperCase'), ('BIOS_SUB_HL_DE', 'sub_hl_de')]
         if 'mx_getCursorPos' not in k:
-            leaves[:0] = [('BIOS_GET_CURSOR_POS', 'bios_getCursorPos'), ('BIOS_SET_CURSOR_POS', 'bios_setCursorPos')]
+            leaves[:0] = [('BIOS_GET_CURSOR_POS', 'mx_getCursorPos'), ('BIOS_SET_CURSOR_POS', 'mx_setCursorPos')]
         for index, (op, vector) in enumerate(leaves):
             slots[op] = io['bbFastSlots'] + 4 * index, io[vector]
             mark(io, vector, [0])
@@ -154,7 +154,7 @@ def main():
         (folder/'system.json').write_text(json.dumps(src, indent=2)+'\n', encoding='utf-8')
         def measure(n, operation, inline, after_copy, repeat, queue, direct_vector=None):
             page(n)
-            # Активный callback сам обращается к F80Ch: вложенный flush должен сразу вернуться.
+            # Активный callback сам обращается к F86Ch: вложенный flush должен сразу вернуться.
             m.write(HOOK, b'\x21'+WORD(COUNT)+b'\x34\xcd'+WORD(k['mx_queueFlush'])+b'\xc9')
             run_code(n, b'\xcd'+WORD(k['mx_queueBind']), dict(hl=HOOK if queue else 0))
             m.write(COUNT, b'\0')
@@ -173,7 +173,7 @@ def main():
                 cursor_command = k.get('MXOS_COMMAND_BIOS_SET_CURSOR_POS', 10)
                 m.write(STRING, bytes([cursor_command, 5, 1, 11, 15]))
             page(0)
-            m.write(b['bios_vars.cursorY'], WORD(0x100a))
+            m.write(b['mon2_vars.cursorY'], WORD(0x100a))
             page(1)
             m.write(dos['v_dosError'], b'\0')
             page(n)
@@ -243,7 +243,7 @@ def main():
             elif operation == 'BIOS_SET_CURSOR_POS':
                 assert (r['af'],r['bc'],r['de'],r['hl']) == (af,bc,de,hl), r
                 page(0)
-                assert m.read(b['bios_vars.cursorY'], 2) == WORD(hl)
+                assert m.read(b['mon2_vars.cursorY'], 2) == WORD(hl)
                 page(n)
             elif operation == 'BIOS_SUB_HL_DE':
                 assert (r['bc'], r['de'], r['hl'], r['af'] & 1) == (bc, de, (hl-de)&65535, int(hl<de)), r
@@ -254,7 +254,7 @@ def main():
             elif operation == 'BIOS_COMMAND_BATCH':
                 assert not r['af'] & 1, r
                 page(0)
-                assert m.read(b['bios_vars.cursorY'], 2) == WORD(0x0f0b), r
+                assert m.read(b['mon2_vars.cursorY'], 2) == WORD(0x0f0b), r
                 page(n)
             if operation != 'NESTED' and not inline and 'MXOS_'+operation in k:
                 assert m.read(PACKET,8) == REGS.pack(*(r[v] for v in ('hl','de','bc','af'))), (operation,r)

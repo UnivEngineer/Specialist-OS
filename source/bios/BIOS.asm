@@ -5,6 +5,7 @@
     INCLUDE "../common/version.inc"
     INCLUDE "../common/layoutMacros.inc"
     INCLUDE "../../bin/banked/transport-imports.inc"
+    INCLUDE "reference-dos.inc"
     INCLUDE "../../bin/System.layout.inc"
     INCLUDE "getch.inc"
     INCLUDE "cmp_hl_de_2.inc"

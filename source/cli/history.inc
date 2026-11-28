@@ -155,7 +155,7 @@ cliHistoryRecallCopy:
     call cliHistoryCopy
     ex de,hl
     ld de,CMD_LINE+1
-    call bios_sub_hl_de
+    call lineEditMath.sub_hl_de
     ld a,l
     ld (lineEditLength),a
     ld (lineEditPosition),a
@@ -206,7 +206,7 @@ cliHistoryLoadSize:
     jp nz,cliHistoryDiskEnd
     ld hl,(cliHistoryDescriptor+FILE_DESCRIPTOR.size)
     ld de,cliHistoryEnd-cliHistoryData
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,cliHistoryDiskEnd
     call cliHistoryOpenRead
     jp c,cliHistoryDisable
@@ -219,11 +219,11 @@ cliHistoryLoadSize:
     jp c,cliHistoryDisable
     ld hl,(cliHistoryData)
     ld de,0434Dh
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,cliHistoryInvalid
     ld hl,(cliHistoryData+2)
     ld de,03148h
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,cliHistoryInvalid
     ld a,(cliHistoryCount)
     cp CLI_HISTORY_COUNT+1
@@ -329,7 +329,7 @@ cliHistoryDiskError:
 cliHistoryFileSlot:
     call cliHistorySlot
     ld de,cliHistoryData
-    jp bios_sub_hl_de
+    jp lineEditMath.sub_hl_de
 
 cliHistoryOpenRead:
     ld a,FILE_MODE_READ
@@ -342,7 +342,7 @@ cliHistoryOpen:
     ld hl,cliHistoryDescriptor
     ld de,cliHistoryDescriptor+12
     ld bc,flHandle
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld a,(cliHistoryDrive)
     ld (flHandle+FH_DRIVE),a
     pop af
@@ -371,7 +371,7 @@ cliHistoryTransfer:
     pop de
     ret c
     ld hl,(flHandle+FH_COUNT)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret z
     scf
     ret

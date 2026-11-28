@@ -21,10 +21,10 @@
     ; Запрос буквы диска для форматирования
 chooseDrive:
     ld      hl, str_ChoseDrive
-    call    bios_printString; Вывод сообщения 'CHOOSE DRIVE: '
-    call    bios_getch      ; Ожидание нажатия клавиши
+    call    mon2_printStringOld; Вывод сообщения 'CHOOSE DRIVE: '
+    call    mon2_getchOld      ; Ожидание нажатия клавиши
     ld      c, a
-    call    bios_printChar
+    call    mon2_printCharOld
     cp      21h             ; сравнение c пробелом
     jp c,   Abort           ; Выход в ОС, если меньше или равно
     ld      b, a            ; Запомнить букву диска в b
@@ -56,10 +56,10 @@ ConfirmRequest:
     ld      a, b
     ld      (str_A_Y_N),a   ; Заменить 'A' в строке сообщения на введённую букву
     ld      hl, str_Format
-    call    bios_printString; вывод сообщения 'FORMAT <буква>: [Y/N]?'
-    call    bios_getch      ; Ожидание нажатия клавиши
+    call    mon2_printStringOld; вывод сообщения 'FORMAT <буква>: [Y/N]?'
+    call    mon2_getchOld      ; Ожидание нажатия клавиши
     ld      c, a
-    call    bios_printChar
+    call    mon2_printCharOld
     cp      'Y'             ; сравнение c 'Y'
     jp nz,  Abort           ; Выход в ОС, если не 'Y'
     
@@ -78,7 +78,7 @@ Format:
     ld      e, 01h
     MXOS_CALL_REGS MXOS_DOS_FILE_GET_SET_DRIVE ; Выдать размер диска в a
     ld      e, 03h
-    call    bios_diskDriver
+    call formatDiskDriver
     ld      e, a    ; Поместить размер диска в e
     dec     a
 
@@ -104,7 +104,7 @@ CreateFATLoop2:
     ; e - код операции
 WriteToDisk:
     ld      de, 0001h  ; Запись сектора номер 0
-    call    bios_diskDriver
+    call formatDiskDriver
 
     ; Создание пустой структуры каталога (256 байт)
 CreateCatLoop:
@@ -115,7 +115,7 @@ CreateCatLoop:
     ; Запись секторов c номера 3 по 1
     ld      d, 03h
 WriteLoop:
-    call    bios_diskDriver
+    call formatDiskDriver
     dec     d
     jp nz,  WriteLoop
 
@@ -124,11 +124,11 @@ WriteLoop:
 
 Abort:
     ld      hl, str_Aborting
-    jp      bios_printString     ; Вывод сообщения 'ABORTING'
+    jp      mon2_printStringOld     ; Вывод сообщения 'ABORTING'
 
 InvalidDrive:
     ld      hl, str_InvalidDrive
-    jp      bios_printString     ; Вывод сообщения 'INVALID DRIVE LETTER'
+    jp      mon2_printStringOld     ; Вывод сообщения 'INVALID DRIVE LETTER'
 
 ;----------------------------------------------------------------------------
 ; Данные
@@ -152,4 +152,7 @@ buffer = 0D100h ; Буфер
 
 ;----------------------------------------------------------------------------
 
+formatDiskDriver:
+    MXOS_CALL_REGS MXOS_BIOS_DISK_DRIVER
+    ret
     END

@@ -74,7 +74,7 @@ keNativeExtension:
     call kdStore
     jp c,keLoadError
     ld hl,v_curFileDescr
-    call imageOpenModule
+    call imageOpenExec
     jp c,keLoadError
     ld a,(v_imageHeader+4)
     cp IMAGE_RELOC_VERSION
@@ -99,7 +99,7 @@ keFixedImage:
     jp c,keMainStackReady
     jp nz,keStackBad
 keMainStackReady:
-    ; Основная память до переходника RUN; верхние драйверы — явные области.
+    ; Основная память до системного стека; верхние драйверы — явные области.
     push hl
     push de
     ld hl,(v_imageHeader+IMAGE_MEMORY_END)
@@ -112,7 +112,7 @@ keMainStackReady:
     pop de
     jp c,keRangeError
     ld a,d
-    cp 08Ch
+    cp high APP_MEMORY_END
     push hl
     ld hl,(memorySystemEnd)
     push af

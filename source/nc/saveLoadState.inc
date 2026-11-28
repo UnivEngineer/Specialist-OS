@@ -247,7 +247,7 @@ saveState:
     ld (vars.fileListPtr),hl
     pop hl
     ld de,NC_SORT_KEYS
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld (ncStateIO+FILE_PATH_IO.count),hl
     IF NC_BANKED
     ld hl,vars.stateFile
@@ -513,10 +513,10 @@ ncBankPackState:
     ld hl,state.activePanel
     ld de,state.panelA_curFile
     ld bc,ncBankSnapshot
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,state.panelA_sort
     ld de,stateEnd
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     xor a
     ld bc,ncBankSnapshot+13
     call ncBankPackLeaf
@@ -548,15 +548,15 @@ ncBankPackName:
     add hl,de
     ex de,hl
     pop hl
-    jp bios_memcpy_bc_hl
+    jp mon2_memcpy_bc_hl
 ncBankUnpackState:
     ld hl,ncBankSnapshot
     ld de,ncBankSnapshot+9
     ld bc,state.activePanel
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld de,ncBankSnapshot+13
     ld bc,state.panelA_sort
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     ld hl,ncBankSnapshot+13
     ld de,vars.savedSelectedA
     call ncBankUnpackLeaf

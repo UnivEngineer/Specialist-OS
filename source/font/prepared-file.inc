@@ -10,7 +10,7 @@ checkWorkspace:
     ld (workspaceEnd),hl
     ld de,FONT_INIT_END-1
     call bios_getMemTop
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret nc
     ld a,MEM_ERROR_NOMEM
     scf
@@ -41,7 +41,7 @@ loadPrepared:
     ld hl,(staging+IMAGE_HEADER_SIZE+44)
     ex de,hl
     ld hl,(preparedIO+FILE_PATH_IO.actual)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     xor a
     ret

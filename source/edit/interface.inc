@@ -122,7 +122,7 @@ editorLoadingBanner:
         COLOR COLOR_BIOS
         CALL disableInverse
         LD HL,editorCopyright
-        JP bios_printString
+        JP mon2_printStringOld
     MACRO EDIT_STARTUP_CREDIT
 editorCopyright:
         DB "EDIT ",EDIT_VERSION,'.',EDIT_REVISION,'.',VERSION_BUILD," (C) 2026 SPb SpaceEngineer",13,10
@@ -176,7 +176,7 @@ editorBusySaving:       DB 'Saving...',0
 ; SDK owns the frame, separators, button geometry and text alignment.
 editorModalBegin:
         PUSH HL
-        LD HL,(bios_vars.cursorY)
+        LD HL,(mon2_vars.cursorY)
         LD (editorModalCursor),HL
         POP HL
         CALL disableInverse
@@ -210,11 +210,11 @@ editorErrorWait:
 editorStartupError:
         CALL disableInverse
         COLOR COLOR_BIOS
-        CALL bios_printString
+        CALL mon2_printStringOld
         LD HL,editorStartupWaitText
-        CALL bios_printString
+        CALL mon2_printStringOld
 editorStartupErrorWait:
-        CALL bios_getch
+        CALL mon2_getchOld
         CP 13
         JP NZ,editorStartupErrorWait
         RET
@@ -222,7 +222,7 @@ editorStartupWaitText: DB 13,10,'Press Enter to return.',13,10,0
 editorCloseModal:
         CALL disableInverse
         LD HL,(editorModalCursor)
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
     IF EDIT_BANKED
         JP ebRestoreModal
     ELSE
@@ -248,7 +248,7 @@ editorOpenInputModal:
         CALL uiModalBodyY
         LD H,36
         LD L,E
-        LD (bios_vars.cursorY),HL
+        LD (mon2_vars.cursorY),HL
         CALL enableInverse
         ; Input occupies 240 pixels inside the SDK's centered 256px window.
         LD A,(FONT_ENGINE_HEADER+5)

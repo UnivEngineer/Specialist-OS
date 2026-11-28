@@ -131,7 +131,7 @@ for font, across in [('Rotate',16), ('Fast8',8), ('Cpm4',16)]:
             for dy in range(8):
                 for cell in separators:
                     assert not any(pixel(raw,x,y+dy) for x in range(6*cell,6*(cell+1)))
-            assert raw[S['bios_vars.cursorY']+1] == 3*slots[0]
+            assert raw[S['mon2_vars.cursorY']+1] == 3*slots[0]
         for idx in range(16):
             for char in (False,True):
                 slot=idx%across
@@ -153,9 +153,9 @@ for code,shift in ((0x7f,False),(0x7f,True),(7,False),(ord('G'),False)):
     m[0xffe1]=0 if shift else 2
     # The second BIOS call enters with Shift held and returns F9.
     stub=0x8c70
-    m[S['bios_getch']:S['bios_getch']+3]=b'\xc3'+stub.to_bytes(2,'little')
+    m[S['mon2_getchOld']:S['mon2_getchOld']+3]=b'\xc3'+stub.to_bytes(2,'little')
     tail=stub+12
-    m[stub:stub+12]=b'\x21'+tail.to_bytes(2,'little')+b'\x22'+(S['bios_getch']+1).to_bytes(2,'little')+bytes([0x3e,code,0xb7,0xc9,0,0])
+    m[stub:stub+12]=b'\x21'+tail.to_bytes(2,'little')+b'\x22'+(S['mon2_getchOld']+1).to_bytes(2,'little')+bytes([0x3e,code,0xb7,0xc9,0,0])
     m[tail:tail+8]=b'\xaf\x32\xe1\xff\x3e\x8a\xb7\xc9'
     m=run(m,'hexWait')
     assert document(m)==b'A\0B\r\nC'
@@ -269,7 +269,7 @@ for font,across in [('Rotate',16),('Fast8',8),('Cpm4',16)]:
     # Returning to text with plain F9 and with Shift+F9 works on every font.
     for shift in (0,2):
         m[0xffe1]=shift
-        m[S['bios_getch']:S['bios_getch']+4]=b'\x3e\x8a\xb7\xc9'
+        m[S['mon2_getchOld']:S['mon2_getchOld']+4]=b'\x3e\x8a\xb7\xc9'
         run(m,'hexWait')
 print('HEX SCROLL AND KEYS PASS')
 
@@ -390,9 +390,9 @@ for font,text_mode in [('Cpm4',False),('Rotate',False),('Rotate',True),('Fast8',
         word(m,'v_undoLength',1)
         m[S['v_lineDirty']]=1
         m=render(m,'hexView')
-        high_x=m[S['bios_vars.cursorY']+1]
+        high_x=m[S['mon2_vars.cursorY']+1]
         for key,byte,caret,nibble in [('a',0xA0|(data[offset]&15),offset,1),('5',0xA5,offset+1,0)]:
-            y=m[S['bios_vars.cursorY']]-4
+            y=m[S['mon2_vars.cursorY']]-4
             marker=0x9000+47*256+y
             old=m[marker]
             if offset in (0,15):
@@ -404,7 +404,7 @@ for font,text_mode in [('Cpm4',False),('Rotate',False),('Rotate',True),('Fast8',
             assert document(m)==data[:offset]+bytes([byte])+data[offset+1:],(font,offset,key)
             assert number(m,'hexCaret')==caret and m[S['hexNibble']]==nibble
             if nibble:
-                assert m[S['bios_vars.cursorY']+1] == high_x+m[S['v_charStep']]
+                assert m[S['mon2_vars.cursorY']+1] == high_x+m[S['v_charStep']]
             assert m[S['v_documentDirty']] and not number(m,'v_undoLength')
             assert not m[S['v_lineDirty']]
             fresh=render(m,'hexRepaint')
@@ -516,10 +516,10 @@ for font in ('Rotate','Fast8','Cpm4'):
     m=fixture(bytes([0xAB])*17,font)
     m[S['hexActive']]=1
     m=render(m,'hexView')
-    x=m[S['bios_vars.cursorX']]
+    x=m[S['mon2_vars.cursorX']]
     m=render(m,'hexRight')
     assert number(m,'hexCaret')==0 and m[S['hexNibble']]==1
-    assert m[S['bios_vars.cursorX']]==x+m[S['v_charStep']]
+    assert m[S['mon2_vars.cursorX']]==x+m[S['v_charStep']]
     m=render(m,'hexDown')
     assert number(m,'hexCaret')==m[S['hexAcross']] and m[S['hexNibble']]==1
     m=render(m,'hexUp')

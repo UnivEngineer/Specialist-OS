@@ -21,7 +21,7 @@ try:
  font=m.read(b['FONT_ADDR'],2048);encoding=m.read(b['bios_upper.koi7'],1)
  for args in ('-P 4','-P 0'):
   page(0);command=('C:\\DRIVERS\\RAMDISK.COM '+args).encode()+b'\0';m.write(0x5000,command+bytes(128-len(command)))
-  m.write(0x5100,struct.pack('<4H',0x5000,0,0,0));m.write(0x5200,bytes.fromhex('cd00f8c30053'));m.stop_at(0x5300)
+  m.write(0x5100,struct.pack('<4H',0x5000,0,0,0));m.write(0x5200,bytes.fromhex('cd60f8c30053'));m.stop_at(0x5300)
   m.call('regs_set',pc=0x5200,sp=0x8f00,bc=k['MXOS_DOS_FILE_EXEC_NATIVE'],de=0x5100);state=m.until(0x5300,40)
   if args=='-P 4':assert not state['flags']['C'],state
   assert m.read(b['FONT_ADDR'],2048)==font and m.read(b['bios_upper.koi7'],1)==encoding
@@ -44,11 +44,11 @@ try:
     if preceding is not None:
      # Настоящее содержимое COPY: полная порция либо точный остаток.
      m.write(0x8200,struct.pack('<BHBHH',caller,0x4100,target,0x4200,preceding))
-     m.write(0x8300,bytes.fromhex('cd0ff8c30084'));m.stop_at(0x8400)
+     m.write(0x8300,bytes.fromhex('cd6ff8c30084'));m.stop_at(0x8400)
      m.call('regs_set',pc=0x8300,sp=0x8f00,hl=0x8200)
      copied=m.until(0x8400,20);assert not copied['flags']['C']
     last=m.read(0xffde,2)
-    m.write(0x8000,bytes.fromhex('cd15f8c30081'));m.stop_at(0x8100)
+    m.write(0x8000,bytes.fromhex('cd75f8c30081'));m.stop_at(0x8100)
     m.call('regs_set',pc=0x8000,sp=0x8f00,af=op*256+2,bc=target*256+0x5a,de=0xabcd,hl=0x4001)
     ticks=m.call('cpu_state')['cpu_ticks'];state=m.until(0x8100,20);ticks=state['cpu_ticks']-ticks
     assert not state['flags']['C'] and state['registers']['sp']['dec']==0x8f00

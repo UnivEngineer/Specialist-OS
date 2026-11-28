@@ -67,7 +67,7 @@ store:
 scalar:
     ld a,c
     ld (code+1),a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     and 3
     ld (phase+1),a
@@ -83,7 +83,7 @@ scalar:
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
 code: ld l,0
 phase: ld a,0
     or a

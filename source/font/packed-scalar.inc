@@ -1,18 +1,18 @@
 scalar:
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,packedInverse.scalar
     jp packedNormal.scalar
 packedWrap:
     ld c,10
-    call bios_fontControl
-    ld hl,(bios_vars.cursorY)
+    call biosEngineControl
+    ld hl,(mon2_vars.cursorY)
     ret
     MODULE packedNormal
 scalar:
     ld a,c
     ld (code+1),a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 190
     call nc,packedWrap
@@ -31,7 +31,7 @@ scalar:
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ex de,hl
 code: ld e,0
 phase: ld a,0
@@ -88,7 +88,7 @@ column:
 scalar:
     ld a,c
     ld (code+1),a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 190
     call nc,packedWrap
@@ -107,7 +107,7 @@ scalar:
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ex de,hl
 code: ld e,0
 phase: ld a,0

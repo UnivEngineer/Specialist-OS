@@ -4,24 +4,24 @@ bench_init:
     di
     ld a,(bios_upper.koi7)
     ld (savedKoi),a
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     ld (savedInverse),a
     ld a,(bios_upper.escMode)
     ld (savedEsc),a
     ld hl,(bios_upper.charGen)
     ld (savedFont),hl
     xor a
-    call bios_setFontEncoding
-    ld (bios_vars.inverse),a
+    call FONT_ENGINE_ENCODING
+    ld (mon2_vars.inverse),a
     dec a
     ld (bios_upper.escMode),a
-    call bios_getMemTop
+    call mx_getMemTop
     IFDEF FONT_NATIVE_GRID
     ld de,035FFh ; controller + temporary corpus, below resident tables
     ELSE
     ld de,084FFh
     ENDIF
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,bench_no_memory
     ld a,TIMER_RAW
     MXOS_CALL_REGS MXOS_DOS_TIMER
@@ -55,7 +55,7 @@ bench_finish:
     ld hl,keyText
     call puts
 waitKey:
-    call bios_getch
+    call mon2_getchOld
     cp 13
     jp nz,waitKey
 bench_restore:
@@ -63,9 +63,9 @@ bench_restore:
     call bench_release_timer
     pop af
     ld a,(savedKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld a,(savedInverse)
-    ld (bios_vars.inverse),a
+    ld (mon2_vars.inverse),a
     ld a,(savedEsc)
     ld (bios_upper.escMode),a
     ld hl,(savedFont)
@@ -97,10 +97,10 @@ puts:
 reportPutsScreen:
     pop af
     ENDIF
-    jp bios_printString
+    jp mon2_printStringOld
 bench_clear:
     ld c,01Fh
-    jp bios_printChar
+    jp mon2_printCharOld
 timing_printChar:
     IFDEF FONT_NATIVE_GRID
     jp gridPrintChar
@@ -116,7 +116,7 @@ reportCharScreen:
     pop af
     ENDIF
     ld c,a
-    jp bios_printChar
+    jp mon2_printCharOld
     INCLUDE "../../sdk/asm/lib/timing-pit.inc"
 timer_read   = io_pitRead
 timing_print = puts

@@ -2,7 +2,7 @@
 ncModalSnapshot:
     push hl
     ld de,ncEditorLoadingModal+7
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     pop hl
     call nz,ncDialogOpen
     COLOR COLOR_DIALOG
@@ -84,7 +84,7 @@ ncCatalogWarnPanel:
     call ncBankFlush
     ENDIF
 ncCatalogWarningRelease:
-    call bios_keyScan
+    call ncKeyScan
     inc a
     jp nz,ncCatalogWarningRelease
 ncCatalogWarningKey:

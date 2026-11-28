@@ -29,7 +29,7 @@ for font in ['Rotate','Fast8','Cpm4']:
             m=position(m,offset)
             expected=len(raw[:offset].expandtabs(8))
             assert wide(m,'v_visualColumn')==expected,(font,raw,offset)
-            assert m[S['bios_vars.cursorX']]==(expected-wide(m,'v_leftColumn'))*m[S['v_charStep']]
+            assert m[S['mon2_vars.cursorX']]==(expected-wide(m,'v_leftColumn'))*m[S['v_charStep']]
 
     m=fixture(b'ABCD\rNEXT',font);m=position(m,2)
     m=run(m,'keyHandler_Tab');assert document(m)==b'AB\tCD\rNEXT'

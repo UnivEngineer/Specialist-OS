@@ -25,7 +25,7 @@ def parse_cpu(data):
 
 def format_cpu(load,entry=None,flags=0,monitor=None,fields=None):
     if entry is None: entry=load
-    if monitor is None: monitor='mxos2.mon' if flags else 'mon2.mon'
+    if monitor is None: monitor='mxos2.mon'
     extra={'FLAGS':f'{flags:02X}',**(fields or {})}
     text=f'{load:04X}\n{entry:04X}\n{monitor}\n'+''.join(f'{k}={v}\n' for k,v in extra.items())
     parsed=parse_cpu(text.encode('ascii'))

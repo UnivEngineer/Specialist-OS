@@ -21,7 +21,7 @@ try:
     m.call('debug_break'); m.call('bp_clear')
     font = m.read(b['FONT_ADDR'], b['FONT_BYTES'])
     cases = 0
-    for bank, entry, stub, stack, start in [(0,b['bios_memcpy_bc_hl'],0x8000,0x8f00,0x3000), (1,k['memcpy_bc_hl'],0xc000,k['DOS_BANK_STACK_TOP'],0xc200)]:
+    for bank, entry, stub, stack, start in [(0,b['mon2_memcpy_bc_hl'],0x8000,0x8f00,0x3000), (1,k['memcpy_bc_hl'],0xc000,k['DOS_BANK_STACK_TOP'],0xc200)]:
         page(bank)
         if bank:
             assert m.read(k['diActive'],1)==b'\0'

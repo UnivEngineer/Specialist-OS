@@ -197,7 +197,7 @@ def route_bytes(rec, kind, recipe):
             if image.flags != 4:
                 raise ValueError('NATIVE требует флаг MAIN')
         elif mode in MODES and not image.flags:
-            image = replace(image, mode=MODES[mode])
+            image = replace(image, mode=MODES[mode] if not image.monitor else MODES["MON"])
         else:
             raise ValueError('Конфликт режима реестра с заголовком')
     return encode(image, kind)

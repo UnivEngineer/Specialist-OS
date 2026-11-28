@@ -32,23 +32,23 @@ def main():
     for index,(drive,expected) in enumerate(scenarios):
         m.call('bp_clear');m.call('bp_set',addr=0x8100,type='exec')
         assert not m.subroutine(0xC842,af=drive<<8,de=1)['flags']['C']
-        total=m.subroutine(SYSTEM['bios_diskDriver'],bc=0x0300)['registers']['de']['dec']//4
+        total=m.subroutine(SYSTEM['sysDiskDriver'],bc=0x0300)['registers']['de']['dec']//4
         free=m.subroutine(0xC872)['registers']['de']['dec']//4
         mem=int.from_bytes(m.read(ds['v_memTop'],2),'little')+1
         extended=m.read(0x8FF8,1)[0]*64
-        original=m.read(SYSTEM['bios_diskDriver'],3)
+        original=m.read(SYSTEM['sysDiskDriver'],3)
         if expected=='n/a':
             # Только запрос описания отвергается; B=2/3 остаются настоящими.
             target=original[1]|original[2]<<8
             m.write(0x7000,bytes((0x78,0xFE,0xFF,0xCA,0x09,0x70,
                                 0xC3,target&255,target>>8,0x21,0,0,0x37,0xC9)))
-            m.write(SYSTEM['bios_diskDriver'],bytes.fromhex('c30070'))
+            m.write(SYSTEM['sysDiskDriver'],bytes.fromhex('c30070'))
         texts=[];numbers=[];pads=[]
         try:
             m.write(ns['state']+1,bytes([index&1]))
             m.write(0x8000,bytes((0xCD,ns['printInfoPanel']&255,ns['printInfoPanel']>>8,0xC3,0,0x81)))
             m.call('regs_set',pc=0x8000,sp=0x8F00)
-            for addr in (0xC818,SYSTEM['bios_printDecWord']):m.call('bp_set',addr=addr,type='exec')
+            for addr in (0xC818,SYSTEM['printDecWord']):m.call('bp_set',addr=addr,type='exec')
             for _ in range(180):
                 m.call('emu_run_for',ms=500)
                 state=m.call('cpu_state');pc=state['registers']['pc']['dec']
@@ -56,7 +56,7 @@ def main():
                 if pc==0xC818:
                     ptr=state['registers']['hl']['dec']
                     texts.append(m.read(ptr,min(64,65536-ptr)).split(bytes([0]))[0].decode('ascii'))
-                elif pc==SYSTEM['bios_printDecWord']:
+                elif pc==SYSTEM['printDecWord']:
                     numbers.append(state['registers']['de']['dec'])
                     pads.append(state['registers']['bc']['dec']>>8)
                 else:continue
@@ -68,7 +68,7 @@ def main():
             key=('flash' if args.flash else 'rom')+f'-{drive}-{expected.replace("/","-")}'
             Bench(m.url).screenshot(out/(key+'.png'))
             results[key]=dict(technology=expected,numbers=numbers,padding=pads)
-        finally:m.write(SYSTEM['bios_diskDriver'],original)
+        finally:m.write(SYSTEM['sysDiskDriver'],original)
     (out/('flash.json' if args.flash else 'rom.json')).write_text(json.dumps(results,indent=2)+'\n')
     print(results)
 

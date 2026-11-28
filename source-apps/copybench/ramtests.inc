@@ -69,10 +69,10 @@ runOne:
     call reset_timing
     ld hl,(descriptor)
     ld de,byteDesc
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,transferByte
     ld de,cpmDesc
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp z,transferCPM
     ld a,(readDirection)
     or a

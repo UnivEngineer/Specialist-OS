@@ -273,7 +273,7 @@ try:
         m.write(key['IO_TIMER_MODE'],bytes([channel*64]))
         port=key['IO_TIMER_CH0']+channel
         return int.from_bytes(m.read(port,1)+m.read(port,1),'little')
-    m.write(0x2800,b'\xcd'+word(k['bios_getch'])+b'\xc3'+word(0x8b00))
+    m.write(0x2800,b'\xcd'+word(k['mon2_getchOld'])+b'\xc3'+word(0x8b00))
     m.stop_at(bios['loc_C23C'])
     m.call('regs_set',pc=0x2800,sp=0x8fdf)
     start=m.until(bios['loc_C23C'],10,page=0)['cpu_ticks']

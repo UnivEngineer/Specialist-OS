@@ -26,12 +26,12 @@ def main():
         memory[0x8FFA:0x8FFC] = inverse.to_bytes(2,'little')
         code = bytes.fromhex('31 00 8F 21')+src.to_bytes(2,'little')
         code += b'\x11'+((src+count)&65535).to_bytes(2,'little')+b'\x01'+dst.to_bytes(2,'little')
-        address = sy[entry] if entry == 'bios_memcpy_bc_hl' else sy['dos_piece_scroll_1_start' if entry == 'up' else 'dos_piece_scrollDown_1_start']
+        address = sy[entry] if entry == 'mon2_memcpy_bc_hl' else sy['dos_piece_scroll_1_start' if entry == 'up' else 'dos_piece_scrollDown_1_start']
         code += b'\xCD'+address.to_bytes(2,'little')
         code += bytes.fromhex('22 00 87 60 69 22 02 87 EB 22 04 87 C3 00 83')
         memory[0x8200:0x8200+len(code)] = code
         expected = bytearray(memory)
-        if entry == 'bios_memcpy_bc_hl':
+        if entry == 'mon2_memcpy_bc_hl':
             expected[dst:dst+count] = memory[src:src+count]
         else:
             down = entry == 'down'
@@ -50,7 +50,7 @@ def main():
         data = out.read_bytes()
         assert data[65542:65544] == bytes.fromhex('00 83'), result.stdout
         assert data[65544:65546] == bytes.fromhex('00 8F')
-        if entry == 'bios_memcpy_bc_hl':
+        if entry == 'mon2_memcpy_bc_hl':
             assert data[dst:dst+count] == expected[dst:dst+count], (image,src,dst,count)
             assert data[0x8700:0x8706] == ((src+count)&65535).to_bytes(2,'little')+((dst+count)&65535).to_bytes(2,'little')+((src+count)&65535).to_bytes(2,'little')
             # Проверяем соседние байты вне стека и служебной области.
@@ -66,17 +66,17 @@ def main():
     lengths = list(range(34))+[63,64,127,128,245,246,247,254,255,256,257,258,511,512,513,1023,1024,4096,8192]
     for n in lengths:
         for src,dst in [(0x2000,0x5000),(0x3000,0x2000),(0x2000,0x2001),(0x2001,0x2000),(0x2000,0x2000)]:
-            ticks = run(args.image,'bios_memcpy_bc_hl',src,dst,n)
+            ticks = run(args.image,'mon2_memcpy_bc_hl',src,dst,n)
             cases.append(dict(source=src,destination=dst,count=n,ticks=ticks))
     for src,dst,n in [(0xF000,0x3000,4096),(0x3000,0xF000,4096)]:
-        cases.append(dict(source=src,destination=dst,count=n,ticks=run(args.image,'bios_memcpy_bc_hl',src,dst,n)))
+        cases.append(dict(source=src,destination=dst,count=n,ticks=run(args.image,'mon2_memcpy_bc_hl',src,dst,n)))
     comparisons=[]
     for n in [2,20,246,256,512,4096,12278]:
         for src,dst in [(0x2000,0x1000),(0x1000,0x2000)]:
-            new=run(args.image,'bios_memcpy_bc_hl',src,dst,n)
+            new=run(args.image,'mon2_memcpy_bc_hl',src,dst,n)
             if not args.baseline.exists():
                 continue
-            old=run(args.baseline,'bios_memcpy_bc_hl',src,dst,n)
+            old=run(args.baseline,'mon2_memcpy_bc_hl',src,dst,n)
             comparisons.append(dict(count=n,backward=dst>src,old_ticks=old,new_ticks=new,percent=100*(new/old-1)))
     scroll=[]
     for entry in ['up','down']:

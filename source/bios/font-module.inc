@@ -1,9 +1,9 @@
-; Internal BIOS callers use fixed module entries. Only public BIOS jumps are patched.
-printChar            = FONT_ENGINE_CHAR
+; Векторы Монитора-2 сохраняют перехват вывода независимо от профиля C800h.
+printChar            = mon2_printCharOld
 printCharRaw         = FONT_ENGINE_RAW
 printCharReal        = FONT_ENGINE_RAW
-printString          = FONT_ENGINE_Z
-printStringZ         = FONT_ENGINE_Z
+printString          = mon2_printStringOld
+printStringZ         = mon2_printStringOld
 printStringRawZ      = FONT_ENGINE_RAWZ
 printStringReal      = FONT_ENGINE_RAWZ
 printStringRawLim    = FONT_ENGINE_LIM

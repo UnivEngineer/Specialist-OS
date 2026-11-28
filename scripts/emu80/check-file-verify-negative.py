@@ -21,10 +21,10 @@ try:
  errors=[]
  for i in [0,11,12,31]:
   sector=bytearray(original[i*256:(i+1)*256]);sector[255]^=1
-  m.write(0x6500,sector);assert not x.func(x.ds['bios_diskDriver'],bc=0x0100,de=chain[i],hl=0x6500)['flags']['C'];x.func(x.ds['bios_diskDriver'],bc=0x0400)
+  m.write(0x6500,sector);assert not x.func(x.ds['sysDiskDriver'],bc=0x0100,de=chain[i],hl=0x6500)['flags']['C'];x.func(x.ds['sysDiskDriver'],bc=0x0400)
   assert verify('verify_file_data') and verify('verify_raw_data'),i
   assert m.read(0x2000,8192)==original
-  m.write(0x6500,original[i*256:(i+1)*256]);assert not x.func(x.ds['bios_diskDriver'],bc=0x0100,de=chain[i],hl=0x6500)['flags']['C'];x.func(x.ds['bios_diskDriver'],bc=0x0400)
+  m.write(0x6500,original[i*256:(i+1)*256]);assert not x.func(x.ds['sysDiskDriver'],bc=0x0100,de=chain[i],hl=0x6500)['flags']['C'];x.func(x.ds['sysDiskDriver'],bc=0x0400)
   errors.append(i*256+255)
  # Сравнение HIGH не подменяет оригинал прочитанными данными.
  m.write(0x2000,bytes([original[0]^1]));assert x.func(s['read_high'],bc=0)['flags']['C'];assert m.read(0x2000,1)==bytes([original[0]^1]);m.write(0x2000,original[:1])

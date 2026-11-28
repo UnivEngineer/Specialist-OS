@@ -65,7 +65,7 @@ ncDialogSize:
     dec a
     jp nz,ncDialogSize
     ld de,3073
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nc,ncDialogFallback
     ld hl,ncDialogRequest
     call uiBitmapSaveColors

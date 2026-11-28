@@ -138,8 +138,8 @@ for font, width in (('Cpm4',4),('Compact',6),('Fast8',8)):
                           ('IO.main.bin',0xf000), (f'fonts/{font}.i80',0xd800)):
         module = (ROOT/'bin'/name).read_bytes()
         prepared[address:address+len(module)] = module
-    variables = bios['bios_vars']
-    prepared[variables:variables+bios['BIOS_VARIABLES']] = prepared[bios['initVars']:bios['initVarsEnd']]
+    variables = bios['mon2_vars']
+    prepared[variables:variables+bios['MON2_VARIABLES']] = (ROOT/'bin/BIOS.defaults.bin').read_bytes()[:bios['MON2_VARIABLES']]
     prepared = run(prepared,bios['FONT_ENGINE_INIT'])
     prepared = run(prepared,symbols['ncLayoutInit'])
     assert prepared[symbols['ncFontWidth']]==width

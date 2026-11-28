@@ -1,4 +1,4 @@
-; A/CF = клавиша и признак CTRL из bios_getch. AF/BC/DE/HL разрушены.
+; A/CF = клавиша и признак CTRL из mon2_getchOld. AF/BC/DE/HL разрушены.
 ; CF=1 only for a plain navigation key that cannot change the selection.
 ; Checked BEFORE either inverse draw: holding an arrow at the edge is a no-op.
 ncNavigationBlocked:

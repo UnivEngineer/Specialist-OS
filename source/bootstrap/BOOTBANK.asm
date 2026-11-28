@@ -204,7 +204,7 @@ installDosProfile:
     xor a
     call install
     ld de,clientImage
-    ld hl,0F800h
+    ld hl,BOOT_BANK_CLIENT
     ld bc,clientEnd-clientImage
     xor a
     call install
@@ -246,16 +246,16 @@ installDosProfile:
     ld (BANK_SERVICE_SP),hl
     ld hl,BOOT_BIOS_STACK_FLOOR
     ld (BANK_STACK_FLOOR),hl
-    ; Полный MEM-клиент одинаков в main и DOS; BIOS задаст локальный вход.
+    ; MAIN пропускает слоты драйвера C: и банковых обработчиков CLIENT.
     ld hl,localBlockImage
     ld de,localBlockImage+BANK_MAIN_LOCAL_BYTES
     ld bc,BOOT_LOCAL_BLOCK
     call moveCore
-    ld hl,clientImage
-    ; CLIENT одинаков в MAIN и DOS; слот AT512KS расположен в LOCAL.
-    ld de,clientImage+BANK_MAIN_CLIENT_BYTES
-    ld bc,0F800h
+    ld hl,mainClientImage
+    ld de,mainClientImage+BANK_MAIN_CLIENT_BYTES
+    ld bc,BOOT_MAIN_CLIENT
     call moveCore
+    call installMainBiosOverlay
     ld hl,windowImage
     ld de,windowEnd
     ld bc,0FFC0h
@@ -266,10 +266,15 @@ installDosProfile:
 bootDone:
     xor a
     ld (0FFFCh),a
+    ld hl,bootBiosStart
+    ld (biosBootEntry),hl
     jp 0C000h
 bootFailed:
     halt
     jp bootFailed
+
+    INCLUDE "bios-overlay.inc"
+    INCLUDE "bios-start.inc"
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -322,6 +327,7 @@ transportImage  = memImage+MEM_TRANSPORT_OFFSET
 transportEnd    = transportImage+MEM_TRANSPORT_SIZE
 clientImage     = memImage+MEM_CLIENT_OFFSET
 clientEnd       = clientImage+MEM_CLIENT_SIZE
+mainClientImage = clientImage+BOOT_MAIN_CLIENT-BOOT_BANK_CLIENT
 localBlockImage = memImage+MEM_LOCAL_OFFSET
 localBlockEnd   = localBlockImage+MEM_LOCAL_SIZE
 windowImage     = memImage+MEM_WINDOW_OFFSET

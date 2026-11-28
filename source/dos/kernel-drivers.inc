@@ -25,7 +25,7 @@ diskDriver:
     jp kernelDiskDone
 kernelFloppyIO:
 diFloppyCall:
-    call DOS_FLOPPY_ADDR     ; Операнд публикует registryBoot/diCopyFloppy.
+    call DOS_FLOPPY_ADDR     ; Операнд заменяет diCopyFloppy при установке драйвера.
     jp kernelDiskDone
 kernelExternalIO:
     call fastDriver
@@ -65,6 +65,7 @@ dosPhysicalExternal:
     pop hl
     ret
 dosPhysicalFloppy:
+    ASSERT kernelFloppyDrive+1 == kernelExternalDrive
     dec hl
     cp (hl)
     jp z,dosPhysicalIsFloppy

@@ -10,6 +10,7 @@ memPrintNear:
     ENDIF
 memPrintReturn:
     ld (BANK_IO_RAM),a
+memPrintResumeInBank:
     ex de,hl
     ld sp,hl
     pop hl
@@ -59,6 +60,6 @@ entry:
     ld de,vector
     jp memFixedEnter
     ENDM
-    MEM_BIOS_VECTOR memFixedPrint,bios_printChar
-    MEM_BIOS_VECTOR memFixedRaw,bios_printCharRaw
-    MEM_BIOS_VECTOR memFixedHexByte,bios_printHexByte
+    MEM_BIOS_VECTOR memFixedPrint,mon2_printCharOld
+    MEM_BIOS_VECTOR memFixedRaw,FONT_ENGINE_RAW
+    MEM_BIOS_VECTOR memFixedHexByte,BIOS_BANK_PRINT_HEX_BYTE

@@ -19,7 +19,7 @@ def main():
     for name,prepared in (('raw',False),('upper',True)):
         core = source.replace('NC_COMPARE_START', name.upper()+'_COMPARE_START')
         if prepared:
-            core = core.replace('    call bios_upperCase','    ; already normalized')
+            core = core.replace('    call sortStrings.upperCase','    ; already normalized')
         (folder/f'{name}-core.inc').write_text(core,encoding='utf-8')
         fixture = kernels.replace('@TIMING@',(ROOT/'sdk/asm/lib/timing-pit.inc').as_posix())
         fixture = fixture.replace('@CORE@',f'{name}-core.inc')

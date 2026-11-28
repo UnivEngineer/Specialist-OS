@@ -15,7 +15,7 @@ m=bytearray(65536);m[0x2000:0x2000+len(raw)]=raw
 w=lambda x:x.to_bytes(2,'little');code=bytearray(b'\x31\x00\x8f');expect=bytearray(12288)
 for c in range(256):
  x=(c%48)*4;y=(c//48)*10+7
- code+=b'\x21'+bytes([y,x])+b'\x22'+w(s['bios_vars.cursorY'])+b'\x0e'+bytes([c])+b'\xcd'+w(s['scalar'])
+ code+=b'\x21'+bytes([y,x])+b'\x22'+w(s['mon2_vars.cursorY'])+b'\x0e'+bytes([c])+b'\xcd'+w(s['scalar'])
  for row in range(8):expect[(x//4)*256+y-7+row]=font[c*8+row]
 code+=b'\xc3\x00\x18';m[0x100:0x100+len(code)]=code;(O/'in.bin').write_bytes(m)
 subprocess.run(['D:/Projects/RetroPC/Specialist/MySoft/z88dk/bin/z88dk-ticks.exe','-m8080','-pc','100','-end','1800','-counter','30000000','-output',str(O/'out.bin'),str(O/'in.bin')],check=True,capture_output=True,timeout=30)

@@ -4,7 +4,7 @@
     MODULE fast6
 tryGroup:
     ld (text),hl
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     cp 192
     jp nc,empty
     IFNDEF FONT_GRAPHIC_X
@@ -21,11 +21,11 @@ escReady:
     IFDEF FONT_ALIGNED_ROWS
     jp graphicAlignedPacket
     ELSE
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     IFDEF FONT_GRAPHIC_X
     and 3
     jp nz,graphicPacket
-    ld a,(bios_vars.cursorX)
+    ld a,(mon2_vars.cursorX)
     ENDIF
     rrca
     rrca
@@ -57,7 +57,7 @@ quotaReady:
     ld (normalUpLimit+1),a
     ld (inverseDownLimit+1),a
     ld (inverseUpLimit+1),a
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     sub 7
     ld e,a
     ld a,(realMode)
@@ -74,7 +74,7 @@ thresholdReady:
     ld (inverseUpMin+1),a
     ld hl,normalDown
     ld bc,normalUp
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp z,checkedRoute
     ld hl,inverseDown
@@ -84,7 +84,7 @@ checkedRoute:
 unrestricted:
     ld hl,normalDownRaw
     ld bc,normalUpRaw
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp z,routeReady
     ld hl,inverseDownRaw
@@ -156,10 +156,10 @@ startColumn: cp 0
     sub high MX_SCREEN_BASE
     add a,a
     add a,a
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     cp 192
     jp c,done
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     call fontLineEnd
 done:
     ld hl,(text)

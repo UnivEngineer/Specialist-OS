@@ -1,4 +1,5 @@
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../bin/bios-imports.inc"
     INCLUDE "../../sdk/asm/formats/font.inc"
     INCLUDE "../../sdk/asm/formats/font-init.inc"
     ORG FONT_INIT_ADDR
@@ -57,7 +58,7 @@ initialize:
     push de
     ld d,b
     ld e,c
-    call bios_sub_hl_de
+    call biosEngineSubtract
     pop de
     pop bc
     add hl,bc

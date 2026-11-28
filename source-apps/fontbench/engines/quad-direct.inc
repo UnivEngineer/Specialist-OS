@@ -57,7 +57,7 @@ quadDirectSecond:
     ld (quadRaw),hl
     ex de,hl
     ld (quadText),hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca

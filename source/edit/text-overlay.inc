@@ -420,7 +420,7 @@ ebPrefetchStart:
 ; Keep that anchor so the idle job can skip traversing the visible page.
 ebObserveBottom:
     push af
-    ld a,(bios_vars.cursorY)
+    ld a,(mon2_vars.cursorY)
     cp EDITOR_LAST_Y
     jp nz,ebObserveDone
     ld a,(editorWholeRow)

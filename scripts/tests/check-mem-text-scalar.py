@@ -9,8 +9,8 @@ base[t['bankPage']]=1;base[t['bankPageCount']]=16;base[t['bankServiceSP']:t['ban
 # Capture the native scalar handler; the 8080 model ignores mapper writes.
 # Actual transport, register packets and both distinct stack ranges still run.
 rows=[]
-for mode,entry,vector in ((3,b['mx_printChar'],b['bios_printChar']),
-                       (4,b['mx_printCharRaw'],b['bios_printCharRaw'])):
+for mode,entry,vector in ((3,b['mx_printChar'],b['mon2_printCharOld']),
+                       (4,b['mx_printCharRaw'],b['FONT_ENGINE_RAW'])):
  for value in (0,9,10,13,27,65,128,255):
   m=bytearray(base);m[0xffc0:0xffe0]=bytes(range(0x60,0x80))
   m[vector:vector+3]=b'\xc3'+W(0x8000)

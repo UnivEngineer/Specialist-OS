@@ -84,7 +84,7 @@ mainLoop_cursorReady:
             jp c,ncRefreshDirty
             ; Положение курсора в ком строке
             ld      hl, (vars.cmdLinePos)
-            ld      (bios_vars.cursorY), hl
+            ld      (mon2_vars.cursorY), hl
 
             ; Ждем нажатия клавиши
             COLOR   COLOR_CMDLINE
@@ -182,7 +182,7 @@ mainLoop_appendChar:
             jp      mainLoop_savePos
 
 mainLoop_savePos: ; ?
-            ld      hl, (bios_vars.cursorY)
+            ld      hl, (mon2_vars.cursorY)
             ld      (vars.cmdLinePos), hl
 
             jp      mainLoop_editDone
@@ -206,7 +206,7 @@ but_Bkspc:  ; Если ком строка пустая, выходим
             jp      mainLoop_editDone
 mainLoop_eraseChar:
             ld      hl, asc_DC17
-            call    bios_printString
+            call    mon2_printStringOld
             jp      mainLoop_savePos
 
 ; ---------------------------------------------------------------------------
@@ -255,15 +255,15 @@ ncExitToCli:
             MXOS_CALL_REGS MXOS_DOS_SET_SHELL
             COLOR COLOR_CMDSCREEN
             ld c,01Fh
-            call bios_printChar
-            jp bios_reboot
+            call mon2_printCharOld
+            jp mon2_init
 
     IF NC_BANKED
 ; Exit on the Shift toolbar remains resident. Ctrl-F10 explicitly unloads.
 ncBankFullExitToCli:
             COLOR COLOR_CMDSCREEN
             ld c,31
-            call bios_printChar
+            call mon2_printCharOld
             call ncBankFlush
             ld a,2
             ld (ncBankExitAction),a

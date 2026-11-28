@@ -56,7 +56,7 @@ def verify(machine, floppy, out):
     m.until(cli['cliPrompt'], 120, page=0)
 
     def call(op, hl=0, de=0, bc=0, a=0, error=None):
-        m.write(0x2800, bytes.fromhex('CD 00 F8 C3 00 8B'))
+        m.write(0x2800, bytes.fromhex('CD 60 F8 C3 00 8B'))
         m.write(0x2f80, struct.pack('<4H', hl, de, bc, (a << 8) | 2))
         m.stop_at(0x8b00)
         m.call('regs_set', pc=0x2800, sp=0x8fdf, bc=op, de=0x2f80)

@@ -138,7 +138,7 @@ hexGridFile:
     ld a,(hexAlign)
     ld e,a
     ld d,0
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     jp nc,hexGridFileReady
     ld hl,0
 hexGridFileReady:
@@ -178,7 +178,7 @@ hexEnter:
     ld hl,(v_textBeginLo)
     ex de,hl
     pop hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld (hexCaret),hl
     xor a
     ld (hexChangedBreak),a
@@ -229,7 +229,7 @@ hexTextFound:
     ld (v_currentLine),hl
     ex de,hl
     pop hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld (v_column),hl
     call hexRestoreTextGeometry
     IF EDIT_BANKED

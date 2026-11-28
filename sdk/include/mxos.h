@@ -92,7 +92,10 @@ mxos_u16 mxos_enumerate(mxos_u8 operation,MXOS_ENUM_REQUEST *request);
 #define MXOS_DISK_TECH_MX_VV55_ROM     'Q'
 #define MXOS_RAW_PREPARE 6 /* RAW_IO B=6: unified entry HL (B=1/2/4/5), DE=0, shift B, drive C. */
 
-#define MXOS_BIOS_ABI_PRINT_STRING_Z 0xC818
+/* Значения A для MXOS_BIOS_PROFILE. При успехе A содержит прежний профиль. */
+#define MXOS_BIOS_PROFILE_RAMFOS 1
+#define MXOS_BIOS_PROFILE_MON2   2
+#define MXOS_BIOS_PROFILE_QUERY  0xFF
 #define MXOS_FONT_PRERENDER_BYTES 10240
 #define MXOS_FONT_RENDER_QUERY 0
 #define MXOS_FONT_RENDER_BUILD 1
@@ -106,7 +109,7 @@ typedef struct {
     mxos_u16 load,entry,body_bytes,body_checksum,bss,mem_begin,mem_end,min_heap;
     mxos_u8 policy,api;
     mxos_u16 stack_bytes;
-    mxos_u8 mode,header_bytes,options,reserved;
+    mxos_u8 mode,header_bytes,options,monitor_bytes;
     mxos_u16 header_checksum;
 } MXOS_IMAGE_HEADER;
 #define MXOS_IMAGE_HEADER_SIZE 32
@@ -149,26 +152,21 @@ typedef struct {
 #define MXOS_CLI_OBSERVER 9
 typedef struct { char bytes[MXOS_MAX_PATH]; } MXOS_PATH;
 
-#define MXOS_BIOS_ABI_MEMCPY 0xC42D
-#define MXOS_BIOS_ABI_GETCH 0xC803
-#define MXOS_BIOS_ABI_PUTCH 0xC809
-#define MXOS_BIOS_ABI_INPUT 0xC80F
-#define MXOS_BIOS_ABI_PUTS 0xC818
-#define MXOS_BIOS_ABI_PRINT_HEX8 0xC815
-#define MXOS_BIOS_ABI_KEY_SCAN 0xC81B
-#define MXOS_BIOS_ABI_CURSOR_GET 0xC81E
-#define MXOS_BIOS_ABI_CHECKSUM 0xC82A
-#define MXOS_BIOS_ABI_MEMTOP_SET 0xC830
-#define MXOS_BIOS_ABI_MEMTOP_GET 0xC833
-
 /* Один мост позволяет обращаться и к остальным уже объявленным ABI. */
 void mxos_bios_call(MXOS_REGS *regs) MXOS_FASTCALL;
 
-#define MXOS_MEM_ABI_VERSION 0x0104
-#define MXOS_MEM_COPY_FAR 0xF80F
-#define MXOS_MEM_INFO 0xF812
+#define MXOS_MEM_ABI_VERSION 0x0105
+#define MXOS_MEM_COPY_FAR 0xF86F
+#define MXOS_MEM_INFO 0xF872
+#define MXOS_MEM_PRINT_CHAR     0xF87B
+#define MXOS_MEM_GET_CURSOR_POS 0xF87E
+#define MXOS_MEM_SET_CURSOR_POS 0xF881
+#define MXOS_MEM_PRINT_HEX_BYTE  0xF887
+#define MXOS_MEM_PRINT_HEX_WORD  0xF88A
+#define MXOS_MEM_GET_TOP        0xF88D
+#define MXOS_MEM_SET_TOP        0xF890
 #define MXOS_MEM_CAP_COPY 1
-#define MXOS_MEM_CAP_LAZY_WINDOW 2  /* Исторический бит MEM 1.3, в 1.4 не выдаётся. */
+#define MXOS_MEM_CAP_LAZY_WINDOW 2  /* Исторический бит MEM 1.3, не выдаётся начиная с 1.4. */
 #define MXOS_MEM_CAP_MEMORY_OPS 4
 #define MXOS_MEM_CAP_MODULES 8
 #define MXOS_MEM_CAP_ALLOCATOR 16
@@ -185,10 +183,10 @@ typedef struct {
  * Локальное перекрытие допустимо, включая DATA. Межбанковый перенос оставляет COPY. */
 mxos_u16 mxos_memcpy_far(MXOS_FAR_COPY *request) MXOS_FASTCALL;
 
-#define MXOS_MEM_SERVICE 0xF815
+#define MXOS_MEM_SERVICE 0xF875
 #define MXOS_ALLOC_MAIN 0
 #define MXOS_ALLOC_ANY_BANK 255
-/* Операции F815h: 0..5; MXOS_DOS_MEMORY: 1..4, 6..10. */
+/* Операции F875h: 0..5; MXOS_DOS_MEMORY: 1..4, 6..10. */
 #define MXOS_MEM_OP_MOVE 0
 #define MXOS_MEM_OP_GET8 1
 #define MXOS_MEM_OP_GET16 2
@@ -317,12 +315,12 @@ void mxos_cls(void);
  * The application owns callback code and its command buffer. */
 void mxos_queue_bind(void (*flush)(void)) MXOS_FASTCALL;
 void mxos_queue_flush(void);
-#define MXOS_ROUTE_CALL_ADDR 0xF818
+#define MXOS_ROUTE_CALL_ADDR 0xF878
 #define MXOS_QUEUE_BIOS 0
 #define MXOS_QUEUE_DOS 1
 #define MXOS_QUEUE_DLL 2
-#define MXOS_QUEUE_BIND_ADDR 0xF809
-#define MXOS_QUEUE_FLUSH_ADDR 0xF80C
+#define MXOS_QUEUE_BIND_ADDR 0xF869
+#define MXOS_QUEUE_FLUSH_ADDR 0xF86C
 #define MXOS_COMMAND_REG_HL 1
 #define MXOS_COMMAND_REG_DE 2
 #define MXOS_COMMAND_REG_BC 4

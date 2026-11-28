@@ -1,5 +1,16 @@
-; Аппаратные процедуры ВВ55 из MAIN-сегмента IO.SYS.
+; Аппаратные процедуры ВВ55 для MAIN IO.SYS и совместимого BIOS STD.
+    IFDEF PPI_STD
+PPI_KEY_A    = 0FF00h
+PPI_KEY_B    = 0FF01h
+PPI_KEY_C    = 0FF02h
+PPI_KEY_MODE = 0FF03h
+    ELSE
     INCLUDE "timer-hardware.inc"
+PPI_KEY_A    = IO_KEYB_A
+PPI_KEY_B    = IO_KEYB_B
+PPI_KEY_C    = IO_KEYB_C
+PPI_KEY_MODE = IO_KEYB_MODE
+    ENDIF
 
 ;+---------------------------------------------------------------------------
 ; MXOS
@@ -17,18 +28,18 @@ beep:       ; Сохраняем все регистры. de не использ
             push  hl
 
             ; Частота и длительность сигнала
-            ld    hl, (bios_vars.beepFreq)
+            ld    hl, (mon2_vars.beepFreq)
 
 beep_0:     ; Единицу на динамик
             ld    a, 0Bh
-            ld    (IO_KEYB_MODE),a
+            ld    (PPI_KEY_MODE),a
 
             ; Задержка l тактов
             call  delay_l
 
             ; Ноль на динамик
             ld    a, 0Ah
-            ld    (IO_KEYB_MODE),a
+            ld    (PPI_KEY_MODE),a
 
             ; Задержка l тактов
             call  delay_l
@@ -61,10 +72,10 @@ beep_0:     ; Единицу на динамик
 
 ioKeyReadCtrl:
             ld    a,083h
-            ld    (IO_KEYB_MODE),a
+            ld    (PPI_KEY_MODE),a
             ld    a,0F7h
-            ld    (IO_KEYB_A),a
-            ld    a,(IO_KEYB_B)
+            ld    (PPI_KEY_A),a
+            ld    a,(PPI_KEY_B)
             cpl
             ld    d,a
 
@@ -80,14 +91,18 @@ ioKeyReadCtrl:
 ;   A = записанный режим, BC, DE, HL и флаги сохранены.
 ;----------------------------------------------------------------------------
 
+    IFDEF PPI_STD
+    jp mon2_setKeybMode82
+ioKeyMode82 = mon2_setKeybMode82
+    ELSE
 ioKeyMode82:
             ld    a,082h
-            ld    (IO_KEYB_MODE),a
+            ld    (PPI_KEY_MODE),a
             ret
 
 ioKeyMode91:
             ld    a,091h
-            ld    (IO_KEYB_MODE),a
+            ld    (PPI_KEY_MODE),a
             ret
 
 ;----------------------------------------------------------------------------
@@ -103,8 +118,9 @@ ioKeyMode91:
 ;----------------------------------------------------------------------------
 
 ioKeyReadRows:
-            ld    a,(IO_KEYB_B)
+            ld    a,(PPI_KEY_B)
             ret
+    ENDIF
 
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -119,6 +135,7 @@ ioKeyReadRows:
 ;   BC, DE, HL и флаги сохранены.
 ;----------------------------------------------------------------------------
 
+    IFNDEF PPI_STD
 ioResetSound:
             ld    a,0B6h
             ld    (IO_TIMER_MODE),a
@@ -127,5 +144,6 @@ ioResetSound:
             ld    a,036h
             ld    (IO_TIMER_MODE),a
             ld    a,00Ah
-            ld    (IO_KEYB_MODE),a
+            ld    (PPI_KEY_MODE),a
             ret
+    ENDIF

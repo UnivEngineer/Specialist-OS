@@ -89,8 +89,8 @@ for variant in ['valid','wrong-parent','cycle','duplicate','missing-dot']:
  m=bytearray(65536)
  for p,at in [(R/'bin/DOS.sys',0xC000),(R/'bin/CHKDSK.i80',0),(O/'driver.bin',0xB000)]:
   raw=p.read_bytes();m[at:at+len(raw)]=raw
- m[0x9000:0xB000]=disk;m[s['bios_diskDriver']:s['bios_diskDriver']+3]=b'\xC3'+W(0xB000)
- m[s['printChar']]=0xC9;m[s['bios_printChar']]=0xC9;m[s['bios_getch']:s['bios_getch']+3]=bytes.fromhex('3E 0D C9')
+ m[0x9000:0xB000]=disk;m[s['sysDiskDriver']:s['sysDiskDriver']+3]=b'\xC3'+W(0xB000)
+ m[s['printChar']]=0xC9;m[s['mon2_printCharOld']]=0xC9;m[s['mon2_getchOld']:s['mon2_getchOld']+3]=bytes.fromhex('3E 0D C9')
  m[s['bios_upper.koi7']]=1;m[s['v_drive']]=1
  m[0x5800:0x5806]=b' B:\r\0\0'
  stub=b'\x31'+W(s['STACK_ADDR'])+b'\x11'+W(0x5800)+bytes.fromhex('CD 00 00 C3 00 61');m[0x6000:0x6000+len(stub)]=stub

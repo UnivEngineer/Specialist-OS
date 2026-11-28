@@ -62,7 +62,7 @@ def io(label):
    for mode in [1,2]:
     if mode==2:m.m.write(buffer,bytes(256))
     ticks=m.m.call('cpu_state')['cpu_ticks']
-    state=m.func(d['bios_diskDriver'],af=0x5A02,bc=(mode<<8)|0xA7,de=sector,hl=buffer)
+    state=m.func(d['sysDiskDriver'],af=0x5A02,bc=(mode<<8)|0xA7,de=sector,hl=buffer)
     elapsed=state['cpu_ticks']-ticks
     assert not state['flags']['C'],(label,sector,buffer,state)
     assert state['registers']['af']['dec']>>8==0x5A
@@ -72,7 +72,7 @@ def io(label):
     if sector==0x100 and buffer==0x4001:report['sectorMs'].setdefault(label,{})[str(mode)]=elapsed/2000
    m.m.write(buffer-1,original)
  for sector,buffer in [(0xFF,0x4001),(0xFFF,0x4001),(0x1000,0x4001),(0x100,0xFE01)]:
-  for mode in [1,2]:assert m.func(d['bios_diskDriver'],bc=mode<<8,de=sector,hl=buffer)['flags']['C'],(label,sector,buffer)
+  for mode in [1,2]:assert m.func(d['sysDiskDriver'],bc=mode<<8,de=sector,hl=buffer)['flags']['C'],(label,sector,buffer)
  report['checks'].append(label+': read/write, page boundaries, unaligned/high buffers, guards, registers, invalid ranges')
  print(label,'I/O PASS',flush=True)
 
@@ -85,14 +85,14 @@ try:
  select(d['RAMD_DRIVER_RESTORE']);window(user)
  report['checks'].append('explicit block selection preserve registered user driver; all selector registers/flags preserved')
  # Для испытания встроенного физического пути заменяем только регистрацию B:.
- assert not m.func(d['bios_installDriver'],af=0x0100,hl=d['diskDriver'])['flags']['C']
+ assert not m.func(d['installDriver'],af=0x0100,hl=d['diskDriver'])['flags']['C']
  select(d['RAMD_DRIVER_BLOCK']);m.select(1);io('R3')
  # REGISTER не устанавливает окно, USER/RESTORE применяют новый шаблон.
  select(d['RAMD_DRIVER_REGISTER'],d['driverBlockStart']);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_USER']);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_REGISTER'],user);window(d['driverBlockStart'])
  select(d['RAMD_DRIVER_RESTORE']);window(user)
- assert not m.func(d['bios_installDriver'],af=0x0100,hl=r['Driver'])['flags']['C']
+ assert not m.func(d['installDriver'],af=0x0100,hl=r['Driver'])['flags']['C']
  m.select(1);io(driverLabel)
  if args.compare_r4:
   r4=symbols('RAMDISK-R4')
@@ -102,7 +102,7 @@ try:
  report['checks'].append('REGISTER leaves current window intact; USER applies new template; user registration restored')
  # Аппаратный сброс сохраняет RAM, но заново устанавливает начальный шаблон BIOS.
  sentinel=bytes(range(256));m.m.write(0x4001,sentinel)
- assert not m.func(d['bios_diskDriver'],bc=0x0100,de=0x100,hl=0x4001)['flags']['C']
+ assert not m.func(d['sysDiskDriver'],bc=0x0100,de=0x100,hl=0x4001)['flags']['C']
  m.m.call('bp_clear');m.m.call('emu_reset');m.m.stop_at(d['reboot3_1']);m.m.until(d['reboot3_1'],30)
  assert int.from_bytes(m.m.read(d['setRAMDBlockTemplate']+1,2),'little')==d['driverBlockStart']
  m.m.stop_at(d['skipFormat']);m.m.call('bp_set',addr=d['fileExec'],type='exec');m.m.until(d['skipFormat'],30)
@@ -110,7 +110,7 @@ try:
  m.m.stop_at(n['mainLoop']);m.m.until(n['mainLoop'],60)
  select(d['RAMD_DRIVER_USER']);window(user);m.select(1)
  m.m.write(0x4001,bytes(256))
- assert not m.func(d['bios_diskDriver'],bc=0x0200,de=0x100,hl=0x4001)['flags']['C']
+ assert not m.func(d['sysDiskDriver'],bc=0x0200,de=0x100,hl=0x4001)['flags']['C']
  assert m.m.read(0x4001,256)==sentinel
  report['checks'].append('hardware reset restores BIOS default block template, skips format on existing RAM disk, AUTOEXEC reinstalls configured driver, data retained')
  (args.report/'result.json').write_text(json.dumps(report,indent=2)+'\n')

@@ -34,7 +34,7 @@ pip_infoDrive:
     ENDIF
             ld (pipReservedPages),a
             ld b,3
-            call bios_diskDriver
+            call ncDiskDriver
             ld (vars.diskInfoPtr),hl
             ex de,hl
             ld (pipDiskBlocks),hl
@@ -50,7 +50,7 @@ pip_infoDrive:
 pip_readDriver:
             ld hl,0
             ld b,0FFh
-            call bios_diskDriver
+            call ncDiskDriver
             jp c,pip_driverUnknown
             ld a,h
             or l
@@ -384,7 +384,7 @@ ncInfoFreeDeferred:     DB 0
 ; Preserve the original string pointer in HL and the value pointer in DE.
 pip_nextInfoRow:
             push hl
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld a,l
             add a,10
             ld l,a
@@ -411,10 +411,10 @@ pip_readMain:
             ; This is the upper limit with FONT retained, from address 0.
             push hl
             ld hl,(ncGfxBase)
-            call bios_cmp_hl_de
+            call mon2_cmp_hl_de
             jp z,pip_shellMainLimit
             ld hl,NC_MAIN_PACKET
-            call bios_cmp_hl_de
+            call mon2_cmp_hl_de
 pip_shellMainLimit:
             pop hl
             ret nz
@@ -428,7 +428,7 @@ pip_shellMainLimit:
 pip_readMainFallback:
             ld hl,0
             ld (pipFontBytes),hl
-            call bios_getMemTop
+            call mx_getMemTop
             inc hl
             ex de,hl
             ret
@@ -475,7 +475,7 @@ pip_numberPadding:
             COLOR COLOR_INFONUMBER
             call nz,printSpaces
             ld hl,ncDecimalText
-            jp bios_printStringRawZ
+            jp FONT_ENGINE_RAWZ
 pip_printDiskNumber:
             call pip_printNumber
             jp pip_printInfoDrive ; Same color as the label, no color seam.
@@ -504,7 +504,7 @@ pip_unitsDivide:
 pip_printDetail:
             push de
             push hl
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld e,l
             pop hl
             COLOR COLOR_INFOTEXT
@@ -519,7 +519,7 @@ pip_detailAlign:
             call ncPrintPanelAligned
             pop hl
             push hl
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld a,(pipDetailX)
             ld h,a
             call setCursorPosPanel

@@ -70,8 +70,8 @@ copyLoop:
             data = (out/'stub.bin').read_bytes()
             memory[0x9000:0x9000+len(data)] = data
             memory[sy[body]:sy[body]+3] = b'\xc3'+word(0x9000)
-            memory[0xF812:0xF816] = bytes.fromhex('3E 03 B7 C9')
-            memory[0xF80F:0xF812] = b'\xc3'+word(0x9100)
+            memory[sy['mx_memInfo']:sy['mx_memInfo']+4] = bytes.fromhex('3E 03 B7 C9')
+            memory[sy['mx_memcpyFar']:sy['mx_memcpyFar']+3] = b'\xc3'+word(0x9100)
             if failure:
                 memory[0x9100:0x9104] = bytes.fromhex('3E E2 37 C9')
             payload = bytes(range(32))

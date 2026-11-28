@@ -191,7 +191,7 @@ class Campaign:
    assert state['registers']['de']['dec']==128,state
    rows['list_ticks'].append(ticks)
   # Nonblocking raw key scans, without a pressed key; no cursor/repeat delay.
-  scanner=self.n['ncBankKeyScan'] if self.page else self.n['bios_keyScan']
+  scanner=self.n['ncBankKeyScan'] if self.page else self.n['ncKeyScan']
   code=b'\x06\x64\xc5\xcd'+W(scanner)+b'\xc1\x05\xc2'+W(origin+2)
   rows['scan100_ticks']=[timed(code)[0] for _ in range(3)]
   # Prototype only: same BIOS scan source and key table in local EXEC RAM.

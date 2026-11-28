@@ -263,7 +263,7 @@ cliPwd:
     call directoryCwdUnchecked
     ret c
     ld hl,cliPath1
-    call bios_printString
+    call mon2_printStringOld
     jp cliNewLine
 cliMkdir:
     call cliOnePath
@@ -287,7 +287,7 @@ cliEcho:
     ld a,1
     ld (cliOutput),a
     ld hl,(cliArgs)
-    call bios_printString
+    call mon2_printStringOld
     jp cliNewLine
 cliEchoOn:
     ld a,1
@@ -303,7 +303,7 @@ cliEchoOffText:     DB 'OFF',0
 cliEchoOnText:      DB 'ON',0
 cliNewLine:
     ld c,0Ah
-    call bios_printChar
+    call mon2_printCharOld
     jp cliSuccess
 ;----------------------------------------------------------------------------
 ; MXOS
@@ -323,7 +323,7 @@ cliPause:
     or a
     jp nz,blockArgument
     ld hl,cliPauseText
-    call bios_printString
+    call mon2_printStringOld
 cliPauseWait:
     call j_getch
     jp cliNewLine
@@ -331,14 +331,25 @@ cliPauseText: DB 'PRESS ANY KEY TO CONTINUE',10,0
 
 cliCls:
     ld c,01Fh
-    call bios_printChar
+    call mon2_printCharOld
     jp cliSuccess
 cliHelp:
     ld a,1
     ld (cliOutput),a
-    ld hl,cliHelpText
-    call bios_printString
-    jp cliNewLine
+    ld hl,cliHelpDrive
+    call mon2_printStringOld
+    ld hl,cliCommands
+cliHelpNext:
+    call mon2_printStringOld
+    ld de,4          ; От NUL перейти через адрес и флаги записи.
+    add hl,de
+    ld a,(hl)
+    or a
+    jp z,cliNewLine
+    ld c,' '
+    call mon2_printCharOld
+    jp cliHelpNext
+cliHelpDrive: DB 'A: ',0
 cliExit:
     ld a,2
     ld (cliOutput),a
@@ -594,7 +605,7 @@ cliDirLoop:
     jp z,cliDirShort
     ld de,32
     add hl,de
-    call bios_printString
+    call mon2_printStringOld
     jp cliDirNext
 cliDirShort:
     push hl
@@ -608,7 +619,7 @@ cliDirShort:
     cp ' '
     jp z,cliDirNoExt
     ld c,'.'
-    call bios_printChar
+    call mon2_printCharOld
     ld b,3
     call cliPrintNamePart
 cliDirNoExt:
@@ -623,7 +634,7 @@ cliDirNoExt:
     and 010h
     jp z,cliDirSize
     ld hl,cliDirText
-    call bios_printString
+    call mon2_printStringOld
     jp cliDirNext
 cliDirSize:
     ld de,17
@@ -632,10 +643,10 @@ cliDirSize:
     inc hl
     ld d,(hl)
     ld b,' '
-    call bios_printDecWord
+    call printDecWord
 cliDirNext:
     ld c,0Ah
-    call bios_printChar
+    call mon2_printCharOld
     jp cliDirLoop
 cliDirEnd:
     push af
@@ -649,7 +660,7 @@ cliDirHadItems:
     or a
     jp nz,cliSuccess
     ld hl,cliDirNoMatches
-    call bios_printString
+    call mon2_printStringOld
     jp cliNewLine
 cliDirNoMatches: DB 'No matching files',0
 cliPrintNamePart:
@@ -657,7 +668,7 @@ cliPrintNamePart:
     cp ' '
     ret z
     ld c,a
-    call bios_printChar
+    call mon2_printCharOld
     inc hl
     dec b
     jp nz,cliPrintNamePart
@@ -706,7 +717,7 @@ cliTypePrint:
     push bc
     push hl
     ld c,a
-    call bios_printChar
+    call mon2_printCharOld
     pop hl
     pop bc
     dec bc
@@ -884,30 +895,26 @@ cliResolveAssociation:
 cliCheckNativeImage:
     ld hl,cliRequest.source
     IFDEF BANKED_DOS_BUILD
-    call imageOpenModule
+    call imageClassify
     jp c,cliResolveFail
-    ld a,(v_imageHeader+4)
-    cp IMAGE_RELOC_VERSION
-    jp nz,cliFixedImage
-    ld a,(v_tmpFileDescr+5)
-    cp IMAGE_FLAG_DRIVER
+    or a
     jp z,cliAssociationAbsent
-    call imageError
-    jp cliResolveFail
-cliFixedImage:
+    ld hl,cliRunPath
+    jp cliPreparePrefix
     ELSE
     call imageOpen
     jp c,cliResolveFail
-    ENDIF
     ld a,(v_tmpFileDescr+5)
     or a
     jp nz,cliAssociationAbsent
+    ENDIF
 cliFindAssociation:
     ld hl,cliRequest.source+8
     ld de,cliAssociationBuffer
     ld bc,512
     call fileAssociation
     jp c,cliNoAssociation
+cliPreparePrefix:
     ld de,CMD_LINE
     ld b,MAX_PATH-1
 cliResolvePrefix:
@@ -920,6 +927,9 @@ cliResolvePrefix:
     ret c
     inc hl
     jp cliResolvePrefix
+    IFDEF BANKED_DOS_BUILD
+cliRunPath: DB BOOT_VOLUME_LETTER,':',05Ch,"DOS",05Ch,"RUN.COM",0
+    ENDIF
 cliResolveSpace:
     ld a,' '
     call cliEmit
@@ -1028,7 +1038,7 @@ cliPathPrint:
     ld a,1
     ld (cliOutput),a
     ld hl,v_cliPath
-    call bios_printString
+    call mon2_printStringOld
     jp cliNewLine
 
 ; Cooperative cancellation; no interrupts and no forced abort inside a driver.

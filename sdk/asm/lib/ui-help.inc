@@ -48,7 +48,7 @@ uiHelpCountDone:
     jp nz,uiHelpCloseError
     ld (uiHelpScroll.total),hl
     ld de,UI_HELP_ROWS
-    call bios_sub_hl_de
+    call uiHelpMath.sub_hl_de
     jp nc,uiHelpLastReady
     ld hl,0
 uiHelpLastReady:
@@ -65,7 +65,7 @@ uiHelpLastReady:
 uiHelpPage:
     ex de,hl
     ld hl,(uiHelpScroll.position)
-    call bios_sub_hl_de         ; old - new
+    call uiHelpMath.sub_hl_de         ; old - new
     ld a,h
     or l
     jp z,uiHelpRead
@@ -173,7 +173,7 @@ uiHelpCheckLast:
     ex de,hl
     ld hl,(uiHelpLast)
     ex de,hl
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,uiHelpPage
     ex de,hl
     jp uiHelpPage
@@ -198,13 +198,13 @@ uiHelpCloseError:
     jp flClose
 
 uiHelpPrintRow:
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     ld a,36
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     call UI_HELP_COLOR
     ld hl,uiHelpRow
     ld bc,UI_HELP_COLUMNS
-    jp bios_printStringRawLim
+    jp FONT_ENGINE_LIM
 
 uiHelpReadEdge:
     call uiHelpGoto
@@ -242,7 +242,7 @@ uiHelpCheckpoint:
     ld a,(uiHelpRemaining)
     ld e,a
     ld d,0
-    call bios_sub_hl_de
+    call uiHelpMath.sub_hl_de
     ex de,hl
     pop hl
     ld (hl),e
@@ -274,7 +274,7 @@ uiHelpGoto:
     ex de,hl
     ld hl,(uiHelpStreamLine)
     ex de,hl
-    call bios_sub_hl_de
+    call uiHelpMath.sub_hl_de
     jp c,uiHelpGotoIndexed
     ld a,h
     or a
@@ -285,7 +285,7 @@ uiHelpGoto:
 uiHelpGotoIndexed:
     ld hl,(uiHelpTarget)
     ld de,UI_HELP_INDEX_LAST
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,uiHelpGotoCheckpoint
     ex de,hl
 uiHelpGotoCheckpoint:
@@ -302,7 +302,7 @@ uiHelpGotoCheckpoint:
     inc de
     inc de
     ld bc,flHandle+FH_SEEK
-    call bios_memcpy_bc_hl
+    call mon2_memcpy_bc_hl
     xor a
     ld (uiHelpRemaining),a
     ld a,FILE_OP_SEEK
@@ -311,7 +311,7 @@ uiHelpGotoCheckpoint:
     ld hl,(uiHelpStreamLine)
     ex de,hl
     ld hl,(uiHelpTarget)
-    call bios_sub_hl_de
+    call uiHelpMath.sub_hl_de
 uiHelpSkip:
     ld a,h
     or l
@@ -442,3 +442,8 @@ uiHelpNext:         DW            0
 uiHelpRemaining:    DB            0
 uiHelpError:        DB            0
 uiHelpRow:          DS            UI_HELP_COLUMNS,0
+
+    MODULE uiHelpMath
+    DEFINE MATH_SUB
+    INCLUDE "math.inc"
+    ENDMODULE

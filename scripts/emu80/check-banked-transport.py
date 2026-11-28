@@ -223,7 +223,7 @@ recursive:
             packet=bytes([source])+src.to_bytes(2,'little')+bytes([dest])+dst.to_bytes(2,'little')+size.to_bytes(2,'little')
             m.write(0x1000,packet)
             if entry=='MOVE':
-                m.write(0x2000,bytes.fromhex('afcd15f8c30070'))
+                m.write(0x2000,bytes.fromhex('afcd75f8c30070'))
             else:
                 m.write(0x2000,bytes([0xCD])+sy[entry].to_bytes(2,'little')+bytes.fromhex('c30070'))
             before=m.read(0xFFC0,32)
@@ -254,7 +254,7 @@ recursive:
             reset();select(target);m.write(0x3000,initial)
             packet=struct.pack('<BHBHH',target,0x3000+source,target,0x3000+dest,size)
             select(caller);m.write(0x1000,packet)
-            m.write(0x2000,bytes.fromhex('afcd15f8c30070'))
+            m.write(0x2000,bytes.fromhex('afcd75f8c30070'))
             state=run(0x2000,hl=0x1000,bc=0x1234,de=0x5678)
             assert state['registers']['af']['dec']>>8==error and bool(state['flags']['C'])==bool(error),state
             assert tuple(state['registers'][name]['dec'] for name in ('hl','bc','de'))==(0x1000,0x1234,0x5678)

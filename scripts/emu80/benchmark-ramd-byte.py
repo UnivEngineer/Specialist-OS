@@ -31,11 +31,11 @@ def main():
     matrix=Matrix()
     try:
         matrix.start('ramd-r3')
-        matrix.func(matrix.ds['bios_installDriver'],af=0x0100,hl=matrix.ds['diskDriver'])
+        matrix.func(matrix.ds['installDriver'],af=0x0100,hl=matrix.ds['diskDriver'])
         matrix.func(matrix.ds['bios_setRAMDDriver'],bc=0x0200,hl=matrix.ds['driverBlockStart'])
         matrix.func(matrix.ds['bios_setRAMDDriver'],bc=0)
         matrix.select(1)
-        state=matrix.func(matrix.ds['bios_diskDriver'],bc=0xFF00)
+        state=matrix.func(matrix.ds['sysDiskDriver'],bc=0xFF00)
         assert not state['flags']['C']
         ptr=state['registers']['hl']['dec']
         assert matrix.m.read(ptr,40).split(b'\0')[:2]==[b'RAMD',b'R3']

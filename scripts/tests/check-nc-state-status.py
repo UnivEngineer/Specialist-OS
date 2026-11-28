@@ -203,12 +203,12 @@ statusClosed: DB 0
         m=bytearray(65536)
         for at,path in [(0,'NC.i80'),(0xc000,'BIOS.sys'),(0xf000,'IO.main.bin'),(0xd800,f'fonts/{font}.i80')]:
             data=(ROOT/'bin'/path).read_bytes();m[at:at+len(data)]=data
-        m[b['bios_vars']:b['bios_vars']+b['BIOS_VARIABLES']]=m[b['initVars']:b['initVarsEnd']]
+        m[b['mon2_vars']:b['mon2_vars']+b['MON2_VARIABLES']]=(ROOT/'bin/BIOS.defaults.bin').read_bytes()[:b['MON2_VARIABLES']]
         m[b['bios_upper.escMode']]=255
         m=call(m,'FONT_ENGINE_INIT');m=call(m,'ncLayoutInit')
         data=(OUT/'fixture.bin').read_bytes();m[0x8200:0x8200+len(data)]=data
-        patch(m,'mx_callRegs','gateway');patch(m,'bios_diskDriver','driver')
-        patch(m,'bios_getMemTop','getMemTop');patch(m,'getSelectedFile','getSelected')
+        patch(m,'mx_callRegs','gateway');patch(m,'sysDiskDriver','driver')
+        patch(m,'mx_getMemTop','getMemTop');patch(m,'getSelectedFile','getSelected')
         m[0x8600+n['DISK_INFO.isValid']]=n['DISK_VALID']
         m[0x8600+n['DISK_INFO.blockSize']:0x8600+n['DISK_INFO.blockSize']+2]=W(256)
         m[0x8600+n['DISK_INFO.clusterBytes']:0x8600+n['DISK_INFO.clusterBytes']+2]=W(512)
@@ -220,11 +220,11 @@ statusClosed: DB 0
     for font in ('Cpm4','Compact','Fast8'):
         m=seed(font)
         prompt=bytearray(m)
-        prompt[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=W(50)
-        newline=call(prompt,'bios_printChar',bc=10)
+        prompt[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]=W(50)
+        newline=call(prompt,'mon2_printCharOld',bc=10)
         banner=call(prompt,'ncStartupCopyright')
-        assert banner[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]==newline[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2],(font,'extra newline before copyright')
-        koi7=call(m,'bios_setFontEncoding',a=1)
+        assert banner[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]==newline[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2],(font,'extra newline before copyright')
+        koi7=call(m,'FONT_ENGINE_ENCODING',a=1)
         assert koi7[n['bios_upper.koi7']]!=0
         restored=call(koi7,'Start',stop=n['ncLayoutInit'])
         baseline=call(m,'Start',stop=n['ncLayoutInit'])
@@ -247,8 +247,8 @@ statusClosed: DB 0
                 start=0x9000+col*256+113
                 assert total[start:start+8]==fast[start:start+8],(font,panel,'disk capacity')
             label=bytearray(q)
-            label[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([46,value_x+96*panel])
-            label=call(label,'bios_printStringRawZ',hl=n['aMainRAM'])
+            label[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]=bytes([46,value_x+96*panel])
+            label=call(label,'FONT_ENGINE_RAWZ',hl=n['aMainRAM'])
             for x in range(value_x//4+24*panel,23+24*panel):
                 assert fast[0x9000+x*256+39:0x9000+x*256+47]==label[0x9000+x*256+39:0x9000+x*256+47], (font,'memory label')
             # Independently place each label/value: common left value edge,
@@ -261,11 +261,11 @@ statusClosed: DB 0
                 value = value[:(92-value_x)//char_width]
                 expected=bytearray(m)
                 expected[0x8500:0x8500+len(label)+1]=label+b'\0'
-                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,label_end-len(label)*char_width+96*panel])
-                expected=call(expected,'bios_printStringRawZ',hl=0x8500)
+                expected[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]=bytes([y,label_end-len(label)*char_width+96*panel])
+                expected=call(expected,'FONT_ENGINE_RAWZ',hl=0x8500)
                 expected[0x8500:0x8500+len(value)+1]=value+b'\0'
-                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,value_x+96*panel])
-                expected=call(expected,'bios_printStringRawZ',hl=0x8500)
+                expected[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]=bytes([y,value_x+96*panel])
+                expected=call(expected,'FONT_ENGINE_RAWZ',hl=0x8500)
                 for x in range(24*panel,23+24*panel):
                     assert fast[0x9000+x*256+y-7:0x9000+x*256+y+1]==expected[0x9000+x*256+y-7:0x9000+x*256+y+1],(font,panel,y,'metadata column alignment')
             # Same-drive Enter/CD redraws only the file panel. A drive change
@@ -305,9 +305,9 @@ statusClosed: DB 0
                 line=text.ljust(width-len(suffix))+suffix
                 assert len(line)==width
                 expected=bytearray(q)
-                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=W((n['P_FILE_NAME_X']+panel*96)*256+n['P_FILE_NAME_Y'])
+                expected[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]=W((n['P_FILE_NAME_X']+panel*96)*256+n['P_FILE_NAME_Y'])
                 expected[0x8700:0x8700+width]=line
-                expected=call(expected,'bios_printStringRawLim',hl=0x8700,bc=width)
+                expected=call(expected,'FONT_ENGINE_LIM',hl=0x8700,bc=width)
                 assert result[0x9000:0xc000]==expected[0x9000:0xc000],(font,panel,name,'status text')
                 q=result
             for size, suffix in [(0,b'0'),(65535,b'65535'),(65536,b'64K'),(443802,b'433K'),
@@ -357,8 +357,8 @@ statusClosed: DB 0
                 result[quiet:quiet+2]=W(2)
                 waiting=call(result,'ncStatusIdle')
                 assert waiting[quiet:quiet+2]==W(1) and waiting[s['statusClosed']]==0
-                position=n['bios_vars.cursorY']
-                inverse=n['bios_vars.inverse']
+                position=n['mon2_vars.cursorY']
+                inverse=n['mon2_vars.inverse']
                 waiting[position:position+2]=W(0x16f2)
                 waiting[inverse:inverse+2]=W(1)
                 waiting[n['ncCurrentColor']]=0x71
@@ -373,7 +373,7 @@ statusClosed: DB 0
                 reference=bytearray(q)
                 reference[position:position+2]=W((n['P_FILE_NAME_X']+panel*96)*256+n['P_FILE_NAME_Y'])
                 reference[0x8700:0x8700+width]=expected
-                reference=call(reference,'bios_printStringRawLim',hl=0x8700,bc=width)
+                reference=call(reference,'FONT_ENGINE_LIM',hl=0x8700,bc=width)
                 assert result[0x9000:0xc000]==reference[0x9000:0xc000],(font,panel,expected)
                 assert result[s['statusOpenedDrive']]==panel+2
                 assert result[s['statusOpenedParent']:s['statusOpenedParent']+2]==W(0x1234)
@@ -407,7 +407,7 @@ statusClosed: DB 0
         assert seen,'prompt repaint was not exercised'
         # First typed character and entry into Lineedit never write the prefix.
         q[n['ncInputHookBegin']]=q[n['ncInputHookEnd']]=0xc9
-        q[n['bios_getch']:n['bios_getch']+3]=b'\xc3'+W(0x8500)
+        q[n['mon2_getchOld']:n['mon2_getchOld']+3]=b'\xc3'+W(0x8500)
         reader=bytes.fromhex('3a 00 88 3c 32 00 88 fe 02 ca')+W(trace_tools['TRACE_STOP'])+bytes.fromhex('3e 61 b7 c9')
         q[0x8500:0x8500+len(reader)]=reader
         final,_,trace,initial=trace_tools['execute'](q,n['mainLoop_cursorReady'],OUT,trace=True)
@@ -432,12 +432,12 @@ statusClosed: DB 0
             driver=b'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\0'+b'LONG FLASH DESCRIPTION\0'
             q[0x8640:0x8640+len(driver)]=driver
             fast=call(q,'printInfoContents',stop=s['slowQuery'])
-            assert fast[n['pipRows']]==4 and fast[n['bios_vars.cursorY']]==219,'fixed fields must never wrap'
+            assert fast[n['pipRows']]==4 and fast[n['mon2_vars.cursorY']]==219,'fixed fields must never wrap'
             for y, prefix in [(170,b'ABCDEFGHIJKLMNOP\0'),(190,b'LONG FLASH DESCR\0')]:
                 expected=bytearray(m)
                 expected[0x8500:0x8500+len(prefix)]=prefix
-                expected[n['bios_vars.cursorY']:n['bios_vars.cursorY']+2]=bytes([y,28])
-                expected=call(expected,'bios_printStringRawZ',hl=0x8500)
+                expected[n['mon2_vars.cursorY']:n['mon2_vars.cursorY']+2]=bytes([y,28])
+                expected=call(expected,'FONT_ENGINE_RAWZ',hl=0x8500)
                 for col in range(7,24):
                     start=0x9000+col*256+y-7
                     assert fast[start:start+8]==expected[start:start+8],(y,'value must stop at 16 characters in 8px')

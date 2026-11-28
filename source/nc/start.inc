@@ -10,9 +10,9 @@ Start:
             ld (ncDialogActive),a
             ld (ncListMask),a
             ld (ncStartupPrepared),a
-            call bios_setFontEncoding ; Always restore KOI-8 before any NC output.
+            call FONT_ENGINE_ENCODING ; Always restore KOI-8 before any NC output.
             ld hl,0
-            ld (bios_vars.inverse),hl
+            ld (mon2_vars.inverse),hl
     IF !NC_BANKED
             call ncStartupCopyright
     ENDIF
@@ -63,7 +63,7 @@ formatCalled:
             ; Выводим строку с кнопками
             COLOR   COLOR_HELP_F
             ld      c, 1Fh  ; очистка экрана
-            call    bios_printChar
+            call    mon2_printCharOld
             call    drawToolbar
 
             ; Очищаем командную строку

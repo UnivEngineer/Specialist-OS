@@ -137,7 +137,7 @@ def doc():
 def graphics_counters():
  return struct.unpack('<3H',main_memory(g['ngBatches'],6))
 def endwait(modal=False,trace=False):
- target=s['ebWaitReady'] if banked else s['bios_getch'] if modal else s['keyInput']
+ target=s['ebWaitReady'] if banked else s['mon2_getchOld'] if modal else s['keyInput']
  if trace and probe:
   state,counts=probe.until(target,corepage,graphics_submit=s['cqDeliverDll'] if banked else None)
   state['counters']=counts
@@ -293,11 +293,11 @@ def held_down():
  def until(target,trace=False):
   m.stop_at(target)
   if trace:
-   m.call('bp_set',addr=t['mx_callRegs'],type='exec',skipCount=1_000_000,comment='F806')
+   m.call('bp_set',addr=t['mx_callRegs'],type='exec',skipCount=1_000_000,comment='F866')
   state=m.until(target,90,page=corepage)
   calls=None
   if trace:
-   calls=next(bp['hitCount'] for bp in m.call('bp_list')['breakpoints'] if bp['comment']=='F806')
+   calls=next(bp['hitCount'] for bp in m.call('bp_list')['breakpoints'] if bp['comment']=='F866')
   return state,calls
 
  ready()
@@ -323,7 +323,7 @@ def held_down():
    polling,setup_calls=until(decoder[poll_name],wait_trace)
    samples.append(dict(decoded=decoded['cpu_ticks'],accepted=accepted['cpu_ticks'],
                        rendered=rendered['cpu_ticks'],pollReady=polling['cpu_ticks'],
-                       line=line,top=new_top,pollF806=poll_calls,postRenderF806=setup_calls,
+                       line=line,top=new_top,pollF866=poll_calls,postRenderF866=setup_calls,
                        repeatConfiguration=configuration))
  finally:
   m.call('kbd_send',keys=['down'],action='release')
@@ -352,7 +352,7 @@ try:
   m.write(0x3200,struct.pack('<3H',0x3400,0x4000,len(short))+bytes(34))
   api['path_io'](m,call,k,0x3200,True)
   call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
-  m.stop_at(n['mainLoop']);m.call('regs_set',pc=k['bios_reboot'],sp=k['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
+  m.stop_at(n['mainLoop']);m.call('regs_set',pc=k['mon2_init'],sp=k['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
  if a.font!='Rotate':
   # The current NC MAIN body does not fit below Fast12K: use native CLI.
   ready();tap('esc');text('C:/DOS/CLI');m.stop_at(c['cliPrompt']);tap('enter');m.until(c['cliPrompt'],90,page=0);ready()
@@ -416,7 +416,7 @@ try:
    ready();m.call('kbd_send',keys=['shift'],action='press');m.call('emu_run_for',ms=500)
    m.stop_at(s['hexToggle']);tap('f9')
    start=m.until(s['hexToggle'],60,page=corepage)['cpu_ticks']
-   wait=s['ebWaitReady' if banked else 'bios_getch']
+   wait=s['ebWaitReady' if banked else 'mon2_getchOld']
    m.stop_at(wait)
    elapsed=m.until(wait,90,page=corepage)['cpu_ticks']-start
    if banked:capture()
@@ -660,7 +660,7 @@ try:
    edit('lf','keyHandler_DocumentEnd','rpt');action('f6');assert doc()==payload+b'ELITE'
    action('f8');assert doc()==payload
    edit('home','keyHandler_DocumentHome','rpt')
-   locks=get(s['ebKeyLocks'] if banked else s['bios_vars.keyLocks'],1,banked)[0];old=locks&1
+   locks=get(s['ebKeyLocks'] if banked else s['mon2_vars.keyLocks'],1,banked)[0];old=locks&1
    def typed_letter(language, uppercase):
     char='а' if language else 'a'
     return (char.upper() if uppercase else char).encode('koi8-r')[0]
@@ -713,7 +713,7 @@ try:
   state=m.until(s['editorSearchStart'],60,page=corepage);start=state['cpu_ticks']
   if banked:end=endwait()
   else:
-   m.stop_at(s['bios_getch']);end=m.until(s['bios_getch'],60,page=0)
+   m.stop_at(s['mon2_getchOld']);end=m.until(s['mon2_getchOld'],60,page=0)
   elapsed=end['cpu_ticks']-start
   rows.append(dict(profile=name,font=a.font,operation='search_missing_full',cycles=elapsed,ms=elapsed/2000))
   print(rows[-1],flush=True)

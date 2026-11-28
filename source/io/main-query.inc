@@ -3,7 +3,7 @@
 mainIoQuery:
     ld b,a
     ld a,SYSTEM_DRIVE
-    call bios_blockIO
+    call blockIO
     ld hl,0
     ret
 mainIoRequest = io_vars.mainIoRequest

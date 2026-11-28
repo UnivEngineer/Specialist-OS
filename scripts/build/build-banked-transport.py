@@ -28,7 +28,7 @@ def main():
     (OUT/'fast.bin').write_bytes(payload[length:])
     transport.write_bytes(payload[:length])
     (OUT/'transport-imports.inc').write_text('; Генерируемые адреса внутреннего транспорта.\n'+''.join(
-        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
+        f'{name} = 0{sy[name]:04X}h\n' for name in ('bankCopyMoveRemote','moveForwardDispatch','moveDataForward','moveDataForwardEnd','bankMoveToRam','bankMoveToMain','bankMxRegsDos','bankFastPrepare','bankFastBiosSP','bankFastLanding','bankFastDos','bankFastReturn','bankLocalChecked','bankLocalBlockBad','bankQueueBefore','bankQueueBind','bankPublishSP','bankQueueResetImage','bankCall','bankCallPacket','bankCallback','bankModuleCallback','bankCopyFar','bankCopyEnter','bankCopySector','bankCopyPhysical','bankCopyBytes','bankCopyQuads','bankCopyPrepared','bankCopyRequest','bankCopyOK','bankCopyError','bankCopyPair','bankCopyPageCheck','bankCopyRange','bankCopyReturn','bankCopyClone','bankCopySP','bankCopyRest','bankCopyTail','bankCopyLocalParams','bankCopySourcePair','bankCopyDestPair','bankCopyReturnPair','bankCopyCount','bankPageCount','bankPage','bankOwner','bankHome','bankDepth','bankServiceSP','bankStackFloor')),encoding='utf-8')
     with (OUT/'transport-imports.inc').open('a',encoding='utf-8') as stream:
         for name in ('bankTextCopy32','bankTextChecked','bankTextCopyPartial'):
             stream.write(f'{name} = 0{sy[name]:04X}h\n')
@@ -52,7 +52,7 @@ def main():
     # Установочный формат по-прежнему содержит отдельные LOCAL и CLIENT.
     cs = dict(re.findall(r'^([\w.]+): EQU 0x([0-9A-Fa-f]+)', (OUT/'LOCALBLOCK.sym').read_text(), re.M))
     core = (OUT/'LOCALBLOCK.bin').read_bytes()
-    split = int(cs['mx_callPacket'],16)-int(cs['MEM_IMAGE_LOCAL_START'],16)
+    split = int(cs['MEM_BANK_CLIENT_START'],16)-int(cs['MEM_IMAGE_LOCAL_START'],16)
     (OUT/'CLIENT.bin').write_bytes(core[split:])
     (OUT/'LOCALBLOCK.bin').write_bytes(core[:split])
     (OUT/'CLIENT.sym').write_text((OUT/'LOCALBLOCK.sym').read_text(),encoding='utf-8')

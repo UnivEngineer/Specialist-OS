@@ -12,7 +12,7 @@
 ; 2013-12-12 Дизассемблировано vinxru
 ;----------------------------------------------------------------------------
 
-setCursorPos:     ld    (bios_vars.cursorY), hl
+setCursorPos:     ld    (mon2_vars.cursorY), hl
 
 ;----------------------------------------------------------------------------
 ; Получить положение курсора
@@ -23,6 +23,6 @@ setCursorPos:     ld    (bios_vars.cursorY), hl
 ;  l - координата Y в пикселях
 ;----------------------------------------------------------------------------
 
-getCursorPos:     ld    hl, (bios_vars.cursorY)
+getCursorPos:     ld    hl, (mon2_vars.cursorY)
             ret
 

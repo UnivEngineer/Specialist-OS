@@ -218,7 +218,7 @@ hexLocateRow:
     ld hl,(hexTop)
     ex de,hl
     pop hl
-    call bios_sub_hl_de
+    call nativeMath.sub_hl_de
     ld a,h
     or a
     jp nz,hexRowOutside
@@ -228,7 +228,7 @@ hexLocateRow:
     jp nc,hexRowOutside
     call hexScreenY
     ld (hexY),a
-    ld (bios_vars.cursorY),a
+    ld (mon2_vars.cursorY),a
     or a
     ret
 hexRowOutside:

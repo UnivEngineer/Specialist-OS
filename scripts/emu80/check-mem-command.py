@@ -19,6 +19,7 @@ def main():
     m=Bench(f'http://127.0.0.1:{a.port}/mcp');ts=symbols(R/'bin/banked/TRANSPORT.sym')
     image=(R/'bin/MEM.sys').read_bytes();parts=[struct.unpack_from('<HHH',image,6+i*6) for i in range(image[5])]
     rows=[]
+    overlays=tuple(runpy.run_path(str(R/'scripts/tests/mem-image.py'))['read_bios_overlays'](R/'bin'))
     process=subprocess.Popen([str(a.runtime/'Emu80qt-mcp.exe'),'--conf-file','specialist-os/launch.conf','--platform','specialist-os'],cwd=a.runtime,env=dict(os.environ,SPECIALIST_EMU80_MCP_PORT=str(a.port)))
     try:
         for _ in range(60):
@@ -28,13 +29,20 @@ def main():
         def select(page):m.write(0xfffd if page else 0xfffc,bytes([page-1 if page else 0]))
         for page in (0,1,3):
             select(page)
-            for addr,size,offset in parts:m.write(addr,image[offset:offset+size])
+            for addr,size,offset in parts:
+                if page==0 and addr==ts['MEM_BANK_CLIENT_START']:
+                    skip=ts['mx_callPacket']-addr
+                    addr+=skip;size-=skip;offset+=skip
+                m.write(addr,image[offset:offset+size])
+            if page==0:
+                for address,body in overlays:
+                    m.write(address,body)
             m.write(ts['bankPage'],bytes([page]));m.write(ts['bankPageCount'],b'\x10')
         for page in (2,4):
             select(page);addr,size,offset=parts[2];begin=ts['MEM_DATA_START']
             m.write(begin,image[offset+begin-addr:offset+size])
             # No executable client and no valid target stack: COMMAND is register-only.
-            m.write(0xf800,b'\x76'*32)
+            m.write(ts['mx_callPacket'],b'\x76'*32)
         def case(caller,target,seed,op,address=0x3001,error=0):
             select(target if target<=16 else 2)
             if not error:m.write(0x3000,bytes.fromhex('a51234565a'))

@@ -6,9 +6,9 @@ input:
             call ncInputHookBegin
     ENDIF
             ld a,1
-            ld (bios_vars.inverse),a
+            ld (mon2_vars.inverse),a
             call ncModalInputCursor
-            ld (bios_vars.cursorY),hl
+            ld (mon2_vars.cursorY),hl
             ld hl,vars.input
             ld a,(ncInputChars)
             ld c,a
@@ -19,7 +19,7 @@ input:
     ENDIF
             push af
             ld hl,0
-            ld (bios_vars.inverse),hl
+            ld (mon2_vars.inverse),hl
             pop af
             ret
 
@@ -61,12 +61,12 @@ ncReadKey:
 ncReadMainKey:
             ld hl,(vars.cmdLineEnd)
             ld de,vars.cmdLine
-            call bios_cmp_hl_de
+            call mon2_cmp_hl_de
             jp z,ncGetch
             ex de,hl
             push de
             ld hl,(vars.cmdTextPos)
-            ld (bios_vars.cursorY),hl
+            ld (mon2_vars.cursorY),hl
             pop de
             ld hl,vars.cmdLine
             ld a,(vars.cmdCapacity)
@@ -106,7 +106,7 @@ ncCommandEditSaved:
             ld hl,vars.cmdLine
             add hl,de
             ld (vars.cmdLineEnd),hl
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld (vars.cmdLinePos),hl
             ld a,(lineEditOffset)
             ld (vars.cmdOffset),a

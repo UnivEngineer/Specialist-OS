@@ -77,14 +77,14 @@ if (-not $RunBuild) {
         foreach ($folder in 'bios', 'dos', 'io', 'mem', 'common', 'bootstrap/tests') {
             $cacheArgs += @('--asm', (Join-Path $repositoryRoot "source/$folder"))
         }
-        foreach ($path in 'bin', 'sdk/asm/abi/syscall-ids.inc', 'source/bios/syscall-tables.inc', 'source/bios/vectors.inc') {
+        foreach ($path in 'bin', 'sdk/asm/abi/syscall-ids.inc', 'source/bios/syscall-tables.inc', 'source/dos/native-syscalls.inc') {
             $cacheArgs += @('--exclude', (Join-Path $repositoryRoot $path))
         }
         $cacheArgs += @('--scan-output', $outputDirectory)
-        $outputs += @('bin/BIOS.sys', 'bin/BIOS.sym', 'bin/DOS.sys', 'bin/IO.sys', 'bin/MEM.sys', 'bin/MEM.sym',
+        $outputs += @('bin/BIOS.sys', 'bin/BIOS.sym', 'bin/BIOS.defaults.bin', 'bin/BIOS.main-overlay.bin', 'bin/DOS.sys', 'bin/IO.sys', 'bin/MEM.sys', 'bin/MEM.sym',
             'bin/System.layout.json', 'bin/banked/KERNEL.sym', 'bin/banked/TRANSPORT.sym',
-            'bin/fonts/Compact.pf', 'sdk/asm/abi/syscall-ids.inc', 'source/bios/syscall-tables.inc',
-            'source/bios/vectors.inc', 'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
+            'bin/fonts/Compact.pf', 'sdk/asm/abi/syscall-ids.inc', 'source/bios/syscall-tables.inc', 'source/dos/native-syscalls.inc',
+            'bin/bios-imports.inc', 'sdk/include/mxos_syscall_ids.h', 'sdk/src/mxos_syscall_ids.inc')
     } elseif ($editor -or $commander) {
         $inputs += @('bin/banked/KERNEL.sym', 'scripts/build/build-driver.py', 'scripts/build/pack-dos.py',
             'scripts/images/executable.py', 'scripts/images/cpu.py')

@@ -42,7 +42,7 @@ def main():
         m.write(0x7e00, b'\xcd'+ds['mx_callRegs'].to_bytes(2,'little')+service.to_bytes(2,'little')+b'\xc9')
         assert not m.subroutine(0x7e00, af=drive<<8, de=1)['flags']['C']
 
-    def info(expected, entry=ds['bios_diskDriver']):
+    def info(expected, entry=ds['sysDiskDriver']):
         state = m.subroutine(entry, bc=0xFF00, hl=0)
         assert not state['flags']['C']
         addr = state['registers']['hl']['dec']
@@ -78,7 +78,7 @@ def main():
         select(0)
         m.write(0x4000,bytes(b^255 for b in before[-256:]))
         m.write(0x8FF9,b'\0')
-        state=m.subroutine(ds['bios_diskDriver'],bc=0x0500,de=len(before)//256-1,hl=0x4000)
+        state=m.subroutine(ds['sysDiskDriver'],bc=0x0500,de=len(before)//256-1,hl=0x4000)
         assert state['flags']['C'] and m.read(0x8FF9,1)==b'\1'
         assert state['registers']['sp']['dec']==0x8F00 and image.read_bytes()==before
         (out/'locked.json').write_text(json.dumps(dict(checkedWriteRejected=True,
@@ -89,7 +89,7 @@ def main():
     absent=m.subroutine(ds['diskDriverDummy'],bc=0xFF00,hl=0xBEEF)
     assert absent['flags']['C'] and absent['registers']['hl']['dec']==0
     select(1); info('RAMD')
-    m.subroutine(ds['bios_installDriver'], af=0, hl=ds['diskDriver'])
+    m.subroutine(ds['installDriver'], af=0, hl=ds['diskDriver'])
     select(0); info('ROM')
     m.install_flash('FlashSys')
     select(1); select(0); info('FLASHSYS')
@@ -108,14 +108,14 @@ def main():
             m.write(0x4000,b'\xDA'+payload+b'\xAD')
             m.write(0x8DC0,bytes([0xCD])*32)
             before=m.call('cpu_state')['cpu_ticks']
-            state=m.subroutine(ds['bios_diskDriver'],bc=mode<<8|0xA7,de=sector,hl=0x4001)
+            state=m.subroutine(ds['sysDiskDriver'],bc=mode<<8|0xA7,de=sector,hl=0x4001)
             ticks[str(mode)]=state['cpu_ticks']-before
             assert not state['flags']['C'], (name,mode)
             assert all(state['registers'][k]['dec']==v for k,v in
                        dict(bc=mode<<8|0xA7,de=sector,hl=0x4001,sp=0x8F00).items())
             assert m.read(0x8DC0,32)==bytes([0xCD])*32
             assert m.read(0x4000,258)==b'\xDA'+payload+b'\xAD'
-            assert not m.subroutine(ds['bios_diskDriver'],bc=0x0200,de=sector,hl=0x5000)['flags']['C']
+            assert not m.subroutine(ds['sysDiskDriver'],bc=0x0200,de=sector,hl=0x5000)['flags']['C']
             assert m.read(0x5000,256)==payload
         report['writes'][name]=ticks
 
@@ -125,14 +125,14 @@ def main():
     saved=m.read(fs['FuncRead'],4)
     m.write(fs['FuncRead'],bytes((0x37,0xC3,fs['Exit']&255,fs['Exit']>>8)))
     m.write(0x8FF9,b'\0')
-    state=m.subroutine(ds['bios_diskDriver'],bc=0x0500,de=8191,hl=0x4001)
+    state=m.subroutine(ds['sysDiskDriver'],bc=0x0500,de=8191,hl=0x4001)
     assert state['flags']['C'] and m.read(0x8FF9,1)==b'\1'
     m.write(fs['FuncRead'],saved)
     report['readFailureRejected']=True
 
     # После настоящего чтения меняем байт временного буфера до сравнения.
     m.call('bp_set',addr=ds['dwcCompare'],type='exec')
-    m.write(0x8000,b'\xcd'+ds['bios_diskDriver'].to_bytes(2,'little')+b'\xc3\x00\x81')
+    m.write(0x8000,b'\xcd'+ds['sysDiskDriver'].to_bytes(2,'little')+b'\xc3\x00\x81')
     m.write(0x8FF9,b'\0')
     m.call('regs_set',pc=0x8000,sp=0x8F00,bc=0x0500,de=8191,hl=0x4001)
     for _ in range(120):

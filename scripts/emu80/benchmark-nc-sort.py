@@ -66,7 +66,7 @@ def build(out, profile=False):
         folder.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT/'source-apps/sortbench/sort-radix.inc', folder/'sort-radix.inc')
         (folder/'sort-under-test.inc').write_text(
-            source.replace('    call bios_upperCase', '    ; normalized key') if prepared else source,
+            source.replace('    call ncStrings.upperCase', '    ; normalized key') if prepared else source,
             encoding='utf-8')
         assembly = ('    INCLUDE "' + (ROOT/'sdk/asm/mxos.inc').as_posix() + '"\n'
                     '    ORG 0100h\nPREUPPER = ' + str(prepared) + '\n' + fixture)

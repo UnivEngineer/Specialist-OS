@@ -31,9 +31,9 @@ name:
     ld (BANK_IO_MAIN),a
 .mapped:
     IF read_cursor
-        ld hl,(bios_vars.cursorY)
+        ld hl,(mon2_vars.cursorY)
     ELSE
-        ld (bios_vars.cursorY),hl
+        ld (mon2_vars.cursorY),hl
     ENDIF
     jp memFixedWordReturn
     ENDM
@@ -88,7 +88,7 @@ BANK_SCALAR_RETURN_PAIR = BANK_WINDOW+28
 BANK_DOS_GATE        = DOS_BANK_CODE_ADDR + (dos_setShell-dos_dosBoot) + 3
 DOS_FAST_ERROR_ENTRY = BANK_DOS_GATE+12
 
-; Две пары слов в MAIN: вектор C8xxh и адрес возврата MEM.
+; Две пары слов в MAIN: адрес обработчика BIOS и адрес возврата MEM.
 ; Номера 17h и 1Ah дают смещения 0Ch и 10h.
 BIOS_FAST_SLOT_BIAS = 6
 BIOS_FAST_SLOT_MASK = 01Ch

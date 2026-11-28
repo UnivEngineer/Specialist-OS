@@ -142,23 +142,34 @@ app_hud_color  = 000h
     ASSERT FRAME_STEP_TICKS < 08000h
     ASSERT PIT_CLOCK_HZ == 2000000 || PIT_CLOCK_HZ == 2500000
 
+    IF ALMAZ_RAMFOS
 app_bios_getch        = bios_getch
 app_bios_print_char   = bios_printChar
-app_bios_print_string = bios_printString
-    IF ALMAZ_RAMFOS
-app_bios_return     = 0F800h
-app_bios_beep       = 0C851h
+app_bios_print_string = bios_printStringZ
+app_bios_return     = bios_reboot
+app_bios_beep       = bios_oldBeep
 app_bios_keycheck   = bios_keyScan
 app_beep_frequency  = 0C64Eh
 app_beep_duration   = 0C64Fh
 app_cursor_position = 0C63Eh
     ELSE
-app_bios_return     = bios_reboot
-app_bios_beep       = bios_beep_Old
-app_bios_keycheck   = bios_keyCheck
-app_beep_frequency  = bios_vars.beepFreq
-app_beep_duration   = bios_vars.beepDuration
-app_cursor_position = bios_vars.cursorY
+    IF ALMAZ_MONITOR_TARGET
+app_bios_getch        = mon2_getch
+app_bios_print_char   = mon2_printChar
+app_bios_print_string = mon2_printStringZ
+app_bios_return       = mon2_reboot
+app_bios_keycheck     = mon2_keyCheck
+    ELSE
+app_bios_getch        = mon2_getchOld
+app_bios_print_char   = mon2_printCharOld
+app_bios_print_string = mon2_printStringOld
+app_bios_return       = mon2_init
+app_bios_keycheck     = mon2_keyScan    ; C81Bh возвращает код клавиши в обоих профилях.
+    ENDIF
+app_bios_beep         = mon2_beep_Old
+app_beep_frequency    = mon2_vars.beepFreq
+app_beep_duration     = mon2_vars.beepDuration
+app_cursor_position   = mon2_vars.cursorY
     ENDIF
 
 ; Один и тот же исходный список посылок для программного и аппаратного звука.

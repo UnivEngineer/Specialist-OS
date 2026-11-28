@@ -36,7 +36,7 @@
 draw:
     ; Обычный курсорный путь встроен, как в standalone COLPRE. Код остаётся
     ; в C, фаза — в B: нет CALL/RET и SMC-записей кода/фазы на каждый глиф.
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 190
     jp nc,wrap
@@ -54,7 +54,7 @@ draw:
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld l,c
     ld a,b
 phaseReady:
@@ -97,7 +97,7 @@ wrap:
     ENDM
 
 draw:
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     or a
     jp nz,inverse.draw
     ; Обычный путь входит в setup без дополнительного CALL/JMP.

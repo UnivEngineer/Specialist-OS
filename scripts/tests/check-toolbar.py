@@ -49,8 +49,8 @@ m[s['v_dosModuleReady']]=1
 assert m[n['uiToolbarWrite']]==0x77
 m[n['uiToolbarWrite']]=0xEF;m[0x28:0x2B]=b'\xC3'+W(0x5000)
 m[0x9000:0xC000]=bytes((i*37+(i>>8)*13)&255 for i in range(0x3000))
-m[s['bios_vars.cursorY']:s['bios_vars.cursorY']+2]=W(0x3543)
-m[s['bios_vars.inverse']]=0xA5
+m[s['mon2_vars.cursorY']:s['mon2_vars.cursorY']+2]=W(0x3543)
+m[s['mon2_vars.inverse']]=0xA5
 font=(R/'assets/system-rom/fonts/6x8/KOI8.pf').read_bytes()
 
 def expected(at):
@@ -87,8 +87,8 @@ for name in ['aF1LeftF2RighF3','aShiftToolbar','aF1LeftF2RighF3']:
     for addr,value,color in records:assert want[addr]==(value,color),(name,hex(addr),want[addr],(value,color))
     for addr in range(0x9000,0xC000):
         assert m[addr]==(want[addr][0] if addr in want else before[addr]),(name,hex(addr))
-    assert m[s['bios_vars.cursorY']:s['bios_vars.cursorY']+2]==W(0x3543)
-    assert m[s['bios_vars.inverse']]==0xA5
+    assert m[s['mon2_vars.cursorY']:s['mon2_vars.cursorY']+2]==W(0x3543)
+    assert m[s['mon2_vars.inverse']]==0xA5
     results.append(dict(layout=name,writes=len(records),uniqueAddresses=True,finalPixelsAndColors=True,modelLog=run.stdout.strip()))
 (O/'result.json').write_text(json.dumps(results,indent=2)+'\n')
 print('Toolbar CPU PASS: normal -> Shift -> normal; 432 final writes per frame; height/colors/BIOS state')

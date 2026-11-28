@@ -181,19 +181,19 @@ def main():
                     delta=delta,error=error,ticks=ticks)
 
     def bios_cases():
-        cursor=b['bios_vars.cursorY']
+        cursor=b['mon2_vars.cursorY']
         mem_top=b['v_memTop']
         hook, counter, nested=0x8300,0x8400,0x8402
-        routines=[('mx_printChar','bios_printChar',0xf81b,True),
-                  ('mx_getCursorPos','bios_getCursorPos',0xf81e,False),
-                  ('mx_setCursorPos','bios_setCursorPos',0xf821,False),
-                  ('mx_printCharRaw','bios_printCharRaw',0xf824,True),
-                  ('mx_getMemTop','bios_getMemTop',0xf830,False),
-                  ('mx_setMemTop','bios_setMemTop',0xf833,False)]
-        routines.extend(row for row in (('mx_printHexByte','bios_printHexByte',0xf827,True),
-                                       ('mx_printHexWord','bios_printHexWord',0xf82a,True)) if row[0] in k)
-        for name,old,address,prints in routines:
-            assert k[name]==address,(name,k.get(name))
+        routines=[('mx_printChar','mon2_printCharOld',True),
+                  ('mx_getCursorPos','mx_getCursorPos',False),
+                  ('mx_setCursorPos','mx_setCursorPos',False),
+                  ('mx_printCharRaw','FONT_ENGINE_RAW',True),
+                  ('mx_getMemTop','mx_getMemTop',False),
+                  ('mx_setMemTop','mx_setMemTop',False)]
+        routines.extend(row for row in (('mx_printHexByte','mx_printHexByte',True),
+                                       ('mx_printHexWord','mx_printHexWord',True)) if row[0] in k)
+        for name,old,prints in routines:
+            address=k[name]
             page(0)
             saved_vram=m.read(0x9000,0x3000) if prints else None
             saved_cursor=m.read(cursor,2)
@@ -254,8 +254,8 @@ def main():
         initial_cursor=m.read(cursor,2)
         args=dict(af=0x5893,bc=0x3451,de=0x5678,hl=0x1234)
         m.write(cursor,WORD(0x100a))
-        run(0,b['bios_printChar'],**dict(args,bc=0x344e))
-        _,direct_regs=run(0,b['bios_printChar'],**args)
+        run(0,b['mon2_printCharOld'],**dict(args,bc=0x344e))
+        _,direct_regs=run(0,b['mon2_printCharOld'],**args)
         expected_cursor=m.read(cursor,2)
         expected_vram=m.read(0x9000,0x3000)
         for caller in (0,1,6):
@@ -283,15 +283,15 @@ def main():
 
     def text_cases():
         kernel=symbols(bundle/'bin/banked/KERNEL.sym')
-        source,cursor=0x8400,b['bios_vars.cursorY']
+        source,cursor=0x8400,b['mon2_vars.cursorY']
         clean_video=bytes(0x3000)
-        modes=[('z','bios_printStringZ','Z'),
-               ('raw-z','bios_printStringRawZ','RAW_Z'),
-               ('raw-lim','bios_printStringRawLim','RAW_LIM')]
+        modes=[('z','mon2_printStringOld','Z'),
+               ('raw-z','FONT_ENGINE_RAWZ','RAW_Z'),
+               ('raw-lim','FONT_ENGINE_LIM','RAW_LIM')]
         if 'MXOS_BIOS_PRINT_STRING_LIM' in k:
-            modes.append(('lim','bios_printStringLim','LIM'))
+            modes.append(('lim','bankText.printStringLim','LIM'))
         for length in args.text_lengths:
-            controls=[('lim-controls','bios_printStringLim','LIM')] if length==33 and 'MXOS_BIOS_PRINT_STRING_LIM' in k else []
+            controls=[('lim-controls','bankText.printStringLim','LIM')] if length==33 and 'MXOS_BIOS_PRINT_STRING_LIM' in k else []
             for mode,entry,id_suffix in modes+controls:
                 payload=(b'Abc123! ' * ((length+7)//8))[:length]
                 if mode=='lim-controls':
@@ -305,10 +305,10 @@ def main():
                     routes.append((1,'dos-native',kernel['bankDosPrintString'],None))
                 expected=None
                 page(0)
-                inverse,esc=b['bios_vars.inverse'],b['bios_upper.escMode']
+                inverse,esc=b['mon2_vars.inverse'],b['bios_upper.escMode']
                 initial_inverse,initial_esc=m.read(inverse,2),m.read(esc,1)
                 if mode=='lim-controls':
-                    scalar=b''.join(b'\x0e'+bytes([ch])+b'\xcd'+WORD(b['bios_printChar']) for ch in payload)
+                    scalar=b''.join(b'\x0e'+bytes([ch])+b'\xcd'+WORD(b['mon2_printCharOld']) for ch in payload)
                     m.write(0x8300,scalar+b'\xc9')
                     m.write(0x9000,clean_video)
                     m.write(cursor,WORD(0x100a))
@@ -346,7 +346,7 @@ def main():
     def text_main_cases():
         """Сверить MAIN-адрес, регистры и экран при вызове из MAIN, DOS и EXEC."""
         page(0)
-        cursor, inverse, esc = b['bios_vars.cursorY'], b['bios_vars.inverse'], b['bios_upper.escMode']
+        cursor, inverse, esc = b['mon2_vars.cursorY'], b['mon2_vars.inverse'], b['bios_upper.escMode']
         inverse0, esc0 = m.read(inverse, 2), m.read(esc, 1)
 
         def reset_screen():
@@ -361,8 +361,8 @@ def main():
             return (m.read(0x9000, 0x3000), m.read(cursor, 2), m.read(inverse, 2), m.read(esc, 1))
 
         dest = 0x8700  # В MAIN ниже memTop стенда, в DOS выше конца ядра.
-        for mode, vector in (('Z', 'bios_printStringZ'), ('RAW_Z', 'bios_printStringRawZ'),
-                             ('RAW_LIM', 'bios_printStringRawLim'), ('LIM', 'bios_printStringLim')):
+        for mode, vector in (('Z', 'mon2_printStringOld'), ('RAW_Z', 'FONT_ENGINE_RAWZ'),
+                             ('RAW_LIM', 'FONT_ENGINE_LIM'), ('LIM', 'bankText.printStringLim')):
             op = k['MXOS_BIOS_PRINT_STRING_' + mode + '_MAIN']
             for length in (0, 33, 1024):
                 data = bytearray((b'Abc123! ' * 128)[:length])
@@ -408,8 +408,8 @@ def main():
         m.write(grid['entry'], module[:grid['IMAGE_BODY_SIZE']])
         source = grid['gridCorpus']
         m.write(source, corpus)
-        for kind, (mode, vector) in enumerate((('Z', 'bios_printStringZ'), ('RAW_Z', 'bios_printStringRawZ'),
-                                              ('RAW_LIM', 'bios_printStringRawLim')), start=2):
+        for kind, (mode, vector) in enumerate((('Z', 'mon2_printStringOld'), ('RAW_Z', 'FONT_ENGINE_RAWZ'),
+                                              ('RAW_LIM', 'FONT_ENGINE_LIM')), start=2):
             copied = length + (mode != 'RAW_LIM')
             reset_screen()
             m.write(cursor, bytes(2))
@@ -438,7 +438,7 @@ def main():
     def window_cost_cases():
         """Сравнить непрерывную печать и те же порции на одном движке в MAIN."""
         page(0)
-        source,cursor=0x8400,b['bios_vars.cursorY']
+        source,cursor=0x8400,b['mon2_vars.cursorY']
         font=b['FONT_ENGINE_TEXT_LIM']
         # Обе контрольные точки вызывают тот же счётный вход, что и банковый Z.
         assert m.read(b['FONT_ENGINE_TEXT_EXT'],2)==WORD(font)
@@ -461,8 +461,8 @@ def main():
                 payload=b'Abc123! '*(length//8)+b'\0'
                 expected=None
                 for route,entry,block in (
-                        ('main-z',b['bios_printStringZ'],length),
-                        ('main-lim',b['bios_printStringLim'],length),
+                        ('main-z',b['mon2_printStringOld'],length),
+                        ('main-lim',b['bankText.printStringLim'],length),
                         ('font-whole',font,length),
                         ('font-32',font,32),
                         ('bank-z',k['mx_callRegs'],length),
@@ -513,7 +513,7 @@ def main():
                         ('SET_CURSOR_POS',0x010a),('PRINT_CHAR_RAW',0x0114),
                         ('PRINT_HEX_BYTE',0x0106),('PRINT_HEX_WORD',0x010e),
                         ('GET_MEM_TOP',0x0110),('SET_MEM_TOP',0x010f))
-        cursor,mem_top=b['bios_vars.cursorY'],b['v_memTop']
+        cursor,mem_top=b['mon2_vars.cursorY'],b['v_memTop']
         page(0)
         video=m.read(0x9000,0x3000)
         original_cursor=m.read(cursor,2)

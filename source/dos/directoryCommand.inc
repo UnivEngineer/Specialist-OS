@@ -50,7 +50,7 @@ cdPrint:
             call directoryCwdUnchecked
             ret c
             ld hl,CMD_LINE
-            call bios_printString
+            call mon2_printStringOld
             xor a
             ret
 cdMatch:

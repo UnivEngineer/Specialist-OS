@@ -62,7 +62,7 @@ def main():
         for base, file in ((0xC000, 'BIOS.sys'), (0xF000, 'IO.main.bin'), (0x4000, 'DOS.native.sys'), (0, 'FORMAT.i80')):
             data = (ROOT / f'bin/{file}').read_bytes()
             m[base:base+len(data)] = data
-        for routine in ('bios_printString', 'bios_printChar', 'bios_setFontEncoding'):
+        for routine in ('mon2_printStringOld', 'mon2_printCharOld', 'FONT_ENGINE_ENCODING'):
             m[s[routine]] = 0xc9
         # Редактор проверяется настоящей клавиатурой отдельно; здесь его ответ
         # задан строкой, завершённой Enter, а не одиночным нажатием.
@@ -73,7 +73,7 @@ def main():
         m[0x8600:0x8600+len(stub)] = stub
         at = s['lineEdit']; m[at:at+3] = bytes.fromhex('c3 00 86')
         # Любой выбор тома/драйвера вместо отказа уводит исполнение в ловушку.
-        for entry in (0xC842,s['bios_diskDriver']):m[entry:entry+3]=bytes.fromhex('c3 01 83')
+        for entry in (0xC842,s['sysDiskDriver']):m[entry:entry+3]=bytes.fromhex('c3 01 83')
         wrapper=bytes.fromhex('31 df 8f 11 00 84 cd 00 00 22 02 85 f5 e1 22 00 85 c3 00 83')
         m[0x8200:0x8200+len(wrapper)] = wrapper
         arg = text.encode('ascii') + b'\r\0'

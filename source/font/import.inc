@@ -144,15 +144,15 @@ initName:
     push de
     ld hl,(staging+IMAGE_HEADER_SIZE+46)
     ld de,FONT_ENGINE_BASE
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,initBad
-    call bios_sub_hl_de
+    call biosEngineSubtract
     push hl
     ld de,13
     add hl,de
     ex de,hl
     ld hl,(imageBytes)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     pop hl
     jp c,initBad
     ld de,staging+IMAGE_HEADER_SIZE
@@ -181,21 +181,21 @@ readInitializer:
     ret c
     ld hl,(initializerIO+FILE_PATH_IO.actual)
     ld de,IMAGE_HEADER_SIZE+8
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,badImage
     ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+6)
     ld de,FONT_INIT_ADDR
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+8)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+10)
     ld de,IMAGE_HEADER_SIZE
     add hl,de
     ex de,hl
     ld hl,(initializerIO+FILE_PATH_IO.actual)
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,FONT_INIT_ADDR-IMAGE_HEADER_SIZE
     ld de,FONT_INIT_ADDR-IMAGE_HEADER_SIZE+IMAGE_HEADER_CHECKSUM-1
@@ -203,7 +203,7 @@ readInitializer:
     ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+IMAGE_HEADER_CHECKSUM)
     ld d,b
     ld e,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,(initializerIO+FILE_PATH_IO.actual)
     ld de,FONT_INIT_ADDR-IMAGE_HEADER_SIZE-1
@@ -214,7 +214,7 @@ readInitializer:
     ld hl,(FONT_INIT_ADDR-IMAGE_HEADER_SIZE+12)
     ld d,b
     ld e,c
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,FONT_INIT_ADDR+3
     ld de,initializerMagic
@@ -248,7 +248,7 @@ importOutputChecked:
     ret c
     ld hl,(importIO+FILE_PATH_IO.actual)
     ld de,2048
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nz,badImage
     ld hl,initContext
     xor a

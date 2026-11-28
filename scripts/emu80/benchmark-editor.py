@@ -83,7 +83,7 @@ try:
  # The isolated ABI fixture bypasses NC's input epilogue. Remove its
  # temporary idle callback before replacing/restarting MAIN shell code.
  call(k['MXOS_BIOS_SET_INPUT_HOOK'],hl=0)
- m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['bios_reboot'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
+ m.stop_at(n['mainLoop']);m.call('regs_set',pc=s['mon2_init'],sp=s['STACK_ADDR']);m.until(n['mainLoop'],90,page=0);ready()
  for font in ([a.font] if a.font else ['Rotate','Packed6K','Fast12K']):
   if font=='Fast12K':
    # The current large MAIN NC exceeds Fast12K's memtop. CLI is itself a
@@ -99,7 +99,7 @@ try:
   payload=elite if font=='Rotate' else short
   command('A:'+a.editor_base+' '+('H:/ELITE.TXT' if font=='Rotate' else 'B:/ELITE16.TXT'),s['editorStatusLoop'])
   assert doc()==payload,(font,'file content')
-  assert int.from_bytes(m.read(s['bios_printStringRawLim']+1,2),'little')>=0xd800
+  assert int.from_bytes(m.read(s['FONT_ENGINE_LIM']+1,2),'little')>=0xd800
   m.screenshot(O/(font+'-loaded.png'))
   modern='editorMainKeys' in s
   measure(font,'down' if modern else 'f3','editorPageDown',modifier='rpt' if modern else None);m.screenshot(O/(font+'-pagedown.png'))

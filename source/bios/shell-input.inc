@@ -16,12 +16,12 @@
 
 biosRecoveryStart:
     ld hl,biosShellPrompt
-    call bios_printString
+    call printStringZ
     ld hl,CMD_LINE
     ld de,CMD_LINE+MAX_PATH-1
-    call bios_input
+    call input
     ld c,10
-    call bios_printChar
+    call printChar
     ld hl,CMD_LINE
     MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     jp c,biosRecoveryStart
@@ -31,9 +31,9 @@ biosShellPrompt: DB 'Shell path: ',0
 ; silently instead of badCommand's print/wait path.
 biosTryShell:
     push hl
-    call bios_printString
+    call printStringZ
     ld c,10
-    call bios_printChar
+    call printChar
     pop hl
     MXOS_CALL_REGS MXOS_DOS_FILE_EXEC_NATIVE
     ret

@@ -37,15 +37,15 @@ entry:
     ld hl,0
     add hl,sp
     ld (callerSP),hl
-    call bios_getMemTop
+    call mx_getMemTop
     ld de,088FFh
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp c,noMemory
     ld sp,08000h
     ld a,(bios_upper.koi7)
     ld (callerKoi),a
     xor a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld a,(bios_upper.ramPageCount)
     or a
     jp z,noRAM
@@ -57,7 +57,7 @@ entry:
     ld e,a
     ld d,0
     ld b,0
-    call bios_printDecWord
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_DEC_WORD
     ld hl,working
     call puts
     ld a,TIMER_RAW
@@ -208,12 +208,12 @@ messageExit:
     ld hl,keyText
     call puts
 waitKey:
-    call bios_getch
+    call mon2_getchOld
     ld hl,exitNewline
     call puts
 exit:
     ld a,(callerKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld hl,(callerSP)
     ld sp,hl
     ret
@@ -231,7 +231,7 @@ result:
     ld hl,failText
     jp puts
 puts:
-    jp bios_printString
+    jp mon2_printStringOld
 byteMode:
     ld hl,builtinByteImage
     ld de,0FFC0h
@@ -345,7 +345,7 @@ TIMING_NUMBER_WIDTH = 8
 DECIMAL             = inputBuffer
 timing_printChar:
     ld c,a
-    jp bios_printChar
+    jp mon2_printCharOld
     INCLUDE "../../sdk/asm/lib/timing.inc"
     INCLUDE "../../sdk/asm/lib/timing-ms.inc"
 callerSP:           DW 0

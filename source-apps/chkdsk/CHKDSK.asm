@@ -1,6 +1,7 @@
 ; CHKDSK: диагностика текущего тома MXOS, без операций записи.
-; Физический вход bios_diskDriver, сектор/кластер 256 байт, одна FAT16-подобная таблица.
+; Физический обмен MXOS_BIOS_DISK_DRIVER, сектор/кластер 256 байт, одна FAT16-подобная таблица.
     INCLUDE "../../sdk/asm/mxos.inc"
+    INCLUDE "../../sdk/asm/formats/font.inc"
 IMAGE_FLAGS = IMAGE_FLAG_MAIN
     MACRO LOAD_DE address
     push hl
@@ -41,10 +42,10 @@ entry:
     ld a,(bios_upper.koi7)
     ld (callerKoi),a
     xor a
-    call bios_setFontEncoding       ; Имена файлов на диске хранятся в KOI-8.
-    call bios_getMemTop
+    call FONT_ENGINE_ENCODING       ; Имена файлов на диске хранятся в KOI-8.
+    call mx_getMemTop
     ld de,IMAGE_MEM_END-1
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     jp nc,checkMemoryReady
     ld hl,txtNoMemory
     call puts
@@ -55,7 +56,7 @@ checkMemoryReady:
     ; MXOS передаёт адрес аргументов в DE, длина в BC не определена.
 readArgument:
     ld hl,(argumentPtr)
-    call bios_argNext
+    MXOS_CALL_REGS MXOS_BIOS_ARG_NEXT
     jp c,askDrive
     ld a,(de)
     jp chooseDrive
@@ -65,7 +66,7 @@ askDrive:
     ; Штатный редактор: поле в один символ с отображением и Enter.
     ld hl,driveInput
     ld de,driveInput+1
-    call bios_input
+    MXOS_CALL_REGS MXOS_BIOS_INPUT
     ld a,(driveInput)
 chooseDrive:
     and 0DFh
@@ -85,7 +86,7 @@ clearCounts:
     dec b
     jp nz,clearCounts
     ld b,3
-    call bios_diskDriver
+    MXOS_CALL_REGS MXOS_BIOS_DISK_DRIVER
     jp c,ioError
     ld bc,DISK_INFO.blockShift
     add hl,bc
@@ -106,7 +107,7 @@ clearCounts:
     call fatNext
     ex de,hl
     ld de,0FFF8h
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     ld a,h
     or l
     call nz,reservedError
@@ -164,11 +165,11 @@ waitPrompt:
     ld hl,txtDone
     call puts
 waitKey:
-    call bios_getch
+    call mon2_getchOld
     ld c,0Ah
-    call bios_printChar
+    call mon2_printCharOld
     ld a,(callerKoi)
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld hl,(callerSP)
     ld sp,hl
     or a
@@ -206,7 +207,7 @@ readSector:
     push bc
     ld b,2
     or a                  ; Исторические драйверы сохраняют входной CF.
-    call bios_diskDriver
+    MXOS_CALL_REGS MXOS_BIOS_DISK_DRIVER
     pop bc
     jp c,ioError
     ret
@@ -214,11 +215,12 @@ readSector:
 printNumber:
     ex de,hl
     ld b,0
-    jp bios_printDecWord
+    MXOS_CALL_REGS MXOS_BIOS_PRINT_DEC_WORD
+    ret
 puts:
-    jp bios_printString
+    jp mon2_printStringOld
 compare:
-    jp bios_cmp_hl_de
+    jp mon2_cmp_hl_de
 
 ; Проверяем границу поддерживаемого формата до чтения его таблиц.
 ; CF=1: геометрия вне текущего формата; AF/BC/DE/HL разрушаются.
@@ -309,7 +311,7 @@ rootDivide:
     ld (dataStart),hl
     ex de,hl
     ld hl,(total)
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     jp c,invalid
     ld a,h
     or l
@@ -589,7 +591,7 @@ dupNext:
     ld de,entryCopy
     push hl
     ld c,11
-    call bios_stricmp
+    MXOS_CALL_REGS MXOS_BIOS_STRICMP
     pop hl
     call z,duplicateError
     ld de,11
@@ -814,7 +816,7 @@ lostError:
     ld hl,txtLost
     call puts
     ex de,hl
-    call bios_printHexWord
+    call mx_printHexWord
     ex de,hl
     pop hl
     ret
@@ -1015,7 +1017,7 @@ rksExtension:
     push hl
     call streamWord
     pop de
-    call bios_sub_hl_de
+    MXOS_CALL_REGS MXOS_BIOS_SUB_HL_DE
     jp c,noSum
     inc hl
     ld a,h
@@ -1122,14 +1124,14 @@ printRecord:
     cp ' '
     ret z
     ld c,'.'
-    call bios_printChar
+    call mon2_printCharOld
     ld b,3
 printName:
     ld a,(hl)
     cp ' '
     jp z,printNameNext
     ld c,a
-    call bios_printChar
+    call mon2_printCharOld
 printNameNext:
     inc hl
     dec b

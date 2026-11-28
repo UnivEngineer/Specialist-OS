@@ -10,7 +10,7 @@ s=symbols('BIOS.sym');c=symbols('CLI.sym');W=lambda v:struct.pack('<H',v)
 m=bytearray(65536)
 for name,at in [('CLI.i80',0),('BIOS.sys',0xC000),('IO.main.bin',0xF000),('fonts/Rotate.i80',0xD800)]:
     b=(R/'bin'/name).read_bytes();m[at:at+len(b)]=b
-m[s['bios_printChar']]=0xC9
+m[s['mon2_printCharOld']]=0xC9
 def run(name,end=0x6100):
     global m
     code=b'\x31'+W(s['STACK_ADDR'])+b'\xCD'+W(c[name])+b'\xC3'+W(0x6100)

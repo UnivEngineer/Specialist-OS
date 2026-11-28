@@ -8,7 +8,7 @@ bbPrintStringLimLoop:
     jp z,bbPrintStringLimDone
     push bc
     ld c,(hl)
-    call bios_printChar
+    call printChar
     pop bc
     inc hl
     dec bc

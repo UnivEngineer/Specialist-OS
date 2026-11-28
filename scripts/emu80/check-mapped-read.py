@@ -98,7 +98,7 @@ def main():
                     start = address - bool(address)
                     guard = (b'\xDA' if address else b'') + b'\xCC' * 256 + b'\xAD'
                     m.write(start, guard)
-                    state, ticks = m.subroutine(SYSTEM['bios_diskDriver'], bc=0x02A7, de=sector, hl=address)
+                    state, ticks = m.subroutine(SYSTEM['sysDiskDriver'], bc=0x02A7, de=sector, hl=address)
                     assert not state['flags']['C'], (name, address, sector)
                     assert all(state['registers'][k]['dec'] == v for k, v in
                                {'bc': 0x02A7, 'de': sector, 'hl': address, 'sp': 0x8F00}.items())

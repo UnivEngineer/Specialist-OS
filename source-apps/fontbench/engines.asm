@@ -110,7 +110,7 @@ linearScalar:
     ld de,02800h
     add hl,de
     ex de,hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     rrca
     rrca
@@ -120,7 +120,7 @@ linearScalar:
     inc h
     inc h
     inc h
-    ld (bios_vars.cursorY),hl
+    ld (mon2_vars.cursorY),hl
     ld a,l
     sub 7
     ld c,a

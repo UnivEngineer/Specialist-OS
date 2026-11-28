@@ -11,11 +11,11 @@ fontPseudoLine:
     jp z,fontPseudoDone
     push bc
     push hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp PSEUDO_WRAP
-    call nc,bios_fontNewLine
-    ld hl,(bios_vars.cursorY)
+    call nc,biosEngineNewLine
+    ld hl,(mon2_vars.cursorY)
     IFDEF PSEUDO_ROUND
     ld a,h
     and PSEUDO_ROUND
@@ -72,7 +72,7 @@ fontPseudoLimit:
     pop hl
     ld (fontPseudoText+1),hl
     call printStringRawLim
-    ld hl,bios_fontNewLine
+    ld hl,biosEngineNewLine
     ld (fontLineEnd+1),hl
     call fontPseudoMargins
     pop bc
@@ -85,10 +85,10 @@ fontPseudoLimit:
     dec b
 fontPseudoMaybeWrap:
     push hl
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,h
     cp 192
-    call nc,bios_fontNewLine
+    call nc,biosEngineNewLine
     pop hl
     jp fontPseudoLine
 fontPseudoDone:
@@ -97,14 +97,14 @@ fontPseudoDone:
     pop af
     ret
 fontLineEnd:
-    jp bios_fontNewLine
+    jp biosEngineNewLine
 fontPseudoHold:
     ; Some packet renderers reach the edge without storing their final X.
     ld a,192
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ret
 fontPseudoMargins:
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     add a,0FFh
     sbc a,a
     ld (fontPseudoFill+1),a

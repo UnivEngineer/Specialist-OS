@@ -48,7 +48,7 @@ searchStart:  PUSH  HL
         LD    HL,vars1.SearchByte1
         LD    (vars1.SearchCursor),HL
         POP   HL
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         RET   Z
         CALL  WaitClsKey
         LD    A,(vars1.SearchLength)
@@ -85,7 +85,7 @@ printSearchContext:  CALL  printMemoryByte
         DEC   B
         JP    NZ,printSearchContext
         LD    HL,txtHomeRight11Dot
-        CALL  mon2_printString
+        CALL  debug_printString
         LD    A,(vars1.SearchLength)
         LD    B,A
         ADD   A,B
@@ -107,7 +107,7 @@ searchNextCandidate:  POP   HL
         JP    searchStart
 printMemoryByte:  LD    A,(HL)
         PUSH  BC
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  printSpace
         POP   BC
         RET
@@ -120,11 +120,11 @@ Dir_N:  LD    A,(HL)
         CALL  printHexWordHL
         LD    A,(HL)
         PUSH  BC
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  WaitClsKey
         CALL  printNewLine
         POP   BC
-nextUnequalByte:  CALL  bios_cmp_hl_de
+nextUnequalByte:  CALL  mon2_cmp_hl_de
         RET   Z
         INC   HL
         JP    Dir_N
@@ -133,7 +133,7 @@ nextUnequalByte:  CALL  bios_cmp_hl_de
 ; Директива F - заполнить блок памяти байтом
 
 Dir_F:  LD    (HL),C
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         RET   Z
         INC   HL
         JP    Dir_F
@@ -143,7 +143,7 @@ Dir_F:  LD    (HL),C
 ; Движок MXOS выбирает направление при перекрытии; DE здесь включительно.
 
 Dir_T:  INC   DE
-        JP    bios_memcpy_bc_hl
+        JP    mon2_memcpy_bc_hl
 
 ;----------------------------------------------------------------------------
 ; Директива C - сравнение двух блоков памяти
@@ -154,16 +154,16 @@ Dir_C:  LD    A,(BC)
         PUSH  BC
         CALL  printHexWordHL
         LD    A,(HL)
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  printSpace
         POP   BC
         PUSH  BC
         LD    A,(BC)
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  WaitClsKey
         CALL  printNewLine
         POP   BC
-compareNextByte:  CALL  bios_cmp_hl_de
+compareNextByte:  CALL  mon2_cmp_hl_de
         RET   Z
         INC   HL
         INC   BC
@@ -177,9 +177,9 @@ printHexWordHL:
         CALL  printSpace
 printHexWordHL_noSpace:
         LD    A,H
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         LD    A,L
-        CALL  mon2_printHexByte
+        CALL  debug_printHexByte
         CALL  printSpace
         POP   BC
         RET
@@ -191,7 +191,7 @@ printHexWordHL_noSpace:
 ;   de = конечный адрес
 
 Dir_K:
-        CALL  mon2_calcCS
+        CALL  debug_calcCS
         PUSH  BC
         POP   HL    ; hl = bc
         CALL  printHexWordHL
@@ -214,9 +214,9 @@ textDumpFilter:  LD    A,C
         CP    7FH           ; 127
         JP    C,textDumpPrint
 textDumpNonprintable:  LD    C,2EH         ; 46 '.'
-textDumpPrint:  CALL  mon2_printChar
+textDumpPrint:  CALL  debug_printChar
         CALL  printSpace
-        CALL  bios_cmp_hl_de
+        CALL  mon2_cmp_hl_de
         RET   Z
         DEC   B
         INC   HL

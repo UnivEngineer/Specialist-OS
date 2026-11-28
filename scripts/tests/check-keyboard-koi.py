@@ -9,7 +9,7 @@ for name,at in [('BIOS.sys',0xc000),('IO.main.bin',0xf000)]:
 count=0
 def run(koi,locks,shift,raw):
  global count
- m=bytearray(base);m[S['bios_upper.koi7']]=koi;m[S['bios_vars.keyLocks']]=locks;m[0xffe1]=0 if shift else 2
+ m=bytearray(base);m[S['bios_upper.koi7']]=koi;m[S['mon2_vars.keyLocks']]=locks;m[0xffe1]=0 if shift else 2
  code=(b'\x31\x00\x8f\x01'+W(raw<<8)+b'\x11'+W(koi<<8|locks)+b'\xcd'+W(S['keyDecode'])+
        b'\xf5\xe1\x22\x00\x8d\xeb\x22\x02\x8d\xc3\x40\x8c')
  m[0x8c00:0x8c00+len(code)]=code

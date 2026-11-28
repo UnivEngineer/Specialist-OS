@@ -88,10 +88,10 @@ ncParentPrefix:
             ld a,(hl)
             or a
             jp z,ncParentPrefixEnd
-            call bios_upperCase
+            call ncStrings.upperCase
             ld b,a
             ld a,(de)
-            call bios_upperCase
+            call ncStrings.upperCase
             cp b
             ret nz
             inc hl
@@ -113,7 +113,7 @@ ncParentCopy:
             ld a,(de)
             cp 05Ch ; CD ../.. is not an immediate parent transition.
             ret z
-            call bios_upperCase
+            call ncStrings.upperCase
             ld (hl),a
             inc hl
             inc de
@@ -174,7 +174,7 @@ ncSelectCompareName:
             pop hl
 ncParentCompare:
             ld a,(hl)
-            call bios_upperCase
+            call ncStrings.upperCase
             ld b,a
             ld a,(de)
             cp b
@@ -315,7 +315,7 @@ redrawCommandLine:
 commandPathReady:
             COLOR COLOR_CMDLINE
             ld hl,000F3h
-            ld (bios_vars.cursorY),hl
+            ld (mon2_vars.cursorY),hl
             ld hl,vars.path
             ld b,24
             call compactPath
@@ -335,9 +335,9 @@ commandPathTail:
             pop hl
 commandPathPrint:
             push bc
-            call bios_printStringRawZ
+            call FONT_ENGINE_RAWZ
             pop bc
-            ld hl,(bios_vars.cursorY)
+            ld hl,(mon2_vars.cursorY)
             ld (vars.cmdTextPos),hl
             ld a,(ncCommandChars)
             dec a
@@ -349,7 +349,7 @@ commandPathPrint:
 redrawCommandText:
             COLOR COLOR_CMDLINE ; This entry also follows a colored file cursor.
             ld hl,(vars.cmdTextPos)
-            ld (bios_vars.cursorY),hl
+            ld (mon2_vars.cursorY),hl
             ld a,(vars.cmdCapacity)
             ld c,a
             ld hl,(vars.cmdLineEnd)
@@ -382,7 +382,7 @@ commandText:
             ld hl,(vars.cmdTextPos)
             add a,h
             ld h,a
-            ld (bios_vars.cursorY),hl
+            ld (mon2_vars.cursorY),hl
             ld (vars.cmdLinePos),hl
             ret
 
@@ -399,7 +399,7 @@ printPanelPath:
             ld hl,00408h
             call setCursorPosPanel
             pop hl
-            jp bios_printStringRawZ
+            jp FONT_ENGINE_RAWZ
 
  ; HL=absolute ASCIIZ path, B=available characters (>=19 for full FAT 8.3).
 ; Preserve complete components, a useful leading directory when it fits, and

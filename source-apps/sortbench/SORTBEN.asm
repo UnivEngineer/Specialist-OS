@@ -33,7 +33,7 @@ start:
     ld hl,0
     add hl,sp
     ld (savedSP),hl
-    call bios_getMemTop
+    call mx_getMemTop
     ld de,08AFFh
     call math.sub_hl_de
     jp c,noMemory
@@ -42,17 +42,17 @@ start:
     ld (reportEnd),hl
     xor a
     ld (failed),a
-    call bios_setFontEncoding
+    call FONT_ENGINE_ENCODING
     ld a,FONT_RENDER_DISABLE
     MXOS_CALL_REGS MXOS_BIOS_FONT_RENDER
     ld hl,clearScreen
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,title
     call output
     ld hl,sourcePrompt
     call output
 chooseSource:
-    call bios_getch
+    call mon2_getchOld
     cp 01Bh
     jp z,exit
     and 0DFh
@@ -72,7 +72,7 @@ sourceChosen:
     ld hl,sizePrompt
     call output
 chooseSize:
-    call bios_getch
+    call mon2_getchOld
     cp 01Bh
     jp z,exit
     cp 13
@@ -243,9 +243,9 @@ showRadix:
     cp 1
     jp nz,advanceMode
     ld hl,betweenText
-    call bios_printStringZ
+    call mon2_printStringOld
 waitBetweenTables:
-    call bios_getch
+    call mon2_getchOld
     cp 13
     jp nz,waitBetweenTables
 advanceMode:
@@ -304,18 +304,18 @@ saveReport:
 saveFailed:
     ld hl,saveErrorText
 saveMessage:
-    call bios_printStringZ
+    call mon2_printStringOld
     ld hl,waitText
-    call bios_printStringZ
+    call mon2_printStringOld
 waitForExit:
-    call bios_getch
+    call mon2_getchOld
 exit:
     ld hl,(savedSP)
     ld sp,hl
     ret
 noMemory:
     ld hl,noMemoryText
-    call bios_printStringZ
+    call mon2_printStringOld
     jp exit
 
 ; DOS selection, root context and enumeration are deliberately not timed.
@@ -583,7 +583,7 @@ outputCopied:
     ex de,hl
     ld (reportEnd),hl
     pop hl
-    jp bios_printStringZ
+    jp mon2_printStringOld
 character:
     ld (oneChar),a
     ld hl,oneChar
@@ -727,6 +727,9 @@ savePath: DB 'B:\SORTBEN.TXT',0
     DS MAX_PATH-($-savePath),0
 REFERENCE = 07200h
 REPORT    = 07300h
+    MODULE sortStrings
+    INCLUDE "../../source/common/strcmp.inc"
+    ENDMODULE
     ASSERT $ < raw.benchRaw
     INCLUDE "../../sdk/asm/lib/file-io.inc"
     END

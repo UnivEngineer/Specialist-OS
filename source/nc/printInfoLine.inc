@@ -123,7 +123,7 @@ ncStatusDraw:
         ld c,a
         ld b,0
         ld hl,ncTextBuffer
-        jp bios_printStringRawLim
+        jp FONT_ENGINE_LIM
 
 infoDirectoryText:  DB '<DIR>'
 infoRootText:       DB 'Go to drive root'
@@ -224,7 +224,7 @@ ncStatusRestoreDrive:
         jp c,ncStatusNoPlatform
         ld hl,(flHandle+FH_COUNT)
         ld de,IMAGE_HEADER_SIZE
-        call bios_cmp_hl_de
+        call mon2_cmp_hl_de
         jp nz,ncStatusNoPlatform
 
         ld hl,ncStatusHeader
@@ -254,7 +254,7 @@ ncStatusHeaderMagic:
         jp c,ncStatusNoPlatform
         ex de,hl
         ld hl,(flHandle+FILE_DESCRIPTOR.size)
-        call bios_cmp_hl_de
+        call mon2_cmp_hl_de
         jp nz,ncStatusNoPlatform
         ld hl,ncStatusHeader
         ld de,ncStatusHeader+IMAGE_HEADER_CHECKSUM-1
@@ -266,7 +266,7 @@ ncStatusHeaderMagic:
         ld hl,(ncStatusHeader+IMAGE_HEADER_CHECKSUM)
         ld d,b
         ld e,c
-        call bios_cmp_hl_de
+        call mon2_cmp_hl_de
         jp nz,ncStatusNoPlatform
         ld a,(ncStatusHeader+IMAGE_MODE)
         cp IMAGE_MODE_RF+1
@@ -329,7 +329,7 @@ ncStatusPlacePlatform:
         ld l,P_FILE_NAME_Y
         call setCursorPosPanel
         pop hl
-        jp bios_printStringRawLim
+        jp FONT_ENGINE_LIM
 ncStatusPlatforms:
         DB 'MXOS  ','MX'
         DB 'STD   ','ST'
@@ -410,12 +410,12 @@ ncStatusIdle:
         or a
         jp z,ncStatusIdleDone
         ld c,a
-        ld hl,(bios_vars.cursorY)
+        ld hl,(mon2_vars.cursorY)
         push hl
-        ld hl,(bios_vars.inverse)
+        ld hl,(mon2_vars.inverse)
         push hl
         ld hl,0
-        ld (bios_vars.inverse),hl
+        ld (mon2_vars.inverse),hl
         ld a,(ncCurrentColor)
         push af
         call ncSetPanelBorder
@@ -426,9 +426,9 @@ ncStatusIdle:
         call ncSetColor
     ENDIF
         pop hl
-        ld (bios_vars.inverse),hl
+        ld (mon2_vars.inverse),hl
         pop hl
-        ld (bios_vars.cursorY),hl
+        ld (mon2_vars.cursorY),hl
     IF NC_BANKED
         call ncBankFlush
     ENDIF

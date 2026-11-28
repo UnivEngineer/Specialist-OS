@@ -55,7 +55,7 @@ tapeRead_1: ; Получаем состояние
 
             ; Около 8,5 мс без фронта при 2 МГц. Полное сканирование
             ; клавиатуры выполняется только при остановившемся сигнале.
-            call  bios_keyCheck
+            MXOS_CALL_REGS MXOS_BIOS_KEY_CHECK
             cp    0FFh
             jp nz, tapeReadError
             call  tapePrepareHardware
@@ -90,7 +90,7 @@ tapeRead_edge:
 
             ; Начинаем загрузку без инверсии
             xor   a
-            ld    (bios_vars.tapeInverse),a
+            ld    (mon2_vars.tapeInverse),a
             jp    tapeRead_3
 
 tapeRead_2: ; Если не найден 19h, переходим на tapeRead_0
@@ -99,7 +99,7 @@ tapeRead_2: ; Если не найден 19h, переходим на tapeRead_0
 
             ; Начинаем загрузку с инверсией
             ld    a, 0FFh
-            ld    (bios_vars.tapeInverse),a
+            ld    (mon2_vars.tapeInverse),a
 
             ; Загружаем 8 бит
 tapeRead_3: ld    d, 9
@@ -109,7 +109,7 @@ tapeRead_4: dec   d
             jp nz,  tapeRead_0
 
             ; Инверсия байта
-            ld    a, (bios_vars.tapeInverse)
+            ld    a, (mon2_vars.tapeInverse)
             xor   c
 
             ; Восстаналиваем регистры

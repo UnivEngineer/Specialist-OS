@@ -31,7 +31,7 @@ def main():
 
     # Только стенд MXOS_CALL_REGS Query заменён переходником к реальной службе IO.
     # Пропускаются два байта номера операции после CALL; транспорта здесь нет.
-    base[0xf806:0xf806 + 7] = b'\xe1\x23\x23\xe5\xc3' + io['glyphCacheService'].to_bytes(2, 'little')
+    base[s['mx_callRegs']:s['mx_callRegs'] + 7] = b'\xe1\x23\x23\xe5\xc3' + io['glyphCacheService'].to_bytes(2, 'little')
     arena_start, arena_end = 0x4b90, 0x5b90
     word(base, s['GLYPH_CACHE_START'], arena_start)
     word(base, s['GLYPH_CACHE_LIMIT'], arena_end)
@@ -39,7 +39,7 @@ def main():
     base[s['GLYPH_CACHE_INVALID']] = 1
     word(base, s['renderFont8'], 0x2800 // 8)
     base[s['bios_upper.koi7']] = 0
-    base[s['bios_vars.inverse']] = 0
+    base[s['mon2_vars.inverse']] = 0
     base[s['bios_upper.escMode']] = 255
     checks = 0
     samples = []
@@ -70,7 +70,7 @@ def main():
                 continue
             _, point, x, y = event
             glyphs.append((point, x, y))
-            code += b'\x21' + bytes((y + 7, x // 2)) + b'\x22' + s['bios_vars.cursorY'].to_bytes(2, 'little')
+            code += b'\x21' + bytes((y + 7, x // 2)) + b'\x22' + s['mon2_vars.cursorY'].to_bytes(2, 'little')
             code += b'\x21\x97\xa5\xe5\xf1\x01' + bytes((point, 0x12)) + b'\x11\x78\x56\x21\xbc\x9a' + call(s['cacheRender'])
             for row, value in enumerate(active_font[point * 8:point * 8 + 8]):
                 for bit in range(6):
@@ -90,7 +90,7 @@ def main():
         if glyphs:
             point, x, y = glyphs[-1]
             assert data[0x8400:0x8408] == bytes.fromhex('BC 9A') + bytes((point, 0x12)) + bytes.fromhex('78 56 97 A5'), ('registers', events[-1])
-            assert data[s['bios_vars.cursorY']:s['bios_vars.cursorY'] + 2] == bytes((y + 7, x // 2 + 3))
+            assert data[s['mon2_vars.cursorY']:s['mon2_vars.cursorY'] + 2] == bytes((y + 7, x // 2 + 3))
         # Нельзя писать за границу полученной арены, в шрифт или стек BIOS.
         assert data[current_start - 16:current_start] == before[current_start - 16:current_start]
         assert data[limit:arena_end + 16] == before[limit:arena_end + 16]

@@ -14,7 +14,7 @@ compactThresholdReady:
     ld (compactRightMin+1),a
     ld (compactLeftUpMin+1),a
     ld (compactRightUpMin+1),a
-    ld a,(bios_vars.inverse)
+    ld a,(mon2_vars.inverse)
     sub 1
     sbc a,a
     cpl

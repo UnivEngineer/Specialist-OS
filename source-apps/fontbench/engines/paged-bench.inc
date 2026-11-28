@@ -30,7 +30,7 @@ pagedEntry:
     push de
     push hl
     ld (pagedMode),a
-    ld hl,(bios_vars.cursorY)
+    ld hl,(mon2_vars.cursorY)
     ld a,c
     add a,a
     add a,a
@@ -42,7 +42,7 @@ pagedEntry:
     sub c
 pagedWidth:
     add a,h
-    ld (bios_vars.cursorX),a
+    ld (mon2_vars.cursorX),a
     ld a,h
     rrca
     rrca
@@ -76,10 +76,10 @@ pagedCoreEnd:
 pagedSelect:
     ld hl,(output+1)
     ld de,pagedCoreStart
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret c
     ld de,pagedCoreEnd
-    call bios_cmp_hl_de
+    call mon2_cmp_hl_de
     ret nc
     ld a,1
     ld (pagedDirty),a
